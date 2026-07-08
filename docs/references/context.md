@@ -39,6 +39,41 @@ The two target audiences:
 
 One shared core should serve both audiences. Do not build two systems.
 
+### BIT worldview and case lens
+
+Imported 2026-07-08 from Adi's private BIT prep
+(`~/GitHub/adi/projects/bit-capital-case-study-2026/resources/`, snapshots
+dated 2026-07-06). Verify live facts before using them in the deliverable.
+
+Design-relevant facts:
+
+- **Devil's Advocate process.** High-conviction positions above a NAV
+  threshold get formally challenged with negative scenarios. Implication:
+  scoring/delivery should surface thesis-breaking evidence, not only bullish
+  signal. Consider an explicit contrary-evidence slot in insights.
+- **Current worldview (mid-2026).** AI as an infrastructure/memory/energy/
+  supply-chain story, not a generic software story: memory supercycle
+  (HBM/DRAM), hyperscaler capex vs ROI debate, bubble anxiety vs investment
+  compulsion, skepticism of AI-eroded software moats.
+- **Signal types BIT publicly respects.** Hyperscaler capex and AI
+  monetization evidence, memory-cycle signals, power/data-center scarcity,
+  company-level operational alt-data that moves KPI forecasts before
+  consensus.
+- **Human × AI boundary.** Final investment decisions stay human; systems
+  recommend, score, summarize, alert.
+- **Role specifics.** Reports to Carlos Bielsa, side-by-side with Vlad
+  Gheorghe. Stack preferences: Python, SQL, AWS; Databricks in stack.
+  Explicit LLMOps expectations: evals, hallucination control, versioned
+  prompts/configs, fallbacks, cost/latency tracking.
+- **Official data-scale claims (bitcap.com investment-approach page).**
+  80 TB raw data/day, 2.4 PB raw data/month, 30+ AI-supported processes,
+  500M+ tokens/month, >75% of trades influenced by systematic data
+  infrastructure. Company marketing claims, not audited facts.
+
+Evaluation lens to expect: investment relevance over dashboards, production
+realism (evals/monitoring/provenance/HITL), agent-native craft, pragmatic
+shipping, honest tradeoffs, and Devil's Advocate discipline.
+
 ## Builder Context
 
 Adi is a systems/product engineer in Berlin, not a data scientist. This case

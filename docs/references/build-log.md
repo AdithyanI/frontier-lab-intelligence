@@ -27,6 +27,8 @@ Use this after every meaningful chunk of work:
 | 2026-07-08 | Reduce doc sprawl. | Consolidated working log, build journal, learning notes, assumptions, sources, seed lists, and context docs into fewer canonical files. | `AGENTS.md`, `docs/references/build-log.md`, `docs/references/context.md`, `docs/references/research-notes.md`. | Future agents have one build log, one context doc, one research/source notes doc, one architecture doc, and one tracker. | Codex Desktop + agent-native-repo-playbook; €0. |
 | 2026-07-08 | Decide how to store graph data later, without implementing it yet. | Documented the deferred graph storage plan: raw observations, accounts, directed graph edges, then reviewed real-world entities/identities/affiliations. | `docs/architecture/overview.md` §Graph Storage Plan; tracker current batch. | The next data-modeling pass should move modeled graph data into SQLite and stop treating nested JSON as the primary graph store. | Codex Desktop; €0. |
 
+| 2026-07-08 | Verify BIT context coverage against Adi's private prep repo. | Imported distilled BIT worldview/lens into `docs/references/context.md`: Devil's Advocate process, memory-supercycle/infra worldview, respected signal types, role/stack specifics, official data-scale claims. | `docs/references/context.md` §BIT worldview and case lens; source: `~/GitHub/adi/projects/bit-capital-case-study-2026/resources/`. | Design gap identified: the funnel has no contrary-evidence concept yet; scoring/insights should carry a thesis-breaking slot. Repo is now self-sufficient on BIT context. | Copilot CLI; €0. |
+
 ## Learning Notes
 
 ### Graph-Derived Discovery
