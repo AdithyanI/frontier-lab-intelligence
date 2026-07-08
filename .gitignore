@@ -10,3 +10,4 @@ data/raw/
 data/private/
 .DS_Store
 *.egg-info/
+.playwright-mcp/
