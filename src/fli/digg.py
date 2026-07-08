@@ -229,10 +229,11 @@ def _split_follower_cards(text: str) -> list[str]:
 def parse_top_followers(raw_html: str, target_username: str) -> dict[str, Any]:
     """Parse the initial top-follower rows from a Digg profile page."""
     text = _normalize(raw_html)
+    payload = _react_stream_payload(raw_html)
     count_match = re.search(
         rf'"username":"{re.escape(target_username)}".*?'
         r'"initialCount":([0-9,]+).*?"totalCount":([0-9,]+)',
-        text,
+        payload or text,
         flags=re.S,
     )
     followers: list[dict[str, Any]] = []
@@ -258,8 +259,42 @@ def parse_top_followers(raw_html: str, target_username: str) -> dict[str, Any]:
     return {
         "initial_count": _to_int(count_match.group(1)) if count_match else len(followers),
         "total_count": _to_int(count_match.group(2)) if count_match else None,
+        "vibe_topics": _parse_vibe_topics(payload),
         "followers": followers,
     }
+
+
+def _parse_vibe_topics(payload: str) -> dict[str, Any] | None:
+    marker = '"vibeTopics":'
+    start = payload.find(marker)
+    if start < 0:
+        return None
+    start += len(marker)
+    level = 0
+    end = None
+    in_string = False
+    escaped = False
+    for index, char in enumerate(payload[start:], start=start):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char == "{":
+            level += 1
+        elif char == "}":
+            level -= 1
+            if level == 0:
+                end = index + 1
+                break
+    if end is None:
+        return None
+    return json.loads(payload[start:end])
 
 
 def scrape(
@@ -326,6 +361,7 @@ def _scrape_profiles(
                     "error": str(exc),
                     "initial_count": 0,
                     "total_count": None,
+                    "vibe_topics": None,
                     "top_followers": [],
                 }
                 profile_edges = []
@@ -345,6 +381,7 @@ def _scrape_one_profile(target: dict[str, Any]) -> tuple[dict[str, Any], list[di
         "target": target,
         "initial_count": parsed["initial_count"],
         "total_count": parsed["total_count"],
+        "vibe_topics": parsed["vibe_topics"],
         "top_followers": parsed["followers"],
     }
     edges = [
@@ -353,9 +390,14 @@ def _scrape_one_profile(target: dict[str, Any]) -> tuple[dict[str, Any], list[di
             "from_username": follower["username"],
             "from_display_name": follower["display_name"],
             "from_digg_rank": follower["rank"],
+            "from_digg_url": follower["digg_url"],
+            "from_x_url": follower["x_url"],
             "to_username": target["username"],
             "to_display_name": target["display_name"],
             "to_digg_rank": target["rank"],
+            "to_digg_url": target["digg_url"],
+            "to_x_url": target["x_url"],
+            "to_github_url": target.get("github_url"),
             "evidence_url": profile_url,
             "evidence_type": "digg_profile_top_follower",
         }

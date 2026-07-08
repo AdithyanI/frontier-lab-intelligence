@@ -28,6 +28,7 @@ href="/u/x/ylecun">
 <p>@<!-- -->ylecun</p>
 <p>Professor at NYU &amp; Executive Chairman at AMI Labs.</p>
 </a>
+<script>self.__next_f.push([1,"44:[\\"$\\",\\"div\\",null,{\\"children\\":[\\"$\\",\\"$L46\\",null,{\\"vibeTopics\\":{\\"vibeDistribution\\":{\\"teaching\\":22.6,\\"informing\\":25.8},\\"topicDistribution\\":{\\"LLM Training\\":26.1,\\"AI Agents\\":20.1},\\"tweetCount\\":200,\\"authorXId\\":\\"33836629\\",\\"username\\":\\"karpathy\\"}}]}]"])</script>
 <script>self.__next_f.push([1,"77:[\\"$\\",\\"$L78\\",null,{\\"username\\":\\"karpathy\\",\\"initialCount\\":50,\\"totalCount\\":1658}]"])</script>
 """
 
@@ -56,6 +57,13 @@ def test_parse_top_followers():
     parsed = parse_top_followers(PROFILE_HTML, "karpathy")
     assert parsed["initial_count"] == 50
     assert parsed["total_count"] == 1658
+    assert parsed["vibe_topics"] == {
+        "vibeDistribution": {"teaching": 22.6, "informing": 25.8},
+        "topicDistribution": {"LLM Training": 26.1, "AI Agents": 20.1},
+        "tweetCount": 200,
+        "authorXId": "33836629",
+        "username": "karpathy",
+    }
     assert parsed["followers"] == [
         {
             "rank": 3,
