@@ -1,7 +1,0 @@
-fastapi
-jinja2
-markdown
-uvicorn
-
-[dev]
-pytest

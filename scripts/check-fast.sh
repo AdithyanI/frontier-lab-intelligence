@@ -14,14 +14,20 @@ grep -Eqi "deadline|due|submission|unknown" docs/projects/frontier-lab-intellige
   exit 1
 }
 
+if [ -x .venv/bin/python ]; then
+  PYTHON=.venv/bin/python
+else
+  PYTHON=python
+fi
+
 if find src tests -type f -name '*.py' 2>/dev/null | grep -q .; then
   if [ ! -f pyproject.toml ]; then
     echo "Python files exist but pyproject.toml is missing; add pyproject or document a different validation path."
     exit 1
   fi
-  python -m compileall src tests
-  if command -v pytest >/dev/null 2>&1; then
-    pytest -q
+  "$PYTHON" -m compileall src tests
+  if "$PYTHON" -m pytest --version >/dev/null 2>&1; then
+    "$PYTHON" -m pytest -q
   else
     echo "pytest not installed; compile-only validation passed."
   fi
