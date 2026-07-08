@@ -31,5 +31,14 @@ Interpretation choices made where the prompt was silent or ambiguous, and why.
 
 ## Tooling
 - AI coding tools are explicitly expected and will be discussed at the on-site
-  round — the working-log (`docs/references/working-log.md` once created)
-  should capture how AI tools were used, not just the code output.
+  round — the working-log (`docs/references/working-log.md`) captures how AI
+  tools were used, not just the code output.
+
+## Stack
+- Provisional default: Python core + SQLite, boring and inspectable. Final
+  DB/scheduling/UI decisions are made in the Phase 0 design pass and recorded
+  in `docs/references/solution-architecture.md` with reasons — not assumed.
+- LLM provider/model choice per task is a deliverable in itself
+  (architecture write-up requires "model selection per task, and why");
+  deferred to design pass. €100 budget shapes it; spend logged in the
+  working log.

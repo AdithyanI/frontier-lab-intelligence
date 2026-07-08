@@ -5,7 +5,7 @@
 - Received at: 2026-07-07 16:41 CEST (14:41 UTC)
 - Sender: BIT Capital GmbH <career@bitcap.com> (Lars)
 - Email/thread/source: Gmail message `19f3d0692e019e93`, thread `19f056ce40383638`, subject "Re: Re: Adithyan <> BIT Capital | Next Step: Interview with Vlad Gheorghe", account adithyan@wisdominanutshell.academy → adi@aipodcast.ing
-- Local attachments folder: `projects/bit-capital-case-study-2026/resources/source-material/`
+- Local attachments folder: `docs/references/source-material/` (this repo); original capture also at `~/GitHub/adi/projects/bit-capital-case-study-2026/resources/source-material/`
 - Captured by: Dobby, 2026-07-07
 
 ## Verbatim prompt
@@ -118,7 +118,7 @@ Ask only if the answer materially changes the work.
 ## Working-surface decision
 
 - Classification: **Prototype/code task + hybrid** — full agentic pipeline (signal-extraction/research-agent archetype) with runnable code, DB, web UI, evals, and write-ups.
-- Work location: **separate repo `/Users/dobby/GitHub/bit-capital-case-study-2026`** per the default rule (runnable code, dependencies, tests, eval harness, agent pipeline). This Dobby project stays the career/control-plane tracker.
+- Work location: **separate repo `/Users/dobby/GitHub/frontier-lab-intelligence`** (renamed from `bit-capital-case-study-2026` on 2026-07-08) per the default rule (runnable code, dependencies, tests, eval harness, agent pipeline). This Dobby project stays the career/control-plane tracker.
 - Reason: runnable code + demo + DB + web UI are explicitly required; the checklist rule mandates a separate implementation repo built from `agent-native-repo-template.md`.
 
 ## First-day execution plan

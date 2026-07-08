@@ -1,31 +1,46 @@
-# BIT Capital Case Study — Agent Guide
+# Frontier Lab Intelligence — Agent Guide
 
-This repo contains Adi's BIT Capital AI Engineer case-study work ("Frontier Lab
-Intelligence": track frontier AI labs, extract/score signal from their public
-output, deliver reports + alerts to investment and AI team personas).
+Frontier Lab Intelligence: a system that tracks frontier AI labs and their key
+people, extracts and scores signal from their public output, and delivers
+reports + alerts to investment and AI-team personas. Origin: BIT Capital
+AI Engineer case study; built as a real product intended to outlive it.
 
 ## Operating model
 - Human sets intent and approves external submission; agents implement, validate, and maintain docs.
-- Work from `docs/projects/bit-capital-case-study/tasks.md` as the canonical tracker.
+- Work from `docs/projects/frontier-lab-intelligence/tasks.md` as the canonical tracker.
 - Preserve the original prompt in `docs/references/case-prompt.md`; do not rely on chat memory.
 - Do not send, upload, message, publish, push to a public remote, or submit anything externally without explicit Adi approval in the current session.
 - Put scratch files in `tmp/`; keep durable notes in `docs/references/`.
 - Run `scripts/check-fast.sh` before handoff; if a check is skipped, record why in the tracker.
 
+## Standing contracts
+- **Learning log — do → learn.** Adi is learning data science through this
+  build. Any DS/ML technique used in a change (scoring models, validation,
+  ground truth, ranking metrics, calibration, …) gets a plain-words entry in
+  `docs/learning/` in the same change. Contract: `docs/learning/README.md`.
+- **Working log.** Record AI-tool usage per session and every euro of the
+  €100 API budget in `docs/references/working-log.md`. BIT will explicitly
+  ask "how you worked"; the log is the answer.
+- **Design system.** `PRODUCT.md` and `DESIGN.md` at repo root govern all UI
+  work (impeccable-compatible). The web UI is 5% of the rubric; keep it light.
+
 ## Source-of-truth order
 1. `docs/references/case-prompt.md` — original external requirements from BIT/Lars.
-2. `docs/projects/bit-capital-case-study/tasks.md` — current plan, status, blockers, and validation evidence.
+2. `docs/projects/frontier-lab-intelligence/tasks.md` — current plan, status, blockers, and validation evidence.
 3. `docs/references/*` — durable assumptions, sources, design notes, and reviewer instructions.
 4. Chat/session context — useful only after captured into repo docs.
 
 If repo docs conflict with chat memory, preserve the conflict in the tracker and follow the captured prompt until Adi decides otherwise.
 
 ## Docs contract
-- `docs/projects/bit-capital-case-study/tasks.md` is active execution state only.
+- `docs/projects/frontier-lab-intelligence/tasks.md` is active execution state only.
 - `docs/references/case-prompt.md` stores the original prompt and submission instructions verbatim.
+- `docs/references/bit-context.md` stores submission-safe company/role context.
 - `docs/references/assumptions.md` stores assumptions, interpretation choices, and why they were made.
 - `docs/references/sources.md` stores source links and provenance for factual/company/market claims.
+- `docs/references/working-log.md` stores AI-tool usage and budget spend.
 - `docs/references/reviewer-guide.md` stores the final review path: commands, expected outputs, files to inspect, and submission package.
+- `docs/learning/` stores plain-words entries for DS/ML concepts as they are used.
 - Architecture/design explanations belong in `docs/references/solution-architecture.md` or `docs/references/solution-memo.md`, not in `AGENTS.md`.
 
 ## Confidentiality and data handling

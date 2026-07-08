@@ -2,10 +2,14 @@
 set -euo pipefail
 
 test -f AGENTS.md
-test -f docs/projects/bit-capital-case-study/tasks.md
+test -f PRODUCT.md
+test -f DESIGN.md
+test -f docs/projects/frontier-lab-intelligence/tasks.md
 test -f docs/references/case-prompt.md
+test -f docs/references/working-log.md
+test -f docs/learning/README.md
 
-grep -Eqi "deadline|due|submission|unknown" docs/projects/bit-capital-case-study/tasks.md || {
+grep -Eqi "deadline|due|submission|unknown" docs/projects/frontier-lab-intelligence/tasks.md || {
   echo "Tracker should record deadline/submission instructions or unknowns."
   exit 1
 }
