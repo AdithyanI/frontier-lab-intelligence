@@ -9,6 +9,18 @@
 
 ## X Lists
 
+**Aldo Cortesi — AI Anthropic Staff**  
+- URL: https://x.com/i/lists/1892848970994766018  
+- Type: X List  
+- Why useful: Lab-specific staff list for Anthropic; this is cleaner than broad "AI people" lists because nearly every member should be a candidate or validation target for one frontier lab.  
+- Samples: samples not verified from full member export; Grok/X probes surfaced Anthropic staff examples from posts/bios, but full list membership still needs X API/export or manual inspection.
+
+**Claude Code / Anthropic builders**  
+- URL: https://x.com/i/lists/2034354907646476299  
+- Type: X List  
+- Why useful: Focused list around Claude Code and Anthropic-adjacent builders/engineers; good for the "layer below famous leaders" technical-builder slice.  
+- Samples: samples not verified from full member export.
+
 **swyx AI people / researchers list**  
 - URL: https://x.com/i/lists/1585430245762441216  
 - Type: X List  
@@ -38,6 +50,12 @@
 - Type: X List  
 - Why useful: Curator's dedicated "firehose" list for staying on top of AI news, research, and builders (includes JP variant).  
 - Samples: samples not verified
+
+**OpenAI employees list**  
+- URL: https://x.com/i/lists/1639070776178475011  
+- Type: X List  
+- Why useful: Direct OpenAI employee targeting; useful if still maintained, but should be checked carefully for stale memberships.  
+- Samples: samples not verified.
 
 **Simplescraper AI list**  
 - URL: https://twitter.com/i/lists/1678688265367429122  
@@ -94,6 +112,13 @@
 - Samples: @swyx list 1585430245762441216, @Scobleizer 952969346518720512, @altryne 1318967584721690626
 
 ## GitHub Files
+
+**smol-ai / AINews preferred tags (`prefPeople`)**  
+- URL: https://github.com/smol-ai/ainews-web-2025/blob/main/oneoffs/preferredTags.ts  
+- Raw URL: https://raw.githubusercontent.com/smol-ai/ainews-web-2025/main/oneoffs/preferredTags.ts  
+- Type: GitHub file  
+- Why useful: Machine-readable preferred people list used by smol.ai/AI News tagging; small but very clean source of high-signal AI X handles.  
+- Samples: swyx, bindureddy, kevinweil, karpathy, fchollet, ylecun, sama, joannejang, sarahookr, _aidan_clark_, danhendrycks
 
 **L3S/twitter-researcher (multiple data files)**  
 - URL: https://github.com/L3S/twitter-researcher (data/candidates_matched.tsv, candidates_verified.tsv, seeds.tsv, etc.)  
@@ -190,11 +215,11 @@
 
 ## Top 5 Sources to Extract First
 
-1. **swyx X list** (https://x.com/i/lists/1585430245762441216) — Already used in production news pipelines (smol.ai); high relevance to active AI signal.
-2. **Scobleizer AI Newsmakers / Founders lists** (1953536336675365173 and 1744564719309279599) — Highest volume of frontier founders, leaders, and researchers.
-3. **Feedspot Top 100 AI Influencers** — Cleanest explicit verified handles + bios in one scrapeable page.
-4. **Om Bharatiya 100 AI Voices** — Excellent editorial quality and categorization (researchers vs builders vs safety vs investors).
-5. **L3S/twitter-researcher data files** (candidates_matched.tsv etc.) or CosmoBlk GitHub table — Machine-readable bulk handles with academic or builder grounding.
+1. **smol.ai preferred tags** (https://github.com/smol-ai/ainews-web-2025/blob/main/oneoffs/preferredTags.ts) — smallest clean machine-readable handle seed; extract first to prove the pipeline.
+2. **swyx X list** (https://x.com/i/lists/1585430245762441216) — broad high-signal AI people list already used in production news workflows.
+3. **Aldo Cortesi Anthropic staff list** (https://x.com/i/lists/1892848970994766018) — best lab-specific seed found so far; use for Anthropic registry depth.
+4. **Digg Tech / AI Rankings** (https://digg.com/tech/x/rankings) — graph-derived ranked people/source signal with visible handles and bios.
+5. **Scobleizer AI Newsmakers / Founders lists** (1953536336675365173 and 1744564719309279599) — large but noisier expansion set for xAI/founders/builders.
 
 **Next steps notes (for project):**  
 - Clone or curl raw GitHub files where possible for automation.  
