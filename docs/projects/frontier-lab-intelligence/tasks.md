@@ -140,3 +140,9 @@ Before handoff, record:
   in sources.md. Phase 0 defaults recorded in assumptions.md — pending Adi
   confirmation: ground-truth labeling appetite, X-source timing, lab seed
   list final. Next: Phase 1 registry (schema + seeds + discovery).
+- 2026-07-08 (pm, later): Living visual architecture doc added
+  (`docs/architecture/overview.md`, Mermaid: pipeline, funnel, data model,
+  module status) + docs-contract line in AGENTS.md. Web UI shell built
+  (`fli web`): FastAPI + Jinja2 + DESIGN.md tokens; home + /architecture
+  page rendering the doc with client-side Mermaid. 5 tests green;
+  headless-browser check confirmed all 3 diagrams render as SVG.

@@ -1,0 +1,115 @@
+/* FLI — tokens from DESIGN.md (research terminal: quiet precision) */
+
+:root {
+  --bg:      oklch(1.000 0.000 0);
+  --surface: oklch(0.972 0.004 230);
+  --border:  oklch(0.900 0.008 230);
+  --ink:     oklch(0.220 0.020 230);
+  --muted:   oklch(0.500 0.018 230);
+  --primary: oklch(0.450 0.086 230);
+  --accent:  oklch(0.640 0.130 75);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+.shell { display: flex; min-height: 100vh; }
+
+.nav {
+  width: 176px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brand {
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+}
+
+.nav a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.nav a:hover { background: var(--surface); }
+.nav a.active { color: var(--primary); font-weight: 500; background: var(--surface); }
+
+.nav-soon {
+  color: var(--muted);
+  padding: 4px 8px;
+  cursor: default;
+}
+.nav-soon::after {
+  content: "soon";
+  font-size: 11px;
+  margin-left: 6px;
+  color: var(--muted);
+}
+
+.content {
+  flex: 1;
+  max-width: 1100px;
+  padding: 32px 48px;
+}
+
+h1, h2, h3 { font-weight: 600; text-wrap: balance; line-height: 1.25; }
+h1 { font-size: 24px; margin: 0 0 12px; }
+h2 { font-size: 19px; margin: 32px 0 8px; }
+
+a { color: var(--primary); }
+
+.lede { max-width: 70ch; }
+
+.provenance {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.doc { max-width: 70ch; }
+.doc pre.mermaid {
+  max-width: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+}
+.doc code {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 13px;
+}
+.doc pre:not(.mermaid) {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  overflow-x: auto;
+}
+.doc table { border-collapse: collapse; }
+.doc th, .doc td {
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  text-align: left;
+}
+.doc tr:nth-child(even) td { background: var(--surface); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav a { transition: background 150ms ease-out; }
+}

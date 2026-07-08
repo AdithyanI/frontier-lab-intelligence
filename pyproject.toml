@@ -3,10 +3,15 @@ name = "fli"
 version = "0.1.0"
 description = "Frontier Lab Intelligence — tracks frontier AI labs and key people, scores signal from their public output, delivers persona-tailored reports and alerts."
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi",
+    "jinja2",
+    "markdown",
+    "uvicorn",
+]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "httpx"]
 
 [project.scripts]
 fli = "fli.cli:main"
@@ -17,6 +22,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"fli.web" = ["templates/*.html", "static/*.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

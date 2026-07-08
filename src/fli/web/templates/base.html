@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} · FLI</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="shell">
+    <nav class="nav">
+      <div class="brand">FLI</div>
+      <a href="/" {% if title == 'Frontier Lab Intelligence' %}class="active"{% endif %}>Overview</a>
+      <a href="/architecture" {% if title == 'Architecture' %}class="active"{% endif %}>Architecture</a>
+      <span class="nav-soon">Register</span>
+      <span class="nav-soon">Insights</span>
+      <span class="nav-soon">Reports</span>
+    </nav>
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

@@ -134,10 +134,10 @@ scripts/          check-fast.sh and repo tooling
 
 | Module | Status |
 | --- | --- |
-| `fli.cli` | ✅ stub (`--version`, help) |
+| `fli.cli` | ✅ stub (`--version`, help, `web` subcommand) |
 | `fli.registry` | 📐 designed (Phase 0) |
 | `fli.ingest` | 📐 designed |
 | `fli.extract` | 📐 designed |
 | `fli.scoring` | 📐 designed |
 | `fli.delivery` | 📐 designed |
-| `fli.web` | 📐 designed |
+| `fli.web` | ✅ shell: home + `/architecture` (renders this doc with Mermaid); register/insights/reports pending |
