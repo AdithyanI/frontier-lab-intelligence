@@ -27,6 +27,8 @@ Paste results back into the repo when done (see notes at bottom).
 
 **Output:** a table sorted by usefulness (handles + affiliations + machine-readable + recent first), then per-source extraction notes (e.g. "JSON endpoint at …", "parse the second table on page", "clone repo, file at path …"). Flag anything whose terms of service prohibit scraping. End with the top 5 sources you'd use if you could only pick 5, and why.
 
+**Results location:** Live search results from 2026-07-08 saved to `docs/references/seed-lists.md` (compact format matching original request + sections for X Lists, GitHub files, rankings). Use that file as the working inventory.
+
 ---
 
 ## Notes
