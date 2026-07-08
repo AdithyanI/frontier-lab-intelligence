@@ -215,7 +215,7 @@
 
 ## Top 5 Sources to Extract First
 
-1. **Digg Tech / AI Rankings** (https://digg.com/tech/x/rankings) — now the primary v1 source: 1,000 ranked accounts plus per-profile top-follower edges, extracted into `data/digg/`.
+1. **Digg Tech / AI Rankings** (https://digg.com/tech/x/rankings) — now the primary v1 source: 1,000 ranked accounts plus per-profile top-follower edges, extracted into `data/digg/`. A full paginated local pull produced 361,225 directed edges across 999 target accounts; the full raw files are ignored under `data/raw/digg-full-2026-07-08/`, with a tracked summary at `data/digg/full_graph_summary.json`.
 2. **smol.ai preferred tags** (https://github.com/smol-ai/ainews-web-2025/blob/main/oneoffs/preferredTags.ts) — smallest clean machine-readable handle seed; use as a sanity-check/overlap signal.
 3. **swyx X list** (https://x.com/i/lists/1585430245762441216) — broad high-signal AI people list already used in production news workflows; useful if we later pay/export X list members.
 4. **Aldo Cortesi Anthropic staff list** (https://x.com/i/lists/1892848970994766018) — best lab-specific seed found so far; use for Anthropic coverage if Digg misses staff depth.

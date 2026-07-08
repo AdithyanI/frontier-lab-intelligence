@@ -1,4 +1,4 @@
-from fli.digg import parse_rankings, parse_top_followers
+from fli.digg import parse_api_followers, parse_rankings, parse_top_followers
 
 
 RANKINGS_HTML = """
@@ -74,5 +74,41 @@ def test_parse_top_followers():
             "x_id": "48008938",
             "digg_url": "https://digg.com/u/x/ylecun",
             "x_url": "https://x.com/ylecun",
+        }
+    ]
+
+
+def test_parse_api_followers():
+    followers, has_more = parse_api_followers(
+        {
+            "items": [
+                {
+                    "x_id": "2236047510",
+                    "rank": 75,
+                    "username": "giffmana",
+                    "display_name": "Lucas Beyer (bl16)",
+                    "profile_image_url": "https://example.com/avatar.jpg",
+                    "followers_count": 142517,
+                    "bio": "Researcher.",
+                    "category": "Researcher",
+                }
+            ],
+            "hasMore": True,
+        }
+    )
+    assert has_more is True
+    assert followers == [
+        {
+            "rank": 75,
+            "username": "giffmana",
+            "digg_profile_username": "giffmana",
+            "display_name": "Lucas Beyer (bl16)",
+            "bio": "Researcher.",
+            "x_id": "2236047510",
+            "role": "Researcher",
+            "followers_count": 142517,
+            "profile_image_url": "https://example.com/avatar.jpg",
+            "digg_url": "https://digg.com/u/x/giffmana",
+            "x_url": "https://x.com/giffmana",
         }
     ]

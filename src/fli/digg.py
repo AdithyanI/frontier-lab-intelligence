@@ -13,14 +13,18 @@ import datetime as dt
 import html
 import json
 import re
+import sys
+import time
+import urllib.parse
 import urllib.request
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Any
 
 USER_AGENT = "fli/0.1 (research prototype; contact: local)"
 DIGG_BASE = "https://digg.com"
 RANKINGS_URL = f"{DIGG_BASE}/tech/x/rankings"
+FOLLOWERS_PAGE_SIZE = 50
 
 
 def _now() -> str:
@@ -31,6 +35,10 @@ def _get(url: str) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=30) as resp:
         return resp.read().decode("utf-8", "replace")
+
+
+def _get_json(url: str) -> Any:
+    return json.loads(_get(url))
 
 
 def _normalize(raw_html: str) -> str:
@@ -234,7 +242,7 @@ def parse_top_followers(raw_html: str, target_username: str) -> dict[str, Any]:
         rf'"username":"{re.escape(target_username)}".*?'
         r'"initialCount":([0-9,]+).*?"totalCount":([0-9,]+)',
         payload or text,
-        flags=re.S,
+        flags=re.S | re.I,
     )
     followers: list[dict[str, Any]] = []
     for segment in _split_follower_cards(text):
@@ -262,6 +270,31 @@ def parse_top_followers(raw_html: str, target_username: str) -> dict[str, Any]:
         "vibe_topics": _parse_vibe_topics(payload),
         "followers": followers,
     }
+
+
+def parse_api_followers(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], bool]:
+    """Parse a Digg follower API page."""
+    followers = []
+    for item in payload.get("items", []):
+        username = item.get("username")
+        if not username:
+            continue
+        followers.append(
+            {
+                "rank": item.get("rank"),
+                "username": username,
+                "digg_profile_username": username.lower(),
+                "display_name": item.get("display_name") or username,
+                "bio": item.get("bio") or "",
+                "x_id": item.get("x_id"),
+                "role": item.get("category"),
+                "followers_count": item.get("followers_count"),
+                "profile_image_url": item.get("profile_image_url"),
+                "digg_url": f"{DIGG_BASE}/u/x/{username.lower()}",
+                "x_url": f"https://x.com/{username}",
+            }
+        )
+    return followers, bool(payload.get("hasMore"))
 
 
 def _parse_vibe_topics(payload: str) -> dict[str, Any] | None:
@@ -303,6 +336,8 @@ def scrape(
     profile_limit: int,
     include_companies: bool = False,
     workers: int = 6,
+    full_followers: bool = False,
+    page_sleep: float = 0.05,
 ) -> dict[str, Any]:
     rankings_html = _get(RANKINGS_URL)
     rankings = parse_rankings(rankings_html)
@@ -312,7 +347,12 @@ def scrape(
         if include_companies or (row.get("role") or "").lower() != "company"
     ][:profile_limit]
 
-    profiles, edges = _scrape_profiles(selected, workers=workers)
+    profiles, edges = _scrape_profiles(
+        selected,
+        workers=workers,
+        full_followers=full_followers,
+        page_sleep=page_sleep,
+    )
 
     graph = {
         "generated_at": _now(),
@@ -327,9 +367,10 @@ def scrape(
         "rankings": rankings,
         "profiles": profiles,
         "edges": edges,
+        "followers_mode": "full_paginated" if full_followers else "initial_profile_slice",
         "limitations": [
             "Rankings page currently exposes 1,000 structured ranking entries.",
-            "Profile pages expose an initial top-follower slice plus a total count; this is not the full X graph.",
+            "Digg exposes top followers within its ranked tech graph; this is not the full X follower graph.",
             "Bios are self-authored/profile-derived and need primary-source validation before registry promotion.",
         ],
     }
@@ -341,7 +382,7 @@ def scrape(
 
 
 def _scrape_profiles(
-    selected: list[dict[str, Any]], *, workers: int
+    selected: list[dict[str, Any]], *, workers: int, full_followers: bool, page_sleep: float
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if not selected:
         return [], []
@@ -350,7 +391,16 @@ def _scrape_profiles(
     edges: list[dict[str, Any]] = []
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(_scrape_one_profile, target): target for target in selected}
+        futures = {
+            pool.submit(
+                _scrape_one_profile,
+                target,
+                full_followers=full_followers,
+                page_sleep=page_sleep,
+            ): target
+            for target in selected
+        }
+        completed = 0
         for future in as_completed(futures):
             target = futures[future]
             try:
@@ -367,22 +417,49 @@ def _scrape_profiles(
                 profile_edges = []
             profiles_by_rank[target["rank"]] = profile
             edges.extend(profile_edges)
+            completed += 1
+            if completed == len(selected) or completed % 50 == 0:
+                print(
+                    "Digg profile scrape progress: "
+                    f"{completed}/{len(selected)} profiles, {len(edges)} edges",
+                    file=sys.stderr,
+                    flush=True,
+                )
 
     profiles = [profiles_by_rank[target["rank"]] for target in selected]
     edges.sort(key=lambda edge: (edge["to_digg_rank"], edge["from_digg_rank"] or 10**9))
     return profiles, edges
 
 
-def _scrape_one_profile(target: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def _scrape_one_profile(
+    target: dict[str, Any], *, full_followers: bool, page_sleep: float
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     username = target["digg_profile_username"]
     profile_url = f"{DIGG_BASE}/u/x/{username}"
     parsed = parse_top_followers(_get(profile_url), username)
+    follower_fetch_error = None
+    if full_followers:
+        try:
+            followers = _fetch_all_top_followers(
+                username,
+                page_sleep=page_sleep,
+                fallback_followers=parsed["followers"],
+            )
+        except Exception as exc:
+            follower_fetch_error = str(exc)
+            followers = parsed["followers"]
+    else:
+        followers = parsed["followers"]
+
     profile = {
         "target": target,
         "initial_count": parsed["initial_count"],
         "total_count": parsed["total_count"],
+        "fetched_count": len(followers),
         "vibe_topics": parsed["vibe_topics"],
-        "top_followers": parsed["followers"],
+        "top_followers": followers,
+        "followers_mode": "full_paginated" if full_followers else "initial_profile_slice",
+        "follower_fetch_error": follower_fetch_error,
     }
     edges = [
         {
@@ -390,20 +467,60 @@ def _scrape_one_profile(target: dict[str, Any]) -> tuple[dict[str, Any], list[di
             "from_username": follower["username"],
             "from_display_name": follower["display_name"],
             "from_digg_rank": follower["rank"],
+            "from_role": follower.get("role"),
+            "from_followers_count": follower.get("followers_count"),
+            "from_x_id": follower.get("x_id"),
             "from_digg_url": follower["digg_url"],
             "from_x_url": follower["x_url"],
             "to_username": target["username"],
             "to_display_name": target["display_name"],
             "to_digg_rank": target["rank"],
+            "to_role": target.get("role"),
+            "to_x_id": target.get("x_id"),
             "to_digg_url": target["digg_url"],
             "to_x_url": target["x_url"],
             "to_github_url": target.get("github_url"),
-            "evidence_url": profile_url,
-            "evidence_type": "digg_profile_top_follower",
+            "evidence_url": (
+                f"{DIGG_BASE}/api/profile/{urllib.parse.quote(username)}/followers"
+                if full_followers
+                else profile_url
+            ),
+            "evidence_type": (
+                "digg_api_paginated_top_follower"
+                if full_followers
+                else "digg_profile_top_follower"
+            ),
         }
-        for follower in parsed["followers"]
+        for follower in followers
     ]
     return profile, edges
+
+
+def _fetch_all_top_followers(
+    username: str,
+    *,
+    page_sleep: float,
+    fallback_followers: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    followers: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    offset = 0
+    while True:
+        query = urllib.parse.urlencode({"offset": offset, "limit": FOLLOWERS_PAGE_SIZE})
+        url = f"{DIGG_BASE}/api/profile/{urllib.parse.quote(username)}/followers?{query}"
+        page_followers, has_more = parse_api_followers(_get_json(url))
+        for follower in page_followers:
+            key = follower.get("x_id") or follower["username"].lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            followers.append(follower)
+        if not has_more or not page_followers:
+            break
+        offset += FOLLOWERS_PAGE_SIZE
+        if page_sleep > 0:
+            time.sleep(page_sleep)
+    return followers or fallback_followers
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -412,7 +529,7 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         return
     fields = list(rows[0])
     with path.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=fields)
+        writer = csv.DictWriter(fh, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -437,12 +554,25 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Fetch profile edges for company/org ranking rows too.",
     )
+    parser.add_argument(
+        "--full-followers",
+        action="store_true",
+        help="Page through Digg's follower API instead of only using the first rendered slice.",
+    )
+    parser.add_argument(
+        "--page-sleep",
+        type=float,
+        default=0.05,
+        help="Seconds to sleep between paginated follower API requests per worker.",
+    )
     args = parser.parse_args(argv)
     graph = scrape(
         out_dir=Path(args.out),
         profile_limit=args.profiles,
         include_companies=args.include_companies,
         workers=args.workers,
+        full_followers=args.full_followers,
+        page_sleep=args.page_sleep,
     )
     print(
         "Digg scrape wrote "

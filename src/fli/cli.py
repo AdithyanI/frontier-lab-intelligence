@@ -36,6 +36,17 @@ def main(argv: list[str] | None = None) -> int:
         default=6,
         help="Concurrent profile fetches for top-follower edge extraction.",
     )
+    digg_p.add_argument(
+        "--full-followers",
+        action="store_true",
+        help="Page through Digg's follower API instead of only using the first rendered slice.",
+    )
+    digg_p.add_argument(
+        "--page-sleep",
+        type=float,
+        default=0.05,
+        help="Seconds to sleep between paginated follower API requests per worker.",
+    )
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -64,6 +75,9 @@ def main(argv: list[str] | None = None) -> int:
                 str(args.profiles),
                 "--workers",
                 str(args.workers),
+                *(["--full-followers"] if args.full_followers else []),
+                "--page-sleep",
+                str(args.page_sleep),
                 *(["--include-companies"] if args.include_companies else []),
             ]
         )

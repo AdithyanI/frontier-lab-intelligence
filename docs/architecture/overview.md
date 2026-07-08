@@ -81,6 +81,8 @@ Digg seed artifacts are file-based for now:
 data/digg/rankings.csv            # 1,000 ranked Digg/X accounts
 data/digg/top_follower_edges.csv  # initial top-follower edges per ranked account
 data/digg/seed_graph.json         # nested review artifact with metadata + profiles
+data/digg/full_graph_summary.json # tracked summary of full paginated local pull
+data/raw/digg-full-2026-07-08/    # ignored full paginated graph artifacts
 ```
 
 ## Target Data Model Sketch

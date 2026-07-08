@@ -219,3 +219,13 @@ Before handoff, record:
   edges**. No X API spend. Next: inspect/dedupe/rank these candidate nodes,
   filter org/media/investor noise, and design the first candidate review
   table from actual Digg evidence.
+- 2026-07-08 (Digg full follower graph): Added `fli digg --full-followers`
+  to page Digg's public follower API. Smoke test: 2 profiles → 3,126 edges.
+  Full pull: **1,000 rankings**, **1,000 profiles**, **361,225 directed
+  top-follower edges** across 999 target accounts; `xai` returned 404. Full
+  raw artifacts are kept locally under ignored `data/raw/digg-full-2026-07-08/`
+  because they exceed normal git-hosting file-size limits; tracked manifest:
+  `data/digg/full_graph_summary.json`. Tracked `data/digg/` snapshot remains
+  the smaller first-slice graph for reviewability. Next: build candidate
+  review/ranking from the full local edge CSV and decide schema from that
+  evidence.

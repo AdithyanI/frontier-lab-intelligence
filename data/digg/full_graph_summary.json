@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-07-08T16:16:49+00:00",
+  "source": {
+    "name": "Digg Tech rankings",
+    "url": "https://digg.com/tech/x/rankings",
+    "methodology": "Digg says the rankings are built from the X social graph, using roughly 9 million follow relationships."
+  },
+  "followers_mode": "full_paginated",
+  "rankings": 1000,
+  "profiles": 1000,
+  "edges": 361225,
+  "profiles_with_errors": 1,
+  "empty_profiles": [
+    "xai"
+  ],
+  "unique_from_usernames": 2178,
+  "unique_to_usernames": 999,
+  "unique_edge_pairs": 361225,
+  "largest_target": [
+    1658,
+    "karpathy"
+  ],
+  "smallest_target": [
+    0,
+    "xai"
+  ],
+  "local_files": {
+    "seed_graph_json": "data/raw/digg-full-2026-07-08/seed_graph.json",
+    "top_follower_edges_csv": "data/raw/digg-full-2026-07-08/top_follower_edges.csv",
+    "rankings_csv": "data/raw/digg-full-2026-07-08/rankings.csv"
+  },
+  "git_policy": "Full paginated artifacts are kept under ignored data/raw because they exceed normal GitHub file-size limits."
+}
