@@ -1,9 +1,11 @@
 # AI People Seed Lists
 
 **Created:** 2026-07-08  
+**Updated:** 2026-07-08 (second pass — public X list URL discovery via third-party pages; membership not verified on-platform)  
 **Purpose:** Seed sources for Frontier Lab Intelligence people registry (researchers, builders, founders, frontier lab employees). Broad lists preferred — filter downstream to target labs (OpenAI, Anthropic, Google DeepMind, Meta AI, xAI, Mistral, DeepSeek, Qwen + general high-signal AI).  
 **Source:** Live web + X searches (Grok tools). No hallucinations of membership.  
-**Usage:** Extract handles/names, dedupe, enrich with affiliation/role/GitHub/arXiv. Prefer X Lists and GitHub files for direct handles.
+**Usage:** Extract handles/names, dedupe, enrich with affiliation/role/GitHub/arXiv. Prefer X Lists and GitHub files for direct handles.  
+**Discovery note:** `x.com/i/lists/...` pages are login/JS-gated from here — URLs and curators verified via linking pages (GitHub, blogs, newsletters); sample handles only when the linker names them.
 
 ## X Lists
 
@@ -42,6 +44,54 @@
 - Type: X List  
 - Why useful: Public AI-focused list referenced in scraping/monitoring tooling contexts.  
 - Samples: samples not verified
+
+**Scobleizer AI/ML (general)**  
+- URL: https://x.com/i/lists/952969346518720512  
+- Type: X List  
+- Why useful: Broad Scoble-curated list of people and companies in AI/ML; indexed in securibee/Awesome-Twitter-Lists.  
+- Samples: samples not verified
+
+**Altryne AI, AiArt, Generative**  
+- URL: https://x.com/i/lists/1318967584721690626  
+- Type: X List  
+- Why useful: Curated by @altryne; builders and promoters of generative AI tools/models — useful for builder-layer discovery beyond pure research.  
+- Samples: samples not verified
+
+**llm-tracker JP AI Twitter list**  
+- URL: https://x.com/i/lists/1738064886427734518  
+- Type: X List  
+- Why useful: AUGMXNT / llm-tracker companion list for Japan AI scene; regional coverage often missing from Western lists.  
+- Samples: samples not verified
+
+**Anne T Griffin — Dose of AI**  
+- URL: https://x.com/i/lists/1798016427745571174  
+- Type: X List  
+- Why useful: Mix of leaders building with AI and AI product leaders; disclosed on annetgriffin.com/ai-resources.  
+- Samples: samples not verified
+
+**Łukasz Wróbel — AI Experts**  
+- URL: https://x.com/i/lists/1613128091437604864  
+- Type: X List  
+- Why useful: @lukaszwrobel; 500+ individual AI experts curated over several years (people only, not tools).  
+- Samples: samples not verified
+
+**swyx ai-notes Researchers/Developers sub-list**  
+- URL: https://x.com/i/lists/1713824630241202630  
+- Type: X List  
+- Why useful: Linked from swyxio/ai-notes README under Researchers/Developers alongside handles like @nisten and @far__el; owner not confirmed from linker.  
+- Samples: samples not verified
+
+**「AI 精选」 (AI curated picks)**  
+- URL: https://x.com/i/lists/2021198996157710621  
+- Type: X List  
+- Why useful: Recommended as a high-quality AI content source in vigorX777/x-ai-topic-selector tooling docs.  
+- Samples: samples not verified
+
+**securibee/Awesome-Twitter-Lists (AI/ML index)**  
+- URL: https://github.com/securibee/Awesome-Twitter-Lists  
+- Type: other (meta-index)  
+- Why useful: Curated index of public X lists including AI/ML entries (swyx, Scoble, Altryne); good discovery starting point, not a list itself.  
+- Samples: @swyx list 1585430245762441216, @Scobleizer 952969346518720512, @altryne 1318967584721690626
 
 ## GitHub Files
 
@@ -153,4 +203,4 @@
 - Record actual extraction results and spend in working-log.md.  
 - Add durable provenance to sources.md when using specific claims from these.
 
-All entries compiled from live tool results on 2026-07-08. Broad lists retained intentionally.
+All entries compiled from live tool results on 2026-07-08. X list URLs from the second pass (2026-07-08) added above; broad lists retained intentionally.
