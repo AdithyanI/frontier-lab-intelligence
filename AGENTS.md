@@ -8,7 +8,8 @@ AI Engineer case study; built as a real product intended to outlive it.
 ## Operating model
 - Human sets intent and approves external submission; agents implement, validate, and maintain docs.
 - **Budget: do not over-optimize.** The €100 API budget is not a binding design constraint (Adi, 2026-07-08). Don't design around cost minimization or repeatedly raise cost trade-offs; just log spend in the working log and move on. Revisit only if actual spend approaches the ceiling.
-- **Data first.** Current build philosophy (Adi, 2026-07-08): get real data flowing and visible before designing schemas/abstractions on top of it. Fetch raw → inspect → model from evidence, not theory.
+- **Data first.** Current build philosophy (Adi, 2026-07-08): get real data flowing and visible before designing schemas/abstractions on top of it. Fetch raw → inspect → model from evidence, not theory. The modeled DB schema is intentionally not locked yet.
+- **Do not import Dobby machinery.** This repo may use Adi's agent-native habits (tracker, docs, checks, working log), but it is not a Dobby/person-memory workspace. Keep personal-agent architecture in `~/GitHub/adi`/`~/GitHub/agents`, not here.
 - Work from `docs/projects/frontier-lab-intelligence/tasks.md` as the canonical tracker.
 - Preserve the original prompt in `docs/references/case-prompt.md`; do not rely on chat memory.
 - Do not send, upload, message, publish, push to a public remote, or submit anything externally without explicit Adi approval in the current session.
@@ -33,6 +34,18 @@ AI Engineer case study; built as a real product intended to outlive it.
   ask "how you worked"; the log is the answer.
 - **Design system.** `PRODUCT.md` and `DESIGN.md` at repo root govern all UI
   work (impeccable-compatible). The web UI is 5% of the rubric; keep it light.
+
+## Skill routing
+- Repo cleanliness / agent-native harness questions: use
+  `$agent-native-repo-playbook`.
+- Tracker refresh, current batch planning, or long-running execution state:
+  use `$project`.
+- UI review or frontend polish: use `$impeccable`, but defer this until real
+  registry/insight/report data exists.
+- Cross-repo personal Dobby architecture (`~/GitHub/adi`, `~/GitHub/agents`,
+  hooks, memory, workspace ownership): read `dobby-system` only when the work
+  actually crosses that boundary. Do not copy Dobby's personal-memory system
+  into this product repo.
 
 ## Source-of-truth order
 1. `docs/references/case-prompt.md` — original external requirements from BIT/Lars.

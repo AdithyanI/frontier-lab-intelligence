@@ -4,12 +4,19 @@ How to inspect this case study submission. Fill in as the build progresses.
 
 ## Quick start
 ```bash
-# TODO once stack is chosen: setup, install, run instructions
+python3.13 -m venv .venv
+. .venv/bin/activate
+.venv/bin/pip install -e '.[dev]'
+scripts/check-fast.sh
+fli fetch
+fli web
 ```
 
 ## What to look at, in weighted order
 1. **Registry (20%)** — `docs/references/solution-architecture.md` §Registry;
-   `src/bit_case_study/schema.py` and seed data under `data/`.
+   implementation is pending. Current evidence lives in `data/fli.db`
+   (`raw_items`) and the next step is a reviewable candidate table before
+   committing `fli.registry`/modeled schema code.
 2. **Signal-vs-noise (20%)** — filtering logic and the judgment calls behind
    it; see `docs/references/solution-architecture.md` §Signal-vs-noise.
 3. **Scoring + validation (20%)** — the scoring model and how it was
@@ -30,4 +37,6 @@ How to inspect this case study submission. Fill in as the build progresses.
 - Working-log — AI tool usage and €100 budget receipts.
 
 ## Known limitations
-- TODO — populate before submission.
+- The modeled registry/extraction/scoring schema is not implemented yet.
+- The current database is a raw evidence corpus, not the final submission DB.
+- Frontend polish is intentionally deferred until real modeled output exists.

@@ -38,6 +38,25 @@ Company/role context: `docs/references/bit-context.md`.
 - **No external send** (email/publish/public push/submission) without
   explicit Adi approval.
 
+## Current Batch
+
+| Status | Work Item | Role | Resource |
+| --- | --- | --- | --- |
+| todo | Rebuild the registry candidate review from real evidence: `data/fli.db` raw items + documented external source ideas, without relying on the deleted `data/raw/registry-seed/` scratch folder. | parent | `docs/references/deep-research-prompt-seed-lists.md`, `docs/references/working-log.md` |
+| todo | Decide the first modeled registry/data schema only after reviewing real candidate evidence. The DB deliverable/package policy is intentionally open for now. | parent | `docs/references/assumptions.md`, `docs/references/solution-architecture.md` |
+| todo | Keep frontend work deferred until registry/extraction/scoring have real modeled output to display. | parent | `PRODUCT.md`, `DESIGN.md` |
+
+## Open Questions / Blockers
+
+- **DB schema:** deliberately undecided. Keep the raw layer useful, but do not
+  treat `data/fli.db` or the Phase 0 data model sketch as the final schema.
+- **Database artifact policy:** open. The prompt asks for "the database:
+  schema and real data," but packaging/committing policy should be decided
+  after the modeled schema exists.
+- **Dobby system boundary:** do not bring the personal Dobby memory/agent
+  architecture into this repo. Use only the lightweight agent-native workflow
+  patterns that help this product ship.
+
 ## Execution plan (ordered by rubric weight)
 
 ### Phase 0 — Design pass (before pipeline code)
@@ -180,15 +199,16 @@ Before handoff, record:
   algorithmic, not hand-curated, correcting an earlier inference). Mined
   smol.ai's public GitHub repo for their real people-tagging whitelist (33
   handles in `oneoffs/preferredTags.ts`). Both saved to
-  `data/raw/registry-seed/` with a README covering known limitations
-  (truncated-bio false negatives, stale affiliations, nothing
-  auto-verified). Wrote an external deep-research prompt
+  temporary `data/raw/registry-seed/` scratch files with a README covering
+  known limitations (truncated-bio false negatives, stale affiliations,
+  nothing auto-verified). Wrote an external deep-research prompt
   (`docs/references/deep-research-prompt-seed-lists.md`) for Adi to run to
   find more curated lists (X Lists, TIME100 AI, Semantic Scholar,
   conference speaker lists, China-lab coverage).
   **Session paused here — Adi continuing elsewhere. Resume point:**
-  merge Digg (125 lab-bio-matched) + smol.ai (33) + our own arXiv/GitHub
-  evidence counts + whatever the external deep-research turns up, into one
-  reviewable candidate table; Adi does the human approval pass; then write
-  the modeled `people`/`labs` schema from what survives review. No
-  registry schema exists yet — still raw candidate pools only.
+  regenerate/merge Digg-style, smol.ai-style, arXiv, and GitHub evidence into
+  one reviewable candidate table; Adi does the human approval pass; then write
+  the modeled `people`/`labs` schema from what survives review. No registry
+  schema exists yet — still raw candidate pools only. The temporary
+  `data/raw/registry-seed/` folder was deleted later the same day; do not
+  assume those scratch files exist.
