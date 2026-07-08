@@ -229,3 +229,9 @@ Before handoff, record:
   the smaller first-slice graph for reviewability. Next: build candidate
   review/ranking from the full local edge CSV and decide schema from that
   evidence.
+- 2026-07-08 (build journal contract): Added
+  `docs/references/build-journal.md` and AGENTS guidance requiring a concise
+  narrative journal entry after each meaningful chunk of work. Purpose: make
+  the take-home build path reviewable as a sequence of human intent,
+  decisions, evidence, product impact, and next-step rationale, separate from
+  the AI-tool/budget working log.

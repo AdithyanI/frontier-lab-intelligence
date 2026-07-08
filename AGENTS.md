@@ -32,6 +32,11 @@ AI Engineer case study; built as a real product intended to outlive it.
 - **Working log.** Record AI-tool usage per session and every euro of the
   €100 API budget in `docs/references/working-log.md`. BIT will explicitly
   ask "how you worked"; the log is the answer.
+- **Build journal.** After each meaningful chunk of work, append a concise
+  narrative entry to `docs/references/build-journal.md`: human intent,
+  decision/action, evidence, impact on the product, and the next useful step.
+  This is the take-home story of how the system was built; keep private
+  context clearly marked so Phase 4 cleanup can strip it.
 - **Design system.** `PRODUCT.md` and `DESIGN.md` at repo root govern all UI
   work (impeccable-compatible). The web UI is 5% of the rubric; keep it light.
 
@@ -64,6 +69,8 @@ If repo docs conflict with chat memory, preserve the conflict in the tracker and
 - `docs/references/assumptions.md` stores assumptions, interpretation choices, and why they were made.
 - `docs/references/sources.md` stores source links and provenance for factual/company/market claims.
 - `docs/references/working-log.md` stores AI-tool usage and budget spend.
+- `docs/references/build-journal.md` stores the narrative build history:
+  decisions, pivots, evidence, and next-step rationale.
 - `docs/references/reviewer-guide.md` stores the final review path: commands, expected outputs, files to inspect, and submission package.
 - `docs/learning/` stores plain-words entries for DS/ML concepts as they are used.
 - Architecture/design explanations belong in `docs/references/solution-architecture.md` or `docs/references/solution-memo.md`, not in `AGENTS.md`.
