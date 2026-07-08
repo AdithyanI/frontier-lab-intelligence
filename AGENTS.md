@@ -7,9 +7,9 @@ AI Engineer case study; built as a real product intended to outlive it.
 
 ## Operating model
 - Human sets intent and approves external submission; agents implement, validate, and maintain docs.
-- **Budget: do not over-optimize.** The €100 API budget is not a binding design constraint (Adi, 2026-07-08). Don't design around cost minimization or repeatedly raise cost trade-offs; just log spend in the working log and move on. Revisit only if actual spend approaches the ceiling.
+- **Budget: do not over-optimize.** The €100 API budget is not a binding design constraint (Adi, 2026-07-08). Don't design around cost minimization or repeatedly raise cost trade-offs; just log spend in the build log and move on. Revisit only if actual spend approaches the ceiling.
 - **Data first.** Current build philosophy (Adi, 2026-07-08): get real data flowing and visible before designing schemas/abstractions on top of it. Fetch raw → inspect → model from evidence, not theory. The modeled DB schema is intentionally not locked yet.
-- **Do not import Dobby machinery.** This repo may use Adi's agent-native habits (tracker, docs, checks, working log), but it is not a Dobby/person-memory workspace. Keep personal-agent architecture in `~/GitHub/adi`/`~/GitHub/agents`, not here.
+- **Do not import Dobby machinery.** This repo may use Adi's agent-native habits (tracker, docs, checks, build log), but it is not a Dobby/person-memory workspace. Keep personal-agent architecture in `~/GitHub/adi`/`~/GitHub/agents`, not here.
 - Work from `docs/projects/frontier-lab-intelligence/tasks.md` as the canonical tracker.
 - Preserve the original prompt in `docs/references/case-prompt.md`; do not rely on chat memory.
 - Do not send, upload, message, publish, push to a public remote, or submit anything externally without explicit Adi approval in the current session.
@@ -17,26 +17,14 @@ AI Engineer case study; built as a real product intended to outlive it.
 - Run `scripts/check-fast.sh` before handoff; if a check is skipped, record why in the tracker.
 
 ## Standing contracts
-- **Builder context.** Read `docs/references/builder-context.md` to know who
-  Adi is, what he knows, and what he is learning. Calibrate explanations and
-  learning entries to that background (systems engineer, not data scientist).
-- **Dual purpose, cleanup later.** Until submission this repo is both Adi's
-  learning workbench and the future submission. Rich/private context is
-  allowed now, but keep it in clearly marked sections/files (never scattered
-  in code comments or commit messages) so the Phase 4 pre-submission cleanup
-  pass can strip it cleanly.
-- **Learning log — do → learn.** Adi is learning data science through this
-  build. Any DS/ML technique used in a change (scoring models, validation,
-  ground truth, ranking metrics, calibration, …) gets a plain-words entry in
-  `docs/learning/` in the same change. Contract: `docs/learning/README.md`.
-- **Working log.** Record AI-tool usage per session and every euro of the
-  €100 API budget in `docs/references/working-log.md`. BIT will explicitly
-  ask "how you worked"; the log is the answer.
-- **Build journal.** After each meaningful chunk of work, append a concise
-  narrative entry to `docs/references/build-journal.md`: human intent,
-  decision/action, evidence, impact on the product, and the next useful step.
-  This is the take-home story of how the system was built; keep private
-  context clearly marked so Phase 4 cleanup can strip it.
+- **Context.** Read `docs/references/context.md` to know BIT, the role, Adi's
+  background, and private cleanup boundaries.
+- **Build log.** After each meaningful chunk, update
+  `docs/references/build-log.md` with intent, decision/action, evidence,
+  impact/next step, tools used, and any spend. DS/ML learning notes now live
+  there too.
+- **Research notes.** Keep assumptions, provenance, and seed-source leads in
+  `docs/references/research-notes.md`.
 - **Design system.** `PRODUCT.md` and `DESIGN.md` at repo root govern all UI
   work (impeccable-compatible). The web UI is 5% of the rubric; keep it light.
 
@@ -55,31 +43,27 @@ AI Engineer case study; built as a real product intended to outlive it.
 ## Source-of-truth order
 1. `docs/references/case-prompt.md` — original external requirements from BIT/Lars.
 2. `docs/projects/frontier-lab-intelligence/tasks.md` — current plan, status, blockers, and validation evidence.
-3. `docs/references/*` — durable assumptions, sources, design notes, and reviewer instructions.
-4. Chat/session context — useful only after captured into repo docs.
+3. `docs/architecture/overview.md` — current architecture, stack, data shape, and module status.
+4. `docs/references/context.md`, `docs/references/research-notes.md`, `docs/references/build-log.md` — durable context, facts, decisions, and build history.
+5. Chat/session context — useful only after captured into repo docs.
 
 If repo docs conflict with chat memory, preserve the conflict in the tracker and follow the captured prompt until Adi decides otherwise.
 
 ## Docs contract
-- `docs/architecture/overview.md` is the living visual map (Mermaid): pipeline, funnel, data model, repo layout, module status. Any change to system shape updates it in the same change.
+- `docs/architecture/overview.md` is the single living architecture map:
+  stack, pipeline, funnel, data artifacts, model sketch, module status.
 - `docs/projects/frontier-lab-intelligence/tasks.md` is active execution state only.
-- `docs/references/case-prompt.md` stores the original prompt and submission instructions verbatim.
-- `docs/references/bit-context.md` stores submission-safe company/role context.
-- `docs/references/builder-context.md` stores who Adi is, his background, learning goals, and how to calibrate explanations. Mixed private/submission-safe; cleaned at Phase 4.
-- `docs/references/assumptions.md` stores assumptions, interpretation choices, and why they were made.
-- `docs/references/sources.md` stores source links and provenance for factual/company/market claims.
-- `docs/references/working-log.md` stores AI-tool usage and budget spend.
-- `docs/references/build-journal.md` stores the narrative build history:
-  decisions, pivots, evidence, and next-step rationale.
+- `docs/references/case-prompt.md` stores the original prompt and submission instructions; `docs/references/source-material/` stores the original PDF and OCR text.
+- `docs/references/context.md` stores BIT/role context plus clearly marked private builder context for Phase 4 cleanup.
+- `docs/references/research-notes.md` stores assumptions, source provenance, and seed-source leads.
+- `docs/references/build-log.md` stores build history, AI-tool usage, budget spend, and DS/ML learning notes.
 - `docs/references/reviewer-guide.md` stores the final review path: commands, expected outputs, files to inspect, and submission package.
-- `docs/learning/` stores plain-words entries for DS/ML concepts as they are used.
-- Architecture/design explanations belong in `docs/references/solution-architecture.md` or `docs/references/solution-memo.md`, not in `AGENTS.md`.
 
 ## Confidentiality and data handling
 - Treat Lars's prompt, attachments, and provided data as private case-study material.
 - Do not publish, push to a public remote, paste into public tools, or reuse externally unless the prompt explicitly allows it and Adi approves.
 - Do not commit large/private raw data unless the prompt permits it; prefer `data/README.md` plus local ignored data paths.
-- Record data provenance and allowed usage in `docs/references/sources.md` or `docs/references/data-notes.md`.
+- Record data provenance and allowed usage in `docs/references/research-notes.md`.
 
 ## Quality bar
 - Prefer small, working, inspectable deliverables over broad architecture.

@@ -6,8 +6,12 @@ test -f PRODUCT.md
 test -f DESIGN.md
 test -f docs/projects/frontier-lab-intelligence/tasks.md
 test -f docs/references/case-prompt.md
-test -f docs/references/working-log.md
-test -f docs/learning/README.md
+test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf
+test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.txt
+test -f docs/references/context.md
+test -f docs/references/research-notes.md
+test -f docs/references/build-log.md
+test -f docs/architecture/overview.md
 
 grep -Eqi "deadline|due|submission|unknown" docs/projects/frontier-lab-intelligence/tasks.md || {
   echo "Tracker should record deadline/submission instructions or unknowns."

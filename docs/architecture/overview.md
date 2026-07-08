@@ -1,19 +1,28 @@
 # Architecture Overview
 
-The living visual map of the system. **Contract: any change to system shape
-(new module, new pipeline stage, schema change) updates this doc in the same
-change.** Diagrams are Mermaid — they render on GitHub and in most editors.
+Living map of Frontier Lab Intelligence. Update this file when the system
+shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Prose rationale (why these choices): `docs/references/solution-architecture.md`.
-Status: data-first bootstrap. The implemented system currently has a raw
-fetch/store layer (`fli.fetch`, `fli.store`, `raw_items`), a Digg-derived seed
-graph extractor (`fli.digg`), and a lightweight web shell. The modeled
+Status: data-first bootstrap. The implemented code has raw fetch/store,
+Digg-derived seed graph extraction, and a lightweight web shell. The modeled
 registry/extraction/scoring schema is intentionally not locked yet.
 
-## System pipeline
+## Stack
 
-Target shape: five stages, each an independently runnable CLI step, sharing one
-SQLite DB. Current code has only the raw fetch/store slice of ingestion.
+One Python codebase, one SQLite database, one small server-rendered web app.
+
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Language/package | Python 3.13, `src/fli/` | Most rubric weight is data, LLM, scoring, and ingestion work. |
+| Database | SQLite | The prompt asks for a database; a single inspectable file is reviewer-friendly. |
+| Web UI | FastAPI + Jinja2 + plain CSS | UI is 5% of the rubric; avoid a separate frontend stack. |
+| Pipeline | CLI subcommands | Each stage should be independently runnable, testable, and demoable. |
+| Scheduling | Simple cron/loop later | Scheduled ingestion does not need queue infrastructure yet. |
+
+Rejected for now: React/Next split frontend, Streamlit/Gradio toy-dashboard
+shape, and Dobby/personal-memory architecture inside this product repo.
+
+## System pipeline
 
 ```mermaid
 flowchart LR
@@ -22,7 +31,7 @@ flowchart LR
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
-        X[X / Twitter — later]
+        X[X / Twitter later]
     end
 
     REG[(Registry<br/>labs + people)]
@@ -32,63 +41,89 @@ flowchart LR
     DEL[Delivery<br/>digests · alerts]
     UI[Web UI<br/>FastAPI + Jinja2]
 
-    REG -->|who to watch| ING
     DIGG --> REG
+    REG -->|who to watch| ING
     BLOGS & ARXIV & GH & X --> ING
     ING --> EXT
-    EXT -->|attributed, cited insights| SCO
+    EXT --> SCO
     SCO --> DEL
-    REG -.->|entity pages| UI
-    SCO -.->|insights + why-flagged| UI
-    DEL -.->|past reports| UI
+    REG -.-> UI
+    SCO -.-> UI
+    DEL -.-> UI
     ING -.->|discovered names| REG
 ```
 
-## Signal funnel (where noise dies)
+Target stages:
+
+1. **Registry:** labs, people, identities, affiliations, provenance.
+2. **Ingestion:** public source pulls, dedup, clustering, freshness.
+3. **Extraction:** structured/cited insights from surviving documents.
+4. **Scoring:** visible dimensions plus validation, not an arbitrary weighted sum.
+5. **Delivery:** persona digests, alerts, reviewable UI, PDF/export later.
+
+## Signal Funnel
 
 ```mermaid
 flowchart TD
-    S0[Stage 0 — source scoping<br/>curated source list · editorial, free]
-    S1[Stage 1 — dedup / clustering<br/>many links → one event · mechanical, free]
-    S2[Stage 2 — novelty gate<br/>embeddings vs recent history · ~free]
-    S3[Stage 3 — LLM extraction + rubric scoring<br/>costs tokens — only survivors]
-    S4[Stage 4 — persona thresholds<br/>investment vs AI team cut-lines · free]
+    S0[Source scoping<br/>curated source list]
+    S1[Dedup / clustering<br/>many links → one event]
+    S2[Novelty gate<br/>similarity vs recent history]
+    S3[LLM extraction + rubric scoring<br/>only on survivors]
+    S4[Persona thresholds<br/>investment vs AI team]
     OUT1[Alert tier]
-    OUT2[1-page persona digest]
+    OUT2[1-page digest]
     OUT3[Full appendix]
-    NONE[“Nothing significant today”]
+    NONE[Nothing significant today]
 
     S0 --> S1 --> S2 --> S3 --> S4
     S4 --> OUT1 & OUT2 & OUT3
-    S4 -->|no item crosses the bar| NONE
+    S4 --> NONE
 ```
 
-Judgment is encoded in exactly two places: the source list (S0) and the
-scoring rubric (S3). Everything else is mechanical and testable.
+Judgment is meant to live in two visible places: source selection and scoring
+rubrics. Everything else should be mechanical and testable.
 
-## Current database
+Design principles borrowed from prior art:
 
-Implemented today: one raw evidence table. It stores fetched payloads as JSON
-with dedup by `(source, external_id)`. This is not the final modeled schema.
+- Curated source lists and denominator disclosure from smol.ai/AI News.
+- "Nothing significant today" as a trust-preserving output.
+- Machine proposes, human disposes from Techmeme/Digg-style workflows.
+- Reason-for-inclusion labels instead of one opaque score.
+- Time decay and noise dampeners for freshness.
+- Dated affiliations because people moves are themselves a signal.
+
+## Current Data
+
+Implemented raw table:
 
 ```text
 raw_items(id, source, lab, external_id, fetched_at, payload)
 ```
 
-Digg seed artifacts are file-based for now:
+Current file artifacts:
 
 ```text
-data/digg/rankings.csv            # 1,000 ranked Digg/X accounts
-data/digg/top_follower_edges.csv  # initial top-follower edges per ranked account
-data/digg/seed_graph.json         # nested review artifact with metadata + profiles
-data/digg/full_graph_summary.json # tracked summary of full paginated local pull
-data/raw/digg-full-2026-07-08/    # ignored full paginated graph artifacts
+data/fli.db                         # raw evidence SQLite corpus
+data/digg/rankings.csv              # 1,000 ranked Digg/X accounts
+data/digg/top_follower_edges.csv    # tracked first-slice top-follower edges
+data/digg/seed_graph.json           # tracked nested Digg review artifact
+data/digg/full_graph_summary.json   # summary of full paginated local pull
+data/raw/digg-full-2026-07-08/      # ignored full graph artifacts
 ```
+
+Known data facts:
+
+- `fli fetch` landed 1,599 raw items from lab blogs/sitemap, arXiv, and
+  GitHub releases.
+- `fli digg` landed 1,000 ranked accounts and 49,950 tracked first-slice
+  edges.
+- `fli digg --full-followers` produced 361,225 local full-paginated edges;
+  full raw files are ignored because they exceed normal git-hosting size.
 
 ## Target Data Model Sketch
 
-This is the Phase 0 registry/insight shape to test against real data, not a
-locked schema.
+This is a hypothesis to test against real candidate evidence, not a locked
+schema.
 
 ```mermaid
 erDiagram
@@ -114,19 +149,19 @@ erDiagram
     DOCUMENT {
         string id PK
         string source_url
-        string cluster_id "one event, many docs"
+        string cluster_id
         datetime published_at
     }
     INSIGHT {
         string id PK
         string document_id FK
-        string attributed_to FK "entity"
+        string attributed_to FK
         string claim
         string evidence_quote
     }
     SCORE {
         string insight_id FK
-        string dimension "novelty | materiality | credibility | actionability:persona"
+        string dimension
         int value
         string rationale
     }
@@ -135,43 +170,34 @@ erDiagram
     ENTITY ||--o{ IDENTITY : has
     ENTITY ||--o{ INSIGHT : "attributed to"
     DOCUMENT ||--o{ INSIGHT : yields
-    INSIGHT ||--o{ SCORE : "scored on"
+    INSIGHT ||--o{ SCORE : scored
 ```
 
-Affiliations are dated claims, never fixed attributes — people move, and the
-move itself is a signal.
+Scoring dimensions under consideration: novelty, materiality, credibility,
+actionability per persona, corroboration, and freshness. The combination into
+a ranking should be checked against human/hindsight labels before becoming a
+final score.
 
-## Repo layout
-
-```
-src/fli/          the installable package — only shippable code
-  cli.py          pipeline entrypoint
-  digg.py         Digg ranking + top-follower seed graph extractor
-  fetch.py        raw public-source fetch spike
-  store.py        SQLite raw_items storage
-  web/            FastAPI/Jinja shell
-  (planned) registry.py · ingest.py · extract.py · scoring.py · delivery.py
-tests/            mirrors src/fli one-to-one (test_scoring.py ↔ scoring.py)
-docs/
-  architecture/   ← this doc (visual map, kept current)
-  references/     durable decisions, prompt, assumptions, logs
-  learning/       plain-words DS/ML entries (do → learn contract)
-  projects/       execution tracker
-data/             local data paths (large/raw data stays untracked)
-scripts/          check-fast.sh and repo tooling
-```
-
-## Module status
+## Module Status
 
 | Module | Status |
 | --- | --- |
-| `fli.cli` | ✅ `--version`, help, `fetch`, `digg`, `web` |
-| `fli.digg` | ✅ Digg Tech rankings + top-follower seed graph extraction |
-| `fli.store` | ✅ raw `raw_items` SQLite layer |
-| `fli.fetch` | ✅ raw fetch spike: blogs/sitemap, arXiv, GitHub releases for 3 labs |
-| `fli.registry` | ⏳ open — schema from evidence next |
-| `fli.ingest` | ⏳ production ingestion pending; raw fetch spike exists |
-| `fli.extract` | ⏳ pending |
-| `fli.scoring` | ⏳ pending |
-| `fli.delivery` | ⏳ pending |
-| `fli.web` | ✅ shell: home + `/architecture` (renders this doc with Mermaid); register/insights/reports pending |
+| `fli.cli` | `--version`, `fetch`, `digg`, `web` |
+| `fli.digg` | Digg rankings and top-follower graph extraction |
+| `fli.store` | raw `raw_items` SQLite layer |
+| `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
+| `fli.web` | shell: home + `/architecture` |
+| `fli.registry` | pending, schema from candidate evidence next |
+| `fli.ingest` | pending production ingestion; raw fetch spike exists |
+| `fli.extract` | pending |
+| `fli.scoring` | pending |
+| `fli.delivery` | pending |
+
+## Build Order
+
+1. Build a reviewable registry-candidate table from Digg + raw evidence.
+2. Decide the first modeled registry schema from reviewed candidates.
+3. Promote raw fetch into production ingestion around the accepted registry.
+4. Extract and score real ingested data.
+5. Add validation harness and ground-truth labeling.
+6. Delivery and UI last.

@@ -5,7 +5,7 @@
 - Received at: 2026-07-07 16:41 CEST (14:41 UTC)
 - Sender: BIT Capital GmbH <career@bitcap.com> (Lars)
 - Email/thread/source: Gmail message `19f3d0692e019e93`, thread `19f056ce40383638`, subject "Re: Re: Adithyan <> BIT Capital | Next Step: Interview with Vlad Gheorghe", account adithyan@wisdominanutshell.academy → adi@aipodcast.ing
-- Local attachments folder: `docs/references/source-material/` (this repo); original capture also at `~/GitHub/adi/projects/bit-capital-case-study-2026/resources/source-material/`
+- Local attachments folder: `docs/references/source-material/` (this repo); original capture also kept in the career tracker.
 - Captured by: Dobby, 2026-07-07
 
 ## Verbatim prompt
@@ -24,8 +24,8 @@ Best, Lars
 
 Full case study PDF (verbatim, canonical copy is the PDF itself):
 
-- PDF: `resources/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf`
-- Extracted text: `resources/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.txt`
+- PDF: `docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf`
+- Extracted text: `docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.txt`
 
 Case study title: **"Frontier Lab Intelligence" — AI Engineer (m/f/d) · BIT Capital · Take-home case study**
 
@@ -45,8 +45,8 @@ Condensed structure of the PDF (see extracted text for exact wording):
 
 | Item | Type | Local path / URL | Notes |
 | --- | --- | --- | --- |
-| BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf | PDF, 4 pages, 75 KB | `resources/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf` | The full case study; canonical source |
-| Extracted text | txt | `resources/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.txt` | pdftotext -layout extraction for agent reading |
+| BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf | PDF, 4 pages, 75 KB | `docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf` | The full case study; canonical source |
+| Extracted text | txt | `docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.txt` | pdftotext -layout extraction for agent reading |
 
 ## Deadline / timezone
 
@@ -59,7 +59,7 @@ Condensed structure of the PDF (see extracted text for exact wording):
 
 - Is provided material confidential/private? Not stated. Treat the PDF as private-process material: do not publish or share outside this process.
 - Are public web sources allowed? Yes — explicitly required ("research BIT Capital using whatever is public"; ingest public papers/blogs/GitHub/X).
-- Are LLM/agent tools allowed or expected? Explicitly expected: "Use any AI coding tools you want. We expect you to, and we'll ask how you worked." → keep a working-log so the "how you worked" discussion is easy.
+- Are LLM/agent tools allowed or expected? Explicitly expected: "Use any AI coding tools you want. We expect you to, and we'll ask how you worked." → keep a build log so the "how you worked" discussion is easy.
 - Are dependencies/cloud services allowed? Yes — €100 budget for APIs/services, reimbursable with receipts; they care how it's spent. Live deployment is an accepted demo path.
 - Are there restrictions on publishing/pushing/sharing? Not stated. Default: private repo; share access at submission.
 
@@ -127,7 +127,7 @@ Ask only if the answer materially changes the work.
 2. Re-read PDF + this brief; rebuild `tasks.md` Current Batch from the actual weighted rubric (registry/signal-noise/scoring first, UI last).
 3. Create the implementation repo from `agent-native-repo-template.md`; decide stack per `case-study-playbook.md` (Python core; scheduling; SQLite/Postgres; light web UI).
 4. Design pass on the top-3 weighted areas before any pipeline code: register schema + entity resolution approach; signal/noise filtering concept; scoring model + validation/ground-truth plan.
-5. Start working-log (AI-tool usage + budget receipts) from hour one — both are explicitly examined.
+5. Start build log (AI-tool usage + budget receipts) from hour one — both are explicitly examined.
 
 ## Prompt requirements map
 
@@ -142,7 +142,7 @@ Ask only if the answer materially changes the work.
 | Web interface (5%) | Light browse/config UI | todo | impl repo |
 | Git repo + README + runnable demo | Repo scaffold + README + demo path | todo | impl repo |
 | Database schema + real data | DB with real ingested data | todo | impl repo |
-| Architecture write-up (models per task, fallbacks) | `docs/architecture.md` in impl repo | todo | impl repo |
+| Architecture write-up (models per task, fallbacks) | `docs/architecture/overview.md` in impl repo | todo | impl repo |
 | Prompts + design rationale | Prompt files + rationale doc | todo | impl repo |
 | Evaluation (extraction, hallucination, scoring) | Eval harness + write-up | todo | impl repo |
 | Tokenomics (usage + $ per workflow) | Cost tracking + write-up | todo | impl repo |
