@@ -29,6 +29,22 @@ Interpretation choices made where the prompt was silent or ambiguous, and why.
   rolling trailing window, refreshed on each ingestion run, not a fixed
   calendar quarter.
 
+## Phase 0 defaults (set 2026-07-08 by agent; confirm with Adi before Phase 1 locks them)
+- **People per lab:** track ~10–20 individuals per lab — the "layer below the
+  obvious names," ranked by observable signal (recent first-author papers,
+  repo activity, blog bylines). Enough to demonstrate depth without drowning
+  extraction in noise. Adjustable per lab once discovery runs.
+- **Ground-truth labeling:** plan assumes Adi hand-labels ~50–100 extracted
+  insights (high/medium/low signal, ~1–2 hours). This is both the validation
+  backbone and the core DS learning exercise. NOT yet confirmed by Adi —
+  confirm before scheduling the labeling session; fallback is
+  hindsight-retrospective labels only.
+- **Source order:** build ingestion as lab blogs/RSS → arXiv → GitHub
+  releases first (free, stable, primary), then add X/Twitter as the fourth
+  source. Adi said cost is not a blocker for now, but X API pricing/terms are
+  volatile, so the cascade/corroboration signal from X is designed in from
+  the start and switched on when the connector lands.
+
 ## Tooling
 - AI coding tools are explicitly expected and will be discussed at the on-site
   round — the working-log (`docs/references/working-log.md`) captures how AI

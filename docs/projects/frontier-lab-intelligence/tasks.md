@@ -41,17 +41,22 @@ Company/role context: `docs/references/bit-context.md`.
 ## Execution plan (ordered by rubric weight)
 
 ### Phase 0 — Design pass (before pipeline code)
-- [ ] Registry design: entity schema (labs as first-class + individuals),
+- [x] Registry design: entity schema (labs as first-class + individuals),
       identity resolution across X/arXiv/GitHub, "layer below the obvious
       names" discovery approach, currency mechanism (people move, names emerge).
-- [ ] Signal-vs-noise design: what "genuinely important, novel, actionable"
+      → `docs/references/solution-architecture.md` §1.
+- [x] Signal-vs-noise design: what "genuinely important, novel, actionable"
       means operationally; filtering stages; where judgment is encoded.
-- [ ] Scoring design: model + inputs + justification; validation plan against
+      → architecture doc §2 (5-stage funnel; judgment in source list + rubric).
+- [x] Scoring design: model + inputs + justification; validation plan against
       ground truth / human judgment / defensible proxy. Explicit red flag from
       the prompt: an arbitrary weighted sum dressed as a score.
-- [ ] Stack decision recorded in `docs/references/solution-architecture.md`
-      (provisional default: Python core + SQLite; final DB/scheduling/UI
-      choices decided here, with reasons).
+      → architecture doc §3 (visible dimensions + mechanical inputs; combiner
+      fit to ground truth; precision@k + rank correlation). Labeling
+      assumption pending Adi confirmation (`assumptions.md`).
+- [x] Stack decision recorded in `docs/references/solution-architecture.md`
+      (Python modular monolith + SQLite + FastAPI/Jinja2 server-rendered UI;
+      alternatives considered and rejected with reasons).
 
 ### Phase 1 — Core pipeline (60% of rubric)
 - [ ] Register implementation: schema, seed data (labs + individuals),
@@ -127,3 +132,11 @@ Before handoff, record:
   DESIGN.md (seeded pre-implementation), `docs/references/bit-context.md`,
   `docs/learning/` contract, `docs/references/working-log.md`. Rebuilt this
   tracker with the weighted execution plan.
+- 2026-07-08 (pm): Phase 0 design pass complete. Stack decided + recorded
+  (Python monolith, SQLite, FastAPI/Jinja2). Package scaffolded (`src/fli`,
+  CLI stub, 2 tests, venv; check-fast green). Prior-art research (smol.ai,
+  Digg 2026 pivot, Techmeme/HN, landscape audit via 3 research sub-agents)
+  synthesized into architecture doc with 9 adopted design deltas; provenance
+  in sources.md. Phase 0 defaults recorded in assumptions.md — pending Adi
+  confirmation: ground-truth labeling appetite, X-source timing, lab seed
+  list final. Next: Phase 1 registry (schema + seeds + discovery).
