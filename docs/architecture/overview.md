@@ -6,9 +6,9 @@ change.** Diagrams are Mermaid — they render on GitHub and in most editors.
 
 Prose rationale (why these choices): `docs/references/solution-architecture.md`.
 Status: data-first bootstrap. The implemented system currently has a raw
-fetch/store layer (`fli.fetch`, `fli.store`, `raw_items`) and a lightweight web
-shell. The modeled registry/extraction/scoring schema is intentionally not
-locked yet.
+fetch/store layer (`fli.fetch`, `fli.store`, `raw_items`), a Digg-derived seed
+graph extractor (`fli.digg`), and a lightweight web shell. The modeled
+registry/extraction/scoring schema is intentionally not locked yet.
 
 ## System pipeline
 
@@ -18,6 +18,7 @@ SQLite DB. Current code has only the raw fetch/store slice of ingestion.
 ```mermaid
 flowchart LR
     subgraph sources [Sources]
+        DIGG[Digg Tech graph]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
@@ -32,6 +33,7 @@ flowchart LR
     UI[Web UI<br/>FastAPI + Jinja2]
 
     REG -->|who to watch| ING
+    DIGG --> REG
     BLOGS & ARXIV & GH & X --> ING
     ING --> EXT
     EXT -->|attributed, cited insights| SCO
@@ -71,6 +73,14 @@ with dedup by `(source, external_id)`. This is not the final modeled schema.
 
 ```text
 raw_items(id, source, lab, external_id, fetched_at, payload)
+```
+
+Digg seed artifacts are file-based for now:
+
+```text
+data/digg/rankings.csv            # 1,000 ranked Digg/X accounts
+data/digg/top_follower_edges.csv  # initial top-follower edges per ranked account
+data/digg/seed_graph.json         # nested review artifact with metadata + profiles
 ```
 
 ## Target Data Model Sketch
@@ -134,6 +144,7 @@ move itself is a signal.
 ```
 src/fli/          the installable package — only shippable code
   cli.py          pipeline entrypoint
+  digg.py         Digg ranking + top-follower seed graph extractor
   fetch.py        raw public-source fetch spike
   store.py        SQLite raw_items storage
   web/            FastAPI/Jinja shell
@@ -152,7 +163,8 @@ scripts/          check-fast.sh and repo tooling
 
 | Module | Status |
 | --- | --- |
-| `fli.cli` | ✅ `--version`, help, `fetch`, `web` |
+| `fli.cli` | ✅ `--version`, help, `fetch`, `digg`, `web` |
+| `fli.digg` | ✅ Digg Tech rankings + top-follower seed graph extraction |
 | `fli.store` | ✅ raw `raw_items` SQLite layer |
 | `fli.fetch` | ✅ raw fetch spike: blogs/sitemap, arXiv, GitHub releases for 3 labs |
 | `fli.registry` | ⏳ open — schema from evidence next |

@@ -50,6 +50,12 @@ Interpretation choices made where the prompt was silent or ambiguous, and why.
   and evidence assistant, not as the authoritative graph extractor. If full
   "who trusted anchors follow" edges become central, use the official X API
   or another explicit graph source and store observed edges with timestamps.
+- **Digg-first discovery:** after inspecting Digg profile pages, v1 registry
+  discovery uses Digg as the primary graph-derived seed source. It exposes
+  1,000 ranked accounts plus initial top-follower rows per profile, which is
+  enough to build a reviewable candidate graph without X API spend. Keep X
+  lists (swyx/Cortesi/Scobleizer) as backup/coverage supplements, not the
+  first extraction path.
 
 ## Tooling
 - AI coding tools are explicitly expected and will be discussed at the on-site

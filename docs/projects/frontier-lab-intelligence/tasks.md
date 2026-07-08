@@ -42,7 +42,7 @@ Company/role context: `docs/references/bit-context.md`.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Rebuild the registry candidate review from real evidence: `data/fli.db` raw items + documented external source ideas, without relying on the deleted `data/raw/registry-seed/` scratch folder. | parent | `docs/references/deep-research-prompt-seed-lists.md`, `docs/references/working-log.md` |
+| in-progress | Rebuild the registry candidate review from real evidence: `data/fli.db` raw items + Digg-derived seed graph, without relying on the deleted `data/raw/registry-seed/` scratch folder. | parent | `data/digg/`, `docs/references/seed-lists.md`, `docs/references/working-log.md` |
 | todo | Decide the first modeled registry/data schema only after reviewing real candidate evidence. The DB deliverable/package policy is intentionally open for now. | parent | `docs/references/assumptions.md`, `docs/references/solution-architecture.md` |
 | todo | Keep frontend work deferred until registry/extraction/scoring have real modeled output to display. | parent | `PRODUCT.md`, `DESIGN.md` |
 
@@ -212,3 +212,10 @@ Before handoff, record:
   schema exists yet — still raw candidate pools only. The temporary
   `data/raw/registry-seed/` folder was deleted later the same day; do not
   assume those scratch files exist.
+- 2026-07-08 (Digg seed graph scrape): Pivoted v1 discovery to Digg after
+  verifying the site exposes structured ranking/profile data. Added
+  `src/fli/digg.py` + `fli digg`; scraped `data/digg/` with **1,000 ranked
+  accounts**, **1,000 profile pages**, and **49,950 initial top-follower
+  edges**. No X API spend. Next: inspect/dedupe/rank these candidate nodes,
+  filter org/media/investor noise, and design the first candidate review
+  table from actual Digg evidence.

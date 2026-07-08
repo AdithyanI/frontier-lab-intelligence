@@ -215,10 +215,10 @@
 
 ## Top 5 Sources to Extract First
 
-1. **smol.ai preferred tags** (https://github.com/smol-ai/ainews-web-2025/blob/main/oneoffs/preferredTags.ts) — smallest clean machine-readable handle seed; extract first to prove the pipeline.
-2. **swyx X list** (https://x.com/i/lists/1585430245762441216) — broad high-signal AI people list already used in production news workflows.
-3. **Aldo Cortesi Anthropic staff list** (https://x.com/i/lists/1892848970994766018) — best lab-specific seed found so far; use for Anthropic registry depth.
-4. **Digg Tech / AI Rankings** (https://digg.com/tech/x/rankings) — graph-derived ranked people/source signal with visible handles and bios.
+1. **Digg Tech / AI Rankings** (https://digg.com/tech/x/rankings) — now the primary v1 source: 1,000 ranked accounts plus per-profile top-follower edges, extracted into `data/digg/`.
+2. **smol.ai preferred tags** (https://github.com/smol-ai/ainews-web-2025/blob/main/oneoffs/preferredTags.ts) — smallest clean machine-readable handle seed; use as a sanity-check/overlap signal.
+3. **swyx X list** (https://x.com/i/lists/1585430245762441216) — broad high-signal AI people list already used in production news workflows; useful if we later pay/export X list members.
+4. **Aldo Cortesi Anthropic staff list** (https://x.com/i/lists/1892848970994766018) — best lab-specific seed found so far; use for Anthropic coverage if Digg misses staff depth.
 5. **Scobleizer AI Newsmakers / Founders lists** (1953536336675365173 and 1744564719309279599) — large but noisier expansion set for xAI/founders/builders.
 
 **Next steps notes (for project):**  
