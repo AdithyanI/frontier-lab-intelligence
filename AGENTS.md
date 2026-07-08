@@ -14,6 +14,14 @@ AI Engineer case study; built as a real product intended to outlive it.
 - Run `scripts/check-fast.sh` before handoff; if a check is skipped, record why in the tracker.
 
 ## Standing contracts
+- **Builder context.** Read `docs/references/builder-context.md` to know who
+  Adi is, what he knows, and what he is learning. Calibrate explanations and
+  learning entries to that background (systems engineer, not data scientist).
+- **Dual purpose, cleanup later.** Until submission this repo is both Adi's
+  learning workbench and the future submission. Rich/private context is
+  allowed now, but keep it in clearly marked sections/files (never scattered
+  in code comments or commit messages) so the Phase 4 pre-submission cleanup
+  pass can strip it cleanly.
 - **Learning log — do → learn.** Adi is learning data science through this
   build. Any DS/ML technique used in a change (scoring models, validation,
   ground truth, ranking metrics, calibration, …) gets a plain-words entry in
@@ -36,6 +44,7 @@ If repo docs conflict with chat memory, preserve the conflict in the tracker and
 - `docs/projects/frontier-lab-intelligence/tasks.md` is active execution state only.
 - `docs/references/case-prompt.md` stores the original prompt and submission instructions verbatim.
 - `docs/references/bit-context.md` stores submission-safe company/role context.
+- `docs/references/builder-context.md` stores who Adi is, his background, learning goals, and how to calibrate explanations. Mixed private/submission-safe; cleaned at Phase 4.
 - `docs/references/assumptions.md` stores assumptions, interpretation choices, and why they were made.
 - `docs/references/sources.md` stores source links and provenance for factual/company/market claims.
 - `docs/references/working-log.md` stores AI-tool usage and budget spend.

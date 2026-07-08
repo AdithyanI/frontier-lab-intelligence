@@ -82,6 +82,12 @@ Company/role context: `docs/references/bit-context.md`.
 - [ ] Optional: short Loom/video demo (Adi signalled intent in reply to Lars).
 
 ### Phase 4 — Submission
+- [ ] **Pre-submission cleanup pass (hard gate, do first in this phase):**
+      rewrite `docs/references/builder-context.md` down to submission-safe
+      content; review working-log framing, learning-log entries, assumptions,
+      and this tracker for private career context; scan git history for
+      anything private (rewrite history or re-init if needed); no private
+      local paths in any doc that ships.
 - [ ] Self-review against every explicit prompt requirement
       (`docs/references/case-prompt.md` requirements map).
 - [ ] Reviewer guide finalized: what to read, what to run, what output proves
