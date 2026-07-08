@@ -4,7 +4,6 @@
 
 const INK = '#151515'
 const MUTED = '#6b6b68'
-const BORDER = '#e4e4e2'
 const BLUE = '#5bc5f2'
 const BLUE_MID = '#4391b4'
 const BLUE_INK = '#235165'
@@ -113,35 +112,89 @@ function EntityLayers() {
   )
 }
 
-/* ---------- diagram 3: the signal funnel ---------- */
+/* ---------- diagram 3: the signal funnel (HTML, not SVG — real text) ---------- */
+
+const FUNNEL = [
+  {
+    pct: 100,
+    count: '~120 items',
+    name: 'Collect from the watchlist',
+    words:
+      'We only listen to people and labs already in the registry — their posts, papers, releases, and blog posts. Never the whole internet.',
+    tone: 'sand',
+  },
+  {
+    pct: 68,
+    count: '~40 events',
+    name: 'Merge duplicates into events',
+    words:
+      'The same announcement arrives from five directions — a tweet, a blog post, a repo, two reposts. Clustering folds them into one event.',
+    tone: 'sand',
+  },
+  {
+    pct: 42,
+    count: '~12 new',
+    name: 'Keep only what is genuinely new',
+    words:
+      'Seen before, or a rehash of last week? Dropped here — before a single LLM token is spent on it.',
+    tone: 'sand',
+  },
+  {
+    pct: 24,
+    count: '12 scored',
+    name: 'LLM reads and scores the survivors',
+    words:
+      'The one expensive step, run only on what made it this far. Every insight keeps its quote, source, and score inputs — so an analyst can disagree with it.',
+    tone: 'blue',
+  },
+  {
+    pct: 11,
+    count: '2–3 delivered',
+    name: 'Deliver what clears your bar',
+    words:
+      'Each persona sets a threshold. An investor and an AI engineering team read different cuts of the same day.',
+    tone: 'ink',
+  },
+] as const
 
 function Funnel() {
-  const steps = [
-    { w: 640, label: 'Everything the tracked people and labs publish', n: 'posts · papers · releases · blogs' },
-    { w: 480, label: 'Dedup and clustering', n: 'many links → one event' },
-    { w: 340, label: 'Novelty gate', n: 'seen before? drop' },
-    { w: 220, label: 'LLM extraction + scoring', n: 'only on survivors' },
-    { w: 190, label: 'Persona thresholds', n: 'investment vs AI team' },
-  ]
   return (
-    <svg viewBox="0 0 760 380" role="img" aria-label="Signal funnel from raw output to persona delivery">
-      {steps.map((s, i) => {
-        const x = (760 - s.w) / 2
-        const y = 24 + i * 60
-        const isLLM = i === 3
-        return (
-          <g key={i}>
-            <rect x={x} y={y} width={s.w} height={44} fill={isLLM ? BLUE : i === 4 ? INK : SAND} stroke={i < 3 ? BORDER : 'none'} />
-            <text x={380} y={y + 20} textAnchor="middle" fontFamily={UI} fontSize="13.5" fontWeight="500" fill={i >= 4 ? '#fff' : INK}>{s.label}</text>
-            <text x={380} y={y + 36} textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={i >= 4 ? BLUE : MUTED}>{s.n}</text>
-            {i < steps.length - 1 && (
-              <line x1={380} y1={y + 44} x2={380} y2={y + 60} stroke={MUTED} strokeWidth="1" />
-            )}
-          </g>
-        )
-      })}
-      <text x="380" y="356" textAnchor="middle" fontFamily={UI} fontSize="13" fill={MUTED}>“Nothing significant today” is a valid — trust-preserving — output.</text>
-    </svg>
+    <div className="funnel">
+      {FUNNEL.map((s, i) => (
+        <div key={s.name}>
+          {i > 0 && (
+            <div className="funnel-row" aria-hidden="true">
+              <div className="funnel-track">
+                <div className="funnel-lane">
+                  <div
+                    className="funnel-join"
+                    style={{
+                      clipPath: `polygon(0 0, ${FUNNEL[i - 1].pct}% 0, ${s.pct}% 100%, 0 100%)`,
+                    }}
+                  />
+                </div>
+              </div>
+              <div />
+            </div>
+          )}
+          <div className="funnel-row">
+            <div className="funnel-track">
+              <div className="funnel-lane">
+                <div className={`funnel-bar tone-${s.tone}`} style={{ width: `${s.pct}%` }} />
+              </div>
+              <span className="funnel-count">{s.count}</span>
+            </div>
+            <div className="funnel-copy">
+            <h3 className="funnel-name">{s.name}</h3>
+              <p>{s.words}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+      <p className="funnel-footer">
+        “Nothing significant today” is a valid — trust-preserving — output.
+      </p>
+    </div>
   )
 }
 
@@ -200,15 +253,16 @@ export default function Architecture() {
           <span className="arch-no">03</span>
           <h2 className="arch-h">The funnel suppresses noise</h2>
           <p className="arch-p">
-            Cheap mechanical gates run first; the expensive LLM judgment runs
-            last, only on what survives. Scores stay inspectable — each one
-            shows its inputs, including thesis-breaking evidence, so an
-            analyst can disagree with the machine.
+            Each stage lets less through. The cheap, mechanical checks run
+            first; the expensive LLM judgment runs last, only on what
+            survives. Every score shows its inputs — including evidence
+            against our own thesis — so an analyst can always disagree with
+            the machine.
           </p>
         </div>
         <div className="arch-canvas">
           <Funnel />
-          <div className="arch-caption">source scoping → dedup → novelty → extraction + scoring → persona delivery</div>
+          <div className="arch-caption">volumes are an illustrative day — ingestion is not live yet · every surviving insight keeps its citation</div>
         </div>
       </section>
     </div>
