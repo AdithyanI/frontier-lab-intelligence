@@ -1,0 +1,10 @@
+pyproject.toml
+src/fli/__init__.py
+src/fli/cli.py
+src/fli.egg-info/PKG-INFO
+src/fli.egg-info/SOURCES.txt
+src/fli.egg-info/dependency_links.txt
+src/fli.egg-info/entry_points.txt
+src/fli.egg-info/requires.txt
+src/fli.egg-info/top_level.txt
+tests/test_cli.py
