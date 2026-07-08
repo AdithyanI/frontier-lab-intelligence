@@ -22,6 +22,12 @@ for the engineers building it, not the users reading it.
 Strategy: **restrained** — neutrals + one primary, accent ≤10% of any surface.
 The product's value is noise suppression; the palette practices it.
 
+The primary is anchored to BIT's own brand ("capital blue" `#5bc5f2`, steps
+`#4391b4`/`#235165`, extracted from bitcap.com's Webflow tokens 2026-07-08) so
+the product reads as native to their world. We deliberately do not copy their
+warm sand/cloud-white marketing surfaces (wrong register for a tool) or
+Akkurat LL (licensed font; Inter is the working grotesque).
+
 ```css
 :root {
   /* ground */
@@ -33,9 +39,10 @@ The product's value is noise suppression; the palette practices it.
   --ink:     oklch(0.220 0.020 230);    /* body — ≥7:1 on bg */
   --muted:   oklch(0.500 0.018 230);    /* secondary — ≥4.5:1 on bg */
 
-  /* brand */
-  --primary: oklch(0.450 0.086 230);    /* deep cobalt — nav, links, actions; white text on fills */
-  --accent:  oklch(0.640 0.130 75);     /* brass — alerts, high-signal flags only; white text on fills */
+  /* brand — BIT capital-blue anchored */
+  --primary:       oklch(0.410 0.072 230);  /* ≈ capital-blue-700 #235165 — nav, links, actions; white text on fills */
+  --primary-mid:   oklch(0.630 0.090 230);  /* ≈ capital-blue-600 #4391b4 — chart lines, non-text accents */
+  --accent:        oklch(0.640 0.130 75);   /* brass — alerts, high-signal flags only; white text on fills */
 
   /* semantics (data, not decoration) */
   --signal-high: var(--accent);
