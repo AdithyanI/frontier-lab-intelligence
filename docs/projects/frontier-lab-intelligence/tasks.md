@@ -151,3 +151,44 @@ Before handoff, record:
   (digest/register panels with teaching empty states, pipeline status
   table, mono provenance rows). Verdict kept: framework isn't the blandness
   — density is the design; full components arrive with real data (Phase 1–2).
+- 2026-07-08 (data-first fetch spike): Adi chose data-first over
+  schema-first. Built `src/fli/store.py` (raw_items table, dedup by
+  source+external_id) + `src/fli/fetch.py` (blog RSS/sitemap, arXiv API,
+  GitHub releases) for 3 labs (OpenAI, Anthropic, DeepMind). Ran it:
+  **1,599 real raw items** in `data/fli.db`. Fixed Anthropic (no blog RSS
+  exists — added sitemap `/news/` URL fallback, 237 items). Reviewed real
+  payload samples together (arXiv/blog/GitHub) and found 3 concrete
+  findings that will shape the modeled schema: (1) arXiv lab-name search
+  gives false positives (a physics paper about "the anthropic principle"
+  matched "Anthropic") — need author-identity matching, not text search;
+  (2) blog feeds mix marketing/case-studies with real research signal —
+  confirms the funnel/classification step is load-bearing, not optional;
+  (3) GitHub release `author` fields carry real handles for free — a
+  cheap registry-discovery input. 8 tests green.
+- 2026-07-08 (registry bootstrap, paused mid-task): Started Phase 1
+  registry work. Extracted candidate people from our own raw data (arXiv
+  co-authors + GitHub release/org authors) — surfaced real researchers
+  (Trieu H. Trinh, Cordelia Schmid, tomhennigan) and taught us
+  `github-actions[bot]` needs filtering. Explored X API economics for
+  follow-graph seeding (pay-per-use, no subscription: posts $0.005/read,
+  users/follows $0.01/read; reading a big account's followers is
+  expensive, reading who a *trusted* person follows is cheap — ~$10-20 per
+  anchor account — and is the actual mechanic behind "bootstrap from
+  curated lists"). Scraped Digg's live rankings page (Playwright, 700
+  ranked people/companies; page's own text confirms method: "built from
+  the X social graph, using roughly 9 million follow relationships" —
+  algorithmic, not hand-curated, correcting an earlier inference). Mined
+  smol.ai's public GitHub repo for their real people-tagging whitelist (33
+  handles in `oneoffs/preferredTags.ts`). Both saved to
+  `data/raw/registry-seed/` with a README covering known limitations
+  (truncated-bio false negatives, stale affiliations, nothing
+  auto-verified). Wrote an external deep-research prompt
+  (`docs/references/deep-research-prompt-seed-lists.md`) for Adi to run to
+  find more curated lists (X Lists, TIME100 AI, Semantic Scholar,
+  conference speaker lists, China-lab coverage).
+  **Session paused here — Adi continuing elsewhere. Resume point:**
+  merge Digg (125 lab-bio-matched) + smol.ai (33) + our own arXiv/GitHub
+  evidence counts + whatever the external deep-research turns up, into one
+  reviewable candidate table; Adi does the human approval pass; then write
+  the modeled `people`/`labs` schema from what survives review. No
+  registry schema exists yet — still raw candidate pools only.
