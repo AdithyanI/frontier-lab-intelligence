@@ -33,6 +33,10 @@ Paste results back into the repo when done (see notes at bottom).
 
 - Results should become a short source inventory in `docs/references/` and
   rows in `docs/references/sources.md` for anything we actually use.
+- Grok Build CLI can perform live X-backed search/thread fetches, but a
+  2026-07-08 probe did not expose direct following-list retrieval or full X
+  List member enumeration. If a source claims complete X graph/list data, ask
+  for the exact API/export path; otherwise treat it as partial discovery.
 - Do not recreate the old `data/raw/registry-seed/` scratch folder. The next
   useful artifact is a reviewable candidate table derived from `data/fli.db`
   plus any approved external source inventory.

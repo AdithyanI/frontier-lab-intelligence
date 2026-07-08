@@ -44,6 +44,12 @@ Interpretation choices made where the prompt was silent or ambiguous, and why.
   source. Adi said cost is not a blocker for now, but X API pricing/terms are
   volatile, so the cascade/corroboration signal from X is designed in from
   the start and switched on when the connector lands.
+- **Grok/X boundary:** Grok Build CLI is useful for live X-backed search and
+  thread fetches, but the current CLI tool set did not expose direct
+  following-graph or full X List member enumeration. Treat Grok as a discovery
+  and evidence assistant, not as the authoritative graph extractor. If full
+  "who trusted anchors follow" edges become central, use the official X API
+  or another explicit graph source and store observed edges with timestamps.
 
 ## Tooling
 - AI coding tools are explicitly expected and will be discussed at the on-site
