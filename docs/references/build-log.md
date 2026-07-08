@@ -29,6 +29,8 @@ Use this after every meaningful chunk of work:
 
 | 2026-07-08 | Verify BIT context coverage against Adi's private prep repo. | Imported distilled BIT worldview/lens into `docs/references/context.md`: Devil's Advocate process, memory-supercycle/infra worldview, respected signal types, role/stack specifics, official data-scale claims. | `docs/references/context.md` §BIT worldview and case lens; source: `~/GitHub/adi/projects/bit-capital-case-study-2026/resources/`. | Design gap identified: the funnel has no contrary-evidence concept yet; scoring/insights should carry a thesis-breaking slot. Repo is now self-sufficient on BIT context. | Copilot CLI; €0. |
 
+| 2026-07-08 | Adi wants a real frontend for data inspection and a written plan; asked whether to use his personal design language. | Locked the batch plan (graph→SQLite, PageRank weights, curated-list layering, candidate review table, frontend shell). Stack change: React+Vite+TS SPA + sigma.js over FastAPI JSON API, retiring Jinja2. Kept FLI's own cobalt/brass identity over adi-design: the reviewer is a fund; the product should read as their instrument. | Tracker Current Batch; architecture overview stack table. | Next: implement Phase A (graph store) then B (PageRank). | Copilot CLI + adi-design skill (consulted, not applied); €0. |
+
 ## Learning Notes
 
 ### Graph-Derived Discovery

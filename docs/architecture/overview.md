@@ -15,12 +15,14 @@ One Python codebase, one SQLite database, one small server-rendered web app.
 | --- | --- | --- |
 | Language/package | Python 3.13, `src/fli/` | Most rubric weight is data, LLM, scoring, and ingestion work. |
 | Database | SQLite | The prompt asks for a database; a single inspectable file is reviewer-friendly. |
-| Web UI | FastAPI + Jinja2 + plain CSS | UI is 5% of the rubric; avoid a separate frontend stack. |
+| Web UI | React + Vite + TS SPA over a FastAPI JSON API; sigma.js for graph viz | Decided 2026-07-08: the UI doubles as our data-inspection surface (graph + candidate review), which server-rendered Jinja2 handles poorly. Same stack as Adi's other apps. Identity: `DESIGN.md` cobalt/brass, not adi-design. |
 | Pipeline | CLI subcommands | Each stage should be independently runnable, testable, and demoable. |
 | Scheduling | Simple cron/loop later | Scheduled ingestion does not need queue infrastructure yet. |
 
-Rejected for now: React/Next split frontend, Streamlit/Gradio toy-dashboard
-shape, and Dobby/personal-memory architecture inside this product repo.
+Rejected for now: Next.js/SSR frameworks (a static Vite SPA on a JSON API is
+enough), Streamlit/Gradio toy-dashboard shape, and Dobby/personal-memory
+architecture inside this product repo. Jinja2 server-rendered pages were the
+original choice and are being retired in favor of the SPA.
 
 ## System pipeline
 

@@ -21,12 +21,21 @@ Build history, tools, budget, and learning notes now live in
 
 ## Current Batch
 
+Plan agreed with Adi 2026-07-08: X/Digg graph is the connected spine; other
+sources (curated lists, GitHub, blogs) layer on as evidence via shared
+handles; entities/identities connect planes. UI moves to React+Vite+TS as a
+data-inspection surface (FLI's own cobalt/brass identity from `DESIGN.md`,
+not adi-design).
+
 | Status | Work item | Evidence / notes |
 | --- | --- | --- |
-| in-progress | Build a reviewable registry-candidate table from real evidence: Digg full graph + tracked raw corpus, with smol.ai as a small high-trust supplement. | Full Digg graph summary: `data/digg/full_graph_summary.json`; raw full graph ignored under `data/raw/digg-full-2026-07-08/`; source notes in `docs/references/research-notes.md`. |
-| todo | Move modeled graph data into SQLite before adding visualization or more graph-heavy sources. | Design note in `docs/architecture/overview.md` §Graph Storage Plan. Keep raw observations/evidence separate from accounts, graph edges, and later real-world entities. |
-| todo | Decide the first modeled registry schema only after reviewing candidate evidence. | Current `data/fli.db` is raw evidence only. Architecture sketch is in `docs/architecture/overview.md`. |
-| todo | Keep frontend work deferred until registry/extraction/scoring have real modeled output. | UI is 5% of rubric; avoid dashboard-only work. |
+| todo | **A. Graph store in SQLite:** create `accounts`, `graph_edges`, `account_source_facts`, `raw_observations` per `docs/architecture/overview.md` §Graph Storage Plan; load the full Digg pull (1,000 accounts, 361K edges). | Raw pull under ignored `data/raw/digg-full-2026-07-08/`; summary `data/digg/full_graph_summary.json`. |
+| todo | **B. Source weights:** compute PageRank over the edge graph; store alongside Digg rank as two independent attention signals. | "Important if important people follow you" = PageRank; disagreement between the two signals is itself review-worthy. |
+| todo | **C. Layer curated lists:** smol.ai `prefPeople` first (then swyx / Anthropic staff lists) as `account_source_facts` rows joined on handle; triangulation across sources drives candidate confidence. | Source inventory in `docs/references/research-notes.md`. |
+| todo | **D. Candidate review table:** API + UI listing one row per account with per-source evidence columns, sorted by combined confidence; the human-review gate before registry promotion. | This is the rubric's registry deliverable (20%). |
+| todo | **E. Frontend shell:** React + Vite + TS consuming FastAPI JSON; sigma.js graph visualization of the Digg graph. Retire Jinja2 pages. | Identity: `DESIGN.md` (cobalt/brass research terminal). UI doubles as our own data-inspection tool. |
+| todo | Decide the first modeled registry schema (entities/identities/affiliations) only after reviewing candidates in D. | Deliberately unlocked; model from evidence. |
+| later | Design requirement from BIT context: insights/scoring must carry a thesis-supporting vs thesis-breaking dimension (Devil's Advocate). | `docs/references/context.md` §BIT worldview and case lens. |
 
 ## Open Questions / Blockers
 
