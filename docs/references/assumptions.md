@@ -29,7 +29,7 @@ Interpretation choices made where the prompt was silent or ambiguous, and why.
   rolling trailing window, refreshed on each ingestion run, not a fixed
   calendar quarter.
 
-## Phase 0 defaults (set 2026-07-08 by agent; confirm with Adi before Phase 1 locks them)
+## Phase 0 defaults (set 2026-07-08 by agent; not locked)
 - **People per lab:** track ~10–20 individuals per lab — the "layer below the
   obvious names," ranked by observable signal (recent first-author papers,
   repo activity, blog bylines). Enough to demonstrate depth without drowning
@@ -51,9 +51,9 @@ Interpretation choices made where the prompt was silent or ambiguous, and why.
   tools were used, not just the code output.
 
 ## Stack
-- Provisional default: Python core + SQLite, boring and inspectable. Final
-  DB/scheduling/UI decisions are made in the Phase 0 design pass and recorded
-  in `docs/references/solution-architecture.md` with reasons — not assumed.
+- Chosen runtime stack: Python core + SQLite + FastAPI/Jinja2, boring and
+  inspectable. The modeled DB schema is still open; current `data/fli.db`
+  contains only the raw evidence layer.
 - LLM provider/model choice per task is a deliverable in itself
   (architecture write-up requires "model selection per task, and why");
   deferred to design pass. €100 budget shapes it; spend logged in the

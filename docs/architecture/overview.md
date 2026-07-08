@@ -5,12 +5,15 @@ The living visual map of the system. **Contract: any change to system shape
 change.** Diagrams are Mermaid — they render on GitHub and in most editors.
 
 Prose rationale (why these choices): `docs/references/solution-architecture.md`.
-Status: pre-implementation — this reflects the Phase 0 design; boxes appear
-here before code exists, then get annotated as they land.
+Status: data-first bootstrap. The implemented system currently has a raw
+fetch/store layer (`fli.fetch`, `fli.store`, `raw_items`) and a lightweight web
+shell. The modeled registry/extraction/scoring schema is intentionally not
+locked yet.
 
 ## System pipeline
 
-Five stages, each an independently runnable CLI step, sharing one SQLite DB.
+Target shape: five stages, each an independently runnable CLI step, sharing one
+SQLite DB. Current code has only the raw fetch/store slice of ingestion.
 
 ```mermaid
 flowchart LR
@@ -61,7 +64,19 @@ flowchart TD
 Judgment is encoded in exactly two places: the source list (S0) and the
 scoring rubric (S3). Everything else is mechanical and testable.
 
-## Data model (core registry)
+## Current database
+
+Implemented today: one raw evidence table. It stores fetched payloads as JSON
+with dedup by `(source, external_id)`. This is not the final modeled schema.
+
+```text
+raw_items(id, source, lab, external_id, fetched_at, payload)
+```
+
+## Target Data Model Sketch
+
+This is the Phase 0 registry/insight shape to test against real data, not a
+locked schema.
 
 ```mermaid
 erDiagram
@@ -118,8 +133,11 @@ move itself is a signal.
 
 ```
 src/fli/          the installable package — only shippable code
-  cli.py          pipeline entrypoint (stages become subcommands)
-  (planned) registry.py · ingest.py · extract.py · scoring.py · delivery.py · web/
+  cli.py          pipeline entrypoint
+  fetch.py        raw public-source fetch spike
+  store.py        SQLite raw_items storage
+  web/            FastAPI/Jinja shell
+  (planned) registry.py · ingest.py · extract.py · scoring.py · delivery.py
 tests/            mirrors src/fli one-to-one (test_scoring.py ↔ scoring.py)
 docs/
   architecture/   ← this doc (visual map, kept current)
@@ -134,10 +152,12 @@ scripts/          check-fast.sh and repo tooling
 
 | Module | Status |
 | --- | --- |
-| `fli.cli` | ✅ stub (`--version`, help, `web` subcommand) |
-| `fli.registry` | 📐 designed (Phase 0) |
-| `fli.ingest` | 📐 designed |
-| `fli.extract` | 📐 designed |
-| `fli.scoring` | 📐 designed |
-| `fli.delivery` | 📐 designed |
+| `fli.cli` | ✅ `--version`, help, `fetch`, `web` |
+| `fli.store` | ✅ raw `raw_items` SQLite layer |
+| `fli.fetch` | ✅ raw fetch spike: blogs/sitemap, arXiv, GitHub releases for 3 labs |
+| `fli.registry` | ⏳ open — schema from evidence next |
+| `fli.ingest` | ⏳ production ingestion pending; raw fetch spike exists |
+| `fli.extract` | ⏳ pending |
+| `fli.scoring` | ⏳ pending |
+| `fli.delivery` | ⏳ pending |
 | `fli.web` | ✅ shell: home + `/architecture` (renders this doc with Mermaid); register/insights/reports pending |

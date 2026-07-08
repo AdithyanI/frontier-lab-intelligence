@@ -31,7 +31,8 @@ Paste results back into the repo when done (see notes at bottom).
 
 ## Notes
 
-- Results go to `docs/references/` (source inventory) and rows in
-  `docs/references/sources.md` for anything we actually use.
-- Complements in-repo bootstrap: Digg scrape, smol.ai repo mining, our own
-  arXiv/GitHub author extraction from `data/fli.db`.
+- Results should become a short source inventory in `docs/references/` and
+  rows in `docs/references/sources.md` for anything we actually use.
+- Do not recreate the old `data/raw/registry-seed/` scratch folder. The next
+  useful artifact is a reviewable candidate table derived from `data/fli.db`
+  plus any approved external source inventory.

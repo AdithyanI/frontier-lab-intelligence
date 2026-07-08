@@ -1,6 +1,7 @@
 """Frontier Lab Intelligence.
 
-Modular monolith: registry, ingestion, extraction, scoring, delivery, web.
+Data-first Python monolith. Current code has raw fetch/store and a web shell;
+registry, extraction, scoring, and delivery are built from evidence next.
 Stack rationale: docs/references/solution-architecture.md.
 """
 

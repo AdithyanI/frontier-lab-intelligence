@@ -3,6 +3,23 @@
 Living doc. Started 2026-07-08 with the stack decision; pipeline design
 sections get added as Phase 0/1 work lands.
 
+## Current state (2026-07-08 cleanup)
+
+Keep the stack decision. Treat the Phase 0 registry/scoring design below as
+useful design notes, not a schema lock.
+
+Current implementation:
+- `fli.store` creates one raw SQLite table: `raw_items`.
+- `fli.fetch` fetches blogs/sitemap, arXiv, and GitHub releases for OpenAI,
+  Anthropic, and DeepMind into `data/fli.db`.
+- `fli.web` is a shell only.
+
+Current product decision:
+- DB schema is deliberately undecided until we review real candidate evidence.
+- Frontend polish is deferred until registry/extraction/scoring produce real
+  modeled output.
+- Dobby/personal-memory architecture stays out of this product repo.
+
 ## Stack decision (2026-07-08)
 
 **One Python codebase — a modular monolith. No separate frontend framework.**
@@ -50,11 +67,11 @@ quality bar explicitly warns against dashboard-only/toy-demo work.
 
 ---
 
-## Phase 0 strawman designs (2026-07-08 — DRAFT, pending Adi's reaction)
+## Phase 0 design notes (2026-07-08 — not a schema lock)
 
-> Status: brainstorm output written down so it survives the session. Nothing
-> below is implemented or final. Each section ends with the open questions
-> Adi should weigh in on.
+> Status: retained because the reasoning is useful. Do not treat the target
+> entity model, source list, or scoring plan as implemented or final until the
+> data-first evidence pass confirms it.
 
 ### Prior art (researched 2026-07-08; three agent reports, cited)
 
@@ -247,10 +264,11 @@ can add a human headline/lede before a digest ships — machine proposes,
 human disposes (smol.ai/Techmeme/Digg convergent pattern; also the prompt's
 human-in-the-loop requirement).
 
-### Suggested build order after Phase 0 sign-off
+### Current build order
 
-1. Registry schema + seed + discovery (biggest single rubric item).
-2. Ingestion for 2–3 sources end-to-end (thin but real).
-3. Extraction + scoring on real ingested data.
-4. Validation harness + ground-truth labeling.
-5. Delivery + UI last.
+1. Rebuild a reviewable registry-candidate table from real raw evidence.
+2. Decide the first modeled registry schema from the candidate review.
+3. Promote raw fetch into production ingestion around the accepted registry.
+4. Extract and score on real ingested data.
+5. Add validation harness + ground-truth labeling.
+6. Delivery + UI last.
