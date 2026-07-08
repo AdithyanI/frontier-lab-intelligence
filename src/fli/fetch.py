@@ -19,7 +19,9 @@ USER_AGENT = "fli/0.1 (research prototype; contact: local)"
 # seen the data.
 LABS = {
     "anthropic": {
-        "blog_rss": "https://www.anthropic.com/rss.xml",
+        # No news RSS exists (probed 2026-07-08); the sitemap lists /news/
+        # URLs with lastmod dates. Coarse but official.
+        "sitemap_news": "https://www.anthropic.com/sitemap.xml",
         "arxiv_query": 'all:"Anthropic"',
         "github_org": "anthropics",
     },
@@ -88,6 +90,8 @@ def parse_arxiv(xml_bytes: bytes) -> list[dict]:
 
 
 def fetch_blog(lab: str, cfg: dict, conn) -> tuple[int, int]:
+    if "sitemap_news" in cfg:
+        return fetch_sitemap_news(lab, cfg, conn)
     items = parse_rss(_get(cfg["blog_rss"]))
     new = sum(
         store.insert_raw(
@@ -95,6 +99,34 @@ def fetch_blog(lab: str, cfg: dict, conn) -> tuple[int, int]:
             source="blog",
             lab=lab,
             external_id=item.get("link") or item.get("guid") or json.dumps(item)[:200],
+            fetched_at=_now(),
+            payload=item,
+        )
+        for item in items
+    )
+    return new, len(items)
+
+
+SITEMAP_NS = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+
+
+def fetch_sitemap_news(lab: str, cfg: dict, conn) -> tuple[int, int]:
+    """Fallback for labs without RSS: /news/ URLs from the sitemap."""
+    root = ET.fromstring(_get(cfg["sitemap_news"]))
+    items = [
+        {
+            "link": url.findtext(f"{SITEMAP_NS}loc"),
+            "lastmod": url.findtext(f"{SITEMAP_NS}lastmod"),
+        }
+        for url in root.findall(f"{SITEMAP_NS}url")
+        if "/news/" in (url.findtext(f"{SITEMAP_NS}loc") or "")
+    ]
+    new = sum(
+        store.insert_raw(
+            conn,
+            source="blog",
+            lab=lab,
+            external_id=item["link"],
             fetched_at=_now(),
             payload=item,
         )

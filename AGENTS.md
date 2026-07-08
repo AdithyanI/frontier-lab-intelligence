@@ -7,6 +7,8 @@ AI Engineer case study; built as a real product intended to outlive it.
 
 ## Operating model
 - Human sets intent and approves external submission; agents implement, validate, and maintain docs.
+- **Budget: do not over-optimize.** The €100 API budget is not a binding design constraint (Adi, 2026-07-08). Don't design around cost minimization or repeatedly raise cost trade-offs; just log spend in the working log and move on. Revisit only if actual spend approaches the ceiling.
+- **Data first.** Current build philosophy (Adi, 2026-07-08): get real data flowing and visible before designing schemas/abstractions on top of it. Fetch raw → inspect → model from evidence, not theory.
 - Work from `docs/projects/frontier-lab-intelligence/tasks.md` as the canonical tracker.
 - Preserve the original prompt in `docs/references/case-prompt.md`; do not rely on chat memory.
 - Do not send, upload, message, publish, push to a public remote, or submit anything externally without explicit Adi approval in the current session.
