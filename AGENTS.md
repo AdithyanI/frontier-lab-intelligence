@@ -41,6 +41,7 @@ AI Engineer case study; built as a real product intended to outlive it.
 If repo docs conflict with chat memory, preserve the conflict in the tracker and follow the captured prompt until Adi decides otherwise.
 
 ## Docs contract
+- `docs/architecture/overview.md` is the living visual map (Mermaid): pipeline, funnel, data model, repo layout, module status. Any change to system shape updates it in the same change.
 - `docs/projects/frontier-lab-intelligence/tasks.md` is active execution state only.
 - `docs/references/case-prompt.md` stores the original prompt and submission instructions verbatim.
 - `docs/references/bit-context.md` stores submission-safe company/role context.
