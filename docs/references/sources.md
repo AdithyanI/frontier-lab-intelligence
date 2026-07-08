@@ -5,4 +5,10 @@ entry whenever a claim in the write-up depends on an external source.
 
 | Claim | Source | Retrieved | Notes |
 | --- | --- | --- | --- |
-| — | — | — | Populate as research proceeds. Cite primary sources (papers, official blogs, GitHub, model/system cards, X posts) over secondary summaries. |
+| smol.ai/AI News ingestion scale (~550 X accounts, 24 Discords, 12 subreddits), denominator disclosure, "not much happened today" issues | buttondown.com/ainews issue archives + sitemap | 2026-07-08 | Research-agent report; issue headers disclose counts per day |
+| smol.ai tagging pipeline: gpt-4.1-mini + structured outputs + controlled vocabularies | github.com/smol-ai/ainews-web-2025 (`oneoffs/process-emails.ts`, `oneoffs/preferredTags.ts`) | 2026-07-08 | Public code; reference pattern for our extraction stage |
+| Digg 2026 pivot to AI-signal aggregator tracking top 1,000 AI voices via influence cascades | techcrunch.com/2026/05/11/digg-tries-again-this-time-as-an-ai-news-aggregator/ | 2026-07-08 | Also Kevin Rose X threads |
+| Digg community-voting phase failed to bots ("votes couldn't be trusted") | techcrunch.com/2026/03/13/digg-lays-off-staff-and-shuts-down-app-as-company-retools/ | 2026-07-08 | Anti-pattern evidence for no-voting design |
+| Techmeme editorial pyramid (algorithm proposes, editors dispose) | techmeme.com/about | 2026-07-08 | Convergent human-in-the-loop pattern |
+| HN ranking gravity formula `(P−1)/(T+2)^1.8` with multiplicative penalties | medium.com/hacking-and-gonzo/how-hacker-news-ranking-algorithm-works-1d9b0cf2c08d | 2026-07-08 | Time-decay reference for freshness input |
+| Market gaps: no researcher-move-as-signal product; no persona re-scoring product | Landscape audit across Zeta Alpha, CB Insights, Emergent Mind, Crunchbase, Ben's Bites, TLDR | 2026-07-08 | Research-agent survey; differentiation claims in architecture doc |

@@ -22,7 +22,8 @@ Append one row per meaningful working session.
 | Date | Driver | What was done | AI tools used | Notes |
 | --- | --- | --- | --- | --- |
 | 2026-07-07 | Dobby (Codex CLI) | Repo scaffolded from agent-native template; prompt captured verbatim | GitHub Copilot CLI (Claude) | Pre-code setup |
-| 2026-07-08 | Dobby (Codex CLI) | Renamed repo to frontier-lab-intelligence; added PRODUCT.md + DESIGN.md (impeccable-seeded), bit-context.md, learning-log contract, this working log; rebuilt tracker with weighted execution plan | GitHub Copilot CLI (Claude), impeccable skill | Setup complete; next: Phase 0 design pass |
+| 2026-07-08 | Dobby (Copilot CLI) | Renamed repo to frontier-lab-intelligence; added PRODUCT.md + DESIGN.md (impeccable-seeded), bit-context.md, learning-log contract, this working log; rebuilt tracker with weighted execution plan | GitHub Copilot CLI (Claude), impeccable skill | Setup complete; next: Phase 0 design pass |
+| 2026-07-08 | Dobby (Copilot CLI, Fable 5) | Stack decision recorded (Python monolith + SQLite + FastAPI/Jinja2); package scaffolded (pyproject, src/fli, CLI stub, 2 tests passing); Phase 0 strawman designs drafted; 3 research sub-agents (smol.ai, Digg, landscape — 2× Fable 5, 1× Haiku) synthesized into prior-art section + design deltas in solution-architecture.md | GitHub Copilot CLI (Fable 5 main + research sub-agents) | Model-per-subagent cost discussed; Adi chose not to encode a policy for now. Pending: Phase 0 sign-off decisions (lab seeds, labeling appetite, X ingestion) |
 
 ## Budget log (€100 ceiling)
 

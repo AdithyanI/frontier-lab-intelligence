@@ -9,3 +9,4 @@ __pycache__/
 data/raw/
 data/private/
 .DS_Store
+*.egg-info/

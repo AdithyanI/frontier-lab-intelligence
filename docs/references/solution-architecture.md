@@ -56,6 +56,69 @@ quality bar explicitly warns against dashboard-only/toy-demo work.
 > below is implemented or final. Each section ends with the open questions
 > Adi should weigh in on.
 
+### Prior art (researched 2026-07-08; three agent reports, cited)
+
+We audited the landscape before designing, to borrow mechanics instead of
+reinventing them. Full agent reports summarized here; key sources inline.
+
+**smol.ai / AI News (swyx)** — the closest existing product: automated
+weekday digest over ~550 curated X accounts, ~24 Discords, ~12 subreddits.
+- Curation happens at the *source* level (whitelists), with each issue
+  disclosing its denominator ("we checked 8,290 messages… ~852 min saved").
+- "Not much happened today" is a first-class output — the strongest
+  anti-cry-wolf trust mechanic we found anywhere.
+- Human headline + LLM body: one human-picked top story with opinionated
+  analysis; below the fold, LLM recaps where every sentence links to the
+  primary tweet/post.
+- Tagging code is public (`smol-ai/ainews-web-2025`,
+  `oneoffs/process-emails.ts`): gpt-4.1-mini + structured outputs +
+  controlled vocabularies ("prefer this list of ~100 canonical company
+  tags"; "google-deepmind not google"; people = "who MADE the news, not who
+  reported it").
+- Known weaknesses we avoid: no item-level ranking (only source-level), one
+  20k-word monolithic issue, people tags without an entity database.
+
+**Digg (2026 relaunch)** — pivoted in May 2026 into almost exactly this
+product: "AI news, before it trends. Digg watches the people who move
+first." Tracks top 1,000 AI voices; ranks by influence cascades on X
+(TechCrunch 2026-05-11).
+- Its earlier community-voting phase died in ~2 months to bots — "votes
+  couldn't be trusted" (TechCrunch 2026-03-13). Curated-source LLM scoring
+  sidesteps that entire manipulation surface.
+- Presents rank with named reason-for-inclusion slots (Rising Discussion /
+  Fastest-Climbing / ICYMI) instead of one opaque score.
+
+**Techmeme / Hacker News** — the durable ranking patterns:
+- Techmeme's editorial pyramid: crawlers cluster and re-sort; a tiny human
+  team makes final calls. Serves Pichai/Nadella daily with ~5 editors.
+- HN's gravity: `(points−1)/(age+2)^1.8` — super-linear time decay keeps
+  feeds fresh; quality penalties are multiplicative dampeners, not bans.
+
+**Landscape (Zeta Alpha, CB Insights, Emergent Mind, Crunchbase, …)** —
+two confirmed market gaps that are exactly our prompt's requirements:
+nobody surfaces *researcher moves as market signal* (Zeta Alpha has people
+pages but paper-centric), and nobody *re-scores the same insight per
+persona* (investor vs engineer).
+
+**Convergent lesson** (smol.ai, Digg, Techmeme independently):
+**machine proposes, human disposes.** The pipeline clusters, scores, and
+drafts; the operator makes final editorial calls. This is now a design
+principle, and it matches the prompt's human-in-the-loop requirement.
+
+Design deltas adopted from this research:
+1. Item-level scoring on top of source-level curation (smol.ai's gap).
+2. Controlled-vocabulary extraction with canonical entity tags (smol.ai).
+3. Denominator disclosure in every digest (smol.ai).
+4. "Nothing significant today" as a legitimate digest state (smol.ai).
+5. Layered output: alert tier → 1-page persona digest → full appendix
+   (anti-monolith; smol.ai's #1 user complaint).
+6. Reason-for-inclusion slots in delivery, not one opaque number (Digg).
+7. Cross-source corroboration + tracked-voice cascade as scoring inputs
+   (Digg; Emergent Mind's multi-source velocity).
+8. Time-decay freshness with multiplicative noise dampeners (HN).
+9. Registry as an entity database with dated affiliations and move
+   history — the gap nobody fills (Zeta Alpha/CB Insights hybrid).
+
 ### System shape
 
 Five stages, each an independently runnable CLI step over one SQLite DB:
@@ -108,13 +171,21 @@ one:
   sources. Scoped-well beats broad-badly; the source list is itself a
   documented judgment.
 - **Stage 1 — dedup/canonicalization (mechanical, free):** same paper via
-  arXiv + blog + X thread = one event with multiple citations, not three.
+  arXiv + blog + X thread = one event with multiple citations, not three —
+  Techmeme-style story clustering. Corroboration count (how many distinct
+  sources/tracked voices hit the same event) is kept as a scoring input.
 - **Stage 2 — cheap novelty gate (embeddings, ~free):** embed each item;
   near-duplicates of recently seen content get suppressed as "not novel."
 - **Stage 3 — LLM extraction + rubric scoring (costs tokens):** only
-  survivors get the expensive treatment.
+  survivors get the expensive treatment. Extraction uses controlled
+  vocabularies for entity tags (canonical lab/person IDs from the registry;
+  smol.ai's public tagging prompt is the reference pattern — "who made the
+  news, not who reported it").
 - **Stage 4 — persona thresholds (free):** what alerts an investor differs
   from what alerts an AI team; same scored insight, different cut-lines.
+  A day where nothing crosses the bar produces an honest "nothing
+  significant today" digest (smol.ai's strongest trust mechanic), and every
+  digest discloses its denominator (items checked → items surfaced).
 
 Judgment is encoded in exactly two visible places: the source list (stage 0)
 and the scoring rubric (stage 3). Everything else is mechanical and testable.
@@ -132,9 +203,14 @@ invented weights is exactly that.
    already known), **materiality** (does this change capability/cost/
    competitive position), **credibility** (primary announcement vs rumor;
    who said it), **actionability per persona** (separately for investment
-   team vs AI team).
+   team vs AI team). Mechanical inputs join the LLM dimensions:
+   **corroboration** (distinct sources/tracked voices on the same event,
+   from stage 1) and **freshness** (HN-style time decay so nothing dominates
+   the digest for days).
 2. Dimensions stay visible in the UI/report — the "why flagged" answer is
-   the dimension scores + evidence quotes, not one opaque number.
+   the dimension scores + evidence quotes, not one opaque number. Delivery
+   frames items by reason-for-inclusion (Digg pattern: "multiple labs
+   engaging," "fast-rising," "you'd have missed this"), not by raw score.
 3. The combination into a ranking is **fit to ground truth, not invented**:
    start with the simplest combiner (e.g., max-of-dimensions or unweighted
    mean), then check against the validation set and only add complexity if
@@ -162,9 +238,14 @@ truth.
 ### 4. Delivery design (15%) — sketch only
 
 One shared core of scored insights → two persona lenses (investment: money,
-moats, market moves; AI team: techniques, models, tooling). Digest = top-k
-above persona threshold, rendered as HTML in-app and print-CSS PDF. Alerts =
-score crosses the alert threshold → push (channel TBD) with citation.
+moats, market moves; AI team: techniques, models, tooling). Layered output,
+never a monolith (smol.ai's #1 user complaint): alert tier (immediate push
+on material events) → 1-page persona digest (top-k with reason-for-inclusion
+slots + denominator line) → full appendix (everything scored, with
+citations). Digest rendered as HTML in-app and print-CSS PDF. The operator
+can add a human headline/lede before a digest ships — machine proposes,
+human disposes (smol.ai/Techmeme/Digg convergent pattern; also the prompt's
+human-in-the-loop requirement).
 
 ### Suggested build order after Phase 0 sign-off
 
