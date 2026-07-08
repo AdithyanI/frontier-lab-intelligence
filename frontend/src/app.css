@@ -1,0 +1,329 @@
+/* App shell + surfaces. Tokens in tokens.css; DESIGN.md is the contract. */
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---- nav ---- */
+
+.nav {
+  width: 184px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: var(--s5) var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--primary);
+  letter-spacing: 0.03em;
+  margin-bottom: var(--s5);
+  padding: 0 var(--s2);
+}
+
+.nav a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 5px var(--s2);
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background 150ms var(--ease-out);
+}
+
+.nav a:hover { background: var(--surface); }
+
+.nav a.active {
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.nav-soon {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 5px var(--s2);
+}
+
+.nav-soon::after {
+  content: 'soon';
+  font-size: 10.5px;
+  margin-left: var(--s2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 6px;
+  vertical-align: 1px;
+}
+
+/* ---- content ---- */
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: var(--s6) var(--s7);
+  max-width: 1100px;
+}
+
+.page-title {
+  font-size: 21px;
+  margin: 0 0 var(--s1);
+}
+
+.page-sub {
+  color: var(--muted);
+  margin: 0 0 var(--s6);
+  font-size: 14px;
+  max-width: 70ch;
+}
+
+/* ---- system map ---- */
+
+.map {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: var(--s4);
+}
+
+.stage-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stage-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+.stage-dot[data-state='live'] { background: var(--positive); }
+.stage-dot[data-state='in-progress'] { background: var(--primary-mid); }
+.stage-dot[data-state='pending'] {
+  background: transparent;
+  border: 1.5px solid var(--border);
+}
+
+.stage-line {
+  width: 1px;
+  flex: 1;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.stage:last-child .stage-line { display: none; }
+
+.stage-body { padding-bottom: var(--s5); min-width: 0; }
+
+.stage-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+.stage-name { font-size: 16px; margin: 0; }
+
+.stage[data-state='pending'] .stage-name { color: var(--muted); font-weight: 500; }
+
+.stage-state {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.stage-state[data-state='live'] { color: var(--positive); }
+.stage-state[data-state='in-progress'] { color: var(--primary-mid); }
+.stage-state[data-state='pending'] { color: var(--muted); }
+
+.stage-summary {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 62ch;
+}
+
+.stage-stats {
+  display: flex;
+  gap: var(--s5);
+  margin-top: var(--s3);
+  flex-wrap: wrap;
+}
+
+.stat { display: flex; flex-direction: column; }
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.stat-label { font-size: 12px; color: var(--muted); }
+
+/* ---- accounts table ---- */
+
+.table-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.search {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px var(--s3);
+  width: 260px;
+}
+
+.search::placeholder { color: var(--muted); }
+
+.table-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding: var(--s2) var(--s3);
+  white-space: nowrap;
+}
+
+td {
+  padding: var(--s2) var(--s3);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tbody tr:hover { background: var(--surface); }
+
+td.num, th.num { text-align: right; }
+
+td.num {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.handle { font-weight: 500; white-space: nowrap; }
+
+.handle a { text-decoration: none; }
+.handle a:hover { text-decoration: underline; }
+
+.bio {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 46ch;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.load-more {
+  font: inherit;
+  font-size: 14px;
+  color: var(--primary);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px var(--s4);
+  margin-top: var(--s4);
+  cursor: pointer;
+  transition: background 150ms var(--ease-out);
+}
+
+.load-more:hover { background: var(--surface); }
+.load-more:disabled { color: var(--muted); cursor: default; }
+
+/* ---- architecture doc ---- */
+
+.doc { max-width: 75ch; }
+.doc h1 { font-size: 21px; }
+.doc h2 { font-size: 17px; margin-top: var(--s6); }
+.doc h3 { font-size: 15px; margin-top: var(--s5); }
+.doc pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--s4);
+  overflow-x: auto;
+  font-size: 12.5px;
+}
+.doc code { font-family: var(--font-mono); font-size: 12.5px; }
+.doc table { font-size: 13.5px; margin: var(--s4) 0; }
+.doc .mermaid-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--s4);
+  margin: var(--s4) 0;
+  overflow-x: auto;
+}
+
+/* ---- states ---- */
+
+.skeleton {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--surface);
+  animation: pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.45; } }
+
+.error-note {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--s4);
+  color: var(--negative);
+  font-size: 14px;
+  max-width: 60ch;
+}
+
+@media (max-width: 760px) {
+  .shell { flex-direction: column; }
+  .nav {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: var(--s3) var(--s4);
+  }
+  .brand { margin-bottom: 0; margin-right: var(--s3); }
+  .content { padding: var(--s5) var(--s4); }
+}

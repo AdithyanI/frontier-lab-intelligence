@@ -4,12 +4,13 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: data-first bootstrap. The implemented code has raw fetch/store,
-Digg-derived seed graph extraction, and a lightweight web shell. The modeled
-registry/extraction/scoring schema is intentionally not locked yet.
+Digg-derived seed graph extraction, a modeled SQLite graph layer, and a
+React SPA (system map, accounts table, architecture view) over a JSON API.
+The modeled registry/extraction/scoring schema is intentionally not locked yet.
 
 ## Stack
 
-One Python codebase, one SQLite database, one small server-rendered web app.
+One Python codebase, one SQLite database, one React SPA served by the API.
 
 | Layer | Choice | Why |
 | --- | --- | --- |
@@ -239,11 +240,12 @@ final score.
 
 | Module | Status |
 | --- | --- |
-| `fli.cli` | `--version`, `fetch`, `digg`, `web` |
+| `fli.cli` | `--version`, `fetch`, `digg`, `graph`, `web` |
 | `fli.digg` | Digg rankings and top-follower graph extraction |
 | `fli.store` | raw `raw_items` SQLite layer |
+| `fli.graph` | modeled accounts / source facts / edges; `fli graph load` |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
-| `fli.web` | shell: home + `/architecture` |
+| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/architecture`) + built SPA host; source in `frontend/` |
 | `fli.registry` | pending, schema from candidate evidence next |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |

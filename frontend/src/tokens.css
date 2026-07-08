@@ -1,0 +1,68 @@
+/* FLI tokens — DESIGN.md is the contract. Research terminal: quiet precision. */
+
+:root {
+  /* ground */
+  --bg:      oklch(1.000 0.000 0);
+  --surface: oklch(0.972 0.004 230);
+  --border:  oklch(0.900 0.008 230);
+
+  /* text */
+  --ink:     oklch(0.220 0.020 230);
+  --muted:   oklch(0.500 0.018 230);
+
+  /* brand — BIT capital-blue anchored */
+  --primary:     oklch(0.410 0.072 230);
+  --primary-mid: oklch(0.630 0.090 230);
+  --accent:      oklch(0.640 0.130 75);
+
+  /* semantics */
+  --signal-high: var(--accent);
+  --positive:    oklch(0.560 0.100 155);
+  --negative:    oklch(0.520 0.140 25);
+
+  /* spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { text-wrap: balance; font-weight: 600; }
+
+a { color: var(--primary); }
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.muted { color: var(--muted); }
+
+:focus-visible {
+  outline: 2px solid var(--primary-mid);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

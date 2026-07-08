@@ -5,8 +5,6 @@ description = "Frontier Lab Intelligence — tracks frontier AI labs and key peo
 requires-python = ">=3.13"
 dependencies = [
     "fastapi",
-    "jinja2",
-    "markdown",
     "uvicorn",
 ]
 
@@ -24,7 +22,7 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"fli.web" = ["templates/*.html", "static/*.css"]
+"fli.web" = ["dist/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

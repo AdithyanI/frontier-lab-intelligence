@@ -33,6 +33,8 @@ Use this after every meaningful chunk of work:
 
 | 2026-07-08 | Adi flagged redundancy in the raw edge CSVs; start Phase A. | Built `fli.graph`: normalized modeled layer (`accounts`, `account_source_facts`, `graph_edges`) loaded from raw Digg CSVs; raw stays redundant as evidence, model stores each account once. New CLI: `fli graph load|summary`. | 2,314 accounts, 6,760 facts, 361,225 deduped edges; top targets karpathy/jeffdean/sama/ilyasut/ylecun; `tests/test_graph.py`; 12 tests green. | Phase B next: PageRank source weights over the edge graph. | Copilot CLI; €0. |
 
+| 2026-07-08 | Adi wants the frontend now, as a visual anchor: a living system map he can learn from and demo on a call. | Built the SPA: Vite+React+TS in `frontend/` building into `src/fli/web/dist`; rewrote `fli.web` as JSON API (`/api/status`, `/api/accounts`, `/api/architecture`) + SPA host; removed Jinja2/markdown deps. Pages: System (pipeline stages w/ live DB counts), Accounts (searchable candidate table), Architecture (doc + Mermaid). DESIGN.md tokens (BIT capital-blue anchored). Committed built dist so reviewers run Python only. | Screenshots of all 3 pages verified against DESIGN.md; 14 tests green; `check-fast.sh` OK. Playwright installed as frontend devDep for visual checks. | Next: PageRank (B) then list layering (C); numbers appear in the UI as they land. | Copilot CLI + impeccable + agent-native-repo-playbook; €0. |
+
 ## Learning Notes
 
 ### Graph-Derived Discovery

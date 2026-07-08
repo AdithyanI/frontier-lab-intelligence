@@ -1,52 +1,168 @@
-"""FastAPI app — server-rendered UI per DESIGN.md.
+"""FastAPI app: JSON API + built SPA host.
 
-First surface: /architecture renders docs/architecture/overview.md with
-Mermaid diagrams, so the living map is viewable in the product itself.
+The frontend lives in frontend/ (Vite + React + TS) and builds into
+src/fli/web/dist, which this app serves. During frontend development,
+`npm run dev` in frontend/ proxies /api to this server.
+
+Endpoints:
+- /api/status        pipeline stages with live DB counts (the system map)
+- /api/accounts      modeled accounts with Digg facts, sortable/paginated
+- /api/architecture  raw markdown of the living architecture doc
 """
 
 from pathlib import Path
 
-import markdown
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Query
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from starlette.requests import Request
+
+from fli import graph
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ARCHITECTURE_DOC = REPO_ROOT / "docs" / "architecture" / "overview.md"
-
-_WEB_DIR = Path(__file__).parent
-templates = Jinja2Templates(directory=_WEB_DIR / "templates")
+DIST_DIR = Path(__file__).parent / "dist"
 
 app = FastAPI(title="Frontier Lab Intelligence")
-app.mount("/static", StaticFiles(directory=_WEB_DIR / "static"), name="static")
 
 
-def render_markdown(text: str) -> str:
-    """Markdown → HTML, turning ```mermaid fences into <pre class="mermaid">."""
-    return markdown.markdown(
-        text,
-        extensions=["tables", "fenced_code"],
-        extension_configs={},
-        output_format="html",
-    ).replace(
-        '<pre><code class="language-mermaid">', '<pre class="mermaid"><code>'
+def _counts() -> dict:
+    conn = graph.connect()
+    try:
+        def one(sql: str) -> int:
+            return conn.execute(sql).fetchone()[0]
+
+        return {
+            "accounts": one("SELECT COUNT(*) FROM accounts"),
+            "ranked_accounts": one(
+                "SELECT COUNT(*) FROM account_source_facts"
+                " WHERE source = 'digg' AND fact = 'rank'"
+            ),
+            "edges": one("SELECT COUNT(*) FROM graph_edges"),
+            "facts": one("SELECT COUNT(*) FROM account_source_facts"),
+            "raw_items": one("SELECT COUNT(*) FROM raw_items"),
+            "fact_sources": one(
+                "SELECT COUNT(DISTINCT source) FROM account_source_facts"
+            ),
+        }
+    finally:
+        conn.close()
+
+
+@app.get("/api/status")
+def status() -> JSONResponse:
+    c = _counts()
+    stages = [
+        {
+            "id": "sources",
+            "name": "Sources",
+            "state": "live",
+            "summary": "Digg X-graph pull + raw lab blogs / arXiv / GitHub corpus.",
+            "stats": [
+                {"label": "graph edges", "value": c["edges"]},
+                {"label": "raw items", "value": c["raw_items"]},
+                {"label": "fact sources", "value": c["fact_sources"]},
+            ],
+        },
+        {
+            "id": "registry",
+            "name": "Registry",
+            "state": "in-progress",
+            "summary": "Graph-derived candidates awaiting weights, triangulation, review.",
+            "stats": [
+                {"label": "candidate accounts", "value": c["accounts"]},
+                {"label": "ranked by Digg", "value": c["ranked_accounts"]},
+                {"label": "confirmed entities", "value": 0},
+            ],
+        },
+        {
+            "id": "ingestion",
+            "name": "Ingestion",
+            "state": "pending",
+            "summary": "Scheduled pulls around the accepted registry; dedup + clustering.",
+            "stats": [],
+        },
+        {
+            "id": "extraction",
+            "name": "Extraction",
+            "state": "pending",
+            "summary": "LLM → structured, cited insights tied to people and labs.",
+            "stats": [],
+        },
+        {
+            "id": "scoring",
+            "name": "Scoring",
+            "state": "pending",
+            "summary": "Visible dimensions incl. thesis-breaking; validated, not vibes.",
+            "stats": [],
+        },
+        {
+            "id": "delivery",
+            "name": "Delivery",
+            "state": "pending",
+            "summary": "Persona digests and alerts for investment and AI teams.",
+            "stats": [],
+        },
+    ]
+    return JSONResponse({"stages": stages})
+
+
+@app.get("/api/accounts")
+def accounts(
+    limit: int = Query(100, le=500),
+    offset: int = 0,
+    q: str = "",
+) -> JSONResponse:
+    conn = graph.connect()
+    try:
+        where = ""
+        params: list = []
+        if q:
+            where = "WHERE a.handle LIKE ? OR a.display_name LIKE ?"
+            params = [f"%{q}%", f"%{q}%"]
+        rows = conn.execute(
+            f"""
+            SELECT a.id, a.handle, a.display_name, a.bio, a.followers_count,
+                   CAST(rank.value AS INTEGER) AS digg_rank,
+                   role.value AS role,
+                   gh.value AS github_url,
+                   (SELECT COUNT(*) FROM graph_edges e
+                    WHERE e.to_account_id = a.id) AS tracked_followers
+            FROM accounts a
+            LEFT JOIN account_source_facts rank
+              ON rank.account_id = a.id AND rank.source = 'digg' AND rank.fact = 'rank'
+            LEFT JOIN account_source_facts role
+              ON role.account_id = a.id AND role.source = 'digg' AND role.fact = 'role'
+            LEFT JOIN account_source_facts gh
+              ON gh.account_id = a.id AND gh.source = 'digg' AND gh.fact = 'github_url'
+            {where}
+            ORDER BY digg_rank IS NULL, digg_rank, tracked_followers DESC
+            LIMIT ? OFFSET ?
+            """,
+            [*params, limit, offset],
+        ).fetchall()
+        total = conn.execute(
+            f"SELECT COUNT(*) FROM accounts a {where}", params
+        ).fetchone()[0]
+        return JSONResponse(
+            {"total": total, "accounts": [dict(r) for r in rows]}
+        )
+    finally:
+        conn.close()
+
+
+@app.get("/api/architecture")
+def architecture() -> JSONResponse:
+    return JSONResponse(
+        {"markdown": ARCHITECTURE_DOC.read_text(encoding="utf-8")}
     )
 
 
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(
-        request, "home.html", {"title": "Frontier Lab Intelligence"}
-    )
+if DIST_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
 
-
-@app.get("/architecture", response_class=HTMLResponse)
-def architecture(request: Request) -> HTMLResponse:
-    body = render_markdown(ARCHITECTURE_DOC.read_text(encoding="utf-8"))
-    return templates.TemplateResponse(
-        request,
-        "architecture.html",
-        {"title": "Architecture", "body": body},
-    )
+    @app.get("/{path:path}")
+    def spa(path: str) -> FileResponse:
+        candidate = DIST_DIR / path
+        if path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(DIST_DIR / "index.html")
