@@ -7,7 +7,6 @@ src/fli/web/dist, which this app serves. During frontend development,
 Endpoints:
 - /api/status        pipeline stages with live DB counts (the system map)
 - /api/accounts      modeled accounts with Digg facts, sortable/paginated
-- /api/architecture  raw markdown of the living architecture doc
 """
 
 from pathlib import Path
@@ -18,8 +17,6 @@ from fastapi.staticfiles import StaticFiles
 
 from fli import graph
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-ARCHITECTURE_DOC = REPO_ROOT / "docs" / "architecture" / "overview.md"
 DIST_DIR = Path(__file__).parent / "dist"
 
 app = FastAPI(title="Frontier Lab Intelligence")
@@ -148,13 +145,6 @@ def accounts(
         )
     finally:
         conn.close()
-
-
-@app.get("/api/architecture")
-def architecture() -> JSONResponse:
-    return JSONResponse(
-        {"markdown": ARCHITECTURE_DOC.read_text(encoding="utf-8")}
-    )
 
 
 if DIST_DIR.exists():

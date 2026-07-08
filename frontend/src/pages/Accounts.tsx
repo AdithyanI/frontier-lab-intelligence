@@ -32,7 +32,8 @@ export default function Accounts() {
   }, [q])
 
   return (
-    <>
+    <div className="page">
+      <div className="page-kicker">SOURCE PLANE · X VIA DIGG</div>
       <h1 className="page-title">Accounts</h1>
       <p className="page-sub">
         Every X account observed in the Digg graph pull — ranked accounts plus
@@ -68,8 +69,10 @@ export default function Accounts() {
         </thead>
         <tbody>
           {rows.map((a) => (
-            <tr key={a.id}>
-              <td className="num">{a.digg_rank ?? '—'}</td>
+            <tr key={a.id} className={a.digg_rank == null ? 'unranked' : undefined}>
+              <td className="num">
+                <span className="rank-chip">{a.digg_rank ?? '—'}</span>
+              </td>
               <td className="handle">
                 <a
                   href={`https://x.com/${a.handle}`}
@@ -105,6 +108,6 @@ export default function Accounts() {
           {loading ? 'Loading…' : `Load ${Math.min(PAGE, total - rows.length)} more`}
         </button>
       )}
-    </>
+    </div>
   )
 }

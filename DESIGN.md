@@ -1,13 +1,15 @@
 # Design
 
-Seeded 2026-07-08, pre-implementation. Re-run `$impeccable document` once the
-web UI exists to capture real tokens. Register: **product** (see PRODUCT.md).
+Seeded 2026-07-08 pre-implementation; rewritten same day after the v2 UI
+shipped. Register: **product** (see PRODUCT.md). Source of truth for tokens:
+`frontend/src/tokens.css`.
 
 ## Mood
 
-Research terminal at a Berlin fund. Quiet precision: deep harbor-blue
-instruments on clean paper, one brass signal-light for the things that matter.
-The interface is an instrument, not a brochure — the drama belongs to the
+Editorial instrument. A fund's annual report crossed with a live terminal:
+bold typographic hierarchy, big tabular numerals, capital-blue as the one
+working accent on paper-white ground. The interface states its numbers with
+confidence and otherwise stays out of the way — the drama belongs to the
 intelligence, never the chrome.
 
 ## Theme
@@ -19,87 +21,98 @@ for the engineers building it, not the users reading it.
 
 ## Color
 
-Strategy: **restrained** — neutrals + one primary, accent ≤10% of any surface.
-The product's value is noise suppression; the palette practices it.
+Strategy: **restrained** — neutrals + the BIT capital-blue family, accent
+≤10% of any surface. The product's value is noise suppression; the palette
+practices it.
 
-The primary is anchored to BIT's own brand ("capital blue" `#5bc5f2`, steps
-`#4391b4`/`#235165`, extracted from bitcap.com's Webflow tokens 2026-07-08) so
-the product reads as native to their world. We deliberately do not copy their
-warm sand/cloud-white marketing surfaces (wrong register for a tool) or
-Akkurat LL (licensed font; Inter is the working grotesque).
+Anchored to BIT's own brand (extracted from bitcap.com's Webflow tokens
+2026-07-08): alpha-black `#151515` as ink, capital-blue `#5bc5f2` /
+`#4391b4` / `#235165` as the accent family. Their coin-sand appears only at
+whisper strength (`#f4f1ea`) as a row-hover / band tint — we do not copy
+their sand marketing surfaces (wrong register for a tool) or Akkurat LL
+(licensed; Inter is the working grotesque).
 
 ```css
 :root {
   /* ground */
-  --bg:      oklch(1.000 0.000 0);      /* pure white, no hidden warmth */
-  --surface: oklch(0.972 0.004 230);    /* raised panels, table stripes */
-  --border:  oklch(0.900 0.008 230);    /* hairlines */
+  --bg:            #ffffff;   /* pure white, no hidden warmth */
+  --surface:       #f7f7f6;   /* raised panels, pills, captions */
+  --sand:          #f4f1ea;   /* BIT coin-sand at whisper strength — hovers, bands */
+  --border:        #e4e4e2;   /* hairlines */
+  --border-strong: #151515;   /* structural rules — the editorial line */
 
   /* text */
-  --ink:     oklch(0.220 0.020 230);    /* body — ≥7:1 on bg */
-  --muted:   oklch(0.500 0.018 230);    /* secondary — ≥4.5:1 on bg */
+  --ink:       #151515;   /* BIT alpha-black */
+  --ink-soft:  #434343;
+  --muted:     #6b6b68;
 
-  /* brand — BIT capital-blue anchored */
-  --primary:       oklch(0.410 0.072 230);  /* ≈ capital-blue-700 #235165 — nav, links, actions; white text on fills */
-  --primary-mid:   oklch(0.630 0.090 230);  /* ≈ capital-blue-600 #4391b4 — chart lines, non-text accents */
-  --accent:        oklch(0.640 0.130 75);   /* brass — alerts, high-signal flags only; white text on fills */
+  /* brand — BIT capital-blue family */
+  --blue:      #5bc5f2;   /* fills, marks, large accents (not for text) */
+  --blue-mid:  #4391b4;   /* lines, secondary accents */
+  --blue-ink:  #235165;   /* link text, kickers — AA-safe on white */
 
   /* semantics (data, not decoration) */
-  --signal-high: var(--accent);
-  --positive:    oklch(0.560 0.100 155);
-  --negative:    oklch(0.520 0.140 25);
+  --positive:  #2e7d4f;
+  --negative:  #a13333;
 }
 ```
 
 Rules:
 
-- The accent is earned: it marks genuinely high-signal items (alert-worthy
-  insights, threshold-crossing scores). If brass appears more than a few
-  times per screen, the filtering failed before the UI did.
+- `--blue` is a shape color (node fills, brand mark, funnel stage), never
+  body-text color; text-on-white blue is always `--blue-ink`.
+- Structural rules use `--border-strong` (ink) — full-bleed 1px lines that
+  divide the page like an editorial layout. Soft hairlines use `--border`.
 - Score/severity is never color-only — always paired with a number or label.
-- White text on primary and accent fills. Dark text only on pale/neutral fills.
+- White text on ink and blue-ink fills. Dark text on white/sand/blue-500.
 
 ## Typography
 
 - **UI + prose:** Inter (system-ui fallback). Weights 400/500/600 only.
-- **Data + provenance:** a mono for scores, timestamps, tickers, source IDs —
-  IBM Plex Mono or JetBrains Mono, one of them, never both.
-- Body 15–16px, line-height 1.55, max measure 70ch.
-- Headings: same family, weight 600, tight scale (1.25 ratio); this is a
-  tool, not editorial. `text-wrap: balance` on headings.
-- Tabular numerals (`font-variant-numeric: tabular-nums`) everywhere numbers
-  column-align: score tables, token counts, dates.
+- **Data + provenance:** IBM Plex Mono for numbers, kickers, timestamps,
+  source IDs, table headers.
+- Display: clamp(34–56px), weight 600, letter-spacing −0.025em, for the one
+  statement a page gets to make. Big stats in mono at 26–40px.
+- Body 15–16px, line-height 1.55, max measure ~60ch.
+- Kickers: mono 11–12px, blue-ink, uppercase — every page opens with one.
+- Tabular numerals everywhere numbers column-align.
 
 ## Layout
 
-- App shell: slim left nav (register / insights / reports / settings),
-  content column max ~1100px. No dashboard hero, no metric cards.
+- App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
+  beneath. No sidebar — pages own their full width.
+- Home is an editorial split: statement + hero numerals on the left, live
+  pipeline rail on the right, divided by an ink rule.
 - Density first: tables and lists over cards. Cards only where an item is
   genuinely a self-contained unit (a report), never for lists of insights.
-- Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48. Section rhythm from spacing,
-  not dividers-everywhere.
+- Diagrams are hand-built inline SVG in brand colors with mono captions —
+  never rendered-markdown or generic diagram-tool output.
+- Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 72.
 - Provenance line (source, date, entity) sits directly under every insight
   title in mono — first-class, not a footnote.
 
-## Components (anticipated)
+## Components (current + anticipated)
 
-- **Insight row:** title, one-line why-flagged rationale, score (mono), provenance
-  line, persona tag. Expandable for full extraction detail.
-- **Entity page:** lab or person; identity-resolution facts, tracked channels,
-  recent scored contributions.
-- **Score breakdown:** always inspectable — inputs and weights visible on
-  demand next to any score. Trust through inspectability (PRODUCT.md #3).
-- **Report view:** rendered digest, print/PDF-clean stylesheet.
-- **Alert config:** thresholds per persona/channel.
+- **Pipeline rail:** stage node (blue = live, outlined = in progress), name,
+  mono state, one-line summary, live mono counts.
+- **Accounts table:** mono uppercase headers, ink rank chips, sand row hover,
+  pill search, load-more.
+- **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
+  surface ground.
+- **Insight row (anticipated):** title, why-flagged rationale, score (mono),
+  provenance line, persona tag; expandable.
+- **Score breakdown (anticipated):** inputs and weights visible on demand
+  next to any score. Trust through inspectability (PRODUCT.md #3).
 
 ## Motion
 
-Near-none. State transitions (expand row, panel open) at 150–200ms ease-out.
-No entrance animations, no staggered reveals — analysts open this dozens of
-times a day. `prefers-reduced-motion`: transitions become instant.
+Near-none. State transitions (hover, expand) at 150ms ease-out. No entrance
+animations, no staggered reveals — analysts open this dozens of times a day.
+`prefers-reduced-motion`: transitions become instant.
 
 ## Anti-checklist (from PRODUCT.md anti-references)
 
-- No gradient anything. No glassmorphism. No hero metrics.
+- No gradient anything. No glassmorphism. No metric-card grids.
 - No identical card grids. No side-stripe accents on list items.
 - No decorative charts — every chart answers a question a user actually has.
+- No rendered-markdown pages posing as product UI.

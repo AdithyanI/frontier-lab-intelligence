@@ -6,15 +6,18 @@ import Architecture from './pages/Architecture'
 export default function App() {
   return (
     <div className="shell">
-      <nav className="nav" aria-label="Main">
-        <div className="brand">Frontier Lab Intelligence</div>
-        <NavLink to="/" end>System</NavLink>
-        <NavLink to="/accounts">Accounts</NavLink>
-        <NavLink to="/architecture">Architecture</NavLink>
-        <span className="nav-soon">Registry</span>
-        <span className="nav-soon">Insights</span>
-        <span className="nav-soon">Reports</span>
-      </nav>
+      <header className="topbar">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true" />
+          Frontier Lab Intelligence
+        </div>
+        <nav aria-label="Main">
+          <NavLink to="/" end>System</NavLink>
+          <NavLink to="/accounts">Accounts</NavLink>
+          <NavLink to="/architecture">Architecture</NavLink>
+          <span className="nav-soon">Registry · Insights · Reports — soon</span>
+        </nav>
+      </header>
       <main className="content">
         <Routes>
           <Route path="/" element={<SystemMap />} />

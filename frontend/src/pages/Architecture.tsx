@@ -1,55 +1,216 @@
-import { useEffect, useRef, useState } from 'react'
-import { marked } from 'marked'
-import mermaid from 'mermaid'
-import { getJSON } from '../api'
+/* The architecture, explained visually: three hand-built diagrams that
+   teach the system — the graph plane, the entity/identity layering, and
+   the signal funnel. Real handles, real colors, no generic doc dump. */
 
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'neutral',
-  themeVariables: {
-    fontFamily: 'Inter, system-ui, sans-serif',
-    fontSize: '13px',
-  },
-})
+const INK = '#151515'
+const MUTED = '#6b6b68'
+const BORDER = '#e4e4e2'
+const BLUE = '#5bc5f2'
+const BLUE_MID = '#4391b4'
+const BLUE_INK = '#235165'
+const SAND = '#f4f1ea'
+const MONO = "'IBM Plex Mono', monospace"
+const UI = "'Inter', system-ui, sans-serif"
+
+/* ---------- diagram 1: the graph plane ---------- */
+
+const NODES = [
+  { x: 340, y: 150, r: 26, label: '@karpathy', big: true },
+  { x: 520, y: 90, r: 22, label: '@sama', big: true },
+  { x: 200, y: 90, r: 20, label: '@ylecun', big: true },
+  { x: 460, y: 220, r: 18, label: '@ilyasut', big: true },
+  { x: 120, y: 200, r: 10, label: '' },
+  { x: 240, y: 250, r: 8, label: '' },
+  { x: 620, y: 170, r: 12, label: '' },
+  { x: 680, y: 80, r: 8, label: '' },
+  { x: 90, y: 60, r: 8, label: '' },
+  { x: 390, y: 60, r: 9, label: '' },
+  { x: 580, y: 260, r: 8, label: '' },
+  { x: 300, y: 300, r: 9, label: '' },
+]
+
+const EDGES: [number, number][] = [
+  [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [9, 0],
+  [0, 1], [7, 1], [9, 1], [6, 1],
+  [8, 2], [4, 2], [0, 2],
+  [6, 3], [10, 3], [11, 3], [0, 3],
+]
+
+function GraphPlane() {
+  return (
+    <svg viewBox="0 0 760 360" role="img" aria-label="Directed follow graph of AI accounts">
+      <defs>
+      <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+      </marker>
+      </defs>
+      {EDGES.map(([f, t], i) => {
+        const a = NODES[f], b = NODES[t]
+        const dx = b.x - a.x, dy = b.y - a.y
+        const len = Math.hypot(dx, dy)
+        const ux = dx / len, uy = dy / len
+        const x1 = a.x + ux * (a.r + 4), y1 = a.y + uy * (a.r + 4)
+        const x2 = b.x - ux * (b.r + 8), y2 = b.y - uy * (b.r + 8)
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={BLUE_MID} strokeWidth="1.2" opacity="0.55" markerEnd="url(#arr)" />
+      })}
+      {NODES.map((n, i) => (
+        <g key={i}>
+          <circle cx={n.x} cy={n.y} r={n.r} fill={n.big ? BLUE : '#fff'} stroke={n.big ? BLUE_MID : MUTED} strokeWidth={n.big ? 0 : 1.2} />
+          {n.label && (
+            <text x={n.x} y={n.y + n.r + 18} textAnchor="middle" fontFamily={MONO} fontSize="13" fill={INK}>{n.label}</text>
+          )}
+        </g>
+      ))}
+      <text x="28" y="332" fontFamily={UI} fontSize="13" fill={MUTED}>Node size = attention received from tracked accounts. Arrows = observed “top follower of”.</text>
+    </svg>
+  )
+}
+
+/* ---------- diagram 2: accounts → identities → entity ---------- */
+
+function EntityLayers() {
+  const acc = [
+    { x: 80, label: '@karpathy', plane: 'X · Digg rank #1' },
+    { x: 320, label: 'github.com/karpathy', plane: 'GitHub · nanoGPT, llm.c' },
+    { x: 560, label: 'A. Karpathy', plane: 'arXiv · 12 papers' },
+  ]
+  return (
+    <svg viewBox="0 0 760 400" role="img" aria-label="Accounts link to one real-world entity through identities">
+      {/* plane band */}
+      <rect x="24" y="252" width="712" height="120" fill={SAND} />
+      <text x="40" y="278" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">PLATFORM ACCOUNTS — WHAT THE DATA SHOWS</text>
+      {acc.map((a, i) => (
+        <g key={i}>
+          <rect x={a.x} y={294} width={192} height={56} fill="#fff" stroke={INK} strokeWidth="1" />
+          <text x={a.x + 14} y={317} fontFamily={MONO} fontSize="13" fill={INK}>{a.label}</text>
+          <text x={a.x + 14} y={337} fontFamily={UI} fontSize="12" fill={MUTED}>{a.plane}</text>
+        </g>
+      ))}
+      {/* entity card */}
+      <rect x="270" y="40" width="220" height="72" fill={INK} />
+      <text x="292" y="72" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">Andrej Karpathy</text>
+      <text x="292" y="94" fontFamily={MONO} fontSize="11" fill={BLUE}>ENTITY · PERSON</text>
+      {/* identity lines */}
+      {acc.map((a, i) => {
+        const x1 = a.x + 96, y1 = 294
+        const x2 = 292 + i * 80, y2 = 112
+        const conf = ['0.99', '0.95', '0.85'][i]
+        const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
+        return (
+          <g key={i}>
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={BLUE_MID} strokeWidth="1.4" />
+            <rect x={mx - 30} y={my - 12} width={60} height={22} fill="#fff" stroke={BLUE_MID} strokeWidth="1" rx="11" />
+            <text x={mx} y={my + 3} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={BLUE_INK}>{conf}</text>
+          </g>
+        )
+      })}
+      <text x="512" y="66" fontFamily={UI} fontSize="12.5" fill={MUTED}>One real-world person.</text>
+      <text x="512" y="84" fontFamily={UI} fontSize="12.5" fill={MUTED}>Created only after review.</text>
+      <text x="40" y="56" fontFamily={UI} fontSize="12.5" fill={MUTED}>Identity links carry evidence +</text>
+      <text x="40" y="74" fontFamily={UI} fontSize="12.5" fill={MUTED}>confidence. Wrong match = one</text>
+      <text x="40" y="92" fontFamily={UI} fontSize="12.5" fill={MUTED}>deletable link, not poisoned data.</text>
+    </svg>
+  )
+}
+
+/* ---------- diagram 3: the signal funnel ---------- */
+
+function Funnel() {
+  const steps = [
+    { w: 640, label: 'Everything the tracked people and labs publish', n: 'posts · papers · releases · blogs' },
+    { w: 480, label: 'Dedup and clustering', n: 'many links → one event' },
+    { w: 340, label: 'Novelty gate', n: 'seen before? drop' },
+    { w: 220, label: 'LLM extraction + scoring', n: 'only on survivors' },
+    { w: 190, label: 'Persona thresholds', n: 'investment vs AI team' },
+  ]
+  return (
+    <svg viewBox="0 0 760 380" role="img" aria-label="Signal funnel from raw output to persona delivery">
+      {steps.map((s, i) => {
+        const x = (760 - s.w) / 2
+        const y = 24 + i * 60
+        const isLLM = i === 3
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={s.w} height={44} fill={isLLM ? BLUE : i === 4 ? INK : SAND} stroke={i < 3 ? BORDER : 'none'} />
+            <text x={380} y={y + 20} textAnchor="middle" fontFamily={UI} fontSize="13.5" fontWeight="500" fill={i >= 4 ? '#fff' : INK}>{s.label}</text>
+            <text x={380} y={y + 36} textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={i >= 4 ? BLUE : MUTED}>{s.n}</text>
+            {i < steps.length - 1 && (
+              <line x1={380} y1={y + 44} x2={380} y2={y + 60} stroke={MUTED} strokeWidth="1" />
+            )}
+          </g>
+        )
+      })}
+      <text x="380" y="356" textAnchor="middle" fontFamily={UI} fontSize="13" fill={MUTED}>“Nothing significant today” is a valid — trust-preserving — output.</text>
+    </svg>
+  )
+}
+
+/* ---------- page ---------- */
 
 export default function Architecture() {
-  const [html, setHtml] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    getJSON<{ markdown: string }>('/api/architecture')
-      .then(async (d) => {
-        const renderer = new marked.Renderer()
-        const base = renderer.code.bind(renderer)
-        renderer.code = (token) => {
-          if (token.lang === 'mermaid') {
-            return `<div class="mermaid-block"><pre class="mermaid">${token.text}</pre></div>`
-          }
-          return base(token)
-        }
-        setHtml(await marked.parse(d.markdown, { renderer }))
-      })
-      .catch((e) => setError(String(e)))
-  }, [])
-
-  useEffect(() => {
-    if (html && ref.current) {
-      void mermaid.run({ nodes: ref.current.querySelectorAll('pre.mermaid') })
-    }
-  }, [html])
-
   return (
-    <>
-      {error && <div className="error-note">Could not load doc: {error}</div>}
-      {!html && !error && <div className="skeleton" style={{ width: '50%' }} />}
-      {html && (
-        <div
-          className="doc"
-          ref={ref}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      )}
-    </>
+    <div className="page">
+      <div className="page-kicker">HOW IT WORKS</div>
+      <h1 className="page-title">Architecture</h1>
+      <p className="page-sub">
+        Three ideas carry the whole system: a social graph decides who is worth
+        watching, an entity layer connects every plane of evidence about them,
+        and a funnel makes sure only signal reaches a human.
+      </p>
+
+      <section className="arch-section">
+        <div className="arch-section-head">
+          <span className="arch-no">01</span>
+          <h2 className="arch-h">The graph decides who matters</h2>
+          <p className="arch-p">
+            2,314 X accounts and 361,225 observed follow relationships, pulled
+            from Digg's ranking of the AI community. Attention flows through
+            edges: being followed by ten important accounts beats a thousand
+            random followers. That is PageRank — and it turns a raw social
+            graph into a ranked list of people worth reviewing.
+          </p>
+        </div>
+        <div className="arch-canvas">
+          <GraphPlane />
+          <div className="arch-caption">graph_edges · source: digg · relationship: top_follower_of · every edge carries its evidence URL</div>
+        </div>
+      </section>
+
+      <section className="arch-section">
+        <div className="arch-section-head">
+          <span className="arch-no">02</span>
+          <h2 className="arch-h">Entities connect the planes</h2>
+          <p className="arch-p">
+            The same person exists on X, GitHub, and arXiv under different
+            names. Each platform profile stays a separate account — what the
+            data literally shows. A reviewed entity sits above them, linked by
+            identities that carry evidence and confidence. Every future signal
+            (a post, a release, a paper) lands on an account and is read
+            through its entity.
+          </p>
+        </div>
+        <div className="arch-canvas">
+          <EntityLayers />
+          <div className="arch-caption">accounts → identities (evidence + confidence) → entities · promotion requires human review</div>
+        </div>
+      </section>
+
+      <section className="arch-section" style={{ marginBottom: 72 }}>
+        <div className="arch-section-head">
+          <span className="arch-no">03</span>
+          <h2 className="arch-h">The funnel suppresses noise</h2>
+          <p className="arch-p">
+            Cheap mechanical gates run first; the expensive LLM judgment runs
+            last, only on what survives. Scores stay inspectable — each one
+            shows its inputs, including thesis-breaking evidence, so an
+            analyst can disagree with the machine.
+          </p>
+        </div>
+        <div className="arch-canvas">
+          <Funnel />
+          <div className="arch-caption">source scoping → dedup → novelty → extraction + scoring → persona delivery</div>
+        </div>
+      </section>
+    </div>
   )
 }

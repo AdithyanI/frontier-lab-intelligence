@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { getJSON, type Stage } from '../api'
 
+function findStat(stages: Stage[], stageId: string, label: string): number {
+  const s = stages.find((x) => x.id === stageId)
+  return s?.stats.find((st) => st.label === label)?.value ?? 0
+}
+
 export default function SystemMap() {
   const [stages, setStages] = useState<Stage[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -11,54 +16,70 @@ export default function SystemMap() {
       .catch((e) => setError(String(e)))
   }, [])
 
+  if (error) return <div className="page"><div className="error-note">Could not load status: {error}</div></div>
+  if (!stages) {
+    return (
+      <div className="page" aria-busy="true">
+        <div className="skeleton" style={{ width: '40%', height: 40 }} />
+      </div>
+    )
+  }
+
+  const edges = findStat(stages, 'sources', 'graph edges')
+  const candidates = findStat(stages, 'registry', 'candidate accounts')
+  const entities = findStat(stages, 'registry', 'confirmed entities')
+
   return (
-    <>
-      <h1 className="page-title">System</h1>
-      <p className="page-sub">
-        The pipeline as it actually stands: live counts from the database, not
-        a diagram of intentions. Grey stages are designed but not built.
-      </p>
-      {error && <div className="error-note">Could not load status: {error}</div>}
-      {!stages && !error && (
-        <div className="map" aria-busy="true">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="skeleton" style={{ width: '60%', marginBottom: 24 }} />
-          ))}
+    <div className="hero">
+      <div className="hero-left">
+        <div className="hero-kicker">FRONTIER LAB INTELLIGENCE</div>
+        <h1 className="hero-title">Watching the people who build the frontier.</h1>
+        <p className="hero-sub">
+          A social-graph-derived registry of frontier-AI labs and their key
+          people — their public output extracted, scored, and delivered as
+          signal, not noise.
+        </p>
+        <div className="hero-numbers">
+          <div className="big-stat">
+            <span className="v">{edges.toLocaleString('en-US')}</span>
+            <span className="l">observed follow edges</span>
+          </div>
+          <div className="big-stat">
+            <span className="v">{candidates.toLocaleString('en-US')}</span>
+            <span className="l">candidate accounts</span>
+          </div>
+          <div className="big-stat">
+            <span className="v">{entities.toLocaleString('en-US')}</span>
+            <span className="l">confirmed entities</span>
+          </div>
         </div>
-      )}
-      {stages && (
-        <ol className="map" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          {stages.map((s) => (
-            <li key={s.id} className="stage" data-state={s.state}>
-              <div className="stage-rail">
-                <span className="stage-dot" data-state={s.state} aria-hidden="true" />
-                <span className="stage-line" aria-hidden="true" />
+      </div>
+      <ol className="rail" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        {stages.map((s) => (
+          <li key={s.id} className="rail-stage" data-state={s.state}>
+            <div className="rail-gutter">
+              <span className="rail-node" aria-hidden="true" />
+            </div>
+            <div className="rail-body">
+              <div className="rail-head">
+                <span className="rail-name">{s.name}</span>
+                <span className="rail-state" data-state={s.state}>{s.state}</span>
               </div>
-              <div className="stage-body">
-                <div className="stage-head">
-                  <h2 className="stage-name">{s.name}</h2>
-                  <span className="stage-state" data-state={s.state}>
-                    {s.state}
-                  </span>
+              <p className="rail-summary">{s.summary}</p>
+              {s.stats.length > 0 && (
+                <div className="rail-stats">
+                  {s.stats.map((st) => (
+                    <div key={st.label}>
+                      <span className="stat-v">{st.value.toLocaleString('en-US')}</span>{' '}
+                      <span className="stat-l">{st.label}</span>
+                    </div>
+                  ))}
                 </div>
-                <p className="stage-summary">{s.summary}</p>
-                {s.stats.length > 0 && (
-                  <div className="stage-stats">
-                    {s.stats.map((st) => (
-                      <div key={st.label} className="stat">
-                        <span className="stat-value">
-                          {st.value.toLocaleString('en-US')}
-                        </span>
-                        <span className="stat-label">{st.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
-    </>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }

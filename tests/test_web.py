@@ -32,12 +32,6 @@ def test_accounts_search():
     assert "karpathy" in handles
 
 
-def test_architecture_returns_markdown():
-    r = client.get("/api/architecture")
-    assert r.status_code == 200
-    assert "System pipeline" in r.json()["markdown"]
-
-
 def test_spa_served_when_built():
     r = client.get("/")
     assert r.status_code == 200
