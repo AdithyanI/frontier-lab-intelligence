@@ -120,6 +120,61 @@ Known data facts:
 - `fli digg --full-followers` produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
 
+## Graph Storage Plan
+
+The Digg data is graph data: accounts are nodes, relationships are edges, and
+the source URL/API response is evidence. Store the modeled graph in SQLite
+rather than keeping a large nested JSON file as the main working artifact.
+SQLite is enough for this scale when the edge endpoints are indexed.
+
+Keep these layers separate:
+
+1. **Raw observations** — source payloads or source-file references, fetched
+   time, source URL, and hash. This preserves evidence and allows re-parsing.
+2. **Accounts** — platform accounts such as X handles, with Digg rank/category,
+   display name, bio, X id, GitHub URL, first/last seen timestamps.
+3. **Graph edges** — directed observed relationships, e.g.
+   `from_account -> to_account`, relationship type `top_follower_of` or
+   `follows`, source `digg`, observed time, evidence URL, confidence, and raw
+   observation reference.
+4. **Entities** — real-world people/labs/companies promoted after review.
+   Do not merge accounts into entities too early.
+5. **Identities and affiliations** — links from real-world entities to
+   platform accounts and lab/company affiliations, each with provenance.
+
+Sketch:
+
+```text
+raw_observations(id, source, source_url, fetched_at, payload_ref, payload_hash)
+accounts(id, platform, handle, display_name, x_id, bio, first_seen_at, last_seen_at)
+account_source_facts(account_id, source, rank, role, github_url, observed_at)
+graph_edges(id, from_account_id, to_account_id, relationship, source,
+            observed_at, evidence_url, confidence, raw_observation_id)
+entities(id, kind, canonical_name)
+identities(entity_id, account_id, platform, confidence, evidence)
+affiliations(person_entity_id, lab_entity_id, role, start_date, end_date, evidence)
+```
+
+Indexes likely needed first:
+
+```text
+accounts(platform, handle)
+accounts(platform, x_id)
+graph_edges(from_account_id, relationship)
+graph_edges(to_account_id, relationship)
+graph_edges(source, observed_at)
+```
+
+This structure preserves the original evidence while making ranking and
+visualization straightforward. Example exports later:
+
+```sql
+SELECT f.handle AS from_handle, t.handle AS to_handle, e.relationship
+FROM graph_edges e
+JOIN accounts f ON f.id = e.from_account_id
+JOIN accounts t ON t.id = e.to_account_id;
+```
+
 ## Target Data Model Sketch
 
 This is a hypothesis to test against real candidate evidence, not a locked

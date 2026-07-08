@@ -24,12 +24,16 @@ Build history, tools, budget, and learning notes now live in
 | Status | Work item | Evidence / notes |
 | --- | --- | --- |
 | in-progress | Build a reviewable registry-candidate table from real evidence: Digg full graph + tracked raw corpus, with smol.ai as a small high-trust supplement. | Full Digg graph summary: `data/digg/full_graph_summary.json`; raw full graph ignored under `data/raw/digg-full-2026-07-08/`; source notes in `docs/references/research-notes.md`. |
+| todo | Move modeled graph data into SQLite before adding visualization or more graph-heavy sources. | Design note in `docs/architecture/overview.md` §Graph Storage Plan. Keep raw observations/evidence separate from accounts, graph edges, and later real-world entities. |
 | todo | Decide the first modeled registry schema only after reviewing candidate evidence. | Current `data/fli.db` is raw evidence only. Architecture sketch is in `docs/architecture/overview.md`. |
 | todo | Keep frontend work deferred until registry/extraction/scoring have real modeled output. | UI is 5% of rubric; avoid dashboard-only work. |
 
 ## Open Questions / Blockers
 
 - **DB schema:** deliberately undecided until candidate evidence is reviewed.
+- **Graph storage:** next DB iteration should store accounts and directed
+  graph edges in SQLite, with raw observations/evidence kept separately. Do
+  not keep expanding nested JSON as the primary working graph format.
 - **Database artifact policy:** prompt asks for schema + real data; decide
   packaging/commit policy after modeled schema exists.
 - **X API:** not needed yet. Digg is the first graph source; smol.ai can

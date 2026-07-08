@@ -25,6 +25,7 @@ Use this after every meaningful chunk of work:
 | 2026-07-08 | Find a strong people-discovery spine without paying for X API first. | Pivoted registry bootstrap to Digg after verifying structured rankings/profile data. | `src/fli/digg.py`, `data/digg/`, `docs/references/research-notes.md`. | Digg became the primary v1 graph-derived seed source. Next: use the graph to rank registry candidates. | Codex Desktop; €0. |
 | 2026-07-08 | Pull enough Digg graph data to decide whether it is useful. | Added `fli digg --full-followers`; smoke-tested 2 profiles; ran the full paginated local pull. | 1,000 rankings, 1,000 profiles, 361,225 directed top-follower edges; `xai` returned 404. Tracked summary: `data/digg/full_graph_summary.json`; full raw files: ignored `data/raw/digg-full-2026-07-08/`. | We now have a rich local candidate graph without X API spend. Next: build a candidate review/ranking table. | Codex Desktop + Digg public endpoints; €0. |
 | 2026-07-08 | Reduce doc sprawl. | Consolidated working log, build journal, learning notes, assumptions, sources, seed lists, and context docs into fewer canonical files. | `AGENTS.md`, `docs/references/build-log.md`, `docs/references/context.md`, `docs/references/research-notes.md`. | Future agents have one build log, one context doc, one research/source notes doc, one architecture doc, and one tracker. | Codex Desktop + agent-native-repo-playbook; €0. |
+| 2026-07-08 | Decide how to store graph data later, without implementing it yet. | Documented the deferred graph storage plan: raw observations, accounts, directed graph edges, then reviewed real-world entities/identities/affiliations. | `docs/architecture/overview.md` §Graph Storage Plan; tracker current batch. | The next data-modeling pass should move modeled graph data into SQLite and stop treating nested JSON as the primary graph store. | Codex Desktop; €0. |
 
 ## Learning Notes
 
@@ -62,4 +63,3 @@ section tracks the reimbursable €100 API/services budget.
 | — | — | €0.00 | nothing spent yet | — |
 
 Running total: **€0.00 / €100.00**
-
