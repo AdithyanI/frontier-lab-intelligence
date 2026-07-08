@@ -47,6 +47,10 @@ def main(argv: list[str] | None = None) -> int:
         default=0.05,
         help="Seconds to sleep between paginated follower API requests per worker.",
     )
+    graph_p = sub.add_parser("graph", help="Modeled graph layer (accounts, edges).")
+    graph_p.add_argument("action", choices=["load", "summary"])
+    graph_p.add_argument("--db", default=None, help="Path to SQLite DB.")
+    graph_p.add_argument("--raw-dir", default=None, help="Raw Digg pull directory.")
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -79,6 +83,17 @@ def main(argv: list[str] | None = None) -> int:
                 "--page-sleep",
                 str(args.page_sleep),
                 *(["--include-companies"] if args.include_companies else []),
+            ]
+        )
+
+    if args.command == "graph":
+        from fli import graph
+
+        return graph.main(
+            [
+                args.action,
+                *(["--db", args.db] if args.db else []),
+                *(["--raw-dir", args.raw_dir] if args.raw_dir else []),
             ]
         )
 

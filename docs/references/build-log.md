@@ -31,6 +31,8 @@ Use this after every meaningful chunk of work:
 
 | 2026-07-08 | Adi wants a real frontend for data inspection and a written plan; asked whether to use his personal design language. | Locked the batch plan (graph→SQLite, PageRank weights, curated-list layering, candidate review table, frontend shell). Stack change: React+Vite+TS SPA + sigma.js over FastAPI JSON API, retiring Jinja2. Kept FLI's own cobalt/brass identity over adi-design: the reviewer is a fund; the product should read as their instrument. | Tracker Current Batch; architecture overview stack table. | Next: implement Phase A (graph store) then B (PageRank). | Copilot CLI + adi-design skill (consulted, not applied); €0. |
 
+| 2026-07-08 | Adi flagged redundancy in the raw edge CSVs; start Phase A. | Built `fli.graph`: normalized modeled layer (`accounts`, `account_source_facts`, `graph_edges`) loaded from raw Digg CSVs; raw stays redundant as evidence, model stores each account once. New CLI: `fli graph load|summary`. | 2,314 accounts, 6,760 facts, 361,225 deduped edges; top targets karpathy/jeffdean/sama/ilyasut/ylecun; `tests/test_graph.py`; 12 tests green. | Phase B next: PageRank source weights over the edge graph. | Copilot CLI; €0. |
+
 ## Learning Notes
 
 ### Graph-Derived Discovery

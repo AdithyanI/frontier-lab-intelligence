@@ -29,7 +29,7 @@ not adi-design).
 
 | Status | Work item | Evidence / notes |
 | --- | --- | --- |
-| todo | **A. Graph store in SQLite:** create `accounts`, `graph_edges`, `account_source_facts`, `raw_observations` per `docs/architecture/overview.md` §Graph Storage Plan; load the full Digg pull (1,000 accounts, 361K edges). | Raw pull under ignored `data/raw/digg-full-2026-07-08/`; summary `data/digg/full_graph_summary.json`. |
+| done | **A. Graph store in SQLite:** create `accounts`, `graph_edges`, `account_source_facts` per `docs/architecture/overview.md` §Graph Storage Plan; load the full Digg pull (1,000 accounts, 361K edges). | `fli graph load`: 2,314 accounts, 6,760 facts, 361,225 edges in `data/fli.db`. Normalized (each account once); reload idempotent; `tests/test_graph.py`; 12 tests green. |
 | todo | **B. Source weights:** compute PageRank over the edge graph; store alongside Digg rank as two independent attention signals. | "Important if important people follow you" = PageRank; disagreement between the two signals is itself review-worthy. |
 | todo | **C. Layer curated lists:** smol.ai `prefPeople` first (then swyx / Anthropic staff lists) as `account_source_facts` rows joined on handle; triangulation across sources drives candidate confidence. | Source inventory in `docs/references/research-notes.md`. |
 | todo | **D. Candidate review table:** API + UI listing one row per account with per-source evidence columns, sorted by combined confidence; the human-review gate before registry promotion. | This is the rubric's registry deliverable (20%). |
