@@ -146,3 +146,8 @@ Before handoff, record:
   (`fli web`): FastAPI + Jinja2 + DESIGN.md tokens; home + /architecture
   page rendering the doc with client-side Mermaid. 5 tests green;
   headless-browser check confirmed all 3 diagrams render as SVG.
+- 2026-07-08 (pm, UI polish): Adi flagged the UI as bland → impeccable pass:
+  real fonts loaded (Inter + IBM Plex Mono), home rebuilt product-shaped
+  (digest/register panels with teaching empty states, pipeline status
+  table, mono provenance rows). Verdict kept: framework isn't the blandness
+  — density is the design; full components arrive with real data (Phase 1–2).

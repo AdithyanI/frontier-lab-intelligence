@@ -22,6 +22,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12.5px;
+}
+.muted { color: var(--muted); }
+
 .shell { display: flex; min-height: 100vh; }
 
 .nav {
@@ -65,12 +71,48 @@ body {
 .content {
   flex: 1;
   max-width: 1100px;
-  padding: 32px 48px;
+  padding: 32px 48px 64px;
 }
 
+.page-head { margin-bottom: 32px; }
+
+.panel {
+  border-top: 1px solid var(--border);
+  padding: 16px 0 24px;
+  max-width: 72ch;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.panel-head h2 { margin: 0; }
+.panel-head a { font-size: 13.5px; text-decoration: none; }
+.panel-head a:hover { text-decoration: underline; }
+
+.empty p { margin: 8px 0; max-width: 65ch; }
+.empty p:first-child { color: var(--muted); }
+
+.status-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+.status-table td {
+  padding: 7px 16px 7px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: baseline;
+}
+.status-table tr:last-child td { border-bottom: none; }
+.status-table td:first-child { width: 110px; color: var(--primary); }
+.status-table td:last-child { text-align: right; white-space: nowrap; }
+
 h1, h2, h3 { font-weight: 600; text-wrap: balance; line-height: 1.25; }
-h1 { font-size: 24px; margin: 0 0 12px; }
-h2 { font-size: 19px; margin: 32px 0 8px; }
+h1 { font-size: 22px; margin: 0 0 12px; letter-spacing: -0.01em; }
+h2 { font-size: 16px; margin: 32px 0 8px; }
 
 a { color: var(--primary); }
 
