@@ -206,20 +206,17 @@ function EntityCard({
 
   if (!entity) return <dialog ref={ref} className="ent-card" onClose={onClose} />
 
-  const facts: { label: string; value: ReactNode }[] = []
-  facts.push({
-    label: 'Type',
-    value: entity.kind === 'lab' ? 'Lab' : 'Person',
-  })
-  if (entity.role) facts.push({ label: 'Role', value: entity.role })
-  facts.push({ label: 'Followers', value: fmt(entity.followers) })
-  facts.push({ label: 'Graph follows', value: fmt(entity.graphFollows) })
+  const stats: { label: string; value: ReactNode }[] = [
+    { label: 'Followers', value: fmt(entity.followers) },
+    { label: 'Graph follows', value: fmt(entity.graphFollows) },
+  ]
   if (entity.kind === 'person') {
-    facts.push({ label: 'Seed rank', value: fmt(entity.seedRank) })
-    facts.push({ label: 'PageRank', value: fmt(entity.pagerankRank) })
+    stats.push({ label: 'Seed rank', value: fmt(entity.seedRank) })
+    stats.push({ label: 'PageRank', value: fmt(entity.pagerankRank) })
   }
 
   const xUrl = entity.handle ? `https://x.com/${entity.handle}` : null
+  const blurb = entity.bio ?? entity.notes
 
   return (
     <dialog
@@ -231,34 +228,32 @@ function EntityCard({
       }}
     >
       <div className="ent-card-inner">
+        <button
+          className="ent-card-close"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
         <header className="ent-card-head">
-          <div>
-            <span className={`ent-type ent-type--${entity.kind}`}>
-              {entity.kind === 'lab' ? 'Lab' : 'Person'}
-            </span>
-            <h2>{entity.primary}</h2>
-          </div>
-          <button
-            className="ent-card-close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ✕
-          </button>
+          <span className={`ent-type ent-type--${entity.kind}`}>
+            {entity.kind === 'lab' ? 'Lab' : 'Person'}
+          </span>
+          <h2>{entity.primary}</h2>
+          {entity.role && <p className="ent-card-role">{entity.role}</p>}
         </header>
 
-        {(entity.bio || entity.notes) && (
-          <p className="ent-card-bio">{entity.bio ?? entity.notes}</p>
-        )}
+        {blurb && <p className="ent-card-bio">{blurb}</p>}
 
-        <dl className="ent-card-facts">
-          {facts.map((f) => (
-            <div key={f.label}>
-              <dt>{f.label}</dt>
-              <dd>{f.value}</dd>
+        <div className="ent-stats">
+          {stats.map((s) => (
+            <div className="ent-stat" key={s.label}>
+              <span className="ent-stat-n">{s.value}</span>
+              <span className="ent-stat-l">{s.label}</span>
             </div>
           ))}
-        </dl>
+        </div>
 
         {entity.channels.filter((c) => c.kind !== 'x').length > 0 && (
           <div className="ent-card-channels">
@@ -286,7 +281,7 @@ function EntityCard({
               target="_blank"
               rel="noreferrer"
             >
-              <span>𝕏</span>
+              <span className="ent-x-mark">𝕏</span>
               @{entity.handle}
               <span className="ent-x-go">↗</span>
             </a>
