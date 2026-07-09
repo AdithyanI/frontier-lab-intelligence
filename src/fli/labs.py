@@ -5,7 +5,7 @@ that matter (OpenAI, Anthropic, GDM, Meta, xAI, Mistral, DeepSeek, Qwen,
 stealth spin-offs). Curating ~10 rows is judgment, not automation — the
 automation story is *discovery*: org-like accounts in the follow graph that
 top-ranked researchers point at are candidates for new labs (SSI and
-Thinking Machines already appear in the Digg graph this way).
+Thinking Machines already appear in the frozen seed graph this way).
 
 Each lab row carries official channel hints (org X handle, blog/feed, GitHub
 org, arXiv query). `fli.channels` turns those hints into first-class entities,
@@ -126,7 +126,7 @@ SEED_LABS = [
         "blog_feed": "https://qwenlm.github.io/index.xml",
         "github_org": "QwenLM",
         "arxiv_query": 'all:"Qwen Team"',
-        "notes": "Org X account not in Digg graph (link stays null until observed).",
+        "notes": "Org X account not in the seed graph (link stays null until observed).",
     },
     {
         "slug": "ssi",
@@ -148,7 +148,7 @@ SEED_LABS = [
         "blog_feed": None,
         "github_org": "thinking-machines-lab",
         "arxiv_query": None,
-        "notes": "Murati spin-off. Discovered-in-graph example: org account already in Digg pull.",
+        "notes": "Murati spin-off. Discovered-in-graph example: org account already in the seed graph.",
     },
 ]
 

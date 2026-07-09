@@ -17,10 +17,10 @@ export interface XChannel {
   display_name: string | null
   bio: string | null
   followers_count: number | null
-  digg_rank: number | null
+  seed_rank: number | null
   role: string | null
   github_url: string | null
-  tracked_followers: number
+  graph_follows: number
 }
 
 export interface Lab {
@@ -34,7 +34,7 @@ export interface Lab {
   notes: string | null
   followers_count: number | null
   linked: boolean
-  tracked_followers: number
+  graph_follows: number
 }
 
 export interface Candidate {
@@ -43,10 +43,10 @@ export interface Candidate {
   display_name: string | null
   bio: string | null
   followers_count: number | null
-  digg_rank: number | null
+  seed_rank: number | null
   pagerank_rank: number | null
   role: string | null
-  tracked_followers: number
+  graph_follows: number
   disagreement: number | null
 }
 

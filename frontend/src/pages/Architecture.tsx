@@ -60,7 +60,7 @@ function GraphPlane() {
           )}
         </g>
       ))}
-      <text x="28" y="332" fontFamily={UI} fontSize="13" fill={MUTED}>Node size = attention received by X channels. Arrows = observed “top follower of”.</text>
+      <text x="28" y="332" fontFamily={UI} fontSize="13" fill={MUTED}>Node size = attention received by X channels. Arrows = observed follows.</text>
     </svg>
   )
 }
@@ -68,7 +68,7 @@ function GraphPlane() {
 /* ---------- diagram 2: the data model — who / where / what over time ---------- */
 
 const DM_CHANNELS = [
-  { x: 88, label: '@karpathy', plane: 'X · Digg rank #1', conf: '0.99', fan: 340 },
+  { x: 88, label: '@karpathy', plane: 'X · seed rank #1', conf: '0.99', fan: 340 },
   { x: 292, label: 'github.com/karpathy', plane: 'GitHub · nanoGPT, llm.c', conf: '0.95', fan: 380 },
   { x: 496, label: 'A. Karpathy', plane: 'arXiv · 12 papers', conf: '0.85', fan: 420 },
 ]
@@ -122,24 +122,29 @@ function DataModel() {
       <text x={500} y={64} fontFamily={UI} fontSize="12.5" fill={MUTED}>labs &amp; people —</text>
       <text x={500} y={82} fontFamily={UI} fontSize="12.5" fill={MUTED}>one entity per real-world who.</text>
 
-      {/* channels (where) — and the stream each writes into the store */}
+      {/* channels (where) */}
       {DM_CHANNELS.map((c, i) => (
         <g key={`chan-${i}`}>
           <rect x={c.x} y={DM_CH_TOP} width={DM_CW} height={DM_CH_H} fill="#fff" stroke={INK} strokeWidth="1" />
           <text x={c.x + 14} y={DM_CH_TOP + 24} fontFamily={MONO} fontSize="12.5" fill={INK}>{c.label}</text>
           <text x={c.x + 14} y={DM_CH_TOP + 43} fontFamily={UI} fontSize="12" fill={MUTED}>{c.plane}</text>
-          <line
-            x1={c.x + DM_CW / 2}
-            y1={DM_CH_TOP + DM_CH_H}
-            x2={380 + (i - 1) * 8}
-            y2={298}
-            stroke={BLUE_MID}
-            strokeWidth="1.2"
-            opacity="0.5"
-            markerEnd="url(#dm-arr)"
-          />
         </g>
       ))}
+
+      {/* confluence — every channel writes into the one dated store */}
+      {DM_CHANNELS.map((c, i) => (
+        <line
+          key={`flow-${i}`}
+          x1={c.x + DM_CW / 2}
+          y1={DM_CH_TOP + DM_CH_H}
+          x2={380}
+          y2={286}
+          stroke={BLUE_MID}
+          strokeWidth="1.2"
+          opacity="0.45"
+        />
+      ))}
+      <line x1={380} y1={286} x2={380} y2={300} stroke={BLUE_MID} strokeWidth="1.6" markerEnd="url(#dm-arr)" />
 
       {/* what we see there — the dated store */}
       <rect x={64} y={300} width={632} height={156} fill={SAND} />
@@ -276,7 +281,7 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <DataModel />
-          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · the legacy Digg/X follow-graph is one bootstrap source feeding channels + observations</div>
+          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · the current X graph is a frozen bootstrap source, to be replaced by our own following snapshots</div>
         </div>
       </section>
 
@@ -286,12 +291,14 @@ export default function Architecture() {
           <h2 className="arch-h">The graph decides who matters</h2>
           <p className="arch-p">
             Attention, not follower count: being followed by ten important
-            channels beats a thousand random ones. That is PageRank.
+            channels beats a thousand random ones. Today this uses the frozen
+            seed graph; next it should use our own X following snapshots from
+            the curated watchlist.
           </p>
         </div>
         <div className="arch-canvas">
           <GraphPlane />
-          <div className="arch-caption">graph_edges · source: digg · relationship: top_follower_of · every edge carries its evidence URL</div>
+          <div className="arch-caption">graph_edges · current source: bootstrap snapshot · target source: X following snapshots · every edge carries its evidence URL</div>
         </div>
       </section>
 

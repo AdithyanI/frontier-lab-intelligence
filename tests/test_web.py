@@ -23,7 +23,7 @@ def test_accounts_endpoint_returns_ranked_first():
     data = r.json()
     assert data["total"] > 0
     first = data["accounts"][0]
-    assert first["digg_rank"] == 1
+    assert first["seed_rank"] == 1
 
 
 def test_accounts_search():
@@ -51,7 +51,7 @@ def test_registry_returns_labs_and_candidates():
     assert "googledeepmind" not in handles
 
     karpathy = next(c for c in data["candidates"] if c["handle"] == "karpathy")
-    assert karpathy["digg_rank"] == 1
+    assert karpathy["seed_rank"] == 1
     assert karpathy["pagerank_rank"] is not None
 
     assert data["candidates_pool_total"] >= len(data["candidates"])

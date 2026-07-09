@@ -41,7 +41,7 @@ def _counts() -> dict:
         return {
             "channels": one("SELECT COUNT(*) FROM channels"),
             "x_channels": one("SELECT COUNT(*) FROM channels WHERE kind = 'x'"),
-            "ranked_channels": one(
+            "seed_ranked_channels": one(
                 "SELECT COUNT(DISTINCT channel_id) FROM channel_observations"
                 " WHERE source = 'digg' AND metric = 'rank'"
             ),
@@ -65,7 +65,7 @@ def status() -> JSONResponse:
             "id": "sources",
             "name": "Sources",
             "state": "live",
-            "summary": "Digg X-graph pull + raw lab blogs / arXiv / GitHub corpus.",
+            "summary": "Frozen X seed graph + raw lab blogs / arXiv / GitHub corpus.",
             "stats": [
                 {"label": "graph edges", "value": c["edges"]},
                 {"label": "raw items", "value": c["raw_items"]},
@@ -79,7 +79,7 @@ def status() -> JSONResponse:
             "summary": "Entities linked to channels; people candidates awaiting curation.",
             "stats": [
                 {"label": "x channels", "value": c["x_channels"]},
-                {"label": "ranked channels", "value": c["ranked_channels"]},
+                {"label": "seed-ranked channels", "value": c["seed_ranked_channels"]},
                 {"label": "confirmed entities", "value": c["entities"]},
             ],
         },
@@ -139,7 +139,7 @@ def accounts(
                     ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS followers_count,
                    CAST((SELECT o.value FROM channel_observations o
                     WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'rank'
-                    ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS digg_rank,
+                    ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS seed_rank,
                    (SELECT o.value FROM channel_observations o
                     WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'role'
                     ORDER BY o.observed_at DESC LIMIT 1) AS role,
@@ -148,10 +148,10 @@ def accounts(
                     ORDER BY o.observed_at DESC LIMIT 1) AS github_url,
                    (SELECT COUNT(*) FROM graph_edges e
                     JOIN accounts a ON a.id = e.to_account_id
-                    WHERE a.handle = c.key) AS tracked_followers
+                    WHERE a.handle = c.key) AS graph_follows
             FROM channels c
             WHERE c.kind = 'x' {where}
-            ORDER BY digg_rank IS NULL, digg_rank, tracked_followers DESC
+            ORDER BY seed_rank IS NULL, seed_rank, graph_follows DESC
             LIMIT ? OFFSET ?
             """,
             [*params, limit, offset],
@@ -171,7 +171,7 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
     """The registry: curated lab entities + evidence-ranked people candidates.
 
     Labs are hand-seeded (judgment; ~10 rows). People have no promotion
-    mechanism yet — the "candidates" list is every account with a Digg rank
+    mechanism yet — the "candidates" list is every account with a seed rank
     or a PageRank, ordered by whichever rank is best, excluding accounts
     already linked to a lab (an org shouldn't double-count as a person
     candidate). Honest framing: these are candidates, not tracked entities.
@@ -201,7 +201,7 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
             by_kind = {row["kind"]: row for row in entity_channels}
             x_channel = by_kind.get("x")
             followers_count = None
-            tracked_followers = 0
+            graph_follows = 0
             linked = False
             if x_channel:
                 followers = conn.execute(
@@ -218,7 +218,7 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
                 ).fetchone()
                 linked = account is not None
                 if account:
-                    tracked_followers = conn.execute(
+                    graph_follows = conn.execute(
                         "SELECT COUNT(*) FROM graph_edges WHERE to_account_id = ?",
                         (account["id"],),
                     ).fetchone()[0]
@@ -235,7 +235,7 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
                     "arxiv_query": by_kind["arxiv"]["key"] if "arxiv" in by_kind else None,
                     "followers_count": followers_count,
                     "linked": linked,
-                    "tracked_followers": tracked_followers,
+                    "graph_follows": graph_follows,
                     "channels": [dict(row) for row in entity_channels],
                 }
             )
@@ -252,7 +252,7 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
                         ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS followers_count,
                        CAST((SELECT o.value FROM channel_observations o
                         WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'rank'
-                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS digg_rank,
+                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS seed_rank,
                        CAST((SELECT o.value FROM channel_observations o
                         WHERE o.channel_id = c.id AND o.source = 'graph' AND o.metric = 'pagerank_rank'
                         ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS pagerank_rank,
@@ -267,16 +267,16 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
                        ) AS not_lab_channel,
                        (SELECT COUNT(*) FROM graph_edges e
                         JOIN accounts a ON a.id = e.to_account_id
-                        WHERE a.handle = c.key) AS tracked_followers
+                        WHERE a.handle = c.key) AS graph_follows
                 FROM channels c
                 WHERE c.kind = 'x'
             )
-            SELECT id, handle, display_name, bio, followers_count, digg_rank,
-                   pagerank_rank, role, tracked_followers
+            SELECT id, handle, display_name, bio, followers_count, seed_rank,
+                   pagerank_rank, role, graph_follows
             FROM x
             WHERE not_lab_channel
-              AND (digg_rank IS NOT NULL OR pagerank_rank IS NOT NULL)
-            ORDER BY MIN(COALESCE(digg_rank, 999999),
+              AND (seed_rank IS NOT NULL OR pagerank_rank IS NOT NULL)
+            ORDER BY MIN(COALESCE(seed_rank, 999999),
                          COALESCE(pagerank_rank, 999999)) ASC
             LIMIT ?
             """,
@@ -289,7 +289,7 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
                 SELECT c.id,
                        CAST((SELECT o.value FROM channel_observations o
                         WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'rank'
-                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS digg_rank,
+                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS seed_rank,
                        CAST((SELECT o.value FROM channel_observations o
                         WHERE o.channel_id = c.id AND o.source = 'graph' AND o.metric = 'pagerank_rank'
                         ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS pagerank_rank
@@ -303,7 +303,7 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
                   )
             )
             SELECT COUNT(*) FROM x
-            WHERE digg_rank IS NOT NULL OR pagerank_rank IS NOT NULL
+            WHERE seed_rank IS NOT NULL OR pagerank_rank IS NOT NULL
             """
         ).fetchone()[0]
 
@@ -311,8 +311,8 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
         for r in candidates:
             row = dict(r)
             row["disagreement"] = (
-                row["digg_rank"] - row["pagerank_rank"]
-                if row["digg_rank"] is not None and row["pagerank_rank"] is not None
+                row["seed_rank"] - row["pagerank_rank"]
+                if row["seed_rank"] is not None and row["pagerank_rank"] is not None
                 else None
             )
             candidates_out.append(row)

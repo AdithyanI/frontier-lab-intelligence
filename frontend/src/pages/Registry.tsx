@@ -134,13 +134,12 @@ export default function Registry() {
           </p>
         </div>
         <p className="registry-lede">
-          Two independent rankings, side by side: <b>Digg rank</b> (raw
-          follower-weighted attention) and <b>PageRank</b> (importance from
-          who follows whom in the graph). Large disagreement between them is
-          itself a signal worth a second look — e.g. @jack ranks #246 by
-          followers but #52 by graph structure: the people already in this
-          network pay him outsized attention relative to his raw follower
-          count.
+          Two independent rankings, side by side: <b>seed rank</b> (the frozen
+          bootstrap ordering) and <b>PageRank</b> (importance from who follows
+          whom in the graph). Large disagreement between them is itself a signal
+          worth a second look — e.g. @jack ranks #246 by seed order but #52 by
+          graph structure: the people already in this network pay him outsized
+          attention relative to his raw follower count.
         </p>
         <div className="table-tools">
           <input
@@ -177,7 +176,7 @@ export default function Registry() {
               <tr>
                 <th>Account</th>
                 <th>Role</th>
-                <th className="num">Digg rank</th>
+                <th className="num">Seed rank</th>
                 <th className="num">PageRank</th>
                 <th>Disagreement</th>
                 <th className="num">Followers</th>
@@ -205,7 +204,7 @@ export default function Registry() {
                   </td>
                   <td>{c.role ?? <span className="muted">—</span>}</td>
                   <td className="num">
-                    {c.digg_rank ?? <span className="muted">—</span>}
+                    {c.seed_rank ?? <span className="muted">—</span>}
                   </td>
                   <td className="num">
                     {c.pagerank_rank ?? <span className="muted">—</span>}
@@ -230,7 +229,7 @@ function disagreementLabel(d: number | null) {
   const strong = Math.abs(d) >= 100
   return (
     <span className={strong ? 'disagreement-strong' : undefined}>
-      {d > 0 ? `graph +${d}` : `digg +${-d}`}
+      {d > 0 ? `graph +${d}` : `seed +${-d}`}
     </span>
   )
 }

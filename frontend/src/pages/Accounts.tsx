@@ -36,9 +36,9 @@ export default function Accounts() {
       <div className="page-kicker">SOURCE PLANE · X CHANNELS</div>
       <h1 className="page-title">Channels</h1>
       <p className="page-sub">
-        Every X channel observed through the graph/bootstrap sources. Channels
-        are places we watch; entities are the labs or people those channels
-        resolve to after curation.
+        Every X channel observed through the current seed graph. Channels are
+        places we watch; entities are the labs or people those channels resolve
+        to after curation.
       </p>
       <div className="table-tools">
         <input
@@ -59,19 +59,19 @@ export default function Accounts() {
       <table>
         <thead>
           <tr>
-            <th className="num">Digg rank</th>
+            <th className="num">Seed rank</th>
             <th>Channel</th>
             <th>Role</th>
-            <th className="num">Tracked followers</th>
+            <th className="num">Graph follows</th>
             <th className="num">X followers</th>
             <th>Bio</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((a) => (
-            <tr key={a.id} className={a.digg_rank == null ? 'unranked' : undefined}>
+            <tr key={a.id} className={a.seed_rank == null ? 'unranked' : undefined}>
               <td className="num">
-                <span className="rank-chip">{a.digg_rank ?? '—'}</span>
+                <span className="rank-chip">{a.seed_rank ?? '—'}</span>
               </td>
               <td className="handle">
                 <a
@@ -88,7 +88,7 @@ export default function Accounts() {
                 )}
               </td>
               <td>{a.role ?? <span className="muted">—</span>}</td>
-              <td className="num">{a.tracked_followers.toLocaleString('en-US')}</td>
+              <td className="num">{a.graph_follows.toLocaleString('en-US')}</td>
               <td className="num">
                 {a.followers_count?.toLocaleString('en-US') ?? '—'}
               </td>

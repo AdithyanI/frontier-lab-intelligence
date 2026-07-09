@@ -3,11 +3,11 @@
 Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Status: data-first bootstrap. The implemented code has raw fetch/store,
-Digg-derived seed graph extraction, a modeled SQLite graph layer, and a
-React SPA (registry, channels workbench, system map, architecture view) over a
-JSON API. The registry foundation is now entity/channel based; extraction and
-scoring schemas are intentionally not locked yet.
+Status: data-first bootstrap. The implemented code has raw fetch/store, a
+frozen X seed graph snapshot, a modeled SQLite graph layer, and a React SPA
+(registry, channels workbench, architecture view) over a JSON API. The
+registry foundation is entity/channel based; extraction and scoring schemas are
+intentionally not locked yet.
 
 ## Stack
 
@@ -31,11 +31,11 @@ original choice and are being retired in favor of the SPA.
 ```mermaid
 flowchart LR
     subgraph sources [Sources]
-        DIGG[Digg Tech graph]
+        XSEED[Frozen X seed graph]
+        XFOLLOW[X following snapshots]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
-        X[X / Twitter later]
     end
 
     REG[(Registry<br/>labs + people)]
@@ -45,9 +45,10 @@ flowchart LR
     DEL[Delivery<br/>digests · alerts]
     UI[Web UI<br/>FastAPI + React SPA]
 
-    DIGG --> REG
+    XSEED --> REG
+    XFOLLOW --> REG
     REG -->|who to watch| ING
-    BLOGS & ARXIV & GH & X --> ING
+    BLOGS & ARXIV & GH --> ING
     ING --> EXT
     EXT --> SCO
     SCO --> DEL
@@ -91,7 +92,7 @@ Design principles borrowed from prior art:
 
 - Curated source lists and denominator disclosure from smol.ai/AI News.
 - "Nothing significant today" as a trust-preserving output.
-- Machine proposes, human disposes from Techmeme/Digg-style workflows.
+- Machine proposes, human disposes from Techmeme-style workflows.
 - Reason-for-inclusion labels instead of one opaque score.
 - Time decay and noise dampeners for freshness.
 - Dated affiliations because people moves are themselves a signal.
@@ -108,20 +109,20 @@ Current file artifacts:
 
 ```text
 data/fli.db                         # raw evidence SQLite corpus
-data/digg/rankings.csv              # 1,000 ranked Digg/X accounts
-data/digg/top_follower_edges.csv    # tracked first-slice top-follower edges
-data/digg/seed_graph.json           # tracked nested Digg review artifact
+data/digg/rankings.csv              # frozen bootstrap ranked X accounts
+data/digg/top_follower_edges.csv    # frozen bootstrap first-slice edges
+data/digg/seed_graph.json           # frozen nested review artifact
 data/digg/full_graph_summary.json   # summary of full paginated local pull
-data/raw/digg-full-2026-07-08/      # ignored full graph artifacts
+data/raw/digg-full-2026-07-08/      # ignored frozen raw graph artifacts
 ```
 
 Known data facts:
 
 - `fli fetch` landed 1,599 raw items from lab blogs/sitemap, arXiv, and
   GitHub releases.
-- `fli digg` landed 1,000 ranked accounts and 49,950 tracked first-slice
-  edges.
-- `fli digg --full-followers` produced 361,225 local full-paginated edges;
+- The frozen bootstrap graph landed 1,000 ranked accounts and 49,950
+  first-slice edges.
+- The full frozen bootstrap pull produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
 - `fli channels sync` currently materializes 10 lab entities, 2,347 channels
   (2,315 X, 10 websites, 9 GitHub, 8 arXiv, 5 blog/feed), 42 entity-channel
@@ -157,7 +158,7 @@ erDiagram
     ACCOUNT_SOURCE_FACTS {
         int id PK
         int account_id FK
-        string source "digg | smol_ai"
+        string source "digg | smol_ai | x_api"
         string fact "rank | role | cohort"
         string value
     }
@@ -165,7 +166,7 @@ erDiagram
         int id PK
         int from_account_id FK
         int to_account_id FK
-        string relationship "top_follower_of"
+        string relationship "follows | top_follower_of (legacy)"
         string source
     }
     LABS {
@@ -180,7 +181,6 @@ erDiagram
         string kind "lab | person"
         string slug
         string name
-        string status
     }
     CHANNELS {
         int id PK
@@ -197,7 +197,7 @@ erDiagram
     CHANNEL_OBSERVATIONS {
         int id PK
         int channel_id FK
-        string source "digg | graph | x_profile"
+        string source "digg | graph | x_profile | x_api"
         string metric "rank | pagerank_rank | followers_count"
         string value
         string observed_at
@@ -220,7 +220,7 @@ Table row counts: `raw_items` 1,599, `accounts` 2,314,
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
 ingestion/extraction lands. The `accounts` / `account_source_facts` /
-`graph_edges` trio is the legacy Digg/X import layer described above; it
+`graph_edges` trio is the legacy bootstrap X import layer described above; it
 still backs the graph viz but is being superseded by `entities` / `channels`
 / `entity_channels` / `channel_observations` as the product's canonical model.
 
@@ -248,7 +248,7 @@ Observation = what we saw there at a time
 Current implemented tables:
 
 ```text
-entities(id, kind, slug, name, status, notes, created_at, updated_at)
+entities(id, kind, slug, name, notes, created_at, updated_at)
 channels(id, kind, key, label, url, first_seen_at, last_seen_at)
 entity_channels(entity_id, channel_id, relationship, confidence, evidence_url, notes)
 channel_observations(channel_id, source, metric, value, observed_at, evidence_url)
@@ -256,9 +256,33 @@ channel_observations(channel_id, source, metric, value, observed_at, evidence_ur
 
 The old `accounts`, `account_source_facts`, and `graph_edges` tables remain as
 the X graph import backing layer. They are not the product model. X accounts are
-mirrored into `channels(kind='x')`, and Digg/PageRank/profile fields are copied
-into `channel_observations`. That keeps Digg as one bootstrap source, not the
-center of the schema.
+mirrored into `channels(kind='x')`, and seed/PageRank/profile fields are copied
+into `channel_observations`. The current rows from the old Digg pull are a
+frozen bootstrap source, not the center of the schema.
+
+## X Graph Source Direction
+
+The next graph source should be our own X following snapshots, not more Digg.
+Pull **who trusted accounts follow**, not the full follower audience of large
+accounts.
+
+```text
+curated X watchlist
+  -> GET following for each trusted X user
+  -> graph_edges(source='x_api', relationship='follows')
+  -> PageRank over the observed follows graph
+  -> people candidates for curation
+```
+
+Why this direction:
+
+- Followers of a large account are mostly audience and spam.
+- Following lists from frontier researchers/labs are a higher-signal attention
+  graph.
+- Costs stay bounded because the watchlist is curated and each edge has a
+  source snapshot/evidence URL.
+- Third-party X data APIs can be evaluated later, but the official API shape is
+  the cleanest story for a case-study product.
 
 Examples:
 
@@ -282,7 +306,6 @@ erDiagram
         string kind "lab | person"
         string slug
         string name
-        string status
     }
     CHANNEL {
         string id PK
@@ -350,13 +373,13 @@ final score.
 | Module | Status |
 | --- | --- |
 | `fli.cli` | `--version`, `fetch`, `digg`, `graph`, `labs`, `web` |
-| `fli.digg` | Digg rankings and top-follower graph extraction |
+| `fli.digg` | frozen Digg bootstrap importer; not the target live graph source |
 | `fli.store` | raw `raw_items` SQLite layer |
 | `fli.graph` | legacy X graph import backing layer (`accounts`, facts, edges); PageRank; mirrors observations into channels |
 | `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
 | `fli.labs` | curated lab seed data (10 labs); seeds lab entities + official channels |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
-| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`, `/api/architecture`) + built SPA host, Registry-first nav; source in `frontend/` |
+| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host, Registry-first nav; source in `frontend/` |
 | `fli.registry` | lab entities/channels live; people-candidate promotion (auto-curation) still pending |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
