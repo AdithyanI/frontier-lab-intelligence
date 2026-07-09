@@ -19,7 +19,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fli import store
+from fli import graph, store
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS labs (
@@ -156,7 +156,7 @@ SEED_LABS = [
 
 
 def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
-    conn = store.connect(db_path)
+    conn = graph.connect(db_path)
     conn.executescript(SCHEMA)
     return conn
 

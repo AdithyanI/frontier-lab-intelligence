@@ -74,8 +74,8 @@ data-inspection surface (BIT-anchored editorial-instrument identity from
 
 Update before each handoff when meaningful work lands.
 
-- Commands run: `scripts/install-launchd-frontier-lab-intelligence.sh --install-deps`; `cloudflared tunnel --config ~/.cloudflared/config.yml ingress validate`; `/Users/dobby/GitHub/scripts/setup/network/install-launchd-cloudflare-tunnel.sh`; Cloudflare DNS + Access API calls; local/public `curl` smokes.
-- Results: local app healthy at `http://127.0.0.1:8797/`; `frontier-lab-intelligence.adithyan.io` redirects unauthenticated requests to Cloudflare Access; DNS CNAME targets the shared tunnel.
+- Commands run: `scripts/install-launchd-frontier-lab-intelligence.sh --install-deps`; `cloudflared tunnel --config ~/.cloudflared/config.yml ingress validate`; `/Users/dobby/GitHub/scripts/setup/network/install-launchd-cloudflare-tunnel.sh`; Cloudflare DNS + Access API calls; local/public `curl` smokes; `scripts/check-fast.sh`; `~/GitHub/scripts/ops/check-fast.sh`.
+- Results: local app healthy at `http://127.0.0.1:8797/`; `frontier-lab-intelligence.adithyan.io` redirects unauthenticated requests to Cloudflare Access; DNS CNAME targets the shared tunnel; app process has `cloudflare_env_count=0`; both fast checks passed.
 - Files/artifacts reviewed: `~/GitHub/scripts/docs/references/mac-mini-cloudflare-tunnel.md`, `~/GitHub/scripts/sync/local-production-services.json`, `~/.cloudflared/config.yml`, app launchd logs.
 - Known limitations: public browser access requires Cloudflare Access login; this is a private preview, not an externally approved submission.
 - Prompt requirements satisfied: current machine hosting path is live behind the existing tunnel pattern.

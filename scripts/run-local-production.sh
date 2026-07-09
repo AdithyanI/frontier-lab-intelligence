@@ -18,6 +18,13 @@ fi
 
 cd "${ROOT_DIR}"
 
+unset CLOUDFLARE_API_TOKEN
+unset CLOUDFLARE_TOKEN_MANAGER_API_TOKEN
+unset CLOUDFLARE_R2_ACCESS_KEY_ID
+unset CLOUDFLARE_R2_SECRET_ACCESS_KEY
+unset CLOUDFLARE_R2_ENDPOINT
+unset CLOUDFLARE_ACCOUNT_ID
+
 if [[ ! -f "${DIST_INDEX}" ]]; then
   echo "Built web UI missing at ${DIST_INDEX}; building..." >&2
   if [[ ! -d "${FRONTEND_DIR}/node_modules" ]]; then

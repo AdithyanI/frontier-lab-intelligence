@@ -248,7 +248,6 @@ chmod 0644 "${PLIST_PATH}"
 
 launchctl bootout "${DOMAIN}" "${PLIST_PATH}" >/dev/null 2>&1 || true
 launchctl bootstrap "${DOMAIN}" "${PLIST_PATH}"
-launchctl kickstart -k "${DOMAIN}/${LABEL}" >/dev/null 2>&1 || true
 
 echo "Loaded ${LABEL} from ${PLIST_PATH}"
 echo "Logs:"

@@ -68,3 +68,29 @@ def test_load_digg_normalizes_and_dedupes(tmp_path):
     # reload is idempotent
     counts2 = graph.load_digg(conn, raw_dir)
     assert counts2 == counts
+
+
+def test_pagerank_ranks_followed_account_highest(tmp_path):
+    raw_dir = tmp_path / "raw"
+    _write_fixture(raw_dir)
+    conn = graph.connect(tmp_path / "test.db")
+    graph.load_digg(conn, raw_dir)
+
+    result = graph.compute_pagerank(conn)
+    assert result["nodes"] == 2
+
+    rows = conn.execute(
+        """SELECT a.handle, f.value FROM account_source_facts f
+           JOIN accounts a ON a.id = f.account_id
+           WHERE f.source = 'graph' AND f.fact = 'pagerank_rank'
+           ORDER BY CAST(f.value AS INTEGER)"""
+    ).fetchall()
+    # karpathy is followed, ylecun only follows → karpathy must rank first
+    assert [r["handle"] for r in rows] == ["karpathy", "ylecun"]
+
+    # recompute is idempotent (old graph-source rows replaced, not duplicated)
+    graph.compute_pagerank(conn)
+    n = conn.execute(
+        "SELECT COUNT(*) AS n FROM account_source_facts WHERE source = 'graph'"
+    ).fetchone()["n"]
+    assert n == 4  # 2 accounts x (pagerank + pagerank_rank)
