@@ -1,0 +1,237 @@
+"""Labs as first-class registry entities.
+
+The lab list is deliberately hand-curated: the case prompt names the labs
+that matter (OpenAI, Anthropic, GDM, Meta, xAI, Mistral, DeepSeek, Qwen,
+stealth spin-offs). Curating ~10 rows is judgment, not automation — the
+automation story is *discovery*: org-like accounts in the follow graph that
+top-ranked researchers point at are candidates for new labs (SSI and
+Thinking Machines already appear in the Digg graph this way).
+
+Each lab row carries its official channels (org X handle, blog/feed, GitHub
+org, arXiv query). Where the org X account exists in `accounts`, we link it
+(`x_account_id`) so the lab is anchored into the same graph as the people.
+People affiliate to labs later via an optional affiliation edge — a person
+without a lab is still a valid registry entry.
+"""
+
+import sqlite3
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+from fli import store
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS labs (
+    id INTEGER PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,         -- stable key, e.g. 'openai'
+    name TEXT NOT NULL,
+    status TEXT NOT NULL,              -- 'frontier' | 'emerging'
+    x_handle TEXT,                     -- official org X handle (lowercased)
+    x_account_id INTEGER REFERENCES accounts (id),  -- link into the graph, if present
+    website TEXT,
+    blog_feed TEXT,                    -- RSS/Atom feed or sitemap fallback
+    github_org TEXT,
+    arxiv_query TEXT,                  -- affiliation search string for arXiv API
+    notes TEXT,                        -- why tracked / channel caveats
+    seeded_at TEXT NOT NULL
+);
+"""
+
+# Hand-curated seed: the labs the case prompt names, plus the two known
+# stealth spin-offs. Channels probed manually; missing values mean the lab
+# has no such official channel (or none worth fetching yet).
+SEED_LABS = [
+    {
+        "slug": "openai",
+        "name": "OpenAI",
+        "status": "frontier",
+        "x_handle": "openai",
+        "website": "https://openai.com",
+        "blog_feed": "https://openai.com/news/rss.xml",
+        "github_org": "openai",
+        "arxiv_query": 'all:"OpenAI"',
+        "notes": "Named in case prompt.",
+    },
+    {
+        "slug": "anthropic",
+        "name": "Anthropic",
+        "status": "frontier",
+        "x_handle": "anthropicai",
+        "website": "https://www.anthropic.com",
+        "blog_feed": "https://www.anthropic.com/sitemap.xml",
+        "github_org": "anthropics",
+        "arxiv_query": 'all:"Anthropic"',
+        "notes": "No news RSS (probed 2026-07-08); sitemap /news/ fallback.",
+    },
+    {
+        "slug": "deepmind",
+        "name": "Google DeepMind",
+        "status": "frontier",
+        "x_handle": "googledeepmind",
+        "website": "https://deepmind.google",
+        "blog_feed": "https://deepmind.google/blog/rss.xml",
+        "github_org": "google-deepmind",
+        "arxiv_query": 'all:"Google DeepMind"',
+        "notes": "Named in case prompt.",
+    },
+    {
+        "slug": "meta-ai",
+        "name": "Meta AI (FAIR / superintelligence)",
+        "status": "frontier",
+        "x_handle": "aiatmeta",
+        "website": "https://ai.meta.com",
+        "blog_feed": "https://ai.meta.com/blog/rss/",
+        "github_org": "facebookresearch",
+        "arxiv_query": 'all:"Meta AI" OR all:"FAIR"',
+        "notes": "Named in case prompt.",
+    },
+    {
+        "slug": "xai",
+        "name": "xAI",
+        "status": "frontier",
+        "x_handle": "xai",
+        "website": "https://x.ai",
+        "blog_feed": None,
+        "github_org": "xai-org",
+        "arxiv_query": 'all:"xAI"',
+        "notes": "No blog RSS; news page needs scraping. Publishes little on arXiv.",
+    },
+    {
+        "slug": "mistral",
+        "name": "Mistral AI",
+        "status": "frontier",
+        "x_handle": "mistralai",
+        "website": "https://mistral.ai",
+        "blog_feed": None,
+        "github_org": "mistralai",
+        "arxiv_query": 'all:"Mistral AI"',
+        "notes": "Named in case prompt. News page has no stable RSS (probe again).",
+    },
+    {
+        "slug": "deepseek",
+        "name": "DeepSeek",
+        "status": "frontier",
+        "x_handle": "deepseek_ai",
+        "website": "https://www.deepseek.com",
+        "blog_feed": None,
+        "github_org": "deepseek-ai",
+        "arxiv_query": 'all:"DeepSeek-AI" OR all:"DeepSeek"',
+        "notes": "Ships via GitHub + papers more than blog.",
+    },
+    {
+        "slug": "qwen",
+        "name": "Qwen (Alibaba)",
+        "status": "frontier",
+        "x_handle": "alibaba_qwen",
+        "website": "https://qwenlm.github.io",
+        "blog_feed": "https://qwenlm.github.io/index.xml",
+        "github_org": "QwenLM",
+        "arxiv_query": 'all:"Qwen Team"',
+        "notes": "Org X account not in Digg graph (link stays null until observed).",
+    },
+    {
+        "slug": "ssi",
+        "name": "Safe Superintelligence Inc.",
+        "status": "emerging",
+        "x_handle": "ssi",
+        "website": "https://ssi.inc",
+        "blog_feed": None,
+        "github_org": None,
+        "arxiv_query": None,
+        "notes": "Stealth (Sutskever). Near-zero public output; signal is hiring + graph attention.",
+    },
+    {
+        "slug": "thinking-machines",
+        "name": "Thinking Machines Lab",
+        "status": "emerging",
+        "x_handle": "thinkymachines",
+        "website": "https://thinkingmachines.ai",
+        "blog_feed": None,
+        "github_org": "thinking-machines-lab",
+        "arxiv_query": None,
+        "notes": "Murati spin-off. Discovered-in-graph example: org account already in Digg pull.",
+    },
+]
+
+
+def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
+    conn = store.connect(db_path)
+    conn.executescript(SCHEMA)
+    return conn
+
+
+def seed(conn: sqlite3.Connection, labs: list[dict] | None = None) -> dict[str, int]:
+    """Upsert the hand-curated lab seed; link org X accounts found in the graph."""
+    seeded_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    linked = 0
+    labs = labs if labs is not None else SEED_LABS
+    for lab in labs:
+        account_id = None
+        if lab.get("x_handle"):
+            row = conn.execute(
+                "SELECT id FROM accounts WHERE platform = 'x' AND handle = ?",
+                (lab["x_handle"],),
+            ).fetchone()
+            account_id = row["id"] if row else None
+            linked += account_id is not None
+        conn.execute(
+            """INSERT INTO labs
+               (slug, name, status, x_handle, x_account_id, website, blog_feed,
+                github_org, arxiv_query, notes, seeded_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT (slug) DO UPDATE SET
+                   name = excluded.name,
+                   status = excluded.status,
+                   x_handle = excluded.x_handle,
+                   x_account_id = excluded.x_account_id,
+                   website = excluded.website,
+                   blog_feed = excluded.blog_feed,
+                   github_org = excluded.github_org,
+                   arxiv_query = excluded.arxiv_query,
+                   notes = excluded.notes""",
+            (
+                lab["slug"], lab["name"], lab["status"], lab.get("x_handle"),
+                account_id, lab.get("website"), lab.get("blog_feed"),
+                lab.get("github_org"), lab.get("arxiv_query"), lab.get("notes"),
+                seeded_at,
+            ),
+        )
+    conn.commit()
+    n = conn.execute("SELECT COUNT(*) AS n FROM labs").fetchone()["n"]
+    return {"labs": n, "x_linked": linked}
+
+
+def summary(conn: sqlite3.Connection) -> list[str]:
+    rows = conn.execute(
+        """SELECT l.slug, l.status, l.x_handle, l.x_account_id,
+                  a.followers_count
+           FROM labs l LEFT JOIN accounts a ON a.id = l.x_account_id
+           ORDER BY l.status, a.followers_count DESC"""
+    ).fetchall()
+    lines = []
+    for r in rows:
+        link = f"linked, {r['followers_count']:,} followers" if r["x_account_id"] else "not in graph"
+        lines.append(f"{r['slug']:18s} {r['status']:9s} @{r['x_handle'] or '-':16s} {link}")
+    return lines
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(prog="fli labs")
+    parser.add_argument("action", choices=["seed", "summary"])
+    parser.add_argument("--db", default=None)
+    args = parser.parse_args(argv)
+
+    conn = connect(args.db) if args.db else connect()
+    if args.action == "seed":
+        counts = seed(conn)
+        print(f"labs: {counts['labs']}, org accounts linked into graph: {counts['x_linked']}")
+    for line in summary(conn):
+        print(line)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

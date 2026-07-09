@@ -215,6 +215,65 @@ def load_digg(
     }
 
 
+def compute_pagerank(
+    conn: sqlite3.Connection,
+    damping: float = 0.85,
+    max_iter: int = 100,
+    tol: float = 1e-10,
+) -> dict[str, int]:
+    """PageRank over the follow graph, stored as a second attention signal.
+
+    Edges mean "from is a top follower of to", so rank flows along the edge:
+    being followed by accounts that are themselves heavily followed is worth
+    more than raw follower count. Independent of Digg's own rank — where the
+    two signals disagree, that account deserves human review.
+
+    Pure-Python power iteration; 361K edges over ~2.3K nodes converges in
+    well under a second. Dangling nodes (no out-edges) redistribute uniformly.
+    """
+    edges = conn.execute(
+        "SELECT from_account_id, to_account_id FROM graph_edges"
+    ).fetchall()
+    nodes: set[int] = set()
+    out_links: dict[int, list[int]] = {}
+    for e in edges:
+        nodes.add(e["from_account_id"])
+        nodes.add(e["to_account_id"])
+        out_links.setdefault(e["from_account_id"], []).append(e["to_account_id"])
+
+    n = len(nodes)
+    if n == 0:
+        return {"nodes": 0, "iterations": 0}
+    rank = {node: 1.0 / n for node in nodes}
+    iterations = 0
+    for iterations in range(1, max_iter + 1):
+        dangling = sum(rank[node] for node in nodes if node not in out_links)
+        base = (1.0 - damping) / n + damping * dangling / n
+        new_rank = {node: base for node in nodes}
+        for node, targets in out_links.items():
+            share = damping * rank[node] / len(targets)
+            for target in targets:
+                new_rank[target] += share
+        delta = sum(abs(new_rank[node] - rank[node]) for node in nodes)
+        rank = new_rank
+        if delta < tol:
+            break
+
+    observed_at = _now()
+    conn.execute("DELETE FROM account_source_facts WHERE source = 'graph'")
+    ordered = sorted(rank.items(), key=lambda kv: kv[1], reverse=True)
+    for position, (account_id, value) in enumerate(ordered, start=1):
+        for fact, val in (("pagerank", f"{value:.10f}"), ("pagerank_rank", str(position))):
+            conn.execute(
+                """INSERT OR REPLACE INTO account_source_facts
+                   (account_id, source, fact, value, observed_at, evidence_url)
+                   VALUES (?, 'graph', ?, ?, ?, NULL)""",
+                (account_id, fact, val, observed_at),
+            )
+    conn.commit()
+    return {"nodes": n, "iterations": iterations}
+
+
 def summary(conn: sqlite3.Connection) -> list[str]:
     lines = []
     for table in ("accounts", "account_source_facts", "graph_edges"):
@@ -233,7 +292,7 @@ def main(argv: list[str] | None = None) -> int:
     import argparse
 
     parser = argparse.ArgumentParser(prog="fli graph")
-    parser.add_argument("action", choices=["load", "summary"])
+    parser.add_argument("action", choices=["load", "summary", "pagerank"])
     parser.add_argument("--db", default=None)
     parser.add_argument("--raw-dir", default=str(DEFAULT_RAW_DIR))
     args = parser.parse_args(argv)
@@ -243,6 +302,16 @@ def main(argv: list[str] | None = None) -> int:
         counts = load_digg(conn, Path(args.raw_dir))
         for k, v in counts.items():
             print(f"{k}: {v}")
+    if args.action == "pagerank":
+        result = compute_pagerank(conn)
+        print(f"pagerank: {result['nodes']} nodes, converged in {result['iterations']} iterations")
+        top = conn.execute(
+            """SELECT a.handle, f.value FROM account_source_facts f
+               JOIN accounts a ON a.id = f.account_id
+               WHERE f.source = 'graph' AND f.fact = 'pagerank_rank'
+               ORDER BY CAST(f.value AS INTEGER) LIMIT 10"""
+        ).fetchall()
+        print("top 10: " + ", ".join(f"{r['handle']}(#{r['value']})" for r in top))
     for line in summary(conn):
         print(line)
     return 0

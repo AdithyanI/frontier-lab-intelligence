@@ -48,9 +48,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Seconds to sleep between paginated follower API requests per worker.",
     )
     graph_p = sub.add_parser("graph", help="Modeled graph layer (accounts, edges).")
-    graph_p.add_argument("action", choices=["load", "summary"])
+    graph_p.add_argument("action", choices=["load", "summary", "pagerank"])
     graph_p.add_argument("--db", default=None, help="Path to SQLite DB.")
     graph_p.add_argument("--raw-dir", default=None, help="Raw Digg pull directory.")
+    labs_p = sub.add_parser("labs", help="Hand-curated lab registry.")
+    labs_p.add_argument("action", choices=["seed", "summary"])
+    labs_p.add_argument("--db", default=None, help="Path to SQLite DB.")
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -94,6 +97,16 @@ def main(argv: list[str] | None = None) -> int:
                 args.action,
                 *(["--db", args.db] if args.db else []),
                 *(["--raw-dir", args.raw_dir] if args.raw_dir else []),
+            ]
+        )
+
+    if args.command == "labs":
+        from fli import labs
+
+        return labs.main(
+            [
+                args.action,
+                *(["--db", args.db] if args.db else []),
             ]
         )
 
