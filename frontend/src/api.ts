@@ -23,7 +23,16 @@ export interface XChannel {
   graph_follows: number
 }
 
+export interface EntityChannel {
+  id: number
+  kind: string
+  key: string
+  label: string
+  url: string
+}
+
 export interface Lab {
+  id: number
   slug: string
   name: string
   x_handle: string | null
@@ -35,6 +44,7 @@ export interface Lab {
   followers_count: number | null
   linked: boolean
   graph_follows: number
+  channels: EntityChannel[]
 }
 
 export interface Candidate {

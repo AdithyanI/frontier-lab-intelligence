@@ -1,5 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { getJSON, type Registry as RegistryData } from '../api'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  getJSON,
+  type EntityChannel,
+  type Registry as RegistryData,
+} from '../api'
 
 type Kind = 'lab' | 'person'
 
@@ -7,14 +11,22 @@ interface EntityRow {
   key: string
   kind: Kind
   primary: string
-  secondary: string | null
+  handle: string | null
   role: string | null
   followers: number | null
-  href: string | null
+  graphFollows: number
+  bio: string | null
+  seedRank: number | null
+  pagerankRank: number | null
+  notes: string | null
+  channels: EntityChannel[]
 }
 
 const FIRST = 40
 const STEP = 40
+
+const fmt = (n: number | null | undefined) =>
+  n == null ? '—' : n.toLocaleString('en-US')
 
 export default function Registry() {
   const [data, setData] = useState<RegistryData | null>(null)
@@ -22,9 +34,10 @@ export default function Registry() {
   const [q, setQ] = useState('')
   const [kind, setKind] = useState<'all' | Kind>('all')
   const [shown, setShown] = useState(FIRST)
+  const [selected, setSelected] = useState<EntityRow | null>(null)
 
   useEffect(() => {
-    getJSON<RegistryData>('/api/registry?limit=150')
+    getJSON<RegistryData>('/api/registry?limit=5000')
       .then(setData)
       .catch((e) => setError(String(e)))
   }, [])
@@ -35,19 +48,29 @@ export default function Registry() {
       key: `lab-${l.slug}`,
       kind: 'lab',
       primary: l.name,
-      secondary: l.x_handle ? `@${l.x_handle}` : null,
+      handle: l.x_handle,
       role: null,
       followers: l.followers_count,
-      href: l.x_handle ? `https://x.com/${l.x_handle}` : null,
+      graphFollows: l.graph_follows,
+      bio: null,
+      seedRank: null,
+      pagerankRank: null,
+      notes: l.notes,
+      channels: l.channels ?? [],
     }))
     const people: EntityRow[] = data.candidates.map((c) => ({
       key: `person-${c.id}`,
       kind: 'person',
       primary: c.display_name ?? `@${c.handle}`,
-      secondary: c.display_name ? `@${c.handle}` : null,
+      handle: c.handle,
       role: c.role,
       followers: c.followers_count,
-      href: `https://x.com/${c.handle}`,
+      graphFollows: c.graph_follows,
+      bio: c.bio,
+      seedRank: c.seed_rank,
+      pagerankRank: c.pagerank_rank,
+      notes: null,
+      channels: [],
     }))
     return [...labs, ...people].sort(
       (a, b) => (b.followers ?? -1) - (a.followers ?? -1),
@@ -61,7 +84,7 @@ export default function Registry() {
       if (!needle) return true
       return (
         e.primary.toLowerCase().includes(needle) ||
-        (e.secondary ?? '').toLowerCase().includes(needle) ||
+        (e.handle ?? '').toLowerCase().includes(needle) ||
         (e.role ?? '').toLowerCase().includes(needle)
       )
     })
@@ -79,7 +102,7 @@ export default function Registry() {
       <h1 className="page-title">Registry</h1>
       <p className="page-sub">
         Every entity the system tracks — labs and people, resolved from raw
-        channels. Search, filter, and open any one to see its channels.
+        channels. Open any row to see its full profile.
       </p>
 
       {error && (
@@ -110,51 +133,41 @@ export default function Registry() {
         </div>
         {data && (
           <span className="table-count">
-            {visible.length.toLocaleString('en-US')} of{' '}
-            {filtered.length.toLocaleString('en-US')}
+            {fmt(visible.length)} of {fmt(filtered.length)}
           </span>
         )}
       </div>
 
       {data && (
-        <table>
+        <table className="ent-table">
           <thead>
             <tr>
               <th>Entity</th>
               <th>Type</th>
               <th>Role</th>
-              <th className="num">Followers</th>
             </tr>
           </thead>
           <tbody>
             {visible.map((e) => (
-              <tr key={e.key}>
-                <td className="handle">
-                  {e.href ? (
-                    <a href={e.href} target="_blank" rel="noreferrer">
-                      {e.primary}
-                    </a>
-                  ) : (
-                    e.primary
-                  )}
-                  {e.secondary && (
-                    <div
-                      className="muted"
-                      style={{ fontSize: 12.5, fontWeight: 400 }}
-                    >
-                      {e.secondary}
-                    </div>
-                  )}
-                </td>
+              <tr
+                key={e.key}
+                className="ent-row"
+                onClick={() => setSelected(e)}
+                tabIndex={0}
+                onKeyDown={(ev) => {
+                  if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault()
+                    setSelected(e)
+                  }
+                }}
+              >
+                <td className="ent-name">{e.primary}</td>
                 <td>
                   <span className={`ent-type ent-type--${e.kind}`}>
                     {e.kind === 'lab' ? 'Lab' : 'Person'}
                   </span>
                 </td>
                 <td>{e.role ?? <span className="muted">—</span>}</td>
-                <td className="num">
-                  {e.followers?.toLocaleString('en-US') ?? '—'}
-                </td>
               </tr>
             ))}
           </tbody>
@@ -166,9 +179,118 @@ export default function Registry() {
           className="load-more"
           onClick={() => setShown((n) => n + STEP)}
         >
-          Show {Math.min(STEP, filtered.length - shown)} more
+          Show {fmt(Math.min(STEP, filtered.length - shown))} more
         </button>
       )}
+
+      <EntityCard entity={selected} onClose={() => setSelected(null)} />
     </div>
+  )
+}
+
+function EntityCard({
+  entity,
+  onClose,
+}: {
+  entity: EntityRow | null
+  onClose: () => void
+}) {
+  const ref = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    const dlg = ref.current
+    if (!dlg) return
+    if (entity && !dlg.open) dlg.showModal()
+    if (!entity && dlg.open) dlg.close()
+  }, [entity])
+
+  if (!entity) return <dialog ref={ref} className="ent-card" onClose={onClose} />
+
+  const facts: { label: string; value: React.ReactNode }[] = []
+  facts.push({
+    label: 'Type',
+    value: entity.kind === 'lab' ? 'Lab' : 'Person',
+  })
+  if (entity.role) facts.push({ label: 'Role', value: entity.role })
+  facts.push({ label: 'Followers', value: fmt(entity.followers) })
+  facts.push({ label: 'Graph follows', value: fmt(entity.graphFollows) })
+  if (entity.kind === 'person') {
+    facts.push({ label: 'Seed rank', value: fmt(entity.seedRank) })
+    facts.push({ label: 'PageRank', value: fmt(entity.pagerankRank) })
+  }
+
+  const xUrl = entity.handle ? `https://x.com/${entity.handle}` : null
+
+  return (
+    <dialog
+      ref={ref}
+      className="ent-card"
+      onClose={onClose}
+      onClick={(e) => {
+        if (e.target === ref.current) onClose()
+      }}
+    >
+      <div className="ent-card-inner">
+        <header className="ent-card-head">
+          <div>
+            <span className={`ent-type ent-type--${entity.kind}`}>
+              {entity.kind === 'lab' ? 'Lab' : 'Person'}
+            </span>
+            <h2>{entity.primary}</h2>
+          </div>
+          <button
+            className="ent-card-close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </header>
+
+        {(entity.bio || entity.notes) && (
+          <p className="ent-card-bio">{entity.bio ?? entity.notes}</p>
+        )}
+
+        <dl className="ent-card-facts">
+          {facts.map((f) => (
+            <div key={f.label}>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {entity.channels.length > 0 && (
+          <div className="ent-card-channels">
+            <div className="ent-card-label">Channels</div>
+            <ul>
+              {entity.channels.map((c) => (
+                <li key={c.id}>
+                  <a href={c.url} target="_blank" rel="noreferrer">
+                    <span className="ent-ch-kind">{c.kind}</span>
+                    <span className="ent-ch-label">{c.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {xUrl && (
+          <footer className="ent-card-foot">
+            <a
+              className="ent-x-tag"
+              href={xUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span>𝕏</span>
+              @{entity.handle}
+              <span className="ent-x-go">↗</span>
+            </a>
+          </footer>
+        )}
+      </div>
+    </dialog>
   )
 }
