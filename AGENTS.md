@@ -12,7 +12,7 @@ AI Engineer case study; built as a real product intended to outlive it.
 - **System principles (Adi, 2026-07-09), full text in `PRODUCT.md` §System Principles:** (1) high quality first, bend the cost curve later; (2) every pipeline stage is automatically done and human-correctable — LLM decides with cited reasons, human overrides are stored as data, no manual per-item approval gates; (3) human judgment enters as versioned bootstrap inputs (seed lists, rubrics, overrides), not as clicks in the loop.
 - **Do not import Dobby machinery.** This repo may use Adi's agent-native habits (tracker, docs, checks, build log), but it is not a Dobby/person-memory workspace. Keep personal-agent architecture in `~/GitHub/adi`/`~/GitHub/agents`, not here.
 - **Teach Adi as you build (Adi, 2026-07-09).** Adi is new to data-science/graph/entity-resolution concepts (entities, identities, entity resolution, PageRank, confidence scores, scoring models). Whenever a design uses a concept like this: (1) explain it in plain words with a concrete example (e.g. Karpathy's accounts → identity links → one entity) *before or while* building it, and (2) make the concept visible in the web UI's Architecture page as a visual explanation, not just prose. Adi needs to be able to defend every design choice in the on-site interview — chat explanations that never land in the repo/UI are lost.
-- Work from `docs/projects/frontier-lab-intelligence/tasks.md` as the canonical tracker.
+- Work is split into focused projects under `docs/projects/<project>/tasks.md` (archive: `docs/projects/archive/`). Work from the active project's tracker; the archived `docs/projects/archive/frontier-lab-intelligence/` tracker holds pre-split history (phases A–F).
 - Preserve the original prompt in `docs/references/case-prompt.md`; do not rely on chat memory.
 - Do not send, upload, message, publish, push to a public remote, or submit anything externally without explicit Adi approval in the current session.
 - Put scratch files in `tmp/`; keep durable notes in `docs/references/`.
@@ -46,7 +46,7 @@ AI Engineer case study; built as a real product intended to outlive it.
 
 ## Source-of-truth order
 1. `docs/references/case-prompt.md` — original external requirements from BIT/Lars.
-2. `docs/projects/frontier-lab-intelligence/tasks.md` — current plan, status, blockers, and validation evidence.
+2. `docs/projects/<project>/tasks.md` (active projects) — current plan, status, blockers, and validation evidence; pre-split history in `docs/projects/archive/frontier-lab-intelligence/tasks.md`.
 3. `docs/architecture/overview.md` — current architecture, stack, data shape, and module status.
 4. `docs/references/context.md`, `docs/references/research-notes.md`, `docs/references/build-log.md` — durable context, facts, decisions, and build history.
 5. Chat/session context — useful only after captured into repo docs.
@@ -56,7 +56,7 @@ If repo docs conflict with chat memory, preserve the conflict in the tracker and
 ## Docs contract
 - `docs/architecture/overview.md` is the single living architecture map:
   stack, pipeline, funnel, data artifacts, model sketch, module status.
-- `docs/projects/frontier-lab-intelligence/tasks.md` is active execution state only.
+- `docs/projects/<project>/tasks.md` trackers are active execution state only; finished projects move to `docs/projects/archive/<project>/`.
 - `docs/references/case-prompt.md` stores the original prompt and submission instructions; `docs/references/source-material/` stores the original PDF and OCR text.
 - `docs/references/context.md` stores BIT/role context plus clearly marked private builder context for Phase 4 cleanup.
 - `docs/references/research-notes.md` stores assumptions, source provenance, and seed-source leads.

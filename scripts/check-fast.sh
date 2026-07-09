@@ -4,7 +4,8 @@ set -euo pipefail
 test -f AGENTS.md
 test -f PRODUCT.md
 test -f DESIGN.md
-test -f docs/projects/frontier-lab-intelligence/tasks.md
+test -d docs/projects
+test -f docs/projects/archive/frontier-lab-intelligence/tasks.md
 test -f docs/references/case-prompt.md
 test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf
 test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.txt
@@ -14,8 +15,8 @@ test -f docs/references/build-log.md
 test -f docs/references/build-log.jsonl
 test -f docs/architecture/overview.md
 
-grep -Eqi "deadline|due|submission|unknown" docs/projects/frontier-lab-intelligence/tasks.md || {
-  echo "Tracker should record deadline/submission instructions or unknowns."
+grep -Eqi "deadline|due|submission|unknown" docs/references/case-prompt.md || {
+  echo "Case prompt should record deadline/submission instructions or unknowns."
   exit 1
 }
 

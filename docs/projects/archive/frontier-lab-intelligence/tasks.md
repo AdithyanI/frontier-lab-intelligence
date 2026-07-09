@@ -1,4 +1,13 @@
-# Frontier Lab Intelligence — Tracker
+# Frontier Lab Intelligence — Tracker (ARCHIVED)
+
+> **Archived 2026-07-09.** This monolithic tracker grew too broad; Adi split
+> the work into focused per-phase projects under `docs/projects/`. It is kept
+> as the historical record of phases A–F (graph store, PageRank, labs seed,
+> frontend v1/v2, docs/harness). Durable cross-project facts (deadline,
+> rubric, principles, open questions) were carried into
+> `docs/projects/registry-ui/tasks.md` and successor trackers; design
+> decisions live in `PRODUCT.md`, `AGENTS.md`, and the build log.
+> First successor project: `docs/projects/registry-ui/`.
 
 Active execution state for the BIT Capital case-study product.
 
