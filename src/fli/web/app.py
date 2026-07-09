@@ -167,7 +167,7 @@ def accounts(
 
 
 @app.get("/api/registry")
-def registry(limit: int = Query(150, le=500)) -> JSONResponse:
+def registry(limit: int = Query(150, le=5000)) -> JSONResponse:
     """The registry: curated lab entities + evidence-ranked people candidates.
 
     Labs are hand-seeded (judgment; ~10 rows). People have no promotion
