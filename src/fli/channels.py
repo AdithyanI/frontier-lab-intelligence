@@ -2,7 +2,7 @@
 
 Simple mental model:
 
-- entities: who we track (labs, later people)
+- entities: observed identities (`lab`, `person`, or unresolved `unknown`)
 - channels: where we observe them (X, GitHub, blog, arXiv, website)
 - entity_channels: evidence that a channel belongs to an entity
 - channel_observations: measured facts about a channel at a time
@@ -19,10 +19,12 @@ from urllib.parse import quote_plus
 
 from fli import store
 
+ENTITY_KINDS = frozenset({"lab", "person", "unknown"})
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS entities (
     id INTEGER PRIMARY KEY,
-    kind TEXT NOT NULL,                -- 'lab' | 'person'
+    kind TEXT NOT NULL,                -- 'lab' | 'person' | 'unknown'
     slug TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     notes TEXT,
@@ -147,6 +149,8 @@ def upsert_entity(
     notes: str | None = None,
     observed_at: str | None = None,
 ) -> int:
+    if kind not in ENTITY_KINDS:
+        raise ValueError(f"unsupported entity kind: {kind}")
     ensure_schema(conn)
     observed_at = observed_at or _now()
     row = conn.execute("SELECT * FROM entities WHERE slug = ?", (slug,)).fetchone()
@@ -375,7 +379,9 @@ def seed_lab_entities(conn: sqlite3.Connection) -> dict[str, int]:
             channel_id = upsert_channel(
                 conn, kind=kind, key=key, label=label, observed_at=observed_at
             )
-            link_entity_channel(
+            from fli import registry
+
+            registry.claim_channel(
                 conn,
                 entity_id=entity_id,
                 channel_id=channel_id,
@@ -402,7 +408,10 @@ def sync_all(conn: sqlite3.Connection) -> dict[str, int]:
     ensure_schema(conn)
     x_counts = sync_x_channels_from_accounts(conn)
     lab_counts = seed_lab_entities(conn)
-    return {**x_counts, **lab_counts}
+    from fli import registry
+
+    registry_counts = registry.materialize_unlinked_channels(conn)
+    return {**x_counts, **lab_counts, **registry_counts}
 
 
 def summary(conn: sqlite3.Connection) -> list[str]:
@@ -440,7 +449,8 @@ def main(argv: list[str] | None = None) -> int:
         counts = sync_all(conn)
         print(
             "x_channels: {x_channels}, entities: {entities}, "
-            "linked_channels: {linked_channels}, observations: {observations}".format(**counts)
+            "unknown_entities: {unknown_entities}, unlinked_channels: {unlinked_channels}, "
+            "observations: {observations}".format(**counts)
         )
     for line in summary(conn):
         print(line)

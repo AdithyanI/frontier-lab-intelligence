@@ -335,7 +335,7 @@ def import_members(
                 )
                 facts_written += int(not before_exists)
         if sync_channels:
-            channels.sync_x_channels_from_accounts(conn)
+            channels.sync_all(conn)
 
     return {
         "provider": PROVIDER,
@@ -434,7 +434,7 @@ def run_import_x_list(
             )
     finally:
         if wrote_any and not dry_run:
-            channels.sync_x_channels_from_accounts(conn)
+            channels.sync_all(conn)
     return totals
 
 

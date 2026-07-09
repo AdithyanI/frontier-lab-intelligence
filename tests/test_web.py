@@ -13,8 +13,8 @@ def test_status_reports_pipeline_stages():
     assert ids == ["sources", "registry", "ingestion", "extraction", "scoring", "delivery"]
     registry = stages[1]
     assert registry["state"] == "in-progress"
-    assert any(s["label"] == "x channels" for s in registry["stats"])
-    assert any(s["label"] == "confirmed entities" for s in registry["stats"])
+    assert any(s["label"] == "entity universe" for s in registry["stats"])
+    assert any(s["label"] == "unknown" for s in registry["stats"])
 
 
 def test_accounts_endpoint_returns_ranked_first():
@@ -33,28 +33,19 @@ def test_accounts_search():
     assert "karpathy" in handles
 
 
-def test_registry_returns_labs_and_candidates():
+def test_registry_returns_complete_typed_entity_universe():
     r = client.get("/api/registry?limit=50")
     assert r.status_code == 200
     data = r.json()
-    assert len(data["labs"]) == 10
-    openai = next(l for l in data["labs"] if l["slug"] == "openai")
-    assert openai["linked"] is True
-    assert openai["x_handle"] == "openai"
+    assert data["total"] == sum(data["counts"].values())
+    assert data["counts"]["lab"] == 10
+    assert data["counts"]["person"] == 0
+    assert data["counts"]["unknown"] > 0
+    openai = next(e for e in data["entities"] if e["slug"] == "openai")
+    assert openai["kind"] == "lab"
     assert any(c["kind"] == "x" for c in openai["channels"])
     assert any(c["kind"] == "github" for c in openai["channels"])
-
-    handles = [c["handle"] for c in data["candidates"]]
-    assert "karpathy" in handles
-    # lab org accounts must not double-count as person candidates
-    assert "openai" not in handles
-    assert "googledeepmind" not in handles
-
-    karpathy = next(c for c in data["candidates"] if c["handle"] == "karpathy")
-    assert karpathy["seed_rank"] == 1
-    assert karpathy["pagerank_rank"] is not None
-
-    assert data["candidates_pool_total"] >= len(data["candidates"])
+    assert set(openai) == {"id", "slug", "kind", "name", "bio", "channels"}
 
 
 def test_spa_served_when_built():

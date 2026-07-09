@@ -393,6 +393,14 @@ td.num {
   transition: color 120ms var(--ease-out), background 120ms var(--ease-out);
 }
 
+.seg-count {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+}
+
 .seg button:hover { color: var(--ink-soft); }
 
 .seg button.is-active {
@@ -416,13 +424,28 @@ td.num {
 }
 
 .ent-type--person {
+  color: var(--blue-ink);
+  background: #edf6fa;
+}
+
+.ent-type--unknown {
   color: var(--muted);
   background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 /* clickable entity rows */
 .ent-table tbody tr.ent-row { cursor: pointer; }
-.ent-name { font-weight: 500; color: var(--ink); }
+.ent-table th:last-child,
+.ent-table td:last-child { width: 140px; }
+.ent-name { display: block; font-weight: 500; color: var(--ink); }
+.ent-handle {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
 .ent-row:hover .ent-name { color: var(--blue-ink); }
 .ent-row:focus-visible {
   outline: 2px solid var(--blue-mid);
@@ -491,12 +514,6 @@ td.num {
   text-wrap: balance;
 }
 
-.ent-card-role {
-  margin: 6px 0 0;
-  font-size: 13.5px;
-  color: var(--muted);
-}
-
 .ent-card-bio {
   margin: 14px 0 0;
   color: var(--ink-soft);
@@ -504,37 +521,7 @@ td.num {
   line-height: 1.55;
   max-width: 58ch;
 }
-
-.ent-stats {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px 28px;
-}
-
-.ent-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.ent-stat-n {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-
-.ent-stat-l {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-}
+.ent-card-bio.muted { color: var(--muted); }
 
 .ent-card-label {
   font-family: var(--font-mono);
@@ -595,6 +582,19 @@ td.num {
   margin-top: 22px;
   padding-top: 18px;
   border-top: 1px solid var(--border);
+}
+
+.registry-loading {
+  width: 100%;
+  height: 160px;
+  margin-top: 20px;
+}
+
+.registry-empty {
+  padding: 44px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .ent-x-tag {

@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { siArxiv, siGithub, siRss, siX } from 'simple-icons'
 import {
   getJSON,
+  type Entity,
   type EntityChannel,
+  type EntityKind,
   type Registry as RegistryData,
 } from '../api'
 
-type Kind = 'lab' | 'person'
+type KindFilter = 'all' | EntityKind
 
 const BRAND_ICON: Record<string, string> = {
   github: siGithub.path,
@@ -14,6 +16,15 @@ const BRAND_ICON: Record<string, string> = {
   arxiv: siArxiv.path,
   blog: siRss.path,
 }
+
+const FIRST = 40
+const STEP = 40
+
+const fmt = (n: number | null | undefined) =>
+  n == null ? '—' : n.toLocaleString('en-US')
+
+const typeLabel = (kind: EntityKind) =>
+  kind === 'lab' ? 'Lab' : kind === 'person' ? 'Person' : 'Unknown'
 
 function ChannelGlyph({ kind }: { kind: string }) {
   if (kind === 'website') {
@@ -43,121 +54,75 @@ function ChannelGlyph({ kind }: { kind: string }) {
   )
 }
 
-function channelLabel(c: EntityChannel): string {
-  switch (c.kind) {
+function channelLabel(channel: EntityChannel): string {
+  switch (channel.kind) {
     case 'website':
       try {
-        return new URL(c.url).hostname.replace(/^www\./, '')
+        return channel.url
+          ? new URL(channel.url).hostname.replace(/^www\./, '')
+          : 'Website'
       } catch {
         return 'Website'
       }
     case 'github':
-      return c.key || c.label
+      return channel.key || channel.label || 'GitHub'
     case 'arxiv':
       return 'arXiv'
     case 'blog':
       return 'Blog'
     default:
-      return c.label
+      return channel.label || channel.key
   }
 }
-
-interface EntityRow {
-  key: string
-  kind: Kind
-  primary: string
-  handle: string | null
-  role: string | null
-  followers: number | null
-  graphFollows: number
-  bio: string | null
-  seedRank: number | null
-  pagerankRank: number | null
-  notes: string | null
-  channels: EntityChannel[]
-}
-
-const FIRST = 40
-const STEP = 40
-
-const fmt = (n: number | null | undefined) =>
-  n == null ? '—' : n.toLocaleString('en-US')
 
 export default function Registry() {
   const [data, setData] = useState<RegistryData | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [q, setQ] = useState('')
-  const [kind, setKind] = useState<'all' | Kind>('all')
+  const [query, setQuery] = useState('')
+  const [kind, setKind] = useState<KindFilter>('all')
   const [shown, setShown] = useState(FIRST)
-  const [selected, setSelected] = useState<EntityRow | null>(null)
+  const [selected, setSelected] = useState<Entity | null>(null)
 
   useEffect(() => {
     getJSON<RegistryData>('/api/registry?limit=5000')
       .then(setData)
-      .catch((e) => setError(String(e)))
+      .catch((cause) => setError(String(cause)))
   }, [])
 
-  const entities = useMemo<EntityRow[]>(() => {
-    if (!data) return []
-    const labs: EntityRow[] = data.labs.map((l) => ({
-      key: `lab-${l.slug}`,
-      kind: 'lab',
-      primary: l.name,
-      handle: l.x_handle,
-      role: null,
-      followers: l.followers_count,
-      graphFollows: l.graph_follows,
-      bio: null,
-      seedRank: null,
-      pagerankRank: null,
-      notes: l.notes,
-      channels: l.channels ?? [],
-    }))
-    const people: EntityRow[] = data.candidates.map((c) => ({
-      key: `person-${c.id}`,
-      kind: 'person',
-      primary: c.display_name ?? `@${c.handle}`,
-      handle: c.handle,
-      role: c.role,
-      followers: c.followers_count,
-      graphFollows: c.graph_follows,
-      bio: c.bio,
-      seedRank: c.seed_rank,
-      pagerankRank: c.pagerank_rank,
-      notes: null,
-      channels: [],
-    }))
-    return [...labs, ...people].sort(
-      (a, b) => (b.followers ?? -1) - (a.followers ?? -1),
-    )
-  }, [data])
-
   const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase()
-    return entities.filter((e) => {
-      if (kind !== 'all' && e.kind !== kind) return false
+    if (!data) return []
+    const needle = query.trim().toLowerCase()
+    return data.entities.filter((entity) => {
+      if (kind !== 'all' && entity.kind !== kind) return false
       if (!needle) return true
       return (
-        e.primary.toLowerCase().includes(needle) ||
-        (e.handle ?? '').toLowerCase().includes(needle) ||
-        (e.role ?? '').toLowerCase().includes(needle)
+        entity.name.toLowerCase().includes(needle) ||
+        (entity.bio ?? '').toLowerCase().includes(needle) ||
+        entity.channels.some((channel) =>
+          channel.key.toLowerCase().includes(needle),
+        )
       )
     })
-  }, [entities, q, kind])
+  }, [data, kind, query])
 
-  useEffect(() => {
-    setShown(FIRST)
-  }, [q, kind])
+  useEffect(() => setShown(FIRST), [kind, query])
 
   const visible = filtered.slice(0, shown)
+  const filters: { key: KindFilter; label: string; count: number }[] = [
+    { key: 'all', label: 'All', count: data?.total ?? 0 },
+    { key: 'lab', label: 'Labs', count: data?.counts.lab ?? 0 },
+    { key: 'person', label: 'People', count: data?.counts.person ?? 0 },
+    { key: 'unknown', label: 'Unknown', count: data?.counts.unknown ?? 0 },
+  ]
 
   return (
     <div className="page">
-      <div className="page-kicker">ENTITY PLANE · WHO WE TRACK</div>
+      <div className="page-kicker">ENTITY UNIVERSE · WHO WE HAVE OBSERVED</div>
       <h1 className="page-title">Registry</h1>
       <p className="page-sub">
-        Every entity the system tracks — labs and people, resolved from raw
-        channels. Open any row to see its full profile.
+        {data
+          ? `${fmt(data.total)} identities. ${fmt(data.counts.lab)} known labs; ${fmt(data.counts.unknown)} remain unknown until classification.`
+          : 'Every observed channel resolves to one entity. Unresolved identities remain unknown.'}
       </p>
 
       {error && (
@@ -168,21 +133,22 @@ export default function Registry() {
         <input
           className="search"
           type="search"
-          placeholder="Search name, handle, or role…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search name, handle, or bio…"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
           aria-label="Search entities"
         />
         <div className="seg" role="tablist" aria-label="Filter by type">
-          {(['all', 'lab', 'person'] as const).map((k) => (
+          {filters.map((filter) => (
             <button
-              key={k}
+              key={filter.key}
               role="tab"
-              aria-selected={kind === k}
-              className={kind === k ? 'is-active' : undefined}
-              onClick={() => setKind(k)}
+              aria-selected={kind === filter.key}
+              className={kind === filter.key ? 'is-active' : undefined}
+              onClick={() => setKind(filter.key)}
             >
-              {k === 'all' ? 'All' : k === 'lab' ? 'Labs' : 'People'}
+              {filter.label}
+              <span className="seg-count">{fmt(filter.count)}</span>
             </button>
           ))}
         </div>
@@ -193,46 +159,62 @@ export default function Registry() {
         )}
       </div>
 
-      {data && (
+      {!data && !error && <div className="registry-loading skeleton" />}
+
+      {data && visible.length > 0 && (
         <table className="ent-table">
           <thead>
             <tr>
               <th>Entity</th>
               <th>Type</th>
-              <th>Role</th>
             </tr>
           </thead>
           <tbody>
-            {visible.map((e) => (
-              <tr
-                key={e.key}
-                className="ent-row"
-                onClick={() => setSelected(e)}
-                tabIndex={0}
-                onKeyDown={(ev) => {
-                  if (ev.key === 'Enter' || ev.key === ' ') {
-                    ev.preventDefault()
-                    setSelected(e)
-                  }
-                }}
-              >
-                <td className="ent-name">{e.primary}</td>
-                <td>
-                  <span className={`ent-type ent-type--${e.kind}`}>
-                    {e.kind === 'lab' ? 'Lab' : 'Person'}
-                  </span>
-                </td>
-                <td>{e.role ?? <span className="muted">—</span>}</td>
-              </tr>
-            ))}
+            {visible.map((entity) => {
+              const xChannel = entity.channels.find((channel) => channel.kind === 'x')
+              return (
+                <tr
+                  key={entity.id}
+                  className="ent-row"
+                  onClick={() => setSelected(entity)}
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      setSelected(entity)
+                    }
+                  }}
+                >
+                  <td>
+                    <span className="ent-name">{entity.name}</span>
+                    {xChannel && (
+                      <span className="ent-handle">@{xChannel.key}</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className={`ent-type ent-type--${entity.kind}`}>
+                      {typeLabel(entity.kind)}
+                    </span>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
+      )}
+
+      {data && visible.length === 0 && (
+        <div className="registry-empty">
+          {kind === 'person' && !query
+            ? 'No people have been classified yet.'
+            : 'No entities match this view.'}
+        </div>
       )}
 
       {filtered.length > shown && (
         <button
           className="load-more"
-          onClick={() => setShown((n) => n + STEP)}
+          onClick={() => setShown((current) => current + STEP)}
         >
           Show {fmt(Math.min(STEP, filtered.length - shown))} more
         </button>
@@ -247,92 +229,71 @@ function EntityCard({
   entity,
   onClose,
 }: {
-  entity: EntityRow | null
+  entity: Entity | null
   onClose: () => void
 }) {
   const ref = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
-    const dlg = ref.current
-    if (!dlg) return
-    if (entity && !dlg.open) dlg.showModal()
-    if (!entity && dlg.open) dlg.close()
+    const dialog = ref.current
+    if (!dialog) return
+    if (entity && !dialog.open) dialog.showModal()
+    if (!entity && dialog.open) dialog.close()
   }, [entity])
 
   if (!entity) return <dialog ref={ref} className="ent-card" onClose={onClose} />
 
-  const stats: { label: string; value: ReactNode }[] = [
-    { label: 'Followers', value: fmt(entity.followers) },
-    { label: 'Graph follows', value: fmt(entity.graphFollows) },
-  ]
-  if (entity.kind === 'person') {
-    stats.push({ label: 'Seed rank', value: fmt(entity.seedRank) })
-    stats.push({ label: 'PageRank', value: fmt(entity.pagerankRank) })
-  }
-
-  const xUrl = entity.handle ? `https://x.com/${entity.handle}` : null
-  const blurb = entity.bio
+  const xChannel = entity.channels.find((channel) => channel.kind === 'x')
+  const otherChannels = entity.channels.filter((channel) => channel.kind !== 'x')
 
   return (
     <dialog
       ref={ref}
       className="ent-card"
       onClose={onClose}
-      onClick={(e) => {
-        if (e.target === ref.current) onClose()
+      onClick={(event) => {
+        if (event.target === ref.current) onClose()
       }}
     >
       <div className="ent-card-inner">
-        <button
-          className="ent-card-close"
-          onClick={onClose}
-          aria-label="Close"
-        >
+        <button className="ent-card-close" onClick={onClose} aria-label="Close">
           ✕
         </button>
 
         <header className="ent-card-head">
           <span className={`ent-type ent-type--${entity.kind}`}>
-            {entity.kind === 'lab' ? 'Lab' : 'Person'}
+            {typeLabel(entity.kind)}
           </span>
-          <h2>{entity.primary}</h2>
-          {entity.role && <p className="ent-card-role">{entity.role}</p>}
+          <h2>{entity.name}</h2>
         </header>
 
-        {blurb && <p className="ent-card-bio">{blurb}</p>}
+        {entity.bio ? (
+          <p className="ent-card-bio">{entity.bio}</p>
+        ) : (
+          <p className="ent-card-bio muted">No bio observed yet.</p>
+        )}
 
-        <div className="ent-stats">
-          {stats.map((s) => (
-            <div className="ent-stat" key={s.label}>
-              <span className="ent-stat-n">{s.value}</span>
-              <span className="ent-stat-l">{s.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {entity.channels.filter((c) => c.kind !== 'x').length > 0 && (
+        {otherChannels.length > 0 && (
           <div className="ent-card-channels">
             <div className="ent-card-label">Channels</div>
             <ul>
-              {entity.channels
-                .filter((c) => c.kind !== 'x')
-                .map((c) => (
-                  <li key={c.id}>
-                    <a href={c.url} target="_blank" rel="noreferrer">
-                      <ChannelGlyph kind={c.kind} />
-                      <span className="ent-ch-label">{channelLabel(c)}</span>
-                    </a>
-                  </li>
-                ))}
+              {otherChannels.map((channel) => (
+                <li key={channel.id}>
+                  <a href={channel.url ?? undefined} target="_blank" rel="noreferrer">
+                    <ChannelGlyph kind={channel.kind} />
+                    <span className="ent-ch-label">{channelLabel(channel)}</span>
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         )}
 
-        {xUrl && (
+        {xChannel && (
           <footer className="ent-card-foot">
             <a
               className="ent-x-tag"
-              href={xUrl}
+              href={xChannel.url ?? `https://x.com/${xChannel.key}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -344,7 +305,7 @@ function EntityCard({
               >
                 <path d={siX.path} />
               </svg>
-              @{entity.handle}
+              @{xChannel.key}
               <span className="ent-x-go">↗</span>
             </a>
           </footer>

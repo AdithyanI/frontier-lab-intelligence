@@ -91,6 +91,13 @@ def test_import_x_list_writes_accounts_facts_and_channels(tmp_path):
     assert fact["value"] == "1585430245762441216"
     channel = conn.execute("SELECT * FROM channels WHERE key = 'openai'").fetchone()
     assert channel["kind"] == "x"
+    entity = conn.execute(
+        """SELECT e.* FROM entities e
+           JOIN entity_channels ec ON ec.entity_id = e.id
+           WHERE ec.channel_id = ?""",
+        (channel["id"],),
+    ).fetchone()
+    assert entity["kind"] == "unknown"
 
 
 def test_sources_cli_missing_key_returns_json_error(tmp_path, capsys):

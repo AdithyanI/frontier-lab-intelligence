@@ -21,16 +21,19 @@ Build history, tools, budget, and learning notes now live in
 
 ## Current Batch
 
-**Resume here.** The source-import batch is complete. Do not import another
-list or design a larger classification system yet. First consolidate the
-current evidence into a reviewable candidate view and inspect it with Adi.
+**Resume here.** Adi chose the identity spine on 2026-07-09: every observed
+channel must resolve to one entity. Known lab channels resolve to the 10 seeded
+labs; every other current channel starts as `unknown`. Kind classification and
+track/reject curation are separate later stages.
 
 | Status | Work item | Evidence / notes |
 | --- | --- | --- |
 | done | Freeze the initial evidence layer. | Digg graph + PageRank, AI High Signal list, and smol.ai `prefPeople` are in `data/fli.db` with source facts and pinned provenance. |
-| todo | Build the smallest consolidation view over existing accounts. | Group candidates by source agreement and expose handle, bio, follower count, Digg rank, PageRank, AI High Signal membership, and smol.ai membership. Start with read-only output; do not add a large registry schema first. It must include the 294 curated-only accounts currently omitted from `/api/registry`. |
-| todo | Review the consolidation with Adi and agree on the first decision rule. | Begin with the 17 accounts present in Digg + AI High Signal + smol.ai, then inspect the 4 in both curated lists and the 10 smol-only accounts. Likely output is simply `track` or `reject`, but this is not decided yet. |
-| later | Add person/org classification, optional person-to-lab affiliation, and durable registry decisions after the review. | People may belong to labs, but affiliation is optional and should not block independent researchers. |
+| done | Materialize the complete entity universe. | 2,608 entities (10 lab, 0 person, 2,598 unknown) own all 2,640 channels. Sync is hash-idempotent and future graph/list imports run the same materialization path. |
+| done | Show the complete universe in the Registry UI. | `/api/registry` and the SPA expose only entity name, truthful kind, bio, and channels. Digg role/ranking mechanics remain raw evidence and are absent from this surface. |
+| todo | Inspect the unknown universe with Adi and freeze the calibration sample. | Use a small stratified set spanning source partitions, missing bios, obvious people/orgs, and ambiguous handles. Record labels without using the future evaluation holdout. |
+| later | Build and evaluate the kind-classification agent. | Agent input is only identity-bearing fields (name, bio, channels). Output is `lab` / `person` / `unknown` plus confidence, rationale, and policy version. Calibration/evaluation comes before full-dataset application. |
+| later | Build the separate track/reject curation stage. | Attention/source evidence belongs here, not in kind classification. Human corrections become durable overrides. |
 
 ## Fresh-Agent Context
 
@@ -95,6 +98,16 @@ net 294 accounts beyond the original 2,314-row Digg graph load.
 - Keep the first version simple. Merge evidence before classification; do not
   create many status labels, roles, or confidence tiers just because the schema
   can support them.
+- **Entity is identity, not endorsement.** Every observed channel resolves to
+  one entity so imports are immediately usable. An unresolved identity has
+  kind `unknown`; it is not silently treated as a person.
+- The complete current universe is 2,608 entities: 10 known labs already own
+  10 X channels, while the other 2,598 X channels become provisional unknowns.
+- Kind classification answers only `lab` / `person` / `unknown`. Tracking
+  answers `track` / `reject` later. Keep these as separate, evaluable stages.
+- Digg rank, PageRank, follower count, list membership, and Digg role remain
+  provenance/attention observations. They are not kind labels and should not
+  enter the first kind-classifier input contract.
 - The implemented `entities` table intentionally has no
   `frontier`/`emerging`/`candidate` status. Do not reintroduce those labels
   without a concrete product need. The older `labs.status` field and target
@@ -155,42 +168,37 @@ net 294 accounts beyond the original 2,314-row Digg graph load.
   user-facing System page and should not be removed merely because `/system`
   was removed.
 - `/api/accounts` is a compatibility workbench over X channels.
-- `/api/registry` returns 10 seeded lab entities plus 2,305 people candidates
-  selected only when they have Digg rank or PageRank. Those rows are honestly
-  candidates, not promoted/tracked person entities.
-- The UI currently calls that combined surface “Registry” and its copy says
-  “Every entity the system tracks,” even though people are still candidates.
-  Treat this as known provisional copy/model debt; consolidation should make
-  the distinction truthful rather than silently promoting everyone.
-- The major current visibility gap is that `/api/registry` does not expose
-  curated-list membership and omits the 294 accounts added by the curated
-  imports because they have neither Digg rank nor PageRank.
+- `/api/registry` returns the complete 2,608-entity universe: 10 labs, zero
+  people, and 2,598 unknowns. The frontend exposes the same counts and filters.
+- The main Registry should stay lean. Raw source agreement, ranks, and follower
+  observations remain available for later curation/evaluation rather than
+  becoming permanent table columns.
 - Of 2,608 accounts, 1,333 currently have a non-empty bio and 2,600 have a
   follower count. The eight new smol-only account rows have handles and source
   provenance but no fetched profile metadata yet.
 
 ### Next-Step Acceptance Check
 
-Before any automatic curation or schema migration, produce a read-only
-consolidation that:
+The first entity-spine batch is accepted when:
 
-1. Covers all 2,608 X accounts, including curated-only and graph-only rows.
-2. Shows explicit booleans/values for Digg, PageRank, AI High Signal, and
-   smol.ai rather than collapsing them into one opaque score.
-3. Makes the seven source groups above filterable or at least countable.
-4. Preserves missing data honestly; do not infer missing bios, roles, or lab
-   affiliations.
-5. Reproduces these invariants: Digg 1,000; AI High Signal 609; smol.ai 31;
-   curated-only new rows 294; all-three 17; total accounts/X channels 2,608.
-6. Is inspected with Adi before adding `track`/`reject`, an LLM classifier,
-   person entities, affiliation tables, or another source.
+1. All 2,640 channels link to exactly one entity.
+2. The entity universe contains exactly 2,608 rows: 10 labs, 0 people, and
+   2,598 unknowns before classifier work begins.
+3. Re-running synchronization creates no rows or material DB diff.
+4. `/api/registry` and the SPA expose all 2,608 entities with only truthful,
+   identity-bearing fields; Digg role is absent from the canonical UI.
+5. Missing bios remain missing and no lab/person kind is inferred from rank,
+   followers, or list membership.
+6. Existing evidence invariants remain unchanged: Digg 1,000; AI High Signal
+   609; smol.ai 31; graph edges 361,225.
 
 ## Open Questions / Blockers
 
-- **First decision rule:** deliberately undecided until the consolidation view
-  is inspected with Adi. Do not assume source count alone equals importance.
-- **DB schema:** the final people/affiliation/decision schema remains unlocked
-  until candidate evidence is reviewed.
+- **Kind classifier:** not built in this batch. Its calibration sample, model,
+  prompt, and evaluation metrics remain to be chosen after the unknown universe
+  is visible.
+- **Track/reject rule:** deliberately separate and undecided. Do not assume
+  source count alone equals importance.
 - **Legacy migration:** `accounts` and `account_source_facts` still back graph
   code while `channels` and `channel_observations` are the product model. Do
   not delete the legacy layer until graph consumers have migrated.
@@ -219,15 +227,15 @@ consolidation that:
 
 Update before each handoff when meaningful work lands.
 
-- Latest commands: AI High Signal X-list import via TwitterAPI.io; pinned
-  smol.ai `prefPeople` import from public GitHub; SQLite integrity/parity
-  queries; `scripts/check-fast.sh`.
-- Latest results: 2,608 X accounts mirror exactly to 2,608 X channels;
-  `PRAGMA integrity_check` is `ok`; 31 smol.ai facts are stored; all 19 tests
-  pass. The local app remains at `http://127.0.0.1:8797/`.
-- Known limitations: no candidate consolidation or track/reject decision exists
-  yet. Public browser access requires Cloudflare Access login; no external
-  submission was performed.
+- Latest commands: `fli channels sync` twice with SHA comparison;
+  `scripts/check-fast.sh`; frontend lint/build; impeccable detector; live API
+  and in-app browser checks on the always-on 8797 server.
+- Latest results: 2,608 entities (10 lab, 0 person, 2,598 unknown), 2,640 owned
+  channels, zero unowned channels, zero duplicate owners; SQLite integrity is
+  `ok`; the second sync keeps the same DB SHA; all 22 tests pass.
+- Known limitations: no kind classifier, calibration/evaluation set, or
+  track/reject decision exists yet. Public browser access requires Cloudflare
+  Access login; no external submission was performed.
 - Submission package path:
 
 ## Progress Log
@@ -245,3 +253,16 @@ Update before each handoff when meaningful work lands.
 - The next agent should build a small read-only consolidation view and review
   the evidence groups with Adi before adding another source, LLM classifier,
   affiliation model, or broad registry schema.
+
+2026-07-09 — Canonical entity spine and truthful Registry landed:
+
+- Every observed channel now has exactly one owner. Ten seeded lab entities
+  claim their 42 official channels; the remaining 2,598 X channels each have
+  one provisional `unknown` entity.
+- The Registry API/UI is one complete 2,608-entity universe with only name,
+  `lab` / `person` / `unknown`, bio, and channels. Old Digg role/rank fields
+  remain source evidence but are not canonical identity fields.
+- Synchronization is hash-idempotent. Tests, lint, build, detector, live API,
+  and browser interaction checks pass.
+- Next: choose a stratified calibration sample with Adi, then write and
+  evaluate the versioned kind-classification agent before full-dataset use.

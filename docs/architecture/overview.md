@@ -3,11 +3,11 @@
 Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Status: data-first bootstrap. The implemented code has raw fetch/store, a
+Status: entity-spine bootstrap. The implemented code has raw fetch/store, a
 frozen X seed graph snapshot, a modeled SQLite graph layer, and a React SPA
-(registry, channels workbench, architecture view) over a JSON API. The
-registry foundation is entity/channel based; extraction and scoring schemas are
-intentionally not locked yet.
+over a JSON API. Every observed channel now resolves to one entity; known labs
+are classified and every other identity remains `unknown` until a later agent
+classifies it. Extraction and scoring schemas are intentionally not locked yet.
 
 ## Stack
 
@@ -138,9 +138,9 @@ Known data facts:
   first-slice edges.
 - The full frozen bootstrap pull produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
-- `fli channels sync` currently materializes 10 lab entities, 2,640 channels
-  (2,608 X plus lab websites/GitHub/arXiv/blog feeds), 42 entity-channel
-  links, and 17,656 channel observations.
+- `fli channels sync` currently materializes 2,608 entities (10 labs and 2,598
+  unknowns), 2,640 channels (2,608 X plus lab websites/GitHub/arXiv/blog
+  feeds), 2,640 entity-channel links, and 17,656 channel observations.
 - `fli sources import-x-list --list-id 1585430245762441216 --source
   ai_high_signal` imported 609 AI High Signal X-list members via
   TwitterAPI.io; 230 were already in the Digg bootstrap and 379 were new
@@ -200,7 +200,7 @@ erDiagram
     }
     ENTITIES {
         int id PK
-        string kind "lab | person"
+        string kind "lab | person | unknown"
         string slug
         string name
     }
@@ -230,13 +230,13 @@ erDiagram
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,225 total)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (42)"
-    CHANNELS ||--o{ ENTITY_CHANNELS : resolves_to
+    CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (17,656)"
 ```
 
 Table row counts: `raw_items` 1,599, `accounts` 2,608,
 `account_source_facts` 12,026, `graph_edges` 361,225, `labs` 10,
-`entities` 10, `channels` 2,640, `entity_channels` 42,
+`entities` 2,608, `channels` 2,640, `entity_channels` 2,640,
 `channel_observations` 17,656.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
@@ -257,6 +257,30 @@ channels              # where: @openai, OpenAI blog, github.com/openai
 entity_channels       # evidence/confidence that a channel belongs to an entity
 channel_observations  # measured/source-specific facts about a channel over time
 ```
+
+Entity is identity, not endorsement. A channel that cannot yet be resolved
+creates a provisional `unknown` entity. Kind classification (`lab`, `person`,
+`unknown`) and curation (`track`, `reject`) are separate later stages.
+
+```mermaid
+flowchart TD
+    C[Channel arrives]
+    R{Known identity?}
+    E[Link existing entity]
+    U[Create unknown entity]
+    K[Kind classifier later]
+    D[Track or reject later]
+
+    C --> R
+    R -->|yes| E
+    R -->|no or uncertain| U
+    E --> K
+    U --> K
+    K --> D
+```
+
+Exact rules and the future classifier contract live in
+`docs/references/registry-curation.md`.
 
 Rule of thumb:
 
@@ -325,7 +349,7 @@ schema.
 erDiagram
     ENTITY {
         string id PK
-        string kind "lab | person"
+        string kind "lab | person | unknown"
         string slug
         string name
     }
@@ -401,8 +425,8 @@ final score.
 | `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
 | `fli.labs` | curated lab seed data (10 labs); seeds lab entities + official channels |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
-| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; SPA is a single entity Registry (full pool, click-through detail card) + Architecture; source in `frontend/` |
-| `fli.registry` | lab entities/channels live; people-candidate promotion (auto-curation) still pending |
+| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes the full lab/person/unknown universe; source in `frontend/` |
+| `fli.registry` | channel ownership invariant, provisional unknown materialization, and lean Registry read model; kind classifier still pending |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |

@@ -210,7 +210,7 @@ def load_digg(
     conn.commit()
     from fli import channels
 
-    channels.sync_x_channels_from_accounts(conn)
+    channels.sync_all(conn)
     return {
         "accounts": conn.execute("SELECT COUNT(*) AS n FROM accounts").fetchone()["n"],
         "facts": n_facts,
@@ -278,7 +278,7 @@ def compute_pagerank(
     conn.commit()
     from fli import channels
 
-    channels.sync_x_channels_from_accounts(conn)
+    channels.sync_all(conn)
     return {"nodes": n, "iterations": iterations}
 
 
