@@ -143,9 +143,10 @@ export default function Registry() {
           Two independent rankings, side by side: <b>Digg rank</b> (raw
           follower-weighted attention) and <b>PageRank</b> (importance from
           who follows whom in the graph). Large disagreement between them is
-          itself a signal worth a second look — e.g. SSI ranks #401 by
-          followers but #24 by graph structure: the community pays it
-          outsized attention despite a modest follower count.
+          itself a signal worth a second look — e.g. @jack ranks #246 by
+          followers but #52 by graph structure: the people already in this
+          network pay him outsized attention relative to his raw follower
+          count.
         </p>
         <div className="table-tools">
           <input

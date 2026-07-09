@@ -240,13 +240,14 @@ final score.
 
 | Module | Status |
 | --- | --- |
-| `fli.cli` | `--version`, `fetch`, `digg`, `graph`, `web` |
+| `fli.cli` | `--version`, `fetch`, `digg`, `graph`, `labs`, `web` |
 | `fli.digg` | Digg rankings and top-follower graph extraction |
 | `fli.store` | raw `raw_items` SQLite layer |
-| `fli.graph` | modeled accounts / source facts / edges; `fli graph load` |
+| `fli.graph` | modeled accounts / source facts / edges; PageRank; `fli graph load\|pagerank` |
+| `fli.labs` | curated lab entity table (10 seeded, `src/fli/labs.py`); `fli labs seed\|summary` |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
-| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/architecture`) + built SPA host; source in `frontend/` |
-| `fli.registry` | pending, schema from candidate evidence next |
+| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`, `/api/architecture`) + built SPA host, Registry-first nav; source in `frontend/` |
+| `fli.registry` | labs are live via `fli.labs`; people-candidate promotion (status field, auto-curation) still pending |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |
