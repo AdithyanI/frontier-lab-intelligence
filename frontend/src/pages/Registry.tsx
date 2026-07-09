@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { siArxiv, siGithub, siRss, siX } from 'simple-icons'
 import {
   getJSON,
   type EntityChannel,
@@ -6,6 +7,60 @@ import {
 } from '../api'
 
 type Kind = 'lab' | 'person'
+
+const BRAND_ICON: Record<string, string> = {
+  github: siGithub.path,
+  x: siX.path,
+  arxiv: siArxiv.path,
+  blog: siRss.path,
+}
+
+function ChannelGlyph({ kind }: { kind: string }) {
+  if (kind === 'website') {
+    return (
+      <svg
+        className="ch-ico"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18" />
+        <path d="M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9Z" />
+      </svg>
+    )
+  }
+  const path = BRAND_ICON[kind]
+  if (!path) return null
+  return (
+    <svg className="ch-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d={path} />
+    </svg>
+  )
+}
+
+function channelLabel(c: EntityChannel): string {
+  switch (c.kind) {
+    case 'website':
+      try {
+        return new URL(c.url).hostname.replace(/^www\./, '')
+      } catch {
+        return 'Website'
+      }
+    case 'github':
+      return c.key || c.label
+    case 'arxiv':
+      return 'arXiv'
+    case 'blog':
+      return 'Blog'
+    default:
+      return c.label
+  }
+}
 
 interface EntityRow {
   key: string
