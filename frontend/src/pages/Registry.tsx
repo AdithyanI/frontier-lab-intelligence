@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   getJSON,
   type EntityChannel,
@@ -206,7 +206,7 @@ function EntityCard({
 
   if (!entity) return <dialog ref={ref} className="ent-card" onClose={onClose} />
 
-  const facts: { label: string; value: React.ReactNode }[] = []
+  const facts: { label: string; value: ReactNode }[] = []
   facts.push({
     label: 'Type',
     value: entity.kind === 'lab' ? 'Lab' : 'Person',
