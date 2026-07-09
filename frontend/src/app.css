@@ -563,14 +563,14 @@ td.num {
 .ent-card-channels a {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--ink-soft);
   background: var(--surface);
   border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 7px 12px;
+  border-radius: 9px;
+  padding: 8px 13px;
   transition: border-color 120ms var(--ease-out), color 120ms var(--ease-out),
     background 120ms var(--ease-out);
 }
@@ -581,13 +581,15 @@ td.num {
   border-color: var(--blue-mid);
 }
 
-.ent-ch-kind {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.ch-ico {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
   color: var(--muted);
+  transition: color 120ms var(--ease-out);
 }
+
+.ent-card-channels a:hover .ch-ico { color: var(--blue-mid); }
 
 .ent-card-foot {
   margin-top: 22px;
@@ -609,7 +611,7 @@ td.num {
   transition: background 120ms var(--ease-out), color 120ms var(--ease-out);
 }
 
-.ent-x-mark { font-size: 13px; }
+.ent-x-mark { width: 14px; height: 14px; flex-shrink: 0; }
 .ent-x-tag:hover { background: var(--ink); color: #fff; }
 .ent-x-tag .ent-x-go { color: var(--muted); font-size: 12px; }
 .ent-x-tag:hover .ent-x-go { color: #fff; }

@@ -319,8 +319,8 @@ function EntityCard({
                 .map((c) => (
                   <li key={c.id}>
                     <a href={c.url} target="_blank" rel="noreferrer">
-                      <span className="ent-ch-kind">{c.kind}</span>
-                      <span className="ent-ch-label">{c.label}</span>
+                      <ChannelGlyph kind={c.kind} />
+                      <span className="ent-ch-label">{channelLabel(c)}</span>
                     </a>
                   </li>
                 ))}
@@ -336,7 +336,14 @@ function EntityCard({
               target="_blank"
               rel="noreferrer"
             >
-              <span className="ent-x-mark">𝕏</span>
+              <svg
+                className="ent-x-mark"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d={siX.path} />
+              </svg>
               @{entity.handle}
               <span className="ent-x-go">↗</span>
             </a>
