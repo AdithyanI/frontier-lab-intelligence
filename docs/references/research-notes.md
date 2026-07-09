@@ -24,7 +24,7 @@ next; this file records the facts behind those decisions.
 | Claim / fact used | Source | Retrieved | Notes |
 | --- | --- | --- | --- |
 | smol.ai/AI News monitors a large curated source set and discloses denominators. | buttondown.com/ainews issue archives + sitemap | 2026-07-08 | Prior-art pattern for source curation and denominator disclosure. |
-| smol.ai tagging pipeline uses structured outputs and controlled vocabularies. | github.com/smol-ai/ainews-web-2025 (`oneoffs/process-emails.ts`, `oneoffs/preferredTags.ts`) | 2026-07-08 | Public code; reference pattern for extraction. |
+| smol.ai tagging pipeline uses structured outputs and controlled vocabularies. | github.com/smol-ai/ainews-web-2025 (`oneoffs/process-emails.ts`, `oneoffs/preferredTags.ts`, pinned at `0fc45e2c56e2b0cad71478bbee9cf5976c9e573e`) | 2026-07-09 | Public code; `prefPeople` has 33 raw entries and 31 unique X handles. Imported as `smol_ai` evidence: 23 existing accounts, 8 new; 21 overlap AI High Signal, 17 overlap Digg, and 17 occur in all three. |
 | Digg 2026 pivoted to AI-signal aggregation around top AI voices. | TechCrunch, 2026-05-11 | 2026-07-08 | Third-party context; later superseded by Digg page copy for methodology. |
 | Digg community-voting phase failed because votes could not be trusted. | TechCrunch, 2026-03-13 | 2026-07-08 | Anti-pattern for community voting. |
 | Techmeme uses an algorithm-plus-editorial model. | techmeme.com/about | 2026-07-08 | Human-in-the-loop prior art. |
@@ -48,7 +48,7 @@ useful coverage, or machine-readable handles.
 | --- | --- | --- | --- | --- |
 | 1 | Official X following snapshots | Graph/ranking | Pull who trusted X channels follow; bounded, high-signal attention graph. | Target next source; requires explicit approval before paid/API use. |
 | 2 | Digg Tech / AI Rankings (`digg.com/tech/x/rankings`) | Frozen graph/ranking snapshot | Bootstrap only: 1,000 ranked accounts and full local top-follower graph. | Extracted into `data/digg/`; full raw under ignored `data/raw/digg-full-2026-07-08/`. |
-| 3 | smol.ai AINews `prefPeople` | GitHub file | Small, clean, machine-readable list of high-signal AI people used by an existing AI news workflow. | Use as validation/anchor label, not as the graph spine. |
+| 3 | smol.ai AINews `prefPeople` | GitHub file | Small, clean, machine-readable list of high-signal AI people used by an existing AI news workflow. | Imported 2026-07-09: 31 unique handles, 23 existing accounts and 8 new. Stored as validation evidence, not automatic tracking. |
 | 4 | swyx AI people X list | X List | Broad high-signal AI list used by smol.ai workflows. | Imported 2026-07-09 with `fli sources import-x-list --list-id 1585430245762441216 --source ai_high_signal`: 609 members, 230 already in Digg, 379 new versus Digg. |
 | 5 | Aldo Cortesi Anthropic staff list | X List | Lab-specific Anthropic coverage, likely cleaner than broad AI lists. | URL known; membership not verified/exported yet. |
 | Later | Scobleizer AI Newsmakers / Founders lists | X Lists | Large expansion set for founders/builders. | Useful later; noisy. |
