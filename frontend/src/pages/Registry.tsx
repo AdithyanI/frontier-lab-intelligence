@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { siX } from 'simple-icons'
+import { siArxiv, siGithub, siRss, siX } from 'simple-icons'
 import {
   getJSON,
   type EntityChannel,
@@ -8,20 +8,37 @@ import {
 
 type Kind = 'lab' | 'person'
 
-function ChannelGlyph({ kind: _kind }: { kind: string }) {
+const BRAND_ICON: Record<string, string> = {
+  github: siGithub.path,
+  x: siX.path,
+  arxiv: siArxiv.path,
+  blog: siRss.path,
+}
+
+function ChannelGlyph({ kind }: { kind: string }) {
+  if (kind === 'website') {
+    return (
+      <svg
+        className="ch-ico"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18" />
+        <path d="M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9Z" />
+      </svg>
+    )
+  }
+  const path = BRAND_ICON[kind]
+  if (!path) return null
   return (
-    <svg
-      className="ch-ico"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72" />
-      <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    <svg className="ch-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d={path} />
     </svg>
   )
 }
