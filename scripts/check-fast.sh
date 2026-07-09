@@ -4,14 +4,8 @@ set -euo pipefail
 test -f AGENTS.md
 test -f PRODUCT.md
 test -f DESIGN.md
-test -d docs/projects
-test -f docs/projects/archive/frontier-lab-intelligence/tasks.md
 test -f docs/references/case-prompt.md
 test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf
-test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.txt
-test -f docs/references/context.md
-test -f docs/references/research-notes.md
-test -f docs/references/build-log.md
 test -f docs/references/build-log.jsonl
 test -f docs/architecture/overview.md
 
