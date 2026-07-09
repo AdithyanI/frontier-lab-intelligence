@@ -127,6 +127,103 @@ Known data facts:
   (2,315 X, 10 websites, 9 GitHub, 8 arXiv, 5 blog/feed), 42 entity-channel
   links, and 14,674 channel observations.
 
+### Current Schema (as built, not the target sketch)
+
+This is what actually exists in `data/fli.db` today (9 tables). It mixes two
+generations: a legacy X-graph import layer (`accounts`, `account_source_facts`,
+`graph_edges`, plus `labs.x_account_id`) and the newer entity/channel product
+layer (`entities`, `channels`, `entity_channels`, `channel_observations`).
+`raw_items` is an unconnected bootstrap table. Row counts as of this writing
+in parentheses.
+
+```mermaid
+erDiagram
+    RAW_ITEMS {
+        int id PK
+        string source "blog | arxiv | github"
+        string lab
+        string external_id
+        string fetched_at
+        string payload "JSON"
+    }
+    ACCOUNTS {
+        int id PK
+        string platform "x"
+        string handle
+        string display_name
+        string x_id
+        int followers_count
+    }
+    ACCOUNT_SOURCE_FACTS {
+        int id PK
+        int account_id FK
+        string source "digg | smol_ai"
+        string fact "rank | role | cohort"
+        string value
+    }
+    GRAPH_EDGES {
+        int id PK
+        int from_account_id FK
+        int to_account_id FK
+        string relationship "top_follower_of"
+        string source
+    }
+    LABS {
+        int id PK
+        string slug
+        string name
+        string status "frontier | emerging"
+        int x_account_id FK "legacy link"
+    }
+    ENTITIES {
+        int id PK
+        string kind "lab | person"
+        string slug
+        string name
+        string status
+    }
+    CHANNELS {
+        int id PK
+        string kind "x | github | blog | arxiv | website"
+        string key
+        string url
+    }
+    ENTITY_CHANNELS {
+        int entity_id FK
+        int channel_id FK
+        string relationship "official | identity | candidate"
+        float confidence
+    }
+    CHANNEL_OBSERVATIONS {
+        int id PK
+        int channel_id FK
+        string source "digg | graph | x_profile"
+        string metric "rank | pagerank_rank | followers_count"
+        string value
+        string observed_at
+    }
+
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (11,386)"
+    ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
+    ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,225 total)"
+    LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (42)"
+    CHANNELS ||--o{ ENTITY_CHANNELS : resolves_to
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (14,674)"
+```
+
+Table row counts: `raw_items` 1,599, `accounts` 2,314,
+`account_source_facts` 11,386, `graph_edges` 361,225, `labs` 10,
+`entities` 10, `channels` 2,347, `entity_channels` 42,
+`channel_observations` 14,674.
+
+Note `raw_items` has no foreign keys into the rest of the schema yet — it is
+the as-fetched evidence corpus, not joined to entities/channels until
+ingestion/extraction lands. The `accounts` / `account_source_facts` /
+`graph_edges` trio is the legacy Digg/X import layer described above; it
+still backs the graph viz but is being superseded by `entities` / `channels`
+/ `entity_channels` / `channel_observations` as the product's canonical model.
+
 ## Entity / Channel Model
 
 The case prompt asks for labs and individuals as first-class entities, resolved
