@@ -21,10 +21,12 @@ AI Engineer case study; built as a real product intended to outlive it.
 ## Standing contracts
 - **Context.** Read `docs/references/context.md` to know BIT, the role, Adi's
   background, and private cleanup boundaries.
-- **Build log.** After each meaningful chunk, update
-  `docs/references/build-log.md` with intent, decision/action, evidence,
-  impact/next step, tools used, and any spend. DS/ML learning notes now live
-  there too.
+- **Build log.** After each meaningful chunk, append one JSON object to
+  `docs/references/build-log.jsonl` (fields: date, title, intent, action,
+  evidence, impact_next, tools_spend) — the markdown table is generated from
+  it by `scripts/render-build-log.py` (run automatically by check-fast; never
+  hand-edit the generated table). DS/ML learning notes live in the markdown's
+  hand-written sections.
 - **Research notes.** Keep assumptions, provenance, and seed-source leads in
   `docs/references/research-notes.md`.
 - **Design system.** `PRODUCT.md` and `DESIGN.md` at repo root govern all UI

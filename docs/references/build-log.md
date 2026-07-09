@@ -3,175 +3,45 @@
 Chronological record of how this system was built. This combines the previous
 working log, build journal, tool/budget notes, and learning notes.
 
-Use this after every meaningful chunk of work:
+The Build Timeline below is **generated**: append entries as JSON lines to
+`build-log.jsonl` (same directory), then run `scripts/render-build-log.py`
+(check-fast also runs it). Do not hand-edit the generated table. Each entry:
 
-- **Intent:** what Adi asked for or what changed.
-- **Decision / action:** what the agent changed.
-- **Evidence:** commands, files, data counts, or validation.
-- **Impact / next:** why it matters and what should happen next.
-- **Tools / spend:** AI tools used and any API/service spend.
+- **intent:** what Adi asked for or what changed.
+- **action:** what the agent changed.
+- **evidence:** commands, files, data counts, or validation.
+- **impact_next:** why it matters and what should happen next.
+- **tools_spend:** AI tools used and any API/service spend.
 
 ## Build Timeline
 
-### 2026-07-07 — Repo scaffold and prompt capture
+<!-- BEGIN GENERATED: build timeline (edit build-log.jsonl, then run scripts/render-build-log.py) -->
 
-- **Intent:** Start the BIT case-study build as a real product, not a throwaway answer.
-- **Action:** Scaffolded the repo and captured the original prompt plus source material.
-- **Evidence:** `docs/references/case-prompt.md`, `docs/references/source-material/`, tracker.
-- **Impact / next:** Requirements became repo-owned facts instead of chat memory.
-- **Tools / spend:** Copilot CLI; €0.
+| Date | Intent / trigger | Decision / action | Evidence | Impact / next | Tools / spend |
+| --- | --- | --- | --- | --- | --- |
+| 2026-07-07 | Start the BIT case-study build as a real product, not a throwaway answer. | Scaffolded the repo and captured the original prompt plus source material. | `docs/references/case-prompt.md`, `docs/references/source-material/`, tracker. | Requirements became repo-owned facts instead of chat memory. | Copilot CLI; €0. |
+| 2026-07-08 | Make the repo product-shaped and agent-native before deep implementation. | Renamed to Frontier Lab Intelligence; added product/design docs and a weighted execution plan. | `PRODUCT.md`, `DESIGN.md`, tracker. | The repo now has a durable identity and rubric-aware plan. | Copilot CLI + impeccable; €0. |
+| 2026-07-08 | Choose a boring stack that maximizes rubric value. | Chose Python 3.13, SQLite, FastAPI/Jinja2, one installable `src/fli` package. | `pyproject.toml`, `src/fli/`, architecture overview. | Avoids spending effort on frontend infrastructure when UI is only 5% of the rubric. | Copilot CLI; €0. |
+| 2026-07-08 | Understand prior art before locking architecture. | Researched smol.ai/AI News, Digg, Techmeme/HN, and market gaps. | Research notes and sources in `docs/references/research-notes.md`. | Adopted source curation, denominator disclosure, "nothing significant today," reason-for-inclusion slots, and human-in-the-loop review. | Copilot CLI with research subagents; €0. |
+| 2026-07-08 | Stop designing the DB in the abstract; get real data first. | Built `fli.store` and `fli.fetch`; fetched blogs/sitemap, arXiv, and GitHub releases into SQLite. | `data/fli.db` with 1,599 raw items; 8 tests green at the time. | Real payloads showed arXiv text search false positives, blog marketing noise, and GitHub authors as cheap discovery signals. Next: model from evidence. | Copilot CLI; €0. |
+| 2026-07-08 | Rebuild context and clean the harness after multiple agents touched the repo. | Re-read canonical docs, removed generated egg metadata, fixed the fast-check path, and rebuilt the active tracker around evidence-first registry work. | `scripts/check-fast.sh`, tracker updates. | Reduced drift; future agents have a cleaner resume point. | Codex Desktop; €0. |
+| 2026-07-08 | Verify whether Grok Build CLI could help with X-backed discovery. | Installed/authenticated Grok Build CLI and verified live X-backed search/thread fetches. | Grok CLI capability check in prior session output. | Grok is useful as a research assistant, but not as the authoritative follower/list graph extractor. | Codex Desktop + Grok Build CLI; €0 recorded. |
+| 2026-07-08 | Find a strong people-discovery spine without paying for X API first. | Pivoted registry bootstrap to Digg after verifying structured rankings/profile data. | `src/fli/digg.py`, `data/digg/`, `docs/references/research-notes.md`. | Digg became the primary v1 graph-derived seed source. Next: use the graph to rank registry candidates. | Codex Desktop; €0. |
+| 2026-07-08 | Pull enough Digg graph data to decide whether it is useful. | Added `fli digg --full-followers`; smoke-tested 2 profiles; ran the full paginated local pull. | 1,000 rankings, 1,000 profiles, 361,225 directed top-follower edges; `xai` returned 404. Tracked summary: `data/digg/full_graph_summary.json`; full raw files: ignored `data/raw/digg-full-2026-07-08/`. | We now have a rich local candidate graph without X API spend. Next: build a candidate review/ranking table. | Codex Desktop + Digg public endpoints; €0. |
+| 2026-07-08 | Reduce doc sprawl. | Consolidated working log, build journal, learning notes, assumptions, sources, seed lists, and context docs into fewer canonical files. | `AGENTS.md`, `docs/references/build-log.md`, `docs/references/context.md`, `docs/references/research-notes.md`. | Future agents have one build log, one context doc, one research/source notes doc, one architecture doc, and one tracker. | Codex Desktop + agent-native-repo-playbook; €0. |
+| 2026-07-08 | Decide how to store graph data later, without implementing it yet. | Documented the deferred graph storage plan: raw observations, accounts, directed graph edges, then reviewed real-world entities/identities/affiliations. | `docs/architecture/overview.md` §Graph Storage Plan; tracker current batch. | The next data-modeling pass should move modeled graph data into SQLite and stop treating nested JSON as the primary graph store. | Codex Desktop; €0. |
+| 2026-07-08 | Verify BIT context coverage against Adi's private prep repo. | Imported distilled BIT worldview/lens into `docs/references/context.md`: Devil's Advocate process, memory-supercycle/infra worldview, respected signal types, role/stack specifics, official data-scale claims. | `docs/references/context.md` §BIT worldview and case lens; source: `~/GitHub/adi/projects/bit-capital-case-study-2026/resources/`. | Design gap identified: the funnel has no contrary-evidence concept yet; scoring/insights should carry a thesis-breaking slot. Repo is now self-sufficient on BIT context. | Copilot CLI; €0. |
+| 2026-07-08 | Adi wants a real frontend for data inspection and a written plan; asked whether to use his personal design language. | Locked the batch plan (graph→SQLite, PageRank weights, curated-list layering, candidate review table, frontend shell). Stack change: React+Vite+TS SPA + sigma.js over FastAPI JSON API, retiring Jinja2. Kept FLI's own cobalt/brass identity over adi-design: the reviewer is a fund; the product should read as their instrument. | Tracker Current Batch; architecture overview stack table. | Next: implement Phase A (graph store) then B (PageRank). | Copilot CLI + adi-design skill (consulted, not applied); €0. |
+| 2026-07-08 | Adi flagged redundancy in the raw edge CSVs; start Phase A. | Built `fli.graph`: normalized modeled layer (`accounts`, `account_source_facts`, `graph_edges`) loaded from raw Digg CSVs; raw stays redundant as evidence, model stores each account once. New CLI: `fli graph load\|summary`. | 2,314 accounts, 6,760 facts, 361,225 deduped edges; top targets karpathy/jeffdean/sama/ilyasut/ylecun; `tests/test_graph.py`; 12 tests green. | Phase B next: PageRank source weights over the edge graph. | Copilot CLI; €0. |
+| 2026-07-08 | Adi wants the frontend now, as a visual anchor: a living system map he can learn from and demo on a call. | Built the SPA: Vite+React+TS in `frontend/` building into `src/fli/web/dist`; rewrote `fli.web` as JSON API (`/api/status`, `/api/accounts`, `/api/architecture`) + SPA host; removed Jinja2/markdown deps. Pages: System (pipeline stages w/ live DB counts), Accounts (searchable candidate table), Architecture (doc + Mermaid). DESIGN.md tokens (BIT capital-blue anchored). Committed built dist so reviewers run Python only. | Screenshots of all 3 pages verified against DESIGN.md; 14 tests green; `check-fast.sh` OK. Playwright installed as frontend devDep for visual checks. | Next: PageRank (B) then list layering (C); numbers appear in the UI as they land. | Copilot CLI + impeccable + agent-native-repo-playbook; €0. |
+| 2026-07-08 | Adi rejected v1 UI as plain/old-design; wants an out-of-the-box redesign in BIT's design language with a deeply visual Architecture page (image-mockup route abandoned after LiteLLM proxy failures). | Full UI v2, "editorial instrument": hex tokens from bitcap.com (alpha-black ink, capital-blue family, coin-sand whisper), top-bar shell, home as editorial split (statement + hero numerals + live pipeline rail), Accounts restyle (rank chips, mono headers, sand hover). Architecture rebuilt as three hand-built SVG diagrams — graph plane with real handles, accounts→identities→entity layering with confidence chips, signal funnel. Removed `/api/architecture` + marked/mermaid (bundle 1MB→246KB). DESIGN.md rewritten to shipped reality. | All 3 pages screenshot-verified via Playwright MCP at 1440px; overlap bugs fixed on inspection; 13 tests green; `check-fast.sh` OK. | The Architecture page is now the teach-and-demo surface Adi asked for. Next: PageRank (B), list layering (C), candidate review table (D). | Copilot CLI + impeccable + Playwright MCP; €0. |
+| 2026-07-08 | Adi flagged the funnel diagram as ugly and wanted each stage explained in simple words; asked for an impeccable polish pass. | Rebuilt §03 as an HTML/CSS funnel: continuous narrowing silhouette (sand→blue→ink), mono count column with an illustrative day's volumes (~120 items → 2–3 delivered), and a plain-words explanation beside every stage. Simplified section copy; honest caption ("ingestion is not live yet"). | Desktop + 390px mobile screenshots verified via Playwright MCP (fixed count clipping on mobile); 13 tests green; `check-fast.sh` OK. | Architecture §03 now reads as a story: collect → merge → novelty → LLM → persona. | Copilot CLI + impeccable (polish) + Playwright MCP; €0. |
+| 2026-07-09 | Adi asked whether the current machine could host Frontier Lab Intelligence behind the existing Cloudflare-like local tunnel setup. | Used the Mac mini local-production pattern: launchd service on `127.0.0.1:8797`, shared Cloudflare tunnel ingress, Cloudflare DNS CNAME, and Cloudflare Access for `frontier-lab-intelligence.adithyan.io`. Chose `adithyan.io` because the account has no `otherthing.io` zone. Hardened the runner so the app process does not inherit Cloudflare env vars. | Local health: `curl http://127.0.0.1:8797/api/status` returns 6 stages; accounts API returns 2,314 accounts and top handle `karpathy`; public URL returns 302 to Cloudflare Access; DNS CNAME points to the shared tunnel; `cloudflare_env_count=0`; FLI and scripts fast checks passed. Shared inventory updated in `~/GitHub/scripts`. | The current Mac mini now hosts a private, browser-accessible demo URL while preserving the submission guardrail. Next: continue registry/scoring work; this URL is an operational preview, not an external submission. | Codex Desktop + Cloudflare API; €0. |
+| 2026-07-09 | Registry design session with Adi: how labs, people, and the registry relate; then build the first registry pieces. | Design decisions: labs are hand-curated first-class entities (~10, judgment is cheap and defensible); people are graph-derived candidates promoted by evidence; person→lab affiliation is optional (independents are valid registry entries); emerging labs are discoverable from the graph (org accounts that top researchers follow). Built `fli.labs` (seed + org-account linking into the graph) and `fli graph pagerank` (pure-Python power iteration, stored as `account_source_facts` source=graph). | `fli labs seed`: 10 labs, 9 org X accounts linked (SSI + Thinking Machines already in the graph; only alibaba_qwen absent). `fli graph pagerank`: 2,313 nodes, 26 iterations, <1s. Top-10 sane: elonmusk, openai, sama, karpathy, jeffdean… Best disagreement finding: **SSI is Digg #401 but PageRank #24** — insider attention that follower-count methods miss. 15 tests green. | Registry now has its lab half; person half next (classification pass + auto-curation). | Copilot CLI; €0. |
+| 2026-07-09 | Adi codified three system principles after questioning the human-review-gate design. | Written to `PRODUCT.md` §System Principles + mirrored in `AGENTS.md`: (1) high quality first, bend the cost curve later; (2) automatically done, human-correctable — LLM curates/scores/decides with cited reasons, humans audit and override, overrides stored as data; (3) human judgment is the bootstrap (seed lists, rubrics, overrides as versioned inputs), not per-item clicks in the loop. Phase D redesigned accordingly: auto-curated registry instead of manual approval queue. Also added to AGENTS.md: teach-Adi contract (explain DS concepts plainly + visually; he defends every choice on-site). | `PRODUCT.md` §System Principles; `AGENTS.md` operating model; tracker D row. | D is now "LLM curator + human override layer": fewer stages, stronger interview story, one-person operable. | Copilot CLI; €0. |
+| 2026-07-09 | The build-log markdown table rendered broken on GitHub: agents appended rows with blank lines, splitting the table. Adi wants the log programmatic — append to a structured log, auto-generate the markdown, keeping the table format he likes. | Made `docs/references/build-log.jsonl` the source of truth (one JSON object per entry); `scripts/render-build-log.py` regenerates the markdown table between GENERATED markers (idempotent, pipe-escaped, contiguous rows). check-fast runs the renderer and stages the regenerated file, following the machine-wide pattern (shared pre-commit execs repo-owned check-fast; blog-personal's staged-aware convention). AGENTS.md build-log contract updated to the append-JSONL path. | 20 existing entries migrated to JSONL; renderer run twice (second run no-op = idempotent); table renders as one contiguous 20-row block; check-fast green. | Agents can no longer break the log format — mechanical guardrail replaces prose care. Next: registry work (G classification pass or Registry UI page). | Copilot CLI + agent-native-repo-playbook; €0. |
 
-### 2026-07-08 — Product identity and rubric-aware plan
-
-- **Intent:** Make the repo product-shaped and agent-native before deep implementation.
-- **Action:** Renamed to Frontier Lab Intelligence; added product/design docs and a weighted execution plan.
-- **Evidence:** `PRODUCT.md`, `DESIGN.md`, tracker.
-- **Impact / next:** The repo now has a durable identity and rubric-aware plan.
-- **Tools / spend:** Copilot CLI + impeccable; €0.
-
-### 2026-07-08 — Stack choice: boring and rubric-weighted
-
-- **Intent:** Choose a boring stack that maximizes rubric value.
-- **Action:** Chose Python 3.13, SQLite, FastAPI/Jinja2, one installable `src/fli` package.
-- **Evidence:** `pyproject.toml`, `src/fli/`, architecture overview.
-- **Impact / next:** Avoids spending effort on frontend infrastructure when UI is only 5% of the rubric.
-- **Tools / spend:** Copilot CLI; €0.
-
-### 2026-07-08 — Prior-art research (smol.ai, Digg, Techmeme)
-
-- **Intent:** Understand prior art before locking architecture.
-- **Action:** Researched smol.ai/AI News, Digg, Techmeme/HN, and market gaps.
-- **Evidence:** Research notes and sources in `docs/references/research-notes.md`.
-- **Impact / next:** Adopted source curation, denominator disclosure, "nothing significant today," reason-for-inclusion slots, and human-in-the-loop review.
-- **Tools / spend:** Copilot CLI with research subagents; €0.
-
-### 2026-07-08 — First real data: raw fetch layer
-
-- **Intent:** Stop designing the DB in the abstract; get real data first.
-- **Action:** Built `fli.store` and `fli.fetch`; fetched blogs/sitemap, arXiv, and GitHub releases into SQLite.
-- **Evidence:** `data/fli.db` with 1,599 raw items; 8 tests green at the time.
-- **Impact / next:** Real payloads showed arXiv text search false positives, blog marketing noise, and GitHub authors as cheap discovery signals. Next: model from evidence.
-- **Tools / spend:** Copilot CLI; €0.
-
-### 2026-07-08 — Harness cleanup after multi-agent drift
-
-- **Intent:** Rebuild context and clean the harness after multiple agents touched the repo.
-- **Action:** Re-read canonical docs, removed generated egg metadata, fixed the fast-check path, and rebuilt the active tracker around evidence-first registry work.
-- **Evidence:** `scripts/check-fast.sh`, tracker updates.
-- **Impact / next:** Reduced drift; future agents have a cleaner resume point.
-- **Tools / spend:** Codex Desktop; €0.
-
-### 2026-07-08 — Grok Build CLI capability check
-
-- **Intent:** Verify whether Grok Build CLI could help with X-backed discovery.
-- **Action:** Installed/authenticated Grok Build CLI and verified live X-backed search/thread fetches.
-- **Evidence:** Grok CLI capability check in prior session output.
-- **Impact / next:** Grok is useful as a research assistant, but not as the authoritative follower/list graph extractor.
-- **Tools / spend:** Codex Desktop + Grok Build CLI; €0 recorded.
-
-### 2026-07-08 — Registry bootstrap pivot to Digg
-
-- **Intent:** Find a strong people-discovery spine without paying for X API first.
-- **Action:** Pivoted registry bootstrap to Digg after verifying structured rankings/profile data.
-- **Evidence:** `src/fli/digg.py`, `data/digg/`, `docs/references/research-notes.md`.
-- **Impact / next:** Digg became the primary v1 graph-derived seed source. Next: use the graph to rank registry candidates.
-- **Tools / spend:** Codex Desktop; €0.
-
-### 2026-07-08 — Full Digg graph pull (361K edges)
-
-- **Intent:** Pull enough Digg graph data to decide whether it is useful.
-- **Action:** Added `fli digg --full-followers`; smoke-tested 2 profiles; ran the full paginated local pull.
-- **Evidence:** 1,000 rankings, 1,000 profiles, 361,225 directed top-follower edges; `xai` returned 404. Tracked summary: `data/digg/full_graph_summary.json`; full raw files: ignored `data/raw/digg-full-2026-07-08/`.
-- **Impact / next:** We now have a rich local candidate graph without X API spend. Next: build a candidate review/ranking table.
-- **Tools / spend:** Codex Desktop + Digg public endpoints; €0.
-
-### 2026-07-08 — Docs consolidation
-
-- **Intent:** Reduce doc sprawl.
-- **Action:** Consolidated working log, build journal, learning notes, assumptions, sources, seed lists, and context docs into fewer canonical files.
-- **Evidence:** `AGENTS.md`, `docs/references/build-log.md`, `docs/references/context.md`, `docs/references/research-notes.md`.
-- **Impact / next:** Future agents have one build log, one context doc, one research/source notes doc, one architecture doc, and one tracker.
-- **Tools / spend:** Codex Desktop + agent-native-repo-playbook; €0.
-
-### 2026-07-08 — Graph storage plan (deferred design)
-
-- **Intent:** Decide how to store graph data later, without implementing it yet.
-- **Action:** Documented the deferred graph storage plan: raw observations, accounts, directed graph edges, then reviewed real-world entities/identities/affiliations.
-- **Evidence:** `docs/architecture/overview.md` §Graph Storage Plan; tracker current batch.
-- **Impact / next:** The next data-modeling pass should move modeled graph data into SQLite and stop treating nested JSON as the primary graph store.
-- **Tools / spend:** Codex Desktop; €0.
-
-### 2026-07-08 — BIT worldview import from prep repo
-
-- **Intent:** Verify BIT context coverage against Adi's private prep repo.
-- **Action:** Imported distilled BIT worldview/lens into `docs/references/context.md`: Devil's Advocate process, memory-supercycle/infra worldview, respected signal types, role/stack specifics, official data-scale claims.
-- **Evidence:** `docs/references/context.md` §BIT worldview and case lens; source: `~/GitHub/adi/projects/bit-capital-case-study-2026/resources/`.
-- **Impact / next:** Design gap identified: the funnel has no contrary-evidence concept yet; scoring/insights should carry a thesis-breaking slot. Repo is now self-sufficient on BIT context.
-- **Tools / spend:** Copilot CLI; €0.
-
-### 2026-07-08 — Frontend plan and identity decision
-
-- **Intent:** Adi wants a real frontend for data inspection and a written plan; asked whether to use his personal design language.
-- **Action:** Locked the batch plan (graph→SQLite, PageRank weights, curated-list layering, candidate review table, frontend shell). Stack change: React+Vite+TS SPA + sigma.js over FastAPI JSON API, retiring Jinja2. Kept FLI's own cobalt/brass identity over adi-design: the reviewer is a fund; the product should read as their instrument.
-- **Evidence:** Tracker Current Batch; architecture overview stack table.
-- **Impact / next:** Next: implement Phase A (graph store) then B (PageRank).
-- **Tools / spend:** Copilot CLI + adi-design skill (consulted, not applied); €0.
-
-### 2026-07-08 — Phase A: modeled graph layer in SQLite
-
-- **Intent:** Adi flagged redundancy in the raw edge CSVs; start Phase A.
-- **Action:** Built `fli.graph`: normalized modeled layer (`accounts`, `account_source_facts`, `graph_edges`) loaded from raw Digg CSVs; raw stays redundant as evidence, model stores each account once. New CLI: `fli graph load|summary`.
-- **Evidence:** 2,314 accounts, 6,760 facts, 361,225 deduped edges; top targets karpathy/jeffdean/sama/ilyasut/ylecun; `tests/test_graph.py`; 12 tests green.
-- **Impact / next:** Phase B next: PageRank source weights over the edge graph.
-- **Tools / spend:** Copilot CLI; €0.
-
-### 2026-07-08 — SPA frontend v1
-
-- **Intent:** Adi wants the frontend now, as a visual anchor: a living system map he can learn from and demo on a call.
-- **Action:** Built the SPA: Vite+React+TS in `frontend/` building into `src/fli/web/dist`; rewrote `fli.web` as JSON API (`/api/status`, `/api/accounts`, `/api/architecture`) + SPA host; removed Jinja2/markdown deps. Pages: System (pipeline stages w/ live DB counts), Accounts (searchable candidate table), Architecture (doc + Mermaid). DESIGN.md tokens (BIT capital-blue anchored). Committed built dist so reviewers run Python only.
-- **Evidence:** Screenshots of all 3 pages verified against DESIGN.md; 14 tests green; `check-fast.sh` OK. Playwright installed as frontend devDep for visual checks.
-- **Impact / next:** Next: PageRank (B) then list layering (C); numbers appear in the UI as they land.
-- **Tools / spend:** Copilot CLI + impeccable + agent-native-repo-playbook; €0.
-
-### 2026-07-08 — UI v2: editorial instrument redesign
-
-- **Intent:** Adi rejected v1 UI as plain/old-design; wants an out-of-the-box redesign in BIT's design language with a deeply visual Architecture page (image-mockup route abandoned after LiteLLM proxy failures).
-- **Action:** Full UI v2, "editorial instrument": hex tokens from bitcap.com (alpha-black ink, capital-blue family, coin-sand whisper), top-bar shell, home as editorial split (statement + hero numerals + live pipeline rail), Accounts restyle (rank chips, mono headers, sand hover). Architecture rebuilt as three hand-built SVG diagrams — graph plane with real handles, accounts→identities→entity layering with confidence chips, signal funnel. Removed `/api/architecture` + marked/mermaid (bundle 1MB→246KB). DESIGN.md rewritten to shipped reality.
-- **Evidence:** All 3 pages screenshot-verified via Playwright MCP at 1440px; overlap bugs fixed on inspection; 13 tests green; `check-fast.sh` OK.
-- **Impact / next:** The Architecture page is now the teach-and-demo surface Adi asked for. Next: PageRank (B), list layering (C), candidate review table (D).
-- **Tools / spend:** Copilot CLI + impeccable + Playwright MCP; €0.
-
-### 2026-07-08 — Funnel polish pass
-
-- **Intent:** Adi flagged the funnel diagram as ugly and wanted each stage explained in simple words; asked for an impeccable polish pass.
-- **Action:** Rebuilt §03 as an HTML/CSS funnel: continuous narrowing silhouette (sand→blue→ink), mono count column with an illustrative day's volumes (~120 items → 2–3 delivered), and a plain-words explanation beside every stage. Simplified section copy; honest caption ("ingestion is not live yet").
-- **Evidence:** Desktop + 390px mobile screenshots verified via Playwright MCP (fixed count clipping on mobile); 13 tests green; `check-fast.sh` OK.
-- **Impact / next:** Architecture §03 now reads as a story: collect → merge → novelty → LLM → persona.
-- **Tools / spend:** Copilot CLI + impeccable (polish) + Playwright MCP; €0.
-
-### 2026-07-09 — Private demo hosting via Cloudflare tunnel
-
-- **Intent:** Adi asked whether the current machine could host Frontier Lab Intelligence behind the existing Cloudflare-like local tunnel setup.
-- **Action:** Used the Mac mini local-production pattern: launchd service on `127.0.0.1:8797`, shared Cloudflare tunnel ingress, Cloudflare DNS CNAME, and Cloudflare Access for `frontier-lab-intelligence.adithyan.io`. Chose `adithyan.io` because the account has no `otherthing.io` zone. Hardened the runner so the app process does not inherit Cloudflare env vars.
-- **Evidence:** Local health: `curl http://127.0.0.1:8797/api/status` returns 6 stages; accounts API returns 2,314 accounts and top handle `karpathy`; public URL returns 302 to Cloudflare Access; DNS CNAME points to the shared tunnel; `cloudflare_env_count=0`; FLI and scripts fast checks passed. Shared inventory updated in `~/GitHub/scripts`.
-- **Impact / next:** The current Mac mini now hosts a private, browser-accessible demo URL while preserving the submission guardrail. Next: continue registry/scoring work; this URL is an operational preview, not an external submission.
-- **Tools / spend:** Codex Desktop + Cloudflare API; €0.
-
-### 2026-07-09 — Registry design: labs seeded + PageRank
-
-- **Intent:** Registry design session with Adi: how labs, people, and the registry relate; then build the first registry pieces.
-- **Action:** Design decisions: labs are hand-curated first-class entities (~10, judgment is cheap and defensible); people are graph-derived candidates promoted by evidence; person→lab affiliation is optional (independents are valid registry entries); emerging labs are discoverable from the graph (org accounts that top researchers follow). Built `fli.labs` (seed + org-account linking into the graph) and `fli graph pagerank` (pure-Python power iteration, stored as `account_source_facts` source=graph).
-- **Evidence:** `fli labs seed`: 10 labs, 9 org X accounts linked (SSI + Thinking Machines already in the graph; only alibaba_qwen absent). `fli graph pagerank`: 2,313 nodes, 26 iterations, <1s. Top-10 sane: elonmusk, openai, sama, karpathy, jeffdean… Best disagreement finding: **SSI is Digg #401 but PageRank #24** — insider attention that follower-count methods miss. 15 tests green.
-- **Impact / next:** Registry now has its lab half; person half next (classification pass + auto-curation).
-- **Tools / spend:** Copilot CLI; €0.
-
-### 2026-07-09 — System principles codified
-
-- **Intent:** Adi codified three system principles after questioning the human-review-gate design.
-- **Action:** Written to `PRODUCT.md` §System Principles + mirrored in `AGENTS.md`: (1) high quality first, bend the cost curve later; (2) automatically done, human-correctable — LLM curates/scores/decides with cited reasons, humans audit and override, overrides stored as data; (3) human judgment is the bootstrap (seed lists, rubrics, overrides as versioned inputs), not per-item clicks in the loop. Phase D redesigned accordingly: auto-curated registry instead of manual approval queue. Also added to AGENTS.md: teach-Adi contract (explain DS concepts plainly + visually; he defends every choice on-site).
-- **Evidence:** `PRODUCT.md` §System Principles; `AGENTS.md` operating model; tracker D row.
-- **Impact / next:** D is now "LLM curator + human override layer": fewer stages, stronger interview story, one-person operable.
-- **Tools / spend:** Copilot CLI; €0.
+<!-- END GENERATED -->
 
 ## Learning Notes
 
