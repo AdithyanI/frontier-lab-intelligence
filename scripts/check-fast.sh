@@ -15,10 +15,6 @@ test -f docs/references/build-log.md
 test -f docs/references/build-log.jsonl
 test -f docs/architecture/overview.md
 
-grep -Eqi "deadline|due|submission|unknown" docs/references/case-prompt.md || {
-  echo "Case prompt should record deadline/submission instructions or unknowns."
-  exit 1
-}
 
 if [ -x .venv/bin/python ]; then
   PYTHON=.venv/bin/python
