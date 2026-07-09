@@ -120,15 +120,21 @@ def upsert_entity(
 ) -> int:
     ensure_schema(conn)
     observed_at = observed_at or _now()
-    row = conn.execute("SELECT id FROM entities WHERE slug = ?", (slug,)).fetchone()
+    row = conn.execute("SELECT * FROM entities WHERE slug = ?", (slug,)).fetchone()
     if row:
         entity_id = row["id"]
-        conn.execute(
-            """UPDATE entities SET
-                   kind = ?, name = ?, status = ?, notes = ?, updated_at = ?
-               WHERE id = ?""",
-            (kind, name, status, notes, observed_at, entity_id),
-        )
+        if (
+            row["kind"] != kind
+            or row["name"] != name
+            or row["status"] != status
+            or row["notes"] != notes
+        ):
+            conn.execute(
+                """UPDATE entities SET
+                       kind = ?, name = ?, status = ?, notes = ?, updated_at = ?
+                   WHERE id = ?""",
+                (kind, name, status, notes, observed_at, entity_id),
+            )
         return entity_id
     cur = conn.execute(
         """INSERT INTO entities
@@ -153,18 +159,26 @@ def upsert_channel(
     key = _channel_key(kind, key)
     url = url or _channel_url(kind, key)
     row = conn.execute(
-        "SELECT id FROM channels WHERE kind = ? AND key = ?", (kind, key)
+        "SELECT * FROM channels WHERE kind = ? AND key = ?", (kind, key)
     ).fetchone()
     if row:
         channel_id = row["id"]
-        conn.execute(
-            """UPDATE channels SET
-                   label = COALESCE(?, label),
-                   url = COALESCE(?, url),
-                   last_seen_at = ?
-               WHERE id = ?""",
-            (label, url, observed_at, channel_id),
-        )
+        next_label = label or row["label"]
+        next_url = url or row["url"]
+        next_seen = max(row["last_seen_at"], observed_at)
+        if (
+            row["label"] != next_label
+            or row["url"] != next_url
+            or row["last_seen_at"] != next_seen
+        ):
+            conn.execute(
+                """UPDATE channels SET
+                       label = ?,
+                       url = ?,
+                       last_seen_at = ?
+                   WHERE id = ?""",
+                (next_label, next_url, next_seen, channel_id),
+            )
         return channel_id
     cur = conn.execute(
         """INSERT INTO channels
@@ -194,7 +208,10 @@ def link_entity_channel(
            ON CONFLICT (entity_id, channel_id, relationship) DO UPDATE SET
                confidence = excluded.confidence,
                evidence_url = COALESCE(excluded.evidence_url, entity_channels.evidence_url),
-               notes = COALESCE(excluded.notes, entity_channels.notes)""",
+               notes = COALESCE(excluded.notes, entity_channels.notes)
+           WHERE entity_channels.confidence IS NOT excluded.confidence
+              OR COALESCE(entity_channels.evidence_url, '') IS NOT COALESCE(excluded.evidence_url, entity_channels.evidence_url, '')
+              OR COALESCE(entity_channels.notes, '') IS NOT COALESCE(excluded.notes, entity_channels.notes, '')""",
         (entity_id, channel_id, relationship, confidence, evidence_url, notes, observed_at),
     )
 
@@ -217,7 +234,9 @@ def observe_channel(
            VALUES (?, ?, ?, ?, ?, ?)
            ON CONFLICT (channel_id, source, metric, observed_at) DO UPDATE SET
                value = excluded.value,
-               evidence_url = COALESCE(excluded.evidence_url, channel_observations.evidence_url)""",
+               evidence_url = COALESCE(excluded.evidence_url, channel_observations.evidence_url)
+           WHERE channel_observations.value IS NOT excluded.value
+              OR COALESCE(channel_observations.evidence_url, '') IS NOT COALESCE(excluded.evidence_url, channel_observations.evidence_url, '')""",
         (channel_id, source, metric, str(value), observed_at, evidence_url),
     )
 
@@ -301,9 +320,9 @@ def seed_lab_entities(conn: sqlite3.Connection) -> dict[str, int]:
                 "SELECT COUNT(*) AS n FROM entity_channels"
             ).fetchone()["n"],
         }
-    observed_at = _now()
     rows = conn.execute("SELECT * FROM labs ORDER BY slug").fetchall()
     for lab in rows:
+        observed_at = lab["seeded_at"]
         entity_id = upsert_entity(
             conn,
             kind="lab",
@@ -315,7 +334,7 @@ def seed_lab_entities(conn: sqlite3.Connection) -> dict[str, int]:
         )
         channel_specs = []
         if lab["x_handle"]:
-            channel_specs.append(("x", lab["x_handle"], f"@{lab['x_handle']}", "official X account"))
+            channel_specs.append(("x", lab["x_handle"], None, "official X account"))
         if lab["blog_feed"]:
             channel_specs.append(("blog", lab["blog_feed"], "Blog feed", "official blog/feed"))
         if lab["github_org"]:
