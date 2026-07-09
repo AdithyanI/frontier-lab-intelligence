@@ -1,4 +1,5 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
+import Registry from './pages/Registry'
 import SystemMap from './pages/SystemMap'
 import Accounts from './pages/Accounts'
 import Architecture from './pages/Architecture'
@@ -12,15 +13,17 @@ export default function App() {
           Frontier Lab Intelligence
         </div>
         <nav aria-label="Main">
-          <NavLink to="/" end>System</NavLink>
+          <NavLink to="/" end>Registry</NavLink>
+          <NavLink to="/system">System</NavLink>
           <NavLink to="/accounts">Accounts</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
-          <span className="nav-soon">Registry · Insights · Reports — soon</span>
+          <span className="nav-soon">Insights · Reports — soon</span>
         </nav>
       </header>
       <main className="content">
         <Routes>
-          <Route path="/" element={<SystemMap />} />
+          <Route path="/" element={<Registry />} />
+          <Route path="/system" element={<SystemMap />} />
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/architecture" element={<Architecture />} />
         </Routes>
