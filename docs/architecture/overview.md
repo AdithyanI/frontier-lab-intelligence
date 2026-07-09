@@ -138,9 +138,13 @@ Known data facts:
   first-slice edges.
 - The full frozen bootstrap pull produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
-- `fli channels sync` currently materializes 10 lab entities, 2,347 channels
-  (2,315 X, 10 websites, 9 GitHub, 8 arXiv, 5 blog/feed), 42 entity-channel
-  links, and 14,674 channel observations.
+- `fli channels sync` currently materializes 10 lab entities, 2,632 channels
+  (2,600 X plus lab websites/GitHub/arXiv/blog feeds), 42 entity-channel
+  links, and 17,581 channel observations.
+- `fli sources import-x-list --list-id 1585430245762441216 --source
+  ai_high_signal` imported 609 AI High Signal X-list members via
+  TwitterAPI.io; 230 were already in the Digg bootstrap and 379 were new
+  versus Digg.
 
 ### Current Schema (as built, not the target sketch)
 
@@ -217,19 +221,19 @@ erDiagram
         string observed_at
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (11,386)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (11,995)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,225 total)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (42)"
     CHANNELS ||--o{ ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (14,674)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (17,581)"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,314,
-`account_source_facts` 11,386, `graph_edges` 361,225, `labs` 10,
-`entities` 10, `channels` 2,347, `entity_channels` 42,
-`channel_observations` 14,674.
+Table row counts: `raw_items` 1,599, `accounts` 2,600,
+`account_source_facts` 11,995, `graph_edges` 361,225, `labs` 10,
+`entities` 10, `channels` 2,632, `entity_channels` 42,
+`channel_observations` 17,581.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
