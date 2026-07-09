@@ -261,10 +261,8 @@ export default function Architecture() {
       <div className="page-kicker">HOW IT WORKS</div>
       <h1 className="page-title">Architecture</h1>
       <p className="page-sub">
-        Three ideas carry the whole system: one data model lays out who we
-        track, where we watch them, and what we saw; a social graph decides who
-        is worth watching in the first place; and a funnel makes sure only
-        signal reaches a human.
+        Three ideas, three pictures: the data model, the graph that ranks who
+        matters, and the funnel that keeps only signal.
       </p>
 
       <section className="arch-section">
@@ -272,15 +270,8 @@ export default function Architecture() {
           <span className="arch-no">01</span>
           <h2 className="arch-h">One data model underneath</h2>
           <p className="arch-p">
-            Start here — everything else reads through this. Everything the
-            system stores fits a single spine. An entity is a
-            <em> who</em> — a lab or a person. It is watched through
-            <em> channels</em> — its X account, GitHub org, arXiv author, blog —
-            and evidence-and-confidence links resolve many channels to one
-            entity. Each channel then carries a dated stream of
-            <em> what</em> we saw there: measured observations and the raw
-            content itself. Read it top to bottom: who, where, and what — over
-            time.
+            One spine holds everything: a <em>who</em>, the <em>wheres</em> we
+            watch them, and <em>what</em> we saw — over time.
           </p>
         </div>
         <div className="arch-canvas">
@@ -294,11 +285,8 @@ export default function Architecture() {
           <span className="arch-no">02</span>
           <h2 className="arch-h">The graph decides who matters</h2>
           <p className="arch-p">
-            2,315 X channels and 361,225 observed follow relationships, pulled
-            from Digg's ranking of the AI community. Attention flows through
-            edges: being followed by ten important channels beats a thousand
-            random followers. That is PageRank — and it turns a raw social
-            graph into a ranked list of people worth reviewing.
+            Attention, not follower count: being followed by ten important
+            channels beats a thousand random ones. That is PageRank.
           </p>
         </div>
         <div className="arch-canvas">
@@ -312,11 +300,8 @@ export default function Architecture() {
           <span className="arch-no">03</span>
           <h2 className="arch-h">The funnel suppresses noise</h2>
           <p className="arch-p">
-            Each stage lets less through. The cheap, mechanical checks run
-            first; the expensive LLM judgment runs last, only on what
-            survives. Every score shows its inputs — including evidence
-            against our own thesis — so an analyst can always disagree with
-            the machine.
+            Cheap mechanical checks first, the expensive LLM last — only on what
+            survives. Every score keeps its evidence, so you can disagree.
           </p>
         </div>
         <div className="arch-canvas">
