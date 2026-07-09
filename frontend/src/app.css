@@ -397,77 +397,51 @@ tr.unranked .rank-chip { background: transparent; color: var(--muted); }
 
 /* ---- registry page ---- */
 
-.registry-section { margin-top: 48px; }
-.registry-section:first-of-type { margin-top: 32px; }
-
-.registry-h2 {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 3px;
 }
 
-.registry-lede {
-  color: var(--ink-soft);
-  font-size: 14.5px;
-  max-width: 66ch;
-  margin: 10px 0 24px;
+.seg button {
+  font: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: color 120ms var(--ease-out), background 120ms var(--ease-out);
 }
 
-.small-note { font-size: 12px; }
+.seg button:hover { color: var(--ink-soft); }
 
-.status-pill {
+.seg button.is-active {
+  color: #fff;
+  background: var(--ink);
+}
+
+.ent-type {
   font-family: var(--font-mono);
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 3px 10px;
+  letter-spacing: 0.03em;
+  padding: 2px 9px;
   border-radius: 999px;
   display: inline-block;
   white-space: nowrap;
 }
 
-.status-pill.tone-candidate {
-  background: var(--surface);
-  color: var(--ink-soft);
-  border: 1px solid var(--border-strong);
-}
-
-.registry-status-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  padding: 16px 20px;
-  margin-bottom: 20px;
-}
-
-.registry-status-banner .status-pill { margin-top: 2px; flex-shrink: 0; }
-
-.registry-status-banner p {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 13.5px;
-  max-width: 68ch;
-}
-
-.channel-list { display: flex; gap: 12px; font-size: 13px; }
-.channel-list a { text-decoration: none; }
-.channel-list a:hover { text-decoration: underline; }
-
-.role-select {
-  font: inherit;
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--surface);
-  border: none;
-  border-radius: 999px;
-  padding: 9px 16px;
-}
-
-.disagreement-strong {
-  font-weight: 600;
+.ent-type--lab {
   color: var(--blue-ink);
+  background: rgba(35, 81, 101, 0.09);
+}
+
+.ent-type--person {
+  color: var(--muted);
+  background: var(--surface);
 }
 
 /* ---- responsive ---- */
