@@ -41,6 +41,30 @@ information-forward, quiet chrome, zero decoration that doesn't carry meaning.
 - Anything that looks vibe-coded: the client explicitly warned against a
   "vibe-coded demo that ticks the boxes."
 
+## System Principles
+
+Codified with Adi, 2026-07-09. These govern how the system is built, not how
+it looks. Argue against them in the tracker, not by silently deviating.
+
+1. **High quality first; bend the cost curve later.** In the build phase we
+   pick the best model / richest evidence / most thorough pass, and measure
+   quality. Cost optimization (cheaper models, caching, pruning) comes
+   afterwards, once quality is known — given time, the cost curve can be bent
+   to reach the same quality cheaper. Never the reverse order: optimizing
+   cost before quality is known locks in a quality ceiling silently.
+   (Tokenomics still gets logged per workflow — measured, not minimized.)
+2. **Automatically done, human-correctable.** Every pipeline stage runs
+   end-to-end without a human gate: the LLM curates, scores, and decides,
+   always writing down *why* (cited evidence, confidence). Humans audit the
+   finished artifact and override where wrong; overrides are stored as data —
+   the strongest evidence tier — and survive recomputation. No stage may
+   require manual per-item approval to produce output.
+3. **Human judgment is the bootstrap, not the loop.** Hand-made choices enter
+   the system once, as inspectable inputs — the seed lab list, the curation
+   rubric given to the LLM, recorded overrides — and the machine runs with
+   them. Keeping judgment in versioned inputs (not in per-item clicks) is
+   what lets one person operate the whole system.
+
 ## Design Principles
 
 1. **Signal density over decoration** — every pixel earns its place by
