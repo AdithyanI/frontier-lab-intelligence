@@ -57,6 +57,8 @@ def main(argv: list[str] | None = None) -> int:
     channels_p = sub.add_parser("channels", help="Entity/channel model.")
     channels_p.add_argument("action", choices=["sync", "summary"])
     channels_p.add_argument("--db", default=None, help="Path to SQLite DB.")
+    sources_p = sub.add_parser("sources", help="Curated source importers.")
+    sources_p.add_argument("source_args", nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -122,6 +124,11 @@ def main(argv: list[str] | None = None) -> int:
                 *(["--db", args.db] if args.db else []),
             ]
         )
+
+    if args.command == "sources":
+        from fli import sources
+
+        return sources.main(args.source_args)
 
     parser.print_help()
     return 0

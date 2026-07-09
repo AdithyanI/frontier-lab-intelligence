@@ -32,7 +32,8 @@ original choice and are being retired in favor of the SPA.
 flowchart LR
     subgraph sources [Sources]
         XSEED[Frozen X seed graph]
-        XFOLLOW[X following snapshots]
+    XLISTS[X list memberships]
+    XFOLLOW[X following snapshots]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
@@ -46,6 +47,7 @@ flowchart LR
     UI[Web UI<br/>FastAPI + React SPA]
 
     XSEED --> REG
+    XLISTS --> REG
     XFOLLOW --> REG
     REG -->|who to watch| ING
     BLOGS & ARXIV & GH --> ING
@@ -115,6 +117,18 @@ data/digg/seed_graph.json           # frozen nested review artifact
 data/digg/full_graph_summary.json   # summary of full paginated local pull
 data/raw/digg-full-2026-07-08/      # ignored frozen raw graph artifacts
 ```
+
+Current source-import command:
+
+```text
+fli sources import-x-list --list-id <x-list-id> --source <source_key>
+```
+
+The first provider implementation is TwitterAPI.io. It reads its API key from
+`~/.secrets/twitterapi-io/api-key`, writes one X list membership source fact per
+account, mirrors X accounts into channels, emits one JSON object, and pages
+until the provider says there is no next page. It does not classify imported
+members as tracked people.
 
 Known data facts:
 
