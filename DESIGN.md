@@ -90,6 +90,10 @@ Rules:
 - Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 72.
 - Provenance line (source, date, entity) sits directly under every insight
   title in mono — first-class, not a footnote.
+- **Desktop-first (2026-07-09):** the primary target is the desktop view
+  (analyst at a desk). Design and polish desktop; mobile/responsive polish is
+  deferred until Adi asks — don't spend effort making SVG diagrams reflow for
+  small screens yet.
 
 ## Components (current + anticipated)
 

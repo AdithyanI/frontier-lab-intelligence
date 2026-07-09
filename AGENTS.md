@@ -39,6 +39,20 @@ preserved prompt until Adi decides.
 - Run `scripts/check-fast.sh` before handoff, or record why validation was
   skipped in the active tracker.
 
+## UI Preview & Visual Checks
+
+- An always-on local server serves the built SPA at `http://127.0.0.1:8797`
+  (launchd `com.dobby.frontier-lab-intelligence`). Use it. Do **not** spin up a
+  throwaway `vite preview` / dev server on another port for screenshots.
+- To see UI changes: `npm --prefix frontend run build` (writes into
+  `src/fli/web/dist`, which the always-on server hosts), then reload
+  `127.0.0.1:8797`.
+- Take screenshots with the **Playwright MCP** tools
+  (`playwright-browser_navigate` → `_resize` → `_take_screenshot`), not
+  ad-hoc puppeteer scripts. Save any images under `tmp/`.
+- **Desktop-first for now:** design and polish the desktop view; do not spend
+  effort on mobile/responsive polish unless Adi asks. (Decision 2026-07-09.)
+
 ## Skill Routing
 
 - AGENTS/docs/harness review: `$agent-native-repo-playbook`.
