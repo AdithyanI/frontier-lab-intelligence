@@ -260,18 +260,20 @@ function EntityCard({
           ))}
         </dl>
 
-        {entity.channels.length > 0 && (
+        {entity.channels.filter((c) => c.kind !== 'x').length > 0 && (
           <div className="ent-card-channels">
             <div className="ent-card-label">Channels</div>
             <ul>
-              {entity.channels.map((c) => (
-                <li key={c.id}>
-                  <a href={c.url} target="_blank" rel="noreferrer">
-                    <span className="ent-ch-kind">{c.kind}</span>
-                    <span className="ent-ch-label">{c.label}</span>
-                  </a>
-                </li>
-              ))}
+              {entity.channels
+                .filter((c) => c.kind !== 'x')
+                .map((c) => (
+                  <li key={c.id}>
+                    <a href={c.url} target="_blank" rel="noreferrer">
+                      <span className="ent-ch-kind">{c.kind}</span>
+                      <span className="ent-ch-label">{c.label}</span>
+                    </a>
+                  </li>
+                ))}
             </ul>
           </div>
         )}

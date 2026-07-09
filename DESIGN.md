@@ -99,8 +99,12 @@ Rules:
 
 - **Pipeline rail:** stage node (blue = live, outlined = in progress), name,
   mono state, one-line summary, live mono counts.
-- **Accounts table:** mono uppercase headers, ink rank chips, sand row hover,
-  pill search, load-more.
+- **Entity registry table:** mono uppercase headers, sand row hover, pill
+  search + All/Labs/People segmented filter, load-more; rows open a detail
+  card.
+- **Entity detail card:** native `<dialog>` opened on row click — type pill,
+  name, bio/notes, a 2-col facts grid (followers, graph follows, ranks),
+  lab channel chips, and the X profile as a tagged link pinned at the bottom.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
 - **Insight row (anticipated):** title, why-flagged rationale, score (mono),

@@ -379,7 +379,7 @@ final score.
 | `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
 | `fli.labs` | curated lab seed data (10 labs); seeds lab entities + official channels |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
-| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host, Registry-first nav; source in `frontend/` |
+| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; SPA is a single entity Registry (full pool, click-through detail card) + Architecture; source in `frontend/` |
 | `fli.registry` | lab entities/channels live; people-candidate promotion (auto-curation) still pending |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
