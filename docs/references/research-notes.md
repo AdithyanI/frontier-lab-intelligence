@@ -16,7 +16,7 @@ next; this file records the facts behind those decisions.
 | Stack | Python 3.13 + SQLite + FastAPI/Jinja2. Current `data/fli.db` is raw evidence only, not the final schema. | Chosen. |
 | Schema | Do not lock the modeled DB schema until real candidate evidence is reviewed. | Current build philosophy. |
 | Discovery | Treat Digg as a frozen bootstrap snapshot only. Next graph source should be our own X following snapshots from a curated watchlist. | Updated 2026-07-09. |
-| X/Grok | Grok Build CLI can help with live X-backed search/thread fetches, but is not an authoritative follower/list graph extractor. Use official X API or another explicit graph source for follow edges. | Observed 2026-07-08; direction updated 2026-07-09. |
+| X/Grok | Grok/grok-build can help with live X-backed search and coding, but it is not the graph source. Use an explicit following-list provider for follow edges. | Rechecked 2026-07-09. |
 | Budget | Do not over-optimize around the €100 budget; log real spend and revisit only if spend approaches the ceiling. | Adi decision. |
 
 ## Source Provenance
@@ -31,6 +31,8 @@ next; this file records the facts behind those decisions.
 | HN ranking uses gravity/time decay. | Medium explainer on HN ranking | 2026-07-08 | Freshness/time-decay reference. |
 | Market gap: no obvious product combines researcher moves, frontier-lab signal, and persona-specific re-scoring. | Landscape audit across Zeta Alpha, CB Insights, Emergent Mind, Crunchbase, Ben's Bites, TLDR | 2026-07-08 | Differentiation claim. |
 | X API is pay-per-use for posts/users/follows. | docs.x.com pricing | 2026-07-09 | Pricing is volatile; verify before spend. Following/followers reads are currently priced per returned resource. |
+| X API `GET /2/users/{id}/following` returns the users followed by a specific user and paginates up to 1,000 results per request. | docs.x.com API reference | 2026-07-09 | Correct endpoint for the target graph, but third-party following reads are currently expensive at official rates. |
+| xAI X Search can search X posts, user profiles, and threads; it does not document a structured following-list export. | docs.x.ai X Search + pricing | 2026-07-09 | Useful for discovery/validation prompts, not for building the PageRank edge table. |
 | Digg says rankings are built from the X social graph using roughly 9 million follow relationships. | digg.com/tech/x/rankings page copy | 2026-07-08 | Primary methodology claim. |
 | Digg profile pages expose ranked accounts plus initial top-follower rows. | digg.com/tech/x/rankings and digg.com/u/x/{handle} | 2026-07-08 | `fli digg` tracked snapshot: 1,000 accounts and 49,950 first-slice edges. |
 | Digg public follower API exposes a larger paginated top-follower graph. | digg.com/api/profile/{handle}/followers | 2026-07-08 | Full local pull: 361,225 directed edges across 999 target accounts; `xai` returned 404. |
@@ -53,6 +55,19 @@ useful coverage, or machine-readable handles.
 | Later | Editorial rankings (TIME100 AI, Feedspot, Om Bharatiya, etc.) | Articles/rankings | Good sanity checks and public names. | Use sparingly; can be stale or influencer-heavy. |
 | Later | Conference signals (NeurIPS/ICML/ICLR speakers/award winners) | Academic lists | Useful for high-signal researchers outside social graph. | Not pulled yet. |
 | Later | China-lab coverage | Articles/lists | Helps DeepSeek/Qwen undercoverage. | Needs targeted research. |
+
+## X Following Data Options
+
+Checked 2026-07-09. Do not run paid APIs or scrapers without explicit current-
+session approval and a small hard cap.
+
+| Option | Current pricing signal | Fit for our graph |
+| --- | --- | --- |
+| Official X API | Following/followers reads: `$0.010` per returned resource; owned-account reads: `$0.001` per returned resource. | Cleanest provenance, but expensive for third-party watchlist pulls. Good long-term target if cost/access is acceptable. |
+| TwitterAPI.io | Followers/following: from `$0.01 / 1K`, tiered; profiles `$0.18 / 1K`. | Best-looking low-cost pilot path if terms/access are acceptable. |
+| SocialData.tools | Get User Following: `$0.0002` per followed user (`$0.20 / 1K`). | Simple paid API fallback; more expensive than the cheapest TwitterAPI.io/Apify paths but still far below official X third-party reads. |
+| Apify actors | Public X following/follower actors range roughly from `$0.10 / 1K` to `$1.50 / 1K` delivered profiles, depending on actor. | Fast pilot path, but provenance/terms/reliability need review per actor. |
+| xAI Grok / X Search | `grok-build-0.1`: `$1` input / `$2` output per 1M tokens; X Search tool: `$5 / 1K` tool calls plus tokens. | Good for search, summaries, candidate validation, and maybe resolving ambiguous handles; not a direct follow-edge source. |
 
 ## Deep Research Prompt Summary
 
