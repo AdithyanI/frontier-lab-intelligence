@@ -5,7 +5,7 @@ src/fli/web/dist, which this app serves. During frontend development,
 `npm run dev` in frontend/ proxies /api to this server.
 
 Endpoints:
-- /api/status        pipeline stages with live DB counts (the system map)
+- /api/status        pipeline stages with live DB counts (health/ops)
 - /api/accounts      compatibility route for X channels, sortable/paginated
 - /api/registry      labs (curated entities) + top people candidates
                      (evidence-ranked, not yet promoted — the registry
@@ -181,10 +181,10 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
         labs = []
         lab_entities = conn.execute(
             """
-            SELECT id, slug, name, status, notes
+            SELECT id, slug, name, notes
             FROM entities
             WHERE kind = 'lab'
-            ORDER BY (status = 'frontier') DESC, name
+            ORDER BY name
             """
         ).fetchall()
         for entity in lab_entities:
@@ -227,7 +227,6 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
                     "id": entity["id"],
                     "slug": entity["slug"],
                     "name": entity["name"],
-                    "status": entity["status"],
                     "notes": entity["notes"],
                     "x_handle": x_channel["key"] if x_channel else None,
                     "website": by_kind["website"]["url"] if "website" in by_kind else None,

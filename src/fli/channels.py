@@ -25,12 +25,11 @@ CREATE TABLE IF NOT EXISTS entities (
     kind TEXT NOT NULL,                -- 'lab' | 'person'
     slug TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    status TEXT NOT NULL,
     notes TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_entities_kind ON entities (kind, status);
+CREATE INDEX IF NOT EXISTS idx_entities_kind ON entities (kind);
 
 CREATE TABLE IF NOT EXISTS channels (
     id INTEGER PRIMARY KEY,
@@ -87,6 +86,37 @@ def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    _migrate_entities_drop_status(conn)
+
+
+def _migrate_entities_drop_status(conn: sqlite3.Connection) -> None:
+    columns = [
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(entities)").fetchall()
+    ]
+    if "status" not in columns:
+        return
+    conn.execute("DROP INDEX IF EXISTS idx_entities_kind")
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS entities_new (
+               id INTEGER PRIMARY KEY,
+               kind TEXT NOT NULL,
+               slug TEXT NOT NULL UNIQUE,
+               name TEXT NOT NULL,
+               notes TEXT,
+               created_at TEXT NOT NULL,
+               updated_at TEXT NOT NULL
+           )"""
+    )
+    conn.execute(
+        """INSERT OR REPLACE INTO entities_new
+           (id, kind, slug, name, notes, created_at, updated_at)
+           SELECT id, kind, slug, name, notes, created_at, updated_at
+           FROM entities"""
+    )
+    conn.execute("DROP TABLE entities")
+    conn.execute("ALTER TABLE entities_new RENAME TO entities")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_entities_kind ON entities (kind)")
 
 
 def _channel_key(kind: str, value: str) -> str:
@@ -114,7 +144,6 @@ def upsert_entity(
     kind: str,
     slug: str,
     name: str,
-    status: str,
     notes: str | None = None,
     observed_at: str | None = None,
 ) -> int:
@@ -126,21 +155,20 @@ def upsert_entity(
         if (
             row["kind"] != kind
             or row["name"] != name
-            or row["status"] != status
             or row["notes"] != notes
         ):
             conn.execute(
                 """UPDATE entities SET
-                       kind = ?, name = ?, status = ?, notes = ?, updated_at = ?
+                       kind = ?, name = ?, notes = ?, updated_at = ?
                    WHERE id = ?""",
-                (kind, name, status, notes, observed_at, entity_id),
+                (kind, name, notes, observed_at, entity_id),
             )
         return entity_id
     cur = conn.execute(
         """INSERT INTO entities
-           (kind, slug, name, status, notes, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        (kind, slug, name, status, notes, observed_at, observed_at),
+           (kind, slug, name, notes, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (kind, slug, name, notes, observed_at, observed_at),
     )
     return cur.lastrowid
 
@@ -328,7 +356,6 @@ def seed_lab_entities(conn: sqlite3.Connection) -> dict[str, int]:
             kind="lab",
             slug=lab["slug"],
             name=lab["name"],
-            status=lab["status"],
             notes=lab["notes"],
             observed_at=observed_at,
         )
@@ -386,12 +413,12 @@ def summary(conn: sqlite3.Connection) -> list[str]:
     lines = ["channels:"]
     lines.extend(f"  {row['kind']:8s} {row['n']}" for row in rows)
     entity_rows = conn.execute(
-        """SELECT kind, status, COUNT(*) AS n
-           FROM entities GROUP BY kind, status ORDER BY kind, status"""
+        """SELECT kind, COUNT(*) AS n
+           FROM entities GROUP BY kind ORDER BY kind"""
     ).fetchall()
     lines.append("entities:")
     lines.extend(
-        f"  {row['kind']:8s} {row['status']:9s} {row['n']}" for row in entity_rows
+        f"  {row['kind']:8s} {row['n']}" for row in entity_rows
     )
     observations = conn.execute(
         "SELECT COUNT(*) AS n FROM channel_observations"

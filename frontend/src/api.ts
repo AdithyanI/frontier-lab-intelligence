@@ -26,7 +26,6 @@ export interface XChannel {
 export interface Lab {
   slug: string
   name: string
-  status: 'frontier' | 'emerging'
   x_handle: string | null
   website: string | null
   blog_feed: string | null

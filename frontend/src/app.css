@@ -426,8 +426,6 @@ tr.unranked .rank-chip { background: transparent; color: var(--muted); }
   white-space: nowrap;
 }
 
-.status-pill.tone-frontier { background: var(--ink); color: #fff; }
-.status-pill.tone-emerging { background: var(--blue); color: var(--ink); }
 .status-pill.tone-candidate {
   background: var(--surface);
   color: var(--ink-soft);

@@ -65,49 +65,104 @@ function GraphPlane() {
   )
 }
 
-/* ---------- diagram 2: channels → entity ---------- */
+/* ---------- diagram 2: the data model — who / where / what over time ---------- */
 
-function EntityLayers() {
-  const acc = [
-    { x: 80, label: '@karpathy', plane: 'X · Digg rank #1' },
-    { x: 320, label: 'github.com/karpathy', plane: 'GitHub · nanoGPT, llm.c' },
-    { x: 560, label: 'A. Karpathy', plane: 'arXiv · 12 papers' },
-  ]
+const DM_CHANNELS = [
+  { x: 88, label: '@karpathy', plane: 'X · Digg rank #1', conf: '0.99', fan: 340 },
+  { x: 292, label: 'github.com/karpathy', plane: 'GitHub · nanoGPT, llm.c', conf: '0.95', fan: 380 },
+  { x: 496, label: 'A. Karpathy', plane: 'arXiv · 12 papers', conf: '0.85', fan: 420 },
+]
+const DM_CW = 176
+const DM_CH_TOP = 176
+const DM_CH_H = 56
+const DM_OBS_DOTS = [316, 366, 416, 466, 516, 566, 616]
+const DM_RAW_CARDS = [
+  { x: 312, tag: 'post' },
+  { x: 432, tag: 'paper' },
+  { x: 552, tag: 'release' },
+]
+
+function DataModel() {
   return (
-    <svg viewBox="0 0 760 400" role="img" aria-label="Channels resolve to one real-world entity">
-      {/* plane band */}
-      <rect x="24" y="252" width="712" height="120" fill={SAND} />
-      <text x="40" y="278" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">CHANNELS — WHERE WE OBSERVE</text>
-      {acc.map((a, i) => (
-        <g key={i}>
-          <rect x={a.x} y={294} width={192} height={56} fill="#fff" stroke={INK} strokeWidth="1" />
-          <text x={a.x + 14} y={317} fontFamily={MONO} fontSize="13" fill={INK}>{a.label}</text>
-          <text x={a.x + 14} y={337} fontFamily={UI} fontSize="12" fill={MUTED}>{a.plane}</text>
-        </g>
-      ))}
-      {/* entity card */}
-      <rect x="270" y="40" width="220" height="72" fill={INK} />
-      <text x="292" y="72" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">Andrej Karpathy</text>
-      <text x="292" y="94" fontFamily={MONO} fontSize="11" fill={BLUE}>ENTITY · PERSON</text>
-      {/* entity-channel links */}
-      {acc.map((a, i) => {
-        const x1 = a.x + 96, y1 = 294
-        const x2 = 292 + i * 80, y2 = 112
-        const conf = ['0.99', '0.95', '0.85'][i]
-        const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
+    <svg
+      viewBox="0 0 760 480"
+      role="img"
+      aria-label="The data model: entities resolve to channels, which carry a dated stream of observations and raw items"
+    >
+      <defs>
+        <marker id="dm-arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+        </marker>
+      </defs>
+
+      {/* role labels down the spine */}
+      <text transform="rotate(-90 26 72)" x={26} y={72} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.14em">WHO</text>
+      <text transform="rotate(-90 26 204)" x={26} y={204} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.14em">WHERE</text>
+      <text transform="rotate(-90 26 378)" x={26} y={378} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.14em">WHAT</text>
+
+      {/* entity → channel links, each carrying a confidence */}
+      {DM_CHANNELS.map((c, i) => {
+        const cx = c.x + DM_CW / 2
+        const x1 = c.fan, y1 = 104, x2 = cx, y2 = DM_CH_TOP
+        const mx = x1 + (x2 - x1) * 0.5, my = y1 + (y2 - y1) * 0.5
         return (
-          <g key={i}>
-            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={BLUE_MID} strokeWidth="1.4" />
-            <rect x={mx - 30} y={my - 12} width={60} height={22} fill="#fff" stroke={BLUE_MID} strokeWidth="1" rx="11" />
-            <text x={mx} y={my + 3} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={BLUE_INK}>{conf}</text>
+          <g key={`link-${i}`}>
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={BLUE_MID} strokeWidth="1.4" opacity="0.8" />
+            <rect x={mx - 27} y={my - 11} width={54} height={22} rx={11} fill="#fff" stroke={BLUE_MID} strokeWidth="1" />
+            <text x={mx} y={my + 4} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={BLUE_INK}>{c.conf}</text>
           </g>
         )
       })}
-      <text x="512" y="66" fontFamily={UI} fontSize="12.5" fill={MUTED}>One real-world person.</text>
-      <text x="512" y="84" fontFamily={UI} fontSize="12.5" fill={MUTED}>Created only after review.</text>
-      <text x="40" y="56" fontFamily={UI} fontSize="12.5" fill={MUTED}>Entity-channel links carry evidence +</text>
-      <text x="40" y="74" fontFamily={UI} fontSize="12.5" fill={MUTED}>confidence. Wrong match = one</text>
-      <text x="40" y="92" fontFamily={UI} fontSize="12.5" fill={MUTED}>deletable link, not poisoned data.</text>
+
+      {/* entity (who) — one card, faint stack behind = the whole registry */}
+      <rect x={288} y={48} width={200} height={64} fill={INK} opacity="0.12" />
+      <rect x={280} y={40} width={200} height={64} fill={INK} />
+      <text x={300} y={72} fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">Andrej Karpathy</text>
+      <text x={300} y={92} fontFamily={MONO} fontSize="11" fill={BLUE}>ENTITY · PERSON</text>
+      <text x={500} y={64} fontFamily={UI} fontSize="12.5" fill={MUTED}>labs &amp; people —</text>
+      <text x={500} y={82} fontFamily={UI} fontSize="12.5" fill={MUTED}>one entity per real-world who.</text>
+
+      {/* channels (where) — and the stream each writes into the store */}
+      {DM_CHANNELS.map((c, i) => (
+        <g key={`chan-${i}`}>
+          <rect x={c.x} y={DM_CH_TOP} width={DM_CW} height={DM_CH_H} fill="#fff" stroke={INK} strokeWidth="1" />
+          <text x={c.x + 14} y={DM_CH_TOP + 24} fontFamily={MONO} fontSize="12.5" fill={INK}>{c.label}</text>
+          <text x={c.x + 14} y={DM_CH_TOP + 43} fontFamily={UI} fontSize="12" fill={MUTED}>{c.plane}</text>
+          <line
+            x1={c.x + DM_CW / 2}
+            y1={DM_CH_TOP + DM_CH_H}
+            x2={380 + (i - 1) * 8}
+            y2={298}
+            stroke={BLUE_MID}
+            strokeWidth="1.2"
+            opacity="0.5"
+            markerEnd="url(#dm-arr)"
+          />
+        </g>
+      ))}
+
+      {/* what we see there — the dated store */}
+      <rect x={64} y={300} width={632} height={156} fill={SAND} />
+      <text x={84} y={328} fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHAT WE SEE THERE — OVER TIME</text>
+      <text x={614} y={328} fontFamily={MONO} fontSize="11" fill={MUTED}>time →</text>
+
+      {/* lane 1 — measured observations */}
+      <text x={84} y={368} fontFamily={MONO} fontSize="12" fill={INK}>channel_observations</text>
+      <text x={84} y={384} fontFamily={UI} fontSize="11" fill={MUTED}>rank · followers · pagerank, dated</text>
+      <line x1={300} y1={370} x2={648} y2={370} stroke={MUTED} strokeWidth="1" opacity="0.55" markerEnd="url(#dm-arr)" />
+      {DM_OBS_DOTS.map((x, i) => (
+        <circle key={`obs-${i}`} cx={x} cy={370} r={4} fill={BLUE} />
+      ))}
+
+      {/* lane 2 — the raw content itself */}
+      <text x={84} y={420} fontFamily={MONO} fontSize="12" fill={INK}>raw_items</text>
+      <text x={84} y={436} fontFamily={UI} fontSize="11" fill={MUTED}>the content: posts · papers · releases</text>
+      {DM_RAW_CARDS.map((r, i) => (
+        <g key={`raw-${i}`}>
+          <rect x={r.x} y={410} width={66} height={24} fill="#fff" stroke={BLUE_MID} strokeWidth="1" />
+          <text x={r.x + 33} y={426} textAnchor="middle" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{r.tag}</text>
+        </g>
+      ))}
     </svg>
   )
 }
@@ -185,7 +240,7 @@ function Funnel() {
               <span className="funnel-count">{s.count}</span>
             </div>
             <div className="funnel-copy">
-            <h3 className="funnel-name">{s.name}</h3>
+              <h3 className="funnel-name">{s.name}</h3>
               <p>{s.words}</p>
             </div>
           </div>
@@ -206,14 +261,37 @@ export default function Architecture() {
       <div className="page-kicker">HOW IT WORKS</div>
       <h1 className="page-title">Architecture</h1>
       <p className="page-sub">
-        Three ideas carry the whole system: a social graph decides who is worth
-        watching, an entity/channel layer connects every observation plane,
-        and a funnel makes sure only signal reaches a human.
+        Three ideas carry the whole system: one data model lays out who we
+        track, where we watch them, and what we saw; a social graph decides who
+        is worth watching in the first place; and a funnel makes sure only
+        signal reaches a human.
       </p>
 
       <section className="arch-section">
         <div className="arch-section-head">
           <span className="arch-no">01</span>
+          <h2 className="arch-h">One data model underneath</h2>
+          <p className="arch-p">
+            Start here — everything else reads through this. Everything the
+            system stores fits a single spine. An entity is a
+            <em> who</em> — a lab or a person. It is watched through
+            <em> channels</em> — its X account, GitHub org, arXiv author, blog —
+            and evidence-and-confidence links resolve many channels to one
+            entity. Each channel then carries a dated stream of
+            <em> what</em> we saw there: measured observations and the raw
+            content itself. Read it top to bottom: who, where, and what — over
+            time.
+          </p>
+        </div>
+        <div className="arch-canvas">
+          <DataModel />
+          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · the legacy Digg/X follow-graph is one bootstrap source feeding channels + observations</div>
+        </div>
+      </section>
+
+      <section className="arch-section">
+        <div className="arch-section-head">
+          <span className="arch-no">02</span>
           <h2 className="arch-h">The graph decides who matters</h2>
           <p className="arch-p">
             2,315 X channels and 361,225 observed follow relationships, pulled
@@ -226,25 +304,6 @@ export default function Architecture() {
         <div className="arch-canvas">
           <GraphPlane />
           <div className="arch-caption">graph_edges · source: digg · relationship: top_follower_of · every edge carries its evidence URL</div>
-        </div>
-      </section>
-
-      <section className="arch-section">
-        <div className="arch-section-head">
-          <span className="arch-no">02</span>
-          <h2 className="arch-h">Entities connect the planes</h2>
-          <p className="arch-p">
-            The same person exists on X, GitHub, and arXiv under different
-            names. Each source stays a separate channel — what the data
-            literally shows. A reviewed entity sits above them, linked by
-            entity-channel records that carry evidence and confidence. Every
-            future signal (a post, a release, a paper) lands on a channel and is read
-            through its entity.
-          </p>
-        </div>
-        <div className="arch-canvas">
-          <EntityLayers />
-          <div className="arch-caption">channels → entity_channels (evidence + confidence) → entities · promotion requires curation</div>
         </div>
       </section>
 

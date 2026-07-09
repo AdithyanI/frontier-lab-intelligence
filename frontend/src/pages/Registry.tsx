@@ -62,7 +62,6 @@ export default function Registry() {
             <thead>
               <tr>
                 <th>Lab</th>
-                <th>Status</th>
                 <th>X channel</th>
                 <th>Channels</th>
                 <th className="num">Followers</th>
@@ -72,11 +71,6 @@ export default function Registry() {
               {data.labs.map((l) => (
                 <tr key={l.slug}>
                   <td className="handle">{l.name}</td>
-                  <td>
-                    <span className={`status-pill tone-${l.status}`}>
-                      {l.status}
-                    </span>
-                  </td>
                   <td>
                     {l.x_handle ? (
                       <a

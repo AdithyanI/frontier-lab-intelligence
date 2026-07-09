@@ -1,6 +1,5 @@
-import { NavLink, Route, Routes } from 'react-router-dom'
+import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import Registry from './pages/Registry'
-import SystemMap from './pages/SystemMap'
 import Accounts from './pages/Accounts'
 import Architecture from './pages/Architecture'
 
@@ -14,7 +13,6 @@ export default function App() {
         </div>
         <nav aria-label="Main">
           <NavLink to="/" end>Registry</NavLink>
-          <NavLink to="/system">System</NavLink>
           <NavLink to="/channels">Channels</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
           <span className="nav-soon">Insights · Reports — soon</span>
@@ -23,10 +21,10 @@ export default function App() {
       <main className="content">
         <Routes>
           <Route path="/" element={<Registry />} />
-          <Route path="/system" element={<SystemMap />} />
           <Route path="/channels" element={<Accounts />} />
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/architecture" element={<Architecture />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>
