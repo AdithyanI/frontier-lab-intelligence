@@ -15,7 +15,7 @@ export default function App() {
         <nav aria-label="Main">
           <NavLink to="/" end>Registry</NavLink>
           <NavLink to="/system">System</NavLink>
-          <NavLink to="/accounts">Accounts</NavLink>
+          <NavLink to="/channels">Channels</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
           <span className="nav-soon">Insights · Reports — soon</span>
         </nav>
@@ -24,6 +24,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Registry />} />
           <Route path="/system" element={<SystemMap />} />
+          <Route path="/channels" element={<Accounts />} />
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/architecture" element={<Architecture />} />
         </Routes>

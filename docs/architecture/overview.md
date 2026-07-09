@@ -5,8 +5,9 @@ shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: data-first bootstrap. The implemented code has raw fetch/store,
 Digg-derived seed graph extraction, a modeled SQLite graph layer, and a
-React SPA (system map, accounts table, architecture view) over a JSON API.
-The modeled registry/extraction/scoring schema is intentionally not locked yet.
+React SPA (registry, channels workbench, system map, architecture view) over a
+JSON API. The registry foundation is now entity/channel based; extraction and
+scoring schemas are intentionally not locked yet.
 
 ## Stack
 
@@ -42,7 +43,7 @@ flowchart LR
     EXT[Extraction<br/>LLM → structured insights]
     SCO[Scoring<br/>dimensions + validation]
     DEL[Delivery<br/>digests · alerts]
-    UI[Web UI<br/>FastAPI + Jinja2]
+    UI[Web UI<br/>FastAPI + React SPA]
 
     DIGG --> REG
     REG -->|who to watch| ING
@@ -122,60 +123,54 @@ Known data facts:
   edges.
 - `fli digg --full-followers` produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
+- `fli channels sync` currently materializes 10 lab entities, 2,347 channels
+  (2,315 X, 10 websites, 9 GitHub, 8 arXiv, 5 blog/feed), 42 entity-channel
+  links, and 14,674 channel observations.
 
-## Graph Storage Plan
+## Entity / Channel Model
 
-The Digg data is graph data: accounts are nodes, relationships are edges, and
-the source URL/API response is evidence. Store the modeled graph in SQLite
-rather than keeping a large nested JSON file as the main working artifact.
-SQLite is enough for this scale when the edge endpoints are indexed.
-
-Keep these layers separate:
-
-1. **Raw observations** — source payloads or source-file references, fetched
-   time, source URL, and hash. This preserves evidence and allows re-parsing.
-2. **Accounts** — platform accounts such as X handles, with Digg rank/category,
-   display name, bio, X id, GitHub URL, first/last seen timestamps.
-3. **Graph edges** — directed observed relationships, e.g.
-   `from_account -> to_account`, relationship type `top_follower_of` or
-   `follows`, source `digg`, observed time, evidence URL, confidence, and raw
-   observation reference.
-4. **Entities** — real-world people/labs/companies promoted after review.
-   Do not merge accounts into entities too early.
-5. **Identities and affiliations** — links from real-world entities to
-   platform accounts and lab/company affiliations, each with provenance.
-
-Sketch:
+The case prompt asks for labs and individuals as first-class entities, resolved
+across X, GitHub, arXiv, and official lab channels. The model is therefore:
 
 ```text
-raw_observations(id, source, source_url, fetched_at, payload_ref, payload_hash)
-accounts(id, platform, handle, display_name, x_id, bio, first_seen_at, last_seen_at)
-account_source_facts(account_id, source, rank, role, github_url, observed_at)
-graph_edges(id, from_account_id, to_account_id, relationship, source,
-            observed_at, evidence_url, confidence, raw_observation_id)
-entities(id, kind, canonical_name)
-identities(entity_id, account_id, platform, confidence, evidence)
-affiliations(person_entity_id, lab_entity_id, role, start_date, end_date, evidence)
+entities              # who: OpenAI, Anthropic, Andrej Karpathy
+channels              # where: @openai, OpenAI blog, github.com/openai
+entity_channels       # evidence/confidence that a channel belongs to an entity
+channel_observations  # measured/source-specific facts about a channel over time
 ```
 
-Indexes likely needed first:
+Rule of thumb:
 
 ```text
-accounts(platform, handle)
-accounts(platform, x_id)
-graph_edges(from_account_id, relationship)
-graph_edges(to_account_id, relationship)
-graph_edges(source, observed_at)
+Entity = who
+Channel = where we observe them
+Entity channel = proof that this where belongs to that who
+Observation = what we saw there at a time
 ```
 
-This structure preserves the original evidence while making ranking and
-visualization straightforward. Example exports later:
+Current implemented tables:
 
-```sql
-SELECT f.handle AS from_handle, t.handle AS to_handle, e.relationship
-FROM graph_edges e
-JOIN accounts f ON f.id = e.from_account_id
-JOIN accounts t ON t.id = e.to_account_id;
+```text
+entities(id, kind, slug, name, status, notes, created_at, updated_at)
+channels(id, kind, key, label, url, first_seen_at, last_seen_at)
+entity_channels(entity_id, channel_id, relationship, confidence, evidence_url, notes)
+channel_observations(channel_id, source, metric, value, observed_at, evidence_url)
+```
+
+The old `accounts`, `account_source_facts`, and `graph_edges` tables remain as
+the X graph import backing layer. They are not the product model. X accounts are
+mirrored into `channels(kind='x')`, and Digg/PageRank/profile fields are copied
+into `channel_observations`. That keeps Digg as one bootstrap source, not the
+center of the schema.
+
+Examples:
+
+```text
+Entity: OpenAI
+Channels: @openai, openai.com/news/rss.xml, github.com/openai, arXiv query
+
+Entity: Andrej Karpathy (future curation pass)
+Channels: @karpathy, github.com/karpathy, arXiv author/query
 ```
 
 ## Target Data Model Sketch
@@ -188,7 +183,29 @@ erDiagram
     ENTITY {
         string id PK
         string kind "lab | person"
-        string canonical_name
+        string slug
+        string name
+        string status
+    }
+    CHANNEL {
+        string id PK
+        string kind "x | github | blog | arxiv | website"
+        string key
+        string url
+    }
+    ENTITY_CHANNEL {
+        string entity_id FK
+        string channel_id FK
+        string relationship "official | identity | candidate"
+        float confidence
+        string evidence_url
+    }
+    CHANNEL_OBSERVATION {
+        string channel_id FK
+        string source
+        string metric
+        string value
+        datetime observed_at
     }
     AFFILIATION {
         string person_id FK
@@ -196,13 +213,6 @@ erDiagram
         date start_date
         date end_date "null = current"
         string provenance
-    }
-    IDENTITY {
-        string entity_id FK
-        string platform "x | arxiv | github | site"
-        string handle
-        float confidence
-        string evidence
     }
     DOCUMENT {
         string id PK
@@ -224,8 +234,10 @@ erDiagram
         string rationale
     }
 
+    ENTITY ||--o{ ENTITY_CHANNEL : has
+    CHANNEL ||--o{ ENTITY_CHANNEL : resolves_to
+    CHANNEL ||--o{ CHANNEL_OBSERVATION : observed_as
     ENTITY ||--o{ AFFILIATION : "person side"
-    ENTITY ||--o{ IDENTITY : has
     ENTITY ||--o{ INSIGHT : "attributed to"
     DOCUMENT ||--o{ INSIGHT : yields
     INSIGHT ||--o{ SCORE : scored
@@ -243,11 +255,12 @@ final score.
 | `fli.cli` | `--version`, `fetch`, `digg`, `graph`, `labs`, `web` |
 | `fli.digg` | Digg rankings and top-follower graph extraction |
 | `fli.store` | raw `raw_items` SQLite layer |
-| `fli.graph` | modeled accounts / source facts / edges; PageRank; `fli graph load\|pagerank` |
-| `fli.labs` | curated lab entity table (10 seeded, `src/fli/labs.py`); `fli labs seed\|summary` |
+| `fli.graph` | legacy X graph import backing layer (`accounts`, facts, edges); PageRank; mirrors observations into channels |
+| `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
+| `fli.labs` | curated lab seed data (10 labs); seeds lab entities + official channels |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`, `/api/architecture`) + built SPA host, Registry-first nav; source in `frontend/` |
-| `fli.registry` | labs are live via `fli.labs`; people-candidate promotion (status field, auto-curation) still pending |
+| `fli.registry` | lab entities/channels live; people-candidate promotion (auto-curation) still pending |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |
@@ -255,9 +268,8 @@ final score.
 
 ## Build Order
 
-1. Build a reviewable registry-candidate table from Digg + raw evidence.
-2. Decide the first modeled registry schema from reviewed candidates.
-3. Promote raw fetch into production ingestion around the accepted registry.
-4. Extract and score real ingested data.
-5. Add validation harness and ground-truth labeling.
-6. Delivery and UI last.
+1. Finish the entity/channel registry foundation and people promotion path.
+2. Promote raw fetch into production ingestion around accepted entity channels.
+3. Extract and score real ingested data.
+4. Add validation harness and ground-truth labeling.
+5. Delivery and UI last.

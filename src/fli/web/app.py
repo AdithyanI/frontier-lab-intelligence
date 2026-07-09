@@ -6,7 +6,7 @@ src/fli/web/dist, which this app serves. During frontend development,
 
 Endpoints:
 - /api/status        pipeline stages with live DB counts (the system map)
-- /api/accounts      modeled accounts with Digg facts, sortable/paginated
+- /api/accounts      compatibility route for X channels, sortable/paginated
 - /api/registry      labs (curated entities) + top people candidates
                      (evidence-ranked, not yet promoted — the registry
                      itself, before the auto-curation pass exists)
@@ -18,31 +18,40 @@ from fastapi import FastAPI, Query
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from fli import graph
+from fli import channels
 
 DIST_DIR = Path(__file__).parent / "dist"
 
 app = FastAPI(title="Frontier Lab Intelligence")
 
 
+def _model_conn():
+    conn = channels.connect()
+    if conn.execute("SELECT COUNT(*) FROM channels").fetchone()[0] == 0:
+        channels.sync_all(conn)
+    return conn
+
+
 def _counts() -> dict:
-    conn = graph.connect()
+    conn = _model_conn()
     try:
         def one(sql: str) -> int:
             return conn.execute(sql).fetchone()[0]
 
         return {
-            "accounts": one("SELECT COUNT(*) FROM accounts"),
-            "ranked_accounts": one(
-                "SELECT COUNT(*) FROM account_source_facts"
-                " WHERE source = 'digg' AND fact = 'rank'"
+            "channels": one("SELECT COUNT(*) FROM channels"),
+            "x_channels": one("SELECT COUNT(*) FROM channels WHERE kind = 'x'"),
+            "ranked_channels": one(
+                "SELECT COUNT(DISTINCT channel_id) FROM channel_observations"
+                " WHERE source = 'digg' AND metric = 'rank'"
             ),
             "edges": one("SELECT COUNT(*) FROM graph_edges"),
-            "facts": one("SELECT COUNT(*) FROM account_source_facts"),
+            "observations": one("SELECT COUNT(*) FROM channel_observations"),
             "raw_items": one("SELECT COUNT(*) FROM raw_items"),
-            "fact_sources": one(
-                "SELECT COUNT(DISTINCT source) FROM account_source_facts"
+            "observation_sources": one(
+                "SELECT COUNT(DISTINCT source) FROM channel_observations"
             ),
+            "entities": one("SELECT COUNT(*) FROM entities"),
         }
     finally:
         conn.close()
@@ -60,18 +69,18 @@ def status() -> JSONResponse:
             "stats": [
                 {"label": "graph edges", "value": c["edges"]},
                 {"label": "raw items", "value": c["raw_items"]},
-                {"label": "fact sources", "value": c["fact_sources"]},
+                {"label": "observation sources", "value": c["observation_sources"]},
             ],
         },
         {
             "id": "registry",
             "name": "Registry",
             "state": "in-progress",
-            "summary": "Graph-derived candidates awaiting weights, triangulation, review.",
+            "summary": "Entities linked to channels; people candidates awaiting curation.",
             "stats": [
-                {"label": "candidate accounts", "value": c["accounts"]},
-                {"label": "ranked by Digg", "value": c["ranked_accounts"]},
-                {"label": "confirmed entities", "value": 0},
+                {"label": "x channels", "value": c["x_channels"]},
+                {"label": "ranked channels", "value": c["ranked_channels"]},
+                {"label": "confirmed entities", "value": c["entities"]},
             ],
         },
         {
@@ -112,36 +121,43 @@ def accounts(
     offset: int = 0,
     q: str = "",
 ) -> JSONResponse:
-    conn = graph.connect()
+    conn = _model_conn()
     try:
         where = ""
         params: list = []
         if q:
-            where = "WHERE a.handle LIKE ? OR a.display_name LIKE ?"
+            where = "AND (c.key LIKE ? OR c.label LIKE ?)"
             params = [f"%{q}%", f"%{q}%"]
         rows = conn.execute(
             f"""
-            SELECT a.id, a.handle, a.display_name, a.bio, a.followers_count,
-                   CAST(rank.value AS INTEGER) AS digg_rank,
-                   role.value AS role,
-                   gh.value AS github_url,
+            SELECT c.id, c.key AS handle, c.label AS display_name,
+                   (SELECT o.value FROM channel_observations o
+                    WHERE o.channel_id = c.id AND o.source = 'x_profile' AND o.metric = 'bio'
+                    ORDER BY o.observed_at DESC LIMIT 1) AS bio,
+                   CAST((SELECT o.value FROM channel_observations o
+                    WHERE o.channel_id = c.id AND o.source = 'x_profile' AND o.metric = 'followers_count'
+                    ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS followers_count,
+                   CAST((SELECT o.value FROM channel_observations o
+                    WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'rank'
+                    ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS digg_rank,
+                   (SELECT o.value FROM channel_observations o
+                    WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'role'
+                    ORDER BY o.observed_at DESC LIMIT 1) AS role,
+                   (SELECT o.value FROM channel_observations o
+                    WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'github_url'
+                    ORDER BY o.observed_at DESC LIMIT 1) AS github_url,
                    (SELECT COUNT(*) FROM graph_edges e
-                    WHERE e.to_account_id = a.id) AS tracked_followers
-            FROM accounts a
-            LEFT JOIN account_source_facts rank
-              ON rank.account_id = a.id AND rank.source = 'digg' AND rank.fact = 'rank'
-            LEFT JOIN account_source_facts role
-              ON role.account_id = a.id AND role.source = 'digg' AND role.fact = 'role'
-            LEFT JOIN account_source_facts gh
-              ON gh.account_id = a.id AND gh.source = 'digg' AND gh.fact = 'github_url'
-            {where}
+                    JOIN accounts a ON a.id = e.to_account_id
+                    WHERE a.handle = c.key) AS tracked_followers
+            FROM channels c
+            WHERE c.kind = 'x' {where}
             ORDER BY digg_rank IS NULL, digg_rank, tracked_followers DESC
             LIMIT ? OFFSET ?
             """,
             [*params, limit, offset],
         ).fetchall()
         total = conn.execute(
-            f"SELECT COUNT(*) FROM accounts a {where}", params
+            f"SELECT COUNT(*) FROM channels c WHERE c.kind = 'x' {where}", params
         ).fetchone()[0]
         return JSONResponse(
             {"total": total, "accounts": [dict(r) for r in rows]}
@@ -160,59 +176,135 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
     already linked to a lab (an org shouldn't double-count as a person
     candidate). Honest framing: these are candidates, not tracked entities.
     """
-    conn = graph.connect()
+    conn = _model_conn()
     try:
-        labs = conn.execute(
+        labs = []
+        lab_entities = conn.execute(
             """
-            SELECT l.slug, l.name, l.status, l.x_handle, l.website, l.blog_feed,
-                   l.github_org, l.arxiv_query, l.notes,
-                   a.followers_count,
-                   (a.id IS NOT NULL) AS linked,
-                   (SELECT COUNT(*) FROM graph_edges e
-                    WHERE e.to_account_id = a.id) AS tracked_followers
-            FROM labs l
-            LEFT JOIN accounts a ON a.id = l.x_account_id
-            ORDER BY (l.status = 'frontier') DESC, COALESCE(a.followers_count, 0) DESC
+            SELECT id, slug, name, status, notes
+            FROM entities
+            WHERE kind = 'lab'
+            ORDER BY (status = 'frontier') DESC, name
             """
         ).fetchall()
-
-        candidate_filter = """
-            (d.value IS NOT NULL OR p.value IS NOT NULL)
-            AND a.id NOT IN (
-                SELECT x_account_id FROM labs WHERE x_account_id IS NOT NULL
+        for entity in lab_entities:
+            entity_channels = conn.execute(
+                """
+                SELECT c.id, c.kind, c.key, c.label, c.url
+                FROM entity_channels ec
+                JOIN channels c ON c.id = ec.channel_id
+                WHERE ec.entity_id = ?
+                ORDER BY c.kind, c.key
+                """,
+                (entity["id"],),
+            ).fetchall()
+            by_kind = {row["kind"]: row for row in entity_channels}
+            x_channel = by_kind.get("x")
+            followers_count = None
+            tracked_followers = 0
+            linked = False
+            if x_channel:
+                followers = conn.execute(
+                    """SELECT value FROM channel_observations
+                       WHERE channel_id = ? AND source = 'x_profile'
+                         AND metric = 'followers_count'
+                       ORDER BY observed_at DESC LIMIT 1""",
+                    (x_channel["id"],),
+                ).fetchone()
+                followers_count = int(followers["value"]) if followers else None
+                account = conn.execute(
+                    "SELECT id FROM accounts WHERE platform = 'x' AND handle = ?",
+                    (x_channel["key"],),
+                ).fetchone()
+                linked = account is not None
+                if account:
+                    tracked_followers = conn.execute(
+                        "SELECT COUNT(*) FROM graph_edges WHERE to_account_id = ?",
+                        (account["id"],),
+                    ).fetchone()[0]
+            labs.append(
+                {
+                    "id": entity["id"],
+                    "slug": entity["slug"],
+                    "name": entity["name"],
+                    "status": entity["status"],
+                    "notes": entity["notes"],
+                    "x_handle": x_channel["key"] if x_channel else None,
+                    "website": by_kind["website"]["url"] if "website" in by_kind else None,
+                    "blog_feed": by_kind["blog"]["url"] if "blog" in by_kind else None,
+                    "github_org": by_kind["github"]["key"] if "github" in by_kind else None,
+                    "arxiv_query": by_kind["arxiv"]["key"] if "arxiv" in by_kind else None,
+                    "followers_count": followers_count,
+                    "linked": linked,
+                    "tracked_followers": tracked_followers,
+                    "channels": [dict(row) for row in entity_channels],
+                }
             )
-        """
+
         candidates = conn.execute(
-            f"""
-            SELECT a.id, a.handle, a.display_name, a.bio, a.followers_count,
-                   CAST(d.value AS INTEGER) AS digg_rank,
-                   CAST(p.value AS INTEGER) AS pagerank_rank,
-                   role.value AS role,
-                   (SELECT COUNT(*) FROM graph_edges e
-                    WHERE e.to_account_id = a.id) AS tracked_followers
-            FROM accounts a
-            LEFT JOIN account_source_facts d
-              ON d.account_id = a.id AND d.source = 'digg' AND d.fact = 'rank'
-            LEFT JOIN account_source_facts p
-              ON p.account_id = a.id AND p.source = 'graph' AND p.fact = 'pagerank_rank'
-            LEFT JOIN account_source_facts role
-              ON role.account_id = a.id AND role.source = 'digg' AND role.fact = 'role'
-            WHERE {candidate_filter}
-            ORDER BY MIN(COALESCE(CAST(d.value AS INTEGER), 999999),
-                         COALESCE(CAST(p.value AS INTEGER), 999999)) ASC
+            """
+            WITH x AS (
+                SELECT c.id, c.key AS handle, c.label AS display_name,
+                       (SELECT o.value FROM channel_observations o
+                        WHERE o.channel_id = c.id AND o.source = 'x_profile' AND o.metric = 'bio'
+                        ORDER BY o.observed_at DESC LIMIT 1) AS bio,
+                       CAST((SELECT o.value FROM channel_observations o
+                        WHERE o.channel_id = c.id AND o.source = 'x_profile' AND o.metric = 'followers_count'
+                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS followers_count,
+                       CAST((SELECT o.value FROM channel_observations o
+                        WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'rank'
+                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS digg_rank,
+                       CAST((SELECT o.value FROM channel_observations o
+                        WHERE o.channel_id = c.id AND o.source = 'graph' AND o.metric = 'pagerank_rank'
+                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS pagerank_rank,
+                       (SELECT o.value FROM channel_observations o
+                        WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'role'
+                        ORDER BY o.observed_at DESC LIMIT 1) AS role,
+                       c.id NOT IN (
+                         SELECT ec.channel_id
+                         FROM entity_channels ec
+                         JOIN entities e ON e.id = ec.entity_id
+                         WHERE e.kind = 'lab'
+                       ) AS not_lab_channel,
+                       (SELECT COUNT(*) FROM graph_edges e
+                        JOIN accounts a ON a.id = e.to_account_id
+                        WHERE a.handle = c.key) AS tracked_followers
+                FROM channels c
+                WHERE c.kind = 'x'
+            )
+            SELECT id, handle, display_name, bio, followers_count, digg_rank,
+                   pagerank_rank, role, tracked_followers
+            FROM x
+            WHERE not_lab_channel
+              AND (digg_rank IS NOT NULL OR pagerank_rank IS NOT NULL)
+            ORDER BY MIN(COALESCE(digg_rank, 999999),
+                         COALESCE(pagerank_rank, 999999)) ASC
             LIMIT ?
             """,
             [limit],
         ).fetchall()
 
         pool_total = conn.execute(
-            f"""
-            SELECT COUNT(DISTINCT a.id) FROM accounts a
-            LEFT JOIN account_source_facts d
-              ON d.account_id = a.id AND d.source = 'digg' AND d.fact = 'rank'
-            LEFT JOIN account_source_facts p
-              ON p.account_id = a.id AND p.source = 'graph' AND p.fact = 'pagerank_rank'
-            WHERE {candidate_filter}
+            """
+            WITH x AS (
+                SELECT c.id,
+                       CAST((SELECT o.value FROM channel_observations o
+                        WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'rank'
+                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS digg_rank,
+                       CAST((SELECT o.value FROM channel_observations o
+                        WHERE o.channel_id = c.id AND o.source = 'graph' AND o.metric = 'pagerank_rank'
+                        ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS pagerank_rank
+                FROM channels c
+                WHERE c.kind = 'x'
+                  AND c.id NOT IN (
+                    SELECT ec.channel_id
+                    FROM entity_channels ec
+                    JOIN entities e ON e.id = ec.entity_id
+                    WHERE e.kind = 'lab'
+                  )
+            )
+            SELECT COUNT(*) FROM x
+            WHERE digg_rank IS NOT NULL OR pagerank_rank IS NOT NULL
             """
         ).fetchone()[0]
 
@@ -226,15 +318,9 @@ def registry(limit: int = Query(150, le=500)) -> JSONResponse:
             )
             candidates_out.append(row)
 
-        labs_out = []
-        for r in labs:
-            row = dict(r)
-            row["linked"] = bool(row["linked"])
-            labs_out.append(row)
-
         return JSONResponse(
             {
-                "labs": labs_out,
+                "labs": labs,
                 "candidates": candidates_out,
                 "candidates_pool_total": pool_total,
             }

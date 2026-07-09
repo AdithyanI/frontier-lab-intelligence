@@ -26,7 +26,7 @@ export default function SystemMap() {
   }
 
   const edges = findStat(stages, 'sources', 'graph edges')
-  const candidates = findStat(stages, 'registry', 'candidate accounts')
+  const candidates = findStat(stages, 'registry', 'x channels')
   const entities = findStat(stages, 'registry', 'confirmed entities')
 
   return (
@@ -46,7 +46,7 @@ export default function SystemMap() {
           </div>
           <div className="big-stat">
             <span className="v">{candidates.toLocaleString('en-US')}</span>
-            <span className="l">candidate accounts</span>
+            <span className="l">x channels</span>
           </div>
           <div className="big-stat">
             <span className="v">{entities.toLocaleString('en-US')}</span>

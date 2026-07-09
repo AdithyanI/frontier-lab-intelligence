@@ -11,7 +11,7 @@ export interface Stage {
   stats: StageStat[]
 }
 
-export interface Account {
+export interface XChannel {
   id: number
   handle: string
   display_name: string | null

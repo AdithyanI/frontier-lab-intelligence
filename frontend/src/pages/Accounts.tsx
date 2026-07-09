@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { getJSON, type Account } from '../api'
+import { getJSON, type XChannel } from '../api'
 
 const PAGE = 100
 
 export default function Accounts() {
-  const [rows, setRows] = useState<Account[]>([])
+  const [rows, setRows] = useState<XChannel[]>([])
   const [total, setTotal] = useState<number | null>(null)
   const [q, setQ] = useState('')
   const [loading, setLoading] = useState(false)
@@ -13,7 +13,7 @@ export default function Accounts() {
   async function load(query: string, offset: number) {
     setLoading(true)
     try {
-      const d = await getJSON<{ total: number; accounts: Account[] }>(
+      const d = await getJSON<{ total: number; accounts: XChannel[] }>(
         `/api/accounts?limit=${PAGE}&offset=${offset}&q=${encodeURIComponent(query)}`,
       )
       setTotal(d.total)
@@ -33,12 +33,12 @@ export default function Accounts() {
 
   return (
     <div className="page">
-      <div className="page-kicker">SOURCE PLANE · X VIA DIGG</div>
-      <h1 className="page-title">Accounts</h1>
+      <div className="page-kicker">SOURCE PLANE · X CHANNELS</div>
+      <h1 className="page-title">Channels</h1>
       <p className="page-sub">
-        Every X account observed in the Digg graph pull — ranked accounts plus
-        the followers they surfaced. Candidates, not confirmed people: the
-        registry review decides who becomes an entity.
+        Every X channel observed through the graph/bootstrap sources. Channels
+        are places we watch; entities are the labs or people those channels
+        resolve to after curation.
       </p>
       <div className="table-tools">
         <input
@@ -47,7 +47,7 @@ export default function Accounts() {
           placeholder="Search handle or name…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          aria-label="Search accounts"
+          aria-label="Search channels"
         />
         {total !== null && (
           <span className="table-count">
@@ -55,12 +55,12 @@ export default function Accounts() {
           </span>
         )}
       </div>
-      {error && <div className="error-note">Could not load accounts: {error}</div>}
+      {error && <div className="error-note">Could not load channels: {error}</div>}
       <table>
         <thead>
           <tr>
             <th className="num">Digg rank</th>
-            <th>Account</th>
+            <th>Channel</th>
             <th>Role</th>
             <th className="num">Tracked followers</th>
             <th className="num">X followers</th>

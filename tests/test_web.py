@@ -13,7 +13,8 @@ def test_status_reports_pipeline_stages():
     assert ids == ["sources", "registry", "ingestion", "extraction", "scoring", "delivery"]
     registry = stages[1]
     assert registry["state"] == "in-progress"
-    assert any(s["label"] == "candidate accounts" for s in registry["stats"])
+    assert any(s["label"] == "x channels" for s in registry["stats"])
+    assert any(s["label"] == "confirmed entities" for s in registry["stats"])
 
 
 def test_accounts_endpoint_returns_ranked_first():
@@ -40,6 +41,8 @@ def test_registry_returns_labs_and_candidates():
     openai = next(l for l in data["labs"] if l["slug"] == "openai")
     assert openai["linked"] is True
     assert openai["x_handle"] == "openai"
+    assert any(c["kind"] == "x" for c in openai["channels"])
+    assert any(c["kind"] == "github" for c in openai["channels"])
 
     handles = [c["handle"] for c in data["candidates"]]
     assert "karpathy" in handles

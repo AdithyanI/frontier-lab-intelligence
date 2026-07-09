@@ -51,6 +51,9 @@ def test_load_digg_normalizes_and_dedupes(tmp_path):
     counts = graph.load_digg(conn, raw_dir)
     assert counts["accounts"] == 2  # karpathy stored once despite 3 mentions
     assert counts["edges"] == 1     # duplicate edge deduped
+    assert conn.execute(
+        "SELECT COUNT(*) AS n FROM channels WHERE kind = 'x'"
+    ).fetchone()["n"] == 2
 
     acct = conn.execute(
         "SELECT * FROM accounts WHERE handle = 'karpathy'"
@@ -64,6 +67,13 @@ def test_load_digg_normalizes_and_dedupes(tmp_path):
            WHERE a.handle = 'karpathy' AND f.source = 'digg' AND f.fact = 'rank'"""
     ).fetchone()
     assert rank["value"] == "1"
+    obs = conn.execute(
+        """SELECT o.value FROM channel_observations o
+           JOIN channels c ON c.id = o.channel_id
+           WHERE c.kind = 'x' AND c.key = 'karpathy'
+             AND o.source = 'digg' AND o.metric = 'rank'"""
+    ).fetchone()
+    assert obs["value"] == "1"
 
     # reload is idempotent
     counts2 = graph.load_digg(conn, raw_dir)
@@ -94,3 +104,7 @@ def test_pagerank_ranks_followed_account_highest(tmp_path):
         "SELECT COUNT(*) AS n FROM account_source_facts WHERE source = 'graph'"
     ).fetchone()["n"]
     assert n == 4  # 2 accounts x (pagerank + pagerank_rank)
+    obs_n = conn.execute(
+        "SELECT COUNT(*) AS n FROM channel_observations WHERE source = 'graph'"
+    ).fetchone()["n"]
+    assert obs_n == 4

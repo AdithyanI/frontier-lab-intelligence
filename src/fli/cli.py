@@ -47,13 +47,16 @@ def main(argv: list[str] | None = None) -> int:
         default=0.05,
         help="Seconds to sleep between paginated follower API requests per worker.",
     )
-    graph_p = sub.add_parser("graph", help="Modeled graph layer (accounts, edges).")
+    graph_p = sub.add_parser("graph", help="X graph import layer (accounts, edges).")
     graph_p.add_argument("action", choices=["load", "summary", "pagerank"])
     graph_p.add_argument("--db", default=None, help="Path to SQLite DB.")
     graph_p.add_argument("--raw-dir", default=None, help="Raw Digg pull directory.")
     labs_p = sub.add_parser("labs", help="Hand-curated lab registry.")
     labs_p.add_argument("action", choices=["seed", "summary"])
     labs_p.add_argument("--db", default=None, help="Path to SQLite DB.")
+    channels_p = sub.add_parser("channels", help="Entity/channel model.")
+    channels_p.add_argument("action", choices=["sync", "summary"])
+    channels_p.add_argument("--db", default=None, help="Path to SQLite DB.")
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -104,6 +107,16 @@ def main(argv: list[str] | None = None) -> int:
         from fli import labs
 
         return labs.main(
+            [
+                args.action,
+                *(["--db", args.db] if args.db else []),
+            ]
+        )
+
+    if args.command == "channels":
+        from fli import channels
+
+        return channels.main(
             [
                 args.action,
                 *(["--db", args.db] if args.db else []),

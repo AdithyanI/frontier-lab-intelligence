@@ -39,7 +39,7 @@ export default function Registry() {
       <h1 className="page-title">Registry</h1>
       <p className="page-sub">
         Every entity the system tracks — real people and labs, resolved from
-        raw accounts, not the accounts themselves. Labs are hand-curated: a
+        raw channels, not the channels themselves. Labs are hand-curated: a
         small, known list with verified official channels. People are still
         candidates below: ranked by evidence, not yet promoted by a human or
         an automated curator.
@@ -63,7 +63,7 @@ export default function Registry() {
               <tr>
                 <th>Lab</th>
                 <th>Status</th>
-                <th>X account</th>
+                <th>X channel</th>
                 <th>Channels</th>
                 <th className="num">Followers</th>
               </tr>
@@ -133,7 +133,7 @@ export default function Registry() {
           <span className="status-pill tone-candidate">0 tracked</span>
           <p>
             No person has been promoted into the registry yet — the
-            auto-curation pass (an LLM reading each account&rsquo;s evidence
+            auto-curation pass (an LLM reading each channel&rsquo;s evidence
             and deciding track / reject with cited reasons) hasn&rsquo;t run.
             Below is the candidate pool ranked by evidence, for you to look at
             while that gets built.

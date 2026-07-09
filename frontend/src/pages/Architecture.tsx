@@ -1,5 +1,5 @@
 /* The architecture, explained visually: three hand-built diagrams that
-   teach the system — the graph plane, the entity/identity layering, and
+   teach the system — the graph plane, the entity/channel layering, and
    the signal funnel. Real handles, real colors, no generic doc dump. */
 
 const INK = '#151515'
@@ -37,7 +37,7 @@ const EDGES: [number, number][] = [
 
 function GraphPlane() {
   return (
-    <svg viewBox="0 0 760 360" role="img" aria-label="Directed follow graph of AI accounts">
+    <svg viewBox="0 0 760 360" role="img" aria-label="Directed follow graph of AI X channels">
       <defs>
       <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
         <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
@@ -60,12 +60,12 @@ function GraphPlane() {
           )}
         </g>
       ))}
-      <text x="28" y="332" fontFamily={UI} fontSize="13" fill={MUTED}>Node size = attention received from tracked accounts. Arrows = observed “top follower of”.</text>
+      <text x="28" y="332" fontFamily={UI} fontSize="13" fill={MUTED}>Node size = attention received by X channels. Arrows = observed “top follower of”.</text>
     </svg>
   )
 }
 
-/* ---------- diagram 2: accounts → identities → entity ---------- */
+/* ---------- diagram 2: channels → entity ---------- */
 
 function EntityLayers() {
   const acc = [
@@ -74,10 +74,10 @@ function EntityLayers() {
     { x: 560, label: 'A. Karpathy', plane: 'arXiv · 12 papers' },
   ]
   return (
-    <svg viewBox="0 0 760 400" role="img" aria-label="Accounts link to one real-world entity through identities">
+    <svg viewBox="0 0 760 400" role="img" aria-label="Channels resolve to one real-world entity">
       {/* plane band */}
       <rect x="24" y="252" width="712" height="120" fill={SAND} />
-      <text x="40" y="278" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">PLATFORM ACCOUNTS — WHAT THE DATA SHOWS</text>
+      <text x="40" y="278" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">CHANNELS — WHERE WE OBSERVE</text>
       {acc.map((a, i) => (
         <g key={i}>
           <rect x={a.x} y={294} width={192} height={56} fill="#fff" stroke={INK} strokeWidth="1" />
@@ -89,7 +89,7 @@ function EntityLayers() {
       <rect x="270" y="40" width="220" height="72" fill={INK} />
       <text x="292" y="72" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">Andrej Karpathy</text>
       <text x="292" y="94" fontFamily={MONO} fontSize="11" fill={BLUE}>ENTITY · PERSON</text>
-      {/* identity lines */}
+      {/* entity-channel links */}
       {acc.map((a, i) => {
         const x1 = a.x + 96, y1 = 294
         const x2 = 292 + i * 80, y2 = 112
@@ -105,7 +105,7 @@ function EntityLayers() {
       })}
       <text x="512" y="66" fontFamily={UI} fontSize="12.5" fill={MUTED}>One real-world person.</text>
       <text x="512" y="84" fontFamily={UI} fontSize="12.5" fill={MUTED}>Created only after review.</text>
-      <text x="40" y="56" fontFamily={UI} fontSize="12.5" fill={MUTED}>Identity links carry evidence +</text>
+      <text x="40" y="56" fontFamily={UI} fontSize="12.5" fill={MUTED}>Entity-channel links carry evidence +</text>
       <text x="40" y="74" fontFamily={UI} fontSize="12.5" fill={MUTED}>confidence. Wrong match = one</text>
       <text x="40" y="92" fontFamily={UI} fontSize="12.5" fill={MUTED}>deletable link, not poisoned data.</text>
     </svg>
@@ -207,7 +207,7 @@ export default function Architecture() {
       <h1 className="page-title">Architecture</h1>
       <p className="page-sub">
         Three ideas carry the whole system: a social graph decides who is worth
-        watching, an entity layer connects every plane of evidence about them,
+        watching, an entity/channel layer connects every observation plane,
         and a funnel makes sure only signal reaches a human.
       </p>
 
@@ -216,9 +216,9 @@ export default function Architecture() {
           <span className="arch-no">01</span>
           <h2 className="arch-h">The graph decides who matters</h2>
           <p className="arch-p">
-            2,314 X accounts and 361,225 observed follow relationships, pulled
+            2,315 X channels and 361,225 observed follow relationships, pulled
             from Digg's ranking of the AI community. Attention flows through
-            edges: being followed by ten important accounts beats a thousand
+            edges: being followed by ten important channels beats a thousand
             random followers. That is PageRank — and it turns a raw social
             graph into a ranked list of people worth reviewing.
           </p>
@@ -235,16 +235,16 @@ export default function Architecture() {
           <h2 className="arch-h">Entities connect the planes</h2>
           <p className="arch-p">
             The same person exists on X, GitHub, and arXiv under different
-            names. Each platform profile stays a separate account — what the
-            data literally shows. A reviewed entity sits above them, linked by
-            identities that carry evidence and confidence. Every future signal
-            (a post, a release, a paper) lands on an account and is read
+            names. Each source stays a separate channel — what the data
+            literally shows. A reviewed entity sits above them, linked by
+            entity-channel records that carry evidence and confidence. Every
+            future signal (a post, a release, a paper) lands on a channel and is read
             through its entity.
           </p>
         </div>
         <div className="arch-canvas">
           <EntityLayers />
-          <div className="arch-caption">accounts → identities (evidence + confidence) → entities · promotion requires human review</div>
+          <div className="arch-caption">channels → entity_channels (evidence + confidence) → entities · promotion requires curation</div>
         </div>
       </section>
 

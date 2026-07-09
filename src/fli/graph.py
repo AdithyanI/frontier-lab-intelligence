@@ -1,4 +1,4 @@
-"""Modeled graph layer: accounts, source facts, and directed edges.
+"""Modeled graph import layer: X accounts, source facts, and directed edges.
 
 Normalizes the redundant raw Digg CSVs (where every edge row repeats both
 endpoint profiles) into three tables:
@@ -11,7 +11,9 @@ endpoint profiles) into three tables:
 
 Raw files stay as evidence; this layer is rebuildable from them at any time
 (`fli graph load` is idempotent: it wipes and reloads digg-sourced rows).
-Entities/identities (real-world people/labs) are a later, separate layer.
+The product model now lives in `fli.channels`: entities, channels,
+entity_channels, and channel_observations. This module remains the legacy
+X-graph import backing layer so the Digg/PageRank pull stays reproducible.
 """
 
 import csv
@@ -206,6 +208,9 @@ def load_digg(
             n_edges += 1
 
     conn.commit()
+    from fli import channels
+
+    channels.sync_x_channels_from_accounts(conn)
     return {
         "accounts": conn.execute("SELECT COUNT(*) AS n FROM accounts").fetchone()["n"],
         "facts": n_facts,
@@ -271,6 +276,9 @@ def compute_pagerank(
                 (account_id, fact, val, observed_at),
             )
     conn.commit()
+    from fli import channels
+
+    channels.sync_x_channels_from_accounts(conn)
     return {"nodes": n, "iterations": iterations}
 
 

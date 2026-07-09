@@ -1,4 +1,4 @@
-"""Labs as first-class registry entities.
+"""Hand-curated lab seed data.
 
 The lab list is deliberately hand-curated: the case prompt names the labs
 that matter (OpenAI, Anthropic, GDM, Meta, xAI, Mistral, DeepSeek, Qwen,
@@ -7,11 +7,9 @@ automation story is *discovery*: org-like accounts in the follow graph that
 top-ranked researchers point at are candidates for new labs (SSI and
 Thinking Machines already appear in the Digg graph this way).
 
-Each lab row carries its official channels (org X handle, blog/feed, GitHub
-org, arXiv query). Where the org X account exists in `accounts`, we link it
-(`x_account_id`) so the lab is anchored into the same graph as the people.
-People affiliate to labs later via an optional affiliation edge — a person
-without a lab is still a valid registry entry.
+Each lab row carries official channel hints (org X handle, blog/feed, GitHub
+org, arXiv query). `fli.channels` turns those hints into first-class entities,
+channels, and entity-channel links.
 """
 
 import sqlite3
@@ -19,7 +17,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fli import graph, store
+from fli import channels, graph, store
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS labs (
@@ -156,7 +154,7 @@ SEED_LABS = [
 
 
 def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
-    conn = graph.connect(db_path)
+    conn = channels.connect(db_path)
     conn.executescript(SCHEMA)
     return conn
 
@@ -198,8 +196,9 @@ def seed(conn: sqlite3.Connection, labs: list[dict] | None = None) -> dict[str, 
             ),
         )
     conn.commit()
+    channel_counts = channels.sync_all(conn)
     n = conn.execute("SELECT COUNT(*) AS n FROM labs").fetchone()["n"]
-    return {"labs": n, "x_linked": linked}
+    return {"labs": n, "x_linked": linked, **channel_counts}
 
 
 def summary(conn: sqlite3.Connection) -> list[str]:
