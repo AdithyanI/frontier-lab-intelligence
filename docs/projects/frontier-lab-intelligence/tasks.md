@@ -37,6 +37,7 @@ data-inspection surface (BIT-anchored editorial-instrument identity from
 | todo | **D. Candidate review table:** API + UI listing one row per account with per-source evidence columns, sorted by combined confidence; the human-review gate before registry promotion. | This is the rubric's registry deliverable (20%). |
 | done | **E. Frontend shell:** React + Vite + TS consuming FastAPI JSON. Jinja2 retired. | Live at `fli web` (127.0.0.1:8500): System map with live DB counts per pipeline stage, Accounts table (search/paginate over 2,314 candidates). Built `dist` committed so reviewers need Python only. |
 | done | **E3. UI redesign (v2):** editorial-instrument direction — BIT capital-blue tokens, top-bar shell, hero-numeral home, custom visual Architecture page (hand-built SVG: graph plane, entities/identities, funnel). | `/api/architecture` + marked/mermaid removed (bundle 1MB→246KB); DESIGN.md rewritten to match; 13 tests green; all three pages screenshot-verified via Playwright MCP. |
+| done | **E4. Private Mac mini preview:** host the current app through the shared Cloudflare tunnel. | `frontier-lab-intelligence.adithyan.io` → Cloudflare Access (`adithyan@wisdominanutshell.academy`) → tunnel → `127.0.0.1:8797`; launchd service `com.dobby.frontier-lab-intelligence`; local `/api/status` returns 6 stages; public unauthenticated requests 302 to Access. |
 | todo | **E2. Graph visualization:** sigma.js view of the Digg graph (top ~500 nodes default, depth slider), as a drill-down from the Sources stage. | Deferred from E; Adi wants overview-first, detail later. |
 | todo | Decide the first modeled registry schema (entities/identities/affiliations) only after reviewing candidates in D. | Deliberately unlocked; model from evidence. |
 | later | Design requirement from BIT context: insights/scoring must carry a thesis-supporting vs thesis-breaking dimension (Devil's Advocate). | `docs/references/context.md` §BIT worldview and case lens. |
@@ -73,12 +74,12 @@ data-inspection surface (BIT-anchored editorial-instrument identity from
 
 Update before each handoff when meaningful work lands.
 
-- Commands run:
-- Results:
-- Files/artifacts reviewed:
-- Known limitations:
-- Prompt requirements satisfied:
-- Prompt requirements not satisfied / blocked:
+- Commands run: `scripts/install-launchd-frontier-lab-intelligence.sh --install-deps`; `cloudflared tunnel --config ~/.cloudflared/config.yml ingress validate`; `/Users/dobby/GitHub/scripts/setup/network/install-launchd-cloudflare-tunnel.sh`; Cloudflare DNS + Access API calls; local/public `curl` smokes.
+- Results: local app healthy at `http://127.0.0.1:8797/`; `frontier-lab-intelligence.adithyan.io` redirects unauthenticated requests to Cloudflare Access; DNS CNAME targets the shared tunnel.
+- Files/artifacts reviewed: `~/GitHub/scripts/docs/references/mac-mini-cloudflare-tunnel.md`, `~/GitHub/scripts/sync/local-production-services.json`, `~/.cloudflared/config.yml`, app launchd logs.
+- Known limitations: public browser access requires Cloudflare Access login; this is a private preview, not an externally approved submission.
+- Prompt requirements satisfied: current machine hosting path is live behind the existing tunnel pattern.
+- Prompt requirements not satisfied / blocked: none for private preview; no external submission performed.
 - Submission package path:
 
 ## Latest Checkpoint
