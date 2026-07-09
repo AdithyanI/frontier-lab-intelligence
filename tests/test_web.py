@@ -32,6 +32,28 @@ def test_accounts_search():
     assert "karpathy" in handles
 
 
+def test_registry_returns_labs_and_candidates():
+    r = client.get("/api/registry?limit=50")
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data["labs"]) == 10
+    openai = next(l for l in data["labs"] if l["slug"] == "openai")
+    assert openai["linked"] is True
+    assert openai["x_handle"] == "openai"
+
+    handles = [c["handle"] for c in data["candidates"]]
+    assert "karpathy" in handles
+    # lab org accounts must not double-count as person candidates
+    assert "openai" not in handles
+    assert "googledeepmind" not in handles
+
+    karpathy = next(c for c in data["candidates"] if c["handle"] == "karpathy")
+    assert karpathy["digg_rank"] == 1
+    assert karpathy["pagerank_rank"] is not None
+
+    assert data["candidates_pool_total"] >= len(data["candidates"])
+
+
 def test_spa_served_when_built():
     r = client.get("/")
     assert r.status_code == 200

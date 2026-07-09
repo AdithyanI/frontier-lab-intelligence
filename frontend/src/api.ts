@@ -23,6 +23,40 @@ export interface Account {
   tracked_followers: number
 }
 
+export interface Lab {
+  slug: string
+  name: string
+  status: 'frontier' | 'emerging'
+  x_handle: string | null
+  website: string | null
+  blog_feed: string | null
+  github_org: string | null
+  arxiv_query: string | null
+  notes: string | null
+  followers_count: number | null
+  linked: boolean
+  tracked_followers: number
+}
+
+export interface Candidate {
+  id: number
+  handle: string
+  display_name: string | null
+  bio: string | null
+  followers_count: number | null
+  digg_rank: number | null
+  pagerank_rank: number | null
+  role: string | null
+  tracked_followers: number
+  disagreement: number | null
+}
+
+export interface Registry {
+  labs: Lab[]
+  candidates: Candidate[]
+  candidates_pool_total: number
+}
+
 export async function getJSON<T>(url: string): Promise<T> {
   const r = await fetch(url)
   if (!r.ok) throw new Error(`${url} → ${r.status}`)

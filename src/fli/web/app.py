@@ -7,6 +7,9 @@ src/fli/web/dist, which this app serves. During frontend development,
 Endpoints:
 - /api/status        pipeline stages with live DB counts (the system map)
 - /api/accounts      modeled accounts with Digg facts, sortable/paginated
+- /api/registry      labs (curated entities) + top people candidates
+                     (evidence-ranked, not yet promoted — the registry
+                     itself, before the auto-curation pass exists)
 """
 
 from pathlib import Path
@@ -142,6 +145,99 @@ def accounts(
         ).fetchone()[0]
         return JSONResponse(
             {"total": total, "accounts": [dict(r) for r in rows]}
+        )
+    finally:
+        conn.close()
+
+
+@app.get("/api/registry")
+def registry(limit: int = Query(150, le=500)) -> JSONResponse:
+    """The registry: curated lab entities + evidence-ranked people candidates.
+
+    Labs are hand-seeded (judgment; ~10 rows). People have no promotion
+    mechanism yet — the "candidates" list is every account with a Digg rank
+    or a PageRank, ordered by whichever rank is best, excluding accounts
+    already linked to a lab (an org shouldn't double-count as a person
+    candidate). Honest framing: these are candidates, not tracked entities.
+    """
+    conn = graph.connect()
+    try:
+        labs = conn.execute(
+            """
+            SELECT l.slug, l.name, l.status, l.x_handle, l.website, l.blog_feed,
+                   l.github_org, l.arxiv_query, l.notes,
+                   a.followers_count,
+                   (a.id IS NOT NULL) AS linked,
+                   (SELECT COUNT(*) FROM graph_edges e
+                    WHERE e.to_account_id = a.id) AS tracked_followers
+            FROM labs l
+            LEFT JOIN accounts a ON a.id = l.x_account_id
+            ORDER BY (l.status = 'frontier') DESC, COALESCE(a.followers_count, 0) DESC
+            """
+        ).fetchall()
+
+        candidate_filter = """
+            (d.value IS NOT NULL OR p.value IS NOT NULL)
+            AND a.id NOT IN (
+                SELECT x_account_id FROM labs WHERE x_account_id IS NOT NULL
+            )
+        """
+        candidates = conn.execute(
+            f"""
+            SELECT a.id, a.handle, a.display_name, a.bio, a.followers_count,
+                   CAST(d.value AS INTEGER) AS digg_rank,
+                   CAST(p.value AS INTEGER) AS pagerank_rank,
+                   role.value AS role,
+                   (SELECT COUNT(*) FROM graph_edges e
+                    WHERE e.to_account_id = a.id) AS tracked_followers
+            FROM accounts a
+            LEFT JOIN account_source_facts d
+              ON d.account_id = a.id AND d.source = 'digg' AND d.fact = 'rank'
+            LEFT JOIN account_source_facts p
+              ON p.account_id = a.id AND p.source = 'graph' AND p.fact = 'pagerank_rank'
+            LEFT JOIN account_source_facts role
+              ON role.account_id = a.id AND role.source = 'digg' AND role.fact = 'role'
+            WHERE {candidate_filter}
+            ORDER BY MIN(COALESCE(CAST(d.value AS INTEGER), 999999),
+                         COALESCE(CAST(p.value AS INTEGER), 999999)) ASC
+            LIMIT ?
+            """,
+            [limit],
+        ).fetchall()
+
+        pool_total = conn.execute(
+            f"""
+            SELECT COUNT(DISTINCT a.id) FROM accounts a
+            LEFT JOIN account_source_facts d
+              ON d.account_id = a.id AND d.source = 'digg' AND d.fact = 'rank'
+            LEFT JOIN account_source_facts p
+              ON p.account_id = a.id AND p.source = 'graph' AND p.fact = 'pagerank_rank'
+            WHERE {candidate_filter}
+            """
+        ).fetchone()[0]
+
+        candidates_out = []
+        for r in candidates:
+            row = dict(r)
+            row["disagreement"] = (
+                row["digg_rank"] - row["pagerank_rank"]
+                if row["digg_rank"] is not None and row["pagerank_rank"] is not None
+                else None
+            )
+            candidates_out.append(row)
+
+        labs_out = []
+        for r in labs:
+            row = dict(r)
+            row["linked"] = bool(row["linked"])
+            labs_out.append(row)
+
+        return JSONResponse(
+            {
+                "labs": labs_out,
+                "candidates": candidates_out,
+                "candidates_pool_total": pool_total,
+            }
         )
     finally:
         conn.close()
