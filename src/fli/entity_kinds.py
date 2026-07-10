@@ -22,7 +22,7 @@ from typing import Any, Callable
 
 from fli import channels, store
 
-PROMPT_VERSION = "entity-kind-v1"
+PROMPT_VERSION = "entity-kind-v2"
 SCHEMA_VERSION = "entity-kind-output-v1"
 DEFAULT_MODEL = "gpt-5-nano"
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
@@ -40,10 +40,12 @@ Return person when the account represents one individual human.
 Return organization when it represents a company, lab, nonprofit, team,
 product, publication, community, or project rather than one individual.
 Return unsure when the identity evidence is missing, contradictory, or too
-weak. A personal name is evidence for person, but do not invent identity from
-an opaque handle. Judge only the supplied identity-bearing fields. Keep the
-reason to one short sentence grounded in those fields. Do not discuss
-relevance, prominence, affiliation, ranking, confidence, or channel merging.
+weak. A full personal name is evidence for person, but a lone given name or
+generic display name with an empty biography and opaque handle is unsure. Do
+not invent identity from an opaque handle or use outside knowledge. Keep the
+reason to one short sentence grounded only in the supplied fields; do not call
+an actor "known." Do not discuss relevance, prominence, affiliation, ranking,
+confidence, or channel merging.
 """
 
 CLASSIFICATION_FORMAT: dict[str, Any] = {
@@ -370,7 +372,8 @@ def classify_one(
             separators=(",", ":"),
         ),
         text={"format": CLASSIFICATION_FORMAT},
-        max_output_tokens=100,
+        reasoning={"effort": "minimal"},
+        max_output_tokens=200,
         store=False,
     )
     response_data = _response_dict(response)

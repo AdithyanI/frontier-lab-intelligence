@@ -100,6 +100,7 @@ def test_completed_result_is_resumable_without_duplicate_call(tmp_path):
         "profile_url",
     }
     assert request["text"]["format"] == entity_kinds.CLASSIFICATION_FORMAT
+    assert request["reasoning"] == {"effort": "minimal"}
 
 
 def test_invalid_extra_field_is_retried_and_recorded(tmp_path):
