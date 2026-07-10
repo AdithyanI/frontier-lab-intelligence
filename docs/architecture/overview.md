@@ -4,8 +4,8 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
-Registry retains the post-1,000-follower-floor classified universe: 2,735
-people, 184 organizations, two active unsure, three rejected, and zero unknown.
+Registry retains the post-1,000-follower-floor classified universe: 2,736
+people, 184 organizations, one active unsure, three rejected, and zero unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
@@ -142,8 +142,8 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,924 classified entities: 2,735 people, 184
-  organizations, two active unsure, and three protected-account rejections. The
+- The active Registry retains 2,924 classified entities: 2,736 people, 184
+  organizations, one active unsure, and three protected-account rejections. The
   2,956 channels include 32 additional lab
   channels. Removing discovery edges does not remove already classified nodes.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
@@ -287,27 +287,27 @@ erDiagram
         int run_id FK
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (5,837)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (5,838)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,956)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (13,545)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,988)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (13,547)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (3,084)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (0)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (1)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
     ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
     ENTITIES ||--o| ENTITY_REGISTRY_REJECTIONS : "may be rejected with reason"
 ```
 
 Table row counts: `raw_items` 1,599, `accounts` 2,924,
-`account_source_facts` 5,837, `graph_edges` 0, `labs` 10,
+`account_source_facts` 5,838, `graph_edges` 0, `labs` 10,
 `entities` 2,924, `channels` 2,956, `entity_channels` 2,956,
-`channel_observations` 13,545, `entity_kind_classification_runs` 8,
-`entity_kind_classifications` 2,946, `entity_kind_web_enrichments` 0, and
+`channel_observations` 13,547, `entity_kind_classification_runs` 10,
+`entity_kind_classifications` 3,084, `entity_kind_web_enrichments` 1, and
 `entity_kind_classification_errors` 0, and `entity_registry_rejections` 3.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is

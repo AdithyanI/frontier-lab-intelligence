@@ -114,17 +114,22 @@ being deleted or sent to the model again.
 
 ## Open Questions / Blockers
 
-- Paid live proof is awaiting Adi's explicit approval. Recommended first target:
-  only `@jack`; expected incremental cost is small but includes hosted-search
-  spend that is not fully represented by the LiteLLM model-cost header.
+- The `@jack` live proof resolved correctly, but the hosted search cited one
+  secondary article even though its 43 consulted sources included the exact X
+  profile and Block's official board page. Before applying web escalation more
+  broadly, decide whether the current first-party preference is sufficient or
+  should become a hard evidence-quality requirement.
+- `@linatawfik9` is the only active `unsure` entity left. It has not been sent
+  through hosted search because Adi approved only the bounded `@jack` proof.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Implement and locally validate the canonical single-handle X lifecycle with a final bounded web-search escalation. | parent | — |
-| blocked | Run one paid `@jack` calibration and inspect the exact sources, cost, and persisted Registry result. | parent | `resources/philschmid-calibration.md` (historical tool smoke only) |
-| todo | Review the live result, run final validation, and archive the tracker if the accepted scope is complete. | parent | — |
+| done | Run one paid `@jack` calibration and inspect the exact sources, cost, and persisted Registry result. | parent | `resources/philschmid-calibration.md` (historical tool smoke only) |
+| in progress | Review source quality and decide whether to run the same final escalation for `@linatawfik9`. | parent | — |
+| todo | Archive the tracker after the remaining-entity and evidence-quality decisions are accepted. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -136,7 +141,8 @@ being deleted or sent to the model again.
 - [x] Route the canonical single-handle onboarding lifecycle through the same
   protected-account gate and rejection store.
 - [x] Add a final required hosted-web turn only after profile and posts abstain.
-- [ ] Run the explicitly approved live calibration, verify Registry/API state,
+- [x] Run the explicitly approved live calibration and verify Registry/API state.
+- [ ] Review the calibrated evidence quality
   and decide whether to run the same final step for `@linatawfik9`.
 
 ## Validation / Test Plan
@@ -220,3 +226,15 @@ being deleted or sent to the model again.
   turn continues with `previous_response_id`, caps hosted tool calls at four,
   and persists actions/sources outside the unchanged two-field model schema.
   Focused fake-provider tests pass; live paid proof is awaiting approval.
+- 2026-07-10: [DONE] At Adi's explicit approval, ran only `@jack` through the
+  complete lifecycle. Profile evidence and 20 authored posts both abstained;
+  the required final web turn used four search actions, consulted 43 URLs, and
+  classified the exact account as `person` (Jack Dorsey). The runner promoted
+  entity 251, so the Registry now shows 2,736 people, 184 organizations, one
+  active unsure, three rejected, and zero unknown. The accepted chain used
+  28,672 input and 1,054 output tokens; estimated total model cost was
+  `$0.034996`, of which LiteLLM reported `$0.031398` on the hosted-search turn.
+  The human-facing reason is citation-free while all actions and source URLs
+  remain in `entity_kind_web_enrichments`. The single cited article was
+  secondary despite official sources in the consulted set, so broader web
+  escalation remains a quality-policy decision rather than an automatic run.

@@ -55,9 +55,9 @@ filtered and classified nodes, the active corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 2,735 |
+| person | 2,736 |
 | organization | 184 (including 10 seeded labs) |
-| unsure (active) | 2 |
+| unsure (active) | 1 |
 | rejected | 3 |
 | unknown | 0 |
 | **total** | **2,924** |
@@ -218,4 +218,8 @@ chaining and are not explicitly deleted.
 Hosted Azure web search was separately proven through LiteLLM before being
 adopted as this final escalation. Deterministic authored posts remain the first
 enrichment source; hosted search runs only after both cheaper identity stages
-abstain.
+abstain. The first live canonical run promoted `@jack` from `unsure` to
+`person`: the profile and 20-post turns abstained, while four bounded search
+actions consulted 43 URLs and resolved the exact account. The Registry reason
+is normalized to plain text; complete source URLs remain in the web-evidence
+row rather than leaking into the model-output field.
