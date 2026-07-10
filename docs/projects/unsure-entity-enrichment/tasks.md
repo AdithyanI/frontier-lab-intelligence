@@ -91,6 +91,9 @@ turning ad-hoc browsing into an unrepeatable correction.
   gate a full run?
 - Should recent posts be fetched deterministically before open-web escalation?
 - What promotion rule should apply when web enrichment still returns `unsure`?
+- The `@philschmid` result stored all 17 consulted URLs but no final-message
+  citation annotations. Is a complete consulted-source trace sufficient, or
+  must the internal enrichment contract bind its reason to specific source IDs?
 
 ## Current Batch
 
@@ -99,7 +102,8 @@ turning ad-hoc browsing into an unrepeatable correction.
 | done | Implement the bounded web-enrichment runner and evidence schema. | parent | — |
 | done | Add focused tests and run repository validation. | parent | — |
 | done | Update curation/architecture references and checkpoint this tracker. | parent | — |
-| blocked | Agree the calibration sample and evidence-quality rubric with Adi; do not run until discussion resumes. | parent | — |
+| done | Run and document one live `@philschmid` calibration without promotion. | parent | `resources/philschmid-calibration.md` |
+| blocked | Review source binding and agree the broader calibration rubric with Adi; do not run more entities yet. | parent | `resources/philschmid-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -126,3 +130,11 @@ turning ad-hoc browsing into an unrepeatable correction.
   focused tests; all 42 repository tests plus frontend lint/build pass. Applied
   the new empty table to `data/fli.db`; canonical kinds remain 2,639 person,
   182 organization, and 145 unsure, with zero stored enrichments.
+- 2026-07-10: [DONE] Ran one live `@philschmid` enrichment through LiteLLM.
+  Stage one had only handle/name/null bio/X URL and correctly abstained. Stage
+  two performed one hosted search, consulted 17 URLs, and staged `person` with
+  a grounded personal-site/Hugging Face reason. It used 8,698 input and 160
+  output tokens and cost `$0.009658`. Canonical kind remains `unsure`. The
+  exact trace is in `resources/philschmid-calibration.md`; broader execution is
+  paused because the structured message did not identify a minimal cited
+  subset within the full consulted-source list.
