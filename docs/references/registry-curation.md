@@ -166,3 +166,22 @@ signal, not the final track/reject label.
 All structural kinds remain eligible for this ranking, including `unsure`.
 Weak identity evidence must not prevent a potentially important account from
 surfacing; identity enrichment and tracking relevance remain separate.
+
+## Azure Web-Search Enrichment Compatibility
+
+Microsoft's current Azure OpenAI Responses documentation supports hosted
+agentic `web_search` for GPT-4 and later. The shared LiteLLM Luna route points
+to the Azure OpenAI v1/preview endpoint and advertises web search, tool choice,
+function calling, and response schemas. A tagged 2026-07-10 smoke through
+LiteLLM proved the exact combined contract: Luna-medium performed two searches
+and one page open, returned 12 source URLs, and completed the strict
+`classification` + `reason` schema for `@jack`. The request used 8,693 input
+and 279 output tokens and LiteLLM reported `$0.010367`.
+
+This proves transport/tool compatibility, not evidence quality. The smoke
+found the correct person but consulted several weak secondary domains. The
+production enrichment policy should prefer stored recent tweets and official
+or first-party identity sources, use domain controls where useful, and reserve
+open-web search for cases that remain unresolved. Azure's hosted search uses
+Grounding with Bing, incurs separate tool costs, and sends search data outside
+the Azure compliance and geo boundary under Microsoft's documented terms.
