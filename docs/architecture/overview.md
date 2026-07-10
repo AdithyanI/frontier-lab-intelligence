@@ -13,6 +13,10 @@ Registry contains 2,639 people, 182 organizations, 145 unsure, and zero
 unknown. The `labs` table remains internal source/seed provenance because its
 10 rows are not an exhaustive lab classification; it is not exposed as a
 Registry kind, badge, count, or filter.
+An unpromoted `fli entity-kinds enrich` stage is now implemented for the 145
+abstentions. It requires hosted Responses web search and persists the strict
+two-field decision plus observable search actions, source URLs, usage, and
+cost. No enrichment batch has run and canonical counts are unchanged.
 Channel merging, track/reject curation, extraction, and scoring remain later
 stages.
 
@@ -172,13 +176,14 @@ Known data facts:
 
 ### Current Schema (as built, not the target sketch)
 
-This is what actually exists in `data/fli.db` today (12 tables). It mixes two
+This is what actually exists in `data/fli.db` today (13 tables). It mixes two
 generations: a legacy X-graph import layer (`accounts`, `account_source_facts`,
 `graph_edges`, plus `labs.x_account_id`) and the newer entity/channel product
 layer (`entities`, `channels`, `entity_channels`, `channel_observations`).
-The classifier adds separate run, result, and error tables without changing
-`entities.kind`. `raw_items` is an unconnected bootstrap table. Row counts as
-of this writing are in parentheses.
+The classifier adds separate run, profile-only result, web-enrichment, and
+error tables without changing `entities.kind` until an explicit promotion.
+`raw_items` is an unconnected bootstrap table. Row counts as of this writing
+are in parentheses.
 
 ```mermaid
 erDiagram
@@ -274,6 +279,17 @@ erDiagram
         string error_type
         int terminal
     }
+    ENTITY_KIND_WEB_ENRICHMENTS {
+        int entity_id FK
+        string input_sha256
+        string classification "person | organization | unsure"
+        string reason
+        string prompt_version "entity-kind-web-v1"
+        string actions_json
+        string sources_json
+        float reported_cost_usd
+        int run_id FK
+    }
 
     ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (12,664)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
@@ -285,14 +301,17 @@ erDiagram
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,988)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (0)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
+    ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
 ```
 
 Table row counts: `raw_items` 1,599, `accounts` 2,967,
 `account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
 `entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
 `channel_observations` 21,133, `entity_kind_classification_runs` 7,
-`entity_kind_classifications` 2,988, and `entity_kind_classification_errors` 0.
+`entity_kind_classifications` 2,988, `entity_kind_web_enrichments` 0, and
+`entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -396,6 +415,14 @@ entities: 2,639 person, 172 organization, and 145 unsure. The atomic promotion
 step validates the current input hash and accepted model/effort/prompt contract
 before updating canonical kinds. The Registry exposes the stored reason in the
 detail view. Seeded lab provenance remains internal and is not displayed.
+
+`fli entity-kinds enrich --limit N` is the bounded second-stage path for
+current abstentions. It uses required Azure-hosted `web_search` through
+LiteLLM, keeps the same strict output schema, and stages results in
+`entity_kind_web_enrichments` with search actions and deduplicated consulted or
+cited sources. Exact input/model/effort/prompt matches resume without a second
+paid call. The command does not promote results; calibration and promotion
+policy remain open in `docs/projects/unsure-entity-enrichment/tasks.md`.
 
 This pass does not merge channels. Later identity resolution may attach several
 official/product X channels to one organization. A person is expected to have

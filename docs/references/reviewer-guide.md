@@ -45,6 +45,8 @@ fli web
 
 - Structural kind is not tracking relevance; graph-based relevance curation is
   the next registry step.
+- A staged hosted-web runner exists for the 145 structural abstentions, but no
+  enrichment batch has run and no promotion policy has been accepted.
 - Raw blog, arXiv, and GitHub items exist, but entity-linked deduplication,
   cited insight extraction, scoring validation, reports, and alerts remain.
 - The final report, workflow-level tokenomics summary, and submission package

@@ -23,10 +23,12 @@ from typing import Any, Callable
 from fli import channels, store
 
 PROMPT_VERSION = "entity-kind-v2"
+WEB_PROMPT_VERSION = "entity-kind-web-v1"
 SCHEMA_VERSION = "entity-kind-output-v1"
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_REASONING_EFFORT = "medium"
 DEFAULT_WORKERS = 100
+DEFAULT_WEB_WORKERS = 20
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
 
@@ -50,6 +52,22 @@ not invent identity from an opaque handle or use outside knowledge. Keep the
 reason to one short sentence grounded only in the supplied fields; do not call
 an actor "known." Do not discuss relevance, prominence, affiliation, ranking,
 confidence, or channel merging.
+"""
+
+WEB_ENRICHMENT_INSTRUCTIONS = """Resolve the structural kind of an X profile
+that a profile-only classifier could not determine.
+
+You must use web search. Prefer first-party identity evidence: the supplied X
+profile, an official personal or organization site, an employer/team page, or
+another page controlled by the represented actor. Use reputable secondary
+sources only when first-party evidence is unavailable. A pseudonym can still
+represent one individual human. Return person for one human and organization
+for a company, lab, nonprofit, team, product, publication, community, or
+project. Return unsure when the searched evidence remains contradictory or too
+weak. Keep the reason to one short sentence grounded in the searched evidence,
+but do not include URLs, markdown citations, source counts, confidence,
+relevance, prominence, affiliation guesses, or channel-merging claims. The
+runner stores sources separately.
 """
 
 CLASSIFICATION_FORMAT: dict[str, Any] = {
@@ -132,6 +150,33 @@ CREATE TABLE IF NOT EXISTS entity_kind_classification_errors (
 );
 CREATE INDEX IF NOT EXISTS idx_entity_kind_errors_run
 ON entity_kind_classification_errors (run_id, entity_id);
+
+CREATE TABLE IF NOT EXISTS entity_kind_web_enrichments (
+    entity_id INTEGER NOT NULL REFERENCES entities (id) ON DELETE CASCADE,
+    input_sha256 TEXT NOT NULL,
+    classification TEXT NOT NULL
+        CHECK (classification IN ('person', 'organization', 'unsure')),
+    reason TEXT NOT NULL,
+    model TEXT NOT NULL,
+    reasoning_effort TEXT NOT NULL,
+    response_model TEXT,
+    prompt_version TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    response_id TEXT,
+    actions_json TEXT NOT NULL,
+    sources_json TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    estimated_cost_usd REAL NOT NULL,
+    reported_cost_usd REAL,
+    run_id INTEGER NOT NULL REFERENCES entity_kind_classification_runs (id),
+    enriched_at TEXT NOT NULL,
+    PRIMARY KEY (
+        entity_id, input_sha256, model, reasoning_effort, prompt_version
+    )
+);
+CREATE INDEX IF NOT EXISTS idx_entity_kind_web_label
+ON entity_kind_web_enrichments (classification);
 """
 
 
@@ -177,6 +222,12 @@ class ClassificationResult:
 
 
 @dataclass(frozen=True)
+class WebEnrichmentResult(ClassificationResult):
+    actions: tuple[dict[str, Any], ...]
+    sources: tuple[dict[str, Any], ...]
+
+
+@dataclass(frozen=True)
 class ClassificationError:
     entity: EntityInput
     attempt: int
@@ -208,8 +259,14 @@ def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
     return conn
 
 
-def read_unknown_inputs(conn: sqlite3.Connection) -> list[EntityInput]:
-    """Read deterministic identity-only inputs for current unknown X entities."""
+def _read_inputs_for_kind(
+    conn: sqlite3.Connection,
+    *,
+    kind: str,
+) -> list[EntityInput]:
+    """Read deterministic identity-only inputs for one canonical kind."""
+    if kind not in {"unknown", "unsure"}:
+        raise ValueError(f"unsupported input kind: {kind!r}")
     ensure_schema(conn)
     rows = conn.execute(
         """SELECT e.id AS entity_id,
@@ -224,15 +281,16 @@ def read_unknown_inputs(conn: sqlite3.Connection) -> list[EntityInput]:
            FROM entities e
            JOIN entity_channels ec ON ec.entity_id = e.id
            JOIN channels c ON c.id = ec.channel_id AND c.kind = 'x'
-           WHERE e.kind = 'unknown'
-           ORDER BY e.id, c.id"""
+           WHERE e.kind = ?
+           ORDER BY e.id, c.id""",
+        (kind,),
     ).fetchall()
     seen: set[int] = set()
     inputs: list[EntityInput] = []
     for row in rows:
         if row["entity_id"] in seen:
             raise RuntimeError(
-                f"unknown entity {row['entity_id']} has multiple X channels; "
+                f"{kind} entity {row['entity_id']} has multiple X channels; "
                 "channel merging is outside this classifier"
             )
         seen.add(row["entity_id"])
@@ -246,6 +304,16 @@ def read_unknown_inputs(conn: sqlite3.Connection) -> list[EntityInput]:
             )
         )
     return inputs
+
+
+def read_unknown_inputs(conn: sqlite3.Connection) -> list[EntityInput]:
+    """Read deterministic identity-only inputs for current unknown X entities."""
+    return _read_inputs_for_kind(conn, kind="unknown")
+
+
+def read_unsure_inputs(conn: sqlite3.Connection) -> list[EntityInput]:
+    """Read deterministic identity-only inputs for current unsure X entities."""
+    return _read_inputs_for_kind(conn, kind="unsure")
 
 
 def _load_env_file(path: Path) -> dict[str, str]:
@@ -354,14 +422,20 @@ def default_reasoning_effort(model: str) -> str:
     return DEFAULT_REASONING_EFFORT
 
 
-def request_tags(*, scope: str, run_id: int) -> tuple[str, ...]:
+def request_tags(
+    *,
+    scope: str,
+    run_id: int,
+    job: str = "entity-kind-classification",
+    prompt_version: str = PROMPT_VERSION,
+) -> tuple[str, ...]:
     """Return stable, queryable LiteLLM spend tags for one classifier run."""
     return (
         "app:frontier-lab-intelligence",
         "pipeline:entity-kind-classification",
-        "job:entity-kind-classification",
+        f"job:{job}",
         f"scope:{scope}",
-        f"prompt:{PROMPT_VERSION}",
+        f"prompt:{prompt_version}",
         f"run:{run_id}",
     )
 
@@ -443,6 +517,150 @@ def classify_one(
     )
 
 
+def _web_evidence(
+    response_data: dict[str, Any],
+) -> tuple[tuple[dict[str, Any], ...], tuple[dict[str, Any], ...]]:
+    """Extract observable hosted-search actions and deduplicated sources."""
+    actions: list[dict[str, Any]] = []
+    sources_by_url: dict[str, dict[str, Any]] = {}
+
+    def add_source(
+        *,
+        url: Any,
+        title: Any = None,
+        source_type: Any = None,
+        cited: bool = False,
+    ) -> None:
+        if not isinstance(url, str) or not url:
+            return
+        source = sources_by_url.setdefault(
+            url,
+            {
+                "url": url,
+                "title": None,
+                "type": None,
+                "cited": False,
+            },
+        )
+        if isinstance(title, str) and title:
+            source["title"] = title
+        if isinstance(source_type, str) and source_type:
+            source["type"] = source_type
+        source["cited"] = source["cited"] or cited
+
+    for item in response_data.get("output") or []:
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "web_search_call":
+            action = item.get("action") or {}
+            if not isinstance(action, dict):
+                action = {}
+            actions.append(
+                {
+                    key: action[key]
+                    for key in ("type", "query", "url", "pattern")
+                    if action.get(key) is not None
+                }
+            )
+            for source in action.get("sources") or []:
+                if isinstance(source, dict):
+                    add_source(
+                        url=source.get("url"),
+                        title=source.get("title"),
+                        source_type=source.get("type"),
+                    )
+        if item.get("type") == "message":
+            for content in item.get("content") or []:
+                if not isinstance(content, dict):
+                    continue
+                for annotation in content.get("annotations") or []:
+                    if (
+                        isinstance(annotation, dict)
+                        and annotation.get("type") == "url_citation"
+                    ):
+                        add_source(
+                            url=annotation.get("url"),
+                            title=annotation.get("title"),
+                            source_type="url_citation",
+                            cited=True,
+                        )
+    if not actions:
+        raise OutputContractError("response completed without a web search call")
+    return tuple(actions), tuple(sources_by_url.values())
+
+
+def enrich_one_with_web(
+    client: Any,
+    entity: EntityInput,
+    *,
+    model: str,
+    effort: str,
+    tags: tuple[str, ...],
+    input_cost_per_token: float,
+    output_cost_per_token: float,
+) -> WebEnrichmentResult:
+    """Resolve one abstention with required hosted web search."""
+    request = dict(
+        model=model,
+        instructions=WEB_ENRICHMENT_INSTRUCTIONS,
+        input=json.dumps(
+            entity.model_payload,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
+        tools=[{"type": "web_search", "search_context_size": "medium"}],
+        tool_choice="required",
+        include=["web_search_call.action.sources"],
+        text={"format": CLASSIFICATION_FORMAT},
+        reasoning={"effort": effort},
+        max_output_tokens=600,
+        store=False,
+        extra_body={"metadata": {"tags": list(tags)}},
+        extra_headers={"x-litellm-tags": ",".join(tags)},
+    )
+    raw_api = getattr(client.responses, "with_raw_response", None)
+    if raw_api is None:
+        response = client.responses.create(**request)
+        reported_cost_usd = None
+    else:
+        raw_response = raw_api.create(**request)
+        response = raw_response.parse()
+        reported_cost_usd = _reported_cost(raw_response.headers)
+    response_data = _response_dict(response)
+    refusal = _find_refusal(response_data)
+    if refusal:
+        raise ModelRefusalError(refusal)
+    status = getattr(response, "status", None) or response_data.get("status")
+    if status and status != "completed":
+        raise OutputContractError(f"response status was {status!r}")
+    output_text = getattr(response, "output_text", None)
+    if output_text is None:
+        output_text = response_data.get("output_text")
+    classification, reason = _validate_output(output_text)
+    actions, sources = _web_evidence(response_data)
+    usage = getattr(response, "usage", None) or response_data.get("usage")
+    input_tokens = _usage_value(usage, "input_tokens")
+    output_tokens = _usage_value(usage, "output_tokens")
+    return WebEnrichmentResult(
+        entity=entity,
+        classification=classification,
+        reason=reason,
+        response_id=getattr(response, "id", None) or response_data.get("id"),
+        response_model=(
+            getattr(response, "model", None) or response_data.get("model")
+        ),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        estimated_cost_usd=(
+            input_tokens * input_cost_per_token
+            + output_tokens * output_cost_per_token
+        ),
+        reported_cost_usd=reported_cost_usd,
+        actions=actions,
+        sources=sources,
+    )
+
+
 def _classify_safely(
     client: Any,
     entity: EntityInput,
@@ -456,6 +674,41 @@ def _classify_safely(
     try:
         return (
             classify_one(
+                client,
+                entity,
+                model=model,
+                effort=effort,
+                tags=tags,
+                input_cost_per_token=input_cost_per_token,
+                output_cost_per_token=output_cost_per_token,
+            ),
+            [],
+        )
+    except Exception as exc:
+        return None, [
+            ClassificationError(
+                entity=entity,
+                attempt=1,
+                error_type=type(exc).__name__,
+                error_message=str(exc)[:500],
+                terminal=True,
+            )
+        ]
+
+
+def _enrich_safely(
+    client: Any,
+    entity: EntityInput,
+    *,
+    model: str,
+    effort: str,
+    tags: tuple[str, ...],
+    input_cost_per_token: float,
+    output_cost_per_token: float,
+) -> tuple[WebEnrichmentResult | None, list[ClassificationError]]:
+    try:
+        return (
+            enrich_one_with_web(
                 client,
                 entity,
                 model=model,
@@ -497,6 +750,30 @@ def _already_classified(
                 model,
                 effort,
                 PROMPT_VERSION,
+            ),
+        ).fetchone()
+    )
+
+
+def _already_enriched(
+    conn: sqlite3.Connection,
+    entity: EntityInput,
+    *,
+    model: str,
+    effort: str,
+) -> bool:
+    return bool(
+        conn.execute(
+            """SELECT 1 FROM entity_kind_web_enrichments
+               WHERE entity_id = ? AND input_sha256 = ?
+                 AND model = ? AND reasoning_effort = ?
+                 AND prompt_version = ?""",
+            (
+                entity.entity_id,
+                entity.input_sha256,
+                model,
+                effort,
+                WEB_PROMPT_VERSION,
             ),
         ).fetchone()
     )
@@ -686,6 +963,214 @@ def run_classification(
     }
 
 
+def run_web_enrichment(
+    conn: sqlite3.Connection,
+    inputs: list[EntityInput],
+    *,
+    client: Any,
+    model: str = DEFAULT_MODEL,
+    workers: int = DEFAULT_WEB_WORKERS,
+    scope: str = "web-custom",
+    reasoning_effort_override: str | None = None,
+    pricing: tuple[float, float] | None = None,
+) -> dict[str, Any]:
+    """Enrich current abstentions with hosted search without promoting them."""
+    if workers < 1:
+        raise ValueError("workers must be at least 1")
+    if pricing is None:
+        if model != DEFAULT_MODEL:
+            raise ValueError(
+                f"no local pricing snapshot for {model!r}; pass pricing explicitly"
+            )
+        pricing = DEFAULT_MODEL_PRICING_USD_PER_TOKEN
+    ensure_schema(conn)
+    effort = reasoning_effort_override or default_reasoning_effort(model)
+    current_unsure_ids = {
+        entity.entity_id for entity in read_unsure_inputs(conn)
+    }
+    invalid_ids = [
+        entity.entity_id
+        for entity in inputs
+        if entity.entity_id not in current_unsure_ids
+    ]
+    if invalid_ids:
+        raise ValueError(
+            "web enrichment accepts only current unsure entities; "
+            f"invalid IDs: {invalid_ids[:10]}"
+        )
+    pending = [
+        entity
+        for entity in inputs
+        if not _already_enriched(conn, entity, model=model, effort=effort)
+    ]
+    started_at = _now()
+    prompt_sha256 = hashlib.sha256(
+        WEB_ENRICHMENT_INSTRUCTIONS.encode()
+    ).hexdigest()
+    cursor = conn.execute(
+        """INSERT INTO entity_kind_classification_runs
+           (model, reasoning_effort, prompt_version, schema_version,
+            prompt_sha256, scope,
+            requested_count, skipped_count, status, started_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'running', ?)""",
+        (
+            model,
+            effort,
+            WEB_PROMPT_VERSION,
+            SCHEMA_VERSION,
+            prompt_sha256,
+            scope,
+            len(inputs),
+            len(inputs) - len(pending),
+            started_at,
+        ),
+    )
+    run_id = cursor.lastrowid
+    tags = request_tags(
+        scope=scope,
+        run_id=run_id,
+        job="entity-kind-web-enrichment",
+        prompt_version=WEB_PROMPT_VERSION,
+    )
+    conn.execute(
+        """UPDATE entity_kind_classification_runs
+           SET request_tags = ? WHERE id = ?""",
+        (json.dumps(tags), run_id),
+    )
+    conn.commit()
+
+    results: list[WebEnrichmentResult] = []
+    errors: list[ClassificationError] = []
+    if pending:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [
+                executor.submit(
+                    _enrich_safely,
+                    client,
+                    entity,
+                    model=model,
+                    effort=effort,
+                    tags=tags,
+                    input_cost_per_token=pricing[0],
+                    output_cost_per_token=pricing[1],
+                )
+                for entity in pending
+            ]
+            for future in concurrent.futures.as_completed(futures):
+                result, item_errors = future.result()
+                errors.extend(item_errors)
+                if result:
+                    results.append(result)
+                enriched_at = _now()
+                if result:
+                    conn.execute(
+                        """INSERT OR IGNORE INTO entity_kind_web_enrichments
+                           (entity_id, input_sha256, classification, reason,
+                            model, reasoning_effort, response_model,
+                            prompt_version, schema_version, response_id,
+                            actions_json, sources_json, input_tokens,
+                            output_tokens, estimated_cost_usd,
+                            reported_cost_usd, run_id, enriched_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            result.entity.entity_id,
+                            result.entity.input_sha256,
+                            result.classification,
+                            result.reason,
+                            model,
+                            effort,
+                            result.response_model,
+                            WEB_PROMPT_VERSION,
+                            SCHEMA_VERSION,
+                            result.response_id,
+                            json.dumps(result.actions, ensure_ascii=False),
+                            json.dumps(result.sources, ensure_ascii=False),
+                            result.input_tokens,
+                            result.output_tokens,
+                            result.estimated_cost_usd,
+                            result.reported_cost_usd,
+                            run_id,
+                            enriched_at,
+                        ),
+                    )
+                for error in item_errors:
+                    conn.execute(
+                        """INSERT INTO entity_kind_classification_errors
+                           (run_id, entity_id, input_sha256, attempt,
+                            error_type, error_message, terminal, occurred_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            run_id,
+                            error.entity.entity_id,
+                            error.entity.input_sha256,
+                            error.attempt,
+                            error.error_type,
+                            error.error_message,
+                            int(error.terminal),
+                            enriched_at,
+                        ),
+                    )
+                conn.commit()
+
+    completed_at = _now()
+    failure_count = len(pending) - len(results)
+    input_tokens = sum(result.input_tokens for result in results)
+    output_tokens = sum(result.output_tokens for result in results)
+    estimated_cost_usd = sum(result.estimated_cost_usd for result in results)
+    reported_costs = [
+        result.reported_cost_usd
+        for result in results
+        if result.reported_cost_usd is not None
+    ]
+    reported_cost_usd = sum(reported_costs)
+    status = "completed" if failure_count == 0 else "partial"
+    conn.execute(
+        """UPDATE entity_kind_classification_runs
+           SET success_count = ?, failure_count = ?, input_tokens = ?,
+               output_tokens = ?, estimated_cost_usd = ?,
+               reported_cost_usd = ?, reported_cost_count = ?, status = ?,
+               completed_at = ?
+           WHERE id = ?""",
+        (
+            len(results),
+            failure_count,
+            input_tokens,
+            output_tokens,
+            estimated_cost_usd,
+            reported_cost_usd,
+            len(reported_costs),
+            status,
+            completed_at,
+            run_id,
+        ),
+    )
+    conn.commit()
+    counts = {classification: 0 for classification in sorted(CLASSIFICATIONS)}
+    for result in results:
+        counts[result.classification] += 1
+    return {
+        "run_id": run_id,
+        "scope": scope,
+        "model": model,
+        "reasoning_effort": effort,
+        "prompt_version": WEB_PROMPT_VERSION,
+        "request_tags": tags,
+        "requested": len(inputs),
+        "skipped": len(inputs) - len(pending),
+        "enriched": len(results),
+        "failed": failure_count,
+        "counts": counts,
+        "sources": sum(len(result.sources) for result in results),
+        "web_search_actions": sum(len(result.actions) for result in results),
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "estimated_cost_usd": estimated_cost_usd,
+        "reported_cost_usd": reported_cost_usd,
+        "reported_cost_count": len(reported_costs),
+        "status": status,
+    }
+
+
 def promote_classifications(
     conn: sqlite3.Connection,
     *,
@@ -760,11 +1245,14 @@ def main(
     client_factory: Callable[[], Any] = create_litellm_client,
 ) -> int:
     parser = argparse.ArgumentParser(prog="fli entity-kinds")
-    parser.add_argument("action", choices=["run", "summary", "promote"])
+    parser.add_argument(
+        "action",
+        choices=["run", "enrich", "summary", "promote"],
+    )
     parser.add_argument("--db", default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--limit", type=int)
-    parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
+    parser.add_argument("--workers", type=int)
     parser.add_argument(
         "--reasoning-effort",
         choices=["none", "minimal", "low", "medium", "high", "xhigh", "max"],
@@ -772,7 +1260,6 @@ def main(
     args = parser.parse_args(argv)
 
     conn = connect(args.db) if args.db else connect()
-    inputs = read_unknown_inputs(conn)
     if args.action == "promote":
         summary = promote_classifications(
             conn,
@@ -782,35 +1269,65 @@ def main(
         print(json.dumps(summary, sort_keys=True))
         return 0
     if args.action == "summary":
+        unknown_inputs = read_unknown_inputs(conn)
+        unsure_inputs = read_unsure_inputs(conn)
         row = conn.execute(
             """SELECT COUNT(*) AS classified,
                       COALESCE(SUM(estimated_cost_usd), 0) AS cost
                FROM entity_kind_classifications"""
         ).fetchone()
+        web_row = conn.execute(
+            """SELECT COUNT(*) AS enriched,
+                      COALESCE(SUM(estimated_cost_usd), 0) AS estimated_cost,
+                      COALESCE(SUM(reported_cost_usd), 0) AS reported_cost
+               FROM entity_kind_web_enrichments"""
+        ).fetchone()
         print(
             json.dumps(
                 {
-                    "unknown_inputs": len(inputs),
+                    "unknown_inputs": len(unknown_inputs),
+                    "unsure_inputs": len(unsure_inputs),
                     "stored_classifications": row["classified"],
                     "estimated_cost_usd": row["cost"],
+                    "stored_web_enrichments": web_row["enriched"],
+                    "web_estimated_cost_usd": web_row["estimated_cost"],
+                    "web_reported_cost_usd": web_row["reported_cost"],
                 },
                 sort_keys=True,
             )
         )
         return 0
 
+    inputs = (
+        read_unsure_inputs(conn)
+        if args.action == "enrich"
+        else read_unknown_inputs(conn)
+    )
     selected = inputs
-    scope = "full" if args.limit is None else "limited"
+    scope_prefix = "web" if args.action == "enrich" else "profile"
+    scope = f"{scope_prefix}-full" if args.limit is None else f"{scope_prefix}-limited"
     if args.limit is not None:
         if args.limit < 1:
             parser.error("--limit must be at least 1")
         selected = selected[: args.limit]
+    if args.action == "enrich":
+        summary = run_web_enrichment(
+            conn,
+            selected,
+            client=client_factory(),
+            model=args.model,
+            workers=args.workers or DEFAULT_WEB_WORKERS,
+            scope=scope,
+            reasoning_effort_override=args.reasoning_effort,
+        )
+        print(json.dumps(summary, sort_keys=True))
+        return 0 if summary["failed"] == 0 else 1
     summary = run_classification(
         conn,
         selected,
         client=client_factory(),
         model=args.model,
-        workers=args.workers,
+        workers=args.workers or DEFAULT_WORKERS,
         scope=scope,
         reasoning_effort_override=args.reasoning_effort,
     )

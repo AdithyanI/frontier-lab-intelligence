@@ -185,3 +185,15 @@ or first-party identity sources, use domain controls where useful, and reserve
 open-web search for cases that remain unresolved. Azure's hosted search uses
 Grounding with Bing, incurs separate tool costs, and sends search data outside
 the Azure compliance and geo boundary under Microsoft's documented terms.
+
+The bounded runner is implemented as `fli entity-kinds enrich --limit N`.
+It reads only entities whose canonical kind is currently `unsure`, requires at
+least one observable hosted search action, returns the same strict
+`classification` + `reason` output, and stages the result in
+`entity_kind_web_enrichments`. `actions_json` records search/open/find actions;
+`sources_json` deduplicates consulted URLs and merges citation titles/state.
+Run/model/prompt/input hashes, tokens, errors, LiteLLM tags, local estimates,
+and proxy-reported cost use the existing classifier provenance machinery.
+Every completed entity commits immediately and exact matching results skip on
+resume. The runner never updates `entities.kind`; no batch execution or
+promotion policy has been accepted yet.
