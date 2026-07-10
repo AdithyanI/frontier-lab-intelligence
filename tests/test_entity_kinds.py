@@ -12,7 +12,7 @@ class FakeResponses:
     def create(self, **kwargs):
         self.calls.append(kwargs)
         output = self.outputs.pop(0)
-        if isinstance(output, Exception):
+        if isinstance(output, BaseException):
             raise output
         return SimpleNamespace(
             id=f"response-{len(self.calls)}",
@@ -127,6 +127,53 @@ def test_completed_result_is_resumable_without_duplicate_call(tmp_path):
     assert "prompt:entity-kind-v2" in tags
     assert any(tag.startswith("run:") for tag in tags)
     assert request["extra_headers"]["x-litellm-tags"] == ",".join(tags)
+
+
+def test_interrupted_batch_persists_completed_results_for_resume(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    first = make_unknown(conn, handle="first", name="First Person")
+    make_unknown(conn, handle="second", name="Second Person")
+    first, second = entity_kinds.read_unknown_inputs(conn)
+    interrupted_client = FakeClient(
+        [
+            {"classification": "person", "reason": "A full personal name."},
+            KeyboardInterrupt(),
+        ]
+    )
+
+    try:
+        entity_kinds.run_classification(
+            conn,
+            [first, second],
+            client=interrupted_client,
+            workers=1,
+            max_attempts=1,
+        )
+    except KeyboardInterrupt:
+        pass
+    else:
+        raise AssertionError("expected the simulated batch interruption")
+
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_kind_classifications"
+    ).fetchone()[0] == 1
+    resumed_client = FakeClient(
+        [{"classification": "person", "reason": "A full personal name."}]
+    )
+    resumed = entity_kinds.run_classification(
+        conn,
+        [first, second],
+        client=resumed_client,
+        workers=1,
+        max_attempts=1,
+    )
+
+    assert resumed["skipped"] == 1
+    assert resumed["classified"] == 1
+    assert len(resumed_client.responses.calls) == 1
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_kind_classifications"
+    ).fetchone()[0] == 2
 
 
 def test_invalid_extra_field_is_retried_and_recorded(tmp_path):

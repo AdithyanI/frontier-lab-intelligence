@@ -190,11 +190,6 @@ Rules:
 
 ## Open Questions / Blockers
 
-- `gpt-5-nano` did not pass the semantic calibration: it labeled `@rpoo`
-  (`Ross`, no bio) as `person` twice. `gpt-5.6-luna` with prompt v2 and
-  `reasoning.effort=none` passed the same 10-profile comparison, including the
-  intended `unsure` abstention. The remaining gate is Adi's full-run decision
-  after receiving the cost/quality evidence.
 - The one-time 2,000-follower cleanup is not replayable policy. Do not rerun
   `import-x-following` or `channels sync` during classification without first
   handling the documented rematerialization risk.
@@ -205,11 +200,11 @@ Rules:
 | --- | --- | --- | --- |
 | done | Freeze `gpt-5.6-luna` + prompt v2 + reasoning `medium` as the application default after the 15-profile result passed qualitative review. | parent | `src/fli/entity_kinds.py` |
 | done | Verify the stable LiteLLM deployment with one tagged Luna-medium call and reconcile request tags, token counts, proxy spend, and local estimated cost. | parent | `data/fli.db` |
-| todo | Move beyond the 15-handle smoke set to a versioned 50-profile human-labeled evaluation fixture; compare accuracy and abstention before bulk inference. | parent | `tests/fixtures/` |
+| in_progress | Run all 2,956 initial unknown entities with resumable Luna-medium inference, then reconcile classifications, spend, errors, and data invariants. | parent | `data/fli.db` |
 
 ## Backlog / Remaining Work
 
-- [ ] Run the complete 2,956-entity initial unknown corpus after calibration.
+- [ ] Add a versioned human-labeled evaluation fixture for regression testing; Adi explicitly authorized the full run after reviewing the 15-profile calibration.
 - [ ] Reconcile classification counts and verify graph/channel invariants.
 - [ ] Migrate or project accepted results into the Registry API and UI.
 - [ ] Re-enable Playwright through the control plane for final UI screenshots.

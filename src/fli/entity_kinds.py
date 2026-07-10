@@ -715,52 +715,57 @@ def run_classification(
                 errors.extend(item_errors)
                 if result:
                     results.append(result)
+                classified_at = _now()
+                if result:
+                    conn.execute(
+                        """INSERT OR IGNORE INTO entity_kind_classifications
+                           (entity_id, input_sha256, classification, reason,
+                            model, reasoning_effort, response_model,
+                            prompt_version, schema_version, response_id,
+                            input_tokens, output_tokens, estimated_cost_usd,
+                            reported_cost_usd, run_id, classified_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            result.entity.entity_id,
+                            result.entity.input_sha256,
+                            result.classification,
+                            result.reason,
+                            model,
+                            effort,
+                            result.response_model,
+                            PROMPT_VERSION,
+                            SCHEMA_VERSION,
+                            result.response_id,
+                            result.input_tokens,
+                            result.output_tokens,
+                            result.estimated_cost_usd,
+                            result.reported_cost_usd,
+                            run_id,
+                            classified_at,
+                        ),
+                    )
+                for error in item_errors:
+                    conn.execute(
+                        """INSERT INTO entity_kind_classification_errors
+                           (run_id, entity_id, input_sha256, attempt,
+                            error_type, error_message, terminal, occurred_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            run_id,
+                            error.entity.entity_id,
+                            error.entity.input_sha256,
+                            error.attempt,
+                            error.error_type,
+                            error.error_message,
+                            int(error.terminal),
+                            classified_at,
+                        ),
+                    )
+                # Persist every completed entity so an interrupted full run can
+                # resume without repeating earlier paid requests.
+                conn.commit()
 
     classified_at = _now()
-    for result in results:
-        conn.execute(
-            """INSERT OR IGNORE INTO entity_kind_classifications
-               (entity_id, input_sha256, classification, reason, model,
-                reasoning_effort, response_model, prompt_version,
-                schema_version, response_id, input_tokens, output_tokens,
-                estimated_cost_usd, reported_cost_usd, run_id, classified_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                result.entity.entity_id,
-                result.entity.input_sha256,
-                result.classification,
-                result.reason,
-                model,
-                effort,
-                result.response_model,
-                PROMPT_VERSION,
-                SCHEMA_VERSION,
-                result.response_id,
-                result.input_tokens,
-                result.output_tokens,
-                result.estimated_cost_usd,
-                result.reported_cost_usd,
-                run_id,
-                classified_at,
-            ),
-        )
-    for error in errors:
-        conn.execute(
-            """INSERT INTO entity_kind_classification_errors
-               (run_id, entity_id, input_sha256, attempt, error_type,
-                error_message, terminal, occurred_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                run_id,
-                error.entity.entity_id,
-                error.entity.input_sha256,
-                error.attempt,
-                error.error_type,
-                error.error_message,
-                int(error.terminal),
-                classified_at,
-            ),
-        )
     failure_count = len(pending) - len(results)
     input_tokens = sum(result.input_tokens for result in results)
     output_tokens = sum(result.output_tokens for result in results)
