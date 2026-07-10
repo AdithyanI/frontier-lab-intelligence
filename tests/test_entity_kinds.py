@@ -172,3 +172,8 @@ def test_full_run_estimate_scales_calibration_usage():
         "estimated_output_tokens": 59_120,
         "estimated_cost_usd": 0.038428,
     }
+
+
+def test_reasoning_effort_matches_model_family():
+    assert entity_kinds.reasoning_effort("gpt-5-nano") == "minimal"
+    assert entity_kinds.reasoning_effort("gpt-5.6-luna") == "none"

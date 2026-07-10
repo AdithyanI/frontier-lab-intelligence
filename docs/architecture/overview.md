@@ -9,8 +9,10 @@ snapshot, a modeled SQLite graph layer, and a React SPA over a JSON API. Every
 observed channel resolves to one entity; 10 seeded labs are classified and the
 other 2,956 visible identities remain `unknown`. The accepted first classifier
 returns only `person`, `organization`, or `unsure` plus a short reason into a
-separate resumable results layer. Nano calibration has not yet passed the
-missing-evidence abstention check, so no results are projected into the Registry.
+separate resumable results layer. Nano failed the missing-evidence abstention
+check; GPT-5.6 Luna passed the bounded prompt-v2 comparison. Results are not yet
+projected into the Registry because the full corpus and schema migration remain
+separate stages.
 Channel merging, track/reject curation, extraction, and scoring remain later
 stages.
 
@@ -275,7 +277,7 @@ erDiagram
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (22)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (32)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
 ```
@@ -283,8 +285,8 @@ erDiagram
 Table row counts: `raw_items` 1,599, `accounts` 2,967,
 `account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
 `entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
-`channel_observations` 21,133, `entity_kind_classification_runs` 2,
-`entity_kind_classifications` 22, and `entity_kind_classification_errors` 0.
+`channel_observations` 21,133, `entity_kind_classification_runs` 3,
+`entity_kind_classifications` 32, and `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until

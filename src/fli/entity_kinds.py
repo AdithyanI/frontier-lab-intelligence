@@ -32,6 +32,7 @@ CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
 MODEL_PRICING_USD_PER_TOKEN = {
     "gpt-5-nano": (0.05 / 1_000_000, 0.40 / 1_000_000),
     "gpt-5-mini": (0.25 / 1_000_000, 2.00 / 1_000_000),
+    "gpt-5.6-luna": (1.00 / 1_000_000, 6.00 / 1_000_000),
 }
 
 CLASSIFIER_INSTRUCTIONS = """Classify what the supplied X profile represents.
@@ -355,6 +356,11 @@ def _usage_value(usage: Any, field: str) -> int:
     return int(getattr(usage, field, 0) or 0)
 
 
+def reasoning_effort(model: str) -> str:
+    """Choose a supported low-cost effort for the requested model family."""
+    return "none" if model.startswith("gpt-5.6") else "minimal"
+
+
 def classify_one(
     client: Any,
     entity: EntityInput,
@@ -372,7 +378,7 @@ def classify_one(
             separators=(",", ":"),
         ),
         text={"format": CLASSIFICATION_FORMAT},
-        reasoning={"effort": "minimal"},
+        reasoning={"effort": reasoning_effort(model)},
         max_output_tokens=200,
         store=False,
     )

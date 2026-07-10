@@ -135,7 +135,7 @@ Rules:
 - [x] M1 — Classifier foundation. Acceptance: official docs checked; OpenAI SDK
       talks to LiteLLM; minimal structured schema, prompt, persistence, CLI, and
       tests exist. Validate: focused tests plus `scripts/check-fast.sh`.
-- [ ] M2 — Calibration. Acceptance: a deterministic varied sample is processed,
+- [x] M2 — Calibration. Acceptance: a deterministic varied sample is processed,
       outputs and abstentions are inspected, prompt errors are corrected, and
       estimated full-run cost is recorded. Validate: sample reconciliation and
       qualitative audit notes.
@@ -183,11 +183,11 @@ Rules:
 
 ## Open Questions / Blockers
 
-- `gpt-5-nano` has not passed the semantic calibration. Prompt v2 explicitly
-  says a lone given name plus empty bio and opaque handle is `unsure`, but nano
-  still labeled `@rpoo` (`Ross`, no bio) as `person` and incorrectly called it
-  a full name. Discuss a stronger model or a sharper evaluated prompt before
-  any bulk run.
+- `gpt-5-nano` did not pass the semantic calibration: it labeled `@rpoo`
+  (`Ross`, no bio) as `person` twice. `gpt-5.6-luna` with prompt v2 and
+  `reasoning.effort=none` passed the same 10-profile comparison, including the
+  intended `unsure` abstention. The remaining gate is Adi's full-run decision
+  after receiving the cost/quality evidence.
 - The one-time 2,000-follower cleanup is not replayable policy. Do not rerun
   `import-x-following` or `channels sync` during classification without first
   handling the documented rematerialization risk.
@@ -196,9 +196,9 @@ Rules:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Decide whether to strengthen the evaluated prompt further or calibrate `gpt-5-mini`; nano v2 still over-classifies the `Ross`/empty-bio edge case. | parent | `src/fli/entity_kinds.py` |
-| todo | Run only the newly approved bounded comparison batch, then inspect ambiguous and missing-bio cases before accepting a model. | parent | `data/fli.db` |
-| todo | Keep the 2,956-entity full run blocked until Adi has received the cost/quality evidence and the selected configuration passes calibration. | parent | `docs/projects/entity-kind-classification/tasks.md` |
+| done | Accept `gpt-5.6-luna` + prompt v2 + reasoning `none` from the 10-profile comparison; it fixed nano's `@rpoo` error with grounded reasons. | parent | `data/fli.db` |
+| done | Report the measured full-run estimate and optional regional uplift to Adi; do not start bulk inference in the same turn. | parent | `docs/projects/entity-kind-classification/tasks.md` |
+| todo | After Adi's decision, run or defer the 2,956-entity corpus; if run, reconcile every result and preserve graph/channel invariants. | parent | `src/fli/entity_kinds.py` |
 
 ## Backlog / Remaining Work
 
@@ -271,3 +271,13 @@ Copy this into a fresh Codex task after restarting the app:
   2,434 input + 538 output tokens, and $0.0003369. Nano still mislabeled
   `@rpoo`; M2 remains open. The measured v2 full-run estimate is 719,490 input
   + 159,033 output tokens and $0.09959 for 2,956 entities. No bulk run started.
+- 2026-07-10: [DONE] Adi proposed the newly available `gpt-5.6-luna` alias.
+  Official docs identify Luna as the efficient/high-volume GPT-5.6 option and
+  require `none`/`low` rather than the older `minimal` effort. The same 10
+  prompt-v2 inputs ran with `reasoning.effort=none`: 10 valid outputs, zero
+  errors, 4 person / 5 organization / 1 unsure, 2,434 input + 392 output
+  tokens, and $0.004786 at official standard prices. Luna correctly abstained
+  on `@rpoo` and all nine obvious labels/reasons passed qualitative review.
+  The base full-run projection is 719,490 input + 115,875 output tokens and
+  $1.41474; budget $1.56 if the documented 10% regional-processing uplift
+  applies. No full run started.

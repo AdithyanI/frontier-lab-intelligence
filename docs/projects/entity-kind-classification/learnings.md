@@ -17,6 +17,9 @@ this note before archiving the project.
 - `gpt-5-nano` followed the strict JSON shape but not the semantic abstention
   boundary: it called the lone given name `Ross` a full name twice, including
   after the prompt explicitly defined that case as `unsure`.
+- The same prompt and inputs on `gpt-5.6-luna` with reasoning `none` correctly
+  abstained on `Ross`, kept the other nine labels correct, and produced shorter,
+  more evidence-grounded reasons. Model quality, not schema shape, was the gap.
 
 ## Improvement Opportunities
 
