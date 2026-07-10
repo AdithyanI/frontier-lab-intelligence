@@ -118,17 +118,19 @@ data/digg/full_graph_summary.json   # summary of full paginated local pull
 data/raw/digg-full-2026-07-08/      # ignored frozen raw graph artifacts
 ```
 
-Current source-import command:
+Current source-import commands:
 
 ```text
 fli sources import-x-list --list-id <x-list-id> --source <source_key>
+fli sources import-x-following --username <x-handle> --source <source_key>
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
-`~/.secrets/twitterapi-io/api-key`, writes one X list membership source fact per
-account, mirrors X accounts into channels, emits one JSON object, and pages
-until the provider says there is no next page. It does not classify imported
-members as tracked people.
+`~/.secrets/twitterapi-io/api-key`, mirrors X accounts into channels, emits one
+JSON object, and pages until the provider says there is no next page. List
+imports write membership facts. Following imports atomically replace one
+complete snapshot with `followed_by` facts plus directed `follows` edges. Neither
+command classifies imported accounts or approves them for tracking.
 
 Known data facts:
 
@@ -138,9 +140,9 @@ Known data facts:
   first-slice edges.
 - The full frozen bootstrap pull produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
-- `fli channels sync` currently materializes 2,608 entities (10 labs and 2,598
-  unknowns), 2,640 channels (2,608 X plus lab websites/GitHub/arXiv/blog
-  feeds), 2,640 entity-channel links, and 17,656 channel observations.
+- `fli channels sync` currently materializes 3,094 entities (10 labs and 3,084
+  unknowns), 3,126 channels (3,094 X plus lab websites/GitHub/arXiv/blog
+  feeds), 3,126 entity-channel links, and 21,776 channel observations.
 - `fli sources import-x-list --list-id 1585430245762441216 --source
   ai_high_signal` imported 609 AI High Signal X-list members via
   TwitterAPI.io; 230 were already in the Digg bootstrap and 379 were new
@@ -149,6 +151,11 @@ Known data facts:
   public GitHub source. Twenty-three already existed and eight new accounts
   were added; 21 overlap AI High Signal, 17 overlap Digg, and 17 occur in all
   three sources.
+- `fli sources import-x-following --username adithyan_ai --source
+  adi_following` imported a complete 767-account outgoing-follow snapshot on
+  2026-07-10. It matched 282 existing accounts, added 485 followed accounts
+  plus the source account, and wrote 767 directed `follows` edges. The provider
+  estimated 934 credits / $0.00934 for the four pages.
 
 ### Current Schema (as built, not the target sketch)
 
@@ -225,19 +232,19 @@ erDiagram
         string observed_at
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (12,026)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (12,793)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
-    ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,225 total)"
+    ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,992 total)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (42)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (3,126)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (17,656)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,776)"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,608,
-`account_source_facts` 12,026, `graph_edges` 361,225, `labs` 10,
-`entities` 2,608, `channels` 2,640, `entity_channels` 2,640,
-`channel_observations` 17,656.
+Table row counts: `raw_items` 1,599, `accounts` 3,094,
+`account_source_facts` 12,793, `graph_edges` 361,992, `labs` 10,
+`entities` 3,094, `channels` 3,126, `entity_channels` 3,126,
+`channel_observations` 21,776.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -308,14 +315,15 @@ frozen bootstrap source, not the center of the schema.
 
 ## X Graph Source Direction
 
-The next graph source should be our own X following snapshots, not more Digg.
-Pull **who trusted accounts follow**, not the full follower audience of large
-accounts.
+The live graph direction is our own X following snapshots, not more Digg. Pull
+**who trusted accounts follow**, not the full follower audience of large
+accounts. The first snapshot is Adi's 767 outgoing follows; it is personal
+attention evidence, not automatic frontier relevance.
 
 ```text
 curated X watchlist
   -> GET following for each trusted X user
-  -> graph_edges(source='x_api', relationship='follows')
+  -> graph_edges(source=<snapshot source>, relationship='follows')
   -> PageRank over the observed follows graph
   -> people candidates for curation
 ```
@@ -329,6 +337,10 @@ Why this direction:
   source snapshot/evidence URL.
 - Third-party X data APIs can be evaluated later, but the official API shape is
   the cleanest story for a case-study product.
+
+Do not recompute one blended PageRank merely because a new source lands. The
+current Digg follower graph and trusted-person following graph have different
+semantics; choose and validate their weighting before combining them.
 
 Examples:
 
@@ -425,6 +437,7 @@ final score.
 | `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
 | `fli.labs` | curated lab seed data (10 labs); seeds lab entities + official channels |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
+| `fli.sources` | machine-readable TwitterAPI.io X-list and outgoing-follow importers; provenance only, no classification |
 | `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes the full lab/person/unknown universe; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and lean Registry read model; kind classifier still pending |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |

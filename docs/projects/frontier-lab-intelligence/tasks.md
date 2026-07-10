@@ -21,18 +21,22 @@ Build history, tools, budget, and learning notes now live in
 
 ## Current Batch
 
-**Resume here.** Adi chose the identity spine on 2026-07-09: every observed
-channel must resolve to one entity. Known lab channels resolve to the 10 seeded
-labs; every other current channel starts as `unknown`. Kind classification and
-track/reject curation are separate later stages.
+**Resume here.** The frozen evidence universe now includes Adi's outgoing X
+following snapshot: 3,094 X accounts / provisional identity clusters, including
+10 seeded labs and 3,084 unresolved clusters. Kind resolution and track/reject
+curation remain separate later stages. Before classifier implementation, settle
+the structural taxonomy raised by the 2026-07-09 review: `person` /
+`organization` with lab as a role, versus the currently implemented
+`lab` / `person` / `unknown` kinds.
 
 | Status | Work item | Evidence / notes |
 | --- | --- | --- |
 | done | Freeze the initial evidence layer. | Digg graph + PageRank, AI High Signal list, and smol.ai `prefPeople` are in `data/fli.db` with source facts and pinned provenance. |
-| done | Materialize the complete entity universe. | 2,608 entities (10 lab, 0 person, 2,598 unknown) own all 2,640 channels. Sync is hash-idempotent and future graph/list imports run the same materialization path. |
-| done | Show the complete universe in the Registry UI. | `/api/registry` and the SPA expose only entity name, truthful kind, bio, and channels. Digg role/ranking mechanics remain raw evidence and are absent from this surface. |
-| todo | Inspect the unknown universe with Adi and freeze the calibration sample. | Use a small stratified set spanning source partitions, missing bios, obvious people/orgs, and ambiguous handles. Record labels without using the future evaluation holdout. |
-| later | Build and evaluate the kind-classification agent. | Agent input is only identity-bearing fields (name, bio, channels). Output is `lab` / `person` / `unknown` plus confidence, rationale, and policy version. Calibration/evaluation comes before full-dataset application. |
+| done | Import Adi's outgoing X following snapshot. | `adi_following` contains 767 full-profile memberships and directed `@adithyan_ai -> followed account` edges; 282 matched existing accounts and 485 followed accounts were new. Import is atomic, rerunnable, and source-scoped. |
+| done | Materialize the complete current cluster universe. | 3,094 clusters (10 lab, 0 person, 3,084 unknown) own all 3,126 channels. Future graph/list imports run the same materialization path. |
+| done | Show the complete universe in the Registry UI. | `/api/registry` and the SPA expose only entity name, current kind, bio, and channels. Source ranking mechanics remain raw evidence and are absent from this surface. |
+| todo | Settle the entity-resolution contract and freeze the calibration sample. | Confirm person/organization/unresolved semantics, lab role, resolver actions, and a stratified sample spanning source partitions, missing bios, obvious people/orgs, brands, and ambiguous handles. |
+| later | Build and evaluate the resolution agent. | Separate link/create/abstain identity actions from structural kind and later track/reject decisions. Calibration/evaluation comes before full-dataset application. |
 | later | Build the separate track/reject curation stage. | Attention/source evidence belongs here, not in kind classification. Human corrections become durable overrides. |
 
 ## Fresh-Agent Context
@@ -54,11 +58,11 @@ track/reject curation are separate later stages.
   10 occur only in smol.ai. The smol import added eight account rows:
   `akhaliq`, `danhendrycks`, `labenz`, `lucidrains`, `philschmid`,
   `rohanpaul_ai`, `thebloke`, and `tom_doerr`.
-- **Current DB:** 2,608 X accounts, 2,640 channels, 12,026 account source facts,
-  361,225 graph edges, 17,656 channel observations, 10 lab entities, and 42
+- **Current DB:** 3,094 X accounts, 3,126 channels, 12,793 account source facts,
+  361,992 graph edges, 21,776 channel observations, 10 lab entities, and 3,126
   entity-channel links.
 - **Model distinction:** `accounts` is the legacy X-specific graph table.
-  `channels` is the canonical cross-source location model: 2,608 X channels
+  `channels` is the canonical cross-source location model: 3,094 X channels
   plus 10 websites, 9 GitHub channels, 8 arXiv channels, and 5 blogs. Each X
   account is currently mirrored one-to-one into an X channel.
 - **Source semantics:** list membership is evidence only. It must not
@@ -71,7 +75,7 @@ track/reject curation are separate later stages.
   `docs/references/research-notes.md` for source provenance before changing
   ingestion or classification.
 
-### Exact Source Partition
+### Baseline Source Partition Before Adi Following
 
 These groups use explicit list/ranking membership facts, not mere presence as
 an endpoint in the Digg graph:
@@ -93,6 +97,18 @@ means no Digg ranking fact; only 286 created new rows during that import because
 many were already graph endpoints. smol.ai then created eight more rows, for a
 net 294 accounts beyond the original 2,314-row Digg graph load.
 
+### Adi Following Snapshot
+
+The 2026-07-10 `adi_following` import fetched all 767 accounts followed by
+`@adithyan_ai`. Of those, 282 already existed and 485 followed accounts were
+new; the source account itself was also new, bringing the current universe to
+3,094 accounts. Overlap within the 767: 177 Digg-ranked, 127 AI High Signal, 10
+smol.ai, and 257 present in the prior graph. All 767 have follower counts and
+744 have non-empty bios. The provider returned pages 200/200/200/167. One
+validation/repair rerun plus a 20-profile shape probe put the documented
+following-page estimate at about $0.01928 total for this session; profile lookup
+cost is negligible and separately unquantified.
+
 ### Decisions Already Made
 
 - Keep the first version simple. Merge evidence before classification; do not
@@ -101,8 +117,9 @@ net 294 accounts beyond the original 2,314-row Digg graph load.
 - **Entity is identity, not endorsement.** Every observed channel resolves to
   one entity so imports are immediately usable. An unresolved identity has
   kind `unknown`; it is not silently treated as a person.
-- The complete current universe is 2,608 entities: 10 known labs already own
-  10 X channels, while the other 2,598 X channels become provisional unknowns.
+- The complete current universe is 3,094 provisional identity clusters: 10
+  known labs own their X and other official channels, while 3,084 clusters
+  remain `unknown` under the current implementation.
 - Kind classification answers only `lab` / `person` / `unknown`. Tracking
   answers `track` / `reject` later. Keep these as separate, evaluable stages.
 - Digg rank, PageRank, follower count, list membership, and Digg role remain
@@ -168,35 +185,36 @@ net 294 accounts beyond the original 2,314-row Digg graph load.
   user-facing System page and should not be removed merely because `/system`
   was removed.
 - `/api/accounts` is a compatibility workbench over X channels.
-- `/api/registry` returns the complete 2,608-entity universe: 10 labs, zero
-  people, and 2,598 unknowns. The frontend exposes the same counts and filters.
+- `/api/registry` returns the complete 3,094-cluster universe: 10 labs, zero
+  resolved people, and 3,084 unknowns. The frontend exposes the same counts and
+  filters.
 - The main Registry should stay lean. Raw source agreement, ranks, and follower
   observations remain available for later curation/evaluation rather than
   becoming permanent table columns.
-- Of 2,608 accounts, 1,333 currently have a non-empty bio and 2,600 have a
-  follower count. The eight new smol-only account rows have handles and source
-  provenance but no fetched profile metadata yet.
+- Of 3,094 accounts, 1,861 currently have a non-empty bio and 3,087 have a
+  follower count. The eight smol-only account rows still have handles and source
+  provenance but no fetched profile metadata.
 
 ### Next-Step Acceptance Check
 
 The first entity-spine batch is accepted when:
 
-1. All 2,640 channels link to exactly one entity.
-2. The entity universe contains exactly 2,608 rows: 10 labs, 0 people, and
-   2,598 unknowns before classifier work begins.
+1. All 3,126 channels link to exactly one provisional cluster.
+2. The current universe contains exactly 3,094 rows: 10 labs, 0 resolved
+   people, and 3,084 unknowns before resolver work begins.
 3. Re-running synchronization creates no rows or material DB diff.
-4. `/api/registry` and the SPA expose all 2,608 entities with only truthful,
+4. `/api/registry` and the SPA expose all 3,094 clusters with only truthful,
    identity-bearing fields; Digg role is absent from the canonical UI.
 5. Missing bios remain missing and no lab/person kind is inferred from rank,
    followers, or list membership.
-6. Existing evidence invariants remain unchanged: Digg 1,000; AI High Signal
-   609; smol.ai 31; graph edges 361,225.
+6. Evidence invariants hold: Digg 1,000; AI High Signal 609; smol.ai 31;
+   `adi_following` 767; graph edges 361,992.
 
 ## Open Questions / Blockers
 
-- **Kind classifier:** not built in this batch. Its calibration sample, model,
-  prompt, and evaluation metrics remain to be chosen after the unknown universe
-  is visible.
+- **Resolution contract:** not built. Confirm the proposed structural
+  `person` / `organization` kinds, unresolved state, lab role, and
+  link/create/abstain actions before freezing calibration labels.
 - **Track/reject rule:** deliberately separate and undecided. Do not assume
   source count alone equals importance.
 - **Legacy migration:** `accounts` and `account_source_facts` still back graph
@@ -204,8 +222,9 @@ The first entity-spine batch is accepted when:
   not delete the legacy layer until graph consumers have migrated.
 - **Database artifact policy:** prompt asks for schema + real data; decide
   packaging/commit policy after modeled schema exists.
-- **More sources:** pause source expansion. Revisit Anthropic staff or X
-  following data only after the current evidence has been consolidated.
+- **More sources:** pause further expansion after the explicitly approved Adi
+  following snapshot. Revisit additional trusted-person following seeds only
+  after the current evidence and resolution contract are consolidated.
 - **Private cleanup:** before external sharing, strip or rewrite private
   context from `docs/references/context.md` and the build log.
 
@@ -227,15 +246,18 @@ The first entity-spine batch is accepted when:
 
 Update before each handoff when meaningful work lands.
 
-- Latest commands: `fli channels sync` twice with SHA comparison;
-  `scripts/check-fast.sh`; frontend lint/build; impeccable detector; live API
-  and in-app browser checks on the always-on 8797 server.
-- Latest results: 2,608 entities (10 lab, 0 person, 2,598 unknown), 2,640 owned
-  channels, zero unowned channels, zero duplicate owners; SQLite integrity is
-  `ok`; the second sync keeps the same DB SHA; all 22 tests pass.
-- Known limitations: no kind classifier, calibration/evaluation set, or
-  track/reject decision exists yet. Public browser access requires Cloudflare
-  Access login; no external submission was performed.
+- Latest commands: `fli sources import-x-following --username adithyan_ai
+  --source adi_following`; focused source tests; SQLite invariant/overlap
+  queries; `scripts/check-fast.sh`.
+- Latest results: 3,094 clusters (10 lab, 0 person, 3,084 unknown), 3,126 owned
+  channels, zero unowned channels, zero duplicate owners; 767 directed
+  `adi_following` edges and facts; SQLite integrity is `ok`.
+  Repository validation passes all 28 tests.
+- Known limitations: no resolution agent, calibration/evaluation set, or
+  track/reject decision exists yet. The current database still encodes
+  `lab` / `person` / `unknown` pending the taxonomy decision. PageRank was not
+  recomputed because Digg follower edges and trusted-person following edges
+  need an explicit weighting policy. No external submission was performed.
 - Submission package path:
 
 ## Progress Log

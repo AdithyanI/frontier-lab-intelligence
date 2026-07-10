@@ -1,8 +1,8 @@
-"""Curated source importers.
+"""Curated X source importers.
 
-This is intentionally small: one generic X-list importer backed by
-TwitterAPI.io. It layers list membership as evidence; it does not decide who
-is tracked.
+The TwitterAPI.io adapter imports list membership and trusted users' outgoing
+following snapshots. Both remain provenance/graph evidence; neither decides
+who is tracked.
 """
 
 from __future__ import annotations
@@ -26,7 +26,9 @@ DEFAULT_TWITTERAPI_IO_KEY_FILE = Path.home() / ".secrets/twitterapi-io/api-key"
 TWITTERAPI_IO_BASE_URL = "https://api.twitterapi.io"
 SCHEMA_VERSION = "1.0"
 SOURCE_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+X_HANDLE_RE = re.compile(r"^[a-z0-9_]{1,15}$")
 PROVIDER = "twitterapi_io"
+PROVIDER_MAX_ATTEMPTS = 3
 
 
 @dataclass
@@ -87,41 +89,49 @@ class TwitterApiIoClient:
         self.timeout = timeout
         self.page_sleep_seconds = page_sleep_seconds
 
-    def fetch_page(self, *, list_id: str, cursor: str | None) -> dict[str, Any]:
-        query: dict[str, str] = {"list_id": list_id}
-        if cursor:
-            query["cursor"] = cursor
-        url = f"{self.base_url}/twitter/list/members?{parse.urlencode(query)}"
-        req = request.Request(url, headers={"X-API-Key": self.api_key})
-        try:
-            with request.urlopen(req, timeout=self.timeout) as response:
-                raw = response.read().decode("utf-8")
-        except error.HTTPError as exc:
-            exit_code = 3 if exc.code in {401, 403} else 4
-            retryable = exc.code in {408, 409, 425, 429, 500, 502, 503, 504}
-            raise SourceCliError(
-                code="E_PROVIDER_HTTP",
-                message=f"TwitterAPI.io returned HTTP {exc.code}.",
-                hint="Check the API key, account credits, provider status, and list id.",
-                exit_code=exit_code,
-                retryable=retryable,
-            ) from exc
-        except TimeoutError as exc:
-            raise SourceCliError(
-                code="E_TIMEOUT",
-                message="TwitterAPI.io request timed out.",
-                hint="Retry later or increase --timeout-seconds.",
-                exit_code=5,
-                retryable=True,
-            ) from exc
-        except OSError as exc:
-            raise SourceCliError(
-                code="E_NETWORK",
-                message="Could not reach TwitterAPI.io.",
-                hint="Check network connectivity and provider status.",
-                exit_code=4,
-                retryable=True,
-            ) from exc
+    def _fetch_json(self, url: str) -> dict[str, Any]:
+        raw = ""
+        for attempt in range(PROVIDER_MAX_ATTEMPTS):
+            req = request.Request(url, headers={"X-API-Key": self.api_key})
+            try:
+                with request.urlopen(req, timeout=self.timeout) as response:
+                    raw = response.read().decode("utf-8")
+                break
+            except error.HTTPError as exc:
+                if exc.code == 429 and attempt + 1 < PROVIDER_MAX_ATTEMPTS:
+                    retry_after = exc.headers.get("Retry-After")
+                    try:
+                        delay = float(retry_after) if retry_after else 2**attempt
+                    except ValueError:
+                        delay = 2**attempt
+                    exc.close()
+                    time.sleep(max(0.0, min(delay, 60.0)))
+                    continue
+                exit_code = 3 if exc.code in {401, 403} else 4
+                retryable = exc.code in {408, 409, 425, 429, 500, 502, 503, 504}
+                raise SourceCliError(
+                    code="E_PROVIDER_HTTP",
+                    message=f"TwitterAPI.io returned HTTP {exc.code}.",
+                    hint="Check the API key, account credits, provider status, and request parameters.",
+                    exit_code=exit_code,
+                    retryable=retryable,
+                ) from exc
+            except TimeoutError as exc:
+                raise SourceCliError(
+                    code="E_TIMEOUT",
+                    message="TwitterAPI.io request timed out.",
+                    hint="Retry later or increase --timeout-seconds.",
+                    exit_code=5,
+                    retryable=True,
+                ) from exc
+            except OSError as exc:
+                raise SourceCliError(
+                    code="E_NETWORK",
+                    message="Could not reach TwitterAPI.io.",
+                    hint="Check network connectivity and provider status.",
+                    exit_code=4,
+                    retryable=True,
+                ) from exc
         try:
             payload = json.loads(raw)
         except json.JSONDecodeError as exc:
@@ -135,12 +145,23 @@ class TwitterApiIoClient:
         if payload.get("status") == "error":
             raise SourceCliError(
                 code="E_PROVIDER_ERROR",
-                message=str(payload.get("msg") or "TwitterAPI.io returned an error."),
-                hint="Check the list id, API key, account credits, and provider status.",
+                message=str(
+                    payload.get("msg")
+                    or payload.get("message")
+                    or "TwitterAPI.io returned an error."
+                ),
+                hint="Check the request parameters, API key, account credits, and provider status.",
                 exit_code=4,
                 retryable=False,
             )
         return payload
+
+    def fetch_page(self, *, list_id: str, cursor: str | None) -> dict[str, Any]:
+        query: dict[str, str] = {"list_id": list_id}
+        if cursor:
+            query["cursor"] = cursor
+        url = f"{self.base_url}/twitter/list/members?{parse.urlencode(query)}"
+        return self._fetch_json(url)
 
     def iter_member_pages(self, *, list_id: str):
         cursor: str | None = None
@@ -172,6 +193,79 @@ class TwitterApiIoClient:
                 raise SourceCliError(
                     code="E_PROVIDER_CURSOR_REPEAT",
                     message="TwitterAPI.io repeated a pagination cursor.",
+                    hint="Stopped to avoid an infinite pagination loop.",
+                    exit_code=4,
+                    retryable=True,
+                )
+            seen_cursors.add(next_cursor)
+            cursor = next_cursor
+            if self.page_sleep_seconds > 0:
+                time.sleep(self.page_sleep_seconds)
+
+    def fetch_user(self, *, username: str) -> dict[str, Any]:
+        query = parse.urlencode({"userName": username})
+        payload = self._fetch_json(f"{self.base_url}/twitter/user/info?{query}")
+        user = payload.get("data")
+        if not isinstance(user, dict):
+            raise SourceCliError(
+                code="E_PROVIDER_SHAPE",
+                message="TwitterAPI.io response did not include a user object.",
+                hint="Inspect provider docs/status before retrying.",
+                exit_code=4,
+                retryable=True,
+            )
+        return user
+
+    def fetch_following_page(
+        self,
+        *,
+        username: str,
+        cursor: str | None,
+        page_size: int = 200,
+    ) -> dict[str, Any]:
+        query: dict[str, str | int] = {
+            "userName": username,
+            "pageSize": page_size,
+        }
+        if cursor:
+            query["cursor"] = cursor
+        url = f"{self.base_url}/twitter/user/followings?{parse.urlencode(query)}"
+        return self._fetch_json(url)
+
+    def iter_following_pages(self, *, username: str, page_size: int = 200):
+        cursor: str | None = None
+        seen_cursors: set[str] = set()
+        while True:
+            payload = self.fetch_following_page(
+                username=username,
+                cursor=cursor,
+                page_size=page_size,
+            )
+            page_followings = payload.get("followings")
+            if not isinstance(page_followings, list):
+                raise SourceCliError(
+                    code="E_PROVIDER_SHAPE",
+                    message="TwitterAPI.io response did not include a followings array.",
+                    hint="Inspect provider docs/status before retrying.",
+                    exit_code=4,
+                    retryable=True,
+                )
+            yield [member for member in page_followings if isinstance(member, dict)]
+            if not payload.get("has_next_page"):
+                return
+            next_cursor = str(payload.get("next_cursor") or "")
+            if not next_cursor:
+                raise SourceCliError(
+                    code="E_PROVIDER_CURSOR_MISSING",
+                    message="TwitterAPI.io reported another following page without a cursor.",
+                    hint="Retry later or inspect the provider response.",
+                    exit_code=4,
+                    retryable=True,
+                )
+            if next_cursor in seen_cursors:
+                raise SourceCliError(
+                    code="E_PROVIDER_CURSOR_REPEAT",
+                    message="TwitterAPI.io repeated a following pagination cursor.",
                     hint="Stopped to avoid an infinite pagination loop.",
                     exit_code=4,
                     retryable=True,
@@ -217,7 +311,10 @@ def _upsert_account(
     display_name = member.get("name")
     x_id = member.get("id")
     bio = member.get("description")
-    followers_count = _int_or_none(member.get("followers"))
+    followers_value = member.get("followers")
+    if followers_value is None:
+        followers_value = member.get("followers_count")
+    followers_count = _int_or_none(followers_value)
     if row:
         conn.execute(
             """UPDATE accounts SET
@@ -240,15 +337,43 @@ def _upsert_account(
     return cur.lastrowid, True
 
 
-def _has_source_fact(conn: sqlite3.Connection, *, account_id: int, source: str) -> bool:
+def _has_source_fact(
+    conn: sqlite3.Connection,
+    *,
+    account_id: int,
+    source: str,
+    fact: str = "list_member",
+) -> bool:
     return (
         conn.execute(
             """SELECT 1 FROM account_source_facts
-               WHERE account_id = ? AND source = ? AND fact = 'list_member'""",
-            (account_id, source),
+               WHERE account_id = ? AND source = ? AND fact = ?""",
+            (account_id, source, fact),
         ).fetchone()
         is not None
     )
+
+
+def _validate_source(source: str) -> None:
+    if not SOURCE_RE.match(source):
+        raise SourceCliError(
+            code="E_SOURCE_INVALID",
+            message="--source must be lowercase letters, numbers, underscores, or hyphens.",
+            hint="Example: --source adi_following",
+            exit_code=2,
+        )
+
+
+def _normalize_username(username: str) -> str:
+    normalized = username.strip().removeprefix("@").lower()
+    if not X_HANDLE_RE.match(normalized):
+        raise SourceCliError(
+            code="E_USERNAME_INVALID",
+            message="--username must be a valid X handle.",
+            hint="Pass the handle without a profile URL, for example: adithyan_ai",
+            exit_code=2,
+        )
+    return normalized
 
 
 def import_members(
@@ -269,13 +394,7 @@ def import_members(
             hint="Pass the numeric X list id.",
             exit_code=2,
         )
-    if not SOURCE_RE.match(source):
-        raise SourceCliError(
-            code="E_SOURCE_INVALID",
-            message="--source must be lowercase letters, numbers, underscores, or hyphens.",
-            hint="Example: --source ai_high_signal",
-            exit_code=2,
-        )
+    _validate_source(source)
 
     observed_at = observed_at or _now()
     evidence_url = f"https://x.com/i/lists/{list_id}"
@@ -438,6 +557,272 @@ def run_import_x_list(
     return totals
 
 
+def _following_page_credits(returned: int) -> int:
+    """Estimate TwitterAPI.io credits from its documented returned-page tiers."""
+    if returned <= 0:
+        return 0
+    if returned >= 200:
+        return returned
+    if returned >= 100:
+        return returned * 2
+    return max(60, returned * 3)
+
+
+def import_followings(
+    conn: sqlite3.Connection,
+    *,
+    username: str,
+    source: str,
+    source_profile: dict[str, Any],
+    followings: list[dict[str, Any]],
+    dry_run: bool,
+    sync_channels: bool = True,
+    observed_at: str | None = None,
+) -> dict[str, Any]:
+    """Replace one user's directed following snapshot atomically."""
+    username = _normalize_username(username)
+    _validate_source(source)
+    observed_at = observed_at or _now()
+    evidence_url = f"https://x.com/{username}/following"
+    channels.ensure_schema(conn)
+
+    unique: dict[str, dict[str, Any]] = {}
+    skipped = 0
+    for member in followings:
+        handle = _normalize_handle(member)
+        if not handle:
+            skipped += 1
+            continue
+        unique.setdefault(handle, member)
+
+    all_handles = set(unique) | {username}
+    existing_handles = {
+        row["handle"]
+        for row in conn.execute(
+            "SELECT handle FROM accounts WHERE platform = 'x'"
+        ).fetchall()
+    }
+    existing_fact_handles = {
+        row["handle"]
+        for row in conn.execute(
+            """SELECT a.handle
+               FROM account_source_facts f
+               JOIN accounts a ON a.id = f.account_id
+               WHERE f.source = ? AND f.fact = 'followed_by' AND f.value = ?""",
+            (source, username),
+        ).fetchall()
+    }
+    existing_edge_handles = {
+        row["handle"]
+        for row in conn.execute(
+            """SELECT target.handle
+               FROM graph_edges edge
+               JOIN accounts source_account ON source_account.id = edge.from_account_id
+               JOIN accounts target ON target.id = edge.to_account_id
+               WHERE edge.source = ?
+                 AND edge.relationship = 'follows'
+                 AND source_account.handle = ?""",
+            (source, username),
+        ).fetchall()
+    }
+
+    would_create = len(all_handles - existing_handles)
+    would_update = len(all_handles & existing_handles)
+    would_write_facts = len(set(unique) - existing_fact_handles)
+    would_write_edges = len(set(unique) - existing_edge_handles)
+    stale_fact_handles = existing_fact_handles - set(unique)
+    stale_edge_handles = existing_edge_handles - set(unique)
+
+    created = 0
+    updated = 0
+    facts_written = 0
+    edges_written = 0
+    facts_removed = 0
+    edges_removed = 0
+    source_account_id: int | None = None
+    if not dry_run:
+        with conn:
+            source_member = dict(source_profile)
+            source_member["userName"] = username
+            source_account_id, source_created = _upsert_account(
+                conn,
+                member=source_member,
+                handle=username,
+                observed_at=observed_at,
+            )
+            created += int(source_created)
+            updated += int(not source_created)
+
+            target_ids: list[int] = []
+            for handle, member in unique.items():
+                account_id, is_created = _upsert_account(
+                    conn,
+                    member=member,
+                    handle=handle,
+                    observed_at=observed_at,
+                )
+                target_ids.append(account_id)
+                created += int(is_created)
+                updated += int(not is_created)
+                before_fact = _has_source_fact(
+                    conn,
+                    account_id=account_id,
+                    source=source,
+                    fact="followed_by",
+                )
+                conn.execute(
+                    """INSERT INTO account_source_facts
+                       (account_id, source, fact, value, observed_at, evidence_url)
+                       VALUES (?, ?, 'followed_by', ?, ?, ?)
+                       ON CONFLICT (account_id, source, fact) DO UPDATE SET
+                           value = excluded.value,
+                           observed_at = excluded.observed_at,
+                           evidence_url = excluded.evidence_url""",
+                    (account_id, source, username, observed_at, evidence_url),
+                )
+                facts_written += int(not before_fact)
+
+                before_edge = conn.execute(
+                    """SELECT 1 FROM graph_edges
+                       WHERE from_account_id = ? AND to_account_id = ?
+                         AND relationship = 'follows' AND source = ?""",
+                    (source_account_id, account_id, source),
+                ).fetchone()
+                conn.execute(
+                    """INSERT INTO graph_edges
+                       (from_account_id, to_account_id, relationship, source,
+                        observed_at, evidence_url)
+                       VALUES (?, ?, 'follows', ?, ?, ?)
+                       ON CONFLICT (from_account_id, to_account_id, relationship, source)
+                       DO UPDATE SET
+                           observed_at = excluded.observed_at,
+                           evidence_url = excluded.evidence_url""",
+                    (source_account_id, account_id, source, observed_at, evidence_url),
+                )
+                edges_written += int(before_edge is None)
+
+            conn.execute(
+                "CREATE TEMP TABLE IF NOT EXISTS current_following_ids "
+                "(account_id INTEGER PRIMARY KEY)"
+            )
+            conn.execute("DELETE FROM current_following_ids")
+            conn.executemany(
+                "INSERT INTO current_following_ids (account_id) VALUES (?)",
+                ((account_id,) for account_id in target_ids),
+            )
+            edge_result = conn.execute(
+                """DELETE FROM graph_edges
+                   WHERE source = ? AND relationship = 'follows'
+                     AND from_account_id = ?
+                     AND NOT EXISTS (
+                         SELECT 1 FROM current_following_ids current
+                         WHERE current.account_id = graph_edges.to_account_id
+                     )""",
+                (source, source_account_id),
+            )
+            fact_result = conn.execute(
+                """DELETE FROM account_source_facts
+                   WHERE source = ? AND fact = 'followed_by' AND value = ?
+                     AND NOT EXISTS (
+                         SELECT 1 FROM current_following_ids current
+                         WHERE current.account_id = account_source_facts.account_id
+                     )""",
+                (source, username),
+            )
+            conn.execute("DROP TABLE current_following_ids")
+            edges_removed = edge_result.rowcount
+            facts_removed = fact_result.rowcount
+        if sync_channels:
+            channels.sync_all(conn)
+
+    return {
+        "provider": PROVIDER,
+        "username": username,
+        "source": source,
+        "dry_run": dry_run,
+        "followings_fetched": len(followings),
+        "unique_handles": len(unique),
+        "skipped_followings": skipped,
+        "would_create_accounts": would_create,
+        "would_update_accounts": would_update,
+        "would_write_source_facts": would_write_facts,
+        "would_write_edges": would_write_edges,
+        "would_remove_source_facts": len(stale_fact_handles),
+        "would_remove_edges": len(stale_edge_handles),
+        "created_accounts": created,
+        "updated_accounts": updated,
+        "source_facts_written": facts_written,
+        "edges_written": edges_written,
+        "source_facts_removed": facts_removed,
+        "edges_removed": edges_removed,
+        "source_account_id": source_account_id,
+        "evidence_url": evidence_url,
+    }
+
+
+def run_import_x_following(
+    *,
+    db_path: str | None,
+    username: str,
+    source: str,
+    key_file: Path,
+    dry_run: bool,
+    timeout_seconds: float,
+    page_sleep_seconds: float,
+    page_size: int = 200,
+    client: TwitterApiIoClient | None = None,
+) -> dict[str, Any]:
+    username = _normalize_username(username)
+    _validate_source(source)
+    if not 20 <= page_size <= 200:
+        raise SourceCliError(
+            code="E_PAGE_SIZE_INVALID",
+            message="--page-size must be between 20 and 200.",
+            hint="Use 200 for the provider's lowest per-following price.",
+            exit_code=2,
+        )
+    if client is None:
+        api_key = _read_api_key(key_file)
+        client = TwitterApiIoClient(
+            api_key=api_key,
+            timeout=timeout_seconds,
+            page_sleep_seconds=page_sleep_seconds,
+        )
+
+    observed_at = _now()
+    source_profile = client.fetch_user(username=username)
+    followings: list[dict[str, Any]] = []
+    page_counts: list[int] = []
+    for page_followings in client.iter_following_pages(
+        username=username,
+        page_size=page_size,
+    ):
+        followings.extend(page_followings)
+        page_counts.append(len(page_followings))
+
+    conn = channels.connect(db_path) if db_path else channels.connect()
+    data = import_followings(
+        conn,
+        username=username,
+        source=source,
+        source_profile=source_profile,
+        followings=followings,
+        dry_run=dry_run,
+        observed_at=observed_at,
+    )
+    estimated_credits = sum(_following_page_credits(count) for count in page_counts)
+    data.update(
+        {
+            "pages_fetched": len(page_counts),
+            "page_counts": page_counts,
+            "estimated_provider_credits": estimated_credits,
+            "estimated_provider_cost_usd": round(estimated_credits / 100_000, 6),
+            "database": str(db_path or store.DEFAULT_DB_PATH),
+        }
+    )
+    return data
+
+
 def _result(
     *,
     command: str,
@@ -470,59 +855,94 @@ def _print_result(payload: dict[str, Any], *, plain: bool) -> None:
         print(f"error: {err.get('code')}: {err.get('message')}")
         return
     data = payload["data"] or {}
+    action = payload.get("command", "sources").split()[-1]
     print(
-        "import-x-list: "
+        f"{action}: "
         f"{data.get('unique_handles', 0)} handles, "
         f"{data.get('pages_fetched', 0)} pages, "
         f"dry_run={data.get('dry_run')}"
     )
 
 
-def main(argv: list[str] | None = None) -> int:
-    started = time.monotonic()
-    request_id = str(uuid.uuid4())
-    parser = JsonArgumentParser(prog="fli sources")
-    sub = parser.add_subparsers(dest="action", required=True)
-    import_p = sub.add_parser("import-x-list", help="Import members of one X list.")
-    import_p.add_argument("--list-id", required=True)
-    import_p.add_argument("--source", required=True)
-    import_p.add_argument("--db", default=None)
-    import_p.add_argument(
+def _add_provider_arguments(
+    parser: argparse.ArgumentParser,
+    *,
+    default_page_sleep_seconds: float,
+) -> None:
+    parser.add_argument("--source", required=True)
+    parser.add_argument("--db", default=None)
+    parser.add_argument(
         "--key-file",
         default=str(DEFAULT_TWITTERAPI_IO_KEY_FILE),
         help="Path to a file containing the provider API key.",
     )
-    import_p.add_argument("--timeout-seconds", type=float, default=30.0)
-    import_p.add_argument(
+    parser.add_argument("--timeout-seconds", type=float, default=30.0)
+    parser.add_argument(
         "--page-sleep-seconds",
         type=float,
-        default=5.0,
-        help="Seconds to wait between provider pages; default respects new-account QPS.",
+        default=default_page_sleep_seconds,
+        help="Optional client-side delay between cursor pages.",
     )
-    import_p.add_argument("--dry-run", action="store_true")
-    import_p.add_argument("--no-input", action="store_true")
-    import_p.add_argument("--json", action="store_true", help="Emit JSON (default).")
-    import_p.add_argument("--plain", action="store_true", help="Emit compact text.")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--no-input", action="store_true")
+    parser.add_argument("--json", action="store_true", help="Emit JSON (default).")
+    parser.add_argument("--plain", action="store_true", help="Emit compact text.")
+
+
+def main(argv: list[str] | None = None) -> int:
+    started = time.monotonic()
+    request_id = str(uuid.uuid4())
+    command = "sources"
+    parser = JsonArgumentParser(prog="fli sources")
+    sub = parser.add_subparsers(dest="action", required=True)
+    import_p = sub.add_parser("import-x-list", help="Import members of one X list.")
+    import_p.add_argument("--list-id", required=True)
+    _add_provider_arguments(import_p, default_page_sleep_seconds=5.0)
+    following_p = sub.add_parser(
+        "import-x-following",
+        help="Import the current accounts followed by one X user.",
+    )
+    following_p.add_argument("--username", required=True)
+    following_p.add_argument(
+        "--page-size",
+        type=int,
+        default=200,
+        help="Provider page size (20-200); 200 has the lowest unit price.",
+    )
+    _add_provider_arguments(following_p, default_page_sleep_seconds=0.0)
     try:
         args = parser.parse_args(argv)
-        if args.action != "import-x-list":
+        command = f"sources {args.action}"
+        if args.action == "import-x-list":
+            data = run_import_x_list(
+                db_path=args.db,
+                list_id=args.list_id,
+                source=args.source,
+                key_file=Path(args.key_file).expanduser(),
+                dry_run=args.dry_run,
+                timeout_seconds=args.timeout_seconds,
+                page_sleep_seconds=args.page_sleep_seconds,
+            )
+        elif args.action == "import-x-following":
+            data = run_import_x_following(
+                db_path=args.db,
+                username=args.username,
+                source=args.source,
+                key_file=Path(args.key_file).expanduser(),
+                dry_run=args.dry_run,
+                timeout_seconds=args.timeout_seconds,
+                page_sleep_seconds=args.page_sleep_seconds,
+                page_size=args.page_size,
+            )
+        else:
             raise SourceCliError(
                 code="E_USAGE",
                 message="Unsupported action.",
                 hint="Run `fli sources --help`.",
                 exit_code=2,
             )
-        data = run_import_x_list(
-            db_path=args.db,
-            list_id=args.list_id,
-            source=args.source,
-            key_file=Path(args.key_file).expanduser(),
-            dry_run=args.dry_run,
-            timeout_seconds=args.timeout_seconds,
-            page_sleep_seconds=args.page_sleep_seconds,
-        )
         payload = _result(
-            command="sources import-x-list",
+            command=command,
             status="ok",
             data=data,
             error_obj=None,
@@ -533,7 +953,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except SourceCliError as exc:
         payload = _result(
-            command="sources import-x-list",
+            command=command,
             status="error",
             data=None,
             error_obj={
