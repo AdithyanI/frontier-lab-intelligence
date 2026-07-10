@@ -245,3 +245,66 @@ def test_merge_entity_moves_channels_without_losing_observations(tmp_path):
         "SELECT value FROM channel_observations WHERE channel_id = ?",
         (ai_channel,),
     ).fetchone()["value"] == "2000000"
+
+
+def test_organization_groups_are_explicit_and_idempotent(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    entities = {}
+    for handle, name in [
+        ("anthropicai", "Anthropic"),
+        ("claudeai", "Claude"),
+        ("claudedevs", "Claude Developers"),
+    ]:
+        entity_id = channels.upsert_entity(
+            conn,
+            kind="organization",
+            slug=f"x-{handle}",
+            name=name,
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
+        channel_id = channels.upsert_channel(
+            conn,
+            kind="x",
+            key=handle,
+            label=name,
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
+        channels.link_entity_channel(
+            conn,
+            entity_id=entity_id,
+            channel_id=channel_id,
+            relationship="identity",
+        )
+        entities[handle] = entity_id
+    conn.commit()
+    groups = [
+        {
+            "canonical_handle": "anthropicai",
+            "member_handles": ["claudeai", "claudedevs"],
+            "reason": "Official Anthropic product accounts.",
+        }
+    ]
+
+    first = registry.apply_organization_groups(conn, groups)
+    conn.commit()
+    second = registry.apply_organization_groups(conn, groups)
+    conn.commit()
+
+    assert first["merged_entities"] == 2
+    assert first["moved_channels"] == 2
+    assert second["merged_entities"] == 0
+    assert second["already_grouped"] == 2
+    assert conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 1
+    handles = conn.execute(
+        """SELECT c.key
+           FROM channels c
+           JOIN entity_channels ec ON ec.channel_id = c.id
+           WHERE ec.entity_id = ? AND c.kind = 'x'
+           ORDER BY c.key""",
+        (entities["anthropicai"],),
+    ).fetchall()
+    assert [row["key"] for row in handles] == [
+        "anthropicai",
+        "claudeai",
+        "claudedevs",
+    ]

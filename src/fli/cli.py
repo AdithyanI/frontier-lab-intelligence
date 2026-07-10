@@ -23,6 +23,8 @@ def main(argv: list[str] | None = None) -> int:
     channels_p = sub.add_parser("channels", help="Entity/channel model.")
     channels_p.add_argument("action", choices=["sync", "summary"])
     channels_p.add_argument("--db", default=None, help="Path to SQLite DB.")
+    registry_p = sub.add_parser("registry", help="Registry identity curation.")
+    registry_p.add_argument("registry_args", nargs=argparse.REMAINDER)
     sources_p = sub.add_parser("sources", help="Curated source importers.")
     sources_p.add_argument("source_args", nargs=argparse.REMAINDER)
     entity_kinds_p = sub.add_parser(
@@ -65,6 +67,11 @@ def main(argv: list[str] | None = None) -> int:
                 *(["--db", args.db] if args.db else []),
             ]
         )
+
+    if args.command == "registry":
+        from fli import registry
+
+        return registry.main(args.registry_args)
 
     if args.command == "sources":
         from fli import sources

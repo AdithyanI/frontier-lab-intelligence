@@ -8,6 +8,9 @@
   paginated follower pulls are too large for normal git hosting, so their raw
   artifacts stay under ignored `raw/` with a small tracked summary manifest in
   `digg/full_graph_summary.json`.
+- `registry/organization-groups.json` — reviewed, high-confidence mappings of
+  product/developer X accounts into one canonical organization. Applied through
+  `fli registry apply-organization-groups`; entries not listed remain separate.
 
 `fli.db` is the current inspectable SQLite corpus for the data-first spike.
 Its `raw_items` table is evidence, not the final modeled schema. The final

@@ -12,9 +12,11 @@ is not part of the Registry kind contract.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import sqlite3
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fli import channels
 
@@ -31,6 +33,13 @@ CREATE TABLE IF NOT EXISTS entity_registry_rejections (
     rejected_at TEXT NOT NULL
 );
 """
+
+DEFAULT_ORGANIZATION_GROUPS_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "registry"
+    / "organization-groups.json"
+)
 
 
 def _now() -> str:
@@ -296,6 +305,170 @@ def merge_entity_into(
         "removed_entity_id": duplicate_entity_id,
         "moved_channels": moved_channels,
     }
+
+
+def load_organization_groups(path: Path | str) -> list[dict]:
+    groups = json.loads(Path(path).read_text())
+    if not isinstance(groups, list):
+        raise ValueError("organization groups manifest must be a JSON list")
+    canonical_handles: set[str] = set()
+    member_handles: set[str] = set()
+    for index, group in enumerate(groups):
+        if not isinstance(group, dict):
+            raise ValueError(f"organization group {index} must be an object")
+        canonical = group.get("canonical_handle")
+        members = group.get("member_handles")
+        reason = group.get("reason")
+        if not isinstance(canonical, str) or not canonical.strip():
+            raise ValueError(f"organization group {index} needs canonical_handle")
+        if not isinstance(members, list) or not members:
+            raise ValueError(f"organization group {index} needs member_handles")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValueError(f"organization group {index} needs a reason")
+        canonical = canonical.removeprefix("@").lower()
+        normalized_members = []
+        for member in members:
+            if not isinstance(member, str) or not member.strip():
+                raise ValueError(
+                    f"organization group {index} has an invalid member handle"
+                )
+            normalized = member.removeprefix("@").lower()
+            if normalized == canonical:
+                raise ValueError(f"organization group {index} contains its canonical")
+            if normalized in member_handles:
+                raise ValueError(f"member handle @{normalized} appears more than once")
+            member_handles.add(normalized)
+            normalized_members.append(normalized)
+        if canonical in canonical_handles:
+            raise ValueError(f"canonical handle @{canonical} appears more than once")
+        canonical_handles.add(canonical)
+        group["canonical_handle"] = canonical
+        group["member_handles"] = normalized_members
+    overlap = canonical_handles & member_handles
+    if overlap:
+        raise ValueError(
+            "canonical handles cannot also be members: "
+            + ", ".join(f"@{handle}" for handle in sorted(overlap))
+        )
+    return groups
+
+
+def _entity_for_x_handle(conn: sqlite3.Connection, handle: str) -> sqlite3.Row:
+    row = conn.execute(
+        """SELECT e.id, e.kind, e.slug, e.name, c.id AS channel_id
+           FROM channels c
+           JOIN entity_channels ec ON ec.channel_id = c.id
+           JOIN entities e ON e.id = ec.entity_id
+           WHERE c.kind = 'x' AND lower(c.key) = lower(?)""",
+        (handle.removeprefix("@"),),
+    ).fetchone()
+    if row is None:
+        raise ValueError(f"X handle @{handle.removeprefix('@')} has no entity")
+    return row
+
+
+def apply_organization_groups(
+    conn: sqlite3.Connection,
+    groups: list[dict],
+    *,
+    observed_at: str | None = None,
+) -> dict:
+    """Apply explicit same-organization mappings without fuzzy inference."""
+    ensure_schema(conn)
+    observed_at = observed_at or _now()
+    merged_entities = 0
+    moved_channels = 0
+    already_grouped = 0
+    results = []
+    for group in groups:
+        canonical = _entity_for_x_handle(conn, group["canonical_handle"])
+        if canonical["kind"] != "organization":
+            raise ValueError(
+                f"canonical @{group['canonical_handle']} is {canonical['kind']}, "
+                "not organization"
+            )
+        group_merged = 0
+        for member_handle in group["member_handles"]:
+            member = _entity_for_x_handle(conn, member_handle)
+            if member["id"] == canonical["id"]:
+                already_grouped += 1
+                continue
+            if member["kind"] != "organization":
+                raise ValueError(
+                    f"member @{member_handle} is {member['kind']}, not organization"
+                )
+            merged = merge_entity_into(
+                conn,
+                canonical_entity_id=canonical["id"],
+                duplicate_entity_id=member["id"],
+                observed_at=observed_at,
+            )
+            conn.execute(
+                """UPDATE entity_channels
+                   SET relationship = 'official',
+                       evidence_url = COALESCE(evidence_url, ?),
+                       notes = COALESCE(notes, ?)
+                   WHERE entity_id = ? AND channel_id = ?""",
+                (
+                    f"https://x.com/{member_handle}",
+                    group["reason"],
+                    canonical["id"],
+                    member["channel_id"],
+                ),
+            )
+            merged_entities += 1
+            group_merged += 1
+            moved_channels += merged["moved_channels"]
+        results.append(
+            {
+                "canonical_handle": group["canonical_handle"],
+                "canonical_entity_id": canonical["id"],
+                "merged_entities": group_merged,
+                "member_handles": group["member_handles"],
+            }
+        )
+    return {
+        "groups": len(groups),
+        "merged_entities": merged_entities,
+        "moved_channels": moved_channels,
+        "already_grouped": already_grouped,
+        "results": results,
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(prog="fli registry")
+    parser.add_argument("action", choices=["apply-organization-groups"])
+    parser.add_argument("--db", default=None)
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=DEFAULT_ORGANIZATION_GROUPS_PATH,
+    )
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+
+    conn = channels.connect(args.db) if args.db else channels.connect()
+    groups = load_organization_groups(args.manifest)
+    try:
+        conn.execute("BEGIN")
+        result = apply_organization_groups(conn, groups)
+        if args.dry_run:
+            conn.rollback()
+        else:
+            conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    print(
+        json.dumps(
+            {"status": "ok", "dry_run": args.dry_run, **result},
+            sort_keys=True,
+        )
+    )
+    return 0
 
 
 def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:

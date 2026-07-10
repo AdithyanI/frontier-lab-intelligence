@@ -1,0 +1,65 @@
+[
+  {
+    "canonical_handle": "anthropicai",
+    "member_handles": ["claudeai", "claudedevs"],
+    "reason": "Claude and Claude Developers are official Anthropic product/developer accounts."
+  },
+  {
+    "canonical_handle": "openai",
+    "member_handles": ["openaidevs"],
+    "reason": "OpenAI Developers is the official developer account for OpenAI."
+  },
+  {
+    "canonical_handle": "mistralai",
+    "member_handles": ["mistraldevs"],
+    "reason": "Mistral AI for Developers is the official developer account for Mistral AI."
+  },
+  {
+    "canonical_handle": "anysphere",
+    "member_handles": ["cursor_ai"],
+    "reason": "Cursor is the product built by Anysphere."
+  },
+  {
+    "canonical_handle": "vercel",
+    "member_handles": ["nextjs", "v0", "aisdk"],
+    "reason": "Next.js, v0, and AI SDK are Vercel-owned product/project accounts."
+  },
+  {
+    "canonical_handle": "huggingface",
+    "member_handles": ["gradio", "diffuserslib"],
+    "reason": "Gradio and diffusers are maintained within the Hugging Face organization."
+  },
+  {
+    "canonical_handle": "fal",
+    "member_handles": ["editwithfal"],
+    "reason": "Edit with fal is an official fal product account."
+  },
+  {
+    "canonical_handle": "stabilityai",
+    "member_handles": ["stablediffusion"],
+    "reason": "Stable Diffusion is a Stability AI model/product channel."
+  },
+  {
+    "canonical_handle": "thinkymachines",
+    "member_handles": ["tinkerapi"],
+    "reason": "Tinker is the post-training product/API from Thinking Machines."
+  },
+  {
+    "canonical_handle": "google",
+    "member_handles": [
+      "googleai",
+      "geminiapp",
+      "googlelabs",
+      "googleaistudio",
+      "googleresearch",
+      "julesagent",
+      "stitchbygoogle"
+    ],
+    "reason": "These are Google AI, research, lab, and product accounts; Google DeepMind remains separate as an assignment-scoped frontier lab."
+  },
+  {
+    "canonical_handle": "aiatmeta",
+    "member_handles": ["manusai"],
+    "reason": "Manus identifies itself as a Meta product; AI at Meta remains the assignment-scoped canonical AI organization."
+  }
+]

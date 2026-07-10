@@ -128,7 +128,7 @@ being deleted or sent to the model again.
 | --- | --- | --- | --- |
 | done | Implement and locally validate the canonical single-handle X lifecycle with a final bounded web-search escalation. | parent | — |
 | done | Run one paid `@jack` calibration and inspect the exact sources, cost, and persisted Registry result. | parent | `resources/philschmid-calibration.md` (historical tool smoke only) |
-| done | Add and visually verify a simple account-to-Registry lifecycle diagram at the front of the Architecture page without changing the graph/PageRank view. | parent | — |
+| done | Add, polish, and visually verify a simple account-to-Registry lifecycle diagram at the front of the Architecture page without changing the graph/PageRank view. | parent | — |
 | in progress | Review source quality and decide whether to run the same final escalation for `@linatawfik9`. | parent | — |
 | todo | Archive the tracker after the remaining-entity and evidence-quality decisions are accepted. | parent | — |
 
@@ -246,3 +246,10 @@ being deleted or sent to the model again.
   Registry output. The existing data-model, graph/PageRank, and signal-funnel
   diagrams remain in place. Frontend lint/build pass and the rendered local
   page was visually checked with no browser errors.
+- 2026-07-10: [DONE] Completed an Impeccable polish pass on the lifecycle
+  diagram. Reduced the SVG's viewBox and microcopy, increased its effective
+  type scale, aligned the four stages on one baseline, made the terminology
+  match the `@handle` entrypoint, and removed a duplicated internal footer.
+  Verified at 1,014px and 1,440px desktop widths with no text clipping,
+  horizontal overflow, warnings, or browser errors. The original graph and
+  PageRank section remains unchanged.

@@ -31,6 +31,19 @@ const TYPE_LABEL: Record<EntityKind, string> = {
   unknown: 'Unknown',
 }
 
+const CHANNEL_KIND_ORDER = ['x', 'website', 'github', 'blog', 'arxiv']
+
+const channelKindLabel = (kind: string) => {
+  const labels: Record<string, string> = {
+    x: 'X',
+    website: 'Website',
+    github: 'GitHub',
+    blog: 'Blog',
+    arxiv: 'arXiv',
+  }
+  return labels[kind] ?? kind
+}
+
 const typeLabel = (entity: Entity) =>
   entity.registry_state === 'rejected' ? 'Rejected' : TYPE_LABEL[entity.kind]
 
@@ -85,9 +98,15 @@ function channelLabel(channel: EntityChannel): string {
     case 'github':
       return channel.key || channel.label || 'GitHub'
     case 'arxiv':
-      return 'arXiv'
+      return 'Search'
     case 'blog':
-      return 'Blog'
+      try {
+        return channel.url
+          ? new URL(channel.url).hostname.replace(/^www\./, '')
+          : 'Feed'
+      } catch {
+        return 'Feed'
+      }
     default:
       return channel.label || channel.key
   }
@@ -295,10 +314,23 @@ function EntityCard({
   if (!entity) return <dialog ref={ref} className="ent-card" onClose={onClose} />
 
   const orderedChannels = [...entity.channels].sort((left, right) => {
-    const priority = (channel: EntityChannel) =>
-      channel.kind === 'x' ? 0 : channel.kind === 'website' ? 1 : 2
+    const priority = (channel: EntityChannel) => {
+      const index = CHANNEL_KIND_ORDER.indexOf(channel.kind)
+      return index === -1 ? CHANNEL_KIND_ORDER.length : index
+    }
     return priority(left) - priority(right) || left.key.localeCompare(right.key)
   })
+  const channelGroups = orderedChannels.reduce<
+    { kind: string; channels: EntityChannel[] }[]
+  >((groups, channel) => {
+    const current = groups.at(-1)
+    if (current?.kind === channel.kind) {
+      current.channels.push(channel)
+    } else {
+      groups.push({ kind: channel.kind, channels: [channel] })
+    }
+    return groups
+  }, [])
   const titleId = `entity-card-title-${entity.id}`
   const bioId = `entity-card-bio-${entity.id}`
   const bioIsSourcePreview = /(?:\.{3}|…)$/.test(entity.bio?.trim() ?? '')
@@ -381,28 +413,41 @@ function EntityCard({
         {orderedChannels.length > 0 && (
           <div className="ent-card-channels">
             <div className="ent-card-label">Channels</div>
-            <ul>
-              {orderedChannels.map((channel) => (
-                <li key={channel.id}>
-                  {channel.url ? (
-                    <a
-                      className="ent-card-channel"
-                      href={channel.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <ChannelGlyph kind={channel.kind} />
-                      <span className="ent-ch-label">{channelLabel(channel)}</span>
-                    </a>
-                  ) : (
-                    <span className="ent-card-channel is-unavailable">
-                      <ChannelGlyph kind={channel.kind} />
-                      <span className="ent-ch-label">{channelLabel(channel)}</span>
-                    </span>
-                  )}
-                </li>
+            <dl className="ent-channel-list">
+              {channelGroups.map((group) => (
+                <div className="ent-channel-row" key={group.kind}>
+                  <dt>
+                    <ChannelGlyph kind={group.kind} />
+                    <span>{channelKindLabel(group.kind)}</span>
+                  </dt>
+                  <dd>
+                    {group.channels.map((channel) =>
+                      channel.url ? (
+                        <a
+                          className="ent-card-channel"
+                          href={channel.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          key={channel.id}
+                        >
+                          <span>{channelLabel(channel)}</span>
+                          <span className="ent-channel-go" aria-hidden="true">
+                            ↗
+                          </span>
+                        </a>
+                      ) : (
+                        <span
+                          className="ent-card-channel is-unavailable"
+                          key={channel.id}
+                        >
+                          {channelLabel(channel)}
+                        </span>
+                      ),
+                    )}
+                  </dd>
+                </div>
               ))}
-            </ul>
+            </dl>
           </div>
         )}
       </div>
