@@ -119,10 +119,10 @@ Rules:
 - [x] A varied calibration batch is stored and inspected before the full run;
       obvious people, organizations, missing bios, brands, and ambiguous
       handles are represented.
-- [ ] Every one of the 2,956 initial unknown entities has either a stored valid
+- [x] Every one of the 2,956 initial unknown entities has either a stored valid
       classification result or a clearly recorded terminal error requiring
       action; `unsure` is a valid result.
-- [ ] Result counts reconcile to the input universe and no channel ownership,
+- [x] Result counts reconcile to the input universe and no channel ownership,
       source evidence, or graph edges are changed by classification.
 - [ ] The Registry/API exposes the truthful person/organization/unsure result
       without presenting a probability.
@@ -139,7 +139,7 @@ Rules:
       outputs and abstentions are inspected, prompt errors are corrected, and
       estimated full-run cost is recorded. Validate: sample reconciliation and
       qualitative audit notes.
-- [ ] M3 — Full corpus. Acceptance: the complete initial unknown set is
+- [x] M3 — Full corpus. Acceptance: the complete initial unknown set is
       processed resumably with bounded concurrency and exact reconciliation.
       Validate: database invariants, token/cost totals, and SQLite integrity.
 - [ ] M4 — Product surface and closeout. Acceptance: API/Registry shows the new
@@ -187,6 +187,10 @@ Rules:
   pipeline, job, scope, prompt, and run through both `metadata.tags` and the
   compatibility `x-litellm-tags` header. Store proxy-reported cost separately
   from the local official-price estimate.
+- 2026-07-10: Full-corpus execution uses 100 application workers and one
+  application attempt per entity. LiteLLM owns provider retry and fallback;
+  application persistence commits each completed entity immediately so a
+  terminal failure or interruption can resume without replaying stored work.
 
 ## Open Questions / Blockers
 
@@ -200,12 +204,13 @@ Rules:
 | --- | --- | --- | --- |
 | done | Freeze `gpt-5.6-luna` + prompt v2 + reasoning `medium` as the application default after the 15-profile result passed qualitative review. | parent | `src/fli/entity_kinds.py` |
 | done | Verify the stable LiteLLM deployment with one tagged Luna-medium call and reconcile request tags, token counts, proxy spend, and local estimated cost. | parent | `data/fli.db` |
-| in_progress | Run all 2,956 initial unknown entities with resumable Luna-medium inference, then reconcile classifications, spend, errors, and data invariants. | parent | `data/fli.db` |
+| done | Run all 2,956 initial unknown entities with resumable Luna-medium inference, then reconcile classifications, spend, errors, and data invariants. | parent | `data/fli.db` |
+| todo | Project accepted structural labels into the Registry API/UI without changing relevance or merging channels. | parent | `src/fli/web/` |
 
 ## Backlog / Remaining Work
 
 - [ ] Add a versioned human-labeled evaluation fixture for regression testing; Adi explicitly authorized the full run after reviewing the 15-profile calibration.
-- [ ] Reconcile classification counts and verify graph/channel invariants.
+- [x] Reconcile classification counts and verify graph/channel invariants.
 - [ ] Migrate or project accepted results into the Registry API and UI.
 - [ ] Re-enable Playwright through the control plane for final UI screenshots.
 - [ ] Update architecture, curation contract, and build log to implemented state.
@@ -301,3 +306,20 @@ Copy this into a fresh Codex task after restarting the app:
   are present in both the request log and tag aggregation. The database now
   holds 5 runs, 48 classifications, and zero classification errors. No bulk
   run was started.
+- 2026-07-10: [DONE] Adi explicitly authorized the full corpus after the
+  15-profile calibration. Hardened persistence so every completed entity is
+  committed immediately, then started conservatively at 3 workers. At Adi's
+  direction, stopped at the durable checkpoint and resumed with 100 workers
+  and one app attempt, leaving LiteLLM to own provider retry/fallback. All
+  2,956 initial unknown entities now have one Luna-medium prompt-v2 result:
+  2,639 person / 172 organization / 145 unsure, zero terminal errors, 719,059
+  input + 123,374 output tokens on stored results. The complete inference cost
+  is approximately `$1.459852`: `$1.452005` persisted under the two full-run
+  tags, `$0.000477` for the verification result reused by the full universe,
+  and `$0.007370` estimated for the 15 results made before the proxy pricing
+  upgrade. Three in-flight calls completed around the intentional worker
+  restart; two resumed requests were served at zero spend, leaving a net
+  restart overhead of `$0.000549`. Coverage is exactly 2,956 distinct entity
+  IDs; canonical entity kinds remain 10 lab / 0 person / 2,956 unknown, and
+  2,998 channels/links, 12,664 source facts, 361,863 graph edges, and 21,133
+  observations are unchanged. SQLite integrity is `ok`.

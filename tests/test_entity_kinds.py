@@ -194,7 +194,7 @@ def test_invalid_extra_field_is_retried_and_recorded(tmp_path):
     )
 
     summary = entity_kinds.run_classification(
-        conn, [entity], client=client, workers=1
+        conn, [entity], client=client, workers=1, max_attempts=2
     )
 
     assert summary["classified"] == 1
@@ -249,6 +249,8 @@ def test_full_run_estimate_scales_calibration_usage():
 
 def test_reasoning_effort_matches_model_family():
     assert entity_kinds.DEFAULT_MODEL == "gpt-5.6-luna"
+    assert entity_kinds.DEFAULT_WORKERS == 100
+    assert entity_kinds.DEFAULT_MAX_ATTEMPTS == 1
     assert entity_kinds.default_reasoning_effort("gpt-5-nano") == "minimal"
     assert entity_kinds.default_reasoning_effort("gpt-5.6-luna") == "medium"
 

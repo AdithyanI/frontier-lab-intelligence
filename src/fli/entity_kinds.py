@@ -25,6 +25,8 @@ from fli import channels, store
 PROMPT_VERSION = "entity-kind-v2"
 SCHEMA_VERSION = "entity-kind-output-v1"
 DEFAULT_MODEL = "gpt-5.6-luna"
+DEFAULT_WORKERS = 100
+DEFAULT_MAX_ATTEMPTS = 1
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
 
@@ -641,8 +643,8 @@ def run_classification(
     *,
     client: Any,
     model: str = DEFAULT_MODEL,
-    workers: int = 3,
-    max_attempts: int = 2,
+    workers: int = DEFAULT_WORKERS,
+    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
     scope: str = "custom",
     reasoning_effort_override: str | None = None,
     pricing: tuple[float, float] | None = None,
@@ -854,8 +856,8 @@ def main(
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--calibration", action="store_true")
     parser.add_argument("--limit", type=int)
-    parser.add_argument("--workers", type=int, default=3)
-    parser.add_argument("--max-attempts", type=int, default=2)
+    parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
+    parser.add_argument("--max-attempts", type=int, default=DEFAULT_MAX_ATTEMPTS)
     parser.add_argument(
         "--reasoning-effort",
         choices=["none", "minimal", "low", "medium", "high", "xhigh", "max"],

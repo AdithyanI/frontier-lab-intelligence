@@ -133,6 +133,14 @@ identity-link precision because false merges are more damaging than temporarily
 leaving two clusters separate. Overall classification accuracy alone is
 misleading because people will likely dominate.
 
+The 2026-07-10 full Luna-medium prompt-v2 pass completed with exact coverage of
+the 2,956 initial unknown entities: 2,639 person (89.28%), 172 organization
+(5.82%), and 145 unsure (4.91%), with zero terminal errors. Stored result usage
+is 719,059 input plus 123,374 output tokens. The inference cost, including the
+calibration/verification results reused by the full universe and net restart
+overhead, is approximately `$1.459852`. Canonical entity kinds have not yet
+been projected; classification remains separate from merging and relevance.
+
 ## Later Track/Reject Curation
 
 Tracking is a separate decision and may use richer attention and relevance

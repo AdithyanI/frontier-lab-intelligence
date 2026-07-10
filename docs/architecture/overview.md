@@ -282,7 +282,7 @@ erDiagram
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (48)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,988)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
 ```
@@ -290,8 +290,8 @@ erDiagram
 Table row counts: `raw_items` 1,599, `accounts` 2,967,
 `account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
 `entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
-`channel_observations` 21,133, `entity_kind_classification_runs` 5,
-`entity_kind_classifications` 48, and `entity_kind_classification_errors` 0.
+`channel_observations` 21,133, `entity_kind_classification_runs` 7,
+`entity_kind_classifications` 2,988, and `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -389,6 +389,10 @@ prompt, and run. The runner stores its official-rate estimate separately from
 LiteLLM's reported response cost. The post-upgrade LiteLLM 1.91.1 verification
 reconciled both values with the persisted spend log, including the tagged token
 counts; proxy spend logs are the operational source of truth for billed usage.
+The full Luna-medium prompt-v2 result set covers all 2,956 initial unknown
+entities: 2,639 person, 172 organization, and 145 unsure. These remain staged
+decisions; the canonical `entities.kind` rows are unchanged until the separate
+Registry projection/migration.
 
 This pass does not merge channels. Later identity resolution may attach several
 official/product X channels to one organization. A person is expected to have
