@@ -1,5 +1,9 @@
 # `@philschmid` web-enrichment calibration
 
+> Historical discarded calibration. Adi explicitly removed this stray
+> candidate and all of its local evidence on 2026-07-10. No staged enrichment
+> row or canonical Registry entity remains.
+
 Captured 2026-07-10 through the shared LiteLLM `gpt-5.6-luna` route. This is a
 staged calibration result, not a canonical Registry promotion.
 

@@ -8,3 +8,6 @@ Captured from the local production Registry on 2026-07-10 after promoting the co
 The full pass used `gpt-5.6-luna` with medium reasoning through the shared LiteLLM endpoint. Approximate inference cost was $1.459852; no direct Azure OpenAI calls were made.
 
 These files are durable presentation artifacts, not source evidence.
+They preserve the classifier state at capture time; a later explicit corpus
+cleanup removed `@philschmid` and 38 sub-1,000-follower entities, so the images
+are historical rather than the current Registry totals.

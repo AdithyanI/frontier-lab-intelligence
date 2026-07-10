@@ -53,16 +53,30 @@ After the 2026-07-10 Adi-following snapshot, the corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 2,639 |
-| organization | 182 (including 10 seeded labs) |
-| unsure | 145 |
+| person | 2,607 |
+| organization | 180 (including 10 seeded labs) |
+| unsure | 137 |
 | unknown | 0 |
-| **total** | **2,966** |
+| **total** | **2,924** |
 
-Those provisional clusters own all 2,998 channels. The difference is the 32 additional
+Those clusters own all 2,956 channels. The difference is the 32 additional
 official website, GitHub, arXiv, and blog channels already linked to labs.
 The legacy graph has one additional non-Registry account: `@adithyan_ai`, kept
 only as the source node for its 638 retained outgoing-follow edges.
+
+On 2026-07-10, Adi explicitly removed the stray `@philschmid` candidate and
+all entities whose verified X follower count was below 1,000. The six initially
+missing smol.ai profiles were then checked through TwitterAPI.io: three valid
+above-floor accounts remain, `@akhaliq` and `@lucidrains` were removed at 40
+and 395 followers, and stale `@danhendrycks` was resolved to the existing
+canonical `@hendrycks` entity. All 137 remaining unsure entities have a stored
+follower count of at least 1,000. This was a one-time destructive corpus
+cleanup, not a reusable relevance model or a change to structural-kind
+semantics.
+
+`@adithyan_ai` remains an internal graph-source account for 638 retained edges,
+but has no Registry channel or entity. Channel sync mirrors only accounts with
+source facts, so this graph-only account cannot rematerialize as `unknown`.
 
 ## First Kind Classifier: Accepted Contract
 

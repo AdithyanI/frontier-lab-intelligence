@@ -39,6 +39,11 @@ def test_known_lab_replaces_its_provisional_unknown(tmp_path):
            (platform, handle, display_name, first_seen_at, last_seen_at)
            VALUES ('x', 'openai', 'OpenAI', '2026-07-09', '2026-07-09')"""
     )
+    conn.execute(
+        """INSERT INTO account_source_facts
+           (account_id, source, fact, value, observed_at)
+           VALUES (1, 'test', 'list_member', 'seed', '2026-07-09')"""
+    )
     conn.commit()
     channels.sync_all(conn)
     assert conn.execute(

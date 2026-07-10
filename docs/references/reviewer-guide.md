@@ -15,8 +15,8 @@ fli web
 
 ## What to look at, in weighted order
 1. **Registry (20%)** — the entity/channel spine and structural-kind pass are
-   implemented. The Registry contains 2,966 observed identities: 2,639 people,
-   182 organizations, and 145 explicit abstentions. Open an entity to inspect
+   implemented. The Registry contains 2,924 observed identities: 2,607 people,
+   180 organizations, and 137 explicit abstentions. Open an entity to inspect
    its observed profile and classification reason. Exact rules live in
    `docs/references/registry-curation.md`.
 2. **Signal-vs-noise (20%)** — filtering logic and the judgment calls behind

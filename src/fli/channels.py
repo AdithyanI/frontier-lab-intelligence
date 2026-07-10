@@ -287,11 +287,19 @@ def observe_channel(
 
 
 def sync_x_channels_from_accounts(conn: sqlite3.Connection) -> dict[str, int]:
-    """Mirror legacy X account rows/facts into canonical channels/observations."""
+    """Mirror evidenced X accounts into canonical channels/observations.
+
+    A legacy account with no source facts may exist only to anchor graph edges
+    (for example the owner of an imported following snapshot). Keep that node
+    in the graph, but do not materialize it as a public Registry channel.
+    """
     ensure_schema(conn)
     accounts = conn.execute(
         """SELECT id, handle, display_name, bio, followers_count, first_seen_at, last_seen_at
-           FROM accounts"""
+           FROM accounts a
+           WHERE EXISTS (
+               SELECT 1 FROM account_source_facts f WHERE f.account_id = a.id
+           )"""
     ).fetchall()
     by_account_id: dict[int, int] = {}
     for account in accounts:

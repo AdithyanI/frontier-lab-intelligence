@@ -252,10 +252,13 @@ def test_import_x_following_writes_profiles_facts_edges_and_channels(tmp_path):
     assert dict(fact) == {"fact": "followed_by", "value": "adithyan_ai"}
     assert conn.execute(
         "SELECT COUNT(*) AS n FROM channels WHERE kind = 'x'"
-    ).fetchone()["n"] == 3
+    ).fetchone()["n"] == 2
     assert conn.execute(
         "SELECT COUNT(*) AS n FROM entities WHERE kind = 'unknown'"
-    ).fetchone()["n"] == 3
+    ).fetchone()["n"] == 2
+    assert conn.execute(
+        "SELECT COUNT(*) AS n FROM channels WHERE key = 'adithyan_ai'"
+    ).fetchone()["n"] == 0
 
 
 def test_import_x_following_replaces_stale_edges_but_keeps_accounts(tmp_path):

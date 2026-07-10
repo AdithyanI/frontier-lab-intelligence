@@ -53,7 +53,10 @@ def test_load_digg_normalizes_and_dedupes(tmp_path):
     assert counts["edges"] == 1     # duplicate edge deduped
     assert conn.execute(
         "SELECT COUNT(*) AS n FROM channels WHERE kind = 'x'"
-    ).fetchone()["n"] == 2
+    ).fetchone()["n"] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) AS n FROM channels WHERE key = 'ylecun'"
+    ).fetchone()["n"] == 0
 
     acct = conn.execute(
         "SELECT * FROM accounts WHERE handle = 'karpathy'"

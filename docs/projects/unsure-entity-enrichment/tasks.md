@@ -8,7 +8,8 @@ calibration evidence.
 
 ## Why / Impact
 
-The profile-only classifier correctly abstained on 145 weak identity records.
+The profile-only classifier initially abstained on 145 weak identity records;
+137 remain after explicit corpus removals.
 Many can likely be resolved with current public evidence, but the next pass
 must preserve its searches, sources, cost, and exact input identity rather than
 turning ad-hoc browsing into an unrepeatable correction.
@@ -91,9 +92,9 @@ turning ad-hoc browsing into an unrepeatable correction.
   gate a full run?
 - Should recent posts be fetched deterministically before open-web escalation?
 - What promotion rule should apply when web enrichment still returns `unsure`?
-- The `@philschmid` result stored all 17 consulted URLs but no final-message
-  citation annotations. Is a complete consulted-source trace sufficient, or
-  must the internal enrichment contract bind its reason to specific source IDs?
+- The discarded `@philschmid` result stored all 17 consulted URLs but no
+  final-message citation annotations. A replacement calibration still needs
+  to decide whether the internal contract must bind its reason to source IDs.
 
 ## Current Batch
 
@@ -102,8 +103,8 @@ turning ad-hoc browsing into an unrepeatable correction.
 | done | Implement the bounded web-enrichment runner and evidence schema. | parent | — |
 | done | Add focused tests and run repository validation. | parent | — |
 | done | Update curation/architecture references and checkpoint this tracker. | parent | — |
-| done | Run and document one live `@philschmid` calibration without promotion. | parent | `resources/philschmid-calibration.md` |
-| blocked | Review source binding and agree the broader calibration rubric with Adi; do not run more entities yet. | parent | `resources/philschmid-calibration.md` |
+| done | Run, document, and then discard the `@philschmid` calibration and entity at Adi's direction. | parent | `resources/philschmid-calibration.md` |
+| blocked | Select a replacement calibration and agree the source-binding rubric with Adi; do not run more entities yet. | parent | `resources/philschmid-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -138,3 +139,20 @@ turning ad-hoc browsing into an unrepeatable correction.
   exact trace is in `resources/philschmid-calibration.md`; broader execution is
   paused because the structured message did not identify a minimal cited
   subset within the full consulted-source list.
+- 2026-07-10: [DONE] At Adi's explicit direction, permanently removed the stray
+  `@philschmid` candidate and its local account, channel, source fact,
+  classification, and staged enrichment. Then audited every remaining
+  Registry X channel and removed all 38 entities with a stored follower count
+  below 1,000: 32 people, two organizations, and four unsure, plus 558 attached
+  graph edges. Six entities with missing counts remain. Current Registry:
+  2,607 people, 180 organizations, 140 unsure; zero below-threshold entities;
+  SQLite integrity `ok`.
+- 2026-07-10: [DONE] Filled five of six missing smol.ai profile snapshots
+  through TwitterAPI.io. Removed `@akhaliq` at 40 followers and `@lucidrains`
+  at 395; retained `@rohanpaul_ai`, `@thebloke`, and `@tom_doerr` above the
+  floor. The stale `@danhendrycks` handle resolved to the existing canonical
+  `@hendrycks` entity, refreshed at 44,775 followers, and its smol.ai provenance
+  was transferred. Removed only the accidental `@adithyan_ai` unknown Registry
+  row while preserving its internal account and 638 graph edges. All 137 unsure
+  entities remain, all have follower counts of at least 1,000, and the Registry
+  has zero unknowns.

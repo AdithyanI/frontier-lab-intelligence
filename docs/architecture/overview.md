@@ -8,15 +8,17 @@ implemented code has raw fetch/store, a frozen X seed graph snapshot, a modeled
 SQLite graph layer, and a React SPA over a JSON API. Every observed channel
 resolves to one entity. Luna-medium prompt-v2 classified and atomically
 promoted all 2,956 initial unknowns: 2,639 people, 172 organizations, and 145
-unsure. Together with the 10 previously seeded organizations, the canonical
-Registry contains 2,639 people, 182 organizations, 145 unsure, and zero
+unsure. A later explicit cleanup removed the stray `@philschmid` candidate and
+all 38 entities with a stored X follower count below 1,000. The canonical
+Registry now contains 2,607 people, 180 organizations, 137 unsure, and zero
 unknown. The `labs` table remains internal source/seed provenance because its
 10 rows are not an exhaustive lab classification; it is not exposed as a
 Registry kind, badge, count, or filter.
-An unpromoted `fli entity-kinds enrich` stage is now implemented for the 145
+An unpromoted `fli entity-kinds enrich` stage is now implemented for the 137
 abstentions. It requires hosted Responses web search and persists the strict
 two-field decision plus observable search actions, source URLs, usage, and
-cost. No enrichment batch has run and canonical counts are unchanged.
+cost. One discarded calibration ran, but no enrichment results remain and no
+enrichment batch has run.
 Channel merging, track/reject curation, extraction, and scoring remain later
 stages.
 
@@ -151,10 +153,11 @@ Known data facts:
   first-slice edges.
 - The full frozen bootstrap pull produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
-- The current curated snapshot has 2,967 X graph accounts but materializes
-  2,966 Registry clusters (10 labs and 2,956 unknowns). `@adithyan_ai` remains
-  only as the graph source node. The model has 2,998 channels/links and 21,133
-  channel observations.
+- After explicit low-follower and stale-handle cleanup, the current snapshot
+  has 2,925 X graph accounts and 2,924 Registry entities: 2,607 people, 180
+  organizations, and 137 unsure. `@adithyan_ai` remains only as the extra graph
+  source node. The model has 2,956 channels/links and 20,963 channel
+  observations.
 - `fli sources import-x-list --list-id 1585430245762441216 --source
   ai_high_signal` imported 609 AI High Signal X-list members via
   TwitterAPI.io; 230 were already in the Digg bootstrap and 379 were new
@@ -306,11 +309,11 @@ erDiagram
     ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,967,
-`account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
-`entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
-`channel_observations` 21,133, `entity_kind_classification_runs` 7,
-`entity_kind_classifications` 2,988, `entity_kind_web_enrichments` 0, and
+Table row counts: `raw_items` 1,599, `accounts` 2,925,
+`account_source_facts` 12,617, `graph_edges` 361,305, `labs` 10,
+`entities` 2,924, `channels` 2,956, `entity_channels` 2,956,
+`channel_observations` 20,963, `entity_kind_classification_runs` 8,
+`entity_kind_classifications` 2,946, `entity_kind_web_enrichments` 0, and
 `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
