@@ -3,11 +3,14 @@
 Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Status: entity-spine bootstrap. The implemented code has raw fetch/store, a
-frozen X seed graph snapshot, a modeled SQLite graph layer, and a React SPA
-over a JSON API. Every observed channel now resolves to one entity; known labs
-are classified and every other identity remains `unknown` until a later agent
-classifies it. Extraction and scoring schemas are intentionally not locked yet.
+Status: entity spine complete; entity-kind classification is the active next
+stage. The implemented code has raw fetch/store, a frozen X seed graph
+snapshot, a modeled SQLite graph layer, and a React SPA over a JSON API. Every
+observed channel resolves to one entity; 10 seeded labs are classified and the
+other 2,956 visible identities remain `unknown`. The accepted first classifier
+will return only `person`, `organization`, or `unsure` plus a short reason.
+Channel merging, track/reject curation, extraction, and scoring remain later
+stages.
 
 ## Stack
 
@@ -272,8 +275,11 @@ channel_observations  # measured/source-specific facts about a channel over time
 ```
 
 Entity is identity, not endorsement. A channel that cannot yet be resolved
-creates a provisional `unknown` entity. Kind classification (`lab`, `person`,
-`unknown`) and curation (`track`, `reject`) are separate later stages.
+creates a provisional `unknown` entity. The current database kind vocabulary is
+still `lab`, `person`, and `unknown`. The accepted first classifier vocabulary
+is `person`, `organization`, and `unsure`; migration into the canonical entity
+schema must preserve seeded labs as organizations with a lab role. Curation
+(`track` / `reject`) remains a separate later stage.
 
 ```mermaid
 flowchart TD
@@ -281,7 +287,7 @@ flowchart TD
     R{Known identity?}
     E[Link existing entity]
     U[Create unknown entity]
-    K[Kind classifier later]
+    K[Kind classifier<br/>person · organization · unsure]
     D[Track or reject later]
 
     C --> R
@@ -292,7 +298,7 @@ flowchart TD
     K --> D
 ```
 
-Exact rules and the future classifier contract live in
+Exact rules and the accepted classifier contract live in
 `docs/references/registry-curation.md`.
 
 Rule of thumb:
@@ -318,6 +324,32 @@ the X graph import backing layer. They are not the product model. X accounts are
 mirrored into `channels(kind='x')`, and seed/PageRank/profile fields are copied
 into `channel_observations`. The current rows from the old Digg pull are a
 frozen bootstrap source, not the center of the schema.
+
+### Active Classifier Boundary
+
+The first LLM pass operates on each current unknown X-backed cluster
+independently. Deterministic code supplies handle, display name, bio, and
+profile URL. Structured model output contains exactly:
+
+```json
+{
+  "classification": "person | organization | unsure",
+  "reason": "Short identity-based explanation"
+}
+```
+
+The model does not return identifiers, probability, model name, prompt version,
+timestamp, or cost. The runner owns that metadata, resumability, concurrency,
+and database association. It calls OpenAI models through the shared LiteLLM
+proxy using `LLM_API_ENDPOINT` and `LLM_API_KEY`; the app does not use direct
+Azure OpenAI credentials. Attention observations such as follower count,
+PageRank, Digg rank, and list membership are excluded from this structural
+classification.
+
+This pass does not merge channels. Later identity resolution may attach several
+official/product X channels to one organization. A person is expected to have
+one primary X account in most cases, but the data model permits multiple
+channels for both people and organizations.
 
 ## X Graph Source Direction
 
@@ -368,7 +400,7 @@ schema.
 erDiagram
     ENTITY {
         string id PK
-        string kind "lab | person | unknown"
+        string kind "person | organization | unknown (target)"
         string slug
         string name
     }
@@ -446,7 +478,7 @@ final score.
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io X-list and outgoing-follow importers; provenance only, no classification |
 | `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes the full lab/person/unknown universe; source in `frontend/` |
-| `fli.registry` | channel ownership invariant, provisional unknown materialization, and lean Registry read model; kind classifier still pending |
+| `fli.registry` | channel ownership invariant, provisional unknown materialization, and lean Registry read model; `person / organization / unsure` classifier is the active next stage |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |
@@ -454,7 +486,7 @@ final score.
 
 ## Build Order
 
-1. Finish the entity/channel registry foundation and people promotion path.
+1. Classify the current unknown registry as person/organization/unsure through a calibrated, resumable LiteLLM pass.
 2. Promote raw fetch into production ingestion around accepted entity channels.
 3. Extract and score real ingested data.
 4. Add validation harness and ground-truth labeling.

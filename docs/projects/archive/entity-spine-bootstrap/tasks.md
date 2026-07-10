@@ -1,6 +1,9 @@
-# Frontier Lab Intelligence — Tracker
+# Entity Spine Bootstrap — Archived Tracker
 
-Active execution state for the BIT Capital case-study product.
+Status: archived 2026-07-10. This tracker preserves the evidence-import and
+entity-spine phase of the BIT Capital case-study product. The overall product is
+not complete; execution continues in
+`docs/projects/entity-kind-classification/tasks.md`.
 
 Full prompt and original materials:
 - Prompt capture: `docs/references/case-prompt.md`
@@ -19,26 +22,25 @@ Build history, tools, budget, and learning notes now live in
 - **Budget:** €100 reimbursable API/services budget; log spend in
   `docs/references/build-log.md`.
 
-## Current Batch
+## Closeout Summary
 
-**Resume here.** The frozen evidence universe now includes Adi's outgoing X
-following snapshot, then a one-time 2,000-follower privacy/noise cleanup. The
-graph has 2,967 X accounts; the visible Registry has 2,966 provisional clusters
-(10 seeded labs and 2,956 unresolved). Kind resolution and track/reject curation
-remain separate later stages. Before classifier implementation, settle
-the structural taxonomy raised by the 2026-07-09 review: `person` /
-`organization` with lab as a role, versus the currently implemented
-`lab` / `person` / `unknown` kinds.
+The scoped bootstrap phase is complete:
 
-| Status | Work item | Evidence / notes |
-| --- | --- | --- |
-| done | Freeze the initial evidence layer. | Digg graph + PageRank, AI High Signal list, and smol.ai `prefPeople` are in `data/fli.db` with source facts and pinned provenance. |
-| done | Import and one-time clean Adi's outgoing X following snapshot. | Fetched 767 full profiles, then retained 638 with at least 2,000 followers. Removed 129 source links, deleted 127 Adi-only accounts, preserved two independently supported accounts, and hid Adi's graph-source account from Registry. This threshold is not an importer policy. |
-| done | Materialize the complete current cluster universe. | 2,966 visible clusters (10 lab, 0 person, 2,956 unknown) own all 2,998 channels. The legacy graph has one additional hidden source account. |
-| done | Show the complete universe in the Registry UI. | `/api/registry` and the SPA expose only entity name, current kind, bio, and channels. Source ranking mechanics remain raw evidence and are absent from this surface. |
-| todo | Settle the entity-resolution contract and freeze the calibration sample. | Confirm person/organization/unresolved semantics, lab role, resolver actions, and a stratified sample spanning source partitions, missing bios, obvious people/orgs, brands, and ambiguous handles. |
-| later | Build and evaluate the resolution agent. | Separate link/create/abstain identity actions from structural kind and later track/reject decisions. Calibration/evaluation comes before full-dataset application. |
-| later | Build the separate track/reject curation stage. | Attention/source evidence belongs here, not in kind classification. Human corrections become durable overrides. |
+- Frozen Digg, AI High Signal, smol.ai, and Adi-following evidence is stored
+  with provenance.
+- The visible Registry contains 2,966 provisional entity clusters: 10 seeded
+  labs and 2,956 unknowns.
+- All 2,998 channels have exactly one owner; the legacy graph contains one
+  additional hidden source account, `@adithyan_ai`.
+- The Registry UI exposes the full entity universe without presenting rank,
+  follower count, or list membership as identity labels.
+- Structural kind classification, channel merging, and track/reject curation
+  were deliberately transferred to later projects rather than conflated here.
+
+The one-time 2,000-follower cleanup is the only reproducibility exception:
+rerunning the following import restores the unfiltered snapshot, and a later
+channel sync may rematerialize Adi's source node. This limitation is accepted
+for this archived phase and carried into the next tracker.
 
 ## Fresh-Agent Context
 
@@ -207,7 +209,10 @@ The first entity-spine batch is accepted when:
 1. All 2,998 channels link to exactly one provisional cluster.
 2. The current visible universe contains exactly 2,966 rows: 10 labs, 0 resolved
    people, and 2,956 unknowns before resolver work begins.
-3. Re-running synchronization creates no rows or material DB diff.
+3. Before the one-time personal-follow cleanup, re-running synchronization
+   created no rows or material DB diff. The cleanup itself is intentionally
+   not encoded as reusable policy, so this invariant no longer holds if the
+   following import or channel sync is rerun.
 4. `/api/registry` and the SPA expose all 2,966 clusters with only truthful,
    identity-bearing fields; Digg role is absent from the canonical UI.
 5. Missing bios remain missing and no lab/person kind is inferred from rank,
@@ -215,11 +220,11 @@ The first entity-spine batch is accepted when:
 6. Evidence invariants hold: Digg 1,000; AI High Signal 609; smol.ai 31;
    `adi_following` 638; graph edges 361,863.
 
-## Open Questions / Blockers
+## Residual Risks Handed Forward
 
-- **Resolution contract:** not built. Confirm the proposed structural
-  `person` / `organization` kinds, unresolved state, lab role, and
-  link/create/abstain actions before freezing calibration labels.
+- **Kind classifier:** Adi approved a narrow first pass with only
+  `person` / `organization` / `unsure` and a short reason. The implementation
+  and calibration set are owned by the next tracker.
 - **Track/reject rule:** deliberately separate and undecided. Do not assume
   source count alone equals importance.
 - **Legacy migration:** `accounts` and `account_source_facts` still back graph
@@ -271,6 +276,16 @@ Update before each handoff when meaningful work lands.
 - Submission package path:
 
 ## Progress Log
+
+2026-07-10 — Bootstrap phase archived and classification work handed forward:
+
+- Verified the final snapshot directly from SQLite and the live API: 2,967
+  graph accounts, 2,966 visible entities, 2,998 channels/links, 12,664 source
+  facts, 361,863 edges, 21,133 observations, and SQLite integrity `ok`.
+- Froze the next classifier contract as `person` / `organization` / `unsure`,
+  with model output limited to `classification` and `reason`.
+- Moved remaining implementation into
+  `docs/projects/entity-kind-classification/tasks.md` and archived this phase.
 
 2026-07-09 — Initial source layering complete; pause ingestion and consolidate:
 

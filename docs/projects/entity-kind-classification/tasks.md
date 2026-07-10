@@ -1,0 +1,249 @@
+# Entity Kind Classification
+
+## Goal
+
+Build and evaluate an agent-native first pass that classifies every currently
+unknown X-backed entity as `person`, `organization`, or `unsure`, stores a short
+reason, and makes the result safely resumable before any channel merging or
+track/reject curation.
+
+## Why / Impact
+
+The Registry currently contains 2,956 unknown provisional clusters. Earlier UI
+versions implicitly presented most accounts as people even though the corpus
+contains organizations, products, publications, communities, and projects.
+This pass establishes the simplest truthful structural label so later agents
+can merge organizational channels and separately decide what is worth tracking.
+
+## Scope / Non-Goals
+
+### In Scope
+
+- Classify each existing unknown X-backed entity independently as
+  `person`, `organization`, or `unsure`.
+- Use only identity-bearing profile fields for the first attempt: handle,
+  display name, bio, and profile URL.
+- Use OpenAI Structured Outputs through the existing LiteLLM proxy.
+- Return only `classification` and `reason` from the model.
+- Persist classifications, short reasons, and deterministic run metadata so a
+  failed or interrupted run can resume without repeating completed work.
+- Run a varied bounded calibration batch before the complete corpus.
+- Keep the Registry/API truthful as classifications land.
+
+### Out of Scope
+
+- Merging multiple X accounts into one organization.
+- Inferring employment or lab affiliation for people.
+- Track/reject relevance curation.
+- PageRank recomputation or source weighting.
+- Adding more discovery sources.
+- Fetching recent posts for every account. Recent posts may later enrich only
+  accounts classified `unsure`.
+- Direct Azure OpenAI integration.
+
+## Context / Constraints
+
+- Date started: 2026-07-10.
+- Deadline: 2026-07-20, Europe/Berlin working assumption.
+- Read first: `AGENTS.md`, this tracker,
+  `docs/references/registry-curation.md`, and
+  `docs/architecture/overview.md`.
+- Archived predecessor:
+  `docs/projects/archive/entity-spine-bootstrap/tasks.md`.
+- Current database snapshot:
+  - 2,967 graph accounts; 1,746 have a non-empty bio.
+  - 2,966 visible entities: 10 seeded labs and 2,956 unknowns.
+  - 2,998 channels and exactly 2,998 entity-channel links.
+  - 12,664 source facts, 361,863 graph edges, and 21,133 observations.
+  - SQLite integrity is `ok`.
+- Source invariants: Digg ranks 1,000; AI High Signal members 609; smol.ai
+  members 31; retained Adi follows 638.
+- Runtime LLM path: LiteLLM only. Read `LLM_API_ENDPOINT` and `LLM_API_KEY`
+  from the existing shared machine-secret setup at `~/.secrets/litellm/env`.
+  Do not add or consume direct Azure OpenAI credentials in this repo.
+- The existing `openai-docs` skill and `openaiDeveloperDocs` MCP are routed to
+  this repository. A fresh Codex task is required to load them.
+- Playwright MCP is intentionally disabled for this data phase. Re-enable it
+  through `/Users/dobby/GitHub/agents/codex/config/repo-bootstrap.json` only
+  when frontend visual work resumes.
+- The current database still implements `lab | person | unknown`. Do not
+  pretend the target taxonomy is already migrated.
+
+## Accepted Classifier Contract
+
+The runner already knows the entity/account being processed. The model must not
+repeat the handle, ID, model name, prompt version, timestamp, or probability.
+
+Input assembled by deterministic code:
+
+```json
+{
+  "handle": "example",
+  "display_name": "Example Name",
+  "bio": "Observed profile biography or null",
+  "profile_url": "https://x.com/example"
+}
+```
+
+Only valid model output:
+
+```json
+{
+  "classification": "person",
+  "reason": "The name and biography describe an individual researcher."
+}
+```
+
+Rules:
+
+- `person`: the account represents an individual human.
+- `organization`: the account represents a company, lab, nonprofit, team,
+  product, publication, community, or project rather than one individual.
+- `unsure`: identity-bearing evidence is missing, contradictory, or too weak.
+- No probability or confidence score.
+- Digg rank, PageRank, follower count, Digg role, and list membership are not
+  classifier inputs.
+- Classification is independent per current cluster. Do not merge channels in
+  this pass.
+- A person usually has one primary X account; an organization may have many.
+  The underlying channel model continues to allow multiple channels for both.
+- Seeded labs are organizations with a lab role in the target model. Preserve
+  current lab UI behavior until the migration is explicitly implemented.
+
+## Done When
+
+- [ ] The prompt and Structured Outputs schema enforce exactly
+      `classification` plus `reason`.
+- [ ] A resumable CLI/agent runner processes deterministic account batches
+      through LiteLLM with bounded concurrency and structured errors.
+- [ ] A varied calibration batch is stored and inspected before the full run;
+      obvious people, organizations, missing bios, brands, and ambiguous
+      handles are represented.
+- [ ] Every one of the 2,956 initial unknown entities has either a stored valid
+      classification result or a clearly recorded terminal error requiring
+      action; `unsure` is a valid result.
+- [ ] Result counts reconcile to the input universe and no channel ownership,
+      source evidence, or graph edges are changed by classification.
+- [ ] The Registry/API exposes the truthful person/organization/unsure result
+      without presenting a probability.
+- [ ] Prompt/model version, token use, cost, and validation evidence are logged
+      outside the model response.
+- [ ] Repo checks pass and architecture/curation docs match implemented reality.
+
+## Milestones
+
+- [ ] M1 — Classifier foundation. Acceptance: official docs checked; OpenAI SDK
+      talks to LiteLLM; minimal structured schema, prompt, persistence, CLI, and
+      tests exist. Validate: focused tests plus `scripts/check-fast.sh`.
+- [ ] M2 — Calibration. Acceptance: a deterministic varied sample is processed,
+      outputs and abstentions are inspected, prompt errors are corrected, and
+      estimated full-run cost is recorded. Validate: sample reconciliation and
+      qualitative audit notes.
+- [ ] M3 — Full corpus. Acceptance: the complete initial unknown set is
+      processed resumably with bounded concurrency and exact reconciliation.
+      Validate: database invariants, token/cost totals, and SQLite integrity.
+- [ ] M4 — Product surface and closeout. Acceptance: API/Registry shows the new
+      structural labels truthfully, docs are current, checks pass, and this
+      tracker is archived. Re-enable Playwright through the control plane before
+      any required screenshot validation.
+
+## Execution Rules
+
+- Use `$openai-docs` and the official Developer Docs MCP before implementing
+  Responses API or Structured Outputs code.
+- Keep the model schema minimal; application code owns identifiers and run
+  metadata.
+- Treat `unsure` as correct abstention, not a request to invent an answer.
+- Do not use attention metrics as structural identity evidence.
+- Make writes idempotent and resumable before running paid bulk inference.
+- Estimate and record spend before the full-corpus run.
+- Keep classification, merging, affiliation, and relevance as separate stages.
+- Update this tracker and `docs/references/build-log.jsonl` after each milestone.
+- Run `scripts/check-fast.sh` before handoff.
+- Archive this tracker when all Done When conditions are satisfied.
+
+## Decisions
+
+- 2026-07-10: First pass labels are exactly `person`, `organization`, and
+  `unsure`; no probability is wanted.
+- 2026-07-10: Model output is exactly `classification` and `reason`. Repeating
+  the handle or operational metadata in the LLM output is unnecessary.
+- 2026-07-10: Run through the shared LiteLLM proxy, not direct Azure OpenAI.
+- 2026-07-10: Use identity-bearing profile data first. Consider recent posts
+  only for `unsure` cases after the initial pass.
+- 2026-07-10: Kind classification comes before channel merging. Track/reject is
+  a later independent decision.
+- 2026-07-10: Organization is intentionally broad for this first pass and
+  includes non-person brands, products, publications, communities, and
+  projects. Later merging determines the parent organization when appropriate.
+
+## Open Questions / Blockers
+
+- Choose the inexpensive LiteLLM OpenAI model alias after consulting the live
+  OpenAI docs and local LiteLLM routing config. Prefer the smallest model that
+  passes the calibration rather than assuming a model from memory.
+- Decide the exact persistence/migration shape during M1. It must preserve the
+  current seeded-lab UI until organization-with-lab-role is implemented.
+- The one-time 2,000-follower cleanup is not replayable policy. Do not rerun
+  `import-x-following` or `channels sync` during classification without first
+  handling the documented rematerialization risk.
+
+## Current Batch
+
+| Status | Work Item | Role | Resource |
+| --- | --- | --- | --- |
+| todo | Verify current Responses API Structured Outputs shape through `$openai-docs`; inspect local LiteLLM model aliases and Responses compatibility. | parent | `docs/references/registry-curation.md` |
+| todo | Implement the minimal versioned prompt/schema, persistence, resumable runner, and tests without calling the full corpus. | parent | `src/fli/` |
+| todo | Run and inspect one varied calibration batch; record model, tokens, cost estimate, and prompt changes. | parent | `docs/projects/entity-kind-classification/tasks.md` |
+
+## Backlog / Remaining Work
+
+- [ ] Run the complete 2,956-entity initial unknown corpus after calibration.
+- [ ] Reconcile classification counts and verify graph/channel invariants.
+- [ ] Migrate or project accepted results into the Registry API and UI.
+- [ ] Re-enable Playwright through the control plane for final UI screenshots.
+- [ ] Update architecture, curation contract, and build log to implemented state.
+- [ ] Review project learnings and archive this tracker at completion.
+
+## Validation / Test Plan
+
+- `scripts/check-fast.sh`
+- Focused classifier/CLI tests with a fake LiteLLM client; no network required.
+- Structured-output schema rejects extra keys and invalid labels.
+- Rerunning a completed batch performs no duplicate paid calls or duplicate
+  decision writes.
+- Calibration and full-run counts reconcile to the snapshotted input IDs.
+- SQLite `PRAGMA integrity_check` returns `ok`.
+- Entity/channel ownership, source fact counts, and graph edge counts remain
+  unchanged by pure classification.
+- Live `/api/registry` counts and labels match stored classification results
+  once M4 lands.
+
+## Fresh-Session Resume Prompt
+
+Copy this into a fresh Codex task after restarting the app:
+
+> Use `$project` and `$openai-docs`. Resume the active project at
+> `docs/projects/entity-kind-classification/tasks.md`. Read `AGENTS.md`, that
+> tracker, `docs/references/registry-curation.md`, and
+> `docs/architecture/overview.md` first. Confirm that the OpenAI Developer Docs
+> MCP is available and Playwright MCP is absent. Then execute the Current Batch
+> autonomously: verify the current Responses API Structured Outputs contract,
+> inspect the local LiteLLM routing contract, and implement the minimal
+> `person | organization | unsure` classifier whose model output contains only
+> `classification` and `reason`. Use only the LiteLLM endpoint/key already
+> provided by the shared machine-secret setup; do not use direct Azure OpenAI.
+> You are authorized to run one bounded calibration batch through LiteLLM after
+> implementing tests and resumability. Estimate and report the full-run cost
+> before processing all 2,956 unknown entities. Do not add sources, merge
+> channels, classify relevance, rerun the X following import, or submit anything
+> externally. Keep the tracker and build log current and run
+> `scripts/check-fast.sh` before handoff.
+
+## Progress Log
+
+- 2026-07-10: [IN-PROGRESS] Archived the evidence/entity-spine phase and
+  created this tracker from Adi's accepted minimal classifier contract.
+- 2026-07-10: [DONE] Verified the handoff snapshot against SQLite and the live
+  Registry API; JSONL build history parsed, all 28 tests passed, and
+  `scripts/check-fast.sh` completed successfully. No inference call was made.

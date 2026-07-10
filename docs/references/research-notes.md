@@ -13,8 +13,10 @@ next; this file records the facts behind those decisions.
 | Scope weighting | Optimize depth around registry, signal-vs-noise, scoring/validation. Keep UI light. | From prompt rubric. |
 | Labs | Start with OpenAI, Anthropic, Google DeepMind, Meta AI, xAI, Mistral, DeepSeek, Qwen/Alibaba. | From prompt examples. |
 | Data window | Treat the prompt's "~3 months" as a rolling trailing window. | Working assumption. |
-| Stack | Python 3.13 + SQLite + FastAPI/Jinja2. Current `data/fli.db` is raw evidence only, not the final schema. | Chosen. |
+| Stack | Python 3.13 + SQLite + FastAPI JSON API + React/Vite SPA. `data/fli.db` contains both legacy graph tables and the current entity/channel model. | Implemented. |
 | Schema | Do not lock the modeled DB schema until real candidate evidence is reviewed. | Current build philosophy. |
+| First kind pass | Classify current unknown X-backed clusters independently as `person`, `organization`, or `unsure`; model output is only `classification` and `reason`. | Adi decision 2026-07-10. |
+| LLM runtime | Use the shared LiteLLM OpenAI-compatible endpoint and key; do not wire this app directly to Azure OpenAI. | Adi decision 2026-07-10. |
 | Discovery | Treat Digg as a frozen bootstrap snapshot only. Build the live graph from outgoing-follow snapshots of trusted people; Adi's account is the first source. | Updated 2026-07-10. |
 | X/Grok | Grok/grok-build can help with live X-backed search and coding, but it is not the graph source. Use an explicit following-list provider for follow edges. | Rechecked 2026-07-09. |
 | Budget | Do not over-optimize around the €100 budget; log real spend and revisit only if spend approaches the ceiling. | Adi decision. |
