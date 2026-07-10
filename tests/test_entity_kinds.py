@@ -29,6 +29,24 @@ class FakeClient:
         self.responses = FakeResponses(outputs)
 
 
+class FakeRawResponses(FakeResponses):
+    @property
+    def with_raw_response(self):
+        return self
+
+    def create(self, **kwargs):
+        parsed = super().create(**kwargs)
+        return SimpleNamespace(
+            headers={"x-litellm-response-cost": "0.00125"},
+            parse=lambda: parsed,
+        )
+
+
+class FakeRawClient:
+    def __init__(self, outputs):
+        self.responses = FakeRawResponses(outputs)
+
+
 def make_unknown(conn, *, handle="karpathy", name="Andrej Karpathy", bio=None):
     channel_id = channels.upsert_channel(
         conn,
@@ -100,7 +118,15 @@ def test_completed_result_is_resumable_without_duplicate_call(tmp_path):
         "profile_url",
     }
     assert request["text"]["format"] == entity_kinds.CLASSIFICATION_FORMAT
-    assert request["reasoning"] == {"effort": "minimal"}
+    assert request["reasoning"] == {"effort": "medium"}
+    tags = request["extra_body"]["metadata"]["tags"]
+    assert "app:frontier-lab-intelligence" in tags
+    assert "pipeline:entity-kind-classification" in tags
+    assert "job:entity-kind-classification" in tags
+    assert "scope:custom" in tags
+    assert "prompt:entity-kind-v2" in tags
+    assert any(tag.startswith("run:") for tag in tags)
+    assert request["extra_headers"]["x-litellm-tags"] == ",".join(tags)
 
 
 def test_invalid_extra_field_is_retried_and_recorded(tmp_path):
@@ -175,5 +201,150 @@ def test_full_run_estimate_scales_calibration_usage():
 
 
 def test_reasoning_effort_matches_model_family():
-    assert entity_kinds.reasoning_effort("gpt-5-nano") == "minimal"
-    assert entity_kinds.reasoning_effort("gpt-5.6-luna") == "none"
+    assert entity_kinds.DEFAULT_MODEL == "gpt-5.6-luna"
+    assert entity_kinds.default_reasoning_effort("gpt-5-nano") == "minimal"
+    assert entity_kinds.default_reasoning_effort("gpt-5.6-luna") == "medium"
+
+
+def test_reasoning_effort_is_part_of_resume_identity(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    entity = make_unknown(conn)
+    client = FakeClient(
+        [
+            {"classification": "person", "reason": "A full personal name."},
+            {"classification": "person", "reason": "A full personal name."},
+        ]
+    )
+
+    first = entity_kinds.run_classification(
+        conn,
+        [entity],
+        client=client,
+        model="gpt-5.6-luna",
+        workers=1,
+        reasoning_effort_override="none",
+    )
+    second = entity_kinds.run_classification(
+        conn,
+        [entity],
+        client=client,
+        model="gpt-5.6-luna",
+        workers=1,
+        reasoning_effort_override="medium",
+    )
+
+    assert first["classified"] == 1
+    assert second["classified"] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_kind_classifications"
+    ).fetchone()[0] == 2
+
+
+def test_proxy_reported_cost_is_captured(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    entity = make_unknown(conn)
+    client = FakeRawClient(
+        [{"classification": "person", "reason": "A full personal name."}]
+    )
+
+    summary = entity_kinds.run_classification(
+        conn, [entity], client=client, workers=1
+    )
+
+    assert summary["reported_cost_usd"] == 0.00125
+    assert summary["reported_cost_count"] == 1
+    stored = conn.execute(
+        "SELECT reported_cost_usd FROM entity_kind_classifications"
+    ).fetchone()[0]
+    assert stored == 0.00125
+
+
+def test_legacy_results_migrate_reasoning_effort_without_loss(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    channel_id = channels.upsert_channel(
+        conn,
+        kind="x",
+        key="karpathy",
+        label="Andrej Karpathy",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    registry.materialize_unlinked_channels(conn)
+    entity_id = conn.execute(
+        "SELECT entity_id FROM entity_channels WHERE channel_id = ?",
+        (channel_id,),
+    ).fetchone()[0]
+    conn.executescript(
+        """CREATE TABLE entity_kind_classification_runs (
+               id INTEGER PRIMARY KEY,
+               model TEXT NOT NULL,
+               prompt_version TEXT NOT NULL,
+               schema_version TEXT NOT NULL,
+               prompt_sha256 TEXT NOT NULL,
+               scope TEXT NOT NULL,
+               requested_count INTEGER NOT NULL,
+               skipped_count INTEGER NOT NULL DEFAULT 0,
+               success_count INTEGER NOT NULL DEFAULT 0,
+               failure_count INTEGER NOT NULL DEFAULT 0,
+               input_tokens INTEGER NOT NULL DEFAULT 0,
+               output_tokens INTEGER NOT NULL DEFAULT 0,
+               estimated_cost_usd REAL NOT NULL DEFAULT 0,
+               status TEXT NOT NULL,
+               started_at TEXT NOT NULL,
+               completed_at TEXT
+           );
+           CREATE TABLE entity_kind_classifications (
+               entity_id INTEGER NOT NULL REFERENCES entities (id),
+               input_sha256 TEXT NOT NULL,
+               classification TEXT NOT NULL,
+               reason TEXT NOT NULL,
+               model TEXT NOT NULL,
+               response_model TEXT,
+               prompt_version TEXT NOT NULL,
+               schema_version TEXT NOT NULL,
+               response_id TEXT,
+               input_tokens INTEGER NOT NULL,
+               output_tokens INTEGER NOT NULL,
+               estimated_cost_usd REAL NOT NULL,
+               run_id INTEGER NOT NULL,
+               classified_at TEXT NOT NULL,
+               PRIMARY KEY (entity_id, input_sha256, model, prompt_version)
+           );"""
+    )
+    conn.execute(
+        """INSERT INTO entity_kind_classification_runs
+           (id, model, prompt_version, schema_version, prompt_sha256, scope,
+            requested_count, success_count, status, started_at, completed_at)
+           VALUES (1, 'gpt-5.6-luna', 'entity-kind-v2',
+                   'entity-kind-output-v1', 'prompt-hash', 'calibration',
+                   1, 1, 'completed', '2026-07-10', '2026-07-10')"""
+    )
+    conn.execute(
+        """INSERT INTO entity_kind_classifications
+           (entity_id, input_sha256, classification, reason, model,
+            response_model, prompt_version, schema_version, response_id,
+            input_tokens, output_tokens, estimated_cost_usd, run_id,
+            classified_at)
+           VALUES (?, 'input-hash', 'person', 'A full personal name.',
+                   'gpt-5.6-luna', 'gpt-5.6-luna', 'entity-kind-v2',
+                   'entity-kind-output-v1', 'response-1', 100, 20,
+                   0.00022, 1, '2026-07-10')""",
+        (entity_id,),
+    )
+    conn.commit()
+
+    entity_kinds.ensure_schema(conn)
+    entity_kinds.ensure_schema(conn)
+
+    result = conn.execute(
+        "SELECT * FROM entity_kind_classifications"
+    ).fetchone()
+    run = conn.execute(
+        "SELECT * FROM entity_kind_classification_runs"
+    ).fetchone()
+    assert result["classification"] == "person"
+    assert result["reasoning_effort"] == "none"
+    assert result["reported_cost_usd"] is None
+    assert run["reasoning_effort"] == "none"
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_kind_classifications"
+    ).fetchone()[0] == 1

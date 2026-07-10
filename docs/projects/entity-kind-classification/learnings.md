@@ -20,6 +20,14 @@ this note before archiving the project.
 - The same prompt and inputs on `gpt-5.6-luna` with reasoning `none` correctly
   abstained on `Ross`, kept the other nine labels correct, and produced shorter,
   more evidence-grounded reasons. Model quality, not schema shape, was the gap.
+- Luna with reasoning `medium` also passed a broader 15-profile smoke set,
+  including two correct abstentions. Changing reasoning effort must invalidate
+  the resume key; otherwise a prior `none` result can silently skip a `medium`
+  evaluation.
+- LiteLLM 1.83.14 accepted Responses calls but did not retain request-body tags
+  and priced the new Luna alias at zero. Send the documented tag header as a
+  compatibility path and keep local estimates separate from proxy-reported
+  cost until the stable proxy upgrade is verified.
 
 ## Improvement Opportunities
 
@@ -32,8 +40,9 @@ this note before archiving the project.
 
 ### Skills
 
-- Record any reusable prompt/schema workflow that should be promoted out of
-  this repo.
+- BerriAI publishes an official `view-usage` skill for tag/job usage queries,
+  but request instrumentation is a small application contract and does not
+  justify installing a skill yet.
 
 ### AGENTS / Docs
 

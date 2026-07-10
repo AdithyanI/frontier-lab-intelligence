@@ -34,6 +34,10 @@ preserved prompt until Adi decides.
   EUR100 budget unless actual spend approaches it.
 - Build log: append one JSON object to `docs/references/build-log.jsonl` after
   meaningful chunks; `scripts/check-fast.sh` renders markdown.
+- Route every LLM call through the shared LiteLLM endpoint with stable
+  `metadata.tags` for app, pipeline, job, scope, prompt, and run. Capture the
+  proxy-reported response cost when available; keep a local documented estimate
+  because new proxy model aliases may temporarily report zero spend.
 - Update `docs/architecture/overview.md` when pipeline, schema, source classes,
   or module boundaries change.
 - Run `scripts/check-fast.sh` before handoff, or record why validation was

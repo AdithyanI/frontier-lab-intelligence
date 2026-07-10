@@ -248,11 +248,14 @@ erDiagram
     ENTITY_KIND_CLASSIFICATION_RUNS {
         int id PK
         string model
+        string reasoning_effort
         string prompt_version
         string status
         int input_tokens
         int output_tokens
         float estimated_cost_usd
+        float reported_cost_usd
+        string request_tags "JSON array"
     }
     ENTITY_KIND_CLASSIFICATIONS {
         int entity_id FK
@@ -260,6 +263,8 @@ erDiagram
         string classification "person | organization | unsure"
         string reason
         string prompt_version
+        string reasoning_effort
+        float reported_cost_usd
         int run_id FK
     }
     ENTITY_KIND_CLASSIFICATION_ERRORS {
@@ -277,7 +282,7 @@ erDiagram
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (32)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (47)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
 ```
@@ -285,8 +290,8 @@ erDiagram
 Table row counts: `raw_items` 1,599, `accounts` 2,967,
 `account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
 `entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
-`channel_observations` 21,133, `entity_kind_classification_runs` 3,
-`entity_kind_classifications` 32, and `entity_kind_classification_errors` 0.
+`channel_observations` 21,133, `entity_kind_classification_runs` 4,
+`entity_kind_classifications` 47, and `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until

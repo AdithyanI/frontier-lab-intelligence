@@ -24,11 +24,11 @@ from fli import channels, store
 
 PROMPT_VERSION = "entity-kind-v2"
 SCHEMA_VERSION = "entity-kind-output-v1"
-DEFAULT_MODEL = "gpt-5-nano"
+DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
 
-# Verified against the local LiteLLM /model/info endpoint on 2026-07-10.
+# Verified from the local proxy plus official model pricing on 2026-07-10.
 MODEL_PRICING_USD_PER_TOKEN = {
     "gpt-5-nano": (0.05 / 1_000_000, 0.40 / 1_000_000),
     "gpt-5-mini": (0.25 / 1_000_000, 2.00 / 1_000_000),
@@ -80,12 +80,16 @@ CALIBRATION_HANDLES = (
     "geminiapp",  # single-source product/brand
     "theaitimeline",  # publication-style account
     "vibagor44145276",  # opaque pseudonymous account
+    "julesagent",  # single-source product/agent
+    "_matthewli",  # single-source person
+    "zhihufrontier",  # single-source publication/community
 )
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS entity_kind_classification_runs (
     id INTEGER PRIMARY KEY,
     model TEXT NOT NULL,
+    reasoning_effort TEXT NOT NULL,
     prompt_version TEXT NOT NULL,
     schema_version TEXT NOT NULL,
     prompt_sha256 TEXT NOT NULL,
@@ -97,6 +101,9 @@ CREATE TABLE IF NOT EXISTS entity_kind_classification_runs (
     input_tokens INTEGER NOT NULL DEFAULT 0,
     output_tokens INTEGER NOT NULL DEFAULT 0,
     estimated_cost_usd REAL NOT NULL DEFAULT 0,
+    reported_cost_usd REAL NOT NULL DEFAULT 0,
+    reported_cost_count INTEGER NOT NULL DEFAULT 0,
+    request_tags TEXT NOT NULL DEFAULT '[]',
     status TEXT NOT NULL,
     started_at TEXT NOT NULL,
     completed_at TEXT
@@ -109,6 +116,7 @@ CREATE TABLE IF NOT EXISTS entity_kind_classifications (
         CHECK (classification IN ('person', 'organization', 'unsure')),
     reason TEXT NOT NULL,
     model TEXT NOT NULL,
+    reasoning_effort TEXT NOT NULL,
     response_model TEXT,
     prompt_version TEXT NOT NULL,
     schema_version TEXT NOT NULL,
@@ -116,9 +124,12 @@ CREATE TABLE IF NOT EXISTS entity_kind_classifications (
     input_tokens INTEGER NOT NULL,
     output_tokens INTEGER NOT NULL,
     estimated_cost_usd REAL NOT NULL,
+    reported_cost_usd REAL,
     run_id INTEGER NOT NULL REFERENCES entity_kind_classification_runs (id),
     classified_at TEXT NOT NULL,
-    PRIMARY KEY (entity_id, input_sha256, model, prompt_version)
+    PRIMARY KEY (
+        entity_id, input_sha256, model, reasoning_effort, prompt_version
+    )
 );
 CREATE INDEX IF NOT EXISTS idx_entity_kind_classifications_label
 ON entity_kind_classifications (classification);
@@ -177,6 +188,7 @@ class ClassificationResult:
     input_tokens: int
     output_tokens: int
     estimated_cost_usd: float
+    reported_cost_usd: float | None
 
 
 @dataclass(frozen=True)
@@ -203,6 +215,118 @@ def _now() -> str:
 def ensure_schema(conn: sqlite3.Connection) -> None:
     channels.ensure_schema(conn)
     conn.executescript(SCHEMA)
+    _migrate_classifications_reasoning_effort(conn)
+    _add_column(
+        conn,
+        "entity_kind_classification_runs",
+        "reasoning_effort",
+        "TEXT NOT NULL DEFAULT ''",
+    )
+    _add_column(
+        conn,
+        "entity_kind_classification_runs",
+        "reported_cost_usd",
+        "REAL NOT NULL DEFAULT 0",
+    )
+    _add_column(
+        conn,
+        "entity_kind_classification_runs",
+        "reported_cost_count",
+        "INTEGER NOT NULL DEFAULT 0",
+    )
+    _add_column(
+        conn,
+        "entity_kind_classification_runs",
+        "request_tags",
+        "TEXT NOT NULL DEFAULT '[]'",
+    )
+    conn.execute(
+        """UPDATE entity_kind_classification_runs
+           SET reasoning_effort = CASE
+               WHEN model LIKE 'gpt-5.6-%' THEN 'none'
+               ELSE 'minimal'
+           END
+           WHERE reasoning_effort = ''"""
+    )
+
+
+def _add_column(
+    conn: sqlite3.Connection,
+    table: str,
+    column: str,
+    definition: str,
+) -> None:
+    columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column not in columns:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+
+
+def _migrate_classifications_reasoning_effort(
+    conn: sqlite3.Connection,
+) -> None:
+    columns = {
+        row["name"]
+        for row in conn.execute(
+            "PRAGMA table_info(entity_kind_classifications)"
+        )
+    }
+    if "reasoning_effort" in columns:
+        return
+    with conn:
+        conn.execute(
+            "DROP INDEX IF EXISTS idx_entity_kind_classifications_label"
+        )
+        conn.execute("DROP TABLE IF EXISTS entity_kind_classifications_new")
+        conn.execute(
+            """CREATE TABLE entity_kind_classifications_new (
+               entity_id INTEGER NOT NULL
+                   REFERENCES entities (id) ON DELETE CASCADE,
+               input_sha256 TEXT NOT NULL,
+               classification TEXT NOT NULL CHECK (
+                   classification IN ('person', 'organization', 'unsure')
+               ),
+               reason TEXT NOT NULL,
+               model TEXT NOT NULL,
+               reasoning_effort TEXT NOT NULL,
+               response_model TEXT,
+               prompt_version TEXT NOT NULL,
+               schema_version TEXT NOT NULL,
+               response_id TEXT,
+               input_tokens INTEGER NOT NULL,
+               output_tokens INTEGER NOT NULL,
+               estimated_cost_usd REAL NOT NULL,
+               reported_cost_usd REAL,
+               run_id INTEGER NOT NULL
+                   REFERENCES entity_kind_classification_runs (id),
+               classified_at TEXT NOT NULL,
+               PRIMARY KEY (
+                   entity_id, input_sha256, model, reasoning_effort,
+                   prompt_version
+               )
+           )"""
+        )
+        conn.execute(
+            """INSERT INTO entity_kind_classifications_new
+           (entity_id, input_sha256, classification, reason, model,
+            reasoning_effort, response_model, prompt_version, schema_version,
+            response_id, input_tokens, output_tokens, estimated_cost_usd,
+            reported_cost_usd, run_id, classified_at)
+           SELECT entity_id, input_sha256, classification, reason, model,
+                  CASE WHEN model LIKE 'gpt-5.6-%' THEN 'none' ELSE 'minimal' END,
+                  response_model, prompt_version, schema_version, response_id,
+                  input_tokens, output_tokens, estimated_cost_usd, NULL,
+                  run_id, classified_at
+           FROM entity_kind_classifications"""
+        )
+        conn.execute("DROP TABLE entity_kind_classifications")
+        conn.execute(
+            "ALTER TABLE entity_kind_classifications_new "
+            "RENAME TO entity_kind_classifications"
+        )
+        conn.execute(
+            """CREATE INDEX idx_entity_kind_classifications_label
+               ON entity_kind_classifications (classification)"""
+        )
 
 
 def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
@@ -356,9 +480,33 @@ def _usage_value(usage: Any, field: str) -> int:
     return int(getattr(usage, field, 0) or 0)
 
 
-def reasoning_effort(model: str) -> str:
-    """Choose a supported low-cost effort for the requested model family."""
-    return "none" if model.startswith("gpt-5.6") else "minimal"
+def default_reasoning_effort(model: str) -> str:
+    """Choose the evaluated default effort for the requested model family."""
+    return "medium" if model.startswith("gpt-5.6") else "minimal"
+
+
+def request_tags(*, scope: str, run_id: int) -> tuple[str, ...]:
+    """Return stable, queryable LiteLLM spend tags for one classifier run."""
+    return (
+        "app:frontier-lab-intelligence",
+        "pipeline:entity-kind-classification",
+        "job:entity-kind-classification",
+        f"scope:{scope}",
+        f"prompt:{PROMPT_VERSION}",
+        f"run:{run_id}",
+    )
+
+
+def _reported_cost(headers: Any) -> float | None:
+    if headers is None:
+        return None
+    raw_cost = headers.get("x-litellm-response-cost")
+    if raw_cost in (None, ""):
+        return None
+    try:
+        return float(raw_cost)
+    except (TypeError, ValueError):
+        return None
 
 
 def classify_one(
@@ -366,10 +514,12 @@ def classify_one(
     entity: EntityInput,
     *,
     model: str,
+    effort: str,
+    tags: tuple[str, ...],
     input_cost_per_token: float,
     output_cost_per_token: float,
 ) -> ClassificationResult:
-    response = client.responses.create(
+    request = dict(
         model=model,
         instructions=CLASSIFIER_INSTRUCTIONS,
         input=json.dumps(
@@ -378,10 +528,20 @@ def classify_one(
             separators=(",", ":"),
         ),
         text={"format": CLASSIFICATION_FORMAT},
-        reasoning={"effort": reasoning_effort(model)},
+        reasoning={"effort": effort},
         max_output_tokens=200,
         store=False,
+        extra_body={"metadata": {"tags": list(tags)}},
+        extra_headers={"x-litellm-tags": ",".join(tags)},
     )
+    raw_api = getattr(client.responses, "with_raw_response", None)
+    if raw_api is None:
+        response = client.responses.create(**request)
+        reported_cost_usd = None
+    else:
+        raw_response = raw_api.create(**request)
+        response = raw_response.parse()
+        reported_cost_usd = _reported_cost(raw_response.headers)
     response_data = _response_dict(response)
     refusal = _find_refusal(response_data)
     if refusal:
@@ -410,6 +570,7 @@ def classify_one(
             input_tokens * input_cost_per_token
             + output_tokens * output_cost_per_token
         ),
+        reported_cost_usd=reported_cost_usd,
     )
 
 
@@ -418,6 +579,8 @@ def _classify_with_retries(
     entity: EntityInput,
     *,
     model: str,
+    effort: str,
+    tags: tuple[str, ...],
     input_cost_per_token: float,
     output_cost_per_token: float,
     max_attempts: int,
@@ -429,6 +592,8 @@ def _classify_with_retries(
                 client,
                 entity,
                 model=model,
+                effort=effort,
+                tags=tags,
                 input_cost_per_token=input_cost_per_token,
                 output_cost_per_token=output_cost_per_token,
             )
@@ -451,13 +616,21 @@ def _already_classified(
     entity: EntityInput,
     *,
     model: str,
+    effort: str,
 ) -> bool:
     return bool(
         conn.execute(
             """SELECT 1 FROM entity_kind_classifications
                WHERE entity_id = ? AND input_sha256 = ?
-                 AND model = ? AND prompt_version = ?""",
-            (entity.entity_id, entity.input_sha256, model, PROMPT_VERSION),
+                 AND model = ? AND reasoning_effort = ?
+                 AND prompt_version = ?""",
+            (
+                entity.entity_id,
+                entity.input_sha256,
+                model,
+                effort,
+                PROMPT_VERSION,
+            ),
         ).fetchone()
     )
 
@@ -471,6 +644,7 @@ def run_classification(
     workers: int = 3,
     max_attempts: int = 2,
     scope: str = "custom",
+    reasoning_effort_override: str | None = None,
     pricing: tuple[float, float] | None = None,
 ) -> dict[str, Any]:
     """Classify a deterministic batch, skipping already completed inputs."""
@@ -483,20 +657,23 @@ def run_classification(
             raise ValueError(f"no verified pricing configured for model {model!r}")
         pricing = MODEL_PRICING_USD_PER_TOKEN[model]
     ensure_schema(conn)
+    effort = reasoning_effort_override or default_reasoning_effort(model)
     pending = [
         entity
         for entity in inputs
-        if not _already_classified(conn, entity, model=model)
+        if not _already_classified(conn, entity, model=model, effort=effort)
     ]
     started_at = _now()
     prompt_sha256 = hashlib.sha256(CLASSIFIER_INSTRUCTIONS.encode()).hexdigest()
     cursor = conn.execute(
         """INSERT INTO entity_kind_classification_runs
-           (model, prompt_version, schema_version, prompt_sha256, scope,
+           (model, reasoning_effort, prompt_version, schema_version,
+            prompt_sha256, scope,
             requested_count, skipped_count, status, started_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'running', ?)""",
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'running', ?)""",
         (
             model,
+            effort,
             PROMPT_VERSION,
             SCHEMA_VERSION,
             prompt_sha256,
@@ -507,6 +684,12 @@ def run_classification(
         ),
     )
     run_id = cursor.lastrowid
+    tags = request_tags(scope=scope, run_id=run_id)
+    conn.execute(
+        """UPDATE entity_kind_classification_runs
+           SET request_tags = ? WHERE id = ?""",
+        (json.dumps(tags), run_id),
+    )
     conn.commit()
 
     results: list[ClassificationResult] = []
@@ -519,6 +702,8 @@ def run_classification(
                     client,
                     entity,
                     model=model,
+                    effort=effort,
+                    tags=tags,
                     input_cost_per_token=pricing[0],
                     output_cost_per_token=pricing[1],
                     max_attempts=max_attempts,
@@ -536,16 +721,17 @@ def run_classification(
         conn.execute(
             """INSERT OR IGNORE INTO entity_kind_classifications
                (entity_id, input_sha256, classification, reason, model,
-                response_model, prompt_version, schema_version, response_id,
-                input_tokens, output_tokens, estimated_cost_usd, run_id,
-                classified_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                reasoning_effort, response_model, prompt_version,
+                schema_version, response_id, input_tokens, output_tokens,
+                estimated_cost_usd, reported_cost_usd, run_id, classified_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 result.entity.entity_id,
                 result.entity.input_sha256,
                 result.classification,
                 result.reason,
                 model,
+                effort,
                 result.response_model,
                 PROMPT_VERSION,
                 SCHEMA_VERSION,
@@ -553,6 +739,7 @@ def run_classification(
                 result.input_tokens,
                 result.output_tokens,
                 result.estimated_cost_usd,
+                result.reported_cost_usd,
                 run_id,
                 classified_at,
             ),
@@ -578,11 +765,18 @@ def run_classification(
     input_tokens = sum(result.input_tokens for result in results)
     output_tokens = sum(result.output_tokens for result in results)
     estimated_cost_usd = sum(result.estimated_cost_usd for result in results)
+    reported_costs = [
+        result.reported_cost_usd
+        for result in results
+        if result.reported_cost_usd is not None
+    ]
+    reported_cost_usd = sum(reported_costs)
     status = "completed" if failure_count == 0 else "partial"
     conn.execute(
         """UPDATE entity_kind_classification_runs
            SET success_count = ?, failure_count = ?, input_tokens = ?,
-               output_tokens = ?, estimated_cost_usd = ?, status = ?,
+               output_tokens = ?, estimated_cost_usd = ?,
+               reported_cost_usd = ?, reported_cost_count = ?, status = ?,
                completed_at = ?
            WHERE id = ?""",
         (
@@ -591,6 +785,8 @@ def run_classification(
             input_tokens,
             output_tokens,
             estimated_cost_usd,
+            reported_cost_usd,
+            len(reported_costs),
             status,
             classified_at,
             run_id,
@@ -604,6 +800,8 @@ def run_classification(
         "run_id": run_id,
         "scope": scope,
         "model": model,
+        "reasoning_effort": effort,
+        "request_tags": tags,
         "requested": len(inputs),
         "skipped": len(inputs) - len(pending),
         "classified": len(results),
@@ -612,6 +810,8 @@ def run_classification(
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
         "estimated_cost_usd": estimated_cost_usd,
+        "reported_cost_usd": reported_cost_usd,
+        "reported_cost_count": len(reported_costs),
         "status": status,
     }
 
@@ -651,6 +851,10 @@ def main(
     parser.add_argument("--limit", type=int)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--max-attempts", type=int, default=2)
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=["none", "minimal", "low", "medium", "high", "xhigh", "max"],
+    )
     args = parser.parse_args(argv)
 
     conn = connect(args.db) if args.db else connect()
@@ -691,6 +895,7 @@ def main(
         workers=args.workers,
         max_attempts=args.max_attempts,
         scope=scope,
+        reasoning_effort_override=args.reasoning_effort,
     )
     if args.calibration and summary["classified"]:
         summary["full_run_estimate"] = estimate_full_run(

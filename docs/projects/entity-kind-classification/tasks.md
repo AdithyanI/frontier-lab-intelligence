@@ -180,6 +180,13 @@ Rules:
   `additionalProperties: false`, and required `classification` / `reason`.
   LiteLLM advertises response-schema support for `gpt-5-nano` and
   `gpt-5-mini`; calibration started with nano at minimal reasoning effort.
+- 2026-07-10: The accepted runtime default is `gpt-5.6-luna` with
+  `reasoning.effort=medium`. Reasoning effort is part of the resumability key,
+  so evaluation results from `none` and `medium` remain independently auditable.
+- 2026-07-10: Every classifier request carries stable LiteLLM tags for app,
+  pipeline, job, scope, prompt, and run through both `metadata.tags` and the
+  compatibility `x-litellm-tags` header. Store proxy-reported cost separately
+  from the local official-price estimate.
 
 ## Open Questions / Blockers
 
@@ -188,6 +195,10 @@ Rules:
   `reasoning.effort=none` passed the same 10-profile comparison, including the
   intended `unsure` abstention. The remaining gate is Adi's full-run decision
   after receiving the cost/quality evidence.
+- The live proxy was still LiteLLM 1.83.14 during run 4. It logged Luna tokens
+  but zero spend and ignored request-body tags. Adi is updating the owning
+  proxy deployment; verify tags and nonzero spend with one request after the
+  new stable version is live.
 - The one-time 2,000-follower cleanup is not replayable policy. Do not rerun
   `import-x-following` or `channels sync` during classification without first
   handling the documented rematerialization risk.
@@ -196,9 +207,9 @@ Rules:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Accept `gpt-5.6-luna` + prompt v2 + reasoning `none` from the 10-profile comparison; it fixed nano's `@rpoo` error with grounded reasons. | parent | `data/fli.db` |
-| done | Report the measured full-run estimate and optional regional uplift to Adi; do not start bulk inference in the same turn. | parent | `docs/projects/entity-kind-classification/tasks.md` |
-| todo | After Adi's decision, run or defer the 2,956-entity corpus; if run, reconcile every result and preserve graph/channel invariants. | parent | `src/fli/entity_kinds.py` |
+| done | Freeze `gpt-5.6-luna` + prompt v2 + reasoning `medium` as the application default after the 15-profile result passed qualitative review. | parent | `src/fli/entity_kinds.py` |
+| in_progress | After the stable LiteLLM deployment lands, make one tagged verification call and reconcile request tags, token counts, proxy spend, and local estimated cost. | parent | `data/fli.db` |
+| todo | Move beyond the 15-handle smoke set to a versioned 50-profile human-labeled evaluation fixture; compare accuracy and abstention before bulk inference. | parent | `tests/fixtures/` |
 
 ## Backlog / Remaining Work
 
@@ -281,3 +292,13 @@ Copy this into a fresh Codex task after restarting the app:
   The base full-run projection is 719,490 input + 115,875 output tokens and
   $1.41474; budget $1.56 if the documented 10% regional-processing uplift
   applies. No full run started.
+- 2026-07-10: [IN-PROGRESS] Made Luna-medium the default and expanded the
+  deterministic smoke set to 15 profiles. Run 4 completed 15/15 with zero
+  errors: 5 person / 8 organization / 2 unsure, 3,698 input + 612 output
+  tokens, and $0.00737 by official pricing; the full-run projection is
+  $1.45238 before any regional uplift. All labels and reasons passed
+  qualitative review, including abstentions for `@rpoo` and the anonymous
+  `@vibagor44145276`. Added reasoning-aware resume identity, six stable
+  LiteLLM request tags, compatibility tag headers, and proxy response-cost
+  capture. The old proxy stored tokens but zero spend and only User-Agent tags;
+  wait for Adi's stable LiteLLM deployment, then verify with one call.
