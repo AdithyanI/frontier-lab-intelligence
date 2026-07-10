@@ -116,7 +116,7 @@ Rules:
       `classification` plus `reason`.
 - [x] A resumable CLI/agent runner processes deterministic account batches
       through LiteLLM with bounded concurrency and structured errors.
-- [ ] A varied calibration batch is stored and inspected before the full run;
+- [x] A varied calibration batch is stored and inspected before the full run;
       obvious people, organizations, missing bios, brands, and ambiguous
       handles are represented.
 - [ ] Every one of the 2,956 initial unknown entities has either a stored valid
@@ -195,10 +195,6 @@ Rules:
   `reasoning.effort=none` passed the same 10-profile comparison, including the
   intended `unsure` abstention. The remaining gate is Adi's full-run decision
   after receiving the cost/quality evidence.
-- The live proxy was still LiteLLM 1.83.14 during run 4. It logged Luna tokens
-  but zero spend and ignored request-body tags. Adi is updating the owning
-  proxy deployment; verify tags and nonzero spend with one request after the
-  new stable version is live.
 - The one-time 2,000-follower cleanup is not replayable policy. Do not rerun
   `import-x-following` or `channels sync` during classification without first
   handling the documented rematerialization risk.
@@ -208,7 +204,7 @@ Rules:
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Freeze `gpt-5.6-luna` + prompt v2 + reasoning `medium` as the application default after the 15-profile result passed qualitative review. | parent | `src/fli/entity_kinds.py` |
-| in_progress | After the stable LiteLLM deployment lands, make one tagged verification call and reconcile request tags, token counts, proxy spend, and local estimated cost. | parent | `data/fli.db` |
+| done | Verify the stable LiteLLM deployment with one tagged Luna-medium call and reconcile request tags, token counts, proxy spend, and local estimated cost. | parent | `data/fli.db` |
 | todo | Move beyond the 15-handle smoke set to a versioned 50-profile human-labeled evaluation fixture; compare accuracy and abstention before bulk inference. | parent | `tests/fixtures/` |
 
 ## Backlog / Remaining Work
@@ -302,3 +298,11 @@ Copy this into a fresh Codex task after restarting the app:
   LiteLLM request tags, compatibility tag headers, and proxy response-cost
   capture. The old proxy stored tokens but zero spend and only User-Agent tags;
   wait for Adi's stable LiteLLM deployment, then verify with one call.
+- 2026-07-10: [DONE] LiteLLM 1.91.1 and the explicit GPT-5.6 standard rate
+  cards deployed successfully. One post-deploy Luna-medium request classified
+  `@jeffdean` as `person` with a grounded reason. App run 5, the response cost
+  header, and the persisted LiteLLM spend log all reconcile at 261 input + 36
+  output tokens and `$0.000477`; all six app/pipeline/job/scope/prompt/run tags
+  are present in both the request log and tag aggregation. The database now
+  holds 5 runs, 48 classifications, and zero classification errors. No bulk
+  run was started.

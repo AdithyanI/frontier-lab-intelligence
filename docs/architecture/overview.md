@@ -282,7 +282,7 @@ erDiagram
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (47)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (48)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
 ```
@@ -290,8 +290,8 @@ erDiagram
 Table row counts: `raw_items` 1,599, `accounts` 2,967,
 `account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
 `entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
-`channel_observations` 21,133, `entity_kind_classification_runs` 4,
-`entity_kind_classifications` 47, and `entity_kind_classification_errors` 0.
+`channel_observations` 21,133, `entity_kind_classification_runs` 5,
+`entity_kind_classifications` 48, and `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -383,6 +383,12 @@ proxy using `LLM_API_ENDPOINT` and `LLM_API_KEY`; the app does not use direct
 Azure OpenAI credentials. Attention observations such as follower count,
 PageRank, Digg rank, and list membership are excluded from this structural
 classification.
+
+Every request carries stable LiteLLM tags for app, pipeline, job, scope,
+prompt, and run. The runner stores its official-rate estimate separately from
+LiteLLM's reported response cost. The post-upgrade LiteLLM 1.91.1 verification
+reconciled both values with the persisted spend log, including the tagged token
+counts; proxy spend logs are the operational source of truth for billed usage.
 
 This pass does not merge channels. Later identity resolution may attach several
 official/product X channels to one organization. A person is expected to have

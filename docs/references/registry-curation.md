@@ -115,6 +115,11 @@ hash and entity ID, and `entity_kind_classification_errors` owns structured
 retry/terminal failures. This preserves the current seeded-lab UI while the
 target organization/role migration remains separate.
 
+Classifier requests are tagged in LiteLLM by app, pipeline, job, scope,
+prompt version, and run ID. Store the proxy-reported response cost separately
+from the local official-rate estimate, and use the persisted LiteLLM spend log
+to audit tokens, exact spend, and tag attribution.
+
 ## Evaluation Before Full Classification
 
 Start with a small varied calibration set spanning multi-source accounts,
