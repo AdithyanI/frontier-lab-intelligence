@@ -5,7 +5,7 @@ shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
 Registry retains the post-1,000-follower-floor classified universe: 2,736
-people, 184 organizations, one active unsure, three rejected, and zero unknown.
+people, 183 organizations, one active unsure, three rejected, and zero unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
@@ -14,8 +14,9 @@ graph is empty until the trusted-seed contract is accepted. The `labs` table
 remains internal source/seed provenance because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
-Channel merging, broader relevance curation, extraction, and scoring remain
-later stages.
+The first organization consolidation is live: SpaceX owns both `@spacex` and
+`@SpaceXAI` plus the x.ai/GitHub/arXiv channels. Broader identity resolution,
+relevance curation, extraction, and scoring remain later stages.
 
 ## Stack
 
@@ -142,7 +143,7 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,924 classified entities: 2,736 people, 184
+- The active Registry retains 2,923 classified entities: 2,736 people, 183
   organizations, one active unsure, and three protected-account rejections. The
   2,956 channels include 32 additional lab
   channels. Removing discovery edges does not remove already classified nodes.
@@ -305,7 +306,7 @@ erDiagram
 
 Table row counts: `raw_items` 1,599, `accounts` 2,924,
 `account_source_facts` 5,838, `graph_edges` 0, `labs` 10,
-`entities` 2,924, `channels` 2,956, `entity_channels` 2,956,
+`entities` 2,923, `channels` 2,956, `entity_channels` 2,956,
 `channel_observations` 13,547, `entity_kind_classification_runs` 10,
 `entity_kind_classifications` 3,084, `entity_kind_web_enrichments` 1, and
 `entity_kind_classification_errors` 0, and `entity_registry_rejections` 3.
@@ -337,6 +338,13 @@ and do not create a public subtype. There is no generic entity-role schema yet;
 add one only after an exhaustive role policy is justified. Rejection remains a
 separate curation state. An explicit protected-account flag is the first
 implemented rejection gate; broader relevance curation remains later.
+
+An entity may own multiple channels of the same kind. The first applied case
+is SpaceX: one `organization` entity owns the independent X channels
+`@spacex` and `@SpaceXAI`. Each X account keeps its own backing account row,
+profile observations, and source facts; only the redundant organization entity
+is removed. The one-owner index on `entity_channels.channel_id` still prevents
+any channel from belonging to two entities.
 
 ```mermaid
 flowchart TD
@@ -431,10 +439,12 @@ Exact prompt/model results resume without another paid call. The batch
 `fli entity-kinds enrich --limit N` path reuses the same staged lifecycle for
 current abstentions.
 
-This pass does not merge channels. Later identity resolution may attach several
-official/product X channels to one organization. A person is expected to have
-one primary X account in most cases, but the data model permits multiple
-channels for both people and organizations.
+Identity resolution may attach several X channels to one organization. A
+person is expected to have one primary X account in most cases, but the data
+model permits multiple channels for both people and organizations. The first
+consolidation keeps SpaceX as the canonical entity, renames the stable former
+`@xai` account to its current `@SpaceXAI` handle, and attaches it beside
+`@spacex`; no historical-handle record is exposed.
 
 ## X Graph Source Direction
 

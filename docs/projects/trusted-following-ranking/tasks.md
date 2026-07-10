@@ -99,11 +99,17 @@ candidate generator while demonstrating ranking and validation discipline.
   tracked edge artifacts, and reload/rank commands were removed cleanly.
 - Protect the end-to-end submission: this is one timeboxed milestone, not the
   product destination.
+- Registry identity resolution uses one entity with many independently
+  observed channels. SpaceX is the canonical organization for `@spacex` and
+  `@SpaceXAI`; the stable former `@xai` account was renamed in place, not
+  duplicated, and no historical alias is exposed.
 
 ## Open Questions / Blockers
 
 - Which exact people and organizations form the first trusted seed set?
 - What top-k size and relevance labels will Adi review for the evaluation?
+- Which high-confidence organization group should be consolidated after the
+  accepted SpaceX database/UI proof?
 
 ## Current Batch
 
@@ -113,7 +119,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
 | done | Remove Digg/personal graph evidence while retaining the post-floor classified nodes; keep Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
 | done | Estimate a full 2,924-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
-| blocked | Pause before seed selection, live following fetches, or new ranking work until Adi returns. | parent | — |
+| done | Consolidate SpaceX and SpaceXAI into one organization with two active X channels; prove replay and invariants. | parent | — |
+| blocked | Pause before more organization merges or Registry UI work until Adi reviews the database shape. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -183,3 +190,12 @@ candidate generator while demonstrating ranking and validation discipline.
   2,308 accurately carry `digg_bootstrap.candidate_origin` (1,308 graph-only,
   one ranked-only, 999 both). Graph edges remain zero and no Digg rank, score,
   or PageRank is active.
+- 2026-07-10: [DONE] Proved the one-entity/many-channels contract with the first
+  real organization consolidation. SpaceX is now one organization owning the
+  active `@spacex` and `@SpaceXAI` X channels plus x.ai, xai-org, and the xAI
+  arXiv query. Renamed the stable former `@xai` account in place, removed the
+  redundant entity without deleting account/channel evidence, and made the
+  two-X seed replay idempotently. Registry state is 2,923 entities, 2,956
+  channels/links, and zero graph edges; SQLite foreign keys are clean,
+  integrity is `ok`, and all 49 tests plus frontend lint/build pass. UI work is
+  intentionally paused for Adi's database review.
