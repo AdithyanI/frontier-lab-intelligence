@@ -37,6 +37,11 @@ const typeLabel = (entity: Entity) =>
 const typeClass = (entity: Entity) =>
   entity.registry_state === 'rejected' ? 'rejected' : entity.kind
 
+const xHandleLabel = (channel: EntityChannel) => {
+  const label = channel.label?.trim()
+  return `@${label && label.toLowerCase() === channel.key ? label : channel.key}`
+}
+
 function ChannelGlyph({ kind }: { kind: string }) {
   if (kind === 'website') {
     return (
@@ -67,6 +72,8 @@ function ChannelGlyph({ kind }: { kind: string }) {
 
 function channelLabel(channel: EntityChannel): string {
   switch (channel.kind) {
+    case 'x':
+      return xHandleLabel(channel)
     case 'website':
       try {
         return channel.url
@@ -206,7 +213,9 @@ export default function Registry() {
           </thead>
           <tbody>
             {visible.map((entity) => {
-              const xChannel = entity.channels.find((channel) => channel.kind === 'x')
+              const xChannels = entity.channels.filter(
+                (channel) => channel.kind === 'x',
+              )
               return (
                 <tr
                   key={entity.id}
@@ -222,8 +231,14 @@ export default function Registry() {
                 >
                   <td>
                     <span className="ent-name">{entity.name}</span>
-                    {xChannel && (
-                      <span className="ent-handle">@{xChannel.key}</span>
+                    {xChannels.length > 0 && (
+                      <span className="ent-handles">
+                        {xChannels.map((channel) => (
+                          <span className="ent-handle" key={channel.id}>
+                            {xHandleLabel(channel)}
+                          </span>
+                        ))}
+                      </span>
                     )}
                   </td>
                   <td>
@@ -279,8 +294,11 @@ function EntityCard({
 
   if (!entity) return <dialog ref={ref} className="ent-card" onClose={onClose} />
 
-  const xChannel = entity.channels.find((channel) => channel.kind === 'x')
-  const otherChannels = entity.channels.filter((channel) => channel.kind !== 'x')
+  const orderedChannels = [...entity.channels].sort((left, right) => {
+    const priority = (channel: EntityChannel) =>
+      channel.kind === 'x' ? 0 : channel.kind === 'website' ? 1 : 2
+    return priority(left) - priority(right) || left.key.localeCompare(right.key)
+  })
   const titleId = `entity-card-title-${entity.id}`
   const bioId = `entity-card-bio-${entity.id}`
   const bioIsSourcePreview = /(?:\.{3}|…)$/.test(entity.bio?.trim() ?? '')
@@ -360,11 +378,11 @@ function EntityCard({
           </div>
         )}
 
-        {otherChannels.length > 0 && (
+        {orderedChannels.length > 0 && (
           <div className="ent-card-channels">
             <div className="ent-card-label">Channels</div>
             <ul>
-              {otherChannels.map((channel) => (
+              {orderedChannels.map((channel) => (
                 <li key={channel.id}>
                   {channel.url ? (
                     <a
@@ -386,30 +404,6 @@ function EntityCard({
               ))}
             </ul>
           </div>
-        )}
-
-        {xChannel && (
-          <footer className="ent-card-foot">
-            <a
-              className="ent-x-tag"
-              href={xChannel.url ?? `https://x.com/${xChannel.key}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <svg
-                className="ent-x-mark"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d={siX.path} />
-              </svg>
-              <span>
-                Open <strong>@{xChannel.key}</strong> on X
-              </span>
-              <span className="ent-x-go">↗</span>
-            </a>
-          </footer>
         )}
       </div>
     </dialog>

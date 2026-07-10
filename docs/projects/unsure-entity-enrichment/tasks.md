@@ -59,7 +59,7 @@ being deleted or sent to the model again.
 - [x] Protected accounts are rejected before inference and shown with reasons.
 - [x] One idempotent X-handle command owns profile persistence, eligibility
   gates, profile/posts/web classification, promotion, and Registry visibility.
-- [ ] A paid live calibration proves the final web-search escalation through
+- [x] A paid live calibration proves the final web-search escalation through
   the shared LiteLLM route before project closeout.
 
 ## Milestones
@@ -128,6 +128,7 @@ being deleted or sent to the model again.
 | --- | --- | --- | --- |
 | done | Implement and locally validate the canonical single-handle X lifecycle with a final bounded web-search escalation. | parent | — |
 | done | Run one paid `@jack` calibration and inspect the exact sources, cost, and persisted Registry result. | parent | `resources/philschmid-calibration.md` (historical tool smoke only) |
+| done | Add and visually verify a simple account-to-Registry lifecycle diagram at the front of the Architecture page without changing the graph/PageRank view. | parent | — |
 | in progress | Review source quality and decide whether to run the same final escalation for `@linatawfik9`. | parent | — |
 | todo | Archive the tracker after the remaining-entity and evidence-quality decisions are accepted. | parent | — |
 
@@ -238,3 +239,10 @@ being deleted or sent to the model again.
   remain in `entity_kind_web_enrichments`. The single cited article was
   secondary despite official sources in the consulted set, so broader web
   escalation remains a quality-policy decision rather than an automatic run.
+- 2026-07-10: [DONE] Added the canonical single-account lifecycle as the first
+  Architecture-page diagram. It begins only when an operator supplies an X
+  handle, then shows profile retrieval and the deterministic follower/protected
+  gates, the profile/posts/web classification ladder, and immediate persisted
+  Registry output. The existing data-model, graph/PageRank, and signal-funnel
+  diagrams remain in place. Frontend lint/build pass and the rendered local
+  page was visually checked with no browser errors.

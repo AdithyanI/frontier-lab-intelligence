@@ -1,6 +1,6 @@
-/* The architecture, explained visually: three hand-built diagrams that
-   teach the system — the graph plane, the entity/channel layering, and
-   the signal funnel. Real handles, real colors, no generic doc dump. */
+/* The architecture, explained visually: four hand-built diagrams that teach
+   the account lifecycle, entity/channel layering, graph plane, and signal funnel.
+   Real provenance, real handles, real colors, no generic doc dump. */
 
 const INK = '#151515'
 const MUTED = '#6b6b68'
@@ -11,7 +11,79 @@ const SAND = '#f4f1ea'
 const MONO = "'IBM Plex Mono', monospace"
 const UI = "'Inter', system-ui, sans-serif"
 
-/* ---------- diagram 1: the graph plane ---------- */
+/* ---------- diagram 1: one supplied X account to classified Registry entity ---------- */
+
+function AccountLifecycle() {
+  return (
+    <svg
+      viewBox="0 0 1120 360"
+      role="img"
+      aria-label="X account lifecycle: a supplied handle is profiled, checked for eligibility, classified from profile, posts, and bounded web research as needed, then stored in the Registry"
+    >
+      <defs>
+        <marker id="account-arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+        </marker>
+      </defs>
+
+      <text x="40" y="44" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.1em">YOU PROVIDE</text>
+      <rect x="40" y="104" width="144" height="116" fill={INK} />
+      <text x="60" y="139" fontFamily={MONO} fontSize="10.5" fill={BLUE}>X ACCOUNT</text>
+      <text x="60" y="174" fontFamily={UI} fontSize="20" fontWeight="600" fill="#fff">@handle</text>
+      <text x="60" y="199" fontFamily={UI} fontSize="12" fill="#fff" opacity="0.72">one account ID</text>
+
+      <line x1="184" y1="162" x2="230" y2="162" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#account-arr)" />
+
+      <text x="248" y="44" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.1em">FETCH + CHECK</text>
+      <rect x="248" y="76" width="234" height="172" fill={SAND} />
+      <text x="268" y="108" fontFamily={UI} fontSize="17" fontWeight="600" fill={INK}>X profile</text>
+      <text x="268" y="134" fontFamily={UI} fontSize="12.5" fill={MUTED}>name · bio · followers · protection</text>
+      <line x1="268" y1="151" x2="462" y2="151" stroke={MUTED} strokeWidth="1" opacity="0.35" />
+      <text x="268" y="178" fontFamily={MONO} fontSize="10.5" fill={INK}>&lt;1,000</text>
+      <text x="352" y="178" fontFamily={UI} fontSize="12.5" fill={MUTED}>not added</text>
+      <text x="268" y="207" fontFamily={MONO} fontSize="10.5" fill={INK}>PROTECTED</text>
+      <text x="352" y="207" fontFamily={UI} fontSize="12.5" fill={MUTED}>rejected with reason</text>
+      <text x="268" y="235" fontFamily={MONO} fontSize="10.5" fill={BLUE_INK}>PUBLIC + 1K+</text>
+      <text x="378" y="235" fontFamily={UI} fontSize="12.5" fill={INK}>continue</text>
+
+      <line x1="482" y1="162" x2="538" y2="162" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#account-arr)" />
+
+      <text x="556" y="44" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.1em">CLASSIFY</text>
+      <rect x="556" y="60" width="286" height="204" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="576" y="92" fontFamily={UI} fontSize="17" fontWeight="600" fill={INK}>Person or organization?</text>
+
+      <circle cx="590" cy="130" r="13" fill={INK} />
+      <text x="590" y="134" textAnchor="middle" fontFamily={MONO} fontSize="10" fill="#fff">1</text>
+      <text x="616" y="135" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Profile</text>
+
+      <line x1="590" y1="143" x2="590" y2="174" stroke={BLUE_MID} strokeWidth="1" markerEnd="url(#account-arr)" />
+      <text x="610" y="167" fontFamily={MONO} fontSize="10" fill={MUTED}>IF UNSURE</text>
+      <circle cx="590" cy="190" r="13" fill={BLUE} />
+      <text x="590" y="194" textAnchor="middle" fontFamily={MONO} fontSize="10" fill={INK}>2</text>
+      <text x="616" y="195" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>20 authored posts</text>
+
+      <line x1="590" y1="203" x2="590" y2="234" stroke={BLUE_MID} strokeWidth="1" markerEnd="url(#account-arr)" />
+      <text x="610" y="227" fontFamily={MONO} fontSize="10" fill={MUTED}>IF STILL UNSURE</text>
+      <circle cx="590" cy="250" r="13" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="590" y="254" textAnchor="middle" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>3</text>
+      <text x="616" y="255" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Bounded web research</text>
+
+      <line x1="842" y1="162" x2="906" y2="162" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#account-arr)" />
+
+      <text x="924" y="44" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.1em">PERSIST</text>
+      <rect x="924" y="92" width="156" height="140" fill={INK} />
+      <text x="944" y="123" fontFamily={MONO} fontSize="10.5" fill={BLUE}>REGISTRY</text>
+      <text x="944" y="156" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Person</text>
+      <text x="944" y="184" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Organization</text>
+      <text x="944" y="212" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Unsure</text>
+
+      <line x1="40" y1="312" x2="1080" y2="312" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      <text x="40" y="338" fontFamily={UI} fontSize="12.5" fill={MUTED}>One account in, one persisted outcome out. The reason, evidence, and cost stay attached.</text>
+    </svg>
+  )
+}
+
+/* ---------- diagram 2: the graph plane ---------- */
 
 const NODES = [
   { x: 340, y: 150, r: 26, label: '@karpathy', big: true },
@@ -65,7 +137,7 @@ function GraphPlane() {
   )
 }
 
-/* ---------- diagram 2: the data model — who / where / what over time ---------- */
+/* ---------- diagram 3: the data model — who / where / what over time ---------- */
 
 const DM_CHANNELS = [
   { x: 88, label: '@karpathy', plane: 'X · seed rank #1', conf: '0.99', fan: 340 },
@@ -172,7 +244,7 @@ function DataModel() {
   )
 }
 
-/* ---------- diagram 3: the signal funnel (HTML, not SVG — real text) ---------- */
+/* ---------- diagram 4: the signal funnel (HTML, not SVG — real text) ---------- */
 
 const FUNNEL = [
   {
@@ -266,13 +338,29 @@ export default function Architecture() {
       <div className="page-kicker">HOW IT WORKS</div>
       <h1 className="page-title">Architecture</h1>
       <p className="page-sub">
-        Three ideas, three pictures: the data model, the graph that ranks who
-        matters, and the funnel that keeps only signal.
+        Four views: how entities enter, where evidence lives, how attention
+        ranks, and how the system keeps only signal.
       </p>
 
       <section className="arch-section">
         <div className="arch-section-head">
           <span className="arch-no">01</span>
+          <h2 className="arch-h">From an X account to the Registry</h2>
+          <p className="arch-p">
+            Give the system one X handle. It fetches the profile, applies the
+            eligibility rules, resolves the actor in bounded stages, and makes
+            the result visible immediately.
+          </p>
+        </div>
+        <div className="arch-canvas">
+          <AccountLifecycle />
+          <div className="arch-caption">profile first · 20 authored posts only if unsure · bounded web research only if still unsure · result appears in the Registry</div>
+        </div>
+      </section>
+
+      <section className="arch-section">
+        <div className="arch-section-head">
+          <span className="arch-no">02</span>
           <h2 className="arch-h">One data model underneath</h2>
           <p className="arch-p">
             One spine holds everything: a <em>who</em>, the <em>wheres</em> we
@@ -287,7 +375,7 @@ export default function Architecture() {
 
       <section className="arch-section">
         <div className="arch-section-head">
-          <span className="arch-no">02</span>
+          <span className="arch-no">03</span>
           <h2 className="arch-h">The graph decides who matters</h2>
           <p className="arch-p">
             Attention, not follower count: being followed by several trusted
@@ -303,7 +391,7 @@ export default function Architecture() {
 
       <section className="arch-section" style={{ marginBottom: 72 }}>
         <div className="arch-section-head">
-          <span className="arch-no">03</span>
+          <span className="arch-no">04</span>
           <h2 className="arch-h">The funnel suppresses noise</h2>
           <p className="arch-p">
             Cheap mechanical checks first, the expensive LLM last — only on what
