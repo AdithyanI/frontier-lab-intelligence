@@ -8,6 +8,7 @@ who is tracked.
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import sqlite3
@@ -216,6 +217,121 @@ class TwitterApiIoClient:
             )
         return user
 
+    def fetch_recent_tweets_page(
+        self,
+        *,
+        username: str,
+        cursor: str | None = None,
+    ) -> dict[str, Any]:
+        """Fetch one recent-timeline page without replies."""
+        query: dict[str, str] = {
+            "userName": username,
+            "includeReplies": "false",
+        }
+        if cursor:
+            query["cursor"] = cursor
+        url = f"{self.base_url}/twitter/user/last_tweets?{parse.urlencode(query)}"
+        return self._fetch_json(url)
+
+    def fetch_recent_authored_posts(
+        self,
+        *,
+        username: str,
+        limit: int = 20,
+        max_pages: int = 10,
+    ) -> tuple[dict[str, Any], ...]:
+        """Return recent authored posts, excluding replies and retweets.
+
+        TwitterAPI.io has returned both ``tweets`` and ``data.tweets`` shapes
+        for this endpoint. Pagination continues only as needed to replace
+        filtered retweets, bounded by ``max_pages``.
+        """
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+        if max_pages < 1:
+            raise ValueError("max_pages must be at least 1")
+        handle = username.strip().removeprefix("@").lower()
+        if not X_HANDLE_RE.fullmatch(handle):
+            raise ValueError(f"invalid X handle: {username!r}")
+
+        posts: list[dict[str, Any]] = []
+        seen_ids: set[str] = set()
+        seen_cursors: set[str] = set()
+        cursor: str | None = None
+        for _page_number in range(max_pages):
+            payload = self.fetch_recent_tweets_page(
+                username=handle,
+                cursor=cursor,
+            )
+            data = payload.get("data")
+            nested = data if isinstance(data, dict) else {}
+            tweets = nested.get("tweets")
+            if not isinstance(tweets, list):
+                tweets = payload.get("tweets")
+            if not isinstance(tweets, list):
+                raise SourceCliError(
+                    code="E_PROVIDER_SHAPE",
+                    message=(
+                        "TwitterAPI.io response did not include a tweets array."
+                    ),
+                    hint="Inspect provider docs/status before retrying.",
+                    exit_code=4,
+                    retryable=True,
+                )
+
+            for tweet in tweets:
+                if not isinstance(tweet, dict) or _is_retweet(tweet):
+                    continue
+                if _is_reply(tweet):
+                    continue
+                text = html.unescape(str(tweet.get("text") or ""))
+                text = " ".join(text.split())
+                if not text:
+                    continue
+                tweet_id = str(tweet.get("id") or tweet.get("tweetId") or "")
+                dedupe_key = tweet_id or hashlib.sha256(text.encode()).hexdigest()
+                if dedupe_key in seen_ids:
+                    continue
+                seen_ids.add(dedupe_key)
+                is_quote = bool(
+                    tweet.get("quoted_tweet")
+                    or tweet.get("quotedTweet")
+                    or tweet.get("isQuote")
+                    or tweet.get("is_quote")
+                )
+                posts.append(
+                    {
+                        "id": tweet_id,
+                        "created_at": (
+                            tweet.get("createdAt")
+                            or tweet.get("created_at")
+                        ),
+                        "text": text,
+                        "url": tweet.get("url") or tweet.get("twitterUrl"),
+                        "post_type": "quote" if is_quote else "original",
+                    }
+                )
+                if len(posts) >= limit:
+                    return tuple(posts)
+
+            has_next = bool(
+                nested.get("has_next_page")
+                if "has_next_page" in nested
+                else payload.get("has_next_page")
+            )
+            next_cursor = str(
+                nested.get("next_cursor") or payload.get("next_cursor") or ""
+            )
+            if not has_next and not next_cursor:
+                break
+            if not next_cursor or next_cursor in seen_cursors:
+                break
+            seen_cursors.add(next_cursor)
+            cursor = next_cursor
+            if self.page_sleep_seconds > 0:
+                time.sleep(self.page_sleep_seconds)
+        return tuple(posts)
+
     def fetch_following_page(
         self,
         *,
@@ -282,6 +398,26 @@ def _normalize_handle(member: dict[str, Any]) -> str | None:
         return None
     handle = str(raw).strip().removeprefix("@").lower()
     return handle or None
+
+
+def _is_retweet(tweet: dict[str, Any]) -> bool:
+    text = str(tweet.get("text") or "").lstrip()
+    return bool(
+        tweet.get("retweeted_tweet")
+        or tweet.get("retweetedTweet")
+        or tweet.get("isRetweet")
+        or tweet.get("is_retweet")
+        or text.startswith("RT @")
+    )
+
+
+def _is_reply(tweet: dict[str, Any]) -> bool:
+    return bool(
+        tweet.get("isReply")
+        or tweet.get("is_reply")
+        or tweet.get("inReplyToId")
+        or tweet.get("in_reply_to_status_id")
+    )
 
 
 def _int_or_none(value: Any) -> int | None:
