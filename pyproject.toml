@@ -5,6 +5,7 @@ description = "Frontier Lab Intelligence — tracks frontier AI labs and key peo
 requires-python = ">=3.13"
 dependencies = [
     "fastapi",
+    "openai>=2.30,<3",
     "uvicorn",
 ]
 

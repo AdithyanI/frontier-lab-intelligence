@@ -59,6 +59,10 @@ def main(argv: list[str] | None = None) -> int:
     channels_p.add_argument("--db", default=None, help="Path to SQLite DB.")
     sources_p = sub.add_parser("sources", help="Curated source importers.")
     sources_p.add_argument("source_args", nargs=argparse.REMAINDER)
+    entity_kinds_p = sub.add_parser(
+        "entity-kinds", help="Classify provisional entity structure."
+    )
+    entity_kinds_p.add_argument("entity_kind_args", nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -129,6 +133,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import sources
 
         return sources.main(args.source_args)
+
+    if args.command == "entity-kinds":
+        from fli import entity_kinds
+
+        return entity_kinds.main(args.entity_kind_args)
 
     parser.print_help()
     return 0
