@@ -16,14 +16,25 @@ class FakeResponses:
         output = self.outputs.pop(0)
         if isinstance(output, BaseException):
             raise output
-        return SimpleNamespace(
+        payload = dict(output)
+        response_output = payload.pop("_response_output", [])
+        response = SimpleNamespace(
             id=f"response-{len(self.calls)}",
             model=kwargs["model"],
             status="completed",
-            output_text=json.dumps(output),
-            output=[],
+            output_text=json.dumps(payload),
+            output=response_output,
             usage=SimpleNamespace(input_tokens=100, output_tokens=20),
         )
+        response.model_dump = lambda: {
+            "id": response.id,
+            "model": response.model,
+            "status": response.status,
+            "output_text": response.output_text,
+            "output": response.output,
+            "usage": {"input_tokens": 100, "output_tokens": 20},
+        }
+        return response
 
 
 class FakeClient:
@@ -50,19 +61,27 @@ class FakeRawClient:
 
 
 class FakePostClient:
-    def __init__(self, posts=(), *, protected=False):
+    def __init__(self, posts=(), *, protected=False, profile=None):
         self.posts = tuple(posts)
         self.protected = protected
+        self.profile = profile
         self.calls = []
         self.profile_calls = []
 
     def fetch_user(self, *, username):
         self.profile_calls.append(username)
-        return {"userName": username, "protected": self.protected}
+        return self.profile or {
+            "userName": username,
+            "name": username,
+            "description": None,
+            "followers": 2_000,
+            "protected": self.protected,
+        }
 
     def fetch_recent_authored_posts(self, *, username, limit, profile=None):
         self.calls.append({"username": username, "limit": limit})
-        assert profile == {"userName": username, "protected": False}
+        assert profile is not None
+        assert profile.get("protected") is False
         return self.posts[:limit]
 
 
@@ -464,6 +483,108 @@ def test_post_enrichment_chains_responses_without_persisting(tmp_path):
     ).fetchone()[0] == "unsure"
 
 
+def test_post_enrichment_uses_bounded_web_search_after_posts_abstain(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    entity = make_unsure(conn, handle="jack", name="jack")
+    web_output = [
+        {
+            "type": "web_search_call",
+            "action": {
+                "type": "search",
+                "queries": ["@jack exact identity"],
+                "sources": [
+                    {
+                        "url": "https://blog.x.com/jack",
+                        "title": "Jack Dorsey (@jack)",
+                        "type": "computer_initialize_state",
+                    }
+                ],
+            },
+        },
+        {
+            "type": "message",
+            "content": [
+                {
+                    "type": "output_text",
+                    "annotations": [
+                        {
+                            "type": "url_citation",
+                            "url": "https://blog.x.com/jack",
+                            "title": "Jack Dorsey (@jack)",
+                        }
+                    ],
+                }
+            ],
+        },
+    ]
+    client = FakeClient(
+        [
+            {
+                "classification": "unsure",
+                "reason": "The profile is insufficient.",
+            },
+            {
+                "classification": "unsure",
+                "reason": "The posts are still ambiguous.",
+            },
+            {
+                "classification": "person",
+                "reason": "Official evidence identifies @jack as Jack Dorsey.",
+                "_response_output": web_output,
+            },
+        ]
+    )
+    post_client = FakePostClient(
+        [
+            {
+                "id": "1",
+                "created_at": "2026-07-10T00:00:00Z",
+                "text": "our company is building",
+                "url": "https://x.com/jack/status/1",
+                "post_type": "original",
+            }
+        ]
+    )
+
+    summary = entity_kinds.run_post_enrichment(
+        conn,
+        [entity],
+        client=client,
+        post_client=post_client,
+        workers=1,
+        persist=True,
+        promote=True,
+    )
+
+    assert summary["counts"]["person"] == 1
+    assert summary["followups"] == 1
+    assert summary["web_followups"] == 1
+    assert summary["web_search_actions"] == 1
+    assert summary["web_sources"] == 1
+    assert len(client.responses.calls) == 3
+    web_request = client.responses.calls[2]
+    assert web_request["previous_response_id"] == "response-2"
+    assert web_request["tools"] == [
+        {"type": "web_search", "search_context_size": "medium"}
+    ]
+    assert web_request["tool_choice"] == "required"
+    assert web_request["max_tool_calls"] == 4
+    assert web_request["include"] == ["web_search_call.action.sources"]
+    assert web_request["text"]["format"] == entity_kinds.CLASSIFICATION_FORMAT
+    assert "exact X account (@jack)" in web_request["input"][0]["content"]
+    assert summary["items"][0]["web"]["response_id"] == "response-3"
+    stored = conn.execute("SELECT * FROM entity_kind_web_enrichments").fetchone()
+    assert stored["classification"] == "person"
+    assert json.loads(stored["actions_json"])[0]["queries"] == [
+        "@jack exact identity"
+    ]
+    assert json.loads(stored["sources_json"])[0]["cited"] is True
+    assert conn.execute(
+        "SELECT kind FROM entities WHERE id = ?",
+        (entity.entity_id,),
+    ).fetchone()[0] == "person"
+
+
 def test_post_enrichment_persists_and_promotes_with_existing_schema(tmp_path):
     conn = entity_kinds.connect(tmp_path / "test.db")
     entity = make_unsure(conn, handle="jack", name="jack")
@@ -579,11 +700,112 @@ def test_post_enrichment_rejects_protected_account_before_model_call(tmp_path):
     assert row["rejection_reason"] == entity_kinds.PROTECTED_ACCOUNT_REASON
 
 
+def test_single_handle_lifecycle_materializes_classifies_and_resumes(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    profile = {
+        "userName": "new_person",
+        "id": "123",
+        "name": "New Person",
+        "description": "Researcher and engineer.",
+        "followers": 2_500,
+        "protected": False,
+    }
+    post_client = FakePostClient(profile=profile)
+    client = FakeClient(
+        [
+            {
+                "classification": "person",
+                "reason": "The profile identifies an individual researcher.",
+            }
+        ]
+    )
+
+    first = entity_kinds.run_x_account_lifecycle(
+        conn,
+        handle="@New_Person",
+        client=client,
+        post_client=post_client,
+    )
+    second = entity_kinds.run_x_account_lifecycle(
+        conn,
+        handle="new_person",
+        client=client,
+        post_client=post_client,
+    )
+
+    assert first["outcome"] == "classified"
+    assert first["stage"] == "profile"
+    assert first["classification"] == "person"
+    assert second["outcome"] == "existing"
+    assert second["classification"] == "person"
+    assert second["model_calls"] == 0
+    assert len(client.responses.calls) == 1
+    assert conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0] == 1
+    assert conn.execute("SELECT COUNT(*) FROM channels").fetchone()[0] == 1
+    assert conn.execute(
+        "SELECT kind FROM entities"
+    ).fetchone()[0] == "person"
+
+
+def test_single_handle_lifecycle_rejects_protected_before_model(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    profile = {
+        "userName": "private_person",
+        "name": "Private Person",
+        "description": None,
+        "followers": 1_500,
+        "protected": True,
+    }
+    client = FakeClient([])
+
+    result = entity_kinds.run_x_account_lifecycle(
+        conn,
+        handle="private_person",
+        client=client,
+        post_client=FakePostClient(profile=profile),
+    )
+
+    assert result["outcome"] == "rejected"
+    assert result["stage"] == "protected_account"
+    assert result["persisted"] is True
+    assert client.responses.calls == []
+    row = registry.read_entities(conn)[0]
+    assert row["registry_state"] == "rejected"
+    assert row["rejection_reason_code"] == "protected_x_account"
+
+
+def test_single_handle_lifecycle_drops_below_follower_floor(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    profile = {
+        "userName": "small_account",
+        "name": "Small Account",
+        "description": "I build things.",
+        "followers": 999,
+        "protected": False,
+    }
+    client = FakeClient([])
+
+    result = entity_kinds.run_x_account_lifecycle(
+        conn,
+        handle="small_account",
+        client=client,
+        post_client=FakePostClient(profile=profile),
+    )
+
+    assert result["outcome"] == "rejected"
+    assert result["stage"] == "follower_floor"
+    assert result["persisted"] is False
+    assert result["followers_count"] == 999
+    assert client.responses.calls == []
+    assert conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0] == 0
+    assert conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 0
+
+
 def test_post_enrichment_rejects_non_unsure_inputs(tmp_path):
     conn = entity_kinds.connect(tmp_path / "test.db")
     entity = make_unknown(conn)
 
-    with pytest.raises(ValueError, match="only current unsure"):
+    with pytest.raises(ValueError, match="only current abstentions"):
         entity_kinds.run_post_enrichment(
             conn,
             [entity],
@@ -622,3 +844,38 @@ def test_post_enrichment_cli_is_bounded_and_staged(tmp_path, capsys):
         "SELECT kind FROM entities WHERE id = ?",
         (entity.entity_id,),
     ).fetchone()[0] == "unsure"
+
+
+def test_onboard_cli_runs_the_complete_single_handle_entrypoint(tmp_path, capsys):
+    db = tmp_path / "test.db"
+    profile = {
+        "userName": "product_account",
+        "name": "Product Account",
+        "description": "Official product updates.",
+        "followers": 5_000,
+        "protected": False,
+    }
+    client = FakeClient(
+        [
+            {
+                "classification": "organization",
+                "reason": "The profile presents an official product account.",
+            }
+        ]
+    )
+
+    code = entity_kinds.main(
+        ["onboard", "--db", str(db), "--handle", "@product_account"],
+        client_factory=lambda: client,
+        post_client_factory=lambda: FakePostClient(profile=profile),
+    )
+
+    assert code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["outcome"] == "classified"
+    assert payload["stage"] == "profile"
+    assert payload["classification"] == "organization"
+    conn = entity_kinds.connect(db)
+    assert conn.execute(
+        "SELECT kind FROM entities"
+    ).fetchone()[0] == "organization"

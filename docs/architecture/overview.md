@@ -415,13 +415,21 @@ step validates the current input hash and accepted model/effort/prompt contract
 before updating canonical kinds. The Registry exposes the stored reason in the
 detail view. Seeded lab provenance remains internal and is not displayed.
 
-`fli entity-kinds enrich --limit N` is the bounded second-stage path for
-current abstentions. It uses required Azure-hosted `web_search` through
-LiteLLM, keeps the same strict output schema, and stages results in
-`entity_kind_web_enrichments` with search actions and deduplicated consulted or
-cited sources. Exact input/model/effort/prompt matches resume without a second
-paid call. The command does not promote results; calibration and promotion
-policy remain open in `docs/projects/unsure-entity-enrichment/tasks.md`.
+`fli entity-kinds onboard --handle @name` is the canonical single-account
+entrypoint. It fetches the provider profile, applies the 1,000-follower floor,
+persists eligible profile evidence, and rejects protected accounts before any
+model call. Public accounts enter one sequential Responses chain: profile;
+then up to 20 authored posts after abstention; then one required hosted-web
+turn, capped at four tool calls, after a second abstention. Every turn keeps the
+same strict `classification` + `reason` schema and continues through
+`previous_response_id`.
+
+The runner commits the final decision and promotion immediately. Hosted-web
+actions and deduplicated consulted/cited sources are stored separately in
+`entity_kind_web_enrichments`; they do not expand the model-output schema.
+Exact prompt/model results resume without another paid call. The batch
+`fli entity-kinds enrich --limit N` path reuses the same staged lifecycle for
+current abstentions.
 
 This pass does not merge channels. Later identity resolution may attach several
 official/product X channels to one organization. A person is expected to have

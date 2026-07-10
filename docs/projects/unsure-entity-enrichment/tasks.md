@@ -57,6 +57,10 @@ being deleted or sent to the model again.
 - [x] Contract, chaining, error, scope, and bounded CLI tests pass.
 - [x] The full cohort is persisted and promoted with per-entity resumability.
 - [x] Protected accounts are rejected before inference and shown with reasons.
+- [x] One idempotent X-handle command owns profile persistence, eligibility
+  gates, profile/posts/web classification, promotion, and Registry visibility.
+- [ ] A paid live calibration proves the final web-search escalation through
+  the shared LiteLLM route before project closeout.
 
 ## Milestones
 
@@ -71,15 +75,21 @@ being deleted or sent to the model again.
 - [x] M5 — Reject unusable protected accounts. Acceptance: rejection occurs
   before model inference, retains the entity kind, and exposes a reason in the
   Registry.
+- [x] M6 — Consolidate one X-account lifecycle. Acceptance: one command applies
+  the follower floor, protected gate, profile turn, 20-post turn, final bounded
+  web search, persistence, and promotion with exact resume behavior.
+- [ ] M7 — Live proof and closeout. Acceptance: one explicitly authorized paid
+  calibration resolves or safely abstains, sources/cost are persisted, and
+  `scripts/check-fast.sh` passes before archive.
 
 ## Execution Rules
 
-- Keep the implementation bounded to this one two-stage workflow.
-- Do not run the full unsure batch or promote results in this batch.
+- Keep the classifier sequential and bounded: profile, then at most 20 authored
+  posts, then one Responses request with at most four hosted web tool calls.
 - Keep model output exactly `classification` and `reason`; runner-owned evidence
   and metadata must not leak into the output schema.
-- Do not add local result persistence until the calibration clarifies which
-  stage data is worth retaining.
+- Do not run a paid hosted-web calibration without explicit current-session
+  approval.
 - Update this tracker before handoff and leave it active while calibration and
   promotion decisions remain open.
 
@@ -95,24 +105,26 @@ being deleted or sent to the model again.
 - A Registry rejection is curation state, not a fourth structural kind. The
   add-only `entity_registry_rejections` table owns its code, reason, source,
   evidence URL, and timestamp.
+- Twenty authored posts remain the deterministic evidence cap. If they still
+  abstain, missing evidence is usually external identity linkage rather than
+  more account voice, so one required hosted-web turn is the final escalation.
+- Hosted-web actions and complete consulted sources remain runner-owned in the
+  existing `entity_kind_web_enrichments` table; the model still returns only
+  `classification` and `reason`.
 
 ## Open Questions / Blockers
 
-- Which fields from each stage should become the durable persistence contract?
-- Should a later run retain the full normalized post sample, only its hash, or
-  both?
-- What promotion rule should apply when the post follow-up remains `unsure`?
+- Paid live proof is awaiting Adi's explicit approval. Recommended first target:
+  only `@jack`; expected incremental cost is small but includes hosted-search
+  spend that is not fully represented by the LiteLLM model-cost header.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Replace the hosted-web runner with one profile-to-posts Responses workflow. | parent | — |
-| done | Add focused chaining and TwitterAPI.io authored-post tests. | parent | — |
-| done | Run the full 137-account calibration; do not persist or promote results. | parent | — |
-| done | Persist and promote the current 137-account set using the existing schema. | parent | — |
-| done | Reject the three explicitly protected remaining accounts before inference and expose the reason in the Registry. | parent | — |
-| pending | Implement the canonical single-handle X onboarding lifecycle. | parent | — |
+| done | Implement and locally validate the canonical single-handle X lifecycle with a final bounded web-search escalation. | parent | — |
+| blocked | Run one paid `@jack` calibration and inspect the exact sources, cost, and persisted Registry result. | parent | `resources/philschmid-calibration.md` (historical tool smoke only) |
+| todo | Review the live result, run final validation, and archive the tracker if the accepted scope is complete. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -121,8 +133,11 @@ being deleted or sent to the model again.
 - [ ] Decide the durable local storage and resume contract.
 - [ ] Implement and validate atomic promotion only after the policy is accepted.
 - [ ] Run the accepted scope, verify Registry invariants, and archive the project.
-- [ ] Route the canonical single-handle onboarding lifecycle through the same
+- [x] Route the canonical single-handle onboarding lifecycle through the same
   protected-account gate and rejection store.
+- [x] Add a final required hosted-web turn only after profile and posts abstain.
+- [ ] Run the explicitly approved live calibration, verify Registry/API state,
+  and decide whether to run the same final step for `@linatawfik9`.
 
 ## Validation / Test Plan
 
@@ -197,3 +212,11 @@ being deleted or sent to the model again.
   Marked `@_michi_y`, `@andrwpng`, and `@samsamoa` rejected from provider flags
   without deleting them. The Registry now presents 2,735 people, 184
   organizations, two active unsure, three rejected, and zero unknown.
+- 2026-07-10: [IN-PROGRESS] Consolidated the full lifecycle behind
+  `fli entity-kinds onboard --handle @…`: fetch/persist the provider profile,
+  enforce the 1,000-follower and protected-account gates before inference,
+  classify the profile, add up to 20 authored posts after abstention, and use
+  one required hosted-web Responses turn after a second abstention. The web
+  turn continues with `previous_response_id`, caps hosted tool calls at four,
+  and persists actions/sources outside the unchanged two-field model schema.
+  Focused fake-provider tests pass; live paid proof is awaiting approval.

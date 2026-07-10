@@ -381,6 +381,43 @@ def read_unsure_inputs(conn: sqlite3.Connection) -> list[EntityInput]:
     return _read_inputs_for_kind(conn, kind="unsure")
 
 
+def read_entity_input(conn: sqlite3.Connection, *, entity_id: int) -> EntityInput:
+    """Read one X-backed entity regardless of its current lifecycle kind."""
+    ensure_schema(conn)
+    rows = conn.execute(
+        """SELECT e.id AS entity_id,
+                  c.key AS handle,
+                  COALESCE(c.label, e.name) AS display_name,
+                  (SELECT o.value FROM channel_observations o
+                   WHERE o.channel_id = c.id
+                     AND o.source = 'x_profile'
+                     AND o.metric = 'bio'
+                   ORDER BY o.observed_at DESC LIMIT 1) AS bio,
+                  COALESCE(c.url, 'https://x.com/' || c.key) AS profile_url
+           FROM entities e
+           JOIN entity_channels ec ON ec.entity_id = e.id
+           JOIN channels c ON c.id = ec.channel_id AND c.kind = 'x'
+           WHERE e.id = ?
+           ORDER BY c.id""",
+        (entity_id,),
+    ).fetchall()
+    if not rows:
+        raise ValueError(f"entity {entity_id} does not have an X channel")
+    if len(rows) > 1:
+        raise RuntimeError(
+            f"entity {entity_id} has multiple X channels; channel merging "
+            "is outside this classifier"
+        )
+    row = rows[0]
+    return EntityInput(
+        entity_id=row["entity_id"],
+        handle=row["handle"],
+        display_name=row["display_name"],
+        bio=row["bio"] or None,
+        profile_url=row["profile_url"],
+    )
+
+
 def _load_env_file(path: Path) -> dict[str, str]:
     if not path.exists():
         raise FileNotFoundError(f"LiteLLM machine-secret file not found: {path}")
@@ -986,13 +1023,14 @@ def _post_enrich_safely(
     input_cost_per_token: float,
     output_cost_per_token: float,
     post_limit: int,
+    profile: dict[str, Any] | None = None,
 ) -> tuple[
     PostEnrichmentResult | None,
     list[ClassificationError],
     RegistryRejection | None,
 ]:
     try:
-        profile = post_client.fetch_user(username=entity.handle)
+        profile = profile or post_client.fetch_user(username=entity.handle)
         if sources.is_protected_profile(profile):
             return (
                 None,
@@ -1276,8 +1314,11 @@ def run_post_enrichment(
     post_limit: int = DEFAULT_POST_LIMIT,
     persist: bool = False,
     promote: bool = False,
+    allow_unknown: bool = False,
+    profiles: dict[int, dict[str, Any]] | None = None,
+    force: bool = False,
 ) -> dict[str, Any]:
-    """Run profile/post classification for current abstentions."""
+    """Run the profile/posts/web lifecycle for current abstentions."""
     if workers < 1:
         raise ValueError("workers must be at least 1")
     if post_limit < 1:
@@ -1293,18 +1334,23 @@ def run_post_enrichment(
     ensure_schema(conn)
     effort = reasoning_effort_override or default_reasoning_effort(model)
     current_unsure_ids = {entity.entity_id for entity in read_unsure_inputs(conn)}
+    eligible_ids = set(current_unsure_ids)
+    if allow_unknown:
+        eligible_ids.update(
+            entity.entity_id for entity in read_unknown_inputs(conn)
+        )
     invalid_ids = [
         entity.entity_id
         for entity in inputs
-        if entity.entity_id not in current_unsure_ids
+        if entity.entity_id not in eligible_ids
     ]
     if invalid_ids:
         raise ValueError(
-            "post enrichment accepts only current unsure entities; "
+            "entity-kind enrichment accepts only current abstentions; "
             f"invalid IDs: {invalid_ids[:10]}"
         )
     pending = inputs
-    if persist:
+    if persist and not force:
         pending = [
             entity
             for entity in inputs
@@ -1368,6 +1414,7 @@ def run_post_enrichment(
                     input_cost_per_token=pricing[0],
                     output_cost_per_token=pricing[1],
                     post_limit=post_limit,
+                    profile=(profiles or {}).get(entity.entity_id),
                 )
                 for entity in pending
             ]
@@ -1621,6 +1668,183 @@ def run_post_enrichment(
     }
 
 
+def _latest_entity_classification(
+    conn: sqlite3.Connection,
+    *,
+    entity_id: int,
+    prompt_version: str | None = None,
+) -> sqlite3.Row | None:
+    prompt_clause = "AND prompt_version = ?" if prompt_version else ""
+    params: tuple[Any, ...] = (
+        (entity_id, prompt_version)
+        if prompt_version
+        else (entity_id,)
+    )
+    return conn.execute(
+        f"""SELECT * FROM entity_kind_classifications
+            WHERE entity_id = ? {prompt_clause}
+            ORDER BY classified_at DESC, run_id DESC
+            LIMIT 1""",
+        params,
+    ).fetchone()
+
+
+def run_x_account_lifecycle(
+    conn: sqlite3.Connection,
+    *,
+    handle: str,
+    client: Any,
+    post_client: Any,
+    model: str = DEFAULT_MODEL,
+    reasoning_effort_override: str | None = None,
+    pricing: tuple[float, float] | None = None,
+    post_limit: int = DEFAULT_POST_LIMIT,
+    min_followers: int = DEFAULT_MIN_FOLLOWERS,
+    force: bool = False,
+) -> dict[str, Any]:
+    """Run one X handle through the complete, idempotent Registry lifecycle."""
+    if min_followers < 0:
+        raise ValueError("min_followers must be non-negative")
+    normalized = sources.normalize_x_handle(handle)
+    profile = post_client.fetch_user(username=normalized)
+    followers_count = sources.profile_followers_count(profile)
+    if followers_count is None:
+        raise sources.SourceCliError(
+            code="E_FOLLOWER_COUNT_MISSING",
+            message=f"@{normalized} profile has no follower count.",
+            hint="Do not admit the account until the eligibility floor can be checked.",
+            exit_code=4,
+            retryable=False,
+        )
+    if followers_count < min_followers:
+        return {
+            "status": "completed",
+            "outcome": "rejected",
+            "stage": "follower_floor",
+            "handle": normalized,
+            "followers_count": followers_count,
+            "min_followers": min_followers,
+            "persisted": False,
+            "reason_code": "below_follower_floor",
+            "reason": (
+                f"The X account has {followers_count:,} followers, below the "
+                f"current {min_followers:,}-follower floor."
+            ),
+        }
+
+    materialized = sources.persist_x_profile(conn, profile=profile)
+    entity_id = int(materialized["entity_id"])
+    entity = read_entity_input(conn, entity_id=entity_id)
+    if sources.is_protected_profile(profile):
+        registry.reject_entity(
+            conn,
+            entity_id=entity_id,
+            reason_code=PROTECTED_ACCOUNT_REASON_CODE,
+            reason=PROTECTED_ACCOUNT_REASON,
+            source=sources.PROVIDER,
+            evidence_url=entity.profile_url,
+        )
+        conn.commit()
+        return {
+            "status": "completed",
+            "outcome": "rejected",
+            "stage": "protected_account",
+            "handle": normalized,
+            "entity_id": entity_id,
+            "followers_count": followers_count,
+            "persisted": True,
+            "reason_code": PROTECTED_ACCOUNT_REASON_CODE,
+            "reason": PROTECTED_ACCOUNT_REASON,
+        }
+
+    registry.clear_rejection(conn, entity_id=entity_id)
+    conn.commit()
+    current_kind = conn.execute(
+        "SELECT kind FROM entities WHERE id = ?",
+        (entity_id,),
+    ).fetchone()[0]
+    if current_kind in {"person", "organization"} and not force:
+        existing = _latest_entity_classification(conn, entity_id=entity_id)
+        return {
+            "status": "completed",
+            "outcome": "existing",
+            "stage": "existing_classification",
+            "handle": normalized,
+            "entity_id": entity_id,
+            "followers_count": followers_count,
+            "classification": current_kind,
+            "reason": existing["reason"] if existing else None,
+            "persisted": True,
+            "model_calls": 0,
+        }
+
+    workflow = run_post_enrichment(
+        conn,
+        [entity],
+        client=client,
+        post_client=post_client,
+        model=model,
+        workers=1,
+        scope="x-account-lifecycle",
+        reasoning_effort_override=reasoning_effort_override,
+        pricing=pricing,
+        post_limit=post_limit,
+        persist=True,
+        promote=True,
+        allow_unknown=True,
+        profiles={entity_id: profile},
+        force=force,
+    )
+    if workflow["failed"]:
+        return {
+            "status": "partial",
+            "outcome": "failed",
+            "stage": "classification",
+            "handle": normalized,
+            "entity_id": entity_id,
+            "followers_count": followers_count,
+            "workflow": workflow,
+        }
+    item = workflow["items"][0] if workflow["items"] else None
+    if item is None:
+        existing = _latest_entity_classification(
+            conn,
+            entity_id=entity_id,
+            prompt_version=PROMPT_VERSION,
+        )
+        if existing is None:
+            raise RuntimeError(
+                f"@{normalized} was skipped without a stored {PROMPT_VERSION} result"
+            )
+        return {
+            "status": "completed",
+            "outcome": "existing",
+            "stage": "resume",
+            "handle": normalized,
+            "entity_id": entity_id,
+            "followers_count": followers_count,
+            "classification": existing["classification"],
+            "reason": existing["reason"],
+            "persisted": True,
+            "model_calls": 0,
+        }
+    final_stage = "web_search" if item["web"] else (
+        "recent_posts" if item["followup"] else "profile"
+    )
+    return {
+        "status": "completed",
+        "outcome": "classified",
+        "stage": final_stage,
+        "handle": normalized,
+        "entity_id": entity_id,
+        "followers_count": followers_count,
+        "classification": item["classification"],
+        "reason": item["reason"],
+        "persisted": True,
+        "workflow": workflow,
+    }
+
+
 def promote_classifications(
     conn: sqlite3.Connection,
     *,
@@ -1698,12 +1922,16 @@ def main(
     parser = argparse.ArgumentParser(prog="fli entity-kinds")
     parser.add_argument(
         "action",
-        choices=["run", "enrich", "summary", "promote"],
+        choices=["run", "enrich", "onboard", "summary", "promote"],
     )
     parser.add_argument("--db", default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--handle")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--workers", type=int)
+    parser.add_argument("--post-limit", type=int, default=DEFAULT_POST_LIMIT)
+    parser.add_argument("--min-followers", type=int, default=DEFAULT_MIN_FOLLOWERS)
+    parser.add_argument("--force", action="store_true")
     parser.add_argument(
         "--reasoning-effort",
         choices=["none", "minimal", "low", "medium", "high", "xhigh", "max"],
@@ -1711,6 +1939,22 @@ def main(
     args = parser.parse_args(argv)
 
     conn = connect(args.db) if args.db else connect()
+    if args.action == "onboard":
+        if not args.handle:
+            parser.error("onboard requires --handle")
+        summary = run_x_account_lifecycle(
+            conn,
+            handle=args.handle,
+            client=client_factory(),
+            post_client=post_client_factory(),
+            model=args.model,
+            reasoning_effort_override=args.reasoning_effort,
+            post_limit=args.post_limit,
+            min_followers=args.min_followers,
+            force=args.force,
+        )
+        print(json.dumps(summary, sort_keys=True))
+        return 0 if summary["status"] == "completed" else 1
     if args.action == "promote":
         summary = promote_classifications(
             conn,
