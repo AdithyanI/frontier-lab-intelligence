@@ -140,9 +140,10 @@ Known data facts:
   first-slice edges.
 - The full frozen bootstrap pull produced 361,225 local full-paginated edges;
   full raw files are ignored because they exceed normal git-hosting size.
-- `fli channels sync` currently materializes 3,094 entities (10 labs and 3,084
-  unknowns), 3,126 channels (3,094 X plus lab websites/GitHub/arXiv/blog
-  feeds), 3,126 entity-channel links, and 21,776 channel observations.
+- The current curated snapshot has 2,967 X graph accounts but materializes
+  2,966 Registry clusters (10 labs and 2,956 unknowns). `@adithyan_ai` remains
+  only as the graph source node. The model has 2,998 channels/links and 21,133
+  channel observations.
 - `fli sources import-x-list --list-id 1585430245762441216 --source
   ai_high_signal` imported 609 AI High Signal X-list members via
   TwitterAPI.io; 230 were already in the Digg bootstrap and 379 were new
@@ -156,6 +157,11 @@ Known data facts:
   2026-07-10. It matched 282 existing accounts, added 485 followed accounts
   plus the source account, and wrote 767 directed `follows` edges. The provider
   estimated 934 credits / $0.00934 for the four pages.
+- Adi then chose a one-time 2,000-follower floor for this personal source. The
+  cleanup retained 638 directed edges, removed the 129 lower-follower source
+  links, deleted 127 accounts supported only by this import, preserved two
+  lower-follower accounts with independent evidence, and hid the source account
+  from the Registry. This is not a reusable importer policy.
 
 ### Current Schema (as built, not the target sketch)
 
@@ -232,19 +238,19 @@ erDiagram
         string observed_at
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (12,793)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (12,664)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
-    ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,992 total)"
+    ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,863 total)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (3,126)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,776)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 3,094,
-`account_source_facts` 12,793, `graph_edges` 361,992, `labs` 10,
-`entities` 3,094, `channels` 3,126, `entity_channels` 3,126,
-`channel_observations` 21,776.
+Table row counts: `raw_items` 1,599, `accounts` 2,967,
+`account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
+`entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
+`channel_observations` 21,133.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -317,8 +323,9 @@ frozen bootstrap source, not the center of the schema.
 
 The live graph direction is our own X following snapshots, not more Digg. Pull
 **who trusted accounts follow**, not the full follower audience of large
-accounts. The first snapshot is Adi's 767 outgoing follows; it is personal
-attention evidence, not automatic frontier relevance.
+accounts. Adi's source currently contributes 638 outgoing follows after the
+one-time 2,000-follower cleanup; it is personal-attention evidence, not
+automatic frontier relevance.
 
 ```text
 curated X watchlist

@@ -51,11 +51,13 @@ After the 2026-07-10 Adi-following snapshot, the corpus contains:
 | --- | ---: |
 | lab | 10 |
 | person | 0 |
-| unknown | 3,084 |
-| **total** | **3,094** |
+| unknown | 2,956 |
+| **total** | **2,966** |
 
-Those provisional clusters own all 3,126 channels. The difference is the 32 additional
+Those provisional clusters own all 2,998 channels. The difference is the 32 additional
 official website, GitHub, arXiv, and blog channels already linked to labs.
+The legacy graph has one additional non-Registry account: `@adithyan_ai`, kept
+only as the source node for its 638 retained outgoing-follow edges.
 
 ## Resolution Agent: Proposed Input Contract
 
