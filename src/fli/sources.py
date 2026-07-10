@@ -8,6 +8,7 @@ who is tracked.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import re
@@ -331,7 +332,6 @@ class TwitterApiIoClient:
             if self.page_sleep_seconds > 0:
                 time.sleep(self.page_sleep_seconds)
         return tuple(posts)
-
     def fetch_following_page(
         self,
         *,
@@ -390,6 +390,20 @@ class TwitterApiIoClient:
             cursor = next_cursor
             if self.page_sleep_seconds > 0:
                 time.sleep(self.page_sleep_seconds)
+
+
+def create_twitterapi_io_client(
+    *,
+    key_file: Path = DEFAULT_TWITTERAPI_IO_KEY_FILE,
+    timeout: float = 30.0,
+    page_sleep_seconds: float = 0.0,
+) -> TwitterApiIoClient:
+    """Create the shared TwitterAPI.io client from the machine secret."""
+    return TwitterApiIoClient(
+        api_key=_read_api_key(key_file),
+        timeout=timeout,
+        page_sleep_seconds=page_sleep_seconds,
+    )
 
 
 def _normalize_handle(member: dict[str, Any]) -> str | None:

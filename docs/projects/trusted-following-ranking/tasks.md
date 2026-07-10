@@ -29,7 +29,7 @@ validation discipline.
 ### Out of Scope
 
 - Treating the legacy Digg/follower graph as trusted evidence.
-- Deleting legacy data before the replacement is validated.
+- Deleting non-edge Digg candidate provenance without a separate decision.
 - An open-ended recursive or internet-scale crawl.
 - Using graph rank as the final score for documents or insights.
 - Unsure-entity enrichment, which Adi owns separately.
@@ -91,7 +91,10 @@ validation discipline.
 
 - Rebuild from trusted accounts' outgoing follows, not their followers.
 - Prefer personalized PageRank seeded by the trusted set over global PageRank.
-- Quarantine rather than delete the legacy graph until replacement validation.
+- The legacy Digg edge plane and its derived PageRank have no accepted product
+  use. Cleanup scope is pending Adi's decision; candidate-source facts are a
+  separate concern because 676 Registry entities currently have only Digg
+  source provenance.
 - Protect the end-to-end submission: this is one timeboxed milestone, not the
   product destination.
 
@@ -99,17 +102,20 @@ validation discipline.
 
 - Which exact people and organizations form the first trusted seed set?
 - What top-k size and relevance labels will Adi review for the evaluation?
-- Which existing storage and importer pieces are safe to reuse after the
-  evidence-boundary audit?
+- Should cleanup remove only the 360,667 Digg edges and 4,614 derived PageRank
+  facts/observations, or also the 76 MB tracked edge artifacts and legacy
+  importer/ranker commands? Recommended: remove all of those, while retaining
+  the small Digg ranking/candidate facts until the replacement shortlist is
+  validated.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| delegated | Audit existing edge, following-import, and PageRank code contracts; identify safe reuse and mixing risks. | explorer | — |
-| delegated | Audit current graph data semantics and source/relationship distributions; identify what must be quarantined. | explorer | — |
-| in_progress | Synthesize the smallest isolated replacement boundary and draft the seed/evaluation contracts. | parent | — |
-| todo | Rebuild the next batch from the audit; do not fetch live data yet. | parent | — |
+| done | Audit existing edge/import/PageRank code and current database provenance locally. | parent | — |
+| done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
+| blocked | Confirm the destructive legacy-edge cleanup boundary with Adi. | parent | — |
+| todo | Freeze the first trusted seed set and isolated snapshot contract; do not fetch full lists yet. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -136,3 +142,18 @@ validation discipline.
   ranking basis and chose a fresh graph from trusted accounts' outgoing
   follows. Created the timeboxed ranking tracker under the submission north
   star; live fetching waits for the evidence-boundary audit and seed decision.
+- 2026-07-10: [DONE] Local audit found 360,667 Digg `top_follower_of` edges and
+  638 Adi `follows` edges in one table. The old PageRank reads both without a
+  source filter and its 4,614 stored facts/observations are not a safe current
+  signal. Deleting only the edge plane does not change the 2,924 Registry
+  entities; deleting all Digg source facts would remove the sole recorded
+  candidate provenance for 676 of them.
+- 2026-07-10: [DONE] Official X docs confirm `public_metrics.following_count`
+  and `GET /2/users/{id}/following` with up to 1,000 results per page. One
+  bounded TwitterAPI.io profile lookup found `@karpathy` follows 1,108 accounts
+  and cost about `$0.00018`; a full existing-provider snapshot is estimated at
+  `$0.01216`, versus about `$11.08` through official third-party X reads.
+- 2026-07-10: [BLOCKED] Full `scripts/check-fast.sh` was not run for this
+  documentation/research checkpoint because unrelated in-progress changes are
+  present in `src/fli/entity_kinds.py` and `src/fli/sources.py`. Build-log JSONL
+  validation, renderer regeneration, and `git diff --check` passed.

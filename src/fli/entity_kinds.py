@@ -20,15 +20,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from fli import channels, store
+from fli import channels, sources, store
 
 PROMPT_VERSION = "entity-kind-v2"
 WEB_PROMPT_VERSION = "entity-kind-web-v1"
+POST_PROMPT_VERSION = "entity-kind-posts-v1"
 SCHEMA_VERSION = "entity-kind-output-v1"
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_REASONING_EFFORT = "medium"
 DEFAULT_WORKERS = 100
 DEFAULT_WEB_WORKERS = 20
+DEFAULT_POST_WORKERS = 10
+DEFAULT_POST_LIMIT = 20
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
 
@@ -68,6 +71,32 @@ weak. Keep the reason to one short sentence grounded in the searched evidence,
 but do not include URLs, markdown citations, source counts, confidence,
 relevance, prominence, affiliation guesses, or channel-merging claims. The
 runner stores sources separately.
+"""
+
+POST_ENRICHMENT_INSTRUCTIONS = """Classify what one X account represents.
+
+The goal is to determine the structural actor speaking through the account,
+not whether the account is relevant, prominent, trustworthy, or popular.
+
+Return person when the account represents one individual human, including a
+pseudonymous human. Return organization when it represents a company, lab,
+nonprofit, team, product, publication, newsletter, community, project, or
+other collective or institutional actor. Return unsure when the supplied
+evidence is insufficient or contradictory.
+
+Use the account's own voice, not merely the subjects it discusses. A person
+may promote a company, project, newsletter, or show and still be a person when
+the account speaks as that individual. Repeated first-person singular voice,
+personal experiences, and personal work support person. Institutional voice,
+team language, publication branding, and product or service announcements
+support organization. Do not use follower count, fame, outside knowledge, or
+assumptions based on a recognizable handle. Do not infer identity from topic
+alone, and do not force a binary answer when the evidence remains weak.
+
+Return exactly classification and reason through the required schema. Keep
+the reason to one short sentence grounded only in the supplied profile or
+posts. Do not mention confidence, relevance, prominence, ranking, or these
+instructions.
 """
 
 CLASSIFICATION_FORMAT: dict[str, Any] = {
@@ -177,6 +206,39 @@ CREATE TABLE IF NOT EXISTS entity_kind_web_enrichments (
 );
 CREATE INDEX IF NOT EXISTS idx_entity_kind_web_label
 ON entity_kind_web_enrichments (classification);
+
+CREATE TABLE IF NOT EXISTS entity_kind_post_enrichments (
+    entity_id INTEGER NOT NULL REFERENCES entities (id) ON DELETE CASCADE,
+    profile_input_sha256 TEXT NOT NULL,
+    evidence_sha256 TEXT NOT NULL,
+    profile_classification TEXT NOT NULL
+        CHECK (profile_classification IN ('person', 'organization', 'unsure')),
+    profile_reason TEXT NOT NULL,
+    classification TEXT NOT NULL
+        CHECK (classification IN ('person', 'organization', 'unsure')),
+    reason TEXT NOT NULL,
+    model TEXT NOT NULL,
+    reasoning_effort TEXT NOT NULL,
+    response_model TEXT,
+    prompt_version TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    profile_response_id TEXT,
+    followup_response_id TEXT,
+    recent_posts_json TEXT NOT NULL,
+    turns_json TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    estimated_cost_usd REAL NOT NULL,
+    reported_cost_usd REAL,
+    run_id INTEGER NOT NULL REFERENCES entity_kind_classification_runs (id),
+    enriched_at TEXT NOT NULL,
+    PRIMARY KEY (
+        entity_id, profile_input_sha256, model, reasoning_effort,
+        prompt_version
+    )
+);
+CREATE INDEX IF NOT EXISTS idx_entity_kind_post_label
+ON entity_kind_post_enrichments (classification);
 """
 
 
@@ -225,6 +287,46 @@ class ClassificationResult:
 class WebEnrichmentResult(ClassificationResult):
     actions: tuple[dict[str, Any], ...]
     sources: tuple[dict[str, Any], ...]
+
+
+@dataclass(frozen=True)
+class PostEnrichmentResult:
+    entity: EntityInput
+    profile_result: ClassificationResult
+    followup_result: ClassificationResult | None
+    recent_posts: tuple[dict[str, Any], ...]
+    evidence_sha256: str
+
+    @property
+    def final_result(self) -> ClassificationResult:
+        return self.followup_result or self.profile_result
+
+    @property
+    def turns(self) -> tuple[ClassificationResult, ...]:
+        if self.followup_result is None:
+            return (self.profile_result,)
+        return (self.profile_result, self.followup_result)
+
+    @property
+    def input_tokens(self) -> int:
+        return sum(turn.input_tokens for turn in self.turns)
+
+    @property
+    def output_tokens(self) -> int:
+        return sum(turn.output_tokens for turn in self.turns)
+
+    @property
+    def estimated_cost_usd(self) -> float:
+        return sum(turn.estimated_cost_usd for turn in self.turns)
+
+    @property
+    def reported_cost_usd(self) -> float | None:
+        costs = [
+            turn.reported_cost_usd
+            for turn in self.turns
+            if turn.reported_cost_usd is not None
+        ]
+        return sum(costs) if costs else None
 
 
 @dataclass(frozen=True)
@@ -517,6 +619,176 @@ def classify_one(
     )
 
 
+def _profile_workflow_input(entity: EntityInput) -> list[dict[str, str]]:
+    bio = entity.bio.strip() if entity.bio else "No bio observed."
+    prompt = "\n".join(
+        (
+            "Classify this X account from its profile alone.",
+            "",
+            f"Handle: @{entity.handle}",
+            f"Display name: {entity.display_name}",
+            f"Bio: {bio}",
+            f"Profile: {entity.profile_url}",
+        )
+    )
+    return [
+        {"role": "developer", "content": POST_ENRICHMENT_INSTRUCTIONS},
+        {"role": "user", "content": prompt},
+    ]
+
+
+def _posts_followup_input(
+    posts: tuple[dict[str, Any], ...],
+) -> list[dict[str, str]]:
+    blocks = [
+        "The profile alone was not enough to classify this account.",
+        "",
+        (
+            "Here are recent posts written by the same account. Replies and "
+            "retweets have been excluded. Re-evaluate the account using the "
+            "profile and these posts together."
+        ),
+    ]
+    for index, post in enumerate(posts, start=1):
+        created_at = post.get("created_at") or "date unavailable"
+        post_type = post.get("post_type") or "original"
+        blocks.extend(
+            (
+                "",
+                f"Post {index} ({post_type}, {created_at}):",
+                str(post.get("text") or ""),
+            )
+        )
+    return [{"role": "user", "content": "\n".join(blocks)}]
+
+
+def _post_workflow_turn(
+    client: Any,
+    entity: EntityInput,
+    *,
+    input_items: list[dict[str, str]],
+    model: str,
+    effort: str,
+    tags: tuple[str, ...],
+    input_cost_per_token: float,
+    output_cost_per_token: float,
+    previous_response_id: str | None = None,
+) -> ClassificationResult:
+    request: dict[str, Any] = {
+        "model": model,
+        "input": input_items,
+        "text": {"format": CLASSIFICATION_FORMAT},
+        "reasoning": {"effort": effort},
+        "max_output_tokens": 200,
+        "store": True,
+        "extra_body": {"metadata": {"tags": list(tags)}},
+        "extra_headers": {"x-litellm-tags": ",".join(tags)},
+    }
+    if previous_response_id is not None:
+        request["previous_response_id"] = previous_response_id
+    raw_api = getattr(client.responses, "with_raw_response", None)
+    if raw_api is None:
+        response = client.responses.create(**request)
+        reported_cost_usd = None
+    else:
+        raw_response = raw_api.create(**request)
+        response = raw_response.parse()
+        reported_cost_usd = _reported_cost(raw_response.headers)
+    response_data = _response_dict(response)
+    refusal = _find_refusal(response_data)
+    if refusal:
+        raise ModelRefusalError(refusal)
+    status = getattr(response, "status", None) or response_data.get("status")
+    if status and status != "completed":
+        raise OutputContractError(f"response status was {status!r}")
+    output_text = getattr(response, "output_text", None)
+    if output_text is None:
+        output_text = response_data.get("output_text")
+    classification, reason = _validate_output(output_text)
+    usage = getattr(response, "usage", None) or response_data.get("usage")
+    input_tokens = _usage_value(usage, "input_tokens")
+    output_tokens = _usage_value(usage, "output_tokens")
+    return ClassificationResult(
+        entity=entity,
+        classification=classification,
+        reason=reason,
+        response_id=getattr(response, "id", None) or response_data.get("id"),
+        response_model=(
+            getattr(response, "model", None) or response_data.get("model")
+        ),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        estimated_cost_usd=(
+            input_tokens * input_cost_per_token
+            + output_tokens * output_cost_per_token
+        ),
+        reported_cost_usd=reported_cost_usd,
+    )
+
+
+def enrich_one_with_posts(
+    client: Any,
+    post_client: Any,
+    entity: EntityInput,
+    *,
+    model: str,
+    effort: str,
+    tags: tuple[str, ...],
+    input_cost_per_token: float,
+    output_cost_per_token: float,
+    post_limit: int = DEFAULT_POST_LIMIT,
+) -> PostEnrichmentResult:
+    """Run profile-first classification, then authored posts if still unsure."""
+    profile_result = _post_workflow_turn(
+        client,
+        entity,
+        input_items=_profile_workflow_input(entity),
+        model=model,
+        effort=effort,
+        tags=tags,
+        input_cost_per_token=input_cost_per_token,
+        output_cost_per_token=output_cost_per_token,
+    )
+    recent_posts: tuple[dict[str, Any], ...] = ()
+    followup_result: ClassificationResult | None = None
+    if profile_result.classification == "unsure":
+        recent_posts = post_client.fetch_recent_authored_posts(
+            username=entity.handle,
+            limit=post_limit,
+        )
+        if recent_posts:
+            followup_result = _post_workflow_turn(
+                client,
+                entity,
+                input_items=_posts_followup_input(recent_posts),
+                model=model,
+                effort=effort,
+                tags=tags,
+                input_cost_per_token=input_cost_per_token,
+                output_cost_per_token=output_cost_per_token,
+                previous_response_id=profile_result.response_id,
+            )
+    evidence_payload = {
+        "profile": entity.model_payload,
+        "recent_posts": recent_posts,
+    }
+    evidence_sha256 = hashlib.sha256(
+        json.dumps(
+            evidence_payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+    ).hexdigest()
+    return PostEnrichmentResult(
+        entity=entity,
+        profile_result=profile_result,
+        followup_result=followup_result,
+        recent_posts=recent_posts,
+        evidence_sha256=evidence_sha256,
+    )
+
+
 def _web_evidence(
     response_data: dict[str, Any],
 ) -> tuple[tuple[dict[str, Any], ...], tuple[dict[str, Any], ...]]:
@@ -731,6 +1003,45 @@ def _enrich_safely(
         ]
 
 
+def _post_enrich_safely(
+    client: Any,
+    post_client: Any,
+    entity: EntityInput,
+    *,
+    model: str,
+    effort: str,
+    tags: tuple[str, ...],
+    input_cost_per_token: float,
+    output_cost_per_token: float,
+    post_limit: int,
+) -> tuple[PostEnrichmentResult | None, list[ClassificationError]]:
+    try:
+        return (
+            enrich_one_with_posts(
+                client,
+                post_client,
+                entity,
+                model=model,
+                effort=effort,
+                tags=tags,
+                input_cost_per_token=input_cost_per_token,
+                output_cost_per_token=output_cost_per_token,
+                post_limit=post_limit,
+            ),
+            [],
+        )
+    except Exception as exc:
+        return None, [
+            ClassificationError(
+                entity=entity,
+                attempt=1,
+                error_type=type(exc).__name__,
+                error_message=str(exc)[:500],
+                terminal=True,
+            )
+        ]
+
+
 def _already_classified(
     conn: sqlite3.Connection,
     entity: EntityInput,
@@ -774,6 +1085,30 @@ def _already_enriched(
                 model,
                 effort,
                 WEB_PROMPT_VERSION,
+            ),
+        ).fetchone()
+    )
+
+
+def _already_post_enriched(
+    conn: sqlite3.Connection,
+    entity: EntityInput,
+    *,
+    model: str,
+    effort: str,
+) -> bool:
+    return bool(
+        conn.execute(
+            """SELECT 1 FROM entity_kind_post_enrichments
+               WHERE entity_id = ? AND profile_input_sha256 = ?
+                 AND model = ? AND reasoning_effort = ?
+                 AND prompt_version = ?""",
+            (
+                entity.entity_id,
+                entity.input_sha256,
+                model,
+                effort,
+                POST_PROMPT_VERSION,
             ),
         ).fetchone()
     )
