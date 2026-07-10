@@ -1,5 +1,8 @@
 # Entity Kind Classification
 
+Archived 2026-07-10 after full classification, canonical promotion, and live
+Registry verification.
+
 ## Goal
 
 Build and evaluate an agent-native first pass that classifies every currently
@@ -50,7 +53,7 @@ can merge organizational channels and separately decide what is worth tracking.
   `docs/architecture/overview.md`.
 - Archived predecessor:
   `docs/projects/archive/entity-spine-bootstrap/tasks.md`.
-- Current database snapshot:
+- Starting database snapshot:
   - 2,967 graph accounts; 1,746 have a non-empty bio.
   - 2,966 visible entities: 10 seeded labs and 2,956 unknowns.
   - 2,998 channels and exactly 2,998 entity-channel links.
@@ -66,8 +69,9 @@ can merge organizational channels and separately decide what is worth tracking.
 - Playwright MCP is intentionally disabled for this data phase. Re-enable it
   through `/Users/dobby/GitHub/agents/codex/config/repo-bootstrap.json` only
   when frontend visual work resumes.
-- The current database still implements `lab | person | unknown`. Do not
-  pretend the target taxonomy is already migrated.
+- The target canonical kinds are `person | organization | unsure`; `unknown`
+  is only the provisional pre-classification lifecycle state. The existing
+  `labs` table remains internal source/seed provenance, not a public subtype.
 
 ## Accepted Classifier Contract
 
@@ -107,8 +111,9 @@ Rules:
   this pass.
 - A person usually has one primary X account; an organization may have many.
   The underlying channel model continues to allow multiple channels for both.
-- Seeded labs are organizations with a lab role in the target model. Preserve
-  current lab UI behavior until the migration is explicitly implemented.
+- Do not expose the incomplete 10-row `labs` seed as an exhaustive kind,
+  subtype, badge, count, or filter. Add a lab role only after evaluating every
+  organization under a separate role-classification contract.
 
 ## Done When
 
@@ -124,11 +129,11 @@ Rules:
       action; `unsure` is a valid result.
 - [x] Result counts reconcile to the input universe and no channel ownership,
       source evidence, or graph edges are changed by classification.
-- [ ] The Registry/API exposes the truthful person/organization/unsure result
+- [x] The Registry/API exposes the truthful person/organization/unsure result
       without presenting a probability.
 - [x] Prompt/model version, token use, cost, and validation evidence are logged
       outside the model response.
-- [ ] Repo checks pass and architecture/curation docs match implemented reality.
+- [x] Repo checks pass and architecture/curation docs match implemented reality.
 
 ## Milestones
 
@@ -142,7 +147,7 @@ Rules:
 - [x] M3 — Full corpus. Acceptance: the complete initial unknown set is
       processed resumably with bounded concurrency and exact reconciliation.
       Validate: database invariants, token/cost totals, and SQLite integrity.
-- [ ] M4 — Product surface and closeout. Acceptance: API/Registry shows the new
+- [x] M4 — Product surface and closeout. Acceptance: API/Registry shows the new
       structural labels truthfully, docs are current, checks pass, and this
       tracker is archived. Re-enable Playwright through the control plane before
       any required screenshot validation.
@@ -191,6 +196,10 @@ Rules:
   application attempt per entity. LiteLLM owns provider retry and fallback;
   application persistence commits each completed entity immediately so a
   terminal failure or interruption can resume without replaying stored work.
+- 2026-07-10: Canonical kinds are exactly person, organization, and unsure;
+  unknown remains available only for future unclassified arrivals. The
+  incomplete `labs` seed remains internal provenance, not a public subtype or
+  generic role. Registry filters are All, People, Organizations, and Unsure.
 
 ## Open Questions / Blockers
 
@@ -205,16 +214,16 @@ Rules:
 | done | Freeze `gpt-5.6-luna` + prompt v2 + reasoning `medium` as the application default after the 15-profile result passed qualitative review. | parent | `src/fli/entity_kinds.py` |
 | done | Verify the stable LiteLLM deployment with one tagged Luna-medium call and reconcile request tags, token counts, proxy spend, and local estimated cost. | parent | `data/fli.db` |
 | done | Run all 2,956 initial unknown entities with resumable Luna-medium inference, then reconcile classifications, spend, errors, and data invariants. | parent | `data/fli.db` |
-| todo | Project accepted structural labels into the Registry API/UI without changing relevance or merging channels. | parent | `src/fli/web/` |
+| done | Project accepted structural labels into the Registry API/UI without changing relevance or merging channels. | parent | `src/fli/web/` |
 
 ## Backlog / Remaining Work
 
 - [ ] Add a versioned human-labeled evaluation fixture for regression testing; Adi explicitly authorized the full run after reviewing the 15-profile calibration.
 - [x] Reconcile classification counts and verify graph/channel invariants.
-- [ ] Migrate or project accepted results into the Registry API and UI.
-- [ ] Re-enable Playwright through the control plane for final UI screenshots.
-- [ ] Update architecture, curation contract, and build log to implemented state.
-- [ ] Review project learnings and archive this tracker at completion.
+- [x] Migrate or project accepted results into the Registry API and UI.
+- [x] Verify the live Registry through the available in-app browser Playwright surface.
+- [x] Update architecture, curation contract, and build log to implemented state.
+- [x] Review project learnings and archive this tracker at completion.
 
 ## Validation / Test Plan
 
@@ -323,3 +332,13 @@ Copy this into a fresh Codex task after restarting the app:
   IDs; canonical entity kinds remain 10 lab / 0 person / 2,956 unknown, and
   2,998 channels/links, 12,664 source facts, 361,863 graph edges, and 21,133
   observations are unchanged. SQLite integrity is `ok`.
+- 2026-07-10: [DONE] Added atomic `fli entity-kinds promote`: it requires an
+  accepted Luna-medium prompt-v2 result matching every current unknown input
+  hash before changing any canonical kind. Promoted all 2,956 results. The
+  Registry now reports 2,639 people, 182 organizations including the 10 seeded
+  originally seeded organizations, 145 unsure, and zero unknown. The internal
+  `labs` source is not exposed, and no role column/framework was added. The API
+  includes the classifier reason, the UI uses
+  All/People/Organizations/Unsure filters, and the live page was verified in
+  the in-app browser. All 40 tests, frontend build, Impeccable detector,
+  SQLite integrity, and `scripts/check-fast.sh` pass.

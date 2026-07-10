@@ -101,9 +101,9 @@ Rules:
   mono state, one-line summary, live mono counts.
 - **Entity registry table:** mono uppercase headers, sand row hover, pill
   search + All/People/Organizations/Unsure segmented filter with live counts,
-  load-more; seeded labs display as `Organization · Lab` within the
-  Organizations kind rather than as a peer filter. Rows show only identity +
-  truthful kind and open a detail card.
+  load-more; rows show only identity + truthful kind and open a detail card.
+  Internal source seeds such as the curated `labs` table do not create public
+  kinds, badges, or filters.
 - **Entity detail card:** native `<dialog>` opened on row click — type pill,
   name, observed bio, channel chips, and the X profile as a tagged link pinned
   at the bottom. Preserve bio line breaks; label source-truncated snapshots

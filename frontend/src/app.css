@@ -418,11 +418,6 @@ td.num {
   white-space: nowrap;
 }
 
-.ent-type--lab {
-  color: #fff;
-  background: var(--blue-ink);
-}
-
 .ent-type--person {
   color: var(--blue-ink);
   background: #edf6fa;

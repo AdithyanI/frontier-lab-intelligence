@@ -34,7 +34,7 @@ def test_accounts_search():
 
 
 def test_registry_returns_complete_typed_entity_universe():
-    r = client.get("/api/registry?limit=50")
+    r = client.get("/api/registry?limit=5000")
     assert r.status_code == 200
     data = r.json()
     assert data["total"] == sum(data["counts"].values())
@@ -42,17 +42,14 @@ def test_registry_returns_complete_typed_entity_universe():
     assert data["counts"]["organization"] == 182
     assert data["counts"]["unsure"] == 145
     assert data["counts"]["unknown"] == 0
-    assert data["lab_count"] == 10
     openai = next(e for e in data["entities"] if e["slug"] == "openai")
     assert openai["kind"] == "organization"
-    assert openai["is_lab"] is True
     assert any(c["kind"] == "x" for c in openai["channels"])
     assert any(c["kind"] == "github" for c in openai["channels"])
     assert set(openai) == {
         "id",
         "slug",
         "kind",
-        "is_lab",
         "kind_reason",
         "name",
         "bio",

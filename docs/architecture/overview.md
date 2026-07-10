@@ -8,10 +8,11 @@ implemented code has raw fetch/store, a frozen X seed graph snapshot, a modeled
 SQLite graph layer, and a React SPA over a JSON API. Every observed channel
 resolves to one entity. Luna-medium prompt-v2 classified and atomically
 promoted all 2,956 initial unknowns: 2,639 people, 172 organizations, and 145
-unsure. Together with 10 seeded labs, the canonical Registry contains 2,639
-people, 182 organizations, 145 unsure, and zero unknown. Labs are a curated
-subset of organizations derived from the existing `labs` table, not a peer
-kind or a generic role field.
+unsure. Together with the 10 previously seeded organizations, the canonical
+Registry contains 2,639 people, 182 organizations, 145 unsure, and zero
+unknown. The `labs` table remains internal source/seed provenance because its
+10 rows are not an exhaustive lab classification; it is not exposed as a
+Registry kind, badge, count, or filter.
 Channel merging, track/reject curation, extraction, and scoring remain later
 stages.
 
@@ -278,7 +279,7 @@ erDiagram
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,863 total)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
-    LABS ||--|| ENTITIES : "curated organization subset by slug"
+    LABS ||--|| ENTITIES : "internal seed provenance by slug"
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
@@ -315,9 +316,9 @@ channel_observations  # measured/source-specific facts about a channel over time
 Entity is identity, not endorsement. A channel that cannot yet be resolved
 creates a provisional `unknown` entity. The canonical structural vocabulary is
 `person`, `organization`, and `unsure`; `unknown` is only the pre-classification
-lifecycle state. The 10 seeded rows in `labs` identify a curated subset of
-organizations for product display. There is no generic entity-role schema yet;
-add one only when another concrete role requires it. Curation (`track` /
+lifecycle state. The 10 seeded rows in `labs` remain internal source provenance
+and do not create a public subtype. There is no generic entity-role schema yet;
+add one only after an exhaustive role policy is justified. Curation (`track` /
 `reject`) remains a separate later stage.
 
 ```mermaid
@@ -394,7 +395,7 @@ The full Luna-medium prompt-v2 result set covers all 2,956 initial unknown
 entities: 2,639 person, 172 organization, and 145 unsure. The atomic promotion
 step validates the current input hash and accepted model/effort/prompt contract
 before updating canonical kinds. The Registry exposes the stored reason in the
-detail view, while seeded lab membership remains derived from `labs`.
+detail view. Seeded lab provenance remains internal and is not displayed.
 
 This pass does not merge channels. Later identity resolution may attach several
 official/product X channels to one organization. A person is expected to have
@@ -524,11 +525,11 @@ final score.
 | `fli.store` | raw `raw_items` SQLite layer |
 | `fli.graph` | legacy X graph import backing layer (`accounts`, facts, edges); PageRank; mirrors observations into channels |
 | `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
-| `fli.labs` | curated lab seed data (10 labs); identifies a subset of organization entities and seeds official channels |
+| `fli.labs` | internal curated source seed (10 historical rows); seeds official channels but does not define a public Registry kind/subtype |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io X-list and outgoing-follow importers; provenance only, no classification |
 | `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes people, organizations, unsure results, and classifier reasons; source in `frontend/` |
-| `fli.registry` | channel ownership invariant, provisional unknown materialization, curated lab-subset derivation, and canonical Registry read model |
+| `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |

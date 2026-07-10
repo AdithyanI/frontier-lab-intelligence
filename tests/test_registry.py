@@ -108,13 +108,11 @@ def test_registry_read_model_excludes_attention_and_source_fields(tmp_path):
         "id",
         "slug",
         "kind",
-        "is_lab",
         "kind_reason",
         "name",
         "bio",
         "channels",
     }
-    assert row["is_lab"] is False
     assert row["kind_reason"] is None
     assert row["bio"] == "I like to train neural nets."
     assert "rank" not in row

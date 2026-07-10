@@ -191,7 +191,6 @@ def registry(limit: int = Query(150, le=5000)) -> JSONResponse:
                 "entities": entity_registry.read_entities(conn, limit=limit),
                 "total": sum(counts.values()),
                 "counts": counts,
-                "lab_count": entity_registry.lab_count(conn),
             }
         )
     finally:

@@ -18,8 +18,9 @@ Do not collapse these into one opaque decision. An entity means "observed
 identity," not "approved for tracking." The canonical structural kinds are
 `person`, `organization`, and `unsure`; `unknown` remains only the provisional
 lifecycle state for a newly observed, unclassified entity. Labs are not a
-fourth kind: the existing curated `labs` table identifies 10 organizations as
-the seeded lab subset. Later organization-channel merging remains separate.
+fourth kind. The existing curated `labs` table remains internal seed/source
+provenance and is not exposed as an exhaustive Registry category. Later
+organization-channel merging remains separate.
 
 ## Channel-To-Entity Lifecycle
 
@@ -30,7 +31,6 @@ channel import
   -> otherwise create one provisional entity with kind=unknown
   -> later resolver links an existing actor, creates person/organization,
      or abstains
-  -> curated lab membership may identify an organization as a seeded lab
   -> later curation policy proposes track/reject
   -> human corrections override automated proposals durably
 ```
@@ -118,8 +118,8 @@ hash and entity ID, and `entity_kind_classification_errors` owns structured
 retry/terminal failures. `fli entity-kinds promote` atomically projects the
 accepted model/effort/prompt results into canonical kinds only when all current
 unknown inputs have matching results. The Registry joins the stored reason for
-auditability. Lab display is derived from the existing `labs` table; no generic
-role field or role framework was introduced.
+auditability. The internal `labs` seed is not surfaced as a public kind or
+filter; no generic role field or role framework was introduced.
 
 Classifier requests are tagged in LiteLLM by app, pipeline, job, scope,
 prompt version, and run ID. Store the proxy-reported response cost separately

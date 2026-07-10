@@ -30,11 +30,7 @@ const TYPE_LABEL: Record<EntityKind, string> = {
   unknown: 'Unknown',
 }
 
-const typeLabel = (entity: Entity) =>
-  entity.is_lab ? 'Organization · Lab' : TYPE_LABEL[entity.kind]
-
-const typeClass = (entity: Entity) =>
-  entity.is_lab ? 'lab' : entity.kind
+const typeLabel = (entity: Entity) => TYPE_LABEL[entity.kind]
 
 function ChannelGlyph({ kind }: { kind: string }) {
   if (kind === 'website') {
@@ -142,7 +138,7 @@ export default function Registry() {
       <h1 className="page-title">Registry</h1>
       <p className="page-sub">
         {data
-          ? `${fmt(data.total)} identities: ${fmt(data.counts.person)} people, ${fmt(data.counts.organization)} organizations including ${fmt(data.lab_count)} seeded labs, and ${fmt(data.counts.unsure)} unsure.`
+          ? `${fmt(data.total)} identities: ${fmt(data.counts.person)} people, ${fmt(data.counts.organization)} organizations, and ${fmt(data.counts.unsure)} unsure.`
           : 'Every observed channel resolves to one structurally typed entity.'}
       </p>
 
@@ -213,7 +209,7 @@ export default function Registry() {
                     )}
                   </td>
                   <td>
-                    <span className={`ent-type ent-type--${typeClass(entity)}`}>
+                    <span className={`ent-type ent-type--${entity.kind}`}>
                       {typeLabel(entity)}
                     </span>
                   </td>
@@ -297,7 +293,7 @@ function EntityCard({
 
       <div className="ent-card-inner">
         <header className="ent-card-head">
-          <span className={`ent-type ent-type--${typeClass(entity)}`}>
+          <span className={`ent-type ent-type--${entity.kind}`}>
             {typeLabel(entity)}
           </span>
           <h2 id={titleId}>{entity.name}</h2>

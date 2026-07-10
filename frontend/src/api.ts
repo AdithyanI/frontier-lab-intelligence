@@ -42,7 +42,6 @@ export interface Entity {
   slug: string
   name: string
   kind: EntityKind
-  is_lab: boolean
   kind_reason: string | null
   bio: string | null
   channels: EntityChannel[]
@@ -52,7 +51,6 @@ export interface Registry {
   entities: Entity[]
   total: number
   counts: Record<EntityKind, number>
-  lab_count: number
 }
 
 export async function getJSON<T>(url: string): Promise<T> {
