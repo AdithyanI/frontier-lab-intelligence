@@ -123,8 +123,8 @@ filter; no generic role field or role framework was introduced.
 
 Classifier requests are tagged in LiteLLM by app, pipeline, job, scope,
 prompt version, and run ID. Store the proxy-reported response cost separately
-from the local official-rate estimate, and use the persisted LiteLLM spend log
-to audit tokens, exact spend, and tag attribution.
+from the dated local rate snapshot, and use the persisted LiteLLM spend log as
+the operational source of truth for tokens, exact spend, and tag attribution.
 
 ## Evaluation Before Full Classification
 
@@ -154,3 +154,15 @@ Tracking is a separate decision and may use richer attention and relevance
 evidence. Store automated decisions with rationale, model/policy version,
 timestamp, and token cost. Human corrections are durable overrides and must
 survive recomputation.
+
+The leading next-step design is graph-first rather than an LLM-only judgment
+from profile biographies. Pull the **following lists of a bounded trusted
+watchlist**: whom a frontier researcher or lab chooses to follow is generally
+cleaner attention evidence than the large, spam-prone follower audience of a
+popular account. Keep graph sources with different semantics separate until a
+validation set justifies combining them. PageRank should produce an attention
+signal, not the final track/reject label.
+
+All structural kinds remain eligible for this ranking, including `unsure`.
+Weak identity evidence must not prevent a potentially important account from
+surfacing; identity enrichment and tracking relevance remain separate.

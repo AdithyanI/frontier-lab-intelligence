@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "httpx2"]
+dev = ["pytest", "httpx"]
 
 [project.scripts]
 fli = "fli.cli:main"

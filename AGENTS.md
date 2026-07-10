@@ -28,16 +28,17 @@ preserved prompt until Adi decides.
 
 ## Work Contracts
 
-- Data first: fetch raw evidence, inspect, then model; the DB schema is not
-  locked yet.
+- Data first: fetch raw evidence, inspect, then model. Preserve documented
+  schema invariants, but evolve unfinished pipeline stages from real evidence.
 - Product principles live in `PRODUCT.md`; do not trade away quality for the
   EUR100 budget unless actual spend approaches it.
 - Build log: append one JSON object to `docs/references/build-log.jsonl` after
   meaningful chunks; `scripts/check-fast.sh` renders markdown.
 - Route every LLM call through the shared LiteLLM endpoint with stable
   `metadata.tags` for app, pipeline, job, scope, prompt, and run. Capture the
-  proxy-reported response cost when available; keep a local documented estimate
-  because new proxy model aliases may temporarily report zero spend.
+  proxy-reported response cost as the operational source of truth. Use a dated
+  local price snapshot only when a pre-run estimate or zero-cost proxy fallback
+  is actually needed.
 - Update `docs/architecture/overview.md` when pipeline, schema, source classes,
   or module boundaries change.
 - Run `scripts/check-fast.sh` before handoff, or record why validation was
@@ -51,9 +52,9 @@ preserved prompt until Adi decides.
 - To see UI changes: `npm --prefix frontend run build` (writes into
   `src/fli/web/dist`, which the always-on server hosts), then reload
   `127.0.0.1:8797`.
-- Take screenshots with the **Playwright MCP** tools
-  (`playwright-browser_navigate` → `_resize` → `_take_screenshot`), not
-  ad-hoc puppeteer scripts. Save any images under `tmp/`.
+- Use the in-app Browser skill for UI inspection and screenshots, not ad-hoc
+  Puppeteer scripts. Put disposable captures in `tmp/`; presentation assets
+  explicitly requested for reuse belong under `docs/references/`.
 - **Desktop-first for now:** design and polish the desktop view; do not spend
   effort on mobile/responsive polish unless Adi asks. (Decision 2026-07-09.)
 

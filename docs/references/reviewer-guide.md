@@ -1,6 +1,7 @@
 # Reviewer Guide
 
-How to inspect this case study submission. Fill in as the build progresses.
+How to inspect the current case-study system. This guide describes implemented
+behavior; unfinished deliverables are listed explicitly below.
 
 ## Quick start
 ```bash
@@ -13,10 +14,11 @@ fli web
 ```
 
 ## What to look at, in weighted order
-1. **Registry (20%)** — `docs/architecture/overview.md` §Pipeline and §Target Data Model Sketch;
-   implementation is pending. Current evidence lives in `data/fli.db`
-   (`raw_items`) and the next step is a reviewable candidate table before
-   committing `fli.registry`/modeled schema code.
+1. **Registry (20%)** — the entity/channel spine and structural-kind pass are
+   implemented. The Registry contains 2,966 observed identities: 2,639 people,
+   182 organizations, and 145 explicit abstentions. Open an entity to inspect
+   its observed profile and classification reason. Exact rules live in
+   `docs/references/registry-curation.md`.
 2. **Signal-vs-noise (20%)** — filtering logic and the judgment calls behind
    it; see `docs/architecture/overview.md` §Signal Funnel.
 3. **Scoring + validation (20%)** — the scoring model and how it was
@@ -29,15 +31,21 @@ fli web
 6. **Web interface (5%)** — minimal browse/config UI, not over-polished.
 
 ## Evidence to check
-- `docs/references/final-report.md` — what works, what's next, learnings,
-  and the 3–5 most interesting real insights the system surfaced.
-- `docs/references/tokenomics.md` — token usage and $ cost per workflow.
-- Evaluation write-up — extraction quality, hallucination control, scoring
-  validation, ground-truth approach.
+
+- `data/fli.db` — inspectable SQLite database with real graph, entity, channel,
+  observation, raw-item, and classifier provenance tables.
+- `docs/architecture/overview.md` — current system shape and implemented schema.
+- `docs/references/registry-curation.md` — identity/kind/curation boundaries,
+  model contract, evaluation outcome, usage, and cost.
 - `docs/references/build-log.md` — build history, AI tool usage, learning
   notes, and €100 budget receipts.
+- `docs/projects/archive/` — completed phase trackers and reusable learnings.
 
 ## Known limitations
-- The modeled registry/extraction/scoring schema is not implemented yet.
-- The current database is a raw evidence corpus, not the final submission DB.
-- Frontend polish is intentionally deferred until real modeled output exists.
+
+- Structural kind is not tracking relevance; graph-based relevance curation is
+  the next registry step.
+- Raw blog, arXiv, and GitHub items exist, but entity-linked deduplication,
+  cited insight extraction, scoring validation, reports, and alerts remain.
+- The final report, workflow-level tokenomics summary, and submission package
+  are not complete yet.

@@ -34,6 +34,14 @@ complete. This note captures the reusable lessons from that work.
   cost until the stable proxy upgrade is verified.
 - Persisting results only after a whole batch was not sufficient resumability
   for a long paid run. Commit each completed entity before launching bulk work.
+- LiteLLM owns provider retry and fallback for this deployment. A second
+  application retry layer creates duplicate-spend ambiguity, so the durable
+  classifier makes one application attempt and stores terminal failures for a
+  later resumable run.
+- Calibration handles, full-run projection helpers, and transitional schema
+  rebuilds were useful during the bounded rollout but were not permanent
+  product contracts. Remove one-time scaffolding after its evidence is captured
+  in the archived tracker and regression tests.
 - A hand-curated seed is not an exhaustive taxonomy. The 10-row `labs` table
   remains useful source provenance, but surfacing it as a Registry subtype
   would imply that every other organization had been evaluated for lab status.
@@ -58,6 +66,9 @@ complete. This note captures the reusable lessons from that work.
 - Keep implemented schema and proposed migration language visibly separate.
 - When a source seed resembles a product category, document explicitly whether
   it is exhaustive before exposing it as a filter or badge.
+- Treat proxy-reported spend as authoritative. A dated local model-price
+  snapshot is only a fallback for pre-run projection or a temporarily unpriced
+  proxy alias, not a second billing system.
 
 ### Validation / Feedback Loops
 

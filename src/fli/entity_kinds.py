@@ -25,17 +25,18 @@ from fli import channels, store
 PROMPT_VERSION = "entity-kind-v2"
 SCHEMA_VERSION = "entity-kind-output-v1"
 DEFAULT_MODEL = "gpt-5.6-luna"
+DEFAULT_REASONING_EFFORT = "medium"
 DEFAULT_WORKERS = 100
-DEFAULT_MAX_ATTEMPTS = 1
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
 
-# Verified from the local proxy plus official model pricing on 2026-07-10.
-MODEL_PRICING_USD_PER_TOKEN = {
-    "gpt-5-nano": (0.05 / 1_000_000, 0.40 / 1_000_000),
-    "gpt-5-mini": (0.25 / 1_000_000, 2.00 / 1_000_000),
-    "gpt-5.6-luna": (1.00 / 1_000_000, 6.00 / 1_000_000),
-}
+# Frozen fallback for the accepted classifier contract, verified 2026-07-10.
+# LiteLLM's reported response cost is the operational source of truth. This
+# snapshot exists only to preserve local estimates when the proxy omits cost.
+DEFAULT_MODEL_PRICING_USD_PER_TOKEN = (
+    1.00 / 1_000_000,
+    6.00 / 1_000_000,
+)
 
 CLASSIFIER_INSTRUCTIONS = """Classify what the supplied X profile represents.
 
@@ -68,24 +69,6 @@ CLASSIFICATION_FORMAT: dict[str, Any] = {
         "additionalProperties": False,
     },
 }
-
-CALIBRATION_HANDLES = (
-    "karpathy",  # obvious person, five sources
-    "huggingface",  # obvious organization, multiple sources
-    "arena",  # organization/community, multiple sources
-    "dwarkesh_sp",  # individual who hosts a publication
-    "alecrad",  # recognizable personal name, missing bio
-    "rpoo",  # ambiguous handle/name, missing bio
-    "tgale96",  # graph-only individual
-    "tinkerapi",  # single-source product
-    "claude_code",  # single-source community account
-    "geminiapp",  # single-source product/brand
-    "theaitimeline",  # publication-style account
-    "vibagor44145276",  # opaque pseudonymous account
-    "julesagent",  # single-source product/agent
-    "_matthewli",  # single-source person
-    "zhihufrontier",  # single-source publication/community
-)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS entity_kind_classification_runs (
@@ -217,118 +200,6 @@ def _now() -> str:
 def ensure_schema(conn: sqlite3.Connection) -> None:
     channels.ensure_schema(conn)
     conn.executescript(SCHEMA)
-    _migrate_classifications_reasoning_effort(conn)
-    _add_column(
-        conn,
-        "entity_kind_classification_runs",
-        "reasoning_effort",
-        "TEXT NOT NULL DEFAULT ''",
-    )
-    _add_column(
-        conn,
-        "entity_kind_classification_runs",
-        "reported_cost_usd",
-        "REAL NOT NULL DEFAULT 0",
-    )
-    _add_column(
-        conn,
-        "entity_kind_classification_runs",
-        "reported_cost_count",
-        "INTEGER NOT NULL DEFAULT 0",
-    )
-    _add_column(
-        conn,
-        "entity_kind_classification_runs",
-        "request_tags",
-        "TEXT NOT NULL DEFAULT '[]'",
-    )
-    conn.execute(
-        """UPDATE entity_kind_classification_runs
-           SET reasoning_effort = CASE
-               WHEN model LIKE 'gpt-5.6-%' THEN 'none'
-               ELSE 'minimal'
-           END
-           WHERE reasoning_effort = ''"""
-    )
-
-
-def _add_column(
-    conn: sqlite3.Connection,
-    table: str,
-    column: str,
-    definition: str,
-) -> None:
-    columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
-    if column not in columns:
-        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
-
-
-def _migrate_classifications_reasoning_effort(
-    conn: sqlite3.Connection,
-) -> None:
-    columns = {
-        row["name"]
-        for row in conn.execute(
-            "PRAGMA table_info(entity_kind_classifications)"
-        )
-    }
-    if "reasoning_effort" in columns:
-        return
-    with conn:
-        conn.execute(
-            "DROP INDEX IF EXISTS idx_entity_kind_classifications_label"
-        )
-        conn.execute("DROP TABLE IF EXISTS entity_kind_classifications_new")
-        conn.execute(
-            """CREATE TABLE entity_kind_classifications_new (
-               entity_id INTEGER NOT NULL
-                   REFERENCES entities (id) ON DELETE CASCADE,
-               input_sha256 TEXT NOT NULL,
-               classification TEXT NOT NULL CHECK (
-                   classification IN ('person', 'organization', 'unsure')
-               ),
-               reason TEXT NOT NULL,
-               model TEXT NOT NULL,
-               reasoning_effort TEXT NOT NULL,
-               response_model TEXT,
-               prompt_version TEXT NOT NULL,
-               schema_version TEXT NOT NULL,
-               response_id TEXT,
-               input_tokens INTEGER NOT NULL,
-               output_tokens INTEGER NOT NULL,
-               estimated_cost_usd REAL NOT NULL,
-               reported_cost_usd REAL,
-               run_id INTEGER NOT NULL
-                   REFERENCES entity_kind_classification_runs (id),
-               classified_at TEXT NOT NULL,
-               PRIMARY KEY (
-                   entity_id, input_sha256, model, reasoning_effort,
-                   prompt_version
-               )
-           )"""
-        )
-        conn.execute(
-            """INSERT INTO entity_kind_classifications_new
-           (entity_id, input_sha256, classification, reason, model,
-            reasoning_effort, response_model, prompt_version, schema_version,
-            response_id, input_tokens, output_tokens, estimated_cost_usd,
-            reported_cost_usd, run_id, classified_at)
-           SELECT entity_id, input_sha256, classification, reason, model,
-                  CASE WHEN model LIKE 'gpt-5.6-%' THEN 'none' ELSE 'minimal' END,
-                  response_model, prompt_version, schema_version, response_id,
-                  input_tokens, output_tokens, estimated_cost_usd, NULL,
-                  run_id, classified_at
-           FROM entity_kind_classifications"""
-        )
-        conn.execute("DROP TABLE entity_kind_classifications")
-        conn.execute(
-            "ALTER TABLE entity_kind_classifications_new "
-            "RENAME TO entity_kind_classifications"
-        )
-        conn.execute(
-            """CREATE INDEX idx_entity_kind_classifications_label
-               ON entity_kind_classifications (classification)"""
-        )
 
 
 def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
@@ -375,14 +246,6 @@ def read_unknown_inputs(conn: sqlite3.Connection) -> list[EntityInput]:
             )
         )
     return inputs
-
-
-def calibration_inputs(inputs: list[EntityInput]) -> list[EntityInput]:
-    by_handle = {item.handle.lower(): item for item in inputs}
-    missing = [handle for handle in CALIBRATION_HANDLES if handle not in by_handle]
-    if missing:
-        raise RuntimeError(f"calibration handles missing from input universe: {missing}")
-    return [by_handle[handle] for handle in CALIBRATION_HANDLES]
 
 
 def _load_env_file(path: Path) -> dict[str, str]:
@@ -483,8 +346,12 @@ def _usage_value(usage: Any, field: str) -> int:
 
 
 def default_reasoning_effort(model: str) -> str:
-    """Choose the evaluated default effort for the requested model family."""
-    return "medium" if model.startswith("gpt-5.6") else "minimal"
+    """Return the evaluated effort for the accepted model contract."""
+    if model != DEFAULT_MODEL:
+        raise ValueError(
+            f"no evaluated reasoning effort for {model!r}; pass one explicitly"
+        )
+    return DEFAULT_REASONING_EFFORT
 
 
 def request_tags(*, scope: str, run_id: int) -> tuple[str, ...]:
@@ -576,7 +443,7 @@ def classify_one(
     )
 
 
-def _classify_with_retries(
+def _classify_safely(
     client: Any,
     entity: EntityInput,
     *,
@@ -585,12 +452,10 @@ def _classify_with_retries(
     tags: tuple[str, ...],
     input_cost_per_token: float,
     output_cost_per_token: float,
-    max_attempts: int,
 ) -> tuple[ClassificationResult | None, list[ClassificationError]]:
-    errors: list[ClassificationError] = []
-    for attempt in range(1, max_attempts + 1):
-        try:
-            result = classify_one(
+    try:
+        return (
+            classify_one(
                 client,
                 entity,
                 model=model,
@@ -598,19 +463,19 @@ def _classify_with_retries(
                 tags=tags,
                 input_cost_per_token=input_cost_per_token,
                 output_cost_per_token=output_cost_per_token,
+            ),
+            [],
+        )
+    except Exception as exc:
+        return None, [
+            ClassificationError(
+                entity=entity,
+                attempt=1,
+                error_type=type(exc).__name__,
+                error_message=str(exc)[:500],
+                terminal=True,
             )
-            return result, errors
-        except Exception as exc:  # provider and contract errors share retry policy
-            errors.append(
-                ClassificationError(
-                    entity=entity,
-                    attempt=attempt,
-                    error_type=type(exc).__name__,
-                    error_message=str(exc)[:500],
-                    terminal=attempt == max_attempts,
-                )
-            )
-    return None, errors
+        ]
 
 
 def _already_classified(
@@ -644,7 +509,6 @@ def run_classification(
     client: Any,
     model: str = DEFAULT_MODEL,
     workers: int = DEFAULT_WORKERS,
-    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
     scope: str = "custom",
     reasoning_effort_override: str | None = None,
     pricing: tuple[float, float] | None = None,
@@ -652,12 +516,12 @@ def run_classification(
     """Classify a deterministic batch, skipping already completed inputs."""
     if workers < 1:
         raise ValueError("workers must be at least 1")
-    if max_attempts < 1:
-        raise ValueError("max_attempts must be at least 1")
     if pricing is None:
-        if model not in MODEL_PRICING_USD_PER_TOKEN:
-            raise ValueError(f"no verified pricing configured for model {model!r}")
-        pricing = MODEL_PRICING_USD_PER_TOKEN[model]
+        if model != DEFAULT_MODEL:
+            raise ValueError(
+                f"no local pricing snapshot for {model!r}; pass pricing explicitly"
+            )
+        pricing = DEFAULT_MODEL_PRICING_USD_PER_TOKEN
     ensure_schema(conn)
     effort = reasoning_effort_override or default_reasoning_effort(model)
     pending = [
@@ -700,7 +564,7 @@ def run_classification(
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [
                 executor.submit(
-                    _classify_with_retries,
+                    _classify_safely,
                     client,
                     entity,
                     model=model,
@@ -708,7 +572,6 @@ def run_classification(
                     tags=tags,
                     input_cost_per_token=pricing[0],
                     output_cost_per_token=pricing[1],
-                    max_attempts=max_attempts,
                 )
                 for entity in pending
             ]
@@ -823,28 +686,6 @@ def run_classification(
     }
 
 
-def estimate_full_run(
-    *,
-    calibration_summary: dict[str, Any],
-    full_count: int,
-) -> dict[str, float | int]:
-    classified = int(calibration_summary["classified"])
-    if classified < 1:
-        raise ValueError("at least one calibration result is required")
-    return {
-        "entities": full_count,
-        "estimated_input_tokens": round(
-            calibration_summary["input_tokens"] / classified * full_count
-        ),
-        "estimated_output_tokens": round(
-            calibration_summary["output_tokens"] / classified * full_count
-        ),
-        "estimated_cost_usd": (
-            calibration_summary["estimated_cost_usd"] / classified * full_count
-        ),
-    }
-
-
 def promote_classifications(
     conn: sqlite3.Connection,
     *,
@@ -922,10 +763,8 @@ def main(
     parser.add_argument("action", choices=["run", "summary", "promote"])
     parser.add_argument("--db", default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--calibration", action="store_true")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
-    parser.add_argument("--max-attempts", type=int, default=DEFAULT_MAX_ATTEMPTS)
     parser.add_argument(
         "--reasoning-effort",
         choices=["none", "minimal", "low", "medium", "high", "xhigh", "max"],
@@ -960,12 +799,8 @@ def main(
         )
         return 0
 
-    if args.calibration:
-        selected = calibration_inputs(inputs)
-        scope = "calibration"
-    else:
-        selected = inputs
-        scope = "full" if args.limit is None else "limited"
+    selected = inputs
+    scope = "full" if args.limit is None else "limited"
     if args.limit is not None:
         if args.limit < 1:
             parser.error("--limit must be at least 1")
@@ -976,15 +811,9 @@ def main(
         client=client_factory(),
         model=args.model,
         workers=args.workers,
-        max_attempts=args.max_attempts,
         scope=scope,
         reasoning_effort_override=args.reasoning_effort,
     )
-    if args.calibration and summary["classified"]:
-        summary["full_run_estimate"] = estimate_full_run(
-            calibration_summary=summary,
-            full_count=len(inputs),
-        )
     print(json.dumps(summary, sort_keys=True))
     return 0 if summary["failed"] == 0 else 1
 
