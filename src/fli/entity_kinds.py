@@ -1298,6 +1298,266 @@ def run_classification(
     }
 
 
+def _post_turn_record(
+    stage: str,
+    result: ClassificationResult,
+) -> dict[str, Any]:
+    return {
+        "stage": stage,
+        "classification": result.classification,
+        "reason": result.reason,
+        "response_id": result.response_id,
+        "response_model": result.response_model,
+        "input_tokens": result.input_tokens,
+        "output_tokens": result.output_tokens,
+        "estimated_cost_usd": result.estimated_cost_usd,
+        "reported_cost_usd": result.reported_cost_usd,
+    }
+
+
+def run_post_enrichment(
+    conn: sqlite3.Connection,
+    inputs: list[EntityInput],
+    *,
+    client: Any,
+    post_client: Any,
+    model: str = DEFAULT_MODEL,
+    workers: int = DEFAULT_POST_WORKERS,
+    scope: str = "posts-custom",
+    reasoning_effort_override: str | None = None,
+    pricing: tuple[float, float] | None = None,
+    post_limit: int = DEFAULT_POST_LIMIT,
+) -> dict[str, Any]:
+    """Stage profile-first, recent-post enrichment for current abstentions."""
+    if workers < 1:
+        raise ValueError("workers must be at least 1")
+    if post_limit < 1:
+        raise ValueError("post_limit must be at least 1")
+    if pricing is None:
+        if model != DEFAULT_MODEL:
+            raise ValueError(
+                f"no local pricing snapshot for {model!r}; pass pricing explicitly"
+            )
+        pricing = DEFAULT_MODEL_PRICING_USD_PER_TOKEN
+    ensure_schema(conn)
+    effort = reasoning_effort_override or default_reasoning_effort(model)
+    current_unsure_ids = {entity.entity_id for entity in read_unsure_inputs(conn)}
+    invalid_ids = [
+        entity.entity_id
+        for entity in inputs
+        if entity.entity_id not in current_unsure_ids
+    ]
+    if invalid_ids:
+        raise ValueError(
+            "post enrichment accepts only current unsure entities; "
+            f"invalid IDs: {invalid_ids[:10]}"
+        )
+    pending = [
+        entity
+        for entity in inputs
+        if not _already_post_enriched(conn, entity, model=model, effort=effort)
+    ]
+    started_at = _now()
+    prompt_sha256 = hashlib.sha256(
+        POST_ENRICHMENT_INSTRUCTIONS.encode()
+    ).hexdigest()
+    cursor = conn.execute(
+        """INSERT INTO entity_kind_classification_runs
+           (model, reasoning_effort, prompt_version, schema_version,
+            prompt_sha256, scope,
+            requested_count, skipped_count, status, started_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'running', ?)""",
+        (
+            model,
+            effort,
+            POST_PROMPT_VERSION,
+            SCHEMA_VERSION,
+            prompt_sha256,
+            scope,
+            len(inputs),
+            len(inputs) - len(pending),
+            started_at,
+        ),
+    )
+    run_id = cursor.lastrowid
+    tags = request_tags(
+        scope=scope,
+        run_id=run_id,
+        job="entity-kind-post-enrichment",
+        prompt_version=POST_PROMPT_VERSION,
+    )
+    conn.execute(
+        """UPDATE entity_kind_classification_runs
+           SET request_tags = ? WHERE id = ?""",
+        (json.dumps(tags), run_id),
+    )
+    conn.commit()
+
+    results: list[PostEnrichmentResult] = []
+    errors: list[ClassificationError] = []
+    if pending:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [
+                executor.submit(
+                    _post_enrich_safely,
+                    client,
+                    post_client,
+                    entity,
+                    model=model,
+                    effort=effort,
+                    tags=tags,
+                    input_cost_per_token=pricing[0],
+                    output_cost_per_token=pricing[1],
+                    post_limit=post_limit,
+                )
+                for entity in pending
+            ]
+            for future in concurrent.futures.as_completed(futures):
+                result, item_errors = future.result()
+                errors.extend(item_errors)
+                if result:
+                    results.append(result)
+                enriched_at = _now()
+                if result:
+                    final = result.final_result
+                    turn_records = [
+                        _post_turn_record("profile", result.profile_result)
+                    ]
+                    if result.followup_result is not None:
+                        turn_records.append(
+                            _post_turn_record(
+                                "recent_posts",
+                                result.followup_result,
+                            )
+                        )
+                    conn.execute(
+                        """INSERT OR IGNORE INTO entity_kind_post_enrichments
+                           (entity_id, profile_input_sha256, evidence_sha256,
+                            profile_classification, profile_reason,
+                            classification, reason, model, reasoning_effort,
+                            response_model, prompt_version, schema_version,
+                            profile_response_id, followup_response_id,
+                            recent_posts_json, turns_json, input_tokens,
+                            output_tokens, estimated_cost_usd,
+                            reported_cost_usd, run_id, enriched_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                                   ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            result.entity.entity_id,
+                            result.entity.input_sha256,
+                            result.evidence_sha256,
+                            result.profile_result.classification,
+                            result.profile_result.reason,
+                            final.classification,
+                            final.reason,
+                            model,
+                            effort,
+                            final.response_model,
+                            POST_PROMPT_VERSION,
+                            SCHEMA_VERSION,
+                            result.profile_result.response_id,
+                            (
+                                result.followup_result.response_id
+                                if result.followup_result
+                                else None
+                            ),
+                            json.dumps(
+                                result.recent_posts,
+                                ensure_ascii=False,
+                            ),
+                            json.dumps(turn_records, ensure_ascii=False),
+                            result.input_tokens,
+                            result.output_tokens,
+                            result.estimated_cost_usd,
+                            result.reported_cost_usd,
+                            run_id,
+                            enriched_at,
+                        ),
+                    )
+                for error in item_errors:
+                    conn.execute(
+                        """INSERT INTO entity_kind_classification_errors
+                           (run_id, entity_id, input_sha256, attempt,
+                            error_type, error_message, terminal, occurred_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            run_id,
+                            error.entity.entity_id,
+                            error.entity.input_sha256,
+                            error.attempt,
+                            error.error_type,
+                            error.error_message,
+                            int(error.terminal),
+                            enriched_at,
+                        ),
+                    )
+                conn.commit()
+
+    completed_at = _now()
+    failure_count = len(pending) - len(results)
+    input_tokens = sum(result.input_tokens for result in results)
+    output_tokens = sum(result.output_tokens for result in results)
+    estimated_cost_usd = sum(result.estimated_cost_usd for result in results)
+    reported_costs = [
+        turn.reported_cost_usd
+        for result in results
+        for turn in result.turns
+        if turn.reported_cost_usd is not None
+    ]
+    reported_cost_usd = sum(reported_costs)
+    status = "completed" if failure_count == 0 else "partial"
+    conn.execute(
+        """UPDATE entity_kind_classification_runs
+           SET success_count = ?, failure_count = ?, input_tokens = ?,
+               output_tokens = ?, estimated_cost_usd = ?,
+               reported_cost_usd = ?, reported_cost_count = ?, status = ?,
+               completed_at = ?
+           WHERE id = ?""",
+        (
+            len(results),
+            failure_count,
+            input_tokens,
+            output_tokens,
+            estimated_cost_usd,
+            reported_cost_usd,
+            len(reported_costs),
+            status,
+            completed_at,
+            run_id,
+        ),
+    )
+    conn.commit()
+    counts = {classification: 0 for classification in sorted(CLASSIFICATIONS)}
+    for result in results:
+        counts[result.final_result.classification] += 1
+    return {
+        "run_id": run_id,
+        "scope": scope,
+        "model": model,
+        "reasoning_effort": effort,
+        "prompt_version": POST_PROMPT_VERSION,
+        "request_tags": tags,
+        "requested": len(inputs),
+        "skipped": len(inputs) - len(pending),
+        "enriched": len(results),
+        "failed": failure_count,
+        "counts": counts,
+        "profile_only": sum(
+            result.followup_result is None for result in results
+        ),
+        "followups": sum(
+            result.followup_result is not None for result in results
+        ),
+        "recent_posts": sum(len(result.recent_posts) for result in results),
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "estimated_cost_usd": estimated_cost_usd,
+        "reported_cost_usd": reported_cost_usd,
+        "reported_cost_count": len(reported_costs),
+        "status": status,
+    }
+
+
 def run_web_enrichment(
     conn: sqlite3.Connection,
     inputs: list[EntityInput],
