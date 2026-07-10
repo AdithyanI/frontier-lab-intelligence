@@ -2,8 +2,10 @@
 
 Every observed channel belongs to exactly one entity. Known lab channels are
 claimed by the seeded lab entity. Any channel that cannot yet be resolved gets
-one provisional entity with kind ``unknown``. Classification and track/reject
-curation are intentionally later, separate stages.
+one provisional entity with kind ``unknown``. Structural classification can
+promote it to ``person``, ``organization``, or ``unsure``. Labs are the
+organizations present in the curated ``labs`` table; track/reject curation
+remains separate.
 """
 
 from __future__ import annotations
@@ -189,17 +191,50 @@ def materialize_unlinked_channels(
 
 
 def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
-    """Return only identity-bearing fields for the Registry UI."""
+    """Return identity-bearing fields plus the structural-kind reason."""
     ensure_schema(conn)
+    has_classifications = bool(
+        conn.execute(
+            """SELECT 1 FROM sqlite_master
+               WHERE type = 'table'
+                 AND name = 'entity_kind_classifications'"""
+        ).fetchone()
+    )
+    kind_reason_sql = (
+        """(SELECT k.reason FROM entity_kind_classifications k
+             WHERE k.entity_id = e.id AND k.classification = e.kind
+             ORDER BY k.classified_at DESC, k.run_id DESC
+             LIMIT 1)"""
+        if has_classifications
+        else "NULL"
+    )
+    has_labs = bool(
+        conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'labs'"
+        ).fetchone()
+    )
+    is_lab_sql = (
+        "EXISTS (SELECT 1 FROM labs l WHERE l.slug = e.slug)"
+        if has_labs
+        else "0"
+    )
     rows = conn.execute(
-        """WITH selected AS (
-               SELECT id, slug, kind, name
-               FROM entities
-               ORDER BY CASE kind WHEN 'lab' THEN 0 WHEN 'person' THEN 1 ELSE 2 END,
-                        name COLLATE NOCASE
+        f"""WITH selected AS (
+               SELECT e.id, e.slug, e.kind, e.name,
+                      {is_lab_sql} AS is_lab
+               FROM entities e
+               ORDER BY is_lab DESC,
+                        CASE e.kind
+                            WHEN 'organization' THEN 0
+                            WHEN 'person' THEN 1
+                            WHEN 'unsure' THEN 2
+                            ELSE 3
+                        END,
+                        e.name COLLATE NOCASE
                LIMIT ?
            )
-           SELECT e.id, e.slug, e.kind, e.name,
+           SELECT e.id, e.slug, e.kind, e.is_lab, e.name,
+                  {kind_reason_sql} AS kind_reason,
                   c.id AS channel_id, c.kind AS channel_kind, c.key AS channel_key,
                   c.label AS channel_label, c.url AS channel_url,
                   (SELECT o.value FROM channel_observations o
@@ -209,7 +244,13 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
            FROM selected e
            LEFT JOIN entity_channels ec ON ec.entity_id = e.id
            LEFT JOIN channels c ON c.id = ec.channel_id
-           ORDER BY CASE e.kind WHEN 'lab' THEN 0 WHEN 'person' THEN 1 ELSE 2 END,
+           ORDER BY e.is_lab DESC,
+                    CASE e.kind
+                        WHEN 'organization' THEN 0
+                        WHEN 'person' THEN 1
+                        WHEN 'unsure' THEN 2
+                        ELSE 3
+                    END,
                     e.name COLLATE NOCASE, c.kind, c.key""",
         (limit,),
     ).fetchall()
@@ -221,6 +262,8 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                 "id": row["id"],
                 "slug": row["slug"],
                 "kind": row["kind"],
+                "is_lab": bool(row["is_lab"]),
+                "kind_reason": row["kind_reason"],
                 "name": row["name"],
                 "bio": None,
                 "channels": [],
@@ -249,3 +292,17 @@ def kind_counts(conn: sqlite3.Connection) -> dict[str, int]:
     ).fetchall():
         counts[row["kind"]] = row["n"]
     return counts
+
+
+def lab_count(conn: sqlite3.Connection) -> int:
+    ensure_schema(conn)
+    if not conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'labs'"
+    ).fetchone():
+        return 0
+    return conn.execute(
+        """SELECT COUNT(*) AS n
+           FROM entities e
+           JOIN labs l ON l.slug = e.slug
+           WHERE e.kind = 'organization'"""
+    ).fetchone()["n"]

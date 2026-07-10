@@ -2,7 +2,8 @@
 
 Simple mental model:
 
-- entities: observed identities (`lab`, `person`, or unresolved `unknown`)
+- entities: observed identities (`person`, `organization`, `unsure`, or
+  unresolved `unknown`); lab membership comes from the curated `labs` table
 - channels: where we observe them (X, GitHub, blog, arXiv, website)
 - entity_channels: evidence that a channel belongs to an entity
 - channel_observations: measured facts about a channel at a time
@@ -19,12 +20,12 @@ from urllib.parse import quote_plus
 
 from fli import store
 
-ENTITY_KINDS = frozenset({"lab", "person", "unknown"})
+ENTITY_KINDS = frozenset({"person", "organization", "unsure", "unknown"})
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS entities (
     id INTEGER PRIMARY KEY,
-    kind TEXT NOT NULL,                -- 'lab' | 'person' | 'unknown'
+    kind TEXT NOT NULL,                -- person | organization | unsure | unknown
     slug TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     notes TEXT,
@@ -89,6 +90,18 @@ def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
 def ensure_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
     _migrate_entities_drop_status(conn)
+    _migrate_entity_kinds(conn)
+
+
+def _migrate_entity_kinds(conn: sqlite3.Connection) -> None:
+    if conn.execute(
+        "SELECT 1 FROM entities WHERE kind = 'lab' LIMIT 1"
+    ).fetchone():
+        conn.execute(
+            """UPDATE entities
+               SET kind = 'organization'
+               WHERE kind = 'lab'"""
+        )
 
 
 def _migrate_entities_drop_status(conn: sqlite3.Connection) -> None:
@@ -357,7 +370,7 @@ def seed_lab_entities(conn: sqlite3.Connection) -> dict[str, int]:
         observed_at = lab["seeded_at"]
         entity_id = upsert_entity(
             conn,
-            kind="lab",
+            kind="organization",
             slug=lab["slug"],
             name=lab["name"],
             notes=lab["notes"],

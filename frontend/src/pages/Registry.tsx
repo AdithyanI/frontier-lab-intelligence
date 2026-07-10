@@ -23,8 +23,18 @@ const STEP = 40
 const fmt = (n: number | null | undefined) =>
   n == null ? '—' : n.toLocaleString('en-US')
 
-const typeLabel = (kind: EntityKind) =>
-  kind === 'lab' ? 'Lab' : kind === 'person' ? 'Person' : 'Unknown'
+const TYPE_LABEL: Record<EntityKind, string> = {
+  person: 'Person',
+  organization: 'Organization',
+  unsure: 'Unsure',
+  unknown: 'Unknown',
+}
+
+const typeLabel = (entity: Entity) =>
+  entity.is_lab ? 'Organization · Lab' : TYPE_LABEL[entity.kind]
+
+const typeClass = (entity: Entity) =>
+  entity.is_lab ? 'lab' : entity.kind
 
 function ChannelGlyph({ kind }: { kind: string }) {
   if (kind === 'website') {
@@ -110,10 +120,21 @@ export default function Registry() {
   const visible = filtered.slice(0, shown)
   const filters: { key: KindFilter; label: string; count: number }[] = [
     { key: 'all', label: 'All', count: data?.total ?? 0 },
-    { key: 'lab', label: 'Labs', count: data?.counts.lab ?? 0 },
     { key: 'person', label: 'People', count: data?.counts.person ?? 0 },
-    { key: 'unknown', label: 'Unknown', count: data?.counts.unknown ?? 0 },
+    {
+      key: 'organization',
+      label: 'Organizations',
+      count: data?.counts.organization ?? 0,
+    },
+    { key: 'unsure', label: 'Unsure', count: data?.counts.unsure ?? 0 },
   ]
+  if ((data?.counts.unknown ?? 0) > 0) {
+    filters.push({
+      key: 'unknown',
+      label: 'Unknown',
+      count: data?.counts.unknown ?? 0,
+    })
+  }
 
   return (
     <div className="page">
@@ -121,8 +142,8 @@ export default function Registry() {
       <h1 className="page-title">Registry</h1>
       <p className="page-sub">
         {data
-          ? `${fmt(data.total)} identities. ${fmt(data.counts.lab)} known labs; ${fmt(data.counts.unknown)} remain unknown until classification.`
-          : 'Every observed channel resolves to one entity. Unresolved identities remain unknown.'}
+          ? `${fmt(data.total)} identities: ${fmt(data.counts.person)} people, ${fmt(data.counts.organization)} organizations including ${fmt(data.lab_count)} seeded labs, and ${fmt(data.counts.unsure)} unsure.`
+          : 'Every observed channel resolves to one structurally typed entity.'}
       </p>
 
       {error && (
@@ -192,8 +213,8 @@ export default function Registry() {
                     )}
                   </td>
                   <td>
-                    <span className={`ent-type ent-type--${entity.kind}`}>
-                      {typeLabel(entity.kind)}
+                    <span className={`ent-type ent-type--${typeClass(entity)}`}>
+                      {typeLabel(entity)}
                     </span>
                   </td>
                 </tr>
@@ -204,11 +225,7 @@ export default function Registry() {
       )}
 
       {data && visible.length === 0 && (
-        <div className="registry-empty">
-          {kind === 'person' && !query
-            ? 'No people have been classified yet.'
-            : 'No entities match this view.'}
-        </div>
+        <div className="registry-empty">No entities match this view.</div>
       )}
 
       {filtered.length > shown && (
@@ -245,32 +262,76 @@ function EntityCard({
 
   const xChannel = entity.channels.find((channel) => channel.kind === 'x')
   const otherChannels = entity.channels.filter((channel) => channel.kind !== 'x')
+  const titleId = `entity-card-title-${entity.id}`
+  const bioId = `entity-card-bio-${entity.id}`
+  const bioIsSourcePreview = /(?:\.{3}|…)$/.test(entity.bio?.trim() ?? '')
 
   return (
     <dialog
       ref={ref}
       className="ent-card"
+      aria-labelledby={titleId}
+      aria-describedby={entity.bio ? bioId : undefined}
       onClose={onClose}
       onClick={(event) => {
         if (event.target === ref.current) onClose()
       }}
     >
-      <div className="ent-card-inner">
-        <button className="ent-card-close" onClick={onClose} aria-label="Close">
-          ✕
-        </button>
+      <button
+        className="ent-card-close"
+        type="button"
+        onClick={onClose}
+        aria-label="Close profile"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
+          <path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5" />
+        </svg>
+      </button>
 
+      <div className="ent-card-inner">
         <header className="ent-card-head">
-          <span className={`ent-type ent-type--${entity.kind}`}>
-            {typeLabel(entity.kind)}
+          <span className={`ent-type ent-type--${typeClass(entity)}`}>
+            {typeLabel(entity)}
           </span>
-          <h2>{entity.name}</h2>
+          <h2 id={titleId}>{entity.name}</h2>
         </header>
 
-        {entity.bio ? (
-          <p className="ent-card-bio">{entity.bio}</p>
-        ) : (
-          <p className="ent-card-bio muted">No bio observed yet.</p>
+        <section className="ent-card-profile" aria-labelledby={`${bioId}-label`}>
+          <div className="ent-card-label-row">
+            <div className="ent-card-label" id={`${bioId}-label`}>
+              Profile bio
+            </div>
+            {bioIsSourcePreview && (
+              <span className="ent-card-source-state">Source preview</span>
+            )}
+          </div>
+          {entity.bio ? (
+            <p className="ent-card-bio" id={bioId}>
+              {entity.bio}
+            </p>
+          ) : (
+            <p className="ent-card-bio muted">No bio observed yet.</p>
+          )}
+          {bioIsSourcePreview && (
+            <p className="ent-card-source-note">
+              This snapshot ends where the source preview ends. Open the profile
+              for the complete text.
+            </p>
+          )}
+        </section>
+
+        {entity.kind_reason && (
+          <div className="ent-card-reason">
+            <div className="ent-card-label">Why this type</div>
+            <p>{entity.kind_reason}</p>
+          </div>
         )}
 
         {otherChannels.length > 0 && (
@@ -279,10 +340,22 @@ function EntityCard({
             <ul>
               {otherChannels.map((channel) => (
                 <li key={channel.id}>
-                  <a href={channel.url ?? undefined} target="_blank" rel="noreferrer">
-                    <ChannelGlyph kind={channel.kind} />
-                    <span className="ent-ch-label">{channelLabel(channel)}</span>
-                  </a>
+                  {channel.url ? (
+                    <a
+                      className="ent-card-channel"
+                      href={channel.url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <ChannelGlyph kind={channel.kind} />
+                      <span className="ent-ch-label">{channelLabel(channel)}</span>
+                    </a>
+                  ) : (
+                    <span className="ent-card-channel is-unavailable">
+                      <ChannelGlyph kind={channel.kind} />
+                      <span className="ent-ch-label">{channelLabel(channel)}</span>
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -305,7 +378,9 @@ function EntityCard({
               >
                 <path d={siX.path} />
               </svg>
-              @{xChannel.key}
+              <span>
+                Open <strong>@{xChannel.key}</strong> on X
+              </span>
               <span className="ent-x-go">↗</span>
             </a>
           </footer>

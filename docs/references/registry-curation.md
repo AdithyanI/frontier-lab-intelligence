@@ -15,10 +15,11 @@ system shape; this reference records the implementation rules.
 4. **Curation:** should Frontier Lab Intelligence `track` or `reject` it?
 
 Do not collapse these into one opaque decision. An entity means "observed
-identity," not "approved for tracking." The current database still implements
-`lab` / `person` / `unknown`; Adi accepted `person` / `organization` / `unsure`
-for the first independent kind-classification pass on 2026-07-10. The database
-migration and later organization-channel merging remain separate work.
+identity," not "approved for tracking." The canonical structural kinds are
+`person`, `organization`, and `unsure`; `unknown` remains only the provisional
+lifecycle state for a newly observed, unclassified entity. Labs are not a
+fourth kind: the existing curated `labs` table identifies 10 organizations as
+the seeded lab subset. Later organization-channel merging remains separate.
 
 ## Channel-To-Entity Lifecycle
 
@@ -29,7 +30,7 @@ channel import
   -> otherwise create one provisional entity with kind=unknown
   -> later resolver links an existing actor, creates person/organization,
      or abstains
-  -> later role policy may designate an organization as a frontier model lab
+  -> curated lab membership may identify an organization as a seeded lab
   -> later curation policy proposes track/reject
   -> human corrections override automated proposals durably
 ```
@@ -40,10 +41,11 @@ Current invariants:
 - Synchronization was idempotent before the one-time Adi-following cleanup. The
   cleanup is intentionally not reusable importer policy, so rerunning that
   import or a later channel sync can rematerialize removed source rows.
-- Currently allowed database kinds are only `lab`, `person`, and `unknown`.
+- Database kinds are `person`, `organization`, `unsure`, and provisional
+  `unknown`; there are currently zero unknown entities.
 - A seeded lab may claim a channel from a one-channel provisional unknown.
 - A resolved entity's channel cannot be silently reassigned.
-- Missing identity evidence stays missing; uncertainty stays `unknown`.
+- Missing identity evidence stays missing; classifier abstention is `unsure`.
 
 ## Current Implemented Universe
 
@@ -51,9 +53,10 @@ After the 2026-07-10 Adi-following snapshot, the corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| lab | 10 |
-| person | 0 |
-| unknown | 2,956 |
+| person | 2,639 |
+| organization | 182 (including 10 seeded labs) |
+| unsure | 145 |
+| unknown | 0 |
 | **total** | **2,966** |
 
 Those provisional clusters own all 2,998 channels. The difference is the 32 additional
@@ -108,12 +111,15 @@ Use OpenAI Structured Outputs through the shared LiteLLM proxy. Runtime reads
 `LLM_API_ENDPOINT` and `LLM_API_KEY` from the existing machine-secret setup;
 this repo does not consume direct Azure OpenAI credentials.
 
-Implemented persistence deliberately remains separate from `entities.kind`:
+Classification provenance deliberately remains separate from `entities.kind`:
 `entity_kind_classification_runs` owns prompt/model/token/cost metadata,
 `entity_kind_classifications` owns the two-field decision joined to its input
 hash and entity ID, and `entity_kind_classification_errors` owns structured
-retry/terminal failures. This preserves the current seeded-lab UI while the
-target organization/role migration remains separate.
+retry/terminal failures. `fli entity-kinds promote` atomically projects the
+accepted model/effort/prompt results into canonical kinds only when all current
+unknown inputs have matching results. The Registry joins the stored reason for
+auditability. Lab display is derived from the existing `labs` table; no generic
+role field or role framework was introduced.
 
 Classifier requests are tagged in LiteLLM by app, pipeline, job, scope,
 prompt version, and run ID. Store the proxy-reported response cost separately
@@ -138,8 +144,9 @@ the 2,956 initial unknown entities: 2,639 person (89.28%), 172 organization
 (5.82%), and 145 unsure (4.91%), with zero terminal errors. Stored result usage
 is 719,059 input plus 123,374 output tokens. The inference cost, including the
 calibration/verification results reused by the full universe and net restart
-overhead, is approximately `$1.459852`. Canonical entity kinds have not yet
-been projected; classification remains separate from merging and relevance.
+overhead, is approximately `$1.459852`. Those results are now projected, giving
+2,639 people, 182 organizations after including the 10 seeded labs, 145 unsure,
+and zero unknown. Classification remains separate from merging and relevance.
 
 ## Later Track/Reject Curation
 

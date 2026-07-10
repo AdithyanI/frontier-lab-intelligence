@@ -1,6 +1,8 @@
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from fli import channels, entity_kinds, registry
 
 
@@ -173,6 +175,74 @@ def test_interrupted_batch_persists_completed_results_for_resume(tmp_path):
     assert len(resumed_client.responses.calls) == 1
     assert conn.execute(
         "SELECT COUNT(*) FROM entity_kind_classifications"
+    ).fetchone()[0] == 2
+
+
+def test_promote_classifications_is_atomic_and_idempotent(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    channels.upsert_entity(
+        conn,
+        kind="organization",
+        slug="seeded-lab",
+        name="Seeded Lab",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    make_unknown(conn, handle="person", name="Person Name")
+    make_unknown(conn, handle="company", name="Company")
+    make_unknown(conn, handle="opaque", name="Opaque")
+    inputs = entity_kinds.read_unknown_inputs(conn)
+    client = FakeClient(
+        [
+            {"classification": "person", "reason": "A full personal name."},
+            {
+                "classification": "organization",
+                "reason": "The profile represents a company.",
+            },
+            {
+                "classification": "unsure",
+                "reason": "The identity evidence is too weak.",
+            },
+        ]
+    )
+    entity_kinds.run_classification(
+        conn, inputs, client=client, workers=1, max_attempts=1
+    )
+
+    first = entity_kinds.promote_classifications(conn)
+    second = entity_kinds.promote_classifications(conn)
+
+    assert first["promoted"] == 3
+    assert second["promoted"] == 0
+    assert first["counts"] == {
+        "organization": 2,
+        "person": 1,
+        "unsure": 1,
+    }
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE kind = 'unknown'"
+    ).fetchone()[0] == 0
+
+
+def test_promote_classifications_rejects_incomplete_coverage(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    make_unknown(conn, handle="first", name="First Person")
+    make_unknown(conn, handle="second", name="Second Person")
+    first, _ = entity_kinds.read_unknown_inputs(conn)
+    entity_kinds.run_classification(
+        conn,
+        [first],
+        client=FakeClient(
+            [{"classification": "person", "reason": "A full personal name."}]
+        ),
+        workers=1,
+        max_attempts=1,
+    )
+
+    with pytest.raises(RuntimeError, match="lack an accepted classification"):
+        entity_kinds.promote_classifications(conn)
+
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE kind = 'unknown'"
     ).fetchone()[0] == 2
 
 

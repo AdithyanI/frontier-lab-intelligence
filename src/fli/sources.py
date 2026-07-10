@@ -552,8 +552,11 @@ def run_import_x_list(
                 or page_data["source_facts_written"]
             )
     finally:
-        if wrote_any and not dry_run:
-            channels.sync_all(conn)
+        try:
+            if wrote_any and not dry_run:
+                channels.sync_all(conn)
+        finally:
+            conn.close()
     return totals
 
 
@@ -801,26 +804,33 @@ def run_import_x_following(
         page_counts.append(len(page_followings))
 
     conn = channels.connect(db_path) if db_path else channels.connect()
-    data = import_followings(
-        conn,
-        username=username,
-        source=source,
-        source_profile=source_profile,
-        followings=followings,
-        dry_run=dry_run,
-        observed_at=observed_at,
-    )
-    estimated_credits = sum(_following_page_credits(count) for count in page_counts)
-    data.update(
-        {
-            "pages_fetched": len(page_counts),
-            "page_counts": page_counts,
-            "estimated_provider_credits": estimated_credits,
-            "estimated_provider_cost_usd": round(estimated_credits / 100_000, 6),
-            "database": str(db_path or store.DEFAULT_DB_PATH),
-        }
-    )
-    return data
+    try:
+        data = import_followings(
+            conn,
+            username=username,
+            source=source,
+            source_profile=source_profile,
+            followings=followings,
+            dry_run=dry_run,
+            observed_at=observed_at,
+        )
+        estimated_credits = sum(
+            _following_page_credits(count) for count in page_counts
+        )
+        data.update(
+            {
+                "pages_fetched": len(page_counts),
+                "page_counts": page_counts,
+                "estimated_provider_credits": estimated_credits,
+                "estimated_provider_cost_usd": round(
+                    estimated_credits / 100_000, 6
+                ),
+                "database": str(db_path or store.DEFAULT_DB_PATH),
+            }
+        )
+        return data
+    finally:
+        conn.close()
 
 
 def _result(

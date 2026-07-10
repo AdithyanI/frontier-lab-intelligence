@@ -69,7 +69,7 @@ def test_known_lab_replaces_its_provisional_unknown(tmp_path):
            JOIN channels c ON c.id = ec.channel_id
            WHERE c.kind = 'x' AND c.key = 'openai'"""
     ).fetchone()
-    assert owner["kind"] == "lab"
+    assert owner["kind"] == "organization"
     assert owner["slug"] == "openai"
     assert conn.execute(
         "SELECT COUNT(*) FROM entities WHERE kind = 'unknown'"
@@ -104,7 +104,17 @@ def test_registry_read_model_excludes_attention_and_source_fields(tmp_path):
     registry.materialize_unlinked_channels(conn)
 
     row = registry.read_entities(conn)[0]
-    assert set(row) == {"id", "slug", "kind", "name", "bio", "channels"}
+    assert set(row) == {
+        "id",
+        "slug",
+        "kind",
+        "is_lab",
+        "kind_reason",
+        "name",
+        "bio",
+        "channels",
+    }
+    assert row["is_lab"] is False
+    assert row["kind_reason"] is None
     assert row["bio"] == "I like to train neural nets."
-    assert "role" not in row
     assert "rank" not in row

@@ -3,16 +3,15 @@
 Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Status: entity spine complete; entity-kind classification foundation is built
-and calibration is active. The implemented code has raw fetch/store, a frozen X seed graph
-snapshot, a modeled SQLite graph layer, and a React SPA over a JSON API. Every
-observed channel resolves to one entity; 10 seeded labs are classified and the
-other 2,956 visible identities remain `unknown`. The accepted first classifier
-returns only `person`, `organization`, or `unsure` plus a short reason into a
-separate resumable results layer. Nano failed the missing-evidence abstention
-check; GPT-5.6 Luna passed the bounded prompt-v2 comparison. Results are not yet
-projected into the Registry because the full corpus and schema migration remain
-separate stages.
+Status: entity spine and entity-kind classification are complete. The
+implemented code has raw fetch/store, a frozen X seed graph snapshot, a modeled
+SQLite graph layer, and a React SPA over a JSON API. Every observed channel
+resolves to one entity. Luna-medium prompt-v2 classified and atomically
+promoted all 2,956 initial unknowns: 2,639 people, 172 organizations, and 145
+unsure. Together with 10 seeded labs, the canonical Registry contains 2,639
+people, 182 organizations, 145 unsure, and zero unknown. Labs are a curated
+subset of organizations derived from the existing `labs` table, not a peer
+kind or a generic role field.
 Channel merging, track/reject curation, extraction, and scoring remain later
 stages.
 
@@ -221,7 +220,7 @@ erDiagram
     }
     ENTITIES {
         int id PK
-        string kind "lab | person | unknown"
+        string kind "person | organization | unsure | unknown (provisional)"
         string slug
         string name
     }
@@ -279,6 +278,7 @@ erDiagram
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,863 total)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
+    LABS ||--|| ENTITIES : "curated organization subset by slug"
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
@@ -313,11 +313,12 @@ channel_observations  # measured/source-specific facts about a channel over time
 ```
 
 Entity is identity, not endorsement. A channel that cannot yet be resolved
-creates a provisional `unknown` entity. The current database kind vocabulary is
-still `lab`, `person`, and `unknown`. The accepted first classifier vocabulary
-is `person`, `organization`, and `unsure`; migration into the canonical entity
-schema must preserve seeded labs as organizations with a lab role. Curation
-(`track` / `reject`) remains a separate later stage.
+creates a provisional `unknown` entity. The canonical structural vocabulary is
+`person`, `organization`, and `unsure`; `unknown` is only the pre-classification
+lifecycle state. The 10 seeded rows in `labs` identify a curated subset of
+organizations for product display. There is no generic entity-role schema yet;
+add one only when another concrete role requires it. Curation (`track` /
+`reject`) remains a separate later stage.
 
 ```mermaid
 flowchart TD
@@ -390,9 +391,10 @@ LiteLLM's reported response cost. The post-upgrade LiteLLM 1.91.1 verification
 reconciled both values with the persisted spend log, including the tagged token
 counts; proxy spend logs are the operational source of truth for billed usage.
 The full Luna-medium prompt-v2 result set covers all 2,956 initial unknown
-entities: 2,639 person, 172 organization, and 145 unsure. These remain staged
-decisions; the canonical `entities.kind` rows are unchanged until the separate
-Registry projection/migration.
+entities: 2,639 person, 172 organization, and 145 unsure. The atomic promotion
+step validates the current input hash and accepted model/effort/prompt contract
+before updating canonical kinds. The Registry exposes the stored reason in the
+detail view, while seeded lab membership remains derived from `labs`.
 
 This pass does not merge channels. Later identity resolution may attach several
 official/product X channels to one organization. A person is expected to have
@@ -522,11 +524,11 @@ final score.
 | `fli.store` | raw `raw_items` SQLite layer |
 | `fli.graph` | legacy X graph import backing layer (`accounts`, facts, edges); PageRank; mirrors observations into channels |
 | `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
-| `fli.labs` | curated lab seed data (10 labs); seeds lab entities + official channels |
+| `fli.labs` | curated lab seed data (10 labs); identifies a subset of organization entities and seeds official channels |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io X-list and outgoing-follow importers; provenance only, no classification |
-| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes the full lab/person/unknown universe; source in `frontend/` |
-| `fli.registry` | channel ownership invariant, provisional unknown materialization, and lean Registry read model; `person / organization / unsure` classifier is the active next stage |
+| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes people, organizations, unsure results, and classifier reasons; source in `frontend/` |
+| `fli.registry` | channel ownership invariant, provisional unknown materialization, curated lab-subset derivation, and canonical Registry read model |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |
@@ -534,8 +536,7 @@ final score.
 
 ## Build Order
 
-1. Classify the current unknown registry as person/organization/unsure through a calibrated, resumable LiteLLM pass.
-2. Promote raw fetch into production ingestion around accepted entity channels.
-3. Extract and score real ingested data.
-4. Add validation harness and ground-truth labeling.
-5. Delivery and UI last.
+1. Promote raw fetch into production ingestion around accepted entity channels.
+2. Extract and score real ingested data.
+3. Add validation harness and ground-truth labeling.
+4. Delivery and report UI.

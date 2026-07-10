@@ -7,7 +7,7 @@ src/fli/web/dist, which this app serves. During frontend development,
 Endpoints:
 - /api/status        pipeline stages with live DB counts (health/ops)
 - /api/accounts      compatibility route for X channels, sortable/paginated
-- /api/registry      complete lab/person/unknown entity universe
+- /api/registry      complete typed entity universe
 """
 
 from pathlib import Path
@@ -58,10 +58,13 @@ def _counts() -> dict:
             ),
             "entities": one("SELECT COUNT(*) FROM entities"),
             "classified_entities": one(
-                "SELECT COUNT(*) FROM entities WHERE kind IN ('lab', 'person')"
+                "SELECT COUNT(*) FROM entities WHERE kind <> 'unknown'"
             ),
             "unknown_entities": one(
                 "SELECT COUNT(*) FROM entities WHERE kind = 'unknown'"
+            ),
+            "unsure_entities": one(
+                "SELECT COUNT(*) FROM entities WHERE kind = 'unsure'"
             ),
         }
     finally:
@@ -86,12 +89,12 @@ def status() -> JSONResponse:
         {
             "id": "registry",
             "name": "Registry",
-            "state": "in-progress",
-            "summary": "Every observed channel resolves to an entity; unknowns await classification.",
+            "state": "live",
+            "summary": "Every observed channel resolves to a structurally typed entity; unsure identities remain explicit.",
             "stats": [
                 {"label": "entity universe", "value": c["entities"]},
                 {"label": "classified", "value": c["classified_entities"]},
-                {"label": "unknown", "value": c["unknown_entities"]},
+                {"label": "unsure", "value": c["unsure_entities"]},
             ],
         },
         {
@@ -188,6 +191,7 @@ def registry(limit: int = Query(150, le=5000)) -> JSONResponse:
                 "entities": entity_registry.read_entities(conn, limit=limit),
                 "total": sum(counts.values()),
                 "counts": counts,
+                "lab_count": entity_registry.lab_count(conn),
             }
         )
     finally:

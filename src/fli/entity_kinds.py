@@ -1,9 +1,9 @@
 """Resumable structural-kind classification for provisional X entities.
 
 The model sees only identity-bearing profile fields and returns exactly a
-classification plus a short reason. Operational metadata stays in SQLite, and
-the canonical ``entities.kind`` vocabulary remains unchanged until its
-separate migration is implemented.
+classification plus a short reason. Operational metadata stays in SQLite.
+Accepted results can be promoted into the canonical ``entities.kind`` field
+as a separate, atomic operation.
 """
 
 from __future__ import annotations
@@ -845,13 +845,81 @@ def estimate_full_run(
     }
 
 
+def promote_classifications(
+    conn: sqlite3.Connection,
+    *,
+    model: str = DEFAULT_MODEL,
+    reasoning_effort: str | None = None,
+    prompt_version: str = PROMPT_VERSION,
+) -> dict[str, Any]:
+    """Atomically promote accepted results into canonical entity kinds.
+
+    Only current ``unknown`` entities are eligible. Every eligible entity must
+    have a result for its current identity input and the exact accepted
+    model/effort/prompt contract, otherwise nothing is changed.
+    """
+    ensure_schema(conn)
+    effort = reasoning_effort or default_reasoning_effort(model)
+    inputs = read_unknown_inputs(conn)
+    decisions: list[tuple[str, str, int]] = []
+    missing: list[int] = []
+    promoted_at = _now()
+    for entity in inputs:
+        row = conn.execute(
+            """SELECT classification
+               FROM entity_kind_classifications
+               WHERE entity_id = ? AND input_sha256 = ?
+                 AND model = ? AND reasoning_effort = ?
+                 AND prompt_version = ?
+               ORDER BY classified_at DESC, run_id DESC
+               LIMIT 1""",
+            (
+                entity.entity_id,
+                entity.input_sha256,
+                model,
+                effort,
+                prompt_version,
+            ),
+        ).fetchone()
+        if row is None:
+            missing.append(entity.entity_id)
+            continue
+        decisions.append((row["classification"], promoted_at, entity.entity_id))
+    if missing:
+        preview = ", ".join(str(entity_id) for entity_id in missing[:10])
+        raise RuntimeError(
+            f"cannot promote: {len(missing)} unknown entities lack an accepted "
+            f"classification for their current input (first IDs: {preview})"
+        )
+
+    with conn:
+        conn.executemany(
+            """UPDATE entities SET kind = ?, updated_at = ?
+               WHERE id = ? AND kind = 'unknown'""",
+            decisions,
+        )
+    counts = {
+        row["kind"]: row["n"]
+        for row in conn.execute(
+            "SELECT kind, COUNT(*) AS n FROM entities GROUP BY kind"
+        ).fetchall()
+    }
+    return {
+        "promoted": len(decisions),
+        "model": model,
+        "reasoning_effort": effort,
+        "prompt_version": prompt_version,
+        "counts": counts,
+    }
+
+
 def main(
     argv: list[str] | None = None,
     *,
     client_factory: Callable[[], Any] = create_litellm_client,
 ) -> int:
     parser = argparse.ArgumentParser(prog="fli entity-kinds")
-    parser.add_argument("action", choices=["run", "summary"])
+    parser.add_argument("action", choices=["run", "summary", "promote"])
     parser.add_argument("--db", default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--calibration", action="store_true")
@@ -866,6 +934,14 @@ def main(
 
     conn = connect(args.db) if args.db else connect()
     inputs = read_unknown_inputs(conn)
+    if args.action == "promote":
+        summary = promote_classifications(
+            conn,
+            model=args.model,
+            reasoning_effort=args.reasoning_effort,
+        )
+        print(json.dumps(summary, sort_keys=True))
+        return 0
     if args.action == "summary":
         row = conn.execute(
             """SELECT COUNT(*) AS classified,

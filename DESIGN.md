@@ -100,11 +100,15 @@ Rules:
 - **Pipeline rail:** stage node (blue = live, outlined = in progress), name,
   mono state, one-line summary, live mono counts.
 - **Entity registry table:** mono uppercase headers, sand row hover, pill
-  search + All/Labs/People/Unknown segmented filter with live counts,
-  load-more; rows show only identity + truthful kind and open a detail card.
+  search + All/People/Organizations/Unsure segmented filter with live counts,
+  load-more; seeded labs display as `Organization · Lab` within the
+  Organizations kind rather than as a peer filter. Rows show only identity +
+  truthful kind and open a detail card.
 - **Entity detail card:** native `<dialog>` opened on row click — type pill,
   name, observed bio, channel chips, and the X profile as a tagged link pinned
-  at the bottom. Attention/ranking evidence stays out of this identity surface.
+  at the bottom. Preserve bio line breaks; label source-truncated snapshots
+  honestly; bound long content with internal scrolling while keeping close
+  access fixed. Attention/ranking evidence stays out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
 - **Insight row (anticipated):** title, why-flagged rationale, score (mono),

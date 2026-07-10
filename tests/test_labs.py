@@ -20,7 +20,7 @@ def test_seed_links_org_accounts_and_is_idempotent(tmp_path):
     assert row["status"] == "frontier"
     assert row["x_account_id"] is not None
     entity = conn.execute("SELECT * FROM entities WHERE slug = 'openai'").fetchone()
-    assert entity["kind"] == "lab"
+    assert entity["kind"] == "organization"
     x_channel = conn.execute(
         """SELECT c.* FROM channels c
            JOIN entity_channels ec ON ec.channel_id = c.id
