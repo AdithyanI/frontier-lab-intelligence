@@ -110,6 +110,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Audit existing edge/import/PageRank code and current database provenance locally. | parent | — |
 | done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
 | done | Remove Digg/personal graph data and unsupported candidates; retain Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
+| done | Estimate a full 586-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
 | blocked | Pause before seed selection, live following fetches, or new ranking work until Adi returns. | parent | — |
 
 ## Backlog / Remaining Work
@@ -164,3 +165,8 @@ candidate generator while demonstrating ranking and validation discipline.
   frontend production build, live `/api/status` and `/api/registry`
   reconciliation, SQLite foreign-key check, and integrity check. Execution is
   intentionally paused before seed selection or any following-list fetch.
+- 2026-07-10: [DONE] Rechecked current TwitterAPI.io page pricing and modeled
+  the clean 586-account cohort without making an API request. A Karpathy-like
+  1,108-following average would cost about `$7.23`; a 500–2,000 average gives a
+  `$3.62–$11.83` planning range. Cost is affordable, but using every candidate
+  as a trust seed would weaken the graph's meaning and evaluation story.

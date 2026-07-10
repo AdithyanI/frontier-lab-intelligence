@@ -404,8 +404,6 @@ def _validate_output(output_text: str) -> tuple[str, str]:
     if not isinstance(reason, str) or not reason.strip():
         raise OutputContractError("reason must be a non-empty string")
     reason = " ".join(reason.split())
-    if len(reason) > 240:
-        raise OutputContractError("reason exceeds 240 characters")
     return classification, reason
 
 

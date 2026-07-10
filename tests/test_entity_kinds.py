@@ -111,6 +111,17 @@ def test_schema_and_model_payload_are_minimal(tmp_path):
     assert schema["additionalProperties"] is False
 
 
+def test_reason_has_no_arbitrary_local_character_limit():
+    reason = "This is valid evidence. " * 20
+
+    classification, normalized = entity_kinds._validate_output(
+        json.dumps({"classification": "person", "reason": reason})
+    )
+
+    assert classification == "person"
+    assert len(normalized) > 240
+
+
 def test_completed_result_is_resumable_without_duplicate_call(tmp_path):
     conn = entity_kinds.connect(tmp_path / "test.db")
     entity = make_unknown(conn, bio="Researcher and engineer.")
