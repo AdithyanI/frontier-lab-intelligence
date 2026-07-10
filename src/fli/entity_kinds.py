@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from fli import channels, sources, store
+from fli import channels, registry, sources, store
 
 PROMPT_VERSION = "entity-kind-v4"
 SCHEMA_VERSION = "entity-kind-output-v1"
@@ -31,6 +31,10 @@ DEFAULT_POST_WORKERS = 10
 DEFAULT_POST_LIMIT = 20
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
+PROTECTED_ACCOUNT_REASON_CODE = "protected_x_account"
+PROTECTED_ACCOUNT_REASON = (
+    "The X account has protected posts, so its public output cannot be collected."
+)
 
 # Frozen fallback for the accepted classifier contract, verified 2026-07-10.
 # LiteLLM's reported response cost is the operational source of truth. This
@@ -235,6 +239,15 @@ class PostEnrichmentResult:
             if turn.reported_cost_usd is not None
         ]
         return sum(costs) if costs else None
+
+
+@dataclass(frozen=True)
+class RegistryRejection:
+    entity: EntityInput
+    reason_code: str
+    reason: str
+    source: str
+    evidence_url: str
 
 
 @dataclass(frozen=True)
@@ -643,6 +656,7 @@ def enrich_one_with_posts(
     input_cost_per_token: float,
     output_cost_per_token: float,
     post_limit: int = DEFAULT_POST_LIMIT,
+    profile: dict[str, Any] | None = None,
 ) -> PostEnrichmentResult:
     """Run profile-first classification, then authored posts if still unsure."""
     profile_result = _post_workflow_turn(
@@ -661,6 +675,7 @@ def enrich_one_with_posts(
         recent_posts = post_client.fetch_recent_authored_posts(
             username=entity.handle,
             limit=post_limit,
+            profile=profile,
         )
         if recent_posts:
             followup_result = _post_workflow_turn(
@@ -741,8 +756,25 @@ def _post_enrich_safely(
     input_cost_per_token: float,
     output_cost_per_token: float,
     post_limit: int,
-) -> tuple[PostEnrichmentResult | None, list[ClassificationError]]:
+) -> tuple[
+    PostEnrichmentResult | None,
+    list[ClassificationError],
+    RegistryRejection | None,
+]:
     try:
+        profile = post_client.fetch_user(username=entity.handle)
+        if sources.is_protected_profile(profile):
+            return (
+                None,
+                [],
+                RegistryRejection(
+                    entity=entity,
+                    reason_code=PROTECTED_ACCOUNT_REASON_CODE,
+                    reason=PROTECTED_ACCOUNT_REASON,
+                    source=sources.PROVIDER,
+                    evidence_url=entity.profile_url,
+                ),
+            )
         return (
             enrich_one_with_posts(
                 client,
@@ -754,19 +786,25 @@ def _post_enrich_safely(
                 input_cost_per_token=input_cost_per_token,
                 output_cost_per_token=output_cost_per_token,
                 post_limit=post_limit,
+                profile=profile,
             ),
             [],
+            None,
         )
     except Exception as exc:
-        return None, [
-            ClassificationError(
-                entity=entity,
-                attempt=1,
-                error_type=type(exc).__name__,
-                error_message=str(exc)[:500],
-                terminal=True,
-            )
-        ]
+        return (
+            None,
+            [
+                ClassificationError(
+                    entity=entity,
+                    attempt=1,
+                    error_type=type(exc).__name__,
+                    error_message=str(exc)[:500],
+                    terminal=True,
+                )
+            ],
+            None,
+        )
 
 
 def _already_classified(
@@ -1006,12 +1044,16 @@ def run_post_enrichment(
     reasoning_effort_override: str | None = None,
     pricing: tuple[float, float] | None = None,
     post_limit: int = DEFAULT_POST_LIMIT,
+    persist: bool = False,
+    promote: bool = False,
 ) -> dict[str, Any]:
-    """Run a non-persisting profile/post calibration for current abstentions."""
+    """Run profile/post classification for current abstentions."""
     if workers < 1:
         raise ValueError("workers must be at least 1")
     if post_limit < 1:
         raise ValueError("post_limit must be at least 1")
+    if promote and not persist:
+        raise ValueError("promote requires persist")
     if pricing is None:
         if model != DEFAULT_MODEL:
             raise ValueError(
@@ -1031,17 +1073,58 @@ def run_post_enrichment(
             "post enrichment accepts only current unsure entities; "
             f"invalid IDs: {invalid_ids[:10]}"
         )
-    run_id = int(datetime.now(timezone.utc).timestamp() * 1000)
+    pending = inputs
+    if persist:
+        pending = [
+            entity
+            for entity in inputs
+            if not conn.execute(
+                """SELECT 1 FROM entity_kind_classifications
+                   WHERE entity_id = ? AND model = ?
+                     AND reasoning_effort = ? AND prompt_version = ?
+                   LIMIT 1""",
+                (entity.entity_id, model, effort, PROMPT_VERSION),
+            ).fetchone()
+        ]
+        cursor = conn.execute(
+            """INSERT INTO entity_kind_classification_runs
+               (model, reasoning_effort, prompt_version, schema_version,
+                prompt_sha256, scope, requested_count, skipped_count,
+                status, started_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'running', ?)""",
+            (
+                model,
+                effort,
+                PROMPT_VERSION,
+                SCHEMA_VERSION,
+                hashlib.sha256(ENTITY_KIND_INSTRUCTIONS.encode()).hexdigest(),
+                scope,
+                len(inputs),
+                len(inputs) - len(pending),
+                _now(),
+            ),
+        )
+        run_id = cursor.lastrowid
+    else:
+        run_id = int(datetime.now(timezone.utc).timestamp() * 1000)
     tags = request_tags(
         scope=scope,
         run_id=run_id,
         job="entity-kind-post-enrichment",
         prompt_version=PROMPT_VERSION,
     )
+    if persist:
+        conn.execute(
+            """UPDATE entity_kind_classification_runs
+               SET request_tags = ? WHERE id = ?""",
+            (json.dumps(tags), run_id),
+        )
+        conn.commit()
 
     results: list[PostEnrichmentResult] = []
     errors: list[ClassificationError] = []
-    if inputs:
+    rejections: list[RegistryRejection] = []
+    if pending:
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [
                 executor.submit(
@@ -1056,16 +1139,91 @@ def run_post_enrichment(
                     output_cost_per_token=pricing[1],
                     post_limit=post_limit,
                 )
-                for entity in inputs
+                for entity in pending
             ]
             for future in concurrent.futures.as_completed(futures):
-                result, item_errors = future.result()
+                result, item_errors, rejection = future.result()
                 errors.extend(item_errors)
                 if result:
                     results.append(result)
+                if rejection:
+                    rejections.append(rejection)
+                if persist:
+                    completed_at = _now()
+                    if result:
+                        final = result.final_result
+                        conn.execute(
+                            """INSERT OR IGNORE INTO entity_kind_classifications
+                               (entity_id, input_sha256, classification, reason,
+                                model, reasoning_effort, response_model,
+                                prompt_version, schema_version, response_id,
+                                input_tokens, output_tokens,
+                                estimated_cost_usd, reported_cost_usd, run_id,
+                                classified_at)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                            (
+                                result.entity.entity_id,
+                                result.evidence_sha256,
+                                final.classification,
+                                final.reason,
+                                model,
+                                effort,
+                                final.response_model,
+                                PROMPT_VERSION,
+                                SCHEMA_VERSION,
+                                final.response_id,
+                                result.input_tokens,
+                                result.output_tokens,
+                                result.estimated_cost_usd,
+                                result.reported_cost_usd,
+                                run_id,
+                                completed_at,
+                            ),
+                        )
+                        if promote:
+                            conn.execute(
+                                """UPDATE entities
+                                   SET kind = ?, updated_at = ?
+                                   WHERE id = ?""",
+                                (
+                                    final.classification,
+                                    completed_at,
+                                    result.entity.entity_id,
+                                ),
+                            )
+                    if rejection:
+                        registry.reject_entity(
+                            conn,
+                            entity_id=rejection.entity.entity_id,
+                            reason_code=rejection.reason_code,
+                            reason=rejection.reason,
+                            source=rejection.source,
+                            evidence_url=rejection.evidence_url,
+                            rejected_at=completed_at,
+                        )
+                    for error in item_errors:
+                        conn.execute(
+                            """INSERT INTO entity_kind_classification_errors
+                               (run_id, entity_id, input_sha256, attempt,
+                                error_type, error_message, terminal,
+                                occurred_at)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                            (
+                                run_id,
+                                error.entity.entity_id,
+                                error.entity.input_sha256,
+                                error.attempt,
+                                error.error_type,
+                                error.error_message,
+                                int(error.terminal),
+                                completed_at,
+                            ),
+                        )
+                    conn.commit()
     results.sort(key=lambda item: item.entity.entity_id)
     errors.sort(key=lambda item: item.entity.entity_id)
-    failure_count = len(inputs) - len(results)
+    rejections.sort(key=lambda item: item.entity.entity_id)
+    failure_count = len(pending) - len(results) - len(rejections)
     input_tokens = sum(result.input_tokens for result in results)
     output_tokens = sum(result.output_tokens for result in results)
     estimated_cost_usd = sum(result.estimated_cost_usd for result in results)
@@ -1077,6 +1235,28 @@ def run_post_enrichment(
     ]
     reported_cost_usd = sum(reported_costs)
     status = "completed" if failure_count == 0 else "partial"
+    if persist:
+        conn.execute(
+            """UPDATE entity_kind_classification_runs
+               SET success_count = ?, failure_count = ?, input_tokens = ?,
+                   output_tokens = ?, estimated_cost_usd = ?,
+                   reported_cost_usd = ?, reported_cost_count = ?, status = ?,
+                   completed_at = ?
+               WHERE id = ?""",
+            (
+                len(results) + len(rejections),
+                failure_count,
+                input_tokens,
+                output_tokens,
+                estimated_cost_usd,
+                reported_cost_usd,
+                len(reported_costs),
+                status,
+                _now(),
+                run_id,
+            ),
+        )
+        conn.commit()
     counts = {classification: 0 for classification in sorted(CLASSIFICATIONS)}
     for result in results:
         counts[result.final_result.classification] += 1
@@ -1088,7 +1268,9 @@ def run_post_enrichment(
         "prompt_version": PROMPT_VERSION,
         "request_tags": tags,
         "requested": len(inputs),
+        "skipped": len(inputs) - len(pending),
         "enriched": len(results),
+        "rejected": len(rejections),
         "failed": failure_count,
         "counts": counts,
         "profile_only": sum(
@@ -1103,6 +1285,9 @@ def run_post_enrichment(
         "estimated_cost_usd": estimated_cost_usd,
         "reported_cost_usd": reported_cost_usd,
         "reported_cost_count": len(reported_costs),
+        "persisted": len(results) if persist else 0,
+        "rejections_persisted": len(rejections) if persist else 0,
+        "promoted": len(results) if promote else 0,
         "items": [
             {
                 "entity_id": result.entity.entity_id,
@@ -1122,6 +1307,17 @@ def run_post_enrichment(
                 "evidence_sha256": result.evidence_sha256,
             }
             for result in results
+        ],
+        "rejections": [
+            {
+                "entity_id": rejection.entity.entity_id,
+                "handle": rejection.entity.handle,
+                "reason_code": rejection.reason_code,
+                "reason": rejection.reason,
+                "source": rejection.source,
+                "evidence_url": rejection.evidence_url,
+            }
+            for rejection in rejections
         ],
         "errors": [
             {

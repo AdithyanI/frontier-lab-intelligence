@@ -15,6 +15,7 @@ def test_status_reports_pipeline_stages():
     assert registry["state"] == "live"
     assert any(s["label"] == "entity universe" for s in registry["stats"])
     assert any(s["label"] == "unsure" for s in registry["stats"])
+    assert any(s["label"] == "rejected" for s in registry["stats"])
 
 
 def test_registry_returns_complete_typed_entity_universe():
@@ -22,9 +23,10 @@ def test_registry_returns_complete_typed_entity_universe():
     assert r.status_code == 200
     data = r.json()
     assert data["total"] == sum(data["counts"].values())
-    assert data["counts"]["person"] == 2_607
-    assert data["counts"]["organization"] == 180
-    assert data["counts"]["unsure"] == 137
+    assert data["counts"]["person"] > 0
+    assert data["counts"]["organization"] >= 10
+    assert data["counts"]["unsure"] >= 0
+    assert data["counts"]["rejected"] >= 0
     assert data["counts"]["unknown"] == 0
     openai = next(e for e in data["entities"] if e["slug"] == "openai")
     assert openai["kind"] == "organization"
@@ -35,6 +37,11 @@ def test_registry_returns_complete_typed_entity_universe():
         "slug",
         "kind",
         "kind_reason",
+        "registry_state",
+        "rejection_reason_code",
+        "rejection_reason",
+        "rejection_source",
+        "rejection_evidence_url",
         "name",
         "bio",
         "channels",

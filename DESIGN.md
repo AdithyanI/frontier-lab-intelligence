@@ -100,8 +100,9 @@ Rules:
 - **Pipeline rail:** stage node (blue = live, outlined = in progress), name,
   mono state, one-line summary, live mono counts.
 - **Entity registry table:** mono uppercase headers, sand row hover, pill
-  search + All/People/Organizations/Unsure segmented filter with live counts,
-  load-more; rows show only identity + truthful kind and open a detail card.
+  search + All/People/Organizations/Unsure/Rejected segmented filter with live
+  counts, load-more; rejected rows expose their reason in the table, while
+  active rows show identity + truthful kind and open a detail card.
   Internal source seeds such as the curated `labs` table do not create public
   kinds, badges, or filters.
 - **Entity detail card:** native `<dialog>` opened on row click — type pill,

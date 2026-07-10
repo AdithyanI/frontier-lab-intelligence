@@ -440,10 +440,16 @@ td.num {
   box-shadow: inset 0 0 0 1px var(--border);
 }
 
+.ent-type--rejected {
+  color: var(--negative);
+  background: #fbefef;
+  box-shadow: inset 0 0 0 1px #e6caca;
+}
+
 /* clickable entity rows */
 .ent-table tbody tr.ent-row { cursor: pointer; }
-.ent-table th:last-child,
-.ent-table td:last-child { width: 180px; }
+.ent-table th:nth-child(2),
+.ent-table td:nth-child(2) { width: 180px; }
 .ent-name { display: block; font-weight: 500; color: var(--ink); }
 .ent-handle {
   display: block;
@@ -456,6 +462,13 @@ td.num {
 .ent-row:focus-visible {
   outline: 2px solid var(--blue-mid);
   outline-offset: -2px;
+}
+
+.ent-rejection-reason {
+  width: 44%;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 /* entity detail card (native dialog) */
@@ -586,6 +599,10 @@ td.num {
   color: var(--ink-soft);
   font-size: 13.5px;
   line-height: 1.55;
+}
+
+.ent-card-reason--rejected .ent-card-label {
+  color: var(--negative);
 }
 
 .ent-card-label {

@@ -50,12 +50,19 @@ class FakeRawClient:
 
 
 class FakePostClient:
-    def __init__(self, posts=()):
+    def __init__(self, posts=(), *, protected=False):
         self.posts = tuple(posts)
+        self.protected = protected
         self.calls = []
+        self.profile_calls = []
 
-    def fetch_recent_authored_posts(self, *, username, limit):
+    def fetch_user(self, *, username):
+        self.profile_calls.append(username)
+        return {"userName": username, "protected": self.protected}
+
+    def fetch_recent_authored_posts(self, *, username, limit, profile=None):
         self.calls.append({"username": username, "limit": limit})
+        assert profile == {"userName": username, "protected": False}
         return self.posts[:limit]
 
 
@@ -457,6 +464,61 @@ def test_post_enrichment_chains_responses_without_persisting(tmp_path):
     ).fetchone()[0] == "unsure"
 
 
+def test_post_enrichment_persists_and_promotes_with_existing_schema(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    entity = make_unsure(conn, handle="jack", name="jack")
+    client = FakeClient(
+        [
+            {
+                "classification": "unsure",
+                "reason": "The profile is insufficient.",
+            },
+            {
+                "classification": "person",
+                "reason": "The posts speak as one individual.",
+            },
+        ]
+    )
+    post_client = FakePostClient(
+        [
+            {
+                "id": "1",
+                "created_at": "2026-07-10T00:00:00Z",
+                "text": "I built this.",
+                "url": "https://x.com/jack/status/1",
+                "post_type": "original",
+            }
+        ]
+    )
+
+    summary = entity_kinds.run_post_enrichment(
+        conn,
+        [entity],
+        client=client,
+        post_client=post_client,
+        workers=1,
+        persist=True,
+        promote=True,
+    )
+
+    assert summary["persisted"] == 1
+    assert summary["promoted"] == 1
+    row = conn.execute(
+        "SELECT * FROM entity_kind_classifications WHERE prompt_version = ?",
+        (entity_kinds.PROMPT_VERSION,),
+    ).fetchone()
+    assert row["classification"] == "person"
+    assert row["reason"] == "The posts speak as one individual."
+    assert row["response_id"] == "response-2"
+    assert row["input_tokens"] == 200
+    assert row["output_tokens"] == 40
+    assert row["input_sha256"] != entity.input_sha256
+    assert conn.execute(
+        "SELECT kind FROM entities WHERE id = ?",
+        (entity.entity_id,),
+    ).fetchone()[0] == "person"
+
+
 def test_post_enrichment_stops_when_profile_is_decisive(tmp_path):
     conn = entity_kinds.connect(tmp_path / "test.db")
     entity = make_unsure(conn, handle="product", name="Product")
@@ -484,6 +546,37 @@ def test_post_enrichment_stops_when_profile_is_decisive(tmp_path):
     assert summary["followups"] == 0
     assert len(client.responses.calls) == 1
     assert post_client.calls == []
+
+
+def test_post_enrichment_rejects_protected_account_before_model_call(tmp_path):
+    conn = entity_kinds.connect(tmp_path / "test.db")
+    entity = make_unsure(conn, handle="private_person", name="Private Person")
+    client = FakeClient([])
+    post_client = FakePostClient(protected=True)
+
+    summary = entity_kinds.run_post_enrichment(
+        conn,
+        [entity],
+        client=client,
+        post_client=post_client,
+        workers=1,
+        persist=True,
+        promote=True,
+    )
+
+    assert summary["status"] == "completed"
+    assert summary["enriched"] == 0
+    assert summary["rejected"] == 1
+    assert summary["rejections_persisted"] == 1
+    assert summary["failed"] == 0
+    assert client.responses.calls == []
+    assert post_client.profile_calls == ["private_person"]
+    assert post_client.calls == []
+    row = registry.read_entities(conn)[0]
+    assert row["kind"] == "unsure"
+    assert row["registry_state"] == "rejected"
+    assert row["rejection_reason_code"] == "protected_x_account"
+    assert row["rejection_reason"] == entity_kinds.PROTECTED_ACCOUNT_REASON
 
 
 def test_post_enrichment_rejects_non_unsure_inputs(tmp_path):

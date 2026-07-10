@@ -3,9 +3,10 @@
 Every observed channel belongs to exactly one entity. Known lab channels are
 claimed by the seeded lab entity. Any channel that cannot yet be resolved gets
 one provisional entity with kind ``unknown``. Structural classification can
-promote it to ``person``, ``organization``, or ``unsure``; track/reject
-curation remains separate. The curated labs source remains an internal channel
-seed and is not part of the Registry kind contract.
+promote it to ``person``, ``organization``, or ``unsure``. Registry rejection
+is a separate, reason-bearing curation state; it never masquerades as a
+structural kind. The curated labs source remains an internal channel seed and
+is not part of the Registry kind contract.
 """
 
 from __future__ import annotations
@@ -20,6 +21,15 @@ from fli import channels
 SCHEMA = """
 CREATE UNIQUE INDEX IF NOT EXISTS idx_entity_channels_one_owner
 ON entity_channels (channel_id);
+
+CREATE TABLE IF NOT EXISTS entity_registry_rejections (
+    entity_id INTEGER PRIMARY KEY REFERENCES entities (id) ON DELETE CASCADE,
+    reason_code TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    source TEXT NOT NULL,
+    evidence_url TEXT,
+    rejected_at TEXT NOT NULL
+);
 """
 
 
@@ -190,8 +200,51 @@ def materialize_unlinked_channels(
     }
 
 
+def reject_entity(
+    conn: sqlite3.Connection,
+    *,
+    entity_id: int,
+    reason_code: str,
+    reason: str,
+    source: str,
+    evidence_url: str | None = None,
+    rejected_at: str | None = None,
+) -> None:
+    """Record a deterministic Registry rejection without changing entity kind."""
+    ensure_schema(conn)
+    rejected_at = rejected_at or _now()
+    conn.execute(
+        """INSERT INTO entity_registry_rejections
+           (entity_id, reason_code, reason, source, evidence_url, rejected_at)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT (entity_id) DO UPDATE SET
+               reason_code = excluded.reason_code,
+               reason = excluded.reason,
+               source = excluded.source,
+               evidence_url = excluded.evidence_url,
+               rejected_at = excluded.rejected_at""",
+        (
+            entity_id,
+            reason_code,
+            reason,
+            source,
+            evidence_url,
+            rejected_at,
+        ),
+    )
+
+
+def clear_rejection(conn: sqlite3.Connection, *, entity_id: int) -> None:
+    """Remove a rejection after a correction or fresh public evidence."""
+    ensure_schema(conn)
+    conn.execute(
+        "DELETE FROM entity_registry_rejections WHERE entity_id = ?",
+        (entity_id,),
+    )
+
+
 def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
-    """Return identity-bearing fields plus the structural-kind reason."""
+    """Return identity fields, structural-kind reason, and curation state."""
     ensure_schema(conn)
     has_classifications = bool(
         conn.execute(
@@ -212,16 +265,24 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
         f"""WITH selected AS (
                SELECT e.id, e.slug, e.kind, e.name
                FROM entities e
-               ORDER BY CASE e.kind
-                            WHEN 'organization' THEN 0
-                            WHEN 'person' THEN 1
-                            WHEN 'unsure' THEN 2
-                            ELSE 3
+               LEFT JOIN entity_registry_rejections rejected
+                 ON rejected.entity_id = e.id
+               ORDER BY CASE WHEN rejected.entity_id IS NOT NULL THEN 3
+                             WHEN e.kind = 'organization' THEN 0
+                             WHEN e.kind = 'person' THEN 1
+                             WHEN e.kind = 'unsure' THEN 2
+                             ELSE 4
                         END,
                         e.name COLLATE NOCASE
                LIMIT ?
            )
            SELECT e.id, e.slug, e.kind, e.name,
+                  CASE WHEN rejected.entity_id IS NULL
+                       THEN 'active' ELSE 'rejected' END AS registry_state,
+                  rejected.reason_code AS rejection_reason_code,
+                  rejected.reason AS rejection_reason,
+                  rejected.source AS rejection_source,
+                  rejected.evidence_url AS rejection_evidence_url,
                   {kind_reason_sql} AS kind_reason,
                   c.id AS channel_id, c.kind AS channel_kind, c.key AS channel_key,
                   c.label AS channel_label, c.url AS channel_url,
@@ -230,13 +291,15 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                      AND o.source = 'x_profile' AND o.metric = 'bio'
                    ORDER BY o.observed_at DESC LIMIT 1) AS bio
            FROM selected e
+           LEFT JOIN entity_registry_rejections rejected
+             ON rejected.entity_id = e.id
            LEFT JOIN entity_channels ec ON ec.entity_id = e.id
            LEFT JOIN channels c ON c.id = ec.channel_id
-           ORDER BY CASE e.kind
-                        WHEN 'organization' THEN 0
-                        WHEN 'person' THEN 1
-                        WHEN 'unsure' THEN 2
-                        ELSE 3
+           ORDER BY CASE WHEN rejected.entity_id IS NOT NULL THEN 3
+                         WHEN e.kind = 'organization' THEN 0
+                         WHEN e.kind = 'person' THEN 1
+                         WHEN e.kind = 'unsure' THEN 2
+                         ELSE 4
                     END,
                     e.name COLLATE NOCASE, c.kind, c.key""",
         (limit,),
@@ -250,6 +313,11 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                 "slug": row["slug"],
                 "kind": row["kind"],
                 "kind_reason": row["kind_reason"],
+                "registry_state": row["registry_state"],
+                "rejection_reason_code": row["rejection_reason_code"],
+                "rejection_reason": row["rejection_reason"],
+                "rejection_source": row["rejection_source"],
+                "rejection_evidence_url": row["rejection_evidence_url"],
                 "name": row["name"],
                 "bio": None,
                 "channels": [],
@@ -271,10 +339,18 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
 
 
 def kind_counts(conn: sqlite3.Connection) -> dict[str, int]:
+    """Return disjoint Registry-view counts, including rejected entities."""
     ensure_schema(conn)
     counts = {kind: 0 for kind in channels.ENTITY_KINDS}
+    counts["rejected"] = 0
     for row in conn.execute(
-        "SELECT kind, COUNT(*) AS n FROM entities GROUP BY kind"
+        """SELECT CASE WHEN rejected.entity_id IS NOT NULL
+                        THEN 'rejected' ELSE e.kind END AS registry_kind,
+                  COUNT(*) AS n
+           FROM entities e
+           LEFT JOIN entity_registry_rejections rejected
+             ON rejected.entity_id = e.id
+           GROUP BY registry_kind"""
     ).fetchall():
-        counts[row["kind"]] = row["n"]
+        counts[row["registry_kind"]] = row["n"]
     return counts

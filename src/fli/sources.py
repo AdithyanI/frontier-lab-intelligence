@@ -240,6 +240,7 @@ class TwitterApiIoClient:
         username: str,
         limit: int = 20,
         max_pages: int = 10,
+        profile: dict[str, Any] | None = None,
     ) -> tuple[dict[str, Any], ...]:
         """Return recent authored posts, excluding replies and retweets.
 
@@ -254,6 +255,15 @@ class TwitterApiIoClient:
         handle = username.strip().removeprefix("@").lower()
         if not X_HANDLE_RE.fullmatch(handle):
             raise ValueError(f"invalid X handle: {username!r}")
+        profile = profile or self.fetch_user(username=handle)
+        if is_protected_profile(profile):
+            raise SourceCliError(
+                code="E_ACCOUNT_PROTECTED",
+                message=f"@{handle} has protected posts.",
+                hint="Reject protected accounts; their posts are not public evidence.",
+                exit_code=6,
+                retryable=False,
+            )
 
         posts: list[dict[str, Any]] = []
         seen_ids: set[str] = set()
@@ -332,6 +342,7 @@ class TwitterApiIoClient:
             if self.page_sleep_seconds > 0:
                 time.sleep(self.page_sleep_seconds)
         return tuple(posts)
+
     def fetch_following_page(
         self,
         *,
@@ -431,6 +442,14 @@ def _is_reply(tweet: dict[str, Any]) -> bool:
         or tweet.get("is_reply")
         or tweet.get("inReplyToId")
         or tweet.get("in_reply_to_status_id")
+    )
+
+
+def is_protected_profile(profile: dict[str, Any]) -> bool:
+    """Return the provider's explicit protected/private account state."""
+    return any(
+        profile.get(key) is True
+        for key in ("protected", "isProtected", "isPrivate", "private")
     )
 
 

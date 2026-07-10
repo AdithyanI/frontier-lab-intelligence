@@ -4,8 +4,9 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
-Registry retains the post-1,000-follower-floor classified universe: 2,607
-people, 180 organizations, 137 unsure, and zero unknown. The rejected Digg
+Registry retains the post-1,000-follower-floor classified universe: 2,735
+people, 184 organizations, two active unsure, three rejected, and zero unknown.
+Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
 1,000-account ranking survives only as an offline comparison CSV; the active
@@ -13,8 +14,8 @@ graph is empty until the trusted-seed contract is accepted. The `labs` table
 remains internal source/seed provenance because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
-Channel merging, track/reject curation, extraction, and scoring remain later
-stages.
+Channel merging, broader relevance curation, extraction, and scoring remain
+later stages.
 
 ## Stack
 
@@ -141,8 +142,9 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,924 classified entities: 2,607 people, 180
-  organizations, and 137 unsure. The 2,956 channels include 32 additional lab
+- The active Registry retains 2,924 classified entities: 2,735 people, 184
+  organizations, two active unsure, and three protected-account rejections. The
+  2,956 channels include 32 additional lab
   channels. Removing discovery edges does not remove already classified nodes.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
   marker. The 2,308 accounts actually observed through Digg also carry one
@@ -165,8 +167,9 @@ This is what actually exists in `data/fli.db` today. The `accounts`,
 `account_source_facts`, and empty `graph_edges` tables back X source imports;
 the product model is `entities`, `channels`, `entity_channels`, and
 `channel_observations`.
-The classifier adds separate run, profile-only result, web-enrichment, and
-error tables without changing `entities.kind` until an explicit promotion.
+The classifier adds separate run, classification, and error tables. Registry
+rejections remain separate from structural kind in
+`entity_registry_rejections`.
 `raw_items` is an unconnected bootstrap table. Row counts as of this writing
 are in parentheses.
 
@@ -264,6 +267,14 @@ erDiagram
         string error_type
         int terminal
     }
+    ENTITY_REGISTRY_REJECTIONS {
+        int entity_id PK,FK
+        string reason_code
+        string reason
+        string source
+        string evidence_url
+        string rejected_at
+    }
     ENTITY_KIND_WEB_ENRICHMENTS {
         int entity_id FK
         string input_sha256
@@ -289,6 +300,7 @@ erDiagram
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (0)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
     ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
+    ENTITIES ||--o| ENTITY_REGISTRY_REJECTIONS : "may be rejected with reason"
 ```
 
 Table row counts: `raw_items` 1,599, `accounts` 2,924,
@@ -296,7 +308,7 @@ Table row counts: `raw_items` 1,599, `accounts` 2,924,
 `entities` 2,924, `channels` 2,956, `entity_channels` 2,956,
 `channel_observations` 13,545, `entity_kind_classification_runs` 8,
 `entity_kind_classifications` 2,946, `entity_kind_web_enrichments` 0, and
-`entity_kind_classification_errors` 0.
+`entity_kind_classification_errors` 0, and `entity_registry_rejections` 3.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -322,8 +334,9 @@ creates a provisional `unknown` entity. The canonical structural vocabulary is
 `person`, `organization`, and `unsure`; `unknown` is only the pre-classification
 lifecycle state. The 10 seeded rows in `labs` remain internal source provenance
 and do not create a public subtype. There is no generic entity-role schema yet;
-add one only after an exhaustive role policy is justified. Curation (`track` /
-`reject`) remains a separate later stage.
+add one only after an exhaustive role policy is justified. Rejection remains a
+separate curation state. An explicit protected-account flag is the first
+implemented rejection gate; broader relevance curation remains later.
 
 ```mermaid
 flowchart TD
@@ -331,14 +344,16 @@ flowchart TD
     R{Known identity?}
     E[Link existing entity]
     U[Create unknown entity]
+    P{Public account?}
+    X[Rejected<br/>reason retained]
     K[Kind classifier<br/>person · organization · unsure]
-    D[Track or reject later]
+    D[Broader relevance curation later]
 
     C --> R
-    R -->|yes| E
-    R -->|no or uncertain| U
-    E --> K
-    U --> K
+    R -->|yes| E --> P
+    R -->|no or uncertain| U --> P
+    P -->|protected| X
+    P -->|public| K
     K --> D
 ```
 

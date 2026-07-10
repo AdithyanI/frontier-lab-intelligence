@@ -25,12 +25,20 @@ export type EntityKind =
   | 'unsure'
   | 'unknown'
 
+export type RegistryState = 'active' | 'rejected'
+export type RegistryGroup = EntityKind | 'rejected'
+
 export interface Entity {
   id: number
   slug: string
   name: string
   kind: EntityKind
   kind_reason: string | null
+  registry_state: RegistryState
+  rejection_reason_code: string | null
+  rejection_reason: string | null
+  rejection_source: string | null
+  rejection_evidence_url: string | null
   bio: string | null
   channels: EntityChannel[]
 }
@@ -38,7 +46,7 @@ export interface Entity {
 export interface Registry {
   entities: Entity[]
   total: number
-  counts: Record<EntityKind, number>
+  counts: Record<RegistryGroup, number>
 }
 
 export async function getJSON<T>(url: string): Promise<T> {

@@ -2,6 +2,8 @@ import json
 from io import BytesIO
 from urllib import error
 
+import pytest
+
 from fli import sources
 
 
@@ -410,6 +412,11 @@ def test_recent_authored_posts_filter_retweets_replies_and_paginate(monkeypatch)
         return next(pages)
 
     monkeypatch.setattr(client, "fetch_recent_tweets_page", fake_fetch_page)
+    monkeypatch.setattr(
+        client,
+        "fetch_user",
+        lambda *, username: {"userName": username, "protected": False},
+    )
 
     posts = client.fetch_recent_authored_posts(username="@Example", limit=2)
 
@@ -417,6 +424,30 @@ def test_recent_authored_posts_filter_retweets_replies_and_paginate(monkeypatch)
     assert [post["id"] for post in posts] == ["original", "quote"]
     assert posts[0]["text"] == "I built & shipped this."
     assert posts[1]["post_type"] == "quote"
+
+
+def test_recent_authored_posts_reject_protected_account(monkeypatch):
+    client = sources.TwitterApiIoClient(api_key="secret", page_sleep_seconds=0)
+    timeline_called = False
+
+    monkeypatch.setattr(
+        client,
+        "fetch_user",
+        lambda *, username: {"userName": username, "protected": True},
+    )
+
+    def fake_timeline(**_kwargs):
+        nonlocal timeline_called
+        timeline_called = True
+        return {"tweets": []}
+
+    monkeypatch.setattr(client, "fetch_recent_tweets_page", fake_timeline)
+
+    with pytest.raises(sources.SourceCliError) as exc_info:
+        client.fetch_recent_authored_posts(username="private_user")
+
+    assert exc_info.value.code == "E_ACCOUNT_PROTECTED"
+    assert timeline_called is False
 
 
 def test_following_cli_defaults_to_no_page_sleep(monkeypatch, capsys):

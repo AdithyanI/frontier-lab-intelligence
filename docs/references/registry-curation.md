@@ -31,7 +31,8 @@ channel import
   -> otherwise create one provisional entity with kind=unknown
   -> later resolver links an existing actor, creates person/organization,
      or abstains
-  -> later curation policy proposes track/reject
+  -> deterministic eligibility gates may reject before model inference
+  -> later relevance curation may propose track/reject
   -> human corrections override automated proposals durably
 ```
 
@@ -44,6 +45,8 @@ Current invariants:
 - A seeded lab may claim a channel from a one-channel provisional unknown.
 - A resolved entity's channel cannot be silently reassigned.
 - Missing identity evidence stays missing; classifier abstention is `unsure`.
+- A Registry rejection is stored separately from structural kind with a reason,
+  source, evidence URL, and timestamp.
 
 ## Current Implemented Universe
 
@@ -52,9 +55,10 @@ filtered and classified nodes, the active corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 2,607 |
-| organization | 180 (including 10 seeded labs) |
-| unsure | 137 |
+| person | 2,735 |
+| organization | 184 (including 10 seeded labs) |
+| unsure (active) | 2 |
+| rejected | 3 |
 | unknown | 0 |
 | **total** | **2,924** |
 
@@ -156,7 +160,15 @@ overhead, is approximately `$1.459852`. Those results are now projected, giving
 2,639 people, 182 organizations after including the 10 seeded labs, 145 unsure,
 and zero unknown. Classification remains separate from merging and relevance.
 
-## Later Track/Reject Curation
+## Registry Rejection And Later Relevance Curation
+
+An explicit protected/private provider flag is now a deterministic eligibility
+gate: the account is rejected before any LLM call because its public output
+cannot be collected. The entity and its structural kind remain intact for
+auditability. `entity_registry_rejections` stores the reason code, human-readable
+reason, provider source, evidence URL, and decision time. The Registry presents
+these rows in a separate Rejected view; they are excluded from active
+person/organization/unsure counts.
 
 Tracking is a separate decision and may use richer attention and relevance
 evidence. Store automated decisions with rationale, model/policy version,
@@ -186,13 +198,13 @@ call with `previous_response_id`. Quote posts contribute only the account's
 top-level commentary. Both turns use Luna-medium through LiteLLM and the same
 strict `classification` + `reason` schema.
 
-The initial calibration runner intentionally does not add a database table,
-write classifications, or change `entities.kind`. It returns the normalized
-post evidence, stage outputs, Response IDs, hashes, tokens, LiteLLM tags, local
-estimate, proxy-reported cost, and errors for inspection. Responses use Azure's
-normal 30-day storage to support chaining and are not explicitly deleted.
-Durable persistence and resume semantics will be selected after the bounded
-calibration shows which evidence is useful.
+The accepted runner now persists each final decision and promotes its canonical
+kind with per-entity commits. It stores the final Response ID, evidence hash,
+aggregate token usage, proxy-reported cost, and reason in the existing
+classification tables. Before the profile turn it fetches the provider profile;
+an explicit protected flag records a Registry rejection instead and performs
+zero model calls. Responses use Azure's normal 30-day storage to support
+chaining and are not explicitly deleted.
 
 Hosted Azure web search was separately proven through LiteLLM and remains a
 historical capability smoke, not part of the selected entity-kind workflow.

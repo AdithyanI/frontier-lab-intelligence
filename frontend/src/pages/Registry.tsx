@@ -5,10 +5,11 @@ import {
   type Entity,
   type EntityChannel,
   type EntityKind,
+  type RegistryGroup,
   type Registry as RegistryData,
 } from '../api'
 
-type KindFilter = 'all' | EntityKind
+type KindFilter = 'all' | RegistryGroup
 
 const BRAND_ICON: Record<string, string> = {
   github: siGithub.path,
@@ -30,7 +31,11 @@ const TYPE_LABEL: Record<EntityKind, string> = {
   unknown: 'Unknown',
 }
 
-const typeLabel = (entity: Entity) => TYPE_LABEL[entity.kind]
+const typeLabel = (entity: Entity) =>
+  entity.registry_state === 'rejected' ? 'Rejected' : TYPE_LABEL[entity.kind]
+
+const typeClass = (entity: Entity) =>
+  entity.registry_state === 'rejected' ? 'rejected' : entity.kind
 
 function ChannelGlyph({ kind }: { kind: string }) {
   if (kind === 'website') {
@@ -99,11 +104,17 @@ export default function Registry() {
     if (!data) return []
     const needle = query.trim().toLowerCase()
     return data.entities.filter((entity) => {
-      if (kind !== 'all' && entity.kind !== kind) return false
+      if (kind === 'rejected' && entity.registry_state !== 'rejected') return false
+      if (
+        kind !== 'all' &&
+        kind !== 'rejected' &&
+        (entity.registry_state === 'rejected' || entity.kind !== kind)
+      ) return false
       if (!needle) return true
       return (
         entity.name.toLowerCase().includes(needle) ||
         (entity.bio ?? '').toLowerCase().includes(needle) ||
+        (entity.rejection_reason ?? '').toLowerCase().includes(needle) ||
         entity.channels.some((channel) =>
           channel.key.toLowerCase().includes(needle),
         )
@@ -123,6 +134,11 @@ export default function Registry() {
       count: data?.counts.organization ?? 0,
     },
     { key: 'unsure', label: 'Unsure', count: data?.counts.unsure ?? 0 },
+    {
+      key: 'rejected',
+      label: 'Rejected',
+      count: data?.counts.rejected ?? 0,
+    },
   ]
   if ((data?.counts.unknown ?? 0) > 0) {
     filters.push({
@@ -131,6 +147,7 @@ export default function Registry() {
       count: data?.counts.unknown ?? 0,
     })
   }
+  const showRejectionReason = kind === 'rejected'
 
   return (
     <div className="page">
@@ -138,7 +155,7 @@ export default function Registry() {
       <h1 className="page-title">Registry</h1>
       <p className="page-sub">
         {data
-          ? `${fmt(data.total)} identities: ${fmt(data.counts.person)} people, ${fmt(data.counts.organization)} organizations, and ${fmt(data.counts.unsure)} unsure.`
+          ? `${fmt(data.total)} identities: ${fmt(data.counts.person)} people, ${fmt(data.counts.organization)} organizations, ${fmt(data.counts.unsure)} unsure, and ${fmt(data.counts.rejected)} rejected.`
           : 'Every observed channel resolves to one structurally typed entity.'}
       </p>
 
@@ -155,7 +172,7 @@ export default function Registry() {
           onChange={(event) => setQuery(event.target.value)}
           aria-label="Search entities"
         />
-        <div className="seg" role="tablist" aria-label="Filter by type">
+        <div className="seg" role="tablist" aria-label="Filter Registry">
           {filters.map((filter) => (
             <button
               key={filter.key}
@@ -184,6 +201,7 @@ export default function Registry() {
             <tr>
               <th>Entity</th>
               <th>Type</th>
+              {showRejectionReason && <th>Why rejected</th>}
             </tr>
           </thead>
           <tbody>
@@ -209,10 +227,15 @@ export default function Registry() {
                     )}
                   </td>
                   <td>
-                    <span className={`ent-type ent-type--${entity.kind}`}>
+                    <span className={`ent-type ent-type--${typeClass(entity)}`}>
                       {typeLabel(entity)}
                     </span>
                   </td>
+                  {showRejectionReason && (
+                    <td className="ent-rejection-reason">
+                      {entity.rejection_reason ?? 'No rejection reason recorded.'}
+                    </td>
+                  )}
                 </tr>
               )
             })}
@@ -293,7 +316,7 @@ function EntityCard({
 
       <div className="ent-card-inner">
         <header className="ent-card-head">
-          <span className={`ent-type ent-type--${entity.kind}`}>
+          <span className={`ent-type ent-type--${typeClass(entity)}`}>
             {typeLabel(entity)}
           </span>
           <h2 id={titleId}>{entity.name}</h2>
@@ -323,7 +346,14 @@ function EntityCard({
           )}
         </section>
 
-        {entity.kind_reason && (
+        {entity.registry_state === 'rejected' && entity.rejection_reason && (
+          <div className="ent-card-reason ent-card-reason--rejected">
+            <div className="ent-card-label">Why rejected</div>
+            <p>{entity.rejection_reason}</p>
+          </div>
+        )}
+
+        {entity.registry_state !== 'rejected' && entity.kind_reason && (
           <div className="ent-card-reason">
             <div className="ent-card-label">Why this type</div>
             <p>{entity.kind_reason}</p>

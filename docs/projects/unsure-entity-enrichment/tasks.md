@@ -2,17 +2,17 @@
 
 ## Goal
 
-Add a bounded profile-to-recent-posts Responses workflow for structurally
-`unsure` entities without changing canonical kinds until Adi reviews a live
-calibration.
+Resolve structurally `unsure` entities with a bounded profile-to-recent-posts
+Responses workflow, persist accepted results, and reject accounts whose posts
+are explicitly protected before any model call.
 
 ## Why / Impact
 
 The profile-only classifier initially abstained on 145 weak identity records;
-137 remain after explicit follower-floor removals and the graph-evidence reset.
-Many can likely be resolved from their own recent authored posts. The first
-calibration should test that evidence and the two-turn model interaction before
-choosing a durable local persistence contract.
+The 137-account cohort has now been classified and persisted. Three of the five
+remaining abstentions expose an explicit protected-account flag and cannot
+supply public output, so they belong in an auditable rejected state rather than
+being deleted or sent to the model again.
 
 ## Scope / Non-Goals
 
@@ -28,12 +28,11 @@ choosing a durable local persistence contract.
 - Return only `classification` and `reason` from the model.
 - Return inspectable stage outputs, Response IDs, normalized evidence, usage,
   cost, and errors from the bounded calibration runner.
+- Check the provider's explicit protected flag before inference; persist a
+  reason-bearing Registry rejection and make it visible in the UI.
 
 ### Out of Scope
 
-- Running the full unsure cohort in this implementation batch.
-- Promoting enriched results into `entities.kind`.
-- Adding a new database table or deciding the production persistence schema.
 - Hosted web search or open-web fallback.
 - Relevance curation, channel merging, roles, affiliations, or new sources.
 - Agents SDK, Codex subagents, or a generalized agent framework.
@@ -56,10 +55,8 @@ choosing a durable local persistence contract.
   the authored-post follow-up and `previous_response_id`.
 - [x] Retweets and replies are excluded, including across pagination.
 - [x] Contract, chaining, error, scope, and bounded CLI tests pass.
-- [ ] Adi reviews a bounded calibration and accepts or changes the evidence
-  policy before any full run.
-- [ ] Promotion is implemented and executed, or explicitly descoped, before
-  project closeout.
+- [x] The full cohort is persisted and promoted with per-entity resumability.
+- [x] Protected accounts are rejected before inference and shown with reasons.
 
 ## Milestones
 
@@ -67,10 +64,13 @@ choosing a durable local persistence contract.
   one recent-post follow-up with the same strict output contract.
 - [x] M2 — Implement authored-post retrieval. Acceptance: up to 20 normalized
   authored posts are returned while replies and retweets are excluded.
-- [ ] M3 — Validate and calibrate. Acceptance: `scripts/check-fast.sh` passes
+- [x] M3 — Validate and calibrate. Acceptance: `scripts/check-fast.sh` passes
   and a bounded live sample is reviewed before storage or promotion work.
-- [ ] M4 — Calibrate and decide promotion. Acceptance: reviewed evidence and
+- [x] M4 — Calibrate and decide promotion. Acceptance: reviewed evidence and
   cost support an explicit go/change/stop decision before bulk execution.
+- [x] M5 — Reject unusable protected accounts. Acceptance: rejection occurs
+  before model inference, retains the entity kind, and exposes a reason in the
+  Registry.
 
 ## Execution Rules
 
@@ -92,6 +92,9 @@ choosing a durable local persistence contract.
 - Responses use `store=True` only to support chaining and rely on Azure's normal
   30-day retention; no explicit remote deletion is required.
 - The first calibration returns JSON but does not write model results locally.
+- A Registry rejection is curation state, not a fourth structural kind. The
+  add-only `entity_registry_rejections` table owns its code, reason, source,
+  evidence URL, and timestamp.
 
 ## Open Questions / Blockers
 
@@ -107,7 +110,9 @@ choosing a durable local persistence contract.
 | done | Replace the hosted-web runner with one profile-to-posts Responses workflow. | parent | — |
 | done | Add focused chaining and TwitterAPI.io authored-post tests. | parent | — |
 | done | Run the full 137-account calibration; do not persist or promote results. | parent | — |
-| pending | Decide the local persistence/resume contract from calibration evidence. | Adi + parent | — |
+| done | Persist and promote the current 137-account set using the existing schema. | parent | — |
+| done | Reject the three explicitly protected remaining accounts before inference and expose the reason in the Registry. | parent | — |
+| pending | Implement the canonical single-handle X onboarding lifecycle. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -116,6 +121,8 @@ choosing a durable local persistence contract.
 - [ ] Decide the durable local storage and resume contract.
 - [ ] Implement and validate atomic promotion only after the policy is accepted.
 - [ ] Run the accepted scope, verify Registry invariants, and archive the project.
+- [ ] Route the canonical single-handle onboarding lifecycle through the same
+  protected-account gate and rejection store.
 
 ## Validation / Test Plan
 
@@ -179,3 +186,14 @@ choosing a durable local persistence contract.
   LiteLLM; an earlier 10-account calibration cost `$0.018285`. Removed an
   arbitrary local 240-character reason limit and raised the Responses output
   ceiling after the calibration exposed both harness issues.
+- 2026-07-10: [DONE] At Adi's direction, reran the current 137-account set and
+  committed every completion immediately into the existing
+  `entity_kind_classifications` table, then updated `entities.kind` without a
+  schema change. The Registry now shows 2,735 people, 184 organizations, five
+  unsure, and zero unknown; the live API/UI and SQLite integrity check confirm
+  the persisted state. This persistence run cost `$0.382921` through LiteLLM.
+- 2026-07-10: [DONE] Added an explicit protected-account precondition before
+  model inference and a separate reason-bearing Registry rejection state.
+  Marked `@_michi_y`, `@andrwpng`, and `@samsamoa` rejected from provider flags
+  without deleting them. The Registry now presents 2,735 people, 184
+  organizations, two active unsure, three rejected, and zero unknown.

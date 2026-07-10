@@ -114,10 +114,58 @@ def test_registry_read_model_excludes_attention_and_source_fields(tmp_path):
         "slug",
         "kind",
         "kind_reason",
+        "registry_state",
+        "rejection_reason_code",
+        "rejection_reason",
+        "rejection_source",
+        "rejection_evidence_url",
         "name",
         "bio",
         "channels",
     }
     assert row["kind_reason"] is None
+    assert row["registry_state"] == "active"
+    assert row["rejection_reason"] is None
     assert row["bio"] == "I like to train neural nets."
     assert "rank" not in row
+
+
+def test_registry_rejection_is_reasoned_and_separate_from_kind(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    channels.upsert_channel(
+        conn,
+        kind="x",
+        key="private_person",
+        label="Private Person",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    registry.materialize_unlinked_channels(conn)
+    entity = conn.execute("SELECT * FROM entities").fetchone()
+    conn.execute(
+        "UPDATE entities SET kind = 'unsure' WHERE id = ?",
+        (entity["id"],),
+    )
+    registry.reject_entity(
+        conn,
+        entity_id=entity["id"],
+        reason_code="protected_x_account",
+        reason="The X account has protected posts.",
+        source="twitterapi_io",
+        evidence_url="https://x.com/private_person",
+        rejected_at="2026-07-10T00:00:00+00:00",
+    )
+    conn.commit()
+
+    row = registry.read_entities(conn)[0]
+    assert row["kind"] == "unsure"
+    assert row["registry_state"] == "rejected"
+    assert row["rejection_reason_code"] == "protected_x_account"
+    assert row["rejection_reason"] == "The X account has protected posts."
+    assert row["rejection_source"] == "twitterapi_io"
+    assert registry.kind_counts(conn) == {
+        "person": 0,
+        "organization": 0,
+        "unsure": 0,
+        "unknown": 0,
+        "rejected": 1,
+    }

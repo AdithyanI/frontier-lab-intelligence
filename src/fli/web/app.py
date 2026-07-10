@@ -33,6 +33,7 @@ def _model_conn():
     ).fetchone()
     if conn.execute("SELECT COUNT(*) FROM channels").fetchone()[0] == 0 or unlinked:
         channels.sync_all(conn)
+    entity_registry.ensure_schema(conn)
     return conn
 
 
@@ -59,7 +60,15 @@ def _counts() -> dict:
                 "SELECT COUNT(*) FROM entities WHERE kind = 'unknown'"
             ),
             "unsure_entities": one(
-                "SELECT COUNT(*) FROM entities WHERE kind = 'unsure'"
+                """SELECT COUNT(*) FROM entities e
+                   WHERE e.kind = 'unsure'
+                     AND NOT EXISTS (
+                         SELECT 1 FROM entity_registry_rejections rejected
+                         WHERE rejected.entity_id = e.id
+                     )"""
+            ),
+            "rejected_entities": one(
+                "SELECT COUNT(*) FROM entity_registry_rejections"
             ),
         }
     finally:
@@ -90,6 +99,7 @@ def status() -> JSONResponse:
                 {"label": "entity universe", "value": c["entities"]},
                 {"label": "classified", "value": c["classified_entities"]},
                 {"label": "unsure", "value": c["unsure_entities"]},
+                {"label": "rejected", "value": c["rejected_entities"]},
             ],
         },
         {
