@@ -85,15 +85,19 @@ SEED_LABS = [
         "notes": "Named in case prompt.",
     },
     {
-        "slug": "xai",
-        "name": "xAI",
+        "slug": "spacex",
+        "name": "SpaceX",
         "status": "frontier",
-        "x_handle": "xai",
+        "x_handle": "spacexai",
+        "x_handles": ["spacex", "spacexai"],
         "website": "https://x.ai",
         "blog_feed": None,
         "github_org": "xai-org",
         "arxiv_query": 'all:"xAI"',
-        "notes": "No blog RSS; news page needs scraping. Publishes little on arXiv.",
+        "notes": (
+            "Named in the case prompt as xAI; now consolidated under SpaceX. "
+            "The x.ai news page needs scraping and publishes little on arXiv."
+        ),
     },
     {
         "slug": "mistral",
@@ -197,8 +201,83 @@ def seed(conn: sqlite3.Connection, labs: list[dict] | None = None) -> dict[str, 
         )
     conn.commit()
     channel_counts = channels.sync_all(conn)
+    configured_x_channels = _claim_configured_x_channels(
+        conn,
+        labs=labs,
+        observed_at=seeded_at,
+    )
     n = conn.execute("SELECT COUNT(*) AS n FROM labs").fetchone()["n"]
-    return {"labs": n, "x_linked": linked, **channel_counts}
+    return {
+        "labs": n,
+        "x_linked": linked,
+        "configured_x_channels": configured_x_channels,
+        **channel_counts,
+    }
+
+
+def _claim_configured_x_channels(
+    conn: sqlite3.Connection,
+    *,
+    labs: list[dict],
+    observed_at: str,
+) -> int:
+    """Attach every explicitly configured X account to its lab entity.
+
+    ``labs.x_handle`` remains the primary provider/account lookup. The optional
+    source-only ``x_handles`` list expresses the real one-organization-to-many-
+    X-accounts relationship without flattening those accounts into one channel.
+    """
+    from fli import registry
+
+    claimed = 0
+    for lab in labs:
+        handles = lab.get("x_handles") or [lab.get("x_handle")]
+        handles = [handle for handle in handles if handle]
+        if not handles:
+            continue
+        entity = conn.execute(
+            "SELECT id FROM entities WHERE slug = ?", (lab["slug"],)
+        ).fetchone()
+        if entity is None:
+            raise RuntimeError(f"seeded lab entity {lab['slug']!r} is missing")
+        for handle in dict.fromkeys(handle.lower() for handle in handles):
+            channel_id = channels.upsert_channel(
+                conn,
+                kind="x",
+                key=handle,
+                observed_at=observed_at,
+            )
+            owner = conn.execute(
+                """SELECT e.id, e.kind
+                   FROM entity_channels ec
+                   JOIN entities e ON e.id = ec.entity_id
+                   WHERE ec.channel_id = ?""",
+                (channel_id,),
+            ).fetchone()
+            if (
+                owner is not None
+                and owner["id"] != entity["id"]
+                and owner["kind"] != "unknown"
+            ):
+                registry.merge_entity_into(
+                    conn,
+                    canonical_entity_id=entity["id"],
+                    duplicate_entity_id=owner["id"],
+                    observed_at=observed_at,
+                )
+            registry.claim_channel(
+                conn,
+                entity_id=entity["id"],
+                channel_id=channel_id,
+                relationship="official",
+                confidence=1.0,
+                evidence_url=f"https://x.com/{handle}",
+                notes="Official X account from the curated lab seed.",
+                observed_at=observed_at,
+            )
+            claimed += 1
+    conn.commit()
+    return claimed
 
 
 def summary(conn: sqlite3.Connection) -> list[str]:

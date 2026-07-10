@@ -169,3 +169,79 @@ def test_registry_rejection_is_reasoned_and_separate_from_kind(tmp_path):
         "unknown": 0,
         "rejected": 1,
     }
+
+
+def test_merge_entity_moves_channels_without_losing_observations(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    canonical_id = channels.upsert_entity(
+        conn,
+        kind="organization",
+        slug="spacex",
+        name="SpaceX",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    duplicate_id = channels.upsert_entity(
+        conn,
+        kind="organization",
+        slug="x-spacexai",
+        name="SpaceXAI",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    corporate_channel = channels.upsert_channel(
+        conn,
+        kind="x",
+        key="spacex",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    ai_channel = channels.upsert_channel(
+        conn,
+        kind="x",
+        key="spacexai",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    channels.link_entity_channel(
+        conn,
+        entity_id=canonical_id,
+        channel_id=corporate_channel,
+        relationship="official",
+    )
+    channels.link_entity_channel(
+        conn,
+        entity_id=duplicate_id,
+        channel_id=ai_channel,
+        relationship="identity",
+    )
+    channels.observe_channel(
+        conn,
+        channel_id=ai_channel,
+        source="x_profile",
+        metric="followers_count",
+        value=2_000_000,
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    conn.commit()
+
+    result = registry.merge_entity_into(
+        conn,
+        canonical_entity_id=canonical_id,
+        duplicate_entity_id=duplicate_id,
+        observed_at="2026-07-10T01:00:00+00:00",
+    )
+
+    assert result["moved_channels"] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE id = ?", (duplicate_id,)
+    ).fetchone()[0] == 0
+    handles = conn.execute(
+        """SELECT c.key
+           FROM channels c
+           JOIN entity_channels ec ON ec.channel_id = c.id
+           WHERE ec.entity_id = ? AND c.kind = 'x'
+           ORDER BY c.key""",
+        (canonical_id,),
+    ).fetchall()
+    assert [row["key"] for row in handles] == ["spacex", "spacexai"]
+    assert conn.execute(
+        "SELECT value FROM channel_observations WHERE channel_id = ?",
+        (ai_channel,),
+    ).fetchone()["value"] == "2000000"

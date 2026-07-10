@@ -40,3 +40,45 @@ def test_seed_links_org_accounts_and_is_idempotent(tmp_path):
     # reseed must not duplicate
     counts2 = labs.seed(conn)
     assert counts2["labs"] == counts["labs"]
+
+
+def test_seed_can_claim_multiple_x_accounts_for_one_organization(tmp_path):
+    db = tmp_path / "test.db"
+    conn = labs.connect(db)
+    conn.executemany(
+        """INSERT INTO accounts
+           (platform, handle, display_name, first_seen_at, last_seen_at)
+           VALUES ('x', ?, ?, '2026-07-10', '2026-07-10')""",
+        [("spacex", "SpaceX"), ("spacexai", "SpaceXAI")],
+    )
+    lab = {
+        "slug": "spacex",
+        "name": "SpaceX",
+        "status": "frontier",
+        "x_handle": "spacexai",
+        "x_handles": ["spacex", "spacexai"],
+        "website": "https://x.ai",
+        "blog_feed": None,
+        "github_org": "xai-org",
+        "arxiv_query": 'all:"xAI"',
+        "notes": "Tracks the AI unit inside SpaceX.",
+    }
+
+    counts = labs.seed(conn, labs=[lab])
+
+    assert counts["configured_x_channels"] == 2
+    entity = conn.execute(
+        "SELECT * FROM entities WHERE slug = 'spacex'"
+    ).fetchone()
+    handles = conn.execute(
+        """SELECT c.key
+           FROM channels c
+           JOIN entity_channels ec ON ec.channel_id = c.id
+           WHERE ec.entity_id = ? AND c.kind = 'x'
+           ORDER BY c.key""",
+        (entity["id"],),
+    ).fetchall()
+    assert [row["key"] for row in handles] == ["spacex", "spacexai"]
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE kind = 'organization'"
+    ).fetchone()[0] == 1

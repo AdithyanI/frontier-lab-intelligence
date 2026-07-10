@@ -243,6 +243,61 @@ def clear_rejection(conn: sqlite3.Connection, *, entity_id: int) -> None:
     )
 
 
+def merge_entity_into(
+    conn: sqlite3.Connection,
+    *,
+    canonical_entity_id: int,
+    duplicate_entity_id: int,
+    observed_at: str | None = None,
+) -> dict[str, int]:
+    """Move every channel to one canonical entity and remove the duplicate.
+
+    Accounts, channel observations, and source facts stay attached to their
+    existing account/channel rows. Only the redundant real-world identity is
+    removed. Callers must make the ownership decision explicitly.
+    """
+    ensure_schema(conn)
+    if canonical_entity_id == duplicate_entity_id:
+        raise ValueError("canonical and duplicate entities must differ")
+    canonical = conn.execute(
+        "SELECT id, kind FROM entities WHERE id = ?", (canonical_entity_id,)
+    ).fetchone()
+    duplicate = conn.execute(
+        "SELECT id, kind FROM entities WHERE id = ?", (duplicate_entity_id,)
+    ).fetchone()
+    if canonical is None:
+        raise ValueError(f"canonical entity {canonical_entity_id} does not exist")
+    if duplicate is None:
+        raise ValueError(f"duplicate entity {duplicate_entity_id} does not exist")
+    if canonical["kind"] != duplicate["kind"]:
+        raise ValueError(
+            "entity merge requires matching structural kinds: "
+            f"{canonical['kind']} != {duplicate['kind']}"
+        )
+
+    observed_at = observed_at or _now()
+    moved_channels = conn.execute(
+        "SELECT COUNT(*) AS n FROM entity_channels WHERE entity_id = ?",
+        (duplicate_entity_id,),
+    ).fetchone()["n"]
+    conn.execute(
+        "UPDATE entity_channels SET entity_id = ? WHERE entity_id = ?",
+        (canonical_entity_id, duplicate_entity_id),
+    )
+    conn.execute(
+        "DELETE FROM entities WHERE id = ?", (duplicate_entity_id,)
+    )
+    conn.execute(
+        "UPDATE entities SET updated_at = ? WHERE id = ?",
+        (observed_at, canonical_entity_id),
+    )
+    return {
+        "canonical_entity_id": canonical_entity_id,
+        "removed_entity_id": duplicate_entity_id,
+        "moved_channels": moved_channels,
+    }
+
+
 def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
     """Return identity fields, structural-kind reason, and curation state."""
     ensure_schema(conn)
