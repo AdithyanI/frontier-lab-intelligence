@@ -106,10 +106,12 @@ Rules:
   Internal source seeds such as the curated `labs` table do not create public
   kinds, badges, or filters.
 - **Entity detail card:** native `<dialog>` opened on row click — type pill,
-  name, observed bio, channel chips, and the X profile as a tagged link pinned
-  at the bottom. Preserve bio line breaks; label source-truncated snapshots
-  honestly; bound long content with internal scrolling while keeping close
-  access fixed. Attention/ranking evidence stays out of this identity surface.
+  name, observed bio, and a flat platform matrix that groups every channel by
+  X, website, GitHub, or blog. Multiple X accounts are equal links on
+  one row; there is no privileged footer CTA. Preserve bio line breaks; label
+  source-truncated snapshots honestly; bound long content with internal
+  scrolling while keeping close access fixed. Attention/ranking evidence stays
+  out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
 - **Insight row (anticipated):** title, why-flagged rationale, score (mono),

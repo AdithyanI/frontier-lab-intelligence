@@ -19,8 +19,8 @@ identity," not "approved for tracking." The canonical structural kinds are
 `person`, `organization`, and `unsure`; `unknown` remains only the provisional
 lifecycle state for a newly observed, unclassified entity. Labs are not a
 fourth kind. The existing curated `labs` table remains internal seed/source
-provenance and is not exposed as an exhaustive Registry category. Later
-organization-channel merging remains separate.
+provenance and is not exposed as an exhaustive Registry category. Explicit
+organization-channel consolidation remains separate from kind classification.
 
 ## Channel-To-Entity Lifecycle
 
@@ -56,14 +56,18 @@ filtered and classified nodes, the active corpus contains:
 | Kind | Entities |
 | --- | ---: |
 | person | 2,736 |
-| organization | 184 (including 10 seeded labs) |
+| organization | 164 (including 10 seeded labs) |
 | unsure (active) | 1 |
 | rejected | 3 |
 | unknown | 0 |
-| **total** | **2,924** |
+| **total** | **2,904** |
 
-Those clusters own all 2,956 channels. The difference is the 32 additional
-official website, GitHub, arXiv, and blog channels already linked to labs.
+Those clusters own all 2,948 channels. The difference is 44 additional
+channels: 24 official website, GitHub, and blog channels linked to labs plus 20
+X/product channels consolidated into an existing organization (SpaceX first,
+then the 19-account reviewed batch below). The eight affiliation-search arXiv
+queries were removed from the identity channel model; all 137 fetched arXiv
+documents remain in `raw_items` for later extraction work.
 The active graph has zero edges. Digg's 1,000-account ranking is an offline
 comparison artifact and is not active Registry provenance. A node's accepted
 follower-floor and structural-kind decisions survive removal of its discovery
@@ -75,6 +79,41 @@ seen through the old Digg source also have one non-scoring
 `digg_bootstrap.candidate_origin` fact: `ranked`, `graph_node`, or
 `ranked_and_graph_node`. These facts explain why a node exists; they must never
 be interpreted as a rank or trusted-follow edge.
+
+## Reviewed Organization Consolidation
+
+False merges are more damaging than temporary duplicates. Organization
+consolidation therefore uses the reviewed
+`data/registry/organization-groups.json` manifest, never fuzzy matching or an
+LLM decision. `fli registry apply-organization-groups --dry-run` resolves and
+validates the entire manifest before mutation, uses one transaction, and may be
+rerun idempotently. Every applied decision records the removed entity, reason,
+source, evidence URL, and timestamp in `entity_merge_audit`; accounts,
+channels, observations, and source facts remain intact.
+
+The 2026-07-10 first wave consolidated 19 redundant entities into nine
+high-confidence organizations:
+
+| Canonical organization | Additional X channels |
+| --- | --- |
+| Anthropic | `@claudeai`, `@claudedevs` |
+| OpenAI | `@openaidevs` |
+| Mistral AI | `@mistraldevs` |
+| Anysphere | `@cursor_ai` |
+| Vercel | `@nextjs`, `@v0`, `@aisdk` |
+| Hugging Face | `@gradio`, `@diffuserslib` |
+| fal | `@editwithfal` |
+| Thinking Machines Lab | `@tinkerapi` |
+| Google | `@googleai`, `@geminiapp`, `@googlelabs`, `@googleaistudio`, `@googleresearch`, `@julesagent`, `@stitchbygoogle` |
+
+Google DeepMind remains first-class because the assignment evaluates frontier
+labs, not only legal parents. Manus remains separate from Meta because the
+acquisition was ordered unwound. Stable Diffusion remains separate from
+Stability AI because current product affiliation is certain but account-level
+corporate control was not strong enough for this precision-first wave. Ought
+and Elicit remain separate because Elicit became an independent public-benefit
+corporation. Independent communities such as `@claude_code` are not absorbed
+into the corresponding vendor.
 
 ## First Kind Classifier: Accepted Contract
 

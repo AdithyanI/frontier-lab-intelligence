@@ -1,3 +1,7 @@
+import json
+
+import pytest
+
 from fli import channels, graph, labs, registry
 
 
@@ -173,6 +177,7 @@ def test_registry_rejection_is_reasoned_and_separate_from_kind(tmp_path):
 
 def test_merge_entity_moves_channels_without_losing_observations(tmp_path):
     conn = channels.connect(tmp_path / "test.db")
+    registry.ensure_schema(conn)
     canonical_id = channels.upsert_entity(
         conn,
         kind="organization",
@@ -249,6 +254,7 @@ def test_merge_entity_moves_channels_without_losing_observations(tmp_path):
 
 def test_organization_groups_are_explicit_and_idempotent(tmp_path):
     conn = channels.connect(tmp_path / "test.db")
+    registry.ensure_schema(conn)
     entities = {}
     for handle, name in [
         ("anthropicai", "Anthropic"),
@@ -275,6 +281,14 @@ def test_organization_groups_are_explicit_and_idempotent(tmp_path):
             channel_id=channel_id,
             relationship="identity",
         )
+        channels.observe_channel(
+            conn,
+            channel_id=channel_id,
+            source="x_profile",
+            metric="bio",
+            value=f"Bio for {handle}",
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
         entities[handle] = entity_id
     conn.commit()
     groups = [
@@ -282,6 +296,7 @@ def test_organization_groups_are_explicit_and_idempotent(tmp_path):
             "canonical_handle": "anthropicai",
             "member_handles": ["claudeai", "claudedevs"],
             "reason": "Official Anthropic product accounts.",
+            "evidence_url": "https://www.anthropic.com/claude",
         }
     ]
 
@@ -308,3 +323,112 @@ def test_organization_groups_are_explicit_and_idempotent(tmp_path):
         "claudeai",
         "claudedevs",
     ]
+    assert conn.execute("SELECT COUNT(*) FROM entity_merge_audit").fetchone()[0] == 2
+    assert registry.read_entities(conn)[0]["bio"] == "Bio for anthropicai"
+
+
+def test_organization_group_dry_run_preserves_logical_snapshot(tmp_path):
+    db = tmp_path / "test.db"
+    conn = channels.connect(db)
+    registry.ensure_schema(conn)
+    for handle in ["openai", "openaidevs"]:
+        entity_id = channels.upsert_entity(
+            conn,
+            kind="organization",
+            slug=f"x-{handle}",
+            name=handle,
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
+        channel_id = channels.upsert_channel(
+            conn,
+            kind="x",
+            key=handle,
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
+        channels.link_entity_channel(
+            conn,
+            entity_id=entity_id,
+            channel_id=channel_id,
+            relationship="identity",
+        )
+    conn.commit()
+    manifest = tmp_path / "groups.json"
+    manifest.write_text(
+        json.dumps(
+            [
+                {
+                    "canonical_handle": "openai",
+                    "member_handles": ["openaidevs"],
+                    "reason": "Official OpenAI developer account.",
+                    "evidence_url": "https://platform.openai.com/docs",
+                }
+            ]
+        )
+    )
+    before = {
+        "entities": conn.execute("SELECT * FROM entities ORDER BY id").fetchall(),
+        "links": conn.execute(
+            "SELECT * FROM entity_channels ORDER BY entity_id, channel_id"
+        ).fetchall(),
+        "audit": conn.execute("SELECT * FROM entity_merge_audit").fetchall(),
+    }
+
+    registry.main(
+        [
+            "apply-organization-groups",
+            "--db",
+            str(db),
+            "--manifest",
+            str(manifest),
+            "--dry-run",
+        ]
+    )
+
+    after = {
+        "entities": conn.execute("SELECT * FROM entities ORDER BY id").fetchall(),
+        "links": conn.execute(
+            "SELECT * FROM entity_channels ORDER BY entity_id, channel_id"
+        ).fetchall(),
+        "audit": conn.execute("SELECT * FROM entity_merge_audit").fetchall(),
+    }
+    assert after == before
+
+
+def test_organization_group_preflight_fails_before_mutation(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    registry.ensure_schema(conn)
+    for handle in ["openai", "openaidevs"]:
+        entity_id = channels.upsert_entity(
+            conn,
+            kind="organization",
+            slug=f"x-{handle}",
+            name=handle,
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
+        channel_id = channels.upsert_channel(
+            conn,
+            kind="x",
+            key=handle,
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
+        channels.link_entity_channel(
+            conn,
+            entity_id=entity_id,
+            channel_id=channel_id,
+            relationship="identity",
+        )
+    conn.commit()
+    groups = [
+        {
+            "canonical_handle": "openai",
+            "member_handles": ["openaidevs", "missing_handle"],
+            "reason": "Official OpenAI developer accounts.",
+            "evidence_url": "https://platform.openai.com/docs",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="missing_handle"):
+        registry.apply_organization_groups(conn, groups)
+
+    assert conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 2
+    assert conn.execute("SELECT COUNT(*) FROM entity_merge_audit").fetchone()[0] == 0

@@ -2,47 +2,50 @@
   {
     "canonical_handle": "anthropicai",
     "member_handles": ["claudeai", "claudedevs"],
-    "reason": "Claude and Claude Developers are official Anthropic product/developer accounts."
+    "reason": "Claude and Claude Developers are official Anthropic product/developer accounts.",
+    "evidence_url": "https://www.anthropic.com/claude"
   },
   {
     "canonical_handle": "openai",
     "member_handles": ["openaidevs"],
-    "reason": "OpenAI Developers is the official developer account for OpenAI."
+    "reason": "OpenAI Developers is the official developer account for OpenAI.",
+    "evidence_url": "https://platform.openai.com/docs"
   },
   {
     "canonical_handle": "mistralai",
     "member_handles": ["mistraldevs"],
-    "reason": "Mistral AI for Developers is the official developer account for Mistral AI."
+    "reason": "Mistral AI for Developers is the official developer account for Mistral AI.",
+    "evidence_url": "https://docs.mistral.ai/"
   },
   {
     "canonical_handle": "anysphere",
     "member_handles": ["cursor_ai"],
-    "reason": "Cursor is the product built by Anysphere."
+    "reason": "Cursor is the product built by Anysphere.",
+    "evidence_url": "https://www.cursor.com/security"
   },
   {
     "canonical_handle": "vercel",
     "member_handles": ["nextjs", "v0", "aisdk"],
-    "reason": "Next.js, v0, and AI SDK are Vercel-owned product/project accounts."
+    "reason": "Next.js, v0, and AI SDK are Vercel-owned product/project accounts.",
+    "evidence_url": "https://vercel.com/ai"
   },
   {
     "canonical_handle": "huggingface",
     "member_handles": ["gradio", "diffuserslib"],
-    "reason": "Gradio and diffusers are maintained within the Hugging Face organization."
+    "reason": "Gradio and diffusers are maintained within the Hugging Face organization.",
+    "evidence_url": "https://huggingface.co/blog/gradio-joins-hf"
   },
   {
     "canonical_handle": "fal",
     "member_handles": ["editwithfal"],
-    "reason": "Edit with fal is an official fal product account."
-  },
-  {
-    "canonical_handle": "stabilityai",
-    "member_handles": ["stablediffusion"],
-    "reason": "Stable Diffusion is a Stability AI model/product channel."
+    "reason": "Edit with fal is an official fal product account.",
+    "evidence_url": "https://x.com/EditWithFal"
   },
   {
     "canonical_handle": "thinkymachines",
     "member_handles": ["tinkerapi"],
-    "reason": "Tinker is the post-training product/API from Thinking Machines."
+    "reason": "Tinker is the post-training product/API from Thinking Machines.",
+    "evidence_url": "https://thinkingmachines.ai/tinker/"
   },
   {
     "canonical_handle": "google",
@@ -55,11 +58,7 @@
       "julesagent",
       "stitchbygoogle"
     ],
-    "reason": "These are Google AI, research, lab, and product accounts; Google DeepMind remains separate as an assignment-scoped frontier lab."
-  },
-  {
-    "canonical_handle": "aiatmeta",
-    "member_handles": ["manusai"],
-    "reason": "Manus identifies itself as a Meta product; AI at Meta remains the assignment-scoped canonical AI organization."
+    "reason": "These are Google AI, research, lab, and product accounts; Google DeepMind remains separate as an assignment-scoped frontier lab.",
+    "evidence_url": "https://blog.google/innovation-and-ai/technology/developers-tools/google-ai-developer-updates-io-2025/"
   }
 ]

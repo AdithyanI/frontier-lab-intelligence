@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { siArxiv, siGithub, siRss, siX } from 'simple-icons'
+import { siGithub, siRss, siX } from 'simple-icons'
 import {
   getJSON,
   type Entity,
@@ -14,7 +14,6 @@ type KindFilter = 'all' | RegistryGroup
 const BRAND_ICON: Record<string, string> = {
   github: siGithub.path,
   x: siX.path,
-  arxiv: siArxiv.path,
   blog: siRss.path,
 }
 
@@ -31,7 +30,7 @@ const TYPE_LABEL: Record<EntityKind, string> = {
   unknown: 'Unknown',
 }
 
-const CHANNEL_KIND_ORDER = ['x', 'website', 'github', 'blog', 'arxiv']
+const CHANNEL_KIND_ORDER = ['x', 'website', 'github', 'blog']
 
 const channelKindLabel = (kind: string) => {
   const labels: Record<string, string> = {
@@ -39,7 +38,6 @@ const channelKindLabel = (kind: string) => {
     website: 'Website',
     github: 'GitHub',
     blog: 'Blog',
-    arxiv: 'arXiv',
   }
   return labels[kind] ?? kind
 }
@@ -97,8 +95,6 @@ function channelLabel(channel: EntityChannel): string {
       }
     case 'github':
       return channel.key || channel.label || 'GitHub'
-    case 'arxiv':
-      return 'Search'
     case 'blog':
       try {
         return channel.url

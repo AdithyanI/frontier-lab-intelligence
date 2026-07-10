@@ -103,13 +103,19 @@ candidate generator while demonstrating ranking and validation discipline.
   observed channels. SpaceX is the canonical organization for `@spacex` and
   `@SpaceXAI`; the stable former `@xai` account was renamed in place, not
   duplicated, and no historical alias is exposed.
+- arXiv affiliation searches are document-ingestion inputs, not
+  organization-owned identity channels. The eight query channels were removed;
+  the 137 fetched arXiv records remain available in the raw evidence layer.
+- The first precision-first organization batch is a reviewed manifest, not a
+  fuzzy clustering step. Nine canonical organizations absorbed 19 explicit
+  product/developer accounts; ambiguous ownership remains separate.
 
 ## Open Questions / Blockers
 
 - Which exact people and organizations form the first trusted seed set?
 - What top-k size and relevance labels will Adi review for the evaluation?
-- Which high-confidence organization group should be consolidated after the
-  accepted SpaceX database/UI proof?
+- Which organizations and people form the bounded first trusted seed set now
+  that the obvious organization channels are consolidated?
 
 ## Current Batch
 
@@ -120,7 +126,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Remove Digg/personal graph evidence while retaining the post-floor classified nodes; keep Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
 | done | Estimate a full 2,924-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
 | done | Consolidate SpaceX and SpaceXAI into one organization with two active X channels; prove replay and invariants. | parent | — |
-| blocked | Pause before more organization merges or Registry UI work until Adi reviews the database shape. | parent | — |
+| done | Consolidate the first nine high-confidence organization groups and make all channels legible in the Registry UI. | parent | `../../references/registry-curation.md` |
+| in progress | Freeze the first bounded trusted people and organization seed set. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -192,10 +199,19 @@ candidate generator while demonstrating ranking and validation discipline.
   or PageRank is active.
 - 2026-07-10: [DONE] Proved the one-entity/many-channels contract with the first
   real organization consolidation. SpaceX is now one organization owning the
-  active `@spacex` and `@SpaceXAI` X channels plus x.ai, xai-org, and the xAI
-  arXiv query. Renamed the stable former `@xai` account in place, removed the
+  active `@spacex` and `@SpaceXAI` X channels plus x.ai and xai-org. Renamed
+  the stable former `@xai` account in place, removed the
   redundant entity without deleting account/channel evidence, and made the
   two-X seed replay idempotently. Registry state is 2,923 entities, 2,956
   channels/links, and zero graph edges; SQLite foreign keys are clean,
   integrity is `ok`, and all 49 tests plus frontend lint/build pass. UI work is
   intentionally paused for Adi's database review.
+- 2026-07-10: [DONE] Applied the precision-first organization batch after two
+  independent audits. Anthropic, OpenAI, Mistral AI, Anysphere, Vercel,
+  Hugging Face, fal, Thinking Machines, and Google now own 19 explicit
+  product/developer X channels. Manus/Meta and Stable Diffusion/Stability AI
+  were deliberately deferred. A rollback rehearsal exposed an implicit SQLite
+  commit; the database was restored from its tracked snapshot, the command was
+  hardened with full preflight, one transaction, merge audit rows, and dry-run
+  regression tests, then replayed idempotently. Current state: 2,904 entities,
+  2,948 channels/links, zero graph edges, clean foreign keys and integrity.

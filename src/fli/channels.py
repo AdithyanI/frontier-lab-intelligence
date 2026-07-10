@@ -16,7 +16,6 @@ can move to the source-agnostic model without rewriting the graph loader first.
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import quote_plus
 
 from fli import store
 
@@ -36,7 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_entities_kind ON entities (kind);
 
 CREATE TABLE IF NOT EXISTS channels (
     id INTEGER PRIMARY KEY,
-    kind TEXT NOT NULL,                -- 'x' | 'github' | 'blog' | 'arxiv' | 'website'
+    kind TEXT NOT NULL,                -- 'x' | 'github' | 'blog' | 'website'
     key TEXT NOT NULL,                 -- normalized handle/url/query
     label TEXT,
     url TEXT,
@@ -146,8 +145,6 @@ def _channel_url(kind: str, key: str) -> str | None:
         return f"https://x.com/{key}"
     if kind == "github":
         return f"https://github.com/{key}"
-    if kind == "arxiv":
-        return f"https://arxiv.org/search/?query={quote_plus(key)}&searchtype=all"
     if kind in {"blog", "website"}:
         return key
     return None
@@ -391,8 +388,6 @@ def seed_lab_entities(conn: sqlite3.Connection) -> dict[str, int]:
             channel_specs.append(("blog", lab["blog_feed"], "Blog feed", "official blog/feed"))
         if lab["github_org"]:
             channel_specs.append(("github", lab["github_org"], lab["github_org"], "official GitHub org"))
-        if lab["arxiv_query"]:
-            channel_specs.append(("arxiv", lab["arxiv_query"], "arXiv query", "affiliation search query"))
         if lab["website"]:
             channel_specs.append(("website", lab["website"], "Website", "official website"))
 

@@ -82,3 +82,6 @@ def test_seed_can_claim_multiple_x_accounts_for_one_organization(tmp_path):
     assert conn.execute(
         "SELECT COUNT(*) FROM entities WHERE kind = 'organization'"
     ).fetchone()[0] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) FROM channels WHERE kind = 'arxiv'"
+    ).fetchone()[0] == 0

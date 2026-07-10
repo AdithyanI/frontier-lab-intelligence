@@ -5,7 +5,7 @@ shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
 Registry retains the post-1,000-follower-floor classified universe: 2,736
-people, 183 organizations, one active unsure, three rejected, and zero unknown.
+people, 164 organizations, one active unsure, three rejected, and zero unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
@@ -14,8 +14,10 @@ graph is empty until the trusted-seed contract is accepted. The `labs` table
 remains internal source/seed provenance because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
-The first organization consolidation is live: SpaceX owns both `@spacex` and
-`@SpaceXAI` plus the x.ai/GitHub/arXiv channels. Broader identity resolution,
+Reviewed organization consolidation is live: SpaceX owns `@spacex` and
+`@SpaceXAI`, and nine additional canonical organizations own 19 explicit
+product/developer X channels. Every batch is manifest-driven, preflighted,
+transactional, idempotent, and audit-recorded. Broader identity resolution,
 relevance curation, extraction, and scoring remain later stages.
 
 ## Stack
@@ -143,10 +145,11 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,923 classified entities: 2,736 people, 183
+- The active Registry retains 2,904 classified entities: 2,736 people, 164
   organizations, one active unsure, and three protected-account rejections. The
-  2,956 channels include 32 additional lab
-  channels. Removing discovery edges does not remove already classified nodes.
+  2,948 channels include 24 website/GitHub/blog lab channels plus 20 X/product
+  channels consolidated into existing organizations. Removing discovery edges
+  does not remove already classified nodes.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
   marker. The 2,308 accounts actually observed through Digg also carry one
   `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
@@ -170,7 +173,8 @@ the product model is `entities`, `channels`, `entity_channels`, and
 `channel_observations`.
 The classifier adds separate run, classification, and error tables. Registry
 rejections remain separate from structural kind in
-`entity_registry_rejections`.
+`entity_registry_rejections`; applied identity merges are recorded in
+`entity_merge_audit`.
 `raw_items` is an unconnected bootstrap table. Row counts as of this writing
 are in parentheses.
 
@@ -221,7 +225,7 @@ erDiagram
     }
     CHANNELS {
         int id PK
-        string kind "x | github | blog | arxiv | website"
+        string kind "x | github | blog | website"
         string key
         string url
     }
@@ -293,7 +297,7 @@ erDiagram
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,956)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,948)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (13,547)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (3,084)"
@@ -302,14 +306,16 @@ erDiagram
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
     ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
     ENTITIES ||--o| ENTITY_REGISTRY_REJECTIONS : "may be rejected with reason"
+    ENTITIES ||--o{ ENTITY_MERGE_AUDIT : "canonical identity records merges"
 ```
 
 Table row counts: `raw_items` 1,599, `accounts` 2,924,
 `account_source_facts` 5,838, `graph_edges` 0, `labs` 10,
-`entities` 2,923, `channels` 2,956, `entity_channels` 2,956,
+`entities` 2,904, `channels` 2,948, `entity_channels` 2,948,
 `channel_observations` 13,547, `entity_kind_classification_runs` 10,
-`entity_kind_classifications` 3,084, `entity_kind_web_enrichments` 1, and
-`entity_kind_classification_errors` 0, and `entity_registry_rejections` 3.
+`entity_kind_classifications` 3,059, `entity_kind_web_enrichments` 1,
+`entity_kind_classification_errors` 0, `entity_registry_rejections` 3, and
+`entity_merge_audit` 19.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -320,8 +326,10 @@ still backs the graph viz but is being superseded by `entities` / `channels`
 
 ## Entity / Channel Model
 
-The case prompt asks for labs and individuals as first-class entities, resolved
-across X, GitHub, arXiv, and official lab channels. The model is therefore:
+The case prompt asks for labs and individuals as first-class entities. The
+identity model resolves them across X, GitHub, websites, and official feeds;
+arXiv papers remain source documents for later extraction, not owned identity
+channels. The model is therefore:
 
 ```text
 entities              # who: OpenAI, Anthropic, Andrej Karpathy
@@ -339,12 +347,15 @@ add one only after an exhaustive role policy is justified. Rejection remains a
 separate curation state. An explicit protected-account flag is the first
 implemented rejection gate; broader relevance curation remains later.
 
-An entity may own multiple channels of the same kind. The first applied case
-is SpaceX: one `organization` entity owns the independent X channels
-`@spacex` and `@SpaceXAI`. Each X account keeps its own backing account row,
-profile observations, and source facts; only the redundant organization entity
-is removed. The one-owner index on `entity_channels.channel_id` still prevents
-any channel from belonging to two entities.
+An entity may own multiple channels of the same kind. SpaceX owns the
+independent X channels `@spacex` and `@SpaceXAI`; the reviewed first wave adds
+19 product/developer accounts to nine canonical organizations. Each X account
+keeps its own backing account row, profile observations, and source facts; only
+the redundant organization entity is removed. A manifest reason and evidence
+URL are retained in `entity_merge_audit`. Complete preflight plus one
+`BEGIN IMMEDIATE` transaction make late validation failures and dry runs
+all-or-nothing. The one-owner index on `entity_channels.channel_id` still
+prevents any channel from belonging to two entities.
 
 ```mermaid
 flowchart TD
@@ -477,10 +488,10 @@ Examples:
 
 ```text
 Entity: OpenAI
-Channels: @openai, openai.com/news/rss.xml, github.com/openai, arXiv query
+Channels: @openai, openai.com/news/rss.xml, github.com/openai
 
 Entity: Andrej Karpathy (future curation pass)
-Channels: @karpathy, github.com/karpathy, arXiv author/query
+Channels: @karpathy, github.com/karpathy
 ```
 
 ## Target Data Model Sketch
@@ -498,7 +509,7 @@ erDiagram
     }
     CHANNEL {
         string id PK
-        string kind "x | github | blog | arxiv | website"
+        string kind "x | github | blog | website"
         string key
         string url
     }

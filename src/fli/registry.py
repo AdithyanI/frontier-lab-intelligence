@@ -32,6 +32,21 @@ CREATE TABLE IF NOT EXISTS entity_registry_rejections (
     evidence_url TEXT,
     rejected_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS entity_merge_audit (
+    id INTEGER PRIMARY KEY,
+    canonical_entity_id INTEGER NOT NULL REFERENCES entities (id),
+    removed_entity_id INTEGER NOT NULL,
+    removed_slug TEXT NOT NULL,
+    removed_name TEXT NOT NULL,
+    removed_kind TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    source TEXT NOT NULL,
+    evidence_url TEXT NOT NULL,
+    merged_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_entity_merge_audit_canonical
+ON entity_merge_audit (canonical_entity_id, merged_at);
 """
 
 DEFAULT_ORGANIZATION_GROUPS_PATH = (
@@ -258,6 +273,9 @@ def merge_entity_into(
     canonical_entity_id: int,
     duplicate_entity_id: int,
     observed_at: str | None = None,
+    reason: str | None = None,
+    source: str | None = None,
+    evidence_url: str | None = None,
 ) -> dict[str, int]:
     """Move every channel to one canonical entity and remove the duplicate.
 
@@ -265,14 +283,15 @@ def merge_entity_into(
     existing account/channel rows. Only the redundant real-world identity is
     removed. Callers must make the ownership decision explicitly.
     """
-    ensure_schema(conn)
     if canonical_entity_id == duplicate_entity_id:
         raise ValueError("canonical and duplicate entities must differ")
     canonical = conn.execute(
-        "SELECT id, kind FROM entities WHERE id = ?", (canonical_entity_id,)
+        "SELECT id, kind, slug, name FROM entities WHERE id = ?",
+        (canonical_entity_id,),
     ).fetchone()
     duplicate = conn.execute(
-        "SELECT id, kind FROM entities WHERE id = ?", (duplicate_entity_id,)
+        "SELECT id, kind, slug, name FROM entities WHERE id = ?",
+        (duplicate_entity_id,),
     ).fetchone()
     if canonical is None:
         raise ValueError(f"canonical entity {canonical_entity_id} does not exist")
@@ -284,6 +303,12 @@ def merge_entity_into(
             f"{canonical['kind']} != {duplicate['kind']}"
         )
 
+    audit_values = (reason, source, evidence_url)
+    if any(value is not None for value in audit_values) and not all(audit_values):
+        raise ValueError(
+            "reason, source, and evidence_url must be supplied together"
+        )
+
     observed_at = observed_at or _now()
     moved_channels = conn.execute(
         "SELECT COUNT(*) AS n FROM entity_channels WHERE entity_id = ?",
@@ -293,6 +318,25 @@ def merge_entity_into(
         "UPDATE entity_channels SET entity_id = ? WHERE entity_id = ?",
         (canonical_entity_id, duplicate_entity_id),
     )
+    if reason is not None and source is not None and evidence_url is not None:
+        conn.execute(
+            """INSERT INTO entity_merge_audit
+               (canonical_entity_id, removed_entity_id, removed_slug,
+                removed_name, removed_kind, reason, source, evidence_url,
+                merged_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                canonical_entity_id,
+                duplicate["id"],
+                duplicate["slug"],
+                duplicate["name"],
+                duplicate["kind"],
+                reason,
+                source,
+                evidence_url,
+                observed_at,
+            ),
+        )
     conn.execute(
         "DELETE FROM entities WHERE id = ?", (duplicate_entity_id,)
     )
@@ -319,12 +363,17 @@ def load_organization_groups(path: Path | str) -> list[dict]:
         canonical = group.get("canonical_handle")
         members = group.get("member_handles")
         reason = group.get("reason")
+        evidence_url = group.get("evidence_url")
         if not isinstance(canonical, str) or not canonical.strip():
             raise ValueError(f"organization group {index} needs canonical_handle")
         if not isinstance(members, list) or not members:
             raise ValueError(f"organization group {index} needs member_handles")
         if not isinstance(reason, str) or not reason.strip():
             raise ValueError(f"organization group {index} needs a reason")
+        if not isinstance(evidence_url, str) or not evidence_url.startswith("https://"):
+            raise ValueError(
+                f"organization group {index} needs an HTTPS evidence_url"
+            )
         canonical = canonical.removeprefix("@").lower()
         normalized_members = []
         for member in members:
@@ -354,17 +403,50 @@ def load_organization_groups(path: Path | str) -> list[dict]:
 
 
 def _entity_for_x_handle(conn: sqlite3.Connection, handle: str) -> sqlite3.Row:
-    row = conn.execute(
+    rows = conn.execute(
         """SELECT e.id, e.kind, e.slug, e.name, c.id AS channel_id
            FROM channels c
            JOIN entity_channels ec ON ec.channel_id = c.id
            JOIN entities e ON e.id = ec.entity_id
            WHERE c.kind = 'x' AND lower(c.key) = lower(?)""",
         (handle.removeprefix("@"),),
-    ).fetchone()
-    if row is None:
+    ).fetchall()
+    if not rows:
         raise ValueError(f"X handle @{handle.removeprefix('@')} has no entity")
-    return row
+    if len(rows) != 1:
+        raise ValueError(
+            f"X handle @{handle.removeprefix('@')} resolves to {len(rows)} entities"
+        )
+    return rows[0]
+
+
+def _preflight_organization_groups(
+    conn: sqlite3.Connection, groups: list[dict]
+) -> list[dict]:
+    """Resolve and validate the complete manifest before the first mutation."""
+    resolved = []
+    for group in groups:
+        canonical = _entity_for_x_handle(conn, group["canonical_handle"])
+        members = [
+            _entity_for_x_handle(conn, handle)
+            for handle in group["member_handles"]
+        ]
+        for role, entity in [("canonical", canonical), *[("member", x) for x in members]]:
+            if entity["kind"] != "organization":
+                raise ValueError(
+                    f"{role} entity {entity['name']!r} is {entity['kind']}, "
+                    "not organization"
+                )
+            rejection = conn.execute(
+                "SELECT 1 FROM entity_registry_rejections WHERE entity_id = ?",
+                (entity["id"],),
+            ).fetchone()
+            if rejection:
+                raise ValueError(
+                    f"{role} entity {entity['name']!r} is Registry-rejected"
+                )
+        resolved.append({"group": group, "canonical": canonical, "members": members})
+    return resolved
 
 
 def apply_organization_groups(
@@ -374,43 +456,37 @@ def apply_organization_groups(
     observed_at: str | None = None,
 ) -> dict:
     """Apply explicit same-organization mappings without fuzzy inference."""
-    ensure_schema(conn)
     observed_at = observed_at or _now()
     merged_entities = 0
     moved_channels = 0
     already_grouped = 0
     results = []
-    for group in groups:
-        canonical = _entity_for_x_handle(conn, group["canonical_handle"])
-        if canonical["kind"] != "organization":
-            raise ValueError(
-                f"canonical @{group['canonical_handle']} is {canonical['kind']}, "
-                "not organization"
-            )
+    resolved_groups = _preflight_organization_groups(conn, groups)
+    for resolved in resolved_groups:
+        group = resolved["group"]
+        canonical = resolved["canonical"]
         group_merged = 0
-        for member_handle in group["member_handles"]:
-            member = _entity_for_x_handle(conn, member_handle)
+        for member_handle, member in zip(group["member_handles"], resolved["members"]):
             if member["id"] == canonical["id"]:
                 already_grouped += 1
                 continue
-            if member["kind"] != "organization":
-                raise ValueError(
-                    f"member @{member_handle} is {member['kind']}, not organization"
-                )
             merged = merge_entity_into(
                 conn,
                 canonical_entity_id=canonical["id"],
                 duplicate_entity_id=member["id"],
                 observed_at=observed_at,
+                reason=group["reason"],
+                source="organization-groups-manifest",
+                evidence_url=group["evidence_url"],
             )
             conn.execute(
                 """UPDATE entity_channels
                    SET relationship = 'official',
-                       evidence_url = COALESCE(evidence_url, ?),
-                       notes = COALESCE(notes, ?)
+                       evidence_url = ?,
+                       notes = ?
                    WHERE entity_id = ? AND channel_id = ?""",
                 (
-                    f"https://x.com/{member_handle}",
+                    group["evidence_url"],
                     group["reason"],
                     canonical["id"],
                     member["channel_id"],
@@ -451,9 +527,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     conn = channels.connect(args.db) if args.db else channels.connect()
+    ensure_schema(conn)
+    conn.commit()
     groups = load_organization_groups(args.manifest)
     try:
-        conn.execute("BEGIN")
+        conn.execute("BEGIN IMMEDIATE")
         result = apply_organization_groups(conn, groups)
         if args.dry_run:
             conn.rollback()
@@ -514,6 +592,7 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                   {kind_reason_sql} AS kind_reason,
                   c.id AS channel_id, c.kind AS channel_kind, c.key AS channel_key,
                   c.label AS channel_label, c.url AS channel_url,
+                  ec.relationship AS channel_relationship,
                   (SELECT o.value FROM channel_observations o
                    WHERE o.channel_id = c.id
                      AND o.source = 'x_profile' AND o.metric = 'bio'
@@ -529,7 +608,11 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                          WHEN e.kind = 'unsure' THEN 2
                          ELSE 4
                     END,
-                    e.name COLLATE NOCASE, c.kind, c.key""",
+                    e.name COLLATE NOCASE,
+                    CASE ec.relationship WHEN 'identity' THEN 0
+                                         WHEN 'official' THEN 1
+                                         ELSE 2 END,
+                    c.kind, c.key""",
         (limit,),
     ).fetchall()
     grouped: dict[int, dict] = {}
