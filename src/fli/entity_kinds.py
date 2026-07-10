@@ -13,6 +13,7 @@ import concurrent.futures
 import hashlib
 import json
 import os
+import re
 import shlex
 import sqlite3
 from dataclasses import dataclass
@@ -33,6 +34,9 @@ DEFAULT_MIN_FOLLOWERS = 1_000
 DEFAULT_WEB_MAX_TOOL_CALLS = 4
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
+TRAILING_MARKDOWN_CITATION_RE = re.compile(
+    r"\s*(?:\(\s*)?\[[^\]]+\]\(https?://[^)]+\)(?:\s*\))?\s*$"
+)
 PROTECTED_ACCOUNT_REASON_CODE = "protected_x_account"
 PROTECTED_ACCOUNT_REASON = (
     "The X account has protected posts, so its public output cannot be collected."
@@ -505,6 +509,12 @@ def _validate_output(output_text: str) -> tuple[str, str]:
     return classification, reason
 
 
+def _without_trailing_web_citation(reason: str) -> str:
+    """Remove a hosted-search citation from the runner-owned reason field."""
+    cleaned = TRAILING_MARKDOWN_CITATION_RE.sub("", reason).strip()
+    return cleaned or reason
+
+
 def _usage_value(usage: Any, field: str) -> int:
     if usage is None:
         return 0
@@ -865,6 +875,7 @@ def _web_workflow_turn(
     if output_text is None:
         output_text = response_data.get("output_text")
     classification, reason = _validate_output(output_text)
+    reason = _without_trailing_web_citation(reason)
     actions, web_sources = _web_evidence(response_data)
     usage = getattr(response, "usage", None) or response_data.get("usage")
     input_tokens = _usage_value(usage, "input_tokens")

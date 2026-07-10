@@ -529,7 +529,10 @@ def test_post_enrichment_uses_bounded_web_search_after_posts_abstain(tmp_path):
             },
             {
                 "classification": "person",
-                "reason": "Official evidence identifies @jack as Jack Dorsey.",
+                "reason": (
+                    "Official evidence identifies @jack as Jack Dorsey. "
+                    "([source](https://blog.x.com/jack))"
+                ),
                 "_response_output": web_output,
             },
         ]
@@ -573,8 +576,12 @@ def test_post_enrichment_uses_bounded_web_search_after_posts_abstain(tmp_path):
     assert web_request["text"]["format"] == entity_kinds.CLASSIFICATION_FORMAT
     assert "exact X account (@jack)" in web_request["input"][0]["content"]
     assert summary["items"][0]["web"]["response_id"] == "response-3"
+    assert summary["items"][0]["reason"] == (
+        "Official evidence identifies @jack as Jack Dorsey."
+    )
     stored = conn.execute("SELECT * FROM entity_kind_web_enrichments").fetchone()
     assert stored["classification"] == "person"
+    assert stored["reason"] == "Official evidence identifies @jack as Jack Dorsey."
     assert json.loads(stored["actions_json"])[0]["queries"] == [
         "@jack exact identity"
     ]
