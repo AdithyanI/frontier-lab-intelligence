@@ -101,7 +101,7 @@ def test_registry_read_model_excludes_attention_and_source_fields(tmp_path):
     channels.observe_channel(
         conn,
         channel_id=channel_id,
-        source="digg",
+        source="attention_source",
         metric="role",
         value="researcher",
         observed_at="2026-07-09T00:00:00+00:00",

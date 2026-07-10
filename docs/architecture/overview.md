@@ -3,22 +3,16 @@
 Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Status: entity spine and entity-kind classification are complete. The
-implemented code has raw fetch/store, a frozen X seed graph snapshot, a modeled
-SQLite graph layer, and a React SPA over a JSON API. Every observed channel
-resolves to one entity. Luna-medium prompt-v2 classified and atomically
-promoted all 2,956 initial unknowns: 2,639 people, 172 organizations, and 145
-unsure. A later explicit cleanup removed the stray `@philschmid` candidate and
-all 38 entities with a stored X follower count below 1,000. The canonical
-Registry now contains 2,607 people, 180 organizations, 137 unsure, and zero
-unknown. The `labs` table remains internal source/seed provenance because its
-10 rows are not an exhaustive lab classification; it is not exposed as a
-Registry kind, badge, count, or filter.
-An unpromoted `fli entity-kinds enrich` stage is now implemented for the 137
-abstentions. It requires hosted Responses web search and persists the strict
-two-field decision plus observable search actions, source URLs, usage, and
-cost. One discarded calibration ran, but no enrichment results remain and no
-enrichment batch has run.
+Status: entity spine and entity-kind classification are complete. The active
+Registry has been reduced to independently sourced public-list candidates plus
+the 10 curated labs: 473 people, 87 organizations, 26 unsure, and zero unknown.
+The rejected Digg edge plane, its derived PageRank, graph-only candidates, and
+the exploratory personal following snapshot have been removed. The Digg
+1,000-account ranking survives only as an offline comparison CSV; the active
+graph is empty until the trusted-seed contract is accepted. The `labs` table
+remains internal source/seed provenance because its 10 rows are not an
+exhaustive lab classification; it is not exposed as a Registry kind, badge,
+count, or filter.
 Channel merging, track/reject curation, extraction, and scoring remain later
 stages.
 
@@ -44,9 +38,8 @@ original choice and are being retired in favor of the SPA.
 ```mermaid
 flowchart LR
     subgraph sources [Sources]
-        XSEED[Frozen X seed graph]
-    XLISTS[X list memberships]
-    XFOLLOW[X following snapshots]
+        XLISTS[X list memberships]
+        XFOLLOW[Trusted following snapshots<br/>planned]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
@@ -59,7 +52,6 @@ flowchart LR
     DEL[Delivery<br/>digests · alerts]
     UI[Web UI<br/>FastAPI + React SPA]
 
-    XSEED --> REG
     XLISTS --> REG
     XFOLLOW --> REG
     REG -->|who to watch| ING
@@ -124,11 +116,8 @@ Current file artifacts:
 
 ```text
 data/fli.db                         # raw evidence SQLite corpus
-data/digg/rankings.csv              # frozen bootstrap ranked X accounts
-data/digg/top_follower_edges.csv    # frozen bootstrap first-slice edges
-data/digg/seed_graph.json           # frozen nested review artifact
-data/digg/full_graph_summary.json   # summary of full paginated local pull
-data/raw/digg-full-2026-07-08/      # ignored frozen raw graph artifacts
+data/digg/rankings.csv              # offline Digg comparison baseline only
+docs/references/digg-ranking-baseline.md
 ```
 
 Current source-import commands:
@@ -149,15 +138,14 @@ Known data facts:
 
 - `fli fetch` landed 1,599 raw items from lab blogs/sitemap, arXiv, and
   GitHub releases.
-- The frozen bootstrap graph landed 1,000 ranked accounts and 49,950
-  first-slice edges.
-- The full frozen bootstrap pull produced 361,225 local full-paginated edges;
-  full raw files are ignored because they exceed normal git-hosting size.
-- After explicit low-follower and stale-handle cleanup, the current snapshot
-  has 2,925 X graph accounts and 2,924 Registry entities: 2,607 people, 180
-  organizations, and 137 unsure. `@adithyan_ai` remains only as the extra graph
-  source node. The model has 2,956 channels/links and 20,963 channel
-  observations.
+- The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
+  graph-only candidates, raw edge artifacts, and exploratory personal
+  following snapshot were removed on 2026-07-10.
+- The active Registry has 586 entities: 473 people, 87 organizations, and 26
+  unsure. They come from the AI High Signal X list, smol.ai, or the 10 curated
+  lab seeds; the 618 channels include 32 additional lab channels.
+- `data/digg/rankings.csv` retains the frozen 1,000-account Digg ranking only
+  for later comparison. It is not imported into the active database.
 - `fli sources import-x-list --list-id 1585430245762441216 --source
   ai_high_signal` imported 609 AI High Signal X-list members via
   TwitterAPI.io; 230 were already in the Digg bootstrap and 379 were new
@@ -166,23 +154,13 @@ Known data facts:
   public GitHub source. Twenty-three already existed and eight new accounts
   were added; 21 overlap AI High Signal, 17 overlap Digg, and 17 occur in all
   three sources.
-- `fli sources import-x-following --username adithyan_ai --source
-  adi_following` imported a complete 767-account outgoing-follow snapshot on
-  2026-07-10. It matched 282 existing accounts, added 485 followed accounts
-  plus the source account, and wrote 767 directed `follows` edges. The provider
-  estimated 934 credits / $0.00934 for the four pages.
-- Adi then chose a one-time 2,000-follower floor for this personal source. The
-  cleanup retained 638 directed edges, removed the 129 lower-follower source
-  links, deleted 127 accounts supported only by this import, preserved two
-  lower-follower accounts with independent evidence, and hid the source account
-  from the Registry. This is not a reusable importer policy.
 
 ### Current Schema (as built, not the target sketch)
 
-This is what actually exists in `data/fli.db` today (13 tables). It mixes two
-generations: a legacy X-graph import layer (`accounts`, `account_source_facts`,
-`graph_edges`, plus `labs.x_account_id`) and the newer entity/channel product
-layer (`entities`, `channels`, `entity_channels`, `channel_observations`).
+This is what actually exists in `data/fli.db` today. The `accounts`,
+`account_source_facts`, and empty `graph_edges` tables back X source imports;
+the product model is `entities`, `channels`, `entity_channels`, and
+`channel_observations`.
 The classifier adds separate run, profile-only result, web-enrichment, and
 error tables without changing `entities.kind` until an explicit promotion.
 `raw_items` is an unconnected bootstrap table. Row counts as of this writing
@@ -209,15 +187,15 @@ erDiagram
     ACCOUNT_SOURCE_FACTS {
         int id PK
         int account_id FK
-        string source "digg | smol_ai | x_api"
-        string fact "rank | role | cohort"
+        string source "ai_high_signal | smol_ai"
+        string fact "list_member"
         string value
     }
     GRAPH_EDGES {
         int id PK
         int from_account_id FK
         int to_account_id FK
-        string relationship "follows | top_follower_of (legacy)"
+        string relationship "follows"
         string source
     }
     LABS {
@@ -248,8 +226,8 @@ erDiagram
     CHANNEL_OBSERVATIONS {
         int id PK
         int channel_id FK
-        string source "digg | graph | x_profile | x_api"
-        string metric "rank | pagerank_rank | followers_count"
+        string source "ai_high_signal | smol_ai | x_profile"
+        string metric "list_member | followers_count"
         string value
         string observed_at
     }
@@ -294,14 +272,14 @@ erDiagram
         int run_id FK
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (12,664)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (605)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
-    ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (361,863 total)"
+    ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (618)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (3,900)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,988)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (0)"
@@ -309,11 +287,11 @@ erDiagram
     ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,925,
-`account_source_facts` 12,617, `graph_edges` 361,305, `labs` 10,
-`entities` 2,924, `channels` 2,956, `entity_channels` 2,956,
-`channel_observations` 20,963, `entity_kind_classification_runs` 8,
-`entity_kind_classifications` 2,946, `entity_kind_web_enrichments` 0, and
+Table row counts: `raw_items` 1,599, `accounts` 586,
+`account_source_facts` 605, `graph_edges` 0, `labs` 10,
+`entities` 586, `channels` 618, `entity_channels` 618,
+`channel_observations` 3,900, `entity_kind_classification_runs` 8,
+`entity_kind_classifications` 599, `entity_kind_web_enrichments` 0, and
 `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
@@ -381,11 +359,9 @@ entity_channels(entity_id, channel_id, relationship, confidence, evidence_url, n
 channel_observations(channel_id, source, metric, value, observed_at, evidence_url)
 ```
 
-The old `accounts`, `account_source_facts`, and `graph_edges` tables remain as
-the X graph import backing layer. They are not the product model. X accounts are
-mirrored into `channels(kind='x')`, and seed/PageRank/profile fields are copied
-into `channel_observations`. The current rows from the old Digg pull are a
-frozen bootstrap source, not the center of the schema.
+The `accounts`, `account_source_facts`, and `graph_edges` tables are source
+import backing, not the product model. X accounts are mirrored into
+`channels(kind='x')`; no Digg or PageRank observations remain.
 
 ### Active Classifier Boundary
 
@@ -434,11 +410,9 @@ channels for both people and organizations.
 
 ## X Graph Source Direction
 
-The live graph direction is our own X following snapshots, not more Digg. Pull
-**who trusted accounts follow**, not the full follower audience of large
-accounts. Adi's source currently contributes 638 outgoing follows after the
-one-time 2,000-follower cleanup; it is personal-attention evidence, not
-automatic frontier relevance.
+The active graph is intentionally empty. Its next source will be complete
+outgoing-follow snapshots from an explicitly reviewed trusted seed set—not
+followers of popular accounts and not the offline Digg comparison ranking.
 
 ```text
 curated X watchlist
@@ -458,9 +432,8 @@ Why this direction:
 - Third-party X data APIs can be evaluated later, but the official API shape is
   the cleanest story for a case-study product.
 
-Do not recompute one blended PageRank merely because a new source lands. The
-current Digg follower graph and trusted-person following graph have different
-semantics; choose and validate their weighting before combining them.
+Do not import the Digg comparison ranking or combine it with the new graph.
+Compare outputs only after the trusted graph has been evaluated independently.
 
 Examples:
 

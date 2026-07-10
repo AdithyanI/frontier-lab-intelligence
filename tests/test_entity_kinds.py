@@ -49,80 +49,14 @@ class FakeRawClient:
         self.responses = FakeRawResponses(outputs)
 
 
-class FakeWebResponses:
-    def __init__(self, outputs, *, include_search=True):
-        self.outputs = list(outputs)
-        self.include_search = include_search
+class FakePostClient:
+    def __init__(self, posts=()):
+        self.posts = tuple(posts)
         self.calls = []
 
-    def create(self, **kwargs):
-        self.calls.append(kwargs)
-        output = self.outputs.pop(0)
-        if isinstance(output, BaseException):
-            raise output
-        message = {
-            "type": "message",
-            "content": [
-                {
-                    "type": "output_text",
-                    "text": json.dumps(output),
-                    "annotations": [
-                        {
-                            "type": "url_citation",
-                            "url": "https://example.com/profile",
-                            "title": "Official profile",
-                        }
-                    ],
-                }
-            ],
-        }
-        response_output = [message]
-        if self.include_search:
-            response_output.insert(
-                0,
-                {
-                    "type": "web_search_call",
-                    "status": "completed",
-                    "action": {
-                        "type": "search",
-                        "query": "example identity",
-                        "sources": [
-                            {
-                                "type": "url",
-                                "url": "https://example.com/profile",
-                            },
-                            {
-                                "type": "url",
-                                "url": "https://example.com/news",
-                            },
-                        ],
-                    },
-                },
-            )
-        data = {
-            "id": f"web-response-{len(self.calls)}",
-            "model": kwargs["model"],
-            "status": "completed",
-            "output_text": json.dumps(output),
-            "output": response_output,
-            "usage": {"input_tokens": 500, "output_tokens": 40},
-        }
-        return SimpleNamespace(
-            id=data["id"],
-            model=data["model"],
-            status=data["status"],
-            output_text=data["output_text"],
-            usage=data["usage"],
-            model_dump=lambda: data,
-        )
-
-
-class FakeWebClient:
-    def __init__(self, outputs, *, include_search=True):
-        self.responses = FakeWebResponses(
-            outputs,
-            include_search=include_search,
-        )
+    def fetch_recent_authored_posts(self, *, username, limit):
+        self.calls.append({"username": username, "limit": limit})
+        return self.posts[:limit]
 
 
 def make_unknown(conn, *, handle="karpathy", name="Andrej Karpathy", bio=None):
@@ -212,7 +146,7 @@ def test_completed_result_is_resumable_without_duplicate_call(tmp_path):
     assert "pipeline:entity-kind-classification" in tags
     assert "job:entity-kind-classification" in tags
     assert "scope:custom" in tags
-    assert "prompt:entity-kind-v2" in tags
+    assert "prompt:entity-kind-v3" in tags
     assert any(tag.startswith("run:") for tag in tags)
     assert request["extra_headers"]["x-litellm-tags"] == ",".join(tags)
 
@@ -435,142 +369,149 @@ def test_proxy_reported_cost_is_captured(tmp_path):
     assert stored == 0.00125
 
 
-def test_web_enrichment_is_resumable_and_persists_evidence(tmp_path):
+def test_post_enrichment_chains_responses_without_persisting(tmp_path):
     conn = entity_kinds.connect(tmp_path / "test.db")
     entity = make_unsure(conn, handle="jack", name="jack")
-    client = FakeWebClient(
+    client = FakeClient(
         [
             {
+                "classification": "unsure",
+                "reason": "The profile does not establish the represented actor.",
+            },
+            {
                 "classification": "person",
-                "reason": "First-party evidence identifies one individual.",
-            }
+                "reason": "The account repeatedly speaks as one individual.",
+            },
+        ]
+    )
+    post_client = FakePostClient(
+        [
+            {
+                "id": "1",
+                "created_at": "2026-07-09T12:00:00Z",
+                "text": "I am building a new tool.",
+                "url": "https://x.com/jack/status/1",
+                "post_type": "original",
+            },
+            {
+                "id": "2",
+                "created_at": "2026-07-08T12:00:00Z",
+                "text": "My notes from this week.",
+                "url": "https://x.com/jack/status/2",
+                "post_type": "quote",
+            },
         ]
     )
 
-    first = entity_kinds.run_web_enrichment(
+    first = entity_kinds.run_post_enrichment(
         conn,
         [entity],
         client=client,
+        post_client=post_client,
         workers=1,
     )
-    second = entity_kinds.run_web_enrichment(
-        conn,
-        [entity],
-        client=client,
-        workers=1,
-    )
-
     assert first["enriched"] == 1
     assert first["counts"]["person"] == 1
-    assert first["web_search_actions"] == 1
-    assert first["sources"] == 2
-    assert second["enriched"] == 0
-    assert second["skipped"] == 1
-    assert len(client.responses.calls) == 1
-    request = client.responses.calls[0]
-    assert request["tools"] == [
-        {"type": "web_search", "search_context_size": "medium"}
-    ]
-    assert request["tool_choice"] == "required"
-    assert request["include"] == ["web_search_call.action.sources"]
-    assert request["text"]["format"] == entity_kinds.CLASSIFICATION_FORMAT
-    assert "job:entity-kind-web-enrichment" in request["extra_body"][
+    assert first["followups"] == 1
+    assert first["recent_posts"] == 2
+    assert len(client.responses.calls) == 2
+    assert post_client.calls == [{"username": "jack", "limit": 20}]
+    profile_request, followup_request = client.responses.calls
+    assert profile_request["store"] is True
+    assert "previous_response_id" not in profile_request
+    assert profile_request["input"][0] == {
+        "role": "developer",
+        "content": entity_kinds.ENTITY_KIND_INSTRUCTIONS,
+    }
+    assert "Handle: @jack" in profile_request["input"][1]["content"]
+    assert followup_request["store"] is True
+    assert followup_request["previous_response_id"] == "response-1"
+    assert len(followup_request["input"]) == 1
+    followup_prompt = followup_request["input"][0]["content"]
+    assert "Replies and retweets have been excluded" in followup_prompt
+    assert "I am building a new tool." in followup_prompt
+    assert followup_request["text"]["format"] == entity_kinds.CLASSIFICATION_FORMAT
+    assert "job:entity-kind-post-enrichment" in profile_request["extra_body"][
         "metadata"
     ]["tags"]
-    row = conn.execute(
-        "SELECT * FROM entity_kind_web_enrichments"
-    ).fetchone()
-    assert row["classification"] == "person"
-    assert json.loads(row["actions_json"]) == [
-        {"type": "search", "query": "example identity"}
-    ]
-    sources = json.loads(row["sources_json"])
-    assert sources == [
-        {
-            "url": "https://example.com/profile",
-            "title": "Official profile",
-            "type": "url_citation",
-            "cited": True,
-        },
-        {
-            "url": "https://example.com/news",
-            "title": None,
-            "type": "url",
-            "cited": False,
-        },
-    ]
+    assert first["items"][0]["profile"]["response_id"] == "response-1"
+    assert first["items"][0]["followup"]["response_id"] == "response-2"
+    assert len(first["items"][0]["recent_posts"]) == 2
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_kind_classification_runs"
+    ).fetchone()[0] == 0
     assert conn.execute(
         "SELECT kind FROM entities WHERE id = ?",
         (entity.entity_id,),
     ).fetchone()[0] == "unsure"
 
 
-def test_web_enrichment_requires_observable_search_action(tmp_path):
+def test_post_enrichment_stops_when_profile_is_decisive(tmp_path):
     conn = entity_kinds.connect(tmp_path / "test.db")
-    entity = make_unsure(conn)
-    client = FakeWebClient(
+    entity = make_unsure(conn, handle="product", name="Product")
+    client = FakeClient(
         [
             {
-                "classification": "person",
-                "reason": "The profile represents an individual.",
-            }
-        ],
-        include_search=False,
+                "classification": "organization",
+                "reason": "The profile presents a product account.",
+            },
+        ]
     )
+    post_client = FakePostClient()
 
-    summary = entity_kinds.run_web_enrichment(
+    summary = entity_kinds.run_post_enrichment(
         conn,
         [entity],
         client=client,
+        post_client=post_client,
         workers=1,
     )
 
-    assert summary["status"] == "partial"
-    assert summary["failed"] == 1
-    assert conn.execute(
-        "SELECT COUNT(*) FROM entity_kind_web_enrichments"
-    ).fetchone()[0] == 0
-    error = conn.execute(
-        "SELECT * FROM entity_kind_classification_errors"
-    ).fetchone()
-    assert error["error_type"] == "OutputContractError"
-    assert "without a web search call" in error["error_message"]
+    assert summary["status"] == "completed"
+    assert summary["counts"]["organization"] == 1
+    assert summary["profile_only"] == 1
+    assert summary["followups"] == 0
+    assert len(client.responses.calls) == 1
+    assert post_client.calls == []
 
 
-def test_web_enrichment_rejects_non_unsure_inputs(tmp_path):
+def test_post_enrichment_rejects_non_unsure_inputs(tmp_path):
     conn = entity_kinds.connect(tmp_path / "test.db")
     entity = make_unknown(conn)
 
     with pytest.raises(ValueError, match="only current unsure"):
-        entity_kinds.run_web_enrichment(
+        entity_kinds.run_post_enrichment(
             conn,
             [entity],
-            client=FakeWebClient([]),
+            client=FakeClient([]),
+            post_client=FakePostClient(),
             workers=1,
         )
 
 
-def test_web_enrichment_cli_is_bounded_and_staged(tmp_path, capsys):
+def test_post_enrichment_cli_is_bounded_and_staged(tmp_path, capsys):
     db = tmp_path / "test.db"
     conn = entity_kinds.connect(db)
     entity = make_unsure(conn, handle="jack", name="jack")
-    client = FakeWebClient(
+    client = FakeClient(
         [
             {
                 "classification": "person",
-                "reason": "First-party evidence identifies one individual.",
-            }
+                "reason": "The profile identifies one individual.",
+            },
         ]
     )
+    post_client = FakePostClient()
 
     code = entity_kinds.main(
         ["enrich", "--db", str(db), "--limit", "1", "--workers", "1"],
         client_factory=lambda: client,
+        post_client_factory=lambda: post_client,
     )
 
     assert code == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["scope"] == "web-limited"
+    assert payload["scope"] == "posts-limited"
     assert payload["requested"] == 1
     assert payload["enriched"] == 1
     assert conn.execute(

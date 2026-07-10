@@ -509,7 +509,7 @@ def _validate_source(source: str) -> None:
         raise SourceCliError(
             code="E_SOURCE_INVALID",
             message="--source must be lowercase letters, numbers, underscores, or hyphens.",
-            hint="Example: --source adi_following",
+            hint="Example: --source trusted_seed_following",
             exit_code=2,
         )
 
@@ -520,7 +520,7 @@ def _normalize_username(username: str) -> str:
         raise SourceCliError(
             code="E_USERNAME_INVALID",
             message="--username must be a valid X handle.",
-            hint="Pass the handle without a profile URL, for example: adithyan_ai",
+            hint="Pass the handle without a profile URL, for example: trusted_seed",
             exit_code=2,
         )
     return normalized

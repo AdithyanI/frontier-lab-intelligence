@@ -11,18 +11,6 @@ export interface Stage {
   stats: StageStat[]
 }
 
-export interface XChannel {
-  id: number
-  handle: string
-  display_name: string | null
-  bio: string | null
-  followers_count: number | null
-  seed_rank: number | null
-  role: string | null
-  github_url: string | null
-  graph_follows: number
-}
-
 export interface EntityChannel {
   id: number
   kind: string

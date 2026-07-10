@@ -2,34 +2,39 @@
 
 ## Goal
 
-Add a bounded, resumable Responses API web-enrichment runner for structurally
-`unsure` entities without changing canonical kinds until Adi reviews the
-calibration evidence.
+Add a bounded profile-to-recent-posts Responses workflow for structurally
+`unsure` entities without changing canonical kinds until Adi reviews a live
+calibration.
 
 ## Why / Impact
 
 The profile-only classifier initially abstained on 145 weak identity records;
-137 remain after explicit corpus removals.
-Many can likely be resolved with current public evidence, but the next pass
-must preserve its searches, sources, cost, and exact input identity rather than
-turning ad-hoc browsing into an unrepeatable correction.
+26 remain after the clean public-source Registry reset.
+Many can likely be resolved from their own recent authored posts. The first
+calibration should test that evidence and the two-turn model interaction before
+choosing a durable local persistence contract.
 
 ## Scope / Non-Goals
 
 ### In Scope
 
 - Read only current `unsure` X-backed entities.
-- Use Luna through shared LiteLLM with hosted Responses `web_search`.
+- Use one shared entity-kind instruction prompt with Luna through LiteLLM.
+- Classify the profile first; only after `unsure`, fetch up to 20 recent
+  authored posts through TwitterAPI.io and continue with
+  `previous_response_id`.
+- Exclude replies and retweets; retain only the account's top-level commentary
+  for quote posts.
 - Return only `classification` and `reason` from the model.
-- Persist search actions, consulted/cited sources, usage, cost, errors, and
-  resumability identity separately from the model output.
-- Provide a bounded CLI action and focused fake-client tests.
+- Return inspectable stage outputs, Response IDs, normalized evidence, usage,
+  cost, and errors from the bounded calibration runner.
 
 ### Out of Scope
 
-- Running all 145 entities in this implementation batch.
+- Running the full unsure cohort in this implementation batch.
 - Promoting enriched results into `entities.kind`.
-- Fetching recent X posts through another provider.
+- Adding a new database table or deciding the production persistence schema.
+- Hosted web search or open-web fallback.
 - Relevance curation, channel merging, roles, affiliations, or new sources.
 - Agents SDK, Codex subagents, or a generalized agent framework.
 
@@ -37,8 +42,8 @@ turning ad-hoc browsing into an unrepeatable correction.
 
 - Date started: 2026-07-10.
 - The first profile-only pass and canonical promotion are complete.
-- Azure-hosted Luna web search was proven through LiteLLM with required search,
-  source inclusion, Structured Outputs, and three hosted tool actions.
+- Azure Responses chaining with `previous_response_id`, Structured Outputs,
+  and 30-day stored-response retention is documented for this route.
 - All LLM calls must use the shared LiteLLM endpoint and stable request tags.
 - One application attempt; LiteLLM owns provider retry/fallback.
 - Existing person and organization entities must remain untouched.
@@ -46,12 +51,11 @@ turning ad-hoc browsing into an unrepeatable correction.
 ## Done When
 
 - [x] `fli entity-kinds enrich` reads only current unsure entities and supports
-  `--limit` without modifying canonical kinds.
-- [x] Completed results skip exact matching input/model/effort/prompt contracts.
-- [x] Search actions and source URLs/titles/citation state are stored with each
-  result, along with usage and proxy-reported cost.
-- [x] Contract, refusal/error, resumability, and scope tests pass.
-- [x] Durable docs describe the implemented boundary and deferred decisions.
+  `--limit` without modifying canonical kinds or adding persistence tables.
+- [x] One developer prompt governs both stages; the second call contains only
+  the authored-post follow-up and `previous_response_id`.
+- [x] Retweets and replies are excluded, including across pagination.
+- [x] Contract, chaining, error, scope, and bounded CLI tests pass.
 - [ ] Adi reviews a bounded calibration and accepts or changes the evidence
   policy before any full run.
 - [ ] Promotion is implemented and executed, or explicitly descoped, before
@@ -59,22 +63,23 @@ turning ad-hoc browsing into an unrepeatable correction.
 
 ## Milestones
 
-- [x] M1 — Implement schema and runner. Acceptance: one fake hosted-search
-  response persists the strict decision plus inspectable evidence.
-- [x] M2 — Implement CLI/resume/error coverage. Acceptance: exact repeats make
-  no second model call and non-unsure entities never enter the runner.
-- [x] M3 — Validate and document. Acceptance: `scripts/check-fast.sh` passes;
-  full execution and promotion remain explicitly deferred.
+- [x] M1 — Implement the two-turn engine. Acceptance: profile `unsure` chains
+  one recent-post follow-up with the same strict output contract.
+- [x] M2 — Implement authored-post retrieval. Acceptance: up to 20 normalized
+  authored posts are returned while replies and retweets are excluded.
+- [ ] M3 — Validate and calibrate. Acceptance: `scripts/check-fast.sh` passes
+  and a bounded live sample is reviewed before storage or promotion work.
 - [ ] M4 — Calibrate and decide promotion. Acceptance: reviewed evidence and
   cost support an explicit go/change/stop decision before bulk execution.
 
 ## Execution Rules
 
-- Keep the implementation bounded to this one enrichment stage.
-- Do not run the 145-entity batch or promote results in this batch.
+- Keep the implementation bounded to this one two-stage workflow.
+- Do not run the full unsure batch or promote results in this batch.
 - Keep model output exactly `classification` and `reason`; runner-owned evidence
   and metadata must not leak into the output schema.
-- Persist each completed entity immediately for interruption-safe resume.
+- Do not add local result persistence until the calibration clarifies which
+  stage data is worth retaining.
 - Update this tracker before handoff and leave it active while calibration and
   promotion decisions remain open.
 
@@ -82,35 +87,33 @@ turning ad-hoc browsing into an unrepeatable correction.
 
 - Direct Responses API through LiteLLM, not Agents SDK: one responsibility and
   existing SQLite orchestration do not justify a general agent framework.
-- Enrichment results remain staged separately from canonical kinds.
-- JSON stores the bounded hosted-tool trace and sources in this first pass;
-  normalize later only if downstream query/UI requirements justify it.
+- One `ENTITY_KIND_INSTRUCTIONS` developer prompt replaces the three historical
+  classifier/web/post instruction variants in the active code.
+- Responses use `store=True` only to support chaining and rely on Azure's normal
+  30-day retention; no explicit remote deletion is required.
+- The first calibration returns JSON but does not write model results locally.
 
 ## Open Questions / Blockers
 
-- Which representative calibration entities and evidence-quality rubric should
-  gate a full run?
-- Should recent posts be fetched deterministically before open-web escalation?
-- What promotion rule should apply when web enrichment still returns `unsure`?
-- The discarded `@philschmid` result stored all 17 consulted URLs but no
-  final-message citation annotations. A replacement calibration still needs
-  to decide whether the internal contract must bind its reason to source IDs.
+- Which fields from each stage should become the durable persistence contract?
+- Should a later run retain the full normalized post sample, only its hash, or
+  both?
+- What promotion rule should apply when the post follow-up remains `unsure`?
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Implement the bounded web-enrichment runner and evidence schema. | parent | — |
-| done | Add focused tests and run repository validation. | parent | — |
-| done | Update curation/architecture references and checkpoint this tracker. | parent | — |
-| done | Run, document, and then discard the `@philschmid` calibration and entity at Adi's direction. | parent | `resources/philschmid-calibration.md` |
-| blocked | Adi owns the replacement calibration and source-binding decision; agents must not run or promote more enrichments unless he asks. | Adi | `resources/philschmid-calibration.md` |
+| done | Replace the hosted-web runner with one profile-to-posts Responses workflow. | parent | — |
+| done | Add focused chaining and TwitterAPI.io authored-post tests. | parent | — |
+| in_progress | Run and review a bounded live sample; do not persist or promote results. | parent | — |
+| pending | Decide the local persistence/resume contract from calibration evidence. | Adi + parent | — |
 
 ## Backlog / Remaining Work
 
-- [ ] Select and run a bounded representative calibration after discussion.
-- [ ] Review labels, sources, search depth, cost, and false-confidence cases.
-- [ ] Decide whether to add deterministic recent-post evidence.
+- [ ] Run and review the bounded recent-post calibration.
+- [ ] Review labels, post evidence, cost, and false-confidence cases.
+- [ ] Decide the durable local storage and resume contract.
 - [ ] Implement and validate atomic promotion only after the policy is accepted.
 - [ ] Run the accepted scope, verify Registry invariants, and archive the project.
 
@@ -152,11 +155,20 @@ turning ad-hoc browsing into an unrepeatable correction.
   at 395; retained `@rohanpaul_ai`, `@thebloke`, and `@tom_doerr` above the
   floor. The stale `@danhendrycks` handle resolved to the existing canonical
   `@hendrycks` entity, refreshed at 44,775 followers, and its smol.ai provenance
-  was transferred. Removed only the accidental `@adithyan_ai` unknown Registry
-  row while preserving its internal account and 638 graph edges. All 137 unsure
-  entities remain, all have follower counts of at least 1,000, and the Registry
-  has zero unknowns.
+  was transferred. At that checkpoint all 137 unsure entities had follower
+  counts of at least 1,000 and the Registry had zero unknowns; the later clean
+  source reset supersedes this historical cohort size.
 - 2026-07-10: [BLOCKED] Adi took ownership of the remaining unsure-enrichment
   calibration and promotion decision. Agent execution moves to the separate
   trusted-following ranking project and must not resume this batch unless Adi
   asks.
+- 2026-07-10: [IN-PROGRESS] Adi explicitly resumed this project and selected a
+  simpler profile-to-posts workflow. Consolidated the active prompt to one
+  developer instruction set, added a plain-language profile turn and optional
+  `previous_response_id` follow-up with up to 20 authored posts, and excluded
+  replies and retweets. The calibration path adds no result table and does not
+  modify canonical kinds; local persistence will be designed after review.
+- 2026-07-10: [DONE] The separate graph cleanup removed every entity supported
+  only by Digg, derived PageRank, or the exploratory personal-follow snapshot.
+  The active unsure cohort is now 26 public-list/curated-source entities; this
+  project must read the current cohort rather than the historical 137.

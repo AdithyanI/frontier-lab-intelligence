@@ -19,19 +19,19 @@ class FakeFollowingClient:
     def __init__(self, pages, profile=None):
         self.pages = pages
         self.profile = profile or {
-            "userName": "adithyan_ai",
-            "id": "1296368039768842240",
-            "name": "Adithyan",
-            "description": "Founder",
-            "followers": 752,
+            "userName": "trusted_seed",
+            "id": "123456789",
+            "name": "Trusted Seed",
+            "description": "Researcher",
+            "followers": 10_000,
         }
 
     def fetch_user(self, *, username):
-        assert username == "adithyan_ai"
+        assert username == "trusted_seed"
         return self.profile
 
     def iter_following_pages(self, *, username, page_size):
-        assert username == "adithyan_ai"
+        assert username == "trusted_seed"
         assert page_size == 200
         for page in self.pages:
             yield page
@@ -162,8 +162,8 @@ def test_import_x_following_dry_run_does_not_write(tmp_path):
 
     data = sources.run_import_x_following(
         db_path=str(db),
-        username="@adithyan_ai",
-        source="adi_following",
+        username="@trusted_seed",
+        source="trusted_seed_following",
         key_file=tmp_path / "missing",
         dry_run=True,
         timeout_seconds=1,
@@ -208,8 +208,8 @@ def test_import_x_following_writes_profiles_facts_edges_and_channels(tmp_path):
 
     data = sources.run_import_x_following(
         db_path=str(db),
-        username="adithyan_ai",
-        source="adi_following",
+        username="trusted_seed",
+        source="trusted_seed_following",
         key_file=tmp_path / "missing",
         dry_run=False,
         timeout_seconds=1,
@@ -222,10 +222,10 @@ def test_import_x_following_writes_profiles_facts_edges_and_channels(tmp_path):
     assert data["edges_written"] == 2
     conn = sources.channels.connect(db)
     source_account = conn.execute(
-        "SELECT * FROM accounts WHERE handle = 'adithyan_ai'"
+        "SELECT * FROM accounts WHERE handle = 'trusted_seed'"
     ).fetchone()
-    assert source_account["display_name"] == "Adithyan"
-    assert source_account["x_id"] == "1296368039768842240"
+    assert source_account["display_name"] == "Trusted Seed"
+    assert source_account["x_id"] == "123456789"
     assert conn.execute(
         "SELECT followers_count FROM accounts WHERE handle = 'openai'"
     ).fetchone()["followers_count"] == 10
@@ -236,10 +236,10 @@ def test_import_x_following_writes_profiles_facts_edges_and_channels(tmp_path):
            FROM graph_edges edge
            JOIN accounts source_account ON source_account.id = edge.from_account_id
            JOIN accounts target ON target.id = edge.to_account_id
-           WHERE edge.source = 'adi_following' AND target.handle = 'karpathy'"""
+           WHERE edge.source = 'trusted_seed_following' AND target.handle = 'karpathy'"""
     ).fetchone()
     assert dict(edge) == {
-        "source_handle": "adithyan_ai",
+        "source_handle": "trusted_seed",
         "target_handle": "karpathy",
         "relationship": "follows",
     }
@@ -247,9 +247,9 @@ def test_import_x_following_writes_profiles_facts_edges_and_channels(tmp_path):
         """SELECT f.fact, f.value
            FROM account_source_facts f
            JOIN accounts a ON a.id = f.account_id
-           WHERE a.handle = 'karpathy' AND f.source = 'adi_following'"""
+           WHERE a.handle = 'karpathy' AND f.source = 'trusted_seed_following'"""
     ).fetchone()
-    assert dict(fact) == {"fact": "followed_by", "value": "adithyan_ai"}
+    assert dict(fact) == {"fact": "followed_by", "value": "trusted_seed"}
     assert conn.execute(
         "SELECT COUNT(*) AS n FROM channels WHERE kind = 'x'"
     ).fetchone()["n"] == 2
@@ -257,7 +257,7 @@ def test_import_x_following_writes_profiles_facts_edges_and_channels(tmp_path):
         "SELECT COUNT(*) AS n FROM entities WHERE kind = 'unknown'"
     ).fetchone()["n"] == 2
     assert conn.execute(
-        "SELECT COUNT(*) AS n FROM channels WHERE key = 'adithyan_ai'"
+        "SELECT COUNT(*) AS n FROM channels WHERE key = 'trusted_seed'"
     ).fetchone()["n"] == 0
 
 
@@ -271,8 +271,8 @@ def test_import_x_following_replaces_stale_edges_but_keeps_accounts(tmp_path):
     )
     common = {
         "db_path": str(db),
-        "username": "adithyan_ai",
-        "source": "adi_following",
+        "username": "trusted_seed",
+        "source": "trusted_seed_following",
         "key_file": tmp_path / "missing",
         "dry_run": False,
         "timeout_seconds": 1,
@@ -290,7 +290,7 @@ def test_import_x_following_replaces_stale_edges_but_keeps_accounts(tmp_path):
         """SELECT target.handle
            FROM graph_edges edge
            JOIN accounts target ON target.id = edge.to_account_id
-           WHERE edge.source = 'adi_following'
+           WHERE edge.source = 'trusted_seed_following'
            ORDER BY target.handle"""
     ).fetchall()
     assert [row["handle"] for row in targets] == ["second", "third"]
@@ -304,9 +304,9 @@ def test_sources_following_cli_missing_key_returns_json_error(tmp_path, capsys):
         [
             "import-x-following",
             "--username",
-            "adithyan_ai",
+            "trusted_seed",
             "--source",
-            "adi_following",
+            "trusted_seed_following",
             "--key-file",
             str(tmp_path / "missing"),
         ]
@@ -363,6 +363,62 @@ def test_twitter_api_io_client_retries_429_using_retry_after(monkeypatch):
     assert delays == [0.0]
 
 
+def test_recent_authored_posts_filter_retweets_replies_and_paginate(monkeypatch):
+    client = sources.TwitterApiIoClient(api_key="secret", page_sleep_seconds=0)
+    pages = iter(
+        [
+            {
+                "data": {
+                    "tweets": [
+                        {
+                            "id": "retweet",
+                            "text": "RT @someone: borrowed words",
+                            "retweeted_tweet": {"id": "source"},
+                        },
+                        {
+                            "id": "original",
+                            "text": "I built &amp; shipped this.",
+                            "createdAt": "2026-07-10T00:00:00Z",
+                        },
+                    ],
+                    "has_next_page": True,
+                    "next_cursor": "next",
+                }
+            },
+            {
+                "tweets": [
+                    {
+                        "id": "reply",
+                        "text": "A reply",
+                        "isReply": True,
+                    },
+                    {
+                        "id": "quote",
+                        "text": "My own quote commentary",
+                        "quoted_tweet": {"id": "quoted"},
+                        "twitterUrl": "https://x.com/example/status/quote",
+                    },
+                ],
+                "has_next_page": False,
+            },
+        ]
+    )
+    calls = []
+
+    def fake_fetch_page(*, username, cursor=None):
+        calls.append((username, cursor))
+        return next(pages)
+
+    monkeypatch.setattr(client, "fetch_recent_tweets_page", fake_fetch_page)
+
+    posts = client.fetch_recent_authored_posts(username="@Example", limit=2)
+
+    assert calls == [("example", None), ("example", "next")]
+    assert [post["id"] for post in posts] == ["original", "quote"]
+    assert posts[0]["text"] == "I built & shipped this."
+    assert posts[1]["post_type"] == "quote"
+
+
 def test_following_cli_defaults_to_no_page_sleep(monkeypatch, capsys):
     captured = {}
 
@@ -379,9 +435,9 @@ def test_following_cli_defaults_to_no_page_sleep(monkeypatch, capsys):
         [
             "import-x-following",
             "--username",
-            "adithyan_ai",
+            "trusted_seed",
             "--source",
-            "adi_following",
+            "trusted_seed_following",
             "--dry-run",
         ]
     )

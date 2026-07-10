@@ -153,7 +153,7 @@ function DataModel() {
 
       {/* lane 1 — measured observations */}
       <text x={84} y={368} fontFamily={MONO} fontSize="12" fill={INK}>channel_observations</text>
-      <text x={84} y={384} fontFamily={UI} fontSize="11" fill={MUTED}>rank · followers · pagerank, dated</text>
+      <text x={84} y={384} fontFamily={UI} fontSize="11" fill={MUTED}>followers · source membership · rank, dated</text>
       <line x1={300} y1={370} x2={648} y2={370} stroke={MUTED} strokeWidth="1" opacity="0.55" markerEnd="url(#dm-arr)" />
       {DM_OBS_DOTS.map((x, i) => (
         <circle key={`obs-${i}`} cx={x} cy={370} r={4} fill={BLUE} />
@@ -281,7 +281,7 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <DataModel />
-          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · the current X graph is a frozen bootstrap source, to be replaced by our own following snapshots</div>
+          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · graph evidence comes only from explicit trusted-follow snapshots</div>
         </div>
       </section>
 
@@ -290,15 +290,14 @@ export default function Architecture() {
           <span className="arch-no">02</span>
           <h2 className="arch-h">The graph decides who matters</h2>
           <p className="arch-p">
-            Attention, not follower count: being followed by ten important
-            channels beats a thousand random ones. Today this uses the frozen
-            seed graph; next it should use our own X following snapshots from
-            the curated watchlist.
+            Attention, not follower count: being followed by several trusted
+            channels can matter more than a large generic audience. The active
+            graph starts small and grows only through explicit snapshots.
           </p>
         </div>
         <div className="arch-canvas">
           <GraphPlane />
-          <div className="arch-caption">graph_edges · current source: bootstrap snapshot · target source: X following snapshots · every edge carries its evidence URL</div>
+          <div className="arch-caption">current graph: empty · next: isolated trusted-seed snapshots · Digg ranking retained offline for comparison only</div>
         </div>
       </section>
 

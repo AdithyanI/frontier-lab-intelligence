@@ -9,10 +9,9 @@ questionable legacy graph.
 ## Why / Impact
 
 The Registry needs a defensible way to discover the people below the obvious
-names. The existing 361K-edge graph has uncertain meaning and should not support
-an interview claim. A smaller trusted-following graph can become a clear,
-testable candidate generator for the Registry while demonstrating ranking and
-validation discipline.
+names. The rejected 361K-edge graph was removed rather than treated as an
+interview claim. A smaller trusted-following graph can become a clear, testable
+candidate generator while demonstrating ranking and validation discipline.
 
 ## Scope / Non-Goals
 
@@ -29,7 +28,7 @@ validation discipline.
 ### Out of Scope
 
 - Treating the legacy Digg/follower graph as trusted evidence.
-- Deleting non-edge Digg candidate provenance without a separate decision.
+- Reintroducing Digg data into the active Registry or graph.
 - An open-ended recursive or internet-scale crawl.
 - Using graph rank as the final score for documents or insights.
 - Unsure-entity enrichment, which Adi owns separately.
@@ -41,11 +40,12 @@ validation discipline.
 - Submission north star: earn the next interview by 2026-07-20 with coherent,
   defensible end-to-end proof; timebox this milestone so extraction, scoring,
   validation, and delivery still ship.
-- Current `graph_edges` contains mixed historical evidence and must be treated
-  as quarantined until its exact semantics are audited.
-- The repo already has an X-following importer and a PageRank implementation;
-  reuse is allowed only after verifying that their contracts enforce the new
-  isolated evidence boundary.
+- The active graph is empty. Digg survives only as the offline 1,000-row
+  comparison artifact documented in
+  `docs/references/digg-ranking-baseline.md`.
+- The repo has a tested X-following provider adapter. The rejected global
+  PageRank implementation was removed; replacement ranking must read only the
+  future isolated snapshot boundary.
 - External fetches must be bounded, attributable, and cost-recorded.
 
 ## Done When
@@ -64,7 +64,7 @@ validation discipline.
 
 ## Milestones
 
-- [ ] M1 — Freeze the evidence boundary. Acceptance: existing graph/import/rank
+- [x] M1 — Freeze the evidence boundary. Acceptance: existing graph/import/rank
   semantics are audited and a fresh snapshot contract cannot mix legacy edges.
 - [ ] M2 — Build one bounded trusted-following snapshot. Acceptance: complete
   outgoing follows for accepted seeds are persisted with provenance and can be
@@ -91,10 +91,10 @@ validation discipline.
 
 - Rebuild from trusted accounts' outgoing follows, not their followers.
 - Prefer personalized PageRank seeded by the trusted set over global PageRank.
-- The legacy Digg edge plane and its derived PageRank have no accepted product
-  use. Cleanup scope is pending Adi's decision; candidate-source facts are a
-  separate concern because 676 Registry entities currently have only Digg
-  source provenance.
+- The active database starts from two public source lists plus the 10 curated
+  labs. Digg is an offline comparison only; personal following data is absent.
+- The rejected Digg edge plane, derived PageRank, graph-only candidates,
+  tracked edge artifacts, and reload/rank commands were removed cleanly.
 - Protect the end-to-end submission: this is one timeboxed milestone, not the
   product destination.
 
@@ -102,11 +102,6 @@ validation discipline.
 
 - Which exact people and organizations form the first trusted seed set?
 - What top-k size and relevance labels will Adi review for the evaluation?
-- Should cleanup remove only the 360,667 Digg edges and 4,614 derived PageRank
-  facts/observations, or also the 76 MB tracked edge artifacts and legacy
-  importer/ranker commands? Recommended: remove all of those, while retaining
-  the small Digg ranking/candidate facts until the replacement shortlist is
-  validated.
 
 ## Current Batch
 
@@ -114,8 +109,8 @@ validation discipline.
 | --- | --- | --- | --- |
 | done | Audit existing edge/import/PageRank code and current database provenance locally. | parent | — |
 | done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
-| blocked | Confirm the destructive legacy-edge cleanup boundary with Adi. | parent | — |
-| todo | Freeze the first trusted seed set and isolated snapshot contract; do not fetch full lists yet. | parent | — |
+| done | Remove Digg/personal graph data and unsupported candidates; retain Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
+| blocked | Pause before seed selection, live following fetches, or new ranking work until Adi returns. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -142,12 +137,10 @@ validation discipline.
   ranking basis and chose a fresh graph from trusted accounts' outgoing
   follows. Created the timeboxed ranking tracker under the submission north
   star; live fetching waits for the evidence-boundary audit and seed decision.
-- 2026-07-10: [DONE] Local audit found 360,667 Digg `top_follower_of` edges and
-  638 Adi `follows` edges in one table. The old PageRank reads both without a
-  source filter and its 4,614 stored facts/observations are not a safe current
-  signal. Deleting only the edge plane does not change the 2,924 Registry
-  entities; deleting all Digg source facts would remove the sole recorded
-  candidate provenance for 676 of them.
+- 2026-07-10: [DONE] Local audit found legacy Digg and exploratory following
+  edges in one table. The old PageRank read every source without a filter and
+  its stored facts/observations were not a safe current signal. The audit also
+  showed that deleting edges alone would leave graph-only candidates active.
 - 2026-07-10: [DONE] Official X docs confirm `public_metrics.following_count`
   and `GET /2/users/{id}/following` with up to 1,000 results per page. One
   bounded TwitterAPI.io profile lookup found `@karpathy` follows 1,108 accounts
@@ -157,3 +150,17 @@ validation discipline.
   documentation/research checkpoint because unrelated in-progress changes are
   present in `src/fli/entity_kinds.py` and `src/fli/sources.py`. Build-log JSONL
   validation, renderer regeneration, and `git diff --check` passed.
+- 2026-07-10: [DONE] Adi approved a clean reset. Removed all 360,667 Digg edges,
+  all exploratory personal-follow edges, their source facts/observations, the
+  invalid derived PageRank, and candidates with no remaining public-list or
+  curated-lab provenance. Removed 76 MB of tracked Digg edge artifacts plus
+  628 MB of ignored raw graph data and retired the Digg scraper/import/ranker
+  paths. The active graph is empty. The Registry now has 586 entities (473
+  people, 87 organizations, 26 unsure), 618 channels, and SQLite integrity
+  `ok`; `data/fli.db` shrank from 93 MB to 3.5 MB. The frozen Digg ranking CSV
+  remains offline for later diagnostic comparison. No following-list API call
+  was made during cleanup.
+- 2026-07-10: [DONE] Final validation passed: all 36 tests, frontend lint,
+  frontend production build, live `/api/status` and `/api/registry`
+  reconciliation, SQLite foreign-key check, and integrity check. Execution is
+  intentionally paused before seed selection or any following-list fetch.

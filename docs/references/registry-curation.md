@@ -38,9 +38,7 @@ channel import
 Current invariants:
 
 - Every channel belongs to exactly one entity after `fli channels sync`.
-- Synchronization was idempotent before the one-time Adi-following cleanup. The
-  cleanup is intentionally not reusable importer policy, so rerunning that
-  import or a later channel sync can rematerialize removed source rows.
+- Synchronization is idempotent for active public sources.
 - Database kinds are `person`, `organization`, `unsure`, and provisional
   `unknown`; there are currently zero unknown entities.
 - A seeded lab may claim a channel from a one-channel provisional unknown.
@@ -49,34 +47,21 @@ Current invariants:
 
 ## Current Implemented Universe
 
-After the 2026-07-10 Adi-following snapshot, the corpus contains:
+After removing the rejected Digg graph and the exploratory personal following
+snapshot, the active source-supported corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 2,607 |
-| organization | 180 (including 10 seeded labs) |
-| unsure | 137 |
+| person | 473 |
+| organization | 87 (including 10 seeded labs) |
+| unsure | 26 |
 | unknown | 0 |
-| **total** | **2,924** |
+| **total** | **586** |
 
-Those clusters own all 2,956 channels. The difference is the 32 additional
+Those clusters own all 618 channels. The difference is the 32 additional
 official website, GitHub, arXiv, and blog channels already linked to labs.
-The legacy graph has one additional non-Registry account: `@adithyan_ai`, kept
-only as the source node for its 638 retained outgoing-follow edges.
-
-On 2026-07-10, Adi explicitly removed the stray `@philschmid` candidate and
-all entities whose verified X follower count was below 1,000. The six initially
-missing smol.ai profiles were then checked through TwitterAPI.io: three valid
-above-floor accounts remain, `@akhaliq` and `@lucidrains` were removed at 40
-and 395 followers, and stale `@danhendrycks` was resolved to the existing
-canonical `@hendrycks` entity. All 137 remaining unsure entities have a stored
-follower count of at least 1,000. This was a one-time destructive corpus
-cleanup, not a reusable relevance model or a change to structural-kind
-semantics.
-
-`@adithyan_ai` remains an internal graph-source account for 638 retained edges,
-but has no Registry channel or entity. Channel sync mirrors only accounts with
-source facts, so this graph-only account cannot rematerialize as `unknown`.
+The active graph has zero edges. Digg's 1,000-account ranking is an offline
+comparison artifact and is not active Registry provenance.
 
 ## First Kind Classifier: Accepted Contract
 
@@ -181,33 +166,26 @@ All structural kinds remain eligible for this ranking, including `unsure`.
 Weak identity evidence must not prevent a potentially important account from
 surfacing; identity enrichment and tracking relevance remain separate.
 
-## Azure Web-Search Enrichment Compatibility
+## Unsure Entity Recent-Post Calibration
 
-Microsoft's current Azure OpenAI Responses documentation supports hosted
-agentic `web_search` for GPT-4 and later. The shared LiteLLM Luna route points
-to the Azure OpenAI v1/preview endpoint and advertises web search, tool choice,
-function calling, and response schemas. A tagged 2026-07-10 smoke through
-LiteLLM proved the exact combined contract: Luna-medium performed two searches
-and one page open, returned 12 source URLs, and completed the strict
-`classification` + `reason` schema for `@jack`. The request used 8,693 input
-and 279 output tokens and LiteLLM reported `$0.010367`.
+The active bounded path is `fli entity-kinds enrich --limit N`. It reads only
+current `unsure` entities and uses one shared `ENTITY_KIND_INSTRUCTIONS`
+developer prompt. The first Responses call supplies the profile. Only when
+that result is `unsure`, the runner fetches up to 20 recent authored posts
+through TwitterAPI.io, excluding replies and retweets, and makes one follow-up
+call with `previous_response_id`. Quote posts contribute only the account's
+top-level commentary. Both turns use Luna-medium through LiteLLM and the same
+strict `classification` + `reason` schema.
 
-This proves transport/tool compatibility, not evidence quality. The smoke
-found the correct person but consulted several weak secondary domains. The
-production enrichment policy should prefer stored recent tweets and official
-or first-party identity sources, use domain controls where useful, and reserve
-open-web search for cases that remain unresolved. Azure's hosted search uses
-Grounding with Bing, incurs separate tool costs, and sends search data outside
-the Azure compliance and geo boundary under Microsoft's documented terms.
+The initial calibration runner intentionally does not add a database table,
+write classifications, or change `entities.kind`. It returns the normalized
+post evidence, stage outputs, Response IDs, hashes, tokens, LiteLLM tags, local
+estimate, proxy-reported cost, and errors for inspection. Responses use Azure's
+normal 30-day storage to support chaining and are not explicitly deleted.
+Durable persistence and resume semantics will be selected after the bounded
+calibration shows which evidence is useful.
 
-The bounded runner is implemented as `fli entity-kinds enrich --limit N`.
-It reads only entities whose canonical kind is currently `unsure`, requires at
-least one observable hosted search action, returns the same strict
-`classification` + `reason` output, and stages the result in
-`entity_kind_web_enrichments`. `actions_json` records search/open/find actions;
-`sources_json` deduplicates consulted URLs and merges citation titles/state.
-Run/model/prompt/input hashes, tokens, errors, LiteLLM tags, local estimates,
-and proxy-reported cost use the existing classifier provenance machinery.
-Every completed entity commits immediately and exact matching results skip on
-resume. The runner never updates `entities.kind`; no batch execution or
-promotion policy has been accepted yet.
+Hosted Azure web search was separately proven through LiteLLM and remains a
+historical capability smoke, not part of the selected entity-kind workflow.
+Its weak secondary-domain evidence and separate Bing costs made deterministic
+authored posts the better first enrichment source.

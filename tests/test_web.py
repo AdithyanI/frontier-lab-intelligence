@@ -17,30 +17,14 @@ def test_status_reports_pipeline_stages():
     assert any(s["label"] == "unsure" for s in registry["stats"])
 
 
-def test_accounts_endpoint_returns_ranked_first():
-    r = client.get("/api/accounts?limit=5")
-    assert r.status_code == 200
-    data = r.json()
-    assert data["total"] > 0
-    first = data["accounts"][0]
-    assert first["seed_rank"] == 1
-
-
-def test_accounts_search():
-    r = client.get("/api/accounts?q=karpathy")
-    assert r.status_code == 200
-    handles = [a["handle"] for a in r.json()["accounts"]]
-    assert "karpathy" in handles
-
-
 def test_registry_returns_complete_typed_entity_universe():
     r = client.get("/api/registry?limit=5000")
     assert r.status_code == 200
     data = r.json()
     assert data["total"] == sum(data["counts"].values())
-    assert data["counts"]["person"] == 2_607
-    assert data["counts"]["organization"] == 180
-    assert data["counts"]["unsure"] == 137
+    assert data["counts"]["person"] == 473
+    assert data["counts"]["organization"] == 87
+    assert data["counts"]["unsure"] == 26
     assert data["counts"]["unknown"] == 0
     openai = next(e for e in data["entities"] if e["slug"] == "openai")
     assert openai["kind"] == "organization"

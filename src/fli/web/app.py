@@ -6,7 +6,6 @@ src/fli/web/dist, which this app serves. During frontend development,
 
 Endpoints:
 - /api/status        pipeline stages with live DB counts (health/ops)
-- /api/accounts      compatibility route for X channels, sortable/paginated
 - /api/registry      complete typed entity universe
 """
 
@@ -46,10 +45,6 @@ def _counts() -> dict:
         return {
             "channels": one("SELECT COUNT(*) FROM channels"),
             "x_channels": one("SELECT COUNT(*) FROM channels WHERE kind = 'x'"),
-            "seed_ranked_channels": one(
-                "SELECT COUNT(DISTINCT channel_id) FROM channel_observations"
-                " WHERE source = 'digg' AND metric = 'rank'"
-            ),
             "edges": one("SELECT COUNT(*) FROM graph_edges"),
             "observations": one("SELECT COUNT(*) FROM channel_observations"),
             "raw_items": one("SELECT COUNT(*) FROM raw_items"),
@@ -79,7 +74,7 @@ def status() -> JSONResponse:
             "id": "sources",
             "name": "Sources",
             "state": "live",
-            "summary": "Frozen X seed graph + raw lab blogs / arXiv / GitHub corpus.",
+            "summary": "Curated public source lists + raw public-output corpus; trusted-follow graph starts empty.",
             "stats": [
                 {"label": "graph edges", "value": c["edges"]},
                 {"label": "raw items", "value": c["raw_items"]},
@@ -127,57 +122,6 @@ def status() -> JSONResponse:
         },
     ]
     return JSONResponse({"stages": stages})
-
-
-@app.get("/api/accounts")
-def accounts(
-    limit: int = Query(100, le=500),
-    offset: int = 0,
-    q: str = "",
-) -> JSONResponse:
-    conn = _model_conn()
-    try:
-        where = ""
-        params: list = []
-        if q:
-            where = "AND (c.key LIKE ? OR c.label LIKE ?)"
-            params = [f"%{q}%", f"%{q}%"]
-        rows = conn.execute(
-            f"""
-            SELECT c.id, c.key AS handle, c.label AS display_name,
-                   (SELECT o.value FROM channel_observations o
-                    WHERE o.channel_id = c.id AND o.source = 'x_profile' AND o.metric = 'bio'
-                    ORDER BY o.observed_at DESC LIMIT 1) AS bio,
-                   CAST((SELECT o.value FROM channel_observations o
-                    WHERE o.channel_id = c.id AND o.source = 'x_profile' AND o.metric = 'followers_count'
-                    ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS followers_count,
-                   CAST((SELECT o.value FROM channel_observations o
-                    WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'rank'
-                    ORDER BY o.observed_at DESC LIMIT 1) AS INTEGER) AS seed_rank,
-                   (SELECT o.value FROM channel_observations o
-                    WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'role'
-                    ORDER BY o.observed_at DESC LIMIT 1) AS role,
-                   (SELECT o.value FROM channel_observations o
-                    WHERE o.channel_id = c.id AND o.source = 'digg' AND o.metric = 'github_url'
-                    ORDER BY o.observed_at DESC LIMIT 1) AS github_url,
-                   (SELECT COUNT(*) FROM graph_edges e
-                    JOIN accounts a ON a.id = e.to_account_id
-                    WHERE a.handle = c.key) AS graph_follows
-            FROM channels c
-            WHERE c.kind = 'x' {where}
-            ORDER BY seed_rank IS NULL, seed_rank, graph_follows DESC
-            LIMIT ? OFFSET ?
-            """,
-            [*params, limit, offset],
-        ).fetchall()
-        total = conn.execute(
-            f"SELECT COUNT(*) FROM channels c WHERE c.kind = 'x' {where}", params
-        ).fetchone()[0]
-        return JSONResponse(
-            {"total": total, "accounts": [dict(r) for r in rows]}
-        )
-    finally:
-        conn.close()
 
 
 @app.get("/api/registry")

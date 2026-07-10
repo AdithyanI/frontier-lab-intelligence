@@ -15,8 +15,8 @@ fli web
 
 ## What to look at, in weighted order
 1. **Registry (20%)** — the entity/channel spine and structural-kind pass are
-   implemented. The Registry contains 2,924 observed identities: 2,607 people,
-   180 organizations, and 137 explicit abstentions. Open an entity to inspect
+   implemented. The clean public-source Registry contains 586 observed
+   identities: 473 people, 87 organizations, and 26 explicit abstentions. Open an entity to inspect
    its observed profile and classification reason. Exact rules live in
    `docs/references/registry-curation.md`.
 2. **Signal-vs-noise (20%)** — filtering logic and the judgment calls behind
@@ -32,8 +32,9 @@ fli web
 
 ## Evidence to check
 
-- `data/fli.db` — inspectable SQLite database with real graph, entity, channel,
-  observation, raw-item, and classifier provenance tables.
+- `data/fli.db` — inspectable SQLite database with real source, entity, channel,
+  observation, raw-item, and classifier provenance tables; the graph is empty
+  until the trusted-seed contract is accepted.
 - `docs/architecture/overview.md` — current system shape and implemented schema.
 - `docs/references/registry-curation.md` — identity/kind/curation boundaries,
   model contract, evaluation outcome, usage, and cost.
@@ -45,8 +46,8 @@ fli web
 
 - Structural kind is not tracking relevance; graph-based relevance curation is
   the next registry step.
-- A staged hosted-web runner exists for the 145 structural abstentions, but no
-  enrichment batch has run and no promotion policy has been accepted.
+- A non-persisting profile-to-recent-posts calibration runner exists for
+  structural abstentions, but no full enrichment batch or promotion has run.
 - Raw blog, arXiv, and GitHub items exist, but entity-linked deduplication,
   cited insight extraction, scoring validation, reports, and alerts remain.
 - The final report, workflow-level tokenomics summary, and submission package
