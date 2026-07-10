@@ -164,7 +164,7 @@ def test_completed_result_is_resumable_without_duplicate_call(tmp_path):
     assert "pipeline:entity-kind-classification" in tags
     assert "job:entity-kind-classification" in tags
     assert "scope:custom" in tags
-    assert "prompt:entity-kind-v4" in tags
+    assert f"prompt:{entity_kinds.PROMPT_VERSION}" in tags
     assert any(tag.startswith("run:") for tag in tags)
     assert request["extra_headers"]["x-litellm-tags"] == ",".join(tags)
 

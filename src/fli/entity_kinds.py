@@ -22,13 +22,15 @@ from typing import Any, Callable
 
 from fli import channels, registry, sources, store
 
-PROMPT_VERSION = "entity-kind-v4"
+PROMPT_VERSION = "entity-kind-v5"
 SCHEMA_VERSION = "entity-kind-output-v1"
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_REASONING_EFFORT = "medium"
 DEFAULT_WORKERS = 100
 DEFAULT_POST_WORKERS = 10
 DEFAULT_POST_LIMIT = 20
+DEFAULT_MIN_FOLLOWERS = 1_000
+DEFAULT_WEB_MAX_TOOL_CALLS = 4
 DEFAULT_SECRET_PATH = Path.home() / ".secrets" / "litellm" / "env"
 CLASSIFICATIONS = frozenset({"person", "organization", "unsure"})
 PROTECTED_ACCOUNT_REASON_CODE = "protected_x_account"
@@ -157,6 +159,33 @@ CREATE TABLE IF NOT EXISTS entity_kind_classification_errors (
 CREATE INDEX IF NOT EXISTS idx_entity_kind_errors_run
 ON entity_kind_classification_errors (run_id, entity_id);
 
+CREATE TABLE IF NOT EXISTS entity_kind_web_enrichments (
+    entity_id INTEGER NOT NULL REFERENCES entities (id) ON DELETE CASCADE,
+    input_sha256 TEXT NOT NULL,
+    classification TEXT NOT NULL
+        CHECK (classification IN ('person', 'organization', 'unsure')),
+    reason TEXT NOT NULL,
+    model TEXT NOT NULL,
+    reasoning_effort TEXT NOT NULL,
+    response_model TEXT,
+    prompt_version TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    response_id TEXT,
+    actions_json TEXT NOT NULL,
+    sources_json TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    estimated_cost_usd REAL NOT NULL,
+    reported_cost_usd REAL,
+    run_id INTEGER NOT NULL REFERENCES entity_kind_classification_runs (id),
+    enriched_at TEXT NOT NULL,
+    PRIMARY KEY (
+        entity_id, input_sha256, model, reasoning_effort, prompt_version
+    )
+);
+CREATE INDEX IF NOT EXISTS idx_entity_kind_web_label
+ON entity_kind_web_enrichments (classification);
+
 """
 
 
@@ -202,22 +231,35 @@ class ClassificationResult:
 
 
 @dataclass(frozen=True)
+class WebEnrichmentResult:
+    result: ClassificationResult
+    actions: tuple[dict[str, Any], ...]
+    sources: tuple[dict[str, Any], ...]
+
+
+@dataclass(frozen=True)
 class PostEnrichmentResult:
     entity: EntityInput
     profile_result: ClassificationResult
     followup_result: ClassificationResult | None
+    web_result: WebEnrichmentResult | None
     recent_posts: tuple[dict[str, Any], ...]
     evidence_sha256: str
 
     @property
     def final_result(self) -> ClassificationResult:
+        if self.web_result is not None:
+            return self.web_result.result
         return self.followup_result or self.profile_result
 
     @property
     def turns(self) -> tuple[ClassificationResult, ...]:
-        if self.followup_result is None:
-            return (self.profile_result,)
-        return (self.profile_result, self.followup_result)
+        turns = [self.profile_result]
+        if self.followup_result is not None:
+            turns.append(self.followup_result)
+        if self.web_result is not None:
+            turns.append(self.web_result.result)
+        return tuple(turns)
 
     @property
     def input_tokens(self) -> int:
@@ -581,6 +623,100 @@ def _posts_followup_input(
     return [{"role": "user", "content": "\n".join(blocks)}]
 
 
+def _web_followup_input(entity: EntityInput) -> list[dict[str, str]]:
+    prompt = "\n".join(
+        (
+            "The profile and recent authored posts were still insufficient.",
+            "",
+            (
+                "Use web search to identify what this exact X account "
+                f"(@{entity.handle}) represents. Match the handle to the "
+                "real-world actor; do not merely find a similarly named or "
+                "famous person."
+            ),
+            (
+                "Prefer first-party identity evidence such as official company "
+                "pages, official blogs, regulatory filings, employer pages, "
+                "or the actor's own site. Use reputable secondary sources only "
+                "when first-party evidence is unavailable."
+            ),
+            (
+                "Re-evaluate the same account using the profile, posts, and "
+                "searched evidence together. Return unsure if the exact-handle "
+                "identity still cannot be established."
+            ),
+        )
+    )
+    return [{"role": "user", "content": prompt}]
+
+
+def _web_evidence(
+    response_data: dict[str, Any],
+) -> tuple[tuple[dict[str, Any], ...], tuple[dict[str, Any], ...]]:
+    """Extract observable hosted-search actions and deduplicated sources."""
+    actions: list[dict[str, Any]] = []
+    sources_by_url: dict[str, dict[str, Any]] = {}
+
+    def add_source(
+        *,
+        url: Any,
+        title: Any = None,
+        source_type: Any = None,
+        cited: bool = False,
+    ) -> None:
+        if not isinstance(url, str) or not url:
+            return
+        source = sources_by_url.setdefault(
+            url,
+            {"url": url, "title": None, "type": None, "cited": False},
+        )
+        if isinstance(title, str) and title:
+            source["title"] = title
+        if isinstance(source_type, str) and source_type:
+            source["type"] = source_type
+        source["cited"] = source["cited"] or cited
+
+    for item in response_data.get("output") or []:
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "web_search_call":
+            action = item.get("action") or {}
+            if not isinstance(action, dict):
+                action = {}
+            actions.append(
+                {
+                    key: action[key]
+                    for key in ("type", "query", "queries", "url", "pattern")
+                    if action.get(key) is not None
+                }
+            )
+            for source in action.get("sources") or []:
+                if isinstance(source, dict):
+                    add_source(
+                        url=source.get("url"),
+                        title=source.get("title"),
+                        source_type=source.get("type"),
+                    )
+        if item.get("type") == "message":
+            for content in item.get("content") or []:
+                if not isinstance(content, dict):
+                    continue
+                for annotation in content.get("annotations") or []:
+                    if (
+                        isinstance(annotation, dict)
+                        and annotation.get("type") == "url_citation"
+                    ):
+                        add_source(
+                            url=annotation.get("url"),
+                            title=annotation.get("title"),
+                            source_type="url_citation",
+                            cited=True,
+                        )
+    if not actions:
+        raise OutputContractError("response completed without a web search call")
+    return tuple(actions), tuple(sources_by_url.values())
+
+
 def _post_workflow_turn(
     client: Any,
     entity: EntityInput,
@@ -645,6 +781,80 @@ def _post_workflow_turn(
     )
 
 
+def _web_workflow_turn(
+    client: Any,
+    entity: EntityInput,
+    *,
+    previous_response_id: str,
+    model: str,
+    effort: str,
+    tags: tuple[str, ...],
+    input_cost_per_token: float,
+    output_cost_per_token: float,
+    max_tool_calls: int = DEFAULT_WEB_MAX_TOOL_CALLS,
+) -> WebEnrichmentResult:
+    """Run the final, required hosted-search escalation for one abstention."""
+    request: dict[str, Any] = {
+        "model": model,
+        "input": _web_followup_input(entity),
+        "previous_response_id": previous_response_id,
+        "tools": [{"type": "web_search", "search_context_size": "medium"}],
+        "tool_choice": "required",
+        "include": ["web_search_call.action.sources"],
+        "max_tool_calls": max_tool_calls,
+        "text": {"format": CLASSIFICATION_FORMAT},
+        "reasoning": {"effort": effort},
+        "max_output_tokens": 800,
+        "store": True,
+        "extra_body": {"metadata": {"tags": list(tags)}},
+        "extra_headers": {"x-litellm-tags": ",".join(tags)},
+    }
+    raw_api = getattr(client.responses, "with_raw_response", None)
+    if raw_api is None:
+        response = client.responses.create(**request)
+        reported_cost_usd = None
+    else:
+        raw_response = raw_api.create(**request)
+        response = raw_response.parse()
+        reported_cost_usd = _reported_cost(raw_response.headers)
+    response_data = _response_dict(response)
+    refusal = _find_refusal(response_data)
+    if refusal:
+        raise ModelRefusalError(refusal)
+    status = getattr(response, "status", None) or response_data.get("status")
+    if status and status != "completed":
+        raise OutputContractError(f"response status was {status!r}")
+    output_text = getattr(response, "output_text", None)
+    if output_text is None:
+        output_text = response_data.get("output_text")
+    classification, reason = _validate_output(output_text)
+    actions, web_sources = _web_evidence(response_data)
+    usage = getattr(response, "usage", None) or response_data.get("usage")
+    input_tokens = _usage_value(usage, "input_tokens")
+    output_tokens = _usage_value(usage, "output_tokens")
+    result = ClassificationResult(
+        entity=entity,
+        classification=classification,
+        reason=reason,
+        response_id=getattr(response, "id", None) or response_data.get("id"),
+        response_model=(
+            getattr(response, "model", None) or response_data.get("model")
+        ),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        estimated_cost_usd=(
+            input_tokens * input_cost_per_token
+            + output_tokens * output_cost_per_token
+        ),
+        reported_cost_usd=reported_cost_usd,
+    )
+    return WebEnrichmentResult(
+        result=result,
+        actions=actions,
+        sources=web_sources,
+    )
+
+
 def enrich_one_with_posts(
     client: Any,
     post_client: Any,
@@ -658,7 +868,7 @@ def enrich_one_with_posts(
     post_limit: int = DEFAULT_POST_LIMIT,
     profile: dict[str, Any] | None = None,
 ) -> PostEnrichmentResult:
-    """Run profile-first classification, then authored posts if still unsure."""
+    """Run profile, authored-post, then hosted-web escalation as needed."""
     profile_result = _post_workflow_turn(
         client,
         entity,
@@ -671,6 +881,7 @@ def enrich_one_with_posts(
     )
     recent_posts: tuple[dict[str, Any], ...] = ()
     followup_result: ClassificationResult | None = None
+    web_result: WebEnrichmentResult | None = None
     if profile_result.classification == "unsure":
         recent_posts = post_client.fetch_recent_authored_posts(
             username=entity.handle,
@@ -689,9 +900,27 @@ def enrich_one_with_posts(
                 output_cost_per_token=output_cost_per_token,
                 previous_response_id=profile_result.response_id,
             )
+    latest_result = followup_result or profile_result
+    if latest_result.classification == "unsure":
+        if latest_result.response_id is None:
+            raise OutputContractError(
+                "cannot continue to web search without a previous response ID"
+            )
+        web_result = _web_workflow_turn(
+            client,
+            entity,
+            previous_response_id=latest_result.response_id,
+            model=model,
+            effort=effort,
+            tags=tags,
+            input_cost_per_token=input_cost_per_token,
+            output_cost_per_token=output_cost_per_token,
+        )
     evidence_payload = {
         "profile": entity.model_payload,
         "recent_posts": recent_posts,
+        "web_actions": web_result.actions if web_result is not None else (),
+        "web_sources": web_result.sources if web_result is not None else (),
     }
     evidence_sha256 = hashlib.sha256(
         json.dumps(
@@ -705,6 +934,7 @@ def enrich_one_with_posts(
         entity=entity,
         profile_result=profile_result,
         followup_result=followup_result,
+        web_result=web_result,
         recent_posts=recent_posts,
         evidence_sha256=evidence_sha256,
     )
@@ -1180,6 +1410,40 @@ def run_post_enrichment(
                                 completed_at,
                             ),
                         )
+                        if result.web_result is not None:
+                            web = result.web_result
+                            web_turn = web.result
+                            conn.execute(
+                                """INSERT OR REPLACE INTO entity_kind_web_enrichments
+                                   (entity_id, input_sha256, classification,
+                                    reason, model, reasoning_effort,
+                                    response_model, prompt_version,
+                                    schema_version, response_id, actions_json,
+                                    sources_json, input_tokens, output_tokens,
+                                    estimated_cost_usd, reported_cost_usd,
+                                    run_id, enriched_at)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                (
+                                    result.entity.entity_id,
+                                    result.evidence_sha256,
+                                    web_turn.classification,
+                                    web_turn.reason,
+                                    model,
+                                    effort,
+                                    web_turn.response_model,
+                                    PROMPT_VERSION,
+                                    SCHEMA_VERSION,
+                                    web_turn.response_id,
+                                    json.dumps(web.actions, ensure_ascii=False),
+                                    json.dumps(web.sources, ensure_ascii=False),
+                                    web_turn.input_tokens,
+                                    web_turn.output_tokens,
+                                    web_turn.estimated_cost_usd,
+                                    web_turn.reported_cost_usd,
+                                    run_id,
+                                    completed_at,
+                                ),
+                            )
                         if promote:
                             conn.execute(
                                 """UPDATE entities
@@ -1274,12 +1538,25 @@ def run_post_enrichment(
         "failed": failure_count,
         "counts": counts,
         "profile_only": sum(
-            result.followup_result is None for result in results
+            len(result.turns) == 1 for result in results
         ),
         "followups": sum(
             result.followup_result is not None for result in results
         ),
         "recent_posts": sum(len(result.recent_posts) for result in results),
+        "web_followups": sum(
+            result.web_result is not None for result in results
+        ),
+        "web_search_actions": sum(
+            len(result.web_result.actions)
+            for result in results
+            if result.web_result is not None
+        ),
+        "web_sources": sum(
+            len(result.web_result.sources)
+            for result in results
+            if result.web_result is not None
+        ),
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
         "estimated_cost_usd": estimated_cost_usd,
@@ -1299,6 +1576,18 @@ def run_post_enrichment(
                 "followup": (
                     _post_turn_record("recent_posts", result.followup_result)
                     if result.followup_result is not None
+                    else None
+                ),
+                "web": (
+                    {
+                        **_post_turn_record(
+                            "web_search",
+                            result.web_result.result,
+                        ),
+                        "actions": result.web_result.actions,
+                        "sources": result.web_result.sources,
+                    }
+                    if result.web_result is not None
                     else None
                 ),
                 "classification": result.final_result.classification,

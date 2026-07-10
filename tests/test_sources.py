@@ -145,6 +145,54 @@ def test_sources_cli_missing_key_returns_json_error(tmp_path, capsys):
     assert payload["error"]["code"] == "E_SECRET_MISSING"
 
 
+def test_persist_x_profile_is_idempotent_and_materializes_entity(tmp_path):
+    conn = sources.channels.connect(tmp_path / "test.db")
+    profile = {
+        "userName": "Example",
+        "id": "42",
+        "name": "Example Person",
+        "description": "I build systems.",
+        "followers": 2_500,
+        "protected": False,
+    }
+
+    first = sources.persist_x_profile(
+        conn,
+        profile=profile,
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    second = sources.persist_x_profile(
+        conn,
+        profile=profile,
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+
+    assert first["handle"] == "example"
+    assert first["account_created"] is True
+    assert first["entity_created"] is True
+    assert second["account_created"] is False
+    assert second["entity_created"] is False
+    assert second["entity_id"] == first["entity_id"]
+    assert conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0] == 1
+    assert conn.execute("SELECT COUNT(*) FROM channels").fetchone()[0] == 1
+    assert conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 1
+    assert conn.execute(
+        """SELECT value FROM account_source_facts
+           WHERE source = 'x_account_onboarding'
+             AND fact = 'submitted_handle'"""
+    ).fetchone()[0] == "example"
+    observations = {
+        row["metric"]: row["value"]
+        for row in conn.execute(
+            "SELECT metric, value FROM channel_observations"
+        ).fetchall()
+    }
+    assert observations == {
+        "bio": "I build systems.",
+        "followers_count": "2500",
+    }
+
+
 def test_import_x_following_dry_run_does_not_write(tmp_path):
     db = tmp_path / "test.db"
     fake = FakeFollowingClient(
