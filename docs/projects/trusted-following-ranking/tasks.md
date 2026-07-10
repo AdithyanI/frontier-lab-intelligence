@@ -114,6 +114,10 @@ candidate generator while demonstrating ranking and validation discipline.
   Organizations label it Combined X followers. This is a temporary visibility
   order only; it does not replace trusted-follow evaluation or define seed
   importance.
+- Structural kind and product relevance are separate decisions. The existing
+  lifecycle resolves person/organization/unsure; a future relevance gate may
+  follow it, but the first full-corpus pass is an offline review artifact only
+  and cannot mutate the Registry. Follower count is not a model input.
 
 ## Open Questions / Blockers
 
@@ -121,6 +125,7 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
+- Which of the 108 conservative relevance-removal candidates does Adi accept?
 
 ## Current Batch
 
@@ -132,11 +137,15 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Estimate a full 2,924-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
 | done | Consolidate SpaceX and SpaceXAI into one organization with two active X channels; prove replay and invariants. | parent | — |
 | done | Consolidate ten high-confidence organization groups and make all channels legible in the Registry UI. | parent | `../../references/registry-curation.md` |
-| in progress | Freeze the first bounded trusted people and organization seed set. | parent | — |
+| done | Run a read-only Luna-medium relevance triage and produce a conservative removal shortlist. | parent | `resources/relevance-removal-candidates.csv` |
+| in progress | Review the 108 proposed removals before any Registry mutation. | parent | `resources/relevance-removal-candidates.csv` |
+| todo | Freeze the first bounded trusted people and organization seed set after relevance review. | parent | — |
 
 ## Backlog / Remaining Work
 
 - [ ] Freeze the first trusted seed set.
+- [ ] Apply only the human-accepted relevance removals through a reversible,
+  reviewed manifest.
 - [ ] Implement isolated snapshot storage and bounded ingestion.
 - [ ] Implement overlap baseline and personalized PageRank.
 - [ ] Build and review the labeled top-k evaluation.
@@ -238,3 +247,12 @@ candidate generator while demonstrating ranking and validation discipline.
   Combined X followers. Handles stay searchable and available in detail cards
   but are omitted from ranked rows, missing observations show an em dash and
   sort last, and the Rejected review view remains reason-bearing.
+- 2026-07-10: [DONE] Ran a disposable, read-only Luna-medium relevance triage
+  over all 2,900 active Registry entities without sending follower count or
+  mutating canonical data. It produced 1,706 keep, 107 remove, and 1,051 review
+  decisions; 36 incomplete JSON responses remain unclassified and are excluded
+  from removal consideration. Central controls including OpenAI, Anthropic,
+  Google DeepMind, DeepSeek, Sam Altman, Demis Hassabis, and Andrej Karpathy
+  were kept. Added Ashton Kutcher manually from review to create a 108-row,
+  follower-sorted removal candidate file for human approval. LiteLLM reported
+  $2.915358 for 1,112,663 input and 300,597 output tokens. No entity was removed.
