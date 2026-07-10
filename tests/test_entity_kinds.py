@@ -157,7 +157,7 @@ def test_completed_result_is_resumable_without_duplicate_call(tmp_path):
     assert "pipeline:entity-kind-classification" in tags
     assert "job:entity-kind-classification" in tags
     assert "scope:custom" in tags
-    assert "prompt:entity-kind-v3" in tags
+    assert "prompt:entity-kind-v4" in tags
     assert any(tag.startswith("run:") for tag in tags)
     assert request["extra_headers"]["x-litellm-tags"] == ",".join(tags)
 
@@ -447,7 +447,7 @@ def test_post_enrichment_chains_responses_without_persisting(tmp_path):
     ]["tags"]
     assert first["items"][0]["profile"]["response_id"] == "response-1"
     assert first["items"][0]["followup"]["response_id"] == "response-2"
-    assert len(first["items"][0]["recent_posts"]) == 2
+    assert first["items"][0]["recent_post_count"] == 2
     assert conn.execute(
         "SELECT COUNT(*) FROM entity_kind_classification_runs"
     ).fetchone()[0] == 0

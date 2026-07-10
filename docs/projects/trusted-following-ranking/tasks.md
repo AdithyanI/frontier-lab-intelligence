@@ -109,8 +109,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | --- | --- | --- | --- |
 | done | Audit existing edge/import/PageRank code and current database provenance locally. | parent | — |
 | done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
-| done | Remove Digg/personal graph data and unsupported candidates; retain Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
-| done | Estimate a full 586-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
+| done | Remove Digg/personal graph evidence while retaining the post-floor classified nodes; keep Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
+| done | Estimate a full 2,924-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
 | blocked | Pause before seed selection, live following fetches, or new ranking work until Adi returns. | parent | — |
 
 ## Backlog / Remaining Work
@@ -166,7 +166,13 @@ candidate generator while demonstrating ranking and validation discipline.
   reconciliation, SQLite foreign-key check, and integrity check. Execution is
   intentionally paused before seed selection or any following-list fetch.
 - 2026-07-10: [DONE] Rechecked current TwitterAPI.io page pricing and modeled
-  the clean 586-account cohort without making an API request. A Karpathy-like
-  1,108-following average would cost about `$7.23`; a 500–2,000 average gives a
-  `$3.62–$11.83` planning range. Cost is affordable, but using every candidate
-  as a trust seed would weaken the graph's meaning and evaluation story.
+  the full classified cohort without making an API request. After correcting
+  the node restoration, a Karpathy-like 1,108-following average is about
+  `$36.08`; a 500–2,000 average gives an `$18.07–$59.01` planning range.
+- 2026-07-10: [DONE] Corrected an over-aggressive interpretation of graph
+  cleanup. Restored the post-floor nodes, channels, observations, and
+  classifications from Git commit `53dd026`, then removed only Digg/personal
+  edges and active Digg/PageRank/personal source evidence. Current state: 2,924
+  accounts/entities (2,607 people, 180 organizations, 137 unsure), 2,956
+  channels, zero graph edges, zero stored follower counts below 1,000, SQLite
+  integrity `ok`. All 37 tests plus frontend lint/build pass.

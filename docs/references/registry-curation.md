@@ -47,21 +47,23 @@ Current invariants:
 
 ## Current Implemented Universe
 
-After removing the rejected Digg graph and the exploratory personal following
-snapshot, the active source-supported corpus contains:
+After removing the rejected graph evidence while retaining the already
+filtered and classified nodes, the active corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 473 |
-| organization | 87 (including 10 seeded labs) |
-| unsure | 26 |
+| person | 2,607 |
+| organization | 180 (including 10 seeded labs) |
+| unsure | 137 |
 | unknown | 0 |
-| **total** | **586** |
+| **total** | **2,924** |
 
-Those clusters own all 618 channels. The difference is the 32 additional
+Those clusters own all 2,956 channels. The difference is the 32 additional
 official website, GitHub, arXiv, and blog channels already linked to labs.
 The active graph has zero edges. Digg's 1,000-account ranking is an offline
-comparison artifact and is not active Registry provenance.
+comparison artifact and is not active Registry provenance. A node's accepted
+follower-floor and structural-kind decisions survive removal of its discovery
+edge.
 
 ## First Kind Classifier: Accepted Contract
 

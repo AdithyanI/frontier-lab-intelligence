@@ -9,7 +9,7 @@ calibration.
 ## Why / Impact
 
 The profile-only classifier initially abstained on 145 weak identity records;
-26 remain after the clean public-source Registry reset.
+137 remain after explicit follower-floor removals and the graph-evidence reset.
 Many can likely be resolved from their own recent authored posts. The first
 calibration should test that evidence and the two-turn model interaction before
 choosing a durable local persistence contract.
@@ -168,7 +168,6 @@ choosing a durable local persistence contract.
   `previous_response_id` follow-up with up to 20 authored posts, and excluded
   replies and retweets. The calibration path adds no result table and does not
   modify canonical kinds; local persistence will be designed after review.
-- 2026-07-10: [DONE] The separate graph cleanup removed every entity supported
-  only by Digg, derived PageRank, or the exploratory personal-follow snapshot.
-  The active unsure cohort is now 26 public-list/curated-source entities; this
-  project must read the current cohort rather than the historical 137.
+- 2026-07-10: [DONE] Corrected an over-aggressive graph cleanup by restoring all
+  post-floor classified nodes from the Git-tracked database snapshot while
+  keeping rejected graph evidence absent. The active unsure cohort remains 137.

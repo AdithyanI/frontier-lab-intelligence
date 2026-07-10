@@ -4,10 +4,10 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
-Registry has been reduced to independently sourced public-list candidates plus
-the 10 curated labs: 473 people, 87 organizations, 26 unsure, and zero unknown.
-The rejected Digg edge plane, its derived PageRank, graph-only candidates, and
-the exploratory personal following snapshot have been removed. The Digg
+Registry retains the post-1,000-follower-floor classified universe: 2,607
+people, 180 organizations, 137 unsure, and zero unknown. The rejected Digg
+edge plane, its derived PageRank, and the exploratory personal following
+snapshot have been removed without deleting the classified nodes. The Digg
 1,000-account ranking survives only as an offline comparison CSV; the active
 graph is empty until the trusted-seed contract is accepted. The `labs` table
 remains internal source/seed provenance because its 10 rows are not an
@@ -141,9 +141,9 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry has 586 entities: 473 people, 87 organizations, and 26
-  unsure. They come from the AI High Signal X list, smol.ai, or the 10 curated
-  lab seeds; the 618 channels include 32 additional lab channels.
+- The active Registry retains 2,924 classified entities: 2,607 people, 180
+  organizations, and 137 unsure. The 2,956 channels include 32 additional lab
+  channels. Removing discovery edges does not remove already classified nodes.
 - `data/digg/rankings.csv` retains the frozen 1,000-account Digg ranking only
   for later comparison. It is not imported into the active database.
 - `fli sources import-x-list --list-id 1585430245762441216 --source
@@ -277,9 +277,9 @@ erDiagram
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (618)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,956)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (3,900)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (8,313)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,988)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (0)"
@@ -287,11 +287,11 @@ erDiagram
     ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 586,
+Table row counts: `raw_items` 1,599, `accounts` 2,924,
 `account_source_facts` 605, `graph_edges` 0, `labs` 10,
-`entities` 586, `channels` 618, `entity_channels` 618,
-`channel_observations` 3,900, `entity_kind_classification_runs` 8,
-`entity_kind_classifications` 599, `entity_kind_web_enrichments` 0, and
+`entities` 2,924, `channels` 2,956, `entity_channels` 2,956,
+`channel_observations` 8,313, `entity_kind_classification_runs` 8,
+`entity_kind_classifications` 2,946, `entity_kind_web_enrichments` 0, and
 `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is

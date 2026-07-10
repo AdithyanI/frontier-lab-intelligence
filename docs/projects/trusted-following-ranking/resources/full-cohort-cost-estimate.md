@@ -4,8 +4,9 @@ Estimate date: 2026-07-10. No API request was made for this estimate.
 
 ## Scope and Pricing
 
-The clean baseline has 586 X accounts: 473 people, 87 organizations, and 26
-unsure. The existing importer also performs one source-profile lookup per seed.
+The clean graph baseline retains 2,924 X accounts: 2,607 people, 180
+organizations, and 137 unsure. The existing importer also performs one
+source-profile lookup per seed.
 
 TwitterAPI.io currently documents:
 
@@ -24,26 +25,26 @@ and `https://docs.twitterapi.io/introduction`.
 The totals include the 18-credit profile lookup for every account and exact
 final-page tiering at the adapter's 200-item page size.
 
-| Average accounts followed | Per seed | All 586 |
+| Average accounts followed | Per seed | All 2,924 |
 | ---: | ---: | ---: |
-| 100 | `$0.00218` | `$1.28` |
-| 250 | `$0.00368` | `$2.16` |
-| 500 | `$0.00618` | `$3.62` |
-| 1,000 | `$0.01018` | `$5.97` |
-| 1,108 (`@karpathy` reference) | `$0.01234` | `$7.23` |
-| 2,000 | `$0.02018` | `$11.83` |
-| 3,000 | `$0.03018` | `$17.69` |
-| 5,000 | `$0.05018` | `$29.41` |
+| 100 | `$0.00218` | `$6.37` |
+| 250 | `$0.00368` | `$10.76` |
+| 500 | `$0.00618` | `$18.07` |
+| 1,000 | `$0.01018` | `$29.77` |
+| 1,108 (`@karpathy` reference) | `$0.01234` | `$36.08` |
+| 2,000 | `$0.02018` | `$59.01` |
+| 3,000 | `$0.03018` | `$88.25` |
+| 5,000 | `$0.05018` | `$146.73` |
 
 ## Planning Read
 
-- Best rough estimate for all 586: about **`$7`**.
-- Sensible planning range: **`$4–$12`** if the average seed follows roughly
+- Best rough estimate for all 2,924: about **`$36`**.
+- Sensible planning range: **`$18–$59`** if the average seed follows roughly
   500–2,000 accounts.
-- A conservative hard-cap assumption is **`$20`**; exceeding it would imply an
-  unusually high average following count or unexpected provider behavior.
+- A full-cohort run can exceed the EUR100 project budget if the average seed
+  follows roughly 3,400 or more accounts.
 
 Cost is not the reason to avoid an all-account run. The stronger objection is
-that all 586 accounts are candidates, not reviewed trust seeds. Treating every
+that all 2,924 accounts are candidates, not reviewed trust seeds. Treating every
 candidate as equally trusted would weaken the meaning of personalized PageRank
 and make the evaluation story less defensible.

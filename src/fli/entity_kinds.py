@@ -22,7 +22,7 @@ from typing import Any, Callable
 
 from fli import channels, sources, store
 
-PROMPT_VERSION = "entity-kind-v3"
+PROMPT_VERSION = "entity-kind-v4"
 SCHEMA_VERSION = "entity-kind-output-v1"
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_REASONING_EFFORT = "medium"
@@ -59,6 +59,12 @@ team language, publication branding, and product or service announcements
 support organization. Do not use follower count, fame, outside knowledge, or
 assumptions based on a recognizable handle. Do not infer identity from topic
 alone, and do not force a binary answer when the evidence remains weak.
+
+On the profile-only turn, require evidence that actually identifies the actor.
+A full personal name or an explicitly personal biography can support person,
+but a lone given name, generic display name, opaque handle, or empty biography
+does not establish that the account represents one human. Return unsure in
+those cases so later authored posts can provide the missing evidence.
 
 Return exactly classification and reason through the required schema. Keep
 the reason to one short sentence grounded only in the supplied profile or
@@ -1112,7 +1118,7 @@ def run_post_enrichment(
                 ),
                 "classification": result.final_result.classification,
                 "reason": result.final_result.reason,
-                "recent_posts": result.recent_posts,
+                "recent_post_count": len(result.recent_posts),
                 "evidence_sha256": result.evidence_sha256,
             }
             for result in results
