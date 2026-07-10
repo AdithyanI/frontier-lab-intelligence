@@ -187,16 +187,25 @@ All structural kinds remain eligible for this ranking, including `unsure`.
 Weak identity evidence must not prevent a potentially important account from
 surfacing; identity enrichment and tracking relevance remain separate.
 
-## Unsure Entity Recent-Post Calibration
+## Canonical X-Account Classification Lifecycle
 
-The active bounded path is `fli entity-kinds enrich --limit N`. It reads only
-current `unsure` entities and uses one shared `ENTITY_KIND_INSTRUCTIONS`
-developer prompt. The first Responses call supplies the profile. Only when
-that result is `unsure`, the runner fetches up to 20 recent authored posts
-through TwitterAPI.io, excluding replies and retweets, and makes one follow-up
-call with `previous_response_id`. Quote posts contribute only the account's
-top-level commentary. Both turns use Luna-medium through LiteLLM and the same
-strict `classification` + `reason` schema.
+The canonical entrypoint is `fli entity-kinds onboard --handle @name`. It
+fetches the TwitterAPI.io profile, enforces the 1,000-follower floor, persists
+eligible profile evidence, and rejects protected accounts before inference.
+Public accounts use one shared `ENTITY_KIND_INSTRUCTIONS` developer prompt.
+The first Responses call supplies the profile. Only when that result is
+`unsure`, the runner fetches up to 20 recent authored posts, excluding replies
+and retweets, and continues with `previous_response_id`. Quote posts contribute
+only the account's top-level commentary.
+
+If the post turn remains `unsure`, one final Responses call requires hosted
+`web_search`, with medium search context and at most four tool calls. It must
+match the exact handle to the represented actor and prioritize first-party
+identity evidence. The final turn still returns only `classification` and
+`reason`; search/open/find actions plus complete consulted and cited sources
+are persisted separately in `entity_kind_web_enrichments`. More tweets are not
+the fallback because a second abstention usually indicates missing external
+identity linkage rather than insufficient account voice.
 
 The accepted runner now persists each final decision and promotes its canonical
 kind with per-entity commits. It stores the final Response ID, evidence hash,
@@ -206,7 +215,7 @@ an explicit protected flag records a Registry rejection instead and performs
 zero model calls. Responses use Azure's normal 30-day storage to support
 chaining and are not explicitly deleted.
 
-Hosted Azure web search was separately proven through LiteLLM and remains a
-historical capability smoke, not part of the selected entity-kind workflow.
-Its weak secondary-domain evidence and separate Bing costs made deterministic
-authored posts the better first enrichment source.
+Hosted Azure web search was separately proven through LiteLLM before being
+adopted as this final escalation. Deterministic authored posts remain the first
+enrichment source; hosted search runs only after both cheaper identity stages
+abstain.
