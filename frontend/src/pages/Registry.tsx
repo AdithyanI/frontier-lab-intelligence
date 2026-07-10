@@ -125,7 +125,7 @@ export default function Registry() {
   const filtered = useMemo(() => {
     if (!data) return []
     const needle = query.trim().toLowerCase()
-    return data.entities.filter((entity) => {
+    const matches = data.entities.filter((entity) => {
       if (kind === 'rejected' && entity.registry_state !== 'rejected') return false
       if (
         kind !== 'all' &&
@@ -142,6 +142,12 @@ export default function Registry() {
         )
       )
     })
+    if (!['all', 'person', 'organization'].includes(kind)) return matches
+    return matches.sort(
+      (left, right) =>
+        (right.followers_count ?? -1) - (left.followers_count ?? -1) ||
+        left.name.localeCompare(right.name),
+    )
   }, [data, kind, query])
 
   useEffect(() => setShown(FIRST), [kind, query])
@@ -170,6 +176,8 @@ export default function Registry() {
     })
   }
   const showRejectionReason = kind === 'rejected'
+  const showFollowerColumn = ['all', 'person', 'organization'].includes(kind)
+  const showTypeColumn = kind !== 'person' && kind !== 'organization'
 
   return (
     <div className="page">
@@ -222,7 +230,12 @@ export default function Registry() {
           <thead>
             <tr>
               <th>Entity</th>
-              <th>Type</th>
+              {showTypeColumn && <th className="ent-type-head">Type</th>}
+              {showFollowerColumn && (
+                <th className="ent-followers-head">
+                  {kind === 'person' ? 'X followers' : 'Combined X followers'}
+                </th>
+              )}
               {showRejectionReason && <th>Why rejected</th>}
             </tr>
           </thead>
@@ -246,7 +259,7 @@ export default function Registry() {
                 >
                   <td>
                     <span className="ent-name">{entity.name}</span>
-                    {xChannels.length > 0 && (
+                    {xChannels.length > 0 && !showFollowerColumn && (
                       <span className="ent-handles">
                         {xChannels.map((channel) => (
                           <span className="ent-handle" key={channel.id}>
@@ -256,11 +269,18 @@ export default function Registry() {
                       </span>
                     )}
                   </td>
-                  <td>
-                    <span className={`ent-type ent-type--${typeClass(entity)}`}>
-                      {typeLabel(entity)}
-                    </span>
-                  </td>
+                  {showTypeColumn && (
+                    <td className="ent-type-cell">
+                      <span className={`ent-type ent-type--${typeClass(entity)}`}>
+                        {typeLabel(entity)}
+                      </span>
+                    </td>
+                  )}
+                  {showFollowerColumn && (
+                    <td className="ent-followers">
+                      {fmt(entity.followers_count)}
+                    </td>
+                  )}
                   {showRejectionReason && (
                     <td className="ent-rejection-reason">
                       {entity.rejection_reason ?? 'No rejection reason recorded.'}

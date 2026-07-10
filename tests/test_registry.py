@@ -85,7 +85,7 @@ def test_known_lab_replaces_its_provisional_unknown(tmp_path):
     ).fetchone()[0] == 0
 
 
-def test_registry_read_model_excludes_attention_and_source_fields(tmp_path):
+def test_registry_read_model_excludes_rank_and_source_fields(tmp_path):
     conn = channels.connect(tmp_path / "test.db")
     channel_id = channels.upsert_channel(
         conn,
@@ -124,6 +124,7 @@ def test_registry_read_model_excludes_attention_and_source_fields(tmp_path):
         "rejection_source",
         "rejection_evidence_url",
         "name",
+        "followers_count",
         "bio",
         "channels",
     }
@@ -131,7 +132,43 @@ def test_registry_read_model_excludes_attention_and_source_fields(tmp_path):
     assert row["registry_state"] == "active"
     assert row["rejection_reason"] is None
     assert row["bio"] == "I like to train neural nets."
+    assert row["followers_count"] is None
     assert "rank" not in row
+
+
+def test_registry_sums_followers_across_an_organizations_x_channels(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    entity_id = channels.upsert_entity(
+        conn,
+        kind="organization",
+        slug="example-org",
+        name="Example Org",
+        observed_at="2026-07-10T00:00:00+00:00",
+    )
+    for handle, followers in [("example", 100), ("exampledevs", 75)]:
+        channel_id = channels.upsert_channel(
+            conn,
+            kind="x",
+            key=handle,
+            observed_at="2026-07-10T00:00:00+00:00",
+        )
+        channels.link_entity_channel(
+            conn,
+            entity_id=entity_id,
+            channel_id=channel_id,
+            relationship="official",
+        )
+        conn.execute(
+            """INSERT INTO accounts
+               (platform, handle, followers_count, first_seen_at, last_seen_at)
+               VALUES ('x', ?, ?, '2026-07-10', '2026-07-10')""",
+            (handle, followers),
+        )
+    conn.commit()
+
+    entity = registry.read_entities(conn)[0]
+
+    assert entity["followers_count"] == 175
 
 
 def test_registry_rejection_is_reasoned_and_separate_from_kind(tmp_path):

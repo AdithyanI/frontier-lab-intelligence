@@ -569,7 +569,19 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
     )
     rows = conn.execute(
         f"""WITH selected AS (
-               SELECT e.id, e.slug, e.kind, e.name
+               SELECT e.id, e.slug, e.kind, e.name,
+                      (
+                          SELECT SUM(a.followers_count)
+                          FROM accounts a
+                          WHERE a.platform = 'x'
+                            AND lower(a.handle) IN (
+                                SELECT lower(xc.key)
+                                FROM entity_channels xec
+                                JOIN channels xc ON xc.id = xec.channel_id
+                                WHERE xec.entity_id = e.id
+                                  AND xc.kind = 'x'
+                            )
+                      ) AS followers_count
                FROM entities e
                LEFT JOIN entity_registry_rejections rejected
                  ON rejected.entity_id = e.id
@@ -582,7 +594,7 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                         e.name COLLATE NOCASE
                LIMIT ?
            )
-           SELECT e.id, e.slug, e.kind, e.name,
+           SELECT e.id, e.slug, e.kind, e.name, e.followers_count,
                   CASE WHEN rejected.entity_id IS NULL
                        THEN 'active' ELSE 'rejected' END AS registry_state,
                   rejected.reason_code AS rejection_reason_code,
@@ -630,6 +642,7 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                 "rejection_source": row["rejection_source"],
                 "rejection_evidence_url": row["rejection_evidence_url"],
                 "name": row["name"],
+                "followers_count": row["followers_count"],
                 "bio": None,
                 "channels": [],
             },

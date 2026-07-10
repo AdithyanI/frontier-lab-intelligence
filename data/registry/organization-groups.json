@@ -60,5 +60,11 @@
     ],
     "reason": "These are Google AI, research, lab, and product accounts; Google DeepMind remains separate as an assignment-scoped frontier lab.",
     "evidence_url": "https://blog.google/innovation-and-ai/technology/developers-tools/google-ai-developer-updates-io-2025/"
+  },
+  {
+    "canonical_handle": "stanfordailab",
+    "member_handles": ["stanfordnlp"],
+    "reason": "Stanford identifies the NLP Group as a research group within the Stanford AI Lab.",
+    "evidence_url": "https://nlp.stanford.edu/"
   }
 ]

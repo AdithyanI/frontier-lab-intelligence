@@ -42,6 +42,7 @@ def test_registry_returns_complete_typed_entity_universe():
         "rejection_reason",
         "rejection_source",
         "rejection_evidence_url",
+        "followers_count",
         "name",
         "bio",
         "channels",

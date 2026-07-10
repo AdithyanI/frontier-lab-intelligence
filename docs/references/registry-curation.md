@@ -56,16 +56,16 @@ filtered and classified nodes, the active corpus contains:
 | Kind | Entities |
 | --- | ---: |
 | person | 2,736 |
-| organization | 164 (including 10 seeded labs) |
+| organization | 163 (including 10 seeded labs) |
 | unsure (active) | 1 |
 | rejected | 3 |
 | unknown | 0 |
-| **total** | **2,904** |
+| **total** | **2,903** |
 
-Those clusters own all 2,948 channels. The difference is 44 additional
-channels: 24 official website, GitHub, and blog channels linked to labs plus 20
-X/product channels consolidated into an existing organization (SpaceX first,
-then the 19-account reviewed batch below). The eight affiliation-search arXiv
+Those clusters own all 2,948 channels. The difference is 45 additional
+channels: 24 official website, GitHub, and blog channels linked to labs plus 21
+X/product/subgroup channels consolidated into an existing organization. The
+eight affiliation-search arXiv
 queries were removed from the identity channel model; all 137 fetched arXiv
 documents remain in `raw_items` for later extraction work.
 The active graph has zero edges. Digg's 1,000-account ranking is an offline
@@ -91,8 +91,8 @@ rerun idempotently. Every applied decision records the removed entity, reason,
 source, evidence URL, and timestamp in `entity_merge_audit`; accounts,
 channels, observations, and source facts remain intact.
 
-The 2026-07-10 first wave consolidated 19 redundant entities into nine
-high-confidence organizations:
+The 2026-07-10 reviewed batches consolidated 20 redundant entities into ten
+high-confidence organizations, in addition to the earlier SpaceX proof:
 
 | Canonical organization | Additional X channels |
 | --- | --- |
@@ -105,6 +105,7 @@ high-confidence organizations:
 | fal | `@editwithfal` |
 | Thinking Machines Lab | `@tinkerapi` |
 | Google | `@googleai`, `@geminiapp`, `@googlelabs`, `@googleaistudio`, `@googleresearch`, `@julesagent`, `@stitchbygoogle` |
+| Stanford AI Lab | `@stanfordnlp` |
 
 Google DeepMind remains first-class because the assignment evaluates frontier
 labs, not only legal parents. Manus remains separate from Meta because the
@@ -114,6 +115,16 @@ corporate control was not strong enough for this precision-first wave. Ought
 and Elicit remain separate because Elicit became an independent public-benefit
 corporation. Independent communities such as `@claude_code` are not absorbed
 into the corresponding vendor.
+
+The Registry's All, People, and Organizations views use one transparent
+temporary ordering: sum the latest stored follower counts across every X
+channel owned by the entity and sort descending. People shows Entity + X
+followers; Organizations shows Entity + Combined X followers; All shows
+Entity + Type + Combined X followers. The visible total is a reach proxy, not
+PageRank, a structural-kind input, or the final trusted-seed decision. Handles
+remain searchable and available in the detail card but are hidden from these
+ranked tables to keep rows calm. Missing follower observations display as an em
+dash and sort last. Rejected retains its review-oriented reason column.
 
 ## First Kind Classifier: Accepted Contract
 

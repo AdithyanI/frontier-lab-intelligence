@@ -106,9 +106,14 @@ candidate generator while demonstrating ranking and validation discipline.
 - arXiv affiliation searches are document-ingestion inputs, not
   organization-owned identity channels. The eight query channels were removed;
   the 137 fetched arXiv records remain available in the raw evidence layer.
-- The first precision-first organization batch is a reviewed manifest, not a
-  fuzzy clustering step. Nine canonical organizations absorbed 19 explicit
-  product/developer accounts; ambiguous ownership remains separate.
+- Precision-first organization consolidation uses a reviewed manifest, not a
+  fuzzy clustering step. Ten canonical organizations absorbed 20 explicit
+  product/developer/subgroup accounts; ambiguous ownership remains separate.
+- The All, People, and Organizations tabs sort by the visible sum of followers
+  across an entity's X channels. People labels the value X followers; All and
+  Organizations label it Combined X followers. This is a temporary visibility
+  order only; it does not replace trusted-follow evaluation or define seed
+  importance.
 
 ## Open Questions / Blockers
 
@@ -126,7 +131,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Remove Digg/personal graph evidence while retaining the post-floor classified nodes; keep Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
 | done | Estimate a full 2,924-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
 | done | Consolidate SpaceX and SpaceXAI into one organization with two active X channels; prove replay and invariants. | parent | — |
-| done | Consolidate the first nine high-confidence organization groups and make all channels legible in the Registry UI. | parent | `../../references/registry-curation.md` |
+| done | Consolidate ten high-confidence organization groups and make all channels legible in the Registry UI. | parent | `../../references/registry-curation.md` |
 | in progress | Freeze the first bounded trusted people and organization seed set. | parent | — |
 
 ## Backlog / Remaining Work
@@ -215,3 +220,21 @@ candidate generator while demonstrating ranking and validation discipline.
   hardened with full preflight, one transaction, merge audit rows, and dry-run
   regression tests, then replayed idempotently. Current state: 2,904 entities,
   2,948 channels/links, zero graph edges, clean foreign keys and integrity.
+- 2026-07-10: [DONE] After a read-only audit of all 164 organization entities
+  and 184 X channels, merged the only accepted subgroup decision: Stanford AI
+  Lab now owns `@stanfordailab` and `@stanfordnlp`. Stanford's official NLP
+  site identifies the group as part of SAIL. The manifest replay is idempotent;
+  Registry state is 2,903 entities, 2,948 channels/links, 20 merge-audit rows,
+  and zero graph edges. Stability product/community accounts remain deferred
+  pending current account-control evidence.
+- 2026-07-10: [DONE] Replaced alphabetical ordering only in the Organizations
+  tab with descending combined X followers. The displayed total sums the
+  latest stored count for every consolidated X channel; All and People remain
+  unchanged. Live verification shows SpaceX, Google, TechCrunch, OpenAI, and
+  Anthropic at the top with their exact totals visible, making the temporary
+  proxy inspectable rather than presenting it as a hidden importance score.
+- 2026-07-10: [DONE] Extended the same inspectable follower ordering to People
+  and All. People now shows Entity + X followers; All shows Entity + Type +
+  Combined X followers. Handles stay searchable and available in detail cards
+  but are omitted from ranked rows, missing observations show an em dash and
+  sort last, and the Rejected review view remains reason-bearing.

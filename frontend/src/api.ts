@@ -39,6 +39,7 @@ export interface Entity {
   rejection_reason: string | null
   rejection_source: string | null
   rejection_evidence_url: string | null
+  followers_count: number | null
   bio: string | null
   channels: EntityChannel[]
 }

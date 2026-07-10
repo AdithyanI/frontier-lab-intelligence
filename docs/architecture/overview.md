@@ -5,7 +5,7 @@ shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
 Registry retains the post-1,000-follower-floor classified universe: 2,736
-people, 164 organizations, one active unsure, three rejected, and zero unknown.
+people, 163 organizations, one active unsure, three rejected, and zero unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
@@ -15,8 +15,8 @@ remains internal source/seed provenance because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
 Reviewed organization consolidation is live: SpaceX owns `@spacex` and
-`@SpaceXAI`, and nine additional canonical organizations own 19 explicit
-product/developer X channels. Every batch is manifest-driven, preflighted,
+`@SpaceXAI`, and ten additional canonical organizations own 20 explicit
+product/developer/subgroup X channels. Every batch is manifest-driven, preflighted,
 transactional, idempotent, and audit-recorded. Broader identity resolution,
 relevance curation, extraction, and scoring remain later stages.
 
@@ -145,9 +145,9 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,904 classified entities: 2,736 people, 164
+- The active Registry retains 2,903 classified entities: 2,736 people, 163
   organizations, one active unsure, and three protected-account rejections. The
-  2,948 channels include 24 website/GitHub/blog lab channels plus 20 X/product
+  2,948 channels include 24 website/GitHub/blog lab channels plus 21 X/product
   channels consolidated into existing organizations. Removing discovery edges
   does not remove already classified nodes.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
@@ -177,6 +177,13 @@ rejections remain separate from structural kind in
 `entity_merge_audit`.
 `raw_items` is an unconnected bootstrap table. Row counts as of this writing
 are in parentheses.
+
+The Registry read model also exposes nullable `followers_count` as the sum of
+the latest stored X-account follower counts owned by each entity. All, People,
+and Organizations sort descending by this value; People labels it X followers,
+while All and Organizations label it Combined X followers because one entity
+may own several channels. Missing observations remain null and sort last. This
+is a presentation proxy, not graph evidence or a canonical importance score.
 
 ```mermaid
 erDiagram
@@ -311,11 +318,11 @@ erDiagram
 
 Table row counts: `raw_items` 1,599, `accounts` 2,924,
 `account_source_facts` 5,838, `graph_edges` 0, `labs` 10,
-`entities` 2,904, `channels` 2,948, `entity_channels` 2,948,
+`entities` 2,903, `channels` 2,948, `entity_channels` 2,948,
 `channel_observations` 13,547, `entity_kind_classification_runs` 10,
-`entity_kind_classifications` 3,059, `entity_kind_web_enrichments` 1,
+`entity_kind_classifications` 3,058, `entity_kind_web_enrichments` 1,
 `entity_kind_classification_errors` 0, `entity_registry_rejections` 3, and
-`entity_merge_audit` 19.
+`entity_merge_audit` 20.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -348,8 +355,8 @@ separate curation state. An explicit protected-account flag is the first
 implemented rejection gate; broader relevance curation remains later.
 
 An entity may own multiple channels of the same kind. SpaceX owns the
-independent X channels `@spacex` and `@SpaceXAI`; the reviewed first wave adds
-19 product/developer accounts to nine canonical organizations. Each X account
+independent X channels `@spacex` and `@SpaceXAI`; the reviewed batches add
+20 product/developer/subgroup accounts to ten canonical organizations. Each X account
 keeps its own backing account row, profile observations, and source facts; only
 the redundant organization entity is removed. A manifest reason and evidence
 URL are retained in `entity_merge_audit`. Complete preflight plus one

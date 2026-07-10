@@ -448,8 +448,19 @@ td.num {
 
 /* clickable entity rows */
 .ent-table tbody tr.ent-row { cursor: pointer; }
-.ent-table th:nth-child(2),
-.ent-table td:nth-child(2) { width: 180px; }
+.ent-type-head,
+.ent-type-cell { width: 180px; }
+.ent-followers-head,
+.ent-followers {
+  width: 180px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ent-followers {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
 .ent-name { display: block; font-weight: 500; color: var(--ink); }
 .ent-handles {
   display: flex;
