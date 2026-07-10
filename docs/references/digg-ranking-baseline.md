@@ -1,8 +1,13 @@
 # Digg Ranking Baseline
 
 Digg's frozen 2026-07-08 ranking is retained only to compare against the future
-trusted-following ranking. It is not imported into `data/fli.db`, does not seed
-the active Registry, and must not be blended into PageRank.
+trusted-following ranking. Rank values are not imported into `data/fli.db` and
+must not be blended into PageRank.
+
+The active database contains only a neutral `digg_bootstrap.candidate_origin`
+marker for the 2,308 accounts actually observed through Digg: 1,308 graph-only,
+one ranking-only, and 999 present in both. This records origin without restoring
+rank, score, edges, or PageRank.
 
 ## Artifact
 

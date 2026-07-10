@@ -106,12 +106,12 @@ choosing a durable local persistence contract.
 | --- | --- | --- | --- |
 | done | Replace the hosted-web runner with one profile-to-posts Responses workflow. | parent | — |
 | done | Add focused chaining and TwitterAPI.io authored-post tests. | parent | — |
-| in_progress | Run and review a bounded live sample; do not persist or promote results. | parent | — |
+| done | Run the full 137-account calibration; do not persist or promote results. | parent | — |
 | pending | Decide the local persistence/resume contract from calibration evidence. | Adi + parent | — |
 
 ## Backlog / Remaining Work
 
-- [ ] Run and review the bounded recent-post calibration.
+- [x] Run the current 137-account recent-post calibration.
 - [ ] Review labels, post evidence, cost, and false-confidence cases.
 - [ ] Decide the durable local storage and resume contract.
 - [ ] Implement and validate atomic promotion only after the policy is accepted.
@@ -171,3 +171,11 @@ choosing a durable local persistence contract.
 - 2026-07-10: [DONE] Corrected an over-aggressive graph cleanup by restoring all
   post-floor classified nodes from the Git-tracked database snapshot while
   keeping rejected graph evidence absent. The active unsure cohort remains 137.
+- 2026-07-10: [DONE] Ran all 137 current unsure accounts through the unified
+  Luna-medium profile-to-posts workflow without writing results or changing
+  canonical kinds. The full pass plus the single `@jack` incomplete-response
+  retry produced 129 person, four organization, and four unsure decisions with
+  zero remaining failures. The accepted full-run calls cost `$0.388090` by
+  LiteLLM; an earlier 10-account calibration cost `$0.018285`. Removed an
+  arbitrary local 240-character reason limit and raised the Responses output
+  ceiling after the calibration exposed both harness issues.

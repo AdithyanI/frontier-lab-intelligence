@@ -65,6 +65,13 @@ comparison artifact and is not active Registry provenance. A node's accepted
 follower-floor and structural-kind decisions survive removal of its discovery
 edge.
 
+Every account has a neutral `registry_bootstrap.retained_candidate` fact with
+value `post_1000_follower_floor_and_kind_classification`. Accounts actually
+seen through the old Digg source also have one non-scoring
+`digg_bootstrap.candidate_origin` fact: `ranked`, `graph_node`, or
+`ranked_and_graph_node`. These facts explain why a node exists; they must never
+be interpreted as a rank or trusted-follow edge.
+
 ## First Kind Classifier: Accepted Contract
 
 The first pass classifies every current unknown X-backed cluster independently.

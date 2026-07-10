@@ -585,7 +585,7 @@ def _post_workflow_turn(
         "input": input_items,
         "text": {"format": CLASSIFICATION_FORMAT},
         "reasoning": {"effort": effort},
-        "max_output_tokens": 200,
+        "max_output_tokens": 800,
         "store": True,
         "extra_body": {"metadata": {"tags": list(tags)}},
         "extra_headers": {"x-litellm-tags": ",".join(tags)},

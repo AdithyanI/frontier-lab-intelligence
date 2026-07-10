@@ -92,7 +92,9 @@ candidate generator while demonstrating ranking and validation discipline.
 - Rebuild from trusted accounts' outgoing follows, not their followers.
 - Prefer personalized PageRank seeded by the trusted set over global PageRank.
 - The active database starts from two public source lists plus the 10 curated
-  labs. Digg is an offline comparison only; personal following data is absent.
+  labs plus the restored post-floor classified nodes. Digg rank is offline;
+  only neutral bootstrap-origin markers remain active. Personal following data
+  is absent.
 - The rejected Digg edge plane, derived PageRank, graph-only candidates,
   tracked edge artifacts, and reload/rank commands were removed cleanly.
 - Protect the end-to-end submission: this is one timeboxed milestone, not the
@@ -176,3 +178,8 @@ candidate generator while demonstrating ranking and validation discipline.
   accounts/entities (2,607 people, 180 organizations, 137 unsure), 2,956
   channels, zero graph edges, zero stored follower counts below 1,000, SQLite
   integrity `ok`. All 37 tests plus frontend lint/build pass.
+- 2026-07-10: [DONE] Added non-scoring provenance without restoring the noisy
+  graph. All 2,924 accounts now carry `registry_bootstrap.retained_candidate`;
+  2,308 accurately carry `digg_bootstrap.candidate_origin` (1,308 graph-only,
+  one ranked-only, 999 both). Graph edges remain zero and no Digg rank, score,
+  or PageRank is active.

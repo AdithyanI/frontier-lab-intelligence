@@ -144,6 +144,10 @@ Known data facts:
 - The active Registry retains 2,924 classified entities: 2,607 people, 180
   organizations, and 137 unsure. The 2,956 channels include 32 additional lab
   channels. Removing discovery edges does not remove already classified nodes.
+- Every account carries a neutral `registry_bootstrap.retained_candidate`
+  marker. The 2,308 accounts actually observed through Digg also carry one
+  `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
+  These are provenance only—not graph edges or ranking inputs.
 - `data/digg/rankings.csv` retains the frozen 1,000-account Digg ranking only
   for later comparison. It is not imported into the active database.
 - `fli sources import-x-list --list-id 1585430245762441216 --source
@@ -272,14 +276,14 @@ erDiagram
         int run_id FK
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (605)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (5,837)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,956)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (8,313)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (13,545)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,988)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (0)"
@@ -288,9 +292,9 @@ erDiagram
 ```
 
 Table row counts: `raw_items` 1,599, `accounts` 2,924,
-`account_source_facts` 605, `graph_edges` 0, `labs` 10,
+`account_source_facts` 5,837, `graph_edges` 0, `labs` 10,
 `entities` 2,924, `channels` 2,956, `entity_channels` 2,956,
-`channel_observations` 8,313, `entity_kind_classification_runs` 8,
+`channel_observations` 13,545, `entity_kind_classification_runs` 8,
 `entity_kind_classifications` 2,946, `entity_kind_web_enrichments` 0, and
 `entity_kind_classification_errors` 0.
 
@@ -361,7 +365,8 @@ channel_observations(channel_id, source, metric, value, observed_at, evidence_ur
 
 The `accounts`, `account_source_facts`, and `graph_edges` tables are source
 import backing, not the product model. X accounts are mirrored into
-`channels(kind='x')`; no Digg or PageRank observations remain.
+`channels(kind='x')`. Neutral Digg/bootstrap origin markers remain, but no
+Digg rank, score, edge, or PageRank observations remain.
 
 ### Active Classifier Boundary
 
