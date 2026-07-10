@@ -31,6 +31,7 @@ SOURCE_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 X_HANDLE_RE = re.compile(r"^[a-z0-9_]{1,15}$")
 PROVIDER = "twitterapi_io"
 PROVIDER_MAX_ATTEMPTS = 3
+X_ONBOARDING_SOURCE = "x_account_onboarding"
 
 
 @dataclass
@@ -543,6 +544,121 @@ def _normalize_username(username: str) -> str:
             exit_code=2,
         )
     return normalized
+
+
+def normalize_x_handle(username: str) -> str:
+    """Normalize one externally supplied X handle."""
+    return _normalize_username(username)
+
+
+def profile_followers_count(profile: dict[str, Any]) -> int | None:
+    """Read a follower count across the provider's observed profile shapes."""
+    for key in ("followers", "followers_count", "followersCount"):
+        value = _int_or_none(profile.get(key))
+        if value is not None:
+            return value
+    return None
+
+
+def persist_x_profile(
+    conn: sqlite3.Connection,
+    *,
+    profile: dict[str, Any],
+    source: str = X_ONBOARDING_SOURCE,
+    observed_at: str | None = None,
+) -> dict[str, Any]:
+    """Upsert one provider profile into the account/channel/entity spine."""
+    from fli import registry
+
+    _validate_source(source)
+    handle = _normalize_handle(profile)
+    if handle is None:
+        raise SourceCliError(
+            code="E_PROVIDER_SHAPE",
+            message="TwitterAPI.io profile did not include a valid X handle.",
+            hint="Inspect the provider profile response before retrying.",
+            exit_code=4,
+            retryable=False,
+        )
+    observed_at = observed_at or _now()
+    evidence_url = f"https://x.com/{handle}"
+    existing_entity = conn.execute(
+        """SELECT e.id
+           FROM entities e
+           JOIN entity_channels ec ON ec.entity_id = e.id
+           JOIN channels c ON c.id = ec.channel_id
+           WHERE c.kind = 'x' AND c.key = ?""",
+        (handle,),
+    ).fetchone()
+    with conn:
+        account_id, account_created = _upsert_account(
+            conn,
+            member=profile,
+            handle=handle,
+            observed_at=observed_at,
+        )
+        conn.execute(
+            """INSERT INTO account_source_facts
+               (account_id, source, fact, value, observed_at, evidence_url)
+               VALUES (?, ?, 'submitted_handle', ?, ?, ?)
+               ON CONFLICT (account_id, source, fact) DO UPDATE SET
+                   value = excluded.value,
+                   observed_at = excluded.observed_at,
+                   evidence_url = excluded.evidence_url""",
+            (
+                account_id,
+                source,
+                handle,
+                observed_at,
+                evidence_url,
+            ),
+        )
+        channel_id = channels.upsert_channel(
+            conn,
+            kind="x",
+            key=handle,
+            label=str(profile.get("name") or f"@{handle}"),
+            url=evidence_url,
+            observed_at=observed_at,
+        )
+        channels.observe_channel(
+            conn,
+            channel_id=channel_id,
+            source="x_profile",
+            metric="followers_count",
+            value=profile_followers_count(profile),
+            observed_at=observed_at,
+            evidence_url=evidence_url,
+        )
+        channels.observe_channel(
+            conn,
+            channel_id=channel_id,
+            source="x_profile",
+            metric="bio",
+            value=profile.get("description"),
+            observed_at=observed_at,
+            evidence_url=evidence_url,
+        )
+    registry.materialize_unlinked_channels(conn, observed_at=observed_at)
+    entity = conn.execute(
+        """SELECT e.id, e.kind
+           FROM entities e
+           JOIN entity_channels ec ON ec.entity_id = e.id
+           WHERE ec.channel_id = ?""",
+        (channel_id,),
+    ).fetchone()
+    if entity is None:
+        raise RuntimeError(f"X channel @{handle} has no entity owner")
+    return {
+        "handle": handle,
+        "account_id": account_id,
+        "account_created": account_created,
+        "channel_id": channel_id,
+        "entity_id": entity["id"],
+        "entity_created": existing_entity is None,
+        "entity_kind": entity["kind"],
+        "profile_url": evidence_url,
+    }
 
 
 def import_members(
