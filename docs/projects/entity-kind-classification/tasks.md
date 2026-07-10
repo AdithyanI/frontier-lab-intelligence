@@ -112,9 +112,9 @@ Rules:
 
 ## Done When
 
-- [ ] The prompt and Structured Outputs schema enforce exactly
+- [x] The prompt and Structured Outputs schema enforce exactly
       `classification` plus `reason`.
-- [ ] A resumable CLI/agent runner processes deterministic account batches
+- [x] A resumable CLI/agent runner processes deterministic account batches
       through LiteLLM with bounded concurrency and structured errors.
 - [ ] A varied calibration batch is stored and inspected before the full run;
       obvious people, organizations, missing bios, brands, and ambiguous
@@ -126,13 +126,13 @@ Rules:
       source evidence, or graph edges are changed by classification.
 - [ ] The Registry/API exposes the truthful person/organization/unsure result
       without presenting a probability.
-- [ ] Prompt/model version, token use, cost, and validation evidence are logged
+- [x] Prompt/model version, token use, cost, and validation evidence are logged
       outside the model response.
 - [ ] Repo checks pass and architecture/curation docs match implemented reality.
 
 ## Milestones
 
-- [ ] M1 — Classifier foundation. Acceptance: official docs checked; OpenAI SDK
+- [x] M1 — Classifier foundation. Acceptance: official docs checked; OpenAI SDK
       talks to LiteLLM; minimal structured schema, prompt, persistence, CLI, and
       tests exist. Validate: focused tests plus `scripts/check-fast.sh`.
 - [ ] M2 — Calibration. Acceptance: a deterministic varied sample is processed,
@@ -176,14 +176,18 @@ Rules:
 - 2026-07-10: Organization is intentionally broad for this first pass and
   includes non-person brands, products, publications, communities, and
   projects. Later merging determines the parent organization when appropriate.
+- 2026-07-10: The Responses request uses `text.format` with strict JSON Schema,
+  `additionalProperties: false`, and required `classification` / `reason`.
+  LiteLLM advertises response-schema support for `gpt-5-nano` and
+  `gpt-5-mini`; calibration started with nano at minimal reasoning effort.
 
 ## Open Questions / Blockers
 
-- Choose the inexpensive LiteLLM OpenAI model alias after consulting the live
-  OpenAI docs and local LiteLLM routing config. Prefer the smallest model that
-  passes the calibration rather than assuming a model from memory.
-- Decide the exact persistence/migration shape during M1. It must preserve the
-  current seeded-lab UI until organization-with-lab-role is implemented.
+- `gpt-5-nano` has not passed the semantic calibration. Prompt v2 explicitly
+  says a lone given name plus empty bio and opaque handle is `unsure`, but nano
+  still labeled `@rpoo` (`Ross`, no bio) as `person` and incorrectly called it
+  a full name. Discuss a stronger model or a sharper evaluated prompt before
+  any bulk run.
 - The one-time 2,000-follower cleanup is not replayable policy. Do not rerun
   `import-x-following` or `channels sync` during classification without first
   handling the documented rematerialization risk.
@@ -192,9 +196,9 @@ Rules:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Verify current Responses API Structured Outputs shape through `$openai-docs`; inspect local LiteLLM model aliases and Responses compatibility. | parent | `docs/references/registry-curation.md` |
-| todo | Implement the minimal versioned prompt/schema, persistence, resumable runner, and tests without calling the full corpus. | parent | `src/fli/` |
-| todo | Run and inspect one varied calibration batch; record model, tokens, cost estimate, and prompt changes. | parent | `docs/projects/entity-kind-classification/tasks.md` |
+| todo | Decide whether to strengthen the evaluated prompt further or calibrate `gpt-5-mini`; nano v2 still over-classifies the `Ross`/empty-bio edge case. | parent | `src/fli/entity_kinds.py` |
+| todo | Run only the newly approved bounded comparison batch, then inspect ambiguous and missing-bio cases before accepting a model. | parent | `data/fli.db` |
+| todo | Keep the 2,956-entity full run blocked until Adi has received the cost/quality evidence and the selected configuration passes calibration. | parent | `docs/projects/entity-kind-classification/tasks.md` |
 
 ## Backlog / Remaining Work
 
@@ -247,3 +251,23 @@ Copy this into a fresh Codex task after restarting the app:
 - 2026-07-10: [DONE] Verified the handoff snapshot against SQLite and the live
   Registry API; JSONL build history parsed, all 28 tests passed, and
   `scripts/check-fast.sh` completed successfully. No inference call was made.
+- 2026-07-10: [DONE] Verified the current official Responses Structured Outputs
+  contract through the OpenAI Developer Docs MCP and OpenAPI spec. The local
+  LiteLLM `/models` and `/model/info` routes advertise `gpt-5-nano` and
+  `gpt-5-mini`, response-schema support, and respective prices of
+  $0.05/$0.40 and $0.25/$2.00 per million input/output tokens. Playwright MCP
+  remains absent.
+- 2026-07-10: [DONE] Implemented `fli entity-kinds`: strict two-field schema,
+  identity-only inputs, versioned prompt/input hashes, separate run/result/error
+  tables, bounded concurrency, retries, resumable skips, refusal/incomplete
+  handling, token/cost accounting, and fake-client tests. The canonical
+  `entities.kind` field remains unchanged.
+- 2026-07-10: [IN-PROGRESS] Calibration run 1 processed 12 varied profiles with
+  nano prompt v1: 12 valid outputs, zero retries/errors, 6 person / 6
+  organization / 0 unsure, 2,626 input + 623 output tokens, and $0.0003805.
+  Audit found `@rpoo` should abstain and outside-knowledge phrasing should be
+  forbidden, producing prompt v2. Adi then authorized only 10 more: run 2
+  produced 10 valid outputs, zero errors, 5 person / 5 organization / 0 unsure,
+  2,434 input + 538 output tokens, and $0.0003369. Nano still mislabeled
+  `@rpoo`; M2 remains open. The measured v2 full-run estimate is 719,490 input
+  + 159,033 output tokens and $0.09959 for 2,956 entities. No bulk run started.

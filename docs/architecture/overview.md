@@ -3,12 +3,14 @@
 Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Status: entity spine complete; entity-kind classification is the active next
-stage. The implemented code has raw fetch/store, a frozen X seed graph
+Status: entity spine complete; entity-kind classification foundation is built
+and calibration is active. The implemented code has raw fetch/store, a frozen X seed graph
 snapshot, a modeled SQLite graph layer, and a React SPA over a JSON API. Every
 observed channel resolves to one entity; 10 seeded labs are classified and the
 other 2,956 visible identities remain `unknown`. The accepted first classifier
-will return only `person`, `organization`, or `unsure` plus a short reason.
+returns only `person`, `organization`, or `unsure` plus a short reason into a
+separate resumable results layer. Nano calibration has not yet passed the
+missing-evidence abstention check, so no results are projected into the Registry.
 Channel merging, track/reject curation, extraction, and scoring remain later
 stages.
 
@@ -168,12 +170,13 @@ Known data facts:
 
 ### Current Schema (as built, not the target sketch)
 
-This is what actually exists in `data/fli.db` today (9 tables). It mixes two
+This is what actually exists in `data/fli.db` today (12 tables). It mixes two
 generations: a legacy X-graph import layer (`accounts`, `account_source_facts`,
 `graph_edges`, plus `labs.x_account_id`) and the newer entity/channel product
 layer (`entities`, `channels`, `entity_channels`, `channel_observations`).
-`raw_items` is an unconnected bootstrap table. Row counts as of this writing
-in parentheses.
+The classifier adds separate run, result, and error tables without changing
+`entities.kind`. `raw_items` is an unconnected bootstrap table. Row counts as
+of this writing are in parentheses.
 
 ```mermaid
 erDiagram
@@ -240,6 +243,30 @@ erDiagram
         string value
         string observed_at
     }
+    ENTITY_KIND_CLASSIFICATION_RUNS {
+        int id PK
+        string model
+        string prompt_version
+        string status
+        int input_tokens
+        int output_tokens
+        float estimated_cost_usd
+    }
+    ENTITY_KIND_CLASSIFICATIONS {
+        int entity_id FK
+        string input_sha256
+        string classification "person | organization | unsure"
+        string reason
+        string prompt_version
+        int run_id FK
+    }
+    ENTITY_KIND_CLASSIFICATION_ERRORS {
+        int id PK
+        int run_id FK
+        int entity_id FK
+        string error_type
+        int terminal
+    }
 
     ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (12,664)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
@@ -248,12 +275,16 @@ erDiagram
     ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,998)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (21,133)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (22)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
+    ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
 ```
 
 Table row counts: `raw_items` 1,599, `accounts` 2,967,
 `account_source_facts` 12,664, `graph_edges` 361,863, `labs` 10,
 `entities` 2,966, `channels` 2,998, `entity_channels` 2,998,
-`channel_observations` 21,133.
+`channel_observations` 21,133, `entity_kind_classification_runs` 2,
+`entity_kind_classifications` 22, and `entity_kind_classification_errors` 0.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until

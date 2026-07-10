@@ -14,7 +14,9 @@ this note before archiving the project.
 
 ## What Slowed Things Down
 
-- None recorded yet.
+- `gpt-5-nano` followed the strict JSON shape but not the semantic abstention
+  boundary: it called the lone given name `Ross` a full name twice, including
+  after the prompt explicitly defined that case as `unsure`.
 
 ## Improvement Opportunities
 
@@ -22,6 +24,8 @@ this note before archiving the project.
 
 - Record whether the OpenAI Developer Docs MCP answered the exact Structured
   Outputs and Responses compatibility questions needed for LiteLLM.
+  It did: `text.format`, strict JSON Schema, refusal handling, and minimal
+  reasoning were all resolved from current official material.
 
 ### Skills
 
@@ -35,6 +39,8 @@ this note before archiving the project.
 ### Validation / Feedback Loops
 
 - Record which calibration examples exposed prompt errors before the bulk run.
+  `@rpoo` (display name `Ross`, no bio, opaque handle) exposed over-classifying
+  weak personal evidence. Keep this example in every later model comparison.
 
 ### Delegation / Subagents
 

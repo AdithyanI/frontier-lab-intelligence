@@ -108,6 +108,13 @@ Use OpenAI Structured Outputs through the shared LiteLLM proxy. Runtime reads
 `LLM_API_ENDPOINT` and `LLM_API_KEY` from the existing machine-secret setup;
 this repo does not consume direct Azure OpenAI credentials.
 
+Implemented persistence deliberately remains separate from `entities.kind`:
+`entity_kind_classification_runs` owns prompt/model/token/cost metadata,
+`entity_kind_classifications` owns the two-field decision joined to its input
+hash and entity ID, and `entity_kind_classification_errors` owns structured
+retry/terminal failures. This preserves the current seeded-lab UI while the
+target organization/role migration remains separate.
+
 ## Evaluation Before Full Classification
 
 Start with a small varied calibration set spanning multi-source accounts,
