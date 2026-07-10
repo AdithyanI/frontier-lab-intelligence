@@ -16,6 +16,15 @@ Capital AI Engineer case study.
 If docs conflict with chat, note it in the active tracker and follow the
 preserved prompt until Adi decides.
 
+## Submission North Star
+
+Until the 2026-07-20 submission, optimize for earning the next interview with
+a coherent, defensible, working case study—not a perfect platform. Prefer a
+narrow end-to-end proof and 3–5 excellent cited insights over broad graph or
+Registry completeness. Timebox infrastructure work, and challenge work that
+does not improve rubric coverage, demo proof, or interview discussion. See
+`docs/references/context.md` for the decision filter.
+
 ## Hard Rules
 
 - No external action without explicit current-session Adi approval: submitting,

@@ -104,7 +104,7 @@ turning ad-hoc browsing into an unrepeatable correction.
 | done | Add focused tests and run repository validation. | parent | — |
 | done | Update curation/architecture references and checkpoint this tracker. | parent | — |
 | done | Run, document, and then discard the `@philschmid` calibration and entity at Adi's direction. | parent | `resources/philschmid-calibration.md` |
-| blocked | Select a replacement calibration and agree the source-binding rubric with Adi; do not run more entities yet. | parent | `resources/philschmid-calibration.md` |
+| blocked | Adi owns the replacement calibration and source-binding decision; agents must not run or promote more enrichments unless he asks. | Adi | `resources/philschmid-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -156,3 +156,7 @@ turning ad-hoc browsing into an unrepeatable correction.
   row while preserving its internal account and 638 graph edges. All 137 unsure
   entities remain, all have follower counts of at least 1,000, and the Registry
   has zero unknowns.
+- 2026-07-10: [BLOCKED] Adi took ownership of the remaining unsure-enrichment
+  calibration and promotion decision. Agent execution moves to the separate
+  trusted-following ranking project and must not resume this batch unless Adi
+  asks.

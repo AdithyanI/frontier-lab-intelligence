@@ -117,6 +117,20 @@ The repo is dual-purpose until submission:
 1. BIT case-study submission due 2026-07-20.
 2. A real product Adi may keep building after the application.
 
+### Submission decision filter
+
+The immediate outcome is to earn the next interview with a coherent,
+defensible, working case study. Before taking on a meaningful batch, ask
+whether it improves the required system, evidence of quality, demonstration,
+or interview discussion.
+
+- A smaller evaluated graph beats a large graph with uncertain meaning.
+- A narrow end-to-end pipeline with 3–5 excellent cited insights beats a
+  perfect Registry with no intelligence output.
+- Timebox graph and infrastructure milestones so extraction, scoring,
+  validation, and delivery still ship.
+- Challenge or defer interesting work that does not materially improve the
+  submission or its weighted rubric.
+
 Phase 4 cleanup must remove or rewrite private context, private career framing,
 and local-only notes before any external sharing.
-
