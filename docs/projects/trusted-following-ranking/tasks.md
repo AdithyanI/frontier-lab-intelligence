@@ -2,9 +2,10 @@
 
 ## Goal
 
-Build and evaluate a fresh, provenance-complete relevance graph from whom a
-small set of trusted people and organizations follow, without reading the
-questionable legacy graph.
+Build and evaluate a fresh, provenance-complete relevance graph from whom the
+frozen relevance-screened Registry cohort follows, with a smaller reviewed
+subset supplying personalized trust, without reading the questionable legacy
+graph.
 
 ## Why / Impact
 
@@ -17,8 +18,10 @@ candidate generator while demonstrating ranking and validation discipline.
 
 ### In Scope
 
-- Freeze a versioned, human-chosen trusted seed set with short reasons.
-- Fetch and persist complete outgoing-follow snapshots for those seeds.
+- Freeze the current Registry X-account collection cohort.
+- Fetch and persist complete outgoing-follow snapshots for accessible members
+  of that cohort.
+- Freeze a smaller, human-chosen personalization set with short reasons.
 - Isolate the new graph from every legacy edge by construction.
 - Compare a simple trusted-seed overlap baseline with personalized PageRank.
 - Evaluate the top results against a small recorded human judgment set.
@@ -50,7 +53,9 @@ candidate generator while demonstrating ranking and validation discipline.
 
 ## Done When
 
-- [ ] The trusted seed set and reasons are versioned and reviewable.
+- [x] The cleaned Registry collection cohort has a byte-exact checkpoint with
+  a documented recovery path.
+- [ ] The smaller personalization set and reasons are versioned and reviewable.
 - [ ] Fresh outgoing-follow snapshots persist edge direction, seed, source,
   fetch time, completeness, and stable identity.
 - [ ] New ranking commands cannot read legacy edges accidentally.
@@ -66,8 +71,9 @@ candidate generator while demonstrating ranking and validation discipline.
 
 - [x] M1 — Freeze the evidence boundary. Acceptance: existing graph/import/rank
   semantics are audited and a fresh snapshot contract cannot mix legacy edges.
-- [ ] M2 — Build one bounded trusted-following snapshot. Acceptance: complete
-  outgoing follows for accepted seeds are persisted with provenance and can be
+- [ ] M2 — Build one bounded Registry-following snapshot. Acceptance: complete
+  outgoing follows for every accessible frozen cohort account are persisted
+  with provenance, inaccessible accounts are explicit, and the snapshot can be
   reproduced without touching legacy edges.
 - [ ] M3 — Rank and compare. Acceptance: overlap baseline and personalized
   PageRank run over the same snapshot and emit inspectable explanations.
@@ -165,13 +171,20 @@ candidate generator while demonstrating ranking and validation discipline.
   active organizations below 10,000 combined stored X followers and allow
   trusted-follow PageRank to rediscover them later. Seventeen organizations
   were removed with their original audit evidence and restoration notes saved.
+- Registry cleanup ended at a byte-exact 2026-07-11 checkpoint: 2,213 entities,
+  2,259 channels, 2,235 X accounts, and zero graph edges. The pushed Git object
+  is the database backup; its checksum, reconciliation, and recovery procedure
+  are recorded in `resources/registry-cleanup-checkpoint.md`.
+- The 2,235 X accounts are the frozen collection cohort, not 2,235 equal-trust
+  seeds. Fetch their outgoing follows where accessible, then compare a simple
+  screened-source overlap baseline with personalized PageRank from a smaller
+  reviewed trust subset.
 
 ## Open Questions / Blockers
 
-- Which exact people and organizations form the first trusted seed set?
 - What top-k size and relevance labels will Adi review for the evaluation?
-- Which organizations and people form the bounded first trusted seed set now
-  that the obvious organization channels are consolidated?
+- Which organizations and people receive personalization weight after the
+  broad collection snapshot is frozen?
 
 ## Current Batch
 
@@ -194,11 +207,13 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Audit organization channel ownership and consolidation candidates, focused on NVIDIA and Meta/Facebook. | external_researcher | `resources/organization-consolidation-audit.md` |
 | done | Audit all organization and person X channels for activity since 2024-07-11. | parent | `resources/organization-x-activity-audit.csv`, `resources/person-x-activity-audit.csv` |
 | done | Apply the temporary under-10,000-follower organization cutoff with a restorable reviewed cohort. | parent | `resources/low-follower-organization-removals.csv` |
-| todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
+| done | Freeze and reconcile the cleaned pre-following database boundary with an exact recovery path. | parent | `resources/registry-cleanup-checkpoint.md` |
+| todo | Design isolated, resumable snapshot storage and freeze the 2,235-account collection manifest before any paid fetch. | parent | — |
 
 ## Backlog / Remaining Work
 
-- [ ] Freeze the first trusted seed set.
+- [x] Freeze the cleaned Registry collection cohort and recovery checkpoint.
+- [ ] Freeze the smaller PageRank personalization set.
 - [x] Complete the bounded Registry relevance cleanup and reconcile the stale
   manual top-100 artifact against the accepted web-grounded boundary.
 - [ ] Implement isolated snapshot storage and bounded ingestion.
@@ -399,3 +414,10 @@ candidate generator while demonstrating ranking and validation discipline.
   organizations, one active unsure, and three rejected; no active organization
   remains below 10,000 combined X followers. Foreign keys are clean, SQLite
   integrity is `ok`, and graph edges remain zero.
+- 2026-07-11: [DONE] Closed the Registry-cleanup phase before fresh graph
+  ingestion. Verified that `data/fli.db` is byte-identical to the database blob
+  in pushed commit `d9ffa37`, recorded its SHA-256, exact counts, integrity,
+  foreign-key state, and recovery procedure, and removed disposable relevance
+  canary/run scratch after confirming the durable review artifacts remain in
+  project resources. The frozen 2,235-account collection cohort is explicitly
+  separate from the future smaller PageRank personalization set.

@@ -492,14 +492,17 @@ consolidation keeps SpaceX as the canonical entity, renames the stable former
 ## X Graph Source Direction
 
 The active graph is intentionally empty. Its next source will be complete
-outgoing-follow snapshots from an explicitly reviewed trusted seed set—not
-followers of popular accounts and not the offline Digg comparison ranking.
+outgoing-follow snapshots from the frozen, relevance-screened Registry cohort,
+where each source account is accessible—not followers of popular accounts and
+not the offline Digg comparison ranking. Collection membership is not itself a
+claim that every account deserves equal trust.
 
 ```text
-curated X watchlist
-  -> GET following for each trusted X user
+frozen Registry X cohort
+  -> GET following for each accessible X user
   -> graph_edges(source=<snapshot source>, relationship='follows')
-  -> PageRank over the observed follows graph
+  -> trusted-follow overlap baseline
+  -> personalized PageRank from a smaller reviewed trust subset
   -> people candidates for curation
 ```
 
@@ -508,13 +511,15 @@ Why this direction:
 - Followers of a large account are mostly audience and spam.
 - Following lists from frontier researchers/labs are a higher-signal attention
   graph.
-- Costs stay bounded because the watchlist is curated and each edge has a
+- Costs stay bounded because the source cohort is frozen and each edge has a
   source snapshot/evidence URL.
 - Third-party X data APIs can be evaluated later, but the official API shape is
   the cleanest story for a case-study product.
 
 Do not import the Digg comparison ranking or combine it with the new graph.
-Compare outputs only after the trusted graph has been evaluated independently.
+Compare outputs only after the fresh graph has been evaluated independently.
+The 2,235-account collection cohort, the smaller personalization subset, and
+the ranked candidate output must remain separate inspectable artifacts.
 
 Examples:
 
