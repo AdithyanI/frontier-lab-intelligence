@@ -561,3 +561,13 @@ candidate generator while demonstrating ranking and validation discipline.
   rejected, and 460,927 unknown. An identical replay reused the same context
   and run without duplicate rows. Personalized PageRank and human top-k review
   remain next.
+- 2026-07-11: [DONE] Shipped the Ranking tab: an interactive trust orbit
+  (phyllotaxis layout, distance = earned rank, dot size = cohort follows,
+  filled = in Registry, hollow = discovered outsider) with a synced ranked
+  score column, search, All/In-Registry/Discovered filters, and click-to-see
+  exactly which cohort sources follow any account (blue arcs + detail card).
+  Backend adds read-only `/api/rankings` and `/api/rankings/followers/{x_id}`
+  over the latest analysis.db plus the frozen snapshot; no ranking data is
+  duplicated into fli.db or static JSON. Counts on the page reconcile with the
+  overlap run (2,219 sources, 2,456,305 edges, 463,180 ranked, 460,927
+  unknown). Validated via build, live endpoints, and browser screenshots.

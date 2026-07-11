@@ -5,8 +5,10 @@ src/fli/web/dist, which this app serves. During frontend development,
 `npm run dev` in frontend/ proxies /api to this server.
 
 Endpoints:
-- /api/status        pipeline stages with live DB counts (health/ops)
-- /api/registry      paged/searchable typed entity universe
+- /api/status                    pipeline stages with live DB counts (health/ops)
+- /api/registry                  paged/searchable typed entity universe
+- /api/rankings                  derived cohort-trust ranking (read-only)
+- /api/rankings/followers/{id}   which cohort sources follow one account
 """
 
 from pathlib import Path
@@ -16,6 +18,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from fli import channels, registry as entity_registry
+from fli.web import rankings as rankings_store
 
 DIST_DIR = Path(__file__).parent / "dist"
 
@@ -171,6 +174,24 @@ def registry(
         )
     finally:
         conn.close()
+
+
+@app.get("/api/rankings")
+def rankings(
+    limit: int = Query(160, ge=1, le=2000),
+    state: str = Query("all", pattern="^(all|active|unknown)$"),
+    q: str = Query("", max_length=200),
+) -> JSONResponse:
+    """Top of the derived cohort-trust ranking, newest run."""
+    return JSONResponse(rankings_store.rankings_payload(limit, state, q))
+
+
+@app.get("/api/rankings/followers/{x_id}")
+def ranking_followers(
+    x_id: str, limit: int = Query(2000, ge=1, le=5000)
+) -> JSONResponse:
+    """Cohort sources following one account, best-ranked first."""
+    return JSONResponse(rankings_store.followers_payload(x_id, limit))
 
 
 if DIST_DIR.exists():

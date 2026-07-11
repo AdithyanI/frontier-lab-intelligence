@@ -680,7 +680,7 @@ final score.
 | `fli.sources` | machine-readable TwitterAPI.io profile, timeline, X-list, and single-source outgoing-follow adapter; provenance only, no classification |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
 | `fli.following_rankings` | derived screened-source overlap baseline with deterministic runs and active/rejected/unknown mapping; personalized PageRank pending |
-| `fli.web` | JSON API (`/api/status`, `/api/registry`) + built SPA host; Registry is server-paged, reach-sorted, searchable by identity fields, and exposes people, organizations, unsure results, rejections, and classifier reasons; source in `frontend/` |
+| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/rankings/followers/{x_id}`) + built SPA host; Registry is server-paged, reach-sorted, searchable by identity fields, and exposes people, organizations, unsure results, rejections, and classifier reasons; the Ranking tab renders the derived cohort-trust orbit read-only from `analysis.db` + the frozen snapshot; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |

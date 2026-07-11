@@ -844,3 +844,188 @@ td.num {
   .funnel-bar { min-height: 44px; }
   .funnel-copy { margin-bottom: 20px; padding: 0; }
 }
+
+/* ---- ranking page: trust orbit + score column ---- */
+
+.rank-page { max-width: 1360px; }
+
+.rank-stats {
+  display: flex;
+  gap: 28px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.rank-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 430px;
+  gap: 40px;
+  margin-top: 8px;
+  align-items: start;
+}
+
+.rank-orbit-wrap { position: sticky; top: 24px; }
+.rank-orbit-wrap svg { width: 100%; height: auto; display: block; }
+
+.rank-legend {
+  display: flex;
+  gap: 22px;
+  font-size: 11px;
+  color: var(--muted);
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.rank-legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+.lg-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+.lg-ink { background: var(--ink); }
+.lg-hollow { background: #fff; border: 1.4px solid var(--ink); }
+.lg-blue { background: var(--blue); border: 1.4px solid var(--blue-ink); }
+.lg-arc {
+  width: 18px;
+  height: 0;
+  border-top: 1.6px solid var(--blue);
+  display: inline-block;
+}
+
+.rank-arc-note {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--blue-ink);
+  margin: 10px 0 0;
+}
+
+.rank-side { display: flex; flex-direction: column; min-width: 0; }
+
+.rank-controls { display: flex; gap: 10px; align-items: center; }
+
+.rank-search { width: 100%; min-width: 0; }
+
+.rank-filter {
+  display: flex;
+  flex: none;
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.rank-filter button {
+  font: inherit;
+  font-size: 12.5px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.rank-filter button.on { background: var(--ink); color: #fff; }
+
+.rank-detail {
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--ink);
+  padding: 16px 18px;
+  margin-top: 16px;
+}
+
+.rank-detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.rank-detail-name { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.rank-detail-handle { font-size: 12px; text-decoration: none; }
+.rank-detail-handle:hover { text-decoration: underline; }
+
+.rank-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  flex: none;
+  margin-top: 2px;
+}
+.rank-pill.active { background: var(--ink); color: #fff; }
+.rank-pill.unknown { border: 1px solid var(--ink); color: var(--ink); }
+
+.rank-detail-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 18px;
+  font-size: 12.5px;
+  margin-top: 14px;
+}
+.rank-detail-grid .l { color: var(--muted); }
+
+.rank-detail-followers {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 14px 0 0;
+  line-height: 1.5;
+}
+
+.rank-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  max-height: 640px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border-strong);
+}
+
+.rank-row {
+  font: inherit;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 34px 14px minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 9px 10px 12px 6px;
+  cursor: pointer;
+  position: relative;
+  color: var(--ink);
+}
+
+.rank-row:hover { background: var(--sand); }
+.rank-row.sel { background: var(--sand); box-shadow: inset 3px 0 0 var(--blue-mid); }
+
+.rank-row .rk { font-size: 11.5px; color: var(--muted); text-align: right; }
+
+.rank-row .nm { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.rank-row .nm-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rank-row .nm-handle { font-size: 11px; color: var(--muted); flex: none; }
+
+.rank-row .sc { font-size: 12.5px; text-align: right; }
+
+.rank-row .bar {
+  position: absolute;
+  left: 56px;
+  bottom: 4px;
+  height: 2px;
+  background: var(--blue);
+  max-width: calc(100% - 120px);
+}
