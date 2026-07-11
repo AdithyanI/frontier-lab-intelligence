@@ -144,6 +144,11 @@ candidate generator while demonstrating ranking and validation discipline.
   were retained where current evidence supports technical, frontier-lab,
   safety, or specialist-intelligence value; the other 30 were approved and
   removed transactionally. Only the 56 original review cases remain unresolved.
+- The final 56 review cases received a bounded human audit: 28 known frontier
+  sources were retained, 16 resolved out-of-scope identities were removed,
+  and 12 identity-unverified accounts were deferred and excluded from trusted
+  seed consideration. Repeating the same LiteLLM audit was rejected because
+  it would manufacture confidence rather than resolve missing identity evidence.
 - Provider-specific Responses quirks normalize in `fli.llm_responses`, not in
   individual audit stages. Claude uses native web search with automatic tool
   choice plus a post-response search-evidence gate; translated search calls and
@@ -155,8 +160,6 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
-- Which of the remaining 56 review cases will Adi accept before the trusted
-  seed set is frozen?
 
 ## Current Batch
 
@@ -175,6 +178,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Review all 51 organization removals; retain AI Engineer and transactionally remove the other 50. | parent | `resources/organization-removal-review.csv` |
 | done | Apply every remaining high-confidence person removal; preserve AI Engineer and leave medium/review cases untouched. | parent | `../../../data/registry/relevance-removals.csv` |
 | done | Individually audit all 41 medium-confidence removals; retain 11 and transactionally remove 30. | parent | `resources/medium-confidence-removal-audit.csv` |
+| done | Resolve the final 56 review cases; retain 28, remove 16, and defer 12 identity-unverified accounts. | parent | `resources/review-case-audit.csv` |
 | todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
@@ -352,3 +356,13 @@ candidate generator while demonstrating ranking and validation discipline.
   Registry state is 2,248 entities: 2,138 people, 106 organizations, one
   unsure, and three rejected; foreign keys are clean, SQLite integrity is
   `ok`, and graph edges remain zero. Only 56 review cases remain unresolved.
+- 2026-07-11: [DONE] Completed the final bounded cleanup audit over all 56
+  review cases. Retained 28 known frontier researchers, recent lab leaders,
+  evaluators, and relevant AI organizations; approved 16 resolved out-of-scope
+  identities for removal; and deferred 12 pseudonymous or identity-mismatched
+  accounts rather than guessing. The 16 passed protected preflight and were
+  removed transactionally after a byte-stable dry run. The canonical manifest
+  now contains 671 identities. Registry state is 2,232 entities: 2,122 people,
+  106 organizations, one unsure, and three rejected; foreign keys are clean,
+  SQLite integrity is `ok`, and graph edges remain zero. The 12 defers are
+  excluded from trusted-seed consideration and do not block ranking work.
