@@ -56,6 +56,29 @@ listed here already exist in the immutable following snapshot unless noted.
 | P1 | 01.AI | `@01ai_yi`; [current company/model record](https://www.01.ai/) | Add as 01.AI; do not infer ownership from similarly named Yi products. |
 | P1 | Adobe | no verified X handle selected yet; [Firefly foundation models](https://news.adobe.com/news/2026/03/adobe-and-nvidia-announce-strategic-partnership) | Verify the canonical X identity, then add Adobe with Firefly evidence. |
 | P1 | Writer | no verified X handle selected yet; [Palmyra models](https://dev.writer.com/home/models) | Verify identity/channel ownership before addition. |
+| P1 | ServiceNow | `@servicenow`, `@servicenowrsrch`; [Frontier AI Research](https://www.servicenow.com/research/) | Add ServiceNow; its research team is a channel, not a separate entity. |
+| P1 | Poolside | `@poolsideai`; [current model program](https://poolside.ai/) | Add despite low X reach after the official handle is reverified. |
+| P1 | Essential AI | `@essential_ai`; [current model program](https://www.essential.ai/) | Add despite low X reach; the official site links the handle. |
+| P1 | LG | no verified X handle selected; [EXAONE](https://www.lgresearch.ai/exaone/) | Add LG with LG AI Research/EXAONE website channels; X is not required. |
+
+## Existing entities that need parent normalization
+
+This is a separate problem from missing coverage. The following active rows are
+products or internal teams, not the stable organization we intend to model.
+
+| Current entity | Canonical organization | Required action |
+| --- | --- | --- |
+| Visual Studio Code | Microsoft | Create Microsoft from `@microsoft`, merge the existing VS Code entity, and retain `@code` as an official product channel. |
+| Meta AI | Meta | Create Meta from `@meta`, merge the existing AI entity, and keep `@aiatmeta` plus the lab sources as official channels. Align the internal seed so replay cannot revert the public name. |
+| Qwen (Alibaba) | Alibaba | Create Alibaba from `@alibabagroup`, merge Qwen, and keep its X/blog/GitHub/model sources as official channels. Align the internal seed. |
+| Baidu Research | Baidu | Create Baidu from `@baidu_inc`, merge the research entity, and keep research/ERNIE sources as official channels. |
+| Databricks AI Research | Databricks | Create Databricks from `@databricks`, merge the research entity, and keep Mosaic AI sources as official channels. |
+| Kimi.ai | Moonshot AI | Create a website-anchored Moonshot AI canonical, merge the product entity, and retain `@kimi_moonshot`. |
+| Kling AI | Kuaishou | Create a website-anchored Kuaishou canonical, merge the product entity, and retain `@kling_ai`. |
+
+Small cosmetic overrides should be handled separately from ownership changes:
+`MiniMax (official)` to `MiniMax`, and removal of decorative emoji from
+Higgsfield AI, Synthesia, and OpenClaw. They are not merge decisions.
 
 ## Already covered
 
@@ -68,25 +91,35 @@ Ideogram, and several infrastructure/evaluation organizations.
 
 ## Deliberate second-pass watchlist
 
-Baichuan AI, Aleph Alpha, Inflection, Adept, and other historically prominent
-model organizations need a current-operation check before inclusion. They are
-not silently treated as covered or rejected. The ranking output may also reveal
-additional organizations, but promotion still requires first-party evidence.
+Baichuan AI, Aleph Alpha, Inflection, Adept, Snowflake, Kakao, NTT, Preferred
+Networks, and other historically or regionally prominent model organizations
+need a current-operation/frontier-scope check before inclusion. Replit, Oracle,
+and SAP should not enter merely because they are large AI platforms. These
+organizations are not silently treated as covered or rejected. The ranking
+output may reveal additional candidates, but promotion still requires
+first-party evidence.
 
 ## Required implementation shape
 
-1. Freeze this reviewed roster in a versioned manifest with expected canonical
-   name, exact handles, first-party evidence, and action (`create`, `attach`, or
-   `merge`).
-2. Preflight every handle against both `fli.db` and the immutable snapshot.
-3. Apply in one transaction, preserving accounts, channels, observations,
-   source facts, and merge audit provenance.
-4. Make replay idempotent and fail closed on ownership conflicts.
-5. Re-run a coverage report that proves every P0 anchor is present and that no
+1. Add tracked `data/registry/organization-coverage.json` with canonical name,
+   slug, exact handles, expected X IDs, channel relationships, first-party
+   evidence, and action (`create`, `attach`, or `merge`).
+2. Add `fli registry apply-organization-coverage --snapshot <snapshot.db>
+   [--dry-run]`. Existing organization-group tooling cannot create a canonical
+   from a target-only snapshot account.
+3. Preflight the exact snapshot id/checksum, stable X IDs, unique handles,
+   expected current owners, kinds, and rejection state before the first write.
+4. Apply in one transaction. Import only reviewed account/profile facts and a
+   dated follower observation—never snapshot edges or raw pages—then preserve
+   channels, observations, source facts, and merge audit provenance.
+5. Make replay idempotent and fail closed on ownership conflicts. Parent X
+   accounts use `identity`; product/research handles use `official`.
+6. Re-run a coverage check that proves every P0 canonical exists and no listed
    product/team entity remains accidentally standalone.
 
 ## Decision still needed
 
-The recommended first mutation is the six P0 organizations. P1 is a coverage
-backlog, not an instruction to flood the Registry: each row should be admitted
-only after its canonical channels and current relevance are verified.
+The recommended first mutation is the six P0 organizations plus the seven
+explicit parent-normalization rows above. P1 is a coverage backlog, not an
+instruction to flood the Registry: each row should be admitted only after its
+canonical channels and current relevance are verified.

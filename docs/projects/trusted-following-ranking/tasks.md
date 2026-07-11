@@ -240,7 +240,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Upload the verified archive to WIN's existing permanent R2/S3 storage and verify the complete remote object by SHA-256. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `resources/m3-ranking-implementation.md` |
 | todo | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-ranking-implementation.md` |
-| todo | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
+| done | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
 | todo | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
 | todo | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-ranking-implementation.md` |
 
@@ -531,7 +531,15 @@ candidate generator while demonstrating ranking and validation discipline.
 - 2026-07-11: [DONE] Agreed the M3 storage contract with Adi and wrote the
   engineering instructions to `resources/m3-ranking-implementation.md`: three
   planes (curated fli.db, frozen snapshot.db, recomputable derived analysis
-  store), known/unknown as a derived x_id LEFT JOIN rather than a new fli.db
-  table, one dated per-channel summary observation as the only fli.db write,
-  and reviewed promotion as the only door into the Registry. Current Batch
-  now carries the five M3 work items in order (overlap baseline first).
+  store), active/rejected/unknown as a derived x_id LEFT JOIN rather than a new
+  fli.db table, and reviewed promotion as the only door into the Registry. M3
+  does not write graph summaries into fli.db without a concrete product need;
+  the overlap baseline uses `cohort_follow_count`, and PageRank remains an
+  experiment because most target accounts are dangling nodes.
+- 2026-07-11: [DONE] Audited major model-organization coverage after the
+  standalone Visual Studio Code row exposed source-list bias. Confirmed six P0
+  missing anchors (Microsoft, Amazon, Apple, Ai2, ByteDance, Tencent), a
+  first-party-evidenced P1 backlog, and seven existing product/team rows that
+  should normalize to stable parents. No Registry rows changed. The required
+  implementation is a versioned coverage manifest plus a transactional,
+  snapshot-aware importer/merger and an automated P0 coverage check.
