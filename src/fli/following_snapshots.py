@@ -388,6 +388,7 @@ def connect_snapshot(path: Path | str) -> sqlite3.Connection:
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA busy_timeout = 30000")
     return conn
 
 
@@ -872,6 +873,32 @@ class RequestStartLimiter:
             time.sleep(delay)
 
 
+class RateLimitedTwitterClient:
+    """Apply one shared start-rate limit across concurrent source workers."""
+
+    def __init__(self, client: Any, limiter: RequestStartLimiter) -> None:
+        self.client = client
+        self.limiter = limiter
+
+    def fetch_user(self, *, username: str) -> dict[str, Any]:
+        self.limiter.wait()
+        return self.client.fetch_user(username=username)
+
+    def fetch_following_page(
+        self,
+        *,
+        username: str,
+        cursor: str | None,
+        page_size: int,
+    ) -> dict[str, Any]:
+        self.limiter.wait()
+        return self.client.fetch_following_page(
+            username=username,
+            cursor=cursor,
+            page_size=page_size,
+        )
+
+
 def _fetch_profile_limited(
     client: sources.TwitterApiIoClient | Any,
     *,
@@ -1307,6 +1334,7 @@ def collect_snapshot(
     page_sleep_seconds: float = 0.0,
     dry_run: bool = False,
     progress: str = "off",
+    _worker_mode: bool = False,
 ) -> dict[str, Any]:
     """Collect a bounded, resumable set of frozen sources."""
     _ensure_mutable(conn)
@@ -1329,13 +1357,6 @@ def collect_snapshot(
             code="E_WORKERS_INVALID",
             message="--workers must be at least 1.",
             hint="Use 10 workers with --profiles-only on the Builder plan.",
-            exit_code=2,
-        )
-    if workers > 1 and not profiles_only:
-        raise SnapshotCliError(
-            code="E_WORKERS_PROFILE_ONLY",
-            message="Parallel workers are currently limited to --profiles-only scans.",
-            hint="Following-page collection remains sequential and cursor-safe.",
             exit_code=2,
         )
     if requests_per_second <= 0:
@@ -1551,6 +1572,198 @@ def collect_snapshot(
                 outcomes["paused"] += 1
                 break
 
+    worker_result = {
+        "dry_run": False,
+        "selected_sources": len(selected),
+        "selected_handle_preview": preview,
+        "selected_handle_preview_truncated": len(selected) > len(preview),
+        "profiles_fetched": profiles_fetched,
+        "profiles_reused": profiles_reused,
+        "pages_fetched": pages_fetched,
+        "outcomes": outcomes,
+        "failures": failures,
+        "invocation_estimated_provider_credits": invocation_credits,
+        "invocation_estimated_provider_cost_usd": round(
+            invocation_credits / 100_000, 6
+        ),
+    }
+    if _worker_mode:
+        return worker_result
+
+    cumulative_cost = _snapshot_cost(conn)
+    conn.execute(
+        "UPDATE snapshot_run SET estimated_cost_usd = ?",
+        (cumulative_cost["estimated_provider_cost_usd"],),
+    )
+    conn.commit()
+    return {
+        **worker_result,
+        "cumulative_cost": cumulative_cost,
+        "profile_cost_projection": profile_cost_projection(conn),
+        "snapshot": snapshot_summary(conn),
+    }
+
+
+def _collect_source_worker(
+    *,
+    snapshot_db: Path,
+    client: Any,
+    handle: str,
+    page_size: int,
+    max_pages_per_source: int | None,
+) -> dict[str, Any]:
+    conn = connect_snapshot(snapshot_db)
+    try:
+        return collect_snapshot(
+            conn,
+            client=client,
+            handles=[handle],
+            page_size=page_size,
+            max_pages_per_source=max_pages_per_source,
+            workers=1,
+            progress="off",
+            _worker_mode=True,
+        )
+    finally:
+        conn.close()
+
+
+def collect_snapshot_parallel(
+    conn: sqlite3.Connection,
+    *,
+    snapshot_db: Path,
+    client: sources.TwitterApiIoClient | Any | None = None,
+    handles: list[str] | None = None,
+    limit: int | None = None,
+    collect_all: bool = False,
+    page_size: int = 200,
+    max_pages_per_source: int | None = None,
+    workers: int = 20,
+    requests_per_second: float = 9.0,
+    key_file: Path = sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+    timeout_seconds: float = 30.0,
+    page_sleep_seconds: float = 0.0,
+    progress: str = "off",
+) -> dict[str, Any]:
+    """Collect sources concurrently while keeping each cursor chain sequential."""
+    if workers < 2:
+        raise SnapshotCliError(
+            code="E_WORKERS_INVALID",
+            message="Parallel collection requires at least 2 workers.",
+            hint="Use collect_snapshot for one worker.",
+            exit_code=2,
+        )
+    if requests_per_second <= 0:
+        raise SnapshotCliError(
+            code="E_QPS_INVALID",
+            message="--requests-per-second must be positive.",
+            hint="Use 9 for headroom under the Builder plan's documented 10 QPS.",
+            exit_code=2,
+        )
+    if not 20 <= page_size <= 200:
+        raise SnapshotCliError(
+            code="E_PAGE_SIZE_INVALID",
+            message="--page-size must be between 20 and 200.",
+            hint="Use 200 for the lowest documented unit price.",
+            exit_code=2,
+        )
+    if max_pages_per_source is not None and max_pages_per_source < 1:
+        raise SnapshotCliError(
+            code="E_MAX_PAGES_INVALID",
+            message="--max-pages-per-source must be at least 1.",
+            hint="Omit the flag to finish each selected source.",
+            exit_code=2,
+        )
+
+    _ensure_mutable(conn)
+    selected = _select_collection_sources(
+        conn,
+        handles=handles,
+        limit=limit,
+        collect_all=collect_all,
+    )
+    preview = [row["source_handle"] for row in selected[:20]]
+    if client is None:
+        try:
+            client = sources.create_twitterapi_io_client(
+                key_file=key_file,
+                timeout=timeout_seconds,
+                page_sleep_seconds=page_sleep_seconds,
+            )
+        except sources.SourceCliError as exc:
+            raise _as_snapshot_error(exc) from exc
+
+    # WAL allows readers and short page-write transactions to overlap. Each
+    # source still owns exactly one worker, so its cursor order cannot race.
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.commit()
+    rate_limited_client = RateLimitedTwitterClient(
+        client,
+        RequestStartLimiter(requests_per_second),
+    )
+    outcome_keys = (
+        "complete",
+        "paused",
+        "protected",
+        "missing",
+        "unavailable",
+        "failed",
+        "already_terminal",
+        "profiled",
+        "retryable_error",
+    )
+    outcomes = {key: 0 for key in outcome_keys}
+    failures: list[dict[str, str]] = []
+    profiles_fetched = 0
+    profiles_reused = 0
+    pages_fetched = 0
+    invocation_credits = 0
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {
+            executor.submit(
+                _collect_source_worker,
+                snapshot_db=snapshot_db,
+                client=rate_limited_client,
+                handle=row["source_handle"],
+                page_size=page_size,
+                max_pages_per_source=max_pages_per_source,
+            ): row["source_handle"]
+            for row in selected
+        }
+        for completed, future in enumerate(as_completed(futures), start=1):
+            handle = futures[future]
+            try:
+                result = future.result()
+            except SnapshotCliError as exc:
+                outcomes["retryable_error"] += int(exc.retryable)
+                failures.append(
+                    {
+                        "handle": handle,
+                        "status": "retryable" if exc.retryable else "error",
+                        "code": exc.code,
+                    }
+                )
+            else:
+                profiles_fetched += result["profiles_fetched"]
+                profiles_reused += result["profiles_reused"]
+                pages_fetched += result["pages_fetched"]
+                invocation_credits += result[
+                    "invocation_estimated_provider_credits"
+                ]
+                failures.extend(result["failures"])
+                for key in outcome_keys:
+                    outcomes[key] += result["outcomes"][key]
+            if progress == "plain" and (
+                completed == len(selected) or completed % 25 == 0
+            ):
+                print(
+                    f"following crawl {completed}/{len(selected)} sources finished; "
+                    f"pages={pages_fetched} errors={len(failures)}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
     cumulative_cost = _snapshot_cost(conn)
     conn.execute(
         "UPDATE snapshot_run SET estimated_cost_usd = ?",
@@ -1565,6 +1778,8 @@ def collect_snapshot(
         "profiles_fetched": profiles_fetched,
         "profiles_reused": profiles_reused,
         "pages_fetched": pages_fetched,
+        "workers": workers,
+        "requests_per_second": requests_per_second,
         "outcomes": outcomes,
         "failures": failures,
         "invocation_estimated_provider_credits": invocation_credits,
@@ -1844,22 +2059,32 @@ def main(argv: list[str] | None = None) -> int:
             with collection_lock(args.snapshot_db):
                 conn = connect_snapshot(args.snapshot_db)
                 try:
-                    data = collect_snapshot(
-                        conn,
-                        handles=args.handles,
-                        limit=args.limit,
-                        collect_all=args.collect_all,
-                        page_size=args.page_size,
-                        max_pages_per_source=args.max_pages_per_source,
-                        profiles_only=args.profiles_only,
-                        workers=args.workers,
-                        requests_per_second=args.requests_per_second,
-                        key_file=args.key_file,
-                        timeout_seconds=args.timeout_seconds,
-                        page_sleep_seconds=args.page_sleep_seconds,
-                        dry_run=args.dry_run,
-                        progress=args.progress,
-                    )
+                    kwargs = {
+                        "handles": args.handles,
+                        "limit": args.limit,
+                        "collect_all": args.collect_all,
+                        "page_size": args.page_size,
+                        "max_pages_per_source": args.max_pages_per_source,
+                        "workers": args.workers,
+                        "requests_per_second": args.requests_per_second,
+                        "key_file": args.key_file,
+                        "timeout_seconds": args.timeout_seconds,
+                        "page_sleep_seconds": args.page_sleep_seconds,
+                        "progress": args.progress,
+                    }
+                    if args.workers > 1 and not args.profiles_only and not args.dry_run:
+                        data = collect_snapshot_parallel(
+                            conn,
+                            snapshot_db=args.snapshot_db,
+                            **kwargs,
+                        )
+                    else:
+                        data = collect_snapshot(
+                            conn,
+                            profiles_only=args.profiles_only,
+                            dry_run=args.dry_run,
+                            **kwargs,
+                        )
                 finally:
                     conn.close()
             data["database"] = str(args.snapshot_db)

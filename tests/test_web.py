@@ -60,6 +60,14 @@ def test_registry_returns_complete_typed_entity_universe():
 
 
 def test_registry_pages_filters_and_searches_on_the_server():
+    all_entities = client.get("/api/registry?limit=40").json()["entities"]
+    follower_counts = [
+        entity["followers_count"]
+        for entity in all_entities
+        if entity["followers_count"] is not None
+    ]
+    assert follower_counts == sorted(follower_counts, reverse=True)
+
     people = client.get("/api/registry?group=person&limit=2").json()
     assert people["filtered_total"] == people["counts"]["person"]
     assert len(people["entities"]) == 2

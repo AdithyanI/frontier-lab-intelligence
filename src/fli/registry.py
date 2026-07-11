@@ -999,6 +999,11 @@ def read_entities(
         if group in {"all", "person", "organization"}
         else "name COLLATE NOCASE"
     )
+    outer_order_sql = (
+        "e.followers_count DESC NULLS LAST, e.name COLLATE NOCASE"
+        if group in {"all", "person", "organization"}
+        else "e.name COLLATE NOCASE"
+    )
     rows = conn.execute(
         f"""WITH selected AS (
                SELECT e.id, e.slug, e.kind, e.name,
@@ -1041,13 +1046,7 @@ def read_entities(
              ON rejected.entity_id = e.id
            LEFT JOIN entity_channels ec ON ec.entity_id = e.id
            LEFT JOIN channels c ON c.id = ec.channel_id
-           ORDER BY CASE WHEN rejected.entity_id IS NOT NULL THEN 3
-                         WHEN e.kind = 'organization' THEN 0
-                         WHEN e.kind = 'person' THEN 1
-                         WHEN e.kind = 'unsure' THEN 2
-                         ELSE 4
-                    END,
-                    e.name COLLATE NOCASE,
+           ORDER BY {outer_order_sql},
                     CASE ec.relationship WHEN 'identity' THEN 0
                                          WHEN 'official' THEN 1
                                          ELSE 2 END,
