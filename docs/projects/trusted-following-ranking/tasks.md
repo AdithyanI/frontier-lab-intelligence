@@ -140,6 +140,10 @@ candidate generator while demonstrating ranking and validation discipline.
   transactionally. AI Engineer remains the sole active high-confidence model
   removal because Adi explicitly overrode it to keep; 41 medium-confidence
   removals and all 56 review cases remain untouched.
+- The 41 medium-confidence removals received individual human review. Eleven
+  were retained where current evidence supports technical, frontier-lab,
+  safety, or specialist-intelligence value; the other 30 were approved and
+  removed transactionally. Only the 56 original review cases remain unresolved.
 - Provider-specific Responses quirks normalize in `fli.llm_responses`, not in
   individual audit stages. Claude uses native web search with automatic tool
   choice plus a post-response search-evidence gate; translated search calls and
@@ -151,8 +155,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
-- Which of the remaining 41 medium-confidence removal recommendations and 56
-  review cases will Adi accept before the trusted seed set is frozen?
+- Which of the remaining 56 review cases will Adi accept before the trusted
+  seed set is frozen?
 
 ## Current Batch
 
@@ -170,6 +174,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Complete the read-only web-grounded relevance audit across the active Registry, including nine manual content-filter fallbacks. | parent | `resources/relevance-complete-v1.json` |
 | done | Review all 51 organization removals; retain AI Engineer and transactionally remove the other 50. | parent | `resources/organization-removal-review.csv` |
 | done | Apply every remaining high-confidence person removal; preserve AI Engineer and leave medium/review cases untouched. | parent | `../../../data/registry/relevance-removals.csv` |
+| done | Individually audit all 41 medium-confidence removals; retain 11 and transactionally remove 30. | parent | `resources/medium-confidence-removal-audit.csv` |
 | todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
@@ -337,3 +342,13 @@ candidate generator while demonstrating ranking and validation discipline.
   entities: 2,168 people, 106 organizations, one unsure, and three rejected;
   foreign keys are clean, SQLite integrity is `ok`, and graph edges remain
   zero. The 41 medium-confidence removals and 56 review cases were untouched.
+- 2026-07-11: [DONE] Individually audited the 41 medium-confidence removals
+  against the repeated-original-signal boundary and preserved the full
+  decision/evidence table. Retained Alfredo Canziani, Andrew McCalip, Anthony
+  Goldbloom, Kyle Russell, Sankalp, Srinivas Narayanan, Sebastian Mallaby, Tim
+  Scarfe, Aymeric Roucher, Oliver Habryka, and Brent Schooley. The other 30
+  passed protected preflight and were removed transactionally after a
+  byte-stable dry run. The canonical manifest now contains 655 identities.
+  Registry state is 2,248 entities: 2,138 people, 106 organizations, one
+  unsure, and three rejected; foreign keys are clean, SQLite integrity is
+  `ok`, and graph edges remain zero. Only 56 review cases remain unresolved.
