@@ -31,6 +31,10 @@ def main(argv: list[str] | None = None) -> int:
         "entity-kinds", help="Classify provisional entity structure."
     )
     entity_kinds_p.add_argument("entity_kind_args", nargs=argparse.REMAINDER)
+    relevance_p = sub.add_parser(
+        "relevance-audit", help="Web-grounded Registry relevance audit."
+    )
+    relevance_p.add_argument("relevance_args", nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -82,6 +86,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import entity_kinds
 
         return entity_kinds.main(args.entity_kind_args)
+
+    if args.command == "relevance-audit":
+        from fli import relevance
+
+        return relevance.main(args.relevance_args)
 
     parser.print_help()
     return 0
