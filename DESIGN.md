@@ -100,8 +100,10 @@ Rules:
 - **Pipeline rail:** stage node (blue = live, outlined = in progress), name,
   mono state, one-line summary, live mono counts.
 - **Entity registry table:** mono uppercase headers, sand row hover, pill
-  search + All/People/Organizations/Unsure/Rejected segmented filter with live
-  counts, load-more; rejected rows expose their reason in the table, while
+  search + primary All/People/Organizations segmented filter with live counts;
+  Unsure/Rejected/Unknown are progressively disclosed through a native More
+  control. Load-more remains below the table; rejected rows expose their reason,
+  while
   active rows show identity + truthful kind and open a detail card.
   All, People, and Organizations are reach-ranked views: People shows X
   followers, Organizations shows combined X followers, and All retains Type
