@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from fli import relevance
+from fli import llm_responses, relevance
 
 
 class FakeResponses:
@@ -20,7 +20,7 @@ class FakeResponses:
             output_text=json.dumps(self.payload),
             usage=SimpleNamespace(input_tokens=100, output_tokens=25),
         )
-        response.model_dump = lambda: {
+        response.model_dump = lambda **_: {
             "id": response.id,
             "model": response.model,
             "status": response.status,
@@ -138,6 +138,22 @@ def test_prompt_cache_key_is_stable_and_sharded():
         "fli:registry-relevance:registry-relevance-v1:shard-"
     )
     assert len({relevance.prompt_cache_key(i) for i in range(256)}) > 32
+
+
+def test_output_text_ignores_nullable_translated_blocks():
+    assert llm_responses.output_text(
+        {
+            "output": [
+                {
+                    "type": "message",
+                    "content": [
+                        {"type": "output_text", "text": None},
+                        {"type": "output_text", "text": '{"decision":"keep"}'},
+                    ],
+                }
+            ]
+        }
+    ) == '{"decision":"keep"}'
 
 
 def test_cli_requires_explicit_scope_before_paid_run(tmp_path):

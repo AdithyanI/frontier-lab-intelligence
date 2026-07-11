@@ -127,6 +127,10 @@ candidate generator while demonstrating ranking and validation discipline.
   crypto, fame, and occasional AI commentary do not. Terra-high must use hosted
   web search for every identity, and a human-reviewed manifest remains the only
   deletion path.
+- The read-only relevance audit now covers all 2,774 requested active entities:
+  2,765 Terra-high results plus nine centrally reviewed manual web fallbacks for
+  provider content-filter terminations. The composite result is 2,162 keep, 56
+  review, and 556 remove recommendations; none directly mutated the Registry.
 
 ## Open Questions / Blockers
 
@@ -134,8 +138,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
-- Which identities in the remaining corpus fail the approved relevance
-  boundary after web-grounded review?
+- Which of the 556 removal recommendations and 56 review cases will Adi accept
+  before the trusted seed set is frozen?
 
 ## Current Batch
 
@@ -150,13 +154,13 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Run a read-only Luna-medium relevance triage and produce a conservative removal shortlist. | parent | `resources/relevance-removal-candidates.csv` |
 | done | Apply the 108 Adi-approved relevance removals through a preflighted, transactional manifest. | parent | `resources/relevance-removal-candidates.csv` |
 | done | Calibrate Terra-high plus required web search on 20 clear and ambiguous identities; manually review and apply three accepted removals. | parent | `resources/relevance-boundary-batch-02.csv` |
-| in progress | Continue bounded web-grounded relevance cleanup batches across the active Registry. | parent | `resources/relevance-calibration-terra-web-v1.json` |
+| done | Complete the read-only web-grounded relevance audit across the active Registry, including nine manual content-filter fallbacks. | parent | `resources/relevance-complete-v1.json` |
 | todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
 
 - [ ] Freeze the first trusted seed set.
-- [ ] Complete the bounded Registry relevance cleanup and reconcile the stale
+- [x] Complete the bounded Registry relevance cleanup and reconcile the stale
   manual top-100 artifact against the accepted web-grounded boundary.
 - [ ] Implement isolated snapshot storage and bounded ingestion.
 - [ ] Implement overlap baseline and personalized PageRank.
@@ -289,3 +293,9 @@ candidate generator while demonstrating ranking and validation discipline.
   accepted and transactionally removed Patrick Collison, Marc Benioff, and Om
   Malik through the existing protected manifest. Registry state is 2,792
   entities with clean foreign keys, SQLite integrity `ok`, and zero graph edges.
+- 2026-07-11: [DONE] Completed the read-only full-corpus relevance audit for all
+  2,774 requested active entities. Terra-high with required hosted web search
+  produced 2,765 valid results; nine persistent Azure content-filter outcomes
+  were researched manually against the same rubric and preserved separately.
+  The composite manifest records 2,162 keep, 56 review, and 556 remove
+  recommendations with zero unresolved identities and no Registry mutation.

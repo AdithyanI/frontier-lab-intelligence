@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from fli import entity_kinds
+from fli import entity_kinds, llm_responses
 
 PROMPT_VERSION = "registry-relevance-v1"
 SCHEMA_VERSION = "registry-relevance-output-v1"
@@ -176,36 +176,12 @@ def read_active_inputs(conn: sqlite3.Connection) -> list[RelevanceInput]:
     return results
 
 
-def _response_dict(response: Any) -> dict[str, Any]:
-    if isinstance(response, dict):
-        return response
-    if hasattr(response, "model_dump"):
-        return response.model_dump()
-    return {}
-
-
 def _usage_value(usage: Any, field: str) -> int:
     if usage is None:
         return 0
     if isinstance(usage, dict):
         return int(usage.get(field) or 0)
     return int(getattr(usage, field, 0) or 0)
-
-
-def _web_evidence(response_data: dict[str, Any]) -> tuple[list[dict], list[dict]]:
-    actions: list[dict] = []
-    sources: dict[str, dict] = {}
-    for item in response_data.get("output") or []:
-        if not isinstance(item, dict) or item.get("type") != "web_search_call":
-            continue
-        action = item.get("action") or {}
-        actions.append(action)
-        for source in action.get("sources") or []:
-            if isinstance(source, dict) and source.get("url"):
-                sources[source["url"]] = source
-    if not actions:
-        raise ValueError("response completed without required web search")
-    return actions, list(sources.values())
 
 
 def _validate_output(output_text: str, entity_id: int) -> dict[str, Any]:
@@ -335,17 +311,16 @@ def audit_one(
         raw_response = raw_api.create(**request)
         response = raw_response.parse()
         reported_cost = entity_kinds._reported_cost(raw_response.headers)
-    response_data = _response_dict(response)
+    response_data = llm_responses.as_dict(response)
     if response_data.get("status") not in (None, "completed"):
         raise ValueError(
             f"response status was {response_data.get('status')!r}: "
             f"{response_data.get('incomplete_details')!r}"
         )
     payload = _validate_output(
-        getattr(response, "output_text", None) or response_data.get("output_text"),
-        entity.entity_id,
+        llm_responses.output_text(response_data), entity.entity_id
     )
-    actions, sources = _web_evidence(response_data)
+    actions, sources = llm_responses.web_evidence(response_data)
     usage = getattr(response, "usage", None) or response_data.get("usage")
     return {
         **payload,

@@ -1,0 +1,224 @@
+{
+  "run": "relevance-manual-content-filter-fallback-v1-20260711",
+  "audit_method": "manual_web_research",
+  "reviewed_at": "2026-07-11",
+  "prompt_version": "registry-relevance-v1",
+  "schema_version": "registry-relevance-output-v1",
+  "source_run": "relevance-full-terra-web-v1-20260711",
+  "reason": "Manual fallback for the nine entities whose Azure GPT-5.6 Terra Responses audits ended with incomplete_details.reason=content_filter. No model result was treated as manual evidence.",
+  "summary": {
+    "requested": 9,
+    "completed": 9,
+    "keep": 2,
+    "review": 1,
+    "remove": 6
+  },
+  "results": [
+    {
+      "entity_id": 199,
+      "entity_name": "Naval",
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Naval's current output is broad founder, investing, technology, and philosophy commentary. AI appears in his work, but current first-party material does not establish a frontier lab, research, evaluation, or sustained specialist-intelligence role.",
+      "current_connection": "Generalist entrepreneur and investor whose current public work discusses AI as one topic among broader company-building, wealth, and philosophy themes.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://nav.al/over",
+        "https://nav.al/ai",
+        "https://usvc.com/documents/USVC%20Venture%20Capital%20Access%20Fund%20Prospectus%20%28Updated%20Apr%202026%29.pdf"
+      ],
+      "consulted_sources": [
+        "https://nav.al/over",
+        "https://nav.al/ai",
+        "https://usvc.com/documents/USVC%20Venture%20Capital%20Access%20Fund%20Prospectus%20%28Updated%20Apr%202026%29.pdf"
+      ]
+    },
+    {
+      "entity_id": 307,
+      "entity_name": "Shivon Zilis",
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Zilis has important historical OpenAI ties, but current evidence places her at Neuralink and does not show that her public channel repeatedly produces original frontier-AI research, evaluations, or specialist intelligence.",
+      "current_connection": "Current Neuralink executive; former OpenAI adviser and board member whose OpenAI service ended in 2023.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://www.theguardian.com/technology/2026/may/06/shivon-zilis-testimony-elon-musk-openai-lawsuit",
+        "https://www.theinformation.com/articles/shivon-zilis-musk-associate-leaves-openai-board/",
+        "https://openai.com/index/welcome-pieter-and-shivon/"
+      ],
+      "consulted_sources": [
+        "https://www.theguardian.com/technology/2026/may/06/shivon-zilis-testimony-elon-musk-openai-lawsuit",
+        "https://fortune.com/2026/05/08/shivon-zilis-openai-trial-elon-musk-xai-sam-altman/",
+        "https://www.theinformation.com/articles/shivon-zilis-musk-associate-leaves-openai-board/",
+        "https://openai.com/index/welcome-pieter-and-shivon/",
+        "https://openai.com/index/the-truth-elon-left-out/"
+      ]
+    },
+    {
+      "entity_id": 1051,
+      "entity_name": "Connor Leahy",
+      "decision": "keep",
+      "relevance_basis": "specialist_intelligence",
+      "audience": "ai_team",
+      "reason": "Leahy remains a concentrated original source on frontier-AI control and catastrophic-risk policy through substantive analysis, testimony, and government briefings.",
+      "current_connection": "US Executive Director of ControlAI and former EleutherAI and Conjecture founder; his current work has shifted from technical research toward frontier-AI control and risk analysis.",
+      "confidence": "medium",
+      "evidence_urls": [
+        "https://controlai.org/about",
+        "https://controlai.org/connor-leahy",
+        "https://www.ettf.land/p/conjecture-a-retrospective",
+        "https://www.ettf.land/p/you-can-only-build-safe-asi-if-asi",
+        "https://openparliament.ca/committees/ethics/45-1/20/connor-leahy-1/only/"
+      ],
+      "consulted_sources": [
+        "https://controlai.org/about",
+        "https://controlai.org/connor-leahy",
+        "https://controlai.org/our-work-in-us",
+        "https://www.ettf.land/p/conjecture-a-retrospective",
+        "https://www.ettf.land/p/you-can-only-build-safe-asi-if-asi",
+        "https://www.ettf.land/p/the-compendium-link/",
+        "https://openparliament.ca/committees/ethics/45-1/20/connor-leahy-1/only/",
+        "https://www.conjecture.dev/about"
+      ]
+    },
+    {
+      "entity_id": 1105,
+      "entity_name": "Lisan al Gaib",
+      "decision": "keep",
+      "relevance_basis": "evaluation_and_safety",
+      "audience": "ai_team",
+      "reason": "The exact @scaling01 entity creates and maintains LisanBench, an open reproducible LLM capability benchmark with programmatic scoring, model-level results, and failure-mode analysis.",
+      "current_connection": "Pseudonymous independent AI evaluator and creator of LisanBench, with an actively maintained benchmark, repository, and current model coverage.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://lisanbench.com/?tab=about",
+        "https://github.com/voice-from-the-outer-world/lisan-bench",
+        "https://x.com/scaling01"
+      ],
+      "consulted_sources": [
+        "https://x.com/scaling01",
+        "https://lisanbench.com/?tab=about",
+        "https://github.com/voice-from-the-outer-world/lisan-bench",
+        "https://threadreaderapp.com/thread/2061513383287882111.html"
+      ]
+    },
+    {
+      "entity_id": 1488,
+      "entity_name": "Kevin Kwok",
+      "decision": "review",
+      "relevance_basis": "uncertain",
+      "audience": "neither",
+      "reason": "Kwok has produced unusually substantive model-engineering work, including reverse-engineering Gemma 3n, but current output is sparse and eclectic, so repeated frontier-AI signal is not yet established.",
+      "current_connection": "Independent software and hardware builder with credible frontier-adjacent projects but no clear current frontier-lab role; recent output spans developer tools, hardware, robotics, and occasional AI engineering.",
+      "confidence": "medium",
+      "evidence_urls": [
+        "https://github.com/antimatter15/reverse-engineering-gemma-3n",
+        "https://github.com/antimatter15",
+        "https://x.com/antimatter15/status/1926459076856131601",
+        "https://antimatter15.com/"
+      ],
+      "consulted_sources": [
+        "https://x.com/antimatter15",
+        "https://github.com/antimatter15",
+        "https://github.com/antimatter15/reverse-engineering-gemma-3n",
+        "https://antimatter15.com/",
+        "https://huggingface.co/cakewalk",
+        "https://mobile.twstalker.com/antimatter15"
+      ]
+    },
+    {
+      "entity_id": 1605,
+      "entity_name": "Allie K. Miller",
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Her current work is primarily broad AI business education, speaking, advising, courses, productivity workflows, and tool guidance rather than original frontier research, evaluations, technical evidence, or narrow investment intelligence.",
+      "current_connection": "Former AWS and IBM AI leader; currently an independent AI business adviser, speaker, course creator, and newsletter publisher focused on adoption and productivity.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://www.alliekmiller.com/home",
+        "https://www.alliekmiller.com/courses",
+        "https://www.alliekmiller.com/ai-first-academy",
+        "https://aiwithallie.beehiiv.com/"
+      ],
+      "consulted_sources": [
+        "https://x.com/alliekmiller",
+        "https://www.alliekmiller.com/home",
+        "https://www.alliekmiller.com/courses",
+        "https://www.alliekmiller.com/ai-first-academy",
+        "https://www.alliekmiller.com/ai-first-entrepreneur",
+        "https://aiwithallie.beehiiv.com/",
+        "https://www.linkedin.com/in/alliekmiller"
+      ]
+    },
+    {
+      "entity_id": 1778,
+      "entity_name": "Jacob Trefethen",
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "He leads life-sciences grantmaking at the OpenAI Foundation, but current evidence does not establish repeated original frontier-model research, evaluation, infrastructure, or narrowly qualifying intelligence from this exact entity.",
+      "current_connection": "Head of Life Sciences and Curing Diseases at the OpenAI Foundation; previously led science and health grantmaking at Coefficient Giving.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://openai.com/index/update-on-the-openai-foundation/",
+        "https://openaifoundation.org/en-US/news/ai-for-alzheimers/",
+        "https://blog.jacobtrefethen.com/about/"
+      ],
+      "consulted_sources": [
+        "https://x.com/jacobtref",
+        "https://openai.com/index/update-on-the-openai-foundation/",
+        "https://openaifoundation.org/en-US/news/ai-for-alzheimers/",
+        "https://blog.jacobtrefethen.com/about/",
+        "https://www.linkedin.com/in/jacob-trefethen-82105350"
+      ]
+    },
+    {
+      "entity_id": 2119,
+      "entity_name": "Vishal Maini",
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "His current work is running an early-stage venture fund with an AGI-oriented thesis. Available output is primarily investment selection and portfolio promotion rather than sustained original frontier-AI research or specialist technical intelligence.",
+      "current_connection": "Founder and Managing Partner of Mythos Ventures; formerly worked on AGI deployment strategy at DeepMind.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://www.mythos.vc/about",
+        "https://www.mythos.vc/",
+        "https://medium.com/@v_maini/taking-the-plunge-my-path-to-working-on-artificial-intelligence-fcf4dc4314f6"
+      ],
+      "consulted_sources": [
+        "https://x.com/v_maini",
+        "https://www.mythos.vc/about",
+        "https://www.mythos.vc/",
+        "https://www.linkedin.com/in/vishalmaini",
+        "https://medium.com/@v_maini/taking-the-plunge-my-path-to-working-on-artificial-intelligence-fcf4dc4314f6",
+        "https://techcrunch.com/2023/09/27/mythos-ventures-ai-14m-fund/"
+      ]
+    },
+    {
+      "entity_id": 2896,
+      "entity_name": "Kieran Hill",
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "He is a broad pre-seed and seed investor whose current publishing centers on deals, founders, funds, and ecosystem promotion; occasional AI investments do not establish repeated original frontier-AI intelligence.",
+      "current_connection": "General Partner for pre-seed and seed investments at 20VC; previously associated with Ascension Ventures and Debut Sessions.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://20vc.fund/team",
+        "https://uk.linkedin.com/in/kieranleehill",
+        "https://www.bitsandpretzels.com/speaker/Kieran_Hill-32892855798"
+      ],
+      "consulted_sources": [
+        "https://x.com/kieranleehill",
+        "https://20vc.fund/team",
+        "https://uk.linkedin.com/in/kieranleehill",
+        "https://www.bitsandpretzels.com/speaker/Kieran_Hill-32892855798",
+        "https://techcrunch.com/2024/12/18/felix-capitals-julien-codorniou-joins-20vc-as-general-partner/"
+      ]
+    }
+  ]
+}
