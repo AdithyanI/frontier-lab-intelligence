@@ -78,9 +78,17 @@ Protected identities can still receive inbound edges from public sources:
 Karpathy's completed list already contains `@dwf` and `@gwern`. They remain
 useful as graph targets and identity anchors, but not as X collection sources.
 
+Adi chose to collect all nine in the existing Rejected view for now. They are
+excluded from active Registry counts and must not enter source ingestion,
+ranking inputs, or candidate output. Their reason-bearing rows make the choice
+inspectable and reversible; `clear_rejection` can restore one later if a usable
+public channel appears.
+
 ## Decision
 
 Do not exclude high-following or high-follower sources solely because they are
 statistical outliers. The current data shows no follower-floor violations and
 the cost tail is modest. Keep the count fields for later evaluation and allow
 the reviewed personalization set—not a hidden numeric cutoff—to decide trust.
+Protected-only X accounts are a separate accessibility decision and remain
+Rejected until explicitly restored.

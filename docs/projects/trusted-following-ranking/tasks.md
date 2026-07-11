@@ -159,6 +159,10 @@ candidate generator while demonstrating ranking and validation discipline.
   individual audit stages. Claude uses native web search with automatic tool
   choice plus a post-response search-evidence gate; translated search calls and
   cited URLs remain visibly labeled in the review artifact.
+- Rejected identities are an inactive, reversible holding set. They are
+  excluded from collection, ranking inputs, and candidate output; restoration
+  requires an explicit `clear_rejection` decision. Nine protected-only X
+  identities entered this set after the profile scan.
 - Organization consolidation remains ownership-driven: NVIDIA and Meta AI each
   have one coherent entity; Moonvalley is now an official Reka channel; Papers
   with Code was removed as a dormant source; and `@shahules786` is the person
@@ -473,3 +477,9 @@ candidate generator while demonstrating ranking and validation discipline.
   protected sources remain explicit inaccessible terminals rather than false
   empty snapshots. They can still be graph targets: Karpathy's completed
   public list already supplies inbound edges to protected `@dwf` and `@gwern`.
+- 2026-07-11: [DONE] At Adi's direction, placed all nine protected-only X
+  identities in the existing Rejected view rather than hard-deleting them.
+  They remain inactive and reversible with visible reasons, but cannot
+  participate in normal collection, ranking inputs, or candidate output.
+  Registry state is now 2,114 active people, 86 active organizations, zero
+  unsure, and 13 rejected; the live UI was verified at 13 of 13 rejected rows.

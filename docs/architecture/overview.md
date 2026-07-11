@@ -4,8 +4,9 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
-Registry retains the relevance-reviewed post-floor universe: 2,123 people,
-86 organizations, zero active unsure, four rejected, and zero unknown.
+Registry retains the relevance-reviewed post-floor universe: 2,114 active
+people, 86 active organizations, zero active unsure, 13 rejected, and zero
+unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
@@ -201,8 +202,8 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,213 classified entities: 2,123 people, 86
-  organizations, zero active unsure, and four rejections. The
+- The Registry retains 2,213 classified entities: 2,114 active people, 86
+  active organizations, zero active unsure, and 13 rejections. The
   2,259 channels include 24 website/GitHub/blog lab channels plus 22 X/product
   channels consolidated into existing organizations. The approved relevance
   manifest contains 689 exact one-X removals. The final organization pass
@@ -381,7 +382,7 @@ Table row counts: `raw_items` 1,599, `accounts` 2,235,
 `entities` 2,213, `channels` 2,259, `entity_channels` 2,259,
 `channel_observations` 10,805, `entity_kind_classification_runs` 10,
 `entity_kind_classifications` 2,306, `entity_kind_web_enrichments` 1,
-`entity_kind_classification_errors` 0, `entity_registry_rejections` 4, and
+`entity_kind_classification_errors` 0, `entity_registry_rejections` 13, and
 `entity_merge_audit` 21, and `entity_override_audit` 3.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is

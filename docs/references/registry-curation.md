@@ -54,10 +54,10 @@ After the relevance and organization-identity cleanup, the corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 2,123 |
+| person (active) | 2,114 |
 | organization | 86 (including 10 seeded labs) |
 | unsure (active) | 0 |
-| rejected | 4 |
+| rejected | 13 |
 | unknown | 0 |
 | **total** | **2,213** |
 
@@ -71,6 +71,14 @@ The active graph has zero edges. Digg's 1,000-account ranking is an offline
 comparison artifact and is not active Registry provenance. A node's accepted
 follower-floor and structural-kind decisions survive removal of its discovery
 edge.
+
+The following profile scan identified nine additional people whose only
+observed channel is protected X. Adi placed them in the existing Rejected view
+under `protected_x_no_public_channel`: Albert Webson, Alane Suhr, David
+Warde-Farley, Gwern, Heng Ji, Maike Osborne, Neal Khosla, Noah A. Smith, and S.
+Osindero. They are excluded from active Registry counts, source collection,
+ranking inputs, and candidate output. `clear_rejection` is the explicit path to
+restore one later if a usable public channel appears.
 
 Relevance cleanup is an explicit, human-approved boundary rather than a
 direct model action. Its 689 rows live in
