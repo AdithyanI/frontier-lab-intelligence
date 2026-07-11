@@ -31,6 +31,10 @@ def main(argv: list[str] | None = None) -> int:
         "following-snapshot", help="Local outgoing-follow snapshot storage."
     )
     following_snapshot_p.add_argument("snapshot_args", nargs=argparse.REMAINDER)
+    following_ranking_p = sub.add_parser(
+        "following-ranking", help="Derived ranking over a frozen follow snapshot."
+    )
+    following_ranking_p.add_argument("ranking_args", nargs=argparse.REMAINDER)
     entity_kinds_p = sub.add_parser(
         "entity-kinds", help="Classify provisional entity structure."
     )
@@ -90,6 +94,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import following_snapshots
 
         return following_snapshots.main(args.snapshot_args)
+
+    if args.command == "following-ranking":
+        from fli import following_rankings
+
+        return following_rankings.main(args.ranking_args)
 
     if args.command == "entity-kinds":
         from fli import entity_kinds

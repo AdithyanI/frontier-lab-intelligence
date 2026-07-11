@@ -238,8 +238,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Obtain Adi's explicit go/no-go, run the full outgoing-follow crawl, validate it, and freeze its tracked proof manifest. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | done | Create and verify a compressed local recovery copy without modifying the immutable snapshot. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | done | Upload the verified archive to WIN's existing permanent R2/S3 storage and verify the complete remote object by SHA-256. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
-| todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `resources/m3-ranking-implementation.md` |
-| todo | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-ranking-implementation.md` |
+| done | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `resources/m3-overlap-baseline.md` |
+| done | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-overlap-baseline.md` |
 | done | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
 | done | Apply the snapshot-pinned organization-coverage manifest, including NVIDIA/AMD/Intel compute anchors, and prove dry-run/replay safety. | parent | `../../../data/registry/organization-coverage.json` |
 | todo | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
@@ -552,3 +552,12 @@ candidate generator while demonstrating ranking and validation discipline.
   Registry state is 2,220 entities: 2,114 active people, 93 active
   organizations, zero active unsure, and 13 rejected. Dry-run, real apply, and
   replay all completed cleanly; the replay made zero writes.
+- 2026-07-11: [DONE] Implemented and ran the M3 screened-source overlap
+  baseline. A new JSON-first `fli following-ranking overlap` command reads the
+  immutable snapshot and only authorizer-approved Registry identity tables,
+  writes a separate ignored `analysis.db`, and exports global and unknown
+  top-100 review CSVs. The deterministic production run ranked 463,180 accounts
+  from 2,456,305 edges and 2,219 complete active sources; 2,240 map active, 13
+  rejected, and 460,927 unknown. An identical replay reused the same context
+  and run without duplicate rows. Personalized PageRank and human top-k review
+  remain next.

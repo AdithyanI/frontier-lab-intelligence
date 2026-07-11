@@ -150,6 +150,7 @@ data/fli.db                         # raw evidence SQLite corpus
 data/digg/rankings.csv              # offline Digg comparison baseline only
 data/following/cohorts/*.json       # frozen broad collection membership
 data/raw/following/*/snapshot.db    # ignored local raw pages + fresh edges
+data/derived/following/*/analysis.db # ignored recomputable rankings + identity map
 docs/references/digg-ranking-baseline.md
 ```
 
@@ -165,6 +166,7 @@ fli following-snapshot finalize --snapshot-db <path>
 fli following-snapshot collect --snapshot-db <path> --handle <x-handle>
 fli following-snapshot collect --snapshot-db <path> --all --profiles-only
 fli following-snapshot collect --snapshot-db <path> --all --workers 20
+fli following-ranking overlap --snapshot-db <path> --registry-db data/fli.db
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
@@ -202,7 +204,16 @@ accessible sources at 20 workers / 9 QPS with zero crawl failures. The immutable
 snapshot contains 13,409 raw pages, 463,180 distinct target accounts, and
 2,456,305 directed edges; its best-available provider-cost estimate is
 `$27.81218`. The tracked manifest binds those facts to the local 2.0 GB database
-checksum. Ranking and evaluation remain next.
+checksum.
+
+The first derived ranking is now live. `fli.following_rankings` materializes a
+snapshot- and Registry-checksummed active/rejected/unknown X-ID map in an
+ignored `analysis.db`, then ranks every discovered account by the number of
+distinct complete active Registry sources that follow it. The command can read
+only the frozen snapshot edge table and an authorizer-limited set of Registry
+identity tables; it cannot read legacy `data/fli.db.graph_edges`. The first run
+reconciled 2,219 complete active sources, 2,456,305 edges, and 463,180 ranked
+accounts. Raw followers are display evidence, not an overlap input.
 
 Known data facts:
 
@@ -547,7 +558,7 @@ claim that every account deserves equal trust.
 ```text
 frozen Registry X cohort
   -> GET following for each accessible X user
-  -> graph_edges(source=<snapshot source>, relationship='follows')
+  -> snapshot.edge(source_x_id, target_x_id)
   -> trusted-follow overlap baseline
   -> personalized PageRank from a smaller reviewed trust subset
   -> people candidates for curation
@@ -667,6 +678,8 @@ final score.
 | `fli.labs` | internal curated source seed (10 historical rows); seeds official channels but does not define a public Registry kind/subtype |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io profile, timeline, X-list, and single-source outgoing-follow adapter; provenance only, no classification |
+| `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
+| `fli.following_rankings` | derived screened-source overlap baseline with deterministic runs and active/rejected/unknown mapping; personalized PageRank pending |
 | `fli.web` | JSON API (`/api/status`, `/api/registry`) + built SPA host; Registry is server-paged, reach-sorted, searchable by identity fields, and exposes people, organizations, unsure results, rejections, and classifier reasons; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
