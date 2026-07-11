@@ -239,8 +239,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Create and verify a compressed local recovery copy without modifying the immutable snapshot. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | done | Upload the verified archive to WIN's existing permanent R2/S3 storage and verify the complete remote object by SHA-256. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `resources/m3-ranking-implementation.md` |
-| todo | Create the derived analysis store (snapshot-stamped, recomputable) with the known/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-ranking-implementation.md` |
-| todo | Write one dated per-channel summary observation into fli.db channel_observations from the snapshot manifest. | parent | `resources/m3-ranking-implementation.md` |
+| todo | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-ranking-implementation.md` |
+| todo | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
 | todo | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
 | todo | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-ranking-implementation.md` |
 
