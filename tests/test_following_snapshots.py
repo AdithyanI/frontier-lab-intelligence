@@ -1,7 +1,29 @@
 import json
 import pytest
 
-from fli import channels, following_snapshots, registry
+from fli import channels, following_snapshots, registry, sources
+
+
+class FakeCollectorClient:
+    def __init__(self, *, profiles, pages):
+        self.profiles = profiles
+        self.pages = pages
+        self.profile_calls = []
+        self.page_calls = []
+
+    def fetch_user(self, *, username):
+        self.profile_calls.append(username)
+        value = self.profiles[username]
+        if isinstance(value, Exception):
+            raise value
+        return value
+
+    def fetch_following_page(self, *, username, cursor, page_size):
+        self.page_calls.append((username, cursor, page_size))
+        value = self.pages[(username, cursor)]
+        if isinstance(value, Exception):
+            raise value
+        return value
 
 
 def _product_db(path):
@@ -298,3 +320,232 @@ def test_invalid_cohort_checksum_is_rejected(tmp_path):
         )
 
     assert exc.value.code == "E_INVALID_COHORT"
+
+
+def test_collector_pauses_and_resumes_without_refetching_profile_or_page(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    client = FakeCollectorClient(
+        profiles={"alpha": {"id": "1", "userName": "alpha", "following": 2}},
+        pages={
+            ("alpha", None): {
+                "followings": [{"id": "10", "userName": "first"}],
+                "has_next_page": True,
+                "next_cursor": "cursor-2",
+            },
+            ("alpha", "cursor-2"): {
+                "followings": [{"id": "11", "userName": "second"}],
+                "has_next_page": False,
+            },
+        },
+    )
+
+    first = following_snapshots.collect_snapshot(
+        conn,
+        client=client,
+        handles=["@alpha"],
+        max_pages_per_source=1,
+    )
+    second = following_snapshots.collect_snapshot(
+        conn,
+        client=client,
+        handles=["alpha"],
+    )
+
+    assert first["outcomes"]["paused"] == 1
+    assert first["profiles_fetched"] == 1
+    assert first["pages_fetched"] == 1
+    assert second["outcomes"]["complete"] == 1
+    assert second["profiles_fetched"] == 0
+    assert second["profiles_reused"] == 1
+    assert second["pages_fetched"] == 1
+    assert client.profile_calls == ["alpha"]
+    assert client.page_calls == [
+        ("alpha", None, 200),
+        ("alpha", "cursor-2", 200),
+    ]
+    assert second["cumulative_cost"] == {
+        "profile_requests": 1,
+        "following_page_requests": 2,
+        "estimated_provider_credits": 138,
+        "estimated_provider_cost_usd": 0.00138,
+    }
+    assert second["snapshot"]["counts"]["raw_profiles"] == 1
+    assert second["snapshot"]["counts"]["edges"] == 2
+    conn.close()
+
+
+def test_collector_marks_protected_without_fetching_following_page(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    client = FakeCollectorClient(
+        profiles={
+            "beta": {
+                "id": "2",
+                "userName": "beta",
+                "protected": True,
+                "following": 20,
+            }
+        },
+        pages={},
+    )
+
+    result = following_snapshots.collect_snapshot(
+        conn,
+        client=client,
+        handles=["beta"],
+    )
+
+    assert result["outcomes"]["protected"] == 1
+    assert result["pages_fetched"] == 0
+    assert client.page_calls == []
+    assert conn.execute(
+        "SELECT status FROM source_fetch WHERE source_x_id = '2'"
+    ).fetchone()[0] == "protected"
+    conn.close()
+
+
+def test_collector_preserves_retryable_error_and_resume_cursor(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    network_error = sources.SourceCliError(
+        code="E_NETWORK",
+        message="Could not reach TwitterAPI.io.",
+        hint="Retry later.",
+        exit_code=4,
+        retryable=True,
+    )
+    client = FakeCollectorClient(
+        profiles={"alpha": network_error},
+        pages={},
+    )
+
+    with pytest.raises(following_snapshots.SnapshotCliError) as exc:
+        following_snapshots.collect_snapshot(
+            conn,
+            client=client,
+            handles=["alpha"],
+        )
+
+    assert exc.value.code == "E_NETWORK"
+    source = conn.execute(
+        "SELECT * FROM source_fetch WHERE source_x_id = '1'"
+    ).fetchone()
+    assert source["status"] == "pending"
+    assert source["next_cursor"] == ""
+    assert source["attempts"] == 1
+    assert source["last_error_code"] == "E_NETWORK"
+    conn.close()
+
+
+def test_collector_dry_run_needs_no_client_or_secret(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+
+    result = following_snapshots.collect_snapshot(
+        conn,
+        handles=["alpha"],
+        dry_run=True,
+        key_file=tmp_path / "missing",
+    )
+
+    assert result["dry_run"] is True
+    assert result["selected_sources"] == 1
+    assert result["selected_handle_preview"] == ["alpha"]
+    assert result["snapshot"]["counts"]["raw_pages"] == 0
+    conn.close()
+
+
+def test_profiles_only_caches_counts_without_following_pages(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    client = FakeCollectorClient(
+        profiles={
+            "alpha": {
+                "id": "1",
+                "userName": "alpha",
+                "followers": 12_345,
+                "following": 2,
+            }
+        },
+        pages={},
+    )
+
+    result = following_snapshots.collect_snapshot(
+        conn,
+        client=client,
+        handles=["alpha"],
+        profiles_only=True,
+    )
+
+    assert result["outcomes"]["profiled"] == 1
+    assert result["pages_fetched"] == 0
+    assert client.page_calls == []
+    assert result["profile_cost_projection"] == {
+        "sources_with_following_count": 1,
+        "advertised_following_total": 2,
+        "average_advertised_following_count": 2.0,
+        "projected_provider_credits_for_profiled_sources": 78,
+        "projected_cost_usd_for_profiled_sources": 0.00078,
+    }
+    source = conn.execute(
+        "SELECT * FROM source_fetch WHERE source_x_id = '1'"
+    ).fetchone()
+    assert source["status"] == "pending"
+    assert source["advertised_following_count"] == 2
+    assert following_snapshots.validate_snapshot(conn)["valid"] is True
+    conn.close()
+
+
+def test_parallel_profile_scan_respects_profile_only_boundary(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    client = FakeCollectorClient(
+        profiles={
+            "alpha": {"id": "1", "userName": "alpha", "following": 2},
+            "beta": {"id": "2", "userName": "beta", "following": 3},
+        },
+        pages={},
+    )
+
+    result = following_snapshots.collect_snapshot(
+        conn,
+        client=client,
+        collect_all=True,
+        profiles_only=True,
+        workers=2,
+        requests_per_second=10_000,
+    )
+
+    assert result["workers"] == 2
+    assert result["outcomes"]["profiled"] == 2
+    assert result["profiles_fetched"] == 2
+    assert result["pages_fetched"] == 0
+    assert sorted(client.profile_calls) == ["alpha", "beta"]
+    assert client.page_calls == []
+    assert following_snapshots.validate_snapshot(conn)["valid"] is True
+    conn.close()
+
+
+def test_collect_cli_requires_explicit_scope(tmp_path, capsys):
+    snapshot_db, _ = _snapshot(tmp_path)
+
+    code = following_snapshots.main(
+        ["collect", "--snapshot-db", str(snapshot_db), "--no-input"]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert code == 2
+    assert payload["status"] == "error"
+    assert payload["error"]["code"] == "E_USAGE"
+
+
+def test_collection_lock_rejects_concurrent_local_collector(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+
+    with following_snapshots.collection_lock(snapshot_db):
+        with pytest.raises(following_snapshots.SnapshotCliError) as exc:
+            with following_snapshots.collection_lock(snapshot_db):
+                pass
+
+    assert exc.value.code == "E_COLLECTION_LOCKED"

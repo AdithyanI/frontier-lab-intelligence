@@ -16,8 +16,10 @@ import json
 import sqlite3
 import subprocess
 import sys
+import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -192,6 +194,10 @@ def _normalize_handle(value: Any) -> str | None:
 def _int_or_none(value: Any) -> int | None:
     if value is None or value == "":
         return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _profile_following_count(profile: dict[str, Any]) -> int | None:
@@ -216,10 +222,6 @@ def _following_page_credits(returned: int) -> int:
     if returned >= 100:
         return returned * 2
     return max(60, returned * 3)
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -518,6 +520,469 @@ def _member_fields(member: dict[str, Any]) -> tuple[str | None, str | None]:
     return x_id, handle
 
 
+def record_profile(
+    conn: sqlite3.Connection,
+    *,
+    source_x_id: str,
+    profile: dict[str, Any],
+    retrieved_at: str | None = None,
+) -> dict[str, Any]:
+    """Cache one source profile before following pages are requested."""
+    retrieved_at = retrieved_at or _now()
+    raw_json = _canonical_json(profile)
+    profile_sha256 = _sha256_bytes(raw_json.encode())
+    observed_x_id = str(profile.get("id") or profile.get("id_str") or "").strip()
+    if observed_x_id and observed_x_id != source_x_id:
+        raise SnapshotCliError(
+            code="E_SOURCE_ID_MISMATCH",
+            message=(
+                f"Provider handle resolved to X ID {observed_x_id}, "
+                f"not frozen source ID {source_x_id}."
+            ),
+            hint="Do not collect this handle until Registry identity is corrected.",
+            exit_code=4,
+        )
+    protected = sources.is_protected_profile(profile)
+    following_count = _profile_following_count(profile)
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        existing = conn.execute(
+            "SELECT profile_sha256 FROM raw_profile WHERE source_x_id = ?",
+            (source_x_id,),
+        ).fetchone()
+        if existing:
+            if existing["profile_sha256"] != profile_sha256:
+                raise SnapshotCliError(
+                    code="E_PROFILE_CONFLICT",
+                    message="The same snapshot source produced different profile data.",
+                    hint="Create a new snapshot rather than rewriting cached evidence.",
+                    exit_code=4,
+                )
+            conn.rollback()
+            return {
+                "source_x_id": source_x_id,
+                "protected": protected,
+                "advertised_following_count": following_count,
+                "created": False,
+            }
+        _ensure_mutable(conn)
+        source = conn.execute(
+            "SELECT * FROM source_fetch WHERE source_x_id = ?", (source_x_id,)
+        ).fetchone()
+        if not source:
+            raise SnapshotCliError(
+                code="E_SOURCE_NOT_IN_COHORT",
+                message=f"Source X ID is not in the frozen cohort: {source_x_id}",
+                hint="Do not add sources to an existing snapshot.",
+                exit_code=4,
+            )
+        if source["status"] in TERMINAL_SOURCE_STATUSES:
+            raise SnapshotCliError(
+                code="E_SOURCE_TERMINAL",
+                message=f"Source @{source['source_handle']} is already {source['status']}.",
+                hint="Create a new snapshot to refresh a terminal source.",
+                exit_code=4,
+            )
+        conn.execute(
+            """INSERT INTO raw_profile
+               (source_x_id, retrieved_at, profile_json, profile_sha256,
+                protected, advertised_following_count)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (
+                source_x_id,
+                retrieved_at,
+                raw_json,
+                profile_sha256,
+                int(protected),
+                following_count,
+            ),
+        )
+        conn.execute(
+            """UPDATE source_fetch
+               SET advertised_following_count = COALESCE(?, advertised_following_count),
+                   updated_at = ?
+               WHERE source_x_id = ?""",
+            (following_count, retrieved_at, source_x_id),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    return {
+        "source_x_id": source_x_id,
+        "protected": protected,
+        "advertised_following_count": following_count,
+        "created": True,
+    }
+
+
+def _cached_profile(
+    conn: sqlite3.Connection, source_x_id: str
+) -> dict[str, Any] | None:
+    row = conn.execute(
+        "SELECT profile_json FROM raw_profile WHERE source_x_id = ?", (source_x_id,)
+    ).fetchone()
+    return json.loads(row["profile_json"]) if row else None
+
+
+def record_attempt_error(
+    conn: sqlite3.Connection,
+    *,
+    source_x_id: str,
+    error_code: str,
+    error_message: str,
+    observed_at: str | None = None,
+) -> None:
+    """Persist a retryable failure without discarding the resume cursor."""
+    observed_at = observed_at or _now()
+    _ensure_mutable(conn)
+    updated = conn.execute(
+        """UPDATE source_fetch
+           SET attempts = attempts + 1, last_error_code = ?,
+               last_error_message = ?, updated_at = ?
+           WHERE source_x_id = ? AND status IN ('pending', 'in_progress')""",
+        (error_code, error_message, observed_at, source_x_id),
+    ).rowcount
+    if not updated:
+        raise SnapshotCliError(
+            code="E_SOURCE_NOT_RESUMABLE",
+            message=f"Source X ID is not resumable: {source_x_id}",
+            hint="Inspect the source status before retrying.",
+            exit_code=4,
+        )
+    conn.commit()
+
+
+def _snapshot_cost(conn: sqlite3.Connection) -> dict[str, int | float]:
+    profile_requests = conn.execute("SELECT COUNT(*) FROM raw_profile").fetchone()[0]
+    page_rows = conn.execute("SELECT item_count FROM raw_page").fetchall()
+    following_credits = sum(_following_page_credits(row["item_count"]) for row in page_rows)
+    credits = profile_requests * PROFILE_CREDITS + following_credits
+    return {
+        "profile_requests": profile_requests,
+        "following_page_requests": len(page_rows),
+        "estimated_provider_credits": credits,
+        "estimated_provider_cost_usd": round(credits / 100_000, 6),
+    }
+
+
+def profile_cost_projection(conn: sqlite3.Connection) -> dict[str, int | float | None]:
+    """Project complete collection cost for sources with cached profile counts."""
+    rows = conn.execute(
+        """SELECT advertised_following_count
+           FROM raw_profile
+           WHERE advertised_following_count IS NOT NULL"""
+    ).fetchall()
+    followed_total = sum(row["advertised_following_count"] for row in rows)
+    following_credits = 0
+    for row in rows:
+        count = row["advertised_following_count"]
+        full_pages, remainder = divmod(count, 200)
+        following_credits += full_pages * 200
+        following_credits += _following_page_credits(remainder)
+    projected_credits = len(rows) * PROFILE_CREDITS + following_credits
+    return {
+        "sources_with_following_count": len(rows),
+        "advertised_following_total": followed_total,
+        "average_advertised_following_count": (
+            round(followed_total / len(rows), 2) if rows else None
+        ),
+        "projected_provider_credits_for_profiled_sources": projected_credits,
+        "projected_cost_usd_for_profiled_sources": round(
+            projected_credits / 100_000, 6
+        ),
+    }
+
+
+def _provider_error_status(exc: sources.SourceCliError) -> str | None:
+    message = exc.message.lower()
+    if "protected" in message or "private" in message:
+        return "protected"
+    if "not found" in message or "does not exist" in message:
+        return "missing"
+    if any(word in message for word in ("suspended", "deactivated", "unavailable")):
+        return "unavailable"
+    return None
+
+
+def _as_snapshot_error(exc: sources.SourceCliError) -> SnapshotCliError:
+    return SnapshotCliError(
+        code=exc.code,
+        message=exc.message,
+        hint=exc.hint,
+        exit_code=exc.exit_code,
+        retryable=exc.retryable,
+    )
+
+
+def _select_collection_sources(
+    conn: sqlite3.Connection,
+    *,
+    handles: list[str] | None,
+    limit: int | None,
+    collect_all: bool,
+) -> list[sqlite3.Row]:
+    selected_modes = sum((bool(handles), limit is not None, collect_all))
+    if selected_modes != 1:
+        raise SnapshotCliError(
+            code="E_SCOPE_REQUIRED",
+            message="Choose exactly one collection scope: --handle, --limit, or --all.",
+            hint="Use --handle for calibration and --all only for an approved full crawl.",
+            exit_code=2,
+        )
+    if handles:
+        normalized = list(dict.fromkeys(_normalize_handle(handle) for handle in handles))
+        if None in normalized:
+            raise SnapshotCliError(
+                code="E_HANDLE_INVALID",
+                message="Every --handle value must contain a non-empty X handle.",
+                hint="Pass handles with or without the leading @.",
+                exit_code=2,
+            )
+        placeholders = ",".join("?" for _ in normalized)
+        rows = conn.execute(
+            f"""SELECT * FROM source_fetch
+                WHERE source_handle IN ({placeholders})
+                ORDER BY source_handle""",
+            normalized,
+        ).fetchall()
+        found = {row["source_handle"] for row in rows}
+        missing = sorted(set(normalized) - found)
+        if missing:
+            raise SnapshotCliError(
+                code="E_SOURCE_NOT_IN_COHORT",
+                message=f"Handles are not in the frozen cohort: {', '.join(missing)}",
+                hint="Inspect the cohort before starting paid collection.",
+                exit_code=2,
+            )
+        return rows
+    if limit is not None and limit < 1:
+        raise SnapshotCliError(
+            code="E_LIMIT_INVALID",
+            message="--limit must be at least 1.",
+            hint="Use a positive bounded source count.",
+            exit_code=2,
+        )
+    sql = """SELECT * FROM source_fetch
+             WHERE status IN ('pending', 'in_progress')
+             ORDER BY CASE status WHEN 'in_progress' THEN 0 ELSE 1 END,
+                      source_handle"""
+    params: tuple[int, ...] = ()
+    if limit is not None:
+        sql += " LIMIT ?"
+        params = (limit,)
+    return conn.execute(sql, params).fetchall()
+
+
+@contextlib.contextmanager
+def collection_lock(snapshot_db: Path):
+    """Prevent two local collectors from paying for the same cursor."""
+    lock_path = snapshot_db.with_suffix(snapshot_db.suffix + ".collect.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("w") as stream:
+        try:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise SnapshotCliError(
+                code="E_COLLECTION_LOCKED",
+                message=f"Another collector holds the snapshot lock: {lock_path}",
+                hint="Wait for that process or inspect it before retrying.",
+                exit_code=4,
+                retryable=True,
+            ) from exc
+        try:
+            yield
+        finally:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+
+
+class RequestStartLimiter:
+    """Space request starts so parallel workers stay under provider QPS."""
+
+    def __init__(self, requests_per_second: float) -> None:
+        if requests_per_second <= 0:
+            raise ValueError("requests_per_second must be positive")
+        self.interval = 1.0 / requests_per_second
+        self.next_start = 0.0
+        self.lock = threading.Lock()
+
+    def wait(self) -> None:
+        with self.lock:
+            now = time.monotonic()
+            start_at = max(now, self.next_start)
+            self.next_start = start_at + self.interval
+        delay = start_at - now
+        if delay > 0:
+            time.sleep(delay)
+
+
+def _fetch_profile_limited(
+    client: sources.TwitterApiIoClient | Any,
+    *,
+    handle: str,
+    limiter: RequestStartLimiter,
+) -> dict[str, Any]:
+    limiter.wait()
+    return client.fetch_user(username=handle)
+
+
+def _collect_profiles_parallel(
+    conn: sqlite3.Connection,
+    *,
+    client: sources.TwitterApiIoClient | Any,
+    selected: list[sqlite3.Row],
+    workers: int,
+    requests_per_second: float,
+    progress: str,
+) -> dict[str, Any]:
+    outcomes = {
+        "complete": 0,
+        "paused": 0,
+        "protected": 0,
+        "missing": 0,
+        "unavailable": 0,
+        "failed": 0,
+        "already_terminal": 0,
+        "profiled": 0,
+        "retryable_error": 0,
+    }
+    failures: list[dict[str, str]] = []
+    profiles_fetched = 0
+    profiles_reused = 0
+    pending: list[sqlite3.Row] = []
+
+    for source in selected:
+        if source["status"] in TERMINAL_SOURCE_STATUSES:
+            outcomes["already_terminal"] += 1
+            continue
+        profile = _cached_profile(conn, source["source_x_id"])
+        if profile is None:
+            pending.append(source)
+            continue
+        profiles_reused += 1
+        if sources.is_protected_profile(profile):
+            mark_source(
+                conn,
+                source_x_id=source["source_x_id"],
+                status="protected",
+                error_code="E_ACCOUNT_PROTECTED",
+                error_message="The cached provider profile marks this account protected.",
+            )
+            outcomes["protected"] += 1
+        else:
+            outcomes["profiled"] += 1
+
+    limiter = RequestStartLimiter(requests_per_second)
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {
+            executor.submit(
+                _fetch_profile_limited,
+                client,
+                handle=source["source_handle"],
+                limiter=limiter,
+            ): source
+            for source in pending
+        }
+        for completed, future in enumerate(as_completed(futures), start=1):
+            source = futures[future]
+            source_x_id = source["source_x_id"]
+            handle = source["source_handle"]
+            try:
+                profile = future.result()
+            except sources.SourceCliError as exc:
+                terminal_status = _provider_error_status(exc)
+                if terminal_status:
+                    mark_source(
+                        conn,
+                        source_x_id=source_x_id,
+                        status=terminal_status,
+                        error_code=exc.code,
+                        error_message=exc.message,
+                    )
+                    outcomes[terminal_status] += 1
+                    failures.append(
+                        {"handle": handle, "status": terminal_status, "code": exc.code}
+                    )
+                else:
+                    record_attempt_error(
+                        conn,
+                        source_x_id=source_x_id,
+                        error_code=exc.code,
+                        error_message=exc.message,
+                    )
+                    outcomes["retryable_error"] += 1
+                    failures.append(
+                        {"handle": handle, "status": "retryable", "code": exc.code}
+                    )
+                continue
+            try:
+                record_profile(conn, source_x_id=source_x_id, profile=profile)
+            except SnapshotCliError as exc:
+                if exc.code != "E_SOURCE_ID_MISMATCH":
+                    raise
+                mark_source(
+                    conn,
+                    source_x_id=source_x_id,
+                    status="failed",
+                    error_code=exc.code,
+                    error_message=exc.message,
+                )
+                outcomes["failed"] += 1
+                failures.append(
+                    {"handle": handle, "status": "failed", "code": exc.code}
+                )
+                continue
+            profiles_fetched += 1
+            if sources.is_protected_profile(profile):
+                mark_source(
+                    conn,
+                    source_x_id=source_x_id,
+                    status="protected",
+                    error_code="E_ACCOUNT_PROTECTED",
+                    error_message="The provider profile marks this X account protected.",
+                )
+                outcomes["protected"] += 1
+            else:
+                outcomes["profiled"] += 1
+            if progress == "plain" and (
+                completed == len(pending) or completed % 100 == 0
+            ):
+                print(
+                    f"profile scan {completed}/{len(pending)} fetched",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+    cumulative_cost = _snapshot_cost(conn)
+    conn.execute(
+        "UPDATE snapshot_run SET estimated_cost_usd = ?",
+        (cumulative_cost["estimated_provider_cost_usd"],),
+    )
+    conn.commit()
+    preview = [row["source_handle"] for row in selected[:20]]
+    return {
+        "dry_run": False,
+        "profiles_only": True,
+        "workers": workers,
+        "requests_per_second": requests_per_second,
+        "selected_sources": len(selected),
+        "selected_handle_preview": preview,
+        "selected_handle_preview_truncated": len(selected) > len(preview),
+        "profiles_fetched": profiles_fetched,
+        "profiles_reused": profiles_reused,
+        "pages_fetched": 0,
+        "outcomes": outcomes,
+        "failures": failures,
+        "invocation_estimated_provider_credits": profiles_fetched * PROFILE_CREDITS,
+        "invocation_estimated_provider_cost_usd": round(
+            profiles_fetched * PROFILE_CREDITS / 100_000, 6
+        ),
+        "cumulative_cost": cumulative_cost,
+        "profile_cost_projection": profile_cost_projection(conn),
+        "snapshot": snapshot_summary(conn),
+    }
+
+
 def record_page(
     conn: sqlite3.Connection,
     *,
@@ -761,6 +1226,288 @@ def mark_source(
     return {"source_x_id": source_x_id, "status": status}
 
 
+def collect_snapshot(
+    conn: sqlite3.Connection,
+    *,
+    client: sources.TwitterApiIoClient | Any | None = None,
+    handles: list[str] | None = None,
+    limit: int | None = None,
+    collect_all: bool = False,
+    page_size: int = 200,
+    max_pages_per_source: int | None = None,
+    profiles_only: bool = False,
+    workers: int = 1,
+    requests_per_second: float = 9.0,
+    key_file: Path = sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+    timeout_seconds: float = 30.0,
+    page_sleep_seconds: float = 0.0,
+    dry_run: bool = False,
+    progress: str = "off",
+) -> dict[str, Any]:
+    """Collect a bounded, resumable set of frozen sources."""
+    _ensure_mutable(conn)
+    if not 20 <= page_size <= 200:
+        raise SnapshotCliError(
+            code="E_PAGE_SIZE_INVALID",
+            message="--page-size must be between 20 and 200.",
+            hint="Use 200 for the lowest documented unit price.",
+            exit_code=2,
+        )
+    if max_pages_per_source is not None and max_pages_per_source < 1:
+        raise SnapshotCliError(
+            code="E_MAX_PAGES_INVALID",
+            message="--max-pages-per-source must be at least 1.",
+            hint="Omit the flag to finish each selected source.",
+            exit_code=2,
+        )
+    if workers < 1:
+        raise SnapshotCliError(
+            code="E_WORKERS_INVALID",
+            message="--workers must be at least 1.",
+            hint="Use 10 workers with --profiles-only on the Builder plan.",
+            exit_code=2,
+        )
+    if workers > 1 and not profiles_only:
+        raise SnapshotCliError(
+            code="E_WORKERS_PROFILE_ONLY",
+            message="Parallel workers are currently limited to --profiles-only scans.",
+            hint="Following-page collection remains sequential and cursor-safe.",
+            exit_code=2,
+        )
+    if requests_per_second <= 0:
+        raise SnapshotCliError(
+            code="E_QPS_INVALID",
+            message="--requests-per-second must be positive.",
+            hint="Use 9 for headroom under the Builder plan's documented 10 QPS.",
+            exit_code=2,
+        )
+    selected = _select_collection_sources(
+        conn,
+        handles=handles,
+        limit=limit,
+        collect_all=collect_all,
+    )
+    preview = [row["source_handle"] for row in selected[:20]]
+    if dry_run:
+        return {
+            "dry_run": True,
+            "selected_sources": len(selected),
+            "selected_handle_preview": preview,
+            "selected_handle_preview_truncated": len(selected) > len(preview),
+            "page_size": page_size,
+            "max_pages_per_source": max_pages_per_source,
+            "profiles_only": profiles_only,
+            "workers": workers,
+            "requests_per_second": requests_per_second,
+            "profile_scan_max_cost_usd": round(
+                len(selected) * PROFILE_CREDITS / 100_000, 6
+            ),
+            "snapshot": snapshot_summary(conn),
+        }
+    if client is None:
+        try:
+            client = sources.create_twitterapi_io_client(
+                key_file=key_file,
+                timeout=timeout_seconds,
+                page_sleep_seconds=page_sleep_seconds,
+            )
+        except sources.SourceCliError as exc:
+            raise _as_snapshot_error(exc) from exc
+    if profiles_only and workers > 1:
+        return _collect_profiles_parallel(
+            conn,
+            client=client,
+            selected=selected,
+            workers=workers,
+            requests_per_second=requests_per_second,
+            progress=progress,
+        )
+
+    outcomes = {
+        "complete": 0,
+        "paused": 0,
+        "protected": 0,
+        "missing": 0,
+        "unavailable": 0,
+        "failed": 0,
+        "already_terminal": 0,
+        "profiled": 0,
+        "retryable_error": 0,
+    }
+    failures: list[dict[str, str]] = []
+    profiles_fetched = 0
+    profiles_reused = 0
+    pages_fetched = 0
+    invocation_credits = 0
+
+    for ordinal, selected_source in enumerate(selected, start=1):
+        source_x_id = selected_source["source_x_id"]
+        handle = selected_source["source_handle"]
+        if selected_source["status"] in TERMINAL_SOURCE_STATUSES:
+            outcomes["already_terminal"] += 1
+            continue
+        if progress == "plain":
+            print(
+                f"collecting {ordinal}/{len(selected)} @{handle} "
+                f"status={selected_source['status']}",
+                file=sys.stderr,
+                flush=True,
+            )
+
+        profile = _cached_profile(conn, source_x_id)
+        if profile is None:
+            try:
+                profile = client.fetch_user(username=handle)
+            except sources.SourceCliError as exc:
+                terminal_status = _provider_error_status(exc)
+                if terminal_status:
+                    mark_source(
+                        conn,
+                        source_x_id=source_x_id,
+                        status=terminal_status,
+                        error_code=exc.code,
+                        error_message=exc.message,
+                    )
+                    outcomes[terminal_status] += 1
+                    failures.append(
+                        {"handle": handle, "status": terminal_status, "code": exc.code}
+                    )
+                    continue
+                record_attempt_error(
+                    conn,
+                    source_x_id=source_x_id,
+                    error_code=exc.code,
+                    error_message=exc.message,
+                )
+                raise _as_snapshot_error(exc) from exc
+            try:
+                profile_result = record_profile(
+                    conn, source_x_id=source_x_id, profile=profile
+                )
+            except SnapshotCliError as exc:
+                if exc.code != "E_SOURCE_ID_MISMATCH":
+                    raise
+                mark_source(
+                    conn,
+                    source_x_id=source_x_id,
+                    status="failed",
+                    error_code=exc.code,
+                    error_message=exc.message,
+                )
+                outcomes["failed"] += 1
+                failures.append(
+                    {"handle": handle, "status": "failed", "code": exc.code}
+                )
+                continue
+            profiles_fetched += int(profile_result["created"])
+            invocation_credits += PROFILE_CREDITS
+        else:
+            profiles_reused += 1
+
+        if sources.is_protected_profile(profile):
+            mark_source(
+                conn,
+                source_x_id=source_x_id,
+                status="protected",
+                error_code="E_ACCOUNT_PROTECTED",
+                error_message="The provider profile marks this X account as protected.",
+            )
+            outcomes["protected"] += 1
+            failures.append(
+                {
+                    "handle": handle,
+                    "status": "protected",
+                    "code": "E_ACCOUNT_PROTECTED",
+                }
+            )
+            continue
+
+        if profiles_only:
+            outcomes["profiled"] += 1
+            continue
+
+        following_count = _profile_following_count(profile)
+        pages_this_source = 0
+        while True:
+            current = conn.execute(
+                "SELECT * FROM source_fetch WHERE source_x_id = ?", (source_x_id,)
+            ).fetchone()
+            cursor = current["next_cursor"] or None
+            try:
+                payload = client.fetch_following_page(
+                    username=handle,
+                    cursor=cursor,
+                    page_size=page_size,
+                )
+            except sources.SourceCliError as exc:
+                terminal_status = _provider_error_status(exc)
+                if terminal_status:
+                    mark_source(
+                        conn,
+                        source_x_id=source_x_id,
+                        status=terminal_status,
+                        error_code=exc.code,
+                        error_message=exc.message,
+                    )
+                    outcomes[terminal_status] += 1
+                    failures.append(
+                        {"handle": handle, "status": terminal_status, "code": exc.code}
+                    )
+                    break
+                record_attempt_error(
+                    conn,
+                    source_x_id=source_x_id,
+                    error_code=exc.code,
+                    error_message=exc.message,
+                )
+                raise _as_snapshot_error(exc) from exc
+            page = record_page(
+                conn,
+                source_x_id=source_x_id,
+                request_cursor=cursor,
+                payload=payload,
+                advertised_following_count=following_count,
+            )
+            pages_fetched += int(page["created"])
+            pages_this_source += int(page["created"])
+            if page["created"]:
+                invocation_credits += _following_page_credits(page["items"])
+            if page.get("source_status") == "complete":
+                outcomes["complete"] += 1
+                break
+            if (
+                max_pages_per_source is not None
+                and pages_this_source >= max_pages_per_source
+            ):
+                outcomes["paused"] += 1
+                break
+
+    cumulative_cost = _snapshot_cost(conn)
+    conn.execute(
+        "UPDATE snapshot_run SET estimated_cost_usd = ?",
+        (cumulative_cost["estimated_provider_cost_usd"],),
+    )
+    conn.commit()
+    return {
+        "dry_run": False,
+        "selected_sources": len(selected),
+        "selected_handle_preview": preview,
+        "selected_handle_preview_truncated": len(selected) > len(preview),
+        "profiles_fetched": profiles_fetched,
+        "profiles_reused": profiles_reused,
+        "pages_fetched": pages_fetched,
+        "outcomes": outcomes,
+        "failures": failures,
+        "invocation_estimated_provider_credits": invocation_credits,
+        "invocation_estimated_provider_cost_usd": round(
+            invocation_credits / 100_000, 6
+        ),
+        "cumulative_cost": cumulative_cost,
+        "profile_cost_projection": profile_cost_projection(conn),
+        "snapshot": snapshot_summary(conn),
+    }
+
+
 def finalize_snapshot(
     conn: sqlite3.Connection,
     *,
@@ -803,6 +1550,7 @@ def snapshot_summary(conn: sqlite3.Connection) -> dict[str, Any]:
     }
     counts = {
         "sources": conn.execute("SELECT COUNT(*) FROM source_fetch").fetchone()[0],
+        "raw_profiles": conn.execute("SELECT COUNT(*) FROM raw_profile").fetchone()[0],
         "raw_pages": conn.execute("SELECT COUNT(*) FROM raw_page").fetchone()[0],
         "accounts": conn.execute("SELECT COUNT(*) FROM account").fetchone()[0],
         "edges": conn.execute("SELECT COUNT(*) FROM edge").fetchone()[0],
@@ -822,7 +1570,7 @@ def snapshot_summary(conn: sqlite3.Connection) -> dict[str, Any]:
             status: status_counts.get(status, 0) for status in sorted(SOURCE_STATUSES)
         },
         "reported_cost_usd": run["reported_cost_usd"],
-        "estimated_cost_usd": run["estimated_cost_usd"],
+        "estimated_cost_usd": _snapshot_cost(conn)["estimated_provider_cost_usd"],
     }
 
 
@@ -847,6 +1595,12 @@ def validate_snapshot(conn: sqlite3.Connection) -> dict[str, Any]:
         actual = _sha256_bytes(row["response_json"].encode())
         if actual != row["response_sha256"]:
             failures.append(f"raw_page_checksum:{row['id']}")
+    for row in conn.execute(
+        "SELECT source_x_id, profile_json, profile_sha256 FROM raw_profile"
+    ):
+        actual = _sha256_bytes(row["profile_json"].encode())
+        if actual != row["profile_sha256"]:
+            failures.append(f"raw_profile_checksum:{row['source_x_id']}")
     bad_page_counts = conn.execute(
         """SELECT COUNT(*) FROM source_fetch sf
            WHERE sf.raw_page_count != (
@@ -950,6 +1704,35 @@ def main(argv: list[str] | None = None) -> int:
     init_p.add_argument("--snapshot-db", type=Path)
     _common_output_arguments(init_p)
 
+    collect_p = sub.add_parser(
+        "collect", help="Collect a bounded, resumable set of outgoing follows."
+    )
+    collect_p.add_argument("--snapshot-db", type=Path, required=True)
+    scope = collect_p.add_mutually_exclusive_group(required=True)
+    scope.add_argument("--handle", action="append", dest="handles")
+    scope.add_argument("--limit", type=int)
+    scope.add_argument("--all", action="store_true", dest="collect_all")
+    collect_p.add_argument("--page-size", type=int, default=200)
+    collect_p.add_argument("--max-pages-per-source", type=int)
+    collect_p.add_argument(
+        "--profiles-only",
+        action="store_true",
+        help="Cache source profiles/counts without requesting following pages.",
+    )
+    collect_p.add_argument("--workers", type=int, default=1)
+    collect_p.add_argument("--requests-per-second", type=float, default=9.0)
+    collect_p.add_argument(
+        "--key-file",
+        type=Path,
+        default=sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+        help="Path to the provider API-key file.",
+    )
+    collect_p.add_argument("--timeout-seconds", type=float, default=30.0)
+    collect_p.add_argument("--page-sleep-seconds", type=float, default=0.0)
+    collect_p.add_argument("--dry-run", action="store_true")
+    collect_p.add_argument("--progress", choices=("off", "plain"), default="off")
+    _common_output_arguments(collect_p)
+
     status_p = sub.add_parser("status", help="Inspect snapshot progress.")
     status_p.add_argument("--snapshot-db", type=Path, required=True)
     _common_output_arguments(status_p)
@@ -977,6 +1760,36 @@ def main(argv: list[str] | None = None) -> int:
                 cohort_path=args.cohort,
                 snapshot_db=snapshot_db,
             )
+        elif args.action == "collect":
+            if not args.snapshot_db.exists():
+                raise SnapshotCliError(
+                    code="E_NOT_FOUND",
+                    message=f"Snapshot database does not exist: {args.snapshot_db}",
+                    hint="Initialize it with `fli following-snapshot init`.",
+                    exit_code=3,
+                )
+            with collection_lock(args.snapshot_db):
+                conn = connect_snapshot(args.snapshot_db)
+                try:
+                    data = collect_snapshot(
+                        conn,
+                        handles=args.handles,
+                        limit=args.limit,
+                        collect_all=args.collect_all,
+                        page_size=args.page_size,
+                        max_pages_per_source=args.max_pages_per_source,
+                        profiles_only=args.profiles_only,
+                        workers=args.workers,
+                        requests_per_second=args.requests_per_second,
+                        key_file=args.key_file,
+                        timeout_seconds=args.timeout_seconds,
+                        page_sleep_seconds=args.page_sleep_seconds,
+                        dry_run=args.dry_run,
+                        progress=args.progress,
+                    )
+                finally:
+                    conn.close()
+            data["database"] = str(args.snapshot_db)
         elif args.action in {"status", "validate"}:
             if not args.snapshot_db.exists():
                 raise SnapshotCliError(
@@ -1014,6 +1827,29 @@ def main(argv: list[str] | None = None) -> int:
         )
         _print_result(payload, plain=args.plain)
         return 0
+    except KeyboardInterrupt:
+        exc = SnapshotCliError(
+            code="E_INTERRUPTED",
+            message="Collection was interrupted; committed pages remain resumable.",
+            hint="Run the same command again to continue from stored cursors.",
+            exit_code=5,
+            retryable=True,
+        )
+        payload = _result(
+            command=command,
+            status="error",
+            data=None,
+            error_obj={
+                "code": exc.code,
+                "message": exc.message,
+                "retryable": exc.retryable,
+                "hint": exc.hint,
+            },
+            started=started,
+            request_id=request_id,
+        )
+        _print_result(payload, plain="--plain" in (argv or []))
+        return exc.exit_code
     except (SnapshotCliError, sqlite3.Error) as exc:
         if isinstance(exc, sqlite3.Error):
             exc = SnapshotCliError(
