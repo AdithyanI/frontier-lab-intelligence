@@ -590,3 +590,112 @@ def test_relevance_removal_preflight_prevents_partial_mutation(tmp_path):
         )
 
     assert conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 2
+
+
+def test_load_relevance_removal_accepts_explicit_keep_override(tmp_path):
+    manifest = tmp_path / "removals.csv"
+    manifest.write_text(
+        "entity_id,name,kind,model_decision,review_basis,reason\n"
+        "42,Retired Source,organization,keep,manual_override_from_keep,"
+        "Source is now dormant.\n"
+    )
+
+    rows = registry.load_relevance_removals(manifest)
+
+    assert rows == [
+        {
+            "entity_id": 42,
+            "name": "Retired Source",
+            "kind": "organization",
+            "model_decision": "keep",
+            "review_basis": "manual_override_from_keep",
+            "reason": "Source is now dormant.",
+        }
+    ]
+
+
+def _make_override_entity(conn, *, name="ikka", kind="organization"):
+    entity_id = channels.upsert_entity(
+        conn,
+        kind=kind,
+        slug="x-shahules786",
+        name=name,
+        observed_at="2026-07-11T00:00:00+00:00",
+    )
+    channel_id = channels.upsert_channel(
+        conn,
+        kind="x",
+        key="shahules786",
+        observed_at="2026-07-11T00:00:00+00:00",
+    )
+    channels.link_entity_channel(
+        conn,
+        entity_id=entity_id,
+        channel_id=channel_id,
+        relationship="identity",
+    )
+    conn.commit()
+    return entity_id
+
+
+def _entity_override(entity_id):
+    return {
+        "entity_id": entity_id,
+        "expected_name": "ikka",
+        "expected_kind": "organization",
+        "target_name": "Shahul ES",
+        "target_kind": "person",
+        "reason": "The X account represents one individual.",
+        "source": "test-review",
+        "evidence_url": "https://example.com/team",
+    }
+
+
+def test_entity_override_updates_identity_records_reason_and_replays(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    registry.ensure_schema(conn)
+    entity_id = _make_override_entity(conn)
+
+    first = registry.apply_entity_overrides(conn, [_entity_override(entity_id)])
+    conn.commit()
+    second = registry.apply_entity_overrides(conn, [_entity_override(entity_id)])
+    conn.commit()
+
+    assert first == {"requested": 1, "overridden": 1, "already_overridden": 0}
+    assert second == {"requested": 1, "overridden": 0, "already_overridden": 1}
+    entity = conn.execute(
+        "SELECT name, kind FROM entities WHERE id = ?", (entity_id,)
+    ).fetchone()
+    assert dict(entity) == {"name": "Shahul ES", "kind": "person"}
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_override_audit WHERE entity_id = ?",
+        (entity_id,),
+    ).fetchone()[0] == 1
+    read = next(item for item in registry.read_entities(conn) if item["id"] == entity_id)
+    assert read["kind_reason"] == "The X account represents one individual."
+
+
+def test_entity_override_dry_run_preserves_entity_and_audit(tmp_path):
+    db = tmp_path / "test.db"
+    conn = channels.connect(db)
+    registry.ensure_schema(conn)
+    entity_id = _make_override_entity(conn)
+    manifest = tmp_path / "overrides.json"
+    manifest.write_text(json.dumps([_entity_override(entity_id)]))
+
+    registry.main(
+        [
+            "apply-entity-overrides",
+            "--db",
+            str(db),
+            "--manifest",
+            str(manifest),
+            "--dry-run",
+        ]
+    )
+
+    entity = conn.execute(
+        "SELECT name, kind FROM entities WHERE id = ?", (entity_id,)
+    ).fetchone()
+    assert dict(entity) == {"name": "ikka", "kind": "organization"}
+    assert conn.execute("SELECT COUNT(*) FROM entity_override_audit").fetchone()[0] == 0

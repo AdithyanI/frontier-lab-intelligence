@@ -66,5 +66,11 @@
     "member_handles": ["stanfordnlp"],
     "reason": "Stanford identifies the NLP Group as a research group within the Stanford AI Lab.",
     "evidence_url": "https://nlp.stanford.edu/"
+  },
+  {
+    "canonical_handle": "rekaailabs",
+    "member_handles": ["moonvalley"],
+    "reason": "Reka's first-party announcement states that Moonvalley merged with Reka and its research and engineering team joined the combined company.",
+    "evidence_url": "https://reka.ai/news/reka-and-moonvalley-join-forces-to-advance-models-and-infrastructure-for-physical-ai"
   }
 ]

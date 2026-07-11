@@ -48,6 +48,21 @@ CREATE TABLE IF NOT EXISTS entity_merge_audit (
 );
 CREATE INDEX IF NOT EXISTS idx_entity_merge_audit_canonical
 ON entity_merge_audit (canonical_entity_id, merged_at);
+
+CREATE TABLE IF NOT EXISTS entity_override_audit (
+    id INTEGER PRIMARY KEY,
+    entity_id INTEGER NOT NULL REFERENCES entities (id) ON DELETE CASCADE,
+    old_name TEXT NOT NULL,
+    new_name TEXT NOT NULL,
+    old_kind TEXT NOT NULL,
+    new_kind TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    source TEXT NOT NULL,
+    evidence_url TEXT NOT NULL,
+    overridden_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_entity_override_audit_decision
+ON entity_override_audit (entity_id, new_name, new_kind);
 """
 
 DEFAULT_ORGANIZATION_GROUPS_PATH = (
@@ -61,6 +76,12 @@ DEFAULT_RELEVANCE_REMOVALS_PATH = (
     / "data"
     / "registry"
     / "relevance-removals.csv"
+)
+DEFAULT_ENTITY_OVERRIDES_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "registry"
+    / "entity-overrides.json"
 )
 
 
@@ -550,10 +571,16 @@ def load_relevance_removals(path: Path | str) -> list[dict]:
         seen.add(entity_id)
         if row["kind"] not in channels.ENTITY_KINDS:
             raise ValueError(f"row {index} has invalid kind {row['kind']!r}")
-        if row["model_decision"] not in {"remove", "review"}:
-            raise ValueError(f"row {index} has an invalid model_decision")
-        if row["review_basis"] not in {"model_remove", "manual_add_from_review"}:
-            raise ValueError(f"row {index} has an invalid review_basis")
+        decision_pair = (row["model_decision"], row["review_basis"])
+        allowed_pairs = {
+            ("remove", "model_remove"),
+            ("review", "manual_add_from_review"),
+            ("keep", "manual_override_from_keep"),
+        }
+        if decision_pair not in allowed_pairs:
+            raise ValueError(
+                f"row {index} has an invalid model_decision/review_basis pair"
+            )
         if not row["name"].strip() or not row["reason"].strip():
             raise ValueError(f"row {index} needs a name and reason")
         removals.append(
@@ -567,6 +594,131 @@ def load_relevance_removals(path: Path | str) -> list[dict]:
             }
         )
     return removals
+
+
+def load_entity_overrides(path: Path | str) -> list[dict]:
+    """Load exact human-reviewed name and structural-kind corrections."""
+    with Path(path).open(encoding="utf-8") as source:
+        overrides = json.load(source)
+    if not isinstance(overrides, list) or not overrides:
+        raise ValueError("entity override manifest must be a non-empty list")
+    required = {
+        "entity_id",
+        "expected_name",
+        "expected_kind",
+        "target_name",
+        "target_kind",
+        "reason",
+        "source",
+        "evidence_url",
+    }
+    seen: set[int] = set()
+    normalized = []
+    for index, item in enumerate(overrides, start=1):
+        if not isinstance(item, dict) or not required.issubset(item):
+            missing = sorted(required - set(item if isinstance(item, dict) else ()))
+            raise ValueError(
+                f"entity override {index} is missing fields: {', '.join(missing)}"
+            )
+        try:
+            entity_id = int(item["entity_id"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"entity override {index} has an invalid entity_id") from exc
+        if entity_id in seen:
+            raise ValueError(f"entity {entity_id} appears more than once")
+        seen.add(entity_id)
+        if item["expected_kind"] not in channels.ENTITY_KINDS:
+            raise ValueError(f"entity override {index} has invalid expected_kind")
+        if item["target_kind"] not in channels.ENTITY_KINDS:
+            raise ValueError(f"entity override {index} has invalid target_kind")
+        for field in ("expected_name", "target_name", "reason", "source"):
+            if not isinstance(item[field], str) or not item[field].strip():
+                raise ValueError(f"entity override {index} needs {field}")
+        if not isinstance(item["evidence_url"], str) or not item[
+            "evidence_url"
+        ].startswith("https://"):
+            raise ValueError(f"entity override {index} needs an HTTPS evidence_url")
+        normalized.append({**item, "entity_id": entity_id})
+    return normalized
+
+
+def _preflight_entity_overrides(
+    conn: sqlite3.Connection, overrides: list[dict]
+) -> tuple[list[dict], int]:
+    resolved = []
+    already_overridden = 0
+    for override in overrides:
+        entity = conn.execute(
+            "SELECT id, name, kind FROM entities WHERE id = ?",
+            (override["entity_id"],),
+        ).fetchone()
+        if entity is None:
+            raise ValueError(f"entity {override['entity_id']} does not exist")
+        current = (entity["name"], entity["kind"])
+        target = (override["target_name"], override["target_kind"])
+        expected = (override["expected_name"], override["expected_kind"])
+        if current == target:
+            already_overridden += 1
+            continue
+        if current != expected:
+            raise ValueError(
+                f"entity {entity['id']} does not match override expectation "
+                f"{expected[0]!r} ({expected[1]})"
+            )
+        if conn.execute(
+            "SELECT 1 FROM entity_registry_rejections WHERE entity_id = ?",
+            (entity["id"],),
+        ).fetchone():
+            raise ValueError(f"entity {entity['id']} is Registry-rejected")
+        resolved.append({"override": override, "entity": entity})
+    return resolved, already_overridden
+
+
+def apply_entity_overrides(
+    conn: sqlite3.Connection,
+    overrides: list[dict],
+    *,
+    observed_at: str | None = None,
+) -> dict:
+    """Apply exact reviewed identity corrections with an idempotent audit trail."""
+    observed_at = observed_at or _now()
+    resolved, already_overridden = _preflight_entity_overrides(conn, overrides)
+    for item in resolved:
+        override = item["override"]
+        entity = item["entity"]
+        conn.execute(
+            """UPDATE entities
+               SET name = ?, kind = ?, updated_at = ?
+               WHERE id = ?""",
+            (
+                override["target_name"],
+                override["target_kind"],
+                observed_at,
+                entity["id"],
+            ),
+        )
+        conn.execute(
+            """INSERT OR IGNORE INTO entity_override_audit
+               (entity_id, old_name, new_name, old_kind, new_kind,
+                reason, source, evidence_url, overridden_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                entity["id"],
+                entity["name"],
+                override["target_name"],
+                entity["kind"],
+                override["target_kind"],
+                override["reason"],
+                override["source"],
+                override["evidence_url"],
+                observed_at,
+            ),
+        )
+    return {
+        "requested": len(overrides),
+        "overridden": len(resolved),
+        "already_overridden": already_overridden,
+    }
 
 
 def _preflight_relevance_removals(
@@ -678,7 +830,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="fli registry")
     parser.add_argument(
         "action",
-        choices=["apply-organization-groups", "apply-relevance-removals"],
+        choices=[
+            "apply-organization-groups",
+            "apply-relevance-removals",
+            "apply-entity-overrides",
+        ],
     )
     parser.add_argument("--db", default=None)
     parser.add_argument(
@@ -696,10 +852,14 @@ def main(argv: list[str] | None = None) -> int:
         manifest_path = args.manifest or DEFAULT_ORGANIZATION_GROUPS_PATH
         manifest = load_organization_groups(manifest_path)
         apply = apply_organization_groups
-    else:
+    elif args.action == "apply-relevance-removals":
         manifest_path = args.manifest or DEFAULT_RELEVANCE_REMOVALS_PATH
         manifest = load_relevance_removals(manifest_path)
         apply = apply_relevance_removals
+    else:
+        manifest_path = args.manifest or DEFAULT_ENTITY_OVERRIDES_PATH
+        manifest = load_entity_overrides(manifest_path)
+        apply = apply_entity_overrides
     try:
         conn.execute("BEGIN IMMEDIATE")
         result = apply(conn, manifest)
@@ -729,13 +889,30 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                  AND name = 'entity_kind_classifications'"""
         ).fetchone()
     )
+    has_overrides = bool(
+        conn.execute(
+            """SELECT 1 FROM sqlite_master
+               WHERE type = 'table' AND name = 'entity_override_audit'"""
+        ).fetchone()
+    )
+    override_reason_sql = (
+        """(SELECT o.reason FROM entity_override_audit o
+             WHERE o.entity_id = e.id
+               AND o.old_kind <> o.new_kind
+               AND o.new_kind = e.kind
+             ORDER BY o.overridden_at DESC, o.id DESC
+             LIMIT 1)"""
+        if has_overrides
+        else "NULL"
+    )
     kind_reason_sql = (
-        """(SELECT k.reason FROM entity_kind_classifications k
+        f"""COALESCE({override_reason_sql},
+             (SELECT k.reason FROM entity_kind_classifications k
              WHERE k.entity_id = e.id AND k.classification = e.kind
              ORDER BY k.classified_at DESC, k.run_id DESC
-             LIMIT 1)"""
+             LIMIT 1))"""
         if has_classifications
-        else "NULL"
+        else override_reason_sql
     )
     rows = conn.execute(
         f"""WITH selected AS (

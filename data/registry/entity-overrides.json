@@ -1,0 +1,32 @@
+[
+  {
+    "entity_id": 951,
+    "expected_name": "NVIDIA AI",
+    "expected_kind": "organization",
+    "target_name": "NVIDIA",
+    "target_kind": "organization",
+    "reason": "NVIDIA AI is the official AI channel of NVIDIA, not a separate organization.",
+    "source": "organization-consolidation-audit",
+    "evidence_url": "https://www.nvidia.com/en-gb/about-nvidia/"
+  },
+  {
+    "entity_id": 4,
+    "expected_name": "Meta AI (FAIR / superintelligence)",
+    "expected_kind": "organization",
+    "target_name": "Meta AI",
+    "target_kind": "organization",
+    "reason": "Meta AI already consolidates Meta's current AI program and the historic facebookresearch namespace; the shorter canonical name is sufficient.",
+    "source": "organization-consolidation-audit",
+    "evidence_url": "https://ai.meta.com/"
+  },
+  {
+    "entity_id": 2470,
+    "expected_name": "ikka",
+    "expected_kind": "organization",
+    "target_name": "Shahul ES",
+    "target_kind": "person",
+    "reason": "The @shahules786 channel represents Shahul ES, the individual co-founder of Vibrant Labs, rather than an organization account.",
+    "source": "organization-consolidation-audit",
+    "evidence_url": "https://vibrantlabs.com/about"
+  }
+]

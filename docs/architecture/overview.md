@@ -4,8 +4,8 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
-Registry retains the relevance-reviewed post-floor universe: 2,635 people,
-156 organizations, one active unsure, three rejected, and zero unknown.
+Registry retains the relevance-reviewed post-floor universe: 2,123 people,
+86 organizations, one active unsure, three rejected, and zero unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
@@ -15,10 +15,13 @@ remains internal source/seed provenance because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
 Reviewed organization consolidation is live: SpaceX owns `@spacex` and
-`@SpaceXAI`, and ten additional canonical organizations own 20 explicit
+`@SpaceXAI`, and eleven additional canonical organizations own 21 explicit
 product/developer/subgroup X channels. Every batch is manifest-driven, preflighted,
 transactional, idempotent, and audit-recorded. Broader identity resolution,
 relevance curation, extraction, and scoring remain later stages.
+Exact human name/kind corrections are separately versioned in
+`data/registry/entity-overrides.json` and recorded in
+`entity_override_audit`; they never rewrite model-classification provenance.
 
 Product relevance is a separate gate after structural kind. The reusable
 `registry-relevance-v1` prompt and strict schema run one entity per
@@ -163,13 +166,15 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,792 classified entities: 2,632 people, 156
+- The active Registry retains 2,213 classified entities: 2,123 people, 86
   organizations, one active unsure, and three protected-account rejections. The
-  2,837 channels include 24 website/GitHub/blog lab channels plus 21 X/product
+  2,259 channels include 24 website/GitHub/blog lab channels plus 22 X/product
   channels consolidated into existing organizations. The approved relevance
-  cleanup removed 111 one-X identities without touching merged or lab channels.
+  manifest contains 689 exact one-X removals. The final organization pass
+  applies Adi's temporary 10,000-follower floor; lower-reach organizations may
+  be rediscovered later through trusted-follow PageRank evidence.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
-  marker. The 2,308 accounts actually observed through Digg also carry one
+  marker. The 1,853 accounts actually observed through Digg also carry one
   `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
   These are provenance only—not graph edges or ranking inputs.
 - `data/digg/rankings.csv` retains the frozen 1,000-account Digg ranking only
@@ -192,7 +197,8 @@ the product model is `entities`, `channels`, `entity_channels`, and
 The classifier adds separate run, classification, and error tables. Registry
 rejections remain separate from structural kind in
 `entity_registry_rejections`; applied identity merges are recorded in
-`entity_merge_audit`.
+`entity_merge_audit`, and reviewed name/kind corrections in
+`entity_override_audit`.
 `raw_items` is an unconnected bootstrap table. Row counts as of this writing
 are in parentheses.
 
@@ -317,30 +323,31 @@ erDiagram
         int run_id FK
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (5,661)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (4,610)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,840)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,259)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (13,152)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,943)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (10,805)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,306)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (1)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
     ENTITIES ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "enriched independently"
     ENTITIES ||--o| ENTITY_REGISTRY_REJECTIONS : "may be rejected with reason"
     ENTITIES ||--o{ ENTITY_MERGE_AUDIT : "canonical identity records merges"
+    ENTITIES ||--o{ ENTITY_OVERRIDE_AUDIT : "records reviewed corrections"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,816,
-`account_source_facts` 5,661, `graph_edges` 0, `labs` 10,
-`entities` 2,795, `channels` 2,840, `entity_channels` 2,840,
-`channel_observations` 13,152, `entity_kind_classification_runs` 10,
-`entity_kind_classifications` 2,943, `entity_kind_web_enrichments` 1,
+Table row counts: `raw_items` 1,599, `accounts` 2,235,
+`account_source_facts` 4,610, `graph_edges` 0, `labs` 10,
+`entities` 2,213, `channels` 2,259, `entity_channels` 2,259,
+`channel_observations` 10,805, `entity_kind_classification_runs` 10,
+`entity_kind_classifications` 2,306, `entity_kind_web_enrichments` 1,
 `entity_kind_classification_errors` 0, `entity_registry_rejections` 3, and
-`entity_merge_audit` 20.
+`entity_merge_audit` 21, and `entity_override_audit` 3.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
 the as-fetched evidence corpus, not joined to entities/channels until
@@ -374,7 +381,7 @@ implemented rejection gate; broader relevance curation remains later.
 
 An entity may own multiple channels of the same kind. SpaceX owns the
 independent X channels `@spacex` and `@SpaceXAI`; the reviewed batches add
-20 product/developer/subgroup accounts to ten canonical organizations. Each X account
+21 product/developer/subgroup accounts to eleven canonical organizations. Each X account
 keeps its own backing account row, profile observations, and source facts; only
 the redundant organization entity is removed. A manifest reason and evidence
 URL are retained in `entity_merge_audit`. Complete preflight plus one

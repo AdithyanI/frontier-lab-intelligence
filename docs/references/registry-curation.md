@@ -50,20 +50,19 @@ Current invariants:
 
 ## Current Implemented Universe
 
-After removing the rejected graph evidence and the first explicitly approved
-relevance-removal batch, the corpus contains:
+After the relevance and organization-identity cleanup, the corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 2,635 |
-| organization | 156 (including 10 seeded labs) |
+| person | 2,123 |
+| organization | 86 (including 10 seeded labs) |
 | unsure (active) | 1 |
 | rejected | 3 |
 | unknown | 0 |
-| **total** | **2,795** |
+| **total** | **2,213** |
 
-Those clusters own all 2,840 channels. The difference is 45 additional
-channels: 24 official website, GitHub, and blog channels linked to labs plus 21
+Those clusters own all 2,259 channels. The difference is 46 additional
+channels: 24 official website, GitHub, and blog channels linked to labs plus 22
 X/product/subgroup channels consolidated into an existing organization. The
 eight affiliation-search arXiv
 queries were removed from the identity channel model; all 137 fetched arXiv
@@ -73,14 +72,16 @@ comparison artifact and is not active Registry provenance. A node's accepted
 follower-floor and structural-kind decisions survive removal of its discovery
 edge.
 
-The first relevance cleanup is an explicit, human-approved boundary rather
-than a direct model action. Its 108 rows live in
+Relevance cleanup is an explicit, human-approved boundary rather than a
+direct model action. Its 689 rows live in
 `data/registry/relevance-removals.csv`; the transactional Registry command
 preflights identity, channel ownership, lab status, merge status, rejection
 state, and graph participation before deleting an entity, its sole X channel,
-and its backing account. The first batch removed 101 people and seven
-organizations. The original model shortlist and the later manual reach audit
-remain review artifacts in the active trusted-following project.
+and its backing account. The accepted set contains 614 people and 75
+organizations. Eighteen organization rows override an earlier model keep:
+one dormant source and 17 organizations below Adi's temporary 10,000-follower
+floor. The original audit evidence and restoration notes remain in the active
+trusted-following project.
 
 Every account has a neutral `registry_bootstrap.retained_candidate` fact with
 value `post_1000_follower_floor_and_kind_classification`. Accounts actually
@@ -100,7 +101,7 @@ rerun idempotently. Every applied decision records the removed entity, reason,
 source, evidence URL, and timestamp in `entity_merge_audit`; accounts,
 channels, observations, and source facts remain intact.
 
-The 2026-07-10 reviewed batches consolidated 20 redundant entities into ten
+The reviewed batches consolidated 21 redundant entities into eleven
 high-confidence organizations, in addition to the earlier SpaceX proof:
 
 | Canonical organization | Additional X channels |
@@ -115,6 +116,7 @@ high-confidence organizations, in addition to the earlier SpaceX proof:
 | Thinking Machines Lab | `@tinkerapi` |
 | Google | `@googleai`, `@geminiapp`, `@googlelabs`, `@googleaistudio`, `@googleresearch`, `@julesagent`, `@stitchbygoogle` |
 | Stanford AI Lab | `@stanfordnlp` |
+| Reka | `@moonvalley` |
 
 Google DeepMind remains first-class because the assignment evaluates frontier
 labs, not only legal parents. Manus remains separate from Meta because the
@@ -124,6 +126,26 @@ corporate control was not strong enough for this precision-first wave. Ought
 and Elicit remain separate because Elicit became an independent public-benefit
 corporation. Independent communities such as `@claude_code` are not absorbed
 into the corresponding vendor.
+
+Exact human corrections that do not merge or delete an identity live in
+`data/registry/entity-overrides.json` and apply through
+`fli registry apply-entity-overrides`. Complete preflight checks the expected
+name and kind before one transaction updates the entity; old/new values,
+reason, source, evidence URL, and timestamp are stored in
+`entity_override_audit`. The active override manifest canonicalizes NVIDIA and
+Meta AI and corrects `@shahules786` to the person Shahul ES. Temporary Task
+Master and Argmax display-name corrections were omitted from replay because
+both entities are removed by the later 10,000-follower boundary.
+
+A bounded TwitterAPI.io activity audit recorded the latest timeline date for
+127 organization X channels and 2,122 person X channels using a 2024-07-11
+cutoff. Inactivity is channel evidence, not an automatic person deletion:
+Papers with Code was removed because both its X channel and underlying service
+are dormant, while inactive but important researchers remain available and
+should simply not be treated as current post sources. The organization audit
+also found that low reach is not the same as low relevance; Adi nevertheless
+approved removing the 17 remaining sub-10,000 organizations as a temporary
+first-PageRank boundary, with restoration through later graph evidence.
 
 The Registry's All, People, and Organizations views use one transparent
 temporary ordering: sum the latest stored follower counts across every X

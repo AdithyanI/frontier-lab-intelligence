@@ -153,6 +153,18 @@ candidate generator while demonstrating ranking and validation discipline.
   individual audit stages. Claude uses native web search with automatic tool
   choice plus a post-response search-evidence gate; translated search calls and
   cited URLs remain visibly labeled in the review artifact.
+- Organization consolidation remains ownership-driven: NVIDIA and Meta AI each
+  have one coherent entity; Moonvalley is now an official Reka channel; Papers
+  with Code was removed as a dormant source; and `@shahules786` is the person
+  Shahul ES. Google and Google DeepMind remain separate source actors.
+- X inactivity is source evidence, not an automatic person deletion. The
+  2024-07-11 cutoff found 74 inactive and 15 no-recent-post person accounts,
+  including important researchers who remain in the Registry but should not be
+  treated as current post sources.
+- Adi explicitly approved a temporary first-PageRank breadth cutoff: remove all
+  active organizations below 10,000 combined stored X followers and allow
+  trusted-follow PageRank to rediscover them later. Seventeen organizations
+  were removed with their original audit evidence and restoration notes saved.
 
 ## Open Questions / Blockers
 
@@ -179,6 +191,9 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Apply every remaining high-confidence person removal; preserve AI Engineer and leave medium/review cases untouched. | parent | `../../../data/registry/relevance-removals.csv` |
 | done | Individually audit all 41 medium-confidence removals; retain 11 and transactionally remove 30. | parent | `resources/medium-confidence-removal-audit.csv` |
 | done | Resolve the final 56 review cases; retain 28, remove 16, and defer 12 identity-unverified accounts. | parent | `resources/review-case-audit.csv` |
+| done | Audit organization channel ownership and consolidation candidates, focused on NVIDIA and Meta/Facebook. | external_researcher | `resources/organization-consolidation-audit.md` |
+| done | Audit all organization and person X channels for activity since 2024-07-11. | parent | `resources/organization-x-activity-audit.csv`, `resources/person-x-activity-audit.csv` |
+| done | Apply the temporary under-10,000-follower organization cutoff with a restorable reviewed cohort. | parent | `resources/low-follower-organization-removals.csv` |
 | todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
@@ -366,3 +381,21 @@ candidate generator while demonstrating ranking and validation discipline.
   106 organizations, one unsure, and three rejected; foreign keys are clean,
   SQLite integrity is `ok`, and graph edges remain zero. The 12 defers are
   excluded from trusted-seed consideration and do not block ranking work.
+- 2026-07-11: [DONE] Completed an independent read-only organization ownership
+  audit plus direct X activity sweeps over 127 organization channels and 2,122
+  person channels. Applied one reviewed merge (Moonvalley into Reka), three
+  durable identity/name overrides, and one dormant-source removal (Papers with
+  Code) through preflighted manifests. Two transient display-name corrections
+  were dropped from replay after the later reach cutoff removed those entities.
+  NVIDIA and Meta AI had no duplicate
+  entities; Google and Google DeepMind remain separate. The delegated audit
+  supplied an independent evidence pass and made no integration edits; parent
+  work owned schema, manifests, documentation, and validation.
+- 2026-07-11: [DONE] At Adi's explicit direction, applied a temporary
+  organization reach boundary for the first PageRank cohort. Preserved all 17
+  sub-10,000 organizations with original relevance evidence and a restoration
+  note, then removed exactly their 17 entities, X channels, and accounts after
+  a byte-stable dry run. Registry state is 2,213 entities: 2,123 people, 86
+  organizations, one active unsure, and three rejected; no active organization
+  remains below 10,000 combined X followers. Foreign keys are clean, SQLite
+  integrity is `ok`, and graph edges remain zero.
