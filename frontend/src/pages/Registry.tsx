@@ -201,7 +201,7 @@ export default function Registry() {
       })
       .finally(() => setLoadingMore(false))
   }
-  const primaryFilters: { key: KindFilter; label: string; count: number }[] = [
+  const filters: { key: KindFilter; label: string; count: number }[] = [
     { key: 'all', label: 'All', count: data?.total ?? 0 },
     { key: 'person', label: 'People', count: data?.counts.person ?? 0 },
     {
@@ -209,12 +209,6 @@ export default function Registry() {
       label: 'Organizations',
       count: data?.counts.organization ?? 0,
     },
-  ]
-  const secondaryFilters: {
-    key: KindFilter
-    label: string
-    count: number
-  }[] = [
     { key: 'unsure', label: 'Unsure', count: data?.counts.unsure ?? 0 },
     {
       key: 'rejected',
@@ -223,13 +217,12 @@ export default function Registry() {
     },
   ]
   if ((data?.counts.unknown ?? 0) > 0) {
-    secondaryFilters.push({
+    filters.push({
       key: 'unknown',
       label: 'Unknown',
       count: data?.counts.unknown ?? 0,
     })
   }
-  const secondaryKind = secondaryFilters.some((filter) => filter.key === kind)
   const showRejectionReason = kind === 'rejected'
   const showFollowerColumn = ['all', 'person', 'organization'].includes(kind)
   const showTypeColumn = kind !== 'person' && kind !== 'organization'
@@ -257,36 +250,19 @@ export default function Registry() {
           onChange={(event) => setQuery(event.target.value)}
           aria-label="Search entities"
         />
-        <div className="filter-cluster">
-          <div className="seg" role="tablist" aria-label="Filter Registry">
-            {primaryFilters.map((filter) => (
-              <button
-                key={filter.key}
-                role="tab"
-                aria-selected={kind === filter.key}
-                className={kind === filter.key ? 'is-active' : undefined}
-                onClick={() => setKind(filter.key)}
-              >
-                {filter.label}
-                <span className="seg-count">{fmt(filter.count)}</span>
-              </button>
-            ))}
-          </div>
-          <select
-            className={`filter-more${secondaryKind ? ' is-active' : ''}`}
-            aria-label="More Registry filters"
-            value={secondaryKind ? kind : ''}
-            onChange={(event) => setKind(event.target.value as KindFilter)}
-          >
-            <option value="" disabled>
-              More
-            </option>
-            {secondaryFilters.map((filter) => (
-              <option key={filter.key} value={filter.key}>
-                {filter.label} · {fmt(filter.count)}
-              </option>
-            ))}
-          </select>
+        <div className="seg" role="tablist" aria-label="Filter Registry">
+          {filters.map((filter) => (
+            <button
+              key={filter.key}
+              role="tab"
+              aria-selected={kind === filter.key}
+              className={kind === filter.key ? 'is-active' : undefined}
+              onClick={() => setKind(filter.key)}
+            >
+              {filter.label}
+              <span className="seg-count">{fmt(filter.count)}</span>
+            </button>
+          ))}
         </div>
         {data && (
           <span className="table-count">

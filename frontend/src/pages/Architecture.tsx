@@ -292,6 +292,102 @@ function DataModel() {
   )
 }
 
+/* ---------- diagram: the discovery loop, conceptually ----------
+   A small circle of people we chose → the crowd they collectively point to →
+   the few the pointing singles out → one reviewed door back into the circle.
+   No numbers, no table names: just the shape of the idea. */
+
+const SP_Y = 96
+const SP_H = 232
+
+// the crowd: scattered small dots inside the middle panel, a few highlighted
+const CROWD: [number, number, boolean][] = [
+  [452, 150, false], [492, 122, false], [532, 168, true], [572, 132, false],
+  [612, 156, false], [652, 124, false], [472, 196, false], [516, 214, false],
+  [556, 240, true], [600, 206, false], [644, 232, false], [488, 252, false],
+  [536, 268, false], [584, 254, false], [630, 262, true], [664, 240, false],
+  [456, 232, false], [668, 186, false],
+]
+
+function StoragePlanes() {
+  return (
+    <svg
+      viewBox="0 0 1080 430"
+      role="img"
+      aria-label="The discovery loop: a small chosen circle of people, the large crowd they collectively follow, ranking that singles out the few worth attention, and one reviewed door that lets those few into the chosen circle"
+    >
+      <defs>
+        <marker id="sp-arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+        </marker>
+        <marker id="sp-arr-ink" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={INK} />
+        </marker>
+      </defs>
+
+      {/* stage kickers */}
+      <text x="24" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">THE CIRCLE</text>
+      <text x="408" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">THE CROWD THEY POINT TO</text>
+      <text x="792" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">THE FEW WHO STAND OUT</text>
+      <text x="24" y="56" fontFamily={UI} fontSize="13" fill={MUTED}>people we deliberately chose</text>
+      <text x="408" y="56" fontFamily={UI} fontSize="13" fill={MUTED}>everyone they follow — kept at arm’s length</text>
+      <text x="792" y="56" fontFamily={UI} fontSize="13" fill={MUTED}>where many chosen people point</text>
+
+      {/* the circle — small, dark, deliberate */}
+      <rect x="24" y={SP_Y} width="288" height={SP_H} fill={INK} />
+      {[
+        [96, SP_Y + 70], [168, SP_Y + 56], [236, SP_Y + 84],
+        [120, SP_Y + 134], [200, SP_Y + 126], [162, SP_Y + 174],
+      ].map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r={11} fill={BLUE} />
+      ))}
+      <text x="168" y={SP_Y + SP_H - 26} textAnchor="middle" fontFamily={UI} fontSize="13" fill="#fff" opacity="0.85">small on purpose —</text>
+      <text x="168" y={SP_Y + SP_H - 8} textAnchor="middle" fontFamily={UI} fontSize="13" fill="#fff" opacity="0.85">every member was a decision</text>
+
+      {/* they look outward */}
+      <line x1="318" y1={SP_Y + 124} x2="402" y2={SP_Y + 124} stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#sp-arr)" />
+      <text x="360" y={SP_Y + 108} textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={BLUE_INK}>who do they</text>
+      <text x="360" y={SP_Y + 148} textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={BLUE_INK}>follow?</text>
+
+      {/* the crowd — big, sand, undifferentiated */}
+      <rect x="408" y={SP_Y} width="288" height={SP_H} fill={SAND} />
+      {CROWD.map(([x, y, hot], i) => (
+        <circle key={i} cx={x} cy={y} r={hot ? 7 : 4} fill={hot ? BLUE : '#c9c4b6'} />
+      ))}
+      <text x="552" y={SP_Y + SP_H - 26} textAnchor="middle" fontFamily={UI} fontSize="13" fill={MUTED}>huge and unvetted — observed,</text>
+      <text x="552" y={SP_Y + SP_H - 8} textAnchor="middle" fontFamily={UI} fontSize="13" fill={MUTED}>never mixed into the circle</text>
+
+      {/* ranking singles out */}
+      <line x1="702" y1={SP_Y + 124} x2="786" y2={SP_Y + 124} stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#sp-arr)" />
+      <text x="743" y={SP_Y + 108} textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={BLUE_INK}>rank</text>
+
+      {/* the few — ordered, explained */}
+      <rect x="792" y={SP_Y} width="264" height={SP_H} fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
+      {[0, 1, 2].map((i) => (
+        <g key={i}>
+          <circle cx={824} cy={SP_Y + 54 + i * 46} r={i === 0 ? 11 : i === 1 ? 9 : 7} fill={BLUE} />
+          <rect x={848} y={SP_Y + 47 + i * 46} width={150 - i * 34} height={13} fill={SAND} />
+        </g>
+      ))}
+      <text x="812" y={SP_Y + 188} fontFamily={UI} fontSize="13" fill={INK}>followed by many of the circle</text>
+      <text x="812" y={SP_Y + 208} fontFamily={UI} fontSize="13" fill={MUTED}>— that consensus is the signal,</text>
+      <text x="812" y={SP_Y + 226} fontFamily={UI} fontSize="13" fill={MUTED}>not follower counts</text>
+
+      {/* the one door back in */}
+      <path
+        d={`M 924 ${SP_Y + SP_H} L 924 ${SP_Y + SP_H + 46} L 168 ${SP_Y + SP_H + 46} L 168 ${SP_Y + SP_H + 8}`}
+        fill="none"
+        stroke={INK}
+        strokeWidth="1.5"
+        markerEnd="url(#sp-arr-ink)"
+      />
+      <rect x="426" y={SP_Y + SP_H + 32} width="240" height="28" fill="#fff" />
+      <text x="546" y={SP_Y + SP_H + 51} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={INK} letterSpacing="0.06em">REVIEWED → INVITED IN</text>
+      <text x="546" y={SP_Y + SP_H + 78} textAnchor="middle" fontFamily={UI} fontSize="12.5" fill={MUTED}>one reviewed door back into the circle — the crowd never gets in on its own</text>
+    </svg>
+  )
+}
+
 /* ---------- diagram 4: the signal funnel (HTML, not SVG — real text) ---------- */
 
 const FUNNEL = [
@@ -386,8 +482,9 @@ export default function Architecture() {
       <div className="page-kicker">HOW IT WORKS</div>
       <h1 className="page-title">Architecture</h1>
       <p className="page-sub">
-        Four views: how one X account becomes an entity, where its evidence
-        lives, how attention ranks, and how noise is removed.
+        Five views: how one X account becomes an entity, where its evidence
+        lives, where the discovery graph is stored, how attention ranks, and
+        how noise is removed.
       </p>
 
       <section className="arch-section">
@@ -426,6 +523,24 @@ export default function Architecture() {
       <section className="arch-section">
         <div className="arch-section-head">
           <span className="arch-no">03</span>
+          <h2 className="arch-h">Discovery keeps its distance</h2>
+          <p className="arch-p">
+            We chose a small circle of people. To find who else matters, we
+            look at who that circle collectively follows — a huge, unvetted
+            crowd we observe but never mix in. Ranking singles out the few
+            the circle keeps pointing at, and only a reviewed invitation
+            brings someone into the circle.
+          </p>
+        </div>
+        <div className="arch-canvas">
+          <StoragePlanes />
+          <div className="arch-caption">chosen circle · observed crowd · ranked few · one reviewed door back in — the crowd lives in its own frozen snapshot, apart from the curated Registry</div>
+        </div>
+      </section>
+
+      <section className="arch-section">
+        <div className="arch-section-head">
+          <span className="arch-no">04</span>
           <h2 className="arch-h">The graph surfaces who deserves attention</h2>
           <p className="arch-p">
             We collect who the relevance-screened Registry follows, then
@@ -436,13 +551,13 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <GraphPlane />
-          <div className="arch-caption">current graph: empty · next: frozen 2,231-account outgoing-follow snapshot · Digg ranking stays offline for comparison only</div>
+          <div className="arch-caption">frozen 2026-07-11 snapshot: 2,219 of 2,231 sources complete · 2.46M follows · ranking next · Digg ranking stays offline for comparison only</div>
         </div>
       </section>
 
       <section className="arch-section" style={{ marginBottom: 72 }}>
         <div className="arch-section-head">
-          <span className="arch-no">04</span>
+          <span className="arch-no">05</span>
           <h2 className="arch-h">The funnel suppresses noise</h2>
           <p className="arch-p">
             Cheap mechanical checks first, the expensive LLM last — only on what
