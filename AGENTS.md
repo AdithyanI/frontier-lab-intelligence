@@ -48,6 +48,9 @@ does not improve rubric coverage, demo proof, or interview discussion. See
   proxy-reported response cost as the operational source of truth. Use a dated
   local price snapshot only when a pre-run estimate or zero-cost proxy fallback
   is actually needed.
+- For bulk LLM jobs with a repeated 1,024+ token prefix, put stable content
+  first, use stable sharded `prompt_cache_key` values, and verify cache reads
+  from `cached_tokens`; do not assume an eligible prompt is getting cache hits.
 - Update `docs/architecture/overview.md` when pipeline, schema, source classes,
   or module boundaries change.
 - Run `scripts/check-fast.sh` before handoff, or record why validation was

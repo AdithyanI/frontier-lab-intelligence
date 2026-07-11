@@ -84,6 +84,8 @@ def test_request_requires_high_context_web_search_and_structured_output():
 
     request = client.responses.calls[0]
     assert request["model"] == "gpt-5.6-terra"
+    assert request["prompt_cache_key"] == relevance.prompt_cache_key(6)
+    assert "max_output_tokens" not in request
     assert request["reasoning"] == {"effort": "high"}
     assert request["tools"] == [
         {
@@ -130,6 +132,38 @@ def test_prompt_is_versioned_and_contains_product_boundary():
     assert "Do not use follower count" in prompt
 
 
+def test_prompt_cache_key_is_stable_and_sharded():
+    assert relevance.prompt_cache_key(6) == relevance.prompt_cache_key(6)
+    assert relevance.prompt_cache_key(6).startswith(
+        "fli:registry-relevance:registry-relevance-v1:shard-"
+    )
+    assert len({relevance.prompt_cache_key(i) for i in range(256)}) > 32
+
+
 def test_cli_requires_explicit_scope_before_paid_run(tmp_path):
     with pytest.raises(SystemExit):
         relevance.main(["run", "--run", "test", "--output", str(tmp_path / "x")])
+
+
+def test_checkpoint_reuses_only_matching_completed_results(tmp_path):
+    entity = make_entity()
+    result = {
+        **keep_payload(),
+        "input_sha256": entity.input_sha256,
+        "model": relevance.DEFAULT_MODEL,
+        "reasoning_effort": relevance.DEFAULT_REASONING_EFFORT,
+        "prompt_version": relevance.PROMPT_VERSION,
+    }
+    path = tmp_path / "checkpoint.jsonl"
+    with path.open("w") as stream:
+        relevance._append_checkpoint(stream, "result", result)
+
+    completed, errors = relevance._load_checkpoint(
+        path,
+        by_id={entity.entity_id: entity},
+        model=relevance.DEFAULT_MODEL,
+        effort=relevance.DEFAULT_REASONING_EFFORT,
+    )
+
+    assert completed == {entity.entity_id: result}
+    assert errors == {}

@@ -6,6 +6,7 @@ import argparse
 import concurrent.futures
 import hashlib
 import json
+import os
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +19,7 @@ SCHEMA_VERSION = "registry-relevance-output-v1"
 DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_REASONING_EFFORT = "high"
 DEFAULT_WORKERS = 8
+PROMPT_CACHE_SHARDS = 64
 PROMPT_PATH = Path(__file__).with_name("prompts") / "registry_relevance_v1.txt"
 
 DECISIONS = frozenset({"keep", "remove", "review"})
@@ -107,6 +109,13 @@ class RelevanceInput:
 
 def instructions() -> str:
     return PROMPT_PATH.read_text().strip()
+
+
+def prompt_cache_key(entity_id: int) -> str:
+    """Route repeated prompt prefixes without overloading one cache key."""
+    digest = hashlib.sha256(str(entity_id).encode()).digest()
+    shard = int.from_bytes(digest[:8], "big") % PROMPT_CACHE_SHARDS
+    return f"fli:registry-relevance:{PROMPT_VERSION}:shard-{shard:02d}"
 
 
 def read_active_inputs(conn: sqlite3.Connection) -> list[RelevanceInput]:
@@ -235,6 +244,60 @@ def request_tags(*, run: str) -> tuple[str, ...]:
     )
 
 
+def _load_checkpoint(
+    path: Path,
+    *,
+    by_id: dict[int, RelevanceInput],
+    model: str,
+    effort: str,
+) -> tuple[dict[int, dict[str, Any]], dict[int, dict[str, Any]]]:
+    """Load valid completed results and the latest unresolved errors."""
+    results: dict[int, dict[str, Any]] = {}
+    errors: dict[int, dict[str, Any]] = {}
+    if not path.exists():
+        return results, errors
+    for line_number, line in enumerate(path.read_text().splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                f"invalid checkpoint JSON at {path}:{line_number}"
+            ) from exc
+        record_type = record.get("type")
+        item = record.get("item")
+        if not isinstance(item, dict) or not isinstance(item.get("entity_id"), int):
+            raise ValueError(f"invalid checkpoint record at {path}:{line_number}")
+        entity_id = item["entity_id"]
+        entity = by_id.get(entity_id)
+        if entity is None:
+            continue
+        if record_type == "result":
+            if (
+                item.get("input_sha256") == entity.input_sha256
+                and item.get("model") == model
+                and item.get("reasoning_effort") == effort
+                and item.get("prompt_version") == PROMPT_VERSION
+            ):
+                results[entity_id] = item
+                errors.pop(entity_id, None)
+        elif record_type == "error" and entity_id not in results:
+            errors[entity_id] = item
+        else:
+            raise ValueError(f"invalid checkpoint record type at {path}:{line_number}")
+    return results, errors
+
+
+def _append_checkpoint(stream: Any, record_type: str, item: dict[str, Any]) -> None:
+    stream.write(
+        json.dumps({"type": record_type, "item": item}, ensure_ascii=False)
+        + "\n"
+    )
+    stream.flush()
+    os.fsync(stream.fileno())
+
+
 def audit_one(
     client: Any,
     entity: RelevanceInput,
@@ -248,6 +311,7 @@ def audit_one(
         "model": model,
         "instructions": instructions(),
         "input": json.dumps(entity.model_payload, ensure_ascii=False),
+        "prompt_cache_key": prompt_cache_key(entity.entity_id),
         "tools": [
             {
                 "type": "web_search",
@@ -259,7 +323,6 @@ def audit_one(
         "include": ["web_search_call.action.sources"],
         "reasoning": {"effort": effort},
         "text": {"format": OUTPUT_FORMAT},
-        "max_output_tokens": 1800,
         "store": False,
         "extra_body": {"metadata": {"tags": list(tags)}},
         "extra_headers": {"x-litellm-tags": ",".join(tags)},
@@ -274,7 +337,10 @@ def audit_one(
         reported_cost = entity_kinds._reported_cost(raw_response.headers)
     response_data = _response_dict(response)
     if response_data.get("status") not in (None, "completed"):
-        raise ValueError(f"response status was {response_data.get('status')!r}")
+        raise ValueError(
+            f"response status was {response_data.get('status')!r}: "
+            f"{response_data.get('incomplete_details')!r}"
+        )
     payload = _validate_output(
         getattr(response, "output_text", None) or response_data.get("output_text"),
         entity.entity_id,
@@ -308,12 +374,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("action", choices=["run"])
     parser.add_argument("--db", default=None)
     parser.add_argument("--entity-id", type=int, action="append", default=[])
+    parser.add_argument("--exclude-entity-id", type=int, action="append", default=[])
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     parser.add_argument("--run", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--checkpoint", type=Path)
     args = parser.parse_args(argv)
     if args.all == bool(args.entity_id):
         parser.error("choose exactly one of --all or one/more --entity-id")
@@ -323,37 +391,87 @@ def main(argv: list[str] | None = None) -> int:
     conn = entity_kinds.connect(args.db) if args.db else entity_kinds.connect()
     inputs = read_active_inputs(conn)
     by_id = {entity.entity_id: entity for entity in inputs}
-    selected = inputs if args.all else [by_id[entity_id] for entity_id in args.entity_id]
+    if args.all:
+        excluded = set(args.exclude_entity_id)
+        selected = [entity for entity in inputs if entity.entity_id not in excluded]
+    else:
+        if args.exclude_entity_id:
+            parser.error("--exclude-entity-id requires --all")
+        missing = [entity_id for entity_id in args.entity_id if entity_id not in by_id]
+        if missing:
+            parser.error(f"unknown or inactive entity IDs: {missing}")
+        selected = [by_id[entity_id] for entity_id in args.entity_id]
+    checkpoint = args.checkpoint or args.output.with_suffix(
+        args.output.suffix + ".partial.jsonl"
+    )
+    checkpoint.parent.mkdir(parents=True, exist_ok=True)
+    completed_by_id, prior_errors = _load_checkpoint(
+        checkpoint,
+        by_id=by_id,
+        model=args.model,
+        effort=args.reasoning_effort,
+    )
+    selected_ids = {entity.entity_id for entity in selected}
+    completed_by_id = {
+        entity_id: result
+        for entity_id, result in completed_by_id.items()
+        if entity_id in selected_ids
+    }
+    pending = [
+        entity for entity in selected if entity.entity_id not in completed_by_id
+    ]
     client = entity_kinds.create_litellm_client()
-    results: list[dict[str, Any]] = []
-    errors: list[dict[str, Any]] = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
-        future_to_entity = {
-            executor.submit(
-                audit_one,
-                client,
-                entity,
-                model=args.model,
-                effort=args.reasoning_effort,
-                run=args.run,
-            ): entity
-            for entity in selected
-        }
-        for future in concurrent.futures.as_completed(future_to_entity):
-            entity = future_to_entity[future]
-            try:
-                results.append(future.result())
-            except Exception as exc:  # preserve per-identity failures in artifact
-                errors.append(
-                    {
+    latest_errors = {
+        entity_id: error
+        for entity_id, error in prior_errors.items()
+        if entity_id in selected_ids and entity_id not in completed_by_id
+    }
+    with checkpoint.open("a", encoding="utf-8") as checkpoint_stream:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
+            future_to_entity = {
+                executor.submit(
+                    audit_one,
+                    client,
+                    entity,
+                    model=args.model,
+                    effort=args.reasoning_effort,
+                    run=args.run,
+                ): entity
+                for entity in pending
+            }
+            for completed_count, future in enumerate(
+                concurrent.futures.as_completed(future_to_entity), start=1
+            ):
+                entity = future_to_entity[future]
+                try:
+                    result = future.result()
+                    completed_by_id[entity.entity_id] = result
+                    latest_errors.pop(entity.entity_id, None)
+                    _append_checkpoint(checkpoint_stream, "result", result)
+                except Exception as exc:  # preserve per-identity failures
+                    error = {
                         "entity_id": entity.entity_id,
                         "entity_name": entity.name,
                         "error_type": type(exc).__name__,
                         "error": str(exc),
                     }
-                )
-    results.sort(key=lambda item: item["entity_id"])
-    errors.sort(key=lambda item: item["entity_id"])
+                    latest_errors[entity.entity_id] = error
+                    _append_checkpoint(checkpoint_stream, "error", error)
+                if completed_count % 25 == 0 or completed_count == len(pending):
+                    print(
+                        json.dumps(
+                            {
+                                "progress": completed_count,
+                                "pending_at_start": len(pending),
+                                "stored_total": len(completed_by_id),
+                                "errors": len(latest_errors),
+                            },
+                            sort_keys=True,
+                        ),
+                        flush=True,
+                    )
+    results = sorted(completed_by_id.values(), key=lambda item: item["entity_id"])
+    errors = sorted(latest_errors.values(), key=lambda item: item["entity_id"])
     artifact = {
         "run": args.run,
         "model": args.model,
