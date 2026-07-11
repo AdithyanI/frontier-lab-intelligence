@@ -138,10 +138,11 @@ the local archive byte count and SHA-256 before the manifest recorded its
 `s3://` URI.
 
 WIN's bucket has a public domain configured, so this backup is durable but must
-not be described as private. The repository records no public HTTP URL, and the
-object key includes the full archive hash; nevertheless, treat it as
-link-accessible to anyone who learns the exact key. Future sensitive snapshots
-need a dedicated private bucket rather than this convenience backup path.
+not be described as private. At Adi's explicit direction, the manifest records
+the verified public recovery URL as well as the authenticated `s3://` URI. The
+object key includes the full archive hash, but anyone with the URL can download
+the archive. Future sensitive snapshots need a dedicated private bucket rather
+than this convenience backup path.
 
 ## Future Production Shape
 

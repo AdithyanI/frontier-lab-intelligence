@@ -198,8 +198,8 @@ candidate generator while demonstrating ranking and validation discipline.
   SQLite snapshot. Its decompressed SHA-256 matches the finalized database.
   The same content-addressed archive now has a full-readback-verified off-machine
   copy in WIN's existing Cloudflare R2/S3 bucket. Because that bucket has a
-  public domain, it is durable but not claimed private; no public HTTP URL is
-  recorded.
+  public domain, it is durable but not claimed private. Adi explicitly approved
+  recording its verified public recovery URL in the tracked manifest.
 - No GitHub Actions workflow is needed before deployment. The managed Stop hook
   plus repo-owned `scripts/check-fast.sh` is the accepted feedback loop for the
   current local case-study phase.
@@ -520,3 +520,7 @@ candidate generator while demonstrating ranking and validation discipline.
   SHA-256. The 484,347,309 remote bytes exactly match the local archive. The
   manifest now records the durable `s3://` URI, checksum, ETag, and access
   limitation. No visualization or ranking work started.
+- 2026-07-11: [DONE] At Adi's explicit direction, added the public R2 recovery
+  URL to the tracked manifest. A live HEAD request returned HTTP 200 with
+  `application/zstd` and the expected 484,347,309-byte content length. The
+  archive is intentionally link-accessible and is not described as private.
