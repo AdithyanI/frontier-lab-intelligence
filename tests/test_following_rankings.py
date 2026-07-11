@@ -241,6 +241,62 @@ def test_overlap_fails_closed_on_registry_identity_conflict(tmp_path):
     assert exc.value.code == "E_REGISTRY_IDENTITY_CONFLICT"
 
 
+def test_overlap_fails_closed_on_orphan_registry_account(tmp_path):
+    snapshot_db = tmp_path / "snapshot.db"
+    registry_db = tmp_path / "registry.db"
+    _snapshot(snapshot_db)
+    _registry(registry_db)
+    with sqlite3.connect(registry_db) as conn:
+        conn.execute(
+            """INSERT INTO accounts
+               (platform, handle, display_name, x_id, first_seen_at, last_seen_at)
+               VALUES ('x', 'orphan', 'Orphan', '999',
+                       '2026-07-11', '2026-07-11')"""
+        )
+        conn.commit()
+
+    with pytest.raises(
+        following_rankings.RankingCliError, match="no single entity owner"
+    ) as exc:
+        following_rankings.run_overlap(
+            snapshot_db=snapshot_db,
+            registry_db=registry_db,
+            analysis_db=tmp_path / "analysis.db",
+        )
+
+    assert exc.value.code == "E_REGISTRY_IDENTITY_CONFLICT"
+
+
+def test_overlap_reuse_detects_corrupt_result_rows(tmp_path):
+    snapshot_db = tmp_path / "snapshot.db"
+    registry_db = tmp_path / "registry.db"
+    analysis_db = tmp_path / "analysis.db"
+    _snapshot(snapshot_db)
+    _registry(registry_db)
+    first = following_rankings.run_overlap(
+        snapshot_db=snapshot_db,
+        registry_db=registry_db,
+        analysis_db=analysis_db,
+    )
+    with sqlite3.connect(analysis_db) as conn:
+        conn.execute(
+            "DELETE FROM ranking_result WHERE run_id = ? AND rank = 4",
+            (first["run_id"],),
+        )
+        conn.commit()
+
+    with pytest.raises(
+        following_rankings.RankingCliError, match="do not match"
+    ) as exc:
+        following_rankings.run_overlap(
+            snapshot_db=snapshot_db,
+            registry_db=registry_db,
+            analysis_db=analysis_db,
+        )
+
+    assert exc.value.code == "E_ANALYSIS_RECONCILIATION"
+
+
 def test_overlap_cli_has_stable_json_success_and_error(tmp_path, capsys):
     snapshot_db = tmp_path / "snapshot.db"
     registry_db = tmp_path / "registry.db"

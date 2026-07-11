@@ -314,6 +314,24 @@ def _preflight_identity_mapping(conn: sqlite3.Connection) -> None:
             hint="Resolve the Registry identity conflict before ranking.",
             exit_code=2,
         )
+    orphan = conn.execute(
+        """SELECT a.x_id
+           FROM registry.accounts a
+           LEFT JOIN registry.channels c
+             ON c.kind = 'x' AND lower(c.key) = lower(a.handle)
+           LEFT JOIN registry.entity_channels ec ON ec.channel_id = c.id
+           WHERE a.platform = 'x'
+             AND trim(COALESCE(a.x_id, '')) != ''
+           GROUP BY a.x_id HAVING COUNT(DISTINCT ec.entity_id) != 1
+           LIMIT 1"""
+    ).fetchone()
+    if orphan:
+        raise RankingCliError(
+            code="E_REGISTRY_IDENTITY_CONFLICT",
+            message=f"Registry X ID has no single entity owner: {orphan[0]}",
+            hint="Synchronize Registry channel ownership before ranking.",
+            exit_code=2,
+        )
     conflict = conn.execute(
         _registry_identity_cte()
         + """SELECT x_id FROM registry_x
@@ -509,6 +527,76 @@ def _mapping_counts(conn: sqlite3.Connection, context_id: str) -> dict[str, int]
     return counts
 
 
+def _validate_context(
+    conn: sqlite3.Connection,
+    *,
+    context_id: str,
+    snapshot: dict[str, Any],
+    snapshot_sha256: str,
+    registry_sha256: str,
+) -> None:
+    context = conn.execute(
+        "SELECT * FROM analysis_context WHERE context_id = ?", (context_id,)
+    ).fetchone()
+    expected = {
+        "schema_version": ANALYSIS_SCHEMA_VERSION,
+        "snapshot_id": snapshot["snapshot_id"],
+        "cohort_sha256": snapshot["cohort_sha256"],
+        "snapshot_db_sha256": snapshot_sha256,
+        "snapshot_checkpoint_commit": snapshot["checkpoint_commit"],
+        "snapshot_checkpoint_db_sha256": snapshot["checkpoint_db_sha256"],
+        "registry_db_sha256": registry_sha256,
+    }
+    if context is None or any(context[key] != value for key, value in expected.items()):
+        raise RankingCliError(
+            code="E_ANALYSIS_RECONCILIATION",
+            message="Derived analysis context does not match its input checksums.",
+            hint="Delete the derived analysis database and rerun.",
+            exit_code=2,
+        )
+    snapshot_nodes = conn.execute("SELECT COUNT(*) FROM snapshot.account").fetchone()[0]
+    derived_nodes = conn.execute(
+        "SELECT COUNT(*) FROM graph_node WHERE context_id = ?", (context_id,)
+    ).fetchone()[0]
+    if derived_nodes != snapshot_nodes:
+        raise RankingCliError(
+            code="E_ANALYSIS_RECONCILIATION",
+            message=(
+                "Derived node count does not match the frozen snapshot: "
+                f"{derived_nodes} != {snapshot_nodes}."
+            ),
+            hint="Delete the derived analysis database and rerun.",
+            exit_code=2,
+        )
+
+
+def _validate_ranking_run(conn: sqlite3.Connection, run: sqlite3.Row) -> None:
+    actual = conn.execute(
+        """SELECT COUNT(*) AS ranked_nodes,
+                  COALESCE(SUM(cohort_follow_count), 0) AS eligible_edges,
+                  COALESCE(MIN(rank), 0) AS min_rank,
+                  COALESCE(MAX(rank), 0) AS max_rank,
+                  COUNT(DISTINCT rank) AS distinct_ranks
+           FROM ranking_result WHERE run_id = ?""",
+        (run["run_id"],),
+    ).fetchone()
+    ranked_nodes = int(run["ranked_node_count"])
+    valid = (
+        actual["ranked_nodes"] == ranked_nodes
+        and actual["eligible_edges"] == run["eligible_edge_count"]
+        and actual["min_rank"] == (1 if ranked_nodes else 0)
+        and actual["max_rank"] == ranked_nodes
+        and actual["distinct_ranks"] == ranked_nodes
+    )
+    if not valid:
+        raise RankingCliError(
+            code="E_ANALYSIS_RECONCILIATION",
+            message="Stored ranking rows do not match their run metadata.",
+            hint="Delete the derived analysis database and rerun.",
+            exit_code=2,
+        )
+
+
 def _top_results(
     conn: sqlite3.Connection,
     *,
@@ -627,6 +715,13 @@ def run_overlap(
                 registry_checkpoint_commit=registry_checkpoint_commit,
             )
             conn.commit()
+        _validate_context(
+            conn,
+            context_id=context_id,
+            snapshot=snapshot,
+            snapshot_sha256=snapshot_sha256,
+            registry_sha256=registry_sha256,
+        )
         existing_run = conn.execute(
             "SELECT * FROM ranking_run WHERE run_id = ?", (run_id,)
         ).fetchone()
@@ -641,6 +736,7 @@ def run_overlap(
             conn.commit()
         else:
             reused = True
+            _validate_ranking_run(conn, existing_run)
             counts = {
                 "complete_sources": int(existing_run["complete_source_count"]),
                 "eligible_edges": int(existing_run["eligible_edge_count"]),
