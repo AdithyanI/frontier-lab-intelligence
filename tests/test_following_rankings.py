@@ -42,6 +42,11 @@ def _snapshot(path, *, status="complete"):
         ("4", "14"),
         ("5", "10"),
         ("5", "13"),
+        ("1", "2"),
+        ("2", "1"),
+        ("3", "5"),
+        ("5", "3"),
+        ("4", "1"),
     ]
     edge_counts = {
         x_id: sum(1 for source_x_id, _ in edges if source_x_id == x_id)
@@ -56,6 +61,11 @@ def _snapshot(path, *, status="complete"):
             (x_id, handle, edge_counts[x_id], source_status),
         )
     targets = [
+        ("1", "alpha", "Alpha", 1000),
+        ("2", "beta", "Beta", 1000),
+        ("3", "charlie", "Charlie", 1000),
+        ("4", "private", "Private", 1000),
+        ("5", "alpha_alt", "Alpha Alt", 1000),
         ("10", "x", "X", 100),
         ("11", "y", "Y", 200),
         ("12", "w", "W", 300),
@@ -165,6 +175,31 @@ def _registry(path):
     conn.close()
 
 
+def _personalization(path, sources=None):
+    sources = sources or [
+        {
+            "x_id": "1",
+            "handle": "alpha",
+            "category": "fixture",
+            "weight": 1.0,
+            "reason": "Fixture trusted source.",
+        }
+    ]
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "following-personalization-v1",
+                "personalization_id": "fixture-personalization",
+                "snapshot_id": "fixture",
+                "status": "experimental",
+                "weighting": "uniform",
+                "selection_rule": "Fixture selection rule.",
+                "sources": sources,
+            }
+        )
+    )
+
+
 def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
     snapshot_db = tmp_path / "snapshot.db"
     registry_db = tmp_path / "registry.db"
@@ -178,7 +213,7 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
         snapshot_db=snapshot_db,
         registry_db=registry_db,
         analysis_db=analysis_db,
-        top_k=5,
+        top_k=10,
         export_csv=export_csv,
         export_unknown_csv=export_unknown_csv,
     )
@@ -186,7 +221,7 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
         snapshot_db=snapshot_db,
         registry_db=registry_db,
         analysis_db=analysis_db,
-        top_k=5,
+        top_k=10,
     )
 
     assert first["reused"] is False
@@ -196,11 +231,11 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
     assert first["counts"] == {
         "eligible_source_accounts": 4,
         "eligible_source_entities": 3,
-        "eligible_edges": 9,
-        "eligible_entity_votes": 8,
-        "ranked_accounts": 5,
-        "active": 1,
-        "rejected": 1,
+        "eligible_edges": 13,
+        "eligible_entity_votes": 12,
+        "ranked_accounts": 10,
+        "active": 5,
+        "rejected": 2,
         "unknown": 3,
     }
     assert [
@@ -210,18 +245,30 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
         ("x", 3, "active"),
         ("y", 2, "rejected"),
         ("z", 2, "unknown"),
+        ("alpha", 1, "active"),
+        ("alpha_alt", 1, "active"),
+        ("beta", 1, "active"),
+        ("charlie", 1, "active"),
         ("w", 1, "unknown"),
+        ("private", 0, "rejected"),
         ("v", 0, "unknown"),
     ]
-    assert [row["score_rank"] for row in first["top"]] == [1, 2, 2, 3, 4]
+    assert [row["score_rank"] for row in first["top"]] == [
+        1, 2, 2, 3, 3, 3, 3, 3, 4, 4
+    ]
     with sqlite3.connect(analysis_db) as conn:
         assert conn.execute("SELECT COUNT(*) FROM analysis_context").fetchone()[0] == 1
         assert conn.execute("SELECT COUNT(*) FROM ranking_run").fetchone()[0] == 1
-        assert conn.execute("SELECT COUNT(*) FROM ranking_result").fetchone()[0] == 5
+        assert conn.execute("SELECT COUNT(*) FROM ranking_result").fetchone()[0] == 10
     with export_csv.open(newline="") as stream:
         rows = list(csv.DictReader(stream))
-    assert [row["handle"] for row in rows] == ["x", "y", "z", "w", "v"]
-    assert [row["handle"] for row in first["top_active"]] == ["x"]
+    assert [row["handle"] for row in rows] == [
+        "x", "y", "z", "alpha", "alpha_alt", "beta", "charlie", "w",
+        "private", "v"
+    ]
+    assert [row["handle"] for row in first["top_active"]] == [
+        "x", "alpha", "alpha_alt", "beta", "charlie"
+    ]
     assert [row["handle"] for row in first["top_unknown"]] == ["z", "w", "v"]
     with export_unknown_csv.open(newline="") as stream:
         unknown_rows = list(csv.DictReader(stream))
@@ -243,6 +290,24 @@ def test_registry_authorizer_denies_legacy_graph_reads():
     )
 
 
+def test_registry_authorizer_blocks_an_attached_legacy_graph(tmp_path):
+    registry_db = tmp_path / "registry.db"
+    _registry(registry_db)
+    conn = sqlite3.connect(":memory:")
+    conn.execute(
+        "ATTACH DATABASE ? AS registry",
+        (following_rankings._readonly_uri(registry_db),),
+    )
+    conn.set_authorizer(following_rankings._analysis_authorizer)
+    try:
+        assert conn.execute("SELECT COUNT(*) FROM registry.accounts").fetchone()[0]
+        with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+            conn.execute("SELECT COUNT(*) FROM registry.graph_edges").fetchone()
+    finally:
+        conn.set_authorizer(None)
+        conn.close()
+
+
 def test_overlap_rejects_incomplete_snapshot_before_output(tmp_path):
     snapshot_db = tmp_path / "snapshot.db"
     registry_db = tmp_path / "registry.db"
@@ -261,6 +326,86 @@ def test_overlap_rejects_incomplete_snapshot_before_output(tmp_path):
 
     assert exc.value.code == "E_SNAPSHOT_INCOMPLETE"
     assert not analysis_db.exists()
+
+
+@pytest.mark.parametrize("collision", ["snapshot", "registry", "export"])
+def test_overlap_rejects_output_path_collisions_before_writing(
+    tmp_path, collision
+):
+    snapshot_db = tmp_path / "snapshot.db"
+    registry_db = tmp_path / "registry.db"
+    analysis_db = tmp_path / "analysis.db"
+    _snapshot(snapshot_db)
+    _registry(registry_db)
+    snapshot_before = hashlib.sha256(snapshot_db.read_bytes()).hexdigest()
+    registry_before = hashlib.sha256(registry_db.read_bytes()).hexdigest()
+    kwargs = {
+        "snapshot_db": snapshot_db,
+        "registry_db": registry_db,
+        "analysis_db": analysis_db,
+    }
+    if collision == "snapshot":
+        kwargs["analysis_db"] = snapshot_db
+    elif collision == "registry":
+        kwargs["analysis_db"] = registry_db
+    else:
+        kwargs["export_csv"] = analysis_db
+
+    with pytest.raises(following_rankings.RankingCliError) as exc:
+        following_rankings.run_overlap(**kwargs)
+
+    assert exc.value.code == "E_PATH_CONFLICT"
+    assert hashlib.sha256(snapshot_db.read_bytes()).hexdigest() == snapshot_before
+    assert hashlib.sha256(registry_db.read_bytes()).hexdigest() == registry_before
+
+
+def test_overlap_rejects_symlink_alias_to_protected_database(tmp_path):
+    snapshot_db = tmp_path / "snapshot.db"
+    registry_db = tmp_path / "registry.db"
+    snapshot_alias = tmp_path / "analysis.db"
+    _snapshot(snapshot_db)
+    _registry(registry_db)
+    snapshot_alias.symlink_to(snapshot_db)
+    snapshot_before = hashlib.sha256(snapshot_db.read_bytes()).hexdigest()
+
+    with pytest.raises(following_rankings.RankingCliError) as exc:
+        following_rankings.run_overlap(
+            snapshot_db=snapshot_db,
+            registry_db=registry_db,
+            analysis_db=snapshot_alias,
+        )
+
+    assert exc.value.code == "E_PATH_CONFLICT"
+    assert hashlib.sha256(snapshot_db.read_bytes()).hexdigest() == snapshot_before
+
+
+def test_registry_backup_includes_committed_wal_rows(tmp_path):
+    snapshot_db = tmp_path / "snapshot.db"
+    registry_db = tmp_path / "registry.db"
+    _snapshot(snapshot_db)
+    _registry(registry_db)
+    conn = sqlite3.connect(registry_db)
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA wal_autocheckpoint = 0")
+    conn.execute(
+        """INSERT INTO accounts
+           (platform, handle, display_name, x_id, first_seen_at, last_seen_at)
+           VALUES ('x', 'wal_orphan', 'WAL Orphan', '998',
+                   '2026-07-11', '2026-07-11')"""
+    )
+    conn.commit()
+    try:
+        with pytest.raises(
+            following_rankings.RankingCliError, match="no single entity owner"
+        ) as exc:
+            following_rankings.run_overlap(
+                snapshot_db=snapshot_db,
+                registry_db=registry_db,
+                analysis_db=tmp_path / "analysis.db",
+            )
+    finally:
+        conn.close()
+    assert exc.value.code == "E_REGISTRY_IDENTITY_CONFLICT"
 
 
 def test_overlap_fails_closed_on_registry_identity_conflict(tmp_path):
@@ -380,3 +525,112 @@ def test_overlap_cli_has_stable_json_success_and_error(tmp_path, capsys):
     assert failure["data"] is None
     assert failure["error"]["code"] == "E_NOT_FOUND"
     assert failure["error"]["retryable"] is False
+
+
+def test_personalization_hash_is_order_independent_and_rejects_duplicates(tmp_path):
+    first_path = tmp_path / "first.json"
+    second_path = tmp_path / "second.json"
+    sources = [
+        {
+            "x_id": "1",
+            "handle": "alpha",
+            "category": "fixture",
+            "weight": 1.0,
+            "reason": "Alpha reason.",
+        },
+        {
+            "x_id": "2",
+            "handle": "beta",
+            "category": "fixture",
+            "weight": 1.0,
+            "reason": "Beta reason.",
+        },
+    ]
+    _personalization(first_path, sources)
+    _personalization(second_path, list(reversed(sources)))
+    _, first_hash = following_rankings.load_personalization(first_path)
+    _, second_hash = following_rankings.load_personalization(second_path)
+    assert first_hash == second_hash
+
+    duplicate_path = tmp_path / "duplicate.json"
+    _personalization(duplicate_path, [sources[0], sources[0]])
+    with pytest.raises(
+        following_rankings.RankingCliError, match="duplicated"
+    ) as exc:
+        following_rankings.load_personalization(duplicate_path)
+    assert exc.value.code == "E_PERSONALIZATION_INVALID"
+
+
+def test_personalized_pagerank_converges_compares_and_reuses(tmp_path):
+    snapshot_db = tmp_path / "snapshot.db"
+    registry_db = tmp_path / "registry.db"
+    analysis_db = tmp_path / "analysis.db"
+    personalization = tmp_path / "personalization.json"
+    comparison_csv = tmp_path / "comparison.csv"
+    unknown_csv = tmp_path / "unknown.csv"
+    _snapshot(snapshot_db)
+    _registry(registry_db)
+    _personalization(personalization)
+
+    first = following_rankings.run_pagerank(
+        snapshot_db=snapshot_db,
+        registry_db=registry_db,
+        analysis_db=analysis_db,
+        personalization_path=personalization,
+        top_k=10,
+        export_comparison_csv=comparison_csv,
+        export_unknown_csv=unknown_csv,
+    )
+    second = following_rankings.run_pagerank(
+        snapshot_db=snapshot_db,
+        registry_db=registry_db,
+        analysis_db=analysis_db,
+        personalization_path=personalization,
+        top_k=10,
+    )
+
+    assert first["reused"] is False
+    assert second["reused"] is True
+    assert first["run_id"] == second["run_id"]
+    assert first["diagnostics"]["converged"] == 1
+    assert first["diagnostics"]["seed_count"] == 1
+    assert first["diagnostics"]["iterations"] <= 100
+    assert first["diagnostics"]["score_sum"] == pytest.approx(1.0, abs=1e-12)
+    assert {row["handle"] for row in first["top_unknown"]} == {"v", "w", "z"}
+    with sqlite3.connect(analysis_db) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM ranking_run").fetchone()[0] == 2
+        assert conn.execute("SELECT COUNT(*) FROM ranking_result").fetchone()[0] == 20
+        assert conn.execute("SELECT COUNT(*) FROM ranking_comparison").fetchone()[0] == 10
+    with unknown_csv.open(newline="") as stream:
+        assert {row["registry_state"] for row in csv.DictReader(stream)} == {
+            "unknown"
+        }
+
+
+def test_personalized_pagerank_nonconvergence_stores_no_partial_run(tmp_path):
+    snapshot_db = tmp_path / "snapshot.db"
+    registry_db = tmp_path / "registry.db"
+    analysis_db = tmp_path / "analysis.db"
+    personalization = tmp_path / "personalization.json"
+    _snapshot(snapshot_db)
+    _registry(registry_db)
+    _personalization(personalization)
+
+    with pytest.raises(
+        following_rankings.RankingCliError, match="did not converge"
+    ) as exc:
+        following_rankings.run_pagerank(
+            snapshot_db=snapshot_db,
+            registry_db=registry_db,
+            analysis_db=analysis_db,
+            personalization_path=personalization,
+            tolerance=1e-30,
+            max_iterations=1,
+        )
+
+    assert exc.value.code == "E_PAGERANK_DID_NOT_CONVERGE"
+    with sqlite3.connect(analysis_db) as conn:
+        assert conn.execute(
+            "SELECT COUNT(*) FROM ranking_run WHERE algorithm = ?",
+            (following_rankings.PAGERANK_ALGORITHM,),
+        ).fetchone()[0] == 0

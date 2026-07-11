@@ -1,101 +1,101 @@
-rank,x_id,handle,display_name,followers_count,cohort_follow_count,cohort_follow_share,registry_state,entity_id,entity_kind,entity_name,explanation
-1,33836629,karpathy,Andrej Karpathy,3314365,1795,0.8089229382604777,active,11,person,Andrej Karpathy,Followed by 1795 complete active Registry sources.
-2,911297187664949248,jeffdean,Jeff Dean,447751,1593,0.7178909418657052,active,12,person,Jeff Dean,Followed by 1593 complete active Registry sources.
-3,1720046887,ilyasut,Ilya Sutskever,763214,1440,0.6489409643983777,active,14,person,Ilya Sutskever,Followed by 1440 complete active Registry sources.
-4,48008938,ylecun,Yann LeCun,1234853,1434,0.6462370437133844,active,13,person,Yann LeCun,Followed by 1434 complete active Registry sources.
-5,4398626122,openai,OpenAI,5012482,1406,0.6336187471834159,active,6,organization,OpenAI,Followed by 1406 complete active Registry sources.
-6,1605,sama,Sam Altman,5427069,1397,0.629562866155926,active,21,person,Sam Altman,Followed by 1397 complete active Registry sources.
-7,1482581556,demishassabis,Demis Hassabis,1369543,1331,0.5998197386210005,active,36,person,Demis Hassabis,Followed by 1331 complete active Registry sources.
-8,4783690002,googledeepmind,Google DeepMind,1472178,1321,0.5953132041460117,active,2,organization,Google DeepMind,Followed by 1321 complete active Registry sources.
-9,216939636,andrewyng,Andrew Ng,1682866,1303,0.587201442091032,active,44,person,Andrew Ng,Followed by 1303 complete active Registry sources.
-10,775449094739197953,goodfellow_ian,Ian Goodfellow,374245,1264,0.5696259576385759,active,15,person,Ian Goodfellow,Followed by 1264 complete active Registry sources.
-11,1084212657761148928,geoffreyhinton,Geoffrey Hinton,618826,1260,0.5678233438485805,active,16,person,Geoffrey Hinton,Followed by 1260 complete active Registry sources.
-12,162124540,gdb,Greg Brockman,1006250,1243,0.5601622352410996,active,39,person,Greg Brockman,Followed by 1243 complete active Registry sources.
-13,3918111614,oriolvinyalsml,Oriol Vinyals,203863,1188,0.5353762956286615,active,17,person,Oriol Vinyals,Followed by 1188 complete active Registry sources.
-14,130745589,drfeifei,Fei-Fei Li,853919,1183,0.5331230283911672,active,18,person,Fei-Fei Li,Followed by 1183 complete active Registry sources.
-15,2895499182,hardmaru,hardmaru,421648,1169,0.526813880126183,active,25,person,hardmaru,Followed by 1169 complete active Registry sources.
-16,1353836358901501952,anthropicai,Anthropic,1520319,1157,0.5214060387561965,active,1,organization,Anthropic,Followed by 1157 complete active Registry sources.
-17,1388977636618080256,johnschulman2,John Schulman,77250,1135,0.5114916629112213,active,43,person,John Schulman,Followed by 1135 complete active Registry sources.
-18,246939962,thom_wolf,Thomas Wolf,119307,1130,0.5092383956737269,active,34,person,Thomas Wolf,Followed by 1130 complete active Registry sources.
-19,731538535795163136,sarahookr,Sara Hooker,62538,1125,0.5069851284362326,active,20,person,Sara Hooker,Followed by 1125 complete active Registry sources.
-20,70831441,soumithchintala,Soumith Chintala,311436,1125,0.5069851284362326,active,62,person,Soumith Chintala,Followed by 1125 complete active Registry sources.
-21,96999384,lilianweng,Lilian Weng,267461,1116,0.5029292474087427,active,32,person,Lilian Weng,Followed by 1116 complete active Registry sources.
-22,2815077014,chrmanning,Christopher Manning,165650,1109,0.4997746732762506,active,24,person,Christopher Manning,Followed by 1109 complete active Registry sources.
-23,2577596593,chelseabfinn,Chelsea Finn,97212,1097,0.49436683190626407,active,19,person,Chelsea Finn,Followed by 1097 complete active Registry sources.
-24,33838201,googleai,Google AI,2428973,1093,0.4925642181162686,active,841,organization,Google,Followed by 1093 complete active Registry sources.
-25,2465283662,_akhaliq,AK,510394,1087,0.48986029743127535,unknown,,,,Followed by 1087 complete active Registry sources.
-26,153196789,ch402,Chris Olah,151781,1086,0.48940964398377645,active,26,person,Chris Olah,Followed by 1086 complete active Registry sources.
-27,4558314927,srush_nlp,Sasha Rush,81684,1066,0.480396575033799,active,27,person,Sasha Rush,Followed by 1066 complete active Registry sources.
-28,1007413134,drjimfan,Jim Fan,488802,1062,0.4785939612438035,active,72,person,Jim Fan,Followed by 1062 complete active Registry sources.
-29,48642190,kchonyc,Kyunghyun Cho,86699,1057,0.47634069400630913,active,22,person,Kyunghyun Cho,Followed by 1057 complete active Registry sources.
-30,68746721,fchollet,François Chollet,704545,1056,0.4758900405588103,active,83,person,François Chollet,Followed by 1056 complete active Registry sources.
-31,1214528593,miles_brundage,Miles Brundage,73088,1053,0.47453808021631366,active,63,person,Miles Brundage,Followed by 1053 complete active Registry sources.
-32,825088493764407298,polynoamial,Noam Brown,147322,1050,0.47318611987381703,active,49,person,Noam Brown,Followed by 1050 complete active Registry sources.
-33,180993910,pabbeel,Pieter Abbeel,113723,1046,0.47138350608382157,active,28,person,Pieter Abbeel,Followed by 1046 complete active Registry sources.
-34,86481377,percyliang,Percy Liang,109417,1031,0.46462370437133843,active,31,person,Percy Liang,Followed by 1031 complete active Registry sources.
-35,86351835,jackclarksf,Jack Clark,136490,1021,0.4601171698963497,active,51,person,Jack Clark,Followed by 1021 complete active Registry sources.
-36,175282603,jeremyphoward,Jeremy Howard,321468,1004,0.45245606128886884,active,96,person,Jeremy Howard,Followed by 1004 complete active Registry sources.
-37,29843511,nandodf,Nando de Freitas,109775,1004,0.45245606128886884,active,30,person,Nando de Freitas,Followed by 1004 complete active Registry sources.
-38,2309105822,ericjang11,Eric Jang,136111,972,0.4380351509689049,active,74,person,Eric Jang,Followed by 972 complete active Registry sources.
-39,1034844617261248512,aiatmeta,AI at Meta,822440,971,0.43758449752140605,active,3079,organization,Meta,Followed by 971 complete active Registry sources.
-40,338526004,sleepinyourhat,Sam Bowman,66558,970,0.43713384407390715,active,35,person,Sam Bowman,Followed by 970 complete active Registry sources.
-41,990433714948661250,svlevine,Sergey Levine,131521,962,0.43352861649391616,active,33,person,Sergey Levine,Followed by 962 complete active Registry sources.
-42,3333052551,hugo_larochelle,Hugo Larochelle,124479,947,0.4267688147814331,active,29,person,Hugo Larochelle,Followed by 947 complete active Registry sources.
-43,710610891058716673,janleike,Jan Leike,133983,940,0.423614240648941,active,46,person,Jan Leike,Followed by 940 complete active Registry sources.
-44,18850305,zacharylipton,Zachary Lipton,67698,931,0.4195583596214511,active,38,person,Zachary Lipton,Followed by 931 complete active Registry sources.
-45,180115578,miramurati,Mira Murati,747442,919,0.41415051825146465,active,52,person,Mira Murati,Followed by 919 complete active Registry sources.
-46,2956121356,rsalakhu,Russ Salakhutdinov,112351,918,0.41369986480396576,active,37,person,Russ Salakhutdinov,Followed by 918 complete active Registry sources.
-47,1319101874532978690,_jasonwei,Jason Wei,109748,914,0.41189725101397023,active,54,person,Jason Wei,Followed by 914 complete active Registry sources.
-48,898805695,alecrad,Alec Radford,71572,903,0.4069400630914827,active,100,person,Alec Radford,Followed by 903 complete active Registry sources.
-49,186420551,clementdelangue,clem 🤗,455899,876,0.3947724200090131,active,115,person,clem 🤗,Followed by 876 complete active Registry sources.
-50,989251872107085824,quocleix,Quoc Le,63736,873,0.39342045966651645,active,41,person,Quoc Le,Followed by 873 complete active Registry sources.
-51,1442906958,richardsocher,Richard Socher,120791,870,0.3920684993240198,active,55,person,Richard Socher,Followed by 870 complete active Registry sources.
-52,1460283925,tszzl,roon,395779,866,0.39026588553402436,active,50,person,roon,Followed by 866 complete active Registry sources.
-53,138840988,neuripsconf,NeurIPS Conference,159036,857,0.3862100045065345,active,3002,organization,NeurIPS Conference,Followed by 857 complete active Registry sources.
-54,778764142412984320,huggingface,Hugging Face,721210,854,0.38485804416403785,active,70,organization,Hugging Face,Followed by 854 complete active Registry sources.
-55,183749519,paulg,Paul Graham,3973595,850,0.3830554303740424,unknown,,,,Followed by 850 complete active Registry sources.
-56,977687191202693125,woj_zaremba,Wojciech Zaremba,155672,846,0.38125281658404686,active,91,person,Wojciech Zaremba,Followed by 846 complete active Registry sources.
-57,2236047510,giffmana,Lucas Beyer (bl16),142829,838,0.3776475890040559,active,78,person,Lucas Beyer (bl16),Followed by 838 complete active Registry sources.
-58,2939913921,natolambert,Nathan Lambert,92168,838,0.3776475890040559,active,86,person,Nathan Lambert,Followed by 838 complete active Registry sources.
-59,3237721718,chrszegedy,Christian Szegedy,44122,836,0.37674628210905814,active,113,person,Christian Szegedy,Followed by 836 complete active Registry sources.
-60,13235832,natfriedman,Nat Friedman,380022,836,0.37674628210905814,active,69,person,Nat Friedman,Followed by 836 complete active Registry sources.
-61,452384386,sebastienbubeck,Sebastien Bubeck,78159,835,0.37629562866155924,active,71,person,Sebastien Bubeck,Followed by 835 complete active Registry sources.
-62,794433401591693312,arankomatsuzaki,Aran Komatsuzaki,182609,831,0.3744930148715638,active,73,person,Aran Komatsuzaki,Followed by 831 complete active Registry sources.
-63,44196397,elonmusk,Elon Musk,240791105,830,0.3740423614240649,active,58,person,Elon Musk,Followed by 830 complete active Registry sources.
-64,5943622,pmarca,Marc Andreessen 🇺🇸,4584737,829,0.37359170797656605,unknown,,,,Followed by 829 complete active Registry sources.
-65,25263396,dpkingma,Durk Kingma,54941,827,0.37269040108156826,active,53,person,Durk Kingma,Followed by 827 complete active Registry sources.
-66,872274950,tim_dettmers,Tim Dettmers,45914,827,0.37269040108156826,active,67,person,Tim Dettmers,Followed by 827 complete active Registry sources.
-67,747212842470891520,shaneguml,Shane Gu,50476,818,0.36863452005407843,active,64,person,Shane Gu,Followed by 818 complete active Registry sources.
-68,1209960539390201864,dwarkesh_sp,Dwarkesh Patel,241858,816,0.36773321315908064,active,66,person,Dwarkesh Patel,Followed by 816 complete active Registry sources.
-69,284333988,officiallogank,Logan Kilpatrick,339430,813,0.36638125281658407,active,106,person,Logan Kilpatrick,Followed by 813 complete active Registry sources.
-70,1601593543,davidduvenaud,David Duvenaud,35586,793,0.35736818386660657,active,48,person,David Duvenaud,Followed by 793 complete active Registry sources.
-71,118263124,stanfordnlp,Stanford NLP Group,189159,782,0.35241099594411895,active,3071,organization,Stanford AI Lab,Followed by 782 complete active Registry sources.
-72,2466279320,suchenzang,Susan Zhang,46765,781,0.3519603424966201,active,90,person,Susan Zhang,Followed by 781 complete active Registry sources.
-73,891077171673931776,berkeley_ai,Berkeley AI Research,278806,774,0.34880576836412797,active,3070,organization,Berkeley AI Research,Followed by 774 complete active Registry sources.
-74,228792418,_rockt,Tim Rocktäschel,46951,773,0.3483551149166291,active,57,person,Tim Rocktäschel,Followed by 773 complete active Registry sources.
-75,44073696,roydanroy,Dan Roy,66758,768,0.34610184767913477,active,56,person,Dan Roy,Followed by 768 complete active Registry sources.
-76,2210861,jacobandreas,Jacob Andreas,24208,767,0.34565119423163587,active,42,person,Jacob Andreas,Followed by 767 complete active Registry sources.
-77,615818451,alexandr_wang,Alexandr Wang,545050,766,0.345200540784137,active,80,person,Alexandr Wang,Followed by 766 complete active Registry sources.
-78,885528008,liamfedus,Liam Fedus,35361,766,0.345200540784137,active,104,person,Liam Fedus,Followed by 766 complete active Registry sources.
-79,905399486,jekbradbury,James Bradbury,17137,765,0.34474988733663814,active,138,person,James Bradbury,Followed by 765 complete active Registry sources.
-80,2785337469,seb_ruder,Sebastian Ruder,98918,756,0.34069400630914826,active,61,person,Sebastian Ruder,Followed by 756 complete active Registry sources.
-81,1273327266957688832,markchen90,Mark Chen,74348,754,0.3397926994141505,active,107,person,Mark Chen,Followed by 754 complete active Registry sources.
-82,893882282175471616,yejinchoinka,Yejin Choi,30095,752,0.3388913925191528,active,59,person,Yejin Choi,Followed by 752 complete active Registry sources.
-83,768092862,tdietterich,Thomas G. Dietterich,62385,749,0.33753943217665616,active,68,person,Thomas G. Dietterich,Followed by 749 complete active Registry sources.
-84,568879807,tri_dao,Tri Dao,42854,742,0.334384858044164,active,118,person,Tri Dao,Followed by 742 complete active Registry sources.
-85,65876824,jaschasd,Jascha Sohl-Dickstein,30358,741,0.3339342045966652,active,151,person,Jascha Sohl-Dickstein,Followed by 741 complete active Registry sources.
-86,2902658140,sedielem,Sander Dieleman @ ICML 2026🇰🇷,68841,740,0.3334835511491663,active,97,person,Sander Dieleman @ ICML 2026🇰🇷,Followed by 740 complete active Registry sources.
-87,938616384572948480,_arohan_,rohan anil,43497,735,0.3312302839116719,active,108,person,rohan anil,Followed by 735 complete active Registry sources.
-88,746788615951355904,ofirpress,Ofir Press,18771,735,0.3312302839116719,active,84,person,Ofir Press,Followed by 735 complete active Registry sources.
-89,1163786515144724485,schmidhuberai,Jürgen Schmidhuber,205268,735,0.3312302839116719,active,92,person,Jürgen Schmidhuber,Followed by 735 complete active Registry sources.
-90,14130366,sundarpichai,Sundar Pichai,9144603,735,0.3312302839116719,active,111,person,Sundar Pichai,Followed by 735 complete active Registry sources.
-91,50393960,billgates,Bill Gates,64061980,734,0.330779630464173,unknown,,,,Followed by 734 complete active Registry sources.
-92,795089712864051200,barret_zoph,Barret Zoph,26081,728,0.3280757097791798,active,109,person,Barret Zoph,Followed by 728 complete active Registry sources.
-93,1891523745929732096,thinkymachines,Thinking Machines,158275,726,0.3271744028841821,active,9,organization,Thinking Machines Lab,Followed by 726 complete active Registry sources.
-94,968053955845484545,_sholtodouglas,Sholto Douglas,47466,724,0.3262730959891843,active,110,person,Sholto Douglas,Followed by 724 complete active Registry sources.
-95,175624200,id_aa_carmack,John Carmack,2847769,720,0.32447048219918884,active,102,person,John Carmack,Followed by 720 complete active Registry sources.
-96,841499391508779008,zicokolter,Zico Kolter,28595,715,0.3222172149616945,active,85,person,Zico Kolter,Followed by 715 complete active Registry sources.
-97,1540897980,dustinvtran,Dustin Tran,58447,714,0.3217665615141956,active,82,person,Dustin Tran,Followed by 714 complete active Registry sources.
-98,759894532649545732,aravsrinivas,Aravind Srinivas,808475,712,0.32086525461919785,active,105,person,Aravind Srinivas,Followed by 712 complete active Registry sources.
-99,352013269,beenwrekt,Ben Recht,34518,711,0.32041460117169895,active,60,person,Ben Recht,Followed by 711 complete active Registry sources.
-100,16535432,goodside,Riley Goodside,216704,710,0.3199639477242001,unknown,,,,Followed by 710 complete active Registry sources.
+position,score_rank,x_id,handle,display_name,followers_count,cohort_follow_count,cohort_follow_share,registry_state,entity_id,entity_kind,entity_name,explanation
+1,1,33836629,karpathy,Andrej Karpathy,3314365,1795,0.8170232134729176,active,11,person,Andrej Karpathy,Followed by 1795 of 2197 complete active Registry entities.
+2,2,911297187664949248,jeffdean,Jeff Dean,447751,1591,0.7241693218024579,active,12,person,Jeff Dean,Followed by 1591 of 2197 complete active Registry entities.
+3,3,1720046887,ilyasut,Ilya Sutskever,763214,1440,0.6554392353208921,active,14,person,Ilya Sutskever,Followed by 1440 of 2197 complete active Registry entities.
+4,4,48008938,ylecun,Yann LeCun,1234853,1434,0.6527082385070551,active,13,person,Yann LeCun,Followed by 1434 of 2197 complete active Registry entities.
+5,5,4398626122,openai,OpenAI,5012482,1406,0.6399635867091489,active,6,organization,OpenAI,Followed by 1406 of 2197 complete active Registry entities.
+6,6,1605,sama,Sam Altman,5427069,1397,0.6358670914883933,active,21,person,Sam Altman,Followed by 1397 of 2197 complete active Registry entities.
+7,7,1482581556,demishassabis,Demis Hassabis,1369543,1329,0.6049157942649067,active,36,person,Demis Hassabis,Followed by 1329 of 2197 complete active Registry entities.
+8,8,4783690002,googledeepmind,Google DeepMind,1472178,1316,0.5989986345015931,active,2,organization,Google DeepMind,Followed by 1316 of 2197 complete active Registry entities.
+9,9,216939636,andrewyng,Andrew Ng,1682866,1302,0.59262630860264,active,44,person,Andrew Ng,Followed by 1302 of 2197 complete active Registry entities.
+10,10,775449094739197953,goodfellow_ian,Ian Goodfellow,374245,1264,0.5753299954483386,active,15,person,Ian Goodfellow,Followed by 1264 of 2197 complete active Registry entities.
+11,11,1084212657761148928,geoffreyhinton,Geoffrey Hinton,618826,1260,0.5735093309057806,active,16,person,Geoffrey Hinton,Followed by 1260 of 2197 complete active Registry entities.
+12,12,162124540,gdb,Greg Brockman,1006250,1243,0.5657715065999089,active,39,person,Greg Brockman,Followed by 1243 of 2197 complete active Registry entities.
+13,13,3918111614,oriolvinyalsml,Oriol Vinyals,203863,1187,0.5402822030040965,active,17,person,Oriol Vinyals,Followed by 1187 of 2197 complete active Registry entities.
+14,14,130745589,drfeifei,Fei-Fei Li,853919,1183,0.5384615384615384,active,18,person,Fei-Fei Li,Followed by 1183 of 2197 complete active Registry entities.
+15,15,2895499182,hardmaru,hardmaru,421648,1169,0.5320892125625853,active,25,person,hardmaru,Followed by 1169 of 2197 complete active Registry entities.
+16,16,1353836358901501952,anthropicai,Anthropic,1520319,1156,0.5261720527992717,active,1,organization,Anthropic,Followed by 1156 of 2197 complete active Registry entities.
+17,17,1388977636618080256,johnschulman2,John Schulman,77250,1135,0.516613563950842,active,43,person,John Schulman,Followed by 1135 of 2197 complete active Registry entities.
+18,18,246939962,thom_wolf,Thomas Wolf,119307,1129,0.513882567137005,active,34,person,Thomas Wolf,Followed by 1129 of 2197 complete active Registry entities.
+19,19,731538535795163136,sarahookr,Sara Hooker,62538,1125,0.512061902594447,active,20,person,Sara Hooker,Followed by 1125 of 2197 complete active Registry entities.
+20,19,70831441,soumithchintala,Soumith Chintala,311436,1125,0.512061902594447,active,62,person,Soumith Chintala,Followed by 1125 of 2197 complete active Registry entities.
+21,20,96999384,lilianweng,Lilian Weng,267461,1116,0.5079654073736914,active,32,person,Lilian Weng,Followed by 1116 of 2197 complete active Registry entities.
+22,21,2815077014,chrmanning,Christopher Manning,165650,1108,0.5043240782885753,active,24,person,Christopher Manning,Followed by 1108 of 2197 complete active Registry entities.
+23,22,2577596593,chelseabfinn,Chelsea Finn,97212,1097,0.4993172507965407,active,19,person,Chelsea Finn,Followed by 1097 of 2197 complete active Registry entities.
+24,23,33838201,googleai,Google AI,2428973,1087,0.49476558944014565,active,841,organization,Google,Followed by 1087 of 2197 complete active Registry entities.
+25,24,2465283662,_akhaliq,AK,510394,1086,0.49431042330450614,unknown,,,,Followed by 1086 of 2197 complete active Registry entities.
+26,24,153196789,ch402,Chris Olah,151781,1086,0.49431042330450614,active,26,person,Chris Olah,Followed by 1086 of 2197 complete active Registry entities.
+27,25,4558314927,srush_nlp,Sasha Rush,81684,1066,0.48520710059171596,active,27,person,Sasha Rush,Followed by 1066 of 2197 complete active Registry entities.
+28,26,1007413134,drjimfan,Jim Fan,488802,1062,0.48338643604915793,active,72,person,Jim Fan,Followed by 1062 of 2197 complete active Registry entities.
+29,27,48642190,kchonyc,Kyunghyun Cho,86699,1057,0.4811106053709604,active,22,person,Kyunghyun Cho,Followed by 1057 of 2197 complete active Registry entities.
+30,28,68746721,fchollet,François Chollet,704545,1056,0.4806554392353209,active,83,person,François Chollet,Followed by 1056 of 2197 complete active Registry entities.
+31,29,1214528593,miles_brundage,Miles Brundage,73088,1053,0.47928994082840237,active,63,person,Miles Brundage,Followed by 1053 of 2197 complete active Registry entities.
+32,30,825088493764407298,polynoamial,Noam Brown,147322,1049,0.47746927628584435,active,49,person,Noam Brown,Followed by 1049 of 2197 complete active Registry entities.
+33,31,180993910,pabbeel,Pieter Abbeel,113723,1046,0.4761037778789258,active,28,person,Pieter Abbeel,Followed by 1046 of 2197 complete active Registry entities.
+34,32,86481377,percyliang,Percy Liang,109417,1031,0.4692762858443332,active,31,person,Percy Liang,Followed by 1031 of 2197 complete active Registry entities.
+35,33,86351835,jackclarksf,Jack Clark,136490,1021,0.4647246244879381,active,51,person,Jack Clark,Followed by 1021 of 2197 complete active Registry entities.
+36,34,175282603,jeremyphoward,Jeremy Howard,321468,1004,0.45698680018206644,active,96,person,Jeremy Howard,Followed by 1004 of 2197 complete active Registry entities.
+37,34,29843511,nandodf,Nando de Freitas,109775,1004,0.45698680018206644,active,30,person,Nando de Freitas,Followed by 1004 of 2197 complete active Registry entities.
+38,35,2309105822,ericjang11,Eric Jang,136111,972,0.4424214838416022,active,74,person,Eric Jang,Followed by 972 of 2197 complete active Registry entities.
+39,36,1034844617261248512,aiatmeta,AI at Meta,822440,971,0.4419663177059627,active,3079,organization,Meta,Followed by 971 of 2197 complete active Registry entities.
+40,37,338526004,sleepinyourhat,Sam Bowman,66558,970,0.44151115157032317,active,35,person,Sam Bowman,Followed by 970 of 2197 complete active Registry entities.
+41,38,990433714948661250,svlevine,Sergey Levine,131521,962,0.4378698224852071,active,33,person,Sergey Levine,Followed by 962 of 2197 complete active Registry entities.
+42,39,3333052551,hugo_larochelle,Hugo Larochelle,124479,947,0.43104233045061446,active,29,person,Hugo Larochelle,Followed by 947 of 2197 complete active Registry entities.
+43,40,710610891058716673,janleike,Jan Leike,133983,940,0.4278561675011379,active,46,person,Jan Leike,Followed by 940 of 2197 complete active Registry entities.
+44,41,18850305,zacharylipton,Zachary Lipton,67698,931,0.42375967228038236,active,38,person,Zachary Lipton,Followed by 931 of 2197 complete active Registry entities.
+45,42,180115578,miramurati,Mira Murati,747442,919,0.4182976786527082,active,52,person,Mira Murati,Followed by 919 of 2197 complete active Registry entities.
+46,43,2956121356,rsalakhu,Russ Salakhutdinov,112351,918,0.4178425125170687,active,37,person,Russ Salakhutdinov,Followed by 918 of 2197 complete active Registry entities.
+47,44,1319101874532978690,_jasonwei,Jason Wei,109748,914,0.4160218479745107,active,54,person,Jason Wei,Followed by 914 of 2197 complete active Registry entities.
+48,45,898805695,alecrad,Alec Radford,71572,903,0.4110150204824761,active,100,person,Alec Radford,Followed by 903 of 2197 complete active Registry entities.
+49,46,186420551,clementdelangue,clem 🤗,455899,876,0.3987255348202094,active,115,person,clem 🤗,Followed by 876 of 2197 complete active Registry entities.
+50,47,989251872107085824,quocleix,Quoc Le,63736,873,0.3973600364132909,active,41,person,Quoc Le,Followed by 873 of 2197 complete active Registry entities.
+51,48,1442906958,richardsocher,Richard Socher,120791,870,0.3959945380063723,active,55,person,Richard Socher,Followed by 870 of 2197 complete active Registry entities.
+52,49,1460283925,tszzl,roon,395779,866,0.3941738734638143,active,50,person,roon,Followed by 866 of 2197 complete active Registry entities.
+53,50,138840988,neuripsconf,NeurIPS Conference,159036,857,0.3900773782430587,active,3002,organization,NeurIPS Conference,Followed by 857 of 2197 complete active Registry entities.
+54,51,778764142412984320,huggingface,Hugging Face,721210,853,0.3882567137005007,active,70,organization,Hugging Face,Followed by 853 of 2197 complete active Registry entities.
+55,52,183749519,paulg,Paul Graham,3973595,850,0.38689121529358217,unknown,,,,Followed by 850 of 2197 complete active Registry entities.
+56,53,977687191202693125,woj_zaremba,Wojciech Zaremba,155672,846,0.38507055075102414,active,91,person,Wojciech Zaremba,Followed by 846 of 2197 complete active Registry entities.
+57,54,2236047510,giffmana,Lucas Beyer (bl16),142829,838,0.38142922166590804,active,78,person,Lucas Beyer (bl16),Followed by 838 of 2197 complete active Registry entities.
+58,54,2939913921,natolambert,Nathan Lambert,92168,838,0.38142922166590804,active,86,person,Nathan Lambert,Followed by 838 of 2197 complete active Registry entities.
+59,55,3237721718,chrszegedy,Christian Szegedy,44122,836,0.380518889394629,active,113,person,Christian Szegedy,Followed by 836 of 2197 complete active Registry entities.
+60,55,13235832,natfriedman,Nat Friedman,380022,836,0.380518889394629,active,69,person,Nat Friedman,Followed by 836 of 2197 complete active Registry entities.
+61,56,452384386,sebastienbubeck,Sebastien Bubeck,78159,835,0.3800637232589895,active,71,person,Sebastien Bubeck,Followed by 835 of 2197 complete active Registry entities.
+62,57,794433401591693312,arankomatsuzaki,Aran Komatsuzaki,182609,831,0.3782430587164315,active,73,person,Aran Komatsuzaki,Followed by 831 of 2197 complete active Registry entities.
+63,58,44196397,elonmusk,Elon Musk,240791105,829,0.3773327264451525,active,58,person,Elon Musk,Followed by 829 of 2197 complete active Registry entities.
+64,58,5943622,pmarca,Marc Andreessen 🇺🇸,4584737,829,0.3773327264451525,unknown,,,,Followed by 829 of 2197 complete active Registry entities.
+65,59,25263396,dpkingma,Durk Kingma,54941,827,0.37642239417387346,active,53,person,Durk Kingma,Followed by 827 of 2197 complete active Registry entities.
+66,59,872274950,tim_dettmers,Tim Dettmers,45914,827,0.37642239417387346,active,67,person,Tim Dettmers,Followed by 827 of 2197 complete active Registry entities.
+67,60,747212842470891520,shaneguml,Shane Gu,50476,818,0.3723258989531179,active,64,person,Shane Gu,Followed by 818 of 2197 complete active Registry entities.
+68,61,1209960539390201864,dwarkesh_sp,Dwarkesh Patel,241858,816,0.3714155666818389,active,66,person,Dwarkesh Patel,Followed by 816 of 2197 complete active Registry entities.
+69,62,284333988,officiallogank,Logan Kilpatrick,339430,811,0.3691397360036413,active,106,person,Logan Kilpatrick,Followed by 811 of 2197 complete active Registry entities.
+70,63,1601593543,davidduvenaud,David Duvenaud,35586,793,0.3609467455621302,active,48,person,David Duvenaud,Followed by 793 of 2197 complete active Registry entities.
+71,64,118263124,stanfordnlp,Stanford NLP Group,189159,782,0.35593991807009556,active,3071,organization,Stanford AI Lab,Followed by 782 of 2197 complete active Registry entities.
+72,65,2466279320,suchenzang,Susan Zhang,46765,781,0.35548475193445606,active,90,person,Susan Zhang,Followed by 781 of 2197 complete active Registry entities.
+73,66,891077171673931776,berkeley_ai,Berkeley AI Research,278806,774,0.3522985889849795,active,3070,organization,Berkeley AI Research,Followed by 774 of 2197 complete active Registry entities.
+74,67,228792418,_rockt,Tim Rocktäschel,46951,773,0.35184342284934,active,57,person,Tim Rocktäschel,Followed by 773 of 2197 complete active Registry entities.
+75,68,44073696,roydanroy,Dan Roy,66758,768,0.34956759217114247,active,56,person,Dan Roy,Followed by 768 of 2197 complete active Registry entities.
+76,69,2210861,jacobandreas,Jacob Andreas,24208,767,0.34911242603550297,active,42,person,Jacob Andreas,Followed by 767 of 2197 complete active Registry entities.
+77,70,615818451,alexandr_wang,Alexandr Wang,545050,766,0.34865725989986346,active,80,person,Alexandr Wang,Followed by 766 of 2197 complete active Registry entities.
+78,70,885528008,liamfedus,Liam Fedus,35361,766,0.34865725989986346,active,104,person,Liam Fedus,Followed by 766 of 2197 complete active Registry entities.
+79,71,905399486,jekbradbury,James Bradbury,17137,765,0.34820209376422395,active,138,person,James Bradbury,Followed by 765 of 2197 complete active Registry entities.
+80,72,2785337469,seb_ruder,Sebastian Ruder,98918,756,0.34410559854346834,active,61,person,Sebastian Ruder,Followed by 756 of 2197 complete active Registry entities.
+81,73,1273327266957688832,markchen90,Mark Chen,74348,754,0.3431952662721893,active,107,person,Mark Chen,Followed by 754 of 2197 complete active Registry entities.
+82,74,893882282175471616,yejinchoinka,Yejin Choi,30095,752,0.3422849340009103,active,59,person,Yejin Choi,Followed by 752 of 2197 complete active Registry entities.
+83,75,768092862,tdietterich,Thomas G. Dietterich,62385,749,0.3409194355939918,active,68,person,Thomas G. Dietterich,Followed by 749 of 2197 complete active Registry entities.
+84,76,65876824,jaschasd,Jascha Sohl-Dickstein,30358,741,0.33727810650887574,active,151,person,Jascha Sohl-Dickstein,Followed by 741 of 2197 complete active Registry entities.
+85,76,568879807,tri_dao,Tri Dao,42854,741,0.33727810650887574,active,118,person,Tri Dao,Followed by 741 of 2197 complete active Registry entities.
+86,77,2902658140,sedielem,Sander Dieleman @ ICML 2026🇰🇷,68841,740,0.33682294037323623,active,97,person,Sander Dieleman @ ICML 2026🇰🇷,Followed by 740 of 2197 complete active Registry entities.
+87,78,938616384572948480,_arohan_,rohan anil,43497,735,0.3345471096950387,active,108,person,rohan anil,Followed by 735 of 2197 complete active Registry entities.
+88,78,746788615951355904,ofirpress,Ofir Press,18771,735,0.3345471096950387,active,84,person,Ofir Press,Followed by 735 of 2197 complete active Registry entities.
+89,78,1163786515144724485,schmidhuberai,Jürgen Schmidhuber,205268,735,0.3345471096950387,active,92,person,Jürgen Schmidhuber,Followed by 735 of 2197 complete active Registry entities.
+90,79,50393960,billgates,Bill Gates,64061980,734,0.3340919435593992,unknown,,,,Followed by 734 of 2197 complete active Registry entities.
+91,80,14130366,sundarpichai,Sundar Pichai,9144603,732,0.3331816112881202,active,111,person,Sundar Pichai,Followed by 732 of 2197 complete active Registry entities.
+92,81,795089712864051200,barret_zoph,Barret Zoph,26081,728,0.33136094674556216,active,109,person,Barret Zoph,Followed by 728 of 2197 complete active Registry entities.
+93,82,1891523745929732096,thinkymachines,Thinking Machines,158275,726,0.3304506144742831,active,9,organization,Thinking Machines Lab,Followed by 726 of 2197 complete active Registry entities.
+94,83,968053955845484545,_sholtodouglas,Sholto Douglas,47466,724,0.3295402822030041,active,110,person,Sholto Douglas,Followed by 724 of 2197 complete active Registry entities.
+95,84,175624200,id_aa_carmack,John Carmack,2847769,720,0.32771961766044605,active,102,person,John Carmack,Followed by 720 of 2197 complete active Registry entities.
+96,85,841499391508779008,zicokolter,Zico Kolter,28595,715,0.3254437869822485,active,85,person,Zico Kolter,Followed by 715 of 2197 complete active Registry entities.
+97,86,1540897980,dustinvtran,Dustin Tran,58447,714,0.324988620846609,active,82,person,Dustin Tran,Followed by 714 of 2197 complete active Registry entities.
+98,87,759894532649545732,aravsrinivas,Aravind Srinivas,808475,712,0.32407828857533,active,105,person,Aravind Srinivas,Followed by 712 of 2197 complete active Registry entities.
+99,88,352013269,beenwrekt,Ben Recht,34518,711,0.3236231224396905,active,60,person,Ben Recht,Followed by 711 of 2197 complete active Registry entities.
+100,89,16535432,goodside,Riley Goodside,216704,710,0.323167956304051,unknown,,,,Followed by 710 of 2197 complete active Registry entities.

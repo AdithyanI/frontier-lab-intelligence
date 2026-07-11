@@ -1,101 +1,101 @@
-rank,x_id,handle,display_name,followers_count,cohort_follow_count,cohort_follow_share,registry_state,entity_id,entity_kind,entity_name,explanation
-25,2465283662,_akhaliq,AK,510394,1087,0.48986029743127535,unknown,,,,Followed by 1087 complete active Registry sources.
-55,183749519,paulg,Paul Graham,3973595,850,0.3830554303740424,unknown,,,,Followed by 850 complete active Registry sources.
-64,5943622,pmarca,Marc Andreessen 🇺🇸,4584737,829,0.37359170797656605,unknown,,,,Followed by 829 complete active Registry sources.
-91,50393960,billgates,Bill Gates,64061980,734,0.330779630464173,unknown,,,,Followed by 734 complete active Registry sources.
-100,16535432,goodside,Riley Goodside,216704,710,0.3199639477242001,unknown,,,,Followed by 710 complete active Registry sources.
-123,4939401,patrickc,Patrick Collison,1286137,658,0.29652996845425866,unknown,,,,Followed by 658 complete active Registry sources.
-135,776585502606721024,pytorch,PyTorch,500981,630,0.28391167192429023,unknown,,,,Followed by 630 complete active Registry sources.
-143,813286,barackobama,Barack Obama,119214481,622,0.28030644434429924,unknown,,,,Followed by 622 complete active Registry sources.
-147,427089628,lexfridman,Lex Fridman,5125931,618,0.2785038305543037,unknown,,,,Followed by 618 complete active Registry sources.
-163,82364810,mit_csail,MIT CSAIL,347091,592,0.266786840919333,unknown,,,,Followed by 592 complete active Registry sources.
-171,387156826,icmlconf,ICML Conference,86502,582,0.2622803064443443,unknown,,,,Followed by 582 complete active Registry sources.
-173,1013971684624424960,iclr_conf,ICLR,59995,581,0.2618296529968454,unknown,,,,Followed by 581 complete active Registry sources.
-198,15626406,michael_nielsen,Michael Nielsen,119795,553,0.24921135646687698,unknown,,,,Followed by 553 complete active Registry sources.
-237,2877269376,3blue1brown,Grant Sanderson,445625,498,0.22442541685443892,unknown,,,,Followed by 498 complete active Registry sources.
-241,13348,scobleizer,Robert Scoble,591431,495,0.22307345651194233,unknown,,,,Followed by 495 complete active Registry sources.
-246,1128159740599656448,nearcyan,near,189849,490,0.22082018927444794,unknown,,,,Followed by 490 complete active Registry sources.
-254,783356145670852608,distillpub,Distill,39363,483,0.21766561514195584,unknown,,,,Followed by 483 complete active Registry sources.
-256,168805139,ykilcher,Yannic Kilcher 🇸🇨,89172,481,0.21676430824695808,unknown,,,,Followed by 481 complete active Registry sources.
-261,173157358,felixhill84,Felix Hill,12464,478,0.21541234790446148,unknown,,,,Followed by 478 complete active Registry sources.
-270,42226885,vkhosla,Vinod Khosla,721343,469,0.2113564668769716,unknown,,,,Followed by 469 complete active Registry sources.
-273,1396491776739905542,techemails,Internal Tech Emails,594830,465,0.2095538530869761,unknown,,,,Followed by 465 complete active Registry sources.
-287,149763,sriramk,Sriram Krishnan,310742,455,0.20504731861198738,unknown,,,,Followed by 455 complete active Registry sources.
-294,745273,naval,Naval,3605906,451,0.2032447048219919,unknown,,,,Followed by 451 complete active Registry sources.
-306,295218901,vitalikbuterin,vitalik.eth,6931648,444,0.20009013068949977,unknown,,,,Followed by 444 complete active Registry sources.
-316,1526643050,slatestarcodex,Scott Alexander,166013,435,0.1960342496620099,unknown,,,,Followed by 435 complete active Registry sources.
-324,11766442,dennybritz,Denny Britz,47142,430,0.19378098242451555,unknown,,,,Followed by 430 complete active Registry sources.
-327,16017475,natesilver538,Nate Silver,3029258,429,0.19333032897701669,unknown,,,,Followed by 429 complete active Registry sources.
-332,1504845539468263451,byjohnnylee,Johnny Lee,30425,426,0.19197836863452006,unknown,,,,Followed by 426 complete active Registry sources.
-345,2178012643,balajis,Balaji,1834281,417,0.1879224876070302,unknown,,,,Followed by 417 complete active Registry sources.
-362,3448284313,omarsar0,elvis,310527,409,0.18431726002703921,unknown,,,,Followed by 409 complete active Registry sources.
-365,254107028,tensorflow,TensorFlow,376868,407,0.18341595313204145,unknown,,,,Followed by 407 complete active Registry sources.
-368,709543955126333440,boredyannlecun,Bored Yann LeCun,21877,406,0.1829652996845426,unknown,,,,Followed by 406 complete active Registry sources.
-380,929791330519322624,black_in_ai,Black in AI,42517,401,0.18071203244704823,unknown,,,,Followed by 401 complete active Registry sources.
-381,914061,levie,Aaron Levie,3045114,400,0.18026137899954936,unknown,,,,Followed by 400 complete active Registry sources.
-386,8496762,tylercowen,tylercowen,349418,396,0.17845876520955387,unknown,,,,Followed by 396 complete active Registry sources.
-395,636513296,nikitabier,Nikita Bier,1185582,393,0.17710680486705724,unknown,,,,Followed by 393 complete active Registry sources.
-405,3452911,kevinweil,Kevin Weil 🇺🇸,121248,388,0.17485353762956288,unknown,,,,Followed by 388 complete active Registry sources.
-414,192201556,teortaxestex,Teortaxes▶️ (DeepSeek 推特🐋铁粉 2023 – ∞),69259,384,0.17305092383956738,unknown,,,,Followed by 384 complete active Registry sources.
-416,1173552893003255808,yacinemtb,kache,316301,383,0.1726002703920685,unknown,,,,Followed by 383 complete active Registry sources.
-417,1538525334781370368,andrewcurran_,Andrew Curran,73370,382,0.17214961694456962,unknown,,,,Followed by 382 complete active Registry sources.
-422,16242081,bhorowitz,benahorowitz.eth,727677,378,0.17034700315457413,unknown,,,,Followed by 378 complete active Registry sources.
-434,1067218780806307841,stanfordhai,Stanford HAI,107412,373,0.16809373591707977,unknown,,,,Followed by 373 complete active Registry sources.
-437,64844802,a16z,a16z,1020436,371,0.167192429022082,unknown,,,,Followed by 371 complete active Registry sources.
-443,939091,joebiden,Joe Biden,37901656,370,0.16674177557458314,unknown,,,,Followed by 370 complete active Registry sources.
-447,113130846,ycombinator,Y Combinator,1622404,369,0.16629112212708427,unknown,,,,Followed by 369 complete active Registry sources.
-468,20844341,patio11,Patrick McKenzie,196277,358,0.16133393420459666,unknown,,,,Followed by 358 complete active Registry sources.
-490,2865100348,wimlworkshop,WiML,17701,352,0.15863001351960343,unknown,,,,Followed by 352 complete active Registry sources.
-492,9445792,zoink,Dylan Field,261415,352,0.15863001351960343,unknown,,,,Followed by 352 complete active Registry sources.
-499,446719282,shivon,Shivon Zilis,441652,350,0.15772870662460567,unknown,,,,Followed by 350 complete active Registry sources.
-500,138203134,aoc,Alexandria Ocasio-Cortez,12700808,349,0.1572780531771068,unknown,,,,Followed by 349 complete active Registry sources.
-503,281877818,noahpinion,Noah Smith 🐇🇺🇸🇺🇦🇹🇼,713884,349,0.1572780531771068,unknown,,,,Followed by 349 complete active Registry sources.
-504,17468569,bryan_johnson,Bryan Johnson,1644679,348,0.15682739972960794,unknown,,,,Followed by 348 complete active Registry sources.
-519,5418912,collision,John Collison,237247,342,0.15412347904461468,unknown,,,,Followed by 342 complete active Registry sources.
-521,1282121312,waitbutwhy,Tim Urban,901108,342,0.15412347904461468,unknown,,,,Followed by 342 complete active Registry sources.
-524,25073877,realdonaldtrump,Donald J. Trump,111740112,341,0.15367282559711581,unknown,,,,Followed by 341 complete active Registry sources.
-547,3319762895,lulumeservey,Lulu Cheng Meservey,138855,335,0.1509689049121226,unknown,,,,Followed by 335 complete active Registry sources.
-558,18816166,kevinroose,Kevin Roose,172553,332,0.14961694456962596,unknown,,,,Followed by 332 complete active Registry sources.
-561,1838288550569349120,tbpn,TBPN,967003,332,0.14961694456962596,unknown,,,,Followed by 332 complete active Registry sources.
-562,2781430855,adampaulcoates,Adam Coates,30276,331,0.1491662911221271,unknown,,,,Followed by 331 complete active Registry sources.
-564,591797093,sanhestpasmoi,Victor Sanh,9401,331,0.1491662911221271,unknown,,,,Followed by 331 complete active Registry sources.
-565,1546624215628910592,ai__pub,AI Pub,71466,330,0.1487156376746282,unknown,,,,Followed by 330 complete active Registry sources.
-566,11518572,chrisalbon,Chris Albon,92158,330,0.1487156376746282,unknown,,,,Followed by 330 complete active Registry sources.
-568,1577241403,levelsio,@levelsio,913681,330,0.1487156376746282,unknown,,,,Followed by 330 complete active Registry sources.
-570,3716745856,uwnlp,UW NLP,14766,329,0.14826498422712933,unknown,,,,Followed by 329 complete active Registry sources.
-575,1076526138736951298,paperswithcode,Papers with Code,113255,325,0.14646237043713384,unknown,,,,Followed by 325 complete active Registry sources.
-576,23511272,tunguz,Bojan Tunguz,292307,325,0.14646237043713384,unknown,,,,Followed by 325 complete active Registry sources.
-586,715582520197156865,taliaringer,Talia Ringer 🕊🪬,32834,322,0.14511041009463724,unknown,,,,Followed by 322 complete active Registry sources.
-603,1008492120125030400,kelseytuoc,Kelsey Piper,65521,317,0.14285714285714285,unknown,,,,Followed by 317 complete active Registry sources.
-615,1113492634021048320,cohere_labs,Cohere Labs,26808,313,0.14105452906714736,unknown,,,,Followed by 313 complete active Registry sources.
-627,14230772,matt_levine,Matt Levine,324673,310,0.13970256872465076,unknown,,,,Followed by 310 complete active Registry sources.
-633,12901712,bchesky,Brian Chesky,1265983,307,0.13835060838215413,unknown,,,,Followed by 307 complete active Registry sources.
-637,999823638932189184,mila_quebec,Mila - Institut québécois d'IA,36437,307,0.13835060838215413,unknown,,,,Followed by 307 complete active Registry sources.
-639,950189417754513409,charles_irl,Charles 🎉 Frye @ ICML,19107,306,0.13789995493465526,unknown,,,,Followed by 306 complete active Registry sources.
-644,845968426011119616,vectorinst,Vector Institute,29623,306,0.13789995493465526,unknown,,,,Followed by 306 complete active Registry sources.
-647,1810393276287168516,eurekalabsai,Eureka Labs,87826,305,0.13744930148715637,unknown,,,,Followed by 305 complete active Registry sources.
-652,1123336792021897216,aclmeeting,ACL 2026,23702,304,0.1369986480396575,unknown,,,,Followed by 304 complete active Registry sources.
-663,18691746,juliagalef,Julia Galef,109355,302,0.13609734114465977,unknown,,,,Followed by 302 complete active Registry sources.
-667,107225267,sapinker,Steven Pinker,857533,302,0.13609734114465977,unknown,,,,Followed by 302 complete active Registry sources.
-675,4157611,willknight,Will Knight,21924,300,0.135196034249662,unknown,,,,Followed by 300 complete active Registry sources.
-681,747538968,hazyresearch,Hazy Research: Strip Mall AI Research Club,11242,297,0.13384407390716538,unknown,,,,Followed by 297 complete active Registry sources.
-689,11348282,nasa,NASA,92163442,296,0.1333934204596665,unknown,,,,Followed by 296 complete active Registry sources.
-690,1349149096909668363,potus46archive,President Biden Archived,35672231,296,0.1333934204596665,unknown,,,,Followed by 296 complete active Registry sources.
-695,957374995721629696,gradientpub,The Gradient,21008,295,0.13294276701216765,unknown,,,,Followed by 295 complete active Registry sources.
-697,1274287728167915522,primeintellect,Prime Intellect,71015,294,0.13249211356466878,unknown,,,,Followed by 294 complete active Registry sources.
-701,5763262,karaswisher,Kara Swisher,1701899,292,0.13159080666967102,unknown,,,,Followed by 292 complete active Registry sources.
-707,1083465257077608451,wtgowers,Timothy Gowers @wtgowers,56788,292,0.13159080666967102,unknown,,,,Followed by 292 complete active Registry sources.
-710,816653,techcrunch,TechCrunch,10414955,291,0.13114015322217215,unknown,,,,Followed by 291 complete active Registry sources.
-716,21066583,cademetz,Cade Metz,32216,289,0.1302388463271744,unknown,,,,Followed by 289 complete active Registry sources.
-723,41609220,isbellhfh,Charles Isbell,8996,288,0.12978819287967552,unknown,,,,Followed by 288 complete active Registry sources.
-727,3511430425,fermatslibrary,Fermat's Library,790494,287,0.12933753943217666,unknown,,,,Followed by 287 complete active Registry sources.
-737,3315205122,deepfates,🎭,62472,285,0.1284362325371789,unknown,,,,Followed by 285 complete active Registry sources.
-740,301427990,laurademing,Laura 🌲 ⛰️,166021,284,0.12798557908968003,unknown,,,,Followed by 284 complete active Registry sources.
-744,18622869,ezraklein,Ezra Klein,2499660,283,0.12753492564218116,unknown,,,,Followed by 283 complete active Registry sources.
-752,1426476636,lishali88,Lisha,18604,282,0.1270842721946823,unknown,,,,Followed by 282 complete active Registry sources.
-754,81961201,ashleevance,Ashlee Vance,201075,281,0.12663361874718343,unknown,,,,Followed by 281 complete active Registry sources.
-766,1254910635906789378,ml_collective,ML Collective,14625,279,0.12573231185218567,unknown,,,,Followed by 279 complete active Registry sources.
-767,41280228,peterjliu,Peter J. Liu,9036,279,0.12573231185218567,unknown,,,,Followed by 279 complete active Registry sources.
-770,5721582,altryne,Alex Volkov @ AI Engineer,41650,278,0.1252816584046868,unknown,,,,Followed by 278 complete active Registry sources.
-775,1561918448766173185,aieleuther,EleutherAI,28308,277,0.12483100495718792,unknown,,,,Followed by 277 complete active Registry sources.
-776,1236101,benedictevans,Benedict Evans,351030,277,0.12483100495718792,unknown,,,,Followed by 277 complete active Registry sources.
+position,score_rank,x_id,handle,display_name,followers_count,cohort_follow_count,cohort_follow_share,registry_state,entity_id,entity_kind,entity_name,explanation
+25,24,2465283662,_akhaliq,AK,510394,1086,0.49431042330450614,unknown,,,,Followed by 1086 of 2197 complete active Registry entities.
+55,52,183749519,paulg,Paul Graham,3973595,850,0.38689121529358217,unknown,,,,Followed by 850 of 2197 complete active Registry entities.
+64,58,5943622,pmarca,Marc Andreessen 🇺🇸,4584737,829,0.3773327264451525,unknown,,,,Followed by 829 of 2197 complete active Registry entities.
+90,79,50393960,billgates,Bill Gates,64061980,734,0.3340919435593992,unknown,,,,Followed by 734 of 2197 complete active Registry entities.
+100,89,16535432,goodside,Riley Goodside,216704,710,0.323167956304051,unknown,,,,Followed by 710 of 2197 complete active Registry entities.
+123,109,4939401,patrickc,Patrick Collison,1286137,658,0.29949931725079654,unknown,,,,Followed by 658 of 2197 complete active Registry entities.
+135,118,776585502606721024,pytorch,PyTorch,500981,630,0.2867546654528903,unknown,,,,Followed by 630 of 2197 complete active Registry entities.
+143,123,813286,barackobama,Barack Obama,119214481,622,0.28311333636777425,unknown,,,,Followed by 622 of 2197 complete active Registry entities.
+147,126,427089628,lexfridman,Lex Fridman,5125931,618,0.2812926718252162,unknown,,,,Followed by 618 of 2197 complete active Registry entities.
+163,137,82364810,mit_csail,MIT CSAIL,347091,592,0.269458352298589,unknown,,,,Followed by 592 of 2197 complete active Registry entities.
+171,144,387156826,icmlconf,ICML Conference,86502,582,0.2649066909421939,unknown,,,,Followed by 582 of 2197 complete active Registry entities.
+173,145,1013971684624424960,iclr_conf,ICLR,59995,581,0.26445152480655437,unknown,,,,Followed by 581 of 2197 complete active Registry entities.
+198,161,15626406,michael_nielsen,Michael Nielsen,119795,553,0.25170687300864814,unknown,,,,Followed by 553 of 2197 complete active Registry entities.
+237,192,2877269376,3blue1brown,Grant Sanderson,445625,498,0.2266727355484752,unknown,,,,Followed by 498 of 2197 complete active Registry entities.
+241,195,13348,scobleizer,Robert Scoble,591431,495,0.22530723714155668,unknown,,,,Followed by 495 of 2197 complete active Registry entities.
+246,199,1128159740599656448,nearcyan,near,189849,490,0.22303140646335912,unknown,,,,Followed by 490 of 2197 complete active Registry entities.
+254,204,783356145670852608,distillpub,Distill,39363,483,0.21984524351388257,unknown,,,,Followed by 483 of 2197 complete active Registry entities.
+256,205,168805139,ykilcher,Yannic Kilcher 🇸🇨,89172,481,0.21893491124260356,unknown,,,,Followed by 481 of 2197 complete active Registry entities.
+261,208,173157358,felixhill84,Felix Hill,12464,478,0.21756941283568504,unknown,,,,Followed by 478 of 2197 complete active Registry entities.
+270,214,42226885,vkhosla,Vinod Khosla,721343,469,0.21347291761492945,unknown,,,,Followed by 469 of 2197 complete active Registry entities.
+273,216,1396491776739905542,techemails,Internal Tech Emails,594830,465,0.21165225307237143,unknown,,,,Followed by 465 of 2197 complete active Registry entities.
+287,222,149763,sriramk,Sriram Krishnan,310742,455,0.20710059171597633,unknown,,,,Followed by 455 of 2197 complete active Registry entities.
+294,224,745273,naval,Naval,3605906,451,0.2052799271734183,unknown,,,,Followed by 451 of 2197 complete active Registry entities.
+306,230,295218901,vitalikbuterin,vitalik.eth,6931648,444,0.20209376422394174,unknown,,,,Followed by 444 of 2197 complete active Registry entities.
+316,237,1526643050,slatestarcodex,Scott Alexander,166013,435,0.19799726900318615,unknown,,,,Followed by 435 of 2197 complete active Registry entities.
+323,241,11766442,dennybritz,Denny Britz,47142,430,0.19572143832498862,unknown,,,,Followed by 430 of 2197 complete active Registry entities.
+327,242,16017475,natesilver538,Nate Silver,3029258,429,0.1952662721893491,unknown,,,,Followed by 429 of 2197 complete active Registry entities.
+332,245,1504845539468263451,byjohnnylee,Johnny Lee,30425,426,0.1939007737824306,unknown,,,,Followed by 426 of 2197 complete active Registry entities.
+345,253,2178012643,balajis,Balaji,1834281,417,0.189804278561675,unknown,,,,Followed by 417 of 2197 complete active Registry entities.
+362,259,3448284313,omarsar0,elvis,310527,409,0.18616294947655895,unknown,,,,Followed by 409 of 2197 complete active Registry entities.
+367,262,709543955126333440,boredyannlecun,Bored Yann LeCun,21877,406,0.1847974510696404,unknown,,,,Followed by 406 of 2197 complete active Registry entities.
+374,263,254107028,tensorflow,TensorFlow,376868,405,0.1843422849340009,unknown,,,,Followed by 405 of 2197 complete active Registry entities.
+380,266,929791330519322624,black_in_ai,Black in AI,42517,401,0.18252162039144287,unknown,,,,Followed by 401 of 2197 complete active Registry entities.
+381,267,914061,levie,Aaron Levie,3045114,400,0.18206645425580337,unknown,,,,Followed by 400 of 2197 complete active Registry entities.
+385,270,8496762,tylercowen,tylercowen,349418,396,0.18024578971324534,unknown,,,,Followed by 396 of 2197 complete active Registry entities.
+395,273,636513296,nikitabier,Nikita Bier,1185582,393,0.17888029130632682,unknown,,,,Followed by 393 of 2197 complete active Registry entities.
+405,278,3452911,kevinweil,Kevin Weil 🇺🇸,121248,388,0.17660446062812926,unknown,,,,Followed by 388 of 2197 complete active Registry entities.
+414,281,192201556,teortaxestex,Teortaxes▶️ (DeepSeek 推特🐋铁粉 2023 – ∞),69259,384,0.17478379608557124,unknown,,,,Followed by 384 of 2197 complete active Registry entities.
+416,282,1173552893003255808,yacinemtb,kache,316301,383,0.17432862994993173,unknown,,,,Followed by 383 of 2197 complete active Registry entities.
+417,283,1538525334781370368,andrewcurran_,Andrew Curran,73370,382,0.17387346381429222,unknown,,,,Followed by 382 of 2197 complete active Registry entities.
+422,286,16242081,bhorowitz,benahorowitz.eth,727677,378,0.17205279927173417,unknown,,,,Followed by 378 of 2197 complete active Registry entities.
+434,291,1067218780806307841,stanfordhai,Stanford HAI,107412,373,0.16977696859353664,unknown,,,,Followed by 373 of 2197 complete active Registry entities.
+437,293,64844802,a16z,a16z,1020436,371,0.16886663632225762,unknown,,,,Followed by 371 of 2197 complete active Registry entities.
+443,294,939091,joebiden,Joe Biden,37901656,370,0.16841147018661812,unknown,,,,Followed by 370 of 2197 complete active Registry entities.
+447,295,113130846,ycombinator,Y Combinator,1622404,369,0.1679563040509786,unknown,,,,Followed by 369 of 2197 complete active Registry entities.
+468,304,20844341,patio11,Patrick McKenzie,196277,358,0.162949476558944,unknown,,,,Followed by 358 of 2197 complete active Registry entities.
+489,310,2865100348,wimlworkshop,WiML,17701,352,0.16021847974510697,unknown,,,,Followed by 352 of 2197 complete active Registry entities.
+491,310,9445792,zoink,Dylan Field,261415,352,0.16021847974510697,unknown,,,,Followed by 352 of 2197 complete active Registry entities.
+498,312,446719282,shivon,Shivon Zilis,441652,350,0.15930814747382796,unknown,,,,Followed by 350 of 2197 complete active Registry entities.
+499,313,138203134,aoc,Alexandria Ocasio-Cortez,12700808,349,0.15885298133818843,unknown,,,,Followed by 349 of 2197 complete active Registry entities.
+502,313,281877818,noahpinion,Noah Smith 🐇🇺🇸🇺🇦🇹🇼,713884,349,0.15885298133818843,unknown,,,,Followed by 349 of 2197 complete active Registry entities.
+503,314,17468569,bryan_johnson,Bryan Johnson,1644679,348,0.15839781520254892,unknown,,,,Followed by 348 of 2197 complete active Registry entities.
+519,319,5418912,collision,John Collison,237247,342,0.15566681838871188,unknown,,,,Followed by 342 of 2197 complete active Registry entities.
+521,319,1282121312,waitbutwhy,Tim Urban,901108,342,0.15566681838871188,unknown,,,,Followed by 342 of 2197 complete active Registry entities.
+524,320,25073877,realdonaldtrump,Donald J. Trump,111740112,341,0.15521165225307237,unknown,,,,Followed by 341 of 2197 complete active Registry entities.
+547,326,3319762895,lulumeservey,Lulu Cheng Meservey,138855,335,0.1524806554392353,unknown,,,,Followed by 335 of 2197 complete active Registry entities.
+558,329,18816166,kevinroose,Kevin Roose,172553,332,0.1511151570323168,unknown,,,,Followed by 332 of 2197 complete active Registry entities.
+561,329,1838288550569349120,tbpn,TBPN,967003,332,0.1511151570323168,unknown,,,,Followed by 332 of 2197 complete active Registry entities.
+562,330,2781430855,adampaulcoates,Adam Coates,30276,331,0.15065999089667728,unknown,,,,Followed by 331 of 2197 complete active Registry entities.
+564,330,591797093,sanhestpasmoi,Victor Sanh,9401,331,0.15065999089667728,unknown,,,,Followed by 331 of 2197 complete active Registry entities.
+565,331,1546624215628910592,ai__pub,AI Pub,71466,330,0.15020482476103778,unknown,,,,Followed by 330 of 2197 complete active Registry entities.
+566,331,11518572,chrisalbon,Chris Albon,92158,330,0.15020482476103778,unknown,,,,Followed by 330 of 2197 complete active Registry entities.
+567,331,1577241403,levelsio,@levelsio,913681,330,0.15020482476103778,unknown,,,,Followed by 330 of 2197 complete active Registry entities.
+570,332,3716745856,uwnlp,UW NLP,14766,329,0.14974965862539827,unknown,,,,Followed by 329 of 2197 complete active Registry entities.
+575,335,1076526138736951298,paperswithcode,Papers with Code,113255,325,0.14792899408284024,unknown,,,,Followed by 325 of 2197 complete active Registry entities.
+576,335,23511272,tunguz,Bojan Tunguz,292307,325,0.14792899408284024,unknown,,,,Followed by 325 of 2197 complete active Registry entities.
+586,338,715582520197156865,taliaringer,Talia Ringer 🕊🪬,32834,322,0.14656349567592172,unknown,,,,Followed by 322 of 2197 complete active Registry entities.
+603,343,1008492120125030400,kelseytuoc,Kelsey Piper,65521,317,0.14428766499772416,unknown,,,,Followed by 317 of 2197 complete active Registry entities.
+615,347,1113492634021048320,cohere_labs,Cohere Labs,26808,313,0.14246700045516614,unknown,,,,Followed by 313 of 2197 complete active Registry entities.
+627,350,14230772,matt_levine,Matt Levine,324673,310,0.14110150204824762,unknown,,,,Followed by 310 of 2197 complete active Registry entities.
+633,353,12901712,bchesky,Brian Chesky,1265983,307,0.1397360036413291,unknown,,,,Followed by 307 of 2197 complete active Registry entities.
+637,353,999823638932189184,mila_quebec,Mila - Institut québécois d'IA,36437,307,0.1397360036413291,unknown,,,,Followed by 307 of 2197 complete active Registry entities.
+639,354,950189417754513409,charles_irl,Charles 🎉 Frye @ ICML,19107,306,0.13928083750568956,unknown,,,,Followed by 306 of 2197 complete active Registry entities.
+644,354,845968426011119616,vectorinst,Vector Institute,29623,306,0.13928083750568956,unknown,,,,Followed by 306 of 2197 complete active Registry entities.
+647,355,1810393276287168516,eurekalabsai,Eureka Labs,87826,305,0.13882567137005006,unknown,,,,Followed by 305 of 2197 complete active Registry entities.
+652,356,1123336792021897216,aclmeeting,ACL 2026,23702,304,0.13837050523441055,unknown,,,,Followed by 304 of 2197 complete active Registry entities.
+663,358,18691746,juliagalef,Julia Galef,109355,302,0.13746017296313154,unknown,,,,Followed by 302 of 2197 complete active Registry entities.
+667,358,107225267,sapinker,Steven Pinker,857533,302,0.13746017296313154,unknown,,,,Followed by 302 of 2197 complete active Registry entities.
+675,360,4157611,willknight,Will Knight,21924,300,0.13654984069185253,unknown,,,,Followed by 300 of 2197 complete active Registry entities.
+686,364,747538968,hazyresearch,Hazy Research: Strip Mall AI Research Club,11242,296,0.1347291761492945,unknown,,,,Followed by 296 of 2197 complete active Registry entities.
+689,364,11348282,nasa,NASA,92163442,296,0.1347291761492945,unknown,,,,Followed by 296 of 2197 complete active Registry entities.
+690,364,1349149096909668363,potus46archive,President Biden Archived,35672231,296,0.1347291761492945,unknown,,,,Followed by 296 of 2197 complete active Registry entities.
+695,365,957374995721629696,gradientpub,The Gradient,21008,295,0.134274010013655,unknown,,,,Followed by 295 of 2197 complete active Registry entities.
+697,366,1274287728167915522,primeintellect,Prime Intellect,71015,294,0.1338188438780155,unknown,,,,Followed by 294 of 2197 complete active Registry entities.
+701,368,5763262,karaswisher,Kara Swisher,1701899,292,0.13290851160673645,unknown,,,,Followed by 292 of 2197 complete active Registry entities.
+707,368,1083465257077608451,wtgowers,Timothy Gowers @wtgowers,56788,292,0.13290851160673645,unknown,,,,Followed by 292 of 2197 complete active Registry entities.
+710,369,816653,techcrunch,TechCrunch,10414955,291,0.13245334547109694,unknown,,,,Followed by 291 of 2197 complete active Registry entities.
+716,371,21066583,cademetz,Cade Metz,32216,289,0.13154301319981793,unknown,,,,Followed by 289 of 2197 complete active Registry entities.
+723,372,41609220,isbellhfh,Charles Isbell,8996,288,0.13108784706417842,unknown,,,,Followed by 288 of 2197 complete active Registry entities.
+727,373,3511430425,fermatslibrary,Fermat's Library,790494,287,0.1306326809285389,unknown,,,,Followed by 287 of 2197 complete active Registry entities.
+737,375,3315205122,deepfates,🎭,62472,285,0.1297223486572599,unknown,,,,Followed by 285 of 2197 complete active Registry entities.
+740,376,301427990,laurademing,Laura 🌲 ⛰️,166021,284,0.1292671825216204,unknown,,,,Followed by 284 of 2197 complete active Registry entities.
+744,377,18622869,ezraklein,Ezra Klein,2499660,283,0.1288120163859809,unknown,,,,Followed by 283 of 2197 complete active Registry entities.
+752,378,1426476636,lishali88,Lisha,18604,282,0.12835685025034138,unknown,,,,Followed by 282 of 2197 complete active Registry entities.
+754,379,81961201,ashleevance,Ashlee Vance,201075,281,0.12790168411470187,unknown,,,,Followed by 281 of 2197 complete active Registry entities.
+766,381,1254910635906789378,ml_collective,ML Collective,14625,279,0.12699135184342286,unknown,,,,Followed by 279 of 2197 complete active Registry entities.
+767,381,41280228,peterjliu,Peter J. Liu,9036,279,0.12699135184342286,unknown,,,,Followed by 279 of 2197 complete active Registry entities.
+770,382,5721582,altryne,Alex Volkov @ AI Engineer,41650,278,0.12653618570778333,unknown,,,,Followed by 278 of 2197 complete active Registry entities.
+775,383,1561918448766173185,aieleuther,EleutherAI,28308,277,0.12608101957214382,unknown,,,,Followed by 277 of 2197 complete active Registry entities.
+776,383,1236101,benedictevans,Benedict Evans,351030,277,0.12608101957214382,unknown,,,,Followed by 277 of 2197 complete active Registry entities.

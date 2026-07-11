@@ -83,7 +83,21 @@
     "finalize": ".venv/bin/fli following-snapshot finalize --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db --no-input"
   },
   "outputs": {
-    "ranking": null,
+    "ranking": {
+      "analysis_schema_version": "following-analysis-v2",
+      "derived_database_path": "data/derived/following/registry-following-2026-07-11-v1/analysis.db",
+      "default_algorithm": "entity-overlap-v2",
+      "overlap_run_id": "181d539ebc7ec1adee8c28adbec0c0a578f151eb116f9bba021094d915dab0f9",
+      "pagerank_run_id": "f00269b4d87471f65af0c74b7e8383cbfaadde99fba1819763b2c0424e44258a",
+      "personalization_manifest": "data/following/personalizations/trusted-personalization-2026-07-11-v1.json",
+      "review_artifacts": [
+        "docs/projects/trusted-following-ranking/resources/overlap-top-100.csv",
+        "docs/projects/trusted-following-ranking/resources/overlap-top-100-unknown.csv",
+        "docs/projects/trusted-following-ranking/resources/pagerank-top-100-comparison.csv",
+        "docs/projects/trusted-following-ranking/resources/pagerank-top-100-unknown.csv"
+      ],
+      "decision": "Entity overlap advances to human review; personalized PageRank remains diagnostic because seed and dangling-node bias reduce general ranking quality."
+    },
     "evaluation": null
   }
 }

@@ -12,8 +12,8 @@ edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
 1,000-account ranking survives only as an offline comparison CSV; the active
 graph is empty at the cleanup checkpoint. A frozen broad Registry-cohort
-outgoing-follow snapshot is now complete; the next graph step is a smaller
-reviewed PageRank personalization set and ranking comparison. The `labs` table remains internal source/seed provenance
+outgoing-follow snapshot, entity-overlap baseline, and experimental PageRank
+comparison are complete; bounded human top-k evaluation is next. The `labs` table remains internal source/seed provenance
 because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
@@ -206,14 +206,25 @@ snapshot contains 13,409 raw pages, 463,180 distinct target accounts, and
 `$27.81218`. The tracked manifest binds those facts to the local 2.0 GB database
 checksum.
 
-The first derived ranking is now live. `fli.following_rankings` materializes a
+The first derived rankings are now live. `fli.following_rankings` materializes a
 snapshot- and Registry-checksummed active/rejected/unknown X-ID map in an
 ignored `analysis.db`, then ranks every discovered account by the number of
-distinct complete active Registry sources that follow it. The command can read
+distinct complete active Registry entities that follow it; multiple X channels
+owned by one organization contribute at most one vote. The command can read
 only the frozen snapshot edge table and an authorizer-limited set of Registry
 identity tables; it cannot read legacy `data/fli.db.graph_edges`. The first run
-reconciled 2,219 complete active sources, 2,456,305 edges, and 463,180 ranked
-accounts. Raw followers are display evidence, not an overlap input.
+reconciled 2,219 complete active source accounts, 2,197 voting entities,
+2,456,305 raw eligible edges, 2,456,084 deduplicated entity-target votes, and
+463,180 ranked accounts. Raw followers are display evidence, not an overlap
+input. Equal overlap counts share one dense score rank and use a separate
+deterministic display position.
+
+An experimental 30-source personalized PageRank also runs over the same edge
+boundary and stores its direct comparison in the derived database. It
+converged correctly, but only 37.9% of its top 100 overlaps the simple baseline;
+the reviewed seeds and their immediate neighbors dominate because most target
+nodes have no collected outgoing edges. PageRank therefore remains diagnostic,
+while entity-overlap advances to human top-k evaluation as the default ranking.
 
 Known data facts:
 
@@ -679,7 +690,7 @@ final score.
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io profile, timeline, X-list, and single-source outgoing-follow adapter; provenance only, no classification |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
-| `fli.following_rankings` | derived screened-source overlap baseline with deterministic runs and active/rejected/unknown mapping; personalized PageRank pending |
+| `fli.following_rankings` | derived entity-overlap baseline plus experimental personalized PageRank/comparison with deterministic runs and active/rejected/unknown mapping |
 | `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/rankings/followers/{x_id}`) + built SPA host; Registry is server-paged, reach-sorted, searchable by identity fields, and exposes people, organizations, unsure results, rejections, and classifier reasons; the Ranking tab renders the derived cohort-trust orbit read-only from `analysis.db` + the frozen snapshot; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
@@ -691,7 +702,7 @@ final score.
 
 ## Build Order
 
-1. Evaluate the isolated Registry-cohort outgoing-follow snapshot with overlap and personalized PageRank.
+1. Human-label the entity-overlap top-k and decide the bounded Registry candidate shortlist; PageRank remains diagnostic.
 2. Promote raw fetch into production ingestion around accepted entity channels.
 3. Extract and score real ingested data.
 4. Add validation harness and ground-truth labeling.

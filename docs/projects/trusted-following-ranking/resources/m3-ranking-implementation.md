@@ -34,14 +34,17 @@ Registry identity exists. Entity-level linkage is enough; do not carry
 ## Ranking work (in order)
 
 1. **Overlap baseline first.** For every target account: count of distinct
-   complete screened cohort sources following it (`cohort_follow_count`), restricted to the
-   frozen snapshot. Emit rank, count, handle, known/unknown flag. This is the
+   complete, active Registry **entities** following it (`cohort_follow_count`),
+   restricted to the frozen snapshot. Multiple official X channels owned by
+   one entity contribute at most one vote to a target. Preserve raw eligible
+   X-account and edge counts separately for provenance. Emit dense score rank,
+   deterministic display position, count, handle, and known/unknown flag. This is the
    explainable baseline everything else is compared against.
 2. **Personalized PageRank second.** Same snapshot, edges restricted to the
    collection boundary by construction (a ranking command must be physically
    unable to read `fli.db.graph_edges` or any legacy source). Personalization
-   vector = the smaller reviewed trust set (to be frozen and versioned with
-   short reasons before the run; still owed). Treat PageRank as an experiment,
+   vector = the smaller reviewed trust set, frozen and versioned with short
+   reasons before the run. Treat PageRank as an experiment,
    not an assumed improvement: only collected Registry sources have outgoing
    edges, while most target accounts are dangling nodes.
 3. **Comparison artifact.** One derived table + one exported CSV comparing

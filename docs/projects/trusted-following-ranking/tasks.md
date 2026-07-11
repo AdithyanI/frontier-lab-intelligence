@@ -47,19 +47,19 @@ candidate generator while demonstrating ranking and validation discipline.
   comparison artifact documented in
   `docs/references/digg-ranking-baseline.md`.
 - The repo has a tested X-following provider adapter. The rejected global
-  PageRank implementation was removed; replacement ranking must read only the
-  future isolated snapshot boundary.
+  PageRank implementation was removed; replacement ranking reads only the
+  isolated immutable snapshot boundary.
 - External fetches must be bounded, attributable, and cost-recorded.
 
 ## Done When
 
 - [x] The cleaned Registry collection cohort has a byte-exact checkpoint with
   a documented recovery path.
-- [ ] The smaller personalization set and reasons are versioned and reviewable.
+- [x] The smaller personalization set and reasons are versioned and reviewable.
 - [x] Fresh outgoing-follow snapshots persist edge direction, seed, source,
   fetch time, completeness, and stable identity.
-- [ ] New ranking commands cannot read legacy edges accidentally.
-- [ ] Trusted-follow count and personalized PageRank are compared on the same
+- [x] New ranking commands cannot read legacy edges accidentally.
+- [x] Trusted-follow count and personalized PageRank are compared on the same
   frozen snapshot.
 - [ ] A labeled top-result review records precision/ranking quality and at
   least the most important failure modes.
@@ -75,7 +75,7 @@ candidate generator while demonstrating ranking and validation discipline.
   outgoing follows for every accessible frozen cohort account are persisted
   with provenance, inaccessible accounts are explicit, and the snapshot can be
   reproduced without touching legacy edges.
-- [ ] M3 — Rank and compare. Acceptance: overlap baseline and personalized
+- [x] M3 — Rank and compare. Acceptance: overlap baseline and personalized
   PageRank run over the same snapshot and emit inspectable explanations.
 - [ ] M4 — Evaluate and decide. Acceptance: labeled top-k review supports an
   explicit keep/change/stop decision and a bounded Registry shortlist.
@@ -96,7 +96,9 @@ candidate generator while demonstrating ranking and validation discipline.
 ## Decisions
 
 - Rebuild from trusted accounts' outgoing follows, not their followers.
-- Prefer personalized PageRank seeded by the trusted set over global PageRank.
+- Compare personalized PageRank seeded by the reviewed set against entity
+  overlap; the measured first run keeps PageRank diagnostic and advances
+  entity overlap to human review.
 - The active database starts from two public source lists plus the 10 curated
   labs plus the restored post-floor classified nodes. Digg rank is offline;
   only neutral bootstrap-origin markers remain active. Personal following data
@@ -207,8 +209,8 @@ candidate generator while demonstrating ranking and validation discipline.
 ## Open Questions / Blockers
 
 - What top-k size and relevance labels will Adi review for the evaluation?
-- Which organizations and people receive personalization weight after the
-  broad collection snapshot is frozen?
+- Does Adi accept the experimental 30-source personalization set as a durable
+  diagnostic, or want edits before any future niche-personalization use?
 
 ## Current Batch
 
@@ -242,21 +244,21 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-overlap-baseline.md` |
 | done | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
 | done | Apply the snapshot-pinned organization-coverage manifest, including NVIDIA/AMD/Intel compute anchors, and prove dry-run/replay safety. | parent | `../../../data/registry/organization-coverage.json` |
-| in_progress | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
-| in_progress | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-ranking-implementation.md` |
+| done | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `../../../data/following/personalizations/trusted-personalization-2026-07-11-v1.json` |
+| done | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-pagerank-comparison.md` |
 
 ## Backlog / Remaining Work
 
 - [x] Freeze the cleaned Registry collection cohort and recovery checkpoint.
-- [ ] Freeze the smaller PageRank personalization set.
+- [x] Freeze the smaller PageRank personalization set.
 - [x] Complete the bounded Registry relevance cleanup and reconcile the stale
   manual top-100 artifact against the accepted web-grounded boundary.
 - [x] Implement isolated, immutable snapshot storage, freeze the broad
   collection cohort, and complete bounded provider ingestion.
-- [ ] Implement overlap baseline and personalized PageRank.
+- [x] Implement overlap baseline and personalized PageRank.
 - [ ] Build and review the labeled top-k evaluation.
-- [ ] Update architecture and append the build log after meaningful changes.
-- [ ] Run `scripts/check-fast.sh` and milestone-specific tests.
+- [x] Update architecture and append the build log after meaningful changes.
+- [x] Run `scripts/check-fast.sh` and milestone-specific tests.
 - [ ] Review project learnings and archive the tracker at closeout.
 
 ## Validation / Test Plan
@@ -559,8 +561,29 @@ candidate generator while demonstrating ranking and validation discipline.
   top-100 review CSVs. The deterministic production run ranked 463,180 accounts
   from 2,456,305 edges and 2,219 complete active sources; 2,240 map active, 13
   rejected, and 460,927 unknown. An identical replay reused the same context
-  and run without duplicate rows. Personalized PageRank and human top-k review
-  remain next.
+  and run without duplicate rows. At that checkpoint, personalized PageRank
+  and human top-k review were the remaining steps.
+- 2026-07-11: [DONE] Adversarially audited and corrected the M3 ranking
+  foundation without touching the UI. Protected source databases and manifests
+  from colliding outputs, transactionally snapshotted the live Registry before
+  hashing, validated the complete frozen snapshot, failed closed on orphaned
+  identities, included zero-score targets, reconciled reused rows, and proved
+  a real legacy-graph query is denied. Corrected the vote unit from X accounts
+  to real Registry entities: 2,219 complete source accounts resolve to 2,197
+  voters over 2,456,305 edges and 2,456,084 deduplicated entity-target votes.
+  Ties now share a dense score rank with separate deterministic position.
+- 2026-07-11: [DONE] Froze a balanced experimental 30-source personalization
+  manifest and completed personalized PageRank over the same immutable graph.
+  The run converged after 104 iterations at L1 delta 9.83e-11 with score mass
+  exactly 1.0, then replayed idempotently. Only 37.9% of its top 100 overlaps
+  entity-overlap; all 30 seeds appear in the PageRank top 100 and narrow
+  one-hop neighbors dominate its unknown results. PageRank remains diagnostic;
+  entity-overlap advances as the default input to bounded M4 human review.
+- 2026-07-11: [DONE] Completed the final M3 consolidation pass. Documented the
+  immutable-evidence versus disposable-derived storage boundary, added
+  symlink-alias overwrite coverage, normalized tracked CSV line endings, and
+  removed temporary ranking outputs. `scripts/check-fast.sh` passed with 107
+  tests plus frontend lint and production build. No Ranking UI source changed.
 - 2026-07-11: [DONE] Shipped the Ranking tab: an interactive trust orbit
   (phyllotaxis layout, distance = earned rank, dot size = cohort follows,
   filled = in Registry, hollow = discovered outsider) with a synced ranked
