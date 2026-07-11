@@ -238,7 +238,11 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Obtain Adi's explicit go/no-go, run the full outgoing-follow crawl, validate it, and freeze its tracked proof manifest. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | done | Create and verify a compressed local recovery copy without modifying the immutable snapshot. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | done | Upload the verified archive to WIN's existing permanent R2/S3 storage and verify the complete remote object by SHA-256. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
-| todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
+| todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `resources/m3-ranking-implementation.md` |
+| todo | Create the derived analysis store (snapshot-stamped, recomputable) with the known/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-ranking-implementation.md` |
+| todo | Write one dated per-channel summary observation into fli.db channel_observations from the snapshot manifest. | parent | `resources/m3-ranking-implementation.md` |
+| todo | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
+| todo | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-ranking-implementation.md` |
 
 ## Backlog / Remaining Work
 
@@ -524,3 +528,10 @@ candidate generator while demonstrating ranking and validation discipline.
   URL to the tracked manifest. A live HEAD request returned HTTP 200 with
   `application/zstd` and the expected 484,347,309-byte content length. The
   archive is intentionally link-accessible and is not described as private.
+- 2026-07-11: [DONE] Agreed the M3 storage contract with Adi and wrote the
+  engineering instructions to `resources/m3-ranking-implementation.md`: three
+  planes (curated fli.db, frozen snapshot.db, recomputable derived analysis
+  store), known/unknown as a derived x_id LEFT JOIN rather than a new fli.db
+  table, one dated per-channel summary observation as the only fli.db write,
+  and reviewed promotion as the only door into the Registry. Current Batch
+  now carries the five M3 work items in order (overlap baseline first).
