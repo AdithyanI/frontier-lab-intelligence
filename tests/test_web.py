@@ -26,6 +26,7 @@ def test_registry_returns_complete_typed_entity_universe():
     assert data["filtered_total"] == data["total"]
     assert data["offset"] == 0
     assert data["limit"] == 5000
+    assert data["direction"] == "desc"
     assert data["counts"]["person"] > 0
     assert data["counts"]["organization"] >= 10
     assert data["counts"]["unsure"] >= 0
@@ -67,6 +68,17 @@ def test_registry_pages_filters_and_searches_on_the_server():
         if entity["followers_count"] is not None
     ]
     assert follower_counts == sorted(follower_counts, reverse=True)
+
+    ascending = client.get(
+        "/api/registry?group=organization&limit=40&direction=asc"
+    ).json()
+    ascending_counts = [
+        entity["followers_count"]
+        for entity in ascending["entities"]
+        if entity["followers_count"] is not None
+    ]
+    assert ascending["direction"] == "asc"
+    assert ascending_counts == sorted(ascending_counts)
 
     people = client.get("/api/registry?group=person&limit=2").json()
     assert people["filtered_total"] == people["counts"]["person"]

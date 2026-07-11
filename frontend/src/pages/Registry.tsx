@@ -10,6 +10,7 @@ import {
 } from '../api'
 
 type KindFilter = 'all' | RegistryGroup
+type SortDirection = 'asc' | 'desc'
 
 const BRAND_ICON: Record<string, string> = {
   github: siGithub.path,
@@ -43,11 +44,17 @@ const channelKindLabel = (kind: string) => {
   return labels[kind] ?? kind
 }
 
-const registryURL = (kind: KindFilter, query: string, offset: number) => {
+const registryURL = (
+  kind: KindFilter,
+  query: string,
+  offset: number,
+  direction: SortDirection,
+) => {
   const params = new URLSearchParams({
     group: kind,
     limit: String(offset === 0 ? FIRST : STEP),
     offset: String(offset),
+    direction,
   })
   const needle = query.trim()
   if (needle) params.set('q', needle)
@@ -126,10 +133,12 @@ export default function Registry() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [kind, setKind] = useState<KindFilter>('all')
+  const [sortDirection, setSortDirection] =
+    useState<SortDirection>('desc')
   const [selected, setSelected] = useState<Entity | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const viewRef = useRef('all\0')
+  const viewRef = useRef('all\0desc')
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -141,15 +150,16 @@ export default function Registry() {
 
   useEffect(() => {
     const controller = new AbortController()
-    const view = `${kind}\0${debouncedQuery}`
+    const view = `${kind}\0${debouncedQuery}\0${sortDirection}`
     viewRef.current = view
     setLoading(true)
     setLoadingMore(false)
     setError(null)
     setSelected(null)
-    getJSON<RegistryData>(registryURL(kind, debouncedQuery, 0), {
-      signal: controller.signal,
-    })
+    getJSON<RegistryData>(
+      registryURL(kind, debouncedQuery, 0, sortDirection),
+      { signal: controller.signal },
+    )
       .then((page) => {
         if (viewRef.current === view) setData(page)
       })
@@ -162,7 +172,7 @@ export default function Registry() {
         }
       })
     return () => controller.abort()
-  }, [debouncedQuery, kind])
+  }, [debouncedQuery, kind, sortDirection])
 
   const visible = data?.entities ?? []
   const loadMore = () => {
@@ -171,7 +181,12 @@ export default function Registry() {
     setLoadingMore(true)
     setError(null)
     getJSON<RegistryData>(
-      registryURL(kind, debouncedQuery, data.entities.length),
+      registryURL(
+        kind,
+        debouncedQuery,
+        data.entities.length,
+        sortDirection,
+      ),
     )
       .then((page) => {
         if (viewRef.current !== view) return
@@ -267,8 +282,33 @@ export default function Registry() {
               <th>Entity</th>
               {showTypeColumn && <th className="ent-type-head">Type</th>}
               {showFollowerColumn && (
-                <th className="ent-followers-head">
-                  {kind === 'person' ? 'X followers' : 'Combined X followers'}
+                <th
+                  className="ent-followers-head"
+                  aria-sort={
+                    sortDirection === 'desc' ? 'descending' : 'ascending'
+                  }
+                >
+                  <button
+                    className="ent-sort"
+                    type="button"
+                    aria-label={`Sort by ${
+                      kind === 'person' ? 'X followers' : 'combined X followers'
+                    }, ${sortDirection === 'desc' ? 'ascending' : 'descending'}`}
+                    onClick={() =>
+                      setSortDirection((current) =>
+                        current === 'desc' ? 'asc' : 'desc',
+                      )
+                    }
+                  >
+                    <span>
+                      {kind === 'person'
+                        ? 'X followers'
+                        : 'Combined X followers'}
+                    </span>
+                    <span className="ent-sort-arrow" aria-hidden="true">
+                      {sortDirection === 'desc' ? '↓' : '↑'}
+                    </span>
+                  </button>
                 </th>
               )}
               {showRejectionReason && <th>Why rejected</th>}

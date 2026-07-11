@@ -51,6 +51,7 @@ export interface Registry {
   counts: Record<RegistryGroup, number>
   limit: number
   offset: number
+  direction: 'asc' | 'desc'
 }
 
 export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {

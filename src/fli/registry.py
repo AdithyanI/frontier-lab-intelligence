@@ -954,6 +954,7 @@ def read_entities(
     offset: int = 0,
     group: str = "all",
     query: str = "",
+    direction: str = "desc",
 ) -> list[dict]:
     """Return identity fields, structural-kind reason, and curation state."""
     ensure_schema(conn)
@@ -993,14 +994,17 @@ def read_entities(
         raise ValueError("limit must be at least 1")
     if offset < 0:
         raise ValueError("offset must be non-negative")
+    if direction not in {"asc", "desc"}:
+        raise ValueError(f"invalid follower sort direction: {direction}")
     where_sql, where_params = _registry_where(group=group, query=query)
+    follower_order = direction.upper()
     order_sql = (
-        "followers_count DESC NULLS LAST, name COLLATE NOCASE"
+        f"followers_count {follower_order} NULLS LAST, name COLLATE NOCASE"
         if group in {"all", "person", "organization"}
         else "name COLLATE NOCASE"
     )
     outer_order_sql = (
-        "e.followers_count DESC NULLS LAST, e.name COLLATE NOCASE"
+        f"e.followers_count {follower_order} NULLS LAST, e.name COLLATE NOCASE"
         if group in {"all", "person", "organization"}
         else "e.name COLLATE NOCASE"
     )

@@ -105,8 +105,10 @@ Rules:
   active rows show identity + truthful kind and open a detail card.
   All, People, and Organizations are reach-ranked views: People shows X
   followers, Organizations shows combined X followers, and All retains Type
-  alongside combined X followers. Each sorts descending by the visible total
-  and hides channel handles to keep rows calm; every channel remains searchable
+  alongside combined X followers. Each defaults to descending by the visible
+  total; the follower header is a full-width, keyboard-accessible control that
+  toggles ascending/descending order. These views hide channel handles to keep
+  rows calm; every channel remains searchable
   and available in the detail card. Missing follower observations display as
   an em dash and sort last. Rejected remains a reason-bearing review view.
   Internal source seeds such as the curated `labs` table do not create public

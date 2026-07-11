@@ -456,6 +456,44 @@ td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+.ent-followers-head { padding: 0; }
+.ent-sort {
+  appearance: none;
+  display: inline-flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1.4;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 150ms var(--ease-out);
+}
+.ent-sort:hover { color: var(--ink-soft); }
+.ent-sort:active { color: var(--ink); }
+.ent-sort:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+}
+.ent-sort-arrow {
+  width: 12px;
+  flex: 0 0 12px;
+  color: var(--blue-ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
 .ent-followers {
   color: var(--ink-soft);
   font-family: var(--font-mono);

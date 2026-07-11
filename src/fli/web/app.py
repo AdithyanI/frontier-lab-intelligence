@@ -142,6 +142,7 @@ def registry(
         "all", pattern="^(all|person|organization|unsure|unknown|rejected)$"
     ),
     q: str = Query("", max_length=200),
+    direction: str = Query("desc", pattern="^(asc|desc)$"),
 ) -> JSONResponse:
     """One server-filtered page of the entity universe."""
     conn = _model_conn()
@@ -158,12 +159,14 @@ def registry(
                     offset=offset,
                     group=group,
                     query=q,
+                    direction=direction,
                 ),
                 "total": sum(counts.values()),
                 "filtered_total": filtered_total,
                 "counts": counts,
                 "limit": limit,
                 "offset": offset,
+                "direction": direction,
             }
         )
     finally:

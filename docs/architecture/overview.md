@@ -240,10 +240,11 @@ are in parentheses.
 
 The Registry read model also exposes nullable `followers_count` as the sum of
 the latest stored X-account follower counts owned by each entity. All, People,
-and Organizations sort descending by this value; People labels it X followers,
-while All and Organizations label it Combined X followers because one entity
-may own several channels. Missing observations remain null and sort last. This
-is a presentation proxy, not graph evidence or a canonical importance score.
+and Organizations default to descending by this value and accept an explicit
+ascending/descending API direction; People labels it X followers, while All
+and Organizations label it Combined X followers because one entity may own
+several channels. Missing observations remain null and sort last. This is a
+presentation proxy, not graph evidence or a canonical importance score.
 
 ```mermaid
 erDiagram
