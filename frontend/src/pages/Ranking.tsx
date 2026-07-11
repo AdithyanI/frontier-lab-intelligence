@@ -54,14 +54,62 @@ function place(nodes: RankingNode[]): Placed[] {
 const nodeName = (n: RankingNode) =>
   n.entity_name || n.display_name || `@${n.handle}`
 
-type StateFilter = 'all' | 'active' | 'unknown'
+const isOrg = (n: RankingNode) => n.entity_kind === 'organization'
+
+type Filter = 'all' | 'person' | 'organization' | 'unknown'
+
+/* One mark on the orbit: circle = person/unknown, square = organization. */
+function Mark({
+  p,
+  fill,
+  stroke,
+  strokeWidth,
+  opacity,
+  onEnter,
+  onLeave,
+  onClick,
+}: {
+  p: Placed
+  fill: string
+  stroke: string
+  strokeWidth: number
+  opacity: number
+  onEnter: () => void
+  onLeave: () => void
+  onClick: () => void
+}) {
+  const common = {
+    fill,
+    stroke,
+    strokeWidth,
+    opacity,
+    style: { cursor: 'pointer', transition: 'opacity 150ms ease-out' },
+    onMouseEnter: onEnter,
+    onMouseLeave: onLeave,
+    onClick,
+  }
+  const title = <title>{`#${p.rank} ${nodeName(p)}`}</title>
+  if (isOrg(p)) {
+    const s = p.r * 1.8
+    return (
+      <rect x={p.x - s / 2} y={p.y - s / 2} width={s} height={s} {...common}>
+        {title}
+      </rect>
+    )
+  }
+  return (
+    <circle cx={p.x} cy={p.y} r={p.r} {...common}>
+      {title}
+    </circle>
+  )
+}
 
 export default function Ranking() {
   const [data, setData] = useState<Rankings | null>(null)
   const [error, setError] = useState('')
   const [selected, setSelected] = useState<string | null>(null)
   const [hovered, setHovered] = useState<string | null>(null)
-  const [filter, setFilter] = useState<StateFilter>('all')
+  const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
   const [followers, setFollowers] = useState<RankingFollowers | null>(null)
   const rowRefs = useRef(new Map<string, HTMLButtonElement>())
@@ -90,6 +138,14 @@ export default function Ranking() {
       rowRefs.current.get(selected)?.scrollIntoView({ block: 'nearest' })
   }, [selected])
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelected(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   const placed = useMemo(() => place(data?.nodes ?? []), [data])
   const byId = useMemo(
     () => new Map(placed.map((p) => [p.x_id, p])),
@@ -97,11 +153,19 @@ export default function Ranking() {
   )
 
   const needle = query.trim().toLowerCase()
-  const matches = (n: RankingNode) =>
-    (filter === 'all' || n.registry_state === filter) &&
-    (!needle ||
-      n.handle.toLowerCase().includes(needle) ||
-      nodeName(n).toLowerCase().includes(needle))
+  const matches = (n: RankingNode) => {
+    const inFilter =
+      filter === 'all' ||
+      (filter === 'unknown'
+        ? n.registry_state === 'unknown'
+        : n.registry_state === 'active' && n.entity_kind === filter)
+    return (
+      inFilter &&
+      (!needle ||
+        n.handle.toLowerCase().includes(needle) ||
+        nodeName(n).toLowerCase().includes(needle))
+    )
+  }
 
   const followerSet = useMemo(
     () => new Set((followers?.followers ?? []).map((f) => f.x_id)),
@@ -144,9 +208,9 @@ export default function Ranking() {
       <p className="page-sub">
         Every account placed by how many of the screened Registry cohort follow
         it — distance from center is earned rank, never raw follower count.
-        Filled dots are already in the Registry; hollow rings are outsiders the
-        inside collectively points at. Click anyone to see exactly who follows
-        them.
+        Circles are people, squares are organizations, hollow rings are
+        outsiders the inside collectively points at. Click anyone to see
+        exactly who follows them.
       </p>
       {run && (
         <div className="rank-stats mono">
@@ -163,7 +227,15 @@ export default function Ranking() {
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             role="img"
             aria-label="Trust orbit: accounts arranged by cohort-trust rank, most trusted at the center"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setSelected(null)
+            }}
           >
+            {/* background hit area so clicking empty space deselects */}
+            <rect
+              x="0" y="0" width={SIZE} height={SIZE} fill="transparent"
+              onClick={() => setSelected(null)}
+            />
             {/* guide rings with the rank they mark */}
             {[10, 50, 150, N_FETCH].map((rank) => {
               const idx = Math.min(rank - 1, placed.length - 1)
@@ -194,39 +266,50 @@ export default function Ranking() {
                     fill="none"
                     stroke={BLUE}
                     strokeWidth="0.9"
-                    strokeOpacity="0.5"
+                    strokeOpacity={visibleArcs.length > 60 ? 0.35 : 0.55}
                   />
                 )
               })}
 
-            {/* dots */}
+            {/* hover halo */}
+            {hov && hov.x_id !== selected && (
+              <circle
+                cx={hov.x}
+                cy={hov.y}
+                r={hov.r + 5}
+                fill="none"
+                stroke={BLUE_MID}
+                strokeWidth="1.2"
+                pointerEvents="none"
+              />
+            )}
+
+            {/* marks: circles = people, squares = organizations */}
             {placed.map((p) => {
               const dim = !matches(p)
               const isSel = p.x_id === selected
               const isFollower = selected != null && followerSet.has(p.x_id)
               const active = p.registry_state === 'active'
               return (
-                <circle
+                <Mark
                   key={p.x_id}
-                  cx={p.x}
-                  cy={p.y}
-                  r={p.r}
-                  fill={isSel ? BLUE : active ? INK : '#ffffff'}
-                  stroke={isSel ? BLUE_INK : isFollower ? BLUE_MID : INK}
+                  p={p}
+                  fill={isSel ? BLUE : active ? (isOrg(p) ? BLUE_MID : INK) : '#ffffff'}
+                  stroke={
+                    isSel ? BLUE_INK : isFollower ? BLUE_MID : isOrg(p) ? BLUE_INK : INK
+                  }
                   strokeWidth={isSel ? 2 : active ? 0 : 1.3}
                   opacity={dim ? 0.08 : selected && !isSel && !isFollower ? 0.3 : 1}
-                  style={{ cursor: 'pointer' }}
-                  onMouseEnter={() => setHovered(p.x_id)}
-                  onMouseLeave={() => setHovered(null)}
+                  onEnter={() => setHovered(p.x_id)}
+                  onLeave={() => setHovered(null)}
                   onClick={() => pick(p.x_id, 'orbit')}
-                >
-                  <title>{`#${p.rank} ${nodeName(p)}`}</title>
-                </circle>
+                />
               )
             })}
 
-            {/* permanent labels for the innermost few, radiating outward */}
-            {placed.slice(0, 3).map((p) => {
+            {/* permanent labels for the innermost few, radiating outward;
+                hidden while a selection is active to keep the stage clear */}
+            {!selected && placed.slice(0, 3).map((p) => {
               const lx = p.x + Math.cos(p.angle) * (p.r + 9)
               const ly = p.y + Math.sin(p.angle) * (p.r + 9)
               const right = Math.cos(p.angle) >= 0
@@ -270,6 +353,19 @@ export default function Ranking() {
               </g>
             )}
 
+            {/* selected halo */}
+            {sel && (
+              <circle
+                cx={sel.x}
+                cy={sel.y}
+                r={Math.max(sel.r, 5) + 6}
+                fill="none"
+                stroke={BLUE_MID}
+                strokeWidth="1.4"
+                pointerEvents="none"
+              />
+            )}
+
             {/* selected label */}
             {sel && (
               <text
@@ -291,8 +387,9 @@ export default function Ranking() {
           </svg>
 
           <div className="rank-legend mono">
-            <span><i className="lg-dot lg-ink" /> in the Registry</span>
-            <span><i className="lg-dot lg-hollow" /> not yet — discovered</span>
+            <span><i className="lg-dot lg-ink" /> person in the Registry</span>
+            <span><i className="lg-sq" /> organization</span>
+            <span><i className="lg-dot lg-hollow" /> discovered — not yet in</span>
             <span><i className="lg-dot lg-blue" /> selected</span>
             <span><i className="lg-arc" /> follows it</span>
           </div>
@@ -313,13 +410,14 @@ export default function Ranking() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <div className="rank-filter" role="tablist" aria-label="Registry state">
+            <div className="rank-filter" role="tablist" aria-label="Kind">
               {(
                 [
                   ['all', 'All'],
-                  ['active', 'In Registry'],
+                  ['person', 'People'],
+                  ['organization', 'Orgs'],
                   ['unknown', 'Discovered'],
-                ] as [StateFilter, string][]
+                ] as [Filter, string][]
               ).map(([value, label]) => (
                 <button
                   key={value}
@@ -348,8 +446,14 @@ export default function Ranking() {
                     @{sel.handle}
                   </a>
                 </div>
-                <span className={`rank-pill ${sel.registry_state}`}>
-                  {sel.registry_state === 'active' ? 'IN REGISTRY' : 'DISCOVERED'}
+                <span
+                  className={`rank-pill ${sel.registry_state}${isOrg(sel) ? ' org' : ''}`}
+                >
+                  {sel.registry_state === 'active'
+                    ? isOrg(sel)
+                      ? 'ORGANIZATION'
+                      : 'IN REGISTRY'
+                    : 'DISCOVERED'}
                 </span>
               </div>
               <div className="rank-detail-grid mono">
@@ -373,6 +477,14 @@ export default function Ranking() {
                     ` and ${fmt((followers.total ?? 0) - 4)} more of the cohort.`}
                 </p>
               )}
+              {sel.registry_state === 'active' && sel.entity_name && (
+                <a
+                  className="rank-detail-reg mono"
+                  href={`/?q=${encodeURIComponent(sel.entity_name)}`}
+                >
+                  VIEW IN REGISTRY →
+                </a>
+              )}
             </div>
           )}
 
@@ -391,7 +503,11 @@ export default function Ranking() {
                 >
                   <span className="rk mono">{p.rank}</span>
                   <i
-                    className={`lg-dot ${p.registry_state === 'active' ? 'lg-ink' : 'lg-hollow'}`}
+                    className={
+                      isOrg(p)
+                        ? 'lg-sq'
+                        : `lg-dot ${p.registry_state === 'active' ? 'lg-ink' : 'lg-hollow'}`
+                    }
                   />
                   <span className="nm">
                     <span className="nm-name">{nodeName(p)}</span>

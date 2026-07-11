@@ -128,10 +128,11 @@ function channelLabel(channel: EntityChannel): string {
 }
 
 export default function Registry() {
+  const initialQuery = new URLSearchParams(window.location.search).get('q') ?? ''
   const [data, setData] = useState<RegistryData | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [query, setQuery] = useState('')
-  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery)
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [kind, setKind] = useState<KindFilter>('all')
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('desc')

@@ -1029,3 +1029,22 @@ td.num {
   background: var(--blue);
   max-width: calc(100% - 120px);
 }
+
+.lg-sq {
+  width: 9px;
+  height: 9px;
+  display: inline-block;
+  flex: none;
+  background: var(--blue-mid);
+}
+
+.rank-pill.active.org { background: var(--blue-ink); }
+
+.rank-detail-reg {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+.rank-detail-reg:hover { text-decoration: underline; }

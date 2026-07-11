@@ -571,3 +571,12 @@ candidate generator while demonstrating ranking and validation discipline.
   duplicated into fli.db or static JSON. Counts on the page reconcile with the
   overlap run (2,219 sources, 2,456,305 edges, 463,180 ranked, 460,927
   unknown). Validated via build, live endpoints, and browser screenshots.
+- 2026-07-11: [DONE] Polished the Ranking tab. Organizations are now visually
+  distinct (capital-blue squares vs ink person circles) on the orbit, in the
+  list, and in the detail pill, with the filter widened to
+  All/People/Orgs/Discovered so each kind is read within its own lane. Added
+  hover and selection halos, Escape/background-click deselect, arc opacity
+  scaling for dense selections, top-label suppression during selection, and a
+  VIEW IN REGISTRY link that lands on the Registry pre-filtered (?q= support
+  added). Fame-vs-trust scatter was consciously dropped as redundant with the
+  orbit. Screenshot-audited each pass; check-fast OK.
