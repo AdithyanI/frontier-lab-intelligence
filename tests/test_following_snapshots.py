@@ -528,6 +528,52 @@ def test_parallel_profile_scan_respects_profile_only_boundary(tmp_path):
     conn.close()
 
 
+def test_parallel_following_crawl_keeps_each_source_cursor_chain_ordered(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    client = FakeCollectorClient(
+        profiles={
+            "alpha": {"id": "1", "userName": "alpha", "following": 2},
+            "beta": {"id": "2", "userName": "beta", "following": 1},
+        },
+        pages={
+            ("alpha", None): {
+                "followings": [{"id": "10", "userName": "first"}],
+                "has_next_page": True,
+                "next_cursor": "alpha-2",
+            },
+            ("alpha", "alpha-2"): {
+                "followings": [{"id": "11", "userName": "second"}],
+                "has_next_page": False,
+            },
+            ("beta", None): {
+                "followings": [{"id": "12", "userName": "third"}],
+                "has_next_page": False,
+            },
+        },
+    )
+
+    result = following_snapshots.collect_snapshot_parallel(
+        conn,
+        snapshot_db=snapshot_db,
+        client=client,
+        collect_all=True,
+        workers=2,
+        requests_per_second=10_000,
+    )
+
+    assert result["workers"] == 2
+    assert result["outcomes"]["complete"] == 2
+    assert result["pages_fetched"] == 3
+    assert [call[1] for call in client.page_calls if call[0] == "alpha"] == [
+        None,
+        "alpha-2",
+    ]
+    assert result["snapshot"]["counts"]["edges"] == 3
+    assert following_snapshots.validate_snapshot(conn)["valid"] is True
+    conn.close()
+
+
 def test_zero_following_profile_completes_without_page_request(tmp_path):
     snapshot_db, _ = _snapshot(tmp_path)
     conn = following_snapshots.connect_snapshot(snapshot_db)
