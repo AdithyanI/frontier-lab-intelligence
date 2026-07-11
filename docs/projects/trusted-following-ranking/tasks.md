@@ -242,8 +242,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-overlap-baseline.md` |
 | done | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
 | done | Apply the snapshot-pinned organization-coverage manifest, including NVIDIA/AMD/Intel compute anchors, and prove dry-run/replay safety. | parent | `../../../data/registry/organization-coverage.json` |
-| todo | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
-| todo | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-ranking-implementation.md` |
+| in_progress | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
+| in_progress | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-ranking-implementation.md` |
 
 ## Backlog / Remaining Work
 
@@ -580,3 +580,11 @@ candidate generator while demonstrating ranking and validation discipline.
   VIEW IN REGISTRY link that lands on the Registry pre-filtered (?q= support
   added). Fame-vs-trust scatter was consciously dropped as redundant with the
   orbit. Screenshot-audited each pass; check-fast OK.
+- 2026-07-11: [DONE] Second Ranking-tab polish pass. Removed the permanent
+  top-3 handle labels (hover/selection labels carry identification), added a
+  close button on the detail card, an always-present hint line (hover to
+  identify · click to trace · esc to clear), up/down-arrow stepping through the
+  visible ranking, a showing-N-of-top-300 count, and an honest empty-search
+  state that says deeper ranks exist beyond the loaded top 300. All
+  interactions screenshot-audited via Playwright against the live server;
+  check-fast OK.

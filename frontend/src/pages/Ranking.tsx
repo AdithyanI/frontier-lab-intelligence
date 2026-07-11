@@ -171,6 +171,33 @@ export default function Ranking() {
     () => new Set((followers?.followers ?? []).map((f) => f.x_id)),
     [followers],
   )
+
+  const filtered = placed.filter(matches)
+
+  /* ↑/↓ step through the visible ranking once something is selected */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (!selected || !filtered.length) return
+      e.preventDefault()
+      const idx = filtered.findIndex((p) => p.x_id === selected)
+      const next =
+        filtered[
+          Math.min(
+            Math.max(idx + (e.key === 'ArrowDown' ? 1 : -1), 0),
+            filtered.length - 1,
+          )
+        ]
+      if (next && next.x_id !== selected) {
+        selectedFrom.current = 'orbit'
+        setSelected(next.x_id)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
   const visibleArcs = useMemo(() => {
     if (!selected) return []
     const target = byId.get(selected)
@@ -307,31 +334,7 @@ export default function Ranking() {
               )
             })}
 
-            {/* permanent labels for the innermost few, radiating outward;
-                hidden while a selection is active to keep the stage clear */}
-            {!selected && placed.slice(0, 3).map((p) => {
-              const lx = p.x + Math.cos(p.angle) * (p.r + 9)
-              const ly = p.y + Math.sin(p.angle) * (p.r + 9)
-              const right = Math.cos(p.angle) >= 0
-              return (
-                <text
-                  key={p.x_id}
-                  x={lx}
-                  y={ly + 3.5}
-                  textAnchor={right ? 'start' : 'end'}
-                  fontFamily={MONO}
-                  fontSize="11"
-                  fontWeight="600"
-                  fill={INK}
-                  stroke="#ffffff"
-                  strokeWidth="3.5"
-                  paintOrder="stroke"
-                  pointerEvents="none"
-                >
-                  {p.handle}
-                </text>
-              )
-            })}
+
 
             {/* hover label */}
             {hov && hov.x_id !== selected && (
@@ -393,11 +396,15 @@ export default function Ranking() {
             <span><i className="lg-dot lg-blue" /> selected</span>
             <span><i className="lg-arc" /> follows it</span>
           </div>
-          {sel && followers?.available && (
+          {sel && followers?.available ? (
             <p className="rank-arc-note mono">
               {fmt(followers.total)} of {fmt(run?.sources)} screened sources follow @{sel.handle}
               {' · '}
               {fmt(visibleArcs.length)} of them are in this view
+            </p>
+          ) : (
+            <p className="rank-arc-note mono hint">
+              hover to identify · click to trace who follows · esc to clear
             </p>
           )}
         </div>
@@ -434,6 +441,13 @@ export default function Ranking() {
 
           {sel && (
             <div className="rank-detail">
+              <button
+                className="rank-detail-close"
+                aria-label="Clear selection"
+                onClick={() => setSelected(null)}
+              >
+                ×
+              </button>
               <div className="rank-detail-head">
                 <div>
                   <div className="rank-detail-name">{nodeName(sel)}</div>
@@ -489,7 +503,13 @@ export default function Ranking() {
           )}
 
           <ol className="rank-list">
-            {placed.filter(matches).map((p) => (
+            {filtered.length === 0 && (
+              <li className="rank-empty mono">
+                No one in the top {N_FETCH} matches — the account may rank
+                deeper in the full 463K.
+              </li>
+            )}
+            {filtered.map((p) => (
               <li key={p.x_id}>
                 <button
                   ref={(el) => {
@@ -522,6 +542,9 @@ export default function Ranking() {
               </li>
             ))}
           </ol>
+          <p className="rank-shown mono">
+            showing {fmt(filtered.length)} of the top {N_FETCH} · ↑↓ to step
+          </p>
         </aside>
       </div>
     </div>
