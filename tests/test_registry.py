@@ -469,3 +469,124 @@ def test_organization_group_preflight_fails_before_mutation(tmp_path):
 
     assert conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 2
     assert conn.execute("SELECT COUNT(*) FROM entity_merge_audit").fetchone()[0] == 0
+
+
+def _make_relevance_candidate(conn, *, handle="irrelevant", name="Irrelevant"):
+    account_id = conn.execute(
+        """INSERT INTO accounts
+           (platform, handle, display_name, followers_count,
+            first_seen_at, last_seen_at)
+           VALUES ('x', ?, ?, 5000, '2026-07-11', '2026-07-11')""",
+        (handle, name),
+    ).lastrowid
+    conn.execute(
+        """INSERT INTO account_source_facts
+           (account_id, source, fact, value, observed_at)
+           VALUES (?, 'test', 'list_member', 'test', '2026-07-11')""",
+        (account_id,),
+    )
+    channel_id = channels.upsert_channel(
+        conn,
+        kind="x",
+        key=handle,
+        label=name,
+        observed_at="2026-07-11T00:00:00+00:00",
+    )
+    entity_id = channels.upsert_entity(
+        conn,
+        kind="person",
+        slug=f"x-{handle}",
+        name=name,
+        observed_at="2026-07-11T00:00:00+00:00",
+    )
+    channels.link_entity_channel(
+        conn,
+        entity_id=entity_id,
+        channel_id=channel_id,
+        relationship="identity",
+    )
+    channels.observe_channel(
+        conn,
+        channel_id=channel_id,
+        source="x_profile",
+        metric="bio",
+        value="Clearly unrelated.",
+        observed_at="2026-07-11T00:00:00+00:00",
+    )
+    conn.commit()
+    return entity_id, channel_id, account_id
+
+
+def _relevance_removal(entity_id, *, name="Irrelevant"):
+    return {
+        "entity_id": entity_id,
+        "name": name,
+        "kind": "person",
+        "model_decision": "remove",
+        "review_basis": "model_remove",
+        "reason": "Clearly irrelevant to frontier AI.",
+    }
+
+
+def test_relevance_removal_deletes_exact_identity_evidence_and_replays(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    registry.ensure_schema(conn)
+    entity_id, channel_id, account_id = _make_relevance_candidate(conn)
+
+    first = registry.apply_relevance_removals(
+        conn, [_relevance_removal(entity_id)]
+    )
+    conn.commit()
+    second = registry.apply_relevance_removals(
+        conn, [_relevance_removal(entity_id)]
+    )
+    conn.commit()
+
+    assert first == {
+        "requested": 1,
+        "removed_entities": 1,
+        "removed_channels": 1,
+        "removed_accounts": 1,
+        "already_removed": 0,
+    }
+    assert second["already_removed"] == 1
+    assert second["removed_entities"] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE id = ?", (entity_id,)
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM channels WHERE id = ?", (channel_id,)
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM channel_observations WHERE channel_id = ?",
+        (channel_id,),
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM accounts WHERE id = ?", (account_id,)
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM account_source_facts WHERE account_id = ?",
+        (account_id,),
+    ).fetchone()[0] == 0
+
+
+def test_relevance_removal_preflight_prevents_partial_mutation(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    registry.ensure_schema(conn)
+    first_id, _, _ = _make_relevance_candidate(
+        conn, handle="first", name="First"
+    )
+    second_id, _, _ = _make_relevance_candidate(
+        conn, handle="second", name="Second"
+    )
+
+    with pytest.raises(ValueError, match="does not match manifest identity"):
+        registry.apply_relevance_removals(
+            conn,
+            [
+                _relevance_removal(first_id, name="First"),
+                _relevance_removal(second_id, name="Wrong"),
+            ],
+        )
+
+    assert conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 2

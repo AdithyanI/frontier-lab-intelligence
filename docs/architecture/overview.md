@@ -4,8 +4,8 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
-Registry retains the post-1,000-follower-floor classified universe: 2,736
-people, 163 organizations, one active unsure, three rejected, and zero unknown.
+Registry retains the relevance-reviewed post-floor universe: 2,635 people,
+156 organizations, one active unsure, three rejected, and zero unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
@@ -19,6 +19,14 @@ Reviewed organization consolidation is live: SpaceX owns `@spacex` and
 product/developer/subgroup X channels. Every batch is manifest-driven, preflighted,
 transactional, idempotent, and audit-recorded. Broader identity resolution,
 relevance curation, extraction, and scoring remain later stages.
+
+Product relevance is a separate gate after structural kind. The first approved
+relevance batch is versioned in `data/registry/relevance-removals.csv` and
+applied only through `fli registry apply-relevance-removals`. The command
+preflights the complete manifest, protects seeded labs, merge canonicals,
+rejections, multi-channel identities, and graph participants, then removes each
+approved one-account identity in one transaction. It supports dry-run and
+idempotent replay; it does not turn model output directly into deletion.
 
 ## Stack
 
@@ -145,11 +153,11 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,903 classified entities: 2,736 people, 163
+- The active Registry retains 2,795 classified entities: 2,635 people, 156
   organizations, one active unsure, and three protected-account rejections. The
-  2,948 channels include 24 website/GitHub/blog lab channels plus 21 X/product
-  channels consolidated into existing organizations. Removing discovery edges
-  does not remove already classified nodes.
+  2,840 channels include 24 website/GitHub/blog lab channels plus 21 X/product
+  channels consolidated into existing organizations. The approved relevance
+  cleanup removed 108 one-X identities without touching merged or lab channels.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
   marker. The 2,308 accounts actually observed through Digg also carry one
   `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
@@ -299,15 +307,15 @@ erDiagram
         int run_id FK
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (5,838)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (5,661)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,948)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,840)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (13,547)"
-    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (3,084)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (13,152)"
+    ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,943)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (1)"
     ENTITIES ||--o{ ENTITY_KIND_CLASSIFICATIONS : "classified independently"
@@ -316,11 +324,11 @@ erDiagram
     ENTITIES ||--o{ ENTITY_MERGE_AUDIT : "canonical identity records merges"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,924,
-`account_source_facts` 5,838, `graph_edges` 0, `labs` 10,
-`entities` 2,903, `channels` 2,948, `entity_channels` 2,948,
-`channel_observations` 13,547, `entity_kind_classification_runs` 10,
-`entity_kind_classifications` 3,058, `entity_kind_web_enrichments` 1,
+Table row counts: `raw_items` 1,599, `accounts` 2,816,
+`account_source_facts` 5,661, `graph_edges` 0, `labs` 10,
+`entities` 2,795, `channels` 2,840, `entity_channels` 2,840,
+`channel_observations` 13,152, `entity_kind_classification_runs` 10,
+`entity_kind_classifications` 2,943, `entity_kind_web_enrichments` 1,
 `entity_kind_classification_errors` 0, `entity_registry_rejections` 3, and
 `entity_merge_audit` 20.
 

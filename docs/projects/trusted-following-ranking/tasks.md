@@ -118,6 +118,9 @@ candidate generator while demonstrating ranking and validation discipline.
   lifecycle resolves person/organization/unsure; a future relevance gate may
   follow it, but the first full-corpus pass is an offline review artifact only
   and cannot mutate the Registry. Follower count is not a model input.
+- Adi approved all 108 first-pass removal candidates. They are now a versioned
+  Registry manifest applied transactionally after complete preflight; model
+  output still has no direct mutation path.
 
 ## Open Questions / Blockers
 
@@ -125,7 +128,11 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
-- Which of the 108 conservative relevance-removal candidates does Adi accept?
+- Which of the 47 additional top-reach manual removal recommendations does Adi
+  accept?
+- The shared LiteLLM endpoint returned Azure 403 for every strict second-pass
+  batch on 2026-07-11. No inference ran and no cost was reported; manual audit
+  continues without treating this temporary route failure as a product block.
 
 ## Current Batch
 
@@ -138,14 +145,15 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Consolidate SpaceX and SpaceXAI into one organization with two active X channels; prove replay and invariants. | parent | — |
 | done | Consolidate ten high-confidence organization groups and make all channels legible in the Registry UI. | parent | `../../references/registry-curation.md` |
 | done | Run a read-only Luna-medium relevance triage and produce a conservative removal shortlist. | parent | `resources/relevance-removal-candidates.csv` |
-| in progress | Review the 108 proposed removals before any Registry mutation. | parent | `resources/relevance-removal-candidates.csv` |
-| todo | Freeze the first bounded trusted people and organization seed set after relevance review. | parent | — |
+| done | Apply the 108 Adi-approved relevance removals through a preflighted, transactional manifest. | parent | `resources/relevance-removal-candidates.csv` |
+| in progress | Audit the remaining ambiguous cohort, starting with the highest-reach 100 identities. | parent | `resources/relevance-manual-audit-top-100.csv` |
+| todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
 
 - [ ] Freeze the first trusted seed set.
-- [ ] Apply only the human-accepted relevance removals through a reversible,
-  reviewed manifest.
+- [ ] Decide the 47 new removal and four review recommendations from the
+  manually audited top-reach 100.
 - [ ] Implement isolated snapshot storage and bounded ingestion.
 - [ ] Implement overlap baseline and personalized PageRank.
 - [ ] Build and review the labeled top-k evaluation.
@@ -256,3 +264,16 @@ candidate generator while demonstrating ranking and validation discipline.
   were kept. Added Ashton Kutcher manually from review to create a 108-row,
   follower-sorted removal candidate file for human approval. LiteLLM reported
   $2.915358 for 1,112,663 input and 300,597 output tokens. No entity was removed.
+- 2026-07-11: [DONE] Adi accepted all 108 candidates. Added a CSV-backed
+  relevance-removal command with complete preflight, dry-run, one transaction,
+  idempotent replay, and tests. It removed exactly 101 people, seven
+  organizations, 108 X channels, and 108 backing accounts; no seeded lab,
+  merge canonical, rejection, multi-channel identity, or graph participant was
+  in scope. Registry state is now 2,795 entities, 2,840 channels/links, and zero
+  graph edges.
+- 2026-07-11: [IN-PROGRESS] A stricter batched Luna audit attempted to reduce
+  the 1,051 conservative reviews, but the shared LiteLLM route returned Azure
+  403 before inference for all 280 batches; zero results and zero reported cost
+  were produced. Continued manually with the 100 highest-reach remaining
+  identities: 49 direct keeps, 47 likely removals, and four genuine reviews.
+  No second-wave deletion has been applied.

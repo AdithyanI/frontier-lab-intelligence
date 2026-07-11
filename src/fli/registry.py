@@ -11,6 +11,7 @@ is not part of the Registry kind contract.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 import re
@@ -54,6 +55,12 @@ DEFAULT_ORGANIZATION_GROUPS_PATH = (
     / "data"
     / "registry"
     / "organization-groups.json"
+)
+DEFAULT_RELEVANCE_REMOVALS_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "registry"
+    / "relevance-removals.csv"
 )
 
 
@@ -512,16 +519,172 @@ def apply_organization_groups(
     }
 
 
+def load_relevance_removals(path: Path | str) -> list[dict]:
+    """Load the explicit human-approved relevance removal boundary."""
+    with Path(path).open(newline="", encoding="utf-8") as source:
+        rows = list(csv.DictReader(source))
+    if not rows:
+        raise ValueError("relevance removal manifest is empty")
+    required = {
+        "entity_id",
+        "name",
+        "kind",
+        "model_decision",
+        "review_basis",
+        "reason",
+    }
+    if not required.issubset(rows[0]):
+        missing = sorted(required - set(rows[0]))
+        raise ValueError(
+            "relevance removal manifest is missing columns: " + ", ".join(missing)
+        )
+    seen: set[int] = set()
+    removals = []
+    for index, row in enumerate(rows, start=2):
+        try:
+            entity_id = int(row["entity_id"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"row {index} has an invalid entity_id") from exc
+        if entity_id in seen:
+            raise ValueError(f"entity {entity_id} appears more than once")
+        seen.add(entity_id)
+        if row["kind"] not in channels.ENTITY_KINDS:
+            raise ValueError(f"row {index} has invalid kind {row['kind']!r}")
+        if row["model_decision"] not in {"remove", "review"}:
+            raise ValueError(f"row {index} has an invalid model_decision")
+        if row["review_basis"] not in {"model_remove", "manual_add_from_review"}:
+            raise ValueError(f"row {index} has an invalid review_basis")
+        if not row["name"].strip() or not row["reason"].strip():
+            raise ValueError(f"row {index} needs a name and reason")
+        removals.append(
+            {
+                "entity_id": entity_id,
+                "name": row["name"],
+                "kind": row["kind"],
+                "model_decision": row["model_decision"],
+                "review_basis": row["review_basis"],
+                "reason": row["reason"],
+            }
+        )
+    return removals
+
+
+def _preflight_relevance_removals(
+    conn: sqlite3.Connection, removals: list[dict]
+) -> tuple[list[dict], int]:
+    """Validate the whole deletion manifest before changing any row."""
+    resolved = []
+    already_removed = 0
+    for removal in removals:
+        entity = conn.execute(
+            "SELECT id, slug, name, kind FROM entities WHERE id = ?",
+            (removal["entity_id"],),
+        ).fetchone()
+        if entity is None:
+            already_removed += 1
+            continue
+        if entity["name"] != removal["name"] or entity["kind"] != removal["kind"]:
+            raise ValueError(
+                f"entity {entity['id']} does not match manifest identity "
+                f"{removal['name']!r} ({removal['kind']})"
+            )
+        if conn.execute(
+            "SELECT 1 FROM entity_registry_rejections WHERE entity_id = ?",
+            (entity["id"],),
+        ).fetchone():
+            raise ValueError(f"entity {entity['id']} is already Registry-rejected")
+        if conn.execute(
+            "SELECT 1 FROM entity_merge_audit WHERE canonical_entity_id = ?",
+            (entity["id"],),
+        ).fetchone():
+            raise ValueError(f"entity {entity['id']} is a merge canonical")
+        channel_rows = conn.execute(
+            """SELECT c.id, c.kind, c.key
+               FROM entity_channels ec
+               JOIN channels c ON c.id = ec.channel_id
+               WHERE ec.entity_id = ?
+               ORDER BY c.id""",
+            (entity["id"],),
+        ).fetchall()
+        if len(channel_rows) != 1 or channel_rows[0]["kind"] != "x":
+            raise ValueError(
+                f"entity {entity['id']} must own exactly one X channel"
+            )
+        channel = channel_rows[0]
+        account = conn.execute(
+            """SELECT id, handle FROM accounts
+               WHERE platform = 'x' AND lower(handle) = lower(?)""",
+            (channel["key"],),
+        ).fetchone()
+        if account is None:
+            raise ValueError(
+                f"entity {entity['id']} channel @{channel['key']} has no account"
+            )
+        has_labs = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'labs'"
+        ).fetchone()
+        if has_labs and conn.execute(
+            "SELECT 1 FROM labs WHERE x_account_id = ?", (account["id"],)
+        ).fetchone():
+            raise ValueError(f"entity {entity['id']} is a seeded lab")
+        if conn.execute(
+            """SELECT 1 FROM graph_edges
+               WHERE from_account_id = ? OR to_account_id = ? LIMIT 1""",
+            (account["id"], account["id"]),
+        ).fetchone():
+            raise ValueError(f"entity {entity['id']} participates in graph edges")
+        resolved.append(
+            {
+                "removal": removal,
+                "entity": entity,
+                "channel": channel,
+                "account": account,
+            }
+        )
+    return resolved, already_removed
+
+
+def apply_relevance_removals(conn: sqlite3.Connection, removals: list[dict]) -> dict:
+    """Delete only the exact, reviewed one-account identities in a manifest."""
+    resolved, already_removed = _preflight_relevance_removals(conn, removals)
+    removed_entities = 0
+    removed_channels = 0
+    removed_accounts = 0
+    for item in resolved:
+        entity_id = item["entity"]["id"]
+        channel_id = item["channel"]["id"]
+        account_id = item["account"]["id"]
+        conn.execute("DELETE FROM entities WHERE id = ?", (entity_id,))
+        conn.execute("DELETE FROM channels WHERE id = ?", (channel_id,))
+        conn.execute(
+            "DELETE FROM account_source_facts WHERE account_id = ?", (account_id,)
+        )
+        conn.execute("DELETE FROM accounts WHERE id = ?", (account_id,))
+        removed_entities += 1
+        removed_channels += 1
+        removed_accounts += 1
+    return {
+        "requested": len(removals),
+        "removed_entities": removed_entities,
+        "removed_channels": removed_channels,
+        "removed_accounts": removed_accounts,
+        "already_removed": already_removed,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
     parser = argparse.ArgumentParser(prog="fli registry")
-    parser.add_argument("action", choices=["apply-organization-groups"])
+    parser.add_argument(
+        "action",
+        choices=["apply-organization-groups", "apply-relevance-removals"],
+    )
     parser.add_argument("--db", default=None)
     parser.add_argument(
         "--manifest",
         type=Path,
-        default=DEFAULT_ORGANIZATION_GROUPS_PATH,
+        default=None,
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
@@ -529,10 +692,17 @@ def main(argv: list[str] | None = None) -> int:
     conn = channels.connect(args.db) if args.db else channels.connect()
     ensure_schema(conn)
     conn.commit()
-    groups = load_organization_groups(args.manifest)
+    if args.action == "apply-organization-groups":
+        manifest_path = args.manifest or DEFAULT_ORGANIZATION_GROUPS_PATH
+        manifest = load_organization_groups(manifest_path)
+        apply = apply_organization_groups
+    else:
+        manifest_path = args.manifest or DEFAULT_RELEVANCE_REMOVALS_PATH
+        manifest = load_relevance_removals(manifest_path)
+        apply = apply_relevance_removals
     try:
         conn.execute("BEGIN IMMEDIATE")
-        result = apply_organization_groups(conn, groups)
+        result = apply(conn, manifest)
         if args.dry_run:
             conn.rollback()
         else:

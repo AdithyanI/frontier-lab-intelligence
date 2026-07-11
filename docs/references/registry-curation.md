@@ -50,19 +50,19 @@ Current invariants:
 
 ## Current Implemented Universe
 
-After removing the rejected graph evidence while retaining the already
-filtered and classified nodes, the active corpus contains:
+After removing the rejected graph evidence and the first explicitly approved
+relevance-removal batch, the corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person | 2,736 |
-| organization | 163 (including 10 seeded labs) |
+| person | 2,635 |
+| organization | 156 (including 10 seeded labs) |
 | unsure (active) | 1 |
 | rejected | 3 |
 | unknown | 0 |
-| **total** | **2,903** |
+| **total** | **2,795** |
 
-Those clusters own all 2,948 channels. The difference is 45 additional
+Those clusters own all 2,840 channels. The difference is 45 additional
 channels: 24 official website, GitHub, and blog channels linked to labs plus 21
 X/product/subgroup channels consolidated into an existing organization. The
 eight affiliation-search arXiv
@@ -72,6 +72,15 @@ The active graph has zero edges. Digg's 1,000-account ranking is an offline
 comparison artifact and is not active Registry provenance. A node's accepted
 follower-floor and structural-kind decisions survive removal of its discovery
 edge.
+
+The first relevance cleanup is an explicit, human-approved boundary rather
+than a direct model action. Its 108 rows live in
+`data/registry/relevance-removals.csv`; the transactional Registry command
+preflights identity, channel ownership, lab status, merge status, rejection
+state, and graph participation before deleting an entity, its sole X channel,
+and its backing account. The first batch removed 101 people and seven
+organizations. The original model shortlist and the later manual reach audit
+remain review artifacts in the active trusted-following project.
 
 Every account has a neutral `registry_bootstrap.retained_candidate` fact with
 value `post_1000_follower_floor_and_kind_classification`. Accounts actually
