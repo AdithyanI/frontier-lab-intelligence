@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { siGithub, siRss, siX } from 'simple-icons'
 import {
   getJSON,
@@ -19,6 +19,7 @@ const BRAND_ICON: Record<string, string> = {
 
 const FIRST = 40
 const STEP = 40
+const SEARCH_DELAY_MS = 180
 
 const fmt = (n: number | null | undefined) =>
   n == null ? '—' : n.toLocaleString('en-US')
@@ -40,6 +41,17 @@ const channelKindLabel = (kind: string) => {
     blog: 'Blog',
   }
   return labels[kind] ?? kind
+}
+
+const registryURL = (kind: KindFilter, query: string, offset: number) => {
+  const params = new URLSearchParams({
+    group: kind,
+    limit: String(offset === 0 ? FIRST : STEP),
+    offset: String(offset),
+  })
+  const needle = query.trim()
+  if (needle) params.set('q', needle)
+  return `/api/registry?${params}`
 }
 
 const typeLabel = (entity: Entity) =>
@@ -112,47 +124,68 @@ export default function Registry() {
   const [data, setData] = useState<RegistryData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [kind, setKind] = useState<KindFilter>('all')
-  const [shown, setShown] = useState(FIRST)
   const [selected, setSelected] = useState<Entity | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const viewRef = useRef('all\0')
 
   useEffect(() => {
-    getJSON<RegistryData>('/api/registry?limit=5000')
-      .then(setData)
-      .catch((cause) => setError(String(cause)))
-  }, [])
-
-  const filtered = useMemo(() => {
-    if (!data) return []
-    const needle = query.trim().toLowerCase()
-    const matches = data.entities.filter((entity) => {
-      if (kind === 'rejected' && entity.registry_state !== 'rejected') return false
-      if (
-        kind !== 'all' &&
-        kind !== 'rejected' &&
-        (entity.registry_state === 'rejected' || entity.kind !== kind)
-      ) return false
-      if (!needle) return true
-      return (
-        entity.name.toLowerCase().includes(needle) ||
-        (entity.bio ?? '').toLowerCase().includes(needle) ||
-        (entity.rejection_reason ?? '').toLowerCase().includes(needle) ||
-        entity.channels.some((channel) =>
-          channel.key.toLowerCase().includes(needle),
-        )
-      )
-    })
-    if (!['all', 'person', 'organization'].includes(kind)) return matches
-    return matches.sort(
-      (left, right) =>
-        (right.followers_count ?? -1) - (left.followers_count ?? -1) ||
-        left.name.localeCompare(right.name),
+    const timer = window.setTimeout(
+      () => setDebouncedQuery(query),
+      SEARCH_DELAY_MS,
     )
-  }, [data, kind, query])
+    return () => window.clearTimeout(timer)
+  }, [query])
 
-  useEffect(() => setShown(FIRST), [kind, query])
+  useEffect(() => {
+    const controller = new AbortController()
+    const view = `${kind}\0${debouncedQuery}`
+    viewRef.current = view
+    setLoading(true)
+    setLoadingMore(false)
+    setError(null)
+    setSelected(null)
+    getJSON<RegistryData>(registryURL(kind, debouncedQuery, 0), {
+      signal: controller.signal,
+    })
+      .then((page) => {
+        if (viewRef.current === view) setData(page)
+      })
+      .catch((cause: unknown) => {
+        if ((cause as Error).name !== 'AbortError') setError(String(cause))
+      })
+      .finally(() => {
+        if (!controller.signal.aborted && viewRef.current === view) {
+          setLoading(false)
+        }
+      })
+    return () => controller.abort()
+  }, [debouncedQuery, kind])
 
-  const visible = filtered.slice(0, shown)
+  const visible = data?.entities ?? []
+  const loadMore = () => {
+    if (!data || loadingMore) return
+    const view = viewRef.current
+    setLoadingMore(true)
+    setError(null)
+    getJSON<RegistryData>(
+      registryURL(kind, debouncedQuery, data.entities.length),
+    )
+      .then((page) => {
+        if (viewRef.current !== view) return
+        setData((current) =>
+          current
+            ? { ...page, entities: [...current.entities, ...page.entities] }
+            : page,
+        )
+      })
+      .catch((cause: unknown) => {
+        if (viewRef.current === view) setError(String(cause))
+      })
+      .finally(() => setLoadingMore(false))
+  }
   const filters: { key: KindFilter; label: string; count: number }[] = [
     { key: 'all', label: 'All', count: data?.total ?? 0 },
     { key: 'person', label: 'People', count: data?.counts.person ?? 0 },
@@ -218,15 +251,17 @@ export default function Registry() {
         </div>
         {data && (
           <span className="table-count">
-            {fmt(visible.length)} of {fmt(filtered.length)}
+            {fmt(visible.length)} of {fmt(data.filtered_total)}
           </span>
         )}
       </div>
 
-      {!data && !error && <div className="registry-loading skeleton" />}
+      {!data && loading && !error && (
+        <div className="registry-loading skeleton" />
+      )}
 
       {data && visible.length > 0 && (
-        <table className="ent-table">
+        <table className="ent-table" aria-busy={loading || loadingMore}>
           <thead>
             <tr>
               <th>Entity</th>
@@ -297,12 +332,15 @@ export default function Registry() {
         <div className="registry-empty">No entities match this view.</div>
       )}
 
-      {filtered.length > shown && (
+      {data && data.entities.length < data.filtered_total && (
         <button
           className="load-more"
-          onClick={() => setShown((current) => current + STEP)}
+          onClick={loadMore}
+          disabled={loadingMore}
         >
-          Show {fmt(Math.min(STEP, filtered.length - shown))} more
+          {loadingMore
+            ? 'Loading…'
+            : `Show ${fmt(Math.min(STEP, data.filtered_total - data.entities.length))} more`}
         </button>
       )}
 

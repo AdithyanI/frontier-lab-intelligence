@@ -103,6 +103,17 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             f"channel {duplicate['channel_id']} belongs to multiple entities"
         )
     conn.executescript(SCHEMA)
+    if conn.execute(
+        """SELECT 1 FROM sqlite_master
+           WHERE type = 'table' AND name = 'entity_kind_classifications'"""
+    ).fetchone():
+        conn.execute(
+            """CREATE INDEX IF NOT EXISTS
+               idx_entity_kind_classifications_entity_label_latest
+               ON entity_kind_classifications (
+                   entity_id, classification, classified_at DESC, run_id DESC
+               )"""
+        )
 
 
 def _slug_base(kind: str, key: str) -> str:
@@ -879,7 +890,71 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
+REGISTRY_GROUPS = frozenset({"all", *channels.ENTITY_KINDS, "rejected"})
+
+
+def _registry_where(*, group: str, query: str) -> tuple[str, list[str]]:
+    if group not in REGISTRY_GROUPS:
+        raise ValueError(f"invalid Registry group: {group}")
+    clauses: list[str] = []
+    params: list[str] = []
+    if group == "rejected":
+        clauses.append("rejected.entity_id IS NOT NULL")
+    elif group != "all":
+        clauses.extend(("rejected.entity_id IS NULL", "e.kind = ?"))
+        params.append(group)
+
+    needle = query.strip().lower()
+    if needle:
+        pattern = f"%{needle}%"
+        clauses.append(
+            """(lower(e.name) LIKE ?
+                 OR lower(COALESCE(rejected.reason, '')) LIKE ?
+                 OR EXISTS (
+                     SELECT 1
+                     FROM entity_channels search_ec
+                     JOIN channels search_c ON search_c.id = search_ec.channel_id
+                     WHERE search_ec.entity_id = e.id
+                       AND (
+                           lower(search_c.key) LIKE ?
+                           OR EXISTS (
+                               SELECT 1 FROM channel_observations search_o
+                               WHERE search_o.channel_id = search_c.id
+                                 AND search_o.source = 'x_profile'
+                                 AND search_o.metric = 'bio'
+                                 AND lower(COALESCE(search_o.value, '')) LIKE ?
+                           )
+                       )
+                 ))"""
+        )
+        params.extend((pattern, pattern, pattern, pattern))
+    return (" AND ".join(clauses) if clauses else "1 = 1"), params
+
+
+def count_entities(
+    conn: sqlite3.Connection, *, group: str = "all", query: str = ""
+) -> int:
+    """Count entities in one server-side Registry search/filter view."""
+    ensure_schema(conn)
+    where_sql, params = _registry_where(group=group, query=query)
+    return conn.execute(
+        f"""SELECT COUNT(*)
+            FROM entities e
+            LEFT JOIN entity_registry_rejections rejected
+              ON rejected.entity_id = e.id
+            WHERE {where_sql}""",
+        params,
+    ).fetchone()[0]
+
+
+def read_entities(
+    conn: sqlite3.Connection,
+    *,
+    limit: int = 5000,
+    offset: int = 0,
+    group: str = "all",
+    query: str = "",
+) -> list[dict]:
     """Return identity fields, structural-kind reason, and curation state."""
     ensure_schema(conn)
     has_classifications = bool(
@@ -914,6 +989,16 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
         if has_classifications
         else override_reason_sql
     )
+    if limit < 1:
+        raise ValueError("limit must be at least 1")
+    if offset < 0:
+        raise ValueError("offset must be non-negative")
+    where_sql, where_params = _registry_where(group=group, query=query)
+    order_sql = (
+        "followers_count DESC NULLS LAST, name COLLATE NOCASE"
+        if group in {"all", "person", "organization"}
+        else "name COLLATE NOCASE"
+    )
     rows = conn.execute(
         f"""WITH selected AS (
                SELECT e.id, e.slug, e.kind, e.name,
@@ -921,8 +1006,8 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                           SELECT SUM(a.followers_count)
                           FROM accounts a
                           WHERE a.platform = 'x'
-                            AND lower(a.handle) IN (
-                                SELECT lower(xc.key)
+                            AND a.handle IN (
+                                SELECT xc.key
                                 FROM entity_channels xec
                                 JOIN channels xc ON xc.id = xec.channel_id
                                 WHERE xec.entity_id = e.id
@@ -932,14 +1017,9 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                FROM entities e
                LEFT JOIN entity_registry_rejections rejected
                  ON rejected.entity_id = e.id
-               ORDER BY CASE WHEN rejected.entity_id IS NOT NULL THEN 3
-                             WHEN e.kind = 'organization' THEN 0
-                             WHEN e.kind = 'person' THEN 1
-                             WHEN e.kind = 'unsure' THEN 2
-                             ELSE 4
-                        END,
-                        e.name COLLATE NOCASE
-               LIMIT ?
+               WHERE {where_sql}
+               ORDER BY {order_sql}
+               LIMIT ? OFFSET ?
            )
            SELECT e.id, e.slug, e.kind, e.name, e.followers_count,
                   CASE WHEN rejected.entity_id IS NULL
@@ -972,7 +1052,7 @@ def read_entities(conn: sqlite3.Connection, *, limit: int = 5000) -> list[dict]:
                                          WHEN 'official' THEN 1
                                          ELSE 2 END,
                     c.kind, c.key""",
-        (limit,),
+        (*where_params, limit, offset),
     ).fetchall()
     grouped: dict[int, dict] = {}
     for row in rows:

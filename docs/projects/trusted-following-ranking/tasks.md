@@ -219,7 +219,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Freeze and reconcile the cleaned pre-following database boundary with an exact recovery path. | parent | `resources/registry-cleanup-checkpoint.md` |
 | done | Design the local-first, isolated, resumable snapshot and tracked-manifest storage boundary. | parent | `../../references/following-snapshot-storage.md` |
 | done | Implement the per-snapshot SQLite schema and freeze the 2,231-account collection manifest before any paid fetch. | parent | `../../../data/following/cohorts/registry-active-2026-07-11.json` |
-| todo | Add the bounded TwitterAPI.io collector over the snapshot store, then prove one small resumable calibration before the full crawl. | parent | `../../references/following-snapshot-storage.md` |
+| done | Add the bounded TwitterAPI.io collector over the snapshot store, then prove one small resumable calibration before the full crawl. | parent | `resources/profile-count-scan.md` |
+| todo | Review the profile-count outliers and obtain Adi's explicit go/no-go for the projected `$27.84` full outgoing-follow crawl. | parent | `resources/profile-count-scan.md` |
 
 ## Backlog / Remaining Work
 
@@ -455,3 +456,20 @@ candidate generator while demonstrating ranking and validation discipline.
   transactionally raw-first, keyed by stable source X ID plus cursor,
   idempotent for identical retries, conflict-safe for changed evidence, and
   immutable after completion. No provider call or spend occurred.
+- 2026-07-11: [DONE] Added the explicit-scope, JSON-first snapshot collector
+  and proved page-level resume on `@karpathy`: one profile plus six following
+  pages produced exactly 1,108 directed edges at an estimated `$0.01234`; the
+  second run reused the cached profile and first page. Added a profile-only
+  scan with a request-start limiter and ran the remaining cohort at 10 workers
+  / 9 QPS under the Builder plan's documented 10-QPS cap. It cached 2,228
+  profiles in total, marked nine protected and three missing sources, and
+  completed 12 zero-following sources without following calls. Current profile
+  counts project the full accessible crawl at `$27.83826`. No count-only
+  exclusion is justified yet: all refreshed profiles pass the 1,000-follower
+  floor and several high-following outliers are clearly valuable AI sources.
+- 2026-07-11: [DONE] Verified the protected-account graph boundary with one
+  bounded `@alsuhr` following-page probe. TwitterAPI.io returned success with
+  zero rows/no cursor despite the cached profile advertising 637 follows, so
+  protected sources remain explicit inaccessible terminals rather than false
+  empty snapshots. They can still be graph targets: Karpathy's completed
+  public list already supplies inbound edges to protected `@dwf` and `@gwern`.

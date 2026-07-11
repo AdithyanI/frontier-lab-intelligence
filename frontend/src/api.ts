@@ -47,11 +47,14 @@ export interface Entity {
 export interface Registry {
   entities: Entity[]
   total: number
+  filtered_total: number
   counts: Record<RegistryGroup, number>
+  limit: number
+  offset: number
 }
 
-export async function getJSON<T>(url: string): Promise<T> {
-  const r = await fetch(url)
+export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(url, init)
   if (!r.ok) throw new Error(`${url} → ${r.status}`)
   return r.json() as Promise<T>
 }

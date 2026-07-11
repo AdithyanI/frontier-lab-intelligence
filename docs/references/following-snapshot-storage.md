@@ -44,10 +44,26 @@ fli following-snapshot status \
 fli following-snapshot validate \
   --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
   --no-input
+
+fli following-snapshot collect \
+  --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
+  --handle karpathy \
+  --max-pages-per-source 1 \
+  --no-input
+
+fli following-snapshot collect \
+  --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
+  --all --profiles-only --workers 10 --requests-per-second 9 \
+  --no-input
 ```
 
 All commands emit one versioned JSON object by default, accept `--plain` for a
 compact operator view, and never prompt when `--no-input` is present.
+Paid collection requires exactly one explicit scope: repeatable `--handle`, a
+bounded `--limit`, or `--all`. Parallel workers are limited to profile-only
+scans; following pages remain sequential within each source and cursor-safe.
+The `$99` Builder plan documents 10 QPS, so the accepted profile scan uses 10
+workers with request starts limited to 9 QPS.
 
 ## Local Snapshot Contract
 

@@ -148,6 +148,10 @@ CREATE TABLE IF NOT EXISTS entity_kind_classifications (
 );
 CREATE INDEX IF NOT EXISTS idx_entity_kind_classifications_label
 ON entity_kind_classifications (classification);
+CREATE INDEX IF NOT EXISTS idx_entity_kind_classifications_entity_label_latest
+ON entity_kind_classifications (
+    entity_id, classification, classified_at DESC, run_id DESC
+);
 
 CREATE TABLE IF NOT EXISTS entity_kind_classification_errors (
     id INTEGER PRIMARY KEY,

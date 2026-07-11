@@ -6,7 +6,7 @@ src/fli/web/dist, which this app serves. During frontend development,
 
 Endpoints:
 - /api/status        pipeline stages with live DB counts (health/ops)
-- /api/registry      complete typed entity universe
+- /api/registry      paged/searchable typed entity universe
 """
 
 from pathlib import Path
@@ -135,16 +135,35 @@ def status() -> JSONResponse:
 
 
 @app.get("/api/registry")
-def registry(limit: int = Query(150, le=5000)) -> JSONResponse:
-    """The complete entity universe with only identity-bearing fields."""
+def registry(
+    limit: int = Query(40, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
+    group: str = Query(
+        "all", pattern="^(all|person|organization|unsure|unknown|rejected)$"
+    ),
+    q: str = Query("", max_length=200),
+) -> JSONResponse:
+    """One server-filtered page of the entity universe."""
     conn = _model_conn()
     try:
         counts = entity_registry.kind_counts(conn)
+        filtered_total = entity_registry.count_entities(
+            conn, group=group, query=q
+        )
         return JSONResponse(
             {
-                "entities": entity_registry.read_entities(conn, limit=limit),
+                "entities": entity_registry.read_entities(
+                    conn,
+                    limit=limit,
+                    offset=offset,
+                    group=group,
+                    query=q,
+                ),
                 "total": sum(counts.values()),
+                "filtered_total": filtered_total,
                 "counts": counts,
+                "limit": limit,
+                "offset": offset,
             }
         )
     finally:

@@ -23,6 +23,9 @@ def test_registry_returns_complete_typed_entity_universe():
     assert r.status_code == 200
     data = r.json()
     assert data["total"] == sum(data["counts"].values())
+    assert data["filtered_total"] == data["total"]
+    assert data["offset"] == 0
+    assert data["limit"] == 5000
     assert data["counts"]["person"] > 0
     assert data["counts"]["organization"] >= 10
     assert data["counts"]["unsure"] >= 0
@@ -54,6 +57,23 @@ def test_registry_returns_complete_typed_entity_universe():
         "bio",
         "channels",
     }
+
+
+def test_registry_pages_filters_and_searches_on_the_server():
+    people = client.get("/api/registry?group=person&limit=2").json()
+    assert people["filtered_total"] == people["counts"]["person"]
+    assert len(people["entities"]) == 2
+    assert all(entity["kind"] == "person" for entity in people["entities"])
+    assert all(entity["registry_state"] == "active" for entity in people["entities"])
+
+    next_page = client.get("/api/registry?group=person&limit=2&offset=2").json()
+    assert {entity["id"] for entity in people["entities"]}.isdisjoint(
+        entity["id"] for entity in next_page["entities"]
+    )
+
+    search = client.get("/api/registry?q=openai&limit=40").json()
+    assert 0 < search["filtered_total"] < search["total"]
+    assert any(entity["slug"] == "openai" for entity in search["entities"])
 
 
 def test_spa_served_when_built():

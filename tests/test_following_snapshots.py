@@ -366,6 +366,7 @@ def test_collector_pauses_and_resumes_without_refetching_profile_or_page(tmp_pat
     ]
     assert second["cumulative_cost"] == {
         "profile_requests": 1,
+        "unpersisted_error_requests": 0,
         "following_page_requests": 2,
         "estimated_provider_credits": 138,
         "estimated_provider_cost_usd": 0.00138,
@@ -523,6 +524,33 @@ def test_parallel_profile_scan_respects_profile_only_boundary(tmp_path):
     assert result["pages_fetched"] == 0
     assert sorted(client.profile_calls) == ["alpha", "beta"]
     assert client.page_calls == []
+    assert following_snapshots.validate_snapshot(conn)["valid"] is True
+    conn.close()
+
+
+def test_zero_following_profile_completes_without_page_request(tmp_path):
+    snapshot_db, _ = _snapshot(tmp_path)
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    client = FakeCollectorClient(
+        profiles={"alpha": {"id": "1", "userName": "alpha", "following": 0}},
+        pages={},
+    )
+
+    result = following_snapshots.collect_snapshot(
+        conn,
+        client=client,
+        handles=["alpha"],
+    )
+
+    assert result["outcomes"]["complete"] == 1
+    assert result["pages_fetched"] == 0
+    assert client.page_calls == []
+    source = conn.execute(
+        "SELECT * FROM source_fetch WHERE source_x_id = '1'"
+    ).fetchone()
+    assert source["status"] == "complete"
+    assert source["fetched_count"] == 0
+    assert source["raw_page_count"] == 0
     assert following_snapshots.validate_snapshot(conn)["valid"] is True
     conn.close()
 

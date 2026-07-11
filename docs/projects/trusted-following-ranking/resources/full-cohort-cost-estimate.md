@@ -65,3 +65,13 @@ updated range:
 
 Actual spend must be recorded from the provider run; these values remain
 pre-run estimates only.
+
+## Profile-Grounded Update
+
+The 2026-07-11 bounded profile scan cached current follower/following counts for
+2,228 of 2,231 frozen sources; nine are protected and three are missing. The
+advertised following counts project the complete accessible outgoing-follow
+crawl at **2,783,826 credits / `$27.83826`** before applying the protected,
+missing, and zero-following exits. This replaces the rough average-based
+planning estimate with a per-source projection. See
+`profile-count-scan.md` for the distribution and outlier review.

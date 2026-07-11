@@ -158,6 +158,8 @@ fli sources import-x-following --username <x-handle> --source <source_key>
 fli following-snapshot freeze-cohort --cohort-id <id> --output <path>
 fli following-snapshot init --snapshot-id <id> --cohort <path>
 fli following-snapshot status|validate --snapshot-db <path>
+fli following-snapshot collect --snapshot-db <path> --handle <x-handle>
+fli following-snapshot collect --snapshot-db <path> --all --profiles-only
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
@@ -176,9 +178,21 @@ and directed source→target edges. Source state distinguishes pending,
 in-progress, complete, protected, missing, unavailable, and failed. Identical
 page retries are no-ops, conflicting retries fail closed, and completed
 snapshots are immutable. `status` and `validate` are JSON-first, non-interactive
-inspection commands. Provider collection and ranking remain the next stages;
-initialization itself makes no external request and the ranking path will
-require an explicit snapshot database rather than reading `data/fli.db` edges.
+inspection commands. Initialization itself makes no external request. Bounded
+provider collection is implemented; the full crawl and ranking remain next,
+and ranking will require an explicit snapshot database rather than reading
+`data/fli.db` edges.
+
+Bounded collection is now implemented. Every paid run requires an explicit
+handle, source limit, or `--all`. Source profiles are cached before following
+pages, so profile and cursor evidence both survive interruption. Profile-only
+scans may use parallel workers behind a request-start QPS limiter; following
+pages remain sequential per source. The first live calibration paused
+`@karpathy` after one 200-edge page, resumed without repeating that profile or
+page, and completed at 1,108 edges across six pages. The all-source profile
+scan cached 2,228 current follower/following counts, marked nine protected and
+three missing sources, and completed 12 zero-following sources without a paid
+following request. The remaining full edge crawl and ranking are not yet run.
 
 Known data facts:
 
@@ -641,7 +655,7 @@ final score.
 | `fli.labs` | internal curated source seed (10 historical rows); seeds official channels but does not define a public Registry kind/subtype |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io profile, timeline, X-list, and single-source outgoing-follow adapter; provenance only, no classification |
-| `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes people, organizations, unsure results, and classifier reasons; source in `frontend/` |
+| `fli.web` | JSON API (`/api/status`, `/api/registry`) + built SPA host; Registry is server-paged, reach-sorted, searchable by identity fields, and exposes people, organizations, unsure results, rejections, and classifier reasons; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |

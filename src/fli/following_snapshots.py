@@ -38,6 +38,7 @@ DEFAULT_PRODUCT_DB = REPO_ROOT / "data" / "fli.db"
 DEFAULT_COHORT_DIR = REPO_ROOT / "data" / "following" / "cohorts"
 DEFAULT_SNAPSHOT_ROOT = REPO_ROOT / "data" / "raw" / "following"
 PROFILE_CREDITS = 18
+MINIMUM_REQUEST_CREDITS = 15
 
 SOURCE_STATUSES = frozenset(
     {
@@ -216,7 +217,7 @@ def _profile_following_count(profile: dict[str, Any]) -> int | None:
 
 def _following_page_credits(returned: int) -> int:
     if returned <= 0:
-        return 0
+        return 60
     if returned >= 200:
         return returned
     if returned >= 100:
@@ -653,13 +654,67 @@ def record_attempt_error(
     conn.commit()
 
 
+def complete_zero_following_source(
+    conn: sqlite3.Connection,
+    *,
+    source_x_id: str,
+    observed_at: str | None = None,
+) -> None:
+    """Complete a source whose cached provider profile advertises zero follows."""
+    observed_at = observed_at or _now()
+    _ensure_mutable(conn)
+    profile = conn.execute(
+        """SELECT advertised_following_count FROM raw_profile
+           WHERE source_x_id = ?""",
+        (source_x_id,),
+    ).fetchone()
+    if not profile or profile["advertised_following_count"] != 0:
+        raise SnapshotCliError(
+            code="E_ZERO_FOLLOWING_EVIDENCE",
+            message="Source does not have cached zero-following profile evidence.",
+            hint="Fetch and cache the source profile before completing it as empty.",
+            exit_code=4,
+        )
+    updated = conn.execute(
+        """UPDATE source_fetch
+           SET status = 'complete', next_cursor = '', fetched_count = 0,
+               last_error_code = NULL, last_error_message = NULL, updated_at = ?
+           WHERE source_x_id = ? AND status IN ('pending', 'in_progress')""",
+        (observed_at, source_x_id),
+    ).rowcount
+    if not updated:
+        raise SnapshotCliError(
+            code="E_SOURCE_NOT_RESUMABLE",
+            message=f"Source X ID is not resumable: {source_x_id}",
+            hint="Inspect the source status before completing it.",
+            exit_code=4,
+        )
+    conn.execute(
+        "UPDATE snapshot_run SET status = 'collecting' WHERE status = 'initialized'"
+    )
+    conn.commit()
+
+
 def _snapshot_cost(conn: sqlite3.Connection) -> dict[str, int | float]:
     profile_requests = conn.execute("SELECT COUNT(*) FROM raw_profile").fetchone()[0]
+    unpersisted_requests = conn.execute(
+        """SELECT COALESCE(SUM(sf.attempts), 0)
+           FROM source_fetch sf
+           WHERE NOT EXISTS (
+               SELECT 1 FROM raw_profile rp
+               WHERE rp.source_x_id = sf.source_x_id
+           )"""
+    ).fetchone()[0]
     page_rows = conn.execute("SELECT item_count FROM raw_page").fetchall()
     following_credits = sum(_following_page_credits(row["item_count"]) for row in page_rows)
-    credits = profile_requests * PROFILE_CREDITS + following_credits
+    credits = (
+        profile_requests * PROFILE_CREDITS
+        + unpersisted_requests * MINIMUM_REQUEST_CREDITS
+        + following_credits
+    )
     return {
         "profile_requests": profile_requests,
+        "unpersisted_error_requests": unpersisted_requests,
         "following_page_requests": len(page_rows),
         "estimated_provider_credits": credits,
         "estimated_provider_cost_usd": round(credits / 100_000, 6),
@@ -679,7 +734,8 @@ def profile_cost_projection(conn: sqlite3.Connection) -> dict[str, int | float |
         count = row["advertised_following_count"]
         full_pages, remainder = divmod(count, 200)
         following_credits += full_pages * 200
-        following_credits += _following_page_credits(remainder)
+        if remainder:
+            following_credits += _following_page_credits(remainder)
     projected_credits = len(rows) * PROFILE_CREDITS + following_credits
     return {
         "sources_with_following_count": len(rows),
@@ -869,6 +925,11 @@ def _collect_profiles_parallel(
                 error_message="The cached provider profile marks this account protected.",
             )
             outcomes["protected"] += 1
+        elif _profile_following_count(profile) == 0:
+            complete_zero_following_source(
+                conn, source_x_id=source["source_x_id"]
+            )
+            outcomes["complete"] += 1
         else:
             outcomes["profiled"] += 1
 
@@ -942,6 +1003,9 @@ def _collect_profiles_parallel(
                     error_message="The provider profile marks this X account protected.",
                 )
                 outcomes["protected"] += 1
+            elif _profile_following_count(profile) == 0:
+                complete_zero_following_source(conn, source_x_id=source_x_id)
+                outcomes["complete"] += 1
             else:
                 outcomes["profiled"] += 1
             if progress == "plain" and (
@@ -1422,6 +1486,11 @@ def collect_snapshot(
             )
             continue
 
+        if _profile_following_count(profile) == 0:
+            complete_zero_following_source(conn, source_x_id=source_x_id)
+            outcomes["complete"] += 1
+            continue
+
         if profiles_only:
             outcomes["profiled"] += 1
             continue
@@ -1671,11 +1740,15 @@ def _print_result(payload: dict[str, Any], *, plain: bool) -> None:
         print(f"error: {error.get('code')}: {error.get('message')}")
         return
     data = payload["data"] or {}
-    counts = data.get("counts") or {}
+    snapshot = data.get("snapshot") or {}
+    counts = data.get("counts") or snapshot.get("counts") or {}
+    selected = data.get("selected_sources")
+    selected_text = f" selected={selected}" if selected is not None else ""
     print(
         f"{payload['command']}: status={data.get('status', 'ok')} "
-        f"sources={data.get('source_count', counts.get('sources', 0))} "
-        f"pages={counts.get('raw_pages', 0)} edges={counts.get('edges', 0)}"
+        f"sources={data.get('source_count', counts.get('sources', 0))}"
+        f"{selected_text} pages={counts.get('raw_pages', 0)} "
+        f"edges={counts.get('edges', 0)}"
     )
 
 
