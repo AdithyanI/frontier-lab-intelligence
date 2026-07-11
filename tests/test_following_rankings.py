@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import json
 import sqlite3
 
@@ -9,6 +10,7 @@ from fli import channels, following_rankings, following_snapshots, registry
 
 def _snapshot(path, *, status="complete"):
     conn = sqlite3.connect(path)
+    conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(following_snapshots.SCHEMA)
     conn.execute(
         """INSERT INTO snapshot_run
@@ -18,37 +20,16 @@ def _snapshot(path, *, status="complete"):
            VALUES ('fixture', 'fixture-cohort', 'cohort-sha', 'cohort.json',
                    'snapshot-commit', 'snapshot-registry-sha', 'fixture',
                    '/fixture', 'following-snapshot-v1', '2026-07-11T00:00:00Z',
-                   '2026-07-11T01:00:00Z', ?, 4)""",
+                   '2026-07-11T01:00:00Z', ?, 5)""",
         (status,),
     )
     sources = [
         ("1", "alpha", "complete"),
         ("2", "beta", "complete"),
         ("3", "charlie", "complete"),
-        ("4", "private", "protected"),
+        ("4", "private", "complete"),
+        ("5", "alpha_alt", "complete"),
     ]
-    for x_id, handle, source_status in sources:
-        conn.execute(
-            """INSERT INTO source_fetch
-               (source_x_id, source_handle, next_cursor, fetched_count,
-                raw_page_count, status, attempts, updated_at)
-               VALUES (?, ?, '', 0, 0, ?, 1, '2026-07-11T01:00:00Z')""",
-            (x_id, handle, source_status),
-        )
-    targets = [
-        ("10", "x", "X", 100),
-        ("11", "y", "Y", 200),
-        ("12", "w", "W", 300),
-        ("13", "z", "Z", 400),
-    ]
-    conn.executemany(
-        """INSERT INTO account
-           (x_id, handle, display_name, followers_count,
-            first_observed_at, last_observed_at)
-           VALUES (?, ?, ?, ?, '2026-07-11T00:00:00Z',
-                   '2026-07-11T01:00:00Z')""",
-        targets,
-    )
     edges = [
         ("1", "10"),
         ("1", "11"),
@@ -58,12 +39,53 @@ def _snapshot(path, *, status="complete"):
         ("3", "11"),
         ("3", "12"),
         ("4", "13"),
+        ("4", "14"),
+        ("5", "10"),
+        ("5", "13"),
     ]
+    edge_counts = {
+        x_id: sum(1 for source_x_id, _ in edges if source_x_id == x_id)
+        for x_id, _, _ in sources
+    }
+    for x_id, handle, source_status in sources:
+        conn.execute(
+            """INSERT INTO source_fetch
+               (source_x_id, source_handle, next_cursor, fetched_count,
+                raw_page_count, status, attempts, updated_at)
+               VALUES (?, ?, '', ?, 1, ?, 1, '2026-07-11T01:00:00Z')""",
+            (x_id, handle, edge_counts[x_id], source_status),
+        )
+    targets = [
+        ("10", "x", "X", 100),
+        ("11", "y", "Y", 200),
+        ("12", "w", "W", 300),
+        ("13", "z", "Z", 400),
+        ("14", "v", "V", 500),
+    ]
+    conn.executemany(
+        """INSERT INTO account
+           (x_id, handle, display_name, followers_count,
+            first_observed_at, last_observed_at)
+           VALUES (?, ?, ?, ?, '2026-07-11T00:00:00Z',
+                   '2026-07-11T01:00:00Z')""",
+        targets,
+    )
+    page_ids = {}
+    response_json = "{}"
+    response_sha256 = hashlib.sha256(response_json.encode()).hexdigest()
+    for x_id, _, _ in sources:
+        page_ids[x_id] = conn.execute(
+            """INSERT INTO raw_page
+               (source_x_id, request_cursor, next_cursor, item_count,
+                retrieved_at, response_json, response_sha256)
+               VALUES (?, '', NULL, ?, '2026-07-11T01:00:00Z', ?, ?)""",
+            (x_id, edge_counts[x_id], response_json, response_sha256),
+        ).lastrowid
     conn.executemany(
         """INSERT INTO edge
            (source_x_id, target_x_id, raw_page_id, observed_at)
-           VALUES (?, ?, 1, '2026-07-11T01:00:00Z')""",
-        edges,
+           VALUES (?, ?, ?, '2026-07-11T01:00:00Z')""",
+        [(source, target, page_ids[source]) for source, target in edges],
     )
     conn.commit()
     conn.close()
@@ -110,7 +132,29 @@ def _registry_identity(conn, *, x_id, handle, name, rejected=False):
 def _registry(path):
     conn = channels.connect(path)
     registry.ensure_schema(conn)
-    for x_id, handle in (("1", "alpha"), ("2", "beta"), ("3", "charlie")):
+    _, alpha_entity_id = _registry_identity(
+        conn, x_id="1", handle="alpha", name="Alpha"
+    )
+    conn.execute(
+        """INSERT INTO accounts
+           (platform, handle, display_name, x_id, first_seen_at, last_seen_at)
+           VALUES ('x', 'alpha_alt', 'Alpha Alt', '5',
+                   '2026-07-11', '2026-07-11')"""
+    )
+    alpha_alt_channel = channels.upsert_channel(
+        conn,
+        kind="x",
+        key="alpha_alt",
+        label="Alpha Alt",
+        observed_at="2026-07-11T00:00:00Z",
+    )
+    channels.link_entity_channel(
+        conn,
+        entity_id=alpha_entity_id,
+        channel_id=alpha_alt_channel,
+        relationship="official",
+    )
+    for x_id, handle in (("2", "beta"), ("3", "charlie")):
         _registry_identity(conn, x_id=x_id, handle=handle, name=handle.title())
     _registry_identity(
         conn, x_id="4", handle="private", name="Private", rejected=True
@@ -134,7 +178,7 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
         snapshot_db=snapshot_db,
         registry_db=registry_db,
         analysis_db=analysis_db,
-        top_k=4,
+        top_k=5,
         export_csv=export_csv,
         export_unknown_csv=export_unknown_csv,
     )
@@ -142,7 +186,7 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
         snapshot_db=snapshot_db,
         registry_db=registry_db,
         analysis_db=analysis_db,
-        top_k=4,
+        top_k=5,
     )
 
     assert first["reused"] is False
@@ -150,12 +194,14 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
     assert second["context_id"] == first["context_id"]
     assert second["run_id"] == first["run_id"]
     assert first["counts"] == {
-        "complete_sources": 3,
-        "eligible_edges": 7,
-        "ranked_accounts": 4,
+        "eligible_source_accounts": 4,
+        "eligible_source_entities": 3,
+        "eligible_edges": 9,
+        "eligible_entity_votes": 8,
+        "ranked_accounts": 5,
         "active": 1,
         "rejected": 1,
-        "unknown": 2,
+        "unknown": 3,
     }
     assert [
         (row["handle"], row["cohort_follow_count"], row["registry_state"])
@@ -163,21 +209,23 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
     ] == [
         ("x", 3, "active"),
         ("y", 2, "rejected"),
+        ("z", 2, "unknown"),
         ("w", 1, "unknown"),
-        ("z", 1, "unknown"),
+        ("v", 0, "unknown"),
     ]
+    assert [row["score_rank"] for row in first["top"]] == [1, 2, 2, 3, 4]
     with sqlite3.connect(analysis_db) as conn:
         assert conn.execute("SELECT COUNT(*) FROM analysis_context").fetchone()[0] == 1
         assert conn.execute("SELECT COUNT(*) FROM ranking_run").fetchone()[0] == 1
-        assert conn.execute("SELECT COUNT(*) FROM ranking_result").fetchone()[0] == 4
+        assert conn.execute("SELECT COUNT(*) FROM ranking_result").fetchone()[0] == 5
     with export_csv.open(newline="") as stream:
         rows = list(csv.DictReader(stream))
-    assert [row["handle"] for row in rows] == ["x", "y", "w", "z"]
+    assert [row["handle"] for row in rows] == ["x", "y", "z", "w", "v"]
     assert [row["handle"] for row in first["top_active"]] == ["x"]
-    assert [row["handle"] for row in first["top_unknown"]] == ["w", "z"]
+    assert [row["handle"] for row in first["top_unknown"]] == ["z", "w", "v"]
     with export_unknown_csv.open(newline="") as stream:
         unknown_rows = list(csv.DictReader(stream))
-    assert [row["handle"] for row in unknown_rows] == ["w", "z"]
+    assert [row["handle"] for row in unknown_rows] == ["z", "w", "v"]
 
 
 def test_registry_authorizer_denies_legacy_graph_reads():
@@ -280,7 +328,7 @@ def test_overlap_reuse_detects_corrupt_result_rows(tmp_path):
     )
     with sqlite3.connect(analysis_db) as conn:
         conn.execute(
-            "DELETE FROM ranking_result WHERE run_id = ? AND rank = 4",
+            "DELETE FROM ranking_result WHERE run_id = ? AND position = 4",
             (first["run_id"],),
         )
         conn.commit()
