@@ -501,7 +501,6 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <AccountLifecycle />
-          <div className="arch-caption">one account in · one persisted outcome out · relevance prompt: registry-relevance-v1 · removals apply only through a versioned manifest · human overrides stored as data</div>
         </div>
       </section>
 
@@ -516,7 +515,6 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <DataModel />
-          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · graph evidence comes only from explicit Registry-cohort snapshots</div>
         </div>
       </section>
 
@@ -534,7 +532,6 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <StoragePlanes />
-          <div className="arch-caption">chosen circle · observed crowd · ranked few · one reviewed door back in — the crowd lives in its own frozen snapshot, apart from the curated Registry</div>
         </div>
       </section>
 
@@ -551,7 +548,6 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <GraphPlane />
-          <div className="arch-caption">frozen 2026-07-11 snapshot: 2,219 of 2,231 sources complete · 2.46M follows · ranking next · Digg ranking stays offline for comparison only</div>
         </div>
       </section>
 
@@ -566,7 +562,6 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <Funnel />
-          <div className="arch-caption">volumes are an illustrative day — ingestion is not live yet · every surviving insight keeps its citation</div>
         </div>
       </section>
     </div>
