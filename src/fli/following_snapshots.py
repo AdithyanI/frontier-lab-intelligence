@@ -9,6 +9,8 @@ provider; collection can be added without changing the storage contract.
 from __future__ import annotations
 
 import argparse
+import contextlib
+import fcntl
 import hashlib
 import json
 import sqlite3
@@ -21,6 +23,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from fli import sources
+
 
 RESULT_SCHEMA_VERSION = "1.0"
 SNAPSHOT_SCHEMA_VERSION = "following-snapshot-v1"
@@ -31,6 +35,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PRODUCT_DB = REPO_ROOT / "data" / "fli.db"
 DEFAULT_COHORT_DIR = REPO_ROOT / "data" / "following" / "cohorts"
 DEFAULT_SNAPSHOT_ROOT = REPO_ROOT / "data" / "raw" / "following"
+PROFILE_CREDITS = 18
 
 SOURCE_STATUSES = frozenset(
     {
@@ -84,6 +89,15 @@ CREATE TABLE source_fetch (
     updated_at TEXT NOT NULL
 );
 CREATE INDEX idx_source_fetch_status ON source_fetch (status, source_handle);
+
+CREATE TABLE raw_profile (
+    source_x_id TEXT PRIMARY KEY REFERENCES source_fetch (source_x_id),
+    retrieved_at TEXT NOT NULL,
+    profile_json TEXT NOT NULL,
+    profile_sha256 TEXT NOT NULL,
+    protected INTEGER NOT NULL CHECK (protected IN (0, 1)),
+    advertised_following_count INTEGER
+);
 
 CREATE TABLE raw_page (
     id INTEGER PRIMARY KEY,
@@ -178,6 +192,30 @@ def _normalize_handle(value: Any) -> str | None:
 def _int_or_none(value: Any) -> int | None:
     if value is None or value == "":
         return None
+
+
+def _profile_following_count(profile: dict[str, Any]) -> int | None:
+    for key in (
+        "following",
+        "following_count",
+        "followingCount",
+        "friends_count",
+        "friendsCount",
+    ):
+        value = _int_or_none(profile.get(key))
+        if value is not None:
+            return value
+    return None
+
+
+def _following_page_credits(returned: int) -> int:
+    if returned <= 0:
+        return 0
+    if returned >= 200:
+        return returned
+    if returned >= 100:
+        return returned * 2
+    return max(60, returned * 3)
     try:
         return int(value)
     except (TypeError, ValueError):
