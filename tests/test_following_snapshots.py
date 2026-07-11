@@ -254,6 +254,8 @@ def test_finalize_requires_terminal_sources_and_makes_snapshot_immutable(tmp_pat
         error_code="E_ACCOUNT_PROTECTED",
         error_message="Posts and following evidence are unavailable.",
     )
+    conn.execute("UPDATE snapshot_run SET estimated_cost_usd = 0.0009")
+    conn.commit()
     with pytest.raises(following_snapshots.SnapshotCliError) as exc:
         following_snapshots.mark_source(conn, source_x_id="2", status="missing")
     assert exc.value.code == "E_SOURCE_TERMINAL"
@@ -263,6 +265,7 @@ def test_finalize_requires_terminal_sources_and_makes_snapshot_immutable(tmp_pat
         completed_at="2026-07-11T02:00:00+00:00",
     )
     assert summary["status"] == "complete"
+    assert summary["estimated_cost_usd"] == 0.0009
     assert summary["source_statuses"]["complete"] == 1
     assert summary["source_statuses"]["protected"] == 1
 

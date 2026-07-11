@@ -56,7 +56,7 @@ candidate generator while demonstrating ranking and validation discipline.
 - [x] The cleaned Registry collection cohort has a byte-exact checkpoint with
   a documented recovery path.
 - [ ] The smaller personalization set and reasons are versioned and reviewable.
-- [ ] Fresh outgoing-follow snapshots persist edge direction, seed, source,
+- [x] Fresh outgoing-follow snapshots persist edge direction, seed, source,
   fetch time, completeness, and stable identity.
 - [ ] New ranking commands cannot read legacy edges accidentally.
 - [ ] Trusted-follow count and personalized PageRank are compared on the same
@@ -71,7 +71,7 @@ candidate generator while demonstrating ranking and validation discipline.
 
 - [x] M1 — Freeze the evidence boundary. Acceptance: existing graph/import/rank
   semantics are audited and a fresh snapshot contract cannot mix legacy edges.
-- [ ] M2 — Build one bounded Registry-following snapshot. Acceptance: complete
+- [x] M2 — Build one bounded Registry-following snapshot. Acceptance: complete
   outgoing follows for every accessible frozen cohort account are persisted
   with provenance, inaccessible accounts are explicit, and the snapshot can be
   reproduced without touching legacy edges.
@@ -189,6 +189,11 @@ candidate generator while demonstrating ranking and validation discipline.
   stays small; Git keeps only the snapshot manifest, checksum, compact rankings,
   and evaluation. The storage contract preserves a later move to object
   storage + Parquet/Postgres without changing `snapshot_id` semantics.
+- The immutable `registry-following-2026-07-11-v1` snapshot completed all 2,219
+  accessible/empty sources and records nine protected plus three missing
+  terminals. Its 13,409 raw pages normalize to 2,456,305 fresh directed edges
+  over 463,180 targets at a best-available estimated provider cost of
+  `$27.81218`; the tracked manifest binds the local artifact checksum.
 - No GitHub Actions workflow is needed before deployment. The managed Stop hook
   plus repo-owned `scripts/check-fast.sh` is the accepted feedback loop for the
   current local case-study phase.
@@ -224,7 +229,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Design the local-first, isolated, resumable snapshot and tracked-manifest storage boundary. | parent | `../../references/following-snapshot-storage.md` |
 | done | Implement the per-snapshot SQLite schema and freeze the 2,231-account collection manifest before any paid fetch. | parent | `../../../data/following/cohorts/registry-active-2026-07-11.json` |
 | done | Add the bounded TwitterAPI.io collector over the snapshot store, then prove one small resumable calibration before the full crawl. | parent | `resources/profile-count-scan.md` |
-| todo | Review the profile-count outliers and obtain Adi's explicit go/no-go for the projected `$27.84` full outgoing-follow crawl. | parent | `resources/profile-count-scan.md` |
+| done | Obtain Adi's explicit go/no-go, run the full outgoing-follow crawl, validate it, and freeze its tracked proof manifest. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
+| todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 
 ## Backlog / Remaining Work
 
@@ -232,8 +238,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - [ ] Freeze the smaller PageRank personalization set.
 - [x] Complete the bounded Registry relevance cleanup and reconcile the stale
   manual top-100 artifact against the accepted web-grounded boundary.
-- [x] Implement isolated, immutable snapshot storage and freeze the broad
-  collection cohort; bounded provider ingestion remains next.
+- [x] Implement isolated, immutable snapshot storage, freeze the broad
+  collection cohort, and complete bounded provider ingestion.
 - [ ] Implement overlap baseline and personalized PageRank.
 - [ ] Build and review the labeled top-k evaluation.
 - [ ] Update architecture and append the build log after meaningful changes.
@@ -483,3 +489,13 @@ candidate generator while demonstrating ranking and validation discipline.
   participate in normal collection, ranking inputs, or candidate output.
   Registry state is now 2,114 active people, 86 active organizations, zero
   unsure, and 13 rejected; the live UI was verified at 13 of 13 rejected rows.
+- 2026-07-11: [DONE] After Adi explicitly authorized the projected `$27.84`
+  spend, upgraded full collection to parallelize independent source accounts
+  while preserving one sequential cursor chain per source and one shared 9-QPS
+  request-start limit. The 20-worker run completed all 2,206 remaining sources
+  with zero crawl errors in about 27 minutes. Together with calibration and
+  zero-following exits, the finalized snapshot has 2,219 complete sources,
+  nine protected, three missing, 13,409 raw pages, 463,180 target accounts,
+  and 2,456,305 directed edges. Independent validation passed with no failures;
+  best-available estimated spend is `$27.81218`. The 2.0 GB local database is
+  immutable and its checksum/counts are frozen in the tracked manifest.

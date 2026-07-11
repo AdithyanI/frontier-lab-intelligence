@@ -1,0 +1,69 @@
+{
+  "schema_version": "following-snapshot-manifest-v1",
+  "snapshot_id": "registry-following-2026-07-11-v1",
+  "snapshot_schema_version": "following-snapshot-v1",
+  "status": "complete",
+  "cohort": {
+    "cohort_id": "registry-active-2026-07-11",
+    "source_count": 2231,
+    "cohort_sha256": "193a4c62ec60ffc2b485d8520e81f475e4eca48e7fd40bf7ba142dc7d5c7e43b",
+    "manifest_path": "data/following/cohorts/registry-active-2026-07-11.json",
+    "checkpoint_commit": "dd1b3c87f78075a41719738a0cb833bcbd6d5dbb",
+    "checkpoint_database_sha256": "aee89a96da49b20e81805a70b5fdd98eb39d7382492dec5e78b37c938113e125"
+  },
+  "provider": {
+    "name": "twitterapi_io",
+    "endpoint": "/twitter/user/followings",
+    "page_size": 200
+  },
+  "collection": {
+    "created_at": "2026-07-11T14:30:54+00:00",
+    "first_page_at": "2026-07-11T14:49:41+00:00",
+    "last_page_at": "2026-07-11T15:53:45+00:00",
+    "completed_at": "2026-07-11T15:55:23+00:00",
+    "workers": 20,
+    "requests_per_second": 9.0,
+    "source_statuses": {
+      "complete": 2219,
+      "protected": 9,
+      "missing": 3,
+      "unavailable": 0,
+      "failed": 0,
+      "pending": 0,
+      "in_progress": 0
+    },
+    "raw_profiles": 2228,
+    "raw_pages": 13409,
+    "raw_items": 2456305,
+    "normalized_accounts": 463180,
+    "directed_edges": 2456305,
+    "duplicate_or_skipped_items": 0
+  },
+  "spend": {
+    "reported_cost_usd": null,
+    "best_available_estimated_cost_usd": 27.81218,
+    "estimated_provider_credits": 2781218,
+    "basis": "Provider responses do not expose exact charged spend; estimate uses the documented per-profile and returned-following-row credit schedule."
+  },
+  "artifact": {
+    "database_path": "data/raw/following/registry-following-2026-07-11-v1/snapshot.db",
+    "database_sha256": "3892fffeb5c1e8838fb5aed266e04ee8c1e3db12541ccea537e6f2d61b97225a",
+    "database_bytes": 2152931328,
+    "tracked": false,
+    "recoverable_from_git": false
+  },
+  "validation": {
+    "valid": true,
+    "validation_failures": [],
+    "validated_at": "2026-07-11T15:54:09+00:00"
+  },
+  "commands": {
+    "collect": ".venv/bin/fli following-snapshot collect --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db --all --workers 20 --requests-per-second 9 --page-size 200 --no-input --progress plain",
+    "validate": ".venv/bin/fli following-snapshot validate --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db --no-input",
+    "finalize": ".venv/bin/fli following-snapshot finalize --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db --no-input"
+  },
+  "outputs": {
+    "ranking": null,
+    "evaluation": null
+  }
+}

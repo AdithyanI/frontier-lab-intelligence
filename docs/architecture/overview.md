@@ -11,9 +11,9 @@ Rejected is a reason-bearing curation state, not a structural kind. The rejected
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
 1,000-account ranking survives only as an offline comparison CSV; the active
-graph is empty at the cleanup checkpoint. The next stage is a frozen broad
-Registry-cohort outgoing-follow snapshot plus a smaller reviewed PageRank
-personalization set. The `labs` table remains internal source/seed provenance
+graph is empty at the cleanup checkpoint. A frozen broad Registry-cohort
+outgoing-follow snapshot is now complete; the next graph step is a smaller
+reviewed PageRank personalization set and ranking comparison. The `labs` table remains internal source/seed provenance
 because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
@@ -68,7 +68,7 @@ original choice and are being retired in favor of the SPA.
 flowchart LR
     subgraph sources [Sources]
         XLISTS[X list memberships]
-        XFOLLOW[Registry following snapshot<br/>planned]
+        XFOLLOW[Registry following snapshot<br/>2.46M fresh edges]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
@@ -159,8 +159,10 @@ fli sources import-x-following --username <x-handle> --source <source_key>
 fli following-snapshot freeze-cohort --cohort-id <id> --output <path>
 fli following-snapshot init --snapshot-id <id> --cohort <path>
 fli following-snapshot status|validate --snapshot-db <path>
+fli following-snapshot finalize --snapshot-db <path>
 fli following-snapshot collect --snapshot-db <path> --handle <x-handle>
 fli following-snapshot collect --snapshot-db <path> --all --profiles-only
+fli following-snapshot collect --snapshot-db <path> --all --workers 20
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
@@ -178,22 +180,27 @@ each transaction stores canonical raw provider JSON before normalized accounts
 and directed source→target edges. Source state distinguishes pending,
 in-progress, complete, protected, missing, unavailable, and failed. Identical
 page retries are no-ops, conflicting retries fail closed, and completed
-snapshots are immutable. `status` and `validate` are JSON-first, non-interactive
-inspection commands. Initialization itself makes no external request. Bounded
-provider collection is implemented; the full crawl and ranking remain next,
-and ranking will require an explicit snapshot database rather than reading
-`data/fli.db` edges.
+snapshots are immutable. `status`, `validate`, and `finalize` are JSON-first,
+non-interactive inspection/lifecycle commands. Initialization itself makes no
+external request. Ranking will require an explicit snapshot database rather
+than reading `data/fli.db` edges.
 
 Bounded collection is now implemented. Every paid run requires an explicit
 handle, source limit, or `--all`. Source profiles are cached before following
 pages, so profile and cursor evidence both survive interruption. Profile-only
-scans may use parallel workers behind a request-start QPS limiter; following
-pages remain sequential per source. The first live calibration paused
+scans and full collection may use parallel source workers behind one
+request-start QPS limiter; exactly one worker owns each source, so its pages
+remain sequential and cursor-safe. The first live calibration paused
 `@karpathy` after one 200-edge page, resumed without repeating that profile or
 page, and completed at 1,108 edges across six pages. The all-source profile
 scan cached 2,228 current follower/following counts, marked nine protected and
 three missing sources, and completed 12 zero-following sources without a paid
-following request. The remaining full edge crawl and ranking are not yet run.
+following request. The authorized full run completed all 2,206 remaining
+accessible sources at 20 workers / 9 QPS with zero crawl failures. The immutable
+snapshot contains 13,409 raw pages, 463,180 distinct target accounts, and
+2,456,305 directed edges; its best-available provider-cost estimate is
+`$27.81218`. The tracked manifest binds those facts to the local 2.0 GB database
+checksum. Ranking and evaluation remain next.
 
 Known data facts:
 
@@ -528,8 +535,9 @@ consolidation keeps SpaceX as the canonical entity, renames the stable former
 
 ## X Graph Source Direction
 
-The active graph is intentionally empty. Its next source will be complete
-outgoing-follow snapshots from the frozen, relevance-screened Registry cohort,
+The product database's graph remains intentionally empty. The completed fresh
+graph source is the outgoing-follow snapshot from the frozen,
+relevance-screened Registry cohort,
 where each source account is accessible—not followers of popular accounts and
 not the offline Digg comparison ranking. Collection membership is not itself a
 claim that every account deserves equal trust.
@@ -668,7 +676,7 @@ final score.
 
 ## Build Order
 
-1. Build and evaluate the isolated Registry-cohort outgoing-follow snapshot.
+1. Evaluate the isolated Registry-cohort outgoing-follow snapshot with overlap and personalized PageRank.
 2. Promote raw fetch into production ingestion around accepted entity channels.
 3. Extract and score real ingested data.
 4. Add validation harness and ground-truth labeling.

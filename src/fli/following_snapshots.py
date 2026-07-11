@@ -1814,6 +1814,17 @@ def finalize_snapshot(
             hint="Resume the stored cursor or mark each inaccessible source explicitly.",
             exit_code=4,
         )
+    validation = validate_snapshot(conn)
+    if not validation["valid"]:
+        raise SnapshotCliError(
+            code="E_SNAPSHOT_INVALID",
+            message="Snapshot integrity validation failed before finalization.",
+            hint="Inspect validation_failures and repair only from cached raw evidence.",
+            exit_code=4,
+        )
+    current = _snapshot_run(conn)
+    if estimated_cost_usd is None:
+        estimated_cost_usd = current["estimated_cost_usd"]
     conn.execute(
         """UPDATE snapshot_run
            SET status = 'complete', completed_at = ?,
@@ -2029,6 +2040,14 @@ def main(argv: list[str] | None = None) -> int:
     validate_p.add_argument("--snapshot-db", type=Path, required=True)
     _common_output_arguments(validate_p)
 
+    finalize_p = sub.add_parser(
+        "finalize", help="Validate and make a terminal snapshot immutable."
+    )
+    finalize_p.add_argument("--snapshot-db", type=Path, required=True)
+    finalize_p.add_argument("--reported-cost-usd", type=float)
+    finalize_p.add_argument("--estimated-cost-usd", type=float)
+    _common_output_arguments(finalize_p)
+
     try:
         args = parser.parse_args(argv)
         command = f"following-snapshot {args.action}"
@@ -2088,7 +2107,7 @@ def main(argv: list[str] | None = None) -> int:
                 finally:
                     conn.close()
             data["database"] = str(args.snapshot_db)
-        elif args.action in {"status", "validate"}:
+        elif args.action in {"status", "validate", "finalize"}:
             if not args.snapshot_db.exists():
                 raise SnapshotCliError(
                     code="E_NOT_FOUND",
@@ -2098,11 +2117,16 @@ def main(argv: list[str] | None = None) -> int:
                 )
             conn = connect_snapshot(args.snapshot_db)
             try:
-                data = (
-                    snapshot_summary(conn)
-                    if args.action == "status"
-                    else validate_snapshot(conn)
-                )
+                if args.action == "status":
+                    data = snapshot_summary(conn)
+                elif args.action == "validate":
+                    data = validate_snapshot(conn)
+                else:
+                    data = finalize_snapshot(
+                        conn,
+                        reported_cost_usd=args.reported_cost_usd,
+                        estimated_cost_usd=args.estimated_cost_usd,
+                    )
             finally:
                 conn.close()
             data["database"] = str(args.snapshot_db)

@@ -55,15 +55,27 @@ fli following-snapshot collect \
   --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
   --all --profiles-only --workers 10 --requests-per-second 9 \
   --no-input
+
+fli following-snapshot collect \
+  --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
+  --all --workers 20 --requests-per-second 9 --page-size 200 \
+  --no-input --progress plain
+
+fli following-snapshot finalize \
+  --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
+  --no-input
 ```
 
 All commands emit one versioned JSON object by default, accept `--plain` for a
 compact operator view, and never prompt when `--no-input` is present.
 Paid collection requires exactly one explicit scope: repeatable `--handle`, a
-bounded `--limit`, or `--all`. Parallel workers are limited to profile-only
-scans; following pages remain sequential within each source and cursor-safe.
-The `$99` Builder plan documents 10 QPS, so the accepted profile scan uses 10
-workers with request starts limited to 9 QPS.
+bounded `--limit`, or `--all`. Full collection may run multiple source accounts
+in parallel, while exactly one worker owns each source's strictly sequential
+cursor chain. Every network request shares one request-start limiter. The `$99`
+Builder plan documents 10 QPS, so the accepted full run uses 20 latency-hiding
+source workers with all request starts limited to 9 QPS. `finalize` independently
+validates terminal state and reconciliation before making the snapshot
+immutable.
 
 ## Local Snapshot Contract
 
