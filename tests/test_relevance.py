@@ -156,6 +156,45 @@ def test_output_text_ignores_nullable_translated_blocks():
     ) == '{"decision":"keep"}'
 
 
+def test_translated_claude_search_is_normalized_with_cited_urls():
+    response = {
+        "output": [
+            {
+                "type": "reasoning",
+                "content": [{"type": "output_text", "text": "private analysis"}],
+            },
+            {
+                "type": "message",
+                "content": [{"type": "output_text", "text": '{"decision":"keep"}'}],
+            },
+            {
+                "type": "function_call",
+                "name": "web_search",
+                "arguments": '{"query":"OpenAI research"}',
+            },
+        ]
+    }
+    assert llm_responses.output_text(response) == '{"decision":"keep"}'
+    actions, sources = llm_responses.web_evidence(
+        response, cited_urls=["https://openai.com/research"]
+    )
+    assert actions == [
+        {
+            "type": "search",
+            "query": "OpenAI research",
+            "translated_from": "function_call",
+        }
+    ]
+    assert sources == [
+        {"url": "https://openai.com/research", "type": "model_citation"}
+    ]
+
+
+def test_claude_can_finish_after_required_native_web_search():
+    assert llm_responses.required_web_search_tool_choice("gpt-5.6-terra") == "required"
+    assert llm_responses.required_web_search_tool_choice("claude-opus-4-6") == "auto"
+
+
 def test_cli_requires_explicit_scope_before_paid_run(tmp_path):
     with pytest.raises(SystemExit):
         relevance.main(["run", "--run", "test", "--output", str(tmp_path / "x")])

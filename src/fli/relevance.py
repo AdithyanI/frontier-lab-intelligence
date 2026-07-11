@@ -295,7 +295,7 @@ def audit_one(
                 "return_token_budget": "unlimited",
             }
         ],
-        "tool_choice": "required",
+        "tool_choice": llm_responses.required_web_search_tool_choice(model),
         "include": ["web_search_call.action.sources"],
         "reasoning": {"effort": effort},
         "text": {"format": OUTPUT_FORMAT},
@@ -320,7 +320,9 @@ def audit_one(
     payload = _validate_output(
         llm_responses.output_text(response_data), entity.entity_id
     )
-    actions, sources = llm_responses.web_evidence(response_data)
+    actions, sources = llm_responses.web_evidence(
+        response_data, cited_urls=payload["evidence_urls"]
+    )
     usage = getattr(response, "usage", None) or response_data.get("usage")
     return {
         **payload,
