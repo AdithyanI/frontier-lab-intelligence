@@ -10,6 +10,7 @@ data/
   fli.db                                      # tracked product/demo state
   following/cohorts/<cohort-id>.json          # tracked frozen source membership
   raw/following/<snapshot-id>/snapshot.db     # ignored local crawl database
+  raw/following/<snapshot-id>/snapshot.db.zst # ignored verified recovery copy
   following/manifests/<snapshot-id>.json      # tracked small manifest
 
 docs/projects/trusted-following-ranking/resources/
@@ -127,6 +128,13 @@ The manifest does not claim the ignored SQLite file is recoverable from Git.
 It proves exactly what local artifact produced the tracked result. The database
 can be copied to durable object storage later without changing the manifest or
 ranking contract.
+
+For the completed first snapshot, the finalized SQLite file is also preserved
+as an ignored local Zstandard recovery archive. Archive verification must cover
+both the compressed stream and the decompressed database SHA-256. This protects
+against accidental file mutation or deletion during local development, but it
+is **not** an off-machine backup: the manifest's `durable_object_uri` remains
+null until a private object-store upload is explicitly approved and verified.
 
 ## Future Production Shape
 

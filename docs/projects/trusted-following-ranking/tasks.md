@@ -194,6 +194,10 @@ candidate generator while demonstrating ranking and validation discipline.
   terminals. Its 13,409 raw pages normalize to 2,456,305 fresh directed edges
   over 463,180 targets at a best-available estimated provider cost of
   `$27.81218`; the tracked manifest binds the local artifact checksum.
+- A verified 462 MiB Zstandard recovery archive sits beside the 2.0 GB local
+  SQLite snapshot. Its decompressed SHA-256 matches the finalized database.
+  This guards local development mistakes but is not an off-machine backup;
+  `durable_object_uri` remains null pending explicit private-storage approval.
 - No GitHub Actions workflow is needed before deployment. The managed Stop hook
   plus repo-owned `scripts/check-fast.sh` is the accepted feedback loop for the
   current local case-study phase.
@@ -230,6 +234,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Implement the per-snapshot SQLite schema and freeze the 2,231-account collection manifest before any paid fetch. | parent | `../../../data/following/cohorts/registry-active-2026-07-11.json` |
 | done | Add the bounded TwitterAPI.io collector over the snapshot store, then prove one small resumable calibration before the full crawl. | parent | `resources/profile-count-scan.md` |
 | done | Obtain Adi's explicit go/no-go, run the full outgoing-follow crawl, validate it, and freeze its tracked proof manifest. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
+| done | Create and verify a compressed local recovery copy without modifying the immutable snapshot. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
+| todo | Upload the verified archive to a dedicated private durable object store after Adi approves the destination and external write. | parent | `../../references/following-snapshot-storage.md` |
 | todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 
 ## Backlog / Remaining Work
@@ -499,3 +505,10 @@ candidate generator while demonstrating ranking and validation discipline.
   and 2,456,305 directed edges. Independent validation passed with no failures;
   best-available estimated spend is `$27.81218`. The 2.0 GB local database is
   immutable and its checksum/counts are frozen in the tracked manifest.
+- 2026-07-11: [DONE] Paused before ranking/visualization to harden recovery.
+  Created a 484,347,309-byte Zstandard archive of the finalized 2.0 GB local
+  database, verified the compressed stream, and proved a streaming
+  decompression reproduces the canonical database SHA-256. Recorded both
+  hashes and sizes in the tracked manifest. No cloud upload occurred: the only
+  visible Azure storage account belongs to an unrelated project, so a dedicated
+  private destination still requires Adi's explicit approval.
