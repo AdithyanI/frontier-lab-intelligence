@@ -2,9 +2,9 @@
 
 ## Goal
 
-Resolve structurally `unsure` entities with a bounded profile-to-recent-posts
-Responses workflow, persist accepted results, and reject accounts whose posts
-are explicitly protected before any model call.
+Build and prove a bounded lifecycle for structurally `unsure` entities using
+profile, recent-post, and final web evidence; persist accepted results and
+reject accounts whose posts are explicitly protected before any model call.
 
 ## Why / Impact
 
@@ -33,7 +33,7 @@ being deleted or sent to the model again.
 
 ### Out of Scope
 
-- Hosted web search or open-web fallback.
+- Unbounded or repeated open-web research after the single final escalation.
 - Relevance curation, channel merging, roles, affiliations, or new sources.
 - Agents SDK, Codex subagents, or a generalized agent framework.
 
@@ -78,7 +78,7 @@ being deleted or sent to the model again.
 - [x] M6 — Consolidate one X-account lifecycle. Acceptance: one command applies
   the follower floor, protected gate, profile turn, 20-post turn, final bounded
   web search, persistence, and promotion with exact resume behavior.
-- [ ] M7 — Live proof and closeout. Acceptance: one explicitly authorized paid
+- [x] M7 — Live proof and closeout. Acceptance: one explicitly authorized paid
   calibration resolves or safely abstains, sources/cost are persisted, and
   `scripts/check-fast.sh` passes before archive.
 
@@ -114,13 +114,9 @@ being deleted or sent to the model again.
 
 ## Open Questions / Blockers
 
-- The `@jack` live proof resolved correctly, but the hosted search cited one
-  secondary article even though its 43 consulted sources included the exact X
-  profile and Block's official board page. Before applying web escalation more
-  broadly, decide whether the current first-party preference is sufficient or
-  should become a hard evidence-quality requirement.
-- `@linatawfik9` is the only active `unsure` entity left. It has not been sent
-  through hosted search because Adi approved only the bounded `@jack` proof.
+None for the closed lifecycle project. `@linatawfik9` remained unsure after the
+bounded workflow and Adi manually rejected it from the active Registry rather
+than triggering another web escalation.
 
 ## Current Batch
 
@@ -129,22 +125,22 @@ being deleted or sent to the model again.
 | done | Implement and locally validate the canonical single-handle X lifecycle with a final bounded web-search escalation. | parent | — |
 | done | Run one paid `@jack` calibration and inspect the exact sources, cost, and persisted Registry result. | parent | `resources/philschmid-calibration.md` (historical tool smoke only) |
 | done | Add, polish, and visually verify a simple account-to-Registry lifecycle diagram at the front of the Architecture page without changing the graph/PageRank view. | parent | — |
-| in progress | Review source quality and decide whether to run the same final escalation for `@linatawfik9`. | parent | — |
-| todo | Archive the tracker after the remaining-entity and evidence-quality decisions are accepted. | parent | — |
+| done | Manually reject `@linatawfik9` from the active Registry rather than automatically repeating the web escalation. | parent | — |
+| done | Close and archive the tracker after full repository validation. | parent | `learnings.md` |
 
 ## Backlog / Remaining Work
 
 - [x] Run the current 137-account recent-post calibration.
-- [ ] Review labels, post evidence, cost, and false-confidence cases.
-- [ ] Decide the durable local storage and resume contract.
-- [ ] Implement and validate atomic promotion only after the policy is accepted.
-- [ ] Run the accepted scope, verify Registry invariants, and archive the project.
+- [x] Review labels, post evidence, cost, and false-confidence cases.
+- [x] Decide the durable local storage and resume contract.
+- [x] Implement and validate atomic promotion after the policy was accepted.
+- [x] Run the accepted scope, verify Registry invariants, and archive the project.
 - [x] Route the canonical single-handle onboarding lifecycle through the same
   protected-account gate and rejection store.
 - [x] Add a final required hosted-web turn only after profile and posts abstain.
 - [x] Run the explicitly approved live calibration and verify Registry/API state.
-- [ ] Review the calibrated evidence quality
-  and decide whether to run the same final step for `@linatawfik9`.
+- [x] Review the calibrated evidence quality and manually reject
+  `@linatawfik9` outside automatic escalation.
 
 ## Validation / Test Plan
 
@@ -253,3 +249,9 @@ being deleted or sent to the model again.
   Verified at 1,014px and 1,440px desktop widths with no text clipping,
   horizontal overflow, warnings, or browser errors. The original graph and
   PageRank section remains unchanged.
+- 2026-07-11: [DONE] Closed the lifecycle project. The profile → authored
+  posts → bounded web path is implemented, resumable, tested, and proven live;
+  protected accounts fail before inference and accepted decisions promote
+  atomically. Adi manually rejected the remaining `@linatawfik9` abstention,
+  leaving zero active unsure identities and four reason-bearing rejections.
+  Repository fast checks passed before archival.

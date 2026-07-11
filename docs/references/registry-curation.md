@@ -56,8 +56,8 @@ After the relevance and organization-identity cleanup, the corpus contains:
 | --- | ---: |
 | person | 2,123 |
 | organization | 86 (including 10 seeded labs) |
-| unsure (active) | 1 |
-| rejected | 3 |
+| unsure (active) | 0 |
+| rejected | 4 |
 | unknown | 0 |
 | **total** | **2,213** |
 

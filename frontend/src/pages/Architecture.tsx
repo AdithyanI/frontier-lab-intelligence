@@ -366,23 +366,24 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas">
           <DataModel />
-          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · graph evidence comes only from explicit trusted-follow snapshots</div>
+          <div className="arch-caption">entities ↔ entity_channels (evidence + confidence) ↔ channels → channel_observations + raw_items · graph evidence comes only from explicit Registry-cohort snapshots</div>
         </div>
       </section>
 
       <section className="arch-section">
         <div className="arch-section-head">
           <span className="arch-no">03</span>
-          <h2 className="arch-h">The graph decides who matters</h2>
+          <h2 className="arch-h">The graph surfaces who deserves attention</h2>
           <p className="arch-p">
-            Attention, not follower count: being followed by several trusted
-            channels can matter more than a large generic audience. The active
-            graph starts small and grows only through explicit snapshots.
+            We collect who the relevance-screened Registry follows, then
+            compare source consensus with PageRank personalized by a smaller
+            reviewed trust set. Follower count remains a reach metric, not
+            trust.
           </p>
         </div>
         <div className="arch-canvas">
           <GraphPlane />
-          <div className="arch-caption">current graph: empty · next: isolated trusted-seed snapshots · Digg ranking retained offline for comparison only</div>
+          <div className="arch-caption">current graph: empty · next: frozen 2,231-account outgoing-follow snapshot · Digg ranking stays offline for comparison only</div>
         </div>
       </section>
 

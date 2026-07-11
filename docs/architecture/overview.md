@@ -5,20 +5,23 @@ shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
 Registry retains the relevance-reviewed post-floor universe: 2,123 people,
-86 organizations, one active unsure, three rejected, and zero unknown.
+86 organizations, zero active unsure, four rejected, and zero unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
 snapshot have been removed without deleting the classified nodes. The Digg
 1,000-account ranking survives only as an offline comparison CSV; the active
-graph is empty until the trusted-seed contract is accepted. The `labs` table
-remains internal source/seed provenance because its 10 rows are not an
+graph is empty at the cleanup checkpoint. The next stage is a frozen broad
+Registry-cohort outgoing-follow snapshot plus a smaller reviewed PageRank
+personalization set. The `labs` table remains internal source/seed provenance
+because its 10 rows are not an
 exhaustive lab classification; it is not exposed as a Registry kind, badge,
 count, or filter.
 Reviewed organization consolidation is live: SpaceX owns `@spacex` and
 `@SpaceXAI`, and eleven additional canonical organizations own 21 explicit
 product/developer/subgroup X channels. Every batch is manifest-driven, preflighted,
-transactional, idempotent, and audit-recorded. Broader identity resolution,
-relevance curation, extraction, and scoring remain later stages.
+transactional, idempotent, and audit-recorded. Relevance curation is complete
+for this checkpoint; production ingestion, extraction, and scoring remain later
+stages.
 Exact human name/kind corrections are separately versioned in
 `data/registry/entity-overrides.json` and recorded in
 `entity_override_audit`; they never rewrite model-classification provenance.
@@ -64,7 +67,7 @@ original choice and are being retired in favor of the SPA.
 flowchart LR
     subgraph sources [Sources]
         XLISTS[X list memberships]
-        XFOLLOW[Trusted following snapshots<br/>planned]
+        XFOLLOW[Registry following snapshot<br/>planned]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
@@ -167,7 +170,7 @@ Known data facts:
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
 - The active Registry retains 2,213 classified entities: 2,123 people, 86
-  organizations, one active unsure, and three protected-account rejections. The
+  organizations, zero active unsure, and four rejections. The
   2,259 channels include 24 website/GitHub/blog lab channels plus 22 X/product
   channels consolidated into existing organizations. The approved relevance
   manifest contains 689 exact one-X removals. The final organization pass
@@ -346,7 +349,7 @@ Table row counts: `raw_items` 1,599, `accounts` 2,235,
 `entities` 2,213, `channels` 2,259, `entity_channels` 2,259,
 `channel_observations` 10,805, `entity_kind_classification_runs` 10,
 `entity_kind_classifications` 2,306, `entity_kind_web_enrichments` 1,
-`entity_kind_classification_errors` 0, `entity_registry_rejections` 3, and
+`entity_kind_classification_errors` 0, `entity_registry_rejections` 4, and
 `entity_merge_audit` 21, and `entity_override_audit` 3.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
@@ -518,8 +521,12 @@ Why this direction:
 
 Do not import the Digg comparison ranking or combine it with the new graph.
 Compare outputs only after the fresh graph has been evaluated independently.
-The 2,235-account collection cohort, the smaller personalization subset, and
+The 2,231-account active collection cohort, the smaller personalization subset, and
 the ranked candidate output must remain separate inspectable artifacts.
+Large raw pages and normalized edges live in an ignored per-snapshot SQLite
+file rather than the Git-tracked product database. Git retains a small manifest
+with cohort, completeness, cost, checksum, and result paths. See
+`docs/references/following-snapshot-storage.md`.
 
 Examples:
 
@@ -609,14 +616,13 @@ final score.
 
 | Module | Status |
 | --- | --- |
-| `fli.cli` | `--version`, `fetch`, `digg`, `graph`, `labs`, `web` |
-| `fli.digg` | frozen Digg bootstrap importer; not the target live graph source |
+| `fli.cli` | `--version`, `web`, `fetch`, `labs`, `channels`, `registry`, `sources`, `entity-kinds`, `relevance-audit` |
 | `fli.store` | raw `raw_items` SQLite layer |
-| `fli.graph` | legacy X graph import backing layer (`accounts`, facts, edges); PageRank; mirrors observations into channels |
+| `fli.graph` | minimal account/source-fact/edge backing schema; no active importer or ranker; active edge count is zero |
 | `fli.channels` | canonical entity/channel model; `fli channels sync\|summary` |
 | `fli.labs` | internal curated source seed (10 historical rows); seeds official channels but does not define a public Registry kind/subtype |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
-| `fli.sources` | machine-readable TwitterAPI.io X-list and outgoing-follow importers; provenance only, no classification |
+| `fli.sources` | machine-readable TwitterAPI.io profile, timeline, X-list, and single-source outgoing-follow adapter; provenance only, no classification |
 | `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes people, organizations, unsure results, and classifier reasons; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
@@ -628,7 +634,8 @@ final score.
 
 ## Build Order
 
-1. Promote raw fetch into production ingestion around accepted entity channels.
-2. Extract and score real ingested data.
-3. Add validation harness and ground-truth labeling.
-4. Delivery and report UI.
+1. Build and evaluate the isolated Registry-cohort outgoing-follow snapshot.
+2. Promote raw fetch into production ingestion around accepted entity channels.
+3. Extract and score real ingested data.
+4. Add validation harness and ground-truth labeling.
+5. Delivery and report UI.

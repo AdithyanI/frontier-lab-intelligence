@@ -32,6 +32,13 @@ def test_registry_returns_complete_typed_entity_universe():
     assert openai["kind"] == "organization"
     assert any(c["kind"] == "x" for c in openai["channels"])
     assert any(c["kind"] == "github" for c in openai["channels"])
+    linatawfik = next(
+        e
+        for e in data["entities"]
+        if any(c["kind"] == "x" and c["key"] == "linatawfik9" for c in e["channels"])
+    )
+    assert linatawfik["registry_state"] == "rejected"
+    assert linatawfik["rejection_reason_code"] == "manual_scope_rejection"
     assert set(openai) == {
         "id",
         "slug",

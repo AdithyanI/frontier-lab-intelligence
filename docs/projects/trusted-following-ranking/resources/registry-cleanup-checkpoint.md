@@ -51,18 +51,22 @@ The expected checksum is the SHA-256 above. Replacing the active database is a
 separate deliberate recovery action; do not overwrite `data/fli.db` merely to
 inspect the checkpoint.
 
-## Next Boundary
+## Final Cleanup Amendment
 
-The 2,235 stored X accounts form the frozen collection cohort. Three protected
-accounts are expected to be unavailable, so ingestion must record skips and
-completeness rather than silently treating them as empty following lists.
+After this byte-exact checkpoint, Adi manually rejected the remaining unsure
+`@linatawfik9` identity. The tracked database still has 2,235 X accounts, but
+four reason-bearing rejected identities are excluded from graph collection.
+The final active collection cohort is therefore 2,231 accounts with zero active
+unsure entities. The original checkpoint remains the rollback boundary before
+that single auditable curation change.
+
+## Next Boundary
 
 Collection breadth and trust are separate:
 
-- fetch outgoing follows for the frozen cohort where accessible;
+- fetch outgoing follows for the 2,231-account active cohort where accessible;
 - preserve one attributable, resumable snapshot per source account;
 - choose a smaller reviewed subset for personalized PageRank teleport weight;
 - compare PageRank with the simple number of screened Registry accounts that
   follow each candidate;
 - do not read the empty legacy `graph_edges` plane as a fallback.
-

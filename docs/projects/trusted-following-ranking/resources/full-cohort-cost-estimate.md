@@ -51,16 +51,17 @@ and make the evaluation story less defensible.
 
 ## Current Checkpoint Update
 
-The relevance-cleanup checkpoint on 2026-07-11 contains 2,235 stored X
-accounts rather than the original 2,924-account planning cohort. Applying the
-same documented price model gives this updated range:
+The final relevance-cleanup state on 2026-07-11 contains 2,235 stored X
+accounts, of which four rejected identities are excluded, leaving a 2,231
+account collection cohort. Applying the same documented price model gives this
+updated range:
 
-| Average accounts followed | All 2,235 |
+| Average accounts followed | All 2,231 |
 | ---: | ---: |
-| 500 | `$13.81` |
-| 1,000 | `$22.75` |
-| 1,108 (`@karpathy` reference) | `$27.58` |
-| 2,000 | `$45.10` |
+| 500 | `$13.79` |
+| 1,000 | `$22.71` |
+| 1,108 (`@karpathy` reference) | `$27.53` |
+| 2,000 | `$45.02` |
 
-Three protected accounts are expected to be inaccessible. Actual spend must be
-recorded from the provider run; these values remain pre-run estimates only.
+Actual spend must be recorded from the provider run; these values remain
+pre-run estimates only.

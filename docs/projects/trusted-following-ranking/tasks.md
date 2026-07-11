@@ -175,10 +175,19 @@ candidate generator while demonstrating ranking and validation discipline.
   2,259 channels, 2,235 X accounts, and zero graph edges. The pushed Git object
   is the database backup; its checksum, reconciliation, and recovery procedure
   are recorded in `resources/registry-cleanup-checkpoint.md`.
-- The 2,235 X accounts are the frozen collection cohort, not 2,235 equal-trust
-  seeds. Fetch their outgoing follows where accessible, then compare a simple
-  screened-source overlap baseline with personalized PageRank from a smaller
-  reviewed trust subset.
+- The database has 2,235 X accounts; four reason-bearing rejected identities
+  are excluded, leaving a frozen 2,231-account active collection cohort. These
+  are not 2,231 equal-trust seeds. Fetch their outgoing follows where
+  accessible, then compare a simple screened-source overlap baseline with
+  personalized PageRank from a smaller reviewed trust subset.
+- Large following evidence is local-first: one ignored SQLite file per
+  immutable snapshot under `data/raw/following/`. The Git-tracked `data/fli.db`
+  stays small; Git keeps only the snapshot manifest, checksum, compact rankings,
+  and evaluation. The storage contract preserves a later move to object
+  storage + Parquet/Postgres without changing `snapshot_id` semantics.
+- No GitHub Actions workflow is needed before deployment. The managed Stop hook
+  plus repo-owned `scripts/check-fast.sh` is the accepted feedback loop for the
+  current local case-study phase.
 
 ## Open Questions / Blockers
 
@@ -208,7 +217,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Audit all organization and person X channels for activity since 2024-07-11. | parent | `resources/organization-x-activity-audit.csv`, `resources/person-x-activity-audit.csv` |
 | done | Apply the temporary under-10,000-follower organization cutoff with a restorable reviewed cohort. | parent | `resources/low-follower-organization-removals.csv` |
 | done | Freeze and reconcile the cleaned pre-following database boundary with an exact recovery path. | parent | `resources/registry-cleanup-checkpoint.md` |
-| todo | Design isolated, resumable snapshot storage and freeze the 2,235-account collection manifest before any paid fetch. | parent | — |
+| done | Design the local-first, isolated, resumable snapshot and tracked-manifest storage boundary. | parent | `../../references/following-snapshot-storage.md` |
+| todo | Implement the per-snapshot SQLite schema and freeze the 2,231-account collection manifest before any paid fetch. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -419,5 +429,19 @@ candidate generator while demonstrating ranking and validation discipline.
   in pushed commit `d9ffa37`, recorded its SHA-256, exact counts, integrity,
   foreign-key state, and recovery procedure, and removed disposable relevance
   canary/run scratch after confirming the durable review artifacts remain in
-  project resources. The frozen 2,235-account collection cohort is explicitly
-  separate from the future smaller PageRank personalization set.
+  project resources. The stored 2,235-account boundary is explicitly separate
+  from the future active collection and smaller PageRank personalization sets.
+- 2026-07-11: [DONE] Fixed the pre-ingestion repository boundary. Large raw
+  pages and normalized edges will live in an ignored, immutable local SQLite
+  snapshot under `data/raw/following/`; tracked `data/fli.db` remains the
+  compact product/demo state. A tracked manifest binds cohort, provider,
+  completeness, spend, checksum, and ranking/evaluation outputs. Future scale
+  moves raw/Parquet data to object storage and run metadata to Postgres without
+  changing snapshot-keyed ranking semantics. Adi explicitly declined GitHub
+  Actions before deployment; local Stop-hook validation remains authoritative.
+- 2026-07-11: [DONE] At Adi's direction, manually rejected the final active
+  unsure identity, `@linatawfik9`, without another API or LLM call. Its
+  structural kind and channel remain as provenance while the reason-bearing
+  Registry state is rejected. The Registry now has zero active unsure and four
+  rejected identities; excluding those four leaves 2,231 active X accounts in
+  the first collection cohort.
