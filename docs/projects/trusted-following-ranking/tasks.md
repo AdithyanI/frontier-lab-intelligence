@@ -131,6 +131,10 @@ candidate generator while demonstrating ranking and validation discipline.
   2,765 Terra-high results plus nine centrally reviewed manual web fallbacks for
   provider content-filter terminations. The composite result is 2,162 keep, 56
   review, and 556 remove recommendations; none directly mutated the Registry.
+- Adi reviewed the 51 organization removal recommendations, overrode AI
+  Engineer to keep as a focused technical AI publication/community, and
+  approved the other 50. The approved rows were added to the protected
+  manifest and removed transactionally after a clean dry run.
 - Provider-specific Responses quirks normalize in `fli.llm_responses`, not in
   individual audit stages. Claude uses native web search with automatic tool
   choice plus a post-response search-evidence gate; translated search calls and
@@ -142,8 +146,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
-- Which of the 556 removal recommendations and 56 review cases will Adi accept
-  before the trusted seed set is frozen?
+- Which of the remaining 505 removal recommendations and 56 review cases will
+  Adi accept before the trusted seed set is frozen?
 
 ## Current Batch
 
@@ -159,6 +163,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Apply the 108 Adi-approved relevance removals through a preflighted, transactional manifest. | parent | `resources/relevance-removal-candidates.csv` |
 | done | Calibrate Terra-high plus required web search on 20 clear and ambiguous identities; manually review and apply three accepted removals. | parent | `resources/relevance-boundary-batch-02.csv` |
 | done | Complete the read-only web-grounded relevance audit across the active Registry, including nine manual content-filter fallbacks. | parent | `resources/relevance-complete-v1.json` |
+| done | Review all 51 organization removals; retain AI Engineer and transactionally remove the other 50. | parent | `resources/organization-removal-review.csv` |
 | todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
@@ -309,3 +314,11 @@ candidate generator while demonstrating ranking and validation discipline.
   agreed with seven central decisions but recommended removing Connor Leahy
   and Kevin Kwok; the existing human-reviewed keep/review decisions remain
   canonical, and the Claude artifact is supplementary evidence only.
+- 2026-07-11: [DONE] Reviewed the 51 organization removal recommendations.
+  Adi retained AI Engineer as a relevant focused technical AI publication and
+  community, then approved the other 50. The canonical removal manifest now
+  records 161 accepted identities. A byte-stable dry run resolved exactly 50
+  live entities and 111 already-applied rows; the transaction removed 50
+  organizations, X channels, and backing accounts. Registry state is 2,742
+  entities, including 106 organizations, with clean foreign keys, SQLite
+  integrity `ok`, and zero graph edges.
