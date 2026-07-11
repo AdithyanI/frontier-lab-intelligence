@@ -145,6 +145,8 @@ Current file artifacts:
 ```text
 data/fli.db                         # raw evidence SQLite corpus
 data/digg/rankings.csv              # offline Digg comparison baseline only
+data/following/cohorts/*.json       # frozen broad collection membership
+data/raw/following/*/snapshot.db    # ignored local raw pages + fresh edges
 docs/references/digg-ranking-baseline.md
 ```
 
@@ -153,6 +155,9 @@ Current source-import commands:
 ```text
 fli sources import-x-list --list-id <x-list-id> --source <source_key>
 fli sources import-x-following --username <x-handle> --source <source_key>
+fli following-snapshot freeze-cohort --cohort-id <id> --output <path>
+fli following-snapshot init --snapshot-id <id> --cohort <path>
+fli following-snapshot status|validate --snapshot-db <path>
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
@@ -161,6 +166,19 @@ JSON object, and pages until the provider says there is no next page. List
 imports write membership facts. Following imports atomically replace one
 complete snapshot with `followed_by` facts plus directed `follows` edges. Neither
 command classifies imported accounts or approves them for tracking.
+
+The broad PageRank collection no longer uses that legacy whole-import path.
+`fli.following_snapshots` freezes the active Registry cohort into tracked JSON
+and initializes one isolated, ignored `following-snapshot-v1` SQLite database.
+Its page cache is keyed by snapshot, stable source X ID, and request cursor;
+each transaction stores canonical raw provider JSON before normalized accounts
+and directed source→target edges. Source state distinguishes pending,
+in-progress, complete, protected, missing, unavailable, and failed. Identical
+page retries are no-ops, conflicting retries fail closed, and completed
+snapshots are immutable. `status` and `validate` are JSON-first, non-interactive
+inspection commands. Provider collection and ranking remain the next stages;
+initialization itself makes no external request and the ranking path will
+require an explicit snapshot database rather than reading `data/fli.db` edges.
 
 Known data facts:
 

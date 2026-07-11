@@ -324,9 +324,13 @@ def freeze_cohort(
 def _validated_cohort(path: Path) -> dict[str, Any]:
     manifest = _load_json(path)
     sources = manifest.get("sources")
+    source_meta = manifest.get("source")
     if (
         manifest.get("schema_version") != COHORT_SCHEMA_VERSION
         or not isinstance(sources, list)
+        or not isinstance(source_meta, dict)
+        or not source_meta.get("checkpoint_commit")
+        or not source_meta.get("database_sha256")
         or manifest.get("source_count") != len(sources)
         or manifest.get("cohort_sha256") != _cohort_hash(sources)
     ):
@@ -698,6 +702,13 @@ def mark_source(
             hint="Do not add sources to an existing snapshot.",
             exit_code=4,
         )
+    if source["status"] in TERMINAL_SOURCE_STATUSES:
+        raise SnapshotCliError(
+            code="E_SOURCE_TERMINAL",
+            message=f"Source @{source['source_handle']} is already {source['status']}.",
+            hint="Create a new snapshot to revise terminal source evidence.",
+            exit_code=4,
+        )
     conn.execute(
         """UPDATE source_fetch
            SET status = ?, attempts = attempts + 1,
@@ -918,6 +929,7 @@ def main(argv: list[str] | None = None) -> int:
                 output_path=args.output,
                 cohort_id=args.cohort_id,
             )
+            data = {key: value for key, value in data.items() if key != "sources"}
         elif args.action == "init":
             snapshot_db = args.snapshot_db or (
                 DEFAULT_SNAPSHOT_ROOT / args.snapshot_id / "snapshot.db"
@@ -928,6 +940,13 @@ def main(argv: list[str] | None = None) -> int:
                 snapshot_db=snapshot_db,
             )
         elif args.action in {"status", "validate"}:
+            if not args.snapshot_db.exists():
+                raise SnapshotCliError(
+                    code="E_NOT_FOUND",
+                    message=f"Snapshot database does not exist: {args.snapshot_db}",
+                    hint="Initialize it with `fli following-snapshot init`.",
+                    exit_code=3,
+                )
             conn = connect_snapshot(args.snapshot_db)
             try:
                 data = (

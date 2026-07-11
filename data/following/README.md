@@ -3,11 +3,12 @@
 Large outgoing-follow snapshots live under ignored
 `data/raw/following/<snapshot-id>/snapshot.db`.
 
-This tracked directory keeps only small snapshot manifests under `manifests/`.
-Each manifest binds a local snapshot checksum to its frozen source cohort,
-provider, completeness counts, spend, collection command, ranking output, and
-evaluation artifact.
+This tracked directory keeps frozen source membership under `cohorts/` and
+completed snapshot manifests under `manifests/`. Cohort files contain stable X
+IDs and handles selected from a byte-exact Registry checkpoint. Each completed
+snapshot manifest binds a local snapshot checksum to that cohort, provider,
+completeness counts, spend, collection command, ranking output, and evaluation
+artifact.
 
 See `docs/references/following-snapshot-storage.md` for the full contract and
 future object-storage migration path.
-

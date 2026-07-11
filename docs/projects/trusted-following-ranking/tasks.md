@@ -218,7 +218,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Apply the temporary under-10,000-follower organization cutoff with a restorable reviewed cohort. | parent | `resources/low-follower-organization-removals.csv` |
 | done | Freeze and reconcile the cleaned pre-following database boundary with an exact recovery path. | parent | `resources/registry-cleanup-checkpoint.md` |
 | done | Design the local-first, isolated, resumable snapshot and tracked-manifest storage boundary. | parent | `../../references/following-snapshot-storage.md` |
-| todo | Implement the per-snapshot SQLite schema and freeze the 2,231-account collection manifest before any paid fetch. | parent | — |
+| done | Implement the per-snapshot SQLite schema and freeze the 2,231-account collection manifest before any paid fetch. | parent | `../../../data/following/cohorts/registry-active-2026-07-11.json` |
+| todo | Add the bounded TwitterAPI.io collector over the snapshot store, then prove one small resumable calibration before the full crawl. | parent | `../../references/following-snapshot-storage.md` |
 
 ## Backlog / Remaining Work
 
@@ -226,7 +227,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - [ ] Freeze the smaller PageRank personalization set.
 - [x] Complete the bounded Registry relevance cleanup and reconcile the stale
   manual top-100 artifact against the accepted web-grounded boundary.
-- [ ] Implement isolated snapshot storage and bounded ingestion.
+- [x] Implement isolated, immutable snapshot storage and freeze the broad
+  collection cohort; bounded provider ingestion remains next.
 - [ ] Implement overlap baseline and personalized PageRank.
 - [ ] Build and review the labeled top-k evaluation.
 - [ ] Update architecture and append the build log after meaningful changes.
@@ -445,3 +447,11 @@ candidate generator while demonstrating ranking and validation discipline.
   Registry state is rejected. The Registry now has zero active unsure and four
   rejected identities; excluding those four leaves 2,231 active X accounts in
   the first collection cohort.
+- 2026-07-11: [DONE] Implemented the `following-snapshot-v1` local SQLite
+  boundary and froze all 2,231 active, non-rejected X accounts into the tracked
+  `registry-active-2026-07-11` cohort. The initialized local snapshot has 2,231
+  pending sources, zero pages, zero accounts, and zero edges, and passes SQLite,
+  foreign-key, checksum, cursor, and reconciliation validation. Page writes are
+  transactionally raw-first, keyed by stable source X ID plus cursor,
+  idempotent for identical retries, conflict-safe for changed evidence, and
+  immutable after completion. No provider call or spend occurred.

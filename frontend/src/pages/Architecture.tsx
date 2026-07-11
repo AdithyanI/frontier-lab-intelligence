@@ -11,71 +11,122 @@ const SAND = '#f4f1ea'
 const MONO = "'IBM Plex Mono', monospace"
 const UI = "'Inter', system-ui, sans-serif"
 
-/* ---------- diagram 1: one supplied X account to classified Registry entity ---------- */
+/* ---------- diagram 1: one supplied X account to classified Registry entity ----------
+   Survivors flow left→right along one spine; everything filtered drops downward
+   with its written reason. Two gates (profile, relevance) drop; kind resolution
+   escalates evidence but drops nothing. */
+
+const LC_Y = 64 // top of the stage band
+const LC_H = 152 // one shared box height
+const LC_MID = LC_Y + LC_H / 2
+
+function LcArrow({ x1, x2 }: { x1: number; x2: number }) {
+  return <line x1={x1} y1={LC_MID} x2={x2} y2={LC_MID} stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#account-arr)" />
+}
+
+function LcDrop({ x, rows }: { x: number; rows: [string, string][] }) {
+  return (
+    <g>
+      <line x1={x} y1={LC_Y + LC_H} x2={x} y2={LC_Y + LC_H + 40} stroke={MUTED} strokeWidth="1.2" strokeDasharray="3 4" markerEnd="url(#account-drop)" />
+      {rows.map(([code, why], i) => (
+        <g key={code}>
+          <text x={x} y={LC_Y + LC_H + 66 + i * 34} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={INK}>{code}</text>
+          <text x={x} y={LC_Y + LC_H + 82 + i * 34} textAnchor="middle" fontFamily={UI} fontSize="12.5" fill={MUTED}>{why}</text>
+        </g>
+      ))}
+    </g>
+  )
+}
 
 function AccountLifecycle() {
   return (
     <svg
-      viewBox="0 0 1000 280"
+      viewBox="0 0 1080 356"
       role="img"
-      aria-label="X account lifecycle: a supplied handle is profiled, checked for eligibility, classified from profile, posts, and bounded web research as needed, then stored in the Registry"
+      aria-label="X account lifecycle: a supplied handle passes a profile gate, entity-kind resolution, and a web-grounded relevance screen before persisting in the Registry; every filtered account exits downward with a written reason"
     >
       <defs>
         <marker id="account-arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
         </marker>
+        <marker id="account-drop" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={MUTED} />
+        </marker>
       </defs>
 
-      <text x="36" y="32" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">INPUT</text>
-      <rect x="36" y="84" width="132" height="120" fill={INK} />
-      <text x="56" y="118" fontFamily={MONO} fontSize="11.5" fill={BLUE}>X ACCOUNT</text>
-      <text x="56" y="155" fontFamily={UI} fontSize="22" fontWeight="600" fill="#fff">@handle</text>
-      <text x="56" y="183" fontFamily={UI} fontSize="13.5" fill="#fff" opacity="0.78">one X handle</text>
+      {/* stage kickers, one shared baseline */}
+      <text x="24" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">INPUT</text>
+      <text x="188" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">PROFILE GATE</text>
+      <text x="420" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">ENTITY KIND</text>
+      <text x="672" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">RELEVANCE GATE</text>
+      <text x="904" y="34" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">PERSIST</text>
 
-      <line x1="168" y1="144" x2="210" y2="144" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#account-arr)" />
+      {/* input */}
+      <rect x="24" y={LC_Y} width="128" height={LC_H} fill={INK} />
+      <text x="44" y={LC_Y + 34} fontFamily={MONO} fontSize="11.5" fill={BLUE}>X ACCOUNT</text>
+      <text x="44" y={LC_Y + 72} fontFamily={UI} fontSize="21" fontWeight="600" fill="#fff">@handle</text>
+      <text x="44" y={LC_Y + 98} fontFamily={UI} fontSize="13" fill="#fff" opacity="0.78">one X handle</text>
 
-      <text x="226" y="32" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">PROFILE GATE</text>
-      <rect x="226" y="64" width="218" height="160" fill={SAND} />
-      <text x="246" y="96" fontFamily={UI} fontSize="18" fontWeight="600" fill={INK}>Fetch X profile</text>
-      <text x="246" y="121" fontFamily={UI} fontSize="13.5" fill={MUTED}>identity · followers · access</text>
-      <line x1="246" y1="138" x2="424" y2="138" stroke={MUTED} strokeWidth="1" opacity="0.35" />
-      <text x="246" y="164" fontFamily={MONO} fontSize="11.5" fill={INK}>&lt;1,000</text>
-      <text x="330" y="164" fontFamily={UI} fontSize="13.5" fill={MUTED}>not added</text>
-      <text x="246" y="191" fontFamily={MONO} fontSize="11.5" fill={INK}>PROTECTED</text>
-      <text x="330" y="191" fontFamily={UI} fontSize="13.5" fill={MUTED}>rejected + reason</text>
-      <text x="246" y="216" fontFamily={MONO} fontSize="11.5" fill={BLUE_INK}>PUBLIC + 1K+</text>
-      <text x="358" y="216" fontFamily={UI} fontSize="13.5" fill={INK}>continue</text>
+      <LcArrow x1={152} x2={186} />
 
-      <line x1="444" y1="144" x2="480" y2="144" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#account-arr)" />
+      {/* profile gate */}
+      <rect x="188" y={LC_Y} width="196" height={LC_H} fill={SAND} />
+      <text x="208" y={LC_Y + 34} fontFamily={UI} fontSize="17" fontWeight="600" fill={INK}>Fetch X profile</text>
+      <text x="208" y={LC_Y + 56} fontFamily={UI} fontSize="13" fill={MUTED}>identity · followers · access</text>
+      <line x1="208" y1={LC_Y + 74} x2="364" y2={LC_Y + 74} stroke={MUTED} strokeWidth="1" opacity="0.35" />
+      <text x="208" y={LC_Y + 102} fontFamily={MONO} fontSize="11.5" fill={BLUE_INK}>PUBLIC + 1K+</text>
+      <text x="208" y={LC_Y + 124} fontFamily={UI} fontSize="13.5" fill={INK}>continues right</text>
 
-      <text x="496" y="32" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">ENTITY KIND</text>
-      <rect x="496" y="48" width="260" height="192" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
-      <text x="516" y="80" fontFamily={UI} fontSize="18" fontWeight="600" fill={INK}>Resolve the actor</text>
+      <LcArrow x1={384} x2={418} />
 
-      <circle cx="530" cy="112" r="13" fill={INK} />
-      <text x="530" y="116" textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill="#fff">1</text>
-      <text x="556" y="117" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Profile evidence</text>
+      {/* entity kind — escalating evidence, drops nothing */}
+      <rect x="420" y={LC_Y} width="216" height={LC_H} fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="440" y={LC_Y + 34} fontFamily={UI} fontSize="17" fontWeight="600" fill={INK}>Resolve the actor</text>
+      <text x="440" y={LC_Y + 66} fontFamily={MONO} fontSize="11.5" fill={BLUE_INK}>1</text>
+      <text x="458" y={LC_Y + 66} fontFamily={UI} fontSize="13.5" fill={INK}>profile evidence</text>
+      <text x="440" y={LC_Y + 92} fontFamily={MONO} fontSize="11.5" fill={BLUE_INK}>2</text>
+      <text x="458" y={LC_Y + 92} fontFamily={UI} fontSize="13.5" fill={INK}>+ 20 authored posts</text>
+      <text x="440" y={LC_Y + 118} fontFamily={MONO} fontSize="11.5" fill={BLUE_INK}>3</text>
+      <text x="458" y={LC_Y + 118} fontFamily={UI} fontSize="13.5" fill={INK}>+ bounded web research</text>
+      <text x="440" y={LC_Y + 140} fontFamily={UI} fontSize="12" fill={MUTED}>each step only if still unsure</text>
 
-      <line x1="530" y1="125" x2="530" y2="151" stroke={BLUE_MID} strokeWidth="1" markerEnd="url(#account-arr)" />
-      <text x="550" y="146" fontFamily={MONO} fontSize="10.5" fill={MUTED}>IF UNSURE</text>
-      <circle cx="530" cy="167" r="13" fill={BLUE} />
-      <text x="530" y="171" textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={INK}>2</text>
-      <text x="556" y="172" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>20 authored posts</text>
+      <LcArrow x1={636} x2={670} />
 
-      <line x1="530" y1="180" x2="530" y2="206" stroke={BLUE_MID} strokeWidth="1" markerEnd="url(#account-arr)" />
-      <text x="550" y="201" fontFamily={MONO} fontSize="10.5" fill={MUTED}>IF STILL UNSURE</text>
-      <circle cx="530" cy="222" r="13" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
-      <text x="530" y="226" textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={BLUE_INK}>3</text>
-      <text x="556" y="227" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Bounded web research</text>
+      {/* relevance gate */}
+      <rect x="672" y={LC_Y} width="196" height={LC_H} fill={SAND} />
+      <text x="692" y={LC_Y + 34} fontFamily={UI} fontSize="17" fontWeight="600" fill={INK}>Relevance screen</text>
+      <text x="692" y={LC_Y + 56} fontFamily={UI} fontSize="13" fill={MUTED}>web search required ·</text>
+      <text x="692" y={LC_Y + 74} fontFamily={UI} fontSize="13" fill={MUTED}>follower count not an input</text>
+      <line x1="692" y1={LC_Y + 88} x2="848" y2={LC_Y + 88} stroke={MUTED} strokeWidth="1" opacity="0.35" />
+      <text x="692" y={LC_Y + 114} fontFamily={MONO} fontSize="11.5" fill={BLUE_INK}>FRONTIER-AI SIGNAL</text>
+      <text x="692" y={LC_Y + 136} fontFamily={UI} fontSize="13.5" fill={INK}>kept, with cited evidence</text>
 
-      <line x1="756" y1="144" x2="806" y2="144" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#account-arr)" />
+      <LcArrow x1={868} x2={902} />
 
-      <text x="822" y="32" fontFamily={MONO} fontSize="12" fill={BLUE_INK} letterSpacing="0.09em">PERSIST</text>
-      <rect x="822" y="74" width="142" height="140" fill={INK} />
-      <text x="842" y="106" fontFamily={MONO} fontSize="11.5" fill={BLUE}>REGISTRY</text>
-      <text x="842" y="140" fontFamily={UI} fontSize="14.5" fontWeight="600" fill="#fff">Person</text>
-      <text x="842" y="169" fontFamily={UI} fontSize="14.5" fontWeight="600" fill="#fff">Organization</text>
-      <text x="842" y="198" fontFamily={UI} fontSize="14.5" fontWeight="600" fill="#fff">Unsure</text>
+      {/* registry */}
+      <rect x="904" y={LC_Y} width="152" height={LC_H} fill={INK} />
+      <text x="924" y={LC_Y + 34} fontFamily={MONO} fontSize="11.5" fill={BLUE}>REGISTRY</text>
+      <text x="924" y={LC_Y + 66} fontFamily={UI} fontSize="14.5" fontWeight="600" fill="#fff">Person</text>
+      <text x="924" y={LC_Y + 92} fontFamily={UI} fontSize="14.5" fontWeight="600" fill="#fff">Organization</text>
+      <text x="924" y={LC_Y + 118} fontFamily={UI} fontSize="12.5" fill="#fff" opacity="0.78">unsure parked,</text>
+      <text x="924" y={LC_Y + 136} fontFamily={UI} fontSize="12.5" fill="#fff" opacity="0.78">not deleted</text>
+
+      {/* what falls out, and why */}
+      <LcDrop
+        x={286}
+        rows={[
+          ['<1,000 FOLLOWERS', 'not added'],
+          ['PROTECTED', 'rejected + reason'],
+        ]}
+      />
+      <LcDrop
+        x={770}
+        rows={[
+          ['OFF-MANDATE', 'removed + reason & evidence URLs'],
+          ['VERSIONED MANIFEST', 'replayable, never a raw delete'],
+        ]}
+      />
+      <text x="540" y={LC_Y + LC_H + 132} textAnchor="middle" fontFamily={MONO} fontSize="11" fill={MUTED} letterSpacing="0.08em">EVERY EXIT KEEPS ITS REASON</text>
     </svg>
   )
 }
@@ -344,14 +395,16 @@ export default function Architecture() {
           <span className="arch-no">01</span>
           <h2 className="arch-h">From an X account to the Registry</h2>
           <p className="arch-p">
-            Give the system one X handle. It checks whether the account is
-            usable, resolves the actor from progressively richer evidence, and
-            persists the result.
+            Give the system one X handle. Cheap mechanical checks run first,
+            the expensive judgment last: a profile gate, entity-kind
+            resolution from progressively richer evidence, then a
+            web-grounded relevance screen. Survivors persist; everything
+            filtered exits with a written reason.
           </p>
         </div>
         <div className="arch-canvas">
           <AccountLifecycle />
-          <div className="arch-caption">one account in · one persisted outcome out · profile → 20 posts if unsure → bounded web if still unsure · reason, evidence, and cost attached</div>
+          <div className="arch-caption">one account in · one persisted outcome out · relevance prompt: registry-relevance-v1 · removals apply only through a versioned manifest · human overrides stored as data</div>
         </div>
       </section>
 

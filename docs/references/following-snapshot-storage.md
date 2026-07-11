@@ -8,6 +8,7 @@ pages and normalized edges do **not** go into the Git-tracked `data/fli.db`.
 ```text
 data/
   fli.db                                      # tracked product/demo state
+  following/cohorts/<cohort-id>.json          # tracked frozen source membership
   raw/following/<snapshot-id>/snapshot.db     # ignored local crawl database
   following/manifests/<snapshot-id>.json      # tracked small manifest
 
@@ -18,6 +19,35 @@ docs/projects/trusted-following-ranking/resources/
 
 This keeps the current Registry checkpoint cheap to clone and review while the
 local snapshot database can grow to millions of edges.
+
+The implemented `following-snapshot-v1` boundary lives in
+`fli.following_snapshots`. It is storage-only: initializing or inspecting a
+snapshot makes no provider request. The first frozen cohort is
+`data/following/cohorts/registry-active-2026-07-11.json` (2,231 stable X IDs).
+
+```text
+fli following-snapshot freeze-cohort \
+  --db data/fli.db \
+  --cohort-id registry-active-2026-07-11 \
+  --output data/following/cohorts/registry-active-2026-07-11.json \
+  --no-input
+
+fli following-snapshot init \
+  --snapshot-id registry-following-2026-07-11-v1 \
+  --cohort data/following/cohorts/registry-active-2026-07-11.json \
+  --no-input
+
+fli following-snapshot status \
+  --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
+  --no-input
+
+fli following-snapshot validate \
+  --snapshot-db data/raw/following/registry-following-2026-07-11-v1/snapshot.db \
+  --no-input
+```
+
+All commands emit one versioned JSON object by default, accept `--plain` for a
+compact operator view, and never prompt when `--no-input` is present.
 
 ## Local Snapshot Contract
 
@@ -43,6 +73,12 @@ Requirements:
 - do not mutate a completed snapshot; create a new snapshot ID for a refresh;
 - ranking commands accept an explicit snapshot path and never fall back to
   `data/fli.db` graph edges.
+
+The concrete cache key is `(snapshot_id, source_x_id, request_cursor)`. An
+identical retry is a no-op; different response content for an existing key is
+an immutable-evidence conflict. The product Registry stores follower counts,
+not advertised following counts, so `advertised_following_count` is nullable
+at initialization and must come from later provider evidence.
 
 ## What Git Keeps
 
@@ -83,4 +119,3 @@ When local storage stops being sufficient:
 
 The first implementation should optimize for one resumable local job and a
 defensible interview artifact, while preserving this migration seam.
-

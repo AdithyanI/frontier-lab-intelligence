@@ -27,6 +27,10 @@ def main(argv: list[str] | None = None) -> int:
     registry_p.add_argument("registry_args", nargs=argparse.REMAINDER)
     sources_p = sub.add_parser("sources", help="Curated source importers.")
     sources_p.add_argument("source_args", nargs=argparse.REMAINDER)
+    following_snapshot_p = sub.add_parser(
+        "following-snapshot", help="Local outgoing-follow snapshot storage."
+    )
+    following_snapshot_p.add_argument("snapshot_args", nargs=argparse.REMAINDER)
     entity_kinds_p = sub.add_parser(
         "entity-kinds", help="Classify provisional entity structure."
     )
@@ -81,6 +85,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import sources
 
         return sources.main(args.source_args)
+
+    if args.command == "following-snapshot":
+        from fli import following_snapshots
+
+        return following_snapshots.main(args.snapshot_args)
 
     if args.command == "entity-kinds":
         from fli import entity_kinds
