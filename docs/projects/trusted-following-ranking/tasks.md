@@ -121,6 +121,12 @@ candidate generator while demonstrating ranking and validation discipline.
 - Adi approved all 108 first-pass removal candidates. They are now a versioned
   Registry manifest applied transactionally after complete preflight; model
   output still has no direct mutation path.
+- Registry cleanup now uses the versioned `registry-relevance-v1` boundary:
+  frontier labs/people, evaluation research, AI-native technical builders, and
+  narrowly focused specialist intelligence qualify; general technology,
+  crypto, fame, and occasional AI commentary do not. Terra-high must use hosted
+  web search for every identity, and a human-reviewed manifest remains the only
+  deletion path.
 
 ## Open Questions / Blockers
 
@@ -128,11 +134,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
-- Which of the 47 additional top-reach manual removal recommendations does Adi
-  accept?
-- The shared LiteLLM endpoint returned Azure 403 for every strict second-pass
-  batch on 2026-07-11. No inference ran and no cost was reported; manual audit
-  continues without treating this temporary route failure as a product block.
+- Which identities in the remaining corpus fail the approved relevance
+  boundary after web-grounded review?
 
 ## Current Batch
 
@@ -146,14 +149,15 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Consolidate ten high-confidence organization groups and make all channels legible in the Registry UI. | parent | `../../references/registry-curation.md` |
 | done | Run a read-only Luna-medium relevance triage and produce a conservative removal shortlist. | parent | `resources/relevance-removal-candidates.csv` |
 | done | Apply the 108 Adi-approved relevance removals through a preflighted, transactional manifest. | parent | `resources/relevance-removal-candidates.csv` |
-| in progress | Audit the remaining ambiguous cohort, starting with the highest-reach 100 identities. | parent | `resources/relevance-manual-audit-top-100.csv` |
+| done | Calibrate Terra-high plus required web search on 20 clear and ambiguous identities; manually review and apply three accepted removals. | parent | `resources/relevance-boundary-batch-02.csv` |
+| in progress | Continue bounded web-grounded relevance cleanup batches across the active Registry. | parent | `resources/relevance-calibration-terra-web-v1.json` |
 | todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
 
 - [ ] Freeze the first trusted seed set.
-- [ ] Decide the 47 new removal and four review recommendations from the
-  manually audited top-reach 100.
+- [ ] Complete the bounded Registry relevance cleanup and reconcile the stale
+  manual top-100 artifact against the accepted web-grounded boundary.
 - [ ] Implement isolated snapshot storage and bounded ingestion.
 - [ ] Implement overlap baseline and personalized PageRank.
 - [ ] Build and review the labeled top-k evaluation.
@@ -277,3 +281,11 @@ candidate generator while demonstrating ranking and validation discipline.
   were produced. Continued manually with the 100 highest-reach remaining
   identities: 49 direct keeps, 47 likely removals, and four genuine reviews.
   No second-wave deletion has been applied.
+- 2026-07-11: [DONE] Restored shared LiteLLM access, versioned the assignment-
+  calibrated `registry-relevance-v1` prompt, and proved Terra-high with required
+  hosted web search on 20 clear and ambiguous identities. The decisions matched
+  the intended boundary: labs, researchers, evaluators, AI-native builders, and
+  specialist sources stayed; broad tech/crypto identities did not. Manually
+  accepted and transactionally removed Patrick Collison, Marc Benioff, and Om
+  Malik through the existing protected manifest. Registry state is 2,792
+  entities with clean foreign keys, SQLite integrity `ok`, and zero graph edges.

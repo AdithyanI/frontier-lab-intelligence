@@ -107,3 +107,6 @@ entity_id,name,kind,followers_count,model_decision,review_basis,reason
 2969,"Shaurya Shikhar",person,4120,remove,model_remove,"This identity focuses on social-media analytics and algorithms without a clear connection to frontier AI research, labs, products, or infrastructure."
 2905,"Kevin Cannon",person,4038,remove,model_remove,"This identity is a product-design leader at general productivity software companies and has no clear frontier-AI connection."
 2680,"Benjamin Houy",person,3500,remove,model_remove,"This identity is an indie software entrepreneur with no clear connection to frontier AI research, labs, infrastructure, or governance."
+87,"Patrick Collison",person,1276965,remove,model_remove,"Patrick Collison's current primary role is leading Stripe; he has no operating role at Arc Institute and is not a recurring direct source of frontier-AI research or intelligence."
+513,"Marc Benioff",person,3965274,remove,model_remove,"Marc Benioff's AI output is primarily Salesforce enterprise-product advocacy rather than original frontier-AI research, evaluation, infrastructure evidence, or specialist intelligence."
+1363,OM,person,1185532,remove,model_remove,"Om Malik was a broad technology commentator rather than a concentrated frontier-AI source and is no longer an active source."

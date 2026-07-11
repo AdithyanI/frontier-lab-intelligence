@@ -20,8 +20,12 @@ product/developer/subgroup X channels. Every batch is manifest-driven, preflight
 transactional, idempotent, and audit-recorded. Broader identity resolution,
 relevance curation, extraction, and scoring remain later stages.
 
-Product relevance is a separate gate after structural kind. The first approved
-relevance batch is versioned in `data/registry/relevance-removals.csv` and
+Product relevance is a separate gate after structural kind. The reusable
+`registry-relevance-v1` prompt and strict schema run one entity per
+Terra-high Responses request with required hosted web search; follower count is
+not an input. Results and consulted sources remain review artifacts with no
+canonical write path. Approved removals are versioned in
+`data/registry/relevance-removals.csv` and
 applied only through `fli registry apply-relevance-removals`. The command
 preflights the complete manifest, protects seeded labs, merge canonicals,
 rejections, multi-channel identities, and graph participants, then removes each
@@ -153,11 +157,11 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The active Registry retains 2,795 classified entities: 2,635 people, 156
+- The active Registry retains 2,792 classified entities: 2,632 people, 156
   organizations, one active unsure, and three protected-account rejections. The
-  2,840 channels include 24 website/GitHub/blog lab channels plus 21 X/product
+  2,837 channels include 24 website/GitHub/blog lab channels plus 21 X/product
   channels consolidated into existing organizations. The approved relevance
-  cleanup removed 108 one-X identities without touching merged or lab channels.
+  cleanup removed 111 one-X identities without touching merged or lab channels.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
   marker. The 2,308 accounts actually observed through Digg also carry one
   `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
@@ -597,6 +601,7 @@ final score.
 | `fli.sources` | machine-readable TwitterAPI.io X-list and outgoing-follow importers; provenance only, no classification |
 | `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes people, organizations, unsure results, and classifier reasons; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
+| `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |
