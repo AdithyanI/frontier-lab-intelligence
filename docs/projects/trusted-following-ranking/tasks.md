@@ -135,6 +135,11 @@ candidate generator while demonstrating ranking and validation discipline.
   Engineer to keep as a focused technical AI publication/community, and
   approved the other 50. The approved rows were added to the protected
   manifest and removed transactionally after a clean dry run.
+- Adi approved every remaining high-confidence person removal recommendation.
+  The 464 exact identities were added to the protected manifest and removed
+  transactionally. AI Engineer remains the sole active high-confidence model
+  removal because Adi explicitly overrode it to keep; 41 medium-confidence
+  removals and all 56 review cases remain untouched.
 - Provider-specific Responses quirks normalize in `fli.llm_responses`, not in
   individual audit stages. Claude uses native web search with automatic tool
   choice plus a post-response search-evidence gate; translated search calls and
@@ -146,8 +151,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - What top-k size and relevance labels will Adi review for the evaluation?
 - Which organizations and people form the bounded first trusted seed set now
   that the obvious organization channels are consolidated?
-- Which of the remaining 505 removal recommendations and 56 review cases will
-  Adi accept before the trusted seed set is frozen?
+- Which of the remaining 41 medium-confidence removal recommendations and 56
+  review cases will Adi accept before the trusted seed set is frozen?
 
 ## Current Batch
 
@@ -164,6 +169,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Calibrate Terra-high plus required web search on 20 clear and ambiguous identities; manually review and apply three accepted removals. | parent | `resources/relevance-boundary-batch-02.csv` |
 | done | Complete the read-only web-grounded relevance audit across the active Registry, including nine manual content-filter fallbacks. | parent | `resources/relevance-complete-v1.json` |
 | done | Review all 51 organization removals; retain AI Engineer and transactionally remove the other 50. | parent | `resources/organization-removal-review.csv` |
+| done | Apply every remaining high-confidence person removal; preserve AI Engineer and leave medium/review cases untouched. | parent | `../../../data/registry/relevance-removals.csv` |
 | todo | Freeze the first bounded trusted people and organization seed set after the manual relevance boundary is accepted. | parent | — |
 
 ## Backlog / Remaining Work
@@ -322,3 +328,12 @@ candidate generator while demonstrating ranking and validation discipline.
   organizations, X channels, and backing accounts. Registry state is 2,742
   entities, including 106 organizations, with clean foreign keys, SQLite
   integrity `ok`, and zero graph edges.
+- 2026-07-11: [DONE] Adi approved clearing every remaining high-confidence
+  person removal. All 464 passed the protected preflight, while AI Engineer
+  stayed excluded under the explicit human keep override. The canonical
+  manifest now records 625 approved identities. A byte-stable dry run resolved
+  exactly 464 live rows plus 161 already-applied rows; the transaction removed
+  464 people, X channels, and backing accounts. Registry state is 2,278
+  entities: 2,168 people, 106 organizations, one unsure, and three rejected;
+  foreign keys are clean, SQLite integrity is `ok`, and graph edges remain
+  zero. The 41 medium-confidence removals and 56 review cases were untouched.
