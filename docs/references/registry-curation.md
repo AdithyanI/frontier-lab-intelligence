@@ -55,15 +55,14 @@ After the relevance and organization-identity cleanup, the corpus contains:
 | Kind | Entities |
 | --- | ---: |
 | person (active) | 2,114 |
-| organization | 86 (including 10 seeded labs) |
+| organization | 93 (including 10 seeded labs) |
 | unsure (active) | 0 |
 | rejected | 13 |
 | unknown | 0 |
-| **total** | **2,213** |
+| **total** | **2,220** |
 
-Those clusters own all 2,259 channels. The difference is 46 additional
-channels: 24 official website, GitHub, and blog channels linked to labs plus 22
-X/product/subgroup channels consolidated into an existing organization. The
+Those clusters own all 2,293 channels. Multiple official X, website, GitHub,
+and blog channels may resolve to one stable real-world organization. The
 eight affiliation-search arXiv
 queries were removed from the identity channel model; all 137 fetched arXiv
 documents remain in `raw_items` for later extraction work.
@@ -135,13 +134,27 @@ and Elicit remain separate because Elicit became an independent public-benefit
 corporation. Independent communities such as `@claude_code` are not absorbed
 into the corresponding vendor.
 
+Major-company coverage is a separate, explicit correction layer. The reviewed
+`data/registry/organization-coverage.json` manifest pins one immutable
+following snapshot by id and checksum, declares stable parent organizations,
+and lists exact identity/product/research channels with first-party evidence.
+`fli registry apply-organization-coverage --snapshot <snapshot.db> --dry-run`
+preflights the entire batch before a transaction imports only reviewed cached
+profiles, attaches channels, and performs named merges. It never imports raw
+following pages or graph edges. The first applied batch created or normalized
+Microsoft, Amazon, Apple, Ai2, ByteDance, Tencent, Meta, Alibaba, Baidu,
+Databricks, Moonshot AI, Kuaishou, NVIDIA, AMD, and Intel. Google remains the
+stable parent for Google product channels; Google DeepMind remains a deliberate
+first-class lab exception.
+
 Exact human corrections that do not merge or delete an identity live in
 `data/registry/entity-overrides.json` and apply through
 `fli registry apply-entity-overrides`. Complete preflight checks the expected
 name and kind before one transaction updates the entity; old/new values,
 reason, source, evidence URL, and timestamp are stored in
-`entity_override_audit`. The active override manifest canonicalizes NVIDIA and
-Meta AI and corrects `@shahules786` to the person Shahul ES. Temporary Task
+`entity_override_audit`. The active override manifest corrects
+`@shahules786` to the person Shahul ES. NVIDIA and Meta now use the stronger
+parent/channel coverage contract rather than one-off renames. Temporary Task
 Master and Argmax display-name corrections were omitted from replay because
 both entities are removed by the later 10,000-follower boundary.
 

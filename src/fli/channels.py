@@ -83,10 +83,36 @@ def connect(db_path: Path | str = store.DEFAULT_DB_PATH) -> sqlite3.Connection:
 
     conn = graph.connect(db_path)
     ensure_schema(conn)
+    # Channels are the Registry's ownership boundary. Initialize the small
+    # Registry audit tables before callers can begin a write transaction so
+    # later claim/merge helpers never need transaction-breaking DDL.
+    from fli import registry
+
+    registry.ensure_schema(conn)
     return conn
 
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
+    if conn.in_transaction:
+        required = {
+            "entities",
+            "channels",
+            "entity_channels",
+            "channel_observations",
+        }
+        existing = {
+            row["name"]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        missing = required - existing
+        if missing:
+            raise RuntimeError(
+                "channel schema must be initialized before a transaction: "
+                + ", ".join(sorted(missing))
+            )
+        return
     conn.executescript(SCHEMA)
     _migrate_entities_drop_status(conn)
     _migrate_entity_kinds(conn)

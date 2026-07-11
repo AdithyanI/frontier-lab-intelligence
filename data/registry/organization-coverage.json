@@ -1,0 +1,200 @@
+{
+  "schema_version": "organization-coverage-v1",
+  "snapshot": {
+    "snapshot_id": "registry-following-2026-07-11-v1",
+    "cohort_sha256": "193a4c62ec60ffc2b485d8520e81f475e4eca48e7fd40bf7ba142dc7d5c7e43b",
+    "database_sha256": "3892fffeb5c1e8838fb5aed266e04ee8c1e3db12541ccea537e6f2d61b97225a"
+  },
+  "organizations": [
+    {
+      "slug": "nvidia",
+      "name": "NVIDIA",
+      "reason": "NVIDIA is the stable parent organization for its corporate and NVIDIA AI channels.",
+      "evidence_url": "https://www.nvidia.com/en-us/solutions/ai/",
+      "channels": [
+        {"kind": "x", "key": "nvidia", "expected_x_id": "61559439", "relationship": "identity", "evidence_url": "https://x.com/nvidia"},
+        {"kind": "x", "key": "nvidiaai", "expected_x_id": "740238495952736256", "relationship": "official", "evidence_url": "https://www.nvidia.com/en-us/solutions/ai/"},
+        {"kind": "website", "key": "https://www.nvidia.com/en-us/solutions/ai/", "label": "NVIDIA AI", "relationship": "official", "evidence_url": "https://www.nvidia.com/en-us/solutions/ai/"}
+      ],
+      "merge_handles": [
+        {"handle": "nvidiaai", "expected_entity_name": "NVIDIA"}
+      ]
+    },
+    {
+      "slug": "amd",
+      "name": "AMD",
+      "reason": "AMD is a stable parent organization for its AI compute hardware and software portfolio.",
+      "evidence_url": "https://www.amd.com/en/solutions/ai.html",
+      "channels": [
+        {"kind": "x", "key": "amd", "expected_x_id": "14861876", "relationship": "identity", "evidence_url": "https://x.com/amd"},
+        {"kind": "website", "key": "https://www.amd.com/en/solutions/ai.html", "label": "AMD AI Solutions", "relationship": "official", "evidence_url": "https://www.amd.com/en/solutions/ai.html"}
+      ]
+    },
+    {
+      "slug": "intel",
+      "name": "Intel",
+      "reason": "Intel is the stable parent organization for its corporate and Intel AI channels.",
+      "evidence_url": "https://www.intel.com/content/www/us/en/artificial-intelligence/overview.html",
+      "channels": [
+        {"kind": "x", "key": "intel", "expected_x_id": "2803191", "relationship": "identity", "evidence_url": "https://x.com/intel"},
+        {"kind": "x", "key": "intelai", "expected_x_id": "825117123936612353", "relationship": "official", "evidence_url": "https://www.intel.com/content/www/us/en/artificial-intelligence/overview.html"},
+        {"kind": "website", "key": "https://www.intel.com/content/www/us/en/artificial-intelligence/overview.html", "label": "Intel AI", "relationship": "official", "evidence_url": "https://www.intel.com/content/www/us/en/artificial-intelligence/overview.html"}
+      ]
+    },
+    {
+      "slug": "microsoft",
+      "name": "Microsoft",
+      "reason": "Microsoft is the stable parent organization for its AI, research, and Visual Studio Code channels.",
+      "evidence_url": "https://www.microsoft.com/en-us/research/lab/ai-frontiers/overview/",
+      "channels": [
+        {"kind": "x", "key": "microsoft", "expected_x_id": "74286565", "relationship": "identity", "evidence_url": "https://x.com/microsoft"},
+        {"kind": "x", "key": "microsoftai", "expected_x_id": "885220904761933824", "relationship": "official", "evidence_url": "https://microsoft.ai/"},
+        {"kind": "x", "key": "msftresearch", "expected_x_id": "21457289", "relationship": "official", "evidence_url": "https://www.microsoft.com/en-us/research/"},
+        {"kind": "x", "key": "code", "expected_x_id": "3167734591", "relationship": "official", "evidence_url": "https://github.com/microsoft/vscode"},
+        {"kind": "website", "key": "https://www.microsoft.com/en-us/research/lab/ai-frontiers/overview/", "label": "AI Frontiers", "relationship": "official", "evidence_url": "https://www.microsoft.com/en-us/research/lab/ai-frontiers/overview/"}
+      ],
+      "merge_handles": [
+        {"handle": "code", "expected_entity_name": "Visual Studio Code"}
+      ]
+    },
+    {
+      "slug": "amazon",
+      "name": "Amazon",
+      "reason": "Amazon is the stable parent organization for Amazon Science, AWS, and the Amazon AGI Lab.",
+      "evidence_url": "https://labs.amazon.science/",
+      "channels": [
+        {"kind": "x", "key": "amazon", "expected_x_id": "20793816", "relationship": "identity", "evidence_url": "https://x.com/amazon"},
+        {"kind": "x", "key": "amazonscience", "expected_x_id": "1204445607978569729", "relationship": "official", "evidence_url": "https://www.amazon.science/"},
+        {"kind": "x", "key": "awscloud", "expected_x_id": "66780587", "relationship": "official", "evidence_url": "https://aws.amazon.com/ai/"},
+        {"kind": "website", "key": "https://labs.amazon.science/", "label": "Amazon AGI Lab", "relationship": "official", "evidence_url": "https://labs.amazon.science/"}
+      ]
+    },
+    {
+      "slug": "apple",
+      "name": "Apple",
+      "reason": "Apple is the stable parent organization for Apple Machine Learning Research and its foundation-model work.",
+      "evidence_url": "https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models",
+      "channels": [
+        {"kind": "x", "key": "apple", "expected_x_id": "380749300", "relationship": "identity", "evidence_url": "https://x.com/apple"},
+        {"kind": "website", "key": "https://machinelearning.apple.com/", "label": "Apple Machine Learning Research", "relationship": "official", "evidence_url": "https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models"}
+      ]
+    },
+    {
+      "slug": "ai2",
+      "name": "Ai2",
+      "reason": "Ai2 is the stable organization behind Olmo and AllenNLP.",
+      "evidence_url": "https://allenai.org/olmo",
+      "channels": [
+        {"kind": "x", "key": "allen_ai", "expected_x_id": "3442793834", "relationship": "identity", "evidence_url": "https://allenai.org/"},
+        {"kind": "x", "key": "ai2_allennlp", "expected_x_id": "1026903001431138304", "relationship": "official", "evidence_url": "https://allenai.org/allennlp"},
+        {"kind": "website", "key": "https://allenai.org/olmo", "label": "Olmo", "relationship": "official", "evidence_url": "https://allenai.org/olmo"}
+      ]
+    },
+    {
+      "slug": "bytedance",
+      "name": "ByteDance",
+      "reason": "ByteDance is the stable parent organization for Seed and ByteDance Open Source.",
+      "evidence_url": "https://seed.bytedance.com/en/models",
+      "channels": [
+        {"kind": "x", "key": "bytedancetalk", "expected_x_id": "749868630221828096", "relationship": "identity", "evidence_url": "https://www.bytedance.com/en/"},
+        {"kind": "x", "key": "bytedanceoss", "expected_x_id": "1608386355893268480", "relationship": "official", "evidence_url": "https://github.com/bytedance"},
+        {"kind": "website", "key": "https://seed.bytedance.com/en/", "label": "ByteDance Seed", "relationship": "official", "evidence_url": "https://seed.bytedance.com/en/models"}
+      ]
+    },
+    {
+      "slug": "tencent",
+      "name": "Tencent",
+      "reason": "Tencent is the stable parent organization for the Hunyuan model family.",
+      "evidence_url": "https://www.tencent.com/en-us/articles/2202386.html",
+      "channels": [
+        {"kind": "x", "key": "tencentglobal", "expected_x_id": "938254316648800256", "relationship": "identity", "evidence_url": "https://www.tencent.com/en-us/"},
+        {"kind": "x", "key": "tencenthunyuan", "expected_x_id": "1810933558703493120", "relationship": "official", "evidence_url": "https://hunyuan.tencent.com/"},
+        {"kind": "website", "key": "https://hunyuan.tencent.com/", "label": "Tencent Hunyuan", "relationship": "official", "evidence_url": "https://www.tencent.com/en-us/articles/2202386.html"}
+      ]
+    },
+    {
+      "slug": "meta",
+      "name": "Meta",
+      "reason": "Meta is the stable parent organization for AI at Meta and Meta's model and research programs.",
+      "evidence_url": "https://ai.meta.com/",
+      "legacy_lab_slug": "meta-ai",
+      "channels": [
+        {"kind": "x", "key": "meta", "expected_x_id": "2425151", "relationship": "identity", "evidence_url": "https://about.meta.com/"},
+        {"kind": "x", "key": "aiatmeta", "expected_x_id": "1034844617261248512", "relationship": "official", "evidence_url": "https://ai.meta.com/"},
+        {"kind": "website", "key": "https://ai.meta.com", "label": "AI at Meta", "relationship": "official", "evidence_url": "https://ai.meta.com/"}
+      ],
+      "merge_handles": [
+        {"handle": "aiatmeta", "expected_entity_name": "Meta AI"}
+      ]
+    },
+    {
+      "slug": "alibaba",
+      "name": "Alibaba",
+      "reason": "Alibaba is the stable parent organization for the Qwen model family.",
+      "evidence_url": "https://www.alibabacloud.com/en/solutions/generative-ai/qwen",
+      "legacy_lab_slug": "qwen",
+      "channels": [
+        {"kind": "x", "key": "alibabagroup", "expected_x_id": "2694564780", "relationship": "identity", "evidence_url": "https://www.alibabagroup.com/en-US/"},
+        {"kind": "x", "key": "alibaba_qwen", "expected_x_id": "1753339277386342400", "relationship": "official", "evidence_url": "https://www.alibabacloud.com/en/solutions/generative-ai/qwen"},
+        {"kind": "website", "key": "https://qwenlm.github.io", "label": "Qwen", "relationship": "official", "evidence_url": "https://www.alibabacloud.com/en/solutions/generative-ai/qwen"}
+      ],
+      "merge_handles": [
+        {"handle": "alibaba_qwen", "expected_entity_name": "Qwen (Alibaba)"}
+      ]
+    },
+    {
+      "slug": "baidu",
+      "name": "Baidu",
+      "reason": "Baidu is the stable parent organization for Baidu Research and ERNIE.",
+      "evidence_url": "https://ir.baidu.com/company-overview",
+      "channels": [
+        {"kind": "x", "key": "baidu_inc", "expected_x_id": "820440736336228352", "relationship": "identity", "evidence_url": "https://ir.baidu.com/company-overview"},
+        {"kind": "x", "key": "baiduresearch", "expected_x_id": "2502019975", "relationship": "official", "evidence_url": "https://research.baidu.com/?lang=en"},
+        {"kind": "website", "key": "https://ernie.baidu.com/", "label": "ERNIE", "relationship": "official", "evidence_url": "https://ernie.baidu.com/blog/posts/ernie-5.1-0508-release/"}
+      ],
+      "merge_handles": [
+        {"handle": "baiduresearch", "expected_entity_name": "Baidu Research"}
+      ]
+    },
+    {
+      "slug": "databricks",
+      "name": "Databricks",
+      "reason": "Databricks is the stable parent organization for Databricks AI Research and Mosaic AI.",
+      "evidence_url": "https://www.databricks.com/product/machine-learning",
+      "channels": [
+        {"kind": "x", "key": "databricks", "expected_x_id": "1562518867", "relationship": "identity", "evidence_url": "https://www.databricks.com/"},
+        {"kind": "x", "key": "dbrxmosaicai", "expected_x_id": "1335773237683240960", "relationship": "official", "evidence_url": "https://www.databricks.com/product/machine-learning"},
+        {"kind": "website", "key": "https://www.databricks.com/product/machine-learning", "label": "Mosaic AI", "relationship": "official", "evidence_url": "https://www.databricks.com/product/machine-learning"}
+      ],
+      "merge_handles": [
+        {"handle": "dbrxmosaicai", "expected_entity_name": "Databricks AI Research"}
+      ]
+    },
+    {
+      "slug": "moonshot-ai",
+      "name": "Moonshot AI",
+      "reason": "Moonshot AI is the stable organization that created the Kimi model and product family.",
+      "evidence_url": "https://www.moonshot.ai/about",
+      "channels": [
+        {"kind": "website", "key": "https://www.moonshot.ai/", "label": "Moonshot AI", "relationship": "identity", "evidence_url": "https://www.moonshot.ai/about"},
+        {"kind": "x", "key": "kimi_moonshot", "expected_x_id": "1863959670169501696", "relationship": "official", "evidence_url": "https://www.moonshot.ai/about"}
+      ],
+      "merge_handles": [
+        {"handle": "kimi_moonshot", "expected_entity_name": "Kimi.ai"}
+      ]
+    },
+    {
+      "slug": "kuaishou",
+      "name": "Kuaishou",
+      "reason": "Kuaishou is the stable organization that develops and operates Kling AI.",
+      "evidence_url": "https://ir.kuaishou.com/news-releases/news-release-details/kuaishou-launches-full-beta-testing-kling-ai-global-users-0",
+      "channels": [
+        {"kind": "website", "key": "https://www.kuaishou.com/en", "label": "Kuaishou", "relationship": "identity", "evidence_url": "https://www.kuaishou.com/en"},
+        {"kind": "x", "key": "kling_ai", "expected_x_id": "1799294856822673408", "relationship": "official", "evidence_url": "https://ir.kuaishou.com/news-releases/news-release-details/kuaishou-launches-full-beta-testing-kling-ai-global-users-0"}
+      ],
+      "merge_handles": [
+        {"handle": "kling_ai", "expected_entity_name": "Kling AI"}
+      ]
+    }
+  ]
+}

@@ -241,6 +241,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `resources/m3-ranking-implementation.md` |
 | todo | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-ranking-implementation.md` |
 | done | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
+| done | Apply the snapshot-pinned organization-coverage manifest, including NVIDIA/AMD/Intel compute anchors, and prove dry-run/replay safety. | parent | `../../../data/registry/organization-coverage.json` |
 | todo | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `resources/m3-ranking-implementation.md` |
 | todo | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-ranking-implementation.md` |
 
@@ -543,3 +544,11 @@ candidate generator while demonstrating ranking and validation discipline.
   should normalize to stable parents. No Registry rows changed. The required
   implementation is a versioned coverage manifest plus a transactional,
   snapshot-aware importer/merger and an automated P0 coverage check.
+- 2026-07-11: [DONE] Implemented and applied the snapshot-pinned organization
+  coverage contract. Fifteen reviewed parents now own their exact corporate,
+  product, and research channels; 21 cached X accounts were imported without a
+  provider call and eight product/team entities were merged. A follow-up
+  compute audit fixed NVIDIA's missing main account and added AMD and Intel.
+  Registry state is 2,220 entities: 2,114 active people, 93 active
+  organizations, zero active unsure, and 13 rejected. Dry-run, real apply, and
+  replay all completed cleanly; the replay made zero writes.

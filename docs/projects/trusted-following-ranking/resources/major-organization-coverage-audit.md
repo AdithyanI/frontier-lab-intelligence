@@ -1,6 +1,6 @@
 # Major Organization Coverage Audit
 
-Status: evidence audit in progress; no Registry mutations from this document.
+Status: P0 and parent-normalization batch applied; P1 remains a reviewed backlog.
 Date: 2026-07-11.
 
 ## Why this audit exists
@@ -44,6 +44,9 @@ listed here already exist in the immutable following snapshot unless noted.
 | P0 | Ai2 | `@allen_ai`, `@ai2_allennlp`; [Olmo](https://allenai.org/olmo) | Create Ai2 and attach its model/research channels. |
 | P0 | ByteDance | `@bytedancetalk`, `@bytedanceoss`; [Seed](https://seed.bytedance.com/en/) | Create ByteDance; treat Seed as its research surface, not a second entity for now. |
 | P0 | Tencent | `@tencentglobal`, `@tencenthunyuan`; [Hunyuan](https://www.tencent.com/en-us/articles/2202386.html) | Create Tencent and attach Hunyuan as a model-family channel. |
+| P0 | NVIDIA | `@nvidia`, `@nvidiaai`; [NVIDIA AI](https://www.nvidia.com/en-us/solutions/ai/) | Normalize NVIDIA as the parent and retain NVIDIA AI as its official channel. |
+| P0 | AMD | `@amd`; [AMD AI Solutions](https://www.amd.com/en/solutions/ai.html) | Add AMD as an AI-compute anchor; do not add consumer product accounts merely to inflate reach. |
+| P0 | Intel | `@intel`, `@intelai`; [Intel AI](https://www.intel.com/content/www/us/en/artificial-intelligence/overview.html) | Add Intel and attach Intel AI as an official channel. |
 | P1 | IBM | `@ibm`, `@ibmresearch`; [foundation models](https://research.ibm.com/topics/foundation-models) | Add as a corporate research anchor. |
 | P1 | Huawei | `@huawei`; [Pangu model documentation](https://support.huaweicloud.com/productdesc-pangulm/) | Add Huawei with Pangu as website evidence; no dedicated Pangu X channel was found in the snapshot. |
 | P1 | Samsung | `@samsung`, `@samsungresearch`; [Samsung Gauss](https://research.samsung.com/artificial-intelligence) | Add Samsung and attach Samsung Research. |
@@ -83,16 +86,17 @@ Higgsfield AI, Synthesia, and OpenClaw. They are not merge decisions.
 ## Already covered
 
 The active Registry already includes the major independent and corporate model
-organizations OpenAI, Anthropic, Google, Google DeepMind, Meta AI, NVIDIA,
-Mistral AI, DeepSeek, Qwen (Alibaba), Baidu Research, Cohere, AI21 Labs,
-Databricks AI Research, MiniMax, Kimi.ai, Z.ai, Safe Superintelligence,
+organizations OpenAI, Anthropic, Google, Google DeepMind, Meta, NVIDIA,
+Microsoft, Amazon, Apple, AMD, Intel, Mistral AI, DeepSeek, Alibaba, Baidu,
+Cohere, AI21 Labs, Databricks, MiniMax, Moonshot AI, Z.ai, Safe Superintelligence,
 Thinking Machines Lab, Black Forest Labs, Stability AI, Runway, Midjourney,
 Ideogram, and several infrastructure/evaluation organizations.
 
 ## Deliberate second-pass watchlist
 
 Baichuan AI, Aleph Alpha, Inflection, Adept, Snowflake, Kakao, NTT, Preferred
-Networks, and other historically or regionally prominent model organizations
+Networks, Arm, Broadcom, Qualcomm, TSMC, Cerebras, Groq, CoreWeave, Lambda,
+SambaNova, Tenstorrent, and other historically or regionally prominent model organizations
 need a current-operation/frontier-scope check before inclusion. Replit, Oracle,
 and SAP should not enter merely because they are large AI platforms. These
 organizations are not silently treated as covered or rejected. The ranking
@@ -117,9 +121,13 @@ first-party evidence.
 6. Re-run a coverage check that proves every P0 canonical exists and no listed
    product/team entity remains accidentally standalone.
 
-## Decision still needed
+## Applied decision
 
-The recommended first mutation is the six P0 organizations plus the seven
-explicit parent-normalization rows above. P1 is a coverage backlog, not an
-instruction to flood the Registry: each row should be admitted only after its
-canonical channels and current relevance are verified.
+The versioned manifest applied the six original missing anchors, seven explicit
+parent-normalization rows, and the NVIDIA/AMD/Intel compute-anchor correction.
+Replay is idempotent and all imported profile facts came from the pinned local
+snapshot, so the mutation incurred no new provider spend. P1 and the compute
+watchlist remain coverage backlogs, not instructions to flood the Registry:
+each organization should be admitted only after its canonical channels and
+current relevance are verified. Ranking may nominate additional candidates,
+but it does not replace this explicit major-anchor review.

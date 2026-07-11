@@ -71,6 +71,12 @@ DEFAULT_ORGANIZATION_GROUPS_PATH = (
     / "registry"
     / "organization-groups.json"
 )
+DEFAULT_ORGANIZATION_COVERAGE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "registry"
+    / "organization-coverage.json"
+)
 DEFAULT_RELEVANCE_REMOVALS_PATH = (
     Path(__file__).resolve().parents[2]
     / "data"
@@ -102,6 +108,25 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
         raise RuntimeError(
             f"channel {duplicate['channel_id']} belongs to multiple entities"
         )
+    if conn.in_transaction:
+        required = {
+            "entity_registry_rejections",
+            "entity_merge_audit",
+            "entity_override_audit",
+        }
+        existing = {
+            row["name"]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        missing = required - existing
+        if missing:
+            raise RuntimeError(
+                "Registry schema must be initialized before a transaction: "
+                + ", ".join(sorted(missing))
+            )
+        return
     conn.executescript(SCHEMA)
     if conn.execute(
         """SELECT 1 FROM sqlite_master
@@ -551,6 +576,538 @@ def apply_organization_groups(
     }
 
 
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def load_organization_coverage(path: Path | str) -> dict:
+    """Load the reviewed parent-organization coverage manifest."""
+    manifest = json.loads(Path(path).read_text())
+    if not isinstance(manifest, dict):
+        raise ValueError("organization coverage manifest must be an object")
+    if manifest.get("schema_version") != "organization-coverage-v1":
+        raise ValueError("unsupported organization coverage schema_version")
+    snapshot = manifest.get("snapshot")
+    if not isinstance(snapshot, dict):
+        raise ValueError("organization coverage manifest needs snapshot metadata")
+    for key in ("snapshot_id", "cohort_sha256", "database_sha256"):
+        if not isinstance(snapshot.get(key), str) or not snapshot[key].strip():
+            raise ValueError(f"organization coverage snapshot needs {key}")
+
+    organizations = manifest.get("organizations")
+    if not isinstance(organizations, list) or not organizations:
+        raise ValueError("organization coverage manifest needs organizations")
+    slugs: set[str] = set()
+    x_handles: set[str] = set()
+    for index, organization in enumerate(organizations):
+        if not isinstance(organization, dict):
+            raise ValueError(f"organization coverage row {index} must be an object")
+        slug = organization.get("slug")
+        name = organization.get("name")
+        reason = organization.get("reason")
+        evidence_url = organization.get("evidence_url")
+        if not isinstance(slug, str) or not re.fullmatch(r"[a-z0-9-]+", slug):
+            raise ValueError(f"organization coverage row {index} has invalid slug")
+        if slug in slugs:
+            raise ValueError(f"organization coverage slug {slug!r} is duplicated")
+        slugs.add(slug)
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"organization coverage row {index} needs name")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValueError(f"organization coverage row {index} needs reason")
+        if not isinstance(evidence_url, str) or not evidence_url.startswith("https://"):
+            raise ValueError(
+                f"organization coverage row {index} needs HTTPS evidence_url"
+            )
+
+        channels_manifest = organization.get("channels")
+        if not isinstance(channels_manifest, list) or not channels_manifest:
+            raise ValueError(f"organization coverage row {index} needs channels")
+        organization_handles: set[str] = set()
+        for channel_index, channel in enumerate(channels_manifest):
+            if not isinstance(channel, dict):
+                raise ValueError(
+                    f"organization coverage row {index} channel {channel_index} "
+                    "must be an object"
+                )
+            kind = channel.get("kind")
+            key = channel.get("key")
+            relationship = channel.get("relationship")
+            channel_evidence = channel.get("evidence_url")
+            if kind not in {"x", "website", "blog", "github"}:
+                raise ValueError(
+                    f"organization coverage row {index} channel {channel_index} "
+                    "has unsupported kind"
+                )
+            if not isinstance(key, str) or not key.strip():
+                raise ValueError(
+                    f"organization coverage row {index} channel {channel_index} "
+                    "needs key"
+                )
+            if relationship not in {"identity", "official"}:
+                raise ValueError(
+                    f"organization coverage row {index} channel {channel_index} "
+                    "has invalid relationship"
+                )
+            if not isinstance(channel_evidence, str) or not channel_evidence.startswith(
+                "https://"
+            ):
+                raise ValueError(
+                    f"organization coverage row {index} channel {channel_index} "
+                    "needs HTTPS evidence_url"
+                )
+            if kind == "x":
+                handle = key.removeprefix("@").lower()
+                expected_x_id = channel.get("expected_x_id")
+                if not isinstance(expected_x_id, str) or not expected_x_id.strip():
+                    raise ValueError(
+                        f"organization coverage X channel @{handle} needs expected_x_id"
+                    )
+                if handle in x_handles:
+                    raise ValueError(
+                        f"organization coverage X handle @{handle} is duplicated"
+                    )
+                x_handles.add(handle)
+                organization_handles.add(handle)
+                channel["key"] = handle
+            elif kind in {"website", "blog"} and not key.startswith("https://"):
+                raise ValueError(
+                    f"organization coverage {kind} channel needs an HTTPS key"
+                )
+
+        merges = organization.get("merge_handles", [])
+        if not isinstance(merges, list):
+            raise ValueError(f"organization coverage row {index} merge_handles invalid")
+        merge_seen: set[str] = set()
+        for merge_index, merge in enumerate(merges):
+            if not isinstance(merge, dict):
+                raise ValueError(
+                    f"organization coverage row {index} merge {merge_index} invalid"
+                )
+            handle = merge.get("handle")
+            expected_name = merge.get("expected_entity_name")
+            if not isinstance(handle, str) or not handle.strip():
+                raise ValueError(
+                    f"organization coverage row {index} merge {merge_index} needs handle"
+                )
+            handle = handle.removeprefix("@").lower()
+            if handle not in organization_handles:
+                raise ValueError(
+                    f"organization coverage merge @{handle} must also be a channel"
+                )
+            if handle in merge_seen:
+                raise ValueError(f"organization coverage merge @{handle} is duplicated")
+            if not isinstance(expected_name, str) or not expected_name.strip():
+                raise ValueError(
+                    f"organization coverage merge @{handle} needs expected_entity_name"
+                )
+            merge_seen.add(handle)
+            merge["handle"] = handle
+        legacy_lab_slug = organization.get("legacy_lab_slug")
+        if legacy_lab_slug is not None and (
+            not isinstance(legacy_lab_slug, str)
+            or not re.fullmatch(r"[a-z0-9-]+", legacy_lab_slug)
+            or legacy_lab_slug == slug
+        ):
+            raise ValueError(
+                f"organization coverage row {index} has invalid legacy_lab_slug"
+            )
+    return manifest
+
+
+def _open_coverage_snapshot(path: Path) -> sqlite3.Connection:
+    if not path.is_file():
+        raise ValueError(f"following snapshot does not exist: {path}")
+    conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def _coverage_channel_owner(
+    conn: sqlite3.Connection, *, kind: str, key: str
+) -> sqlite3.Row | None:
+    return conn.execute(
+        """SELECT e.id, e.slug, e.name, e.kind,
+                  EXISTS (
+                      SELECT 1 FROM entity_registry_rejections r
+                      WHERE r.entity_id = e.id
+                  ) AS rejected
+           FROM channels c
+           JOIN entity_channels ec ON ec.channel_id = c.id
+           JOIN entities e ON e.id = ec.entity_id
+           WHERE c.kind = ? AND lower(c.key) = lower(?)""",
+        (kind, key),
+    ).fetchone()
+
+
+def _preflight_organization_coverage(
+    conn: sqlite3.Connection,
+    manifest: dict,
+    *,
+    snapshot_path: Path,
+) -> list[dict]:
+    expected_snapshot = manifest["snapshot"]
+    actual_sha256 = _file_sha256(snapshot_path)
+    if actual_sha256 != expected_snapshot["database_sha256"]:
+        raise ValueError(
+            "following snapshot SHA-256 mismatch: "
+            f"{actual_sha256} != {expected_snapshot['database_sha256']}"
+        )
+    snapshot = _open_coverage_snapshot(snapshot_path)
+    try:
+        run = snapshot.execute("SELECT * FROM snapshot_run").fetchone()
+        if run is None or run["status"] != "complete":
+            raise ValueError("organization coverage requires a complete snapshot")
+        if run["snapshot_id"] != expected_snapshot["snapshot_id"]:
+            raise ValueError("organization coverage snapshot_id mismatch")
+        if run["cohort_sha256"] != expected_snapshot["cohort_sha256"]:
+            raise ValueError("organization coverage cohort_sha256 mismatch")
+
+        resolved: list[dict] = []
+        for organization in manifest["organizations"]:
+            canonical = conn.execute(
+                "SELECT * FROM entities WHERE slug = ?", (organization["slug"],)
+            ).fetchone()
+            if canonical is not None:
+                if canonical["kind"] != "organization":
+                    raise ValueError(
+                        f"canonical {organization['slug']!r} is not an organization"
+                    )
+                if canonical["name"] != organization["name"]:
+                    raise ValueError(
+                        f"canonical {organization['slug']!r} has unexpected name "
+                        f"{canonical['name']!r}"
+                    )
+                if conn.execute(
+                    "SELECT 1 FROM entity_registry_rejections WHERE entity_id = ?",
+                    (canonical["id"],),
+                ).fetchone():
+                    raise ValueError(
+                        f"canonical {organization['slug']!r} is Registry-rejected"
+                    )
+
+            merge_by_handle = {
+                item["handle"]: item for item in organization.get("merge_handles", [])
+            }
+            merge_entity_ids: set[int] = set()
+            for handle, merge in merge_by_handle.items():
+                member = _entity_for_x_handle(conn, handle)
+                if canonical is not None and member["id"] == canonical["id"]:
+                    merge_entity_ids.add(member["id"])
+                    continue
+                if member["kind"] != "organization":
+                    raise ValueError(f"merge handle @{handle} is not an organization")
+                if member["name"] != merge["expected_entity_name"]:
+                    raise ValueError(
+                        f"merge handle @{handle} has unexpected entity name "
+                        f"{member['name']!r}"
+                    )
+                if conn.execute(
+                    "SELECT 1 FROM entity_registry_rejections WHERE entity_id = ?",
+                    (member["id"],),
+                ).fetchone():
+                    raise ValueError(f"merge handle @{handle} is Registry-rejected")
+                merge_entity_ids.add(member["id"])
+
+            snapshot_accounts: dict[str, sqlite3.Row] = {}
+            for channel in organization["channels"]:
+                kind = channel["kind"]
+                key = channel["key"]
+                if kind == "x":
+                    account = snapshot.execute(
+                        "SELECT * FROM account WHERE lower(handle) = lower(?)", (key,)
+                    ).fetchone()
+                    if account is None:
+                        raise ValueError(f"snapshot has no X account @{key}")
+                    if str(account["x_id"]) != channel["expected_x_id"]:
+                        raise ValueError(
+                            f"snapshot X ID mismatch for @{key}: "
+                            f"{account['x_id']} != {channel['expected_x_id']}"
+                        )
+                    snapshot_accounts[key] = account
+
+                    existing = conn.execute(
+                        "SELECT * FROM accounts WHERE platform = 'x' AND handle = ?",
+                        (key,),
+                    ).fetchone()
+                    if existing is not None and str(existing["x_id"]) != str(
+                        account["x_id"]
+                    ):
+                        raise ValueError(f"Registry X ID mismatch for @{key}")
+                    x_id_owner = conn.execute(
+                        """SELECT handle FROM accounts
+                           WHERE platform = 'x' AND x_id = ? AND handle != ?""",
+                        (str(account["x_id"]), key),
+                    ).fetchone()
+                    if x_id_owner is not None:
+                        raise ValueError(
+                            f"X ID {account['x_id']} already belongs to "
+                            f"@{x_id_owner['handle']}"
+                        )
+
+                owner = _coverage_channel_owner(conn, kind=kind, key=key)
+                if owner is None:
+                    continue
+                if owner["rejected"]:
+                    raise ValueError(
+                        f"{kind} channel {key!r} belongs to a rejected entity"
+                    )
+                if canonical is not None and owner["id"] == canonical["id"]:
+                    continue
+                if owner["id"] not in merge_entity_ids:
+                    raise ValueError(
+                        f"{kind} channel {key!r} is unexpectedly owned by "
+                        f"{owner['name']!r}"
+                    )
+
+            legacy_lab_slug = organization.get("legacy_lab_slug")
+            if legacy_lab_slug and conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'labs'"
+            ).fetchone():
+                legacy_lab = conn.execute(
+                    "SELECT slug FROM labs WHERE slug IN (?, ?)",
+                    (legacy_lab_slug, organization["slug"]),
+                ).fetchall()
+                if not legacy_lab:
+                    raise ValueError(
+                        f"legacy lab seed {legacy_lab_slug!r} is missing"
+                    )
+                if len(legacy_lab) > 1:
+                    raise ValueError(
+                        f"legacy and canonical lab seeds both exist for "
+                        f"{organization['slug']!r}"
+                    )
+            resolved.append(
+                {
+                    "organization": organization,
+                    "canonical": canonical,
+                    "snapshot_accounts": snapshot_accounts,
+                }
+            )
+        return resolved
+    finally:
+        snapshot.close()
+
+
+def _upsert_coverage_account(
+    conn: sqlite3.Connection,
+    *,
+    account: sqlite3.Row,
+    snapshot_id: str,
+    organization_slug: str,
+) -> int:
+    handle = account["handle"].lower()
+    existing = conn.execute(
+        "SELECT * FROM accounts WHERE platform = 'x' AND handle = ?", (handle,)
+    ).fetchone()
+    observed_at = account["last_observed_at"]
+    if existing is None:
+        cursor = conn.execute(
+            """INSERT INTO accounts
+               (platform, handle, display_name, x_id, bio, followers_count,
+                first_seen_at, last_seen_at)
+               VALUES ('x', ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                handle,
+                account["display_name"],
+                str(account["x_id"]),
+                account["bio"],
+                account["followers_count"],
+                account["first_observed_at"],
+                observed_at,
+            ),
+        )
+        account_id = cursor.lastrowid
+    else:
+        account_id = existing["id"]
+        conn.execute(
+            """UPDATE accounts SET
+                   display_name = ?, x_id = ?, bio = ?, followers_count = ?,
+                   first_seen_at = min(first_seen_at, ?),
+                   last_seen_at = max(last_seen_at, ?)
+               WHERE id = ?""",
+            (
+                account["display_name"],
+                str(account["x_id"]),
+                account["bio"],
+                account["followers_count"],
+                account["first_observed_at"],
+                observed_at,
+                account_id,
+            ),
+        )
+    conn.execute(
+        """INSERT INTO account_source_facts
+           (account_id, source, fact, value, observed_at, evidence_url)
+           VALUES (?, ?, 'organization_coverage', ?, ?, ?)
+           ON CONFLICT (account_id, source, fact) DO UPDATE SET
+               value = excluded.value,
+               observed_at = excluded.observed_at,
+               evidence_url = excluded.evidence_url""",
+        (
+            account_id,
+            f"following-snapshot:{snapshot_id}",
+            organization_slug,
+            observed_at,
+            f"https://x.com/{handle}",
+        ),
+    )
+    return account_id
+
+
+def apply_organization_coverage(
+    conn: sqlite3.Connection,
+    manifest: dict,
+    *,
+    snapshot_path: Path | str,
+    observed_at: str | None = None,
+) -> dict:
+    """Create reviewed parent organizations and attach their exact channels."""
+    ensure_schema(conn)
+    observed_at = observed_at or _now()
+    snapshot_path = Path(snapshot_path)
+    resolved = _preflight_organization_coverage(
+        conn, manifest, snapshot_path=snapshot_path
+    )
+    snapshot_id = manifest["snapshot"]["snapshot_id"]
+    created_entities = 0
+    merged_entities = 0
+    imported_accounts = 0
+    linked_channels = 0
+    already_grouped = 0
+
+    for item in resolved:
+        organization = item["organization"]
+        canonical = item["canonical"]
+        if canonical is None:
+            canonical_id = channels.upsert_entity(
+                conn,
+                kind="organization",
+                slug=organization["slug"],
+                name=organization["name"],
+                notes=organization["reason"],
+                observed_at=observed_at,
+            )
+            created_entities += 1
+        else:
+            canonical_id = canonical["id"]
+
+        channel_ids: dict[tuple[str, str], int] = {}
+        for channel in organization["channels"]:
+            kind = channel["kind"]
+            key = channel["key"]
+            if kind == "x":
+                account = item["snapshot_accounts"][key]
+                existed = conn.execute(
+                    "SELECT 1 FROM accounts WHERE platform = 'x' AND handle = ?",
+                    (key,),
+                ).fetchone()
+                _upsert_coverage_account(
+                    conn,
+                    account=account,
+                    snapshot_id=snapshot_id,
+                    organization_slug=organization["slug"],
+                )
+                imported_accounts += existed is None
+                channel_id = channels.upsert_channel(
+                    conn,
+                    kind="x",
+                    key=key,
+                    label=account["display_name"],
+                    observed_at=account["last_observed_at"],
+                )
+                channels.observe_channel(
+                    conn,
+                    channel_id=channel_id,
+                    source=f"following-snapshot:{snapshot_id}",
+                    metric="followers_count",
+                    value=account["followers_count"],
+                    observed_at=account["last_observed_at"],
+                    evidence_url=f"https://x.com/{key}",
+                )
+                channels.observe_channel(
+                    conn,
+                    channel_id=channel_id,
+                    source=f"following-snapshot:{snapshot_id}",
+                    metric="bio",
+                    value=account["bio"],
+                    observed_at=account["last_observed_at"],
+                    evidence_url=f"https://x.com/{key}",
+                )
+            else:
+                channel_id = channels.upsert_channel(
+                    conn,
+                    kind=kind,
+                    key=key,
+                    label=channel.get("label"),
+                    observed_at=observed_at,
+                )
+            channel_ids[(kind, key)] = channel_id
+
+        for merge in organization.get("merge_handles", []):
+            member = _entity_for_x_handle(conn, merge["handle"])
+            if member["id"] == canonical_id:
+                already_grouped += 1
+                continue
+            result = merge_entity_into(
+                conn,
+                canonical_entity_id=canonical_id,
+                duplicate_entity_id=member["id"],
+                observed_at=observed_at,
+                reason=organization["reason"],
+                source="organization-coverage-manifest",
+                evidence_url=organization["evidence_url"],
+            )
+            merged_entities += 1
+            linked_channels += result["moved_channels"]
+
+        legacy_lab_slug = organization.get("legacy_lab_slug")
+        if legacy_lab_slug and conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'labs'"
+        ).fetchone():
+            conn.execute(
+                """UPDATE labs SET slug = ?, name = ?, notes = ?
+                   WHERE slug = ?""",
+                (
+                    organization["slug"],
+                    organization["name"],
+                    organization["reason"],
+                    legacy_lab_slug,
+                ),
+            )
+
+        for channel in organization["channels"]:
+            channel_id = channel_ids[(channel["kind"], channel["key"])]
+            registry_owner = _coverage_channel_owner(
+                conn, kind=channel["kind"], key=channel["key"]
+            )
+            if registry_owner is None or registry_owner["id"] != canonical_id:
+                linked_channels += 1
+            claim_channel(
+                conn,
+                entity_id=canonical_id,
+                channel_id=channel_id,
+                relationship=channel["relationship"],
+                confidence=1.0,
+                evidence_url=channel["evidence_url"],
+                notes=organization["reason"],
+                observed_at=observed_at,
+            )
+
+    return {
+        "organizations": len(resolved),
+        "created_entities": created_entities,
+        "merged_entities": merged_entities,
+        "imported_accounts": imported_accounts,
+        "linked_channels": linked_channels,
+        "already_grouped": already_grouped,
+    }
+
+
 def load_relevance_removals(path: Path | str) -> list[dict]:
     """Load the explicit human-approved relevance removal boundary."""
     with Path(path).open(newline="", encoding="utf-8") as source:
@@ -843,6 +1400,7 @@ def main(argv: list[str] | None = None) -> int:
         "action",
         choices=[
             "apply-organization-groups",
+            "apply-organization-coverage",
             "apply-relevance-removals",
             "apply-entity-overrides",
         ],
@@ -854,6 +1412,7 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
     )
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--snapshot", type=Path, default=None)
     args = parser.parse_args(argv)
 
     conn = channels.connect(args.db) if args.db else channels.connect()
@@ -863,6 +1422,16 @@ def main(argv: list[str] | None = None) -> int:
         manifest_path = args.manifest or DEFAULT_ORGANIZATION_GROUPS_PATH
         manifest = load_organization_groups(manifest_path)
         apply = apply_organization_groups
+    elif args.action == "apply-organization-coverage":
+        manifest_path = args.manifest or DEFAULT_ORGANIZATION_COVERAGE_PATH
+        manifest = load_organization_coverage(manifest_path)
+        if args.snapshot is None:
+            parser.error("apply-organization-coverage requires --snapshot")
+        apply = lambda active_conn, active_manifest: apply_organization_coverage(
+            active_conn,
+            active_manifest,
+            snapshot_path=args.snapshot,
+        )
     elif args.action == "apply-relevance-removals":
         manifest_path = args.manifest or DEFAULT_RELEVANCE_REMOVALS_PATH
         manifest = load_relevance_removals(manifest_path)
