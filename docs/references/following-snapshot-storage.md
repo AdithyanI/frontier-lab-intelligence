@@ -130,11 +130,18 @@ can be copied to durable object storage later without changing the manifest or
 ranking contract.
 
 For the completed first snapshot, the finalized SQLite file is also preserved
-as an ignored local Zstandard recovery archive. Archive verification must cover
-both the compressed stream and the decompressed database SHA-256. This protects
-against accidental file mutation or deletion during local development, but it
-is **not** an off-machine backup: the manifest's `durable_object_uri` remains
-null until a private object-store upload is explicitly approved and verified.
+as an ignored local Zstandard recovery archive. Archive verification covers
+both the compressed stream and the decompressed database SHA-256. The same
+content-addressed archive is stored under `permanent/backups/` in the existing
+WIN Cloudflare R2/S3 bucket. An authenticated full-object readback reproduced
+the local archive byte count and SHA-256 before the manifest recorded its
+`s3://` URI.
+
+WIN's bucket has a public domain configured, so this backup is durable but must
+not be described as private. The repository records no public HTTP URL, and the
+object key includes the full archive hash; nevertheless, treat it as
+link-accessible to anyone who learns the exact key. Future sensitive snapshots
+need a dedicated private bucket rather than this convenience backup path.
 
 ## Future Production Shape
 

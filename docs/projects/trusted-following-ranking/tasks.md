@@ -196,8 +196,10 @@ candidate generator while demonstrating ranking and validation discipline.
   `$27.81218`; the tracked manifest binds the local artifact checksum.
 - A verified 462 MiB Zstandard recovery archive sits beside the 2.0 GB local
   SQLite snapshot. Its decompressed SHA-256 matches the finalized database.
-  This guards local development mistakes but is not an off-machine backup;
-  `durable_object_uri` remains null pending explicit private-storage approval.
+  The same content-addressed archive now has a full-readback-verified off-machine
+  copy in WIN's existing Cloudflare R2/S3 bucket. Because that bucket has a
+  public domain, it is durable but not claimed private; no public HTTP URL is
+  recorded.
 - No GitHub Actions workflow is needed before deployment. The managed Stop hook
   plus repo-owned `scripts/check-fast.sh` is the accepted feedback loop for the
   current local case-study phase.
@@ -235,7 +237,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Add the bounded TwitterAPI.io collector over the snapshot store, then prove one small resumable calibration before the full crawl. | parent | `resources/profile-count-scan.md` |
 | done | Obtain Adi's explicit go/no-go, run the full outgoing-follow crawl, validate it, and freeze its tracked proof manifest. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | done | Create and verify a compressed local recovery copy without modifying the immutable snapshot. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
-| todo | Upload the verified archive to a dedicated private durable object store after Adi approves the destination and external write. | parent | `../../references/following-snapshot-storage.md` |
+| done | Upload the verified archive to WIN's existing permanent R2/S3 storage and verify the complete remote object by SHA-256. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 | todo | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
 
 ## Backlog / Remaining Work
@@ -512,3 +514,9 @@ candidate generator while demonstrating ranking and validation discipline.
   hashes and sizes in the tracked manifest. No cloud upload occurred: the only
   visible Azure storage account belongs to an unrelated project, so a dedicated
   private destination still requires Adi's explicit approval.
+- 2026-07-11: [DONE] Adi approved using WIN's existing S3-compatible storage.
+  Reused its generated R2 environment in place, uploaded the content-addressed
+  permanent archive, and streamed the entire remote object back through
+  SHA-256. The 484,347,309 remote bytes exactly match the local archive. The
+  manifest now records the durable `s3://` URI, checksum, ETag, and access
+  limitation. No visualization or ranking work started.

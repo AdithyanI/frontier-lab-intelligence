@@ -58,7 +58,17 @@
     },
     "tracked": false,
     "recoverable_from_git": false,
-    "durable_object_uri": null
+    "durable_object": {
+      "provider": "cloudflare_r2_s3",
+      "uri": "s3://aipodcasting/permanent/backups/frontier-lab-intelligence/following/registry-following-2026-07-11-v1/a33a50cb230b63ee10629b3b70460a24f026fb785749186c8dbcb03bcc36e15b/snapshot.db.zst",
+      "bytes": 484347309,
+      "sha256": "a33a50cb230b63ee10629b3b70460a24f026fb785749186c8dbcb03bcc36e15b",
+      "etag": "74bb10d7878c9b236feaa9c3cdd2e34c-58",
+      "content_type": "application/zstd",
+      "verified_at": "2026-07-11T16:43:31Z",
+      "verification": "Authenticated full-object readback matched the local archive byte count and SHA-256.",
+      "access_note": "The existing WIN R2 bucket has a public domain configured. No public HTTP URL is recorded; treat the object as link-accessible to anyone who knows the exact content-addressed key."
+    }
   },
   "validation": {
     "valid": true,
