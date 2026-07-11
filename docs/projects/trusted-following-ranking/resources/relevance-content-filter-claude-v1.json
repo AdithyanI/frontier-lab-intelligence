@@ -1,0 +1,677 @@
+{
+  "run": "relevance-content-filter-claude-v1-20260711",
+  "model": "claude-opus-4-6",
+  "reasoning_effort": "high",
+  "prompt_version": "registry-relevance-v1",
+  "requested": 9,
+  "completed": 9,
+  "failed": 0,
+  "reported_cost_usd": 2.6655349999999998,
+  "results": [
+    {
+      "entity_id": 199,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Naval Ravikant is a generalist angel investor, AngelList co-founder, and philosophical thought leader. While he occasionally comments on AI, invests in some AI startups (Perplexity, Moonlake AI), and discusses AI-related themes on his podcast, his output spans wealth philosophy, startups broadly, and personal development. He does not produce sustained original frontier-AI intelligence, is not part of a frontier lab, does not publish research, and his AI commentary is high-level and occasional rather than the deep, recurring signal the registry requires. Per calibration guidance, investing in AI and occasionally discussing it is insufficient.",
+      "current_connection": "Generalist angel investor who occasionally comments on AI trends and has invested in some AI-adjacent startups; co-founded Airchat (voice-based social media app); hosts a podcast that sometimes covers AI topics like vibe coding at a high level.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Naval_Ravikant",
+        "https://nav.al/",
+        "https://www.forbes.com/sites/josipamajic/2026/03/15/naval-ravikants-ai-thesis-is-playing-out-in-public-markets/",
+        "https://tracxn.com/d/people/naval-ravikant/__zjY_8gmflKDzBLSv520Gkf9qM24BNrfFb_Vo_boSVAQ"
+      ],
+      "entity_name": "Naval",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "92988e8626b899336b6f36ab2bc091a83a664309a2d7aed574cd302d68ac97d8",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_s2_XK2ebpc1r6bkOB-SVDaWPhoZ5RkSFuMzYj97n0DSvnRI7l0_qe6VJk7P-FRmTzlTnp1zL5Z4zuDdVHGz2H8IY6fOrP9pHPDcCEU4KgJfhBzYHJiTuMsDAzPjFqBmzJ8-pwj9GmsO3lxm6IWdlUjJPe4M5Jk6xkZ6ux1Mqc0Se1EWy8ymc0KfhnUHz9sRMhHYJWYsvtuuRQ0MiCCFRYzpUf8C8yEGL5_HkstsLJl7JxXBlSoaHqsXfGNGRAkVEpABJE9UipsB2EHC4IdCvMgf6PwwYRNr5fTRic6EQsijDLdNilkphtGFRMid40CytuL5SETXdmmVRzjE7ScvW3Rxn24gnIuw-7Dsv1_Wk22lnzOQpF6IdzUxp_bpZvQf0Oc7FhJ1pDM7tuHr-TJNj1JjNi2jCJ-oR4v5kbc3HNMIeGzGdsxMXruFX01WC5nrUELD2PomTQFf6fA==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 27791,
+      "output_tokens": 1082,
+      "reported_cost_usd": 0.166005,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Naval Ravikant current work 2025 2026",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Naval Ravikant AI frontier research lab",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Naval_Ravikant",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://nav.al/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://www.forbes.com/sites/josipamajic/2026/03/15/naval-ravikants-ai-thesis-is-playing-out-in-public-markets/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://tracxn.com/d/people/naval-ravikant/__zjY_8gmflKDzBLSv520Gkf9qM24BNrfFb_Vo_boSVAQ",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 307,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Shivon Zilis is Director of Operations and Special Projects at Neuralink (brain-computer interfaces), not a frontier AI model lab. She was formerly on OpenAI's board (left 2023) and briefly helped found xAI, but her current role is operational at Neuralink. Her X account and public output do not produce original frontier AI research, evaluations, or specialist analysis. Recent public presence is dominated by the Musk v. OpenAI lawsuit testimony and personal life coverage, not substantive frontier AI signal. Proximity to Musk/xAI through a personal relationship does not constitute direct frontier-AI work.",
+      "current_connection": "Neuralink Director of Operations; former OpenAI board member (2020-2023); co-plaintiff in Musk v. OpenAI lawsuit; no current formal role at a frontier AI model lab producing original technical output.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Shivon_Zilis",
+        "https://fortune.com/2026/05/08/shivon-zilis-openai-trial-elon-musk-xai-sam-altman/",
+        "https://www.cnn.com/2026/05/07/tech/musk-trial-shivon-zilis-testimony",
+        "https://www.crunchbase.com/person/shivon-zilis"
+      ],
+      "entity_name": "Shivon Zilis",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "f10dfa1e87c1cd1f7cae0a101c7c1fc7efdbf54c63b56fe3ff86232d85dcb7f0",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_GS8L0bH-3aF78On6S4OS3z3MUEXc3_thivCAAKGZR99Y3jykbgMketf9kbm_-dtqKw1K5NUgbpvlloK99Zb41ErLoxLWMxvdp17prjfkY5KoovJkx4xgaslvNtSP8VO5LbQjn9MtkVB0FKOJ1Vvw9Hhos0nz-zdWwyJAlVD1FE4Ghlnku_IZ2w_m55kYee9qh-kTguuyQdFvYrlvgov2yRF9DI6dwe6Jid7x2IEXKu4BsMRcywkB7KqY6i0a7k8IiNzw72wviz9HvRym3B8YqGsAUQoBQSlJHQN3vdj2Ifaskag_L3bn9HdafxUIUXMO7CeVT4kx1zevddPYZRUoyIARCixElXNKPHoYdRPETTzJVg501at6yV-WT6VvgYLHEirysZCmcPBolvW0ka70tUlUhzVXz_voV331szzCmmliNGhc6gjOtuGp09MWSzpQcfqGqc_ctGXNRg==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 59951,
+      "output_tokens": 1799,
+      "reported_cost_usd": 0.37473,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Shivon Zilis current role 2025 2026",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Shivon Zilis Neuralink xAI",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Shivon Zilis xAI role 2025 2026",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Shivon_Zilis",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://fortune.com/2026/05/08/shivon-zilis-openai-trial-elon-musk-xai-sam-altman/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://www.cnn.com/2026/05/07/tech/musk-trial-shivon-zilis-testimony",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://www.crunchbase.com/person/shivon-zilis",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 1051,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Connor Leahy left Conjecture in March 2026 and is now US Executive Director of ControlAI, a policy advocacy nonprofit focused on campaigning for a ban on superintelligence development. ControlAI explicitly prioritizes campaigns, media coverage, legislation drafting, and political outreach over research. His current output (Substack blog posts, podcast appearances, LessWrong commentary) is primarily AI safety policy advocacy rather than original technical research, model evaluations, empirical safety work, or investment-relevant analysis. While he has deep technical background from EleutherAI and Conjecture, his current role does not repeatedly produce original frontier-AI signal for either the AI team or the investment team.",
+      "current_connection": "US Executive Director of ControlAI, a policy advocacy nonprofit. Former CEO of Conjecture (AI safety startup, left March 2026) and co-founder of EleutherAI. Writes advocacy-oriented blog posts on Substack (ettf.land) and occasionally on LessWrong. Primary output is AI existential risk advocacy and policy campaigning, not original technical research or intelligence.",
+      "confidence": "medium",
+      "evidence_urls": [
+        "https://en.wikipedia.org/wiki/Connor_Leahy",
+        "https://controlai.org/connor-leahy",
+        "https://en.wikipedia.org/wiki/ControlAI",
+        "https://www.ettf.land/p/conjecture-a-retrospective",
+        "https://controlai.org/about"
+      ],
+      "entity_name": "Connor Leahy",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "6735c1c1d8747ec34b9ff3e1e9ea57264a2aa2577419bc5677d7784d519c982f",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_8pe8e8Edh4C5jFQmseNUV2_q9dwTqkgEqGXQKCBdqx5_02qyYQfaT4iw0G3t2Wao8JiAIyLddQzgvGceLkTToWjm_luinTYGwFhThWLgfOXjOH48q1_BxN-RV988EZL96zvFEsQzmpLeSg3Vcrv2LuoBQwhPOP3amBmb6mMYWDG4f2pbttnIFwzVFJuhKHLy-wjjYGNZlevwqoz3cZ84fChiVhsvpyE0540wIljBUIe7YTs1FCmvVPKgUHhQPWbdpqLIvs4u-ybQetZINKm5E6mzLDdimj8a7WI6i0UKAmA4pTfi7LwfUYNZgSE2QaT_dpFoG0jGxHn6JjYv_X3vabkrS_o5pkvRRnHijEDXplAgCtxRNqwt4GC1eW5v0iq3XW1lueEZytXo983DntYFfYJpodmtSe3igEglPAjN5hvkFri6LUisZdAeSj8acfAaqY8pWdfA1G-g2A==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 60679,
+      "output_tokens": 2557,
+      "reported_cost_usd": 0.40732,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Connor Leahy Conjecture AI CEO",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Connor Leahy AI safety 2025 2026",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "ControlAI nonprofit research publications 2026",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Connor Leahy ETTF technical research 2026",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Connor_Leahy",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://controlai.org/connor-leahy",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/ControlAI",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://www.ettf.land/p/conjecture-a-retrospective",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://controlai.org/about",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 1105,
+      "decision": "keep",
+      "relevance_basis": "evaluation_and_safety",
+      "audience": "ai_team",
+      "reason": "Creator of LisanBench, an original LLM benchmark testing forward planning, vocabulary depth, constraint adherence, and long-context stamina. The benchmark has its own website (lisanbench.com), open-source GitHub repo, leaderboard, and is externally referenced (e.g., BenchLM.ai). Also publishes original ARC-AGI-3 evaluation experiments with custom agent harnesses and detailed analysis of how frontier models exploit word graph topology. Produces sustained original model evaluation content beyond the benchmark itself.",
+      "current_connection": "Independent pseudonymous benchmark creator and model evaluator. No known lab affiliation. Operates @scaling01 on X, maintaining LisanBench and publishing original frontier model evaluation work including ARC-AGI-3 agent testing.",
+      "confidence": "medium",
+      "evidence_urls": [
+        "https://lisanbench.com/",
+        "https://github.com/voice-from-the-outer-world/lisan-bench",
+        "https://x.com/scaling01/status/1928510435164037342",
+        "https://x.com/scaling01/status/2024640940657246235",
+        "https://x.com/scaling01/status/2031855619360088558"
+      ],
+      "entity_name": "Lisan al Gaib",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "50ef36ff7e61b354c68387a71addf0321406c5a97c7ebf1d7472e4e8b09c2cd2",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_bd5dotHqdskjO6qBQJVd0r6YTYfyfPQAf-N4FDEUnvNBRQ_lB8QHiLYHG1DUz07Nz58pT4cNezlrWVwQ0O5XaAFBuFkmxTzudldRqC4wWK-DMFjl22CLvsGAKcpN0DQZY_oznWRZU8JruMW16i7GHiB-fcPTUAoiqHJX4kMjr5sKGqbtE-HTyzwKyBvXJVtcUcTZp3_aB2kml9OS2Cm0zWDuuz_Cju7QVCddkFC1xt_comuIEtdc0LfhvHIVmKjR8yyH5vayLD4JFUPu4EF9v6vBpdphZMMBoNLHkkDg-wKp0Y530DgvFTcxKk0FP_-fTOI0INLn_zi7CR4JbSOBvaB8tbn4RnfhHGvhwbgialJI31mI7s-fKlSe5XNV907nhdUA135PacbiE5JXtHViZ1PbxkUa_9eOcYBfAHhuKkAMjfcstmEXMqBdT7inxCyJRwpM4cU5RsmcXA==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 42541,
+      "output_tokens": 2253,
+      "reported_cost_usd": 0.30902999999999997,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "scaling01 LisanBench AI benchmark",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "@scaling01 twitter AI",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "lisanbench.com benchmark LLM leaderboard",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "\"scaling01\" \"lisan al gaib\" identity researcher",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://lisanbench.com/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://github.com/voice-from-the-outer-world/lisan-bench",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/scaling01/status/1928510435164037342",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/scaling01/status/2024640940657246235",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/scaling01/status/2031855619360088558",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 1488,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Kevin Kwok (@antimatter15) is a talented generalist open-source developer known for tesseract.js, a WebGL Gaussian Splat viewer, and alpaca.cpp. He occasionally produces interesting AI-adjacent implementations (e.g., reverse-engineering Gemma 3n in May 2025, running LLMs on iPhone in 2023), but his output is sporadic, his X account appears largely inactive since 2023, and his primary identity is a general-purpose hacker rather than a focused frontier-AI researcher, engineer, or analyst. He is not affiliated with any frontier lab, does not publish original AI research, and does not provide sustained analysis. Individual impressive projects do not meet the 'repeatedly produce original, high-value information' threshold.",
+      "current_connection": "Independent software developer based in San Francisco; no current frontier lab affiliation. Recent AI-related work includes reverse-engineering Google Gemma 3n architecture (May 2025) and various older open-source implementations (alpaca.cpp, Gaussian Splatting viewer). GitHub profile references 'x4x2' but no identifiable AI-focused company.",
+      "confidence": "medium",
+      "evidence_urls": [
+        "https://github.com/antimatter15",
+        "https://x.com/antimatter15",
+        "https://github.com/antimatter15/reverse-engineering-gemma-3n",
+        "https://antimatter15.com/",
+        "https://huggingface.co/cakewalk"
+      ],
+      "entity_name": "Kevin Kwok",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "64c487bcdf7b6c4ba1b8e1b05566c22d9064f68be6e8f4d82210274779299688",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_DFMmaRQYnMAhmkmxRZL8Kq24iT9vZOgA8MroEcgNWnp6vR2ZRZ-x-LMMwPaR-OzBolV6CR03BwpkZHE0FOxHO0iBl3VdwL2kvcCPbSKMgIYTzzZtOU_Q_C1UKbuIV549xiiCGzAZUuWL4zFkjSxKAvJK5IQmlAAwE4ZuMI5qX80btFENr9n5Npqrh1rt5y87mYhHJnLRx7M6wN_uz8qHj3J4CBR88fEVXdub0Q6Im8Pn7alaicWcE-TLb6e2NpiVt_CZ1siVNMHo2fnQZ-FgovsvuJfwGmxytMNdw0Wvv4mK9emcGNtkOafR7hXJPy1-7eI12SxyBKtveB5wNdFkSlDOywpDKPvAHH1Tnpkx5qlzl6lpm5GGge8UD5KjId87lOjBZ6Chw-Ilo71PpM6YMstGIe0WXRSLUAs_bM3Z4Jayic1wNVq_TQrTN2m5LiH8Y-mOULnBkGw0_A==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 135009,
+      "output_tokens": 2672,
+      "reported_cost_usd": 0.8118449999999999,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Kevin Kwok antimatter15",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "antimatter15 twitter AI research",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Kevin Kwok antimatter15 current job employer 2024 2025",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Kevin Kwok x4x2 startup company",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "\"x4x2\" company AI startup",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Kevin Kwok antimatter15 LinkedIn MIT engineer",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "antimatter15 \"reverse engineering\" gemma 3n blog",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://github.com/antimatter15",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/antimatter15",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://github.com/antimatter15/reverse-engineering-gemma-3n",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://antimatter15.com/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://huggingface.co/cakewalk",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 1605,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Allie K. Miller is CEO of Open Machine, an enterprise AI advisory firm, and a prominent AI public speaker/educator/content creator with ~2M followers. Her work centers on teaching businesses and individuals how to adopt and use AI tools, offering productivity tips, and keynoting at corporate events. She does not produce original frontier-AI research, model evaluations, or sustained specialist analysis of compute, semiconductors, or infrastructure. While she comments on new model releases, her observations are user-experience level rather than original technical or investment-grade analysis. Her primary activities—enterprise AI consulting, AI education courses, motivational speaking—fall into general AI content creation and education, not the original frontier-AI intelligence the registry requires.",
+      "current_connection": "Runs Open Machine, an enterprise AI advisory firm; delivers paid keynotes and online AI courses; angel invests in AI startups. No current role at a frontier lab, no original research or evaluations, no specialist technical or infrastructure analysis.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://www.alliekmiller.com/",
+        "https://en.wikipedia.org/wiki/Allie_K._Miller",
+        "https://time.com/collections/time100-ai-2025/7305788/allie-k-miller/",
+        "https://fortune.com/2025/12/16/ibm-aws-veteran-open-machine-ai-expert-allie-k-miller/",
+        "https://x.com/alliekmiller"
+      ],
+      "entity_name": "Allie K. Miller",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "3ea74b2a9f2d563f7a3173e509f6d047fac7789b00fd46495b99f01faa2b2afc",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_Ntpxg-XrxeKN35wuQJu2u3FpjYt6Yqv2YFdO8G3TEK0EVb8mS_Rf8jdQtzX18DDZzpmACxrx6QS54vChX8NU5CTNLtPHzY7V2ZCZavMsIxGwuqPeBsYmeBkjrCZkDvRo5ucbB1sfd2r67gGFkw9N-SItIVlzw58cVaUprFV3EAhYkEkzAGjfQb_O46Xl7JuRx9rQUbYIJPb_TdGfIoRxWqRRovMRIgHCE5JKpD_PCJTNhnNkndH2os-wmc_FCpCy2I_P6cKj17Yi_RM2N1mxblnDrANIuCAhyHNjClDoBygckj1dEjPTtb4Semk7LxAM5x96q7HkdPOF2H9jgnzVw1HqJkmf5qkhch4RJqldo-sC_ftTCV1Qyj7HFbOq8NtsOfwqIhRAAjv8C5rP1ie4THDKQWhndwwrVP9fguN8wCKJIsLOEJRMDM6W1e9pVeifLsQRU8UtbwRoLg==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 26758,
+      "output_tokens": 1048,
+      "reported_cost_usd": 0.17999,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Allie K. Miller AI current work 2025",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Allie K. Miller alliekmiller",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://www.alliekmiller.com/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Allie_K._Miller",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://time.com/collections/time100-ai-2025/7305788/allie-k-miller/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://fortune.com/2025/12/16/ibm-aws-veteran-open-machine-ai-expert-allie-k-miller/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/alliekmiller",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 1778,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Jacob Trefethen is Head of Life Sciences & Curing Diseases at the OpenAI Foundation, focused on philanthropic grantmaking for AI applications in medicine (Alzheimer's, public health data). Previously at Open Philanthropy overseeing science funding. While organizationally adjacent to OpenAI, his actual work and output concern AI-for-healthcare philanthropy, not frontier AI research, capabilities, safety, infrastructure, or investment-relevant intelligence about compute/semiconductors/data centers. His blog and social media content addresses AI's implications for medical progress and science funding—important but outside the registry's scope of frontier-AI signal.",
+      "current_connection": "Leads Life Sciences & Curing Diseases program at the OpenAI Foundation since March 2026, directing $100M+ in grantmaking for AI-enabled biomedical research. Previously program officer at Open Philanthropy managing ~$100M/year in science funding. Not involved in frontier model development, AI safety research, or technical AI infrastructure.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://openai.com/index/update-on-the-openai-foundation/",
+        "https://x.com/JacobTref/status/2041876743666200980",
+        "https://blog.jacobtrefethen.com/",
+        "https://x.com/jacobtref?lang=en"
+      ],
+      "entity_name": "Jacob Trefethen",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "3cc6c9c46ce21a9604c9f5213490623781f2b864623d59413a22da797a213583",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_b3oB5_zrkEo_XbJMKTG-WDy_e9n7NkTzKkTL3MPBP18L4ADxth0gQqFQl5XGIY0V2S3kYmjcjY-J-iu8BDva0wNyQLYXf9d12KBuWaBMSIpPqy7EI7M77y8C8DxyxrOoDCFbyV4N0vcsnphvKAnXIoAnCazEU1yznRWm8kT-ZZJ5AEQOtQ7NOZ6UTQTCN89TjAGHkgaAiRR9McLkXplFNP-U6G7xaETpt1MA18KstEu8YMBS8E5UHlQbJPrlKJN0y_R6EodbmYKnw2d1wYyR4j_LyuaiQ-vypq249fVCMO31qV8L7viOqtJAwXTD6nsf6PL2RKfWObUtiloe6b7iYE5Vng9C2Z1kRAZ1R6Sri2AQ19ltDdIgAKaS-m6QP2ldtv4muuaQN7QNXuSzGQbqADnYqbTDT0hRjjfjHvHeBGnaAwWmSxFxd6oGToDKoXFcJmKMed_Vx_P_yw==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 17843,
+      "output_tokens": 1070,
+      "reported_cost_usd": 0.135965,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Jacob Trefethen AI research",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "jacobtref twitter AI",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://openai.com/index/update-on-the-openai-foundation/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/JacobTref/status/2041876743666200980",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://blog.jacobtrefethen.com/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/jacobtref?lang=en",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 2119,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Vishal Maini is a former DeepMind strategy/communications lead who now runs Mythos Ventures, an early-stage VC fund investing in AI and other sectors. His current work is venture capital investing, not frontier-AI research or specialist intelligence. His X account posts casual/personal content, not substantive original frontier-AI analysis. Being a VC who invests in AI companies is not sufficient; he does not repeatedly produce original information that helps understand frontier-AI progress or its investment consequences.",
+      "current_connection": "Managing Partner at Mythos Ventures, an early-stage VC fund. Previously strategy & communications at Google DeepMind. No current role producing original frontier-AI research or specialist analysis.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://www.linkedin.com/in/vishalmaini/",
+        "https://www.thenetwork.com/profile/vishal-maini-610025c0",
+        "https://x.com/v_maini?lang=en",
+        "https://medium.com/@v_maini"
+      ],
+      "entity_name": "Vishal Maini",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "7740ba21ea67edd62b7810034428d8ffed3087e6f98be6b2bfc76d925bc45b6e",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_pD8aNpUUTj5t8bJKBeLod6-3PqkV0W_TEPMjgbnI80DeQBu7HEUiVJ9k3CljhlF6rsfXmkaqciRvZNLFJUBUCP2JUtMDylHI2QsGXZiPeTe-G29vMsgIwRZzITa9Acjk_Q6M5qYvbAAIYlVyUaqPjF_iyMQQ_inotYWlUuDaYT6itPYt3KL6gNI3s_p1DNbdEH59WN698DOrBAjQdJJ5BOd4qW44AcaQkWj51E0mJkHqAaqSozdODxnCIhZ-BetbpP8JkH4AeHJ13UEHjw9ebMIiHX_fNLplKu9VzTLojN6ZIbDGgrWqSrsR6umWI-iyfmaRstav1UPl7cxnms0v6523XQFchJ8WojwEQ0t8hNylV8NmTEAGotjwpHsP4zni0ujcBBVJXqccGReZOjgO-GwTCJRlzhkNLMyRNHJhs0THIGZ1Mb3DlkxeUScpnQzU68CJDy8NL9-eRQ==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 17068,
+      "output_tokens": 725,
+      "reported_cost_usd": 0.12346500000000002,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Vishal Maini AI current role",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "Vishal Maini v_maini Twitter",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://www.linkedin.com/in/vishalmaini/",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://www.thenetwork.com/profile/vishal-maini-610025c0",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://x.com/v_maini?lang=en",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://medium.com/@v_maini",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    },
+    {
+      "entity_id": 2896,
+      "decision": "remove",
+      "relevance_basis": "out_of_scope",
+      "audience": "neither",
+      "reason": "Kieran Hill is a seed-stage General Partner at 20VC Fund focused on early-stage European startup investing. His output covers VC deal terms, fundraising mechanics, and general startup commentary. He does not produce original frontier-AI research, specialist AI/semiconductor analysis, or technical intelligence. Being a generalist VC who occasionally invests in AI-adjacent startups does not meet the keep threshold.",
+      "current_connection": "Seed-stage venture capitalist at 20VC Fund (Harry Stebbings' firm). No direct connection to frontier-AI research, model development, evaluation, or specialist AI intelligence production.",
+      "confidence": "high",
+      "evidence_urls": [
+        "https://x.com/Kieranleehill",
+        "https://uk.linkedin.com/in/kieranleehill",
+        "https://pitchbook.com/profiles/investor/233881-84",
+        "https://20vc.fund/team"
+      ],
+      "entity_name": "Kieran Hill",
+      "structural_kind": "person",
+      "is_curated_lab": false,
+      "input_sha256": "19b0e3dac00766ed119dee3d669a9cd97be2c9de93f0f15eb0199b39c0e351df",
+      "model": "claude-opus-4-6",
+      "reasoning_effort": "high",
+      "prompt_version": "registry-relevance-v1",
+      "schema_version": "registry-relevance-output-v1",
+      "response_id": "resp_2K-71yLW5gNiKbH816J9YZznx0Lr9EAPOgvl51gmclJ0PgD8gY2SPHh78dhao6gqYuwZABq4lzZJA2qB8ge2B5RJ4YzWdDDZAYQ58JqYFOs7iEcJs0xhSnQkVMXA6o-HNWkNZAd_mGf6GZr9piIRR5hDNm2ui9t7_OzZ5kF6_YTwnvIeAmejI73MbXygas2OGonHM4yPJl6uyA2AwPaXHyvoRSOHNUa1AU0uQf7FDvQCMyVX0MB9fqkbfnydqbVTFcInzIjahvUQtgkNsi2ynNBRB8UOtLbbjYayEDAs9FFQ298KzXw31LicaKFxzb3rdMwFkZ8HPO7ck6pRTjOhPpSSxYlOwqtJcjr6ZO1UAQNlnRj99agOttkNQ5NcamSNCH3BH2Spx3PhBmFh0aOge9s7JQsn84-N0-akCRm_V88QCLZwljSVAW2oW7VwNIfwxO-6aqCEAa6PUA==",
+      "response_model": "claude-opus-4-6",
+      "input_tokens": 24317,
+      "output_tokens": 624,
+      "reported_cost_usd": 0.157185,
+      "web_actions": [
+        {
+          "type": "search",
+          "query": "Kieran Hill 20VC Fund seed investor",
+          "translated_from": "function_call"
+        },
+        {
+          "type": "search",
+          "query": "kieranleehill AI frontier research",
+          "translated_from": "function_call"
+        }
+      ],
+      "consulted_sources": [
+        {
+          "url": "https://x.com/Kieranleehill",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://uk.linkedin.com/in/kieranleehill",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://pitchbook.com/profiles/investor/233881-84",
+          "type": "model_citation"
+        },
+        {
+          "url": "https://20vc.fund/team",
+          "type": "model_citation"
+        }
+      ],
+      "request_tags": [
+        "app:frontier-lab-intelligence",
+        "pipeline:registry-relevance-audit",
+        "job:web-grounded-relevance",
+        "scope:single-entity",
+        "prompt:registry-relevance-v1",
+        "run:relevance-content-filter-claude-v1-20260711"
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -131,6 +131,10 @@ candidate generator while demonstrating ranking and validation discipline.
   2,765 Terra-high results plus nine centrally reviewed manual web fallbacks for
   provider content-filter terminations. The composite result is 2,162 keep, 56
   review, and 556 remove recommendations; none directly mutated the Registry.
+- Provider-specific Responses quirks normalize in `fli.llm_responses`, not in
+  individual audit stages. Claude uses native web search with automatic tool
+  choice plus a post-response search-evidence gate; translated search calls and
+  cited URLs remain visibly labeled in the review artifact.
 
 ## Open Questions / Blockers
 
@@ -299,3 +303,9 @@ candidate generator while demonstrating ranking and validation discipline.
   were researched manually against the same rubric and preserved separately.
   The composite manifest records 2,162 keep, 56 review, and 556 remove
   recommendations with zero unresolved identities and no Registry mutation.
+- 2026-07-11: [DONE] Added one local Responses normalization boundary and
+  proved the nine Azure-filtered identities through Claude Opus 4.6 native web
+  search: 9/9 completed with recorded search queries and cited URLs. Claude
+  agreed with seven central decisions but recommended removing Connor Leahy
+  and Kevin Kwok; the existing human-reviewed keep/review decisions remain
+  canonical, and the Claude artifact is supplementary evidence only.

@@ -32,6 +32,12 @@ rejections, multi-channel identities, and graph participants, then removes each
 approved one-account identity in one transaction. It supports dry-run and
 idempotent replay; it does not turn model output directly into deletion.
 
+`fli.llm_responses` is the shared provider-normalization boundary for these
+Responses calls. It extracts only final message text, tolerates nullable blocks
+from translated responses, and normalizes hosted-search actions and cited URLs.
+Claude-native web search uses `tool_choice=auto` so the model can finish after
+searching; the audit still rejects any response with no observed search action.
+
 ## Stack
 
 One Python codebase, one SQLite database, one React SPA served by the API.
@@ -602,6 +608,7 @@ final score.
 | `fli.web` | JSON API (`/api/status`, `/api/accounts`, `/api/registry`) + built SPA host; Registry exposes people, organizations, unsure results, and classifier reasons; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
+| `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
 | `fli.ingest` | pending production ingestion; raw fetch spike exists |
 | `fli.extract` | pending |
 | `fli.scoring` | pending |

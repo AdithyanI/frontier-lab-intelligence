@@ -10,4 +10,5 @@ data/raw/
 data/private/
 .DS_Store
 *.egg-info/
+*.partial.jsonl
 .playwright-mcp/

@@ -21,6 +21,13 @@
       "method": "manual-web-research-with-central-review",
       "completed": 9,
       "reason": "Fallback for the nine provider content-filter terminations in the primary artifact."
+    },
+    {
+      "path": "relevance-content-filter-claude-v1.json",
+      "method": "claude-opus-4-6-native-web-search",
+      "completed": 9,
+      "included_in_decision_counts": false,
+      "reason": "Supplementary cross-provider evidence; central review remains canonical after differences on Connor Leahy and Kevin Kwok."
     }
   ]
 }
