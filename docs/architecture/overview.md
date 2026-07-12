@@ -286,8 +286,8 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The Registry retains 2,220 classified entities: 2,114 active people, 93
-  active organizations, zero active unsure, and 13 rejections. The
+- The Registry retains 2,220 classified entities: 2,104 active people, 93
+  active organizations, zero active unsure, and 23 rejections. The
   2,293 channels include official X, website, GitHub, and blog channels
   consolidated into stable real-world organizations. The approved relevance
   manifest contains 689 exact one-X removals. The final organization pass

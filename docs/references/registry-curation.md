@@ -54,10 +54,10 @@ After the relevance and organization-identity cleanup, the corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person (active) | 2,114 |
+| person (active) | 2,104 |
 | organization | 93 (including 10 seeded labs) |
 | unsure (active) | 0 |
-| rejected | 13 |
+| rejected | 23 |
 | unknown | 0 |
 | **total** | **2,220** |
 
@@ -78,6 +78,13 @@ Warde-Farley, Gwern, Heng Ji, Maike Osborne, Neal Khosla, Noah A. Smith, and S.
 Osindero. They are excluded from active Registry counts, source collection,
 ranking inputs, and candidate output. `clear_rejection` is the explicit path to
 restore one later if a usable public channel appears.
+
+The final 2026-07-12 person cleanup added 10 reversible
+`off_mandate_low_trust_support` rejections. Each required both a v3 `remove`
+decision and bottom-decile support in the accepted entity-overlap snapshot;
+the entities and their evidence remain stored. Exact results and retained
+counterexamples are recorded in
+`docs/projects/trusted-following-ranking/resources/registry-evaluation-v3-final-cleanup.md`.
 
 Relevance cleanup is an explicit, human-approved boundary rather than a
 direct model action. Its 689 rows live in

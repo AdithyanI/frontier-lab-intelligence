@@ -289,6 +289,14 @@ candidate generator while demonstrating ranking and validation discipline.
 
 ## Progress Log
 
+- 2026-07-12: [DONE] Ran a focused agent-native carry-over audit of the new
+  evaluator and ranking work. Kept the existing module boundaries and tests,
+  added one exact Registry-evaluation operations reference with local artifact
+  checksums and resume commands, and corrected stale current-state descriptions
+  in architecture, curation, research, and reviewer docs. The only material
+  residual risk is that ignored evaluator/X-content artifacts remain local-only;
+  an external backup needs explicit approval and is not required for the next
+  bounded experiment.
 - 2026-07-12: [DONE] Consolidated the complete Registry and ranking checkpoint.
   Broad filtering is closed at 2,104 active people, 93 organizations, and 23
   reversible rejections. The accepted graph contains 2,456,305 fresh edges and
