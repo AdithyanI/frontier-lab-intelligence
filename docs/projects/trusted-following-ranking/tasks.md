@@ -219,6 +219,13 @@ candidate generator while demonstrating ranking and validation discipline.
   mutated the Registry. A same-evidence Luna-high comparison over the 192
   person removals kept 119, removed 60, and reviewed 13, proving that this
   removal boundary is not stable enough for automatic application.
+- Missing-bio candidates now receive a separate required-search identity
+  context before v3 Registry evaluation; observed profile data remains
+  untouched. The final cleanup rejects only the intersection of v3 `remove`
+  and bottom-decile trusted-follow support, not every model removal.
+- The final intersection moved 10 people into the reversible, reason-bearing
+  Rejected state. Eleven stronger-network v3 removals remain active, two
+  provider failures remain untouched, and the broad Registry cleanup is closed.
 
 ## Open Questions / Blockers
 
@@ -263,6 +270,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `../../../data/following/personalizations/trusted-personalization-2026-07-11-v1.json` |
 | done | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-pagerank-comparison.md` |
 | done | Implement and calibrate the read-only combined kind + Registry-decision Responses contract with optional web research and measured prompt-cache counters. | parent | `resources/registry-evaluation-cache-calibration.md` |
+| done | Ground missing-bio identities, run the v3 durable-membership evaluation, and apply only the 10 bottom-decile model removals as reversible Registry rejections. | parent | `resources/registry-evaluation-v3-final-cleanup.md` |
 
 ## Backlog / Remaining Work
 

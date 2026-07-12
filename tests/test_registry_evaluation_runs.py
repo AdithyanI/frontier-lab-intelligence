@@ -122,6 +122,110 @@ def test_evidence_is_persisted_and_reused(tmp_path):
     ).fetchone()[0] == 2
 
 
+def test_missing_bio_context_is_resumable_and_fed_to_final_evaluator(tmp_path):
+    _, run, _ = freeze(tmp_path)
+    with run:
+        run.execute("UPDATE evaluation_item SET bio = NULL WHERE entity_id = 1")
+    registry_evaluation_runs.collect_evidence(
+        run,
+        post_client=FakePostClient(),
+        workers=2,
+        requests_per_second=10_000,
+    )
+    enrichment_calls = []
+
+    def enricher(client, entity, *, run, model, effort):
+        enrichment_calls.append(entity.handle)
+        return {
+            "identity_status": "resolved",
+            "canonical_name": "Alice",
+            "current_role": "Researcher",
+            "current_organization": "Frontier Lab",
+            "known_for": ["Model research"],
+            "frontier_ai_relevance": "Works on frontier models.",
+            "research_summary": "Resolved through an official team page.",
+            "input_sha256": entity.input_sha256,
+            "response_id": "identity-1",
+            "response_model": model,
+            "input_tokens": 2_000,
+            "cached_tokens": 1_024,
+            "cache_write_tokens": 0,
+            "output_tokens": 100,
+            "reported_cost_usd": 0.01,
+            "web_actions": [{"type": "search"}],
+            "consulted_sources": [
+                {"url": "https://example.com/alice", "title": "Alice"}
+            ],
+        }
+
+    first = registry_evaluation_runs.collect_identity_contexts(
+        run,
+        model="gpt-5.4-mini",
+        effort="high",
+        run_id="test-run",
+        workers=16,
+        client_factory=lambda: object(),
+        enricher=enricher,
+    )
+    second = registry_evaluation_runs.collect_identity_contexts(
+        run,
+        model="gpt-5.4-mini",
+        effort="high",
+        run_id="test-run",
+        workers=16,
+        client_factory=lambda: object(),
+        enricher=enricher,
+    )
+
+    assert first == {"pending_at_start": 1, "complete": 1, "failed": 0}
+    assert second == {"pending_at_start": 0, "complete": 0, "failed": 0}
+    assert enrichment_calls == ["alice"]
+    assert run.execute(
+        "SELECT current_organization FROM identity_context WHERE entity_id = 1"
+    ).fetchone()[0] == "Frontier Lab"
+    assert run.execute(
+        "SELECT bio FROM evaluation_item WHERE entity_id = 1"
+    ).fetchone()[0] is None
+
+    seen_context = {}
+
+    def evaluator(client, entity, *, run, model, effort):
+        seen_context[entity.handle] = entity.identity_context
+        return {
+            "input_sha256": entity.input_sha256,
+            "kind": "person" if entity.handle == "alice" else "organization",
+            "kind_reason": "Known actor.",
+            "registry_decision": "keep",
+            "registry_decision_reason": "Grounded evidence supports membership.",
+            "response_id": f"response-{entity.entity_id}",
+            "response_model": model,
+            "input_tokens": 1_500,
+            "cached_tokens": 1_024,
+            "cache_write_tokens": 0,
+            "output_tokens": 100,
+            "reported_cost_usd": 0.001,
+            "web_actions": [],
+            "consulted_sources": [],
+        }
+
+    result = registry_evaluation_runs.evaluate_pending(
+        run,
+        model="gpt-5.4-mini",
+        effort="high",
+        run_id="test-run",
+        workers=64,
+        client_factory=lambda: object(),
+        evaluator=evaluator,
+    )
+
+    assert result == {"pending_at_start": 2, "complete": 2, "failed": 0}
+    assert seen_context["alice"]["current_organization"] == "Frontier Lab"
+    assert seen_context["alice"]["consulted_sources"][0]["url"].startswith(
+        "https://"
+    )
+    assert seen_context["acme"] is None
+
+
 def test_completed_model_results_are_resumable(tmp_path):
     _, run, _ = freeze(tmp_path)
     registry_evaluation_runs.collect_evidence(

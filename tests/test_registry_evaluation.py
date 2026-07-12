@@ -131,7 +131,7 @@ def test_cache_keys_are_stable_shards_for_shared_prompt():
     assert len(keys) > 32
     assert all(
         key.startswith(
-            "fli:registry-evaluation:registry-evaluation-v2:shard-"
+            "fli:registry-evaluation:registry-evaluation-v3:shard-"
         )
         for key in keys
     )
@@ -142,6 +142,8 @@ def test_prompt_is_detailed_without_unavailable_ranking_warnings():
     assert "TWO INDEPENDENT DECISIONS" in prompt
     assert "Search the open web; do not limit research to X" in prompt
     assert "registry_decision_reason" in prompt
+    assert "Grounded identity context" in prompt
+    assert "Recent posts describe recent public output" in prompt
     assert "graph position" not in prompt.lower()
     assert "cohort follow" not in prompt.lower()
     assert "follower count" not in prompt.lower()
@@ -179,3 +181,32 @@ def test_optional_web_search_evidence_is_retained_when_used():
 
     assert result["web_actions"][0]["type"] == "search"
     assert result["consulted_sources"][0]["url"] == "https://karpathy.ai"
+
+
+def test_verified_identity_context_is_rendered_separately_from_source_bio():
+    entity = make_entity()
+    entity = registry_evaluation.EvaluationInput(
+        **{
+            **entity.__dict__,
+            "bio": None,
+            "identity_context": {
+                "identity_status": "resolved",
+                "canonical_name": "Jarred Sumner",
+                "current_role": "Technical staff",
+                "current_organization": "Anthropic",
+                "known_for": ["Created Bun"],
+                "frontier_ai_relevance": "Works at a frontier lab.",
+                "research_summary": "Resolved through official evidence.",
+                "consulted_sources": [
+                    {"title": "Official page", "url": "https://example.com"}
+                ],
+            },
+        }
+    )
+
+    rendered = registry_evaluation.render_input(entity)
+
+    assert "Bio: No bio observed." in rendered
+    assert "Grounded identity context" in rendered
+    assert "Current organization: Anthropic" in rendered
+    assert "Official page: https://example.com" in rendered

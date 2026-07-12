@@ -14,13 +14,21 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from fli import entity_kinds, registry_evaluation, sources, store, x_content
+from fli import (
+    entity_kinds,
+    identity_contexts,
+    registry_evaluation,
+    sources,
+    store,
+    x_content,
+)
 
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_EFFORT = "high"
 DEFAULT_FETCH_WORKERS = 20
 DEFAULT_FETCH_QPS = 9.0
 DEFAULT_MODEL_WORKERS = registry_evaluation.PROMPT_CACHE_SHARDS
+DEFAULT_IDENTITY_WORKERS = identity_contexts.PROMPT_CACHE_SHARDS
 DEFAULT_POST_LIMIT = 20
 
 RUN_SCHEMA = """
@@ -83,6 +91,40 @@ CREATE INDEX IF NOT EXISTS idx_evaluation_item_status
     ON evaluation_item (evaluation_status, entity_id);
 CREATE INDEX IF NOT EXISTS idx_evaluation_item_cache_key
     ON evaluation_item (prompt_cache_key, entity_id);
+
+CREATE TABLE IF NOT EXISTS identity_context (
+    entity_id INTEGER PRIMARY KEY REFERENCES evaluation_item (entity_id)
+        ON DELETE CASCADE,
+    status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'complete', 'failed')),
+    attempts INTEGER NOT NULL DEFAULT 0,
+    input_sha256 TEXT,
+    context_json TEXT,
+    identity_status TEXT,
+    canonical_name TEXT,
+    current_role TEXT,
+    current_organization TEXT,
+    known_for_json TEXT,
+    frontier_ai_relevance TEXT,
+    research_summary TEXT,
+    response_id TEXT,
+    response_model TEXT,
+    input_tokens INTEGER,
+    cached_tokens INTEGER,
+    cache_write_tokens INTEGER,
+    output_tokens INTEGER,
+    reported_cost_usd REAL,
+    web_action_count INTEGER,
+    source_count INTEGER,
+    result_json TEXT,
+    error_type TEXT,
+    error TEXT,
+    completed_at TEXT,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_identity_context_status
+    ON identity_context (status, entity_id);
 """
 
 
@@ -264,14 +306,6 @@ def freeze_run_from_results(
     ).fetchone()
     if source_meta is None:
         raise ValueError("source run has no metadata")
-    for key, expected_value in (
-        ("prompt_version", registry_evaluation.PROMPT_VERSION),
-        ("prompt_sha256", registry_evaluation.prompt_sha256()),
-        ("schema_version", registry_evaluation.SCHEMA_VERSION),
-    ):
-        if source_meta[key] != expected_value:
-            raise ValueError(f"source run {key} does not match current evaluator")
-
     rows = source_conn.execute(
         """SELECT entity_id, handle, display_name, bio, profile_url,
                   prompt_cache_key, evidence_json, evidence_sha256,
@@ -350,7 +384,7 @@ def freeze_run_from_results(
                     row["display_name"],
                     row["bio"],
                     row["profile_url"],
-                    row["prompt_cache_key"],
+                    registry_evaluation.prompt_cache_key(row["entity_id"]),
                     row["evidence_json"],
                     row["evidence_sha256"],
                     row["evidence_bundle_id"],
@@ -471,6 +505,180 @@ def collect_evidence(
     return {"pending_at_start": len(pending), "complete": complete, "failed": failed}
 
 
+def collect_identity_contexts(
+    run_conn: sqlite3.Connection,
+    *,
+    model: str,
+    effort: str,
+    run_id: str,
+    workers: int = DEFAULT_IDENTITY_WORKERS,
+    client_factory: Callable[[], Any] = entity_kinds.create_litellm_client,
+    enricher: Callable[..., dict[str, Any]] = identity_contexts.enrich_one,
+) -> dict[str, int]:
+    """Ground missing biographies before their pending Registry evaluation."""
+    rows = run_conn.execute(
+        """SELECT item.*
+           FROM evaluation_item item
+           LEFT JOIN identity_context context
+             ON context.entity_id = item.entity_id
+           WHERE item.evidence_status = 'complete'
+             AND item.evaluation_status != 'complete'
+             AND (item.bio IS NULL OR trim(item.bio) = '')
+             AND (context.status IS NULL OR context.status != 'complete')
+           ORDER BY item.entity_id"""
+    ).fetchall()
+    by_key: dict[str, list[sqlite3.Row]] = defaultdict(list)
+    for row in rows:
+        by_key[identity_contexts.prompt_cache_key(row["entity_id"])].append(row)
+
+    write_lock = threading.Lock()
+    progress_lock = threading.Lock()
+    progress = {"processed": 0, "complete": 0, "failed": 0}
+
+    def persist_success(row: sqlite3.Row, result: dict[str, Any]) -> None:
+        now = _now()
+        context = {
+            field: result[field]
+            for field in identity_contexts.OUTPUT_FORMAT["schema"]["required"]
+        }
+        context["consulted_sources"] = result["consulted_sources"]
+        with write_lock, run_conn:
+            run_conn.execute(
+                """INSERT INTO identity_context
+                   (entity_id, status, attempts, input_sha256, context_json,
+                    identity_status, canonical_name, current_role,
+                    current_organization, known_for_json,
+                    frontier_ai_relevance, research_summary, response_id,
+                    response_model, input_tokens, cached_tokens,
+                    cache_write_tokens, output_tokens, reported_cost_usd,
+                    web_action_count, source_count, result_json, error_type,
+                    error, completed_at, updated_at)
+                   VALUES (?, 'complete', 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                           ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
+                   ON CONFLICT(entity_id) DO UPDATE SET
+                       status = 'complete', attempts = identity_context.attempts + 1,
+                       input_sha256 = excluded.input_sha256,
+                       context_json = excluded.context_json,
+                       identity_status = excluded.identity_status,
+                       canonical_name = excluded.canonical_name,
+                       current_role = excluded.current_role,
+                       current_organization = excluded.current_organization,
+                       known_for_json = excluded.known_for_json,
+                       frontier_ai_relevance = excluded.frontier_ai_relevance,
+                       research_summary = excluded.research_summary,
+                       response_id = excluded.response_id,
+                       response_model = excluded.response_model,
+                       input_tokens = excluded.input_tokens,
+                       cached_tokens = excluded.cached_tokens,
+                       cache_write_tokens = excluded.cache_write_tokens,
+                       output_tokens = excluded.output_tokens,
+                       reported_cost_usd = excluded.reported_cost_usd,
+                       web_action_count = excluded.web_action_count,
+                       source_count = excluded.source_count,
+                       result_json = excluded.result_json,
+                       error_type = NULL, error = NULL,
+                       completed_at = excluded.completed_at,
+                       updated_at = excluded.updated_at""",
+                (
+                    row["entity_id"],
+                    result["input_sha256"],
+                    _canonical_json(context),
+                    result["identity_status"],
+                    result["canonical_name"],
+                    result["current_role"],
+                    result["current_organization"],
+                    _canonical_json(result["known_for"]),
+                    result["frontier_ai_relevance"],
+                    result["research_summary"],
+                    result["response_id"],
+                    result["response_model"],
+                    result["input_tokens"],
+                    result["cached_tokens"],
+                    result["cache_write_tokens"],
+                    result["output_tokens"],
+                    result["reported_cost_usd"],
+                    len(result["web_actions"]),
+                    len(result["consulted_sources"]),
+                    _canonical_json(result),
+                    now,
+                    now,
+                ),
+            )
+
+    def persist_error(row: sqlite3.Row, exc: Exception) -> None:
+        now = _now()
+        with write_lock, run_conn:
+            run_conn.execute(
+                """INSERT INTO identity_context
+                   (entity_id, status, attempts, error_type, error, updated_at)
+                   VALUES (?, 'failed', 1, ?, ?, ?)
+                   ON CONFLICT(entity_id) DO UPDATE SET
+                       status = 'failed',
+                       attempts = identity_context.attempts + 1,
+                       error_type = excluded.error_type,
+                       error = excluded.error,
+                       updated_at = excluded.updated_at""",
+                (row["entity_id"], type(exc).__name__, str(exc), now),
+            )
+
+    def note(success: bool) -> None:
+        with progress_lock:
+            progress["processed"] += 1
+            progress["complete" if success else "failed"] += 1
+            if progress["processed"] % 50 == 0 or progress["processed"] == len(rows):
+                print(
+                    _canonical_json(
+                        {
+                            "stage": "identity-context",
+                            "processed": progress["processed"],
+                            "pending_at_start": len(rows),
+                            "complete_this_run": progress["complete"],
+                            "failed_this_run": progress["failed"],
+                        }
+                    ),
+                    flush=True,
+                )
+
+    def run_lane(lane: list[sqlite3.Row]) -> None:
+        client = client_factory()
+        if hasattr(client, "with_options"):
+            client = client.with_options(max_retries=0)
+        for row in lane:
+            entity = identity_contexts.IdentityInput(
+                entity_id=row["entity_id"],
+                handle=row["handle"],
+                display_name=row["display_name"],
+                profile_url=row["profile_url"],
+                recent_posts=tuple(json.loads(row["evidence_json"])),
+            )
+            try:
+                result = enricher(
+                    client,
+                    entity,
+                    run=run_id,
+                    model=model,
+                    effort=effort,
+                )
+                persist_success(row, result)
+                note(True)
+            except Exception as exc:
+                persist_error(row, exc)
+                note(False)
+
+    if rows:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=min(workers, len(by_key))
+        ) as executor:
+            futures = [executor.submit(run_lane, lane) for lane in by_key.values()]
+            for future in concurrent.futures.as_completed(futures):
+                future.result()
+    return {
+        "pending_at_start": len(rows),
+        "complete": progress["complete"],
+        "failed": progress["failed"],
+    }
+
+
 def evaluate_pending(
     run_conn: sqlite3.Connection,
     *,
@@ -482,10 +690,17 @@ def evaluate_pending(
     evaluator: Callable[..., dict[str, Any]] = registry_evaluation.evaluate_one,
 ) -> dict[str, int]:
     rows = run_conn.execute(
-        """SELECT * FROM evaluation_item
-           WHERE evidence_status = 'complete'
-             AND evaluation_status != 'complete'
-           ORDER BY prompt_cache_key, entity_id"""
+        """SELECT item.*, context.context_json AS identity_context_json
+           FROM evaluation_item item
+           LEFT JOIN identity_context context
+             ON context.entity_id = item.entity_id
+           WHERE item.evidence_status = 'complete'
+             AND item.evaluation_status != 'complete'
+             AND (
+                 (item.bio IS NOT NULL AND trim(item.bio) != '')
+                 OR context.status = 'complete'
+             )
+           ORDER BY item.prompt_cache_key, item.entity_id"""
     ).fetchall()
     by_key: dict[str, list[sqlite3.Row]] = defaultdict(list)
     for row in rows:
@@ -574,6 +789,11 @@ def evaluate_pending(
                 bio=row["bio"],
                 profile_url=row["profile_url"],
                 recent_posts=posts,
+                identity_context=(
+                    json.loads(row["identity_context_json"])
+                    if row["identity_context_json"]
+                    else None
+                ),
             )
             try:
                 result = evaluator(
@@ -645,6 +865,22 @@ def status(run_conn: sqlite3.Connection) -> dict[str, Any]:
                ORDER BY kind"""
         )
     }
+    identity = run_conn.execute(
+        """SELECT COUNT(*) AS requested,
+                  SUM(status = 'complete') AS complete,
+                  SUM(status = 'failed') AS failed,
+                  SUM(CASE WHEN status = 'complete'
+                           THEN COALESCE(reported_cost_usd, 0) ELSE 0 END) AS cost,
+                  SUM(CASE WHEN status = 'complete'
+                           THEN COALESCE(input_tokens, 0) ELSE 0 END) AS input_tokens,
+                  SUM(CASE WHEN status = 'complete'
+                           THEN COALESCE(cached_tokens, 0) ELSE 0 END) AS cached_tokens,
+                  SUM(CASE WHEN status = 'complete'
+                           THEN COALESCE(output_tokens, 0) ELSE 0 END) AS output_tokens,
+                  SUM(CASE WHEN status = 'complete'
+                           THEN COALESCE(web_action_count, 0) ELSE 0 END) AS web_actions
+           FROM identity_context"""
+    ).fetchone()
     return {
         "run_id": meta["run_id"],
         "model": meta["model"],
@@ -661,6 +897,14 @@ def status(run_conn: sqlite3.Connection) -> dict[str, Any]:
         "cached_tokens": counts["cached_tokens"] or 0,
         "output_tokens": counts["output_tokens"] or 0,
         "web_actions": counts["web_actions"] or 0,
+        "identity_context_requested": identity["requested"] or 0,
+        "identity_context_complete": identity["complete"] or 0,
+        "identity_context_failed": identity["failed"] or 0,
+        "identity_context_reported_cost_usd": identity["cost"] or 0,
+        "identity_context_input_tokens": identity["input_tokens"] or 0,
+        "identity_context_cached_tokens": identity["cached_tokens"] or 0,
+        "identity_context_output_tokens": identity["output_tokens"] or 0,
+        "identity_context_web_actions": identity["web_actions"] or 0,
         "decisions": decisions,
         "kinds": kinds,
     }
@@ -683,9 +927,16 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("--source-decision", choices=("keep", "remove", "review"))
     run_p.add_argument("--model", default=DEFAULT_MODEL)
     run_p.add_argument("--reasoning-effort", default=DEFAULT_EFFORT)
+    run_p.add_argument(
+        "--identity-model",
+        help="Optional model override for missing-bio identity research.",
+    )
     run_p.add_argument("--fetch-workers", type=int, default=DEFAULT_FETCH_WORKERS)
     run_p.add_argument("--fetch-qps", type=float, default=DEFAULT_FETCH_QPS)
     run_p.add_argument("--model-workers", type=int, default=DEFAULT_MODEL_WORKERS)
+    run_p.add_argument(
+        "--identity-workers", type=int, default=DEFAULT_IDENTITY_WORKERS
+    )
     run_p.add_argument(
         "--x-content-db",
         type=Path,
@@ -706,6 +957,7 @@ def main(argv: list[str] | None = None) -> int:
         "fetch_workers",
         "fetch_qps",
         "model_workers",
+        "identity_workers",
         "x_content_max_age_hours",
     ):
         if getattr(args, name) <= 0:
@@ -773,6 +1025,13 @@ def main(argv: list[str] | None = None) -> int:
             ),
             flush=True,
         )
+    collect_identity_contexts(
+        run_conn,
+        model=args.identity_model or args.model,
+        effort=args.reasoning_effort,
+        run_id=args.run_id,
+        workers=args.identity_workers,
+    )
     evaluate_pending(
         run_conn,
         model=args.model,
@@ -784,6 +1043,9 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps(summary, sort_keys=True))
     return 0 if (
         summary["evidence_complete"] == summary["total"]
+        and summary["identity_context_failed"] == 0
+        and summary["identity_context_complete"]
+        == summary["identity_context_requested"]
         and summary["evaluation_complete"] == summary["total"]
     ) else 1
 

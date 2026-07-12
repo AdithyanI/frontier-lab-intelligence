@@ -4,8 +4,8 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Status: entity spine and entity-kind classification are complete. The active
-Registry retains the relevance-reviewed post-floor universe: 2,114 active
-people, 93 active organizations, zero active unsure, 13 rejected, and zero
+Registry retains the relevance-reviewed post-floor universe: 2,104 active
+people, 93 active organizations, zero active unsure, 23 rejected, and zero
 unknown.
 Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
 edge plane, its derived PageRank, and the exploratory personal following
@@ -41,9 +41,10 @@ rejections, multi-channel identities, and graph participants, then removes each
 approved one-account identity in one transaction. It supports dry-run and
 idempotent replay; it does not turn model output directly into deletion.
 
-The next candidate-admission boundary is implemented read-only in
-`fli.registry_evaluation`. One Responses request receives a public X
-profile plus up to 20 recent authored posts and returns two independent
+The candidate-admission boundary is implemented in
+`fli.registry_evaluation`. Its v3 contract receives a public X profile, up to
+20 recent authored posts, and—when the source bio is missing—a separately
+grounded identity context. It returns two independent
 dimensions: `kind` (`person | organization | unsure`) and
 `registry_decision` (`keep | remove | review`), each with its own reason.
 Application code may later map `keep` to active state and `remove` to a
@@ -53,6 +54,14 @@ available with automatic tool choice and may search the open web when the local
 evidence is insufficient; a response with no search is valid. The model output
 does not mutate canonical state. Search actions and sources remain operational
 metadata outside the four-field decision schema.
+
+`fli.identity_contexts` supplies the missing-bio stage. It runs required hosted
+web research against the exact X identity, stores current role, organization,
+durable contributions, relevance summary, consulted sources, usage, and cost
+in the resumable run database, and never rewrites the source profile bio. The
+final evaluator may still use optional web search. This separates observed
+profile data from research-derived context while preventing a blank bio or a
+20-post sample from being treated as the person's complete career.
 
 The combined evaluator keeps one versioned 1,024+ token instruction prefix
 ahead of per-entity evidence and uses the same stable 64-shard
@@ -66,9 +75,12 @@ than assumed.
 Every bulk run has its own ignored, resumable SQLite artifact under
 `data/derived/registry-evaluation/`. It freezes the cohort, prompt/schema
 hashes, exact evidence bundle, response ID, output, usage, proxy cost, web
-actions, and sources. A filtered comparison run can reuse selected completed
-results' exact evidence without another X-provider request; comparisons never
-overwrite their source run or mutate the Registry.
+actions, sources, and any derived identity context. A filtered comparison run
+can reuse selected completed results' exact evidence without another
+X-provider request; comparisons never overwrite their source run. Applying a
+decision remains a separate curation step: the final 2026-07-12 cleanup used
+the intersection of a v3 `remove` recommendation and bottom-decile trusted
+follow support, then wrote a reversible, reason-bearing Registry rejection.
 
 `fli.llm_responses` is the shared provider-normalization boundary for these
 Responses calls. It extracts only final message text, tolerates nullable blocks
