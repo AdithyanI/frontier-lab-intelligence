@@ -9,6 +9,13 @@ LiteLLM endpoint using Azure-hosted `gpt-5.6-luna` at high reasoning effort.
 The run was read-only: it did not change entity kind, Registry status, channels,
 or rejection state.
 
+This run used the initial v1 model-facing names `registry_status=active` and
+`registry_status_reason`. Immediately after reviewing the terminology, the
+current v2 contract renamed the recommendation to
+`registry_decision=keep | remove | review` and
+`registry_decision_reason`. Persisted states such as active and rejected remain
+an application concern; the historical results below are preserved as emitted.
+
 Both requests used the exact same versioned instruction prefix, structured
 output schema, optional `web_search` tool definition, and stable cache-routing
 key:
@@ -64,11 +71,19 @@ cache read.
 This is not evidence that the prompt structure is ineligible. Both OpenAI and
 Microsoft document the same core requirements: at least 1,024 tokens, an exact
 shared prefix, and stable cache routing. The request satisfied those visible
-requirements. Plausible remaining causes include LiteLLM not forwarding the
-cache key on this Responses route, the proxy routing the two calls to different
-Azure deployments, or provider cache population not being immediately reusable.
-Do not claim cache savings until a later controlled run reports nonzero
-`cached_tokens`.
+requirements. A subsequent read-only LiteLLM inspection established that the
+proxy forwarded `prompt_cache_key` unchanged and that both calls used the same
+model group, deployment ID, and Azure Responses endpoint. The remaining result
+is therefore an upstream Azure cache miss, not a missing FLI request field or a
+cross-deployment LiteLLM route. This matches the earlier project canary where
+Azure Chat caching produced hits but Azure Responses caching did not benefit the
+web-grounded relevance workload. Do not claim cache savings until a later
+controlled run reports nonzero `cached_tokens`.
+
+LiteLLM's configured Redis cache is a different mechanism: it caches complete
+responses by complete request hash. The two entity inputs correctly produced
+different LiteLLM response-cache hashes, so that cache cannot reuse only the
+shared instruction prefix.
 
 Official references:
 
@@ -77,6 +92,9 @@ Official references:
 
 ## Next diagnostic
 
-Inspect the two tagged LiteLLM spend/log records for upstream deployment IDs and
-forwarded request parameters. Do not run another paid calibration until that
-read-only proxy inspection identifies a concrete change to test.
+Keep logging `cached_tokens` and `cache_write_tokens` for every combined
+evaluation. Treat Azure prefix caching as opportunistic on the Responses route;
+do not add the old WIN Chat-Completions `max_tokens` workaround because current
+Responses documentation does not require it and WIN never regression-tested it.
+Do not run another paid calibration unless it tests one concrete provider-side
+change, such as documented Azure support for GPT-5.6 explicit breakpoints.

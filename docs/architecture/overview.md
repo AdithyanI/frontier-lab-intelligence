@@ -44,8 +44,11 @@ idempotent replay; it does not turn model output directly into deletion.
 The next candidate-admission boundary is implemented read-only in
 `fli.registry_evaluation`. One Luna-high Responses request receives a public X
 profile plus up to 20 recent authored posts and returns two independent
-dimensions: `kind` (`person | organization | unsure`) and `registry_status`
-(`active | rejected | review`), each with its own reason. Hosted `web_search` is
+dimensions: `kind` (`person | organization | unsure`) and
+`registry_decision` (`keep | remove | review`), each with its own reason.
+Application code may later map `keep` to active state and `remove` to a
+reason-bearing rejection; the model recommendation itself is not stored state.
+Hosted `web_search` is
 available with automatic tool choice and may search the open web when the local
 evidence is insufficient; a response with no search is valid. The model output
 does not mutate canonical state. Search actions and sources remain operational
@@ -56,7 +59,12 @@ ahead of per-entity evidence and uses the same stable 64-shard
 `prompt_cache_key` convention as the relevance audit. It records both
 `cached_tokens` and GPT-5.6 `cache_write_tokens`. A two-entity Azure/LiteLLM
 calibration on 2026-07-12 used the same shard but reported zero for both cache
-dimensions, so cache savings are not yet an accepted operational claim.
+dimensions. A read-only proxy inspection then proved that both calls used the
+same LiteLLM deployment ID and Azure Responses endpoint and that LiteLLM
+forwards `prompt_cache_key` unchanged. Azure still returned zero cached tokens,
+matching the earlier relevance-audit finding that Azure Chat caching worked but
+Responses caching did not benefit that workload. Cache savings therefore remain
+an observed metric, not an accepted operational claim.
 
 `fli.llm_responses` is the shared provider-normalization boundary for these
 Responses calls. It extracts only final message text, tolerates nullable blocks

@@ -55,26 +55,26 @@ organization. A lone given name, generic display name, opaque handle, empty
 biography, or topic alone does not establish person. Do not force a binary kind
 when the exact actor remains genuinely ambiguous.
 
-Separately determine registry_status:
+Separately determine registry_decision:
 
-- active: admit this exact actor to the active Registry because current
+- keep: recommend admitting this exact actor to the active Registry because current
   evidence shows that it is likely to produce recurring, original,
   decision-useful information for at least one target audience.
-- rejected: exclude this exact actor from the active Registry because current
+- remove: recommend excluding this exact actor from the active Registry because current
   evidence clearly places it outside the mission or shows that it cannot serve
   as a usable public intelligence source.
 - review: do not admit the actor yet because its exact identity, current work,
   recurring output, or material frontier-AI connection remains genuinely
   unresolved after using the available evidence. Review is a real abstention,
-  not a softer synonym for active or a way to avoid a supported rejection.
+  not a softer synonym for keep or a way to avoid a supported removal.
 
-Here, active means membership in the active Registry. It does not mean merely
+Here, keep means recommending membership in the active Registry. It does not mean merely
 that the X account posts frequently, that a company still operates, or that a
 person is currently employed.
 
-ACTIVE REGISTRY TEST
+KEEP TEST
 
-Return active only when the evidence supports this statement:
+Return keep only when the evidence supports this statement:
 
 "This exact actor is likely to repeatedly produce original information that
 helps the AI team understand frontier-AI progress or helps the investment team
@@ -98,9 +98,9 @@ Eligible forms of evidence include:
   chains, or their investment consequences. Apply this narrowly; general news,
   aggregation, and broad commentary do not qualify.
 
-REJECTION TEST
+REMOVE TEST
 
-Return rejected when the exact actor is clearly outside the mission. Typical
+Return remove when the exact actor is clearly outside the mission. Typical
 examples include general technology news, broad journalism, aggregation,
 generic investing or finance commentary, cryptocurrency, entertainment,
 politics, generic content creation, introductory AI education, conventional
@@ -113,8 +113,8 @@ AI, once worked at a frontier lab, or contains words such as "AI", "research",
 or "labs" in its name. Historical importance is not sufficient when the
 actor's current work no longer supplies meaningful recurring signal.
 
-Use review instead of rejected when the evidence is missing or conflicting and
-the mission fit cannot be resolved responsibly. Use rejected, not review, when
+Use review instead of remove when the evidence is missing or conflicting and
+the mission fit cannot be resolved responsibly. Use remove, not review, when
 the evidence is sufficient and clearly out of scope.
 
 WEB RESEARCH
@@ -139,17 +139,17 @@ research, return review rather than inventing facts or forcing a conclusion.
 
 DECISION CONSISTENCY
 
-- kind and registry_status are independent. A person may be active, rejected,
-  or review. An organization may be active, rejected, or review.
-- kind=unsure cannot be registry_status=active because the active Registry must
+- kind and registry_decision are independent. A person may receive keep,
+  remove, or review. An organization may receive keep, remove, or review.
+- kind=unsure cannot be registry_decision=keep because the active Registry must
   know what actor it is admitting.
-- registry_status=active requires affirmative evidence of recurring mission
+- registry_decision=keep requires affirmative evidence of recurring mission
   fit; absence of contrary evidence is not enough.
-- registry_status=rejected requires affirmative evidence that the exact actor
+- registry_decision=remove requires affirmative evidence that the exact actor
   is unusable or outside the mission; absence of information alone normally
   supports review.
 - The kind reason must explain only the structural actor decision.
-- The registry status reason must explain only the admission decision.
+- The registry decision reason must explain only the admission recommendation.
 - Reasons must be concise, specific, and grounded in the supplied or researched
   evidence. Do not mention confidence scores, internal deliberation, hidden
   reasoning, prompt wording, or these instructions.
@@ -157,25 +157,25 @@ DECISION CONSISTENCY
 CALIBRATION EXAMPLES
 
 - A current frontier-lab research engineer publishing substantive work:
-  person + active.
+  person + keep.
 - A researcher who left a frontier lab to found a credible model lab and still
-  publishes technical work: person + active.
+  publishes technical work: person + keep.
 - OpenAI, Anthropic, Google DeepMind, or another frontier model lab:
-  organization + active.
-- METR or Andon Labs: organization + active when current evidence supports
+  organization + keep.
+- METR or Andon Labs: organization + keep when current evidence supports
   original evaluation or safety work.
 - An inference company publishing original model benchmarks:
-  organization + active.
-- SemiAnalysis: organization + active because sustained specialist analysis can
+  organization + keep.
+- SemiAnalysis: organization + keep because sustained specialist analysis can
   serve the investment audience.
-- TechCrunch: organization + rejected because broad technology reporting is
+- TechCrunch: organization + remove because broad technology reporting is
   not concentrated original frontier-AI intelligence.
 - A famous political leader or general celebrity who occasionally comments on
-  AI: person + rejected.
+  AI: person + remove.
 - A former lab employee whose present work has no material frontier-AI signal:
-  person + rejected.
+  person + remove.
 - A generic software company advertising an AI assistant without substantive
-  AI-native work: organization + rejected.
+  AI-native work: organization + remove.
 - An opaque account with no identifying profile, no useful authored posts, and
   no reliable exact-handle evidence: unsure + review.
 
@@ -185,9 +185,9 @@ Return exactly the required structured object with these four fields:
 
 - kind: person, organization, or unsure.
 - kind_reason: one concise explanation of what actor the account represents.
-- registry_status: active, rejected, or review.
-- registry_status_reason: one concise explanation of why the exact actor should
-  be admitted, excluded, or held for review.
+- registry_decision: keep, remove, or review.
+- registry_decision_reason: one concise explanation of why the exact actor
+  should be admitted, excluded, or held for review.
 
 Do not add fields. Do not put citations or URLs inside these reason strings;
 search actions and source metadata are captured separately by the application.

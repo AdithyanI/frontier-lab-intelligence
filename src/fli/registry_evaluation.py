@@ -1,4 +1,4 @@
-"""One-request structural-kind and Registry-status evaluation.
+"""One-request structural-kind and Registry-decision evaluation.
 
 This module owns the read-only model boundary. Mechanical eligibility gates and
 canonical Registry mutation remain application responsibilities.
@@ -14,15 +14,15 @@ from typing import Any
 
 from fli import llm_responses
 
-PROMPT_VERSION = "registry-evaluation-v1"
-SCHEMA_VERSION = "registry-evaluation-output-v1"
+PROMPT_VERSION = "registry-evaluation-v2"
+SCHEMA_VERSION = "registry-evaluation-output-v2"
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_REASONING_EFFORT = "high"
 PROMPT_CACHE_SHARDS = llm_responses.DEFAULT_PROMPT_CACHE_SHARDS
-PROMPT_PATH = Path(__file__).with_name("prompts") / "registry_evaluation_v1.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "registry_evaluation_v2.txt"
 
 KINDS = frozenset({"person", "organization", "unsure"})
-REGISTRY_STATUSES = frozenset({"active", "rejected", "review"})
+REGISTRY_DECISIONS = frozenset({"keep", "remove", "review"})
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
@@ -33,17 +33,17 @@ OUTPUT_FORMAT: dict[str, Any] = {
         "properties": {
             "kind": {"type": "string", "enum": sorted(KINDS)},
             "kind_reason": {"type": "string"},
-            "registry_status": {
+            "registry_decision": {
                 "type": "string",
-                "enum": sorted(REGISTRY_STATUSES),
+                "enum": sorted(REGISTRY_DECISIONS),
             },
-            "registry_status_reason": {"type": "string"},
+            "registry_decision_reason": {"type": "string"},
         },
         "required": [
             "kind",
             "kind_reason",
-            "registry_status",
-            "registry_status_reason",
+            "registry_decision",
+            "registry_decision_reason",
         ],
         "additionalProperties": False,
     },
@@ -142,13 +142,13 @@ def _validate_output(output_text: str) -> dict[str, str]:
         raise ValueError("response does not match the exact evaluation schema")
     if payload["kind"] not in KINDS:
         raise ValueError(f"invalid kind: {payload['kind']!r}")
-    if payload["registry_status"] not in REGISTRY_STATUSES:
+    if payload["registry_decision"] not in REGISTRY_DECISIONS:
         raise ValueError(
-            f"invalid registry status: {payload['registry_status']!r}"
+            f"invalid registry decision: {payload['registry_decision']!r}"
         )
-    if payload["kind"] == "unsure" and payload["registry_status"] == "active":
-        raise ValueError("an unsure actor cannot enter the active Registry")
-    for field in ("kind_reason", "registry_status_reason"):
+    if payload["kind"] == "unsure" and payload["registry_decision"] == "keep":
+        raise ValueError("an unsure actor cannot be kept in the active Registry")
+    for field in ("kind_reason", "registry_decision_reason"):
         value = payload[field]
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"{field} must be a non-empty string")
