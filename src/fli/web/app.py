@@ -9,8 +9,11 @@ Endpoints:
 - /api/registry                  paged/searchable typed entity universe
 - /api/rankings                  derived cohort-trust ranking (read-only)
 - /api/rankings/followers/{id}   which cohort sources follow one account
+- /api/feed/dates                materialized complete X evidence dates
+- /api/feed                      Registry-aware deterministic signal Feed
 """
 
+from datetime import date as calendar_date
 from pathlib import Path
 
 from fastapi import FastAPI, Query
@@ -18,7 +21,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from fli import channels, registry as entity_registry
-from fli.web import rankings as rankings_store
+from fli.web import feed as feed_store, rankings as rankings_store
 
 DIST_DIR = Path(__file__).parent / "dist"
 
@@ -192,6 +195,34 @@ def ranking_followers(
 ) -> JSONResponse:
     """Cohort sources following one account, best-ranked first."""
     return JSONResponse(rankings_store.followers_payload(x_id, limit))
+
+
+@app.get("/api/feed/dates")
+def feed_dates() -> JSONResponse:
+    """Available complete dates in the latest materialized Feed run."""
+    return JSONResponse(feed_store.dates_payload())
+
+
+@app.get("/api/feed")
+def feed(
+    feed_date: calendar_date = Query(..., alias="date"),
+    lane: str = Query("all", pattern="^(all|network|firsthand)$"),
+    sort: str = Query("attention", pattern="^(attention|recent|engagement)$"),
+    q: str = Query("", max_length=200),
+    limit: int = Query(40, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+) -> JSONResponse:
+    """One date of deduplicated evidence, joined to current Registry state."""
+    return JSONResponse(
+        feed_store.feed_payload(
+            day=feed_date.isoformat(),
+            lane=lane,
+            sort=sort,
+            query=q,
+            limit=limit,
+            offset=offset,
+        )
+    )
 
 
 if DIST_DIR.exists():

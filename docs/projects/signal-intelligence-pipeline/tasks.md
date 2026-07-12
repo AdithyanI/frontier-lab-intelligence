@@ -2,45 +2,50 @@
 
 ## Goal
 
-Turn one frozen day of existing X evidence into deduplicated events and 3–5
-useful, primary-grounded insights, while measuring whether Registry network
-support and trusted amplification improve signal/noise over simple baselines.
+Build a polished, auditable Feed that turns the latest seven complete days of
+stored X evidence into deduplicated, date-filterable posts ordered by a
+transparent attention score. The first milestone is the evidence surface and
+its reusable data contract—not generated insights.
 
 ## Why / Impact
 
-The Registry and following graph are working, but the central product thesis is
-not yet proven: can this system surface something BIT would genuinely want to
-know while suppressing noise? This project tests that question end to end before
-building a production ingestion or scoring system.
+The Registry and following graph are working, but their stored public output is
+not yet inspectable as a coherent product surface. A durable Feed makes the
+evidence auditable, tests whether network-supported ordering suppresses noise,
+and creates the reusable input boundary for later extraction and insights.
 
 ## Scope / Non-Goals
 
 ### In Scope
 
-- Freeze the complete 2026-07-11 evidence slice and its exact post hashes.
+- Materialize the latest seven complete days, initially 2026-07-05 through
+  2026-07-11, from locally stored X evidence without provider calls.
 - Normalize stable author X IDs, embedded quote/retweet targets, post relations,
-  cards/articles, and expanded URLs from existing raw JSON.
+  direct X provenance, and public engagement from existing raw JSON.
 - Deduplicate related posts into versioned event candidates.
-- Compare transparent candidate-ordering baselines before LLM judgment.
-- Use an LLM for interest filtering, structured extraction, and clustering only
-  after deterministic normalization.
-- Verify surviving factual claims with first-hand X statements or primary
-  artifacts.
-- Blind-label candidate quality and produce 3–5 cited insights for the two
-  target audiences.
+- Compute a transparent, explicitly experimental attention score from Registry
+  amplification, originator network support, and public engagement.
+- Serve a Registry-aware API and a polished Feed page with date, lane, sort,
+  and text filters plus inspectable score inputs.
+- Keep current Registry rejections dynamic: rejected authors disappear and
+  rejected amplifiers stop contributing on the next API read/page refresh.
+- Provide an idempotent refresh command for newly stored X evidence.
 
 ### Out of Scope
 
-- Backfilling or processing all 63,736 posts before the one-day spike succeeds.
+- Backfilling or processing all 63,736 posts before the seven-day Feed is audited.
 - A permanent scalar trust/importance score or hand-tuned weighted sum.
 - A learned ranking model before labeled evidence exists.
 - Fetching liker, retweeter, or replier identity lists from new endpoints.
 - Recursive discovered-account crawling or broad Registry admission.
 - Systematic RSS/arXiv/GitHub ingestion in the first slice; reuse already stored
   primary items when they match.
+- Queryable card/article payloads and expanded external URLs; the immutable raw
+  JSON retains them for the later extraction/verification stage.
 - Kafka, Postgres, a warehouse migration, scheduling, or production monitoring.
-- Final report/alert product implementation; this project hands verified
-  insights to that delivery stage.
+- LLM relevance filtering, summarization, categorization, insight generation,
+  or primary-source verification in this milestone.
+- Final report/alert product implementation.
 
 ## Context / Constraints
 
@@ -65,44 +70,44 @@ building a production ingestion or scoring system.
 
 ## Done When
 
-- [ ] The exact one-day input can be reconstructed from a versioned run record.
-- [ ] Quote/retweet relations, embedded targets, URLs, and stable author IDs are
+- [x] The exact seven-day input can be reconstructed from a versioned run record.
+- [x] Quote/retweet relations, embedded targets, URLs, and stable author IDs are
   queryable without mutating raw evidence or `data/fli.db`.
-- [ ] At least chronological, raw-engagement, and trusted-attention baselines
-  are frozen before labeling.
-- [ ] Candidate events are deduplicated with inspectable supporting post IDs.
-- [ ] Every delivered factual claim has a primary citation or is explicitly a
-  first-hand X statement.
-- [ ] Blind human evaluation reports Precision@10/@20, usefulness yield,
-  grounding rate, duplicate rate, and coverage for each baseline.
-- [ ] The slice produces at least three genuinely publishable insights and a
-  documented keep/change/pivot decision.
-- [ ] Repository checks pass and architecture/build docs match the accepted
+- [x] Chronological, public-engagement, and network-attention orderings are
+  available from one deterministic API.
+- [x] Candidate evidence items collapse pure retweets and retain inspectable
+  supporting post IDs; quotes remain authored evidence plus a relation.
+- [x] The Feed supports seven dates and exposes the exact reasons for each
+  item's rank without generated interpretation.
+- [x] Registry rejection changes affect the next response without mutating raw
+  or historical derived evidence.
+- [x] The live desktop UI is visually checked and useful for evidence audit.
+- [x] Repository checks pass and architecture/build docs match the accepted
   result.
 
 ## Milestones
 
-- [ ] M0 — Freeze evidence. Acceptance: exact post IDs/hashes, Registry hash,
-  ranking run, and selection contract are stored in one derived run.
-- [ ] M1 — Normalize relationships. Acceptance: stable authors, quote/retweet
-  edges, embedded targets, cards/articles, and URLs are queryable for the day.
-- [ ] M2 — Rank candidates. Acceptance: transparent baselines produce
-  inspectable event queues without a hand-tuned scalar score.
-- [ ] M3 — Extract and ground. Acceptance: LLM-filtered event candidates retain
-  exact detection posts, claims, sources, and audience-specific implications.
-- [ ] M4 — Evaluate and decide. Acceptance: blind labels quantify lift over
-  chronology/raw engagement and trigger keep/change/pivot.
-- [ ] M5 — Deliver the proof. Acceptance: 3–5 cited insights and evaluation
-  evidence are ready for the report/alert stage; tracker is archived.
+- [x] M0 — Freeze evidence. Acceptance: exact post IDs/hashes, source metadata,
+  and selection contract are stored in one derived run.
+- [x] M1 — Normalize relationships. Acceptance: stable authors, quote/retweet
+  edges, embedded targets, X provenance, and public metrics are queryable.
+- [x] M2 — Rank candidates. Acceptance: transparent orderings and an inspectable
+  experimental score are recomputed from current Registry state.
+- [x] M3 — Ship the Feed. Acceptance: backend API, refresh tool, and polished
+  date-filterable UI work together for the seven-day slice.
+- [ ] M4 — Evaluate and decide. Acceptance: the evidence surface is audited and
+  the next extraction/insight milestone is explicitly accepted or changed.
 
 ## Execution Rules
 
 - Raw posts and provider responses are immutable evidence. New relations,
   events, features, and rankings live in a derived per-run database.
-- A signal run pins the exact post snapshot, Registry checksum, accepted
-  following-ranking run, and algorithm/prompt versions.
-- Registry changes create a new signal run. Historical scores and events never
-  change in place.
+- A signal run pins the exact post snapshot and normalization contract. Each
+  run owns immutable normalized post rows and relations.
+- Registry and accepted-ranking state are joined at API read time and returned
+  with the response. They may change the current score/view without mutating a
+  historical evidence run; frozen score snapshots can be added when evaluation
+  begins.
 - Call the graph feature `network support` or `cohort attention`, not proven
   trust or importance.
 - Count each canonical Registry entity at most once per event. Multiple channels
@@ -116,27 +121,25 @@ building a production ingestion or scoring system.
 - Public likes, views, replies, and repost counts are diagnostics/tie-breakers,
   not global importance. Aggregate likes do not reveal trusted liker identity.
 - Freeze baselines before labeling and blind reviewers to ranking features.
-- Spike first. Do not harden resumability, backfill history, or add systematic
-  feeds until the one-day decision gate passes.
+- Spike first. Do not backfill the complete corpus or add systematic feeds until
+  the seven-day evidence surface is audited.
 
 ## Initial Baselines
 
-Keep all features as inspectable columns; do not collapse them into a weighted
-score.
+Keep all score features inspectable. The UI may expose a provisional weighted
+attention score for ordering, but it is not a claim of quality or importance.
 
 1. **Chronological:** newest deduplicated events first.
-2. **Raw engagement:** author-relative interaction percentile, not global likes.
-3. **Trusted attention:** lexicographic order by:
-   - distinct top-network-support Registry entities amplifying the event;
-   - total distinct active Registry entities amplifying/detecting the event;
-   - distinct organizations represented;
-   - originator network-support percentile;
-   - author-relative engagement percentile;
-   - recency.
-4. **Originator lane:** important first-hand posts with no amplification ordered
-   by originator network support, then author-relative engagement and recency.
+2. **Public engagement:** day-relative log interaction percentile; public
+   counts remain a diagnostic, not importance.
+3. **Network attention:** provisional score = 55% active Registry amplification
+   percentile + 25% originator network-support percentile + 20% public
+   engagement percentile. High-network-support amplifiers are visible and add
+   one extra unit before the network percentile is computed.
+4. **First-hand lane:** direct posts remain separately filterable, whether or
+   not another Registry entity amplified them.
 
-## Evaluation Contract
+## Future Evaluation Contract
 
 Reviewers do not see ranking features. Label a stratified sample containing the
 top 20 trusted-attention events, top 20 raw-engagement events, and 20
@@ -176,6 +179,13 @@ instead of expanding the graph or processing the complete X history.
   single-originator posts.
 - Keep first-slice X detection and primary verification complementary. Direct
   primary feeds remain a later option, not a competing implementation now.
+- Name the deterministic product surface **Feed**, not Insights. It shows
+  evidence and ranking inputs without claiming interpretation.
+- Freeze normalized posts and relations per content-addressed run, but join
+  Registry state and the accepted network ranking at read time so curation
+  changes are visible on refresh without rewriting evidence.
+- Use `attention-v1` only as a transparent experimental ordering aid. Search
+  and lane changes never recalibrate scores; self-amplification is excluded.
 
 ## Open Questions / Blockers
 
@@ -186,13 +196,14 @@ instead of expanding the graph or processing the complete X history.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Freeze the exact 2026-07-11 input and create the derived signal-run schema with checksums and selection contract. | parent | — |
-| todo | Normalize stable author IDs, quote/retweet relations, embedded targets, cards/articles, and URLs for the frozen day. | parent | — |
-| todo | Materialize chronological, author-relative engagement, trusted-attention, and originator candidate queues with feature explanations. | parent | — |
-| todo | Blind-label the comparison sample, then run bounded LLM extraction and primary verification only on surviving events. | parent | — |
+| todo | Audit the top Feed results for signal/noise and record the keep/change decision for `attention-v1`. | parent | — |
+| todo | Design the next deterministic event-clustering and relevance-filter boundary from that audit; do not add LLM extraction before the contract is accepted. | parent | — |
+| todo | Normalize expanded external URLs/cards only for the accepted candidate set, then resolve primary citations in the later extraction milestone. | parent | — |
 
 ## Backlog / Remaining Work
 
+- [ ] Add LLM relevance filtering, structured extraction, clustering, and
+  primary verification only after the Feed evidence surface is accepted.
 - [ ] Produce 3–5 cited insights and the keep/change/pivot decision.
 - [ ] Test the accepted rubric unchanged on a second complete day if the first
   day passes.
@@ -220,3 +231,14 @@ instead of expanding the graph or processing the complete X history.
   with at least two active Registry amplifiers. Independent data-model,
   scoring, and project-boundary reviews converged on event-level ranking,
   derived versioned runs, transparent features, and no scalar trust score.
+- 2026-07-12: [CHECKPOINT] Shipped the complete deterministic Feed vertical
+  slice. Content-addressed run `89b7562e...0742949` materializes seven complete
+  days (11,062 direct posts, 15,642 normalized posts, 8,232 relations) without
+  provider or LLM calls. The current Registry view exposes 1,371 items on
+  2026-07-11, including 699 amplified and 806 first-hand. Registry rejections,
+  one-vote-per-entity, self-amplification exclusion, stable scores across
+  filters, pagination, date navigation, search, sort, and long-post expansion
+  are fixture- and browser-tested. `scripts/check-fast.sh` passes 134 tests,
+  frontend lint, and production build. The next product decision is whether
+  the visible top results justify keeping or changing `attention-v1` before
+  relevance filtering and event clustering.

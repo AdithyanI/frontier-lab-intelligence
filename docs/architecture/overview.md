@@ -99,14 +99,39 @@ account or time while still reconstructing the exact 20-post model input.
 changing X-content database stays ignored and can later move to object storage
 or Parquet without changing bundle identity.
 
+The product-facing Feed is a separate, rebuildable read model over that raw
+evidence. `fli.signal_feed` materializes complete UTC calendar days into
+`data/derived/signal-feed/feed.db`: normalized direct posts, embedded
+quote/retweet targets, run membership, and explicit amplification relations.
+Pure retweet wrappers collapse into their referenced target; quote posts remain
+authored evidence and also point at the quoted target. A run pins the calendar
+range and an ordered fingerprint of every selected raw post hash. Re-running an
+unchanged range reuses the same run ID.
+
+`fli.web.feed` deliberately joins the current Registry at read time rather than
+copying curation state into the derived database. Rejected authors disappear
+from the next response, and rejected amplifiers stop contributing, while the
+raw and historical normalized evidence remains unchanged. Each canonical
+Registry entity votes at most once and cannot amplify its own post. The
+provisional `attention-v1` score is an inspectable ordering aid—not an insight
+or quality judgment—and combines day-relative percentiles for Registry
+attention (55%), originator network support (25%), and public engagement (20%).
+The same API also exposes chronological and public-engagement orderings.
+
+The React `/feed` surface is the evidence browser for this boundary. It offers
+complete-day navigation, All/Amplified/First-hand lanes, search, sort, score
+inputs, active Registry amplifiers, raw engagement, and direct X provenance.
+LLM relevance, categories, clustering, summaries, and cited insights remain a
+later stage after this deterministic layer is audited.
+
 ## Stack
 
-One Python codebase, one SQLite database, one React SPA served by the API.
+One Python codebase, isolated SQLite stores, one React SPA served by the API.
 
 | Layer | Choice | Why |
 | --- | --- | --- |
 | Language/package | Python 3.13, `src/fli/` | Most rubric weight is data, LLM, scoring, and ingestion work. |
-| Database | SQLite | The prompt asks for a database; a single inspectable file is reviewer-friendly. |
+| Database | SQLite | A compact tracked Registry plus isolated raw and derived stores keep identity, immutable evidence, and rebuildable read models inspectable. |
 | Web UI | React + Vite + TS SPA over a FastAPI JSON API; sigma.js for graph viz | Decided 2026-07-08: the UI doubles as our data-inspection surface (graph + candidate review), which server-rendered Jinja2 handles poorly. Same stack as Adi's other apps. Identity: `DESIGN.md` cobalt/brass, not adi-design. |
 | Pipeline | CLI subcommands | Each stage should be independently runnable, testable, and demoable. |
 | Scheduling | Simple cron/loop later | Scheduled ingestion does not need queue infrastructure yet. |
@@ -123,6 +148,7 @@ flowchart LR
     subgraph sources [Sources]
         XLISTS[X list memberships]
         XFOLLOW[Registry following snapshot<br/>2.46M fresh edges]
+        XPOSTS[Stored X posts<br/>raw responses + normalized bundles]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
         GH[GitHub releases]
@@ -134,15 +160,19 @@ flowchart LR
     SCO[Scoring<br/>dimensions + validation]
     DEL[Delivery<br/>digests · alerts]
     UI[Web UI<br/>FastAPI + React SPA]
+    FEED[Evidence Feed<br/>dedup · Registry attention · dates]
 
     XLISTS --> REG
     XFOLLOW --> REG
+    XPOSTS --> FEED
+    REG -->|current active/rejected state| FEED
     REG -->|who to watch| ING
     BLOGS & ARXIV & GH --> ING
     ING --> EXT
     EXT --> SCO
     SCO --> DEL
     REG -.-> UI
+    FEED -.-> UI
     SCO -.-> UI
     DEL -.-> UI
     ING -.->|discovered names| REG
@@ -204,6 +234,7 @@ data/following/cohorts/*.json       # frozen broad collection membership
 data/raw/following/*/snapshot.db    # ignored local raw pages + fresh edges
 data/raw/x/x-content.db             # ignored raw X responses + normalized posts/bundles
 data/derived/following/*/analysis.db # ignored recomputable rankings + identity map
+data/derived/signal-feed/feed.db     # ignored versioned Feed posts + relations
 docs/references/digg-ranking-baseline.md
 ```
 
@@ -220,6 +251,7 @@ fli following-snapshot collect --snapshot-db <path> --handle <x-handle>
 fli following-snapshot collect --snapshot-db <path> --all --profiles-only
 fli following-snapshot collect --snapshot-db <path> --all --workers 20
 fli following-ranking overlap --snapshot-db <path> --registry-db data/fli.db
+fli signal-feed refresh --days 7 [--through YYYY-MM-DD]
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from

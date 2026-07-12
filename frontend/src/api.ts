@@ -102,6 +102,111 @@ export interface RankingFollowers {
   followers?: RankingFollower[]
 }
 
+export interface FeedDate {
+  day: string
+  item_count: number
+}
+
+export interface FeedDates {
+  available: boolean
+  reason?: string
+  latest_complete_date?: string
+  date_from?: string
+  date_to?: string
+  run_id?: string
+  dates?: FeedDate[]
+}
+
+export interface FeedAuthor {
+  x_id: string | null
+  handle: string
+  name: string
+  entity_id: number | null
+  entity_name: string | null
+  entity_kind: string | null
+}
+
+export interface FeedAmplifier {
+  entity_id: number
+  entity_name: string
+  entity_kind: string
+  handle: string
+  relation_type: 'quote' | 'retweet'
+  network_support: number
+  source_url: string
+}
+
+export interface FeedMetrics {
+  likes: number | null
+  replies: number | null
+  reposts: number | null
+  quotes: number | null
+  views: number | null
+  bookmarks: number | null
+}
+
+export interface FeedScoreComponents {
+  registry_amplifiers: number
+  high_support_amplifiers: number
+  originator_network_support: number
+  originator_network_rank: number | null
+  public_interactions: number
+  network_attention_percentile: number
+  originator_support_percentile: number
+  public_engagement_percentile: number
+}
+
+export interface FeedItem {
+  post_id: string
+  author: FeedAuthor
+  published_at: string
+  text: string
+  url: string
+  post_type: 'original' | 'quote'
+  observed_directly: boolean
+  context: { target_post_id: string; target_handle: string } | null
+  amplifiers: FeedAmplifier[]
+  metrics: FeedMetrics
+  attention_score: number
+  score_components: FeedScoreComponents
+}
+
+export interface FeedRun {
+  run_id: string
+  date_from: string
+  date_to: string
+  source_post_count: number
+  normalized_post_count: number
+  relation_count: number
+  ranking: {
+    run_id: string
+    algorithm: string
+    snapshot_id: string
+    completed_at: string
+  } | null
+}
+
+export interface FeedResponse {
+  available: boolean
+  reason?: string
+  date?: string
+  lane?: 'all' | 'network' | 'firsthand'
+  sort?: 'attention' | 'recent' | 'engagement'
+  query?: string
+  total?: number
+  limit?: number
+  offset?: number
+  run?: FeedRun
+  score_formula?: {
+    version: string
+    network_attention_weight: number
+    originator_support_weight: number
+    public_engagement_weight: number
+    note: string
+  }
+  items?: FeedItem[]
+}
+
 export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, init)
   if (!r.ok) throw new Error(`${url} → ${r.status}`)
