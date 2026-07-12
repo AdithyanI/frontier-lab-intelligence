@@ -229,48 +229,19 @@ candidate generator while demonstrating ranking and validation discipline.
 
 ## Open Questions / Blockers
 
-- What top-k size and relevance labels will Adi review for the evaluation?
-- Does Adi accept the experimental 30-source personalization set as a durable
-  diagnostic, or want edits before any future niche-personalization use?
+- No blocking question. The next batch tests information yield before any more
+  Registry expansion or filtering.
+- The experimental 30-source PageRank personalization remains diagnostic; it
+  does not block the accepted entity-overlap vertical slice.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Run the finalized combined evaluator read-only over all 2,207 active X entities with GPT-5.4-mini-high, cached post evidence, resumability, and measured spend. | parent | `resources/registry-evaluation-full-run.md` |
-| done | Re-evaluate the 192 person-removal recommendations with Luna-high against identical stored evidence and record agreement/failure modes. | parent | `resources/registry-evaluation-luna-person-remove-comparison.md` |
-| done | Audit existing edge/import/PageRank code and current database provenance locally. | parent | — |
-| done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
-| done | Remove Digg/personal graph evidence while retaining the post-floor classified nodes; keep Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
-| done | Estimate a full 2,924-account TwitterAPI.io following run without making requests. | parent | `resources/full-cohort-cost-estimate.md` |
-| done | Consolidate SpaceX and SpaceXAI into one organization with two active X channels; prove replay and invariants. | parent | — |
-| done | Consolidate ten high-confidence organization groups and make all channels legible in the Registry UI. | parent | `../../references/registry-curation.md` |
-| done | Run a read-only Luna-medium relevance triage and produce a conservative removal shortlist. | parent | `resources/relevance-removal-candidates.csv` |
-| done | Apply the 108 Adi-approved relevance removals through a preflighted, transactional manifest. | parent | `resources/relevance-removal-candidates.csv` |
-| done | Calibrate Terra-high plus required web search on 20 clear and ambiguous identities; manually review and apply three accepted removals. | parent | `resources/relevance-boundary-batch-02.csv` |
-| done | Complete the read-only web-grounded relevance audit across the active Registry, including nine manual content-filter fallbacks. | parent | `resources/relevance-complete-v1.json` |
-| done | Review all 51 organization removals; retain AI Engineer and transactionally remove the other 50. | parent | `resources/organization-removal-review.csv` |
-| done | Apply every remaining high-confidence person removal; preserve AI Engineer and leave medium/review cases untouched. | parent | `../../../data/registry/relevance-removals.csv` |
-| done | Individually audit all 41 medium-confidence removals; retain 11 and transactionally remove 30. | parent | `resources/medium-confidence-removal-audit.csv` |
-| done | Resolve the final 56 review cases; retain 28, remove 16, and defer 12 identity-unverified accounts. | parent | `resources/review-case-audit.csv` |
-| done | Audit organization channel ownership and consolidation candidates, focused on NVIDIA and Meta/Facebook. | external_researcher | `resources/organization-consolidation-audit.md` |
-| done | Audit all organization and person X channels for activity since 2024-07-11. | parent | `resources/organization-x-activity-audit.csv`, `resources/person-x-activity-audit.csv` |
-| done | Apply the temporary under-10,000-follower organization cutoff with a restorable reviewed cohort. | parent | `resources/low-follower-organization-removals.csv` |
-| done | Freeze and reconcile the cleaned pre-following database boundary with an exact recovery path. | parent | `resources/registry-cleanup-checkpoint.md` |
-| done | Design the local-first, isolated, resumable snapshot and tracked-manifest storage boundary. | parent | `../../references/following-snapshot-storage.md` |
-| done | Implement the per-snapshot SQLite schema and freeze the 2,231-account collection manifest before any paid fetch. | parent | `../../../data/following/cohorts/registry-active-2026-07-11.json` |
-| done | Add the bounded TwitterAPI.io collector over the snapshot store, then prove one small resumable calibration before the full crawl. | parent | `resources/profile-count-scan.md` |
-| done | Obtain Adi's explicit go/no-go, run the full outgoing-follow crawl, validate it, and freeze its tracked proof manifest. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
-| done | Create and verify a compressed local recovery copy without modifying the immutable snapshot. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
-| done | Upload the verified archive to WIN's existing permanent R2/S3 storage and verify the complete remote object by SHA-256. | parent | `../../../data/following/manifests/registry-following-2026-07-11-v1.json` |
-| done | Implement the simplest screened-source overlap baseline against the immutable snapshot before choosing personalization weights. | parent | `resources/m3-overlap-baseline.md` |
-| done | Create `data/derived/following/<snapshot-id>/analysis.db` with a snapshot-stamped, recomputable active/rejected/unknown x_id join; no mapping table in fli.db. | parent | `resources/m3-overlap-baseline.md` |
-| done | Audit major frontier-organization coverage and define exact parent/channel rollups before changing the Registry. | parent | `resources/major-organization-coverage-audit.md` |
-| done | Apply the snapshot-pinned organization-coverage manifest, including NVIDIA/AMD/Intel compute anchors, and prove dry-run/replay safety. | parent | `../../../data/registry/organization-coverage.json` |
-| done | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `../../../data/following/personalizations/trusted-personalization-2026-07-11-v1.json` |
-| done | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-pagerank-comparison.md` |
-| done | Implement and calibrate the read-only combined kind + Registry-decision Responses contract with optional web research and measured prompt-cache counters. | parent | `resources/registry-evaluation-cache-calibration.md` |
-| done | Ground missing-bio identities, run the v3 durable-membership evaluation, and apply only the 10 bottom-decile model removals as reversible Registry rejections. | parent | `resources/registry-evaluation-v3-final-cleanup.md` |
+| done | Consolidate the Registry/ranking journey, current evidence, failure modes, spend, and remaining thesis gap into one durable checkpoint. | parent | `resources/registry-ranking-checkpoint-2026-07-12.md` |
+| todo | Freeze a 40-person utility cohort: 20 highly ranked active people and 20 highly ranked discovered people, with exact ranking provenance. | parent | — |
+| todo | Reuse or collect recent evidence, cluster it into events, and evaluate whether the cohort produces 3–5 useful cited insights. | parent | — |
+| todo | Record discovered-vs-active signal yield and decide whether to continue social-graph discovery or pivot toward official sources. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -281,7 +252,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - [x] Implement isolated, immutable snapshot storage, freeze the broad
   collection cohort, and complete bounded provider ingestion.
 - [x] Implement overlap baseline and personalized PageRank.
-- [ ] Build and review the labeled top-k evaluation.
+- [ ] Run the 20-active/20-discovered information-yield evaluation and record
+  usefulness, novelty, provenance, and failure modes.
 - [x] Update architecture and append the build log after meaningful changes.
 - [x] Run `scripts/check-fast.sh` and milestone-specific tests.
 - [ ] Review project learnings and archive the tracker at closeout.
@@ -296,6 +268,13 @@ candidate generator while demonstrating ranking and validation discipline.
 - `scripts/check-fast.sh` before handoff.
 
 ## Progress Log
+
+- 2026-07-12: [DONE] Consolidated the complete Registry and ranking checkpoint.
+  Broad filtering is closed at 2,104 active people, 93 organizations, and 23
+  reversible rejections. The accepted graph contains 2,456,305 fresh edges and
+  460,927 discovered accounts. The remaining thesis gap is information yield,
+  so M4 is replanned as a 20-active/20-discovered vertical slice that must
+  produce useful cited intelligence before any further graph expansion.
 
 - 2026-07-10: [IN-PROGRESS] Adi rejected the current graph as a trustworthy
   ranking basis and chose a fresh graph from trusted accounts' outgoing
