@@ -91,6 +91,16 @@ candidate generator while demonstrating ranking and validation discipline.
   intelligence score.
 - Compare against the simplest credible baseline before defending PageRank.
 - Stop expanding the graph when it no longer improves the accepted evaluation.
+- Urgency doctrine (2026-07-12): upstream rigor (checkpoints, manifests,
+  dual-model comparisons) was right for the Registry, but must not be applied
+  by default to the insight pipeline with ~8 days to submission. Run the
+  information-yield work as scrappy spikes first — prove yield, then harden
+  only what survives. Do not build resumable/replayable infrastructure for a
+  stage whose value is unproven.
+- Set and respect hard decision dates for spikes (first one: the
+  Twitter-vs-primary-sources yield decision) so unproven directions cannot
+  drift. Reserve 1–2 days before submission for the delivery surface
+  (report/alert output), which currently has zero implementation.
 - Update this tracker after each meaningful batch and before handoff.
 
 ## Decisions
