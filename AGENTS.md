@@ -39,8 +39,10 @@ does not improve rubric coverage, demo proof, or interview discussion. See
 
 - Data first: fetch raw evidence, inspect, then model. Preserve documented
   schema invariants, but evolve unfinished pipeline stages from real evidence.
-- Product principles live in `PRODUCT.md`; do not trade away quality for the
-  EUR100 budget unless actual spend approaches it.
+- Product principles live in `PRODUCT.md`. Treat cost as observed telemetry,
+  not as a product or execution gate: record spend, but do not lower quality,
+  change model choice, or block in-scope work because of cost unless Adi sets
+  an explicit cap for that work.
 - Build log: append one JSON object to `docs/references/build-log.jsonl` after
   meaningful chunks; `scripts/check-fast.sh` renders markdown.
 - Route every LLM call through the shared LiteLLM endpoint with stable

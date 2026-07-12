@@ -155,13 +155,10 @@ gave ranked AI accounts and top-follower edges, which is a better starting
 point than scraping millions of raw followers. Then I validate candidates
 against primary sources before they enter the registry."
 
-## Budget Log
+## Spend Log
 
 BIT explicitly expects AI coding tools and will ask how they were used. This
-section tracks the reimbursable €100 API/services budget.
-
-| Date | Service | Amount | Why | Receipt |
-| --- | --- | --- | --- | --- |
-| — | — | €0.00 | nothing spent yet | — |
-
-Running total: **€0.00 / €100.00**
+log therefore records provider and model spend as operational telemetry and
+case-study evidence. Spend is not a product-selection or execution gate unless
+Adi explicitly sets a cap for a specific task. Workflow-level amounts and
+their evidence are recorded in the dated entries above.

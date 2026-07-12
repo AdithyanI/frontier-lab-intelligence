@@ -5,6 +5,10 @@
 - `raw/following/<snapshot-id>/snapshot.db` — ignored local SQLite database for
   a complete outgoing-follow crawl, including raw provider pages, resumable
   source state, normalized accounts, and directed edges.
+- `raw/x/x-content.db` — ignored local SQLite content store for exact raw
+  TwitterAPI.io responses, normalized queryable X posts, and ordered post
+  bundles used by model evaluations. Raw-response freshness controls provider
+  reuse; bundle IDs preserve the exact evidence supplied to a model.
 - `following/manifests/` — small tracked manifests that bind each local
   snapshot checksum to its cohort, provider, completeness, spend, ranking, and
   evaluation outputs.

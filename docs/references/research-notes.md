@@ -19,7 +19,7 @@ next; this file records the facts behind those decisions.
 | LLM runtime | Use the shared LiteLLM OpenAI-compatible endpoint and key; do not wire this app directly to Azure OpenAI. | Adi decision 2026-07-10. |
 | Discovery | The active graph starts empty. Build it only from reviewed trusted accounts' outgoing follows; keep Digg's ranking offline for later comparison. | Updated 2026-07-10. |
 | X/Grok | Grok/grok-build can help with live X-backed search and coding, but it is not the graph source. Use an explicit following-list provider for follow edges. | Rechecked 2026-07-09. |
-| Budget | Do not over-optimize around the €100 budget; log real spend and revisit only if spend approaches the ceiling. | Adi decision. |
+| Spend | Record actual provider and model spend for observability and case-study receipts. Cost is not a product-selection or execution criterion unless Adi explicitly sets a cap for a specific task. | Adi decision 2026-07-12. |
 
 ## Source Provenance
 

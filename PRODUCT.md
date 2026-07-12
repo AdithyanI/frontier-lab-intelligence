@@ -46,13 +46,13 @@ information-forward, quiet chrome, zero decoration that doesn't carry meaning.
 Codified with Adi, 2026-07-09. These govern how the system is built, not how
 it looks. Argue against them in the tracker, not by silently deviating.
 
-1. **High quality first; bend the cost curve later.** In the build phase we
-   pick the best model / richest evidence / most thorough pass, and measure
-   quality. Cost optimization (cheaper models, caching, pruning) comes
-   afterwards, once quality is known — given time, the cost curve can be bent
-   to reach the same quality cheaper. Never the reverse order: optimizing
-   cost before quality is known locks in a quality ceiling silently.
-   (Tokenomics still gets logged per workflow — measured, not minimized.)
+1. **High quality first; cost is telemetry.** In the build phase we pick the
+   model, evidence, and depth that best serve quality and usefulness. Cost is
+   recorded per workflow for observability and later optimization, but it is
+   not a product-selection criterion, an execution gate, or a reason to lower
+   quality unless Adi explicitly sets a cap for that work. Once quality is
+   known, caching and cheaper equivalent paths may bend the cost curve without
+   changing the result.
 2. **Automatically done, human-correctable.** Every pipeline stage runs
    end-to-end without a human gate: the LLM curates, scores, and decides,
    always writing down *why* (cited evidence, confidence). Humans audit the

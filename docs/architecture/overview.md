@@ -73,6 +73,16 @@ header parsing, and normalizes hosted-search actions and cited URLs.
 Claude-native web search uses `tool_choice=auto` so the model can finish after
 searching; the audit still rejects any response with no observed search action.
 
+Recent X content is local-first and queryable rather than a transient API
+bundle. `data/raw/x/x-content.db` preserves exact successful TwitterAPI.io JSON
+responses, normalizes every observed post into `x_post`, and records the ordered
+post membership of each `post_bundle`. The combined evaluator stores the bundle
+ID and evidence hash beside its result, so later analysis can query posts by
+account or time while still reconstructing the exact 20-post model input.
+`fli.db` remains the compact tracked identity/channel Registry; the larger,
+changing X-content database stays ignored and can later move to object storage
+or Parquet without changing bundle identity.
+
 ## Stack
 
 One Python codebase, one SQLite database, one React SPA served by the API.
@@ -176,6 +186,7 @@ data/fli.db                         # raw evidence SQLite corpus
 data/digg/rankings.csv              # offline Digg comparison baseline only
 data/following/cohorts/*.json       # frozen broad collection membership
 data/raw/following/*/snapshot.db    # ignored local raw pages + fresh edges
+data/raw/x/x-content.db             # ignored raw X responses + normalized posts/bundles
 data/derived/following/*/analysis.db # ignored recomputable rankings + identity map
 docs/references/digg-ranking-baseline.md
 ```

@@ -10,11 +10,11 @@ import sqlite3
 import threading
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from fli import entity_kinds, registry_evaluation, sources, store
+from fli import entity_kinds, registry_evaluation, sources, store, x_content
 
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_EFFORT = "high"
@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS evaluation_item (
         CHECK (evidence_status IN ('pending', 'complete', 'failed')),
     evidence_json TEXT,
     evidence_sha256 TEXT,
+    evidence_bundle_id TEXT,
     evidence_fetched_at TEXT,
     evidence_error_type TEXT,
     evidence_error TEXT,
@@ -301,17 +302,28 @@ def collect_evidence(
             try:
                 _, posts = future.result()
                 evidence_json = _canonical_json(list(posts))
+                bundle_id = (
+                    post_client.store_post_bundle(
+                        username=row["handle"],
+                        posts=posts,
+                        requested_limit=post_limit,
+                    )
+                    if hasattr(post_client, "store_post_bundle")
+                    else None
+                )
                 with run_conn:
                     run_conn.execute(
                         """UPDATE evaluation_item
                            SET evidence_status = 'complete', evidence_json = ?,
-                               evidence_sha256 = ?, evidence_fetched_at = ?,
+                               evidence_sha256 = ?, evidence_bundle_id = ?,
+                               evidence_fetched_at = ?,
                                evidence_error_type = NULL, evidence_error = NULL,
                                updated_at = ?
                            WHERE entity_id = ?""",
                         (
                             evidence_json,
                             _sha256(evidence_json),
+                            bundle_id,
                             now,
                             now,
                             row["entity_id"],
@@ -552,6 +564,13 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("--fetch-workers", type=int, default=DEFAULT_FETCH_WORKERS)
     run_p.add_argument("--fetch-qps", type=float, default=DEFAULT_FETCH_QPS)
     run_p.add_argument("--model-workers", type=int, default=DEFAULT_MODEL_WORKERS)
+    run_p.add_argument(
+        "--x-content-db",
+        type=Path,
+        default=x_content.DEFAULT_DB_PATH,
+    )
+    run_p.add_argument("--x-content-max-age-hours", type=float, default=24.0)
+    run_p.add_argument("--refresh-x-content", action="store_true")
     status_p = sub.add_parser("status", help="Inspect a cached evaluation run.")
     status_p.add_argument("--run-db", type=Path, required=True)
     args = parser.parse_args(argv)
@@ -561,7 +580,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if not args.all:
         parser.error("paid bulk execution requires explicit --all")
-    for name in ("fetch_workers", "fetch_qps", "model_workers"):
+    for name in (
+        "fetch_workers",
+        "fetch_qps",
+        "model_workers",
+        "x_content_max_age_hours",
+    ):
         if getattr(args, name) <= 0:
             parser.error(f"--{name.replace('_', '-')} must be positive")
 
@@ -578,12 +602,21 @@ def main(argv: list[str] | None = None) -> int:
         effort=args.reasoning_effort,
     )
     print(_canonical_json({"stage": "freeze", "entities": frozen}), flush=True)
+    limiter = RequestStartLimiter(args.fetch_qps)
+    post_client = x_content.create_client(
+        db_path=args.x_content_db,
+        max_age=timedelta(hours=args.x_content_max_age_hours),
+        refresh=args.refresh_x_content,
+        before_upstream_request=limiter.wait,
+        page_sleep_seconds=0.0,
+    )
     collect_evidence(
         run_conn,
-        post_client=sources.create_twitterapi_io_client(page_sleep_seconds=0.0),
+        post_client=post_client,
         workers=args.fetch_workers,
-        requests_per_second=args.fetch_qps,
+        requests_per_second=1_000_000,
     )
+    print(_canonical_json({"stage": "x-content", **post_client.stats()}), flush=True)
     evaluate_pending(
         run_conn,
         model=args.model,
