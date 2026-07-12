@@ -190,6 +190,58 @@ def test_completed_model_results_are_resumable(tmp_path):
     assert summary["decisions"] == {"keep": 1, "remove": 1}
 
 
+def test_comparison_run_reuses_filtered_evidence_without_refetch(tmp_path):
+    _, source, _ = freeze(tmp_path)
+    registry_evaluation_runs.collect_evidence(
+        source,
+        post_client=FakePostClient(),
+        workers=2,
+        requests_per_second=10_000,
+    )
+    with source:
+        source.execute(
+            """UPDATE evaluation_item
+               SET evaluation_status = 'complete', kind = 'person',
+                   registry_decision = 'remove'
+               WHERE entity_id = 1"""
+        )
+        source.execute(
+            """UPDATE evaluation_item
+               SET evaluation_status = 'complete', kind = 'organization',
+                   registry_decision = 'remove'
+               WHERE entity_id = 2"""
+        )
+
+    comparison = registry_evaluation_runs.connect_run(tmp_path / "comparison.db")
+    count = registry_evaluation_runs.freeze_run_from_results(
+        source,
+        comparison,
+        run_id="comparison",
+        model="gpt-5.6-luna",
+        effort="high",
+        source_kind="person",
+        source_decision="remove",
+    )
+
+    assert count == 1
+    row = comparison.execute("SELECT * FROM evaluation_item").fetchone()
+    assert row["handle"] == "alice"
+    assert row["evidence_status"] == "complete"
+    assert row["evaluation_status"] == "pending"
+    assert row["evidence_json"] == source.execute(
+        "SELECT evidence_json FROM evaluation_item WHERE entity_id = 1"
+    ).fetchone()[0]
+    assert registry_evaluation_runs.freeze_run_from_results(
+        source,
+        comparison,
+        run_id="comparison",
+        model="gpt-5.6-luna",
+        effort="high",
+        source_kind="person",
+        source_decision="remove",
+    ) == 1
+
+
 def test_cli_requires_explicit_all(tmp_path):
     with pytest.raises(SystemExit):
         registry_evaluation_runs.main(

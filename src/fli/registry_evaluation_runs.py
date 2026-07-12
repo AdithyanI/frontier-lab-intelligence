@@ -248,6 +248,121 @@ def freeze_run(
     return len(inputs)
 
 
+def freeze_run_from_results(
+    source_conn: sqlite3.Connection,
+    run_conn: sqlite3.Connection,
+    *,
+    run_id: str,
+    model: str,
+    effort: str,
+    source_kind: str,
+    source_decision: str,
+) -> int:
+    """Freeze a filtered comparison cohort with the source run's exact evidence."""
+    source_meta = source_conn.execute(
+        "SELECT * FROM run_meta WHERE singleton = 1"
+    ).fetchone()
+    if source_meta is None:
+        raise ValueError("source run has no metadata")
+    for key, expected_value in (
+        ("prompt_version", registry_evaluation.PROMPT_VERSION),
+        ("prompt_sha256", registry_evaluation.prompt_sha256()),
+        ("schema_version", registry_evaluation.SCHEMA_VERSION),
+    ):
+        if source_meta[key] != expected_value:
+            raise ValueError(f"source run {key} does not match current evaluator")
+
+    rows = source_conn.execute(
+        """SELECT entity_id, handle, display_name, bio, profile_url,
+                  prompt_cache_key, evidence_json, evidence_sha256,
+                  evidence_bundle_id, evidence_fetched_at
+           FROM evaluation_item
+           WHERE evidence_status = 'complete'
+             AND evaluation_status = 'complete'
+             AND kind = ?
+             AND registry_decision = ?
+           ORDER BY entity_id""",
+        (source_kind, source_decision),
+    ).fetchall()
+    if not rows:
+        raise ValueError("source filter selected no completed results")
+
+    cohort_payload = [
+        {
+            "entity_id": row["entity_id"],
+            "handle": row["handle"],
+            "evidence_sha256": row["evidence_sha256"],
+        }
+        for row in rows
+    ]
+    cohort_sha256 = _sha256(_canonical_json(cohort_payload))
+    expected = {
+        "run_id": run_id,
+        "model": model,
+        "reasoning_effort": effort,
+        "prompt_version": registry_evaluation.PROMPT_VERSION,
+        "prompt_sha256": registry_evaluation.prompt_sha256(),
+        "schema_version": registry_evaluation.SCHEMA_VERSION,
+        "cohort_sha256": cohort_sha256,
+        "expected_count": len(rows),
+    }
+    existing = run_conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+    if existing is not None:
+        mismatches = [key for key, value in expected.items() if existing[key] != value]
+        if mismatches:
+            raise ValueError(
+                "run database does not match current request: " + ", ".join(mismatches)
+            )
+        return len(rows)
+
+    now = _now()
+    with run_conn:
+        run_conn.execute(
+            """INSERT INTO run_meta
+               (singleton, run_id, model, reasoning_effort, prompt_version,
+                prompt_sha256, schema_version, cohort_sha256, expected_count,
+                created_at, updated_at)
+               VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                run_id,
+                model,
+                effort,
+                registry_evaluation.PROMPT_VERSION,
+                registry_evaluation.prompt_sha256(),
+                registry_evaluation.SCHEMA_VERSION,
+                cohort_sha256,
+                len(rows),
+                now,
+                now,
+            ),
+        )
+        run_conn.executemany(
+            """INSERT INTO evaluation_item
+               (entity_id, handle, display_name, bio, profile_url,
+                prompt_cache_key, evidence_status, evidence_json,
+                evidence_sha256, evidence_bundle_id, evidence_fetched_at,
+                updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, 'complete', ?, ?, ?, ?, ?)""",
+            [
+                (
+                    row["entity_id"],
+                    row["handle"],
+                    row["display_name"],
+                    row["bio"],
+                    row["profile_url"],
+                    row["prompt_cache_key"],
+                    row["evidence_json"],
+                    row["evidence_sha256"],
+                    row["evidence_bundle_id"],
+                    row["evidence_fetched_at"],
+                    now,
+                )
+                for row in rows
+            ],
+        )
+    return len(rows)
+
+
 class RequestStartLimiter:
     def __init__(self, requests_per_second: float) -> None:
         if requests_per_second <= 0:
@@ -559,6 +674,13 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("--run-db", type=Path, required=True)
     run_p.add_argument("--run-id", required=True)
     run_p.add_argument("--all", action="store_true")
+    run_p.add_argument(
+        "--source-run-db",
+        type=Path,
+        help="Reuse exact evidence from a completed filtered comparison cohort.",
+    )
+    run_p.add_argument("--source-kind", choices=("person", "organization", "unsure"))
+    run_p.add_argument("--source-decision", choices=("keep", "remove", "review"))
     run_p.add_argument("--model", default=DEFAULT_MODEL)
     run_p.add_argument("--reasoning-effort", default=DEFAULT_EFFORT)
     run_p.add_argument("--fetch-workers", type=int, default=DEFAULT_FETCH_WORKERS)
@@ -589,34 +711,68 @@ def main(argv: list[str] | None = None) -> int:
         if getattr(args, name) <= 0:
             parser.error(f"--{name.replace('_', '-')} must be positive")
 
-    registry_conn = sqlite3.connect(
-        f"file:{args.registry_db.resolve()}?mode=ro", uri=True
-    )
-    registry_conn.row_factory = sqlite3.Row
     run_conn = connect_run(args.run_db, check_same_thread=False)
-    frozen = freeze_run(
-        registry_conn,
-        run_conn,
-        run_id=args.run_id,
-        model=args.model,
-        effort=args.reasoning_effort,
-    )
+    if args.source_run_db is not None:
+        if args.source_kind is None or args.source_decision is None:
+            parser.error(
+                "--source-run-db requires --source-kind and --source-decision"
+            )
+        if args.source_run_db.resolve() == args.run_db.resolve():
+            parser.error("--source-run-db and --run-db must be different files")
+        source_conn = sqlite3.connect(
+            f"file:{args.source_run_db.resolve()}?mode=ro", uri=True
+        )
+        source_conn.row_factory = sqlite3.Row
+        frozen = freeze_run_from_results(
+            source_conn,
+            run_conn,
+            run_id=args.run_id,
+            model=args.model,
+            effort=args.reasoning_effort,
+            source_kind=args.source_kind,
+            source_decision=args.source_decision,
+        )
+    else:
+        if args.source_kind is not None or args.source_decision is not None:
+            parser.error("source filters require --source-run-db")
+        registry_conn = sqlite3.connect(
+            f"file:{args.registry_db.resolve()}?mode=ro", uri=True
+        )
+        registry_conn.row_factory = sqlite3.Row
+        frozen = freeze_run(
+            registry_conn,
+            run_conn,
+            run_id=args.run_id,
+            model=args.model,
+            effort=args.reasoning_effort,
+        )
     print(_canonical_json({"stage": "freeze", "entities": frozen}), flush=True)
-    limiter = RequestStartLimiter(args.fetch_qps)
-    post_client = x_content.create_client(
-        db_path=args.x_content_db,
-        max_age=timedelta(hours=args.x_content_max_age_hours),
-        refresh=args.refresh_x_content,
-        before_upstream_request=limiter.wait,
-        page_sleep_seconds=0.0,
-    )
-    collect_evidence(
-        run_conn,
-        post_client=post_client,
-        workers=args.fetch_workers,
-        requests_per_second=1_000_000,
-    )
-    print(_canonical_json({"stage": "x-content", **post_client.stats()}), flush=True)
+    if args.source_run_db is None:
+        limiter = RequestStartLimiter(args.fetch_qps)
+        post_client = x_content.create_client(
+            db_path=args.x_content_db,
+            max_age=timedelta(hours=args.x_content_max_age_hours),
+            refresh=args.refresh_x_content,
+            before_upstream_request=limiter.wait,
+            page_sleep_seconds=0.0,
+        )
+        collect_evidence(
+            run_conn,
+            post_client=post_client,
+            workers=args.fetch_workers,
+            requests_per_second=1_000_000,
+        )
+        print(
+            _canonical_json({"stage": "x-content", **post_client.stats()}),
+            flush=True,
+        )
+    else:
+        print(
+            _canonical_json(
+                {"stage": "x-content", "cache_hits": frozen, "provider_requests": 0}
+            ),
+            flush=True,
+        )
     evaluate_pending(
         run_conn,
         model=args.model,

@@ -211,6 +211,14 @@ candidate generator while demonstrating ranking and validation discipline.
   the existing stable prompt-cache sharding convention. The first two-entity
   Luna-high calibration produced sensible decisions but no observable cache
   hit, so cached-token savings remain unproven.
+- Cost is operational telemetry, not a product-selection or execution gate.
+  Record actual spend and cache behavior, but do not lower quality or block
+  in-scope work because of cost unless Adi explicitly sets a cap.
+- The full GPT-5.4-mini-high run completed all 2,207 active X entities without
+  terminal failures: 1,855 keep, 201 remove, and 151 review. No recommendation
+  mutated the Registry. A same-evidence Luna-high comparison over the 192
+  person removals kept 119, removed 60, and reviewed 13, proving that this
+  removal boundary is not stable enough for automatic application.
 
 ## Open Questions / Blockers
 
@@ -222,7 +230,8 @@ candidate generator while demonstrating ranking and validation discipline.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Run the finalized combined evaluator read-only over all 2,207 active X entities with GPT-5.4-mini-high, cached post evidence, resumability, and measured spend. | parent | `resources/registry-evaluation-full-run.md` |
+| done | Run the finalized combined evaluator read-only over all 2,207 active X entities with GPT-5.4-mini-high, cached post evidence, resumability, and measured spend. | parent | `resources/registry-evaluation-full-run.md` |
+| done | Re-evaluate the 192 person-removal recommendations with Luna-high against identical stored evidence and record agreement/failure modes. | parent | `resources/registry-evaluation-luna-person-remove-comparison.md` |
 | done | Audit existing edge/import/PageRank code and current database provenance locally. | parent | — |
 | done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
 | done | Remove Digg/personal graph evidence while retaining the post-floor classified nodes; keep Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
@@ -640,3 +649,16 @@ candidate generator while demonstrating ranking and validation discipline.
   calls used the same Azure deployment. Renamed the model-facing v2 decision
   values to the more intuitive `keep | remove | review`; persisted Registry
   state remains a separate application mapping.
+- 2026-07-12: [DONE] Completed the full GPT-5.4-mini-high read-only run over
+  all 2,207 active X entities: 1,855 keep, 201 remove, 151 review, zero terminal
+  failures, 68.38% cached input, and `$13.4861493` in current-result proxy cost.
+  The X evidence store preserved 4,419 raw provider responses, 63,736
+  normalized posts, and 2,207 exact input bundles. No Registry state changed.
+- 2026-07-12: [DONE] Reused the exact evidence for all 192 person-removal
+  recommendations in a Luna-high comparison. Luna kept 119, removed 60, and
+  reviewed 13, with zero terminal failures and `$3.371936` reported spend.
+  Jarred Sumner remained remove because the stored bio was null, the bundle was
+  Bun-heavy, and neither model searched for his new Anthropic role. Alec
+  Radford and other durable-but-inactive identities expose the larger boundary
+  error: Registry membership and current-X-feed collection are separate
+  decisions. The comparison remains read-only.

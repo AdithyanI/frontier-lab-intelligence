@@ -42,7 +42,7 @@ approved one-account identity in one transaction. It supports dry-run and
 idempotent replay; it does not turn model output directly into deletion.
 
 The next candidate-admission boundary is implemented read-only in
-`fli.registry_evaluation`. One Luna-high Responses request receives a public X
+`fli.registry_evaluation`. One Responses request receives a public X
 profile plus up to 20 recent authored posts and returns two independent
 dimensions: `kind` (`person | organization | unsure`) and
 `registry_decision` (`keep | remove | review`), each with its own reason.
@@ -57,14 +57,18 @@ metadata outside the four-field decision schema.
 The combined evaluator keeps one versioned 1,024+ token instruction prefix
 ahead of per-entity evidence and uses the same stable 64-shard
 `prompt_cache_key` convention as the relevance audit. It records both
-`cached_tokens` and GPT-5.6 `cache_write_tokens`. A two-entity Azure/LiteLLM
-calibration on 2026-07-12 used the same shard but reported zero for both cache
-dimensions. A read-only proxy inspection then proved that both calls used the
-same LiteLLM deployment ID and Azure Responses endpoint and that LiteLLM
-forwards `prompt_cache_key` unchanged. Azure still returned zero cached tokens,
-matching the earlier relevance-audit finding that Azure Chat caching worked but
-Responses caching did not benefit that workload. Cache savings therefore remain
-an observed metric, not an accepted operational claim.
+`cached_tokens` and GPT-5.6 `cache_write_tokens`. The full GPT-5.4-mini run
+observed 13.60M cached tokens across 19.88M input tokens (68.38%), while a
+same-evidence Luna-high comparison again observed zero cache reads. Cache
+behavior is therefore model/deployment-specific and always measured rather
+than assumed.
+
+Every bulk run has its own ignored, resumable SQLite artifact under
+`data/derived/registry-evaluation/`. It freezes the cohort, prompt/schema
+hashes, exact evidence bundle, response ID, output, usage, proxy cost, web
+actions, and sources. A filtered comparison run can reuse selected completed
+results' exact evidence without another X-provider request; comparisons never
+overwrite their source run or mutate the Registry.
 
 `fli.llm_responses` is the shared provider-normalization boundary for these
 Responses calls. It extracts only final message text, tolerates nullable blocks
