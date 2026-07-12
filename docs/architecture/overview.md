@@ -41,9 +41,27 @@ rejections, multi-channel identities, and graph participants, then removes each
 approved one-account identity in one transaction. It supports dry-run and
 idempotent replay; it does not turn model output directly into deletion.
 
+The next candidate-admission boundary is implemented read-only in
+`fli.registry_evaluation`. One Luna-high Responses request receives a public X
+profile plus up to 20 recent authored posts and returns two independent
+dimensions: `kind` (`person | organization | unsure`) and `registry_status`
+(`active | rejected | review`), each with its own reason. Hosted `web_search` is
+available with automatic tool choice and may search the open web when the local
+evidence is insufficient; a response with no search is valid. The model output
+does not mutate canonical state. Search actions and sources remain operational
+metadata outside the four-field decision schema.
+
+The combined evaluator keeps one versioned 1,024+ token instruction prefix
+ahead of per-entity evidence and uses the same stable 64-shard
+`prompt_cache_key` convention as the relevance audit. It records both
+`cached_tokens` and GPT-5.6 `cache_write_tokens`. A two-entity Azure/LiteLLM
+calibration on 2026-07-12 used the same shard but reported zero for both cache
+dimensions, so cache savings are not yet an accepted operational claim.
+
 `fli.llm_responses` is the shared provider-normalization boundary for these
 Responses calls. It extracts only final message text, tolerates nullable blocks
-from translated responses, and normalizes hosted-search actions and cited URLs.
+from translated responses, owns stable prompt-cache sharding and LiteLLM cost
+header parsing, and normalizes hosted-search actions and cited URLs.
 Claude-native web search uses `tool_choice=auto` so the model can finish after
 searching; the audit still rejects any response with no observed search action.
 

@@ -205,6 +205,12 @@ candidate generator while demonstrating ranking and validation discipline.
 - No GitHub Actions workflow is needed before deployment. The managed Stop hook
   plus repo-owned `scripts/check-fast.sh` is the accepted feedback loop for the
   current local case-study phase.
+- Candidate admission now has a read-only combined evaluation contract with
+  independent structural kind and Registry status. It uses one descriptive,
+  versioned prompt, optional open-web research, strict four-field output, and
+  the existing stable prompt-cache sharding convention. The first two-entity
+  Luna-high calibration produced sensible decisions but no observable cache
+  hit, so cached-token savings remain unproven.
 
 ## Open Questions / Blockers
 
@@ -246,6 +252,7 @@ candidate generator while demonstrating ranking and validation discipline.
 | done | Apply the snapshot-pinned organization-coverage manifest, including NVIDIA/AMD/Intel compute anchors, and prove dry-run/replay safety. | parent | `../../../data/registry/organization-coverage.json` |
 | done | Freeze and version the smaller reviewed PageRank personalization set with short reasons. | parent | `../../../data/following/personalizations/trusted-personalization-2026-07-11-v1.json` |
 | done | Implement personalized PageRank over the isolated snapshot and emit the overlap-vs-PageRank comparison artifact. | parent | `resources/m3-pagerank-comparison.md` |
+| done | Implement and calibrate the read-only combined kind + Registry-status Responses contract with optional web research and measured prompt-cache counters. | parent | `resources/registry-evaluation-cache-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -619,3 +626,12 @@ candidate generator while demonstrating ranking and validation discipline.
   to accepted `entity-overlap-v2` rather than the newer experimental PageRank
   run, and added endpoint fixtures covering both the ranking and follower
   queries. Live browser verification restored the orbit and detail interaction.
+- 2026-07-12: [DONE] Added the read-only `registry-evaluation-v1` boundary:
+  one descriptive cached-prefix prompt, independent kind and Registry-status
+  fields with separate reasons, optional broad hosted web search, stable shared
+  cache sharding, and cache read/write instrumentation. Ran exactly two
+  sequential Luna-high evaluations through LiteLLM using the same cache shard:
+  `@openai` resolved organization + active and `@janleike` person + active;
+  neither needed web search. Proxy cost was $0.017755. Both responses reported
+  zero cached tokens, so the implementation records but does not claim cache
+  savings pending a read-only LiteLLM routing inspection.
