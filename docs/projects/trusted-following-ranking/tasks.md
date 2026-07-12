@@ -611,3 +611,11 @@ candidate generator while demonstrating ranking and validation discipline.
   state that says deeper ranks exist beyond the loaded top 300. All
   interactions screenshot-audited via Playwright against the live server;
   check-fast OK.
+- 2026-07-12: [DONE] Fixed the Ranking page regression introduced when the M3
+  audit upgraded `ranking_run` and `ranking_result` to the v2 schema. The web
+  adapter still queried removed `complete_source_count` and `rank` columns,
+  causing `/api/rankings` to return HTTP 500. Updated it to the current account
+  count and `position AS rank` contract, explicitly pinned the product endpoint
+  to accepted `entity-overlap-v2` rather than the newer experimental PageRank
+  run, and added endpoint fixtures covering both the ranking and follower
+  queries. Live browser verification restored the orbit and detail interaction.

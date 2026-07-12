@@ -182,7 +182,7 @@ def rankings(
     state: str = Query("all", pattern="^(all|active|unknown)$"),
     q: str = Query("", max_length=200),
 ) -> JSONResponse:
-    """Top of the derived cohort-trust ranking, newest run."""
+    """Top of the accepted entity-overlap cohort-trust ranking."""
     return JSONResponse(rankings_store.rankings_payload(limit, state, q))
 
 

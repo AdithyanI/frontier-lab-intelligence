@@ -13,7 +13,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from fli.following_rankings import DEFAULT_DERIVED_ROOT
+from fli.following_rankings import DEFAULT_DERIVED_ROOT, OVERLAP_ALGORITHM
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RAW_FOLLOWING_ROOT = REPO_ROOT / "data" / "raw" / "following"
@@ -39,13 +39,15 @@ def _latest_analysis_db() -> Path | None:
 def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
     return conn.execute(
         """SELECT r.run_id, r.context_id, r.algorithm,
-                  r.complete_source_count, r.eligible_edge_count,
+                  r.eligible_source_account_count, r.eligible_edge_count,
                   r.ranked_node_count, r.completed_at,
                   c.snapshot_id
            FROM ranking_run r
            JOIN analysis_context c ON c.context_id = r.context_id
-           ORDER BY r.completed_at DESC
-           LIMIT 1"""
+           WHERE r.algorithm = ?
+           ORDER BY r.completed_at DESC, r.run_id DESC
+           LIMIT 1""",
+        [OVERLAP_ALGORITHM],
     ).fetchone()
 
 
@@ -60,7 +62,10 @@ def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
     try:
         run = _latest_run(conn)
         if run is None:
-            return {"available": False, "reason": "Analysis store has no completed run."}
+            return {
+                "available": False,
+                "reason": "Analysis store has no entity-overlap ranking.",
+            }
 
         conditions = ["rr.run_id = ?", "gn.registry_state != 'rejected'"]
         params: list[Any] = [run["run_id"]]
@@ -77,7 +82,8 @@ def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
             params.extend([like, like, like])
 
         rows = conn.execute(
-            f"""SELECT rr.rank, rr.cohort_follow_count, rr.cohort_follow_share,
+            f"""SELECT rr.position AS rank, rr.cohort_follow_count,
+                       rr.cohort_follow_share,
                        gn.x_id, gn.handle, gn.display_name, gn.followers_count,
                        gn.registry_state, gn.entity_id, gn.entity_kind,
                        gn.entity_name
@@ -85,7 +91,7 @@ def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
                 JOIN graph_node gn
                   ON gn.context_id = ? AND gn.x_id = rr.x_id
                 WHERE {' AND '.join(conditions)}
-                ORDER BY rr.rank
+                ORDER BY rr.position
                 LIMIT ?""",
             [run["context_id"], *params, limit],
         ).fetchall()
@@ -107,7 +113,7 @@ def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
                 "algorithm": run["algorithm"],
                 "snapshot_id": run["snapshot_id"],
                 "completed_at": run["completed_at"],
-                "sources": run["complete_source_count"],
+                "sources": run["eligible_source_account_count"],
                 "edges": run["eligible_edge_count"],
                 "ranked_accounts": run["ranked_node_count"],
                 "active_accounts": state_counts.get("active", 0),
@@ -128,7 +134,10 @@ def followers_payload(x_id: str, limit: int) -> dict[str, Any]:
     try:
         run = _latest_run(conn)
         if run is None:
-            return {"available": False, "reason": "Analysis store has no completed run."}
+            return {
+                "available": False,
+                "reason": "Analysis store has no entity-overlap ranking.",
+            }
         snapshot_db = RAW_FOLLOWING_ROOT / run["snapshot_id"] / "snapshot.db"
         if not snapshot_db.is_file():
             return {
@@ -141,14 +150,14 @@ def followers_payload(x_id: str, limit: int) -> dict[str, Any]:
         )
         rows = conn.execute(
             """SELECT gn.x_id, gn.handle, gn.display_name, gn.entity_name,
-                      rr.rank, rr.cohort_follow_count
+                      rr.position AS rank, rr.cohort_follow_count
                FROM snap.edge e
                JOIN graph_node gn
                  ON gn.context_id = ? AND gn.x_id = e.source_x_id
                LEFT JOIN ranking_result rr
                  ON rr.run_id = ? AND rr.x_id = e.source_x_id
                WHERE e.target_x_id = ?
-               ORDER BY rr.rank IS NULL, rr.rank
+               ORDER BY rr.position IS NULL, rr.position
                LIMIT ?""",
             [run["context_id"], run["run_id"], x_id, limit],
         ).fetchall()
