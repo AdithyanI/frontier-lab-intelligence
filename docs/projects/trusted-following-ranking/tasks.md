@@ -222,6 +222,7 @@ candidate generator while demonstrating ranking and validation discipline.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
+| in_progress | Run the finalized combined evaluator read-only over all 2,207 active X entities with GPT-5.4-mini-high, cached post evidence, resumability, and measured spend. | parent | `resources/registry-evaluation-full-run.md` |
 | done | Audit existing edge/import/PageRank code and current database provenance locally. | parent | — |
 | done | Verify the official X contract and one live `@karpathy` following count/cost. | parent | `../../references/research-notes.md` |
 | done | Remove Digg/personal graph evidence while retaining the post-floor classified nodes; keep Digg ranking offline only. | parent | `../../references/digg-ranking-baseline.md` |
