@@ -226,6 +226,12 @@ candidate generator while demonstrating ranking and validation discipline.
 - The final intersection moved 10 people into the reversible, reason-bearing
   Rejected state. Eleven stronger-network v3 removals remain active, two
   provider failures remain untouched, and the broad Registry cleanup is closed.
+- Source-layer doctrine (2026-07-12): in AI, news breaks on X first, so tweets
+  are the detection layer; the linked primary artifact (lab blog post, paper,
+  model card, release) is the citation/verification layer that insights must
+  reference. Non-X sources are not a competing detection channel. Systematic
+  primary-source ingestion (RSS/arXiv/GitHub feeds) is deferred; the first
+  slice extracts URLs already linked from stored posts.
 
 ## Open Questions / Blockers
 
@@ -240,6 +246,8 @@ candidate generator while demonstrating ranking and validation discipline.
 | --- | --- | --- | --- |
 | done | Consolidate the Registry/ranking journey, current evidence, failure modes, spend, and remaining thesis gap into one durable checkpoint. | parent | `resources/registry-ranking-checkpoint-2026-07-12.md` |
 | todo | Freeze a 40-person utility cohort: 20 highly ranked active people and 20 highly ranked discovered people, with exact ranking provenance. | parent | — |
+| todo | Run first extraction pass over the existing 63,736 stored posts (no new crawling): dedupe, cluster into events, and surface candidate signals. | parent | — |
+| todo | Follow URLs linked from candidate tweets to their primary artifacts (blog posts, papers, model cards) as the citation layer; record what could and could not be resolved. | parent | — |
 | todo | Reuse or collect recent evidence, cluster it into events, and evaluate whether the cohort produces 3–5 useful cited insights. | parent | — |
 | todo | Record discovered-vs-active signal yield and decide whether to continue social-graph discovery or pivot toward official sources. | parent | — |
 
@@ -254,6 +262,8 @@ candidate generator while demonstrating ranking and validation discipline.
 - [x] Implement overlap baseline and personalized PageRank.
 - [ ] Run the 20-active/20-discovered information-yield evaluation and record
   usefulness, novelty, provenance, and failure modes.
+- [ ] Resolve tweet-linked URLs into a primary-source citation layer for the
+  slice; defer systematic RSS/arXiv/GitHub ingestion until yield is proven.
 - [x] Update architecture and append the build log after meaningful changes.
 - [x] Run `scripts/check-fast.sh` and milestone-specific tests.
 - [ ] Review project learnings and archive the tracker at closeout.
