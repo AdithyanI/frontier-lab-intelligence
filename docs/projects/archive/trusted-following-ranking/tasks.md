@@ -1,5 +1,8 @@
 # Trusted-Following Ranking
 
+Status: complete on 2026-07-12. Downstream utility evaluation transferred to
+`docs/projects/signal-intelligence-pipeline/tasks.md`.
+
 ## Goal
 
 Build and evaluate a fresh, provenance-complete relevance graph from whom the
@@ -61,11 +64,14 @@ candidate generator while demonstrating ranking and validation discipline.
 - [x] New ranking commands cannot read legacy edges accidentally.
 - [x] Trusted-follow count and personalized PageRank are compared on the same
   frozen snapshot.
-- [ ] A labeled top-result review records precision/ranking quality and at
-  least the most important failure modes.
-- [ ] Adi accepts the bounded shortlist or the evaluation supports stopping;
-  either outcome is documented before moving to the insight pipeline.
-- [ ] Repository checks pass and architecture/build docs match reality.
+- [x] Abstract top-result labeling was explicitly replaced by a stronger
+  downstream test: blind evaluation of whether ranked sources produce useful
+  events and cited insights. That acceptance work is transferred intact to the
+  signal-intelligence project.
+- [x] Entity overlap is accepted as a candidate-generation/network-support
+  feature; PageRank remains diagnostic, and broad shortlist admission is
+  deferred until downstream utility is measured.
+- [x] Repository checks pass and architecture/build docs match reality.
 
 ## Milestones
 
@@ -77,10 +83,11 @@ candidate generator while demonstrating ranking and validation discipline.
   reproduced without touching legacy edges.
 - [x] M3 — Rank and compare. Acceptance: overlap baseline and personalized
   PageRank run over the same snapshot and emit inspectable explanations.
-- [ ] M4 — Evaluate and decide. Acceptance: labeled top-k review supports an
-  explicit keep/change/stop decision and a bounded Registry shortlist.
-- [ ] M5 — Document and close. Acceptance: architecture, build log, validation,
-  and interview-ready trade-offs are current; tracker is archived.
+- [x] M4 — Evaluate and decide. Outcome: do not claim the graph is a final
+  relevance score. Accept entity overlap as one inspectable feature and
+  transfer utility validation to the downstream event/insight evaluation.
+- [x] M5 — Document and close. Architecture, build log, validation,
+  interview-ready trade-offs, and project learnings are current.
 
 ## Execution Rules
 
@@ -245,21 +252,15 @@ candidate generator while demonstrating ranking and validation discipline.
 
 ## Open Questions / Blockers
 
-- No blocking question. The next batch tests information yield before any more
-  Registry expansion or filtering.
-- The experimental 30-source PageRank personalization remains diagnostic; it
-  does not block the accepted entity-overlap vertical slice.
+- None. Signal-yield questions are owned by the successor project.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Consolidate the Registry/ranking journey, current evidence, failure modes, spend, and remaining thesis gap into one durable checkpoint. | parent | `resources/registry-ranking-checkpoint-2026-07-12.md` |
-| todo | Freeze a 40-person utility cohort: 20 highly ranked active people and 20 highly ranked discovered people, with exact ranking provenance. | parent | — |
-| todo | Run first extraction pass over the existing 63,736 stored posts (no new crawling): dedupe, cluster into events, and surface candidate signals. | parent | — |
-| todo | Follow URLs linked from candidate tweets to their primary artifacts (blog posts, papers, model cards) as the citation layer; record what could and could not be resolved. | parent | — |
-| todo | Reuse or collect recent evidence, cluster it into events, and evaluate whether the cohort produces 3–5 useful cited insights. | parent | — |
-| todo | Record discovered-vs-active signal yield and decide whether to continue social-graph discovery or pivot toward official sources. | parent | — |
+| done | Freeze the accepted entity-overlap run/checksums, record PageRank as diagnostic, and transfer information-yield evaluation to the successor project. | parent | `resources/m3-overlap-baseline.md`, `resources/m3-pagerank-comparison.md` |
+| done | Finalize project learnings, validate the repository, and archive the tracker with all resources. | parent | `learnings.md` |
 
 ## Backlog / Remaining Work
 
@@ -270,13 +271,11 @@ candidate generator while demonstrating ranking and validation discipline.
 - [x] Implement isolated, immutable snapshot storage, freeze the broad
   collection cohort, and complete bounded provider ingestion.
 - [x] Implement overlap baseline and personalized PageRank.
-- [ ] Run the 20-active/20-discovered information-yield evaluation and record
-  usefulness, novelty, provenance, and failure modes.
-- [ ] Resolve tweet-linked URLs into a primary-source citation layer for the
-  slice; defer systematic RSS/arXiv/GitHub ingestion until yield is proven.
+- [x] Transfer the information-yield evaluation, event deduplication, and
+  primary-citation slice to `signal-intelligence-pipeline`.
 - [x] Update architecture and append the build log after meaningful changes.
 - [x] Run `scripts/check-fast.sh` and milestone-specific tests.
-- [ ] Review project learnings and archive the tracker at closeout.
+- [x] Review project learnings and archive the tracker at closeout.
 
 ## Validation / Test Plan
 
@@ -289,6 +288,15 @@ candidate generator while demonstrating ranking and validation discipline.
 
 ## Progress Log
 
+- 2026-07-12: [DONE] Closed the project with an explicit boundary rather than
+  allowing extraction work to expand the ranking tracker. The accepted
+  `entity-overlap-v2` run is
+  `181d539ebc7ec1adee8c28adbec0c0a578f151eb116f9bba021094d915dab0f9`
+  over 2,219 source accounts, 2,197 voting entities, 2,456,305 edges, and
+  463,180 ranked accounts. PageRank remains diagnostic. Abstract shortlist
+  review is replaced by blind downstream event/insight utility evaluation in
+  `signal-intelligence-pipeline`; graph expansion, PageRank tuning, and broad
+  discovered-account admission are parked.
 - 2026-07-12: [DONE] Ran a focused agent-native carry-over audit of the new
   evaluator and ranking work. Kept the existing module boundaries and tests,
   added one exact Registry-evaluation operations reference with local artifact

@@ -218,7 +218,7 @@ before it.
 ## Durable References
 
 - System map: `docs/architecture/overview.md`
-- Canonical tracker: `docs/projects/trusted-following-ranking/tasks.md`
+- Archived tracker: `docs/projects/archive/trusted-following-ranking/tasks.md`
 - Following storage contract: `docs/references/following-snapshot-storage.md`
 - Accepted overlap baseline: `resources/m3-overlap-baseline.md`
 - PageRank comparison: `resources/m3-pagerank-comparison.md`

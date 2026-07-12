@@ -31,8 +31,8 @@ kind, credibility, or whether an unknown account belongs in the Registry.
   --registry-db data/fli.db \
   --analysis-db data/derived/following/registry-following-2026-07-11-v1/analysis.db \
   --top-k 100 \
-  --export-csv docs/projects/trusted-following-ranking/resources/overlap-top-100.csv \
-  --export-unknown-csv docs/projects/trusted-following-ranking/resources/overlap-top-100-unknown.csv \
+  --export-csv docs/projects/archive/trusted-following-ranking/resources/overlap-top-100.csv \
+  --export-unknown-csv docs/projects/archive/trusted-following-ranking/resources/overlap-top-100-unknown.csv \
   --no-input
 ```
 

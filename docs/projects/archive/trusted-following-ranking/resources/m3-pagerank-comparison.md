@@ -65,8 +65,8 @@ Review artifacts:
   --analysis-db data/derived/following/registry-following-2026-07-11-v1/analysis.db \
   --personalization data/following/personalizations/trusted-personalization-2026-07-11-v1.json \
   --top-k 100 \
-  --export-comparison-csv docs/projects/trusted-following-ranking/resources/pagerank-top-100-comparison.csv \
-  --export-unknown-csv docs/projects/trusted-following-ranking/resources/pagerank-top-100-unknown.csv \
+  --export-comparison-csv docs/projects/archive/trusted-following-ranking/resources/pagerank-top-100-comparison.csv \
+  --export-unknown-csv docs/projects/archive/trusted-following-ranking/resources/pagerank-top-100-unknown.csv \
   --no-input
 ```
 

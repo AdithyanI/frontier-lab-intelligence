@@ -84,7 +84,7 @@ The final 2026-07-12 person cleanup added 10 reversible
 decision and bottom-decile support in the accepted entity-overlap snapshot;
 the entities and their evidence remain stored. Exact results and retained
 counterexamples are recorded in
-`docs/projects/trusted-following-ranking/resources/registry-evaluation-v3-final-cleanup.md`.
+`docs/projects/archive/trusted-following-ranking/resources/registry-evaluation-v3-final-cleanup.md`.
 
 Relevance cleanup is an explicit, human-approved boundary rather than a
 direct model action. Its 689 rows live in

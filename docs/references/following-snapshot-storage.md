@@ -15,7 +15,7 @@ data/
   derived/following/<snapshot-id>/analysis.db # ignored recomputable rankings
   following/manifests/<snapshot-id>.json      # tracked small manifest
 
-docs/projects/trusted-following-ranking/resources/
+docs/projects/archive/trusted-following-ranking/resources/
   overlap-top-100.csv                          # tracked compact baseline
   pagerank-top-100-comparison.csv              # tracked experiment comparison
   <snapshot-id>-evaluation.csv                # tracked human labels
