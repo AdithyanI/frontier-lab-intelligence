@@ -2,8 +2,40 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from typing import Any
+
+
+DEFAULT_PROMPT_CACHE_SHARDS = 64
+
+
+def sharded_prompt_cache_key(
+    *,
+    namespace: str,
+    prompt_version: str,
+    scope_key: str | int,
+    shards: int = DEFAULT_PROMPT_CACHE_SHARDS,
+) -> str:
+    """Return one stable cache-routing key from the shared repo convention."""
+    if shards < 1:
+        raise ValueError("prompt cache shards must be at least 1")
+    digest = hashlib.sha256(str(scope_key).encode()).digest()
+    shard = int.from_bytes(digest[:8], "big") % shards
+    return f"fli:{namespace}:{prompt_version}:shard-{shard:02d}"
+
+
+def reported_cost(headers: Any) -> float | None:
+    """Read LiteLLM's operational response-cost header when present."""
+    if headers is None:
+        return None
+    raw_cost = headers.get("x-litellm-response-cost")
+    if raw_cost in (None, ""):
+        return None
+    try:
+        return float(raw_cost)
+    except (TypeError, ValueError):
+        return None
 
 
 def required_web_search_tool_choice(model: str) -> str:
@@ -41,6 +73,7 @@ def web_evidence(
     response_data: dict[str, Any],
     *,
     cited_urls: list[str] | None = None,
+    require_search_action: bool = False,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Return hosted-search actions and unique consulted sources."""
     actions: list[dict[str, Any]] = []
@@ -66,7 +99,7 @@ def web_evidence(
                     "translated_from": "function_call",
                 }
             )
-    if not actions:
+    if require_search_action and not actions:
         raise ValueError("response completed without required web search")
     if not sources:
         for url in cited_urls or []:

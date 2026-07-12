@@ -140,6 +140,15 @@ def test_prompt_cache_key_is_stable_and_sharded():
     assert len({relevance.prompt_cache_key(i) for i in range(256)}) > 32
 
 
+def test_relevance_uses_shared_prompt_cache_sharding():
+    assert relevance.prompt_cache_key(6) == llm_responses.sharded_prompt_cache_key(
+        namespace="registry-relevance",
+        prompt_version=relevance.PROMPT_VERSION,
+        scope_key=6,
+        shards=relevance.PROMPT_CACHE_SHARDS,
+    )
+
+
 def test_output_text_ignores_nullable_translated_blocks():
     assert llm_responses.output_text(
         {
@@ -176,7 +185,9 @@ def test_translated_claude_search_is_normalized_with_cited_urls():
     }
     assert llm_responses.output_text(response) == '{"decision":"keep"}'
     actions, sources = llm_responses.web_evidence(
-        response, cited_urls=["https://openai.com/research"]
+        response,
+        cited_urls=["https://openai.com/research"],
+        require_search_action=True,
     )
     assert actions == [
         {

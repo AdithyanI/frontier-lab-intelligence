@@ -113,9 +113,12 @@ def instructions() -> str:
 
 def prompt_cache_key(entity_id: int) -> str:
     """Route repeated prompt prefixes without overloading one cache key."""
-    digest = hashlib.sha256(str(entity_id).encode()).digest()
-    shard = int.from_bytes(digest[:8], "big") % PROMPT_CACHE_SHARDS
-    return f"fli:registry-relevance:{PROMPT_VERSION}:shard-{shard:02d}"
+    return llm_responses.sharded_prompt_cache_key(
+        namespace="registry-relevance",
+        prompt_version=PROMPT_VERSION,
+        scope_key=entity_id,
+        shards=PROMPT_CACHE_SHARDS,
+    )
 
 
 def read_active_inputs(conn: sqlite3.Connection) -> list[RelevanceInput]:
@@ -321,7 +324,9 @@ def audit_one(
         llm_responses.output_text(response_data), entity.entity_id
     )
     actions, sources = llm_responses.web_evidence(
-        response_data, cited_urls=payload["evidence_urls"]
+        response_data,
+        cited_urls=payload["evidence_urls"],
+        require_search_action=True,
     )
     usage = getattr(response, "usage", None) or response_data.get("usage")
     return {
