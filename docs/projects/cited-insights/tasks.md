@@ -130,6 +130,12 @@ reads first.
 
 ## Decisions
 
+- 2026-07-13: Pause cited extraction until the active
+  `temporal-event-projection` project removes future evidence from historical
+  day envelopes and freezes canonical event/snapshot semantics. Existing
+  triage runs remain audit evidence; do not treat a stale day-specific join as
+  a trustworthy extraction input.
+
 - 2026-07-13: Adi explicitly reopened the earlier top-100/day stopping
   decision for one bounded learning run. Evaluate at most the top 1,000 exact
   attention envelopes per complete stored day, not the unrestricted long tail:
@@ -210,7 +216,7 @@ reads first.
 | done | Harden the v2 runner for the bounded expansion: deterministic prompt-cache shards, bounded parallel model calls, single-writer resumability, compact progress, and audit telemetry. | parent | — |
 | done | Run a fresh bounded v2 calibration through LiteLLM; audit decisions and verify cache reads, tags, failures, resumability, and proxy-reported cost before expansion. | parent | — |
 | done | Freeze and triage the top 1,000 attention envelopes per complete day (6,445 total), resume any failures, and record the final keep/drop/cache/cost distribution. | parent | [expansion report](resources/triage-v2.2-top1000-expansion-2026-07-13.md) |
-| todo | Return to the five-record extraction oracle after the bounded expansion is audited. | parent | [pipeline-design.md](resources/pipeline-design.md) |
+| blocked | Return to the five-record extraction oracle after temporal event projection is corrected and audited. | parent | [pipeline-design.md](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
