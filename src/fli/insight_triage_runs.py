@@ -138,6 +138,83 @@ def _expanded_urls(
     return found
 
 
+def _card_value(card: dict[str, Any], key: str) -> str | None:
+    for binding in card.get("binding_values") or []:
+        if not isinstance(binding, dict) or binding.get("key") != key:
+            continue
+        value = binding.get("value") or {}
+        string_value = value.get("string_value")
+        if isinstance(string_value, str) and string_value.strip():
+            return string_value.strip()
+    return None
+
+
+def _provider_artifacts(
+    conn: sqlite3.Connection,
+    post_ids: list[str],
+) -> list[dict[str, str]]:
+    if not post_ids:
+        return []
+    placeholders = ",".join("?" for _ in post_ids)
+    rows = conn.execute(
+        f"SELECT post_id, raw_json FROM x_post WHERE post_id IN ({placeholders})",
+        post_ids,
+    ).fetchall()
+    artifacts: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for row in rows:
+        payload = json.loads(row["raw_json"])
+        post_id = str(row["post_id"])
+        for tweet in (payload, payload.get("quoted_tweet")):
+            if not isinstance(tweet, dict):
+                continue
+            expanded_by_short = {
+                str(item.get("url")): str(item.get("expanded_url") or item.get("url"))
+                for item in (tweet.get("entities") or {}).get("urls") or []
+                if isinstance(item, dict) and item.get("url")
+            }
+            expanded_urls = list(expanded_by_short.values())
+            article = tweet.get("article")
+            if isinstance(article, dict):
+                title = str(article.get("title") or "").strip()
+                preview = str(article.get("preview_text") or "").strip()
+                url = next(
+                    (url for url in expanded_urls if "/i/article/" in url),
+                    expanded_urls[0] if expanded_urls else "",
+                )
+                identity = (post_id, "x_article", title, url)
+                if (title or preview) and identity not in seen:
+                    seen.add(identity)
+                    artifacts.append(
+                        {
+                            "post_id": post_id,
+                            "kind": "x_article",
+                            "title": title,
+                            "preview": preview,
+                            "url": url,
+                        }
+                    )
+            card = tweet.get("card")
+            if isinstance(card, dict):
+                title = _card_value(card, "title") or ""
+                preview = _card_value(card, "description") or ""
+                short_url = _card_value(card, "card_url") or str(card.get("url") or "")
+                url = expanded_by_short.get(short_url, short_url)
+                identity = (post_id, "link_card", title, url)
+                if (title or preview) and identity not in seen:
+                    seen.add(identity)
+                    artifacts.append(
+                        {
+                            "post_id": post_id,
+                            "kind": "link_card",
+                            "title": title,
+                            "preview": preview,
+                            "url": url,
+                        }
+                    )
+    return artifacts
+
+
 def envelope_from_event(
     item: dict[str, Any],
     *,
@@ -180,6 +257,7 @@ def envelope_from_event(
             for post_id in post_ids
             for url in urls_by_post.get(post_id, [])
         ),
+        embedded_artifacts=tuple(_provider_artifacts(raw_conn, post_ids)),
         retweet_count=sum(
             post["relationship"] == "retweet" for post in item["evidence"]
         ),
@@ -193,6 +271,7 @@ def _envelope_payload(envelope: insight_triage.EnvelopeInput) -> dict[str, Any]:
         "root": envelope.root,
         "related_posts": list(envelope.related_posts),
         "urls": list(envelope.urls),
+        "embedded_artifacts": list(envelope.embedded_artifacts),
         "retweet_count": envelope.retweet_count,
     }
 
@@ -204,6 +283,7 @@ def _envelope_from_payload(payload: dict[str, Any]) -> insight_triage.EnvelopeIn
         root=dict(payload["root"]),
         related_posts=tuple(payload.get("related_posts") or ()),
         urls=tuple(payload.get("urls") or ()),
+        embedded_artifacts=tuple(payload.get("embedded_artifacts") or ()),
         retweet_count=int(payload.get("retweet_count") or 0),
     )
 

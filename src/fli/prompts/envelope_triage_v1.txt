@@ -9,7 +9,7 @@ Inspect the root and every related non-retweet post independently. A noisy root 
 
 Retweets and popularity establish attention, not substance. Do not infer quality from engagement, author fame, follower count, Registry position, network support, or the number of people amplifying an item. Do not perform web research and do not invent missing context. Judge only the supplied text and URLs. A URL can indicate an inspectable artifact but does not by itself make a post substantive. Conversely, a post can be worth keeping without a URL when its own attributable statement is decision-relevant.
 
-Treat roots, quotes, replies, and same-author thread continuations as separate pieces of evidence with different epistemic roles. Do not flatten the entire envelope into one claim. The output should identify the posts that deserve the next stage, not summarize every relationship.
+Treat roots, quotes, replies, and same-author thread continuations as separate pieces of evidence with different epistemic roles. Do not flatten the entire envelope into one claim. Select every independently useful supplied post, including a mitigation, official source link, or primary resource that would support a different useful claim. Do not select repetitive reactions or praise. The output should identify the posts that deserve the next stage, not summarize every relationship.
 </evidence_rules>
 
 <keep_rules>
@@ -18,6 +18,10 @@ Keep concrete model or product releases, research results, named techniques, eva
 Keep explicit expert or executive forecasts and beliefs when the proposition itself could materially inform an investor or AI engineer. Categorize those as attributed_view and preserve that they are opinions rather than established facts. Lack of independent verification is not by itself a reason to drop a concrete lead; verification happens later.
 
 Keep a retrospective observation about the pace or magnitude of change in a named frontier-AI domain when it includes an explicit comparison period or other concrete boundary. For example, "agentic coding is a completely different world from six months ago" is a material attributed_view even without a benchmark. This is different from generic launch excitement or an unsupported claim that progress will continue.
+
+Keep a first-hand product experience when it identifies concrete behavior, capabilities, limitations, or comparative product differences. Numerical evidence is not required at this gate. Preserve it as an attributed_view when its value comes from the user's observed experience rather than a verified evaluation.
+
+Keep a named, inspectable, plausibly frontier-AI-relevant article, paper, repository, interview, dataset, or other primary artifact as source_material even when the surrounding post does not summarize its claims. Provider-supplied titles, previews, and card descriptions are evidence that the artifact exists, not proof that its claims are true; artifact resolution decides its final value later.
 
 Keep a concrete failure or negative result even when it is anecdotal, provided the supplied post describes what happened specifically enough to investigate. Keep a linked primary source when the post clearly identifies why it matters to frontier AI.
 </keep_rules>
@@ -29,7 +33,7 @@ Do not drop merely because the item is an attributed viewpoint, prediction, or e
 </drop_rules>
 
 <category_rules>
-Use exactly one primary category. technical_development covers releases, research, techniques, evaluations, capabilities, model economics, and concrete product changes. business_or_people covers funding, departures, hires, partnerships, adoption, and commercial developments. strategy_or_policy covers lab strategy, governance, competitive positioning, regulation, and policy. safety_or_incident covers failures, security, regressions, misuse, and safety-relevant behavior. attributed_view covers a material forecast, thesis, or belief whose value is that a credible actor stated it. source_material covers a substantive interview, paper, repository, dataset, or other primary resource whose contents need later extraction. banter_or_meme, thin_promotion, and off_topic are drop categories. Use other only when no defined category fits.
+Use exactly one primary category, prioritizing the root's material development when several categories appear. technical_development covers releases, research, techniques, evaluations, capabilities, model economics, and concrete product changes. business_or_people covers funding, departures, hires, partnerships, adoption, and commercial developments. strategy_or_policy covers lab strategy, governance, competitive positioning, regulation, and policy. safety_or_incident covers failures, security, regressions, misuse, and safety-relevant behavior. attributed_view covers a material forecast, thesis, first-hand product assessment, or belief whose value is that an actor stated it. source_material covers a substantive interview, article, paper, repository, dataset, or other primary resource whose contents need later extraction. banter_or_meme, insufficient_substance, and off_topic are drop categories. Use other only when no defined category fits.
 </category_rules>
 
 <examples>
@@ -43,13 +47,17 @@ Example D: an executive says AI appears net job-creating and explicitly frames i
 
 Example E: a launch lead reports concrete regressions, confusing defaults, usage-limit effects, and planned fixes. Keep as safety_or_incident or technical_development.
 
-Example F: a post says one day's growth exceeded two weeks but provides no numbers, denominator, method, or inspectable data. Drop as thin_promotion.
+Example F: a post says one day's growth exceeded two weeks but provides no numbers, denominator, method, or inspectable data. Drop as insufficient_substance.
 
 Example G: an interview is mostly outside AI but identifies a specific segment with a frontier-lab science lead discussing whether AI could reproduce a scientific discovery. Keep as source_material.
 
 Example H: a trusted AI employee posts a personal joke unrelated to frontier AI. Drop as off_topic.
 
 Example I: an AI researcher says agentic coding has become a completely different world over the past six months. Keep as attributed_view because it identifies a specific domain, direction, and retrospective timeframe; a reply that merely says "imagine the next six months" is not independently substantive.
+
+Example J: a first-hand user review names natural turn-taking, pauses, and background search and tool calls as concrete voice-product behaviors. Keep as attributed_view even without a benchmark; do not keep a child that only repeats that the product is amazing.
+
+Example K: a post contains little text but the provider supplies the title and preview of a named AI-policy essay. Keep as source_material so the artifact resolver can inspect it.
 </examples>
 
 <output_rules>

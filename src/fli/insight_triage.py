@@ -31,7 +31,7 @@ CATEGORIES = frozenset(
         "attributed_view",
         "source_material",
         "banter_or_meme",
-        "thin_promotion",
+        "insufficient_substance",
         "off_topic",
         "other",
     }
@@ -66,6 +66,7 @@ class EnvelopeInput:
     root: dict[str, Any]
     related_posts: tuple[dict[str, Any], ...] = ()
     urls: tuple[dict[str, str], ...] = ()
+    embedded_artifacts: tuple[dict[str, str], ...] = ()
     retweet_count: int = 0
 
     @property
@@ -141,6 +142,21 @@ def render_input(envelope: EnvelopeInput) -> str:
         blocks.append("None supplied.")
     for link in envelope.urls:
         blocks.append(f"[post_id={link['post_id']}] {link['url']}")
+    blocks.extend(("", "PROVIDER-SUPPLIED ARTIFACT METADATA"))
+    if not envelope.embedded_artifacts:
+        blocks.append("None supplied.")
+    for artifact in envelope.embedded_artifacts:
+        blocks.extend(
+            (
+                "",
+                (
+                    f"[post_id={artifact['post_id']} | kind={artifact['kind']}] "
+                    f"{artifact.get('title') or 'Untitled artifact'}"
+                ),
+                str(artifact.get("preview") or "No preview supplied."),
+                f"URL: {artifact.get('url') or 'No URL supplied.'}",
+            )
+        )
     blocks.extend(
         (
             "",

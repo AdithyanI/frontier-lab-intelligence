@@ -77,6 +77,15 @@ def make_envelope():
                 "url": "https://example.com/research",
             },
         ),
+        embedded_artifacts=(
+            {
+                "post_id": "child-1",
+                "kind": "link_card",
+                "title": "A post-training research note",
+                "preview": "Experiments on post-training data and model behavior.",
+                "url": "https://example.com/research",
+            },
+        ),
         retweet_count=8,
     )
 
@@ -102,6 +111,8 @@ def test_schema_contains_only_the_triage_decision_and_evidence_pointer():
     assert schema["additionalProperties"] is False
     assert "confidence" not in schema["properties"]
     assert "links_to_fetch" not in schema["properties"]
+    assert "insufficient_substance" in schema["properties"]["category"]["enum"]
+    assert "thin_promotion" not in schema["properties"]["category"]["enum"]
 
 
 def test_render_input_preserves_relationships_without_ranking_features():
@@ -110,6 +121,8 @@ def test_render_input_preserves_relationships_without_ranking_features():
     assert "post_id=root-1" in rendered
     assert "post_id=child-1 | relation=quote | other-author" in rendered
     assert "https://example.com/research" in rendered
+    assert "PROVIDER-SUPPLIED ARTIFACT METADATA" in rendered
+    assert "A post-training research note" in rendered
     assert "8 exact retweet copies omitted" in rendered
     assert "attention" not in rendered.lower()
     assert "engagement" not in rendered.lower()
@@ -170,3 +183,5 @@ def test_prompt_keeps_time_bounded_views_but_excludes_popularity():
     assert "agentic coding is a completely different world" in prompt
     assert "do not infer quality from engagement" in prompt
     assert "a noisy root can contain a valuable quote or reply" in prompt
+    assert "first-hand product experience" in prompt
+    assert "provider-supplied titles" in prompt
