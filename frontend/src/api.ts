@@ -147,7 +147,6 @@ export interface FeedMetrics {
 
 export interface FeedScoreComponents {
   registry_amplifiers: number
-  high_support_amplifiers: number
   originator_network_support: number
   originator_network_rank: number | null
   public_interactions: number

@@ -70,7 +70,7 @@ def test_feed_api_deduplicates_and_explains_network_attention(tmp_path, monkeypa
 
     payload = client.get("/api/feed?date=2026-07-11&limit=20").json()
     assert payload["available"] is True
-    assert payload["score_formula"]["version"] == "attention-v1"
+    assert payload["score_formula"]["version"] == "attention-v1.1"
     ids = [item["post_id"] for item in payload["items"]]
     assert "2" not in ids  # pure retweet wrapper collapses into target 1
     target = next(item for item in payload["items"] if item["post_id"] == "1")

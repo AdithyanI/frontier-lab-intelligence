@@ -964,6 +964,15 @@ td.num {
 
 .method-note { color: var(--muted); }
 
+.method-explain {
+  margin: 18px 0 0;
+  max-width: 68ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.method-explain strong { font-weight: 600; color: var(--ink); }
+
 .method-note summary {
   width: fit-content;
   color: var(--blue-ink);

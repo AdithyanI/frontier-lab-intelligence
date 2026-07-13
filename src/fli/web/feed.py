@@ -20,13 +20,14 @@ DEFAULT_REGISTRY_DB = REPO_ROOT / "data" / "fli.db"
 DEFAULT_DERIVED_ROOT = following_rankings.DEFAULT_DERIVED_ROOT
 
 SCORE_FORMULA = {
-    "version": "attention-v1",
+    "version": "attention-v1.1",
     "network_attention_weight": 0.55,
     "originator_support_weight": 0.25,
     "public_engagement_weight": 0.20,
     "note": (
         "Experimental ordering aid, not a quality judgment. Network attention "
-        "counts each active Registry entity once; public engagement is a tie-breaker."
+        "counts each active Registry entity once — people and organizations "
+        "alike; public engagement is a tie-breaker."
     ),
 }
 
@@ -218,8 +219,11 @@ def _percentiles(values: list[float]) -> dict[float, float]:
     if not ordered or ordered[-1] <= 0:
         return {value: 0.0 for value in values}
     denominator = max(len(ordered) - 1, 1)
+    # bisect_left: a value's percentile counts only items strictly below it,
+    # so the large one-amplifier tie block sits at the bottom instead of the
+    # top of its range.
     return {
-        value: (bisect.bisect_right(ordered, value) - 1) / denominator
+        value: bisect.bisect_left(ordered, value) / denominator
         for value in set(values)
     }
 
@@ -340,12 +344,6 @@ def feed_payload(
         active_entity_support[int(account["entity_id"])] = max(
             active_entity_support[int(account["entity_id"])], support.get(x_id, 0)
         )
-    support_values = sorted(active_entity_support.values())
-    high_support_cutoff = (
-        support_values[max(0, math.ceil(len(support_values) * 0.8) - 1)]
-        if support_values
-        else 0
-    )
 
     amplifiers: dict[str, dict[int, dict[str, Any]]] = defaultdict(dict)
     contexts: dict[str, dict[str, Any]] = {}
@@ -399,10 +397,6 @@ def feed_payload(
         if not direct_active and not amp_values:
             continue
         author_support = support.get(str(row["author_x_id"] or ""), 0)
-        high_count = sum(
-            1 for amplifier in amp_values
-            if high_support_cutoff > 0 and amplifier["network_support"] >= high_support_cutoff
-        )
         items.append(
             {
                 "post_id": row["post_id"],
@@ -429,9 +423,8 @@ def feed_payload(
                     "views": row["view_count"],
                     "bookmarks": row["bookmark_count"],
                 },
-                "_network_raw": len(amp_values) + high_count,
+                "_network_raw": len(amp_values),
                 "_amplifier_count": len(amp_values),
-                "_high_support_amplifier_count": high_count,
                 "_originator_support": author_support,
                 "_originator_rank": positions.get(str(row["author_x_id"] or "")),
                 "_engagement": _public_engagement(row),
@@ -449,7 +442,6 @@ def feed_payload(
         item["attention_score"] = round(100 * (0.55 * n + 0.25 * o + 0.20 * e), 1)
         item["score_components"] = {
             "registry_amplifiers": item.pop("_amplifier_count"),
-            "high_support_amplifiers": item.pop("_high_support_amplifier_count"),
             "originator_network_support": item.pop("_originator_support"),
             "originator_network_rank": item.pop("_originator_rank"),
             "public_interactions": item.pop("_engagement"),

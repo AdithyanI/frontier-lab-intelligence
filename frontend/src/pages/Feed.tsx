@@ -230,9 +230,6 @@ function EventRow({ item }: { item: SignalEvent }) {
     c.registry_amplifiers
       ? `${c.registry_amplifiers} Registry amplifier${c.registry_amplifiers === 1 ? '' : 's'}`
       : null,
-    c.high_support_amplifiers
-      ? `${c.high_support_amplifiers} high-support`
-      : null,
     c.originator_network_rank
       ? `originator network rank #${c.originator_network_rank.toLocaleString('en-US')}`
       : null,
