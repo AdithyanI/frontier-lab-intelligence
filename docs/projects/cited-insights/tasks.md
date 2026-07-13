@@ -248,3 +248,12 @@ reads first.
   explicitly metered repair for rare post-ID transcription errors. Next:
   extraction oracle, not more triage. See
   `resources/triage-seven-day-validation-2026-07-13.md`.
+- 2026-07-13: [TRIAGE-AUDIT-UI] Joined the newest complete per-day triage run
+  into the existing Feed as a read-only audit layer. Attention, recency, and
+  engagement remain independent sort choices; a separate All/Kept/Dropped/Not
+  evaluated filter exposes stable counts, and evaluated envelopes show their
+  category, reason, candidate rank, and selected-signal count inline. The
+  expensive exact-envelope projection is now cached once per day, so search,
+  sort, pagination, and triage filtering reuse it instead of rebuilding it.
+  No model or provider calls were added and the next critical-path work remains
+  the five-record extraction oracle.

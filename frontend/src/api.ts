@@ -244,6 +244,23 @@ export interface SignalEvent {
   peak_public_interactions: number
   latest_evidence_at: string
   evidence: EventEvidence[]
+  triage: {
+    decision: 'keep' | 'drop'
+    category:
+      | 'technical_development'
+      | 'business_or_people'
+      | 'strategy_or_policy'
+      | 'safety_or_incident'
+      | 'attributed_view'
+      | 'source_material'
+      | 'banter_or_meme'
+      | 'insufficient_substance'
+      | 'off_topic'
+      | 'other'
+    signal_post_ids: string[]
+    reason: string
+    candidate_rank: number
+  } | null
 }
 
 export interface EventResponse {
@@ -253,6 +270,22 @@ export interface EventResponse {
   lane?: 'all' | 'network' | 'firsthand'
   sort?: 'attention' | 'recent' | 'engagement'
   query?: string
+  triage_filter?: 'all' | 'keep' | 'drop' | 'not_evaluated'
+  triage_counts?: {
+    all: number
+    keep: number
+    drop: number
+    not_evaluated: number
+  }
+  triage_run?: {
+    run_id: string
+    model: string
+    reasoning_effort: string
+    prompt_version: string
+    expected_count: number
+    completed_count: number
+    updated_at: string
+  } | null
   total?: number
   limit?: number
   offset?: number

@@ -159,10 +159,22 @@ proxy cost, and explicit failures in a resumable derived SQLite run. Kept
 envelopes continue whole to artifact resolution and cited extraction, so a
 conservative `signal_post_ids` subset cannot discard supporting evidence.
 
+The Feed exposes these completed decisions as an audit projection, not as a
+replacement ranking. `fli.web.triage` selects the newest fully completed run
+for the requested UTC day and joins it to envelopes by stable `event_id`.
+Attention, recency, and engagement still sort the same evidence independently;
+`keep`, `drop`, and `not evaluated` are separate filters with counts computed
+before pagination. The projection reads the run's existing
+`(decision, current_rank, event_id)` and `(status, current_rank, event_id)`
+indexes and never mutates the triage or Feed stores.
+
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
 version tokens, so a Registry change or rebuilt derived run invalidates the
-affected cache. The SPA deduplicates and prefetches complete Feed days and
+affected cache. Exact-envelope assembly is cached once per complete Feed day;
+search, sort, pagination, and triage filters are then applied over that shared
+projection instead of rebuilding its SQLite joins. The SPA deduplicates and
+prefetches complete Feed days and
 lazy-mounts closed evidence trees. Registry list reads stay uncached in the
 browser because their indexed queries are already fast and curation freshness
 matters more than another cache.

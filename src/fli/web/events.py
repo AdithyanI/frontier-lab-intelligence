@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from fli import signal_events, signal_feed
-from fli.web import feed as feed_store
+from fli.web import feed as feed_store, triage as triage_store
 
 
 DEFAULT_EVENTS_DB = signal_events.DEFAULT_EVENTS_DB
@@ -212,26 +212,24 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _cache_token() -> tuple[tuple[str, int, int, int, int], ...]:
+def _cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
     paths = [DEFAULT_EVENTS_DB, DEFAULT_FEED_DB, feed_store.DEFAULT_REGISTRY_DB]
     analysis = feed_store._latest_analysis_db()
     if analysis is not None:
         paths.append(analysis)
-    return tuple(feed_store._db_version(path) for path in paths)
+    return (
+        *(feed_store._db_version(path) for path in paths),
+        *triage_store.cache_token(day),
+    )
 
 
-@lru_cache(maxsize=64)
-def _events_payload_cached(
+@lru_cache(maxsize=16)
+def _events_day_cached(
     *,
     day: str,
-    lane: str,
-    sort: str,
-    query: str,
-    limit: int,
-    offset: int,
     cache_token: tuple[tuple[str, int, int, int, int], ...],
 ) -> dict[str, Any]:
-    """Return every visible Feed candidate, grouped only by exact relationships."""
+    """Build one reusable day projection over exact Feed relationships."""
     del cache_token  # used only to invalidate this read-model cache
     if not DEFAULT_EVENTS_DB.is_file():
         return {
@@ -277,6 +275,8 @@ def _events_payload_cached(
     for link in link_rows:
         links_by_event.setdefault(link["event_id"], []).append(link)
 
+    triage_payload = triage_store.triage_payload(day)
+    triage_items = triage_payload["items"]
     items: list[dict[str, Any]] = []
     consumed: set[str] = set()
     for cluster in clusters:
@@ -396,10 +396,53 @@ def _events_payload_cached(
     items.extend(
         _singleton(item) for item in feed_items if item["post_id"] not in consumed
     )
+    for item in items:
+        item["triage"] = triage_items.get(item["event_id"])
+    return {
+        "available": True,
+        "date": day,
+        "triage_run": triage_payload["run"],
+        "run": {
+            "run_id": run["run_id"],
+            "feed_run_id": run["feed_run_id"],
+            "clustering_contract": run["clustering_contract"],
+            "cluster_count": run["cluster_count"],
+            "member_count": run["member_count"],
+            "link_count": run["link_count"],
+        },
+        "score_formula": {
+            **feed_result["score_formula"],
+            "note": (
+                "Every Feed candidate is an envelope. Provider-declared exact "
+                "relationships combine evidence; all other posts remain singletons."
+            ),
+        },
+        "items": items,
+    }
+
+
+def events_payload(
+    *,
+    day: str,
+    lane: str,
+    sort: str,
+    query: str,
+    triage_filter: str = "all",
+    limit: int,
+    offset: int,
+) -> dict[str, Any]:
+    """Return a state-aware view over one cached day projection."""
+    payload = _events_day_cached(
+        day=day,
+        cache_token=_cache_token(day),
+    )
+    if not payload.get("available"):
+        return payload
+
     needle = query.strip().lower()
     items = [
         item
-        for item in items
+        for item in payload["items"]
         if (lane != "network" or item["amplifiers"])
         and (lane != "firsthand" or item["first_hand_count"] > 0)
         and (
@@ -421,6 +464,35 @@ def _events_payload_cached(
             ).lower()
         )
     ]
+    triage_counts = {
+        "all": len(items),
+        "keep": sum(
+            item["triage"] is not None
+            and item["triage"]["decision"] == "keep"
+            for item in items
+        ),
+        "drop": sum(
+            item["triage"] is not None
+            and item["triage"]["decision"] == "drop"
+            for item in items
+        ),
+        "not_evaluated": sum(item["triage"] is None for item in items),
+    }
+    if triage_filter == "keep":
+        items = [
+            item
+            for item in items
+            if item["triage"] and item["triage"]["decision"] == "keep"
+        ]
+    elif triage_filter == "drop":
+        items = [
+            item
+            for item in items
+            if item["triage"] and item["triage"]["decision"] == "drop"
+        ]
+    elif triage_filter == "not_evaluated":
+        items = [item for item in items if item["triage"] is None]
+
     if sort == "recent":
         items.sort(
             key=lambda item: (item["latest_evidence_at"], item["event_id"]),
@@ -446,54 +518,20 @@ def _events_payload_cached(
             ),
             reverse=True,
         )
+
     total = len(items)
     return {
-        "available": True,
-        "date": day,
+        **{key: value for key, value in payload.items() if key != "items"},
         "lane": lane,
         "sort": sort,
         "query": query,
+        "triage_filter": triage_filter,
+        "triage_counts": triage_counts,
         "total": total,
         "limit": limit,
         "offset": offset,
-        "run": {
-            "run_id": run["run_id"],
-            "feed_run_id": run["feed_run_id"],
-            "clustering_contract": run["clustering_contract"],
-            "cluster_count": run["cluster_count"],
-            "member_count": run["member_count"],
-            "link_count": run["link_count"],
-        },
-        "score_formula": {
-            **feed_result["score_formula"],
-            "note": (
-                "Every Feed candidate is an envelope. Provider-declared exact "
-                "relationships combine evidence; all other posts remain singletons."
-            ),
-        },
         "items": items[offset : offset + limit],
     }
-
-
-def events_payload(
-    *,
-    day: str,
-    lane: str,
-    sort: str,
-    query: str,
-    limit: int,
-    offset: int,
-) -> dict[str, Any]:
-    """Return a state-aware cached page of exact Feed envelopes."""
-    return _events_payload_cached(
-        day=day,
-        lane=lane,
-        sort=sort,
-        query=query,
-        limit=limit,
-        offset=offset,
-        cache_token=_cache_token(),
-    )
 
 
 def dates_payload() -> dict[str, Any]:

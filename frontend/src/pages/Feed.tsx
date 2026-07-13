@@ -9,12 +9,20 @@ import {
 } from '../api'
 
 type Sort = 'attention' | 'recent' | 'engagement'
+type TriageFilter = 'all' | 'keep' | 'drop' | 'not_evaluated'
 
 const PAGE_SIZE = 40
+const triageSummaryLabels: Record<TriageFilter, string> = {
+  all: 'matching',
+  keep: 'kept',
+  drop: 'dropped',
+  not_evaluated: 'not evaluated',
+}
 
 interface EventPageRequest {
   date: string
   sort: Sort
+  triageFilter: TriageFilter
   query: string
   offset?: number
 }
@@ -25,10 +33,11 @@ const eventPageRequests = new Map<string, Promise<EventResponse>>()
 function eventPageKey({
   date,
   sort,
+  triageFilter,
   query,
   offset = 0,
 }: EventPageRequest) {
-  return `${date}\u0000${sort}\u0000${query}\u0000${offset}`
+  return `${date}\u0000${sort}\u0000${triageFilter}\u0000${query}\u0000${offset}`
 }
 
 function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
@@ -41,6 +50,7 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
     date: request.date,
     lane: 'all',
     sort: request.sort,
+    triage: request.triageFilter,
     q: request.query,
     limit: String(PAGE_SIZE),
     offset: String(request.offset ?? 0),
@@ -102,6 +112,28 @@ function PostText({ item }: { item: Pick<FeedItem, 'text'> }) {
       </summary>
       <p className="feed-text">{item.text}</p>
     </details>
+  )
+}
+
+function TriageNote({ item }: { item: SignalEvent }) {
+  if (!item.triage) return null
+  const { decision, category, reason, signal_post_ids, candidate_rank } = item.triage
+  const decisionLabel = decision === 'keep' ? 'Kept for extraction' : 'Dropped before extraction'
+
+  return (
+    <div className={`event-triage event-triage--${decision}`}>
+      <div className="event-triage-heading mono">
+        <span>{decisionLabel}</span>
+        <span>{category.replaceAll('_', ' ')}</span>
+      </div>
+      <p>{reason}</p>
+      <span className="event-triage-meta mono">
+        Candidate #{candidate_rank}
+        {decision === 'keep' && (
+          <> · {signal_post_ids.length} signal {signal_post_ids.length === 1 ? 'post' : 'posts'}</>
+        )}
+      </span>
+    </div>
   )
 }
 
@@ -283,6 +315,8 @@ function EventRow({ item }: { item: SignalEvent }) {
           </div>
         )}
 
+        <TriageNote item={item} />
+
         {!item.is_grouped && rationale.length > 0 && (
           <div className="feed-proof event-proof">
             <div className="feed-why">
@@ -339,6 +373,7 @@ export default function Feed() {
   const [dates, setDates] = useState<FeedDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [sort, setSort] = useState<Sort>('attention')
+  const [triageFilter, setTriageFilter] = useState<TriageFilter>('all')
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [data, setData] = useState<EventResponse | null>(null)
@@ -375,6 +410,7 @@ export default function Feed() {
     const request = {
       date: selectedDate,
       sort,
+      triageFilter,
       query: debouncedQuery,
       offset: 0,
     }
@@ -399,10 +435,10 @@ export default function Feed() {
     return () => {
       live = false
     }
-  }, [selectedDate, sort, debouncedQuery])
+  }, [selectedDate, sort, triageFilter, debouncedQuery])
 
   useEffect(() => {
-    if (!selectedDate || sort !== 'attention' || debouncedQuery) return
+    if (!selectedDate || sort !== 'attention' || triageFilter !== 'all' || debouncedQuery) return
     let cancelled = false
     const timer = window.setTimeout(async () => {
       for (const value of availableDates) {
@@ -411,6 +447,7 @@ export default function Feed() {
           await requestEventPage({
             date: value.day,
             sort: 'attention',
+            triageFilter: 'all',
             query: '',
             offset: 0,
           })
@@ -423,7 +460,7 @@ export default function Feed() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [availableDates, selectedDate, sort, debouncedQuery])
+  }, [availableDates, selectedDate, sort, triageFilter, debouncedQuery])
 
   const hasSearch = debouncedQuery.trim().length > 0
 
@@ -433,6 +470,7 @@ export default function Feed() {
     requestEventPage({
       date: selectedDate,
       sort,
+      triageFilter,
       query: debouncedQuery,
       offset: items.length,
     })
@@ -497,6 +535,33 @@ export default function Feed() {
           placeholder="Search author, handle, or post…"
           aria-label="Search Feed"
         />
+        <div className="feed-audit" role="group" aria-label="Filter by triage decision">
+          <span className="mono">AUDIT</span>
+          <div className="seg">
+            {([
+              ['all', 'All', 'All evidence'],
+              ['keep', 'Kept', 'Kept for extraction'],
+              ['drop', 'Dropped', 'Dropped before extraction'],
+              ['not_evaluated', 'Not evaluated', 'Not evaluated by triage'],
+            ] as const).map(([value, label, description]) => (
+              <button
+                type="button"
+                key={value}
+                className={triageFilter === value ? 'is-active' : ''}
+                onClick={() => setTriageFilter(value)}
+                aria-label={description}
+                aria-pressed={triageFilter === value}
+              >
+                {label}
+                <span className="seg-count">
+                  {data?.triage_counts
+                    ? data.triage_counts[value].toLocaleString('en-US')
+                    : '—'}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="feed-sort" role="group" aria-label="Sort Feed">
           <span className="mono">SORT</span>
           <div className="seg">
@@ -520,9 +585,10 @@ export default function Feed() {
         </div>
       </div>
 
-      {hasSearch && (
+      {(hasSearch || triageFilter !== 'all') && (
         <div className="feed-summary mono">
-          {(data?.total ?? 0).toLocaleString('en-US')} matching Feed items
+          {(data?.total ?? 0).toLocaleString('en-US')}{' '}
+          {triageSummaryLabels[triageFilter]} Feed items
         </div>
       )}
 
@@ -534,7 +600,7 @@ export default function Feed() {
           : items.map((item) => <EventRow key={item.event_id} item={item} />)}
         {!loading && items.length === 0 && (
           <div className="registry-empty">
-            No evidence matches this date and search. Try another day or clear the search.
+            No evidence matches these audit filters. Try another day or clear the filters.
           </div>
         )}
       </section>
