@@ -19,7 +19,11 @@ reads first.
 ### In Scope
 
 - A versioned `insight-v1` schema: claim · why it matters · evidence citations
-  (envelope + primary artifact links) · confidence · date.
+  (envelope + primary artifact links) · confidence · date · event-type tag
+  (departure / release / capability / technique / open-model) · two persona
+  so-what fields: `implication_investment` (implication + possible
+  public-equity landing spot, flagged as hypothesis) and
+  `implication_engineering` (adopt / investigate / ignore).
 - LLM extraction over the top ~20 attention envelopes per day, resolving links
   already embedded in the tweets as enrichment (fetch, snapshot, cite).
 - A relevance/substance gate so banter and thin envelopes yield no insight
@@ -130,6 +134,15 @@ reads first.
   no second ingestion pipeline before submission.
 - 2026-07-13: Blind evaluation validates insight yield here rather than feed
   ordering in the predecessor project.
+- 2026-07-13: Case-prompt example check — the sheet's example intelligence
+  (researcher departures, capability jumps, new techniques, open models,
+  pipeline-changing papers) is event-shaped and X-first; our pipeline answers
+  5/7 outright. Partials: competitive-map shifts (cross-insight synthesis —
+  manual for the final report, automated is a stated next step) and
+  ticker/thesis implications (LLM-drafted, flagged as hypothesis). Persona
+  tailoring is two schema fields, not a second system. 7-day window vs their
+  ~3-month suggestion is defended as depth-over-breadth; pipeline is
+  date-parameterized.
 
 ## Open Questions / Blockers
 
