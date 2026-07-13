@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from functools import lru_cache
 from pathlib import Path
@@ -85,11 +84,9 @@ def _triage_payload_cached(
     conn = _open_readonly(path)
     meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
     rows = conn.execute(
-        """SELECT event_id, current_rank, decision, category,
-                  signal_post_ids_json, reason
+        """SELECT event_id, decision, reason
            FROM triage_item
-           WHERE status = 'complete'
-           ORDER BY current_rank, event_id"""
+           WHERE status = 'complete'"""
     ).fetchall()
     conn.close()
     if meta is None:
@@ -97,10 +94,7 @@ def _triage_payload_cached(
     items = {
         str(row["event_id"]): {
             "decision": str(row["decision"]),
-            "category": str(row["category"]),
-            "signal_post_ids": json.loads(row["signal_post_ids_json"] or "[]"),
             "reason": str(row["reason"]),
-            "candidate_rank": int(row["current_rank"]),
         }
         for row in rows
     }

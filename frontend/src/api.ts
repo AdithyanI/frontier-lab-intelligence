@@ -246,20 +246,7 @@ export interface SignalEvent {
   evidence: EventEvidence[]
   triage: {
     decision: 'keep' | 'drop'
-    category:
-      | 'technical_development'
-      | 'business_or_people'
-      | 'strategy_or_policy'
-      | 'safety_or_incident'
-      | 'attributed_view'
-      | 'source_material'
-      | 'banter_or_meme'
-      | 'insufficient_substance'
-      | 'off_topic'
-      | 'other'
-    signal_post_ids: string[]
     reason: string
-    candidate_rank: number
   } | null
 }
 

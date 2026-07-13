@@ -117,22 +117,15 @@ function PostText({ item }: { item: Pick<FeedItem, 'text'> }) {
 
 function TriageNote({ item }: { item: SignalEvent }) {
   if (!item.triage) return null
-  const { decision, category, reason, signal_post_ids, candidate_rank } = item.triage
+  const { decision, reason } = item.triage
   const decisionLabel = decision === 'keep' ? 'Kept for extraction' : 'Dropped before extraction'
 
   return (
     <div className={`event-triage event-triage--${decision}`}>
       <div className="event-triage-heading mono">
         <span>{decisionLabel}</span>
-        <span>{category.replaceAll('_', ' ')}</span>
       </div>
       <p>{reason}</p>
-      <span className="event-triage-meta mono">
-        Candidate #{candidate_rank}
-        {decision === 'keep' && (
-          <> · {signal_post_ids.length} signal {signal_post_ids.length === 1 ? 'post' : 'posts'}</>
-        )}
-      </span>
     </div>
   )
 }

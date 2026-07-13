@@ -130,13 +130,14 @@ reads first.
 
 ## Decisions
 
-- 2026-07-13: Freeze envelope triage as one permissive
-  `gpt-5.4-mini`/medium Responses call with no tools and a four-field strict
-  output (`decision`, `category`, `signal_post_ids`, `reason`). The model sees
-  structural evidence plus provider-supplied artifact metadata, never ranking
-  or popularity. Full artifact resolution happens only after keep. Do not add
-  a default reviewer model; the final audited run had zero false drops and
-  verified cache reads. [Calibration report](resources/triage-spike-2026-07-13.md).
+- 2026-07-13: Replace the calibration contract with one permissive
+  `gpt-5.4-mini`/medium Responses call with no tools and the minimal strict
+  output (`decision`, `reason`). The model routes the complete envelope; it
+  does not choose post IDs or assign a topic. Category belongs to each later
+  extracted insight, where the resolved claim and source are available. The
+  obsolete v1 prompt and local v1 run stores were removed rather than supported
+  through a compatibility path. Calibration reports remain historical evidence
+  for the keep/drop rubric. Do not add a default reviewer model.
 
 - 2026-07-13: Stop the cross-day validation at top 100 per complete day. The
   700-row run produced 407 unique kept events and 737 unique selected posts;
@@ -181,6 +182,8 @@ reads first.
 | --- | --- | --- | --- |
 | done | Run a bounded `triage-v1` design spike over representative high-attention envelopes: compare the minimum dynamic input and output schema, verify prompt-cache reads and LiteLLM tags/cost telemetry, audit false drops against the July 11 labels, and recommend one-stage vs two-stage filtering. Do not run the full corpus. | worker | [triage report](resources/triage-spike-2026-07-13.md) |
 | done | Run the frozen triage contract over the top 100 attention envelopes for every complete stored day (2026-07-05 through 2026-07-11; 700 total), preserve one resumable run per day, and audit cross-day/lower-attention keep/drop/category/cache/cost behavior without changing the prompt mid-run. Do not spend the submission critical path labeling the roughly 7,500-envelope long tail before extraction is proved. | worker | [seven-day report](resources/triage-seven-day-validation-2026-07-13.md) |
+| done | Replace the over-specified triage boundary with the two-field envelope decision, remove the ID repair path and obsolete v1 runtime artifacts, synchronize tests/docs, and validate the clean contract. | parent | — |
+| done | Distill the Feed audit presentation to decision + reason and keep Registry amplifiers behind one collapsed disclosure. | worker | — |
 | todo | Hand-build the extraction oracle after cross-day validation: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 | todo | Build artifact fetch + insight extraction for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 
@@ -257,3 +260,15 @@ reads first.
   sort, pagination, and triage filtering reuse it instead of rebuilding it.
   No model or provider calls were added and the next critical-path work remains
   the five-record extraction oracle.
+- 2026-07-13: [TRIAGE-DISTILLED] Adi challenged two premature abstractions:
+  category assignment before extraction and model-selected post IDs even though
+  the next stage receives the full envelope. Replaced the active contract with
+  decision + reason only, removed retweet-count exposure and the post-ID repair
+  retry, deleted the obsolete v1 prompt/local runtime stores, and delegated a
+  matching Feed UI distillation. Category will be assigned per extracted
+  insight after artifact resolution.
+- 2026-07-13: [TRIAGE-DISTILLED-VALIDATED] The clean v2 boundary now has one
+  strict two-field schema, one model call, one resumable fresh-run schema, and
+  one compact Feed projection. The live Feed truthfully shows all 972 July 11
+  envelopes as not evaluated until a v2 run is deliberately started; the old
+  700-row v1 decisions remain only in historical reports, not runtime state.

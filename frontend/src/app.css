@@ -1399,7 +1399,7 @@ td.num {
 
 .event-triage {
   display: grid;
-  grid-template-columns: auto minmax(240px, 1fr) auto;
+  grid-template-columns: auto minmax(240px, 1fr);
   align-items: baseline;
   gap: 8px 16px;
   margin-top: 16px;
@@ -1416,7 +1416,6 @@ td.num {
   text-transform: uppercase;
 }
 
-.event-triage-heading span:last-child { color: var(--muted); }
 .event-triage--keep .event-triage-heading span:first-child { color: var(--positive); }
 .event-triage--drop .event-triage-heading span:first-child { color: var(--negative); }
 
@@ -1427,12 +1426,6 @@ td.num {
   font-size: 11.5px;
   line-height: 1.45;
   text-wrap: pretty;
-}
-
-.event-triage-meta {
-  color: var(--muted);
-  font-size: 9.5px;
-  white-space: nowrap;
 }
 
 .event-evidence {

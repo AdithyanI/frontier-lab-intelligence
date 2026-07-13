@@ -148,7 +148,7 @@ remain later stages after this deterministic layer is audited.
 deterministic Feed. It receives a frozen top-attention envelope but deliberately
 does not receive its attention score, engagement, followers, Registry rank, or
 amplifier prominence. One `gpt-5.4-mini`/medium Responses call through LiteLLM
-returns only `keep | drop`, a category, supplied signal post IDs, and a reason.
+returns only the envelope-level `keep | drop` decision and one concise reason.
 The stable 1,024+ token instructions precede the variable envelope under one
 measured prompt-cache lane. Provider-supplied article/card title, preview, and
 URL already stored in raw X JSON are joined before triage so link-only primary
@@ -156,8 +156,9 @@ artifacts are not mistaken for empty posts; no artifact body is fetched or
 interpreted at this stage. `fli.insight_triage_runs` freezes the cohort,
 prompt/schema hashes, exact input, response, usage, cache reads, LiteLLM tags,
 proxy cost, and explicit failures in a resumable derived SQLite run. Kept
-envelopes continue whole to artifact resolution and cited extraction, so a
-conservative `signal_post_ids` subset cannot discard supporting evidence.
+envelopes continue whole to artifact resolution and cited extraction. Topic
+classification belongs to each extracted insight, where the resolved claim and
+source are available; it is deliberately absent from this routing gate.
 
 The Feed exposes these completed decisions as an audit projection, not as a
 replacement ranking. `fli.web.triage` selects the newest fully completed run

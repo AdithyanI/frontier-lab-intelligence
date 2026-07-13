@@ -9,7 +9,7 @@ implementation brief for the `cited-insights` project. Read
 ## 1. What we are building, in one paragraph
 
 A daily pipeline that takes the top ~20 attention-ranked Feed envelopes,
-runs a cheap LLM **triage** (keep/drop + category + useful post IDs),
+runs a cheap LLM **triage** (keep/drop + reason),
 **fetches the linked primary artifacts** (papers, repos, blog posts) into an
 artifact store keyed by canonical URL, then runs a strong LLM **extraction**
 that turns envelope + artifact text into 3–5 structured, cited,
@@ -66,20 +66,15 @@ reasons (rubric gold).
 
 Input per envelope: root post plus every related non-retweet post with exact
 relationship/authorship markers, embedded expanded URLs, provider-supplied
-article/card titles and previews, and only a count of omitted exact retweet
-copies. Ranking, Registry standing, follower count, amplifier identity, and
+article/card titles and previews. Exact retweet copies are omitted entirely.
+Ranking, Registry standing, follower count, amplifier identity, and
 public engagement are intentionally absent: attention chose the candidate;
 triage judges substance from the evidence itself.
 
 Output (structured, one record per envelope):
 ```
-envelope-triage-output-v1 {
+envelope-triage-output-v2 {
   decision: keep | drop,
-  category: technical_development | business_or_people |
-            strategy_or_policy | safety_or_incident | attributed_view |
-            source_material | banter_or_meme | insufficient_substance |
-            off_topic | other,
-  signal_post_ids: [post_id],  # supplied IDs only; empty for drop
   reason: string               # one concise evidence-based sentence
 }
 ```
@@ -88,9 +83,9 @@ Rules:
   case: Sam Altman banter ranked #1–2 on 07-11 — triage is where that gets
   caught, per the attention-v1.1 decision to NOT fix it in ranking weights.)
 - A thin day may keep <20; never pad.
-- A noisy root may contain a useful child; each supplied post is judged
-  independently. The full frozen envelope continues downstream even when the
-  model selects only a subset of IDs.
+- A noisy root may contain a useful child; each supplied post is inspected,
+  but the model routes the complete envelope rather than selecting evidence
+  IDs.
 - Provider article/card metadata indicates that an artifact is inspectable;
   it is not article extraction or verification.
 - Versioned 1,024+ token instructions form the stable cacheable prefix;
@@ -102,8 +97,8 @@ Rules:
   [`triage-spike-2026-07-13.md`](triage-spike-2026-07-13.md).
 
 ### Stage 3 — Artifact resolution + fetch (new; no LLM)
-For each kept envelope's embedded URLs and provider artifacts, starting with
-the selected signal posts but retaining the full frozen envelope context:
+For each kept envelope's embedded URLs and provider artifacts, inspect the
+complete frozen envelope context:
 1. Resolve: take `expanded_url` from raw JSON (already there); follow HTTP
    redirects max 3 hops for residual shorteners (goo.gle etc.).
 2. Canonicalize: lowercase host, strip tracking params (`utm_*`, `ref`,

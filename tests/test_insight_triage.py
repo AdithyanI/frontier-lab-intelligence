@@ -91,44 +91,33 @@ def make_envelope():
                 "url": "https://example.com/research",
             },
         ),
-        retweet_count=8,
     )
 
 
 def keep_child_payload():
     return {
         "decision": "keep",
-        "category": "strategy_or_policy",
-        "signal_post_ids": ["child-1"],
         "reason": "The child states a concrete thesis about post-training data.",
     }
 
 
-def test_schema_contains_only_the_triage_decision_and_evidence_pointer():
+def test_schema_contains_only_the_envelope_decision_and_reason():
     schema = insight_triage.OUTPUT_FORMAT["schema"]
 
-    assert set(schema["properties"]) == {
-        "decision",
-        "category",
-        "signal_post_ids",
-        "reason",
-    }
+    assert set(schema["properties"]) == {"decision", "reason"}
     assert schema["additionalProperties"] is False
-    assert "confidence" not in schema["properties"]
-    assert "links_to_fetch" not in schema["properties"]
-    assert "insufficient_substance" in schema["properties"]["category"]["enum"]
-    assert "thin_promotion" not in schema["properties"]["category"]["enum"]
 
 
 def test_render_input_preserves_relationships_without_ranking_features():
     rendered = insight_triage.render_input(make_envelope())
 
-    assert "post_id=root-1" in rendered
-    assert "post_id=child-1 | relation=quote | other-author" in rendered
+    assert "[author=@founder | type=quote]" in rendered
+    assert "[relation=quote | other-author | author=@expert]" in rendered
     assert "https://example.com/research" in rendered
     assert "PROVIDER-SUPPLIED ARTIFACT METADATA" in rendered
     assert "A post-training research note" in rendered
-    assert "8 exact retweet copies omitted" in rendered
+    assert "RETWEET SUMMARY" not in rendered
+    assert "post_id=" not in rendered
     assert "attention" not in rendered.lower()
     assert "engagement" not in rendered.lower()
     assert "followers" not in rendered.lower()
@@ -155,55 +144,16 @@ def test_request_uses_cacheable_prefix_structured_output_and_litellm_tags():
         result["request_tags"]
     )
     assert result["decision"] == "keep"
-    assert result["signal_post_ids"] == ["child-1"]
     assert result["cached_tokens"] == 1_280
     assert result["reported_cost_usd"] == pytest.approx(0.0042)
-    assert result["validation_repairs"] == 0
 
 
-def test_invalid_post_id_gets_one_schema_constrained_repair():
-    invalid = keep_child_payload()
-    invalid["signal_post_ids"] = ["invented-post"]
-    client = FakeClient([invalid, keep_child_payload()])
-
-    result = insight_triage.evaluate_one(
-        client,
-        make_envelope(),
-        run="semantic-repair-check",
-    )
-
-    calls = client.responses.with_raw_response.calls
-    assert len(calls) == 2
-    assert calls[0]["text"]["format"] == insight_triage.OUTPUT_FORMAT
-    assert calls[1]["text"]["format"]["schema"]["properties"][
-        "signal_post_ids"
-    ]["items"]["enum"] == ["child-1", "root-1"]
-    assert result["signal_post_ids"] == ["child-1"]
-    assert result["validation_repairs"] == 1
-    assert result["input_tokens"] == 4_000
-    assert result["reported_cost_usd"] == pytest.approx(0.0084)
-
-
-def test_output_rejects_evidence_ids_absent_from_the_envelope():
+def test_output_rejects_fields_outside_the_minimal_contract():
     payload = keep_child_payload()
-    payload["signal_post_ids"] = ["invented-post"]
+    payload["category"] = "strategy_or_policy"
 
-    with pytest.raises(ValueError, match="absent from the input"):
-        insight_triage._validate_output(
-            json.dumps(payload),
-            valid_ids=make_envelope().valid_post_ids,
-        )
-
-
-def test_drop_cannot_select_signal_posts():
-    payload = keep_child_payload()
-    payload.update(decision="drop", signal_post_ids=["child-1"])
-
-    with pytest.raises(ValueError, match="drop must have no signal"):
-        insight_triage._validate_output(
-            json.dumps(payload),
-            valid_ids=make_envelope().valid_post_ids,
-        )
+    with pytest.raises(ValueError, match="exact triage schema"):
+        insight_triage._validate_output(json.dumps(payload))
 
 
 def test_prompt_keeps_time_bounded_views_but_excludes_popularity():
@@ -214,3 +164,5 @@ def test_prompt_keeps_time_bounded_views_but_excludes_popularity():
     assert "a noisy root can contain a valuable quote or reply" in prompt
     assert "first-hand product experience" in prompt
     assert "provider-supplied titles" in prompt
+    assert "signal_post_ids" not in prompt
+    assert "category" not in prompt

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -17,26 +16,11 @@ from typing import Any
 from fli import llm_responses
 
 
-PROMPT_VERSION = "envelope-triage-v1"
-SCHEMA_VERSION = "envelope-triage-output-v1"
+PROMPT_VERSION = "envelope-triage-v2"
+SCHEMA_VERSION = "envelope-triage-output-v2"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "medium"
-PROMPT_PATH = Path(__file__).with_name("prompts") / "envelope_triage_v1.txt"
-
-CATEGORIES = frozenset(
-    {
-        "technical_development",
-        "business_or_people",
-        "strategy_or_policy",
-        "safety_or_incident",
-        "attributed_view",
-        "source_material",
-        "banter_or_meme",
-        "insufficient_substance",
-        "off_topic",
-        "other",
-    }
-)
+PROMPT_PATH = Path(__file__).with_name("prompts") / "envelope_triage_v2.txt"
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
@@ -46,15 +30,9 @@ OUTPUT_FORMAT: dict[str, Any] = {
         "type": "object",
         "properties": {
             "decision": {"type": "string", "enum": ["keep", "drop"]},
-            "category": {"type": "string", "enum": sorted(CATEGORIES)},
-            "signal_post_ids": {
-                "type": "array",
-                "items": {"type": "string"},
-                "maxItems": 32,
-            },
             "reason": {"type": "string"},
         },
-        "required": ["decision", "category", "signal_post_ids", "reason"],
+        "required": ["decision", "reason"],
         "additionalProperties": False,
     },
 }
@@ -68,19 +46,10 @@ class EnvelopeInput:
     related_posts: tuple[dict[str, Any], ...] = ()
     urls: tuple[dict[str, str], ...] = ()
     embedded_artifacts: tuple[dict[str, str], ...] = ()
-    retweet_count: int = 0
 
     @property
     def input_sha256(self) -> str:
         return hashlib.sha256(render_input(self).encode()).hexdigest()
-
-    @property
-    def valid_post_ids(self) -> set[str]:
-        return {
-            str(self.root["post_id"]),
-            *(str(post["post_id"]) for post in self.related_posts),
-        }
-
 
 def instructions() -> str:
     """Return the stable cacheable prefix shared across triage requests."""
@@ -114,10 +83,7 @@ def render_input(envelope: EnvelopeInput) -> str:
         "Evaluate this evidence envelope.",
         "",
         "ROOT POST",
-        (
-            f"[post_id={root['post_id']} | author={root['author']} | "
-            f"type={root['post_type']}]"
-        ),
+        f"[author={root['author']} | type={root['post_type']}]",
         str(root.get("text") or ""),
     ]
     quoted_target = root.get("quoted_target_handle")
@@ -132,7 +98,7 @@ def render_input(envelope: EnvelopeInput) -> str:
             (
                 "",
                 (
-                    f"[post_id={post['post_id']} | relation={post['relation']} | "
+                    f"[relation={post['relation']} | "
                     f"{authorship} | author={post['author']}]"
                 ),
                 str(post.get("text") or ""),
@@ -142,7 +108,7 @@ def render_input(envelope: EnvelopeInput) -> str:
     if not envelope.urls:
         blocks.append("None supplied.")
     for link in envelope.urls:
-        blocks.append(f"[post_id={link['post_id']}] {link['url']}")
+        blocks.append(link["url"])
     blocks.extend(("", "PROVIDER-SUPPLIED ARTIFACT METADATA"))
     if not envelope.embedded_artifacts:
         blocks.append("None supplied.")
@@ -150,48 +116,25 @@ def render_input(envelope: EnvelopeInput) -> str:
         blocks.extend(
             (
                 "",
-                (
-                    f"[post_id={artifact['post_id']} | kind={artifact['kind']}] "
-                    f"{artifact.get('title') or 'Untitled artifact'}"
-                ),
+                f"[{artifact['kind']}] {artifact.get('title') or 'Untitled artifact'}",
                 str(artifact.get("preview") or "No preview supplied."),
                 f"URL: {artifact.get('url') or 'No URL supplied.'}",
             )
         )
-    blocks.extend(
-        (
-            "",
-            "RETWEET SUMMARY",
-            f"{envelope.retweet_count} exact retweet copies omitted.",
-        )
-    )
     return "\n".join(blocks)
 
 
-def _validate_output(output_text: str, *, valid_ids: set[str]) -> dict[str, Any]:
+def _validate_output(output_text: str) -> dict[str, Any]:
     payload = json.loads(output_text)
     required = set(OUTPUT_FORMAT["schema"]["required"])
     if not isinstance(payload, dict) or set(payload) != required:
         raise ValueError("response does not match the exact triage schema")
     if payload["decision"] not in {"keep", "drop"}:
         raise ValueError(f"invalid decision: {payload['decision']!r}")
-    if payload["category"] not in CATEGORIES:
-        raise ValueError(f"invalid category: {payload['category']!r}")
-    post_ids = payload["signal_post_ids"]
-    if not isinstance(post_ids, list) or any(
-        not isinstance(post_id, str) or post_id not in valid_ids
-        for post_id in post_ids
-    ):
-        raise ValueError("signal_post_ids contains an ID absent from the input")
-    if payload["decision"] == "drop" and post_ids:
-        raise ValueError("drop must have no signal_post_ids")
-    if payload["decision"] == "keep" and not post_ids:
-        raise ValueError("keep must identify at least one signal_post_id")
     reason = payload["reason"]
     if not isinstance(reason, str) or not reason.strip():
         raise ValueError("reason must be a non-empty string")
     payload["reason"] = " ".join(reason.split())
-    payload["signal_post_ids"] = list(dict.fromkeys(post_ids))
     return payload
 
 
@@ -212,15 +155,6 @@ def _input_token_detail(usage: Any, field: str) -> int:
         else getattr(usage, "input_tokens_details", None)
     )
     return _usage_value(details, field)
-
-
-def _constrained_output_format(valid_ids: set[str]) -> dict[str, Any]:
-    """Constrain a rare semantic repair to identifiers in the frozen input."""
-    output_format = deepcopy(OUTPUT_FORMAT)
-    output_format["schema"]["properties"]["signal_post_ids"]["items"]["enum"] = (
-        sorted(valid_ids)
-    )
-    return output_format
 
 
 def _create_response(
@@ -265,32 +199,9 @@ def evaluate_one(
         "extra_body": {"metadata": {"tags": list(tags)}},
         "extra_headers": {"x-litellm-tags": ",".join(tags)},
     }
-    responses = [_create_response(client, request)]
-    response, response_data, reported_cost = responses[-1]
-    try:
-        payload = _validate_output(
-            llm_responses.output_text(response_data),
-            valid_ids=envelope.valid_post_ids,
-        )
-    except ValueError as exc:
-        if str(exc) != "signal_post_ids contains an ID absent from the input":
-            raise
-        repair_request = {
-            **request,
-            "text": {"format": _constrained_output_format(envelope.valid_post_ids)},
-        }
-        responses.append(_create_response(client, repair_request))
-        response, response_data, reported_cost = responses[-1]
-        payload = _validate_output(
-            llm_responses.output_text(response_data),
-            valid_ids=envelope.valid_post_ids,
-        )
-
-    usages = [
-        getattr(item, "usage", None) or data.get("usage")
-        for item, data, _ in responses
-    ]
-    costs = [cost for _, _, cost in responses if cost is not None]
+    response, response_data, reported_cost = _create_response(client, request)
+    payload = _validate_output(llm_responses.output_text(response_data))
+    usage = getattr(response, "usage", None) or response_data.get("usage")
     return {
         **payload,
         "event_id": envelope.event_id,
@@ -305,17 +216,10 @@ def evaluate_one(
         "response_id": getattr(response, "id", None) or response_data.get("id"),
         "response_model": getattr(response, "model", None)
         or response_data.get("model"),
-        "input_tokens": sum(_usage_value(usage, "input_tokens") for usage in usages),
-        "cached_tokens": sum(
-            _input_token_detail(usage, "cached_tokens") for usage in usages
-        ),
-        "cache_write_tokens": sum(
-            _input_token_detail(usage, "cache_write_tokens") for usage in usages
-        ),
-        "output_tokens": sum(
-            _usage_value(usage, "output_tokens") for usage in usages
-        ),
-        "reported_cost_usd": sum(costs) if costs else None,
-        "validation_repairs": len(responses) - 1,
+        "input_tokens": _usage_value(usage, "input_tokens"),
+        "cached_tokens": _input_token_detail(usage, "cached_tokens"),
+        "cache_write_tokens": _input_token_detail(usage, "cache_write_tokens"),
+        "output_tokens": _usage_value(usage, "output_tokens"),
+        "reported_cost_usd": reported_cost,
         "request_tags": list(tags),
     }

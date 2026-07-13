@@ -151,8 +151,6 @@ def test_completed_item_is_resumable_without_a_duplicate_model_call(
         calls.append((client, supplied_envelope, kwargs))
         return {
             "decision": "keep",
-            "category": "technical_development",
-            "signal_post_ids": ["post-1"],
             "reason": "The post reports a concrete model evaluation result.",
             "response_id": "resp-1",
             "response_model": "gpt-5.4-mini",
@@ -161,7 +159,6 @@ def test_completed_item_is_resumable_without_a_duplicate_model_call(
             "cache_write_tokens": 0,
             "output_tokens": 80,
             "reported_cost_usd": 0.0042,
-            "validation_repairs": 0,
             "request_tags": ["app:frontier-lab-intelligence"],
         }
 

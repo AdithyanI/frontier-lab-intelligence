@@ -76,21 +76,16 @@ def _write_triage_run(root, *, event_ids):
     )
     for rank, event_id in enumerate(event_ids, start=1):
         decision = "keep" if rank == 1 else "drop"
-        category = "technical_development" if decision == "keep" else "off_topic"
-        signal_ids = '["post-1"]' if decision == "keep" else "[]"
         conn.execute(
             """INSERT INTO triage_item
                (event_id, current_rank, root_post_id, root_url, envelope_json,
-                input_text, input_sha256, status, decision, category,
-                signal_post_ids_json, reason, updated_at)
+                input_text, input_sha256, status, decision, reason, updated_at)
                VALUES (?, ?, 'post-1', 'https://x.com/a/status/1', '{}',
-                       'input', 'hash', 'complete', ?, ?, ?, ?, ?)""",
+                       'input', 'hash', 'complete', ?, ?, ?)""",
             (
                 event_id,
                 rank,
                 decision,
-                category,
-                signal_ids,
                 "Concrete evidence." if decision == "keep" else "Off-topic evidence.",
                 now,
             ),
