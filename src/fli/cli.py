@@ -51,6 +51,10 @@ def main(argv: list[str] | None = None) -> int:
         "signal-feed", help="Materialize the deterministic X evidence Feed."
     )
     signal_feed_p.add_argument("feed_args", nargs=argparse.REMAINDER)
+    signal_events_p = sub.add_parser(
+        "signal-events", help="Group exact structural Feed evidence."
+    )
+    signal_events_p.add_argument("event_args", nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -127,6 +131,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import signal_feed
 
         return signal_feed.main(args.feed_args)
+
+    if args.command == "signal-events":
+        from fli import signal_events
+
+        return signal_events.main(args.event_args)
 
     parser.print_help()
     return 0

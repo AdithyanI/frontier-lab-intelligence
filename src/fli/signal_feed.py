@@ -21,8 +21,8 @@ from typing import Any, Iterable
 from fli import x_content
 
 
-SCHEMA_VERSION = "signal-feed-v2"
-SELECTION_CONTRACT = "complete-calendar-days-v2"
+SCHEMA_VERSION = "signal-feed-v3"
+SELECTION_CONTRACT = "complete-calendar-days-v3"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SOURCE_DB = REPO_ROOT / "data" / "raw" / "x" / "x-content.db"
 DEFAULT_FEED_DB = REPO_ROOT / "data" / "derived" / "signal-feed" / "feed.db"
@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS feed_post (
     text TEXT NOT NULL,
     url TEXT,
     post_type TEXT NOT NULL,
+    conversation_id TEXT,
+    in_reply_to_post_id TEXT,
     like_count INTEGER,
     reply_count INTEGER,
     retweet_count INTEGER,
@@ -68,6 +70,8 @@ CREATE INDEX IF NOT EXISTS idx_feed_post_day
     ON feed_post(run_id, day, published_at DESC, post_id);
 CREATE INDEX IF NOT EXISTS idx_feed_post_author
     ON feed_post(run_id, author_x_id, author_handle, day);
+CREATE INDEX IF NOT EXISTS idx_feed_post_conversation
+    ON feed_post(run_id, conversation_id, in_reply_to_post_id);
 
 CREATE TABLE IF NOT EXISTS feed_run_post (
     run_id TEXT NOT NULL REFERENCES feed_run(run_id) ON DELETE CASCADE,
@@ -103,6 +107,29 @@ CREATE INDEX IF NOT EXISTS idx_feed_relation_target
 def connect(path: Path | str = DEFAULT_FEED_DB) -> sqlite3.Connection:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        probe = sqlite3.connect(path)
+        try:
+            has_run = probe.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'feed_run'"
+            ).fetchone()
+            versions = (
+                {
+                    row[0]
+                    for row in probe.execute(
+                        "SELECT DISTINCT schema_version FROM feed_run"
+                    ).fetchall()
+                }
+                if has_run
+                else set()
+            )
+        finally:
+            probe.close()
+        if versions and versions != {SCHEMA_VERSION}:
+            found = ", ".join(sorted(versions))
+            raise RuntimeError(
+                f"Feed store uses {found}; rebuild the derived store for {SCHEMA_VERSION}."
+            )
     conn = sqlite3.connect(path, timeout=60.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
@@ -198,6 +225,14 @@ def _post_record(
         "text": text,
         "url": _tweet_url(tweet, str(author["handle"]), post_id),
         "post_type": post_type,
+        "conversation_id": str(
+            tweet.get("conversationId") or tweet.get("conversation_id") or ""
+        ).strip()
+        or None,
+        "in_reply_to_post_id": str(
+            tweet.get("inReplyToId") or tweet.get("in_reply_to_post_id") or ""
+        ).strip()
+        or None,
         "like_count": _as_int(tweet.get("likeCount") or tweet.get("like_count")),
         "reply_count": _as_int(tweet.get("replyCount") or tweet.get("reply_count")),
         "retweet_count": _as_int(
@@ -242,6 +277,8 @@ def _insert_post(
                 text = excluded.text,
                 url = excluded.url,
                 post_type = excluded.post_type,
+                conversation_id = excluded.conversation_id,
+                in_reply_to_post_id = excluded.in_reply_to_post_id,
                 like_count = excluded.like_count,
                 reply_count = excluded.reply_count,
                 retweet_count = excluded.retweet_count,

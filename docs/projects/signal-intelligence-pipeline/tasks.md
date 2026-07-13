@@ -186,6 +186,10 @@ instead of expanding the graph or processing the complete X history.
   changes are visible on refresh without rewriting evidence.
 - Use `attention-v1` only as a transparent experimental ordering aid. Search
   and lane changes never recalibrate scores; self-amplification is excluded.
+- Start event grouping with `exact-structural-v1` only: shared quote/retweet
+  target IDs and exact reply/conversation IDs. Shared URLs, text similarity,
+  embeddings, model judgment, relevance, and summaries are separate later
+  contracts.
 
 ## Open Questions / Blockers
 
@@ -198,8 +202,8 @@ instead of expanding the graph or processing the complete X history.
 | --- | --- | --- | --- |
 | todo | Audit the top Feed results for signal/noise and record the keep/change decision for `attention-v1`. | parent | — |
 | done | Audit the stored relation/thread/URL evidence and propose the deterministic event-clustering and separate relevance boundary. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| todo | Implement normalized conversation/canonical-URL anchors and `event-cluster-v1` as a separate content-addressed derived run. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| todo | Add the `Events | Posts` Feed view and run the top-20 false-merge/split audit before enabling event relevance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| in_progress | Implement normalized conversation metadata and `exact-structural-v1` as a separate content-addressed derived run; use no URL or semantic grouping. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| todo | Add the `Events | Posts` Feed view for exact groups and run the top-20 structural audit before enabling any inferred grouping or relevance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | todo | Normalize expanded external URLs/cards only for the accepted candidate set, then resolve primary citations in the later extraction milestone. | parent | — |
 
 ## Backlog / Remaining Work

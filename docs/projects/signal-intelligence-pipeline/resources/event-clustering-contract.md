@@ -1,7 +1,7 @@
 # Proposed Event Clustering Contract
 
-Status: proposed from the 2026-07-13 data audit; implement only after the
-product boundary is confirmed.
+Status: `exact-structural-v1` accepted 2026-07-13. Shared-URL and semantic
+grouping remain explicitly deferred.
 
 ## Decision
 
@@ -40,39 +40,34 @@ changing historical clusters.
 
 ## Clustering Stages
 
-### 1. Normalize Evidence Anchors
+### 1. Normalize Exact Structural Anchors
 
 Extend the rebuildable Feed representation, not the immutable raw store, with:
 
 - `conversation_id` and `in_reply_to_post_id` when present;
-- canonical expanded URLs with tracking parameters removed;
-- X Article/card identifiers when present;
 - the existing quote/retweet target IDs;
 - stable author identity and publication time.
 
-Generic landing pages and broken placeholders such as `t.co/`, `meta.ai`, or
-site homepages are not sufficient URL anchors on their own.
+No URL, name, keyword, embedding, or model-based similarity participates in
+`exact-structural-v1`.
 
 ### 2. Build Deterministic Seed Clusters
 
-Create seed groups from high-precision links:
+Create groups only from relationships asserted directly by X/provider IDs:
 
 1. the same retweet/quote target;
-2. the same conversation root or reply parent;
-3. the same canonical substantive external URL or X Article ID.
+2. the same conversation root or reply parent.
 
-Every membership row stores a reason such as `same_target`, `same_thread`, or
-`same_canonical_url`. Avoid unconditional graph connected-components: one post
-with two unrelated links could otherwise join two events into a false
-mega-cluster.
+Every link stores a reason such as `same_target`, `same_conversation`, or
+`reply_parent`. Connected components are safe in this version because every
+edge is an explicit structural relationship, never an inferred topical link.
 
 ### 3. Merge Semantically Equivalent Seeds
 
-Only unresolved seeds and unanchored first-hand posts enter a bounded semantic
-merge within a short time window, initially 72 hours. Candidate generation can
-use normalized named entities/product names and text similarity; a structured
-model decision may confirm borderline merges. The result must store the merge
-reason, confidence, contract version, and exact input post IDs.
+This is a later contract, not part of `exact-structural-v1`. Only after the
+exact groups are audited may unresolved posts enter a bounded semantic merge.
+That future result must store the merge reason, confidence, contract version,
+and exact input post IDs.
 
 The first implementation should not generate a polished event summary. Its
 representative text can come from the best first-hand/root post until event
@@ -162,4 +157,3 @@ Before relevance or insight extraction:
 3. accept `event-cluster-v1` only if at least 18/20 have no material false
    merge and obvious multi-post launches are not split across the top results;
 4. keep the Posts view as the fallback audit surface regardless of outcome.
-
