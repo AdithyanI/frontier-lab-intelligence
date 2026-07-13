@@ -122,8 +122,8 @@ function AccountIntake() {
           {index < stages.length - 1 && <line x1={stage.x + 190} y1="120" x2={stages[index + 1].x - 8} y2="120" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#intake-arrow)" />}
         </g>
       ))}
-      <path d="M843 170 L843 220 L986 220" fill="none" stroke={MUTED} strokeWidth="1.2" strokeDasharray="4 4" />
-      <text x="1000" y="224" textAnchor="end" fontFamily={MONO} fontSize="10.5" fill={MUTED}>EVERY EXIT STAYS AUDITABLE</text>
+      <path d="M843 170 L843 206" fill="none" stroke={MUTED} strokeWidth="1.2" strokeDasharray="4 4" />
+      <text x="843" y="230" textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={MUTED}>EVERY EXIT STAYS AUDITABLE</text>
     </svg>
   )
 }
@@ -161,7 +161,7 @@ function CurrentDataModel() {
       <text x="566" y="301" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Attention features</text>
       <text x="758" y="301" fontFamily={MONO} fontSize="13" fill={BLUE_MID}>→</text>
       <text x="794" y="301" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Feed rows</text>
-      <text x="30" y="308" fontFamily={UI} fontSize="12.5" fill={MUTED}>Future channels can join the same model; today, this Feed is X-only.</text>
+      <text x="30" y="352" fontFamily={UI} fontSize="12.5" fill={MUTED}>Future channels can join the same model; today, this Feed is X-only.</text>
     </svg>
   )
 }

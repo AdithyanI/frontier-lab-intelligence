@@ -367,18 +367,17 @@ export default function Feed() {
 
   return (
     <div className="page feed-page">
-      <h1 className="page-title">What is the network paying attention to?</h1>
-      <p className="page-sub">
-        Stored public X evidence, organized into exact reply, quote, and retweet
-        envelopes. Nothing here is yet an insight or claim.
-      </p>
-
-      <div className="feed-scope mono" aria-label="Feed scope">
-        <span>SOURCE · X</span>
-        <span>{availableDates.length} COMPLETE UTC DAYS</span>
-        <span>EXACT RELATIONSHIPS · NO SEMANTIC GROUPING</span>
-        <a href="/architecture#system-today">See system map</a>
-      </div>
+      <header className="page-head">
+        <h1 className="page-title">What is the network paying attention to?</h1>
+        <p className="page-sub">
+          Each day&rsquo;s posts from tracked labs and people, ranked by who in
+          the network amplified them — not by raw engagement.
+        </p>
+        <p className="page-method-line mono">
+          <span>X evidence · exact reply, quote, and retweet links only</span>
+          <a href="/architecture#ranking-methods">How scoring works ↗</a>
+        </p>
+      </header>
 
       <section className="feed-calendar" aria-label="Available complete UTC days">
         <div className="feed-days" role="group" aria-label="Feed date">
