@@ -18,6 +18,7 @@
   --blue:      #5bc5f2;            /* capital-blue: fills, marks, large accents */
   --blue-mid:  #4391b4;            /* capital-blue-600: lines, secondary */
   --blue-ink:  #235165;            /* capital-blue-700: link text, AA-safe */
+  --blue-wash: #edf6fa;            /* capital-blue surface: selected/info states */
 
   /* semantics */
   --positive:  #2e7d4f;

@@ -536,7 +536,7 @@ td.num {
 
 .ent-type--person {
   color: var(--blue-ink);
-  background: #edf6fa;
+  background: var(--blue-wash);
 }
 
 .ent-type--organization {
@@ -1358,7 +1358,7 @@ td.num {
   letter-spacing: 0.025em;
 }
 
-.feed-lane--network { color: var(--blue-ink); background: #edf6fa; }
+.feed-lane--network { color: var(--blue-ink); background: var(--blue-wash); }
 .feed-lane--firsthand { color: var(--ink-soft); background: var(--surface); }
 
 .feed-text {
@@ -1504,14 +1504,22 @@ td.num {
   background: var(--blue-ink);
 }
 
+.event-relationship--continuation {
+  background: var(--blue-wash);
+}
+
+.event-relationship--continuation::before {
+  background: var(--blue-mid);
+}
+
 .event-relationship--reply:not(.event-relationship--continuation) .event-relationship-kind {
   color: var(--ink-soft);
 }
 
 .event-relationship--continuation .event-relationship-kind {
   padding: 2px 6px;
-  background: #edf6fa;
-  color: var(--blue-ink);
+  background: var(--blue);
+  color: var(--ink);
 }
 
 .event-relationship--quote,
@@ -1536,6 +1544,11 @@ td.num {
 .event-relationship header > span:not(.event-relationship-kind),
 .event-relationship header time { color: var(--muted); font-size: 9.5px; }
 .event-relationship header time { margin-left: auto; }
+
+.event-relationship--continuation header > span:not(.event-relationship-kind),
+.event-relationship--continuation header time {
+  color: var(--blue-ink);
+}
 
 .event-relationship-kind {
   color: var(--blue-ink);
