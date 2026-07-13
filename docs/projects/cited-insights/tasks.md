@@ -130,6 +130,14 @@ reads first.
 
 ## Decisions
 
+- 2026-07-13: Freeze envelope triage as one permissive
+  `gpt-5.4-mini`/medium Responses call with no tools and a four-field strict
+  output (`decision`, `category`, `signal_post_ids`, `reason`). The model sees
+  structural evidence plus provider-supplied artifact metadata, never ranking
+  or popularity. Full artifact resolution happens only after keep. Do not add
+  a default reviewer model; the final audited run had zero false drops and
+  verified cache reads. [Calibration report](resources/triage-spike-2026-07-13.md).
+
 - 2026-07-13: Keep the frozen `attention-v1.1` candidate-generation contract:
   each active canonical Registry entity contributes one flat amplifier vote;
   the originator's entity-overlap support remains a separate component. Do not
@@ -163,13 +171,13 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Run a bounded `triage-v1` design spike over representative high-attention envelopes: compare the minimum dynamic input and output schema, verify prompt-cache reads and LiteLLM tags/cost telemetry, audit false drops against the July 11 labels, and recommend one-stage vs two-stage filtering. Do not run the full corpus. | worker | [top-20 audit](../archive/signal-intelligence-pipeline/resources/top-20-attention-audit-2026-07-11.md) |
-| todo | Hand-build the extraction oracle after triage stabilizes: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
+| done | Run a bounded `triage-v1` design spike over representative high-attention envelopes: compare the minimum dynamic input and output schema, verify prompt-cache reads and LiteLLM tags/cost telemetry, audit false drops against the July 11 labels, and recommend one-stage vs two-stage filtering. Do not run the full corpus. | worker | [triage report](resources/triage-spike-2026-07-13.md) |
+| in_progress | Hand-build the extraction oracle after triage stabilizes: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 | todo | Build artifact fetch + insight extraction for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
-- [ ] Relevance/substance gate with recorded reasons per envelope.
+- [x] Relevance/substance gate with recorded reasons per envelope.
 - [ ] Second-day run with the unchanged rubric.
 - [ ] Insights API + page with citation click-through.
 - [ ] Daily briefing renderer + CLI command.
@@ -212,3 +220,13 @@ reads first.
   conservative one-stage filtering against an optional reviewer stage using
   real envelopes, record false drops, and verify cache/tag/cost telemetry before
   choosing the durable contract.
+- 2026-07-13: [TRIAGE-FROZEN] Completed five bounded 20-envelope runs (100
+  calls total; no full corpus). The final `gpt-5.4-mini`/medium contract reached
+  19/20 agreement and zero false drops on the audited cohort; its one
+  disagreement correctly retained a substantive child hidden below a noisy
+  root. An independently audited unseen cohort improved from 18/20 to 20/20
+  after adding provider article/card metadata and clarifying first-hand product
+  experience. Prompt cache reads were observed and total proxy-reported spend
+  was $0.304257. Adi chose mini as the single default; no Luna comparison or
+  routine `gpt-5.5` reviewer is needed. Next: build the five-record extraction
+  oracle. See `resources/triage-spike-2026-07-13.md`.

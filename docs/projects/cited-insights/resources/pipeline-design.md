@@ -9,7 +9,7 @@ implementation brief for the `cited-insights` project. Read
 ## 1. What we are building, in one paragraph
 
 A daily pipeline that takes the top ~20 attention-ranked Feed envelopes,
-runs a cheap LLM **triage** (keep/drop + reason + which links to fetch),
+runs a cheap LLM **triage** (keep/drop + category + useful post IDs),
 **fetches the linked primary artifacts** (papers, repos, blog posts) into an
 artifact store keyed by canonical URL, then runs a strong LLM **extraction**
 that turns envelope + artifact text into 3–5 structured, cited,
@@ -60,24 +60,27 @@ Top ~20 envelopes by `peak_attention_score` for the target day, from the
 existing derived run / Feed API. Start day: **2026-07-11** (audited).
 Second day: 2026-07-09 or 07-10 (unaudited — good blind test).
 
-### Stage 2 — Triage gate (new; cheap model)
+### Stage 2 — Triage gate (implemented; `gpt-5.4-mini`)
 Purpose: control *what we even extract*; produce auditable signal-vs-noise
 reasons (rubric gold).
 
-Input per envelope: root post text, author + Registry standing, amplifier
-names/count, engagement, embedded link list (expanded URLs), quoted-post
-text if present.
+Input per envelope: root post plus every related non-retweet post with exact
+relationship/authorship markers, embedded expanded URLs, provider-supplied
+article/card titles and previews, and only a count of omitted exact retweet
+copies. Ranking, Registry standing, follower count, amplifier identity, and
+public engagement are intentionally absent: attention chose the candidate;
+triage judges substance from the evidence itself.
 
 Output (structured, one record per envelope):
 ```
-triage-v1 {
-  envelope_id, run_id, day,
-  verdict: keep | drop,
-  reason: string          # one sentence, will be shown in UI/eval
-  category: departure | release | capability | technique | open-model
-            | funding | banter | meme | other
-  links_to_fetch: [url]   # subset of embedded links worth fetching
-  confidence: 0-1
+envelope-triage-output-v1 {
+  decision: keep | drop,
+  category: technical_development | business_or_people |
+            strategy_or_policy | safety_or_incident | attributed_view |
+            source_material | banter_or_meme | insufficient_substance |
+            off_topic | other,
+  signal_post_ids: [post_id],  # supplied IDs only; empty for drop
+  reason: string               # one concise evidence-based sentence
 }
 ```
 Rules:
@@ -85,10 +88,22 @@ Rules:
   case: Sam Altman banter ranked #1–2 on 07-11 — triage is where that gets
   caught, per the attention-v1.1 decision to NOT fix it in ranking weights.)
 - A thin day may keep <20; never pad.
-- Deterministic-ish: temperature 0, versioned prompt, store raw response.
+- A noisy root may contain a useful child; each supplied post is judged
+  independently. The full frozen envelope continues downstream even when the
+  model selects only a subset of IDs.
+- Provider article/card metadata indicates that an artifact is inspectable;
+  it is not article extraction or verification.
+- Versioned 1,024+ token instructions form the stable cacheable prefix;
+  envelope evidence is the variable suffix. Cache reads, tags, response ID,
+  exact input, usage, errors, and proxy cost live in the resumable local run
+  database. OpenAI-side storage is disabled (`store=False`).
+- No web tool and no routine second-model reviewer. The bounded calibration
+  reached zero false drops; see
+  [`triage-spike-2026-07-13.md`](triage-spike-2026-07-13.md).
 
 ### Stage 3 — Artifact resolution + fetch (new; no LLM)
-For each kept envelope's `links_to_fetch`:
+For each kept envelope's embedded URLs and provider artifacts, starting with
+the selected signal posts but retaining the full frozen envelope context:
 1. Resolve: take `expanded_url` from raw JSON (already there); follow HTTP
    redirects max 3 hops for residual shorteners (goo.gle etc.).
 2. Canonicalize: lowercase host, strip tracking params (`utm_*`, `ref`,
