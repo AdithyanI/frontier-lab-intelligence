@@ -88,6 +88,9 @@ sources need a stable event identity to attach evidence to.
   is unchanged; changed snapshots are identifiable for a later bounded rerun.
 - [ ] The seven-day store is rebuilt and the Anthropic global-workspace event
   passes a Monday/Tuesday regression test.
+- [ ] An adversarial structural audit finds no remaining provider-declared
+  relationship loss, competing top-level envelopes for absorbed evidence, or
+  independently triaged duplicates in a representative high-attention sample.
 - [ ] Architecture/reference docs and build log reflect the landed contract,
   and `scripts/check-fast.sh` passes.
 
@@ -127,6 +130,9 @@ sources need a stable event identity to attach evidence to.
 - Preserve raw evidence. Replace unfinished derived schemas cleanly rather
   than adding compatibility reads for the future-leaking projection.
 - Do not start cited extraction or broaden ingestion in this project.
+- Do not rerun or trust bulk triage as final routing until normalized relations,
+  event clustering, and snapshot projection pass the adversarial audit. Triage
+  cannot repair an envelope assembled from incomplete evidence.
 - Update this tracker after each milestone; archive it once Done When is met.
 
 ## Decisions
@@ -150,6 +156,11 @@ sources need a stable event identity to attach evidence to.
   a second meaningful event. Provider-declared relations must be traversed
   transitively before event clustering; attention can rank an event but cannot
   choose its canonical identity.
+- 2026-07-13: Adi requires an adversarial review after the repair, covering the
+  full data path rather than only the reported examples. The review should
+  challenge normalization depth, relation completeness, canonical-root choice,
+  duplicate suppression, temporal cutoffs, and triage reuse before downstream
+  extraction resumes.
 
 ## Open Questions / Blockers
 
@@ -171,6 +182,10 @@ sources need a stable event identity to attach evidence to.
   nested quote edges, and audit the top affected envelopes for false merges.
 - [ ] Audit triage snapshot hashes; reuse unchanged decisions and enumerate
   changed inputs without silently applying stale decisions.
+- [ ] Run an adversarial review after rebuilding: programmatic invariants over
+  the complete seven-day corpus plus independent manual audits of false splits,
+  false merges, missing roots, duplicate top-level envelopes, and stale triage
+  decisions. Preserve concrete counterexamples and before/after counts.
 - [ ] Audit the continuation affordance against a two-day and a six-day event;
   remove anything more complex than the agreed label/disclosure.
 - [ ] Document the landed architecture and operational rebuild command.
@@ -205,3 +220,8 @@ sources need a stable event identity to attach evidence to.
   independently triaged envelopes. Audited 750 distinct recoverable missing
   nested quote edges; 720 currently bridge separate clusters. Captured the
   repair contract and regression oracle in the linked audit resource.
+- 2026-07-13: [REQUIREMENT] Captured Adi's overnight acceptance gate: after the
+  repair, adversarially review the complete normalization → clustering →
+  temporal projection → triage path. Do not mistake model routing for data
+  correctness, and do not proceed to cited extraction while duplicate or
+  incomplete envelopes remain possible.
