@@ -1524,6 +1524,7 @@ def read_entities(
     group: str = "all",
     query: str = "",
     direction: str = "desc",
+    entity_id: int | None = None,
 ) -> list[dict]:
     """Return identity fields, structural-kind reason, and curation state."""
     ensure_schema(conn)
@@ -1566,6 +1567,9 @@ def read_entities(
     if direction not in {"asc", "desc"}:
         raise ValueError(f"invalid follower sort direction: {direction}")
     where_sql, where_params = _registry_where(group=group, query=query)
+    if entity_id is not None:
+        where_sql = f"({where_sql}) AND e.id = ?"
+        where_params = [*where_params, entity_id]
     follower_order = direction.upper()
     order_sql = (
         f"followers_count {follower_order} NULLS LAST, name COLLATE NOCASE"

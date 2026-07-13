@@ -96,6 +96,23 @@ def test_registry_pages_filters_and_searches_on_the_server():
     assert any(entity["slug"] == "openai" for entity in search["entities"])
 
 
+def test_registry_entity_returns_one_identity_card_payload():
+    listed = client.get("/api/registry?q=openai&limit=5").json()["entities"]
+    openai = next(e for e in listed if e["slug"] == "openai")
+
+    r = client.get(f"/api/registry/entity/{openai['id']}")
+    assert r.status_code == 200
+    entity = r.json()["entity"]
+    assert entity["id"] == openai["id"]
+    assert entity["slug"] == "openai"
+    assert entity["kind"] == "organization"
+    assert any(c["kind"] == "x" for c in entity["channels"])
+    assert set(entity) == set(openai)
+
+    missing = client.get("/api/registry/entity/999999999")
+    assert missing.status_code == 404
+
+
 def test_spa_served_when_built():
     r = client.get("/")
     assert r.status_code == 200

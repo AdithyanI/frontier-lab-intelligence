@@ -1219,9 +1219,14 @@ td.num {
 .rank-detail-reg {
   display: inline-block;
   margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue-ink);
   font-size: 11px;
   letter-spacing: 0.05em;
   text-decoration: none;
+  cursor: pointer;
 }
 .rank-detail-reg:hover { text-decoration: underline; }
 

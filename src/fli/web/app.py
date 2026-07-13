@@ -181,6 +181,21 @@ def registry(
         conn.close()
 
 
+@app.get("/api/registry/entity/{entity_id}")
+def registry_entity(entity_id: int) -> JSONResponse:
+    """One resolved entity with channels, for the shared identity card."""
+    conn = _model_conn()
+    try:
+        entities = entity_registry.read_entities(
+            conn, limit=1, entity_id=entity_id
+        )
+        if not entities:
+            return JSONResponse({"detail": "entity not found"}, status_code=404)
+        return JSONResponse({"entity": entities[0]})
+    finally:
+        conn.close()
+
+
 @app.get("/api/rankings")
 def rankings(
     limit: int = Query(160, ge=1, le=2000),

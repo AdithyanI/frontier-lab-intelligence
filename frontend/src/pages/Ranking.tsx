@@ -7,10 +7,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   getJSON,
+  type Entity,
   type RankingFollowers,
   type RankingNode,
   type Rankings,
 } from '../api'
+import EntityCard from '../components/EntityCard'
 
 const INK = '#151515'
 const MUTED = '#6b6b68'
@@ -112,6 +114,7 @@ export default function Ranking() {
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
   const [followers, setFollowers] = useState<RankingFollowers | null>(null)
+  const [profile, setProfile] = useState<Entity | null>(null)
   const rowRefs = useRef(new Map<string, HTMLButtonElement>())
   const selectedFrom = useRef<'orbit' | 'list'>('orbit')
 
@@ -492,13 +495,20 @@ export default function Ranking() {
                     ` and ${fmt((followers.total ?? 0) - 4)} more of the cohort.`}
                 </p>
               )}
-              {sel.registry_state === 'active' && sel.entity_name && (
-                <a
+              {sel.registry_state === 'active' && sel.entity_id != null && (
+                <button
                   className="rank-detail-reg mono"
-                  href={`/?q=${encodeURIComponent(sel.entity_name)}`}
+                  type="button"
+                  onClick={() => {
+                    getJSON<{ entity: Entity }>(
+                      `/api/registry/entity/${sel.entity_id}`,
+                    )
+                      .then((value) => setProfile(value.entity))
+                      .catch(() => setProfile(null))
+                  }}
                 >
-                  VIEW IN REGISTRY →
-                </a>
+                  FULL PROFILE →
+                </button>
               )}
             </div>
           )}
@@ -550,6 +560,8 @@ export default function Ranking() {
           )}
         </aside>
       </div>
+
+      <EntityCard entity={profile} onClose={() => setProfile(null)} />
     </div>
   )
 }
