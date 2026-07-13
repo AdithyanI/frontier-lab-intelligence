@@ -143,7 +143,7 @@ export default function Ranking() {
 
   useEffect(() => {
     if (selected && selectedFrom.current === 'orbit')
-      rowRefs.current.get(selected)?.scrollIntoView({ block: 'nearest' })
+      rowRefs.current.get(selected)?.scrollIntoView({ block: 'start' })
   }, [selected])
 
   useEffect(() => {
