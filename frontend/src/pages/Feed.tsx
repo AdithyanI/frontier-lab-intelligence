@@ -84,6 +84,9 @@ function RelationshipPost({ item }: { item: EventEvidence }) {
     >
       <header>
         <span className="event-relationship-kind mono">{label}</span>
+        {item.parent_missing && (
+          <span className="event-parent-missing mono">Parent not captured</span>
+        )}
         <strong>{item.author.entity_name ?? item.author.name}</strong>
         <span className="mono">@{item.author.handle}</span>
         <time className="mono" dateTime={item.published_at}>
@@ -139,7 +142,9 @@ function EventRow({ item }: { item: SignalEvent }) {
   const related = item.evidence.filter(
     (evidence) => evidence.relationship === 'related',
   )
-  const narrative = [...replies, ...quotes, ...related]
+  const narrative = item.evidence.filter(
+    (evidence) => evidence.relationship !== 'retweet',
+  )
   const c = root.score_components
   const rationale = [
     c.registry_amplifiers

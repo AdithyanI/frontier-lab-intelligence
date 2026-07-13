@@ -202,6 +202,10 @@ instead of expanding the graph or processing the complete X history.
   Within each envelope render the root once, then exact replies in parent-first
   thread order, unique quotes, and a compact retweeter trace. Do not infer
   missing parents or semantic relationships.
+- Treat exact parent links as the display-order contract: render every captured
+  parent before its descendants, order siblings chronologically, and keep a
+  reply whose parent is absent as an explicitly unparented branch. Relationship
+  kind or depth must never move a child above its captured parent.
 
 ## Open Questions / Blockers
 
@@ -214,6 +218,7 @@ instead of expanding the graph or processing the complete X history.
 | --- | --- | --- | --- |
 | done | Replace the separate post/group read paths with one unified envelope read model, including singleton posts and exact relationship metadata. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | done | Distill the Feed UI to date/search/sort and render each envelope root-first with threaded replies, quotes, and compact retweeter provenance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| done | Correct the unified Feed to traverse exact parent links parent-first, preserve quote/reply branches, mark missing parents, and add only query-aligned indexes. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | in_progress | Audit the top 20 unified Feed envelopes for structural false merges/splits and signal/noise; record the keep/change decision for `attention-v1`. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | done | Audit the stored relation/thread/URL evidence and propose the deterministic event-clustering and separate relevance boundary. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | done | Implement normalized conversation metadata and `exact-structural-v1` as a separate content-addressed derived run; use no URL or semantic grouping. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
@@ -295,3 +300,11 @@ instead of expanding the graph or processing the complete X history.
   singletons. `scripts/check-fast.sh` passes 141 tests plus frontend lint/build,
   and the live browser check confirms the colored continuation treatment; the
   top-20 quality audit is the remaining active work item.
+- 2026-07-13: [FIX] Made exact parent links the Feed's display-order contract.
+  The evidence API now performs a parent-before-descendant traversal with
+  chronological siblings, preserves quote/reply subtrees, and marks replies
+  whose exact parent is absent as unparented instead of guessing from a shared
+  conversation. The frontend preserves that order. The Alexandr Wang audit now
+  places Matt Deitke's quote before its reply and leaves `5/` at the end with
+  `Parent not captured` because its `4/` parent is absent. Added the one
+  event-link index aligned to this read path; targeted schema/API tests pass.

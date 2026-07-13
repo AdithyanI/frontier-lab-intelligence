@@ -133,8 +133,11 @@ group, or lane modes. It offers complete-day navigation, search, the three
 transparent sort orders, score inputs, raw engagement, and direct X
 provenance. Each envelope renders the root once, then exact replies in
 parent-first order, unique quote commentary, and a compact retweeter trace.
-LLM relevance, semantic grouping, summaries, and cited insights remain later
-stages after this deterministic layer is audited.
+Captured parents always precede their descendants and sibling branches are
+chronological. A reply whose exact parent is absent stays as a visibly
+unparented branch rather than being attached by conversation or timing
+inference. LLM relevance, semantic grouping, summaries, and cited insights
+remain later stages after this deterministic layer is audited.
 
 ## Stack
 

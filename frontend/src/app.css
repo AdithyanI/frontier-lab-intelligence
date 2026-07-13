@@ -1524,7 +1524,6 @@ td.num {
 
 .event-relationship--quote,
 .event-relationship--related {
-  margin-left: 0;
   padding-left: 0;
 }
 
@@ -1544,6 +1543,11 @@ td.num {
 .event-relationship header > span:not(.event-relationship-kind),
 .event-relationship header time { color: var(--muted); font-size: 9.5px; }
 .event-relationship header time { margin-left: auto; }
+
+.event-parent-missing {
+  color: var(--negative);
+  font-size: 9.5px;
+}
 
 .event-relationship--continuation header > span:not(.event-relationship-kind),
 .event-relationship--continuation header time {

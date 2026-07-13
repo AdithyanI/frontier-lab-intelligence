@@ -224,6 +224,7 @@ export interface EventEvidence {
   relation_type: 'reply_parent' | 'same_conversation' | 'quote' | 'retweet' | null
   target_post_id: string | null
   parent_post_id: string | null
+  parent_missing: boolean
   depth: number
   same_author_as_root: boolean
 }

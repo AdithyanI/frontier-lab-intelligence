@@ -85,6 +85,7 @@ def _root_post_id(
 def _relationship_rows(
     members: list[dict[str, Any]], links: list[sqlite3.Row], root_post_id: str
 ) -> list[dict[str, Any]]:
+    """Return exact related evidence in parent-before-child display order."""
     root = next(member for member in members if member["post_id"] == root_post_id)
     link_priority = {"reply_parent": 0, "quote": 1, "retweet": 2, "same_conversation": 3}
     source_links: dict[str, list[sqlite3.Row]] = {}
@@ -93,7 +94,6 @@ def _relationship_rows(
     for values in source_links.values():
         values.sort(key=lambda link: link_priority.get(link["link_type"], 9))
 
-    parent_by_reply: dict[str, str] = {}
     payloads: list[dict[str, Any]] = []
     for member in members:
         if member["post_id"] == root_post_id:
@@ -106,11 +106,12 @@ def _relationship_rows(
             "same_conversation",
         ):
             relationship = "reply"
-            parent_post_id = target_post_id or root_post_id
-            parent_by_reply[member["post_id"]] = parent_post_id
+            parent_post_id = member.get("in_reply_to_post_id") or (
+                target_post_id if link_type == "reply_parent" else None
+            )
         elif member["post_type"] == "quote" or link_type == "quote":
             relationship = "quote"
-            parent_post_id = None
+            parent_post_id = target_post_id
         elif member["post_type"] == "retweet" or link_type == "retweet":
             relationship = "retweet"
             parent_post_id = None
@@ -124,6 +125,7 @@ def _relationship_rows(
                 "relation_type": link_type,
                 "target_post_id": target_post_id,
                 "parent_post_id": parent_post_id,
+                "parent_missing": False,
                 "same_author_as_root": (
                     member["author"]["handle"].lower()
                     == root["author"]["handle"].lower()
@@ -131,30 +133,62 @@ def _relationship_rows(
             }
         )
 
-    def depth(post_id: str) -> int:
-        seen: set[str] = set()
-        current = post_id
-        value = 0
-        while current in parent_by_reply and current not in seen:
-            seen.add(current)
-            value += 1
-            current = parent_by_reply[current]
-            if current == root_post_id:
-                break
-        return value
-
-    relationship_priority = {"reply": 0, "quote": 1, "related": 2, "retweet": 3}
-    for payload in payloads:
-        payload["depth"] = depth(payload["post_id"]) if payload["relationship"] == "reply" else 0
-    payloads.sort(
-        key=lambda member: (
-            relationship_priority.get(member["relationship"], 9),
-            member["depth"],
-            member["published_at"],
-            member["post_id"],
+    narrative = [payload for payload in payloads if payload["relationship"] != "retweet"]
+    narrative_by_id = {payload["post_id"]: payload for payload in narrative}
+    captured_parent_ids = {root_post_id, *narrative_by_id}
+    children: dict[str, list[dict[str, Any]]] = {}
+    unparented: list[dict[str, Any]] = []
+    for payload in narrative:
+        parent_id = payload["parent_post_id"]
+        if parent_id == root_post_id or parent_id in narrative_by_id:
+            children.setdefault(parent_id, []).append(payload)
+            continue
+        payload["parent_missing"] = bool(
+            payload["relationship"] == "reply"
+            and parent_id not in captured_parent_ids
         )
-    )
-    return payloads
+        unparented.append(payload)
+
+    order_key = lambda payload: (payload["published_at"], payload["post_id"])
+    for siblings in children.values():
+        siblings.sort(key=order_key)
+    unparented.sort(key=order_key)
+
+    ordered: list[dict[str, Any]] = []
+    visited: set[str] = set()
+
+    def visit(parent_id: str, depth: int) -> None:
+        for child in children.get(parent_id, []):
+            post_id = child["post_id"]
+            if post_id in visited:
+                continue
+            visited.add(post_id)
+            child["depth"] = depth
+            ordered.append(child)
+            visit(post_id, depth + 1)
+
+    visit(root_post_id, 1)
+    for payload in unparented:
+        if payload["post_id"] in visited:
+            continue
+        visited.add(payload["post_id"])
+        payload["depth"] = 1
+        ordered.append(payload)
+        visit(payload["post_id"], 2)
+    for payload in sorted(narrative, key=order_key):
+        if payload["post_id"] in visited:
+            continue
+        payload["parent_missing"] = payload["relationship"] == "reply"
+        payload["depth"] = 1
+        visited.add(payload["post_id"])
+        ordered.append(payload)
+        visit(payload["post_id"], 2)
+
+    retweets = [payload for payload in payloads if payload["relationship"] == "retweet"]
+    for payload in retweets:
+        payload["depth"] = 0
+    retweets.sort(key=order_key)
+    return [*ordered, *retweets]
 
 
 def _singleton(item: dict[str, Any]) -> dict[str, Any]:
@@ -260,6 +294,8 @@ def events_payload(
                     "text": row["text"],
                     "url": row["url"],
                     "post_type": row["post_type"],
+                    "conversation_id": row["conversation_id"],
+                    "in_reply_to_post_id": row["in_reply_to_post_id"],
                     "observed_directly": bool(member["observed_directly"]),
                 }
             )

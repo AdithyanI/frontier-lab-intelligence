@@ -23,6 +23,10 @@ def test_exact_events_group_only_explicit_feed_relations(tmp_path):
     assert repeated["reused"] is True
 
     conn = signal_events.connect(events_db)
+    indexes = {
+        row[1] for row in conn.execute("PRAGMA index_list('event_link')").fetchall()
+    }
+    assert "idx_event_link_source" in indexes
     clusters = conn.execute(
         "SELECT event_id, member_count, link_count FROM event_cluster ORDER BY event_id"
     ).fetchall()

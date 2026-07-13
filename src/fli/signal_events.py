@@ -84,6 +84,10 @@ CREATE TABLE IF NOT EXISTS event_link (
     FOREIGN KEY (run_id, event_id)
         REFERENCES event_cluster(run_id, event_id) ON DELETE CASCADE
 );
+CREATE INDEX IF NOT EXISTS idx_event_link_source
+    ON event_link(
+        run_id, event_id, source_post_id, link_type, target_post_id
+    );
 
 CREATE TABLE IF NOT EXISTS event_anchor (
     run_id TEXT NOT NULL,

@@ -55,8 +55,11 @@ Each grouped response contains one `root` and a related `evidence` list. The
 root never repeats in that list. Related rows expose their exact relationship,
 target or parent post ID, and reply depth. The UI renders replies parent-first,
 labels same-account replies as thread continuations, keeps unique quote
-commentary, and collapses retweets into one traceable amplification strip. No
-URL, text, embedding, or model similarity is used.
+commentary, and collapses retweets into one traceable amplification strip.
+Captured parents precede descendants and siblings are chronological. A reply
+whose parent was not captured appears at the end as an explicit unparented
+branch; the reader never guesses a parent from a shared conversation. No URL,
+text, embedding, or model similarity is used.
 
 Registry rejection changes are dynamic. On the next request, a rejected author
 is absent and a rejected amplifier no longer votes. Raw/derived evidence is not
