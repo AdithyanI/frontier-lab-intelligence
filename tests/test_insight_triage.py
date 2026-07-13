@@ -22,11 +22,16 @@ class FakeRawAPI:
 
     def create(self, **kwargs):
         self.calls.append(kwargs)
+        payload = (
+            self.payload[len(self.calls) - 1]
+            if isinstance(self.payload, list)
+            else self.payload
+        )
         response = SimpleNamespace(
-            id="resp-triage-1",
+            id=f"resp-triage-{len(self.calls)}",
             model=kwargs["model"],
             status="completed",
-            output_text=json.dumps(self.payload),
+            output_text=json.dumps(payload),
             usage=SimpleNamespace(
                 input_tokens=2_000,
                 input_tokens_details=SimpleNamespace(
@@ -153,6 +158,30 @@ def test_request_uses_cacheable_prefix_structured_output_and_litellm_tags():
     assert result["signal_post_ids"] == ["child-1"]
     assert result["cached_tokens"] == 1_280
     assert result["reported_cost_usd"] == pytest.approx(0.0042)
+    assert result["validation_repairs"] == 0
+
+
+def test_invalid_post_id_gets_one_schema_constrained_repair():
+    invalid = keep_child_payload()
+    invalid["signal_post_ids"] = ["invented-post"]
+    client = FakeClient([invalid, keep_child_payload()])
+
+    result = insight_triage.evaluate_one(
+        client,
+        make_envelope(),
+        run="semantic-repair-check",
+    )
+
+    calls = client.responses.with_raw_response.calls
+    assert len(calls) == 2
+    assert calls[0]["text"]["format"] == insight_triage.OUTPUT_FORMAT
+    assert calls[1]["text"]["format"]["schema"]["properties"][
+        "signal_post_ids"
+    ]["items"]["enum"] == ["child-1", "root-1"]
+    assert result["signal_post_ids"] == ["child-1"]
+    assert result["validation_repairs"] == 1
+    assert result["input_tokens"] == 4_000
+    assert result["reported_cost_usd"] == pytest.approx(0.0084)
 
 
 def test_output_rejects_evidence_ids_absent_from_the_envelope():

@@ -161,6 +161,7 @@ def test_completed_item_is_resumable_without_a_duplicate_model_call(
             "cache_write_tokens": 0,
             "output_tokens": 80,
             "reported_cost_usd": 0.0042,
+            "validation_repairs": 0,
             "request_tags": ["app:frontier-lab-intelligence"],
         }
 

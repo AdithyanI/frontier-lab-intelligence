@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -213,6 +214,36 @@ def _input_token_detail(usage: Any, field: str) -> int:
     return _usage_value(details, field)
 
 
+def _constrained_output_format(valid_ids: set[str]) -> dict[str, Any]:
+    """Constrain a rare semantic repair to identifiers in the frozen input."""
+    output_format = deepcopy(OUTPUT_FORMAT)
+    output_format["schema"]["properties"]["signal_post_ids"]["items"]["enum"] = (
+        sorted(valid_ids)
+    )
+    return output_format
+
+
+def _create_response(
+    client: Any,
+    request: dict[str, Any],
+) -> tuple[Any, dict[str, Any], float | None]:
+    raw_api = getattr(client.responses, "with_raw_response", None)
+    if raw_api is None:
+        response = client.responses.create(**request)
+        reported_cost = None
+    else:
+        raw_response = raw_api.create(**request)
+        response = raw_response.parse()
+        reported_cost = llm_responses.reported_cost(raw_response.headers)
+    response_data = llm_responses.as_dict(response)
+    if response_data.get("status") not in (None, "completed"):
+        raise ValueError(
+            f"response status was {response_data.get('status')!r}: "
+            f"{response_data.get('incomplete_details')!r}"
+        )
+    return response, response_data, reported_cost
+
+
 def evaluate_one(
     client: Any,
     envelope: EnvelopeInput,
@@ -234,26 +265,32 @@ def evaluate_one(
         "extra_body": {"metadata": {"tags": list(tags)}},
         "extra_headers": {"x-litellm-tags": ",".join(tags)},
     }
-    raw_api = getattr(client.responses, "with_raw_response", None)
-    if raw_api is None:
-        response = client.responses.create(**request)
-        reported_cost = None
-    else:
-        raw_response = raw_api.create(**request)
-        response = raw_response.parse()
-        reported_cost = llm_responses.reported_cost(raw_response.headers)
-
-    response_data = llm_responses.as_dict(response)
-    if response_data.get("status") not in (None, "completed"):
-        raise ValueError(
-            f"response status was {response_data.get('status')!r}: "
-            f"{response_data.get('incomplete_details')!r}"
+    responses = [_create_response(client, request)]
+    response, response_data, reported_cost = responses[-1]
+    try:
+        payload = _validate_output(
+            llm_responses.output_text(response_data),
+            valid_ids=envelope.valid_post_ids,
         )
-    payload = _validate_output(
-        llm_responses.output_text(response_data),
-        valid_ids=envelope.valid_post_ids,
-    )
-    usage = getattr(response, "usage", None) or response_data.get("usage")
+    except ValueError as exc:
+        if str(exc) != "signal_post_ids contains an ID absent from the input":
+            raise
+        repair_request = {
+            **request,
+            "text": {"format": _constrained_output_format(envelope.valid_post_ids)},
+        }
+        responses.append(_create_response(client, repair_request))
+        response, response_data, reported_cost = responses[-1]
+        payload = _validate_output(
+            llm_responses.output_text(response_data),
+            valid_ids=envelope.valid_post_ids,
+        )
+
+    usages = [
+        getattr(item, "usage", None) or data.get("usage")
+        for item, data, _ in responses
+    ]
+    costs = [cost for _, _, cost in responses if cost is not None]
     return {
         **payload,
         "event_id": envelope.event_id,
@@ -268,10 +305,17 @@ def evaluate_one(
         "response_id": getattr(response, "id", None) or response_data.get("id"),
         "response_model": getattr(response, "model", None)
         or response_data.get("model"),
-        "input_tokens": _usage_value(usage, "input_tokens"),
-        "cached_tokens": _input_token_detail(usage, "cached_tokens"),
-        "cache_write_tokens": _input_token_detail(usage, "cache_write_tokens"),
-        "output_tokens": _usage_value(usage, "output_tokens"),
-        "reported_cost_usd": reported_cost,
+        "input_tokens": sum(_usage_value(usage, "input_tokens") for usage in usages),
+        "cached_tokens": sum(
+            _input_token_detail(usage, "cached_tokens") for usage in usages
+        ),
+        "cache_write_tokens": sum(
+            _input_token_detail(usage, "cache_write_tokens") for usage in usages
+        ),
+        "output_tokens": sum(
+            _usage_value(usage, "output_tokens") for usage in usages
+        ),
+        "reported_cost_usd": sum(costs) if costs else None,
+        "validation_repairs": len(responses) - 1,
         "request_tags": list(tags),
     }

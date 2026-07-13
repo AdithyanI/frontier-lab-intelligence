@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS triage_item (
     cache_write_tokens INTEGER,
     output_tokens INTEGER,
     reported_cost_usd REAL,
+    validation_repairs INTEGER NOT NULL DEFAULT 0,
     request_tags_json TEXT,
     error_type TEXT,
     error_message TEXT,
@@ -103,6 +104,14 @@ def connect_run(path: Path | str) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(RUN_SCHEMA)
+    columns = {
+        str(row["name"]) for row in conn.execute("PRAGMA table_info(triage_item)")
+    }
+    if "validation_repairs" not in columns:
+        conn.execute(
+            "ALTER TABLE triage_item "
+            "ADD COLUMN validation_repairs INTEGER NOT NULL DEFAULT 0"
+        )
     return conn
 
 
@@ -410,6 +419,7 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
                   SUM(COALESCE(cache_write_tokens, 0)) AS cache_write_tokens,
                   SUM(COALESCE(output_tokens, 0)) AS output_tokens,
                   SUM(COALESCE(reported_cost_usd, 0)) AS reported_cost_usd,
+                  SUM(COALESCE(validation_repairs, 0)) AS validation_repairs,
                   SUM(reported_cost_usd IS NOT NULL) AS reported_cost_count
            FROM triage_item"""
     ).fetchone()
@@ -456,7 +466,8 @@ def run_pending(
                            response_id = ?, response_model = ?,
                            input_tokens = ?, cached_tokens = ?,
                            cache_write_tokens = ?, output_tokens = ?,
-                           reported_cost_usd = ?, request_tags_json = ?,
+                           reported_cost_usd = ?, validation_repairs = ?,
+                           request_tags_json = ?,
                            error_type = NULL, error_message = NULL,
                            completed_at = ?, updated_at = ?
                        WHERE event_id = ?""",
@@ -472,6 +483,7 @@ def run_pending(
                         result["cache_write_tokens"],
                         result["output_tokens"],
                         result["reported_cost_usd"],
+                        result["validation_repairs"],
                         _canonical_json(result["request_tags"]),
                         now,
                         now,

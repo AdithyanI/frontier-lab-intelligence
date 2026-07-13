@@ -138,6 +138,14 @@ reads first.
   a default reviewer model; the final audited run had zero false drops and
   verified cache reads. [Calibration report](resources/triage-spike-2026-07-13.md).
 
+- 2026-07-13: Stop the cross-day validation at top 100 per complete day. The
+  700-row run produced 407 unique kept events and 737 unique selected posts;
+  ranks 81–100 still yielded 60.7% keeps, so attention has no sharp relevance
+  cutoff, but expanding to top 200 would enlarge an already sufficient
+  extraction queue. Revisit only if the one-day cited-insight path cannot
+  produce 3–5 excellent outputs. Deduplicate downstream by
+  `(event_id, input_sha256)`. [Seven-day report](resources/triage-seven-day-validation-2026-07-13.md).
+
 - 2026-07-13: Keep the frozen `attention-v1.1` candidate-generation contract:
   each active canonical Registry entity contributes one flat amplifier vote;
   the originator's entity-overlap support remains a separate component. Do not
@@ -172,13 +180,14 @@ reads first.
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Run a bounded `triage-v1` design spike over representative high-attention envelopes: compare the minimum dynamic input and output schema, verify prompt-cache reads and LiteLLM tags/cost telemetry, audit false drops against the July 11 labels, and recommend one-stage vs two-stage filtering. Do not run the full corpus. | worker | [triage report](resources/triage-spike-2026-07-13.md) |
-| in_progress | Hand-build the extraction oracle after triage stabilizes: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
+| done | Run the frozen triage contract over the top 100 attention envelopes for every complete stored day (2026-07-05 through 2026-07-11; 700 total), preserve one resumable run per day, and audit cross-day/lower-attention keep/drop/category/cache/cost behavior without changing the prompt mid-run. Do not spend the submission critical path labeling the roughly 7,500-envelope long tail before extraction is proved. | worker | [seven-day report](resources/triage-seven-day-validation-2026-07-13.md) |
+| todo | Hand-build the extraction oracle after cross-day validation: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 | todo | Build artifact fetch + insight extraction for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
 - [x] Relevance/substance gate with recorded reasons per envelope.
-- [ ] Second-day run with the unchanged rubric.
+- [x] Cross-day run with the unchanged rubric (seven complete days, top 100 each).
 - [ ] Insights API + page with citation click-through.
 - [ ] Daily briefing renderer + CLI command.
 - [ ] Blind/stratified evaluation pass; record under `resources/`.
@@ -230,3 +239,12 @@ reads first.
   was $0.304257. Adi chose mini as the single default; no Luna comparison or
   routine `gpt-5.5` reviewer is needed. Next: build the five-record extraction
   oracle. See `resources/triage-spike-2026-07-13.md`.
+- 2026-07-13: [TRIAGE-SEVEN-DAY] Completed 700/700 frozen top-100 rows across
+  all seven complete days with the unchanged prompt: 487 keep, 213 drop, 407
+  unique kept events, and 737 unique selected signal posts. Manual review of
+  the 81–100 band supported the gate; its 60.7% keep yield shows there is no
+  sharp attention cutoff but also no need to expand the already large queue.
+  Repeated-event decisions were 100% stable. Added one schema-constrained,
+  explicitly metered repair for rare post-ID transcription errors. Next:
+  extraction oracle, not more triage. See
+  `resources/triage-seven-day-validation-2026-07-13.md`.
