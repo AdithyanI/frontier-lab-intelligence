@@ -97,6 +97,14 @@ Rules:
   [`triage-spike-2026-07-13.md`](triage-spike-2026-07-13.md).
 
 ### Stage 3 — Artifact resolution + fetch (new; no LLM)
+
+> 2026-07-13 amendment: the tables below are implemented by the shared
+> `canonical-artifact-library` project rather than being owned by one insight
+> run. The first use remains deliberately narrow: corrected kept X envelopes
+> needed by the extraction oracle. Ordinary X status permalinks remain source
+> evidence; outbound primary links become canonical artifacts; event
+> association is derived through stable post membership. RSS/GitHub/blog
+> adapters and an artifact Feed remain deferred.
 For each kept envelope's embedded URLs and provider artifacts, inspect the
 complete frozen envelope context:
 1. Resolve: take `expanded_url` from raw JSON (already there); follow HTTP

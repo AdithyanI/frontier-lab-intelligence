@@ -1,0 +1,185 @@
+# Canonical Artifact Library
+
+## Goal
+
+Build a small, replayable artifact catalog that turns links found in corrected
+X evidence into one deduplicated, fetchable record per underlying paper, blog
+post, repository, or announcement while preserving exactly which X posts
+pointed to it.
+
+## Why / Impact
+
+The Feed currently knows what the network discussed, and raw X records already
+preserve post permalinks plus most expanded outbound URLs. Cited insights need
+the next boundary: fetch an underlying primary source once, cite it reliably,
+and reuse it when several posts point to the same thing. If this is modeled
+incorrectly, every short link becomes a duplicate, event regrouping can lose
+provenance, and later source adapters would require a replacement schema.
+
+## Scope / Non-Goals
+
+### In Scope
+
+- An X-first canonical artifact catalog under
+  `data/derived/artifacts/artifacts.db`.
+- Deterministic URL extraction, expansion, conservative canonicalization, and
+  alias preservation for URLs already present in stored X records.
+- Independently traceable mappings from an X post to an artifact.
+- Resumable HTTP fetch metadata plus content-addressed snapshots for selected
+  artifacts.
+- The small artifact oracle needed by `cited-insights` after corrected
+  temporal envelopes are available.
+- A source-aware contract that can accept another source kind later without
+  changing artifact identity.
+
+### Out of Scope
+
+- RSS, GitHub, arXiv, or blog ingestion in this project’s first implementation.
+- A generic connector framework or premature adapter abstraction.
+- An artifact-library UI or separate artifact Feed.
+- Broad crawling, web search, or fetching every URL in the stored X corpus.
+- LLM categorization, insight generation, or semantic duplicate merging.
+- Treating every ordinary X status permalink as an artifact.
+
+## Context / Constraints
+
+- Date started: 2026-07-13.
+- This is a planning checkpoint only. Runtime implementation must not begin
+  until the active `temporal-event-projection` project has corrected recursive
+  quote relations and frozen trustworthy event snapshots.
+- Raw X evidence remains immutable in `data/raw/x/x-content.db`.
+- Ordinary X status URLs already live on `x_post.url`; the derived Feed also
+  carries them on `feed_post.url`, and triage runs freeze the root URL. These
+  are source-evidence addresses, not artifact identities.
+- Outbound links already live in `x_post.raw_json` under
+  `entities.urls[]`, usually with both the observed `t.co` URL and
+  `expanded_url`.
+- An X long-form article may be a real artifact. A quote, reply, retweet, media
+  self-link, profile URL, or ordinary status permalink remains source context.
+- The first consumer is `cited-insights`; submission scope remains a narrow
+  X-first proof, not multi-source breadth.
+- See [data-model.md](resources/data-model.md) for the frozen logical boundary
+  proposed for Milestone 1.
+
+## Done When
+
+- [ ] A canonical URL maps to exactly one artifact and every observed alias is
+  retained.
+- [ ] Multiple X posts pointing to the same page create multiple source
+  observations but only one artifact and one reusable fetched snapshot.
+- [ ] An ordinary X status permalink remains source evidence rather than a
+  duplicate artifact; an X long-form article is handled explicitly.
+- [ ] Event merges/splits do not duplicate or orphan artifacts because source
+  observations bind to stable post IDs, not mutable envelope IDs.
+- [ ] Import and fetch operations are idempotent, resumable, and preserve
+  failures without corrupting accepted rows.
+- [ ] The five-record cited-insight oracle can consume fetched artifact text
+  and link back to every discovering source post.
+- [ ] Schema, canonicalization, idempotency, provenance, and fetch-failure
+  tests pass; `scripts/check-fast.sh` passes; architecture and build log are
+  updated.
+
+## Milestones
+
+- [ ] M1 — Freeze the X-first artifact contract from real corrected URLs.
+  Acceptance: table boundaries, identity rules, alias rules, X-status
+  exception, and at least 20 representative URL fixtures are reviewed.
+  Validate: fixture audit plus schema tests.
+- [ ] M2 — Implement the local catalog and deterministic importer. Acceptance:
+  repeated import is byte-stable at the logical row level; duplicate aliases
+  converge; observations retain stable X provenance. Validate: focused pytest
+  suite and SQLite integrity/foreign-key checks.
+- [ ] M3 — Fetch and snapshot the cited-insights oracle. Acceptance: selected
+  primary artifacts have bounded fetch results or explicit terminal errors;
+  clean text and content hashes are reproducible. Validate: replay without
+  duplicate network work plus manual artifact inspection.
+- [ ] M4 — Integrate the oracle with cited insights and close out. Acceptance:
+  the extractor consumes the shared catalog without making envelopes own
+  artifact identity; docs and limitations are current. Validate:
+  `scripts/check-fast.sh` and the cited-insights oracle test.
+
+## Execution Rules
+
+- Keep the first implementation X-first. “Future RSS/GitHub” is a schema
+  compatibility test, not authorization to build those ingestors now.
+- Treat raw provider records as immutable and derived catalog rows as safely
+  rebuildable.
+- Do URL identity work deterministically; do not use an LLM to canonicalize a
+  URL.
+- Remove only known tracking parameters. Do not erase meaningful query
+  parameters to make two URLs look equal.
+- Do not auto-merge different canonical URLs solely because their current
+  content hashes match; record a possible duplicate for later review.
+- Bind provenance to a stable source kind/provider/external ID. Derive an
+  event-to-artifact view through event membership; never make an envelope the
+  artifact owner.
+- Fetch only the bounded oracle first. Cost is telemetry, not a quality gate.
+- Run validation after each milestone, update this tracker after meaningful
+  batches, and archive it when Done When is satisfied.
+
+## Decisions
+
+- 2026-07-13: X is the only ingestion source implemented first. The schema
+  carries `source_kind` so a later RSS entry or GitHub release can use the same
+  observation boundary, but no generic adapter framework is built now.
+- 2026-07-13: Separate **source evidence** from **artifacts**. An X post is a
+  source record addressed by its status permalink; an outbound primary page is
+  an artifact. X long-form articles are the explicit exception.
+- 2026-07-13: Artifact identity is the conservative canonical URL. Original,
+  short, expanded, redirected, and declared-canonical URLs remain aliases so
+  every transformation is auditable.
+- 2026-07-13: Source observations are post-owned, not envelope-owned. Corrected
+  daily/weekly envelopes may project artifact associations without changing
+  the underlying catalog.
+- 2026-07-13: The first physical store is
+  `data/derived/artifacts/artifacts.db`; raw fetched bodies are
+  content-addressed outside catalog rows, with their hashes and storage
+  references recorded in the database.
+- 2026-07-13: Tags are a separate optional relation added only when a concrete
+  consumer needs them; category is not baked into artifact identity.
+
+## Open Questions / Blockers
+
+- Blocked on the corrected temporal event projection before selecting and
+  importing the first kept-envelope oracle.
+- During M1, choose the exact content-addressed raw snapshot path after checking
+  repository data-size conventions. This choice does not change the logical
+  schema.
+
+## Current Batch
+
+| Status | Work Item | Role | Resource |
+| --- | --- | --- | --- |
+| done | Freeze the planning boundary: X-first now, source-aware later, with source post URLs separated from artifact URLs. | parent | [data-model.md](resources/data-model.md) |
+| blocked | Audit representative outbound URLs and freeze canonicalization fixtures after temporal-event rebuilding is complete. | parent | [data-model.md](resources/data-model.md) |
+
+## Backlog / Remaining Work
+
+- [ ] Promote M1 only after `temporal-event-projection` passes its adversarial
+  review and the corrected kept-envelope inputs are available.
+- [ ] Implement schema migrations, catalog queries, and deterministic import.
+- [ ] Implement bounded fetch/snapshot/replay behavior.
+- [ ] Connect the five-record cited-insights oracle.
+- [ ] Update `docs/architecture/overview.md` when the runtime boundary lands.
+- [ ] Defer RSS/GitHub/blog adapters and an artifact Feed UI until the X-first
+  cited path proves useful yield.
+- [ ] Review project learnings and archive the tracker after closeout.
+
+## Validation / Test Plan
+
+- Focused unit fixtures: `t.co` alias, direct HTTPS URL, redirect chain,
+  tracking parameters, fragments, arXiv abs/pdf normalization, GitHub release
+  URL, X long-form article, ordinary X status permalink, media self-link, and
+  repeated observation.
+- Integration: two posts with different observed aliases resolve to one
+  artifact and two observations; a rebuilt/merged event still resolves both.
+- Replay: a second identical import performs no duplicate writes or fetches.
+- SQLite: `PRAGMA integrity_check`, `PRAGMA foreign_key_check`, and unique-index
+  assertions.
+- Repository gate: `scripts/check-fast.sh`.
+
+## Progress Log
+
+- 2026-07-13: [DONE] Created the project and froze an intentionally narrow
+  X-first/source-aware boundary; no runtime code, database, network fetch, RSS,
+  or GitHub ingestion was implemented.

@@ -69,9 +69,11 @@ reads first.
   search, usage/cost capture, prompt cache, resumability.
 - Feed API and envelope contract are frozen; insights read from the derived
   run, never mutate evidence.
-- Sequencing decision (Adi, 2026-07-13): link-artifact resolution happens
-  inside the extraction stage for top envelopes only — not as a prior Feed
-  feature.
+- Sequencing amendment (Adi, 2026-07-13): the first extraction oracle remains
+  bounded to links from corrected, kept X envelopes, but canonical identity,
+  aliases, fetch snapshots, and source provenance live in the shared
+  `canonical-artifact-library` substrate. Cited insights consumes that store;
+  envelopes do not own artifacts. RSS/GitHub/blog ingestion remains deferred.
 
 ## Done When
 
@@ -186,8 +188,13 @@ reads first.
   promote amplifier prominence into a second weight without blind evidence
   that it improves useful yield. Pass amplifier identity, relation type, and
   visible network support into the later qualitative extraction stage instead.
-- 2026-07-13: Link enrichment lives inside extraction (top envelopes only);
-  no second ingestion pipeline before submission.
+- 2026-07-13: Supersede the earlier envelope-owned link-enrichment wording.
+  The bounded extraction oracle uses a shared canonical artifact catalog so
+  repeated X links fetch once and later source kinds can reuse the identity.
+  This does not authorize a second broad ingestion pipeline before submission:
+  X remains the only implemented discovery source, and RSS/GitHub/blog
+  adapters plus an artifact Feed are deferred. See
+  `docs/projects/canonical-artifact-library/`.
 - 2026-07-13: Blind evaluation validates insight yield here rather than feed
   ordering in the predecessor project.
 - 2026-07-13: Case-prompt example check — the sheet's example intelligence
