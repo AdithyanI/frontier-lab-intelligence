@@ -157,8 +157,8 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Design `insight-v1` schema + extraction prompt from the five strong 2026-07-11 audit candidates; fetch and inspect their embedded links first (data-first). | parent | |
-| todo | Build the extraction runner: top-20 envelopes for one day, link resolution, structured output, run store with cost telemetry. | parent | |
+| todo | Read the implementation brief end-to-end, then hand-build the oracle: pull the five strong 2026-07-11 audit candidates, fetch their linked artifacts manually, hand-write the five insight-v1 records they should produce (few-shot + acceptance oracle). | worker | [pipeline-design.md](resources/pipeline-design.md) |
+| todo | Build stages 2–4 (triage → artifact fetch → extraction) for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
@@ -185,3 +185,12 @@ reads first.
 - 2026-07-13: [IN-PROGRESS] Opened the project after archiving
   signal-intelligence-pipeline (M4 KEEP). Scope, milestones, and sequencing
   decisions agreed with Adi in session.
+- 2026-07-13: [DESIGN] Wrote the full implementation brief
+  (`resources/pipeline-design.md`): five-stage pipeline (top-20 →
+  triage-v1 gate → artifact-v1 store keyed by canonical URL →
+  insight-v1 extraction with programmatic citation verification →
+  Insights page + daily briefing), schemas, eval plan with the audit
+  oracle, timeboxed milestones, and hard constraints. Verified in raw
+  data that 95% of t.co posts already carry expanded_url (21,316/22,342)
+  — no new X calls needed for link resolution. Case-prompt example check
+  recorded in Decisions. Handing to implementing engineer.
