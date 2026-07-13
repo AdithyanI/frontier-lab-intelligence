@@ -216,15 +216,20 @@ export default function Ranking() {
   const hov = hovered ? byId.get(hovered) : undefined
   const run = data?.run
 
-  const pick = (id: string, from: 'orbit' | 'list') => {
-    selectedFrom.current = from
+  const selectInOrbit = (id: string) => {
+    selectedFrom.current = 'orbit'
+    setCardOpen(false)
     if (selected === id) {
       setSelected(null)
-      setCardOpen(false)
     } else {
       setSelected(id)
-      setCardOpen(true)
     }
+  }
+
+  const openFromList = (id: string) => {
+    selectedFrom.current = 'list'
+    setSelected(id)
+    setCardOpen(true)
   }
 
   /* profile card follows the selection while it is open */
@@ -358,7 +363,7 @@ export default function Ranking() {
                   opacity={dim ? 0.08 : selected && !isSel && !isFollower ? 0.3 : 1}
                   onEnter={() => setHovered(p.x_id)}
                   onLeave={() => setHovered(null)}
-                  onClick={() => pick(p.x_id, 'orbit')}
+                  onClick={() => selectInOrbit(p.x_id)}
                 />
               )
             })}
@@ -431,11 +436,7 @@ export default function Ranking() {
               {' · '}
               {fmt(visibleArcs.length)} of them are in this view
             </p>
-          ) : (
-            <p className="rank-arc-note mono hint">
-              hover to identify · select to trace followers · ↑↓ to step · esc to clear
-            </p>
-          )}
+          ) : null}
         </div>
 
         <aside className="rank-side">
@@ -483,7 +484,7 @@ export default function Ranking() {
                     else rowRefs.current.delete(p.x_id)
                   }}
                   className={`rank-row ${p.x_id === selected ? 'sel' : ''}`}
-                  onClick={() => pick(p.x_id, 'list')}
+                  onClick={() => openFromList(p.x_id)}
                   onMouseEnter={() => setHovered(p.x_id)}
                   onMouseLeave={() => setHovered(null)}
                 >
