@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import {
   getJSON,
   type EventEvidence,
@@ -115,18 +115,98 @@ function PostText({ item }: { item: Pick<FeedItem, 'text'> }) {
   )
 }
 
+interface FeedMenuOption<T extends string> {
+  value: T
+  label: string
+  description: string
+  count?: number
+}
+
+function FeedMenuSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: T
+  options: readonly FeedMenuOption<T>[]
+  onChange: (value: T) => void
+}) {
+  const detailsRef = useRef<HTMLDetailsElement>(null)
+  const selected = options.find((option) => option.value === value) ?? options[0]
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!detailsRef.current?.contains(event.target as Node)) {
+        detailsRef.current?.removeAttribute('open')
+      }
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') detailsRef.current?.removeAttribute('open')
+    }
+    window.addEventListener('pointerdown', closeOnOutsideClick)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.removeEventListener('pointerdown', closeOnOutsideClick)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [])
+
+  return (
+    <details className="feed-menu" ref={detailsRef}>
+      <summary aria-label={`${label}: ${selected.description}`}>
+        <span className="feed-menu-label mono">{label}</span>
+        <span className="feed-menu-value">{selected.label}</span>
+        {selected.count != null && (
+          <span className="feed-menu-count mono">
+            {selected.count.toLocaleString('en-US')}
+          </span>
+        )}
+        <span className="feed-menu-caret" aria-hidden="true" />
+      </summary>
+      <div className="feed-menu-panel" role="menu" aria-label={label}>
+        {options.map((option) => (
+          <button
+            type="button"
+            key={option.value}
+            className={option.value === value ? 'is-active' : ''}
+            onClick={() => {
+              onChange(option.value)
+              detailsRef.current?.removeAttribute('open')
+            }}
+            role="menuitemradio"
+            aria-checked={option.value === value}
+            title={option.description}
+          >
+            <span>{option.label}</span>
+            {option.count != null && (
+              <span className="mono">{option.count.toLocaleString('en-US')}</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </details>
+  )
+}
+
 function TriageNote({ item }: { item: SignalEvent }) {
   if (!item.triage) return null
   const { decision, reason } = item.triage
   const decisionLabel = decision === 'keep' ? 'Kept for extraction' : 'Dropped before extraction'
 
   return (
-    <div className={`event-triage event-triage--${decision}`}>
-      <div className="event-triage-heading mono">
+    <details className={`event-triage event-triage--${decision}`}>
+      <summary className="event-triage-heading mono">
         <span>{decisionLabel}</span>
-      </div>
+        <span className="event-triage-action">
+          <span className="event-triage-view">View reason</span>
+          <span className="event-triage-hide">Hide reason</span>
+          <span className="event-triage-caret" aria-hidden="true" />
+        </span>
+      </summary>
       <p>{reason}</p>
-    </div>
+    </details>
   )
 }
 
@@ -348,7 +428,7 @@ export default function Feed() {
   const [dates, setDates] = useState<FeedDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [sort, setSort] = useState<Sort>('attention')
-  const [triageFilter, setTriageFilter] = useState<TriageFilter>('all')
+  const [triageFilter, setTriageFilter] = useState<TriageFilter>('keep')
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [data, setData] = useState<EventResponse | null>(null)
@@ -413,7 +493,7 @@ export default function Feed() {
   }, [selectedDate, sort, triageFilter, debouncedQuery])
 
   useEffect(() => {
-    if (!selectedDate || sort !== 'attention' || triageFilter !== 'all' || debouncedQuery) return
+    if (!selectedDate || sort !== 'attention' || debouncedQuery) return
     let cancelled = false
     const timer = window.setTimeout(async () => {
       for (const value of availableDates) {
@@ -422,7 +502,7 @@ export default function Feed() {
           await requestEventPage({
             date: value.day,
             sort: 'attention',
-            triageFilter: 'all',
+            triageFilter,
             query: '',
             offset: 0,
           })
@@ -510,57 +590,37 @@ export default function Feed() {
           placeholder="Search author, handle, or post…"
           aria-label="Search Feed"
         />
-        <div className="feed-audit" role="group" aria-label="Filter by triage decision">
-          <span className="mono">AUDIT</span>
-          <div className="seg">
-            {([
-              ['all', 'All', 'All evidence'],
+        <div className="feed-controls">
+          <FeedMenuSelect
+            label="AUDIT"
+            value={triageFilter}
+            onChange={setTriageFilter}
+            options={([
               ['keep', 'Kept', 'Kept for extraction'],
               ['drop', 'Dropped', 'Dropped before extraction'],
               ['not_evaluated', 'Not evaluated', 'Not evaluated by triage'],
-            ] as const).map(([value, label, description]) => (
-              <button
-                type="button"
-                key={value}
-                className={triageFilter === value ? 'is-active' : ''}
-                onClick={() => setTriageFilter(value)}
-                aria-label={description}
-                aria-pressed={triageFilter === value}
-              >
-                {label}
-                <span className="seg-count">
-                  {data?.triage_counts
-                    ? data.triage_counts[value].toLocaleString('en-US')
-                    : '—'}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="feed-sort" role="group" aria-label="Sort Feed">
-          <span className="mono">SORT</span>
-          <div className="seg">
-            {([
-              ['attention', 'Attention', 'Network attention'],
-              ['recent', 'Recent', 'Most recent'],
-              ['engagement', 'Engagement', 'Public engagement'],
-            ] as const).map(([value, label, description]) => (
-              <button
-                type="button"
-                key={value}
-                className={sort === value ? 'is-active' : ''}
-                onClick={() => setSort(value)}
-                aria-label={description}
-                aria-pressed={sort === value}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+              ['all', 'All', 'All evidence'],
+            ] as const).map(([value, label, description]) => ({
+              value,
+              label,
+              description,
+              count: data?.triage_counts?.[value],
+            }))}
+          />
+          <FeedMenuSelect
+            label="SORT"
+            value={sort}
+            onChange={setSort}
+            options={[
+              { value: 'attention', label: 'Attention', description: 'Network attention' },
+              { value: 'recent', label: 'Recent', description: 'Most recent' },
+              { value: 'engagement', label: 'Engagement', description: 'Public engagement' },
+            ]}
+          />
         </div>
       </div>
 
-      {(hasSearch || triageFilter !== 'all') && (
+      {hasSearch && (
         <div className="feed-summary mono">
           {(data?.total ?? 0).toLocaleString('en-US')}{' '}
           {triageSummaryLabels[triageFilter]} Feed items

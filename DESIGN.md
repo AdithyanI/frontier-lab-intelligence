@@ -128,6 +128,12 @@ Rules:
   out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
+- **Evidence Feed:** default to the decision-ready `Kept` / `Attention` view.
+  Audit and sort are compact labeled disclosures rather than persistent
+  segmented bars; each option remains one click away and audit counts stay
+  visible inside the menu. Per-envelope triage rationale is collapsed by
+  default behind a quiet `View reason` disclosure so evidence remains the
+  primary reading surface.
 - **Insight row (anticipated):** title, why-flagged rationale, score (mono),
   provenance line, persona tag; expandable.
 - **Score breakdown (anticipated):** inputs and weights visible on demand
