@@ -173,6 +173,43 @@ function RetweetTrace({ items }: { items: EventEvidence[] }) {
   )
 }
 
+function EventEvidenceDetails({
+  item,
+  relationshipSummary,
+  narrative,
+  retweets,
+}: {
+  item: SignalEvent
+  relationshipSummary: string[]
+  narrative: EventEvidence[]
+  retweets: EventEvidence[]
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <details
+      className="event-evidence"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary>
+        <span>
+          Follow {relationshipSummary.join(' · ') || `${item.member_count - 1} related posts`}
+        </span>
+        <span className="mono">
+          {item.author_count} {item.author_count === 1 ? 'author' : 'authors'}
+        </span>
+      </summary>
+      {open && (
+        <div className="event-thread">
+          {narrative.map((evidence) => (
+            <RelationshipPost key={evidence.post_id} item={evidence} />
+          ))}
+          <RetweetTrace items={retweets} />
+        </div>
+      )}
+    </details>
+  )
+}
+
 function EventRow({ item }: { item: SignalEvent }) {
   const root = item.root
   const replies = item.evidence.filter((evidence) => evidence.relationship === 'reply')
@@ -214,7 +251,7 @@ function EventRow({ item }: { item: SignalEvent }) {
     related.length
       ? `${related.length} linked ${related.length === 1 ? 'post' : 'posts'}`
       : null,
-  ].filter(Boolean)
+  ].filter((part): part is string => part !== null)
 
   return (
     <article className="feed-row event-row">
@@ -277,22 +314,12 @@ function EventRow({ item }: { item: SignalEvent }) {
         )}
 
         {item.is_grouped && (
-          <details className="event-evidence">
-            <summary>
-              <span>
-                Follow {relationshipSummary.join(' · ') || `${item.member_count - 1} related posts`}
-              </span>
-              <span className="mono">
-                {item.author_count} {item.author_count === 1 ? 'author' : 'authors'}
-              </span>
-            </summary>
-            <div className="event-thread">
-              {narrative.map((evidence) => (
-                <RelationshipPost key={evidence.post_id} item={evidence} />
-              ))}
-              <RetweetTrace items={retweets} />
-            </div>
-          </details>
+          <EventEvidenceDetails
+            item={item}
+            relationshipSummary={relationshipSummary}
+            narrative={narrative}
+            retweets={retweets}
+          />
         )}
 
         <footer className="feed-footer mono">
@@ -444,7 +471,6 @@ export default function Feed() {
           the network amplified them — not by raw engagement.
         </p>
         <p className="page-method-line mono">
-          <span>X evidence · exact reply, quote, and retweet links only</span>
           <a href="/architecture#ranking-methods">How scoring works ↗</a>
         </p>
       </header>

@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  getCachedJSON,
   getJSON,
   type Entity,
   type RankingFollowers,
@@ -120,7 +121,7 @@ export default function Ranking() {
   const selectedFrom = useRef<'orbit' | 'list'>('orbit')
 
   useEffect(() => {
-    getJSON<Rankings>(`/api/rankings?limit=${N_FETCH}`)
+    getCachedJSON<Rankings>(`/api/rankings?limit=${N_FETCH}`)
       .then(setData)
       .catch((e) => setError(String(e)))
   }, [])
@@ -129,7 +130,9 @@ export default function Ranking() {
     setFollowers(null)
     if (!selected) return
     let live = true
-    getJSON<RankingFollowers>(`/api/rankings/followers/${selected}`)
+    getCachedJSON<RankingFollowers>(
+      `/api/rankings/followers/${selected}?limit=${N_FETCH}`,
+    )
       .then((f) => live && setFollowers(f))
       .catch(() => undefined)
     return () => {

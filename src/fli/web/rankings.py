@@ -10,6 +10,7 @@ failing, so the UI can render an honest empty state.
 from __future__ import annotations
 
 import sqlite3
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,21 @@ def _open_readonly(path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _db_version(path: Path) -> tuple[str, int, int, int, int]:
+    try:
+        stat = path.stat()
+        main_mtime, main_size = stat.st_mtime_ns, stat.st_size
+    except FileNotFoundError:
+        main_mtime, main_size = 0, 0
+    wal = Path(f"{path}-wal")
+    try:
+        wal_stat = wal.stat()
+        wal_mtime, wal_size = wal_stat.st_mtime_ns, wal_stat.st_size
+    except FileNotFoundError:
+        wal_mtime, wal_size = 0, 0
+    return str(path.resolve()), main_mtime, main_size, wal_mtime, wal_size
 
 
 def _latest_analysis_db() -> Path | None:
@@ -51,9 +67,15 @@ def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
     ).fetchone()
 
 
-def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
-    analysis_db = _latest_analysis_db()
-    if analysis_db is None:
+@lru_cache(maxsize=32)
+def _rankings_payload_cached(
+    limit: int,
+    state: str,
+    query: str,
+    version: tuple[str, int, int, int, int],
+) -> dict[str, Any]:
+    analysis_db = Path(version[0])
+    if not analysis_db.is_file():
         return {
             "available": False,
             "reason": "No derived ranking found. Run `fli following-ranking overlap` first.",
@@ -125,10 +147,25 @@ def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
         conn.close()
 
 
-def followers_payload(x_id: str, limit: int) -> dict[str, Any]:
-    """Which screened cohort sources follow this account, best-ranked first."""
+def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
     analysis_db = _latest_analysis_db()
     if analysis_db is None:
+        return {
+            "available": False,
+            "reason": "No derived ranking found. Run `fli following-ranking overlap` first.",
+        }
+    return _rankings_payload_cached(limit, state, query, _db_version(analysis_db))
+
+
+@lru_cache(maxsize=128)
+def _followers_payload_cached(
+    x_id: str,
+    limit: int,
+    version: tuple[str, int, int, int, int],
+) -> dict[str, Any]:
+    """Which screened cohort sources follow this account, best-ranked first."""
+    analysis_db = Path(version[0])
+    if not analysis_db.is_file():
         return {"available": False, "reason": "No derived ranking found."}
     conn = _open_readonly(analysis_db)
     try:
@@ -172,3 +209,10 @@ def followers_payload(x_id: str, limit: int) -> dict[str, Any]:
         }
     finally:
         conn.close()
+
+
+def followers_payload(x_id: str, limit: int) -> dict[str, Any]:
+    analysis_db = _latest_analysis_db()
+    if analysis_db is None:
+        return {"available": False, "reason": "No derived ranking found."}
+    return _followers_payload_cached(x_id, limit, _db_version(analysis_db))
