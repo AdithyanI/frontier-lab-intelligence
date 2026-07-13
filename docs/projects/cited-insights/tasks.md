@@ -163,8 +163,9 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Read the implementation brief end-to-end, then hand-build the oracle: pull the five strong 2026-07-11 audit candidates, fetch their linked artifacts manually, hand-write the five insight-v1 records they should produce (few-shot + acceptance oracle). | worker | [pipeline-design.md](resources/pipeline-design.md) |
-| todo | Build stages 2–4 (triage → artifact fetch → extraction) for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
+| in_progress | Run a bounded `triage-v1` design spike over representative high-attention envelopes: compare the minimum dynamic input and output schema, verify prompt-cache reads and LiteLLM tags/cost telemetry, audit false drops against the July 11 labels, and recommend one-stage vs two-stage filtering. Do not run the full corpus. | worker | [top-20 audit](../archive/signal-intelligence-pipeline/resources/top-20-attention-audit-2026-07-11.md) |
+| todo | Hand-build the extraction oracle after triage stabilizes: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
+| todo | Build artifact fetch + insight extraction for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
@@ -205,3 +206,9 @@ reads first.
   durable Feed reference, system architecture, and live Architecture copy now
   agree on flat one-vote-per-entity amplification, separate originator support,
   and day-relative public engagement. Ranking behavior is unchanged.
+- 2026-07-13: [TRIAGE-SPIKE] Started a bounded prompt/schema experiment before
+  production extraction. Primary model is `gpt-5.4-mini` through LiteLLM;
+  `gpt-5.5` is reserved for a small disagreement check. The spike will compare
+  conservative one-stage filtering against an optional reviewer stage using
+  real envelopes, record false drops, and verify cache/tag/cost telemetry before
+  choosing the durable contract.
