@@ -23,6 +23,9 @@ sources need a stable event identity to attach evidence to.
 ### In Scope
 
 - Preserve one stable canonical event and root across all time windows.
+- Repair nested provider-declared quote/retweet chains before clustering so an
+  embedded quote cannot become a competing event when its canonical target is
+  already present.
 - Materialize or query cumulative as-of-day event snapshots.
 - Surface an event on each day that receives new activity; show the canonical
   root plus evidence observed no later than that day's UTC cutoff.
@@ -68,6 +71,9 @@ sources need a stable event identity to attach evidence to.
 
 - [ ] A canonical event has one stable ID and root across every daily/weekly
   projection.
+- [ ] Nested quote chains are transitively connected before clustering; the
+  OpenAI → Greg Brockman → Ben Hylak regression produces one envelope and one
+  triage input.
 - [ ] A selected day contains no evidence published after that UTC day.
 - [ ] A multi-day event appears on each active day as one cumulative revision:
   prior context plus evidence newly observed that day.
@@ -140,6 +146,10 @@ sources need a stable event identity to attach evidence to.
   shows the canonical root and that day's new activity, one muted
   `Continued from <date>` label, and a closed `Show earlier context` control in
   Follow. The cumulative history exists in data without dominating the Feed.
+- 2026-07-13: The Greg Brockman/OpenAI duplicate is a normalization defect, not
+  a second meaningful event. Provider-declared relations must be traversed
+  transitively before event clustering; attention can rank an event but cannot
+  choose its canonical identity.
 
 ## Open Questions / Blockers
 
@@ -149,14 +159,16 @@ sources need a stable event identity to attach evidence to.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
+| todo | Repair recursive provider-relation normalization and add the OpenAI → Greg → Ben false-split regression before changing the temporal read model. | parent | [nested quote audit](resources/nested-quote-split-audit-2026-07-13.md) |
 | todo | Freeze the schema/API contract for canonical events, daily activity deltas, cumulative cutoffs, and weekly rollups. | parent | [cross-day audit](resources/cross-day-envelope-audit-2026-07-13.md) |
 | todo | Add regression fixtures for one event spanning Monday and Tuesday, including a prohibited Saturday member. | parent | — |
 | todo | Implement the cutoff-correct projection and supporting indexes without changing attention weights. | parent | — |
-| todo | Add the minimal continuation affordance inside the existing Feed/Follow language; do not add a timeline or new view mode. | parent | — |
 
 ## Backlog / Remaining Work
 
 - [ ] Rebuild all seven stored days and compare counts/fingerprints.
+- [ ] Report event-cluster merges after restoring the 750 currently recoverable
+  nested quote edges, and audit the top affected envelopes for false merges.
 - [ ] Audit triage snapshot hashes; reuse unchanged decisions and enumerate
   changed inputs without silently applying stale decisions.
 - [ ] Audit the continuation affordance against a two-day and a six-day event;
@@ -187,3 +199,9 @@ sources need a stable event identity to attach evidence to.
 - 2026-07-13: [DECISION] Froze the minimal UI: root plus today's additions by
   default, one continuation label, and prior evidence collapsed inside Follow.
   Requirements collection continues before overnight execution begins.
+- 2026-07-13: [DIAGNOSIS] Traced the Greg Brockman/OpenAI screenshot to a lost
+  nested quote edge. The one-level Feed normalizer preserved Ben → Greg but
+  dropped Greg → OpenAI, splitting one story into two Event clusters and two
+  independently triaged envelopes. Audited 750 distinct recoverable missing
+  nested quote edges; 720 currently bridge separate clusters. Captured the
+  repair contract and regression oracle in the linked audit resource.
