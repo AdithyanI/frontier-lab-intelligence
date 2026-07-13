@@ -149,8 +149,11 @@ deterministic Feed. It receives a frozen top-attention envelope but deliberately
 does not receive its attention score, engagement, followers, Registry rank, or
 amplifier prominence. One `gpt-5.4-mini`/medium Responses call through LiteLLM
 returns only the envelope-level `keep | drop` decision and one concise reason.
-The stable 1,024+ token instructions precede the variable envelope under one
-measured prompt-cache lane. Provider-supplied article/card title, preview, and
+The stable 1,024+ token instructions precede the variable envelope. Bulk runs
+use deterministic cache-key shards with at most one in-flight request per key,
+parallelize across keys, and persist completed responses through one SQLite
+writer so interrupted work resumes without repeating successful calls.
+Provider-supplied article/card title, preview, and
 URL already stored in raw X JSON are joined before triage so link-only primary
 artifacts are not mistaken for empty posts; no artifact body is fetched or
 interpreted at this stage. `fli.insight_triage_runs` freezes the cohort,

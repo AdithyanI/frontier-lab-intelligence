@@ -84,11 +84,11 @@ def test_run_summary_reports_cache_ratio_and_decisions(tmp_path):
     conn.execute(
         """INSERT INTO triage_item
            (event_id, current_rank, root_post_id, root_url, envelope_json,
-            input_text, input_sha256, status, decision, input_tokens,
+            input_text, input_sha256, prompt_cache_key, status, decision, input_tokens,
             cached_tokens, cache_write_tokens, output_tokens,
             reported_cost_usd, updated_at)
            VALUES ('event-1', 1, 'post-1', 'https://x.com/a/status/1', '{}',
-                   'input', 'hash', 'complete', 'keep', 2000, 1280, 0, 80,
+                   'input', 'hash', 'cache-key', 'complete', 'keep', 2000, 1280, 0, 80,
                    0.0042, ?)""",
         (now,),
     )
@@ -98,6 +98,8 @@ def test_run_summary_reports_cache_ratio_and_decisions(tmp_path):
     assert result["counts"]["complete"] == 1
     assert result["counts"]["kept"] == 1
     assert result["counts"]["cache_read_ratio"] == 0.64
+    assert result["counts"]["prompt_cache_keys"] == 1
+    assert result["counts"]["cache_hit_requests"] == 1
     assert result["counts"]["reported_cost_usd"] == 0.0042
 
 
@@ -134,14 +136,15 @@ def test_completed_item_is_resumable_without_a_duplicate_model_call(
     conn.execute(
         """INSERT INTO triage_item
            (event_id, current_rank, root_post_id, root_url, envelope_json,
-            input_text, input_sha256, updated_at)
-           VALUES ('event-1', 1, 'post-1', 'https://x.com/a/status/1', ?, ?, ?, ?)""",
+            input_text, input_sha256, prompt_cache_key, updated_at)
+           VALUES ('event-1', 1, 'post-1', 'https://x.com/a/status/1', ?, ?, ?, ?, ?)""",
         (
             insight_triage_runs._canonical_json(
                 insight_triage_runs._envelope_payload(envelope)
             ),
             insight_triage.render_input(envelope),
             envelope.input_sha256,
+            insight_triage.prompt_cache_key(envelope.event_id),
             now,
         ),
     )
@@ -196,4 +199,6 @@ def test_cli_dry_run_emits_stable_json_without_calling_the_model(capsys):
     assert payload["command"] == "insight-triage.run"
     assert payload["status"] == "ok"
     assert payload["data"]["model"] == "gpt-5.4-mini"
+    assert payload["data"]["workers"] == insight_triage_runs.DEFAULT_WORKERS
+    assert payload["data"]["prompt_cache_shards"] == 32
     assert payload["data"]["will_call_model"] is False

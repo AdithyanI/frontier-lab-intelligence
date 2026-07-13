@@ -135,7 +135,9 @@ def test_request_uses_cacheable_prefix_structured_output_and_litellm_tags():
     request = client.responses.with_raw_response.calls[0]
     assert request["instructions"] == insight_triage.instructions()
     assert len(request["instructions"].split()) > 1_024
-    assert request["prompt_cache_key"] == insight_triage.prompt_cache_key()
+    assert request["prompt_cache_key"] == insight_triage.prompt_cache_key(
+        make_envelope().event_id
+    )
     assert request["text"]["format"] == insight_triage.OUTPUT_FORMAT
     assert request["store"] is False
     assert "tools" not in request
@@ -146,6 +148,19 @@ def test_request_uses_cacheable_prefix_structured_output_and_litellm_tags():
     assert result["decision"] == "keep"
     assert result["cached_tokens"] == 1_280
     assert result["reported_cost_usd"] == pytest.approx(0.0042)
+
+
+def test_prompt_cache_keys_are_stable_and_sharded_by_event():
+    keys = {
+        insight_triage.prompt_cache_key(f"event-{index}")
+        for index in range(100)
+    }
+
+    assert 1 < len(keys) <= insight_triage.PROMPT_CACHE_SHARDS
+    assert insight_triage.prompt_cache_key("event-1") == (
+        insight_triage.prompt_cache_key("event-1")
+    )
+    assert all(key.startswith("fli:cited-insights-triage:") for key in keys)
 
 
 def test_output_rejects_fields_outside_the_minimal_contract():

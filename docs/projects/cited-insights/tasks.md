@@ -130,6 +130,33 @@ reads first.
 
 ## Decisions
 
+- 2026-07-13: Adi explicitly reopened the earlier top-100/day stopping
+  decision for one bounded learning run. Evaluate at most the top 1,000 exact
+  attention envelopes per complete stored day, not the unrestricted long tail:
+  6,445 frozen envelopes across 2026-07-05 through 2026-07-11. Keep the v2
+  `decision` + `reason` contract unchanged; this pass does not categorize,
+  extract artifacts, use web research, or fetch new X data. Validate a fresh
+  small cohort first, estimate the full run from its proxy-reported cost, then
+  expand only if cache, tags, resumability, and decision quality hold.
+
+- 2026-07-13: Freeze `envelope-triage-v2.2` for the bounded expansion. Two
+  64-row hill-climb calibrations exposed and corrected an over-strict demand
+  for provider metadata: concrete self-described capability experiments,
+  identifiable linked primary resources, AI-driven market claims, and specific
+  interface/adoption theses remain `keep` candidates even before artifact
+  resolution. The final cohort returned 47 keep / 17 drop, zero failures, 36
+  cache-hit requests, and $0.130723 proxy-reported cost. An immediate rerun of
+  the prior cohort made zero duplicate calls. Estimated 6,445-row spend is
+  $13.17; cost remains telemetry, not a gate.
+
+- 2026-07-13: Treat the completed top-1,000/day expansion as a learning and
+  evaluation corpus, not the default extraction queue. The 6,445-row run kept
+  3,339 envelopes and dropped 3,106 with zero failures; even ranks 751–1,000
+  retained 42.9%, so attention has no safe relevance cutoff. Continue to use
+  attention for ordering and the triage decision for routing, then return to a
+  small cited-extraction oracle instead of broadening this pass. See the
+  [expansion report](resources/triage-v2.2-top1000-expansion-2026-07-13.md).
+
 - 2026-07-13: Replace the calibration contract with one permissive
   `gpt-5.4-mini`/medium Responses call with no tools and the minimal strict
   output (`decision`, `reason`). The model routes the complete envelope; it
@@ -180,12 +207,10 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Run a bounded `triage-v1` design spike over representative high-attention envelopes: compare the minimum dynamic input and output schema, verify prompt-cache reads and LiteLLM tags/cost telemetry, audit false drops against the July 11 labels, and recommend one-stage vs two-stage filtering. Do not run the full corpus. | worker | [triage report](resources/triage-spike-2026-07-13.md) |
-| done | Run the frozen triage contract over the top 100 attention envelopes for every complete stored day (2026-07-05 through 2026-07-11; 700 total), preserve one resumable run per day, and audit cross-day/lower-attention keep/drop/category/cache/cost behavior without changing the prompt mid-run. Do not spend the submission critical path labeling the roughly 7,500-envelope long tail before extraction is proved. | worker | [seven-day report](resources/triage-seven-day-validation-2026-07-13.md) |
-| done | Replace the over-specified triage boundary with the two-field envelope decision, remove the ID repair path and obsolete v1 runtime artifacts, synchronize tests/docs, and validate the clean contract. | parent | — |
-| done | Distill the Feed audit presentation to decision + reason and consolidate exact relationship provenance under the single Follow disclosure; remove the redundant Noticed by presentation while retaining amplifier evidence for scoring. | parent | — |
-| todo | Hand-build the extraction oracle after cross-day validation: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
-| todo | Build artifact fetch + insight extraction for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
+| done | Harden the v2 runner for the bounded expansion: deterministic prompt-cache shards, bounded parallel model calls, single-writer resumability, compact progress, and audit telemetry. | parent | — |
+| done | Run a fresh bounded v2 calibration through LiteLLM; audit decisions and verify cache reads, tags, failures, resumability, and proxy-reported cost before expansion. | parent | — |
+| done | Freeze and triage the top 1,000 attention envelopes per complete day (6,445 total), resume any failures, and record the final keep/drop/cache/cost distribution. | parent | [expansion report](resources/triage-v2.2-top1000-expansion-2026-07-13.md) |
+| todo | Return to the five-record extraction oracle after the bounded expansion is audited. | parent | [pipeline-design.md](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
@@ -208,6 +233,35 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-13: [TRIAGE-V2-EXPANSION-STARTED] Adi asked for a simple, resumable
+  full learning pass while away, bounded to the top 1,000 attention envelopes
+  per complete day. Measured the exact cohort at 6,445 envelopes. Official
+  OpenAI prompt-caching guidance reconfirmed the existing prefix shape (stable
+  1,024+ token instructions first, variable envelope last) and the need for
+  stable cache-key sharding when increasing request throughput. Replanning the
+  runner and validating a fresh cohort before paid expansion; no prompt/schema
+  changes and no artifact extraction or new provider fetches in this pass.
+
+- 2026-07-13: [TRIAGE-V2.2-CALIBRATED] Hardened the runner with 32
+  deterministic cache lanes, one in-flight request per lane, 32-worker bounded
+  concurrency, single-thread SQLite persistence, and compact progress. Ten
+  focused tests pass. Two fresh 64-row calibrations corrected three obvious
+  false drops and one inconsistent adoption-thesis drop without changing the
+  two-field schema. Final v2.2: 47 keep / 17 drop, 36 cache-hit requests, zero
+  failures, $0.130723; extrapolated bounded-run spend $13.17. Prompt frozen for
+  the 6,445-row execution.
+
+- 2026-07-13: [TRIAGE-V2.2-TOP1000-COMPLETE] Completed the bounded expansion:
+  6,445/6,445 envelopes, 3,339 keep, 3,106 drop, zero failures, and no retry
+  above attempt one. LiteLLM reported $8.207020 total cost, 6,356 cache-hit
+  requests, and 11,390,976 cached of 15,057,381 input tokens. Every run carried
+  the expected tags; 452 repeated cross-day inputs produced zero inconsistent
+  decisions. Lower-attention bands still contained concrete releases, papers,
+  benchmarks, agent demos, and adoption claims, confirming there is no clean
+  rank cutoff. The live Feed now reads the v2.2 decisions. Next: the five-record
+  cited-extraction oracle, not more triage breadth. See
+  `resources/triage-v2.2-top1000-expansion-2026-07-13.md`.
 
 - 2026-07-13: [IN-PROGRESS] Opened the project after archiving
   signal-intelligence-pipeline (M4 KEEP). Scope, milestones, and sequencing

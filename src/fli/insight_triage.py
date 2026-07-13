@@ -16,10 +16,11 @@ from typing import Any
 from fli import llm_responses
 
 
-PROMPT_VERSION = "envelope-triage-v2"
+PROMPT_VERSION = "envelope-triage-v2.2"
 SCHEMA_VERSION = "envelope-triage-output-v2"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "medium"
+PROMPT_CACHE_SHARDS = 32
 PROMPT_PATH = Path(__file__).with_name("prompts") / "envelope_triage_v2.txt"
 
 OUTPUT_FORMAT: dict[str, Any] = {
@@ -51,6 +52,7 @@ class EnvelopeInput:
     def input_sha256(self) -> str:
         return hashlib.sha256(render_input(self).encode()).hexdigest()
 
+
 def instructions() -> str:
     """Return the stable cacheable prefix shared across triage requests."""
     return PROMPT_PATH.read_text().strip()
@@ -60,9 +62,14 @@ def prompt_sha256() -> str:
     return hashlib.sha256(instructions().encode()).hexdigest()
 
 
-def prompt_cache_key() -> str:
-    """One sequential cache lane is sufficient for the top-20 daily cohort."""
-    return f"fli:cited-insights-triage:{PROMPT_VERSION}:shard-00"
+def prompt_cache_key(scope_key: str | int) -> str:
+    """Route repeat-prefix calls over stable lanes for bounded concurrency."""
+    return llm_responses.sharded_prompt_cache_key(
+        namespace="cited-insights-triage",
+        prompt_version=PROMPT_VERSION,
+        scope_key=scope_key,
+        shards=PROMPT_CACHE_SHARDS,
+    )
 
 
 def request_tags(*, run: str, day: str) -> tuple[str, ...]:
@@ -192,7 +199,7 @@ def evaluate_one(
         "model": model,
         "instructions": instructions(),
         "input": render_input(envelope),
-        "prompt_cache_key": prompt_cache_key(),
+        "prompt_cache_key": prompt_cache_key(envelope.event_id),
         "reasoning": {"effort": effort},
         "text": {"format": OUTPUT_FORMAT},
         "store": False,

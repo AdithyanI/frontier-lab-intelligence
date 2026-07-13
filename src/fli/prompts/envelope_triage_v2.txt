@@ -23,11 +23,15 @@ Keep concrete model or product releases, research results, named techniques, eva
 
 Keep explicit expert or executive forecasts, theses, and beliefs when the proposition itself could materially inform an investor or AI engineer. Preserve in the reason that the value is an attributable viewpoint rather than an established fact. Lack of independent verification is not by itself a reason to drop a concrete lead; verification happens later.
 
+Keep a specific product-interface or adoption thesis when it identifies a modality, workflow, user segment, or comparative product behavior and explains the claimed direction. Do not dismiss it as generic praise merely because it lacks a metric. For example, a view that natural voice is underweighted in model assessment and is the main interface for a meaningful user segment is a concrete adoption thesis; "voice mode is amazing" by itself is not.
+
 Keep a retrospective observation about the pace or magnitude of change in a named frontier-AI domain when it includes an explicit comparison period or another concrete boundary. For example, a claim that agentic coding is a completely different world from six months ago is a material attributed observation even without a benchmark. This differs from generic launch excitement or an unsupported claim that progress will continue.
 
 Keep a first-hand product experience when it identifies concrete behavior, capabilities, limitations, regressions, or comparative product differences. Numerical evidence is not required at this gate. A report of natural turn-taking, pauses, background search, tool calls, confusing defaults, or a reproducible failure is a lead that can be investigated.
 
 Keep a named, inspectable, plausibly frontier-AI-relevant article, paper, repository, interview, dataset, evaluation, demo, or other primary artifact even when the surrounding post does not summarize its claims. Keep a concrete negative result or failure even when anecdotal, provided the supplied post describes what happened specifically enough to investigate. Keep a linked primary source when the supplied evidence clearly identifies why it matters to frontier AI.
+
+Do not require provider-supplied metadata when the post itself identifies a concrete experiment or primary resource. A self-contained description of what a named model built, solved, operated, or demonstrated is a capability lead even when the result is informal or an attached image is unavailable. A linked panel, interview, guide, or report is inspectable when the post gives a meaningful title, topic, or participants, even if its expanded URL or preview is absent. For the investor audience, keep a specific attributed claim that AI demand is materially changing semiconductors, infrastructure, labor, adoption, or another identifiable market, even when later artifact resolution is needed.
 </keep_rules>
 
 <drop_rules>
@@ -62,6 +66,10 @@ Example J: a first-hand user review names natural turn-taking, pauses, backgroun
 Example K: a post contains little text but the provider supplies the title and preview of a named AI-policy essay. Keep so the artifact resolver can inspect the primary source. If the provider supplies only an opaque link with no useful title, preview, or surrounding explanation, drop it.
 
 Example L: a widely amplified post describes a federal housing package with no explicit AI proposition. Drop because network attention does not make an off-topic policy development relevant to this pipeline.
+
+Example M: a user says a named model built a game in a specified language and then generated a detailed city map. Keep because that is a concrete capability experiment even if the supplied screenshots cannot be inspected at this gate.
+
+Example N: a post links a named local-AI panel, gives its topic, and identifies participating AI organizations. Keep because it identifies a relevant primary resource even when the provider did not expand the link or supply a preview.
 </decision_examples>
 
 <output_rules>

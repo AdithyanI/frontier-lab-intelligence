@@ -79,9 +79,10 @@ def _write_triage_run(root, *, event_ids):
         conn.execute(
             """INSERT INTO triage_item
                (event_id, current_rank, root_post_id, root_url, envelope_json,
-                input_text, input_sha256, status, decision, reason, updated_at)
+                input_text, input_sha256, prompt_cache_key, status, decision,
+                reason, updated_at)
                VALUES (?, ?, 'post-1', 'https://x.com/a/status/1', '{}',
-                       'input', 'hash', 'complete', ?, ?, ?)""",
+                       'input', 'hash', 'test-cache-key', 'complete', ?, ?, ?)""",
             (
                 event_id,
                 rank,

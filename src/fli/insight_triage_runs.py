@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import hashlib
 import json
 import sqlite3
 import sys
 import time
+from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -18,6 +20,8 @@ from fli.web.events import events_payload
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RUN_ROOT = REPO_ROOT / "data" / "derived" / "cited-insights" / "triage"
+DEFAULT_WORKERS = 32
+DEFAULT_PROGRESS_EVERY = 25
 
 RUN_SCHEMA = """
 CREATE TABLE IF NOT EXISTS run_meta (
@@ -44,6 +48,7 @@ CREATE TABLE IF NOT EXISTS triage_item (
     envelope_json TEXT NOT NULL,
     input_text TEXT NOT NULL,
     input_sha256 TEXT NOT NULL,
+    prompt_cache_key TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'complete', 'failed')),
     attempts INTEGER NOT NULL DEFAULT 0,
@@ -66,6 +71,8 @@ CREATE INDEX IF NOT EXISTS idx_triage_item_status_rank
     ON triage_item (status, current_rank, event_id);
 CREATE INDEX IF NOT EXISTS idx_triage_item_decision_rank
     ON triage_item (decision, current_rank, event_id);
+CREATE INDEX IF NOT EXISTS idx_triage_item_cache_key_rank
+    ON triage_item (prompt_cache_key, current_rank, event_id);
 """
 
 
@@ -338,6 +345,7 @@ def freeze_run(
             "event_id": envelope.event_id,
             "root_post_id": envelope.root["post_id"],
             "input_sha256": envelope.input_sha256,
+            "prompt_cache_key": insight_triage.prompt_cache_key(envelope.event_id),
         }
         for rank, _, envelope in frozen
     ]
@@ -368,8 +376,9 @@ def freeze_run(
         conn.executemany(
             """INSERT INTO triage_item
                (event_id, current_rank, root_post_id, root_url,
-                envelope_json, input_text, input_sha256, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                envelope_json, input_text, input_sha256, prompt_cache_key,
+                updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             [
                 (
                     envelope.event_id,
@@ -379,6 +388,7 @@ def freeze_run(
                     _canonical_json(_envelope_payload(envelope)),
                     insight_triage.render_input(envelope),
                     envelope.input_sha256,
+                    insight_triage.prompt_cache_key(envelope.event_id),
                     now,
                 )
                 for rank, item, envelope in frozen
@@ -403,7 +413,10 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
                   SUM(COALESCE(cache_write_tokens, 0)) AS cache_write_tokens,
                   SUM(COALESCE(output_tokens, 0)) AS output_tokens,
                   SUM(COALESCE(reported_cost_usd, 0)) AS reported_cost_usd,
-                  SUM(reported_cost_usd IS NOT NULL) AS reported_cost_count
+                  SUM(reported_cost_usd IS NOT NULL) AS reported_cost_count,
+                  COUNT(DISTINCT prompt_cache_key) AS prompt_cache_keys,
+                  SUM(COALESCE(input_tokens, 0) >= 1024) AS cache_eligible_requests,
+                  SUM(COALESCE(cached_tokens, 0) > 0) AS cache_hit_requests
            FROM triage_item"""
     ).fetchone()
     data = dict(counts)
@@ -420,7 +433,13 @@ def run_pending(
     conn: sqlite3.Connection,
     *,
     client: Any,
+    workers: int = DEFAULT_WORKERS,
+    progress_every: int = DEFAULT_PROGRESS_EVERY,
 ) -> dict[str, Any]:
+    if workers < 1:
+        raise ValueError("workers must be at least 1")
+    if progress_every < 1:
+        raise ValueError("progress_every must be at least 1")
     meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
     if meta is None:
         raise ValueError("run database has not been prepared")
@@ -429,9 +448,8 @@ def run_pending(
            WHERE status != 'complete'
            ORDER BY current_rank, event_id"""
     ).fetchall()
-    for row in rows:
+    def evaluate(row: sqlite3.Row) -> tuple[sqlite3.Row, dict[str, Any] | None, Exception | None]:
         envelope = _envelope_from_payload(json.loads(row["envelope_json"]))
-        now = _now()
         try:
             result = insight_triage.evaluate_one(
                 client,
@@ -440,56 +458,107 @@ def run_pending(
                 model=str(meta["model"]),
                 effort=str(meta["reasoning_effort"]),
             )
-            with conn:
-                conn.execute(
-                    """UPDATE triage_item
-                       SET status = 'complete', attempts = attempts + 1,
-                           decision = ?, reason = ?,
-                           response_id = ?, response_model = ?,
-                           input_tokens = ?, cached_tokens = ?,
-                           cache_write_tokens = ?, output_tokens = ?,
-                           reported_cost_usd = ?, request_tags_json = ?,
-                           error_type = NULL, error_message = NULL,
-                           completed_at = ?, updated_at = ?
-                       WHERE event_id = ?""",
-                    (
-                        result["decision"],
-                        result["reason"],
-                        result["response_id"],
-                        result["response_model"],
-                        result["input_tokens"],
-                        result["cached_tokens"],
-                        result["cache_write_tokens"],
-                        result["output_tokens"],
-                        result["reported_cost_usd"],
-                        _canonical_json(result["request_tags"]),
-                        now,
-                        now,
-                        row["event_id"],
-                    ),
-                )
-            status = "complete"
+            return row, result, None
         except Exception as exc:
-            with conn:
-                conn.execute(
-                    """UPDATE triage_item
-                       SET status = 'failed', attempts = attempts + 1,
-                           error_type = ?, error_message = ?, updated_at = ?
-                       WHERE event_id = ?""",
-                    (type(exc).__name__, str(exc), now, row["event_id"]),
+            return row, None, exc
+
+    if not rows:
+        return summary(conn)
+
+    lanes: dict[str, deque[sqlite3.Row]] = {}
+    for row in rows:
+        lanes.setdefault(str(row["prompt_cache_key"]), deque()).append(row)
+    waiting_lanes = deque(lanes)
+    executor = concurrent.futures.ThreadPoolExecutor(
+        max_workers=min(workers, len(lanes))
+    )
+    active: dict[concurrent.futures.Future, str] = {}
+
+    def start_next(cache_key: str) -> None:
+        active[executor.submit(evaluate, lanes[cache_key].popleft())] = cache_key
+
+    while waiting_lanes and len(active) < workers:
+        start_next(waiting_lanes.popleft())
+
+    def outcomes():
+        while active:
+            done, _ = concurrent.futures.wait(
+                active,
+                return_when=concurrent.futures.FIRST_COMPLETED,
+            )
+            for future in done:
+                cache_key = active.pop(future)
+                yield future.result()
+                if lanes[cache_key]:
+                    start_next(cache_key)
+                elif waiting_lanes:
+                    start_next(waiting_lanes.popleft())
+
+    try:
+        for processed, (row, result, error) in enumerate(outcomes(), start=1):
+            now = _now()
+            if result is not None:
+                with conn:
+                    conn.execute(
+                        """UPDATE triage_item
+                           SET status = 'complete', attempts = attempts + 1,
+                               decision = ?, reason = ?,
+                               response_id = ?, response_model = ?,
+                               input_tokens = ?, cached_tokens = ?,
+                               cache_write_tokens = ?, output_tokens = ?,
+                               reported_cost_usd = ?, request_tags_json = ?,
+                               error_type = NULL, error_message = NULL,
+                               completed_at = ?, updated_at = ?
+                           WHERE event_id = ?""",
+                        (
+                            result["decision"],
+                            result["reason"],
+                            result["response_id"],
+                            result["response_model"],
+                            result["input_tokens"],
+                            result["cached_tokens"],
+                            result["cache_write_tokens"],
+                            result["output_tokens"],
+                            result["reported_cost_usd"],
+                            _canonical_json(result["request_tags"]),
+                            now,
+                            now,
+                            row["event_id"],
+                        ),
+                    )
+                status = "complete"
+            else:
+                assert error is not None
+                with conn:
+                    conn.execute(
+                        """UPDATE triage_item
+                           SET status = 'failed', attempts = attempts + 1,
+                               error_type = ?, error_message = ?, updated_at = ?
+                           WHERE event_id = ?""",
+                        (type(error).__name__, str(error), now, row["event_id"]),
+                    )
+                status = "failed"
+
+            if (
+                status == "failed"
+                or processed % progress_every == 0
+                or processed == len(rows)
+            ):
+                print(
+                    _canonical_json(
+                        {
+                            "event_id": row["event_id"],
+                            "rank": row["current_rank"],
+                            "status": status,
+                            "processed": processed,
+                            "pending_batch": len(rows),
+                        }
+                    ),
+                    file=sys.stderr,
+                    flush=True,
                 )
-            status = "failed"
-        print(
-            _canonical_json(
-                {
-                    "event_id": row["event_id"],
-                    "rank": row["current_rank"],
-                    "status": status,
-                }
-            ),
-            file=sys.stderr,
-            flush=True,
-        )
+    finally:
+        executor.shutdown(wait=True)
     return summary(conn)
 
 
@@ -527,6 +596,10 @@ def main(argv: list[str] | None = None) -> int:
         "--reasoning-effort",
         default=insight_triage.DEFAULT_REASONING_EFFORT,
     )
+    run_parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
+    run_parser.add_argument(
+        "--progress-every", type=int, default=DEFAULT_PROGRESS_EVERY
+    )
     run_parser.add_argument("--dry-run", action="store_true")
 
     summary_parser = sub.add_parser("summary", help="Inspect a frozen run.")
@@ -548,6 +621,8 @@ def main(argv: list[str] | None = None) -> int:
                 "model": args.model,
                 "reasoning_effort": args.reasoning_effort,
                 "prompt_version": insight_triage.PROMPT_VERSION,
+                "workers": args.workers,
+                "prompt_cache_shards": insight_triage.PROMPT_CACHE_SHARDS,
                 "will_call_model": False,
             }
             print(_canonical_json(_result("insight-triage.run", data)))
@@ -566,7 +641,12 @@ def main(argv: list[str] | None = None) -> int:
             client = entity_kinds.create_litellm_client()
             if hasattr(client, "with_options"):
                 client = client.with_options(max_retries=0, timeout=180.0)
-            data = run_pending(conn, client=client)
+            data = run_pending(
+                conn,
+                client=client,
+                workers=args.workers,
+                progress_every=args.progress_every,
+            )
             conn.close()
             command = "insight-triage.run"
         elif args.action == "summary":
