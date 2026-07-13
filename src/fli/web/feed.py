@@ -235,6 +235,28 @@ def _public_engagement(row: sqlite3.Row) -> int:
     )
 
 
+def _apply_attention_scores(items: list[dict[str, Any]]) -> None:
+    """Apply attention-v1.1 without weighting one Registry vote by prestige."""
+    network_pct = _percentiles([float(item["_network_raw"]) for item in items])
+    origin_pct = _percentiles([float(item["_originator_support"]) for item in items])
+    engagement_pct = _percentiles([math.log1p(item["_engagement"]) for item in items])
+    for item in items:
+        n = network_pct[float(item["_network_raw"])]
+        o = origin_pct[float(item["_originator_support"])]
+        e = engagement_pct[math.log1p(item["_engagement"])]
+        item["attention_score"] = round(100 * (0.55 * n + 0.25 * o + 0.20 * e), 1)
+        item["score_components"] = {
+            "registry_amplifiers": item.pop("_amplifier_count"),
+            "originator_network_support": item.pop("_originator_support"),
+            "originator_network_rank": item.pop("_originator_rank"),
+            "public_interactions": item.pop("_engagement"),
+            "network_attention_percentile": round(n, 3),
+            "originator_support_percentile": round(o, 3),
+            "public_engagement_percentile": round(e, 3),
+        }
+        item.pop("_network_raw")
+
+
 def _iso_day(value: str) -> str:
     return date.fromisoformat(value).isoformat()
 
@@ -432,24 +454,7 @@ def feed_payload(
         )
     conn.close()
 
-    network_pct = _percentiles([float(item["_network_raw"]) for item in items])
-    origin_pct = _percentiles([float(item["_originator_support"]) for item in items])
-    engagement_pct = _percentiles([math.log1p(item["_engagement"]) for item in items])
-    for item in items:
-        n = network_pct[float(item["_network_raw"])]
-        o = origin_pct[float(item["_originator_support"])]
-        e = engagement_pct[math.log1p(item["_engagement"])]
-        item["attention_score"] = round(100 * (0.55 * n + 0.25 * o + 0.20 * e), 1)
-        item["score_components"] = {
-            "registry_amplifiers": item.pop("_amplifier_count"),
-            "originator_network_support": item.pop("_originator_support"),
-            "originator_network_rank": item.pop("_originator_rank"),
-            "public_interactions": item.pop("_engagement"),
-            "network_attention_percentile": round(n, 3),
-            "originator_support_percentile": round(o, 3),
-            "public_engagement_percentile": round(e, 3),
-        }
-        item.pop("_network_raw")
+    _apply_attention_scores(items)
 
     # Scores are calibrated against the complete visible day so switching a
     # lane or searching never changes an item's score.

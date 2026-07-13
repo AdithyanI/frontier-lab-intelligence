@@ -113,10 +113,15 @@ copying curation state into the derived database. Rejected authors disappear
 from the next response, and rejected amplifiers stop contributing, while the
 raw and historical normalized evidence remains unchanged. Each canonical
 Registry entity votes at most once and cannot amplify its own post. The
-provisional `attention-v1` score is an inspectable ordering aid—not an insight
+provisional `attention-v1.1` score is an inspectable ordering aid—not an insight
 or quality judgment—and combines day-relative percentiles for Registry
 attention (55%), originator network support (25%), and public engagement (20%).
-The same API also exposes chronological and public-engagement orderings.
+Registry attention is breadth: every distinct active canonical entity contributes
+one flat vote, independent of its network-support position. The originator's own
+entity-overlap support is the separate 25% component; public interactions are
+log-scaled. This avoids multiplying amplifier prominence into the same signal
+while keeping every input visible for later evaluation. The same API also exposes
+chronological and public-engagement orderings.
 
 `fli.signal_events` is a separate content-addressed projection over the frozen
 Feed run. `exact-structural-v1` joins only provider-declared quote/retweet

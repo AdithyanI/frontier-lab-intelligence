@@ -87,15 +87,16 @@ bounded to the 300 nodes visible in the current visualization.
 
 ## Attention Score
 
-`attention-v1` is an experimental, day-relative ordering aid:
+`attention-v1.1` is an experimental, day-relative ordering aid:
 
-- 55% Registry attention percentile: distinct active Registry amplifiers, with
-  a visible boost for top-quintile network-support amplifiers;
+- 55% Registry attention percentile: distinct active Registry amplifiers, one
+  flat vote per canonical entity regardless of network-support rank;
 - 25% originator network-support percentile;
 - 20% public-interaction percentile (log-scaled likes, replies, reposts, and
   quotes).
 
 Every component is returned beside the score. Each canonical entity votes at
-most once, self-amplification is excluded, and switching lanes or searching
-cannot change an item's score. The score does not claim relevance, quality,
-truth, novelty, or investment importance.
+most once, self-amplification is excluded, and an amplifier's network-support
+position remains visible without multiplying its vote. Switching lanes or
+searching cannot change an item's score. The score does not claim relevance,
+quality, truth, novelty, or investment importance.

@@ -130,6 +130,12 @@ reads first.
 
 ## Decisions
 
+- 2026-07-13: Keep the frozen `attention-v1.1` candidate-generation contract:
+  each active canonical Registry entity contributes one flat amplifier vote;
+  the originator's entity-overlap support remains a separate component. Do not
+  promote amplifier prominence into a second weight without blind evidence
+  that it improves useful yield. Pass amplifier identity, relation type, and
+  visible network support into the later qualitative extraction stage instead.
 - 2026-07-13: Link enrichment lives inside extraction (top envelopes only);
   no second ingestion pipeline before submission.
 - 2026-07-13: Blind evaluation validates insight yield here rather than feed
@@ -194,3 +200,8 @@ reads first.
   data that 95% of t.co posts already carry expanded_url (21,316/22,342)
   — no new X calls needed for link resolution. Case-prompt example check
   recorded in Decisions. Handing to implementing engineer.
+- 2026-07-13: [SCORE-CONTRACT] Reconfirmed the upstream `attention-v1.1`
+  boundary before cited extraction. The implementation, regression test,
+  durable Feed reference, system architecture, and live Architecture copy now
+  agree on flat one-vote-per-entity amplification, separate originator support,
+  and day-relative public engagement. Ranking behavior is unchanged.

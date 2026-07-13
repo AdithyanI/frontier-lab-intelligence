@@ -414,10 +414,10 @@ function RankingMethods() {
           <p className="method-explain">
             <strong>Network</strong> counts every screened Registry member — person or
             organization — exactly once per post: Andrej Karpathy and the newest
-            member carry the same vote. Breadth of insider convergence is the
-            signal, not celebrity, because trusted people retweet football too.
-            <strong> Originator</strong> is the author&rsquo;s own standing in the trust
-            ranking. <strong>Engagement</strong> is log-scaled public interactions,
+            member carry the same vote. This component measures breadth of Registry
+            attention; amplifier network position stays visible but does not multiply
+            the vote. <strong>Originator</strong> is the author&rsquo;s own network-support
+            percentile. <strong>Engagement</strong> is log-scaled public interactions,
             kept small as a tie-breaker. Each component is a percentile within the
             day&rsquo;s posts.
           </p>

@@ -89,6 +89,29 @@ def test_feed_api_deduplicates_and_explains_network_attention(tmp_path, monkeypa
     assert searched_target["attention_score"] == target["attention_score"]
 
 
+def test_attention_uses_flat_amplifier_votes_and_separate_originator_support():
+    def item(*, amplifier_support: int, originator_support: int):
+        return {
+            "amplifiers": [{"network_support": amplifier_support}],
+            "_network_raw": 1,
+            "_amplifier_count": 1,
+            "_originator_support": originator_support,
+            "_originator_rank": None,
+            "_engagement": 10,
+        }
+
+    low_support_amplifier = item(amplifier_support=1, originator_support=5)
+    high_support_amplifier = item(amplifier_support=10_000, originator_support=5)
+    stronger_originator = item(amplifier_support=1, originator_support=50)
+    items = [low_support_amplifier, high_support_amplifier, stronger_originator]
+
+    feed_store._apply_attention_scores(items)
+
+    assert low_support_amplifier["attention_score"] == high_support_amplifier["attention_score"]
+    assert stronger_originator["attention_score"] > low_support_amplifier["attention_score"]
+    assert all(row["score_components"]["registry_amplifiers"] == 1 for row in items)
+
+
 def test_feed_uses_current_registry_rejections_without_rebuild(tmp_path, monkeypatch):
     registry = _feed_fixture(tmp_path, monkeypatch)
     before = client.get("/api/feed?date=2026-07-11&limit=20").json()
