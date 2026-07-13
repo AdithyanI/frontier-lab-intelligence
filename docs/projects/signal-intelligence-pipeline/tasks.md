@@ -210,6 +210,13 @@ instead of expanding the graph or processing the complete X history.
   archive this Feed project and move directly to cited insight extraction,
   evaluation, and two-persona delivery. Do not add more Registry, graph,
   database-scale, or Feed-polish work unless the audit exposes a blocking flaw.
+- Accept the exploratory 2026-07-11 top-20 result as a **conditional keep**:
+  12/20 envelopes were worth attention and five were strong extraction
+  candidates, while eight were noise or too thin. Keep exact grouping and the
+  X slice; treat `attention-v1` only as candidate generation. Because the
+  operator saw rank order, repeat the quality measurement as a genuinely blind
+  stratified review in the cited-insight project rather than overstating this
+  audit as formal evaluation.
 
 ## Open Questions / Blockers
 
@@ -220,7 +227,7 @@ instead of expanding the graph or processing the complete X history.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Blind-audit the top 20 attention envelopes for structural correctness, relevance, substance, usefulness, and primary groundability; require 12/20 worth attention and at least three publishable candidates. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| in_progress | Complete independent blinded validation. The exploratory operator audit found 12/20 worth attention, five strong extraction candidates, eight noise/too-thin envelopes, and no obvious structural false merge. | parent | [top-20-attention-audit-2026-07-11.md](resources/top-20-attention-audit-2026-07-11.md) |
 | todo | Record the M4 keep/change/pivot decision, freeze the accepted evidence contract, and identify the exact one-day extraction cohort. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
 | todo | Close and archive this Feed project, then open the cited-insight project with 3–5 primary-cited insights, stratified evaluation, two persona views, PDF, and an inspectable alert outbox as acceptance criteria. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
 
@@ -316,3 +323,13 @@ instead of expanding the graph or processing the complete X history.
   persona outputs, PDF/alerts, and the final 3–5 insight report. Frozen scope:
   finish the top-20 M4 gate, archive this project, and move directly to cited
   extraction and delivery; do not spend another batch polishing foundations.
+- 2026-07-13: [AUDIT] Reviewed the 2026-07-11 top 20 `attention-v1`
+  envelopes through the deterministic API. Twelve were worth attention, five
+  were strong candidates for primary-artifact extraction, and eight were noise
+  or too thin. No obvious structural false merge appeared under the exact-only
+  contract, but high-status banter occupied ranks one and two. Decision:
+  conditionally keep the X slice and exact grouping, use attention only for
+  candidate generation, and move relevance, substance, primary verification,
+  and blind evaluation into the cited-insight stage. The exploratory review is
+  documented in
+  [top-20-attention-audit-2026-07-11.md](resources/top-20-attention-audit-2026-07-11.md).
