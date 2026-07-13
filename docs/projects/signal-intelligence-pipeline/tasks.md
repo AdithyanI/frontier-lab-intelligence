@@ -197,7 +197,9 @@ instead of expanding the graph or processing the complete X history.
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | todo | Audit the top Feed results for signal/noise and record the keep/change decision for `attention-v1`. | parent | — |
-| todo | Design the next deterministic event-clustering and relevance-filter boundary from that audit; do not add LLM extraction before the contract is accepted. | parent | — |
+| done | Audit the stored relation/thread/URL evidence and propose the deterministic event-clustering and separate relevance boundary. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| todo | Implement normalized conversation/canonical-URL anchors and `event-cluster-v1` as a separate content-addressed derived run. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| todo | Add the `Events | Posts` Feed view and run the top-20 false-merge/split audit before enabling event relevance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | todo | Normalize expanded external URLs/cards only for the accepted candidate set, then resolve primary citations in the later extraction milestone. | parent | — |
 
 ## Backlog / Remaining Work
@@ -242,3 +244,12 @@ instead of expanding the graph or processing the complete X history.
   frontend lint, and production build. The next product decision is whether
   the visible top results justify keeping or changing `attention-v1` before
   relevance filtering and event clustering.
+- 2026-07-13: [DESIGN] Audited the current clustering evidence and proposed a
+  separate content-addressed Event projection plus a later event-level
+  relevance stage. The seven-day run has 1,054 referenced targets engaged by
+  at least two observed handles and 82 exact shared-URL anchors across at least
+  two handles. Existing embedded payloads also preserve 539 partial reply
+  posts across 414 conversations, but direct reply timelines were not
+  collected. The proposed contract keeps Posts as the evidence ledger,
+  exposes why every Event member was grouped, and gates relevance on a top-20
+  false-merge/split audit.
