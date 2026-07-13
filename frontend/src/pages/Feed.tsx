@@ -206,20 +206,18 @@ function EventRow({ item }: { item: SignalEvent }) {
           </div>
         )}
 
-        <div className="feed-proof event-proof">
-          <div className="feed-why">
-            <span className="feed-proof-label">
-              {item.is_grouped ? 'EXACT RELATION' : 'WHY HERE'}
-            </span>
-            <span>
-              {item.is_grouped ? item.why_grouped.join(' · ') : rationale.join(' · ')}
-            </span>
+        {!item.is_grouped && rationale.length > 0 && (
+          <div className="feed-proof event-proof">
+            <div className="feed-why">
+              <span className="feed-proof-label">WHY HERE</span>
+              <span>{rationale.join(' · ')}</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {item.amplifiers.length > 0 && (
           <div className="feed-amplifiers" aria-label="Registry amplifiers">
-            <span className="feed-proof-label">NETWORK ATTENTION</span>
+            <span className="feed-proof-label">NOTICED BY</span>
             {item.amplifiers.slice(0, 6).map((amplifier) => (
               <a
                 key={amplifier.entity_id}
@@ -241,7 +239,9 @@ function EventRow({ item }: { item: SignalEvent }) {
               <span>
                 Follow {relationshipSummary.join(' · ') || `${item.member_count - 1} related posts`}
               </span>
-              <span className="mono">{item.author_count} authors · exact links only</span>
+              <span className="mono">
+                {item.author_count} {item.author_count === 1 ? 'author' : 'authors'}
+              </span>
             </summary>
             <div className="event-thread">
               {narrative.map((evidence) => (
@@ -369,22 +369,18 @@ export default function Feed() {
     <div className="page feed-page">
       <h1 className="page-title">What is the network paying attention to?</h1>
       <p className="page-sub">
-        One evidence stream. Exact X relationships connect a root post to its
-        replies, quotes, and retweets; unrelated posts remain independently traceable.
+        Stored public X evidence, organized into exact reply, quote, and retweet
+        envelopes. Nothing here is yet an insight or claim.
       </p>
 
-      {data?.run && (
-        <details className="method-note page-method mono">
-          <summary>Method</summary>
-          <p>
-            <a href="/architecture#ranking-methods">ATTENTION-V1 scoring formula</a>
-            {' '}· {data.run.clustering_contract} · singleton posts retained
-          </p>
-        </details>
-      )}
+      <div className="feed-scope mono" aria-label="Feed scope">
+        <span>SOURCE · X</span>
+        <span>{availableDates.length} COMPLETE UTC DAYS</span>
+        <span>EXACT RELATIONSHIPS · NO SEMANTIC GROUPING</span>
+        <a href="/architecture#system-today">See system map</a>
+      </div>
 
       <section className="feed-calendar" aria-label="Available complete UTC days">
-        <span className="feed-calendar-label mono">Complete UTC days · evidence posts</span>
         <div className="feed-days" role="group" aria-label="Feed date">
           {availableDates.map((value) => (
             <button

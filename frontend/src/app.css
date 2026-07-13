@@ -284,9 +284,16 @@ td.num {
 .load-more:hover { background: var(--blue-ink); }
 .load-more:disabled { background: var(--muted); cursor: default; }
 
-/* ---- architecture page ---- */
+/* ---- architecture page: one visual learning narrative ---- */
 
-.arch-section { margin-top: 72px; }
+.arch-page { max-width: 1280px; padding-bottom: 88px; }
+
+.arch-section {
+  margin-top: 64px;
+  scroll-margin-top: 88px;
+}
+
+.arch-section--lead { margin-top: 48px; }
 
 .arch-section-head {
   max-width: 860px;
@@ -306,7 +313,7 @@ td.num {
 }
 
 .arch-canvas {
-  margin-top: 32px;
+  margin-top: 24px;
   border: 1px solid var(--border-strong);
   background: var(--bg);
   overflow: hidden;
@@ -317,16 +324,17 @@ td.num {
 .arch-chapters {
   display: inline-flex;
   align-items: stretch;
-  margin-top: 32px;
-  background: var(--surface);
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .arch-chapters a {
   display: flex;
   align-items: center;
-  padding: 11px 18px;
+  padding: 10px 18px;
   color: var(--ink-soft);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   text-decoration: none;
   border-right: 1px solid var(--border);
@@ -334,12 +342,11 @@ td.num {
 }
 
 .arch-chapters a:last-child { border-right: 0; }
-.arch-chapters a:hover { color: var(--blue-ink); background: #fff; }
+.arch-chapters a:hover { color: var(--blue-ink); background: var(--surface); }
 .arch-chapters a:focus-visible { outline: 2px solid var(--blue-mid); outline-offset: 2px; }
 
 .arch-section--methods {
-  margin-bottom: 72px;
-  padding-top: 8px;
+  margin-bottom: 0;
   scroll-margin-top: 84px;
 }
 
@@ -348,19 +355,19 @@ td.num {
 .method-row {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr) 200px;
-  min-height: 188px;
+  min-height: 164px;
   border-bottom: 1px solid var(--border-strong);
 }
 
 .method-id,
 .method-main,
-.method-limit { padding: 28px 32px; }
+.method-limit { padding: 24px 28px; }
 
 .method-id {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 32px;
+  gap: 24px;
   background: var(--surface);
   border-right: 1px solid var(--border);
 }
@@ -385,7 +392,7 @@ td.num {
 }
 
 .method-question {
-  margin: 0 0 24px;
+  margin: 0 0 18px;
   color: var(--muted);
   font-size: 13.5px;
 }
@@ -431,8 +438,8 @@ td.num {
 .method-weight {
   display: grid;
   grid-template-columns: 55fr 25fr 20fr;
-  min-height: 68px;
-  margin-top: 22px;
+  min-height: 58px;
+  margin-top: 18px;
 }
 
 .method-weight > div {
@@ -1239,14 +1246,6 @@ td.num {
 
 .feed-calendar {
   margin-top: 24px;
-}
-
-.feed-calendar-label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--muted);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
 }
 
 .feed-days {
