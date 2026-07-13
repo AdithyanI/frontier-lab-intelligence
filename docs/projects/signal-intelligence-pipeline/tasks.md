@@ -206,6 +206,10 @@ instead of expanding the graph or processing the complete X history.
   parent before its descendants, order siblings chronologically, and keep a
   reply whose parent is absent as an explicitly unparented branch. Relationship
   kind or depth must never move a child above its captured parent.
+- Treat the 2026-07-13 submission gap audit as a hard scope boundary: after M4,
+  archive this Feed project and move directly to cited insight extraction,
+  evaluation, and two-persona delivery. Do not add more Registry, graph,
+  database-scale, or Feed-polish work unless the audit exposes a blocking flaw.
 
 ## Open Questions / Blockers
 
@@ -216,13 +220,9 @@ instead of expanding the graph or processing the complete X history.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Replace the separate post/group read paths with one unified envelope read model, including singleton posts and exact relationship metadata. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| done | Distill the Feed UI to date/search/sort and render each envelope root-first with threaded replies, quotes, and compact retweeter provenance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| done | Correct the unified Feed to traverse exact parent links parent-first, preserve quote/reply branches, mark missing parents, and add only query-aligned indexes. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| in_progress | Audit the top 20 unified Feed envelopes for structural false merges/splits and signal/noise; record the keep/change decision for `attention-v1`. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| done | Audit the stored relation/thread/URL evidence and propose the deterministic event-clustering and separate relevance boundary. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| done | Implement normalized conversation metadata and `exact-structural-v1` as a separate content-addressed derived run; use no URL or semantic grouping. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| todo | Normalize expanded external URLs/cards only for the accepted candidate set, then resolve primary citations in the later extraction milestone. | parent | — |
+| in_progress | Blind-audit the top 20 attention envelopes for structural correctness, relevance, substance, usefulness, and primary groundability; require 12/20 worth attention and at least three publishable candidates. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| todo | Record the M4 keep/change/pivot decision, freeze the accepted evidence contract, and identify the exact one-day extraction cohort. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
+| todo | Close and archive this Feed project, then open the cited-insight project with 3–5 primary-cited insights, stratified evaluation, two persona views, PDF, and an inspectable alert outbox as acceptance criteria. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
 
 ## Backlog / Remaining Work
 
@@ -308,3 +308,11 @@ instead of expanding the graph or processing the complete X history.
   places Matt Deitke's quote before its reply and leaves `5/` at the end with
   `Parent not captured` because its `4/` parent is absent. Added the one
   event-link index aligned to this read path; targeted schema/API tests pass.
+- 2026-07-13: [REPLAN] Re-read the canonical BIT case prompt and mapped the
+  live repository against every weighted area and required deliverable. The
+  Registry, data/provenance layer, discovery/ranking foundation, and evidence
+  UI are strong, but the submission's central proof remains absent: validated
+  signal filtering, structured primary-cited insights, insight scoring, two
+  persona outputs, PDF/alerts, and the final 3–5 insight report. Frozen scope:
+  finish the top-20 M4 gate, archive this project, and move directly to cited
+  extraction and delivery; do not spend another batch polishing foundations.
