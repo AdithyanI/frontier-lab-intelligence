@@ -25,7 +25,7 @@ and creates the reusable input boundary for later extraction and insights.
 - Deduplicate related posts into versioned event candidates.
 - Compute a transparent, explicitly experimental attention score from Registry
   amplification, originator network support, and public engagement.
-- Serve a Registry-aware API and a polished Feed page with date, lane, sort,
+- Serve a Registry-aware API and a polished unified Feed page with date, sort,
   and text filters plus inspectable score inputs.
 - Keep current Registry rejections dynamic: rejected authors disappear and
   rejected amplifiers stop contributing on the next API read/page refresh.
@@ -136,8 +136,8 @@ attention score for ordering, but it is not a claim of quality or importance.
    percentile + 25% originator network-support percentile + 20% public
    engagement percentile. High-network-support amplifiers are visible and add
    one extra unit before the network percentile is computed.
-4. **First-hand lane:** direct posts remain separately filterable, whether or
-   not another Registry entity amplified them.
+4. **Evidence shape:** direct, quoted, replied-to, and amplified evidence remains
+   inspectable inside one Feed rather than being split into product modes.
 
 ## Future Evaluation Contract
 
@@ -175,8 +175,8 @@ instead of expanding the graph or processing the complete X history.
   all history.
 - Normalize observed retweet/quote relations already present in raw JSON; do
   not fetch engagement-actor lists.
-- Use two signal lanes: multi-source consensus events and important
-  single-originator posts.
+- Use one Feed of evidence envelopes: an unrelated post is a one-member
+  envelope, while provider-declared relationships form a multi-member envelope.
 - Keep first-slice X detection and primary verification complementary. Direct
   primary feeds remain a later option, not a competing implementation now.
 - Name the deterministic product surface **Feed**, not Insights. It shows
@@ -185,7 +185,7 @@ instead of expanding the graph or processing the complete X history.
   Registry state and the accepted network ranking at read time so curation
   changes are visible on refresh without rewriting evidence.
 - Use `attention-v1` only as a transparent experimental ordering aid. Search
-  and lane changes never recalibrate scores; self-amplification is excluded.
+  and sort changes never recalibrate scores; self-amplification is excluded.
 - Keep Architecture as one continuous visual narrative. A lightweight chapter
   navigator deep-links to the high-level system map and exact ranking methods;
   it does not hide their relationship behind stateful tabs.
@@ -197,6 +197,11 @@ instead of expanding the graph or processing the complete X history.
   quote/reply text, and render retweets as compact amplification evidence with
   author, time, and direct X provenance. Use visible segmented controls for the
   three sort modes instead of a browser-native select menu.
+- Keep the Feed's product surface singular. Remove the post/group and evidence-
+  lane switches; retain date, search, and `Attention | Recent | Engagement`.
+  Within each envelope render the root once, then exact replies in parent-first
+  thread order, unique quotes, and a compact retweeter trace. Do not infer
+  missing parents or semantic relationships.
 
 ## Open Questions / Blockers
 
@@ -207,11 +212,11 @@ instead of expanding the graph or processing the complete X history.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Audit the top Feed results for signal/noise and record the keep/change decision for `attention-v1`. | parent | — |
+| done | Replace the separate post/group read paths with one unified envelope read model, including singleton posts and exact relationship metadata. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| done | Distill the Feed UI to date/search/sort and render each envelope root-first with threaded replies, quotes, and compact retweeter provenance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| in_progress | Audit the top 20 unified Feed envelopes for structural false merges/splits and signal/noise; record the keep/change decision for `attention-v1`. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | done | Audit the stored relation/thread/URL evidence and propose the deterministic event-clustering and separate relevance boundary. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | done | Implement normalized conversation metadata and `exact-structural-v1` as a separate content-addressed derived run; use no URL or semantic grouping. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| in_progress | Audit the top 20 exact groups for structural false merges/splits before enabling any inferred grouping or relevance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| done | Add the `Exact groups | All posts` Feed view with relation-aware evidence rows and an accessible visible sort control. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | todo | Normalize expanded external URLs/cards only for the accepted candidate set, then resolve primary citations in the later extraction milestone. | parent | — |
 
 ## Backlog / Remaining Work
@@ -280,3 +285,13 @@ instead of expanding the graph or processing the complete X history.
   repeated retweet text into compact amplification rows, and exposes all three
   sort modes as accessible segmented buttons. Frontend lint/build and live
   browser interaction checks pass; the top-20 structural audit remains active.
+- 2026-07-13: [CHECKPOINT] Replaced the separate post/group and evidence-lane
+  modes with one Registry-aware Feed of 972 evidence envelopes over the 1,371
+  visible 2026-07-11 evidence posts. Each envelope renders its root exactly
+  once; exact replies are parent-first, same-author replies are labeled and
+  colored as thread continuations, other-account replies remain neutral,
+  quotes preserve unique commentary, and retweets collapse into a traceable
+  author strip. Ungrouped and rejection-broken posts remain visible as
+  singletons. `scripts/check-fast.sh` passes 141 tests plus frontend lint/build,
+  and the live browser check confirms the colored continuation treatment; the
+  top-20 quality audit is the remaining active work item.

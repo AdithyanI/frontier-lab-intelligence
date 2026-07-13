@@ -1,8 +1,7 @@
-"""Registry-aware read model for exact structural event groups."""
+"""Registry-aware unified Feed envelopes over exact structural relationships."""
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from pathlib import Path
 from typing import Any
@@ -47,7 +46,7 @@ def _event_rows(
     members = events.execute(
         f"""SELECT * FROM event_member
             WHERE run_id = ? AND event_id IN ({placeholders})
-            ORDER BY event_id, is_representative DESC, post_id""",
+            ORDER BY event_id, post_id""",
         parameters,
     ).fetchall()
     links = events.execute(
@@ -59,6 +58,125 @@ def _event_rows(
     return clusters, members, links
 
 
+def _root_post_id(
+    members: list[dict[str, Any]], links: list[sqlite3.Row], candidates: set[str]
+) -> str:
+    """Choose the exact relationship root, constrained to ranked Feed candidates."""
+    inbound: dict[str, int] = {}
+    outbound: dict[str, list[str]] = {}
+    for link in links:
+        inbound[link["target_post_id"]] = inbound.get(link["target_post_id"], 0) + 1
+        outbound.setdefault(link["source_post_id"], []).append(link["link_type"])
+    type_priority = {"original": 0, "reply": 1, "quote": 2, "retweet": 3}
+    eligible = [member for member in members if member["post_id"] in candidates]
+    return min(
+        eligible,
+        key=lambda member: (
+            -inbound.get(member["post_id"], 0),
+            bool(outbound.get(member["post_id"])),
+            type_priority.get(member["post_type"], 9),
+            not member["observed_directly"],
+            member["published_at"],
+            member["post_id"],
+        ),
+    )["post_id"]
+
+
+def _relationship_rows(
+    members: list[dict[str, Any]], links: list[sqlite3.Row], root_post_id: str
+) -> list[dict[str, Any]]:
+    root = next(member for member in members if member["post_id"] == root_post_id)
+    link_priority = {"reply_parent": 0, "quote": 1, "retweet": 2, "same_conversation": 3}
+    source_links: dict[str, list[sqlite3.Row]] = {}
+    for link in links:
+        source_links.setdefault(link["source_post_id"], []).append(link)
+    for values in source_links.values():
+        values.sort(key=lambda link: link_priority.get(link["link_type"], 9))
+
+    parent_by_reply: dict[str, str] = {}
+    payloads: list[dict[str, Any]] = []
+    for member in members:
+        if member["post_id"] == root_post_id:
+            continue
+        link = source_links.get(member["post_id"], [None])[0]
+        link_type = link["link_type"] if link is not None else None
+        target_post_id = link["target_post_id"] if link is not None else None
+        if member["post_type"] == "reply" or link_type in (
+            "reply_parent",
+            "same_conversation",
+        ):
+            relationship = "reply"
+            parent_post_id = target_post_id or root_post_id
+            parent_by_reply[member["post_id"]] = parent_post_id
+        elif member["post_type"] == "quote" or link_type == "quote":
+            relationship = "quote"
+            parent_post_id = None
+        elif member["post_type"] == "retweet" or link_type == "retweet":
+            relationship = "retweet"
+            parent_post_id = None
+        else:
+            relationship = "related"
+            parent_post_id = None
+        payloads.append(
+            {
+                **member,
+                "relationship": relationship,
+                "relation_type": link_type,
+                "target_post_id": target_post_id,
+                "parent_post_id": parent_post_id,
+                "same_author_as_root": (
+                    member["author"]["handle"].lower()
+                    == root["author"]["handle"].lower()
+                ),
+            }
+        )
+
+    def depth(post_id: str) -> int:
+        seen: set[str] = set()
+        current = post_id
+        value = 0
+        while current in parent_by_reply and current not in seen:
+            seen.add(current)
+            value += 1
+            current = parent_by_reply[current]
+            if current == root_post_id:
+                break
+        return value
+
+    relationship_priority = {"reply": 0, "quote": 1, "related": 2, "retweet": 3}
+    for payload in payloads:
+        payload["depth"] = depth(payload["post_id"]) if payload["relationship"] == "reply" else 0
+    payloads.sort(
+        key=lambda member: (
+            relationship_priority.get(member["relationship"], 9),
+            member["depth"],
+            member["published_at"],
+            member["post_id"],
+        )
+    )
+    return payloads
+
+
+def _singleton(item: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "event_id": f"post:{item['post_id']}",
+        "is_grouped": False,
+        "root": item,
+        "why_grouped": [],
+        "anchor_types": [],
+        "member_count": 1,
+        "link_count": 0,
+        "author_count": 1,
+        "registry_account_count": 1 if item["author"]["entity_id"] is not None else 0,
+        "first_hand_count": int(item["observed_directly"]),
+        "amplifiers": item["amplifiers"],
+        "peak_attention_score": item["attention_score"],
+        "peak_public_interactions": item["score_components"]["public_interactions"],
+        "latest_evidence_at": item["published_at"],
+        "evidence": [],
+    }
+
+
 def events_payload(
     *,
     day: str,
@@ -68,6 +186,7 @@ def events_payload(
     limit: int,
     offset: int,
 ) -> dict[str, Any]:
+    """Return every visible Feed candidate, grouped only by exact relationships."""
     if not DEFAULT_EVENTS_DB.is_file():
         return {
             "available": False,
@@ -99,10 +218,7 @@ def events_payload(
 
     feed = _open_readonly(DEFAULT_FEED_DB)
     post_rows = feed.execute(
-        """SELECT post.*
-           FROM feed_post post
-           WHERE post.run_id = ?""",
-        (run["feed_run_id"],),
+        "SELECT * FROM feed_post WHERE run_id = ?", (run["feed_run_id"],)
     ).fetchall()
     feed.close()
     posts = {(row["provider"], row["post_id"]): row for row in post_rows}
@@ -116,12 +232,12 @@ def events_payload(
         links_by_event.setdefault(link["event_id"], []).append(link)
 
     items: list[dict[str, Any]] = []
+    consumed: set[str] = set()
     for cluster in clusters:
         event_id = cluster["event_id"]
-        raw_members = members_by_event.get(event_id, [])
         visible_members: list[dict[str, Any]] = []
         visible_keys: set[tuple[str, str]] = set()
-        for member in raw_members:
+        for member in members_by_event.get(event_id, []):
             row = posts.get((member["provider"], member["post_id"]))
             if row is None:
                 continue
@@ -145,7 +261,6 @@ def events_payload(
                     "url": row["url"],
                     "post_type": row["post_type"],
                     "observed_directly": bool(member["observed_directly"]),
-                    "is_representative": bool(member["is_representative"]),
                 }
             )
         current_links = [
@@ -156,23 +271,17 @@ def events_payload(
         ]
         event_candidates = [
             candidates[member["post_id"]]
-            for member in raw_members
+            for member in visible_members
             if member["post_id"] in candidates
         ]
         if len(visible_members) < 2 or not current_links or not event_candidates:
             continue
 
-        configured_id = cluster["representative_post_id"]
-        representative = candidates.get(configured_id)
-        if representative is None:
-            representative = max(
-                event_candidates,
-                key=lambda item: (
-                    item["attention_score"],
-                    item["published_at"],
-                    item["post_id"],
-                ),
-            )
+        root_post_id = _root_post_id(
+            visible_members, current_links, {item["post_id"] for item in event_candidates}
+        )
+        root = candidates[root_post_id]
+        related = _relationship_rows(visible_members, current_links, root_post_id)
         anchor_types = sorted(
             {
                 "same_target"
@@ -196,31 +305,15 @@ def events_payload(
         }
         amplifiers: dict[int, dict[str, Any]] = {}
         for candidate in event_candidates:
+            consumed.add(candidate["post_id"])
             for amplifier in candidate["amplifiers"]:
                 amplifiers[amplifier["entity_id"]] = amplifier
                 registry_entity_ids.add(amplifier["entity_id"])
-        visible_members.sort(
-            key=lambda member: (
-                not member["is_representative"],
-                {"original": 0, "reply": 1, "quote": 2, "retweet": 3}.get(
-                    member["post_type"], 9
-                ),
-                member["published_at"],
-                member["post_id"],
-            )
-        )
-        peak_attention = max(item["attention_score"] for item in event_candidates)
-        peak_interactions = max(
-            item["score_components"]["public_interactions"]
-            for item in event_candidates
-        )
-        latest_evidence_at = max(
-            item["published_at"] for item in event_candidates
-        )
         items.append(
             {
                 "event_id": event_id,
-                "representative": representative,
+                "is_grouped": True,
+                "root": root,
                 "why_grouped": why_grouped,
                 "anchor_types": anchor_types,
                 "member_count": len(visible_members),
@@ -238,13 +331,23 @@ def events_payload(
                         -amplifier["network_support"], amplifier["entity_name"]
                     ),
                 ),
-                "peak_attention_score": peak_attention,
-                "peak_public_interactions": peak_interactions,
-                "latest_evidence_at": latest_evidence_at,
-                "evidence": visible_members,
+                "peak_attention_score": max(
+                    item["attention_score"] for item in event_candidates
+                ),
+                "peak_public_interactions": max(
+                    item["score_components"]["public_interactions"]
+                    for item in event_candidates
+                ),
+                "latest_evidence_at": max(
+                    member["published_at"] for member in visible_members
+                ),
+                "evidence": related,
             }
         )
 
+    items.extend(
+        _singleton(item) for item in feed_items if item["post_id"] not in consumed
+    )
     needle = query.strip().lower()
     items = [
         item
@@ -255,9 +358,18 @@ def events_payload(
             not needle
             or needle
             in " ".join(
-                f"{member['author']['name']} {member['author']['entity_name'] or ''} "
-                f"{member['author']['handle']} {member['text']}"
-                for member in item["evidence"]
+                [
+                    item["root"]["author"]["name"],
+                    item["root"]["author"]["entity_name"] or "",
+                    item["root"]["author"]["handle"],
+                    item["root"]["text"],
+                    *[
+                        f"{member['author']['name']} "
+                        f"{member['author']['entity_name'] or ''} "
+                        f"{member['author']['handle']} {member['text']}"
+                        for member in item["evidence"]
+                    ],
+                ]
             ).lower()
         )
     ]
@@ -307,8 +419,8 @@ def events_payload(
         "score_formula": {
             **feed_result["score_formula"],
             "note": (
-                "Groups use exact structural links only. Peak attention is the "
-                "highest unchanged Feed attention score among visible evidence."
+                "Every Feed candidate is an envelope. Provider-declared exact "
+                "relationships combine evidence; all other posts remain singletons."
             ),
         },
         "items": items[offset : offset + limit],
@@ -316,6 +428,7 @@ def events_payload(
 
 
 def dates_payload() -> dict[str, Any]:
+    """Expose fast evidence-ledger counts for each complete Feed day."""
     feed_dates = feed_store.dates_payload()
     if not feed_dates.get("available"):
         return feed_dates
@@ -326,108 +439,7 @@ def dates_payload() -> dict[str, Any]:
         }
     events = _open_readonly(DEFAULT_EVENTS_DB)
     run = _latest_run(events)
-    if run is None:
-        events.close()
-        return {"available": False, "reason": "Event store has no materialized run."}
-    members = events.execute(
-        "SELECT * FROM event_member WHERE run_id = ?", (run["run_id"],)
-    ).fetchall()
-    links = events.execute(
-        "SELECT * FROM event_link WHERE run_id = ?", (run["run_id"],)
-    ).fetchall()
-    event_days = events.execute(
-        "SELECT event_id, day FROM event_day WHERE run_id = ?", (run["run_id"],)
-    ).fetchall()
     events.close()
-
-    feed = _open_readonly(DEFAULT_FEED_DB)
-    post_rows = feed.execute(
-        "SELECT * FROM feed_post WHERE run_id = ?", (run["feed_run_id"],)
-    ).fetchall()
-    feed.close()
-    posts = {(row["provider"], row["post_id"]): row for row in post_rows}
-    by_handle, by_x_id = feed_store._registry_maps()
-    account_by_post: dict[tuple[str, str], dict[str, Any] | None] = {}
-    for key, post in posts.items():
-        account_by_post[key] = feed_store._registry_account(
-            post["author_x_id"], post["author_handle"], by_handle, by_x_id
-        )
-
-    visible_by_event: dict[str, set[tuple[str, str]]] = {}
-    active_days_by_event: dict[str, set[str]] = {}
-    observed_directly: set[tuple[str, str]] = set()
-    for member in members:
-        key = (member["provider"], member["post_id"])
-        post = posts.get(key)
-        if post is None:
-            continue
-        account = account_by_post[key]
-        if account and account["registry_state"] == "rejected":
-            continue
-        visible_by_event.setdefault(member["event_id"], set()).add(key)
-        if member["observed_directly"]:
-            observed_directly.add(key)
-        if (
-            member["observed_directly"]
-            and post["post_type"] != "retweet"
-            and account
-            and account["registry_state"] == "active"
-        ):
-            active_days_by_event.setdefault(member["event_id"], set()).add(post["day"])
-
-    current_links_by_event: dict[str, int] = {}
-    for link in links:
-        visible = visible_by_event.get(link["event_id"], set())
-        source = (link["provider"], link["source_post_id"])
-        target = (link["provider"], link["target_post_id"])
-        if source not in visible or target not in visible:
-            continue
-        current_links_by_event[link["event_id"]] = (
-            current_links_by_event.get(link["event_id"], 0) + 1
-        )
-        if link["link_type"] in ("quote", "retweet"):
-            source_post = posts[source]
-            source_account = account_by_post[source]
-            target_account = account_by_post[target]
-            target_is_active_direct = bool(
-                target in observed_directly
-                and target_account
-                and target_account["registry_state"] == "active"
-            )
-            self_amplification = bool(
-                source_account
-                and target_account
-                and source_account["entity_id"] == target_account["entity_id"]
-            )
-            source_is_active_amplifier = bool(
-                source_account
-                and source_account["registry_state"] == "active"
-                and not self_amplification
-            )
-            if target_is_active_direct or source_is_active_amplifier:
-                active_days_by_event.setdefault(link["event_id"], set()).add(
-                    source_post["day"]
-                )
-
-    counts = {item["day"]: 0 for item in feed_dates.get("dates") or []}
-    for event_day in event_days:
-        event_id = event_day["event_id"]
-        day = event_day["day"]
-        if (
-            len(visible_by_event.get(event_id, set())) >= 2
-            and current_links_by_event.get(event_id, 0) > 0
-            and day in active_days_by_event.get(event_id, set())
-        ):
-            counts[day] = counts.get(day, 0) + 1
-    rows = [
-        {"day": item["day"], "item_count": counts.get(item["day"], 0)}
-        for item in feed_dates.get("dates") or []
-    ]
-    return {
-        "available": True,
-        "latest_complete_date": feed_dates["latest_complete_date"],
-        "date_from": feed_dates["date_from"],
-        "date_to": feed_dates["date_to"],
-        "run_id": run["run_id"],
-        "dates": rows,
-    }
+    if run is None:
+        return {"available": False, "reason": "Event store has no materialized run."}
+    return {**feed_dates, "run_id": run["run_id"]}

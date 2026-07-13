@@ -118,11 +118,23 @@ or quality judgment—and combines day-relative percentiles for Registry
 attention (55%), originator network support (25%), and public engagement (20%).
 The same API also exposes chronological and public-engagement orderings.
 
-The React `/feed` surface is the evidence browser for this boundary. It offers
-complete-day navigation, All/Amplified/First-hand lanes, search, sort, score
-inputs, active Registry amplifiers, raw engagement, and direct X provenance.
-LLM relevance, categories, clustering, summaries, and cited insights remain a
-later stage after this deterministic layer is audited.
+`fli.signal_events` is a separate content-addressed projection over the frozen
+Feed run. `exact-structural-v1` joins only provider-declared quote/retweet
+targets, reply parents, and exact conversation IDs. The Event store persists
+only multi-post groups and their source/target links. At read time,
+`fli.web.events` overlays those groups on the complete visible Feed: unconsumed
+posts become one-member envelopes, broken groups degrade to singletons after a
+Registry rejection, and the root is removed from the related evidence list.
+This preserves the immutable post ledger without manufacturing stored events
+for every singleton.
+
+The React `/feed` surface is one evidence browser rather than separate post,
+group, or lane modes. It offers complete-day navigation, search, the three
+transparent sort orders, score inputs, raw engagement, and direct X
+provenance. Each envelope renders the root once, then exact replies in
+parent-first order, unique quote commentary, and a compact retweeter trace.
+LLM relevance, semantic grouping, summaries, and cited insights remain later
+stages after this deterministic layer is audited.
 
 ## Stack
 
@@ -160,7 +172,7 @@ flowchart LR
     SCO[Scoring<br/>dimensions + validation]
     DEL[Delivery<br/>digests · alerts]
     UI[Web UI<br/>FastAPI + React SPA]
-    FEED[Evidence Feed<br/>dedup · Registry attention · dates]
+    FEED[Evidence Feed<br/>exact envelopes · Registry attention · dates]
 
     XLISTS --> REG
     XFOLLOW --> REG
@@ -235,6 +247,7 @@ data/raw/following/*/snapshot.db    # ignored local raw pages + fresh edges
 data/raw/x/x-content.db             # ignored raw X responses + normalized posts/bundles
 data/derived/following/*/analysis.db # ignored recomputable rankings + identity map
 data/derived/signal-feed/feed.db     # ignored versioned Feed posts + relations
+data/derived/signal-events/events.db # ignored exact structural event projection
 docs/references/digg-ranking-baseline.md
 ```
 
@@ -252,6 +265,7 @@ fli following-snapshot collect --snapshot-db <path> --all --profiles-only
 fli following-snapshot collect --snapshot-db <path> --all --workers 20
 fli following-ranking overlap --snapshot-db <path> --registry-db data/fli.db
 fli signal-feed refresh --days 7 [--through YYYY-MM-DD]
+fli signal-events refresh
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from

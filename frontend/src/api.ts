@@ -220,12 +220,18 @@ export interface EventEvidence {
   url: string
   post_type: 'original' | 'quote' | 'retweet' | 'reply'
   observed_directly: boolean
-  is_representative: boolean
+  relationship: 'reply' | 'quote' | 'retweet' | 'related'
+  relation_type: 'reply_parent' | 'same_conversation' | 'quote' | 'retweet' | null
+  target_post_id: string | null
+  parent_post_id: string | null
+  depth: number
+  same_author_as_root: boolean
 }
 
 export interface SignalEvent {
   event_id: string
-  representative: FeedItem
+  is_grouped: boolean
+  root: FeedItem
   why_grouped: string[]
   anchor_types: Array<'same_target' | 'same_conversation'>
   member_count: number
