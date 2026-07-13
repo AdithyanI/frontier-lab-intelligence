@@ -474,29 +474,110 @@ function Funnel() {
   )
 }
 
+/* ---------- ranking methods: three measurements, three different questions ---------- */
+
+function RankingMethods() {
+  return (
+    <div className="methodology" aria-label="Current ranking formulas">
+      <div className="method-row">
+        <div className="method-id mono">
+          <span>REACH</span>
+          <strong>Registry</strong>
+        </div>
+        <div className="method-main">
+          <p className="method-question">How large is the observed X audience?</p>
+          <div className="method-pair">
+            <div>
+              <span className="mono">PERSON</span>
+              <strong>X followers</strong>
+            </div>
+            <div>
+              <span className="mono">ORGANIZATION</span>
+              <strong>Σ followers across owned X channels</strong>
+            </div>
+          </div>
+        </div>
+        <p className="method-limit">Display ordering only. Reach ≠ trust.</p>
+      </div>
+
+      <div className="method-row">
+        <div className="method-id mono">
+          <span>ENTITY-OVERLAP-V2</span>
+          <strong>Network support</strong>
+        </div>
+        <div className="method-main">
+          <p className="method-question">How many screened Registry entities point here?</p>
+          <div className="method-equation mono">
+            support(account) = count(distinct active Registry entities → account)
+          </div>
+          <div className="method-rules mono">
+            <span>1 entity = 1 vote</span>
+            <span>rejected = 0 votes</span>
+            <span>ties share rank</span>
+          </div>
+        </div>
+        <p className="method-limit">Raw follower count is not an input. Support ≠ relevance.</p>
+      </div>
+
+      <div className="method-row method-row--attention">
+        <div className="method-id mono">
+          <span>ATTENTION-V1</span>
+          <strong>Feed ordering</strong>
+        </div>
+        <div className="method-main">
+          <p className="method-question">Which evidence is the network paying attention to today?</p>
+          <div className="method-equation method-equation--large mono">
+            attention = 100 × (0.55N + 0.25O + 0.20E)
+          </div>
+          <div className="method-weight" aria-label="Feed attention weights">
+            <div className="method-weight-network">
+              <b>55%</b><span>Registry attention · N</span>
+            </div>
+            <div className="method-weight-origin">
+              <b>25%</b><span>originator support · O</span>
+            </div>
+            <div className="method-weight-public">
+              <b>20%</b><span>public engagement · E</span>
+            </div>
+          </div>
+          <p className="method-example mono">
+            Example: N .92 · O .80 · E .35 → 77.6 attention
+          </p>
+        </div>
+        <p className="method-limit">
+          Inputs are day-relative percentiles. Attention ≠ quality.
+        </p>
+      </div>
+
+    </div>
+  )
+}
+
 /* ---------- page ---------- */
 
 export default function Architecture() {
   return (
     <div className="page">
-      <div className="page-kicker">HOW IT WORKS</div>
       <h1 className="page-title">Architecture</h1>
       <p className="page-sub">
-        Five views: how one X account becomes an entity, where its evidence
-        lives, where the discovery graph is stored, how attention ranks, and
-        how noise is removed.
+        How public evidence becomes resolved identities, trusted rankings, and
+        a noise-suppressed intelligence feed.
       </p>
 
-      <section className="arch-section">
+      <nav className="arch-chapters" aria-label="Architecture chapters">
+        <a href="#system-map">
+          System map
+        </a>
+        <a href="#ranking-methods">
+          Ranking methods
+        </a>
+      </nav>
+
+      <section className="arch-section" id="system-map">
         <div className="arch-section-head">
-          <span className="arch-no">01</span>
           <h2 className="arch-h">From an X account to the Registry</h2>
           <p className="arch-p">
-            Give the system one X handle. Cheap mechanical checks run first,
-            the expensive judgment last: a profile gate, entity-kind
-            resolution from progressively richer evidence, then a
-            web-grounded relevance screen. Survivors persist; everything
-            filtered exits with a written reason.
+            Cheap checks run first; every filtered exit keeps a written reason.
           </p>
         </div>
         <div className="arch-canvas">
@@ -506,11 +587,10 @@ export default function Architecture() {
 
       <section className="arch-section">
         <div className="arch-section-head">
-          <span className="arch-no">02</span>
           <h2 className="arch-h">One data model underneath</h2>
           <p className="arch-p">
-            One spine holds everything: a <em>who</em>, the <em>wheres</em> we
-            watch them, and <em>what</em> we saw — over time.
+            One identity links every channel to its dated observations and
+            source material.
           </p>
         </div>
         <div className="arch-canvas">
@@ -520,14 +600,10 @@ export default function Architecture() {
 
       <section className="arch-section">
         <div className="arch-section-head">
-          <span className="arch-no">03</span>
           <h2 className="arch-h">Discovery keeps its distance</h2>
           <p className="arch-p">
-            We chose a small circle of people. To find who else matters, we
-            look at who that circle collectively follows — a huge, unvetted
-            crowd we observe but never mix in. Ranking singles out the few
-            the circle keeps pointing at, and only a reviewed invitation
-            brings someone into the circle.
+            The Registry observes the wider graph without treating discovery
+            as membership.
           </p>
         </div>
         <div className="arch-canvas">
@@ -537,13 +613,10 @@ export default function Architecture() {
 
       <section className="arch-section">
         <div className="arch-section-head">
-          <span className="arch-no">04</span>
           <h2 className="arch-h">The graph surfaces who deserves attention</h2>
           <p className="arch-p">
-            We collect who the relevance-screened Registry follows, then
-            compare source consensus with PageRank personalized by a smaller
-            reviewed trust set. Follower count remains a reach metric, not
-            trust.
+            Source consensus and personalized PageRank determine trust;
+            follower count remains reach, not trust.
           </p>
         </div>
         <div className="arch-canvas">
@@ -553,15 +626,26 @@ export default function Architecture() {
 
       <section className="arch-section" style={{ marginBottom: 72 }}>
         <div className="arch-section-head">
-          <span className="arch-no">05</span>
           <h2 className="arch-h">The funnel suppresses noise</h2>
           <p className="arch-p">
-            Cheap mechanical checks first, the expensive LLM last — only on what
-            survives. Every score keeps its evidence, so you can disagree.
+            Only survivors reach the LLM, and every score keeps its evidence.
           </p>
         </div>
         <div className="arch-canvas">
           <Funnel />
+        </div>
+      </section>
+
+      <section className="arch-section arch-section--methods" id="ranking-methods">
+        <div className="arch-section-head">
+          <h2 className="arch-h">The numbers answer different questions</h2>
+          <p className="arch-p">
+            Reach, network support, and attention are distinct; their formulas
+            stay visible so each ranking can be challenged.
+          </p>
+        </div>
+        <div className="arch-canvas arch-canvas--methods">
+          <RankingMethods />
         </div>
       </section>
     </div>

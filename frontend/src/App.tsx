@@ -17,7 +17,6 @@ export default function App() {
           <NavLink to="/ranking">Ranking</NavLink>
           <NavLink to="/feed">Feed</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
-          <span className="nav-soon">Reports — soon</span>
         </nav>
       </header>
       <main className="content">

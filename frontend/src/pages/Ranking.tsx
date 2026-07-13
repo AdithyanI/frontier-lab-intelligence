@@ -217,7 +217,6 @@ export default function Ranking() {
   if (error || (data && !data.available)) {
     return (
       <div className="page">
-        <div className="page-kicker">RANKING</div>
         <h1 className="page-title">Who does the inside trust?</h1>
         <p className="page-sub mono">
           {data?.reason ?? 'Ranking data is unavailable.'}
@@ -228,23 +227,25 @@ export default function Ranking() {
 
   return (
     <div className="page rank-page">
-      <div className="page-kicker">
-        RANKING · {run ? `${run.algorithm.toUpperCase()} · ${run.snapshot_id.toUpperCase()}` : '…'}
-      </div>
       <h1 className="page-title">Who does the inside trust?</h1>
       <p className="page-sub">
-        Every account placed by how many of the screened Registry cohort follow
-        it — distance from center is earned rank, never raw follower count.
-        Circles are people, squares are organizations, hollow rings are
-        outsiders the inside collectively points at. Click anyone to see
-        exactly who follows them.
+        Accounts are ranked by how many screened Registry sources follow them
+        — never by raw follower count.
       </p>
       {run && (
-        <div className="rank-stats mono">
-          <span>{fmt(run.sources)} screened sources</span>
-          <span>{fmt(run.edges)} follow edges</span>
-          <span>{fmt(run.ranked_accounts)} accounts ranked</span>
-          <span>{fmt(run.unknown_accounts)} not yet in the Registry</span>
+        <div className="rank-context mono">
+          <span>
+            Top {fmt(N_FETCH)} of {fmt(run.ranked_accounts)} accounts ·{' '}
+            {fmt(run.sources)} screened sources
+          </span>
+          <details className="method-note">
+            <summary>Method</summary>
+            <p>
+              {run.algorithm.toUpperCase()} · {run.snapshot_id.toUpperCase()} ·{' '}
+              {fmt(run.edges)} observed follow edges · {fmt(run.unknown_accounts)}
+              {' '}accounts not yet in the Registry
+            </p>
+          </details>
         </div>
       )}
 
@@ -404,7 +405,7 @@ export default function Ranking() {
             </p>
           ) : (
             <p className="rank-arc-note mono hint">
-              hover to identify · click to trace who follows · esc to clear
+              hover to identify · select to trace followers · ↑↓ to step · esc to clear
             </p>
           )}
         </div>
@@ -542,9 +543,11 @@ export default function Ranking() {
               </li>
             ))}
           </ol>
-          <p className="rank-shown mono">
-            showing {fmt(filtered.length)} of the top {N_FETCH} · ↑↓ to step
-          </p>
+          {(filter !== 'all' || needle) && (
+            <p className="rank-shown mono">
+              {fmt(filtered.length)} matching in the top {N_FETCH}
+            </p>
+          )}
         </aside>
       </div>
     </div>

@@ -11,6 +11,8 @@ Endpoints:
 - /api/rankings/followers/{id}   which cohort sources follow one account
 - /api/feed/dates                materialized complete X evidence dates
 - /api/feed                      Registry-aware deterministic signal Feed
+- /api/events/dates              exact structural event counts by date
+- /api/events                    Registry-aware exact structural event groups
 """
 
 from datetime import date as calendar_date
@@ -21,7 +23,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from fli import channels, registry as entity_registry
-from fli.web import feed as feed_store, rankings as rankings_store
+from fli.web import events as event_store, feed as feed_store, rankings as rankings_store
 
 DIST_DIR = Path(__file__).parent / "dist"
 
@@ -216,6 +218,34 @@ def feed(
     return JSONResponse(
         feed_store.feed_payload(
             day=feed_date.isoformat(),
+            lane=lane,
+            sort=sort,
+            query=q,
+            limit=limit,
+            offset=offset,
+        )
+    )
+
+
+@app.get("/api/events/dates")
+def event_dates() -> JSONResponse:
+    """Exact structural Event groups available for each Feed date."""
+    return JSONResponse(event_store.dates_payload())
+
+
+@app.get("/api/events")
+def events(
+    event_date: calendar_date = Query(..., alias="date"),
+    lane: str = Query("all", pattern="^(all|network|firsthand)$"),
+    sort: str = Query("attention", pattern="^(attention|recent|engagement)$"),
+    q: str = Query("", max_length=200),
+    limit: int = Query(40, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+) -> JSONResponse:
+    """One date of groups connected only by exact provider relationships."""
+    return JSONResponse(
+        event_store.events_payload(
+            day=event_date.isoformat(),
             lane=lane,
             sort=sort,
             query=q,

@@ -162,7 +162,7 @@ export interface FeedItem {
   published_at: string
   text: string
   url: string
-  post_type: 'original' | 'quote'
+  post_type: 'original' | 'quote' | 'retweet' | 'reply'
   observed_directly: boolean
   context: { target_post_id: string; target_handle: string } | null
   amplifiers: FeedAmplifier[]
@@ -205,6 +205,61 @@ export interface FeedResponse {
     note: string
   }
   items?: FeedItem[]
+}
+
+export interface EventEvidence {
+  post_id: string
+  author: {
+    handle: string
+    name: string
+    entity_id: number | null
+    entity_name: string | null
+  }
+  published_at: string
+  text: string
+  url: string
+  post_type: 'original' | 'quote' | 'retweet' | 'reply'
+  observed_directly: boolean
+  is_representative: boolean
+}
+
+export interface SignalEvent {
+  event_id: string
+  representative: FeedItem
+  why_grouped: string[]
+  anchor_types: Array<'same_target' | 'same_conversation'>
+  member_count: number
+  link_count: number
+  author_count: number
+  registry_account_count: number
+  first_hand_count: number
+  amplifiers: FeedAmplifier[]
+  peak_attention_score: number
+  peak_public_interactions: number
+  latest_evidence_at: string
+  evidence: EventEvidence[]
+}
+
+export interface EventResponse {
+  available: boolean
+  reason?: string
+  date?: string
+  lane?: 'all' | 'network' | 'firsthand'
+  sort?: 'attention' | 'recent' | 'engagement'
+  query?: string
+  total?: number
+  limit?: number
+  offset?: number
+  run?: {
+    run_id: string
+    feed_run_id: string
+    clustering_contract: 'exact-structural-v1'
+    cluster_count: number
+    member_count: number
+    link_count: number
+  }
+  score_formula?: FeedResponse['score_formula']
+  items?: SignalEvent[]
 }
 
 export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {

@@ -186,6 +186,9 @@ instead of expanding the graph or processing the complete X history.
   changes are visible on refresh without rewriting evidence.
 - Use `attention-v1` only as a transparent experimental ordering aid. Search
   and lane changes never recalibrate scores; self-amplification is excluded.
+- Keep Architecture as one continuous visual narrative. A lightweight chapter
+  navigator deep-links to the high-level system map and exact ranking methods;
+  it does not hide their relationship behind stateful tabs.
 - Start event grouping with `exact-structural-v1` only: shared quote/retweet
   target IDs and exact reply/conversation IDs. Shared URLs, text similarity,
   embeddings, model judgment, relevance, and summaries are separate later
@@ -257,3 +260,10 @@ instead of expanding the graph or processing the complete X history.
   collected. The proposed contract keeps Posts as the evidence ledger,
   exposes why every Event member was grouped, and gates relevance on a top-20
   false-merge/split audit.
+- 2026-07-13: [UI] Extended the Architecture page with a chapter navigator and
+  a dedicated ranking-methods canvas while keeping the page as one continuous
+  high-level system explanation. The live formulas distinguish Registry X
+  reach, `entity-overlap-v2` network support, and `attention-v1` Feed ordering;
+  the 55/25/20 weights, one-entity-one-vote rule, exclusions, worked example,
+  versions, and non-claims are visible without opening documentation or a
+  modal. Frontend build/lint and the live in-app browser check pass.

@@ -69,18 +69,22 @@ Rules:
 ## Typography
 
 - **UI + prose:** Inter (system-ui fallback). Weights 400/500/600 only.
-- **Data + provenance:** IBM Plex Mono for numbers, kickers, timestamps,
-  source IDs, table headers.
+- **Data + provenance:** IBM Plex Mono for numbers, timestamps, source IDs,
+  table headers, and compact method metadata.
 - Display: clamp(34–56px), weight 600, letter-spacing −0.025em, for the one
   statement a page gets to make. Big stats in mono at 26–40px.
 - Body 15–16px, line-height 1.55, max measure ~60ch.
-- Kickers: mono 11–12px, blue-ink, uppercase — every page opens with one.
+- Page headers begin with one direct title and one short, useful subtitle. Do
+  not add a route-restating kicker or repeat counts already present in nearby
+  controls. Operational identifiers and formulas belong in a compact Method
+  disclosure or the canonical Architecture explanation.
 - Tabular numerals everywhere numbers column-align.
 
 ## Layout
 
 - App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
-  beneath. No sidebar — pages own their full width.
+  beneath. No sidebar — pages own their full width. Show only working routes;
+  unavailable future destinations do not occupy the navigation.
 - Home is an editorial split: statement + hero numerals on the left, live
   pipeline rail on the right, divided by an ink rule.
 - Density first: tables and lists over cards. Cards only where an item is
@@ -88,6 +92,8 @@ Rules:
 - Diagrams are hand-built inline SVG in brand colors with mono captions —
   never rendered-markdown or generic diagram-tool output.
 - Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 72.
+- Architecture sections use descriptive headings, not decorative sequence
+  numbers. Numbers remain only where order itself carries meaning.
 - Provenance line (source, date, entity) sits directly under every insight
   title in mono — first-class, not a footnote.
 - **Desktop-first (2026-07-09):** the primary target is the desktop view

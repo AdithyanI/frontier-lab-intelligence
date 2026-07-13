@@ -230,12 +230,10 @@ export default function Registry() {
 
   return (
     <div className="page">
-      <div className="page-kicker">ENTITY UNIVERSE · WHO WE HAVE OBSERVED</div>
       <h1 className="page-title">Registry</h1>
       <p className="page-sub">
-        {data
-          ? `${fmt(data.total)} identities: ${fmt(data.counts.person)} people, ${fmt(data.counts.organization)} organizations, ${fmt(data.counts.unsure)} unsure, and ${fmt(data.counts.rejected)} rejected.`
-          : 'Every observed channel resolves to one structurally typed entity.'}
+        Resolved people and organizations, with every observed channel attached
+        to a single identity.
       </p>
 
       {error && (
