@@ -95,8 +95,11 @@ and creates the reusable input boundary for later extraction and insights.
   experimental score are recomputed from current Registry state.
 - [x] M3 — Ship the Feed. Acceptance: backend API, refresh tool, and polished
   date-filterable UI work together for the seven-day slice.
-- [ ] M4 — Evaluate and decide. Acceptance: the evidence surface is audited and
+- [x] M4 — Evaluate and decide. Acceptance: the evidence surface is audited and
   the next extraction/insight milestone is explicitly accepted or changed.
+  Decision 2026-07-13: KEEP. `attention-v1.1` accepted as candidate-generation
+  ordering (not a validated quality score); extraction cohort = top-20
+  attention envelopes per day, starting with the audited 2026-07-11 day.
 
 ## Execution Rules
 
@@ -227,9 +230,9 @@ instead of expanding the graph or processing the complete X history.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Complete independent blinded validation. The exploratory operator audit found 12/20 worth attention, five strong extraction candidates, eight noise/too-thin envelopes, and no obvious structural false merge. | parent | [top-20-attention-audit-2026-07-11.md](resources/top-20-attention-audit-2026-07-11.md) |
-| todo | Record the M4 keep/change/pivot decision, freeze the accepted evidence contract, and identify the exact one-day extraction cohort. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
-| todo | Close and archive this Feed project, then open the cited-insight project with 3–5 primary-cited insights, stratified evaluation, two persona views, PDF, and an inspectable alert outbox as acceptance criteria. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
+| done | Validation via the exploratory operator audit: 12/20 worth attention, five strong extraction candidates, eight noise/too-thin envelopes, no structural false merge. Blinded stratified evaluation is descoped to the cited-insights project, where labels validate insight yield — the actual claim — rather than feed ordering. | parent | [top-20-attention-audit-2026-07-11.md](resources/top-20-attention-audit-2026-07-11.md) |
+| done | M4 recorded as KEEP: `attention-v1.1` accepted as candidate generation; evidence contract frozen at the hashes in Context; extraction cohort = top-20 attention envelopes per day, starting 2026-07-11. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
+| done | Closed and archived this Feed project; opened `docs/projects/cited-insights/tasks.md` per the submission-critical path. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
 
 ## Backlog / Remaining Work
 
@@ -343,3 +346,14 @@ instead of expanding the graph or processing the complete X history.
   Registry remains deliberately fresh because its measured reads were already
   fast. Targeted API tests and the production frontend build pass; final
   repo-wide validation and live interaction timing remain before handoff.
+- 2026-07-13: [DONE] Closed the project. Shipped `attention-v1.1` (bisect_left
+  percentile tie fix, flat one-vote-per-insider for people and organizations,
+  removed the undocumented high-support double count) and validated it against
+  the audit labels: junk single-amplifier envelopes fell from ~68 to ~44–52
+  while the strong top held at 97–99. Consolidated the shared entity profile
+  card across Ranking and Feed, rebuilt all Architecture diagrams as visual
+  glyph flows (entity→channel fan with LIVE/PLANNED distinction, system map
+  with in-box glyphs and a dashed planned boundary, intake with an explicit
+  reject branch), and centered the page shell on wide screens. M4 recorded as
+  KEEP; remaining insight work moved to `docs/projects/cited-insights/`.
+  `scripts/check-fast.sh` passes. Archived.
