@@ -139,6 +139,14 @@ unparented branch rather than being attached by conversation or timing
 inference. LLM relevance, semantic grouping, summaries, and cited insights
 remain later stages after this deterministic layer is audited.
 
+The web layer treats these SQLite stores as versioned read models. Feed/Event
+and Ranking responses are cached in-process against main-database plus WAL
+version tokens, so a Registry change or rebuilt derived run invalidates the
+affected cache. The SPA deduplicates and prefetches complete Feed days and
+lazy-mounts closed evidence trees. Registry list reads stay uncached in the
+browser because their indexed queries are already fast and curation freshness
+matters more than another cache.
+
 ## Stack
 
 One Python codebase, isolated SQLite stores, one React SPA served by the API.

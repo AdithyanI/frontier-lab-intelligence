@@ -65,6 +65,26 @@ Registry rejection changes are dynamic. On the next request, a rejected author
 is absent and a rejected amplifier no longer votes. Raw/derived evidence is not
 deleted, so reversing the curation decision restores the evidence.
 
+## Read Performance
+
+The Feed and exact-event stores already index their date, author, membership,
+target, and source-link read paths. Query planning showed those indexes being
+used; the expensive work was rebuilding the Registry/network joins and event
+projection on every request, not scanning unindexed tables.
+
+The web read model therefore uses state-aware in-process caches. Cache keys
+include the current database and WAL file versions, so Registry curation or a
+new derived run invalidates stale payloads without a compatibility layer. The
+SPA prefetches the other complete days sequentially after the first page is
+idle, deduplicates concurrent requests, and mounts expanded evidence trees only
+when the operator opens them. A hard reload may pay one cold read; switching
+among prefetched days should not repeat SQLite or large hidden-DOM work.
+
+Registry reads remain uncached in the browser because they are already cheap
+and should reflect curation promptly. Derived Ranking payloads use the same
+state-aware server cache and a page-lifetime client cache; follower detail is
+bounded to the 300 nodes visible in the current visualization.
+
 ## Attention Score
 
 `attention-v1` is an experimental, day-relative ordering aid:

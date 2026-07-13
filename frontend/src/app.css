@@ -418,16 +418,6 @@ td.num {
   font-size: 13.5px;
 }
 
-.method-pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 32px;
-}
-
-.method-pair div { display: flex; flex-direction: column; gap: 8px; }
-.method-pair span { color: var(--blue-ink); font-size: 10px; letter-spacing: 0.06em; }
-.method-pair strong { font-size: 16px; font-weight: 500; line-height: 1.35; }
-
 .method-equation {
   color: var(--ink);
   font-size: 13px;
@@ -437,15 +427,6 @@ td.num {
 .method-equation--large {
   font-size: 17px;
   font-weight: 500;
-}
-
-.method-rules {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  margin-top: 24px;
-  color: var(--muted);
-  font-size: 10.5px;
 }
 
 .method-limit {
@@ -480,21 +461,10 @@ td.num {
 .method-weight-origin { color: #fff; background: var(--blue-mid); }
 .method-weight-public { color: #fff; background: var(--blue-ink); }
 
-.method-example {
-  margin: 16px 0 0;
-  color: var(--muted);
-  font-size: 10.5px;
-}
-
 @media (max-width: 1000px) {
   .method-row { grid-template-columns: 190px minmax(0, 1fr); }
   .method-limit { grid-column: 2; border-top: 1px solid var(--border); }
 }
-
-/* legend chips */
-.legend { display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
-.legend span { font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; }
-.legend i { width: 10px; height: 10px; display: inline-block; border-radius: 50%; }
 
 /* ---- states ---- */
 
@@ -973,83 +943,6 @@ td.num {
 @media (max-width: 640px) {
   .topbar { flex-wrap: wrap; height: auto; padding: 14px 20px; row-gap: 10px; }
   .topbar nav { width: 100%; margin-left: 0; overflow-x: auto; }
-}
-
-/* ---- funnel (architecture §03) ---- */
-
-.funnel { padding: 44px 44px 12px; }
-
-.funnel-row {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 48px;
-  align-items: stretch;
-}
-
-.funnel-track {
-  display: grid;
-  grid-template-columns: 240px auto;
-  align-items: center;
-  gap: 14px;
-}
-
-.funnel-lane { min-width: 0; align-self: stretch; display: flex; }
-
-.funnel-bar {
-  min-height: 60px;
-  align-self: stretch;
-}
-
-.funnel-bar.tone-sand { background: #ede9dd; }
-.funnel-bar.tone-blue { background: var(--blue); }
-.funnel-bar.tone-ink  { background: var(--ink); }
-
-.funnel-join {
-  height: 26px;
-  background: #ede9dd;
-  opacity: 0.55;
-  width: 100%;
-}
-
-.funnel-copy { padding: 6px 0 14px; }
-
-.funnel-count {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-
-.funnel-name {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.funnel-copy p {
-  color: var(--muted);
-  font-size: 13.5px;
-  line-height: 1.5;
-  margin: 4px 0 0;
-  max-width: 52ch;
-}
-
-.funnel-footer {
-  margin: 40px 0 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-  color: var(--ink-soft);
-  font-size: 14px;
-}
-
-@media (max-width: 900px) {
-  .funnel { padding: 28px 20px 8px; }
-  .funnel-row { grid-template-columns: 1fr; gap: 10px; }
-  .funnel-row[aria-hidden='true'] { display: none; }
-  .funnel-track { grid-template-columns: minmax(0, 1fr) auto; }
-  .funnel-bar { min-height: 44px; }
-  .funnel-copy { margin-bottom: 20px; padding: 0; }
 }
 
 /* ---- ranking page: trust orbit + score column ---- */

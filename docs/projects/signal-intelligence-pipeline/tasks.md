@@ -333,3 +333,13 @@ instead of expanding the graph or processing the complete X history.
   and blind evaluation into the cited-insight stage. The exploratory review is
   documented in
   [top-20-attention-audit-2026-07-11.md](resources/top-20-attention-audit-2026-07-11.md).
+- 2026-07-13: [POLISH] Simplified Architecture into four visual questions:
+  what is live, how an account enters, where evidence is stored, and what each
+  number means. Audited Feed, Registry, and Ranking latency end to end. Existing
+  SQLite indexes already covered the hot paths; repeated read-model assembly
+  and hidden evidence DOM were the real costs. Added database/WAL-aware Feed,
+  Event, and Ranking caches, sequential Feed-day prefetch, request
+  deduplication, lazy evidence mounting, and a 300-row Ranking follower bound.
+  Registry remains deliberately fresh because its measured reads were already
+  fast. Targeted API tests and the production frontend build pass; final
+  repo-wide validation and live interaction timing remain before handoff.
