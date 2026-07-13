@@ -1126,8 +1126,6 @@ td.num {
   background: var(--blue-mid);
 }
 
-.rank-arc-note.hint { color: var(--muted); }
-
 .rank-empty {
   font-size: 12px;
   color: var(--muted);

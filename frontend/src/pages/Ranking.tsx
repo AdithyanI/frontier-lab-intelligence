@@ -1,8 +1,9 @@
 /* Ranking — the trust orbit. Every dot is an account the screened Registry
    cohort collectively follows; distance from center is earned rank, dot size
    is cohort follows. Filled ink = already in the Registry; hollow ring = an
-   outsider the inside points at. Click a dot (or a row) to see exactly who
-   follows it. Data: /api/rankings over the frozen following snapshot. */
+   outsider the inside points at. Click a dot to trace who follows it; click
+   its ranking row to open the account profile. Data: /api/rankings over the
+   frozen following snapshot. */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
