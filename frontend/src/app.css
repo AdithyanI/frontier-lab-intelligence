@@ -754,6 +754,61 @@ td.num {
   border-top: 1px solid var(--border);
 }
 
+.ent-card-rank {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.ent-card-rank-stats {
+  display: flex;
+  gap: 32px;
+}
+
+.ent-card-rank-stats .stat { min-width: 0; }
+
+.ent-card-rank-stats .v {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ent-card-rank-stats .v .sub {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.ent-card-rank-stats .k {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.ent-card-rank-followers {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 12px 0 0;
+  line-height: 1.5;
+  max-width: 64ch;
+}
+
+.ent-card-rank-handle {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--blue-ink);
+  text-decoration: none;
+}
+.ent-card-rank-handle:hover { text-decoration: underline; }
+
 .ent-card-label-row {
   display: flex;
   align-items: baseline;
@@ -1108,52 +1163,6 @@ td.num {
 
 .rank-filter button.on { background: var(--ink); color: #fff; }
 
-.rank-detail {
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--ink);
-  padding: 16px 18px;
-  margin-top: 16px;
-}
-
-.rank-detail-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.rank-detail-name { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
-.rank-detail-handle { font-size: 12px; text-decoration: none; }
-.rank-detail-handle:hover { text-decoration: underline; }
-
-.rank-pill {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  padding: 4px 9px;
-  border-radius: 999px;
-  flex: none;
-  margin-top: 2px;
-}
-.rank-pill.active { background: var(--ink); color: #fff; }
-.rank-pill.unknown { border: 1px solid var(--ink); color: var(--ink); }
-
-.rank-detail-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 18px;
-  font-size: 12.5px;
-  margin-top: 14px;
-}
-.rank-detail-grid .l { color: var(--muted); }
-
-.rank-detail-followers {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin: 14px 0 0;
-  line-height: 1.5;
-}
-
 .rank-list {
   list-style: none;
   margin: 16px 0 0;
@@ -1214,40 +1223,7 @@ td.num {
   background: var(--blue-mid);
 }
 
-.rank-pill.active.org { background: var(--blue-ink); }
-
-.rank-detail-reg {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--blue-ink);
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-decoration: none;
-  cursor: pointer;
-}
-.rank-detail-reg:hover { text-decoration: underline; }
-
 .rank-arc-note.hint { color: var(--muted); }
-
-.rank-detail { position: relative; }
-
-.rank-detail-close {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font: inherit;
-  font-size: 18px;
-  line-height: 1;
-  border: none;
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 4px;
-}
-.rank-detail-close:hover { color: var(--ink); }
 
 .rank-empty {
   font-size: 12px;
@@ -1262,8 +1238,6 @@ td.num {
   text-align: right;
   margin: 8px 0 0;
 }
-
-.rank-detail-head { padding-right: 20px; }
 
 /* ---- Feed: deterministic evidence browser ---- */
 

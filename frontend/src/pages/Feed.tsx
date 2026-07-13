@@ -12,6 +12,49 @@ type Sort = 'attention' | 'recent' | 'engagement'
 
 const PAGE_SIZE = 40
 
+interface EventPageRequest {
+  date: string
+  sort: Sort
+  query: string
+  offset?: number
+}
+
+const eventPageCache = new Map<string, EventResponse>()
+const eventPageRequests = new Map<string, Promise<EventResponse>>()
+
+function eventPageKey({
+  date,
+  sort,
+  query,
+  offset = 0,
+}: EventPageRequest) {
+  return `${date}\u0000${sort}\u0000${query}\u0000${offset}`
+}
+
+function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
+  const key = eventPageKey(request)
+  const cached = eventPageCache.get(key)
+  if (cached) return Promise.resolve(cached)
+  const inFlight = eventPageRequests.get(key)
+  if (inFlight) return inFlight
+  const params = new URLSearchParams({
+    date: request.date,
+    lane: 'all',
+    sort: request.sort,
+    q: request.query,
+    limit: String(PAGE_SIZE),
+    offset: String(request.offset ?? 0),
+  })
+  const pending = getJSON<EventResponse>(`/api/events?${params}`)
+    .then((value) => {
+      eventPageCache.set(key, value)
+      return value
+    })
+    .finally(() => eventPageRequests.delete(key))
+  eventPageRequests.set(key, pending)
+  return pending
+}
+
 const compact = new Intl.NumberFormat('en-US', {
   notation: 'compact',
   maximumFractionDigits: 1,
@@ -278,6 +321,7 @@ export default function Feed() {
   const [items, setItems] = useState<SignalEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const availableDates = useMemo(() => dates?.dates ?? [], [dates])
 
   useEffect(() => {
     setLoading(true)
@@ -304,17 +348,23 @@ export default function Feed() {
   useEffect(() => {
     if (!selectedDate) return
     let live = true
+    const request = {
+      date: selectedDate,
+      sort,
+      query: debouncedQuery,
+      offset: 0,
+    }
+    const cached = eventPageCache.get(eventPageKey(request))
+    if (cached) {
+      setData(cached)
+      setItems(cached.items ?? [])
+      setLoading(false)
+      setError('')
+      return
+    }
     setLoading(true)
     setError('')
-    const params = new URLSearchParams({
-      date: selectedDate,
-      lane: 'all',
-      sort,
-      q: debouncedQuery,
-      limit: String(PAGE_SIZE),
-      offset: '0',
-    })
-    getJSON<EventResponse>(`/api/events?${params}`)
+    requestEventPage(request)
       .then((value) => {
         if (!live) return
         setData(value)
@@ -327,21 +377,41 @@ export default function Feed() {
     }
   }, [selectedDate, sort, debouncedQuery])
 
-  const availableDates = useMemo(() => dates?.dates ?? [], [dates])
+  useEffect(() => {
+    if (!selectedDate || sort !== 'attention' || debouncedQuery) return
+    let cancelled = false
+    const timer = window.setTimeout(async () => {
+      for (const value of availableDates) {
+        if (cancelled || value.day === selectedDate) continue
+        try {
+          await requestEventPage({
+            date: value.day,
+            sort: 'attention',
+            query: '',
+            offset: 0,
+          })
+        } catch {
+          // Prefetch is opportunistic; foreground requests still surface errors.
+        }
+      }
+    }, 350)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [availableDates, selectedDate, sort, debouncedQuery])
+
   const hasSearch = debouncedQuery.trim().length > 0
 
   const loadMore = () => {
     if (!data?.total || items.length >= data.total) return
-    const params = new URLSearchParams({
-      date: selectedDate,
-      lane: 'all',
-      sort,
-      q: debouncedQuery,
-      limit: String(PAGE_SIZE),
-      offset: String(items.length),
-    })
     setLoading(true)
-    getJSON<EventResponse>(`/api/events?${params}`)
+    requestEventPage({
+      date: selectedDate,
+      sort,
+      query: debouncedQuery,
+      offset: items.length,
+    })
       .then((value) => setItems((current) => [...current, ...(value.items ?? [])]))
       .catch((reason) => setError(String(reason)))
       .finally(() => setLoading(false))

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -211,7 +212,16 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def events_payload(
+def _cache_token() -> tuple[tuple[str, int, int, int, int], ...]:
+    paths = [DEFAULT_EVENTS_DB, DEFAULT_FEED_DB, feed_store.DEFAULT_REGISTRY_DB]
+    analysis = feed_store._latest_analysis_db()
+    if analysis is not None:
+        paths.append(analysis)
+    return tuple(feed_store._db_version(path) for path in paths)
+
+
+@lru_cache(maxsize=64)
+def _events_payload_cached(
     *,
     day: str,
     lane: str,
@@ -219,8 +229,10 @@ def events_payload(
     query: str,
     limit: int,
     offset: int,
+    cache_token: tuple[tuple[str, int, int, int, int], ...],
 ) -> dict[str, Any]:
     """Return every visible Feed candidate, grouped only by exact relationships."""
+    del cache_token  # used only to invalidate this read-model cache
     if not DEFAULT_EVENTS_DB.is_file():
         return {
             "available": False,
@@ -461,6 +473,27 @@ def events_payload(
         },
         "items": items[offset : offset + limit],
     }
+
+
+def events_payload(
+    *,
+    day: str,
+    lane: str,
+    sort: str,
+    query: str,
+    limit: int,
+    offset: int,
+) -> dict[str, Any]:
+    """Return a state-aware cached page of exact Feed envelopes."""
+    return _events_payload_cached(
+        day=day,
+        lane=lane,
+        sort=sort,
+        query=query,
+        limit=limit,
+        offset=offset,
+        cache_token=_cache_token(),
+    )
 
 
 def dates_payload() -> dict[str, Any]:

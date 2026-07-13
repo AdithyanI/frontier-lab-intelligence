@@ -7,6 +7,7 @@ import math
 import sqlite3
 from collections import defaultdict
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +37,22 @@ def _open_readonly(path: Path) -> sqlite3.Connection:
     return conn
 
 
+def _db_version(path: Path) -> tuple[str, int, int, int, int]:
+    """Return a cheap cache token that also notices uncheckpointed WAL writes."""
+    try:
+        stat = path.stat()
+        main_mtime, main_size = stat.st_mtime_ns, stat.st_size
+    except FileNotFoundError:
+        main_mtime, main_size = 0, 0
+    wal = Path(f"{path}-wal")
+    try:
+        wal_stat = wal.stat()
+        wal_mtime, wal_size = wal_stat.st_mtime_ns, wal_stat.st_size
+    except FileNotFoundError:
+        wal_mtime, wal_size = 0, 0
+    return str(path.resolve()), main_mtime, main_size, wal_mtime, wal_size
+
+
 def _latest_analysis_db() -> Path | None:
     if not DEFAULT_DERIVED_ROOT.is_dir():
         return None
@@ -54,10 +71,14 @@ def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
     ).fetchone()
 
 
-def _registry_maps() -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
-    if not DEFAULT_REGISTRY_DB.is_file():
+@lru_cache(maxsize=8)
+def _registry_maps_cached(
+    version: tuple[str, int, int, int, int],
+) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    path = Path(version[0])
+    if not path.is_file():
         return {}, {}
-    conn = _open_readonly(DEFAULT_REGISTRY_DB)
+    conn = _open_readonly(path)
     rows = conn.execute(
         """SELECT e.id AS entity_id, e.name AS entity_name, e.kind AS entity_kind,
                   c.key AS handle, a.x_id,
@@ -83,6 +104,10 @@ def _registry_maps() -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any
     return by_handle, by_x_id
 
 
+def _registry_maps() -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    return _registry_maps_cached(_db_version(DEFAULT_REGISTRY_DB))
+
+
 def _registry_account(
     x_id: str | None,
     handle: str,
@@ -92,9 +117,12 @@ def _registry_account(
     return (by_x_id.get(x_id or "") if x_id else None) or by_handle.get(handle.lower())
 
 
-def _network_support() -> tuple[dict[str, int], dict[str, int], dict[str, Any] | None]:
-    path = _latest_analysis_db()
-    if path is None:
+@lru_cache(maxsize=8)
+def _network_support_cached(
+    version: tuple[str, int, int, int, int],
+) -> tuple[dict[str, int], dict[str, int], dict[str, Any] | None]:
+    path = Path(version[0])
+    if not path.is_file():
         return {}, {}, None
     conn = _open_readonly(path)
     run = conn.execute(
@@ -120,6 +148,13 @@ def _network_support() -> tuple[dict[str, int], dict[str, int], dict[str, Any] |
         {row["x_id"]: row["position"] for row in rows},
         dict(run),
     )
+
+
+def _network_support() -> tuple[dict[str, int], dict[str, int], dict[str, Any] | None]:
+    path = _latest_analysis_db()
+    if path is None:
+        return {}, {}, None
+    return _network_support_cached(_db_version(path))
 
 
 def _candidate_rows(

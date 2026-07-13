@@ -1,7 +1,7 @@
 /* Shared identity card: the one entity detail surface, opened as a native
    <dialog> from any page (Registry table rows, Ranking detail panel, …). */
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { siGithub, siRss, siX } from 'simple-icons'
 import type { Entity, EntityChannel, EntityKind } from '../api'
 
@@ -98,23 +98,30 @@ export function channelLabel(channel: EntityChannel): string {
 
 export default function EntityCard({
   entity,
+  fallback = null,
+  context,
   onClose,
 }: {
   entity: Entity | null
+  /** Header identity when the account has no Registry profile yet. */
+  fallback?: { name: string; handle?: string } | null
+  /** Extra caller-owned section (e.g. ranking evidence) under the header. */
+  context?: ReactNode
   onClose: () => void
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const open = Boolean(entity || fallback)
 
   useEffect(() => {
     const dialog = ref.current
     if (!dialog) return
-    if (entity && !dialog.open) dialog.showModal()
-    if (!entity && dialog.open) dialog.close()
-  }, [entity])
+    if (open && !dialog.open) dialog.showModal()
+    if (!open && dialog.open) dialog.close()
+  }, [open])
 
-  if (!entity) return <dialog ref={ref} className="ent-card" onClose={onClose} />
+  if (!open) return <dialog ref={ref} className="ent-card" onClose={onClose} />
 
-  const orderedChannels = [...entity.channels].sort((left, right) => {
+  const orderedChannels = [...(entity?.channels ?? [])].sort((left, right) => {
     const priority = (channel: EntityChannel) => {
       const index = CHANNEL_KIND_ORDER.indexOf(channel.kind)
       return index === -1 ? CHANNEL_KIND_ORDER.length : index
@@ -132,16 +139,17 @@ export default function EntityCard({
     }
     return groups
   }, [])
-  const titleId = `entity-card-title-${entity.id}`
-  const bioId = `entity-card-bio-${entity.id}`
-  const bioIsSourcePreview = /(?:\.{3}|…)$/.test(entity.bio?.trim() ?? '')
+  const cardKey = entity ? `id-${entity.id}` : `handle-${fallback?.handle ?? 'x'}`
+  const titleId = `entity-card-title-${cardKey}`
+  const bioId = `entity-card-bio-${cardKey}`
+  const bioIsSourcePreview = /(?:\.{3}|…)$/.test(entity?.bio?.trim() ?? '')
 
   return (
     <dialog
       ref={ref}
       className="ent-card"
       aria-labelledby={titleId}
-      aria-describedby={entity.bio ? bioId : undefined}
+      aria-describedby={entity?.bio ? bioId : undefined}
       onClose={onClose}
       onClick={(event) => {
         if (event.target === ref.current) onClose()
@@ -167,12 +175,19 @@ export default function EntityCard({
 
       <div className="ent-card-inner">
         <header className="ent-card-head">
-          <span className={`ent-type ent-type--${typeClass(entity)}`}>
-            {typeLabel(entity)}
-          </span>
-          <h2 id={titleId}>{entity.name}</h2>
+          {entity ? (
+            <span className={`ent-type ent-type--${typeClass(entity)}`}>
+              {typeLabel(entity)}
+            </span>
+          ) : (
+            <span className="ent-type ent-type--unknown">Discovered</span>
+          )}
+          <h2 id={titleId}>{entity?.name ?? fallback?.name}</h2>
         </header>
 
+        {context}
+
+        {entity && (
         <section className="ent-card-profile" aria-labelledby={`${bioId}-label`}>
           <div className="ent-card-label-row">
             <div className="ent-card-label" id={`${bioId}-label`}>
@@ -196,15 +211,16 @@ export default function EntityCard({
             </p>
           )}
         </section>
+        )}
 
-        {entity.registry_state === 'rejected' && entity.rejection_reason && (
+        {entity?.registry_state === 'rejected' && entity.rejection_reason && (
           <div className="ent-card-reason ent-card-reason--rejected">
             <div className="ent-card-label">Why rejected</div>
             <p>{entity.rejection_reason}</p>
           </div>
         )}
 
-        {entity.registry_state !== 'rejected' && entity.kind_reason && (
+        {entity && entity.registry_state !== 'rejected' && entity.kind_reason && (
           <div className="ent-card-reason">
             <div className="ent-card-label">Why this type</div>
             <p>{entity.kind_reason}</p>

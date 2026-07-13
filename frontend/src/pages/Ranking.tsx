@@ -114,6 +114,7 @@ export default function Ranking() {
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
   const [followers, setFollowers] = useState<RankingFollowers | null>(null)
+  const [cardOpen, setCardOpen] = useState(false)
   const [profile, setProfile] = useState<Entity | null>(null)
   const rowRefs = useRef(new Map<string, HTMLButtonElement>())
   const selectedFrom = useRef<'orbit' | 'list'>('orbit')
@@ -143,11 +144,11 @@ export default function Ranking() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelected(null)
+      if (e.key === 'Escape' && !cardOpen) setSelected(null)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [cardOpen])
 
   const placed = useMemo(() => place(data?.nodes ?? []), [data])
   const byId = useMemo(
@@ -214,8 +215,29 @@ export default function Ranking() {
 
   const pick = (id: string, from: 'orbit' | 'list') => {
     selectedFrom.current = from
-    setSelected((cur) => (cur === id ? null : id))
+    if (selected === id) {
+      setSelected(null)
+      setCardOpen(false)
+    } else {
+      setSelected(id)
+      setCardOpen(true)
+    }
   }
+
+  /* profile card follows the selection while it is open */
+  useEffect(() => {
+    setProfile(null)
+    if (!cardOpen || !selected) return
+    const node = byId.get(selected)
+    if (!node || node.entity_id == null) return
+    let live = true
+    getJSON<{ entity: Entity }>(`/api/registry/entity/${node.entity_id}`)
+      .then((value) => live && setProfile(value.entity))
+      .catch(() => undefined)
+    return () => {
+      live = false
+    }
+  }, [cardOpen, selected, byId])
 
   if (error || (data && !data.available)) {
     return (
@@ -443,76 +465,6 @@ export default function Ranking() {
             </div>
           </div>
 
-          {sel && (
-            <div className="rank-detail">
-              <button
-                className="rank-detail-close"
-                aria-label="Clear selection"
-                onClick={() => setSelected(null)}
-              >
-                ×
-              </button>
-              <div className="rank-detail-head">
-                <div>
-                  <div className="rank-detail-name">{nodeName(sel)}</div>
-                  <a
-                    className="mono rank-detail-handle"
-                    href={`https://x.com/${sel.handle}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    @{sel.handle}
-                  </a>
-                </div>
-                <span
-                  className={`rank-pill ${sel.registry_state}${isOrg(sel) ? ' org' : ''}`}
-                >
-                  {sel.registry_state === 'active'
-                    ? isOrg(sel)
-                      ? 'ORGANIZATION'
-                      : 'IN REGISTRY'
-                    : 'DISCOVERED'}
-                </span>
-              </div>
-              <div className="rank-detail-grid mono">
-                <span className="l">trust rank</span>
-                <span>#{sel.rank}</span>
-                <span className="l">cohort follows</span>
-                <span>{fmt(sel.cohort_follow_count)} · {(sel.cohort_follow_share * 100).toFixed(1)}%</span>
-                <span className="l">raw X followers</span>
-                <span>{fmt(sel.followers_count)}</span>
-              </div>
-              {followers?.available && followers.followers && (
-                <p className="rank-detail-followers">
-                  Followed by{' '}
-                  {followers.followers.slice(0, 4).map((f, i) => (
-                    <span key={f.x_id}>
-                      {i > 0 && ', '}
-                      <strong>{f.entity_name || f.display_name || `@${f.handle}`}</strong>
-                    </span>
-                  ))}
-                  {(followers.total ?? 0) > 4 &&
-                    ` and ${fmt((followers.total ?? 0) - 4)} more of the cohort.`}
-                </p>
-              )}
-              {sel.registry_state === 'active' && sel.entity_id != null && (
-                <button
-                  className="rank-detail-reg mono"
-                  type="button"
-                  onClick={() => {
-                    getJSON<{ entity: Entity }>(
-                      `/api/registry/entity/${sel.entity_id}`,
-                    )
-                      .then((value) => setProfile(value.entity))
-                      .catch(() => setProfile(null))
-                  }}
-                >
-                  FULL PROFILE →
-                </button>
-              )}
-            </div>
-          )}
-
           <ol className="rank-list">
             {filtered.length === 0 && (
               <li className="rank-empty mono">
@@ -561,7 +513,65 @@ export default function Ranking() {
         </aside>
       </div>
 
-      <EntityCard entity={profile} onClose={() => setProfile(null)} />
+      <EntityCard
+        entity={cardOpen ? profile : null}
+        fallback={
+          cardOpen && sel && sel.entity_id == null
+            ? { name: nodeName(sel), handle: sel.handle }
+            : null
+        }
+        context={
+          cardOpen && sel ? (
+            <section className="ent-card-rank" aria-label="Trust ranking">
+              <div className="ent-card-rank-stats">
+                <div className="stat">
+                  <span className="v">#{sel.rank}</span>
+                  <span className="k">Trust rank</span>
+                </div>
+                <div className="stat">
+                  <span className="v">
+                    {fmt(sel.cohort_follow_count)}
+                    <span className="sub">
+                      {' '}· {(sel.cohort_follow_share * 100).toFixed(1)}%
+                    </span>
+                  </span>
+                  <span className="k">Cohort follows</span>
+                </div>
+                <div className="stat">
+                  <span className="v">{fmt(sel.followers_count)}</span>
+                  <span className="k">Raw X followers</span>
+                </div>
+              </div>
+              {followers?.available && followers.followers && (
+                <p className="ent-card-rank-followers">
+                  Followed by{' '}
+                  {followers.followers.slice(0, 4).map((f, i) => (
+                    <span key={f.x_id}>
+                      {i > 0 && ', '}
+                      <strong>
+                        {f.entity_name || f.display_name || `@${f.handle}`}
+                      </strong>
+                    </span>
+                  ))}
+                  {(followers.total ?? 0) > 4 &&
+                    ` and ${fmt((followers.total ?? 0) - 4)} more of the cohort.`}
+                </p>
+              )}
+              {sel.entity_id == null && (
+                <a
+                  className="ent-card-rank-handle mono"
+                  href={`https://x.com/${sel.handle}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  @{sel.handle} on X ↗
+                </a>
+              )}
+            </section>
+          ) : undefined
+        }
+        onClose={() => setCardOpen(false)}
+      />
     </div>
   )
 }
