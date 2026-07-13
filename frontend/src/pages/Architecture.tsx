@@ -129,39 +129,121 @@ function AccountIntake() {
 }
 
 function CurrentDataModel() {
+  const channels = [
+    { cx: 245, label: '@karpathy', plane: 'X', live: true },
+    { cx: 540, label: 'github.com/karpathy', plane: 'GitHub', live: false },
+    { cx: 835, label: 'arXiv · A. Karpathy', plane: 'Papers', live: false },
+  ]
+  const CW = 250
+  const CH_TOP = 210
+  const CH_H = 76
+  const obsDots = [368, 440, 512, 584, 656, 728, 800]
+  const rawCards = [
+    { x: 380, tag: 'post' },
+    { x: 500, tag: 'reply' },
+    { x: 620, tag: 'quote' },
+    { x: 740, tag: 'retweet' },
+  ]
   return (
-    <svg viewBox="0 0 1080 360" role="img" aria-label="Current data model: a real-world entity owns an X channel, which has dated profile observations and immutable raw posts; a derived run groups exact relationships and calculates attention for the Feed">
+    <svg
+      viewBox="0 0 1080 580"
+      role="img"
+      aria-label="Current data model: one real-world entity fans out to channels — the X channel is live, GitHub and arXiv are planned — and every channel writes into one dated evidence store that feeds the rebuildable derived run"
+    >
       <defs>
         <marker id="data-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
         </marker>
       </defs>
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE IDENTITY · ONE CURRENT SOURCE CLASS · TWO STORAGE LAYERS</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE IDENTITY · CHANNELS PLUG IN · ONE EVIDENCE STORE</text>
 
-      <rect x="30" y="72" width="214" height="96" fill={INK} />
-      <text x="50" y="105" fontFamily={MONO} fontSize="10" fill={BLUE}>ENTITY · WHO</text>
-      <text x="50" y="137" fontFamily={UI} fontSize="18" fontWeight="600" fill="#fff">Andrej Karpathy</text>
+      {/* entity (who) — faint stack behind = the whole Registry */}
+      <rect x="438" y="68" width="220" height="72" fill={INK} opacity="0.12" />
+      <rect x="430" y="60" width="220" height="72" fill={INK} />
+      <text x="450" y="90" fontFamily={MONO} fontSize="10" fill={BLUE}>ENTITY · WHO</text>
+      <text x="450" y="118" fontFamily={UI} fontSize="17" fontWeight="600" fill="#fff">Andrej Karpathy</text>
 
-      <line x1="244" y1="120" x2="322" y2="120" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#data-arrow)" />
-      <rect x="330" y="72" width="214" height="96" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
-      <text x="350" y="105" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>CHANNEL · WHERE</text>
-      <text x="350" y="137" fontFamily={UI} fontSize="18" fontWeight="600" fill={INK}>@karpathy on X</text>
+      {/* entity → channel fan */}
+      {channels.map((c) => (
+        <line
+          key={`fan-${c.plane}`}
+          x1="540"
+          y1="132"
+          x2={c.cx}
+          y2={CH_TOP - 6}
+          stroke={c.live ? BLUE_MID : MUTED}
+          strokeWidth={c.live ? 1.6 : 1.2}
+          strokeDasharray={c.live ? undefined : '5 5'}
+          opacity={c.live ? 1 : 0.55}
+          markerEnd={c.live ? 'url(#data-arrow)' : undefined}
+        />
+      ))}
 
-      <line x1="544" y1="120" x2="622" y2="120" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#data-arrow)" />
-      <rect x="630" y="58" width="420" height="124" fill={SURFACE} />
-      <text x="652" y="88" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>SOURCE DATA · WHAT WE SAW</text>
-      <text x="652" y="123" fontFamily={UI} fontSize="16" fontWeight="600" fill={INK}>Dated profile observations</text>
-      <text x="652" y="151" fontFamily={UI} fontSize="16" fontWeight="600" fill={INK}>Immutable raw posts + relationships</text>
+      {/* channels (where) */}
+      {channels.map((c) => (
+        <g key={`chan-${c.plane}`} opacity={c.live ? 1 : 0.62}>
+          <rect
+            x={c.cx - CW / 2}
+            y={CH_TOP}
+            width={CW}
+            height={CH_H}
+            fill="#fff"
+            stroke={c.live ? BLUE_MID : MUTED}
+            strokeWidth="1.2"
+            strokeDasharray={c.live ? undefined : '5 5'}
+          />
+          <text x={c.cx - CW / 2 + 16} y={CH_TOP + 27} fontFamily={MONO} fontSize="10" fill={c.live ? BLUE_INK : MUTED} letterSpacing="0.08em">
+            {c.plane.toUpperCase()} · {c.live ? 'LIVE' : 'PLANNED'}
+          </text>
+          <text x={c.cx - CW / 2 + 16} y={CH_TOP + 54} fontFamily={UI} fontSize="15.5" fontWeight="600" fill={INK}>{c.label}</text>
+        </g>
+      ))}
 
-      <line x1="840" y1="182" x2="840" y2="230" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#data-arrow)" />
-      <rect x="330" y="238" width="720" height="88" fill={SAND} />
-      <text x="352" y="270" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>DERIVED RUN · REBUILDABLE</text>
-      <text x="352" y="301" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Exact envelopes</text>
-      <text x="530" y="301" fontFamily={MONO} fontSize="13" fill={BLUE_MID}>→</text>
-      <text x="566" y="301" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Attention features</text>
-      <text x="758" y="301" fontFamily={MONO} fontSize="13" fill={BLUE_MID}>→</text>
-      <text x="794" y="301" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Feed rows</text>
-      <text x="30" y="352" fontFamily={UI} fontSize="12.5" fill={MUTED}>Future channels can join the same model; today, this Feed is X-only.</text>
+      {/* channels → one store */}
+      {channels.map((c) => (
+        <line
+          key={`conf-${c.plane}`}
+          x1={c.cx}
+          y1={CH_TOP + CH_H}
+          x2="540"
+          y2="332"
+          stroke={c.live ? BLUE_MID : MUTED}
+          strokeWidth="1.2"
+          strokeDasharray={c.live ? undefined : '5 5'}
+          opacity={c.live ? 0.8 : 0.4}
+        />
+      ))}
+      <line x1="540" y1="332" x2="540" y2="344" stroke={BLUE_MID} strokeWidth="1.6" markerEnd="url(#data-arrow)" />
+
+      {/* the dated evidence store (what) */}
+      <rect x="90" y="348" width="900" height="122" fill={SURFACE} />
+      <text x="112" y="376" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">SOURCE DATA · WHAT WE SAW, DATED</text>
+      <text x="920" y="376" fontFamily={MONO} fontSize="11" fill={MUTED}>time →</text>
+
+      <text x="112" y="408" fontFamily={MONO} fontSize="12" fill={INK}>observations</text>
+      <line x1="352" y1="404" x2="924" y2="404" stroke={MUTED} strokeWidth="1" opacity="0.5" markerEnd="url(#data-arrow)" />
+      {obsDots.map((x) => (
+        <circle key={`obs-${x}`} cx={x} cy="404" r="4" fill={BLUE} />
+      ))}
+
+      <text x="112" y="446" fontFamily={MONO} fontSize="12" fill={INK}>raw posts</text>
+      {rawCards.map((r) => (
+        <g key={`raw-${r.tag}`}>
+          <rect x={r.x} y="428" width="74" height="24" fill="#fff" stroke={BLUE_MID} strokeWidth="1" />
+          <text x={r.x + 37} y="444" textAnchor="middle" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{r.tag}</text>
+        </g>
+      ))}
+
+      {/* derived run */}
+      <line x1="540" y1="470" x2="540" y2="494" stroke={BLUE_MID} strokeWidth="1.6" markerEnd="url(#data-arrow)" />
+      <rect x="90" y="498" width="900" height="60" fill={SAND} />
+      <text x="112" y="524" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">DERIVED RUN · REBUILDABLE</text>
+      <text x="112" y="546" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Exact envelopes</text>
+      <text x="252" y="546" fontFamily={MONO} fontSize="12" fill={BLUE_MID}>→</text>
+      <text x="282" y="546" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Attention features</text>
+      <text x="428" y="546" fontFamily={MONO} fontSize="12" fill={BLUE_MID}>→</text>
+      <text x="458" y="546" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Feed rows</text>
+      <text x="988" y="546" textAnchor="end" fontFamily={UI} fontSize="12" fill={MUTED}>new channels join the same store — nothing downstream changes</text>
     </svg>
   )
 }
