@@ -1328,54 +1328,6 @@ td.num {
 .feed-why { display: flex; align-items: baseline; gap: 9px; color: var(--ink-soft); font-size: 11.5px; }
 .feed-proof-label { color: var(--blue-ink); font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.06em; }
 
-.feed-amplifiers { margin-top: 12px; }
-
-.feed-amplifiers > summary {
-  display: flex;
-  width: fit-content;
-  align-items: baseline;
-  gap: 8px;
-  color: var(--muted);
-  list-style: none;
-  cursor: pointer;
-}
-
-.feed-amplifiers > summary::-webkit-details-marker { display: none; }
-.feed-amplifiers > summary:hover .feed-amplifier-count { color: var(--ink-soft); }
-
-.feed-amplifier-count {
-  color: var(--muted);
-  font-size: 10.5px;
-  transition: color 150ms var(--ease-out);
-}
-
-.feed-amplifier-toggle {
-  color: var(--blue-ink);
-  font-size: 9.5px;
-}
-
-.feed-amplifier-toggle span:last-child,
-.feed-amplifiers[open] .feed-amplifier-toggle span:first-child { display: none; }
-.feed-amplifiers[open] .feed-amplifier-toggle span:last-child { display: inline; }
-
-.feed-amplifier-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px 16px;
-  padding-top: 8px;
-}
-
-.feed-amplifier-list a {
-  color: var(--muted);
-  font-size: 10.5px;
-  text-decoration: none;
-}
-
-.feed-amplifier-list a:hover {
-  color: var(--blue-ink);
-  text-decoration: underline;
-}
-
 .feed-footer {
   display: flex;
   align-items: baseline;

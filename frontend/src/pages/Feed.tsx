@@ -235,42 +235,6 @@ function EventEvidenceDetails({
   )
 }
 
-function AmplifierDisclosure({
-  amplifiers,
-}: {
-  amplifiers: SignalEvent['amplifiers']
-}) {
-  if (amplifiers.length === 0) return null
-
-  return (
-    <details className="feed-amplifiers">
-      <summary>
-        <span className="feed-proof-label">Noticed by</span>
-        <span className="feed-amplifier-count">
-          {amplifiers.length} Registry {amplifiers.length === 1 ? 'account' : 'accounts'}
-        </span>
-        <span className="feed-amplifier-toggle mono" aria-hidden="true">
-          <span>View</span>
-          <span>Hide</span>
-        </span>
-      </summary>
-      <div className="feed-amplifier-list">
-        {amplifiers.map((amplifier) => (
-          <a
-            key={amplifier.entity_id}
-            href={amplifier.source_url}
-            target="_blank"
-            rel="noreferrer"
-            title={`${amplifier.relation_type} · ${amplifier.network_support} network support`}
-          >
-            {amplifier.entity_name}
-          </a>
-        ))}
-      </div>
-    </details>
-  )
-}
-
 function EventRow({ item }: { item: SignalEvent }) {
   const root = item.root
   const replies = item.evidence.filter((evidence) => evidence.relationship === 'reply')
@@ -354,8 +318,6 @@ function EventRow({ item }: { item: SignalEvent }) {
             </div>
           </div>
         )}
-
-        <AmplifierDisclosure amplifiers={item.amplifiers} />
 
         {item.is_grouped && (
           <EventEvidenceDetails

@@ -183,7 +183,7 @@ reads first.
 | done | Run a bounded `triage-v1` design spike over representative high-attention envelopes: compare the minimum dynamic input and output schema, verify prompt-cache reads and LiteLLM tags/cost telemetry, audit false drops against the July 11 labels, and recommend one-stage vs two-stage filtering. Do not run the full corpus. | worker | [triage report](resources/triage-spike-2026-07-13.md) |
 | done | Run the frozen triage contract over the top 100 attention envelopes for every complete stored day (2026-07-05 through 2026-07-11; 700 total), preserve one resumable run per day, and audit cross-day/lower-attention keep/drop/category/cache/cost behavior without changing the prompt mid-run. Do not spend the submission critical path labeling the roughly 7,500-envelope long tail before extraction is proved. | worker | [seven-day report](resources/triage-seven-day-validation-2026-07-13.md) |
 | done | Replace the over-specified triage boundary with the two-field envelope decision, remove the ID repair path and obsolete v1 runtime artifacts, synchronize tests/docs, and validate the clean contract. | parent | — |
-| done | Distill the Feed audit presentation to decision + reason and keep Registry amplifiers behind one collapsed disclosure. | worker | — |
+| done | Distill the Feed audit presentation to decision + reason and consolidate exact relationship provenance under the single Follow disclosure; remove the redundant Noticed by presentation while retaining amplifier evidence for scoring. | parent | — |
 | todo | Hand-build the extraction oracle after cross-day validation: pull the five strong 2026-07-11 candidates, fetch their linked artifacts manually, and write the five `insight-v1` records they should produce. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 | todo | Build artifact fetch + insight extraction for one day with cost telemetry; pass the M1 oracle test. | worker | [pipeline-design.md](resources/pipeline-design.md) |
 
@@ -272,3 +272,8 @@ reads first.
   one compact Feed projection. The live Feed truthfully shows all 972 July 11
   envelopes as not evaluated until a v2 run is deliberately started; the old
   700-row v1 decisions remain only in historical reports, not runtime state.
+- 2026-07-13: [FEED-PROVENANCE-DISTILLED] Removed the duplicate Noticed by
+  disclosure from Feed cards. The attention score remains the compact summary
+  of Registry support, and Follow is now the single disclosure for exact quote,
+  reply, continuation, retweet, and linked-post evidence. Backend amplifier
+  evidence remains unchanged for scoring and audit logic.
