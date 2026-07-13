@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   getJSON,
+  type EventEvidence,
   type EventResponse,
   type FeedDates,
   type FeedItem,
@@ -35,6 +36,13 @@ const time = new Intl.DateTimeFormat('en-US', {
 
 const fmt = (value: number | null | undefined) =>
   value == null ? '—' : compact.format(value)
+
+const evidenceTypeLabel: Record<EventEvidence['post_type'], string> = {
+  original: 'Original',
+  quote: 'Quoted',
+  retweet: 'Retweeted',
+  reply: 'Replied',
+}
 
 function Metric({ label, value }: { label: string; value: number | null }) {
   return (
@@ -218,21 +226,32 @@ function EventRow({ item }: { item: SignalEvent }) {
           </summary>
           <div className="event-evidence-list">
             {item.evidence.map((evidence) => (
-              <article className="event-evidence-row" key={evidence.post_id}>
+              <article
+                className={`event-evidence-row${
+                  evidence.post_type === 'retweet'
+                    ? ' event-evidence-row--retweet'
+                    : ''
+                }`}
+                key={evidence.post_id}
+              >
                 <div className="event-evidence-meta mono">
                   <strong>
                     {evidence.author.entity_name ?? evidence.author.name}
                   </strong>
                   <span>@{evidence.author.handle}</span>
-                  <span>{evidence.post_type}</span>
+                  <span>{evidenceTypeLabel[evidence.post_type]}</span>
                   <time dateTime={evidence.published_at}>
                     {time.format(new Date(evidence.published_at))}
                   </time>
                 </div>
                 <div>
-                  <p>{evidence.text || 'Post has no text.'}</p>
+                  {evidence.post_type === 'retweet' ? (
+                    <p className="event-evidence-action">Retweeted the original post.</p>
+                  ) : (
+                    <p>{evidence.text || 'Post has no text.'}</p>
+                  )}
                   <a href={evidence.url} target="_blank" rel="noreferrer">
-                    Open evidence on X ↗
+                    Open {evidence.post_type === 'retweet' ? 'retweet' : 'evidence'} on X ↗
                   </a>
                 </div>
               </article>
@@ -446,14 +465,27 @@ export default function Feed() {
             </button>
           ))}
         </div>
-        <label className="feed-sort">
+        <div className="feed-sort" role="group" aria-label="Sort Feed">
           <span className="mono">SORT</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value as Sort)}>
-            <option value="attention">Network attention</option>
-            <option value="recent">Most recent</option>
-            <option value="engagement">Public engagement</option>
-          </select>
-        </label>
+          <div className="seg">
+            {([
+              ['attention', 'Attention', 'Network attention'],
+              ['recent', 'Recent', 'Most recent'],
+              ['engagement', 'Engagement', 'Public engagement'],
+            ] as const).map(([value, label, description]) => (
+              <button
+                type="button"
+                key={value}
+                className={sort === value ? 'is-active' : ''}
+                onClick={() => setSort(value)}
+                aria-label={description}
+                aria-pressed={sort === value}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {hasNarrowedResults && (

@@ -193,6 +193,10 @@ instead of expanding the graph or processing the complete X history.
   target IDs and exact reply/conversation IDs. Shared URLs, text similarity,
   embeddings, model judgment, relevance, and summaries are separate later
   contracts.
+- In expanded exact groups, show content once for the original, preserve unique
+  quote/reply text, and render retweets as compact amplification evidence with
+  author, time, and direct X provenance. Use visible segmented controls for the
+  three sort modes instead of a browser-native select menu.
 
 ## Open Questions / Blockers
 
@@ -205,8 +209,9 @@ instead of expanding the graph or processing the complete X history.
 | --- | --- | --- | --- |
 | todo | Audit the top Feed results for signal/noise and record the keep/change decision for `attention-v1`. | parent | — |
 | done | Audit the stored relation/thread/URL evidence and propose the deterministic event-clustering and separate relevance boundary. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| in_progress | Implement normalized conversation metadata and `exact-structural-v1` as a separate content-addressed derived run; use no URL or semantic grouping. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
-| todo | Add the `Events | Posts` Feed view for exact groups and run the top-20 structural audit before enabling any inferred grouping or relevance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| done | Implement normalized conversation metadata and `exact-structural-v1` as a separate content-addressed derived run; use no URL or semantic grouping. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| in_progress | Audit the top 20 exact groups for structural false merges/splits before enabling any inferred grouping or relevance. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
+| done | Add the `Exact groups | All posts` Feed view with relation-aware evidence rows and an accessible visible sort control. | parent | [event-clustering-contract.md](resources/event-clustering-contract.md) |
 | todo | Normalize expanded external URLs/cards only for the accepted candidate set, then resolve primary citations in the later extraction milestone. | parent | — |
 
 ## Backlog / Remaining Work
@@ -267,3 +272,11 @@ instead of expanding the graph or processing the complete X history.
   the 55/25/20 weights, one-entity-one-vote rule, exclusions, worked example,
   versions, and non-claims are visible without opening documentation or a
   modal. Frontend build/lint and the live in-app browser check pass.
+- 2026-07-13: [CHECKPOINT] Materialized `exact-structural-v1` run
+  `40c9a1f...948d2` as 4,814 exact groups over 13,436 members and 8,898
+  provider-declared links, without URL, semantic, embedding, or LLM grouping.
+  The Feed now switches between the complete post ledger and exact groups,
+  expands every member inline, keeps original/quote/reply content, collapses
+  repeated retweet text into compact amplification rows, and exposes all three
+  sort modes as accessible segmented buttons. Frontend lint/build and live
+  browser interaction checks pass; the top-20 structural audit remains active.

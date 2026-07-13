@@ -1296,23 +1296,9 @@ td.num {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--bg);
 }
 
 .feed-sort span { color: var(--muted); font-size: 9.5px; letter-spacing: 0.05em; }
-
-.feed-sort select {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  font: 12.5px var(--font-ui);
-  cursor: pointer;
-}
 
 .feed-summary {
   margin-top: 16px;
@@ -1503,6 +1489,8 @@ td.num {
 
 .event-evidence-row:last-child { border-bottom: 0; }
 
+.event-evidence-row--retweet { padding-block: 10px; }
+
 .event-evidence-meta {
   display: flex;
   flex-direction: column;
@@ -1520,6 +1508,12 @@ td.num {
   font-size: 13px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+.event-evidence-row p.event-evidence-action {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
 }
 
 .event-evidence-row a {
