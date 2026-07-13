@@ -9,11 +9,12 @@
     {
       "slug": "nvidia",
       "name": "NVIDIA",
-      "reason": "NVIDIA is the stable parent organization for its corporate and NVIDIA AI channels.",
+      "reason": "NVIDIA is the stable parent organization for its corporate, NVIDIA AI, and AI infrastructure channels.",
       "evidence_url": "https://www.nvidia.com/en-us/solutions/ai/",
       "channels": [
         {"kind": "x", "key": "nvidia", "expected_x_id": "61559439", "relationship": "identity", "evidence_url": "https://x.com/nvidia"},
         {"kind": "x", "key": "nvidiaai", "expected_x_id": "740238495952736256", "relationship": "official", "evidence_url": "https://www.nvidia.com/en-us/solutions/ai/"},
+        {"kind": "x", "key": "nvidiaaiinfra", "expected_x_id": "92598387", "relationship": "official", "evidence_url": "https://www.nvidia.com/en-us/data-center/"},
         {"kind": "website", "key": "https://www.nvidia.com/en-us/solutions/ai/", "label": "NVIDIA AI", "relationship": "official", "evidence_url": "https://www.nvidia.com/en-us/solutions/ai/"}
       ],
       "merge_handles": [

@@ -152,7 +152,9 @@ following pages or graph edges. The first applied batch created or normalized
 Microsoft, Amazon, Apple, Ai2, ByteDance, Tencent, Meta, Alibaba, Baidu,
 Databricks, Moonshot AI, Kuaishou, NVIDIA, AMD, and Intel. Google remains the
 stable parent for Google product channels; Google DeepMind remains a deliberate
-first-class lab exception.
+first-class lab exception. NVIDIA owns the reviewed `@nvidia`, `@nvidiaai`, and
+`@nvidiaaiinfra` X channels; the latter's verified profile resolves to NVIDIA's
+first-party data-center site.
 
 Exact human corrections that do not merge or delete an identity live in
 `data/registry/entity-overrides.json` and apply through
