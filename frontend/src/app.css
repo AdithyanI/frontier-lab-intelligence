@@ -1060,19 +1060,13 @@ td.num {
 .rank-page { max-width: 100%; }
 
 .rank-context {
-  display: flex;
-  align-items: baseline;
-  gap: 24px;
   font-size: 12px;
   color: var(--muted);
   margin-top: 20px;
+  margin-bottom: 0;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border-strong);
 }
-
-.rank-context > span { flex: 1; }
-
-.method-note { color: var(--muted); }
 
 .method-explain {
   margin: 18px 0 0;
@@ -1082,25 +1076,6 @@ td.num {
   color: var(--ink-soft);
 }
 .method-explain strong { font-weight: 600; color: var(--ink); }
-
-.method-note summary {
-  width: fit-content;
-  color: var(--blue-ink);
-  cursor: pointer;
-  list-style: none;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: 3px;
-  transition: text-decoration-color 150ms var(--ease-out);
-}
-
-.method-note summary::-webkit-details-marker { display: none; }
-.method-note summary:hover { text-decoration-color: currentColor; }
-.method-note p { margin: 8px 0 0; font-size: 10.5px; line-height: 1.5; }
-.method-note a { color: var(--blue-ink); text-decoration: none; }
-.method-note a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.rank-context .method-note { flex: none; text-align: right; }
-.rank-context .method-note p { max-width: 66ch; }
 
 .rank-split {
   display: grid;

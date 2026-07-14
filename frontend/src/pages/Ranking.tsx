@@ -270,20 +270,9 @@ export default function Ranking() {
         Registry entities follow them — never by raw follower count.
       </p>
       {run && (
-        <div className="rank-context mono">
-          <span>
-            Top {fmt(N_FETCH)} of {fmt(run.ranked_accounts)} accounts ·{' '}
-            {fmt(run.source_entities)} voting entities
-          </span>
-          <details className="method-note">
-            <summary>Method</summary>
-            <p>
-              {run.algorithm.toUpperCase()} · {run.snapshot_id.toUpperCase()} ·{' '}
-              {fmt(run.source_accounts)} source accounts · {fmt(run.edges)} observed follow edges · {fmt(run.unknown_accounts)}
-              {' '}accounts not yet in the Registry
-            </p>
-          </details>
-        </div>
+        <p className="rank-context mono">
+          Top {fmt(N_FETCH)} by Registry support
+        </p>
       )}
 
       <div className="rank-split">
