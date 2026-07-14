@@ -249,6 +249,7 @@ reads first.
 | --- | --- | --- | --- |
 | done | Freeze the five oracle post IDs, corrected event/triage run identities, current decisions, artifact coverage, and known gaps into one cold-resume packet. | parent | [oracle resume](resources/oracle-resume.md) |
 | done | Add and prove a bounded Jina Reader fallback for eligible native public-page failures; preserve provider provenance and resumability. | parent | [artifact library](../../references/artifact-library.md) |
+| done | Expose the live canonical artifact catalog as a minimal chronological operator index with expandable provenance. | parent | [artifact library](../../references/artifact-library.md) |
 | todo | Hand-write the five expected `insight-v1` outcomes, including explicit misses where primary evidence is absent. | parent | [oracle resume](resources/oracle-resume.md) |
 | todo | Implement and run the smallest extraction path against those frozen inputs; audit citation spans before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
 
@@ -276,6 +277,14 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [ARTIFACT-INDEX] Added the first read-only Artifact Library
+  surface at `/artifacts`, backed directly by the canonical SQLite catalog.
+  It lists one canonical artifact per row, newest observation first, and keeps
+  fetch state and provenance expandable instead of adding another analysis
+  view. The live app renders 1,566 artifacts, including 22 text snapshots and
+  eight current retrieval issues; the initial API returns 60 rows and supports
+  bounded pagination. Fourteen focused artifact/web tests pass.
 
 - 2026-07-14: [JINA-READER-FALLBACK] Added a separate `jina-reader-v1`
   recovery run behind the native `bounded-public-v1` fetch contract. The

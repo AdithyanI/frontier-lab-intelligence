@@ -238,7 +238,11 @@ forms, robots-denied pages, authentication, and paywalls remain deferred. The
 2026-07-14 v1 proof indexed 1,566 canonical artifacts and 1,739 source
 observations; its 30-artifact cohort produced 19 native clean texts, then the
 Reader fallback recovered all three OpenAI HTTP-403 pages. Broad crawling,
-RSS/GitHub adapters, artifact UI, and cited-insight generation remain deferred.
+RSS/GitHub adapters and cited-insight generation remain deferred. The web
+layer now exposes the live catalog as a read-only `/api/artifacts` projection
+and a minimal `/artifacts` index: newest observation first, one row per
+canonical artifact, with retrieval state and expandable provenance. This is an
+operator inspection surface, not a second Feed or an insight product.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL

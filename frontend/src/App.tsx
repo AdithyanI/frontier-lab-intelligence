@@ -4,6 +4,7 @@ import { getCachedJSON, type Rankings } from './api'
 import Registry from './pages/Registry'
 import Ranking from './pages/Ranking'
 import Feed from './pages/Feed'
+import Artifacts from './pages/Artifacts'
 import Architecture from './pages/Architecture'
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
           <NavLink to="/" end>Registry</NavLink>
           <NavLink to="/ranking">Ranking</NavLink>
           <NavLink to="/feed">Feed</NavLink>
+          <NavLink to="/artifacts">Artifacts</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
         </nav>
       </header>
@@ -33,6 +35,7 @@ export default function App() {
           <Route path="/" element={<Registry />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/feed" element={<Feed />} />
+          <Route path="/artifacts" element={<Artifacts />} />
           <Route path="/architecture" element={<Architecture />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
