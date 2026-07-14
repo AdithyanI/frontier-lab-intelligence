@@ -8,6 +8,7 @@ import {
 import EntityCard, { typeClass, typeLabel, xHandleLabel } from '../components/EntityCard'
 
 type KindFilter = 'all' | RegistryGroup
+type SortField = 'followers' | 'network'
 type SortDirection = 'asc' | 'desc'
 
 const FIRST = 40
@@ -21,12 +22,14 @@ const registryURL = (
   kind: KindFilter,
   query: string,
   offset: number,
+  sort: SortField,
   direction: SortDirection,
 ) => {
   const params = new URLSearchParams({
     group: kind,
     limit: String(offset === 0 ? FIRST : STEP),
     offset: String(offset),
+    sort,
     direction,
   })
   const needle = query.trim()
@@ -41,12 +44,13 @@ export default function Registry() {
   const [query, setQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [kind, setKind] = useState<KindFilter>('all')
+  const [sortField, setSortField] = useState<SortField>('followers')
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('desc')
   const [selected, setSelected] = useState<Entity | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const viewRef = useRef('all\0desc')
+  const viewRef = useRef('all\0followers\0desc')
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -58,14 +62,14 @@ export default function Registry() {
 
   useEffect(() => {
     const controller = new AbortController()
-    const view = `${kind}\0${debouncedQuery}\0${sortDirection}`
+    const view = `${kind}\0${debouncedQuery}\0${sortField}\0${sortDirection}`
     viewRef.current = view
     setLoading(true)
     setLoadingMore(false)
     setError(null)
     setSelected(null)
     getJSON<RegistryData>(
-      registryURL(kind, debouncedQuery, 0, sortDirection),
+      registryURL(kind, debouncedQuery, 0, sortField, sortDirection),
       { signal: controller.signal },
     )
       .then((page) => {
@@ -80,7 +84,7 @@ export default function Registry() {
         }
       })
     return () => controller.abort()
-  }, [debouncedQuery, kind, sortDirection])
+  }, [debouncedQuery, kind, sortDirection, sortField])
 
   const visible = data?.entities ?? []
   const loadMore = () => {
@@ -93,6 +97,7 @@ export default function Registry() {
         kind,
         debouncedQuery,
         data.entities.length,
+        sortField,
         sortDirection,
       ),
     )
@@ -133,7 +138,16 @@ export default function Registry() {
   }
   const showRejectionReason = kind === 'rejected'
   const showFollowerColumn = ['all', 'person', 'organization'].includes(kind)
+  const showNetworkRankColumn = showFollowerColumn
   const showTypeColumn = kind !== 'person' && kind !== 'organization'
+  const changeSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((current) => (current === 'desc' ? 'asc' : 'desc'))
+      return
+    }
+    setSortField(field)
+    setSortDirection(field === 'network' ? 'asc' : 'desc')
+  }
 
   return (
     <section className="network-view registry-view" aria-labelledby="registry-title">
@@ -187,11 +201,47 @@ export default function Registry() {
             <tr>
               <th>Entity</th>
               {showTypeColumn && <th className="ent-type-head">Type</th>}
+              {showNetworkRankColumn && (
+                <th
+                  className="ent-network-head"
+                  aria-sort={
+                    sortField === 'network'
+                      ? sortDirection === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
+                  }
+                >
+                  <button
+                    className="ent-sort"
+                    type="button"
+                    aria-label={`Sort by network rank, ${
+                      sortField === 'network' && sortDirection === 'asc'
+                        ? 'lowest rank first'
+                        : 'highest rank first'
+                    }`}
+                    onClick={() => changeSort('network')}
+                  >
+                    <span>Network rank</span>
+                    <span className="ent-sort-arrow" aria-hidden="true">
+                      {sortField === 'network'
+                        ? sortDirection === 'asc'
+                          ? '↑'
+                          : '↓'
+                        : '↕'}
+                    </span>
+                  </button>
+                </th>
+              )}
               {showFollowerColumn && (
                 <th
                   className="ent-followers-head"
                   aria-sort={
-                    sortDirection === 'desc' ? 'descending' : 'ascending'
+                    sortField === 'followers'
+                      ? sortDirection === 'desc'
+                        ? 'descending'
+                        : 'ascending'
+                      : 'none'
                   }
                 >
                   <button
@@ -200,11 +250,7 @@ export default function Registry() {
                     aria-label={`Sort by ${
                       kind === 'person' ? 'X followers' : 'combined X followers'
                     }, ${sortDirection === 'desc' ? 'ascending' : 'descending'}`}
-                    onClick={() =>
-                      setSortDirection((current) =>
-                        current === 'desc' ? 'asc' : 'desc',
-                      )
-                    }
+                    onClick={() => changeSort('followers')}
                   >
                     <span>
                       {kind === 'person'
@@ -212,7 +258,11 @@ export default function Registry() {
                         : 'Combined X followers'}
                     </span>
                     <span className="ent-sort-arrow" aria-hidden="true">
-                      {sortDirection === 'desc' ? '↓' : '↑'}
+                      {sortField === 'followers'
+                        ? sortDirection === 'desc'
+                          ? '↓'
+                          : '↑'
+                        : '↕'}
                     </span>
                   </button>
                 </th>
@@ -255,6 +305,24 @@ export default function Registry() {
                       <span className={`ent-type ent-type--${typeClass(entity)}`}>
                         {typeLabel(entity)}
                       </span>
+                    </td>
+                  )}
+                  {showNetworkRankColumn && (
+                    <td
+                      className="ent-network-rank"
+                      title={
+                        entity.network_rank == null
+                          ? 'No owned X account appears in the current network ranking.'
+                          : `Best-ranked owned account${
+                              entity.network_account_handle
+                                ? `: @${entity.network_account_handle}`
+                                : ''
+                            }; ${fmt(entity.network_follow_count)} screened Registry sources follow it.`
+                      }
+                    >
+                      {entity.network_rank == null
+                        ? '—'
+                        : `#${fmt(entity.network_rank)}`}
                     </td>
                   )}
                   {showFollowerColumn && (

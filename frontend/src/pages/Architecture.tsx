@@ -250,7 +250,7 @@ function CurrentDataModel() {
     <svg
       viewBox="0 0 1080 560"
       role="img"
-      aria-label="Current data model: one real-world entity fans out to channels — the X channel is live, GitHub and arXiv are planned. X yields two streams: a fast-moving dated posts store, and a slow-moving follow graph whose network support decides who is tracked."
+      aria-label="Current data model: one real-world entity fans out to channels — the X channel is live, GitHub and arXiv are planned. X yields two streams: a fast-moving dated posts store, and a slow-moving follow graph whose Registry overlap decides who is tracked."
     >
       <defs>
         <marker id="data-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -321,7 +321,7 @@ function CurrentDataModel() {
         </g>
       ))}
       <circle cx="245" cy="430" r="9" fill={INK} />
-      <text x="112" y="481" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">who follows whom → network support</text>
+      <text x="112" y="481" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">who follows whom → Registry overlap</text>
 
       {/* fast stream: the dated posts store */}
       <rect x="440" y="346" width="550" height="154" fill={SURFACE} />
@@ -352,7 +352,7 @@ function CurrentDataModel() {
   )
 }
 
-function TrustRankFigure() {
+function NetworkRankFigure() {
   const insiders = [110, 142, 174, 206, 238]
   const crowd = [
     { x: 596, y: 96, r: 5 },
@@ -374,7 +374,7 @@ function TrustRankFigure() {
           <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
         </marker>
       </defs>
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHY AN ACCOUNT RANKS HIGH · NETWORK SUPPORT</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHY AN ACCOUNT RANKS HIGH · NETWORK RANK</text>
 
       {/* Account A: five screened insiders */}
       <text x="100" y="76" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">SCREENED MEMBERS</text>
@@ -403,7 +403,7 @@ function TrustRankFigure() {
       <rect x="808" y="212" width="26" height="8" fill={BLUE} />
       <text x="808" y="244" fontFamily={UI} fontSize="12.5" fill={INK}>1 screened follower → ranks low</text>
 
-      <text x="30" y="288" fontFamily={UI} fontSize="12.5" fill={MUTED}>Support counts screened Registry members only — a large public follower count is not an input.</text>
+      <text x="30" y="288" fontFamily={UI} fontSize="12.5" fill={MUTED}>Rank uses screened Registry sources only — a large public follower count is not an input.</text>
     </svg>
   )
 }
@@ -420,12 +420,12 @@ function RankingMethods() {
         <p className="method-limit">Useful for reach. Not a trust score.</p>
       </div>
       <div className="method-row">
-        <div className="method-id mono"><span>ENTITY-OVERLAP-V2</span><strong>Network support</strong></div>
+        <div className="method-id mono"><span>ENTITY-OVERLAP-V2</span><strong>Network rank</strong></div>
         <div className="method-main">
           <p className="method-question">How many screened Registry entities point here?</p>
-          <div className="method-equation mono">support = distinct active Registry entities following an account</div>
+          <div className="method-equation mono">rank = order by distinct active Registry entities following an account</div>
         </div>
-        <p className="method-limit">Follower count is not an input. Support is not relevance.</p>
+        <p className="method-limit">Public follower count is not an input. Rank is not relevance.</p>
       </div>
       <div className="method-row method-row--attention">
         <div className="method-id mono"><span>ATTENTION-V1.1</span><strong>Daily score</strong></div>
@@ -489,13 +489,13 @@ export default function Architecture() {
           <p className="arch-p">X yields two streams: fast-moving posts and a slow-moving follow graph that decides who is tracked.</p>
         </div>
         <div className="arch-canvas"><CurrentDataModel /></div>
-        <div className="arch-canvas arch-canvas--sub"><TrustRankFigure /></div>
+        <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
       </section>
 
       <section className="arch-section arch-section--methods" id="ranking-methods">
         <div className="arch-section-head">
           <h2 className="arch-h">The numbers answer different questions</h2>
-          <p className="arch-p">Reach, network support, and the daily score answer different questions so none can masquerade as quality.</p>
+          <p className="arch-p">Reach, network rank, and the daily score answer different questions so none can masquerade as quality.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><RankingMethods /></div>
       </section>

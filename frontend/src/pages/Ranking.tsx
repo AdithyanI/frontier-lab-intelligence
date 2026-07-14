@@ -1,6 +1,6 @@
-/* Ranking — the trust orbit. Every dot is an account the screened Registry
-   cohort collectively follows; distance from center is earned rank, dot size
-   is cohort follows. Filled ink = already in the Registry; hollow ring = an
+/* Ranking — the network orbit. Every dot is an account the screened Registry
+   collectively follows; distance from center is network rank, dot size is the
+   number of Registry sources that follow it. Filled ink = already in the Registry; hollow ring = an
    outsider the inside points at. Click a dot to trace who follows it; click
    its ranking row to open the account profile. Data: /api/rankings over the
    frozen following snapshot. */
@@ -262,7 +262,7 @@ export default function Ranking() {
   return (
     <section className="network-view rank-page" aria-labelledby="ranking-title">
       <h2 className="network-view-title" id="ranking-title">
-        Who does the inside trust?
+        Who does the Network follow?
       </h2>
       <p className="network-view-sub">
         Accounts are ranked by how many screened Registry sources follow them
@@ -290,7 +290,7 @@ export default function Ranking() {
           <svg
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             role="img"
-            aria-label="Trust orbit: accounts arranged by cohort-trust rank, most trusted at the center"
+            aria-label="Network orbit: accounts arranged by network rank, best ranked at the center"
             onClick={(e) => {
               if (e.target === e.currentTarget) setSelected(null)
             }}
@@ -529,11 +529,11 @@ export default function Ranking() {
         }
         context={
           cardOpen && sel ? (
-            <section className="ent-card-rank" aria-label="Trust ranking">
+            <section className="ent-card-rank" aria-label="Network ranking">
               <div className="ent-card-rank-stats">
                 <div className="stat">
                   <span className="v">#{sel.rank}</span>
-                  <span className="k">Trust rank</span>
+                  <span className="k">Network rank</span>
                 </div>
                 <div className="stat">
                   <span className="v">
@@ -542,7 +542,7 @@ export default function Ranking() {
                       {' '}· {(sel.cohort_follow_share * 100).toFixed(1)}%
                     </span>
                   </span>
-                  <span className="k">Cohort follows</span>
+                  <span className="k">Registry sources</span>
                 </div>
                 <div className="stat">
                   <span className="v">{fmt(sel.followers_count)}</span>

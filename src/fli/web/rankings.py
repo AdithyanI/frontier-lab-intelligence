@@ -157,6 +157,50 @@ def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
     return _rankings_payload_cached(limit, state, query, _db_version(analysis_db))
 
 
+@lru_cache(maxsize=32)
+def _entity_network_ranks_cached(
+    version: tuple[str, int, int, int, int],
+) -> dict[int, dict[str, Any]]:
+    """Best global account rank owned by each active Registry entity."""
+    analysis_db = Path(version[0])
+    if not analysis_db.is_file():
+        return {}
+    conn = _open_readonly(analysis_db)
+    try:
+        run = _latest_run(conn)
+        if run is None:
+            return {}
+        rows = conn.execute(
+            """SELECT gn.entity_id, rr.position AS network_rank,
+                      rr.cohort_follow_count, rr.cohort_follow_share,
+                      gn.x_id, gn.handle
+               FROM ranking_result rr
+               JOIN graph_node gn
+                 ON gn.context_id = ? AND gn.x_id = rr.x_id
+               WHERE rr.run_id = ?
+                 AND gn.registry_state = 'active'
+                 AND gn.entity_id IS NOT NULL
+               ORDER BY rr.position""",
+            [run["context_id"], run["run_id"]],
+        ).fetchall()
+        best: dict[int, dict[str, Any]] = {}
+        for row in rows:
+            entity_id = int(row["entity_id"])
+            if entity_id not in best:
+                best[entity_id] = dict(row)
+        return best
+    finally:
+        conn.close()
+
+
+def entity_network_ranks() -> dict[int, dict[str, Any]]:
+    """Map an entity to the global rank of its best-ranked owned X account."""
+    analysis_db = _latest_analysis_db()
+    if analysis_db is None:
+        return {}
+    return _entity_network_ranks_cached(_db_version(analysis_db))
+
+
 @lru_cache(maxsize=128)
 def _followers_payload_cached(
     x_id: str,

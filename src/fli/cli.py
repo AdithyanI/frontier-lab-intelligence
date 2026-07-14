@@ -59,6 +59,10 @@ def main(argv: list[str] | None = None) -> int:
         "insight-triage", help="Triage Feed envelopes for cited extraction."
     )
     insight_triage_p.add_argument("triage_args", nargs=argparse.REMAINDER)
+    cited_insights_p = sub.add_parser(
+        "cited-insights", help="Extract application-verified cited insights."
+    )
+    cited_insights_p.add_argument("insight_args", nargs=argparse.REMAINDER)
     x_daily_collection_p = sub.add_parser(
         "x-daily-collection",
         help="Plan or resume date-complete Registry X collection.",
@@ -156,6 +160,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import insight_triage_runs
 
         return insight_triage_runs.main(args.triage_args)
+
+    if args.command == "cited-insights":
+        from fli import cited_insight_runs
+
+        return cited_insight_runs.main(args.insight_args)
 
     if args.command == "x-daily-collection":
         from fli import x_daily_collection

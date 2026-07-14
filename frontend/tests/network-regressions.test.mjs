@@ -33,6 +33,9 @@ test('Network defaults to Ranking while preserving Registry terminology and reac
   assert.match(rankingSource, /<h2 className="network-view-title" id="ranking-title">/)
   assert.match(registrySource, /<h2 className="network-view-title" id="registry-title">Registry<\/h2>/)
   assert.match(registrySource, /Combined X followers/)
+  assert.match(registrySource, /Network rank/)
+  assert.match(registrySource, /entity\.network_rank/)
+  assert.match(registrySource, /sortField/)
   assert.doesNotMatch(registrySource, /Registry follows/)
 })
 

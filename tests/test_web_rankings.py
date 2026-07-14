@@ -112,6 +112,19 @@ def test_rankings_api_reads_current_schema_and_prefers_overlap(tmp_path, monkeyp
     assert payload["nodes"][0]["x_id"] == "target"
 
 
+def test_entity_network_ranks_use_best_owned_account(tmp_path, monkeypatch):
+    _ranking_fixture(tmp_path, monkeypatch)
+
+    assert rankings_store.entity_network_ranks()[1] == {
+        "entity_id": 1,
+        "network_rank": 2,
+        "cohort_follow_count": 1,
+        "cohort_follow_share": 0.5,
+        "x_id": "source",
+        "handle": "source",
+    }
+
+
 def test_ranking_followers_api_uses_current_position_column(tmp_path, monkeypatch):
     _ranking_fixture(tmp_path, monkeypatch)
 

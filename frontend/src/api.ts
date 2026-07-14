@@ -40,6 +40,10 @@ export interface Entity {
   rejection_source: string | null
   rejection_evidence_url: string | null
   followers_count: number | null
+  network_rank: number | null
+  network_follow_count: number | null
+  network_follow_share: number | null
+  network_account_handle: string | null
   bio: string | null
   channels: EntityChannel[]
 }
@@ -51,6 +55,7 @@ export interface Registry {
   counts: Record<RegistryGroup, number>
   limit: number
   offset: number
+  sort: 'followers' | 'network'
   direction: 'asc' | 'desc'
 }
 

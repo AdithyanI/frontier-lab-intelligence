@@ -569,12 +569,19 @@ td.num {
 .ent-table tbody tr.ent-row { cursor: pointer; }
 .ent-type-head,
 .ent-type-cell { width: 180px; }
+.ent-network-head,
+.ent-network-rank {
+  width: 140px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 .ent-followers-head,
 .ent-followers {
   width: 180px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+.ent-network-head,
 .ent-followers-head { padding: 0; }
 .ent-sort {
   appearance: none;
@@ -613,6 +620,7 @@ td.num {
   letter-spacing: 0;
   line-height: 1;
 }
+.ent-network-rank,
 .ent-followers {
   color: var(--ink-soft);
   font-family: var(--font-mono);

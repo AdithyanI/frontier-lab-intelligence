@@ -142,6 +142,23 @@ reads first.
 
 ## Decisions
 
+- 2026-07-14: Merge Registry and Ranking only at the navigation layer under a
+  single Network workspace, with Ranking as the default and Registry preserved
+  as the assignment-aligned identity term. Registry keeps Combined X followers
+  as the public-reach measure and adds a separately sortable Network rank from
+  the latest immutable entity-overlap run. For multi-account entities, the
+  best global owned-account position is shown. This is an ordinal projection,
+  not a new score, and it does not merge the entity and account datasets.
+
+- 2026-07-14: Keep the five-record extraction proof, first Insights surface,
+  and its Architecture update inside this active `cited-insights` project.
+  They are one unfinished vertical slice, not separate projects. The current
+  execution goal stops after five application-verified citations render in an
+  honest audit UI; day-wide extraction, briefing generation, alerts, and final
+  evaluation remain later milestones. The main agent owns the shared contract
+  and integration. Parallel agents are reserved for independent evaluation,
+  UI polish, or test review after that contract is stable.
+
 - 2026-07-14: Freeze the first extraction contract around the accepted
   envelope, not around external-link availability. Authored first-party X is
   valid primary evidence for the author or organization's own work, release,
@@ -273,8 +290,9 @@ reads first.
 | done | Link each Artifact observation back to its exact ranked Feed envelope so provenance opens in the existing evidence workspace. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Group multiple canonical artifacts disclosed by one exact Feed envelope under one shared visual rank rail without merging their records or disclosures. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
-| todo | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle resume](resources/oracle-resume.md) |
+| in_progress | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle resume](resources/oracle-resume.md) |
 | todo | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
+| todo | Expose only the verified five-record run through an Insights API and audit-first page; update the Architecture visual to show envelope evidence plus optional artifact strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 

@@ -86,6 +86,25 @@ def _counts() -> dict:
         conn.close()
 
 
+def _add_network_ranks(entities: list[dict]) -> None:
+    """Attach the best global account rank owned by each Registry entity."""
+    network_ranks = rankings_store.entity_network_ranks()
+    for entity in entities:
+        rank = network_ranks.get(entity["id"])
+        entity.update(
+            {
+                "network_rank": rank["network_rank"] if rank else None,
+                "network_follow_count": (
+                    rank["cohort_follow_count"] if rank else None
+                ),
+                "network_follow_share": (
+                    rank["cohort_follow_share"] if rank else None
+                ),
+                "network_account_handle": rank["handle"] if rank else None,
+            }
+        )
+
+
 @app.get("/api/status")
 def status() -> JSONResponse:
     c = _counts()
@@ -153,6 +172,7 @@ def registry(
         "all", pattern="^(all|person|organization|unsure|unknown|rejected)$"
     ),
     q: str = Query("", max_length=200),
+    sort: str = Query("followers", pattern="^(followers|network)$"),
     direction: str = Query("desc", pattern="^(asc|desc)$"),
 ) -> JSONResponse:
     """One server-filtered page of the entity universe."""
@@ -162,21 +182,44 @@ def registry(
         filtered_total = entity_registry.count_entities(
             conn, group=group, query=q
         )
+        if sort == "network" and filtered_total:
+            entities = entity_registry.read_entities(
+                conn,
+                limit=filtered_total,
+                offset=0,
+                group=group,
+                query=q,
+                direction="desc",
+            )
+        else:
+            entities = entity_registry.read_entities(
+                conn,
+                limit=limit,
+                offset=offset,
+                group=group,
+                query=q,
+                direction=direction,
+            )
+        _add_network_ranks(entities)
+        if sort == "network":
+            sign = 1 if direction == "asc" else -1
+            entities.sort(
+                key=lambda entity: (
+                    entity["network_rank"] is None,
+                    sign * (entity["network_rank"] or 0),
+                    entity["name"].casefold(),
+                )
+            )
+            entities = entities[offset : offset + limit]
         return JSONResponse(
             {
-                "entities": entity_registry.read_entities(
-                    conn,
-                    limit=limit,
-                    offset=offset,
-                    group=group,
-                    query=q,
-                    direction=direction,
-                ),
+                "entities": entities,
                 "total": sum(counts.values()),
                 "filtered_total": filtered_total,
                 "counts": counts,
                 "limit": limit,
                 "offset": offset,
+                "sort": sort,
                 "direction": direction,
             }
         )
@@ -194,6 +237,7 @@ def registry_entity(entity_id: int) -> JSONResponse:
         )
         if not entities:
             return JSONResponse({"detail": "entity not found"}, status_code=404)
+        _add_network_ranks(entities)
         return JSONResponse({"entity": entities[0]})
     finally:
         conn.close()
@@ -205,7 +249,7 @@ def rankings(
     state: str = Query("all", pattern="^(all|active|unknown)$"),
     q: str = Query("", max_length=200),
 ) -> JSONResponse:
-    """Top of the accepted entity-overlap cohort-trust ranking."""
+    """Top of the accepted entity-overlap network ranking."""
     return JSONResponse(rankings_store.rankings_payload(limit, state, q))
 
 
@@ -213,7 +257,7 @@ def rankings(
 def ranking_followers(
     x_id: str, limit: int = Query(2000, ge=1, le=5000)
 ) -> JSONResponse:
-    """Cohort sources following one account, best-ranked first."""
+    """Screened Registry sources following one account, best-ranked first."""
     return JSONResponse(rankings_store.followers_payload(x_id, limit))
 
 

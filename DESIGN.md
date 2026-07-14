@@ -85,6 +85,11 @@ Rules:
 - App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
   beneath. No sidebar — pages own their full width. Show only working routes;
   unavailable future destinations do not occupy the navigation.
+- Registry and Ranking share one top-level **Network** destination because they
+  are two views of the same source system. Ranking is the default subview;
+  Registry remains an explicit term and subview because it is the assignment's
+  screened identity register. Use a ruled secondary navigation, not another
+  row of top-level pills.
 - Home is an editorial split: statement + hero numerals on the left, live
   pipeline rail on the right, divided by an ink rule.
 - Density first: tables and lists over cards. Cards only where an item is
@@ -109,11 +114,13 @@ Rules:
   search + All/People/Organizations/Unsure/Rejected segmented filter with live
   counts, load-more; rejected rows expose their reason in the table, while
   active rows show identity + truthful kind and open a detail card.
-  All, People, and Organizations are reach-ranked views: People shows X
-  followers, Organizations shows combined X followers, and All retains Type
-  alongside combined X followers. Each defaults to descending by the visible
-  total; the follower header is a full-width, keyboard-accessible control that
-  toggles ascending/descending order. These views hide channel handles to keep
+  All, People, and Organizations default to reach order: People shows X
+  followers, Organizations shows Combined X followers, and All retains Type
+  alongside Combined X followers. They also expose a sortable Network rank:
+  the global entity-overlap position of the entity's best-ranked owned X
+  account. This is an ordinal projection from Ranking, not a new entity score;
+  public follower totals remain a separate reach measure. Both numeric headers
+  are full-width, keyboard-accessible sort controls. These views hide channel handles to keep
   rows calm; every channel remains searchable
   and available in the detail card. Missing follower observations display as
   an em dash and sort last. Rejected remains a reason-bearing review view.

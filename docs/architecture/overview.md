@@ -528,6 +528,15 @@ and Organizations label it Combined X followers because one entity may own
 several channels. Missing observations remain null and sort last. This is a
 presentation proxy, not graph evidence or a canonical importance score.
 
+The Network workspace presents Ranking and Registry as related but distinct
+subviews. Registry may also sort on `network_rank`, a read-time projection of
+the latest immutable entity-overlap run: for an entity with multiple owned X
+accounts, the smallest global account position wins. Its supporting Registry
+source count and account handle travel with the row for explanation. This does
+not mutate Registry identity, combine follower reach into ranking, or create a
+new entity score; entities absent from the current ranking remain null and sort
+last.
+
 ```mermaid
 erDiagram
     RAW_ITEMS {
@@ -949,7 +958,7 @@ final score.
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
 | `fli.following_rankings` | derived entity-overlap baseline plus experimental personalized PageRank/comparison with deterministic runs and active/rejected/unknown mapping |
-| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; Registry and Ranking remain current-state views while Feed/Event readers follow the explicit publication pointer and overlay current Registry curation; source in `frontend/` |
+| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; the Network workspace keeps Registry and Ranking as distinct current-state subviews and projects best-owned-account network rank into Registry at read time, while Feed/Event readers follow the explicit publication pointer and overlay current Registry curation; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |

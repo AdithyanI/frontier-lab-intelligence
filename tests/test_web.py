@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from fli.web import rankings as rankings_store
 from fli.web.app import app
 
 client = TestClient(app)
@@ -26,6 +27,7 @@ def test_registry_returns_complete_typed_entity_universe():
     assert data["filtered_total"] == data["total"]
     assert data["offset"] == 0
     assert data["limit"] == 5000
+    assert data["sort"] == "followers"
     assert data["direction"] == "desc"
     assert data["counts"]["person"] > 0
     assert data["counts"]["organization"] >= 10
@@ -54,6 +56,10 @@ def test_registry_returns_complete_typed_entity_universe():
         "rejection_source",
         "rejection_evidence_url",
         "followers_count",
+        "network_rank",
+        "network_follow_count",
+        "network_follow_share",
+        "network_account_handle",
         "name",
         "bio",
         "channels",
@@ -94,6 +100,40 @@ def test_registry_pages_filters_and_searches_on_the_server():
     search = client.get("/api/registry?q=openai&limit=40").json()
     assert 0 < search["filtered_total"] < search["total"]
     assert any(entity["slug"] == "openai" for entity in search["entities"])
+
+
+def test_registry_can_sort_by_best_owned_account_network_rank(monkeypatch):
+    baseline = client.get("/api/registry?limit=2").json()["entities"]
+    first_id, second_id = (entity["id"] for entity in baseline)
+    monkeypatch.setattr(
+        rankings_store,
+        "entity_network_ranks",
+        lambda: {
+            first_id: {
+                "network_rank": 7,
+                "cohort_follow_count": 12,
+                "cohort_follow_share": 0.1,
+                "handle": "first",
+            },
+            second_id: {
+                "network_rank": 3,
+                "cohort_follow_count": 20,
+                "cohort_follow_share": 0.2,
+                "handle": "second",
+            },
+        },
+    )
+
+    data = client.get(
+        "/api/registry?limit=2&sort=network&direction=asc"
+    ).json()
+
+    assert data["sort"] == "network"
+    assert [entity["id"] for entity in data["entities"]] == [
+        second_id,
+        first_id,
+    ]
+    assert [entity["network_rank"] for entity in data["entities"]] == [3, 7]
 
 
 def test_registry_entity_returns_one_identity_card_payload():
