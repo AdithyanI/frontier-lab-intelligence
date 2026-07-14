@@ -252,6 +252,7 @@ export interface SignalEvent {
   registry_account_count: number
   first_hand_count: number
   amplifiers: FeedAmplifier[]
+  daily_rank: number
   peak_attention_score: number
   daily_score_basis: {
     post_id: string
@@ -283,6 +284,7 @@ export interface EventResponse {
     drop: number
     not_evaluated: number
   }
+  daily_rank_total?: number
   triage_run?: {
     run_id: string
     model: string

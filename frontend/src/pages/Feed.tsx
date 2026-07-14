@@ -300,7 +300,7 @@ function ScoreDisclosure({
         ref={triggerRef}
         type="button"
         className="feed-rank mono"
-        aria-label={`Rank ${rank} of ${total} in this Feed view. Open daily score explanation.`}
+        aria-label={`Daily rank ${rank} of ${total}. Open daily score explanation.`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onToggle}
@@ -316,7 +316,7 @@ function ScoreDisclosure({
         >
           <div className="feed-score-popover-head">
             <div>
-              <h3 id={headingId}>Rank #{rank} in this view</h3>
+              <h3 id={headingId}>Daily rank #{rank} of {total.toLocaleString('en-US')}</h3>
               <p className="mono">
                 Daily score {basis.attention_score.toFixed(1)} ·{' '}
                 {shortDate.format(new Date(`${date}T12:00:00Z`))}
@@ -875,12 +875,12 @@ export default function Feed() {
           ? Array.from({ length: 5 }, (_, index) => (
               <div className="feed-skeleton skeleton" key={index} />
             ))
-          : items.map((item, index) => (
+          : items.map((item) => (
               <EventRow
                 key={item.event_id}
                 item={item}
-                rank={index + 1}
-                total={data?.total ?? items.length}
+                rank={item.daily_rank}
+                total={data?.daily_rank_total ?? data?.triage_counts?.all ?? items.length}
                 date={selectedDate}
                 formula={data?.score_formula}
                 scoreOpen={openScoreEventId === item.event_id}

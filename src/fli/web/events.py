@@ -1005,9 +1005,27 @@ def events_payload(
     if not payload.get("available"):
         return payload
 
+    def score_order_key(item: dict[str, Any]) -> tuple[Any, ...]:
+        return (
+            item["peak_attention_score"],
+            item["registry_account_count"],
+            item["member_count"],
+            item["latest_evidence_at"],
+            item["event_id"],
+        )
+
+    # Audit and search are visibility controls, not separate competitions.
+    # Freeze one score rank over the complete projection before applying them.
+    daily_rank_by_event_id = {
+        item["event_id"]: rank
+        for rank, item in enumerate(
+            sorted(payload["items"], key=score_order_key, reverse=True), start=1
+        )
+    }
+    daily_rank_total = len(daily_rank_by_event_id)
     needle = query.strip().lower()
     items = [
-        item
+        {**item, "daily_rank": daily_rank_by_event_id[item["event_id"]]}
         for item in payload["items"]
         if (lane != "network" or item["amplifiers"])
         and (lane != "firsthand" or item["first_hand_count"] > 0)
@@ -1074,16 +1092,7 @@ def events_payload(
             reverse=True,
         )
     else:
-        items.sort(
-            key=lambda item: (
-                item["peak_attention_score"],
-                item["registry_account_count"],
-                item["member_count"],
-                item["latest_evidence_at"],
-                item["event_id"],
-            ),
-            reverse=True,
-        )
+        items.sort(key=score_order_key, reverse=True)
 
     total = len(items)
     return {
@@ -1094,6 +1103,7 @@ def events_payload(
         "triage_filter": triage_filter,
         "projection": projection,
         "triage_counts": triage_counts,
+        "daily_rank_total": daily_rank_total,
         "total": total,
         "limit": limit,
         "offset": offset,

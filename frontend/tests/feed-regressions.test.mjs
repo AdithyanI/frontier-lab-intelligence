@@ -17,8 +17,11 @@ test('Feed uses semantic classes for optional menu and triage content', () => {
   assert.doesNotMatch(appStyles, /event-triage-heading span:first-child/)
 })
 
-test('Feed leads with view rank and discloses the daily score on demand', () => {
+test('Feed preserves daily rank across audit filters and discloses score on demand', () => {
   assert.match(feedSource, /<strong>#\{rank\}<\/strong>/)
+  assert.match(feedSource, /rank=\{item\.daily_rank\}/)
+  assert.match(feedSource, /Daily rank #\{rank\} of \{total\.toLocaleString/)
+  assert.doesNotMatch(feedSource, /rank=\{index \+ 1\}/)
   assert.match(feedSource, /Daily score \{basis\.attention_score\.toFixed\(1\)\}/)
   assert.match(feedSource, /aria-expanded=\{open\}/)
   assert.match(feedSource, /Higher than \{\(row\.percentile \* 100\)\.toFixed\(1\)\}%/)

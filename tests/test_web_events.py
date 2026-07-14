@@ -164,18 +164,54 @@ def test_events_api_projects_and_filters_completed_triage(tmp_path, monkeypatch)
     }
     assert all_items["triage_run"]["run_id"] == "run-1"
     assert all_items["items"][0]["triage"]["reason"] == "Concrete evidence."
+    assert all_items["daily_rank_total"] == 2
+    daily_rank_by_event_id = {
+        item["event_id"]: item["daily_rank"] for item in all_items["items"]
+    }
+
+    recent = client.get(
+        "/api/events?date=2026-07-11&sort=recent&limit=20"
+    ).json()
+    assert {
+        item["event_id"]: item["daily_rank"] for item in recent["items"]
+    } == daily_rank_by_event_id
+
+    search_target = all_items["items"][-1]
+    searched = client.get(
+        "/api/events",
+        params={
+            "date": "2026-07-11",
+            "q": search_target["root"]["text"],
+            "limit": 20,
+        },
+    ).json()
+    searched_item = next(
+        item
+        for item in searched["items"]
+        if item["event_id"] == search_target["event_id"]
+    )
+    assert searched_item["daily_rank"] == search_target["daily_rank"]
+    assert searched["daily_rank_total"] == all_items["daily_rank_total"]
 
     kept = client.get(
         "/api/events?date=2026-07-11&triage=keep&limit=20"
     ).json()
     assert kept["total"] == 1
     assert kept["items"][0]["triage"]["decision"] == "keep"
+    assert kept["daily_rank_total"] == 2
+    assert kept["items"][0]["daily_rank"] == daily_rank_by_event_id[
+        kept["items"][0]["event_id"]
+    ]
 
     dropped = client.get(
         "/api/events?date=2026-07-11&triage=drop&limit=20"
     ).json()
     assert dropped["total"] == 1
     assert dropped["items"][0]["triage"]["decision"] == "drop"
+    assert dropped["daily_rank_total"] == 2
+    assert dropped["items"][0]["daily_rank"] == daily_rank_by_event_id[
+        dropped["items"][0]["event_id"]
+    ]
 
 
 def test_events_api_exposes_not_evaluated_count(tmp_path, monkeypatch):
@@ -192,6 +228,8 @@ def test_events_api_exposes_not_evaluated_count(tmp_path, monkeypatch):
     assert payload["triage_counts"]["not_evaluated"] == 1
     assert payload["total"] == 1
     assert payload["items"][0]["triage"] is None
+    assert payload["daily_rank_total"] == 2
+    assert payload["items"][0]["daily_rank"] == 2
 
 
 def test_events_api_uses_stable_cumulative_cutoff_revisions(tmp_path, monkeypatch):

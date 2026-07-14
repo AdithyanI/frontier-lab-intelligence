@@ -448,7 +448,7 @@ function RankingMethods() {
             day&rsquo;s posts.
           </p>
         </div>
-        <p className="method-limit">The Feed shows view rank first; click it for this daily score. Not importance, quality, or truth.</p>
+        <p className="method-limit">The Feed shows one stable daily rank across Audit filters; click it for this daily score. Not importance, quality, or truth.</p>
       </div>
     </div>
   )

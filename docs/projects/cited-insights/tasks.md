@@ -520,7 +520,8 @@ reads first.
   diagrams remain the deeper explanations below it.
 - 2026-07-14: [FEED-RANK-FIRST] Replaced the persistent composite decimal with
   ordinal position in the active sorted and filtered Feed view (`#1`, `#2`,
-  ...). Clicking a rank reveals an anchored daily-score disclosure with the
+  ...). This initial rank scope was superseded by [FEED-DAILY-RANK-STABLE]
+  below. Clicking a rank reveals an anchored daily-score disclosure with the
   exact score-producing member post, raw inputs, within-day percentiles,
   weights, contributions, and limitations. Consolidated current terminology:
   rank is the visible position; daily score is the `attention-v1.1` calculation;
@@ -528,3 +529,9 @@ reads first.
   three inputs. Attention remains the broad product question, not the number's
   UI label. A future weekly rank must declare its comparison scope and must not
   average incomparable daily scores.
+- 2026-07-14: [FEED-DAILY-RANK-STABLE] Froze one daily score rank over all
+  projected evidence before Audit, search, or pagination. Filters now only hide
+  rows, so Kept, Dropped, and Not evaluated cannot each present a conflicting
+  `#1`. The API carries `daily_rank` and `daily_rank_total`; the disclosure
+  names the value `Daily rank`, and a future weekly rank remains a separately
+  defined comparison scope.

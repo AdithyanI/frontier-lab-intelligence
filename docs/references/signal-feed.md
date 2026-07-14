@@ -174,10 +174,12 @@ and should reflect curation promptly. Derived Ranking payloads use the same
 state-aware server cache and a page-lifetime client cache; follower detail is
 bounded to the 300 nodes visible in the current visualization.
 
-## Daily Score and View Rank
+## Daily Score and Daily Rank
 
-The Feed presents an ordinal rank within the active sorted and filtered view.
-Clicking that rank reveals the underlying daily score. The score remains
+The Feed presents one stable daily score rank across all projected evidence for
+the selected day. Audit filters and search hide rows without recalculating it,
+so the first visible not-evaluated event may correctly be `#1001` rather than
+another `#1`. Clicking the rank reveals the underlying daily score. The score remains
 implemented by the versioned `attention-v1.1` contract; “attention” is the
 internal contract name and the broad product question, not the UI label for the
 number.
@@ -193,7 +195,7 @@ The daily score is an experimental, day-relative ordering aid:
 Every component is returned with the exact post that produced an envelope's
 peak score. Each canonical entity votes at most once, self-amplification is
 excluded, and an amplifier's network-support position remains visible without
-multiplying its vote. Switching lanes or searching cannot change an item's
-daily score, although the ordinal rank changes with the active view. Daily
+multiplying its vote. Switching Audit filters or searching cannot change an
+item's daily score or daily rank. Daily
 scores from different dates are not directly comparable. The score does not
 claim relevance, quality, truth, novelty, or investment importance.

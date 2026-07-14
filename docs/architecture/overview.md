@@ -138,8 +138,9 @@ entity-overlap support is the separate 25% component; public interactions are
 log-scaled. This avoids multiplying amplifier prominence into the same signal
 while keeping every input visible for later evaluation. The same API also exposes
 chronological and public-engagement orderings. The Feed presents only the
-ordinal rank within the active sorted and filtered view (`#1`, `#2`, ...). A
-click reveals the underlying daily score, raw inputs, within-day percentiles,
+stable daily score rank across all evidence for the selected day (`#1`, `#2`,
+...). Audit filters and search only hide rows; they never restart the ranking.
+A click reveals the underlying daily score, raw inputs, within-day percentiles,
 weights, and limitations. Grouped evidence carries the exact member post and
 components that produced its peak daily score so the disclosure never explains
 the wrong root post.

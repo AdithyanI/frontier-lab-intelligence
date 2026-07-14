@@ -132,8 +132,9 @@ Rules:
   Date navigation shows the newest seven available complete UTC days in one
   ruled row; explicit older/newer controls page through non-overlapping
   seven-date windows while keeping the selected column where possible.
-  The persistent left rail shows only ordinal position within the active view
-  (`#1`, `#2`, ...), never the composite decimal. Clicking the rank opens one
+  The persistent left rail shows the event's stable daily score rank across all
+  evidence for the selected day (`#1`, `#2`, ...), never the composite decimal.
+  Audit filters and search hide rows without restarting that rank. Clicking it opens one
   anchored, non-modal disclosure with the daily score, its exact score-producing
   member post, raw component values, within-day percentiles, weights, and
   limitations. Rank is scope-aware: a future weekly view labels a weekly rank;
