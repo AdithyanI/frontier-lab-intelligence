@@ -18,8 +18,8 @@ from fli import llm_responses
 
 PROMPT_VERSION = "envelope-triage-v2.2"
 SCHEMA_VERSION = "envelope-triage-output-v2"
-DEFAULT_MODEL = llm_responses.DEFAULT_SIMPLE_MODEL
-DEFAULT_REASONING_EFFORT = "low"
+DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
+DEFAULT_REASONING_EFFORT = "medium"
 PROMPT_CACHE_SHARDS = 32
 PROMPT_PATH = Path(__file__).with_name("prompts") / "envelope_triage_v2.txt"
 

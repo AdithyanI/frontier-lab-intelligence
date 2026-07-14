@@ -75,7 +75,11 @@ ahead of per-entity evidence and uses the same stable 64-shard
 observed 13.60M cached tokens across 19.88M input tokens (68.38%), while a
 same-evidence Luna-high comparison again observed zero cache reads. Cache
 behavior is therefore model/deployment-specific and always measured rather
-than assumed.
+than assumed. That comparison predates Azure's 2026-07-13 Responses cache fix.
+The current shared adapter explicitly requests 24-hour retention for GPT-5.6
+on the Azure-backed LiteLLM route; a fresh 64-envelope Luna-medium triage run
+observed 103,936 cached tokens across 168,022 input tokens. Historical run
+telemetry remains unchanged.
 
 Every bulk run has its own ignored, resumable SQLite artifact under
 `data/derived/registry-evaluation/`. It freezes the cohort, prompt/schema
@@ -90,7 +94,12 @@ follow support, then wrote a reversible, reason-bearing Registry rejection.
 `fli.llm_responses` is the shared provider-normalization boundary for these
 Responses calls. It extracts only final message text, tolerates nullable blocks
 from translated responses, owns stable prompt-cache sharding and LiteLLM cost
-header parsing, and normalizes hosted-search actions and cited URLs.
+header parsing, supplies the Azure-compatible GPT-5.6 cache-retention adapter,
+and normalizes hosted-search actions and cited URLs. Luna is the default
+efficient model for the structured triage, extraction, and Registry boundaries;
+triage and extraction use medium reasoning, while grounded identity and
+Registry evaluation use high. The durable routing and evaluation evidence live
+in `docs/references/model-routing.md`.
 Claude-native web search uses `tool_choice=auto` so the model can finish after
 searching; the audit still rejects any response with no observed search action.
 

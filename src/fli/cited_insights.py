@@ -21,7 +21,7 @@ from fli import llm_responses
 
 PROMPT_VERSION = "insight-v1.1"
 SCHEMA_VERSION = "insight-output-v1"
-DEFAULT_MODEL = llm_responses.DEFAULT_SIMPLE_MODEL
+DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "medium"
 PROMPT_CACHE_SHARDS = 1
 PROMPT_PATH = Path(__file__).with_name("prompts") / "insight_extraction_v1.txt"

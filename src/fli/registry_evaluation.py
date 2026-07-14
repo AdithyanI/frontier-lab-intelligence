@@ -16,7 +16,7 @@ from fli import llm_responses
 
 PROMPT_VERSION = "registry-evaluation-v3"
 SCHEMA_VERSION = "registry-evaluation-output-v3"
-DEFAULT_MODEL = "gpt-5.6-luna"
+DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "high"
 PROMPT_CACHE_SHARDS = llm_responses.DEFAULT_PROMPT_CACHE_SHARDS
 PROMPT_PATH = Path(__file__).with_name("prompts") / "registry_evaluation_v3.txt"

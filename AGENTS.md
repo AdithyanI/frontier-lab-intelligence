@@ -55,6 +55,9 @@ does not improve rubric coverage, demo proof, or interview discussion. See
 - For bulk LLM jobs with a repeated 1,024+ token prefix, put stable content
   first, use stable sharded `prompt_cache_key` values, and verify cache reads
   from `cached_tokens`; do not assume an eligible prompt is getting cache hits.
+- Model routing is accuracy-first: use the evaluated Luna defaults and reasoning
+  efforts in `docs/references/model-routing.md`, and obtain GPT-5.6 Azure cache
+  kwargs from `fli.llm_responses` rather than adding provider fields per caller.
 - Update `docs/architecture/overview.md` when pipeline, schema, source classes,
   or module boundaries change.
 - Update `docs/STATUS.md` only when the conceptual system status, active

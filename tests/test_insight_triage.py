@@ -134,7 +134,7 @@ def test_request_uses_cacheable_prefix_structured_output_and_litellm_tags():
 
     request = client.responses.with_raw_response.calls[0]
     assert request["model"] == "gpt-5.6-luna"
-    assert request["reasoning"] == {"effort": "low"}
+    assert request["reasoning"] == {"effort": "medium"}
     assert request["prompt_cache_retention"] == "24h"
     assert request["instructions"] == insight_triage.instructions()
     assert len(request["instructions"].split()) > 1_024

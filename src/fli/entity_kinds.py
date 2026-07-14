@@ -21,11 +21,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from fli import channels, registry, sources, store
+from fli import channels, llm_responses, registry, sources, store
 
 PROMPT_VERSION = "entity-kind-v5"
 SCHEMA_VERSION = "entity-kind-output-v1"
-DEFAULT_MODEL = "gpt-5.6-luna"
+DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "medium"
 DEFAULT_WORKERS = 100
 DEFAULT_POST_WORKERS = 10

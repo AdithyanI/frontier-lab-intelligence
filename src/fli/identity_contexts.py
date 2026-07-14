@@ -13,7 +13,7 @@ from fli import llm_responses
 
 PROMPT_VERSION = "identity-context-v1"
 SCHEMA_VERSION = "identity-context-output-v1"
-DEFAULT_MODEL = llm_responses.DEFAULT_SIMPLE_MODEL
+DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "high"
 PROMPT_CACHE_SHARDS = 16
 PROMPT_PATH = Path(__file__).with_name("prompts") / "identity_context_v1.txt"

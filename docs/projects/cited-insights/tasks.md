@@ -142,6 +142,21 @@ reads first.
 
 ## Decisions
 
+- 2026-07-14: **Luna becomes the accuracy-first efficient-model default.**
+  OpenAI positions `gpt-5.6-luna` for efficient high-volume work and recommends
+  preserving the prior reasoning effort before trying one level lower. The
+  current 64-envelope comparison justified that caution: Luna-low matched the
+  accepted mini-medium decisions 63/64 but made one unsafe drop; Luna-medium
+  matched 64/64, completed with zero failures, read 103,936 cached of 168,022
+  input tokens, and cost $0.120354. The same five-item extraction oracle passed
+  exact citation verification 5/5 with Luna-medium versus 4/5 in the stored
+  mini baseline. Runtime defaults therefore become Luna-medium for triage and
+  extraction and Luna-high for grounded identity/Registry evaluation; the
+  complex relevance audit remains Terra-high. GPT-5.6 cache retention is a
+  shared Azure/LiteLLM adapter concern, currently pinned to `24h`. Preserve old
+  run provenance and continue measuring cache reads rather than assuming them.
+  See `docs/references/model-routing.md`.
+
 - 2026-07-14: Open a bounded **Network Source Architecture Audit** workstream
   under this tracker rather than creating a second competing active project.
   The audit freezes the distinction between Registry membership, monitoring
@@ -335,9 +350,10 @@ reads first.
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Diagnose the Network rank anomaly, denominators, tie semantics, and multi-channel projection against code and live data. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
-| todo | Implement the display delta: entity-union support with denominator, tie-aware within-Registry ordinal, discovery ordering confined to the Ranking view; focused tests + live UI verification. | implementer | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
-| done | Snapshot supported AIE conference sources, run pre-admission coverage, and admit a reversible 20-person World's Fair 2026 cohort with lean provenance, role, bio, and affiliation facts. | implementer | [import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
-| todo | Write the coverage/miss report and a short ADR recording accepted deltas, deferrals (cohort cutoffs, tiers, yield evaluation, voting for new admits), and interview-ready language. | parent | [audit ADR](resources/network-source-architecture-audit/architecture-decision.md) |
+| in_progress | Expand direct admission to every X-addressable World's Fair 2026 and 2024 speaker; reconcile people, organizations, affiliations, and exact new-cohort counts. | parent | [conference import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
+| todo | Reconcile new identities against stored X profiles, daily content, and outgoing-follow coverage; collect only missing provider data with resumable telemetry. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
+| todo | Materialize a new immutable Registry-following snapshot and derived analysis run; preserve old snapshot semantics and disclose the new voting denominator. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
+| todo | Implement and validate the accepted display delta, compare old/new rankings qualitatively, and write the coverage/miss report plus ADR. | parent | [audit ADR](resources/network-source-architecture-audit/architecture-decision.md) |
 
 ## Backlog / Remaining Work
 
@@ -367,6 +383,18 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [AIE-REGISTRY-AND-NETWORK-GOAL] Adi expanded the bounded import
+  into a persistent data-creation goal before stepping away: directly admit all
+  X-addressable World's Fair 2026 and 2024 speakers; identify which newly
+  admitted identities lack stored X profile/content/following evidence;
+  collect missing data through the existing provider path; build a new
+  immutable following snapshot and recompute network-derived views with an
+  explicit new denominator; qualitatively audit the cohort/ranking movement;
+  and finish the previously accepted Registry/Ranking display corrections.
+  Europe 2026 and Summit 2023 remain snapshot-only. Admission, monitoring,
+  collection completeness, and voting eligibility remain separate states so a
+  Registry write cannot silently rewrite the frozen 2026-07-11 analysis.
 
 - 2026-07-14: [AIE-CONFERENCE-COHORT-20] Added a deterministic conference
   source boundary over four official snapshots (World's Fair 2026, Europe

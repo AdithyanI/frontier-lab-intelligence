@@ -83,6 +83,64 @@ def test_monitorable_selection_is_stable_unique_and_limited():
     ]
 
 
+def test_manifest_sources_can_be_selected_in_requested_order():
+    second = conference_sources.ConferenceSource(
+        source_id="aie-second",
+        name="Second",
+        conference_url="https://example.com/second",
+        data_url="https://example.com/second.json",
+        format="speakers-json-v1",
+        observed_at=SOURCE.observed_at,
+    )
+
+    selected = conference_sources.select_sources(
+        [SOURCE, second], ["aie-second", SOURCE.source_id]
+    )
+
+    assert [source.source_id for source in selected] == [
+        "aie-second",
+        SOURCE.source_id,
+    ]
+
+
+def test_organization_matches_an_existing_official_website(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    organization_id = channels.upsert_entity(
+        conn,
+        kind="organization",
+        slug="example",
+        name="Example",
+        observed_at=SOURCE.observed_at,
+    )
+    website_id = channels.upsert_channel(
+        conn,
+        kind="website",
+        key="https://www.example.ai/",
+        observed_at=SOURCE.observed_at,
+    )
+    channels.link_entity_channel(
+        conn,
+        entity_id=organization_id,
+        channel_id=website_id,
+        relationship="official",
+    )
+
+    result = conference_sources.import_records(
+        conn,
+        [
+            _record(
+                company="Example Incorporated",
+                company_website="https://example.ai",
+            )
+        ],
+    )
+
+    assert result["organizations_created"] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE kind = 'organization'"
+    ).fetchone()[0] == 1
+
+
 def test_import_writes_lean_facts_affiliation_and_is_idempotent(tmp_path):
     conn = channels.connect(tmp_path / "test.db")
     record = _record()

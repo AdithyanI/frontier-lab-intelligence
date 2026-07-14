@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Iterable
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from fli import channels
@@ -127,6 +128,20 @@ def load_manifest(path: Path | str = DEFAULT_MANIFEST) -> list[ConferenceSource]
         seen.add(source.source_id)
         sources.append(source)
     return sources
+
+
+def select_sources(
+    sources: Iterable[ConferenceSource], source_ids: Iterable[str] | None
+) -> list[ConferenceSource]:
+    sources = list(sources)
+    if not source_ids:
+        return sources
+    requested = list(dict.fromkeys(source_ids))
+    by_id = {source.source_id: source for source in sources}
+    unknown = [source_id for source_id in requested if source_id not in by_id]
+    if unknown:
+        raise ValueError("unknown conference source_id: " + ", ".join(unknown))
+    return [by_id[source_id] for source_id in requested]
 
 
 def snapshot_sources(
@@ -458,6 +473,29 @@ def _organization_index(conn: sqlite3.Connection) -> dict[str, int]:
     return index
 
 
+def _website_key(value: str | None) -> str | None:
+    if not value:
+        return None
+    parsed = urlsplit(value if "://" in value else f"https://{value}")
+    host = (parsed.hostname or "").casefold().removeprefix("www.")
+    return host or None
+
+
+def _organization_website_index(conn: sqlite3.Connection) -> dict[str, int]:
+    index: dict[str, int] = {}
+    rows = conn.execute(
+        """SELECT c.key, ec.entity_id
+           FROM channels c
+           JOIN entity_channels ec ON ec.channel_id = c.id
+           JOIN entities e ON e.id = ec.entity_id
+           WHERE c.kind = 'website' AND e.kind = 'organization'"""
+    ).fetchall()
+    for row in rows:
+        if key := _website_key(row["key"]):
+            index.setdefault(key, row["entity_id"])
+    return index
+
+
 def _ensure_account(
     conn: sqlite3.Connection, record: SpeakerRecord
 ) -> tuple[int, bool]:
@@ -561,11 +599,15 @@ def _ensure_organization(
     conn: sqlite3.Connection,
     record: SpeakerRecord,
     index: dict[str, int],
+    website_index: dict[str, int],
 ) -> tuple[int | None, bool]:
     if not record.company:
         return None, False
     key = _normalize_organization(record.company)
+    website_key = _website_key(record.company_website)
     entity_id = index.get(key)
+    if entity_id is None and website_key:
+        entity_id = website_index.get(website_key)
     created = False
     if entity_id is None:
         entity_id = channels.upsert_entity(
@@ -577,6 +619,8 @@ def _ensure_organization(
         )
         index[key] = entity_id
         created = True
+    else:
+        index.setdefault(key, entity_id)
     if record.company_website:
         website_channel_id = channels.upsert_channel(
             conn,
@@ -600,6 +644,8 @@ def _ensure_organization(
                 notes=f"Official company link in {record.conference_name} speaker data.",
                 observed_at=record.observed_at,
             )
+            if website_key:
+                website_index.setdefault(website_key, entity_id)
     return entity_id, created
 
 
@@ -644,6 +690,7 @@ def import_records(conn: sqlite3.Connection, records: Iterable[SpeakerRecord]) -
     channels.ensure_schema(conn)
     records = list(records)
     organizations = _organization_index(conn)
+    organization_websites = _organization_website_index(conn)
     created_people = 0
     matched_people: set[int] = set()
     created_organizations = 0
@@ -661,7 +708,7 @@ def import_records(conn: sqlite3.Connection, records: Iterable[SpeakerRecord]) -
         matched_people.add(person_id)
         _record_person_facts(conn, person_id, record)
         organization_id, organization_created = _ensure_organization(
-            conn, record, organizations
+            conn, record, organizations, organization_websites
         )
         created_organizations += organization_created
         if organization_id is not None:
@@ -717,13 +764,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--raw-root", type=Path, default=DEFAULT_RAW_ROOT)
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     parser.add_argument(
+        "--source",
+        dest="source_ids",
+        action="append",
+        help="Restrict the action to one manifest source ID; repeatable.",
+    )
+    parser.add_argument(
         "--limit",
         type=int,
         help="Import at most this many unique speakers with X identities.",
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
-    sources = load_manifest(args.manifest)
+    try:
+        sources = select_sources(load_manifest(args.manifest), args.source_ids)
+    except ValueError as exc:
+        parser.error(str(exc))
     if args.action == "snapshot":
         _print({"status": "ok", "snapshots": snapshot_sources(sources, raw_root=args.raw_root)})
         return 0
