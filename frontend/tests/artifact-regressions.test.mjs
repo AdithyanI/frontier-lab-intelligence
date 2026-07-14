@@ -36,3 +36,10 @@ test('Artifact retrieval state is disclosed only in expanded provenance', () => 
   assert.match(artifactSource, /<dt>Retrieval<\/dt>/)
   assert.match(artifactSource, /fetchLabels\[item\.fetch_state\]/)
 })
+
+test('Artifacts inherit Feed rank while keeping source time secondary', () => {
+  assert.match(artifactSource, /<span>Feed rank<\/span>/)
+  assert.match(artifactSource, /item\.best_source_rank/)
+  assert.match(artifactSource, /<span>Source time<\/span>/)
+  assert.match(artifactSource, /item\.source_published_at/)
+})

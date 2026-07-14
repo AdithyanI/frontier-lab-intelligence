@@ -127,12 +127,14 @@ seven-date navigator filters by the UTC publication day of the X source
 observation, never by retrieval time. Date counts are distinct canonical
 artifacts; an artifact appears on each day it was observed, and exact-day
 search matches every source observation for that artifact rather than only the
-representative latest one. Within a selected day, one chronological row per
-canonical artifact shows its fetch-oriented kind and representative source;
-bounded pagination keeps the surface fast. Expanding a row shows canonical and
-source URLs, first-seen time, retrieval state and method, snapshot size, and
-any current error. It does not rank, summarize, or classify artifact content;
-those are later cited-insight responsibilities.
+representative latest one. Within a selected day, one row per canonical
+artifact inherits the best rank among the accepted Feed envelopes that exposed
+it; the smallest rank wins when several observations converge. Source time is
+shown separately, and the inherited rank is provenance rather than a new
+artifact-quality score. Bounded pagination keeps the surface fast. Expanding a
+row shows canonical and source URLs, first-seen time, retrieval state and
+method, snapshot size, and any current error. It does not summarize or classify
+artifact content; those are later cited-insight responsibilities.
 
 ## Artifact Store v1 evidence
 

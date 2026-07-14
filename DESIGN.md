@@ -143,14 +143,17 @@ Rules:
   visible inside the menu. Per-envelope triage rationale is collapsed by
   default behind a quiet `View reason` disclosure so evidence remains the
   primary reading surface.
-- **Artifact index:** a flat, newest-first ruled list over the canonical
-  artifact catalog. Keep the default row to observed date, artifact title and
-  host, fetch-oriented type, and source. Native `<details>` expansion reveals
+- **Artifact index:** a flat, ruled list over the canonical artifact catalog.
+  Within the selected source day, order by the best originating Feed rank; if
+  several accepted envelopes reveal the same artifact, the smallest rank wins.
+  This is inherited provenance, not a second artifact score. Keep the default
+  row to Feed rank, artifact title and host, fetch-oriented type, source, and a
+  compact source time. Native `<details>` expansion reveals
   canonical/source URLs, retrieval state, and snapshot provenance. A single
   Feed-style date navigator filters by the UTC day of the source post that
   revealed the artifact, never by retrieval time; this is an inspection aid,
-  not a relevance rank. Do not add ranking, summaries, cards, or additional
-  filters until a cited-insight consumer proves the need.
+  not an independent artifact relevance model. Do not add summaries, cards,
+  or additional filters until a cited-insight consumer proves the need.
 - **Insight row (anticipated):** title, why-flagged rationale, score (mono),
   provenance line, persona tag; expandable.
 - **Score breakdown:** inputs and weights are visible only on demand from the

@@ -251,9 +251,11 @@ RSS/GitHub adapters and cited-insight generation remain deferred. The web
 layer now exposes the live catalog through read-only `/api/artifacts/dates`
 and `/api/artifacts` projections plus a minimal `/artifacts` index. The shared
 Feed-style navigator selects the UTC publication day of the X observation
-(never mutable retrieval time); within a day, rows are newest source
-observation first, one row per canonical artifact, with retrieval state inside
-expandable provenance rather than in the collapsed index row. The same artifact
+(never mutable retrieval time); within a day, one row per canonical artifact
+inherits the best originating Feed rank, with source time shown separately and
+retrieval state inside expandable provenance rather than in the collapsed index
+row. This is a frozen ordering input carried from Feed, not a new artifact
+score. The same artifact
 may appear on multiple days when the network independently links it again. This
 is an operator inspection surface, not a second Feed or an insight product.
 

@@ -269,6 +269,7 @@ reads first.
 | done | Audit the live artifact catalog and index ordering for the smallest useful operator experience. | explorer | [artifact library](../../references/artifact-library.md) |
 | done | Add Feed-style Artifact navigation by the UTC publication date of the source post, with bounded search and pagination. | implementer | [artifact library](../../references/artifact-library.md) |
 | done | Distill the Artifact index so collapsed rows show source time, artifact, URL-derived type, and discovery source; keep retrieval mechanics in expanded provenance. | parent | [artifact library](../../references/artifact-library.md) |
+| done | Align the Artifact index with Feed by ordering each selected day on the best inherited Feed rank, while keeping source time compact and visibly secondary. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
 | todo | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle resume](resources/oracle-resume.md) |
 | todo | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
@@ -331,11 +332,13 @@ reads first.
 
 - 2026-07-14: [ARTIFACT-INDEX] Added the first read-only Artifact Library
   surface at `/artifacts`, backed directly by the canonical SQLite catalog.
-  It lists one canonical artifact per row, newest observation first, and keeps
-  fetch state and provenance expandable instead of adding another analysis
-  view. The live app renders 1,566 artifacts, including 22 text snapshots and
-  eight current retrieval issues; the initial API returns 60 rows and supports
-  bounded pagination. Fourteen focused artifact/web tests pass.
+  It lists one canonical artifact per row and keeps fetch state and provenance
+  expandable instead of adding another analysis view. The later rank-first
+  refinement orders each selected day by the best originating Feed rank and
+  leaves source time as a compact secondary fact; it does not invent a new
+  artifact score. The live app renders 1,566 artifacts, including 22 text
+  snapshots and eight current retrieval issues; the initial API returns 60
+  rows and supports bounded pagination.
 
 - 2026-07-14: [JINA-READER-FALLBACK] Added a separate `jina-reader-v1`
   recovery run behind the native `bounded-public-v1` fetch contract. The
