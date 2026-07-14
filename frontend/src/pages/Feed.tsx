@@ -200,7 +200,7 @@ function TriageNote({ item }: { item: SignalEvent }) {
   return (
     <details className={`event-triage event-triage--${decision}`}>
       <summary className="event-triage-heading mono">
-        <span>{decisionLabel}</span>
+        <span className="event-triage-decision">{decisionLabel}</span>
         <span className="event-triage-action">
           <span className="event-triage-view">View reason</span>
           <span className="event-triage-hide">Hide reason</span>
@@ -462,6 +462,7 @@ export default function Feed() {
   const [items, setItems] = useState<SignalEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const activeViewKeyRef = useRef('')
   const availableDates = useMemo(() => dates?.dates ?? [], [dates])
 
   useEffect(() => {
@@ -477,7 +478,7 @@ export default function Feed() {
           )
         }
       })
-      .catch((reason) => setError(String(reason)))
+      .catch(() => setError('Couldn’t load available Feed dates. Reload to try again.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -496,7 +497,9 @@ export default function Feed() {
       query: debouncedQuery,
       offset: 0,
     }
-    const cached = eventPageCache.get(eventPageKey(request))
+    const viewKey = eventPageKey(request)
+    activeViewKeyRef.current = viewKey
+    const cached = eventPageCache.get(viewKey)
     if (cached) {
       setData(cached)
       setItems(cached.items ?? [])
@@ -506,14 +509,22 @@ export default function Feed() {
     }
     setLoading(true)
     setError('')
+    setData(null)
+    setItems([])
     requestEventPage(request)
       .then((value) => {
-        if (!live) return
+        if (!live || activeViewKeyRef.current !== viewKey) return
         setData(value)
         setItems(value.items ?? [])
       })
-      .catch((reason) => live && setError(String(reason)))
-      .finally(() => live && setLoading(false))
+      .catch(() => {
+        if (live && activeViewKeyRef.current === viewKey) {
+          setError('Couldn’t load this Feed view. Change the filter or reload to try again.')
+        }
+      })
+      .finally(() => {
+        if (live && activeViewKeyRef.current === viewKey) setLoading(false)
+      })
     return () => {
       live = false
     }
@@ -548,7 +559,16 @@ export default function Feed() {
 
   const loadMore = () => {
     if (!data?.total || items.length >= data.total) return
+    const viewKey = eventPageKey({
+      date: selectedDate,
+      sort,
+      triageFilter,
+      query: debouncedQuery,
+      offset: 0,
+    })
+    if (activeViewKeyRef.current !== viewKey) return
     setLoading(true)
+    setError('')
     requestEventPage({
       date: selectedDate,
       sort,
@@ -556,9 +576,18 @@ export default function Feed() {
       query: debouncedQuery,
       offset: items.length,
     })
-      .then((value) => setItems((current) => [...current, ...(value.items ?? [])]))
-      .catch((reason) => setError(String(reason)))
-      .finally(() => setLoading(false))
+      .then((value) => {
+        if (activeViewKeyRef.current !== viewKey) return
+        setItems((current) => [...current, ...(value.items ?? [])])
+      })
+      .catch(() => {
+        if (activeViewKeyRef.current === viewKey) {
+          setError('Couldn’t load more Feed items. Try again.')
+        }
+      })
+      .finally(() => {
+        if (activeViewKeyRef.current === viewKey) setLoading(false)
+      })
   }
 
   if (error && !data) {
@@ -599,6 +628,7 @@ export default function Feed() {
               type="button"
               key={value.day}
               className={value.day === selectedDate ? 'is-active' : ''}
+              aria-pressed={value.day === selectedDate}
               onClick={() => setSelectedDate(value.day)}
             >
               <span>{shortDate.format(new Date(`${value.day}T12:00:00Z`))}</span>
@@ -652,6 +682,10 @@ export default function Feed() {
           {(data?.total ?? 0).toLocaleString('en-US')}{' '}
           {triageSummaryLabels[triageFilter]} Feed items
         </div>
+      )}
+
+      {error && data && (
+        <p className="error-note feed-error" role="alert">{error}</p>
       )}
 
       <section className="feed-list" aria-live="polite" aria-busy={loading}>

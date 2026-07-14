@@ -37,6 +37,7 @@ if find src tests -type f -name '*.py' 2>/dev/null | grep -q .; then
 fi
 
 if [ -f frontend/package.json ]; then
+  npm --prefix frontend run test --if-present
   npm --prefix frontend run lint
   npm --prefix frontend run build
   if ! git diff --quiet -- src/fli/web/dist 2>/dev/null; then

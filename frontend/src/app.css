@@ -1466,8 +1466,8 @@ td.num {
 
 .event-triage-heading::-webkit-details-marker { display: none; }
 
-.event-triage--keep .event-triage-heading span:first-child { color: var(--positive); }
-.event-triage--drop .event-triage-heading span:first-child { color: var(--negative); }
+.event-triage--keep .event-triage-decision { color: var(--positive); }
+.event-triage--drop .event-triage-decision { color: var(--negative); }
 
 .event-triage-action {
   display: inline-flex;
