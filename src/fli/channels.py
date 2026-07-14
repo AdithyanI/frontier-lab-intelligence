@@ -71,6 +71,35 @@ CREATE INDEX IF NOT EXISTS idx_channel_obs_lookup
 ON channel_observations (channel_id, source, metric, observed_at);
 CREATE INDEX IF NOT EXISTS idx_channel_obs_metric
 ON channel_observations (source, metric);
+
+CREATE TABLE IF NOT EXISTS entity_source_facts (
+    id INTEGER PRIMARY KEY,
+    entity_id INTEGER NOT NULL REFERENCES entities (id) ON DELETE CASCADE,
+    source TEXT NOT NULL,
+    fact TEXT NOT NULL,
+    value TEXT,
+    observed_at TEXT NOT NULL,
+    evidence_url TEXT,
+    UNIQUE (entity_id, source, fact)
+);
+CREATE INDEX IF NOT EXISTS idx_entity_source_facts_lookup
+ON entity_source_facts (source, fact, entity_id);
+
+CREATE TABLE IF NOT EXISTS entity_affiliations (
+    id INTEGER PRIMARY KEY,
+    person_entity_id INTEGER NOT NULL REFERENCES entities (id) ON DELETE CASCADE,
+    organization_entity_id INTEGER NOT NULL REFERENCES entities (id) ON DELETE CASCADE,
+    relationship TEXT NOT NULL,
+    role_title TEXT,
+    source TEXT NOT NULL,
+    observed_at TEXT NOT NULL,
+    evidence_url TEXT,
+    UNIQUE (person_entity_id, organization_entity_id, relationship, source)
+);
+CREATE INDEX IF NOT EXISTS idx_entity_affiliations_person
+ON entity_affiliations (person_entity_id, source);
+CREATE INDEX IF NOT EXISTS idx_entity_affiliations_organization
+ON entity_affiliations (organization_entity_id, source);
 """
 
 
@@ -99,6 +128,8 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             "channels",
             "entity_channels",
             "channel_observations",
+            "entity_source_facts",
+            "entity_affiliations",
         }
         existing = {
             row["name"]
@@ -306,6 +337,73 @@ def observe_channel(
            WHERE channel_observations.value IS NOT excluded.value
               OR COALESCE(channel_observations.evidence_url, '') IS NOT COALESCE(excluded.evidence_url, channel_observations.evidence_url, '')""",
         (channel_id, source, metric, str(value), observed_at, evidence_url),
+    )
+
+
+def record_entity_fact(
+    conn: sqlite3.Connection,
+    *,
+    entity_id: int,
+    source: str,
+    fact: str,
+    value: str | int | float | None,
+    observed_at: str,
+    evidence_url: str | None = None,
+) -> None:
+    if value is None:
+        return
+    conn.execute(
+        """INSERT INTO entity_source_facts
+           (entity_id, source, fact, value, observed_at, evidence_url)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT (entity_id, source, fact) DO UPDATE SET
+               value = excluded.value,
+               observed_at = excluded.observed_at,
+               evidence_url = COALESCE(excluded.evidence_url, entity_source_facts.evidence_url)
+           WHERE entity_source_facts.value IS NOT excluded.value
+              OR entity_source_facts.observed_at IS NOT excluded.observed_at
+              OR COALESCE(entity_source_facts.evidence_url, '') IS NOT
+                 COALESCE(excluded.evidence_url, entity_source_facts.evidence_url, '')""",
+        (entity_id, source, fact, str(value), observed_at, evidence_url),
+    )
+
+
+def record_affiliation(
+    conn: sqlite3.Connection,
+    *,
+    person_entity_id: int,
+    organization_entity_id: int,
+    relationship: str,
+    role_title: str | None,
+    source: str,
+    observed_at: str,
+    evidence_url: str | None = None,
+) -> None:
+    conn.execute(
+        """INSERT INTO entity_affiliations
+           (person_entity_id, organization_entity_id, relationship, role_title,
+            source, observed_at, evidence_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT
+               (person_entity_id, organization_entity_id, relationship, source)
+           DO UPDATE SET
+               role_title = COALESCE(excluded.role_title, entity_affiliations.role_title),
+               observed_at = excluded.observed_at,
+               evidence_url = COALESCE(excluded.evidence_url, entity_affiliations.evidence_url)
+           WHERE COALESCE(entity_affiliations.role_title, '') IS NOT
+                    COALESCE(excluded.role_title, entity_affiliations.role_title, '')
+              OR entity_affiliations.observed_at IS NOT excluded.observed_at
+              OR COALESCE(entity_affiliations.evidence_url, '') IS NOT
+                 COALESCE(excluded.evidence_url, entity_affiliations.evidence_url, '')""",
+        (
+            person_entity_id,
+            organization_entity_id,
+            relationship,
+            role_title,
+            source,
+            observed_at,
+            evidence_url,
+        ),
     )
 
 

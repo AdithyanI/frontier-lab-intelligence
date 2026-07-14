@@ -1,0 +1,34 @@
+[
+  {
+    "source_id": "aie-worldsfair-2026",
+    "name": "AI Engineer World's Fair 2026",
+    "conference_url": "https://www.ai.engineer/worldsfair/2026",
+    "data_url": "https://www.ai.engineer/worldsfair/2026/speakers.json",
+    "format": "speakers-json-v1",
+    "observed_at": "2026-07-02T23:59:59+00:00"
+  },
+  {
+    "source_id": "aie-europe-2026",
+    "name": "AI Engineer Europe 2026",
+    "conference_url": "https://www.ai.engineer/europe/2026",
+    "data_url": "https://www.ai.engineer/europe/2026/speakers.json",
+    "format": "speakers-json-v1",
+    "observed_at": "2026-04-10T23:59:59+00:00"
+  },
+  {
+    "source_id": "aie-worldsfair-2024",
+    "name": "AI Engineer World's Fair 2024",
+    "conference_url": "https://www.ai.engineer/worldsfair/2024",
+    "data_url": "https://www.ai.engineer/worldsfair/2024",
+    "format": "next-data-worldsfair-2024",
+    "observed_at": "2024-06-27T23:59:59+00:00"
+  },
+  {
+    "source_id": "aie-summit-2023",
+    "name": "AI Engineer Summit 2023",
+    "conference_url": "https://www.ai.engineer/summit/2023",
+    "data_url": "https://www.ai.engineer/summit/2023",
+    "format": "next-data-summit-2023",
+    "observed_at": "2023-10-10T23:59:59+00:00"
+  }
+]

@@ -27,6 +27,13 @@ def main(argv: list[str] | None = None) -> int:
     registry_p.add_argument("registry_args", nargs=argparse.REMAINDER)
     sources_p = sub.add_parser("sources", help="Curated source importers.")
     sources_p.add_argument("source_args", nargs=argparse.REMAINDER)
+    conference_sources_p = sub.add_parser(
+        "conference-sources",
+        help="Snapshot, audit, or import curated conference speakers.",
+    )
+    conference_sources_p.add_argument(
+        "conference_source_args", nargs=argparse.REMAINDER
+    )
     following_snapshot_p = sub.add_parser(
         "following-snapshot", help="Local outgoing-follow snapshot storage."
     )
@@ -120,6 +127,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import sources
 
         return sources.main(args.source_args)
+
+    if args.command == "conference-sources":
+        from fli import conference_sources
+
+        return conference_sources.main(args.conference_source_args)
 
     if args.command == "following-snapshot":
         from fli import following_snapshots
