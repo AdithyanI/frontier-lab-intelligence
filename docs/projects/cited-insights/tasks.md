@@ -374,9 +374,6 @@ reads first.
 - [x] Complete the bounded Network Source Architecture Audit review, record
   Adi's decision, and implement only an accepted delta; do not let the audit
   silently displace M3–M5 delivery work.
-- [ ] Automate Registry-checksum invalidation and background rebuild of the
-  current materialized Network-support run after curation changes; never
-  recompute 2.8M-edge support inside a page request.
 - [ ] Closeout: review learnings, archive tracker.
 
 ## Validation / Test Plan

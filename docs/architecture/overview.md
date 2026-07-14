@@ -507,17 +507,18 @@ owned by one organization contribute at most one vote. The command can read
 only the frozen snapshot edge table and an authorizer-limited set of Registry
 identity tables; it cannot read legacy `data/fli.db.graph_edges`. The current
 run reconciles 2,558 complete active source accounts, 2,521 voting entities,
-2,832,858 raw eligible edges, 2,831,995 deduplicated entity-target votes, and
-2,524 active X-addressable Registry targets. The materialization is rebuilt
-after Registry curation so ranks and denominators stay internally consistent;
-automatic checksum invalidation/background refresh remains planned. It must
-not be recomputed inside an interactive page request.
-557,363 ranked accounts. It also materializes entity-union support for all
-2,527 active X-addressable Registry targets, including 38 zero-support targets;
+2,832,858 raw eligible edges, 2,831,995 deduplicated entity-target votes,
+557,363 ranked accounts, and 2,524 active X-addressable Registry targets,
+including 38 zero-support targets. It also materializes entity-union support;
 multiple target channels are unioned and self-support is excluded. Raw
 followers are display evidence, not an overlap input. Equal support counts
 share one dense score rank and use a separate deterministic account display
 position only in the global discovery view.
+
+The materialization is rebuilt once after a Registry curation batch so ranks
+and denominators stay internally consistent. It is intentionally not recomputed
+inside an interactive page request. Automatic background refresh is deferred
+unless curation becomes frequent enough to justify the added machinery.
 
 An experimental 30-source personalized PageRank also runs over the same edge
 boundary and stores its direct comparison in the derived database. It
