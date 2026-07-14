@@ -262,6 +262,17 @@ score. The same artifact
 may appear on multiple days when the network independently links it again. This
 is an operator inspection surface, not a second Feed or an insight product.
 
+`fli.cited_insight_runs` now freezes the first five accepted envelopes into a
+separate resumable extraction run. `insight-v1.1` gives the model the complete
+accepted first-party X envelope plus any available artifact text, but asks it
+to return only one claim, three compact analytical fields, and one verbatim
+supporting quote. The application—not the model—binds that quote to the frozen
+X post or artifact identity and URL. A result whose quote is not an exact
+substring is retained as a failed calibration row and never reaches the
+read-only `/api/insights` projection. The first proof published four verified
+insights from five candidates; its one rejected citation, usage, prompt-cache
+reads, proxy cost, and raw output remain auditable in the run database.
+
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
 version tokens, so a Registry change or rebuilt derived run invalidates the
@@ -958,15 +969,16 @@ final score.
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts |
 | `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
+| `fli.cited_insights` / `fli.cited_insight_runs` | minimal `insight-v1.1` model boundary, frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
 | `fli.following_rankings` | derived entity-overlap baseline plus experimental personalized PageRank/comparison with deterministic runs and active/rejected/unknown mapping |
 | `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; the Network workspace keeps Registry and Ranking as distinct current-state subviews and projects best-owned-account network rank into Registry at read time, while Feed/Event readers follow the explicit publication pointer and overlay current Registry curation; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Cited insight extraction | active project; five-record oracle not yet proved |
+| Cited insight extraction | first bounded proof live: four verified citations published, one exact-span rejection retained for calibration |
 | Insight scoring/evaluation | planned after the extraction schema survives the oracle |
-| Insights UI + briefing | planned submission-critical delivery boundary |
+| Insights UI | first four-record audit surface live; daily selection and briefing remain planned |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Build Order
