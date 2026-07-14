@@ -56,7 +56,7 @@ def _available_runs(
     root = Path(run_root or DEFAULT_INSIGHTS_ROOT)
     paths = set(root.glob("*/insights.db")) if root.is_dir() else set()
     fallback = Path(default_db or DEFAULT_INSIGHTS_DB)
-    if fallback.is_file():
+    if (run_root is None or default_db is not None) and fallback.is_file():
         paths.add(fallback)
 
     latest_by_day: dict[str, dict[str, Any]] = {}

@@ -76,7 +76,11 @@ test('Feed keeps date navigation stable while loading and compact at narrower de
   assert.match(dateNavigatorSource, /loading\?: boolean/)
   assert.match(dateNavigatorSource, /Array\.from\(\{ length: 7 \}/)
   assert.match(dateNavigatorSource, /className="feed-day-placeholder"/)
-  assert.match(dateNavigatorSource, /aria-label=\{`\$\{fullDateLabel\}, \$\{itemCountLabel\} posts`\}/)
+  assert.match(dateNavigatorSource, /itemLabel = 'posts'/)
+  assert.match(
+    dateNavigatorSource,
+    /aria-label=\{`\$\{fullDateLabel\}, \$\{itemCountLabel\} \$\{itemLabel\}`\}/,
+  )
   assert.match(appStyles, /@media \(max-width: 1100px\)/)
   assert.match(appStyles, /\.feed-day-label-long \{ display: none; \}/)
   assert.match(appStyles, /\.feed-day-label-compact \{ display: inline; \}/)

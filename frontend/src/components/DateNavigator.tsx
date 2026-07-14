@@ -24,6 +24,7 @@ interface DateNavigatorProps {
   onShowOlderDates: () => void
   onShowNewerDates: () => void
   ariaLabel: string
+  itemLabel?: string
   loading?: boolean
 }
 
@@ -36,6 +37,7 @@ export default function DateNavigator({
   onShowOlderDates,
   onShowNewerDates,
   ariaLabel,
+  itemLabel = 'posts',
   loading = false,
 }: DateNavigatorProps) {
   const showLoadingDates = loading && dates.length === 0
@@ -68,7 +70,7 @@ export default function DateNavigator({
                   type="button"
                   key={value.day}
                   className={`feed-day${value.day === selectedDate ? ' is-active' : ''}`}
-                  aria-label={`${fullDateLabel}, ${itemCountLabel} posts`}
+                  aria-label={`${fullDateLabel}, ${itemCountLabel} ${itemLabel}`}
                   aria-pressed={value.day === selectedDate}
                   onClick={() => onSelectDate(value.day)}
                 >

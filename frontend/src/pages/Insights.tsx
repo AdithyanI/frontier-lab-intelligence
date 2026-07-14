@@ -1,5 +1,17 @@
-import { useEffect, useState } from 'react'
-import { getCachedJSON, type InsightItem, type InsightsResponse } from '../api'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import {
+  getCachedJSON,
+  type InsightDates,
+  type InsightItem,
+  type InsightsResponse,
+} from '../api'
+import DateNavigator from '../components/DateNavigator'
+import {
+  getDateWindow,
+  shiftDateWindow,
+  type DateWindowDirection,
+} from '../dateWindow'
 
 const insightDay = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -68,22 +80,82 @@ function InsightRow({ item }: { item: InsightItem }) {
 }
 
 export default function Insights() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialDate = useRef(searchParams.get('date') ?? '')
+  const [dates, setDates] = useState<InsightDates | null>(null)
+  const [selectedDate, setSelectedDate] = useState('')
+  const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const [data, setData] = useState<InsightsResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const availableDates = useMemo(() => dates?.dates ?? [], [dates])
+  const dateWindow = useMemo(
+    () => getDateWindow(dateWindowEnd, availableDates.length),
+    [dateWindowEnd, availableDates.length],
+  )
+  const visibleDates = useMemo(
+    () => availableDates.slice(dateWindow.start, dateWindow.end),
+    [availableDates, dateWindow],
+  )
+  const canShowOlderDates = dateWindow.start > 0
+  const canShowNewerDates = dateWindow.end < availableDates.length
 
   useEffect(() => {
     let live = true
-    getCachedJSON<InsightsResponse>('/api/insights')
+    getCachedJSON<InsightDates>('/api/insights/dates')
       .then((payload) => {
-        if (live) setData(payload)
+        if (!live) return
+        setDates(payload)
+        setDateWindowEnd(payload.dates.length)
+        if (payload.available && payload.latest_date) {
+          const linkedDate = initialDate.current
+          setSelectedDate(
+            payload.dates.some((value) => value.day === linkedDate)
+              ? linkedDate
+              : payload.latest_date,
+          )
+        }
       })
       .catch(() => {
-        if (live) setError('Couldn’t load cited insights. Reload to try again.')
+        if (live) setError('Couldn’t load available insight dates. Reload to try again.')
       })
     return () => {
       live = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!selectedDate) return
+    let live = true
+    setError(null)
+    setData(null)
+    getCachedJSON<InsightsResponse>(`/api/insights?date=${selectedDate}`)
+      .then((payload) => {
+        if (live) setData(payload)
+      })
+      .catch(() => {
+        if (live) setError('Couldn’t load cited insights for this date. Reload to try again.')
+      })
+    setSearchParams({ date: selectedDate }, { replace: true })
+    return () => {
+      live = false
+    }
+  }, [selectedDate, setSearchParams])
+
+  const moveDateWindow = (direction: DateWindowDirection) => {
+    const selectedIndex = availableDates.findIndex(
+      (value) => value.day === selectedDate,
+    )
+    const nextWindow = shiftDateWindow(
+      dateWindow.end,
+      availableDates.length,
+      selectedIndex,
+      direction,
+    )
+    if (nextWindow.end === dateWindow.end) return
+    setDateWindowEnd(nextWindow.end)
+    const nextDate = availableDates[nextWindow.selectedIndex]
+    if (nextDate) setSelectedDate(nextDate.day)
+  }
 
   const items = data?.items ?? []
   const run = data?.run
@@ -99,14 +171,33 @@ export default function Insights() {
           <p className="page-method-line mono">
             <span>{run.verified_count.toLocaleString('en-US')} verified</span>
             {run.failed_count > 0 && <span>{run.failed_count.toLocaleString('en-US')} failed verification</span>}
-            <span>{insightDay.format(new Date(`${run.day}T00:00:00Z`))}</span>
             <span>{run.model}</span>
             <span>{run.prompt_version}</span>
           </p>
         )}
       </header>
 
+      {(!dates || dates.available) && (
+        <section className="feed-calendar" aria-label="Available cited insight dates">
+          <DateNavigator
+            dates={visibleDates}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            canShowOlderDates={canShowOlderDates}
+            canShowNewerDates={canShowNewerDates}
+            onShowOlderDates={() => moveDateWindow('older')}
+            onShowNewerDates={() => moveDateWindow('newer')}
+            ariaLabel="Cited insight date"
+            itemLabel="verified insights"
+            loading={dates === null}
+          />
+        </section>
+      )}
+
       {error && <p className="insight-message mono">{error}</p>}
+      {dates && !dates.available && (
+        <p className="insight-message mono">{dates.reason || 'Cited insights are not available yet.'}</p>
+      )}
       {data && !data.available && (
         <p className="insight-message mono">{data.reason || 'Cited insights are not available yet.'}</p>
       )}

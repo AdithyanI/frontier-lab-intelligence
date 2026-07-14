@@ -380,6 +380,7 @@ export default function Artifacts() {
             onShowOlderDates={() => moveDateWindow('older')}
             onShowNewerDates={() => moveDateWindow('newer')}
             ariaLabel="Artifact source date"
+            itemLabel="artifacts"
           />
         </section>
       )}
