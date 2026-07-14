@@ -347,6 +347,8 @@ def test_comparison_run_reuses_filtered_evidence_without_refetch(tmp_path):
 
 
 def test_cli_requires_explicit_all(tmp_path):
+    assert registry_evaluation_runs.DEFAULT_MODEL == "gpt-5.6-luna"
+    assert registry_evaluation_runs.DEFAULT_EFFORT == "high"
     with pytest.raises(SystemExit):
         registry_evaluation_runs.main(
             [

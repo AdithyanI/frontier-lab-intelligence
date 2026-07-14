@@ -220,6 +220,7 @@ def evaluate_one(
         "instructions": instructions(),
         "input": render_input(entity),
         "prompt_cache_key": prompt_cache_key(entity.entity_id),
+        **llm_responses.litellm_prompt_cache_kwargs(model),
         "tools": [{"type": "web_search"}],
         "tool_choice": "auto",
         "include": ["web_search_call.action.sources"],

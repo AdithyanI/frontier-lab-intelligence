@@ -141,6 +141,9 @@ def test_request_uses_cacheable_prefix_tags_and_verified_citation():
     result = cited_insights.evaluate_one(client, make_packet(), run="oracle-run")
 
     request = client.responses.with_raw_response.calls[0]
+    assert request["model"] == "gpt-5.6-luna"
+    assert request["reasoning"] == {"effort": "medium"}
+    assert request["prompt_cache_retention"] == "24h"
     assert request["instructions"] == cited_insights.instructions()
     assert len(request["instructions"]) > 4_096
     assert request["prompt_cache_key"] == cited_insights.prompt_cache_key("event-1")

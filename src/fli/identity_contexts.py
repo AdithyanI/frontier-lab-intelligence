@@ -13,7 +13,7 @@ from fli import llm_responses
 
 PROMPT_VERSION = "identity-context-v1"
 SCHEMA_VERSION = "identity-context-output-v1"
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL = llm_responses.DEFAULT_SIMPLE_MODEL
 DEFAULT_REASONING_EFFORT = "high"
 PROMPT_CACHE_SHARDS = 16
 PROMPT_PATH = Path(__file__).with_name("prompts") / "identity_context_v1.txt"
@@ -202,6 +202,7 @@ def enrich_one(
         "instructions": instructions(),
         "input": render_input(entity),
         "prompt_cache_key": prompt_cache_key(entity.entity_id),
+        **llm_responses.litellm_prompt_cache_kwargs(model),
         "tools": [{"type": "web_search", "search_context_size": "medium"}],
         "tool_choice": llm_responses.required_web_search_tool_choice(model),
         "include": ["web_search_call.action.sources"],

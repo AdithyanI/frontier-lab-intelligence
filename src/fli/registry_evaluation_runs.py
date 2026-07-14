@@ -23,8 +23,8 @@ from fli import (
     x_content,
 )
 
-DEFAULT_MODEL = "gpt-5.4-mini"
-DEFAULT_EFFORT = "high"
+DEFAULT_MODEL = registry_evaluation.DEFAULT_MODEL
+DEFAULT_EFFORT = registry_evaluation.DEFAULT_REASONING_EFFORT
 DEFAULT_FETCH_WORKERS = 20
 DEFAULT_FETCH_QPS = 9.0
 DEFAULT_MODEL_WORKERS = registry_evaluation.PROMPT_CACHE_SHARDS

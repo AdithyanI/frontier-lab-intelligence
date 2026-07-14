@@ -8,6 +8,21 @@ from typing import Any
 
 
 DEFAULT_PROMPT_CACHE_SHARDS = 64
+DEFAULT_SIMPLE_MODEL = "gpt-5.6-luna"
+AZURE_GPT56_PROMPT_CACHE_RETENTION = "24h"
+
+
+def litellm_prompt_cache_kwargs(model: str) -> dict[str, str]:
+    """Return cache controls verified on the shared Azure-backed LiteLLM route.
+
+    OpenAI's native GPT-5.6 API now prefers ``prompt_cache_options.ttl``, but
+    the shared Azure Responses deployment currently exposes the extended cache
+    through ``prompt_cache_retention``. Keep that provider adaptation here so
+    model boundaries remain provider-neutral.
+    """
+    if model == "gpt-5.6" or model.startswith("gpt-5.6-"):
+        return {"prompt_cache_retention": AZURE_GPT56_PROMPT_CACHE_RETENTION}
+    return {}
 
 
 def sharded_prompt_cache_key(

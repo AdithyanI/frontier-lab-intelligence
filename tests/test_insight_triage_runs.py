@@ -383,7 +383,8 @@ def test_cli_dry_run_emits_stable_json_without_calling_the_model(capsys):
     assert payload["schema_version"] == "1.0"
     assert payload["command"] == "insight-triage.run"
     assert payload["status"] == "ok"
-    assert payload["data"]["model"] == "gpt-5.4-mini"
+    assert payload["data"]["model"] == insight_triage.DEFAULT_MODEL
+    assert payload["data"]["reasoning_effort"] == "low"
     assert payload["data"]["workers"] == insight_triage_runs.DEFAULT_WORKERS
     assert payload["data"]["prompt_cache_shards"] == 32
     assert payload["data"]["will_call_model"] is False

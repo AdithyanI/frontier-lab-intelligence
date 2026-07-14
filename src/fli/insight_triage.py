@@ -18,8 +18,8 @@ from fli import llm_responses
 
 PROMPT_VERSION = "envelope-triage-v2.2"
 SCHEMA_VERSION = "envelope-triage-output-v2"
-DEFAULT_MODEL = "gpt-5.4-mini"
-DEFAULT_REASONING_EFFORT = "medium"
+DEFAULT_MODEL = llm_responses.DEFAULT_SIMPLE_MODEL
+DEFAULT_REASONING_EFFORT = "low"
 PROMPT_CACHE_SHARDS = 32
 PROMPT_PATH = Path(__file__).with_name("prompts") / "envelope_triage_v2.txt"
 
@@ -200,6 +200,7 @@ def evaluate_one(
         "instructions": instructions(),
         "input": render_input(envelope),
         "prompt_cache_key": prompt_cache_key(envelope.event_id),
+        **llm_responses.litellm_prompt_cache_kwargs(model),
         "reasoning": {"effort": effort},
         "text": {"format": OUTPUT_FORMAT},
         "store": False,

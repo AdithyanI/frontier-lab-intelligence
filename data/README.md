@@ -23,6 +23,11 @@
 - `registry/organization-groups.json` — reviewed, high-confidence mappings of
   product/developer X accounts into one canonical organization. Applied through
   `fli registry apply-organization-groups`; entries not listed remain separate.
+- `registry/conference-sources.json` — tracked official conference-source
+  manifest. Full responses are preserved under ignored
+  `raw/conference-sources/`; `fli conference-sources audit` measures coverage
+  before any Registry write, and `import --limit N` admits a bounded,
+  deterministic X-addressable cohort with source facts and affiliations.
 
 `fli.db` is the current tracked, inspectable product/demo corpus. Keep the
 cleaned Registry and compact accepted outputs there; do not load the broad raw

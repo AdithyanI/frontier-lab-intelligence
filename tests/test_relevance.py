@@ -85,6 +85,7 @@ def test_request_requires_high_context_web_search_and_structured_output():
     request = client.responses.calls[0]
     assert request["model"] == "gpt-5.6-terra"
     assert request["prompt_cache_key"] == relevance.prompt_cache_key(6)
+    assert request["prompt_cache_retention"] == "24h"
     assert "max_output_tokens" not in request
     assert request["reasoning"] == {"effort": "high"}
     assert request["tools"] == [

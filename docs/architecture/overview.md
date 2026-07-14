@@ -665,15 +665,35 @@ erDiagram
         float reported_cost_usd
         int run_id FK
     }
+    ENTITY_SOURCE_FACTS {
+        int entity_id FK
+        string source
+        string fact
+        string value
+        string observed_at
+        string evidence_url
+    }
+    ENTITY_AFFILIATIONS {
+        int person_entity_id FK
+        int organization_entity_id FK
+        string relationship
+        string role_title
+        string source
+        string observed_at
+        string evidence_url
+    }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (4,639)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (4,660)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,293)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,310)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (10,937)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (10,939)"
+    ENTITIES ||--o{ ENTITY_SOURCE_FACTS : "evidenced facts (97)"
+    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "person role (19)"
+    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "organization affiliation (19)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,300)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (1)"
@@ -684,12 +704,13 @@ erDiagram
     ENTITIES ||--o{ ENTITY_OVERRIDE_AUDIT : "records reviewed corrections"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,256,
-`account_source_facts` 4,639, `graph_edges` 0, `labs` 10,
-`entities` 2,220, `channels` 2,293, `entity_channels` 2,293,
-`channel_observations` 10,937, `entity_kind_classification_runs` 10,
+Table row counts: `raw_items` 1,599, `accounts` 2,273,
+`account_source_facts` 4,660, `graph_edges` 0, `labs` 10,
+`entities` 2,251, `channels` 2,310, `entity_channels` 2,310,
+`channel_observations` 10,939, `entity_source_facts` 97,
+`entity_affiliations` 19, `entity_kind_classification_runs` 10,
 `entity_kind_classifications` 2,300, `entity_kind_web_enrichments` 1,
-`entity_kind_classification_errors` 0, `entity_registry_rejections` 13, and
+`entity_kind_classification_errors` 0, `entity_registry_rejections` 23, and
 `entity_merge_audit` 29, and `entity_override_audit` 1.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
@@ -711,15 +732,18 @@ entities              # who: OpenAI, Anthropic, Andrej Karpathy
 channels              # where: @openai, OpenAI blog, github.com/openai
 entity_channels       # evidence/confidence that a channel belongs to an entity
 channel_observations  # measured/source-specific facts about a channel over time
+entity_source_facts   # source-bound role, bio, and admission provenance
+entity_affiliations   # dated person-to-organization claims with role + source
 ```
 
 Entity is identity, not endorsement. A channel that cannot yet be resolved
 creates a provisional `unknown` entity. The canonical structural vocabulary is
 `person`, `organization`, and `unsure`; `unknown` is only the pre-classification
 lifecycle state. The 10 seeded rows in `labs` remain internal source provenance
-and do not create a public subtype. There is no generic entity-role schema yet;
-add one only after an exhaustive role policy is justified. Rejection remains a
-separate curation state. An explicit protected-account flag is the first
+and do not create a public subtype. Source-specific role and bio claims live in
+`entity_source_facts`; dated person-to-organization claims live in
+`entity_affiliations`. Neither changes entity kind, voting weight, or rank.
+Rejection remains a separate curation state. An explicit protected-account flag is the first
 implemented rejection gate; broader relevance curation remains later.
 
 An entity may own multiple channels of the same kind. SpaceX owns the

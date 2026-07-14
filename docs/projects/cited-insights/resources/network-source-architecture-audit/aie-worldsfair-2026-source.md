@@ -1,15 +1,15 @@
 # AIE World's Fair 2026 Speaker Source — Implementation Spec
 
 Date: 2026-07-14
-Status: accepted by Adi; ready for engineering review and implementation.
+Status: initial 20-person cohort imported; expansion remains reversible.
 Owner decision context: `project-brief.md` Decision Addendum.
 
 ## What and why
 
 Ingest the speaker directory of the AI Engineer World's Fair 2026
 (https://www.ai.engineer/worldsfair/2026) as a new Registry candidate source
-with **direct admission**. Each speaker entry carries name, exact role,
-employer, and often an X and/or LinkedIn profile link — three assets at once:
+with **bounded direct admission**. Each speaker entry carries name, exact role,
+employer, bio, and often an X profile link — three assets at once:
 
 1. A curated candidate list from the premier AI-engineering conference, same
    architectural class as the existing `digg` / `smol_ai` / AI High Signal
@@ -21,9 +21,11 @@ employer, and often an X and/or LinkedIn profile link — three assets at once:
    the only external label set available before the deadline. This is the
    highest-value use and it constrains the execution order below.
 
-Adi's accepted trust policy: conference curation is the relevance screen.
-Speakers are admitted without per-person review. Registry admission is
-reversible and reason-bearing, so wrong admissions are cheap to correct.
+Adi's accepted trust policy: conference curation is a useful candidate screen,
+not a ranking weight. The first import is deliberately limited to the first 20
+unique X-addressable speakers in the official World's Fair 2026 response.
+Expansion requires another explicit bounded import; wrong admissions remain
+cheap to reject without discarding their source evidence.
 
 ## Hard ordering constraint
 
@@ -41,10 +43,9 @@ trivially 100% and destroys the experiment permanently. Sequence:
 
 ### 1. Raw snapshot (data-first)
 
-- Fetch the speaker directory (and per-speaker detail pages where they carry
-  the social links; see screenshots in the session — X/LinkedIn icons appear
-  on speaker/talk detail views). Check whether the site ships speaker data as
-  JSON (Next.js `__NEXT_DATA__` or an API route) before scraping HTML.
+- Fetch the official structured speaker response. World's Fair 2026 and Europe
+  2026 publish `speakers.json`; World's Fair 2024 and Summit 2023 preserve
+  structured `__NEXT_DATA__` in their official pages.
 - Preserve the as-fetched payloads under the repo's raw-data conventions
   (follow the pattern of existing sources under `data/raw/`; one dated,
   immutable snapshot directory with a manifest: URL, fetched_at, content
@@ -52,22 +53,20 @@ trivially 100% and destroys the experiment permanently. Sequence:
 
 ### 2. Parse and normalize
 
-Per speaker: `name`, `role_title`, `employer`, `x_handle` (nullable),
-`linkedin_url` (nullable), `talk/track context` if cheap, `evidence_url`
-(speaker page). Expect a few hundred entries. Lowercase X handles per
-`accounts.handle` convention.
+The canonical import is intentionally lean: `name`, `role_title`, `employer`,
+`bio`, `x_handle` (nullable), source ID, observation date, and evidence URL.
+Talk titles, LinkedIn, and personal website/blog fields remain only in the raw
+snapshot. Lowercase X handles per `accounts.handle` convention.
 
 ### 3. Identity resolution (mechanical, not a review gate)
 
-- Match against existing entities: primary key is X handle → `channels`
-  (`kind='x'`, `key`) → `entity_channels`; fallback exact-name match flagged
-  for a quick manual scan of ambiguous collisions only.
+- Match against existing entities by X handle → `channels` (`kind='x'`, `key`)
+  → `entity_channels`. Do not merge people by name alone.
 - Many speakers are already in the 2,197 (e.g., Anthropic/OpenAI/DeepMind
   staff). Do not create duplicates — duplicate entities would corrupt the
   entity-union support aggregation being fixed in the same batch.
-- LinkedIn-only speakers: create the identity with the LinkedIn channel
-  recorded; they remain dormant for X collection until an X channel is known.
-  Do not fabricate handles.
+- Speakers without X remain preserved in the raw snapshot and are not admitted.
+  Do not fabricate handles or introduce LinkedIn as a channel in this batch.
 
 ### 4. Coverage/miss report (before admission)
 
@@ -83,15 +82,18 @@ with reproducible SQL. Predeclared measures:
 - Per-lab breakdown using parsed employers (coverage of frontier-lab
   employees specifically, per the case prompt's emphasis).
 
-### 5. Direct admission
+### 5. Bounded direct admission
 
-- Admit all resolved speakers not already active, with provenance:
+- Admit the selected X-addressable cohort with provenance:
   source facts per the `account_source_facts` pattern
   (`source='aie_worldsfair_2026'`, facts: `role`, `employer`, `speaker`,
   `evidence_url`), and an admission note naming the source.
-- Record `role_title`/`employer` as evidenced affiliation facts on existing
-  member entities too — the affiliation data is valuable even where admission
-  is a no-op.
+- Record `role_title`, bio, and employer as source-bound facts on existing
+  entities too. Store the listed person-to-organization relationship in
+  `entity_affiliations`; it does not imply a permanent/current employment fact.
+- Create or reuse the listed organization. Attach an organization website only
+  where the official source clearly identifies it; never infer an organization
+  X account from a speaker's personal profile.
 - New admits join daily X collection like any other Registry member.
 - **They do not vote.** The immutable following snapshot
   (`registry-following-2026-07-11-v1`) predates them; voting eligibility
@@ -101,8 +103,8 @@ with reproducible SQL. Predeclared measures:
 
 ### 6. Validation
 
-- Focused tests for the parser (fixture from the raw snapshot) and identity
-  resolution (dedup, casing, LinkedIn-only, name collisions).
+- Focused tests for parser behavior, stable limit/de-duplication, idempotent
+  source facts and affiliations, and preservation of prior rejections.
 - Reconcile counts: speakers parsed = matched + newly admitted +
   unresolvable(listed).
 - `bash scripts/check-fast.sh`; verify the Registry UI shows new members with
@@ -116,17 +118,18 @@ with reproducible SQL. Predeclared measures:
 - No cohort cutoff, tiering, or re-ranking based on this list.
 - No recursive expansion from speakers' follow graphs.
 - No new following-snapshot collection in this batch.
-- No LinkedIn scraping beyond storing the profile URL as-is.
+- No LinkedIn storage or scraping, talk/session ingestion, or personal-site
+  canonicalization.
 - Do not let this displace cited-insights delivery work; this is a bounded
   side batch (~half a day target).
 
-## Open questions for the implementing engineer
+## Initial result
 
-- Confirm where speaker social links live (listing page vs per-speaker/talk
-  detail pages) and whether a structured data payload exists; choose the
-  cheapest reliable fetch path and record it in the raw manifest.
-- Confirm the current canonical write path for admissions in `src/fli/registry.py`
-  (CLI vs direct function) and reuse it; do not invent a parallel path.
-- If more than ~10% of speakers are unresolvable or ambiguous, stop and report
-  before admitting — that signals a parsing or matching defect, not a data
-  truth.
+The official snapshots contain 945 conference records across four supported
+events, resolving to 528 unique X handles. Before insertion, 101 of those
+handles were already present and active; none were rejected. The accepted
+first batch selected exactly 20 World's Fair 2026 handles in source order:
+4 matched existing people and 16 created new people. It wrote 19 listed
+affiliations, reused or created 18 organizations (15 new), and retained role,
+bio, company, source, date, and evidence URL. The other 508 X-addressable
+records and all non-X records remain snapshot-only until a later decision.

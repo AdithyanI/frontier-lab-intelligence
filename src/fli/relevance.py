@@ -291,6 +291,7 @@ def audit_one(
         "instructions": instructions(),
         "input": json.dumps(entity.model_payload, ensure_ascii=False),
         "prompt_cache_key": prompt_cache_key(entity.entity_id),
+        **llm_responses.litellm_prompt_cache_kwargs(model),
         "tools": [
             {
                 "type": "web_search",

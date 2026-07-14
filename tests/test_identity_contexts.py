@@ -86,11 +86,12 @@ def test_missing_bio_enrichment_requires_grounded_search_and_is_cacheable():
     ]
     client = SimpleNamespace(responses=FakeResponses(payload(), output=output))
 
-    result = identity_contexts.enrich_one(
-        client, make_input(), run="calibration", model="gpt-5.4-mini"
-    )
+    result = identity_contexts.enrich_one(client, make_input(), run="calibration")
 
     request = client.responses.calls[0]
+    assert request["model"] == "gpt-5.6-luna"
+    assert request["reasoning"] == {"effort": "high"}
+    assert request["prompt_cache_retention"] == "24h"
     assert len(request["instructions"].split()) > 1_024
     assert request["tools"] == [
         {"type": "web_search", "search_context_size": "medium"}

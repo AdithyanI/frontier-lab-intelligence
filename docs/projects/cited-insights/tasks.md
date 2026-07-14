@@ -177,18 +177,16 @@ reads first.
   evaluation) is deferred past submission; the audit records the designed
   yield-feedback loop and interview-ready limitation language instead.
 
-- 2026-07-14: **AI Engineer World's Fair 2026 speakers become a direct-admission
-  candidate source.** Adi accepts conference curation as the relevance screen:
-  speakers are admitted to the Registry without per-person review, relying on
-  reversible reason-bearing rejection for correction. Mechanical requirements
-  that remain (they are not review gates): raw directory snapshot preserved
-  data-first, identity resolution against existing entities to prevent
-  duplicates, X handle mapping, and `source`/evidence provenance plus
-  role/employer facts per speaker. Run the network coverage query **before**
-  inserting — "N% of AIE speakers already surfaced by the trusted network" is
-  the audit's non-circular validation evidence and is destroyed if admission
-  happens first. New admits are monitored immediately but cannot vote until a
-  future following-snapshot collection includes their edges (post-submission).
+- 2026-07-14: **AI Engineer conferences become a bounded candidate source.**
+  Preserve the complete supported official snapshots, but admit only the first
+  20 unique X-addressable World's Fair 2026 speakers in source order for the
+  initial batch. Conference curation is provenance, not a ranking boost or a
+  claim that this is the optimal cohort. Match by X identity, keep canonical
+  fields lean (role, bio, listed organization/affiliation, source/date/evidence;
+  verified organization website only), and leave LinkedIn, talks, and personal
+  sites raw-only. The network coverage query ran before insertion. New admits
+  are monitored immediately but cannot vote until a future following-snapshot
+  collection includes their edges (post-submission).
 
 - 2026-07-14: Make Registry public reach rank-first without discarding its
   magnitude. **X reach** is one stable ordinal across all active Registry
@@ -338,7 +336,7 @@ reads first.
 | --- | --- | --- | --- |
 | done | Diagnose the Network rank anomaly, denominators, tie semantics, and multi-channel projection against code and live data. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
 | todo | Implement the display delta: entity-union support with denominator, tie-aware within-Registry ordinal, discovery ordering confined to the Ranking view; focused tests + live UI verification. | implementer | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
-| todo | Snapshot the AIE World's Fair 2026 speaker directory raw, resolve identities, run the pre-admission coverage query, then directly admit speakers with provenance and role/employer facts. | implementer | [aie speaker source](resources/network-source-architecture-audit/aie-worldsfair-2026-source.md) |
+| done | Snapshot supported AIE conference sources, run pre-admission coverage, and admit a reversible 20-person World's Fair 2026 cohort with lean provenance, role, bio, and affiliation facts. | implementer | [import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
 | todo | Write the coverage/miss report and a short ADR recording accepted deltas, deferrals (cohort cutoffs, tiers, yield evaluation, voting for new admits), and interview-ready language. | parent | [audit ADR](resources/network-source-architecture-audit/architecture-decision.md) |
 
 ## Backlog / Remaining Work
@@ -369,6 +367,18 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [AIE-CONFERENCE-COHORT-20] Added a deterministic conference
+  source boundary over four official snapshots (World's Fair 2026, Europe
+  2026, World's Fair 2024, Summit 2023). The pre-write audit found 945 records,
+  528 unique X handles, 101 already active, 427 new, and zero rejected matches.
+  Per Adi's narrowed decision, imported exactly 20 source-order World's Fair
+  2026 speakers: 4 enriched existing people, 16 created people, 15 created
+  organizations, and 19 dated affiliations. Only X identity, role, bio, listed
+  company, affiliation, and provenance entered canonical tables; LinkedIn,
+  sessions, and personal sites remain raw-only. Focused tests cover parsing,
+  the stable limit, idempotency, lean facts, and rejection preservation. See
+  the [import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md).
 
 - 2026-07-14: [AUDIT-DECIDED] Collapsed the four-lane audit review after a
   direct diagnosis answered its core question: the Registry Network rank was

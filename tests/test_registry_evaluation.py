@@ -104,6 +104,9 @@ def test_request_uses_optional_open_web_search_and_cacheable_prefix():
     )
 
     request = client.responses.calls[0]
+    assert request["model"] == "gpt-5.6-luna"
+    assert request["reasoning"] == {"effort": "high"}
+    assert request["prompt_cache_retention"] == "24h"
     assert request["instructions"] == registry_evaluation.instructions()
     assert len(request["instructions"].split()) > 1_024
     assert request["input"].startswith("Evaluate this X account")
