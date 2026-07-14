@@ -181,7 +181,9 @@ function FeedMenuSelect<T extends string>({
           >
             <span>{option.label}</span>
             {option.count != null && (
-              <span className="mono">{option.count.toLocaleString('en-US')}</span>
+              <span className="feed-menu-option-count mono">
+                {option.count.toLocaleString('en-US')}
+              </span>
             )}
           </button>
         ))}

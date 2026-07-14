@@ -1285,8 +1285,8 @@ td.num {
 .feed-menu-panel button:last-child { border-bottom: 0; }
 .feed-menu-panel button:hover { background: var(--sand); color: var(--ink); }
 .feed-menu-panel button.is-active { background: var(--ink); color: #fff; }
-.feed-menu-panel button > span:last-child { color: var(--muted); font-size: 9.5px; }
-.feed-menu-panel button.is-active > span:last-child { color: rgb(255 255 255 / 65%); }
+.feed-menu-option-count { color: var(--muted); font-size: 9.5px; }
+.feed-menu-panel button.is-active .feed-menu-option-count { color: rgb(255 255 255 / 65%); }
 
 .feed-summary {
   margin-top: 16px;

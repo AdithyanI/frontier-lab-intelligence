@@ -252,6 +252,13 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [FEED-MENU-TYPE-CONSISTENCY] Adi caught that Sort option labels
+  rendered smaller than Audit option labels. The shared `span:last-child`
+  selector intended for Audit counts also matched Sort's only span, shrinking
+  every Sort label to the 9.5px count size. Replaced the positional selector
+  with an explicit `feed-menu-option-count` class. Browser-computed styles now
+  prove all option labels are 11.5px in both menus while only numeric counts
+  remain 9.5px; browser logs are clear.
 - 2026-07-14: [FEED-MENUS-COMPACTED] Adi's visual follow-up showed that the
   corrected dropdown language was right but the 210px panel and 40px rows
   were still oversized for their short option sets. Tightened both shared
