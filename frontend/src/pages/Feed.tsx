@@ -941,7 +941,7 @@ export default function Feed() {
         )}
       </section>
 
-      {data?.total != null && items.length < data.total && (
+      {!targetEventId && data?.total != null && items.length < data.total && (
         <button className="load-more" type="button" onClick={loadMore} disabled={loading}>
           {loading
             ? 'Loading…'

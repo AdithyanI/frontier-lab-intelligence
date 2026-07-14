@@ -142,7 +142,8 @@ Rules:
   Audit and sort are compact labeled disclosures rather than persistent
   segmented bars; each option remains one click away and audit counts stay
   visible inside the menu. Search shares their 44px square hairline treatment
-  and stays width-bounded on desktop rather than consuming the toolbar. Per-envelope triage rationale is collapsed by
+  but remains a separate left-aligned input; the paired Audit/Sort controls
+  anchor the right edge. They stack only on narrow screens. Per-envelope triage rationale is collapsed by
   default behind a quiet `View reason` disclosure so evidence remains the
   primary reading surface.
 - **Artifact index:** a flat, ruled list over the canonical artifact catalog.
@@ -151,7 +152,10 @@ Rules:
   This is inherited provenance, not a second artifact score. Keep the default
   row to Feed rank, artifact title and host, fetch-oriented type, source, and a
   compact source time. Native `<details>` expansion reveals
-  canonical/source URLs, retrieval state, and snapshot provenance. A single
+  the canonical URL, a link back to the exact ranked Feed envelope that
+  disclosed it, retrieval state, and snapshot provenance. The Feed envelope
+  remains the evidence workspace and owns the onward X link; Artifacts does
+  not duplicate that context. A single
   Feed-style date navigator filters by the UTC day of the source post that
   revealed the artifact, never by retrieval time; this is an inspection aid,
   not an independent artifact relevance model. Do not add summaries, cards,

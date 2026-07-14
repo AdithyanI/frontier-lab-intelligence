@@ -41,6 +41,38 @@ def _artifact_fixture(path):
             ),
         ],
     )
+    conn.execute(
+        """INSERT INTO artifact_import_run
+           (import_run_id, schema_version, canonicalization_contract,
+            source_feed_run_id, source_event_run_id, triage_runs_json,
+            selection_policy, input_fingerprint, expected_candidate_count,
+            accepted_count, excluded_count, failed_count, created_at,
+            completed_at)
+           VALUES ('import', ?, 'test-v1', 'feed-run', 'event-run', '[]',
+                   'test', 'artifact-fixture', 1, 1, 0, 0,
+                   '2026-07-11T10:00:00+00:00',
+                   '2026-07-11T10:00:00+00:00')""",
+        (artifacts.SCHEMA_VERSION,),
+    )
+    conn.execute(
+        """INSERT INTO artifact_import_candidate
+           (candidate_id, import_run_id, envelope_day, event_id, source_rank,
+            day_candidate_count, source_kind, source_provider,
+            source_external_id, source_snapshot_sha256, source_url,
+            disclosure_external_id, disclosure_snapshot_sha256,
+            disclosure_url, disclosure_published_at, observed_url,
+            expanded_url, candidate_source, title_hint, relation, decision,
+            reason_code, artifact_id, created_at)
+           VALUES ('candidate-newer', 'import', '2026-07-11', 'event-newer',
+                   2, 2, 'x_post', 'twitterapi_io', 'post-2', 'sha',
+                   'https://x.com/example/status/2', 'post-2', 'sha',
+                   'https://x.com/example/status/2',
+                   '2026-07-11T10:00:00+00:00',
+                   'https://github.com/example/project',
+                   'https://github.com/example/project', 'post_url', NULL,
+                   'links_to', 'accepted', 'external_http_url', 'newer',
+                   '2026-07-11T10:00:00+00:00')"""
+    )
     conn.executemany(
         """INSERT INTO artifact_observation
            (observation_id, artifact_id, source_kind, source_provider,
@@ -159,6 +191,7 @@ def test_artifacts_api_defaults_to_latest_source_day_with_provenance(
     assert payload["items"][0]["source_published_at"] == (
         "2026-07-11T10:00:00+00:00"
     )
+    assert payload["items"][0]["source_event_id"] == "event-newer"
     assert payload["items"][0]["fetch_state"] == "catalogued"
     assert payload["items"][1]["best_source_rank"] == 3
     assert payload["items"][1]["last_source_published_at"] == (

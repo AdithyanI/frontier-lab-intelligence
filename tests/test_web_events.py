@@ -193,6 +193,20 @@ def test_events_api_projects_and_filters_completed_triage(tmp_path, monkeypatch)
     assert searched_item["daily_rank"] == search_target["daily_rank"]
     assert searched["daily_rank_total"] == all_items["daily_rank_total"]
 
+    focused = client.get(
+        "/api/events",
+        params={
+            "date": "2026-07-11",
+            "event_id": search_target["event_id"],
+            "limit": 20,
+        },
+    ).json()
+    assert focused["event_id"] == search_target["event_id"]
+    assert focused["total"] == 1
+    assert focused["items"][0]["event_id"] == search_target["event_id"]
+    assert focused["items"][0]["daily_rank"] == search_target["daily_rank"]
+    assert focused["daily_rank_total"] == all_items["daily_rank_total"]
+
     kept = client.get(
         "/api/events?date=2026-07-11&triage=keep&limit=20"
     ).json()

@@ -132,7 +132,9 @@ artifact inherits the best rank among the accepted Feed envelopes that exposed
 it; the smallest rank wins when several observations converge. Source time is
 shown separately, and the inherited rank is provenance rather than a new
 artifact-quality score. Bounded pagination keeps the surface fast. Expanding a
-row shows canonical and source URLs, first-seen time, retrieval state and
+row shows the canonical URL and deep-links to the exact ranked Feed envelope
+that disclosed it; the Feed preserves the full evidence context and onward X
+link. Expanded provenance also shows first-seen time, retrieval state and
 method, snapshot size, and any current error. It does not summarize or classify
 artifact content; those are later cited-insight responsibilities.
 

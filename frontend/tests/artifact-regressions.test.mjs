@@ -43,3 +43,13 @@ test('Artifacts inherit Feed rank while keeping source time secondary', () => {
   assert.match(artifactSource, /<span>Source time<\/span>/)
   assert.match(artifactSource, /item\.source_published_at/)
 })
+
+test('Artifact provenance deep-links to the exact ranked Feed envelope', () => {
+  assert.match(artifactSource, /source_event_id/)
+  assert.match(artifactSource, /Feed envelope/)
+  assert.match(artifactSource, /\/feed\?date=/)
+  assert.match(feedSource, /useSearchParams/)
+  assert.match(feedSource, /event_id:/)
+  assert.match(feedSource, /targetEventId/)
+  assert.match(feedSource, /event-row--focused/)
+})

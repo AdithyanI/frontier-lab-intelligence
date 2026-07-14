@@ -18,7 +18,9 @@ test('Feed uses semantic classes for optional menu and triage content', () => {
 })
 
 test('Feed search matches the compact ruled control language', () => {
-  assert.match(appStyles, /grid-template-columns: minmax\(320px, 480px\) auto/)
+  assert.match(appStyles, /grid-template-columns: minmax\(320px, 400px\) 1fr/)
+  assert.match(appStyles, /\.feed-controls \{[\s\S]*?justify-self: end;[\s\S]*?gap: 8px;/)
+  assert.match(appStyles, /@media \(max-width: 760px\)/)
   assert.match(appStyles, /\.feed-search \{[\s\S]*?min-height: 44px;[\s\S]*?border: 1px solid var\(--border-strong\);[\s\S]*?border-radius: 0;/)
 })
 

@@ -255,7 +255,9 @@ Feed-style navigator selects the UTC publication day of the X observation
 (never mutable retrieval time); within a day, one row per canonical artifact
 inherits the best originating Feed rank, with source time shown separately and
 retrieval state inside expandable provenance rather than in the collapsed index
-row. This is a frozen ordering input carried from Feed, not a new artifact
+row. Expanded provenance deep-links through the stored source event ID to the
+exact Feed envelope; the Feed remains the evidence workspace and owns the
+onward source link. This is a frozen ordering input carried from Feed, not a new artifact
 score. The same artifact
 may appear on multiple days when the network independently links it again. This
 is an operator inspection surface, not a second Feed or an insight product.
