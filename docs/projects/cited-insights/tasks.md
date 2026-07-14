@@ -252,6 +252,13 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [FEED-MENUS-COMPACTED] Adi's visual follow-up showed that the
+  corrected dropdown language was right but the 210px panel and 40px rows
+  were still oversized for their short option sets. Tightened both shared
+  panels to the 166px trigger width and 36px rows while preserving the 44px
+  trigger target. Live checks confirmed that all four Audit labels and counts
+  fit, the three Sort options read cleanly, menu exclusivity still holds, and
+  browser logs remain clear.
 - 2026-07-14: [FEED-MENUS-ALIGNED] Adi flagged that the open Audit and Sort
   controls felt visually unrelated to the rest of the product. Reworked the
   shared Feed disclosure treatment from floating rounded cards into the
