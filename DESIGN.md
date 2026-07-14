@@ -131,7 +131,10 @@ Rules:
 - **Evidence Feed:** default to the decision-ready `Kept` / `Score` view.
   Date navigation shows the newest seven available complete UTC days in one
   ruled row; explicit older/newer controls page through non-overlapping
-  seven-date windows while keeping the selected column where possible.
+  seven-date windows while keeping the selected column where possible. At
+  narrower desktop widths, date labels compact without wrapping while counts
+  remain visible; the same seven-cell structure appears as a quiet skeleton
+  during the initial date request so the page does not jump from an empty rail.
   The persistent left rail shows the event's stable daily score rank across all
   evidence for the selected day (`#1`, `#2`, ...), never the composite decimal.
   Audit filters and search hide rows without restarting that rank. Clicking it opens one

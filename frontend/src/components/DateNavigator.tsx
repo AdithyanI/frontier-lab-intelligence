@@ -5,9 +5,8 @@ const shortDate = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
 })
 
-const compactDate = new Intl.DateTimeFormat('en-US', {
+const compactWeekday = new Intl.DateTimeFormat('en-US', {
   weekday: 'short',
-  day: 'numeric',
   timeZone: 'UTC',
 })
 
@@ -76,7 +75,7 @@ export default function DateNavigator({
                   <span className="feed-day-label" aria-hidden="true">
                     <span className="feed-day-label-long">{fullDateLabel}</span>
                     <span className="feed-day-label-compact">
-                      {compactDate.format(parsedDate)}
+                      {compactWeekday.format(parsedDate)} {parsedDate.getUTCDate()}
                     </span>
                   </span>
                   <span className="feed-day-count mono" aria-hidden="true">
