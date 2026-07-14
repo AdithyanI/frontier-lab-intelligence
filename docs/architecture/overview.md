@@ -231,9 +231,13 @@ redirects, DNS checks, robots, size/time limits, append-only attempts, explicit
 retryable/terminal errors, and content-addressed raw/text snapshots make the
 stage resumable and replayable. HTML uses Trafilatura, PDFs use pypdf, and
 client-rendered error shells remain failures rather than false clean text. The
+replaceable `jina-reader-v1` fallback handles only ordinary public HTML pages
+that failed the native boundary; its separate fetch policy and raw JSON
+snapshot preserve provider provenance, while X, LinkedIn, YouTube, hosted
+forms, robots-denied pages, authentication, and paywalls remain deferred. The
 2026-07-14 v1 proof indexed 1,566 canonical artifacts and 1,739 source
-observations; its 30-artifact cohort produced 19 usable clean texts, four
-terminal failures, and seven exhausted retryable outcomes. Broad crawling,
+observations; its 30-artifact cohort produced 19 native clean texts, then the
+Reader fallback recovered all three OpenAI HTTP-403 pages. Broad crawling,
 RSS/GitHub adapters, artifact UI, and cited-insight generation remain deferred.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event

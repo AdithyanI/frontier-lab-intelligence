@@ -13,6 +13,7 @@ Endpoints:
 - /api/feed                      Registry-aware deterministic signal Feed
 - /api/events/dates              exact structural event counts by date
 - /api/events                    Registry-aware exact structural event groups
+- /api/artifacts                 canonical primary-artifact library
 """
 
 from datetime import date as calendar_date
@@ -23,6 +24,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from fli import channels, registry as entity_registry
+from fli.web import artifact_library as artifact_store
 from fli.web import events as event_store, feed as feed_store, rankings as rankings_store
 
 DIST_DIR = Path(__file__).parent / "dist"
@@ -272,6 +274,15 @@ def events(
             offset=offset,
         )
     )
+
+
+@app.get("/api/artifacts")
+def artifact_library(
+    limit: int = Query(60, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+) -> JSONResponse:
+    """Canonical primary artifacts with compact source and fetch provenance."""
+    return JSONResponse(artifact_store.artifacts_payload(limit=limit, offset=offset))
 
 
 if DIST_DIR.exists():

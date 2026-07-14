@@ -140,6 +140,14 @@ reads first.
 
 ## Decisions
 
+- 2026-07-14: Keep direct bounded retrieval as the primary artifact path and
+  add `jina-reader-v1` only as a replaceable fallback for ordinary public HTML
+  failures. Reader attempts use their own immutable fetch policy, preserve the
+  complete JSON response plus clean Markdown, and never run for the deferred
+  X/LinkedIn/YouTube/form adapters, robots-denied pages, authentication, or
+  paywalls. The optional key is repo-local runtime configuration sourced from
+  the canonical Key Vault secret; no secret CLI flag exists.
+
 - 2026-07-13: Pause cited extraction until the active
   `temporal-event-projection` project removes future evidence from historical
   day envelopes and freezes canonical event/snapshot semantics. Existing
@@ -240,6 +248,7 @@ reads first.
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Freeze the five oracle post IDs, corrected event/triage run identities, current decisions, artifact coverage, and known gaps into one cold-resume packet. | parent | [oracle resume](resources/oracle-resume.md) |
+| done | Add and prove a bounded Jina Reader fallback for eligible native public-page failures; preserve provider provenance and resumability. | parent | [artifact library](../../references/artifact-library.md) |
 | todo | Hand-write the five expected `insight-v1` outcomes, including explicit misses where primary evidence is absent. | parent | [oracle resume](resources/oracle-resume.md) |
 | todo | Implement and run the smallest extraction path against those frozen inputs; audit citation spans before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
 
@@ -267,6 +276,17 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [JINA-READER-FALLBACK] Added a separate `jina-reader-v1`
+  recovery run behind the native `bounded-public-v1` fetch contract. The
+  fallback is JSON-only, authenticated from the repo-local Key Vault mapping,
+  append-only, resumable, denylisted for deferred provider adapters, and stores
+  provider provenance plus token usage without changing artifact identity.
+  Twelve focused fetch tests pass. The live bounded proof recovered all three
+  OpenAI HTTP-403 artifacts (GPT-5.6, GPT-Live, and ambitious work), producing
+  82,476 clean-text characters with zero failures; an immediate replay made no
+  duplicate calls. Next remains the five-record insight oracle, not broader
+  crawling.
 
 - 2026-07-14: [AGENT-NATIVE-HANDOFF-CONSOLIDATION] Adversarial cold-start,
   harness, and submission-strategy reviews all recovered the same critical

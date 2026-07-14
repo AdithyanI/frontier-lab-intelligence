@@ -64,6 +64,8 @@ CREATE TABLE IF NOT EXISTS artifact (
 );
 CREATE INDEX IF NOT EXISTS idx_artifact_host_seen
     ON artifact(host, first_seen_at, artifact_id);
+CREATE INDEX IF NOT EXISTS idx_artifact_last_seen
+    ON artifact(last_seen_at DESC, artifact_id);
 
 CREATE TABLE IF NOT EXISTS artifact_alias (
     alias_url TEXT PRIMARY KEY,
