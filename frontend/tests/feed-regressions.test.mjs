@@ -70,3 +70,14 @@ test('Feed pages through fixed seven-date windows with explicit boundary control
   assert.match(feedSource, /for \(const value of visibleDates\)/)
   assert.doesNotMatch(appStyles, /\.feed-days button span:last-child/)
 })
+
+test('Feed keeps date navigation stable while loading and compact at narrower desktops', () => {
+  assert.match(feedSource, /loading=\{dates === null\}/)
+  assert.match(dateNavigatorSource, /loading\?: boolean/)
+  assert.match(dateNavigatorSource, /Array\.from\(\{ length: 7 \}/)
+  assert.match(dateNavigatorSource, /className="feed-day-placeholder"/)
+  assert.match(dateNavigatorSource, /aria-label=\{`\$\{fullDateLabel\}, \$\{itemCountLabel\} posts`\}/)
+  assert.match(appStyles, /@media \(max-width: 1100px\)/)
+  assert.match(appStyles, /\.feed-day-label-long \{ display: none; \}/)
+  assert.match(appStyles, /\.feed-day-label-compact \{ display: inline; \}/)
+})

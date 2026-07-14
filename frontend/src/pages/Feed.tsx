@@ -849,6 +849,7 @@ export default function Feed() {
           onShowOlderDates={() => moveDateWindow('older')}
           onShowNewerDates={() => moveDateWindow('newer')}
           ariaLabel="Feed date"
+          loading={dates === null}
         />
       </section>
 

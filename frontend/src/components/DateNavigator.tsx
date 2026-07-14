@@ -5,6 +5,12 @@ const shortDate = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
 })
 
+const compactDate = new Intl.DateTimeFormat('en-US', {
+  weekday: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+})
+
 export interface DateNavigatorItem {
   day: string
   item_count: number
@@ -19,6 +25,7 @@ interface DateNavigatorProps {
   onShowOlderDates: () => void
   onShowNewerDates: () => void
   ariaLabel: string
+  loading?: boolean
 }
 
 export default function DateNavigator({
@@ -30,9 +37,12 @@ export default function DateNavigator({
   onShowOlderDates,
   onShowNewerDates,
   ariaLabel,
+  loading = false,
 }: DateNavigatorProps) {
+  const showLoadingDates = loading && dates.length === 0
+
   return (
-    <div className="feed-date-navigator">
+    <div className="feed-date-navigator" aria-busy={loading}>
       <button
         type="button"
         className="feed-date-page feed-date-page--previous"
@@ -43,20 +53,38 @@ export default function DateNavigator({
         <span aria-hidden="true">←</span>
       </button>
       <div className="feed-days" role="group" aria-label={ariaLabel}>
-        {dates.map((value) => (
-          <button
-            type="button"
-            key={value.day}
-            className={`feed-day${value.day === selectedDate ? ' is-active' : ''}`}
-            aria-pressed={value.day === selectedDate}
-            onClick={() => onSelectDate(value.day)}
-          >
-            <span>{shortDate.format(new Date(`${value.day}T12:00:00Z`))}</span>
-            <span className="feed-day-count mono">
-              {value.item_count.toLocaleString('en-US')}
-            </span>
-          </button>
-        ))}
+        {showLoadingDates
+          ? Array.from({ length: 7 }, (_, index) => (
+              <span className="feed-day-placeholder" aria-hidden="true" key={index}>
+                <span className="feed-date-placeholder-label skeleton" />
+                <span className="feed-date-placeholder-count skeleton" />
+              </span>
+            ))
+          : dates.map((value) => {
+              const parsedDate = new Date(`${value.day}T12:00:00Z`)
+              const fullDateLabel = shortDate.format(parsedDate)
+              const itemCountLabel = value.item_count.toLocaleString('en-US')
+              return (
+                <button
+                  type="button"
+                  key={value.day}
+                  className={`feed-day${value.day === selectedDate ? ' is-active' : ''}`}
+                  aria-label={`${fullDateLabel}, ${itemCountLabel} posts`}
+                  aria-pressed={value.day === selectedDate}
+                  onClick={() => onSelectDate(value.day)}
+                >
+                  <span className="feed-day-label" aria-hidden="true">
+                    <span className="feed-day-label-long">{fullDateLabel}</span>
+                    <span className="feed-day-label-compact">
+                      {compactDate.format(parsedDate)}
+                    </span>
+                  </span>
+                  <span className="feed-day-count mono" aria-hidden="true">
+                    {itemCountLabel}
+                  </span>
+                </button>
+              )
+            })}
       </div>
       <button
         type="button"
