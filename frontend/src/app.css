@@ -934,6 +934,55 @@ td.num {
   font-size: 14px;
 }
 
+/* ---- Network: Registry + ranking workspace ---- */
+
+.network-page { max-width: 1360px; }
+
+.network-tabs {
+  display: flex;
+  margin-top: 28px;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+}
+
+.network-tabs a {
+  min-width: 160px;
+  padding: 11px 16px;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.network-tabs a:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.network-tabs a.active {
+  background: var(--ink);
+  color: #fff;
+}
+
+.network-view { margin-top: 36px; }
+
+.network-view-title {
+  letter-spacing: -0.015em;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.network-view-sub {
+  max-width: 62ch;
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.registry-view .table-tools { margin-top: 32px; }
+
 /* ---- responsive ---- */
 
 @media (max-width: 900px) {
@@ -950,9 +999,9 @@ td.num {
   .topbar nav { width: 100%; margin-left: 0; overflow-x: auto; }
 }
 
-/* ---- ranking page: trust orbit + score column ---- */
+/* ---- ranking view: trust orbit + score column ---- */
 
-.rank-page { max-width: 1360px; }
+.rank-page { max-width: 100%; }
 
 .rank-context {
   display: flex;

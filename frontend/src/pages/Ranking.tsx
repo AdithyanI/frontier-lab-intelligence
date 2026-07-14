@@ -250,19 +250,21 @@ export default function Ranking() {
 
   if (error || (data && !data.available)) {
     return (
-      <div className="page">
-        <h1 className="page-title">Who does the inside trust?</h1>
-        <p className="page-sub mono">
+      <section className="network-view rank-page" aria-labelledby="ranking-title">
+        <h2 className="network-view-title" id="ranking-title">Ranking</h2>
+        <p className="network-view-sub mono">
           {data?.reason ?? 'Ranking data is unavailable.'}
         </p>
-      </div>
+      </section>
     )
   }
 
   return (
-    <div className="page rank-page">
-      <h1 className="page-title">Who does the inside trust?</h1>
-      <p className="page-sub">
+    <section className="network-view rank-page" aria-labelledby="ranking-title">
+      <h2 className="network-view-title" id="ranking-title">
+        Who does the inside trust?
+      </h2>
+      <p className="network-view-sub">
         Accounts are ranked by how many screened Registry sources follow them
         — never by raw follower count.
       </p>
@@ -577,6 +579,6 @@ export default function Ranking() {
         }
         onClose={() => setCardOpen(false)}
       />
-    </div>
+    </section>
   )
 }

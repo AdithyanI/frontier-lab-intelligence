@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import { getCachedJSON, type Rankings } from './api'
+import Network from './pages/Network'
 import Registry from './pages/Registry'
 import Ranking from './pages/Ranking'
 import Feed from './pages/Feed'
@@ -23,8 +24,7 @@ export default function App() {
           Frontier Lab Intelligence
         </div>
         <nav aria-label="Main">
-          <NavLink to="/" end>Registry</NavLink>
-          <NavLink to="/ranking">Ranking</NavLink>
+          <NavLink to="/network">Network</NavLink>
           <NavLink to="/feed">Feed</NavLink>
           <NavLink to="/artifacts">Artifacts</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
@@ -32,12 +32,16 @@ export default function App() {
       </header>
       <main className="content">
         <Routes>
-          <Route path="/" element={<Registry />} />
-          <Route path="/ranking" element={<Ranking />} />
+          <Route path="/" element={<Navigate to="/network/ranking" replace />} />
+          <Route path="/network" element={<Network />}>
+            <Route index element={<Navigate to="ranking" replace />} />
+            <Route path="ranking" element={<Ranking />} />
+            <Route path="registry" element={<Registry />} />
+          </Route>
           <Route path="/feed" element={<Feed />} />
           <Route path="/artifacts" element={<Artifacts />} />
           <Route path="/architecture" element={<Architecture />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/network/ranking" replace />} />
         </Routes>
       </main>
     </div>

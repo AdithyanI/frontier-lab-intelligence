@@ -136,9 +136,9 @@ export default function Registry() {
   const showTypeColumn = kind !== 'person' && kind !== 'organization'
 
   return (
-    <div className="page">
-      <h1 className="page-title">Registry</h1>
-      <p className="page-sub">
+    <section className="network-view registry-view" aria-labelledby="registry-title">
+      <h2 className="network-view-title" id="registry-title">Registry</h2>
+      <p className="network-view-sub">
         Resolved people and organizations, with every observed channel attached
         to a single identity.
       </p>
@@ -291,6 +291,6 @@ export default function Registry() {
       )}
 
       <EntityCard entity={selected} onClose={() => setSelected(null)} />
-    </div>
+    </section>
   )
 }
