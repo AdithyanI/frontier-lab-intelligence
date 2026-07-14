@@ -520,13 +520,15 @@ rejections remain separate from structural kind in
 `raw_items` is an unconnected bootstrap table. Row counts as of this writing
 are in parentheses.
 
-The Registry read model also exposes nullable `followers_count` as the sum of
-the latest stored X-account follower counts owned by each entity. All, People,
-and Organizations default to descending by this value and accept an explicit
-ascending/descending API direction; People labels it X followers, while All
-and Organizations label it Combined X followers because one entity may own
-several channels. Missing observations remain null and sort last. This is a
-presentation proxy, not graph evidence or a canonical importance score.
+The Registry read model exposes nullable `followers_count` as the sum of the
+latest stored X-account follower counts owned by each entity, plus a stable
+`reach_rank` across all active Registry entities. All, People, and Organizations
+show this as **X reach**: the ordinal is primary and the compact combined total
+remains secondary scale evidence (`#24 · 3.3M`). The default API order is
+`sort=reach&direction=asc`; reversing it shows the deepest observed ranks first.
+Search, kind filters, and pagination do not redefine the comparison universe.
+Missing observations remain null and sort last. This is a public-reach proxy,
+not graph evidence or a canonical importance score.
 
 The Network workspace presents Ranking and Registry as related but distinct
 subviews. Registry may also sort on `network_rank`, a read-time projection of

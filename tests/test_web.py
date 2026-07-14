@@ -27,8 +27,9 @@ def test_registry_returns_complete_typed_entity_universe():
     assert data["filtered_total"] == data["total"]
     assert data["offset"] == 0
     assert data["limit"] == 5000
-    assert data["sort"] == "followers"
-    assert data["direction"] == "desc"
+    assert data["sort"] == "reach"
+    assert data["direction"] == "asc"
+    assert data["reach_rank_total"] == data["total"] - data["counts"]["rejected"]
     assert data["counts"]["person"] > 0
     assert data["counts"]["organization"] >= 10
     assert data["counts"]["unsure"] >= 0
@@ -56,6 +57,7 @@ def test_registry_returns_complete_typed_entity_universe():
         "rejection_source",
         "rejection_evidence_url",
         "followers_count",
+        "reach_rank",
         "network_rank",
         "network_follow_count",
         "network_follow_share",
@@ -76,14 +78,14 @@ def test_registry_pages_filters_and_searches_on_the_server():
     assert follower_counts == sorted(follower_counts, reverse=True)
 
     ascending = client.get(
-        "/api/registry?group=organization&limit=40&direction=asc"
+        "/api/registry?group=organization&limit=40&direction=desc"
     ).json()
     ascending_counts = [
         entity["followers_count"]
         for entity in ascending["entities"]
         if entity["followers_count"] is not None
     ]
-    assert ascending["direction"] == "asc"
+    assert ascending["direction"] == "desc"
     assert ascending_counts == sorted(ascending_counts)
 
     people = client.get("/api/registry?group=person&limit=2").json()
@@ -100,6 +102,15 @@ def test_registry_pages_filters_and_searches_on_the_server():
     search = client.get("/api/registry?q=openai&limit=40").json()
     assert 0 < search["filtered_total"] < search["total"]
     assert any(entity["slug"] == "openai" for entity in search["entities"])
+    openai = next(entity for entity in search["entities"] if entity["slug"] == "openai")
+    organizations = client.get(
+        "/api/registry?group=organization&q=openai&limit=40"
+    ).json()
+    openai_as_organization = next(
+        entity for entity in organizations["entities"] if entity["slug"] == "openai"
+    )
+    assert openai["reach_rank"] == openai_as_organization["reach_rank"]
+    assert search["reach_rank_total"] == organizations["reach_rank_total"]
 
 
 def test_registry_can_sort_by_best_owned_account_network_rank(monkeypatch):

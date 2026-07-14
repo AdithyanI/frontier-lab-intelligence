@@ -40,6 +40,7 @@ export interface Entity {
   rejection_source: string | null
   rejection_evidence_url: string | null
   followers_count: number | null
+  reach_rank: number | null
   network_rank: number | null
   network_follow_count: number | null
   network_follow_share: number | null
@@ -53,9 +54,10 @@ export interface Registry {
   total: number
   filtered_total: number
   counts: Record<RegistryGroup, number>
+  reach_rank_total: number
   limit: number
   offset: number
-  sort: 'followers' | 'network'
+  sort: 'reach' | 'network'
   direction: 'asc' | 'desc'
 }
 
@@ -375,6 +377,45 @@ export interface ArtifactDates {
   date_from?: string
   date_to?: string
   dates: FeedDate[]
+}
+
+export interface InsightCitation {
+  quote: string
+  url: string
+  source_type: string
+  source_id: string
+  author: string | null
+  title: string | null
+}
+
+export interface InsightItem {
+  event_id: string
+  day: string
+  current_rank: number
+  claim: string
+  why_it_matters: string
+  investment_implication: string
+  engineering_implication: string
+  citation: InsightCitation
+}
+
+export interface InsightRun {
+  run_id: string
+  day: string
+  prompt_version: string
+  model: string
+  verified_count: number
+  failed_count: number
+  reported_cost_usd: number
+  cache_hit_requests: number
+  cache_eligible_requests: number
+}
+
+export interface InsightsResponse {
+  available: boolean
+  reason?: string | null
+  run: InsightRun | null
+  items: InsightItem[]
 }
 
 export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {

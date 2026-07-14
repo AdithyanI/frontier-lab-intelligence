@@ -177,11 +177,12 @@ also found that low reach is not the same as low relevance; Adi nevertheless
 approved removing the 17 remaining sub-10,000 organizations as a temporary
 first-PageRank boundary, with restoration through later graph evidence.
 
-The Registry's All, People, and Organizations views use one transparent
-temporary ordering: sum the latest stored follower counts across every X
-channel owned by the entity and sort descending. People shows Entity + X
-followers; Organizations shows Entity + Combined X followers; All shows
-Entity + Type + Combined X followers. The visible total is a reach proxy, not
+The Registry's All, People, and Organizations views use one transparent,
+stable public-reach ordering: sum the latest stored follower counts across
+every X channel owned by the entity, then assign its ordinal once across all
+active Registry entities. The table labels this **X reach** and renders the
+ordinal first with compact magnitude beside it (`#24 · 3.3M`). Search, kind
+filters, and pagination never restart the rank. This is a reach proxy, not
 PageRank, a structural-kind input, or the final trusted-seed decision. Handles
 remain searchable and available in the detail card but are hidden from these
 ranked tables to keep rows calm. Missing follower observations display as an em

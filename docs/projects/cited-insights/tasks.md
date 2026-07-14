@@ -142,6 +142,13 @@ reads first.
 
 ## Decisions
 
+- 2026-07-14: Make Registry public reach rank-first without discarding its
+  magnitude. **X reach** is one stable ordinal across all active Registry
+  entities and renders as `#rank · compact combined followers`; search, kind
+  filters, and pagination only change visibility. Network rank remains the
+  separate global account ordering. The two columns therefore support quick
+  relative comparison while their underlying counts and scopes stay honest.
+
 - 2026-07-14: Merge Registry and Ranking only at the navigation layer under a
   single Network workspace, with Ranking as the default and Registry preserved
   as the assignment-aligned identity term. Registry keeps Combined X followers

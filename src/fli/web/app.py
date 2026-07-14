@@ -15,6 +15,7 @@ Endpoints:
 - /api/events                    Registry-aware exact structural event groups
 - /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
+- /api/insights                  citation-verified insight proof
 """
 
 from datetime import date as calendar_date
@@ -27,6 +28,7 @@ from fastapi.staticfiles import StaticFiles
 from fli import channels, registry as entity_registry
 from fli.web import artifact_library as artifact_store
 from fli.web import events as event_store, feed as feed_store, rankings as rankings_store
+from fli.web import insights as insight_store
 
 DIST_DIR = Path(__file__).parent / "dist"
 
@@ -86,13 +88,58 @@ def _counts() -> dict:
         conn.close()
 
 
-def _add_network_ranks(entities: list[dict]) -> None:
-    """Attach the best global account rank owned by each Registry entity."""
+def _registry_reach_ranks(conn) -> tuple[dict[int, int], int]:
+    """Stable public-reach position across all active Registry entities."""
+    rows = conn.execute(
+        """WITH reach AS (
+               SELECT e.id, e.name, SUM(a.followers_count) AS followers_count
+               FROM entities e
+               LEFT JOIN entity_registry_rejections rejected
+                 ON rejected.entity_id = e.id
+               LEFT JOIN entity_channels ec ON ec.entity_id = e.id
+               LEFT JOIN channels c ON c.id = ec.channel_id AND c.kind = 'x'
+               LEFT JOIN accounts a
+                 ON a.platform = 'x' AND a.handle = c.key
+               WHERE rejected.entity_id IS NULL
+               GROUP BY e.id, e.name
+           ), ranked AS (
+               SELECT id, followers_count,
+                      ROW_NUMBER() OVER (
+                          ORDER BY (followers_count IS NULL),
+                                   followers_count DESC,
+                                   name COLLATE NOCASE,
+                                   id
+                      ) AS reach_rank,
+                      COUNT(*) OVER () AS reach_rank_total
+               FROM reach
+           )
+           SELECT id,
+                  CASE WHEN followers_count IS NOT NULL
+                       THEN reach_rank END AS reach_rank,
+                  reach_rank_total
+           FROM ranked"""
+    ).fetchall()
+    if not rows:
+        return {}, 0
+    return (
+        {
+            int(row["id"]): int(row["reach_rank"])
+            for row in rows
+            if row["reach_rank"] is not None
+        },
+        int(rows[0]["reach_rank_total"]),
+    )
+
+
+def _add_registry_ranks(conn, entities: list[dict]) -> int:
+    """Attach stable Network and X-reach positions to Registry rows."""
     network_ranks = rankings_store.entity_network_ranks()
+    reach_ranks, reach_rank_total = _registry_reach_ranks(conn)
     for entity in entities:
         rank = network_ranks.get(entity["id"])
         entity.update(
             {
+                "reach_rank": reach_ranks.get(entity["id"]),
                 "network_rank": rank["network_rank"] if rank else None,
                 "network_follow_count": (
                     rank["cohort_follow_count"] if rank else None
@@ -103,6 +150,7 @@ def _add_network_ranks(entities: list[dict]) -> None:
                 "network_account_handle": rank["handle"] if rank else None,
             }
         )
+    return reach_rank_total
 
 
 @app.get("/api/status")
@@ -172,8 +220,8 @@ def registry(
         "all", pattern="^(all|person|organization|unsure|unknown|rejected)$"
     ),
     q: str = Query("", max_length=200),
-    sort: str = Query("followers", pattern="^(followers|network)$"),
-    direction: str = Query("desc", pattern="^(asc|desc)$"),
+    sort: str = Query("reach", pattern="^(reach|network)$"),
+    direction: str = Query("asc", pattern="^(asc|desc)$"),
 ) -> JSONResponse:
     """One server-filtered page of the entity universe."""
     conn = _model_conn()
@@ -192,15 +240,16 @@ def registry(
                 direction="desc",
             )
         else:
+            follower_direction = "desc" if direction == "asc" else "asc"
             entities = entity_registry.read_entities(
                 conn,
                 limit=limit,
                 offset=offset,
                 group=group,
                 query=q,
-                direction=direction,
+                direction=follower_direction,
             )
-        _add_network_ranks(entities)
+        reach_rank_total = _add_registry_ranks(conn, entities)
         if sort == "network":
             sign = 1 if direction == "asc" else -1
             entities.sort(
@@ -217,6 +266,7 @@ def registry(
                 "total": sum(counts.values()),
                 "filtered_total": filtered_total,
                 "counts": counts,
+                "reach_rank_total": reach_rank_total,
                 "limit": limit,
                 "offset": offset,
                 "sort": sort,
@@ -237,7 +287,7 @@ def registry_entity(entity_id: int) -> JSONResponse:
         )
         if not entities:
             return JSONResponse({"detail": "entity not found"}, status_code=404)
-        _add_network_ranks(entities)
+        _add_registry_ranks(conn, entities)
         return JSONResponse({"entity": entities[0]})
     finally:
         conn.close()
@@ -345,6 +395,12 @@ def artifact_library(
 def artifact_dates() -> JSONResponse:
     """Available source-evidence dates with distinct artifact counts."""
     return JSONResponse(artifact_store.artifact_dates_payload())
+
+
+@app.get("/api/insights")
+def insights() -> JSONResponse:
+    """Publishable insights whose citation spans were verified in application code."""
+    return JSONResponse(insight_store.insights_payload())
 
 
 if DIST_DIR.exists():

@@ -8,7 +8,7 @@ import {
 import EntityCard, { typeClass, typeLabel, xHandleLabel } from '../components/EntityCard'
 
 type KindFilter = 'all' | RegistryGroup
-type SortField = 'followers' | 'network'
+type SortField = 'reach' | 'network'
 type SortDirection = 'asc' | 'desc'
 
 const FIRST = 40
@@ -17,6 +17,12 @@ const SEARCH_DELAY_MS = 180
 
 const fmt = (n: number | null | undefined) =>
   n == null ? '—' : n.toLocaleString('en-US')
+const compactFmt = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})
+const fmtCompact = (n: number | null | undefined) =>
+  n == null ? '—' : compactFmt.format(n)
 
 const registryURL = (
   kind: KindFilter,
@@ -44,13 +50,13 @@ export default function Registry() {
   const [query, setQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [kind, setKind] = useState<KindFilter>('all')
-  const [sortField, setSortField] = useState<SortField>('followers')
+  const [sortField, setSortField] = useState<SortField>('reach')
   const [sortDirection, setSortDirection] =
-    useState<SortDirection>('desc')
+    useState<SortDirection>('asc')
   const [selected, setSelected] = useState<Entity | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const viewRef = useRef('all\0followers\0desc')
+  const viewRef = useRef('all\0reach\0asc')
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -146,7 +152,7 @@ export default function Registry() {
       return
     }
     setSortField(field)
-    setSortDirection(field === 'network' ? 'asc' : 'desc')
+    setSortDirection('asc')
   }
 
   return (
@@ -215,10 +221,12 @@ export default function Registry() {
                   <button
                     className="ent-sort"
                     type="button"
-                    aria-label={`Sort by network rank, ${
-                      sortField === 'network' && sortDirection === 'asc'
-                        ? 'lowest rank first'
-                        : 'highest rank first'
+                    aria-label={`Sort by network rank; ${
+                      sortField !== 'network'
+                        ? 'not selected'
+                        : sortDirection === 'asc'
+                          ? 'best rank first'
+                          : 'deepest rank first'
                     }`}
                     onClick={() => changeSort('network')}
                   >
@@ -235,33 +243,33 @@ export default function Registry() {
               )}
               {showFollowerColumn && (
                 <th
-                  className="ent-followers-head"
+                  className="ent-reach-head"
                   aria-sort={
-                    sortField === 'followers'
-                      ? sortDirection === 'desc'
-                        ? 'descending'
-                        : 'ascending'
+                    sortField === 'reach'
+                      ? sortDirection === 'asc'
+                        ? 'ascending'
+                        : 'descending'
                       : 'none'
                   }
                 >
                   <button
                     className="ent-sort"
                     type="button"
-                    aria-label={`Sort by ${
-                      kind === 'person' ? 'X followers' : 'combined X followers'
-                    }, ${sortDirection === 'desc' ? 'ascending' : 'descending'}`}
-                    onClick={() => changeSort('followers')}
+                    aria-label={`Sort by X reach; ${
+                      sortField !== 'reach'
+                        ? 'not selected'
+                        : sortDirection === 'asc'
+                          ? 'best rank first'
+                          : 'deepest rank first'
+                    }`}
+                    onClick={() => changeSort('reach')}
                   >
-                    <span>
-                      {kind === 'person'
-                        ? 'X followers'
-                        : 'Combined X followers'}
-                    </span>
+                    <span>X reach</span>
                     <span className="ent-sort-arrow" aria-hidden="true">
-                      {sortField === 'followers'
-                        ? sortDirection === 'desc'
-                          ? '↓'
-                          : '↑'
+                      {sortField === 'reach'
+                        ? sortDirection === 'asc'
+                          ? '↑'
+                          : '↓'
                         : '↕'}
                     </span>
                   </button>
@@ -326,8 +334,26 @@ export default function Registry() {
                     </td>
                   )}
                   {showFollowerColumn && (
-                    <td className="ent-followers">
-                      {fmt(entity.followers_count)}
+                    <td
+                      className="ent-reach"
+                      title={
+                        entity.reach_rank == null
+                          ? 'No observed X follower total is available for this entity.'
+                          : `#${fmt(entity.reach_rank)} of ${fmt(data.reach_rank_total)} active Registry entities · ${fmt(entity.followers_count)} combined X followers.`
+                      }
+                    >
+                      {entity.reach_rank == null ? (
+                        '—'
+                      ) : (
+                        <span className="ent-reach-value">
+                          <span className="ent-reach-rank">
+                            #{fmt(entity.reach_rank)}
+                          </span>
+                          <span className="ent-reach-magnitude">
+                            · {fmtCompact(entity.followers_count)}
+                          </span>
+                        </span>
+                      )}
                     </td>
                   )}
                   {showRejectionReason && (

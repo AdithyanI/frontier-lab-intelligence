@@ -575,14 +575,14 @@ td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-.ent-followers-head,
-.ent-followers {
+.ent-reach-head,
+.ent-reach {
   width: 180px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 .ent-network-head,
-.ent-followers-head { padding: 0; }
+.ent-reach-head { padding: 0; }
 .ent-sort {
   appearance: none;
   display: inline-flex;
@@ -621,10 +621,22 @@ td.num {
   line-height: 1;
 }
 .ent-network-rank,
-.ent-followers {
+.ent-reach {
   color: var(--ink-soft);
   font-family: var(--font-mono);
   font-size: 12px;
+}
+.ent-reach-value {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  white-space: nowrap;
+}
+.ent-reach-rank { color: var(--ink-soft); }
+.ent-reach-magnitude {
+  color: var(--muted);
+  font-size: 10.5px;
 }
 .ent-name { display: block; font-weight: 500; color: var(--ink); }
 .ent-handles {
@@ -2188,3 +2200,179 @@ td.num {
 }
 
 .artifact-loading { height: 360px; margin-top: 32px; }
+
+/* ---- verified cited insights ---- */
+
+.insight-page { max-width: 1180px; }
+
+.insight-page-head {
+  padding-bottom: 32px;
+}
+
+.insight-list {
+  border-top: 1px solid var(--border-strong);
+}
+
+.insight-row {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.insight-rank {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 32px 20px 32px 0;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.insight-rank strong {
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.insight-body {
+  min-width: 0;
+  padding: 30px 0 36px 32px;
+}
+
+.insight-head h2 {
+  max-width: 32ch;
+  margin: 0;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.insight-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.025em;
+}
+
+.insight-provenance a {
+  color: var(--blue-ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.insight-provenance a:hover,
+.insight-provenance a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.insight-citation {
+  max-width: 74ch;
+  margin: 24px 0 0;
+  padding: 17px 20px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.insight-citation p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.insight-citation cite {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-style: normal;
+}
+
+.insight-citation a {
+  color: var(--blue-ink);
+  text-decoration: none;
+}
+
+.insight-citation a:hover,
+.insight-citation a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.insight-meaning {
+  max-width: 960px;
+  margin-top: 28px;
+}
+
+.insight-meaning h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.insight-meaning p {
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.insight-why {
+  max-width: 74ch;
+}
+
+.insight-implications {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+
+.insight-message,
+.insight-empty {
+  margin: 0;
+  padding: 32px 0;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.insight-loading {
+  display: grid;
+  gap: 1px;
+  margin-top: 32px;
+  border-top: 1px solid var(--border-strong);
+  background: var(--border);
+}
+
+.insight-loading .skeleton {
+  height: 230px;
+  border-radius: 0;
+}
+
+@media (max-width: 860px) {
+  .insight-row { grid-template-columns: 80px minmax(0, 1fr); }
+  .insight-body { padding-left: 24px; }
+  .insight-implications { grid-template-columns: 1fr; gap: 22px; }
+}

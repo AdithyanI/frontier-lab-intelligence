@@ -353,18 +353,22 @@ function CurrentDataModel() {
 }
 
 function NetworkRankFigure() {
-  const screenedFollowers = [108, 138, 168, 198, 228]
-  const publicCrowd = Array.from({ length: 35 }, (_, index) => ({
-    x: 582 + (index % 7) * 20,
-    y: 102 + Math.floor(index / 7) * 24,
+  const leftFollowerField = Array.from({ length: 15 }, (_, index) => ({
+    x: 82 + (index % 3) * 24,
+    y: 108 + Math.floor(index / 3) * 24,
   }))
-  const screenedCrowdIndex = 25
+  const leftScreenedIndices = new Set([0, 4, 8, 10, 14])
+  const rightFollowerField = Array.from({ length: 35 }, (_, index) => ({
+    x: 582 + (index % 7) * 24,
+    y: 108 + Math.floor(index / 7) * 24,
+  }))
+  const rightScreenedIndex = 25
   const supportTicks = [0, 1, 2, 3, 4]
   return (
     <svg
       viewBox="0 0 1080 320"
       role="img"
-      aria-label="Why an account ranks higher: five screened Registry followers count as five signals for Account A. Account B has a large public crowd, but only its one screened Registry follower counts. Public audience size is ignored."
+      aria-label="Why an account ranks higher: Account A has fewer public followers but five screened Registry followers, while Account B has many public followers but only one screened Registry follower. The five screened signals count, public audience size does not."
     >
       <defs>
         <marker id="rank-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -374,13 +378,50 @@ function NetworkRankFigure() {
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHY AN ACCOUNT RANKS HIGHER · COUNTED NETWORK SUPPORT</text>
       <line x1="540" y1="60" x2="540" y2="276" stroke={MUTED} strokeWidth="1" opacity="0.22" />
 
-      {/* Account A: every follower shown is screened and counted. */}
-      <text x="70" y="76" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">5 SCREENED REGISTRY FOLLOWERS</text>
-      {screenedFollowers.map((y) => (
-        <g key={`in-${y}`}>
-          <circle cx="82" cy={y} r="7" fill={BLUE} />
-          <line x1="94" y1={y} x2="286" y2="168" stroke={BLUE_MID} strokeWidth="1.2" opacity="0.72" markerEnd="url(#rank-arrow)" />
-        </g>
+      {/* Account A: the same follower field, with five screened nodes. */}
+      <text x="70" y="72" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">FEWER FOLLOWERS OVERALL</text>
+      <text x="70" y="90" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.05em">BUT 5 SCREENED FOLLOWERS</text>
+      {leftFollowerField.map((node, index) => (
+        leftScreenedIndices.has(index) ? null : (
+          <line
+            key={`a-public-line-${index}`}
+            x1={node.x + 6}
+            y1={node.y}
+            x2="286"
+            y2="168"
+            stroke={MUTED}
+            strokeWidth="0.9"
+            strokeDasharray="2 5"
+            opacity="0.2"
+          />
+        )
+      ))}
+      {leftFollowerField.map((node, index) => (
+        leftScreenedIndices.has(index) ? (
+          <line
+            key={`a-screened-line-${index}`}
+            x1={node.x + 7}
+            y1={node.y}
+            x2="286"
+            y2="168"
+            stroke={BLUE_MID}
+            strokeWidth="1.2"
+            opacity="0.72"
+            markerEnd="url(#rank-arrow)"
+          />
+        ) : null
+      ))}
+      {leftFollowerField.map((node, index) => (
+        <circle
+          key={`a-follower-${index}`}
+          cx={node.x}
+          cy={node.y}
+          r="4.5"
+          fill={leftScreenedIndices.has(index) ? BLUE : '#fff'}
+          stroke={leftScreenedIndices.has(index) ? BLUE : MUTED}
+          strokeWidth={leftScreenedIndices.has(index) ? 0 : 1}
+          opacity={leftScreenedIndices.has(index) ? 1 : 0.52}
+        />
       ))}
       <rect x="296" y="138" width="174" height="60" fill={INK} />
       <text x="320" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill="#fff">Account A</text>
@@ -390,10 +431,11 @@ function NetworkRankFigure() {
       ))}
       <text x="296" y="264" fontFamily={UI} fontSize="12.5" fontWeight="600" fill={INK}>5 counted → higher network rank</text>
 
-      {/* Account B: the large public crowd follows it, but only one node is screened. */}
-      <text x="582" y="76" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">LARGE PUBLIC AUDIENCE</text>
-      {publicCrowd.map((node, index) => (
-        index === screenedCrowdIndex ? null : (
+      {/* Account B: the same follower field, with only one screened node. */}
+      <text x="582" y="72" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">MANY FOLLOWERS OVERALL</text>
+      <text x="582" y="90" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.05em">BUT ONLY 1 SCREENED FOLLOWER</text>
+      {rightFollowerField.map((node, index) => (
+        index === rightScreenedIndex ? null : (
           <line
             key={`crowd-line-${index}`}
             x1={node.x + 6}
@@ -403,34 +445,31 @@ function NetworkRankFigure() {
             stroke={MUTED}
             strokeWidth="0.9"
             strokeDasharray="2 5"
-            opacity="0.16"
+            opacity="0.2"
           />
         )
       ))}
-      {publicCrowd.map((node, index) => (
+      {rightFollowerField.map((node, index) => (
         <circle
           key={`crowd-node-${index}`}
           cx={node.x}
           cy={node.y}
-          r={index === screenedCrowdIndex ? 7 : 4.5}
-          fill={index === screenedCrowdIndex ? BLUE : '#fff'}
-          stroke={index === screenedCrowdIndex ? BLUE : MUTED}
-          strokeWidth={index === screenedCrowdIndex ? 0 : 1}
-          opacity={index === screenedCrowdIndex ? 1 : 0.52}
+          r="4.5"
+          fill={index === rightScreenedIndex ? BLUE : '#fff'}
+          stroke={index === rightScreenedIndex ? BLUE : MUTED}
+          strokeWidth={index === rightScreenedIndex ? 0 : 1}
+          opacity={index === rightScreenedIndex ? 1 : 0.52}
         />
       ))}
       <line
-        x1={publicCrowd[screenedCrowdIndex].x + 12}
-        y1={publicCrowd[screenedCrowdIndex].y}
+        x1={rightFollowerField[rightScreenedIndex].x + 7}
+        y1={rightFollowerField[rightScreenedIndex].y}
         x2="794"
         y2="168"
         stroke={BLUE_MID}
         strokeWidth="1.4"
         markerEnd="url(#rank-arrow)"
       />
-      <text x="582" y="232" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.04em">○ PUBLIC · NOT COUNTED</text>
-      <text x="582" y="250" fontFamily={MONO} fontSize="8.5" fill={BLUE_INK} letterSpacing="0.04em">● SCREENED · COUNTED ×1</text>
-
       <rect x="804" y="138" width="174" height="60" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
       <text x="828" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Account B</text>
       <text x="804" y="222" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">COUNTED SUPPORT</text>

@@ -114,13 +114,14 @@ Rules:
   search + All/People/Organizations/Unsure/Rejected segmented filter with live
   counts, load-more; rejected rows expose their reason in the table, while
   active rows show identity + truthful kind and open a detail card.
-  All, People, and Organizations default to reach order: People shows X
-  followers, Organizations shows Combined X followers, and All retains Type
-  alongside Combined X followers. They also expose a sortable Network rank:
+  All, People, and Organizations default to one stable Registry-wide **X
+  reach** order. Each cell leads with the entity's ordinal among all active
+  Registry entities and keeps the compact combined follower total as quieter
+  scale evidence (`#24 · 3.3M`). Search, kind filters, and pagination only hide
+  rows; they never recompute this rank. The separate sortable Network rank is
   the global entity-overlap position of the entity's best-ranked owned X
-  account. This is an ordinal projection from Ranking, not a new entity score;
-  public follower totals remain a separate reach measure. Both numeric headers
-  are full-width, keyboard-accessible sort controls. These views hide channel handles to keep
+  account. Neither ordinal is a new score, and the two scopes remain explicit.
+  Both numeric headers are full-width, keyboard-accessible sort controls. These views hide channel handles to keep
   rows calm; every channel remains searchable
   and available in the detail card. Missing follower observations display as
   an em dash and sort last. Rejected remains a reason-bearing review view.

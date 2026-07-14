@@ -6,6 +6,7 @@ import Registry from './pages/Registry'
 import Ranking from './pages/Ranking'
 import Feed from './pages/Feed'
 import Artifacts from './pages/Artifacts'
+import Insights from './pages/Insights'
 import Architecture from './pages/Architecture'
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
           <NavLink to="/network">Network</NavLink>
           <NavLink to="/feed">Feed</NavLink>
           <NavLink to="/artifacts">Artifacts</NavLink>
+          <NavLink to="/insights">Insights</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
         </nav>
       </header>
@@ -40,6 +42,7 @@ export default function App() {
           </Route>
           <Route path="/feed" element={<Feed />} />
           <Route path="/artifacts" element={<Artifacts />} />
+          <Route path="/insights" element={<Insights />} />
           <Route path="/architecture" element={<Architecture />} />
           <Route path="*" element={<Navigate to="/network/ranking" replace />} />
         </Routes>
