@@ -34,13 +34,14 @@ Registry
   -> exact quote / retweet / reply envelopes over time
   -> transparent attention ordering
   -> keep / drop evidence routing
-  -> canonical primary artifacts
-  -> cited insights
+  -> cited extraction from stored first-party X
+       + optional canonical-artifact strengthening
+  -> primary-source-cited insights
   -> investor + AI-engineer briefing
 ```
 
-The path through canonical artifacts is implemented. Cited insight extraction
-and delivery are the active missing boundary.
+The stored-X and optional canonical-artifact evidence paths are implemented.
+Cited insight extraction and delivery are the active missing boundary.
 
 ## Where the System Stands
 
@@ -65,14 +66,15 @@ current databases or APIs before using them as present-tense product claims.
 The repository has proved collection, identity, graph support, exact grouping,
 temporal correctness, attention ordering, triage, and artifact storage. It has
 not yet proved that the resulting evidence reliably yields 3–5 excellent,
-primary-cited insights per day.
+primary-source-cited insights per day.
 
 That is now the critical path. The next useful experiment is the five-record
-cited-extraction oracle over corrected snapshot-bound envelopes and the shared
-artifact catalog. It should answer:
+cited-extraction oracle over corrected snapshot-bound envelopes, strengthened
+by the shared artifact catalog when an artifact is available. It should answer:
 
 1. Can the system state a concrete claim without inventing evidence?
-2. Can every shipped claim link to a checkable primary artifact?
+2. Can every shipped claim quote and link to checkable primary evidence—an
+   authored first-party X source or an external artifact?
 3. Can it explain why the claim matters without disguising hypotheses as
    facts?
 4. Does the result help the investment or AI-engineering audience make a
@@ -87,7 +89,7 @@ The active tracker owns the detail. At system level, the remaining proof is:
 
 1. Run the five-record extraction oracle and freeze `insight-v1` only after
    its citations survive inspection.
-2. Produce 3–5 primary-cited insights for 2026-07-11 and one blind day.
+2. Produce 3–5 primary-source-cited insights for 2026-07-11 and one blind day.
 3. Ship the Insights surface and one reproducible daily briefing.
 4. Record citation validity, human worth-attention judgment, hallucination
    controls, and workflow tokenomics.

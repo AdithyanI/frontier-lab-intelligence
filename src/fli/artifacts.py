@@ -118,6 +118,10 @@ CREATE INDEX IF NOT EXISTS idx_artifact_observation_rank
     ON artifact_observation(best_source_rank, artifact_id);
 CREATE INDEX IF NOT EXISTS idx_artifact_observation_published
     ON artifact_observation(source_published_at DESC, best_source_rank, artifact_id);
+CREATE INDEX IF NOT EXISTS idx_artifact_observation_day
+    ON artifact_observation(
+        substr(source_published_at, 1, 10), source_published_at DESC, artifact_id
+    );
 
 CREATE TABLE IF NOT EXISTS artifact_disclosure (
     disclosure_id TEXT PRIMARY KEY,

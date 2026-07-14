@@ -13,6 +13,7 @@ Endpoints:
 - /api/feed                      Registry-aware deterministic signal Feed
 - /api/events/dates              exact structural event counts by date
 - /api/events                    Registry-aware exact structural event groups
+- /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
 """
 
@@ -278,11 +279,26 @@ def events(
 
 @app.get("/api/artifacts")
 def artifact_library(
+    artifact_date: calendar_date | None = Query(None, alias="date"),
+    q: str = Query("", max_length=200),
     limit: int = Query(60, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ) -> JSONResponse:
-    """Canonical primary artifacts with compact source and fetch provenance."""
-    return JSONResponse(artifact_store.artifacts_payload(limit=limit, offset=offset))
+    """Canonical artifacts observed on an exact source-evidence date."""
+    return JSONResponse(
+        artifact_store.artifacts_payload(
+            day=artifact_date.isoformat() if artifact_date else None,
+            query=q,
+            limit=limit,
+            offset=offset,
+        )
+    )
+
+
+@app.get("/api/artifacts/dates")
+def artifact_dates() -> JSONResponse:
+    """Available source-evidence dates with distinct artifact counts."""
+    return JSONResponse(artifact_store.artifact_dates_payload())
 
 
 if DIST_DIR.exists():

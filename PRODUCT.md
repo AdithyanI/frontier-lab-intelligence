@@ -55,7 +55,7 @@ it looks. Argue against them in the tracker, not by silently deviating.
    changing the result.
 2. **Automatically done, human-correctable.** Every pipeline stage runs
    end-to-end without a human gate: the LLM curates, scores, and decides,
-   always writing down *why* (cited evidence, confidence). Humans audit the
+   always writing down *why* with cited evidence and a reason. Humans audit the
    finished artifact and override where wrong; overrides are stored as data —
    the strongest evidence tier — and survive recomputation. No stage may
    require manual per-item approval to produce output.

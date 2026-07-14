@@ -7,7 +7,7 @@ Current system: the Registry, immutable trusted-following snapshot, X evidence
 store, exact event projection, Feed/attention view, keep/drop triage, and
 canonical artifact library are implemented and inspectable. The active product
 boundary is cited insight extraction: the repository has not yet demonstrated
-3–5 excellent primary-cited insights per day or their delivery. See
+3–5 excellent primary-source-cited insights per day or their delivery. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.
@@ -25,8 +25,9 @@ snapshot; entity overlap is the accepted inspectable ranking feature and
 personalized PageRank remains diagnostic. Raw X provider evidence is immutable,
 exact quote/retweet/reply envelopes are cutoff-correct, and current Registry
 curation is overlaid at read time. Triage and canonical artifact storage are
-derived, replayable stages; cited insights must consume them without mutating
-upstream evidence.
+derived, replayable stages. Extraction consumes accepted first-party X
+evidence directly and may join canonical artifact text as optional
+strengthening; it never mutates upstream evidence.
 Exact human name/kind corrections are separately versioned in
 `data/registry/entity-overrides.json` and recorded in
 `entity_override_audit`; they never rewrite model-classification provenance.
@@ -196,9 +197,10 @@ artifacts are not mistaken for empty posts; no artifact body is fetched or
 interpreted at this stage. `fli.insight_triage_runs` freezes the cohort,
 prompt/schema hashes, exact input, response, usage, cache reads, LiteLLM tags,
 proxy cost, and explicit failures in a resumable derived SQLite run. Kept
-envelopes continue whole to artifact resolution and cited extraction. Topic
-classification belongs to each extracted insight, where the resolved claim and
-source are available; it is deliberately absent from this routing gate.
+envelopes continue whole to cited extraction and may join resolved artifact
+text when available. Category/event type is deliberately absent from both the
+routing gate and the first extraction contract until a proven consumer needs
+it.
 
 The Feed exposes these completed decisions as an audit projection, not as a
 replacement ranking. `fli.web.triage` selects the newest fully completed run
@@ -214,10 +216,11 @@ before pagination. The projection reads the run's existing
 `(decision, current_rank, event_id)` and `(status, current_rank, event_id)`
 indexes and never mutates the triage or Feed stores.
 
-`fli.artifacts` and `fli.artifact_urls` implement the next deterministic
-boundary after corrected kept envelopes. They traverse direct and embedded X
-records, bind each outbound URL to the post that actually contains it, and
-index every locally resolvable eligible candidate without fetching it. Ordinary
+`fli.artifacts` and `fli.artifact_urls` implement a parallel deterministic
+enrichment boundary for corrected kept envelopes. They traverse direct and
+embedded X records, bind each outbound URL to the post that actually contains
+it, and index every locally resolvable eligible candidate without fetching it.
+Ordinary
 X status/profile/media URLs remain source evidence; X long-form Articles are
 the explicit artifact exception. Conservative `artifact-url-v1`
 canonicalization removes only known tracking noise, retains every observed and
@@ -303,7 +306,9 @@ flowchart LR
     XLISTS --> REG
     XFOLLOW --> REG
     XPOSTS --> OBS --> FEED --> EVENTS --> PUB --> READ
-    READ -->|corrected kept envelopes| ART --> FETCH --> EXT
+    READ -->|accepted envelopes + first-party X| EXT
+    READ -->|outbound links| ART --> FETCH
+    FETCH -.->|optional primary evidence| EXT
     REG -->|current active/rejected state| READ
     REG -->|who to watch| ING
     BLOGS & ARXIV & GH --> ING
@@ -321,7 +326,8 @@ Target stages:
 
 1. **Registry:** labs, people, identities, affiliations, provenance.
 2. **Ingestion:** public source pulls, dedup, clustering, freshness.
-3. **Extraction:** structured/cited insights from surviving documents.
+3. **Extraction:** structured/cited insights from accepted X evidence,
+   optionally strengthened by fetched artifacts.
 4. **Scoring:** visible dimensions plus validation, not an arbitrary weighted sum.
 5. **Delivery:** persona digests, alerts, reviewable UI, PDF/export later.
 
@@ -330,17 +336,18 @@ Target stages:
 ```mermaid
 flowchart TD
     S0[Source scoping<br/>curated source list]
-    S1[Dedup / clustering<br/>many links → one event]
-    S2[Novelty gate<br/>similarity vs recent history]
-    S3[LLM extraction + rubric scoring<br/>only on survivors]
-    S4[Persona thresholds<br/>investment vs AI team]
+    S1[Exact grouping<br/>replies · quotes · retweets]
+    S2[Attention ordering<br/>transparent candidate generation]
+    S3[Keep / drop triage<br/>sole relevance + substance gate]
+    S4[Cited extraction<br/>X evidence + optional artifacts]
+    S5[Persona framing<br/>investment vs AI team]
     OUT1[Alert tier]
     OUT2[1-page digest]
     OUT3[Full appendix]
     NONE[Nothing significant today]
 
-    S0 --> S1 --> S2 --> S3 --> S4
-    S4 --> OUT1 & OUT2 & OUT3
+    S0 --> S1 --> S2 --> S3 --> S4 --> S5
+    S5 --> OUT1 & OUT2 & OUT3
     S4 --> NONE
 ```
 
@@ -944,7 +951,7 @@ final score.
 2. Hand-write the expected records, then implement and run the smallest
    `insight-v1` extraction path that can reproduce them without unsupported
    claims.
-3. Validate every shipped claim against inspectable primary artifact text and
+3. Validate every shipped claim against frozen authored-X or artifact text and
    run one blind day; do not broaden ingestion to compensate for oracle misses.
 4. Ship the Insights surface and one reproducible daily briefing from the same
    stored records.

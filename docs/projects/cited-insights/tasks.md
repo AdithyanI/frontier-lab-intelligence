@@ -2,9 +2,9 @@
 
 ## Goal
 
-Turn the accepted Feed evidence into 3–5 excellent primary-cited insights per
-day, surfaced in the app and rendered as one delivery artifact, with evaluation
-evidence and a submission write-up — before 2026-07-20.
+Turn accepted Feed evidence into 3–5 excellent primary-source-cited insights
+per day, surfaced in the app and rendered as one delivery artifact, with
+evaluation evidence and a submission write-up — before 2026-07-20.
 
 ## Why / Impact
 
@@ -18,18 +18,19 @@ reads first.
 
 ### In Scope
 
-- A versioned `insight-v1` schema: claim · why it matters · evidence citations
-  (envelope + primary artifact links) · confidence · date · event-type tag
-  (departure / release / capability / technique / open-model) · two persona
-  so-what fields: `implication_investment` (implication + possible
-  public-equity landing spot, flagged as hypothesis) and
-  `implication_engineering` (adopt / investigate / ignore).
-- LLM extraction over the top ~20 attention envelopes per day, resolving links
-  already embedded in the tweets as enrichment (fetch, snapshot, cite).
-- A relevance/substance gate so banter and thin envelopes yield no insight
-  rather than a padded one.
+- A minimal versioned `insight-v1` result: `insight |
+  no_extractable_insight`; an insight contains one falsifiable claim, why it
+  matters, one investment implication, one AI-engineering implication, and one
+  exact supporting quote. Run IDs, dates, and citation/source IDs are bound by
+  application code rather than returned by the model.
+- LLM extraction over the top ~20 accepted attention envelopes per day. The
+  complete stored first-party X evidence is always available; fetched external
+  artifacts are optional strengthening when present.
+- No second general relevance/substance gate. Feed triage owns that decision;
+  extraction may return `no_extractable_insight` only when the accepted
+  evidence cannot safely support a concrete claim.
 - An Insights surface in the app: 3–5 insights per day with citations that
-  click through to the Feed envelope and the primary artifact.
+  click through to the exact first-party X source or external primary artifact.
 - One rendered daily briefing artifact (email-style HTML or PDF) from the
   insights API.
 - Evaluation: extraction validated against the five strong candidates from
@@ -78,10 +79,10 @@ reads first.
 ## Done When
 
 - [ ] `insight-v1` runs end-to-end on 2026-07-11 and at least one more day,
-  producing 3–5 cited insights per day with resolved primary links.
+  producing 3–5 cited insights per day with verified primary-source quotes.
 - [ ] The five strong audit candidates are found (or each miss is explained).
 - [ ] An Insights page ships: per-day insights, citations click through to
-  Feed envelope and primary artifact.
+  the exact first-party X source or external primary artifact.
 - [ ] One rendered daily briefing artifact exists and is reproducible from
   the CLI.
 - [ ] Evaluation evidence recorded: citation validity, hallucination control,
@@ -99,13 +100,14 @@ reads first.
 ## Milestones
 
 - [ ] M1 — Extraction pipeline (target Mon–Tue 07-14/15). Acceptance:
-  versioned `insight-v1` schema + prompt, link resolution for top-20
-  envelopes, run store with cost/usage telemetry; 2026-07-11 run finds the
-  audit's strong candidates. Validate: pytest fixtures + manual audit
-  comparison.
+  minimal versioned `insight-v1` schema + prompt, deterministic evidence
+  bundles for the five-record oracle, application-bound citation verification,
+  and a resumable run store with cost/usage telemetry; the 2026-07-11 run
+  finds the audit's strong candidates. Validate: pytest fixtures + manual
+  audit comparison.
 - [ ] M2 — Insights surface (target Wed 07-16). Acceptance: Insights page
-  with per-day 3–5 insights, citation click-through to Feed envelope and
-  primary artifact; desktop browser check. Validate: `scripts/check-fast.sh`
+  with per-day 3–5 insights and citation click-through to the verified X or
+  artifact source; desktop browser check. Validate: `scripts/check-fast.sh`
   + live check at 127.0.0.1:8797.
 - [ ] M3 — Delivery artifact (target Thu 07-17). Acceptance: one rendered
   daily briefing (HTML or PDF) generated from the insights API by a CLI
@@ -140,6 +142,18 @@ reads first.
 
 ## Decisions
 
+- 2026-07-14: Freeze the first extraction contract around the accepted
+  envelope, not around external-link availability. Authored first-party X is
+  valid primary evidence for the author or organization's own work, release,
+  or observation; replies, quotes, and retweets are not automatically primary.
+  External artifacts strengthen the evidence when available but are optional.
+  Feed triage remains the only relevance/substance gate. Extraction returns
+  only `insight | no_extractable_insight`; the model never returns post,
+  artifact, citation, run, or source IDs. Application code binds an exact
+  supporting quote back to one supplied X or artifact source and rejects any
+  unmatched quote. Defer category/event type, confidence, novelty, and richer
+  scoring until the five-record oracle proves a consumer for them.
+
 - 2026-07-14: Keep direct bounded retrieval as the primary artifact path and
   add `jina-reader-v1` only as a replaceable fallback for ordinary public HTML
   failures. Reader attempts use their own immutable fetch policy, preserve the
@@ -159,11 +173,12 @@ reads first.
   kept envelopes; broad extraction remains out of scope until that proof is
   reviewed.
 
-- 2026-07-14: A shipped "primary-cited insight" must be supported by at least
-  one inspectable primary artifact. Tweet-only evidence may remain an
-  attributed candidate or explain an oracle miss, but it cannot satisfy the
-  submission's primary-citation proof. Artifact access failures are recorded;
-  the pipeline does not bypass publisher controls.
+- 2026-07-14 (superseded by the later evidence-contract decision): A shipped
+  "primary-cited insight" was initially required to have an inspectable
+  external artifact. The corrected contract recognizes authored first-party X
+  as primary evidence and treats external artifacts as optional strengthening.
+  Artifact access failures remain recorded; the pipeline does not bypass
+  publisher controls.
 
 - 2026-07-13: Adi explicitly reopened the earlier top-100/day stopping
   decision for one bounded learning run. Evaluate at most the top 1,000 exact
@@ -250,8 +265,9 @@ reads first.
 | done | Reconcile the new artifact inspection boundary with the submission north star; decide the default ordering and the next end-to-end proof. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Challenge the next-step plan against the case prompt, system status, milestones, and five-record oracle. | explorer | [oracle resume](resources/oracle-resume.md) |
 | done | Audit the live artifact catalog and index ordering for the smallest useful operator experience. | explorer | [artifact library](../../references/artifact-library.md) |
-| todo | Hand-write the five expected `insight-v1` outcomes, including explicit misses where primary evidence is absent. | parent | [oracle resume](resources/oracle-resume.md) |
-| todo | Implement and run the smallest extraction path against those frozen inputs; audit citation spans before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
+| done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
+| todo | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle resume](resources/oracle-resume.md) |
+| todo | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
@@ -270,13 +286,24 @@ reads first.
 
 ## Validation / Test Plan
 
-- Fixture tests for schema validity, citation resolution, and gate behavior.
+- Fixture tests for schema validity, deterministic evidence binding, exact
+  citation resolution, and `no_extractable_insight` behavior.
 - Manual comparison of the 2026-07-11 run against the audit's five strong
   candidates.
 - Blind label pass for citation validity and worth-attention agreement.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [EXTRACTION-CONTRACT-DISTILLATION] Audited the post-artifact
+  boundary before adding extraction code. The previous brief had leaked three
+  premature assumptions into the plan: external artifacts were mandatory,
+  extraction repeated Feed's relevance/substance gate, and the model returned
+  source IDs plus unused category/confidence/novelty fields. Froze the smaller
+  contract instead: accepted envelope + optional artifact text in, `insight |
+  no_extractable_insight` out; authored first-party X can be primary evidence;
+  application code binds and verifies the exact supporting quote. No runtime
+  pipeline, Registry, Feed, ranking, or canonical artifact data changed.
 
 - 2026-07-14: [POST-ARTIFACT-SEQUENCING] Reconciled the live catalog against
   the assignment, `docs/STATUS.md`, and the five-record oracle. Two independent

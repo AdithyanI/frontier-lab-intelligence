@@ -76,6 +76,32 @@ def _artifact_fixture(path):
                 "2026-07-11T10:00:00+00:00",
                 "2026-07-11T10:00:00+00:00",
             ),
+            (
+                "observation-older-reshared",
+                "older",
+                "post-3",
+                "https://x.com/example/status/3",
+                "https://example.com/research",
+                "https://example.com/research",
+                "2026-07-11T11:00:00+00:00",
+                "2026-07-11",
+                3,
+                "2026-07-11T11:00:00+00:00",
+                "2026-07-11T11:00:00+00:00",
+            ),
+            (
+                "observation-older-reshared-again",
+                "older",
+                "post-4",
+                "https://x.com/example/status/4",
+                "https://example.com/research",
+                "https://example.com/research",
+                "2026-07-11T11:30:00+00:00",
+                "2026-07-11",
+                5,
+                "2026-07-11T11:30:00+00:00",
+                "2026-07-11T11:30:00+00:00",
+            ),
         ],
     )
     conn.execute(
@@ -106,7 +132,9 @@ def _artifact_fixture(path):
     conn.close()
 
 
-def test_artifacts_api_returns_newest_first_with_provenance(tmp_path, monkeypatch):
+def test_artifacts_api_defaults_to_latest_source_day_with_provenance(
+    tmp_path, monkeypatch
+):
     db = tmp_path / "artifacts.db"
     _artifact_fixture(db)
     monkeypatch.setattr(artifact_store, "DEFAULT_ARTIFACT_DB", db)
@@ -124,15 +152,58 @@ def test_artifacts_api_returns_newest_first_with_provenance(tmp_path, monkeypatc
         "unavailable": 0,
         "fetching": 0,
     }
-    assert [item["artifact_id"] for item in payload["items"]] == ["newer", "older"]
+    assert payload["date"] == "2026-07-11"
+    assert payload["matching_total"] == 2
+    assert [item["artifact_id"] for item in payload["items"]] == ["older", "newer"]
     assert payload["items"][0]["last_source_published_at"] == (
-        "2026-07-11T10:00:00+00:00"
+        "2026-07-11T11:30:00+00:00"
     )
+    assert payload["items"][0]["observation_count"] == 2
     assert payload["items"][0]["source_provider"] == "twitterapi_io"
-    assert payload["items"][0]["fetch_state"] == "catalogued"
-    assert payload["items"][1]["fetch_state"] == "ready"
-    assert payload["items"][1]["fetch_method"] == "Direct fetch"
-    assert payload["items"][1]["text_char_count"] == 4200
+    assert payload["items"][0]["fetch_state"] == "ready"
+    assert payload["items"][0]["fetch_method"] == "Direct fetch"
+    assert payload["items"][0]["text_char_count"] == 4200
+    assert payload["items"][1]["fetch_state"] == "catalogued"
+
+
+def test_artifact_dates_are_source_dates_with_distinct_counts(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    _artifact_fixture(db)
+    monkeypatch.setattr(artifact_store, "DEFAULT_ARTIFACT_DB", db)
+
+    response = client.get("/api/artifacts/dates")
+    assert response.status_code == 200
+    assert response.json() == {
+        "available": True,
+        "latest_date": "2026-07-11",
+        "date_from": "2026-07-10",
+        "date_to": "2026-07-11",
+        "dates": [
+            {"day": "2026-07-10", "item_count": 1},
+            {"day": "2026-07-11", "item_count": 2},
+        ],
+    }
+
+
+def test_artifacts_api_filters_exact_source_day_and_search(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    _artifact_fixture(db)
+    monkeypatch.setattr(artifact_store, "DEFAULT_ARTIFACT_DB", db)
+
+    older_day = client.get("/api/artifacts?date=2026-07-10")
+    assert older_day.status_code == 200
+    assert older_day.json()["matching_total"] == 1
+    assert [item["artifact_id"] for item in older_day.json()["items"]] == [
+        "older"
+    ]
+
+    searched = client.get("/api/artifacts?date=2026-07-11&q=github")
+    assert searched.status_code == 200
+    assert searched.json()["query"] == "github"
+    assert searched.json()["matching_total"] == 1
+    assert [item["artifact_id"] for item in searched.json()["items"]] == [
+        "newer"
+    ]
 
 
 def test_artifacts_api_is_honest_when_catalog_is_missing(tmp_path, monkeypatch):

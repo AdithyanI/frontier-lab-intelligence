@@ -9,14 +9,14 @@ implemented code and durable reference contracts override stale examples here.
 
 ## 1. What we are building, in one paragraph
 
-A daily pipeline that takes the top ~20 attention-ranked Feed envelopes,
-runs a cheap LLM **triage** (keep/drop + reason),
-**fetches the linked primary artifacts** (papers, repos, blog posts) into an
-artifact store keyed by canonical URL, then runs a strong LLM **extraction**
-that turns envelope + artifact text into 3–5 structured, cited,
-persona-framed insights per day — surfaced on a new Insights page and
-rendered as one daily briefing artifact. Validated against the existing
-human audit labels.
+A daily pipeline that takes the top ~20 attention-ranked Feed envelopes, runs
+a cheap LLM **triage** (keep/drop + reason), optionally enriches kept envelopes
+with fetched primary artifacts (papers, repos, blog posts), then runs a strong
+LLM **extraction** over the accepted first-party X evidence plus any available
+artifact text. The result is 3–5 structured, primary-source-cited,
+persona-framed insights per day — surfaced on a new Insights page and rendered
+as one daily briefing artifact. Validated against the existing human audit
+labels.
 
 Everything upstream (Registry, evidence store, envelopes, attention-v1.1)
 is DONE and frozen. Do not modify it. This project only *reads* from it.
@@ -52,8 +52,10 @@ is DONE and frozen. Do not modify it. This project only *reads* from it.
 ## 4. Pipeline design (five stages, one daily run)
 
 ```
-(1) top-20 envelopes ──▶ (2) LLM triage ──▶ (3) artifact fetch ──▶ (4) LLM extraction ──▶ (5) surface + briefing
-     exists                cheap model         HTTP + readability      strong model            UI + renderer
+(1) top-20 envelopes ──▶ (2) LLM triage ─────────────────────▶ (4) LLM extraction ──▶ (5) surface + briefing
+     exists                sole relevance gate                       strong model            UI + renderer
+                                     └──▶ (3) optional artifact fetch ──┘
+                                               HTTP + readability
 ```
 
 ### Stage 1 — Candidate selection (exists)
@@ -121,45 +123,44 @@ membership. Canonical URLs let multiple insiders converge on one resource and
 leave a clean future seam for RSS, GitHub, or arXiv writers without adding a
 second artifact model now.
 
-Fetch failures are reason-bearing and non-fatal to the daily pipeline, but they
-are fatal to the stronger claim that an output is a *primary-cited insight*.
-The oracle may record a tweet-only candidate or a missing-evidence outcome; it
-may not ship that record as primary-cited. Do not bypass robots,
+Fetch failures are reason-bearing and non-fatal to the daily pipeline. Authored
+first-party X can itself be primary evidence for the author or organization's
+own work, release, or observation; fetched artifacts strengthen that evidence
+and are preferred for broader claims when available. Do not bypass robots,
 authentication, paywalls, or publisher controls.
 
 ### Stage 4 — Insight extraction (new; strong model)
-Input per kept envelope: everything triage saw + fetched artifact texts.
+Input per kept envelope: everything triage saw + any available fetched
+artifact text. The deterministic runner retains the source post IDs, artifact
+IDs, URLs, hashes, day, and run metadata; none of those are model outputs.
 
 Output:
 ```
 insight-v1 {
-  insight_id, run_id, day,
-  claim: string                  # one falsifiable sentence, past tense
-  why_it_matters: string         # ≤2 sentences
-  event_type: departure | release | capability | technique | open-model
-              | funding | other  # maps to case-sheet examples
-  implication_investment: string # implication + possible public-equity
-                                 # landing spot; ALWAYS flagged hypothesis
-  implication_engineering: string# adopt / investigate / ignore + why
-  citations: [
-    { type: artifact, canonical_url, quote: string },   # supporting span
-    { type: envelope, envelope_id, post_ids: [...] }    # who noticed
-  ],
-  confidence: high | medium | low,
-  novelty_note: string | null    # "widely reported" vs "first signal"
+  outcome: insight | no_extractable_insight
+  claim: string | null                   # one falsifiable sentence
+  why_it_matters: string | null          # ≤2 sentences
+  implication_investment: string | null  # analysis/hypothesis, not source fact
+  implication_engineering: string | null # adopt / investigate / ignore + why
+  supporting_quote: string | null        # exact span from one supplied source
 }
 ```
 Hard rules (hallucination control — evaluated deliverable):
-- Every shipped claim must carry at least one primary-artifact citation with a
-  supporting quote that appears verbatim (modulo whitespace) in the snapshotted
-  artifact text. This is verified programmatically post-hoc; failures drop the
-  insight.
-- Envelope/post citations preserve discovery and attribution, but do not
-  substitute for the primary artifact required by a shipped cited insight.
-- No inspectable artifact means no shipped primary-cited insight. Store an
-  explicit miss or tweet-only candidate for audit instead of weakening the
-  label.
-- One envelope may yield 0 insights (substance gate) — record why.
+- Every insight must carry one exact supporting quote that appears verbatim
+  modulo whitespace in one frozen authored-X or artifact input. Application
+  code verifies the span and binds the known post/artifact ID and URL; an
+  unmatched or ambiguous quote never ships.
+- Authored first-party X is primary only for claims about that author or
+  organization's own work, release, or observation. Replies, quotes, and
+  retweets are context unless their own authorship makes them primary for the
+  claim.
+- Feed triage is the sole relevance/substance gate. Extraction does not
+  reclassify the envelope; `no_extractable_insight` means only that the
+  accepted evidence cannot safely support a concrete claim.
+- One envelope may yield zero insights. Never pad a thin day.
+- The model does not return source IDs, citation objects, category/event type,
+  confidence, novelty, scores, dates, or run IDs. Add fields only after the
+  oracle proves that a real consumer needs them.
 - Per-day cap: rank kept insights, surface top 3–5, store the rest.
 
 Prompting notes: stable prefix first (schema + rules + few-shot), envelope
@@ -171,9 +172,9 @@ deliverable.
 
 ### Stage 5 — Surface + briefing (new)
 - **Insights page** (new tab, becomes the app's lead surface): per-day list
-  of 3–5 insights; each shows claim, why-it-matters, both persona
-  implications, event-type, confidence, and citations that click through
-  to (a) the Feed envelope (existing deep-link) and (b) the artifact URL.
+  of 3–5 insights; each shows claim, why-it-matters, both persona implications,
+  and the application-bound citation that clicks through to the exact X source
+  or external artifact.
   Show dropped-by-triage count with reasons behind a disclosure ("what we
   filtered out and why" — signal-vs-noise evidence, great for the demo).
 - **Daily briefing**: one CLI command renders a day's insights into a
@@ -190,7 +191,8 @@ deliverable.
    The 8 noise labels must be dropped by triage (target ≥6/8; misses
    analyzed).
 2. **Citation validity (automated):** % of citations whose quote is found
-   verbatim in the cited text; report the number; failures auto-dropped.
+   verbatim in the frozen cited X/artifact text; report the number; unmatched
+   or ambiguous spans never ship.
 3. **Blind pass (human, ~30 min of Adi's time):** second day's insights +
    triage verdicts shuffled; Adi labels worth-knowing yes/no without
    seeing pipeline scores. Report agreement. No recall claims — precision
@@ -210,10 +212,11 @@ deliverable.
 
 Recommended first task (half a day, before any framework code): follow the
 frozen [`oracle resume packet`](oracle-resume.md), inspect the five corrected
-envelopes and existing artifact coverage, and hand-write the expected
-`insight-v1` outcomes. An explicit missing-evidence outcome is correct where a
-primary artifact is absent. Those records become the schema sanity check and
-oracle before any broad extraction run. Data first, then code.
+envelopes and optional artifact coverage, and hand-write the expected
+`insight-v1` outcomes. Lack of an external artifact is not automatically a
+miss; the test is whether the supplied primary evidence supports an exact
+claim and quote. Those records become the schema sanity check and oracle before
+any broad extraction run. Data first, then code.
 
 ## 7. Honest limitations (state, don't hide — for the write-up)
 
@@ -223,8 +226,9 @@ oracle before any broad extraction run. Data first, then code.
 - X-only discovery: things nobody posts/amplifies on X are invisible;
   fixed by the planned artifact-store pollers (RSS/GitHub/arXiv) — same
   table, new writers.
-- Attention is candidate generation, not truth; substance judgment lives
-  in triage/extraction (this project), validated by the blind pass.
+- Attention is candidate generation, not truth; substance judgment lives in
+  triage, while extraction tests whether the accepted evidence can support a
+  concrete cited claim. The blind pass validates the combined path.
 - `implication_investment` is an LLM hypothesis, never investment advice —
   flagged as such in the UI and briefing.
 - Competitive-map / trend synthesis across weeks: manual for the final
