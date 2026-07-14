@@ -223,28 +223,96 @@ and which parts have been validated.
 - Is the current derived following analysis stale relative to all 23 current
   rejections, and if so, which product projections are affected?
 
+## Decision Addendum — 2026-07-14 (accepted direction)
+
+Recorded after Adi's session with the reviewing architect. This addendum
+supersedes the work board below where they conflict; the parent tracker's
+`Current Batch` is canonical for execution.
+
+### Diagnosis (evidence, reproduced from live data)
+
+- The Registry `Network rank` displays `ranking_result.position`, a
+  `ROW_NUMBER` over the 463,180-target discovery universe ordered by
+  `cohort_follow_count DESC, lower(handle) ASC`. Integer votes create massive
+  tie blocks: 290,408 targets share exactly one vote and occupy positions
+  172,773–463,180 in **alphabetical order**. Low-support Registry members
+  therefore show alphabet-noise ordinals (observed: Josh Bersin #308,612 with
+  1 vote). Two identical-support accounts can differ by 100k+ positions.
+- A tie-aware `score_rank` (DENSE_RANK) already exists in `analysis.db` but is
+  not displayed.
+- Blast radius is display-only: `src/fli/web/feed.py` consumes
+  `cohort_follow_count`, never `position`; the daily score is unaffected.
+- Multi-channel target aggregation uses the best owned account
+  (`entity_network_ranks` in `src/fli/web/rankings.py`, MIN position) instead
+  of unioning distinct supporting entities across official channels. Measured
+  undercounts: SpaceX 491→728 (+48%), Google 1,087→1,201, Microsoft 537→632,
+  Anthropic 1,156→1,215, OpenAI 1,406→1,428. Union does not reorder the top
+  labs; it is a correctness fix, not a ranking shake-up.
+- Snapshot label drift: 2,204 "active" entities in the analysis graph vs 2,197
+  currently active identities; disclose snapshot date/denominator in UI.
+
+### Accepted deltas (implement now)
+
+1. **Registry support display.** Primary value is the support count with an
+   explicit denominator ("followed by N of 2,197 tracked entities"), plus a
+   tie-aware ordinal scoped to active Registry entities only. Never render a
+   tiebreak `position` as an entity's rank. The 463k discovery ordering stays
+   in the Ranking view, labeled as candidate generation.
+2. **Entity-level union support.** Support for an entity = count of distinct
+   eligible Registry entities following **any** of its official X channels,
+   self excluded. Symmetric with the source-side rule: one entity, one vote,
+   on both sides of the edge. Deterministic; document tie behavior.
+3. **AIE World's Fair 2026 speaker source.** Direct-admission candidate
+   source; see `aie-worldsfair-2026-source.md` for the implementation spec.
+   Coverage query runs **before** admission.
+
+### Explicitly deferred (post-submission; record in ADR)
+
+- Cohort cutoffs (500/1,000), tier taxonomy, and yield-based source
+  evaluation. The ADR records the designed seed → discover → admit → measure
+  yield → feed back loop and interview-ready limitation language instead.
+- Voting rights for newly admitted identities (requires a following-snapshot
+  v2 collection).
+- The four-lane independent review program (M2) is collapsed: the diagnosis
+  above answered the audit's core question directly.
+
+### Architect opinion (for the reviewing engineer)
+
+The architecture is sound in three of four layers — identity ownership,
+collection, and source-side vote deduplication are correct. The defect is a
+presentation contract: a tiebreak position was shown as a rank. Fix the
+display semantics, apply the same one-entity-one-vote rule target-side, and
+resist any weight-based importance scheme: authority belongs in explicit
+roles/affiliations (badges, guarantees, routing), never blended into
+descriptive counts, because checkability is the product thesis. The AIE
+speaker list is worth ingesting primarily as a **non-circular external
+validation cohort** (coverage-before-admission) and as curated affiliation
+data; treating it only as "more sources" would waste its best value.
+
 ## Audit Work Board
 
-The parent tracker's `Current Batch` is canonical. This table defines the
-workstream split and expected output files.
+Superseded 2026-07-14 by the Decision Addendum above and the parent tracker's
+`Current Batch`. Original review-lane plan preserved for provenance:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Freeze the architectural problem, known evidence, non-goals, and audit questions. | parent | `problem-statement.md` |
-| todo | Reconcile the current code/data path and denominators, including snapshot freshness and multi-channel behavior. | explorer | `current-state-audit.md` |
-| todo | Independently assess the product/measurement architecture and propose alternatives without assuming a cutoff. | product reviewer | `product-architecture-review.md` |
-| todo | Adversarially review bias, circularity, role treatment, and likely failure cases; recommend no change if that is strongest. | adversarial reviewer | `adversarial-review.md` |
-| todo | Design the smallest non-circular source-yield evaluation that can compare broad, core, and tiered cohorts. | evaluation reviewer | `evaluation-plan.md` |
+| done | Reconcile the current code/data path and denominators, including snapshot freshness and multi-channel behavior. | parent (direct diagnosis) | Decision Addendum above |
+| dropped | Independently assess the product/measurement architecture and propose alternatives without assuming a cutoff. | product reviewer | — |
+| dropped | Adversarially review bias, circularity, role treatment, and likely failure cases; recommend no change if that is strongest. | adversarial reviewer | — |
+| deferred | Design the smallest non-circular source-yield evaluation that can compare broad, core, and tiered cohorts. | evaluation reviewer | post-submission; AIE coverage report is the bounded near-term substitute |
 
 ## Audit Backlog / Remaining Work
 
-- [ ] Synthesize independent reviews and explicitly record disagreements.
-- [ ] Rebuild `Current Batch` for the bounded real-data comparison after the
-  shared alternatives and measures are frozen.
-- [ ] Run the accepted comparison with reproducible cohort manifests and
-  preserve counterexamples.
-- [ ] Write the architecture decision and obtain Adi's product decision.
-- [ ] Implement only the accepted delta, with migration and rollback.
+- [ ] Implement the Registry display delta: entity-union support with
+  denominator, tie-aware within-Registry ordinal, discovery ordering confined
+  to the Ranking view; focused tests plus live UI verification.
+- [ ] Ingest the AIE World's Fair 2026 speaker directory per
+  `aie-worldsfair-2026-source.md`: raw snapshot, identity resolution,
+  pre-admission coverage query, direct admission with provenance and
+  role/employer facts.
+- [ ] Write the coverage/miss report and the ADR (accepted deltas, deferrals,
+  yield-feedback loop design, interview-ready language).
 - [ ] Update `PRODUCT.md`, `DESIGN.md`, `docs/architecture/overview.md`, and
   `docs/STATUS.md` only where the accepted conceptual boundary changes them.
 - [ ] Run focused tests, `scripts/check-fast.sh`, and live browser verification
@@ -282,3 +350,13 @@ workstream split and expected output files.
   operational priority, multi-channel aggregation, and global-versus-Registry
   rank are related but different contracts. Current Feed collection and voting
   behavior remain unchanged while independent audits are gathered.
+- 2026-07-14: [DECIDED] Direct diagnosis replaced the four-lane review
+  program. Root cause of the anomalous ordinals confirmed (alphabetical
+  tiebreak positions inside a 290,408-account one-vote tie block, displayed as
+  ranks); blast radius confirmed display-only. Adi accepted: entity-union
+  support with denominators and tie-aware within-Registry ordinal, no
+  organization weighting (roles carry authority), AIE World's Fair 2026
+  speakers as a direct-admission candidate source with coverage measured
+  before insertion, and deferral of cohort cutoffs/tiers/yield evaluation and
+  new-admit voting to post-submission. See the Decision Addendum above and
+  `aie-worldsfair-2026-source.md`.

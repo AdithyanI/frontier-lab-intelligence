@@ -151,6 +151,45 @@ reads first.
   one-entity/one-vote rule until Adi accepts an architecture decision. See the
   [audit brief](resources/network-source-architecture-audit/project-brief.md).
 
+- 2026-07-14: **Audit diagnosis accepted; review program collapsed.** Direct
+  inspection resolved the audit's core question without the four independent
+  review lanes. Findings: the Registry `Network rank` displays a `ROW_NUMBER`
+  position over the 463,180-target discovery universe whose integer-vote ties
+  break alphabetically — 290,408 targets share exactly one vote (positions
+  172,773–463,180), so low-support members show alphabet-noise ordinals such
+  as #308,612 (Josh Bersin, 1 vote). A tie-aware `score_rank` already exists
+  in the analysis store, and the Feed consumes `cohort_follow_count`, not the
+  ordinal, so the defect is display-scoped. Accepted deltas: (a) show support
+  count with an explicit denominator plus a tie-aware within-Registry ordinal;
+  never render a tiebreak position as a rank; (b) entity-level union support —
+  count distinct eligible Registry entities following any official channel,
+  self excluded ("one entity, one vote on both sides of the edge"); measured
+  best-account undercounts include SpaceX 491→728, Google 1,087→1,201,
+  Microsoft 537→632, Anthropic 1,156→1,215. This supersedes the earlier
+  best-owned-account projection decision below. The global discovery ordering
+  stays in the Ranking view, labeled as candidate generation.
+
+- 2026-07-14: **No blanket organization weight; roles carry authority.**
+  Importance is never blended into descriptive scores. Explicit roles and
+  affiliations (frontier lab, lab employee, first-hand researcher) provide
+  guarantees, badges, and routing; network support stays a checkable count.
+  Cohort-optimality work (500/1,000 cutoffs, tier taxonomy, yield-based source
+  evaluation) is deferred past submission; the audit records the designed
+  yield-feedback loop and interview-ready limitation language instead.
+
+- 2026-07-14: **AI Engineer World's Fair 2026 speakers become a direct-admission
+  candidate source.** Adi accepts conference curation as the relevance screen:
+  speakers are admitted to the Registry without per-person review, relying on
+  reversible reason-bearing rejection for correction. Mechanical requirements
+  that remain (they are not review gates): raw directory snapshot preserved
+  data-first, identity resolution against existing entities to prevent
+  duplicates, X handle mapping, and `source`/evidence provenance plus
+  role/employer facts per speaker. Run the network coverage query **before**
+  inserting — "N% of AIE speakers already surfaced by the trusted network" is
+  the audit's non-circular validation evidence and is destroyed if admission
+  happens first. New admits are monitored immediately but cannot vote until a
+  future following-snapshot collection includes their edges (post-submission).
+
 - 2026-07-14: Make Registry public reach rank-first without discarding its
   magnitude. **X reach** is one stable ordinal across all active Registry
   entities and renders as `#rank · compact combined followers`; search, kind
@@ -297,11 +336,10 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Reconcile the source/ranking code and live denominators, including snapshot freshness and multi-channel behavior. | explorer | [current-state audit](resources/network-source-architecture-audit/current-state-audit.md) |
-| todo | Independently assess the product/measurement architecture without assuming a 500/1,000 cutoff. | product reviewer | [product review](resources/network-source-architecture-audit/product-architecture-review.md) |
-| todo | Adversarially test selection bias, circularity, role treatment, and the strongest no-change case. | adversarial reviewer | [adversarial review](resources/network-source-architecture-audit/adversarial-review.md) |
-| todo | Design the smallest non-circular real-data comparison of broad, core, and tiered cohorts. | evaluation reviewer | [evaluation plan](resources/network-source-architecture-audit/evaluation-plan.md) |
-| todo | Synthesize the reviews into a decision for Adi; do not implement before acceptance, then return execution to M3 delivery. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
+| done | Diagnose the Network rank anomaly, denominators, tie semantics, and multi-channel projection against code and live data. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
+| todo | Implement the display delta: entity-union support with denominator, tie-aware within-Registry ordinal, discovery ordering confined to the Ranking view; focused tests + live UI verification. | implementer | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
+| todo | Snapshot the AIE World's Fair 2026 speaker directory raw, resolve identities, run the pre-admission coverage query, then directly admit speakers with provenance and role/employer facts. | implementer | [aie speaker source](resources/network-source-architecture-audit/aie-worldsfair-2026-source.md) |
+| todo | Write the coverage/miss report and a short ADR recording accepted deltas, deferrals (cohort cutoffs, tiers, yield evaluation, voting for new admits), and interview-ready language. | parent | [audit ADR](resources/network-source-architecture-audit/architecture-decision.md) |
 
 ## Backlog / Remaining Work
 
@@ -332,6 +370,19 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [AUDIT-DECIDED] Collapsed the four-lane audit review after a
+  direct diagnosis answered its core question: the Registry Network rank was
+  an alphabetical tiebreak position inside huge one-vote tie blocks of the
+  463k discovery ranking (290,408 targets share one vote), display-scoped
+  because the Feed consumes counts, not positions. Adi accepted: entity-union
+  support with explicit denominators and a tie-aware within-Registry ordinal;
+  no organization weighting (explicit roles/affiliations carry authority);
+  AIE World's Fair 2026 speakers as a direct-admission candidate source with
+  the coverage query mandatorily run before insertion; cohort cutoffs, tiers,
+  yield evaluation, and new-admit voting deferred post-submission. Handoff
+  spec for the implementing engineer:
+  `resources/network-source-architecture-audit/aie-worldsfair-2026-source.md`;
+  full rationale in the brief's Decision Addendum.
 - 2026-07-14: [NETWORK-SOURCE-ARCHITECTURE-AUDIT] Opened one bounded audit
   workstream under this canonical tracker after the repository correctly
   rejected a second active project owner. The frozen brief states the current
