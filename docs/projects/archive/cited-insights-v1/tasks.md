@@ -1,4 +1,12 @@
-# Cited Insights
+# Cited Insights v1 — Archived Prototype
+
+> Archived 2026-07-14 as a successful shared-insight prototype. The original
+> delivery, alert, final-report, and submission milestones were not completed;
+> they were explicitly descoped when the product contract changed from one
+> blended record to two audience-specific editorial products. The successor is
+> `docs/projects/audience-insights-v2/tasks.md`. Durable v1 resources remain at
+> `docs/projects/cited-insights/resources/` so tracked manifests and historical
+> provenance do not move.
 
 ## Goal
 
@@ -164,7 +172,7 @@ reads first.
   independent reviewers write separate resources and the parent synthesizes.
   Keep all 2,197 active identities monitored and preserve Feed's flat
   one-entity/one-vote rule until Adi accepts an architecture decision. See the
-  [audit brief](resources/network-source-architecture-audit/project-brief.md).
+  [audit brief](../../cited-insights/resources/network-source-architecture-audit/project-brief.md).
 
 - 2026-07-14: **Audit diagnosis accepted; review program collapsed.** Direct
   inspection resolved the audit's core question without the four independent
@@ -296,7 +304,7 @@ reads first.
   retained 42.9%, so attention has no safe relevance cutoff. Continue to use
   attention for ordering and the triage decision for routing, then return to a
   small cited-extraction oracle instead of broadening this pass. See the
-  [expansion report](resources/triage-v2.2-top1000-expansion-2026-07-13.md).
+  [expansion report](../../cited-insights/resources/triage-v2.2-top1000-expansion-2026-07-13.md).
 
 - 2026-07-13 (category clause superseded by the 2026-07-14 extraction-contract
   decision): Replace the calibration contract with one permissive
@@ -315,7 +323,7 @@ reads first.
   cutoff, but expanding to top 200 would enlarge an already sufficient
   extraction queue. Revisit only if the one-day cited-insight path cannot
   produce 3–5 excellent outputs. Deduplicate downstream by
-  `(event_id, input_sha256)`. [Seven-day report](resources/triage-seven-day-validation-2026-07-13.md).
+  `(event_id, input_sha256)`. [Seven-day report](../../cited-insights/resources/triage-seven-day-validation-2026-07-13.md).
 
 - 2026-07-13: Keep the frozen `attention-v1.1` candidate-generation contract:
   each active canonical Registry entity contributes one flat amplifier vote;
@@ -355,8 +363,8 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Audit all zero-support Registry entities without conflating posting activity, graph usefulness, or relevance; keep the externally curated cohort. | parent | [activity audit](resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md) |
-| done | Reject only the three provider-confirmed protected accounts, refresh Registry-derived support, and validate current counts. | parent | [activity audit](resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md) |
+| done | Audit all zero-support Registry entities without conflating posting activity, graph usefulness, or relevance; keep the externally curated cohort. | parent | [activity audit](../../cited-insights/resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md) |
+| done | Reject only the three provider-confirmed protected accounts, refresh Registry-derived support, and validate current counts. | parent | [activity audit](../../cited-insights/resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md) |
 
 ## Backlog / Remaining Work
 
@@ -387,6 +395,13 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [ARCHIVED-SUPERSEDED] Closed v1 after it proved the shared
+  evidence packet, resumable Luna extraction, application-bound exact citation,
+  API, and first Insights surface. M3–M5 and every unchecked delivery/package
+  task are explicitly descoped from this version. Adi rejected the blended
+  investment-plus-engineering record as the product boundary; Audience Insights
+  v2 owns independent editorial prompts and views over the shared evidence core.
+
 - 2026-07-14: [ZERO-SUPPORT-ACTIVITY-AUDIT] Audited all 38 zero-support
   Registry entities after Adi questioned empty timelines. Thirty-five came
   from the newly admitted World's Fair cohort; the other three are established
@@ -401,7 +416,7 @@ reads first.
   Registry now has 2,431 active people, 160 active organizations, and 39
   rejections. Rebuilt entity support over the unchanged snapshot: 2,521 voting
   entities, 2,524 active X-addressable Registry targets, and 38 retained
-  zero-support targets. See the [activity audit](resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md).
+  zero-support targets. See the [activity audit](../../cited-insights/resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md).
 
 - 2026-07-14: [AIE-REGISTRY-AND-NETWORK-GOAL] Adi expanded the bounded import
   into a persistent data-creation goal before stepping away: directly admit all
@@ -430,7 +445,7 @@ reads first.
   evidence. Across the full active Registry, the next cohort has 2,564 stable
   X sources: 2,212 shared with the prior snapshot and 352 new. Profile work
   used 356 requests / 6,408 estimated credits (`$0.06408`) including the
-  terminal-cache retry. See the [final import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md).
+  terminal-cache retry. See the [final import report](../../cited-insights/resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md).
 
 - 2026-07-14: [AIE-NETWORK-REFRESH] Finalized
   `registry-following-2026-07-14-aie-worldsfair-v2` over 2,564 frozen sources:
@@ -442,7 +457,7 @@ reads first.
   material but the conference cohort is explicitly not claimed optimal.
   Marginal provider work is estimated at `$4.37070`. Exact lineage, costs,
   qualitative findings, and interview limitation language are in the
-  [audit ADR](resources/network-source-architecture-audit/architecture-decision.md).
+  [audit ADR](../../cited-insights/resources/network-source-architecture-audit/architecture-decision.md).
 
 - 2026-07-14: [AIE-CONFERENCE-COHORT-20 — superseded by
   AIE-WORLDS-FAIR-423] Added a deterministic conference
@@ -455,7 +470,7 @@ reads first.
   company, affiliation, and provenance entered canonical tables; LinkedIn,
   sessions, and personal sites remain raw-only. Focused tests cover parsing,
   the stable limit, idempotency, lean facts, and rejection preservation. See
-  the [import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md).
+  the [import report](../../cited-insights/resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md).
 
 - 2026-07-14: [AUDIT-DECIDED] Collapsed the four-lane audit review after a
   direct diagnosis answered its core question: the Registry Network rank was
@@ -486,7 +501,7 @@ reads first.
   prompt cache; proxy-reported cost was $0.024084. Preserve this miss rather
   than silently repairing it. The first UI/API intentionally exposes only the
   four verified records so Adi can review the prompt and schema before any
-  broader run. See the [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md).
+  broader run. See the [oracle evaluation](../../cited-insights/resources/insight-oracle-evaluation-2026-07-14.md).
 
 - 2026-07-14: [ARTIFACT-SOURCE-DATE-NAVIGATION] Added the same seven-date
   navigator used by Feed to the Artifact index, keyed strictly by the UTC

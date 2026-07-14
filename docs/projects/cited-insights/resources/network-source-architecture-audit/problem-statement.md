@@ -200,7 +200,7 @@ may be the sole validation label for a cohort selected by the same feature.
 
 ## Instructions For Independent Agents
 
-- Read `docs/projects/cited-insights/tasks.md` and this workstream's
+- Read `docs/projects/archive/cited-insights-v1/tasks.md` and this workstream's
   `project-brief.md` first.
 - Do not edit the parent `tasks.md`; the parent agent is its single writer.
 - Audit before proposing implementation.

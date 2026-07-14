@@ -118,11 +118,11 @@ case-study thesis.
 ## Current Direction
 
 The only active tracker is
-[`docs/projects/cited-insights/tasks.md`](projects/cited-insights/tasks.md).
-Its current batch owns the executable next step: use the frozen
-[`oracle evaluation`](projects/cited-insights/resources/insight-oracle-evaluation-2026-07-14.md)
-and live Insights surface to review the prompt/schema, then run one blind day,
-build one daily briefing, and finish the evaluation and submission package.
+[`docs/projects/audience-insights-v2/tasks.md`](projects/audience-insights-v2/tasks.md).
+Its current batch owns the executable next step: freeze separate Investment and
+AI Engineering contracts, close the X Article evidence gap, pass a known-day
+plus blind-day quality gate, then materialize both audience products across all
+nine complete days. Delivery is deliberately deferred until this split is proven.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -135,7 +135,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | Active [`projects/<project>/tasks.md`](projects/cited-insights/tasks.md) |
+| What should be done next, exactly? | Active [`projects/<project>/tasks.md`](projects/audience-insights-v2/tasks.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |

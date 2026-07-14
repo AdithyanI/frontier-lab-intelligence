@@ -82,8 +82,9 @@ and which parts have been validated.
 ## Context / Constraints
 
 - Date started: 2026-07-14.
-- Submission deadline: 2026-07-20. This is a bounded secondary audit; the
-  current critical path remains `docs/projects/cited-insights/tasks.md`.
+- Submission deadline: 2026-07-20. This was a bounded secondary audit under the
+  archived `docs/projects/archive/cited-insights-v1/tasks.md`; its successor
+  critical path is `docs/projects/audience-insights-v2/tasks.md`.
 - Current canonical Registry: 2,220 identities = 2,104 active people, 93 active
   organizations, and 23 reversible rejections; 2,197 active identities total.
 - Latest daily X collection cohort: 2,234 active X accounts. Organizations may

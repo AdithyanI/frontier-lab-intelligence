@@ -232,7 +232,7 @@ instead of expanding the graph or processing the complete X history.
 | --- | --- | --- | --- |
 | done | Validation via the exploratory operator audit: 12/20 worth attention, five strong extraction candidates, eight noise/too-thin envelopes, no structural false merge. Blinded stratified evaluation is descoped to the cited-insights project, where labels validate insight yield — the actual claim — rather than feed ordering. | parent | [top-20-attention-audit-2026-07-11.md](resources/top-20-attention-audit-2026-07-11.md) |
 | done | M4 recorded as KEEP: `attention-v1.1` accepted as candidate generation; evidence contract frozen at the hashes in Context; extraction cohort = top-20 attention envelopes per day, starting 2026-07-11. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
-| done | Closed and archived this Feed project; opened `docs/projects/cited-insights/tasks.md` per the submission-critical path. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
+| done | Closed and archived this Feed project; opened the tracker now archived at `docs/projects/archive/cited-insights-v1/tasks.md` per the submission-critical path. | parent | [submission-gap-audit-2026-07-13.md](resources/submission-gap-audit-2026-07-13.md) |
 
 ## Backlog / Remaining Work
 
