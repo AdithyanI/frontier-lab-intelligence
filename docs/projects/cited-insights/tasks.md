@@ -268,6 +268,7 @@ reads first.
 | done | Challenge the next-step plan against the case prompt, system status, milestones, and five-record oracle. | explorer | [oracle resume](resources/oracle-resume.md) |
 | done | Audit the live artifact catalog and index ordering for the smallest useful operator experience. | explorer | [artifact library](../../references/artifact-library.md) |
 | done | Add Feed-style Artifact navigation by the UTC publication date of the source post, with bounded search and pagination. | implementer | [artifact library](../../references/artifact-library.md) |
+| done | Distill the Artifact index so collapsed rows show source time, artifact, URL-derived type, and discovery source; keep retrieval mechanics in expanded provenance. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
 | todo | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle resume](resources/oracle-resume.md) |
 | todo | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |

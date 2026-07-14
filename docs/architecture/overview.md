@@ -246,10 +246,10 @@ layer now exposes the live catalog through read-only `/api/artifacts/dates`
 and `/api/artifacts` projections plus a minimal `/artifacts` index. The shared
 Feed-style navigator selects the UTC publication day of the X observation
 (never mutable retrieval time); within a day, rows are newest source
-observation first, one row per canonical artifact, with retrieval state and
-expandable provenance. The same artifact may appear on multiple days when the
-network independently links it again. This is an operator inspection surface,
-not a second Feed or an insight product.
+observation first, one row per canonical artifact, with retrieval state inside
+expandable provenance rather than in the collapsed index row. The same artifact
+may appear on multiple days when the network independently links it again. This
+is an operator inspection surface, not a second Feed or an insight product.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL

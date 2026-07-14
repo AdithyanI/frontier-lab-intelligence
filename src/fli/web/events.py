@@ -281,9 +281,21 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
         "first_hand_count": int(item["observed_directly"]),
         "amplifiers": item["amplifiers"],
         "peak_attention_score": item["attention_score"],
+        "daily_score_basis": _daily_score_basis(item),
         "peak_public_interactions": item["score_components"]["public_interactions"],
         "latest_evidence_at": item["published_at"],
         "evidence": [],
+    }
+
+
+def _daily_score_basis(item: dict[str, Any]) -> dict[str, Any]:
+    """Preserve the exact post and components behind an envelope's peak score."""
+    return {
+        "post_id": item["post_id"],
+        "author": dict(item["author"]),
+        "published_at": item["published_at"],
+        "attention_score": item["attention_score"],
+        "score_components": dict(item["score_components"]),
     }
 
 
@@ -642,6 +654,7 @@ def _project_component(
         "first_hand_count": sum(1 for item in event_candidates if item["observed_directly"]),
         "amplifiers": sorted_amplifiers,
         "peak_attention_score": max(item["attention_score"] for item in event_candidates),
+        "daily_score_basis": _daily_score_basis(template),
         "peak_public_interactions": max(
             item["score_components"]["public_interactions"] for item in event_candidates
         ),
@@ -887,10 +900,27 @@ def _events_week_cached(
                 for state in overlapping
                 for active_day in state["active_days"]
             }
-            peak_score = max(
-                [item["peak_attention_score"]]
-                + [state["peak_attention_score"] for state in overlapping]
+            peak_state = max(
+                [
+                    {
+                        "peak_attention_score": item["peak_attention_score"],
+                        "daily_score_basis": item["daily_score_basis"],
+                    }
+                ]
+                + [
+                    {
+                        "peak_attention_score": state["peak_attention_score"],
+                        "daily_score_basis": state["daily_score_basis"],
+                    }
+                    for state in overlapping
+                ],
+                key=lambda state: (
+                    state["peak_attention_score"],
+                    state["daily_score_basis"]["published_at"],
+                    state["daily_score_basis"]["post_id"],
+                ),
             )
+            peak_score = peak_state["peak_attention_score"]
             peak_interaction = max(
                 [item["peak_public_interactions"]]
                 + [state["peak_public_interactions"] for state in overlapping]
@@ -905,6 +935,7 @@ def _events_week_cached(
                     "member_keys": member_keys,
                     "active_days": {*inherited_days, day},
                     "peak_attention_score": peak_score,
+                    "daily_score_basis": peak_state["daily_score_basis"],
                     "peak_public_interactions": peak_interaction,
                 }
             )
@@ -935,6 +966,7 @@ def _events_week_cached(
             "active_days": active_days,
             "weekly_active_day_count": len(active_days),
             "peak_attention_score": state["peak_attention_score"],
+            "daily_score_basis": state["daily_score_basis"],
             "peak_public_interactions": state["peak_public_interactions"],
             "projection": "week",
             "window_from": start.isoformat(),

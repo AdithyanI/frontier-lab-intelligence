@@ -110,9 +110,6 @@ function ArtifactRow({ item }: { item: ArtifactItem }) {
             <span className="mono">{item.observation_count} observations that day</span>
           )}
         </span>
-        <span className={`artifact-state artifact-state--${item.fetch_state}`}>
-          {fetchLabels[item.fetch_state]}
-        </span>
         <span className="artifact-caret" aria-hidden="true" />
       </summary>
       <div className="artifact-provenance">
@@ -368,7 +365,6 @@ export default function Artifacts() {
             <span>Artifact</span>
             <span>Type</span>
             <span>Found through</span>
-            <span>Retrieval</span>
             <span />
           </div>
           <div className="artifact-list">

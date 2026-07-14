@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
 import {
   getJSON,
   type EventEvidence,
@@ -217,6 +224,144 @@ function TriageNote({ item }: { item: SignalEvent }) {
   )
 }
 
+function ScoreDisclosure({
+  item,
+  rank,
+  total,
+  date,
+  formula,
+  open,
+  onToggle,
+  onClose,
+}: {
+  item: SignalEvent
+  rank: number
+  total: number
+  date: string
+  formula: EventResponse['score_formula']
+  open: boolean
+  onToggle: () => void
+  onClose: () => void
+}) {
+  const disclosureRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const headingId = useId()
+  const panelId = useId()
+  const basis = item.daily_score_basis
+  const components = basis.score_components
+  const networkWeight = formula?.network_attention_weight ?? 0.55
+  const originatorWeight = formula?.originator_support_weight ?? 0.25
+  const engagementWeight = formula?.public_engagement_weight ?? 0.20
+  const rows = [
+    {
+      label: 'Tracked amplification',
+      raw: `${components.registry_amplifiers.toLocaleString('en-US')} tracked ${components.registry_amplifiers === 1 ? 'entity' : 'entities'}`,
+      percentile: components.network_attention_percentile,
+      weight: networkWeight,
+    },
+    {
+      label: 'Author network support',
+      raw: `${components.originator_network_support.toLocaleString('en-US')} Registry entities follow the author`,
+      percentile: components.originator_support_percentile,
+      weight: originatorWeight,
+    },
+    {
+      label: 'Public engagement',
+      raw: `${components.public_interactions.toLocaleString('en-US')} likes, replies, reposts, and quotes`,
+      percentile: components.public_engagement_percentile,
+      weight: engagementWeight,
+    },
+  ]
+
+  useEffect(() => {
+    if (!open) return
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!disclosureRef.current?.contains(event.target as Node)) onClose()
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      onClose()
+      triggerRef.current?.focus()
+    }
+    window.addEventListener('pointerdown', closeOnOutsideClick)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.removeEventListener('pointerdown', closeOnOutsideClick)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [open, onClose])
+
+  return (
+    <div className="feed-score-disclosure" ref={disclosureRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="feed-rank mono"
+        aria-label={`Rank ${rank} of ${total} in this Feed view. Open daily score explanation.`}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={onToggle}
+      >
+        <strong>#{rank}</strong>
+      </button>
+      {open && (
+        <div
+          className="feed-score-popover"
+          id={panelId}
+          role="dialog"
+          aria-labelledby={headingId}
+        >
+          <div className="feed-score-popover-head">
+            <div>
+              <h3 id={headingId}>Rank #{rank} in this view</h3>
+              <p className="mono">
+                Daily score {basis.attention_score.toFixed(1)} ·{' '}
+                {shortDate.format(new Date(`${date}T12:00:00Z`))}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="feed-score-close"
+              aria-label="Close score explanation"
+              onClick={() => {
+                onClose()
+                triggerRef.current?.focus()
+              }}
+            >
+              ×
+            </button>
+          </div>
+          {basis.post_id !== item.presentation_root_post_id && (
+            <p className="feed-score-source">
+              This evidence group uses its highest-scoring member: @{basis.author.handle}.
+            </p>
+          )}
+          <div className="feed-score-components">
+            {rows.map((row) => (
+              <div className="feed-score-component" key={row.label}>
+                <div className="feed-score-component-head">
+                  <strong>{row.label}</strong>
+                  <span className="mono">{Math.round(row.weight * 100)}%</span>
+                </div>
+                <p>{row.raw}</p>
+                <p className="mono">
+                  Higher than {(row.percentile * 100).toFixed(1)}% of that day&rsquo;s
+                  scored posts · {(row.percentile * row.weight * 100).toFixed(1)} points
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="feed-score-limit">
+            The daily score prioritizes what to inspect. It is not importance, truth,
+            quality, or the percentage of the network that engaged. Scores from different
+            days are not directly comparable.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function RelationshipPost({ item }: { item: EventEvidence }) {
   const label =
     item.relationship === 'reply'
@@ -341,7 +486,25 @@ function EventEvidenceDetails({
   )
 }
 
-function EventRow({ item }: { item: SignalEvent }) {
+function EventRow({
+  item,
+  rank,
+  total,
+  date,
+  formula,
+  scoreOpen,
+  onToggleScore,
+  onCloseScore,
+}: {
+  item: SignalEvent
+  rank: number
+  total: number
+  date: string
+  formula: EventResponse['score_formula']
+  scoreOpen: boolean
+  onToggleScore: () => void
+  onCloseScore: () => void
+}) {
   const root = item.root
   const replies = item.evidence.filter((evidence) => evidence.relationship === 'reply')
   const continuations = replies.filter((evidence) => evidence.same_author_as_root)
@@ -353,15 +516,6 @@ function EventRow({ item }: { item: SignalEvent }) {
   const related = item.evidence.filter(
     (evidence) => evidence.relationship === 'related',
   )
-  const c = root.score_components
-  const rationale = [
-    c.registry_amplifiers
-      ? `${c.registry_amplifiers} Registry amplifier${c.registry_amplifiers === 1 ? '' : 's'}`
-      : null,
-    c.originator_network_rank
-      ? `originator network rank #${c.originator_network_rank.toLocaleString('en-US')}`
-      : null,
-  ].filter(Boolean)
   const relationshipSummary = [
     continuations.length
       ? `${continuations.length} thread ${continuations.length === 1 ? 'continuation' : 'continuations'}`
@@ -380,13 +534,16 @@ function EventRow({ item }: { item: SignalEvent }) {
 
   return (
     <article className="feed-row event-row">
-      <div
-        className="feed-rank mono"
-        aria-label={`Attention score ${item.peak_attention_score.toFixed(1)}`}
-      >
-        <strong>{item.peak_attention_score.toFixed(1)}</strong>
-        <span>attention</span>
-      </div>
+      <ScoreDisclosure
+        item={item}
+        rank={rank}
+        total={total}
+        date={date}
+        formula={formula}
+        open={scoreOpen}
+        onToggle={onToggleScore}
+        onClose={onCloseScore}
+      />
 
       <div className="feed-body">
         <header className="feed-byline">
@@ -424,15 +581,6 @@ function EventRow({ item }: { item: SignalEvent }) {
 
         <TriageNote item={item} />
 
-        {!item.is_grouped && rationale.length > 0 && (
-          <div className="feed-proof event-proof">
-            <div className="feed-why">
-              <span className="feed-proof-label">WHY HERE</span>
-              <span>{rationale.join(' · ')}</span>
-            </div>
-          </div>
-        )}
-
         {item.is_grouped && (
           <EventEvidenceDetails
             item={item}
@@ -467,6 +615,7 @@ export default function Feed() {
   const [items, setItems] = useState<SignalEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [openScoreEventId, setOpenScoreEventId] = useState<string | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const activeViewKeyRef = useRef('')
   const availableDates = useMemo(() => dates?.dates ?? [], [dates])
@@ -516,6 +665,7 @@ export default function Feed() {
     }
     const viewKey = eventPageKey(request)
     activeViewKeyRef.current = viewKey
+    setOpenScoreEventId(null)
     const cached = eventPageCache.get(viewKey)
     if (cached) {
       setData(cached)
@@ -698,7 +848,7 @@ export default function Feed() {
             value={sort}
             onChange={setSort}
             options={[
-              { value: 'attention', label: 'Attention', description: 'Network attention' },
+              { value: 'attention', label: 'Score', description: 'Daily score' },
               { value: 'recent', label: 'Recent', description: 'Most recent' },
               { value: 'engagement', label: 'Engagement', description: 'Public engagement' },
             ]}
@@ -722,7 +872,23 @@ export default function Feed() {
           ? Array.from({ length: 5 }, (_, index) => (
               <div className="feed-skeleton skeleton" key={index} />
             ))
-          : items.map((item) => <EventRow key={item.event_id} item={item} />)}
+          : items.map((item, index) => (
+              <EventRow
+                key={item.event_id}
+                item={item}
+                rank={index + 1}
+                total={data?.total ?? items.length}
+                date={selectedDate}
+                formula={data?.score_formula}
+                scoreOpen={openScoreEventId === item.event_id}
+                onToggleScore={() =>
+                  setOpenScoreEventId((current) =>
+                    current === item.event_id ? null : item.event_id,
+                  )
+                }
+                onCloseScore={() => setOpenScoreEventId(null)}
+              />
+            ))}
         {!loading && items.length === 0 && (
           <div className="registry-empty">
             No evidence matches these audit filters. Try another day or clear the filters.

@@ -58,6 +58,10 @@ Canonicalization is conservative and versioned as `artifact-url-v1`:
 - admit X long-form Article URLs explicitly;
 - do not guess the target of a card-only `t.co` URL.
 
+The displayed artifact kind is a deterministic URL-shape hint, not a semantic
+content classification. Known hosts and paths identify papers, repositories,
+videos, articles, and announcement-like URLs; unmatched URLs remain `other`.
+
 Nested quoted and retweeted payloads are traversed recursively. A URL belongs
 to the post that actually contains it, not to the outer wrapper that disclosed
 that post.
@@ -124,11 +128,11 @@ observation, never by retrieval time. Date counts are distinct canonical
 artifacts; an artifact appears on each day it was observed, and exact-day
 search matches every source observation for that artifact rather than only the
 representative latest one. Within a selected day, one chronological row per
-canonical artifact shows its fetch-oriented kind, representative source, and
-current retrieval state; bounded pagination keeps the surface fast. Expanding
-a row shows canonical and source URLs, first-seen time, retrieval method,
-snapshot size, and any current error. It does not rank, summarize, or classify
-artifact content; those are later cited-insight responsibilities.
+canonical artifact shows its fetch-oriented kind and representative source;
+bounded pagination keeps the surface fast. Expanding a row shows canonical and
+source URLs, first-seen time, retrieval state and method, snapshot size, and
+any current error. It does not rank, summarize, or classify artifact content;
+those are later cited-insight responsibilities.
 
 ## Artifact Store v1 evidence
 

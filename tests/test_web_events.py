@@ -122,6 +122,13 @@ def test_events_api_returns_root_once_with_exact_relationships(tmp_path, monkeyp
     assert target_group["link_count"] == 1
     assert target_group["anchor_types"] == ["same_target"]
     assert target_group["why_grouped"] == ["Exact same quoted or reposted post"]
+    assert target_group["daily_score_basis"]["attention_score"] == (
+        target_group["peak_attention_score"]
+    )
+    assert target_group["daily_score_basis"]["post_id"] == "1"
+    assert target_group["daily_score_basis"]["score_components"] == (
+        target_group["root"]["score_components"]
+    )
     assert [item["post_id"] for item in target_group["evidence"]] == ["2"]
     assert target_group["evidence"][0]["relationship"] == "retweet"
     assert target_group["evidence"][0]["target_post_id"] == "1"
@@ -136,6 +143,10 @@ def test_events_api_preserves_ungrouped_posts_as_singletons(tmp_path, monkeypatc
     singleton = next(item for item in payload["items"] if item["root"]["post_id"] == "4")
     assert singleton["is_grouped"] is False
     assert singleton["member_count"] == 1
+    assert singleton["daily_score_basis"]["post_id"] == "4"
+    assert singleton["daily_score_basis"]["attention_score"] == (
+        singleton["peak_attention_score"]
+    )
     assert singleton["evidence"] == []
 
 

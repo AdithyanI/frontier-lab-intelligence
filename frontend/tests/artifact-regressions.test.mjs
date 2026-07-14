@@ -29,3 +29,10 @@ test('Artifacts search is debounced and visible source dates are prefetched', ()
   assert.match(artifactSource, /for \(const value of visibleDates\)/)
   assert.match(artifactSource, /Search title, host, or URL/)
 })
+
+test('Artifact retrieval state is disclosed only in expanded provenance', () => {
+  assert.doesNotMatch(artifactSource, /artifact-state/)
+  assert.doesNotMatch(artifactSource, /<span>Retrieval<\/span>/)
+  assert.match(artifactSource, /<dt>Retrieval<\/dt>/)
+  assert.match(artifactSource, /fetchLabels\[item\.fetch_state\]/)
+})

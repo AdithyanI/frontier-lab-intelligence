@@ -253,6 +253,13 @@ export interface SignalEvent {
   first_hand_count: number
   amplifiers: FeedAmplifier[]
   peak_attention_score: number
+  daily_score_basis: {
+    post_id: string
+    author: FeedAuthor
+    published_at: string
+    attention_score: number
+    score_components: FeedScoreComponents
+  }
   peak_public_interactions: number
   latest_evidence_at: string
   evidence: EventEvidence[]
