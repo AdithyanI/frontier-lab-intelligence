@@ -297,9 +297,9 @@ reads first.
 | done | Link each Artifact observation back to its exact ranked Feed envelope so provenance opens in the existing evidence workspace. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Group multiple canonical artifacts disclosed by one exact Feed envelope under one shared visual rank rail without merging their records or disclosures. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
-| in_progress | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle resume](resources/oracle-resume.md) |
-| todo | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
-| todo | Expose only the verified five-record run through an Insights API and audit-first page; update the Architecture visual to show envelope evidence plus optional artifact strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
+| done | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle expectations](resources/insight-oracle-2026-07-11.md) |
+| done | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md) |
+| in_progress | Expose only the four citation-verified records through an Insights API and audit-first page; update the Architecture visual to show envelope evidence plus optional artifact strengthening. | parent | [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md) |
 
 ## Backlog / Remaining Work
 
@@ -326,6 +326,16 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [FIVE-RECORD-INSIGHT-SKELETON] Froze the five handwritten
+  oracle envelopes and ran `insight-v1.1` through `gpt-5.4-mini`. All five
+  calls returned an insight; application code published four exact-bound
+  citations and rejected rank 12 after the model removed a leading source
+  word and changed capitalization. Three of five eligible requests read from
+  prompt cache; proxy-reported cost was $0.024084. Preserve this miss rather
+  than silently repairing it. The first UI/API intentionally exposes only the
+  four verified records so Adi can review the prompt and schema before any
+  broader run. See the [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md).
 
 - 2026-07-14: [ARTIFACT-SOURCE-DATE-NAVIGATION] Added the same seven-date
   navigator used by Feed to the Artifact index, keyed strictly by the UTC

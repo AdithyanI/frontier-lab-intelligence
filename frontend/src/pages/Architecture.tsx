@@ -367,7 +367,7 @@ function NetworkRankFigure() {
   const supportTicks = [0, 1, 2, 3, 4]
   return (
     <svg
-      viewBox="0 0 1080 320"
+      viewBox="0 0 1080 288"
       role="img"
       aria-label="Why an account ranks higher: Account A has fewer public followers but five screened Registry followers, while Account B has many public followers but only one screened Registry follower. The five screened signals count, public audience size does not."
     >
@@ -489,7 +489,6 @@ function NetworkRankFigure() {
       ))}
       <text x="804" y="264" fontFamily={UI} fontSize="12.5" fill={INK}>1 counted → lower network rank</text>
 
-      <text x="30" y="306" fontFamily={UI} fontSize="12.5" fill={MUTED}>Five screened signals outrank one — regardless of public audience size.</text>
     </svg>
   )
 }
