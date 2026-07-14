@@ -116,6 +116,13 @@ def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def default_run_db(run_id: str) -> Path:
     if not run_id or any(
         character
@@ -333,8 +340,8 @@ def freeze_run(
                 cited_insights.PROMPT_VERSION,
                 cited_insights.prompt_sha256(),
                 cited_insights.SCHEMA_VERSION,
-                str(triage_db.relative_to(REPO_ROOT)),
-                str(artifact_db.relative_to(REPO_ROOT)),
+                _display_path(triage_db),
+                _display_path(artifact_db),
                 event_ids_json,
                 cohort_sha256,
                 len(packets),
