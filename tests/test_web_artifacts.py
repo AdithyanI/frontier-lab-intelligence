@@ -154,16 +154,21 @@ def test_artifacts_api_defaults_to_latest_source_day_with_provenance(
     }
     assert payload["date"] == "2026-07-11"
     assert payload["matching_total"] == 2
-    assert [item["artifact_id"] for item in payload["items"]] == ["older", "newer"]
-    assert payload["items"][0]["last_source_published_at"] == (
+    assert [item["artifact_id"] for item in payload["items"]] == ["newer", "older"]
+    assert payload["items"][0]["best_source_rank"] == 2
+    assert payload["items"][0]["source_published_at"] == (
+        "2026-07-11T10:00:00+00:00"
+    )
+    assert payload["items"][0]["fetch_state"] == "catalogued"
+    assert payload["items"][1]["best_source_rank"] == 3
+    assert payload["items"][1]["last_source_published_at"] == (
         "2026-07-11T11:30:00+00:00"
     )
-    assert payload["items"][0]["observation_count"] == 2
-    assert payload["items"][0]["source_provider"] == "twitterapi_io"
-    assert payload["items"][0]["fetch_state"] == "ready"
-    assert payload["items"][0]["fetch_method"] == "Direct fetch"
-    assert payload["items"][0]["text_char_count"] == 4200
-    assert payload["items"][1]["fetch_state"] == "catalogued"
+    assert payload["items"][1]["observation_count"] == 2
+    assert payload["items"][1]["source_provider"] == "twitterapi_io"
+    assert payload["items"][1]["fetch_state"] == "ready"
+    assert payload["items"][1]["fetch_method"] == "Direct fetch"
+    assert payload["items"][1]["text_char_count"] == 4200
 
 
 def test_artifact_dates_are_source_dates_with_distinct_counts(tmp_path, monkeypatch):

@@ -1863,7 +1863,7 @@ td.num {
 .artifact-columns,
 .artifact-row > summary {
   display: grid;
-  grid-template-columns: 132px minmax(280px, 1fr) 112px 170px 16px;
+  grid-template-columns: 88px minmax(280px, 1fr) 112px 150px 108px 16px;
   gap: 20px;
   align-items: center;
 }
@@ -1895,8 +1895,28 @@ td.num {
 .artifact-row[open] > summary { background: var(--surface); }
 
 .artifact-date {
+  text-align: right;
   color: var(--muted);
   font-size: 10.5px;
+}
+
+.artifact-rank {
+  display: flex;
+  min-height: 76px;
+  align-self: stretch;
+  align-items: center;
+  justify-content: flex-end;
+  margin: -13px 0 -13px -16px;
+  padding-right: 16px;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.artifact-rank strong {
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .artifact-identity {
@@ -1955,7 +1975,7 @@ td.num {
 }
 
 .artifact-provenance {
-  padding: 18px 36px 22px 168px;
+  padding: 18px 36px 22px 124px;
   border-top: 1px solid var(--border);
   background: var(--surface);
 }

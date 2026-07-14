@@ -91,14 +91,14 @@ function sourceLabel(provider: string | null) {
 }
 
 function ArtifactRow({ item }: { item: ArtifactItem }) {
-  const latestObservationAt = item.last_source_published_at || item.last_seen_at
+  const sourcePublishedAt = item.source_published_at || item.last_source_published_at || item.last_seen_at
 
   return (
     <details className="artifact-row">
       <summary>
-        <time className="artifact-date mono" dateTime={latestObservationAt}>
-          {sourceTime.format(new Date(latestObservationAt))}
-        </time>
+        <span className="artifact-rank mono" aria-label={`Feed rank ${item.best_source_rank}`}>
+          <strong>#{item.best_source_rank}</strong>
+        </span>
         <span className="artifact-identity">
           <strong>{displayTitle(item)}</strong>
           <span className="mono">{item.host.replace(/^www\./, '')}</span>
@@ -110,6 +110,9 @@ function ArtifactRow({ item }: { item: ArtifactItem }) {
             <span className="mono">{item.observation_count} observations that day</span>
           )}
         </span>
+        <time className="artifact-date mono" dateTime={sourcePublishedAt}>
+          {sourceTime.format(new Date(sourcePublishedAt))}
+        </time>
         <span className="artifact-caret" aria-hidden="true" />
       </summary>
       <div className="artifact-provenance">
@@ -133,7 +136,7 @@ function ArtifactRow({ item }: { item: ArtifactItem }) {
                 sourceLabel(item.source_provider)
               )}
               <span>
-                Source published {observedAt.format(new Date(latestObservationAt))}
+                Source published {observedAt.format(new Date(sourcePublishedAt))}
               </span>
               <span>Catalogued {observedAt.format(new Date(item.first_seen_at))}</span>
             </dd>
@@ -361,10 +364,11 @@ export default function Artifacts() {
       {data?.available && (
         <section className="artifact-index" aria-label="Primary artifacts">
           <div className="artifact-columns mono" aria-hidden="true">
-            <span>Source time</span>
+            <span>Feed rank</span>
             <span>Artifact</span>
             <span>Type</span>
             <span>Found through</span>
+            <span>Source time</span>
             <span />
           </div>
           <div className="artifact-list">

@@ -331,6 +331,8 @@ export interface ArtifactItem {
   first_seen_at: string
   last_seen_at: string
   observation_count: number
+  best_source_rank: number
+  source_published_at: string
   first_source_published_at: string | null
   last_source_published_at: string | null
   source_kind: string | null

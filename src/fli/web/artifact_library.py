@@ -195,8 +195,8 @@ def artifacts_payload(
                           ) AS last_source_published_at,
                           ROW_NUMBER() OVER (
                               PARTITION BY observation.artifact_id
-                              ORDER BY observation.source_published_at DESC,
-                                       observation.best_source_rank,
+                              ORDER BY observation.best_source_rank,
+                                       observation.source_published_at DESC,
                                        observation.observation_id
                           ) AS ordinal
                    FROM artifact_observation observation
@@ -236,6 +236,8 @@ def artifacts_payload(
                       artifact.host, artifact.artifact_kind, artifact.title,
                       artifact.first_seen_at, artifact.last_seen_at,
                       observation.observation_count,
+                      observation.best_source_rank,
+                      observation.source_published_at,
                       observation.first_source_published_at,
                       observation.last_source_published_at,
                       observation.source_kind, observation.source_provider,
@@ -251,7 +253,8 @@ def artifacts_payload(
                 AND fetch.ordinal = 1
                WHERE observation.ordinal = 1
                  {search_sql}
-               ORDER BY observation.source_published_at DESC,
+               ORDER BY observation.best_source_rank,
+                        observation.source_published_at DESC,
                         artifact.artifact_id
                LIMIT ? OFFSET ?""",
             (selected_day, *search_params, limit, offset),
