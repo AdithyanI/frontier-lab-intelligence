@@ -374,6 +374,60 @@ def test_jina_reader_rejects_thin_provider_output(tmp_path):
     conn.close()
 
 
+def test_jina_reader_resumes_retryable_provider_failure(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    _seed_artifact(db)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    _native_terminal_failure(db)
+    calls = 0
+
+    def reader_handler(_request: httpx.Request):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return httpx.Response(503)
+        return httpx.Response(
+            200,
+            json={
+                "code": 200,
+                "status": 20000,
+                "data": {
+                    "title": "Recovered on retry",
+                    "url": "https://example.com/article",
+                    "content": (
+                        "# Recovered on retry\n\nThe second Reader attempt returned "
+                        "a substantive public artifact while preserving the "
+                        "first retryable attempt for operational audit."
+                    ),
+                },
+            },
+        )
+
+    transport = httpx.MockTransport(reader_handler)
+    first = artifact_fetch.recover_with_jina_reader(
+        db_path=db, api_key="", transport=transport
+    )
+    second = artifact_fetch.recover_with_jina_reader(
+        db_path=db, api_key="", transport=transport
+    )
+
+    assert first["failed_retryable"] == 1
+    assert second["success"] == 1
+    assert calls == 2
+    conn = artifacts.connect(db)
+    attempts = conn.execute(
+        """SELECT attempt_number, status FROM artifact_fetch
+           WHERE fetch_policy = ? ORDER BY attempt_number""",
+        (artifact_fetch.JINA_READER_POLICY,),
+    ).fetchall()
+    assert [(row["attempt_number"], row["status"]) for row in attempts] == [
+        (1, "failed_retryable"),
+        (2, "success"),
+    ]
+    conn.close()
+
+
 def test_jina_api_key_prefers_environment_then_repo_env(tmp_path, monkeypatch):
     env_file = tmp_path / ".env"
     env_file.write_text("JINA_API_KEY='repo-key'\n", encoding="utf-8")

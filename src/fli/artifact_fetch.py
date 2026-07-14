@@ -1080,6 +1080,63 @@ def _create_jina_run(
     return fetch_run_id, False
 
 
+def _resume_jina_run(conn: Any) -> tuple[str, list[dict[str, Any]]] | None:
+    """Resume a crashed or retryable Reader run before selecting new work."""
+    runs = conn.execute(
+        """SELECT fetch_run_id, status, failed_retryable_count
+           FROM artifact_fetch_run
+           WHERE fetch_policy = ?
+           ORDER BY started_at, fetch_run_id""",
+        (JINA_READER_POLICY,),
+    ).fetchall()
+    for run in runs:
+        fetch_run_id = str(run["fetch_run_id"])
+        should_resume = str(run["status"]) == "in_progress"
+        if not should_resume and int(run["failed_retryable_count"]) > 0:
+            pending = conn.execute(
+                """SELECT 1
+                   FROM artifact_fetch_run_item item
+                   WHERE item.fetch_run_id = ?
+                     AND NOT EXISTS (
+                         SELECT 1 FROM artifact_fetch fetch
+                         WHERE fetch.artifact_id = item.artifact_id
+                           AND fetch.fetch_policy = ?
+                           AND fetch.status IN ('success', 'failed_terminal')
+                     )
+                     AND COALESCE((
+                         SELECT MAX(fetch.attempt_number)
+                         FROM artifact_fetch fetch
+                         WHERE fetch.artifact_id = item.artifact_id
+                           AND fetch.fetch_policy = ?
+                     ), 0) < ?
+                   LIMIT 1""",
+                (fetch_run_id, JINA_READER_POLICY, JINA_READER_POLICY, MAX_ATTEMPTS),
+            ).fetchone()
+            should_resume = pending is not None
+        if not should_resume:
+            continue
+        with conn:
+            conn.execute(
+                """UPDATE artifact_fetch_run
+                   SET status = 'in_progress', completed_at = NULL
+                   WHERE fetch_run_id = ?""",
+                (fetch_run_id,),
+            )
+        items = conn.execute(
+            """SELECT item.artifact_id, artifact.canonical_url,
+                      artifact.artifact_kind, artifact.host,
+                      item.source_day, item.source_rank,
+                      item.normalized_rank, item.source_event_id
+               FROM artifact_fetch_run_item item
+               JOIN artifact ON artifact.artifact_id = item.artifact_id
+               WHERE item.fetch_run_id = ?
+               ORDER BY item.selection_rank""",
+            (fetch_run_id,),
+        ).fetchall()
+        return fetch_run_id, [dict(item) for item in items]
+    return None
+
+
 def _jina_headers(api_key: str | None) -> dict[str, str]:
     headers = {
         "Accept": "application/json",
@@ -1189,8 +1246,13 @@ def recover_with_jina_reader(
     fetch evidence.
     """
     conn = artifacts.connect(db_path)
-    selection = _jina_candidates(conn)
-    fetch_run_id, already_complete = _create_jina_run(conn, selection)
+    resumable = _resume_jina_run(conn)
+    if resumable is not None:
+        fetch_run_id, selection = resumable
+        already_complete = False
+    else:
+        selection = _jina_candidates(conn)
+        fetch_run_id, already_complete = _create_jina_run(conn, selection)
     if fetch_run_id is None:
         conn.close()
         return {
