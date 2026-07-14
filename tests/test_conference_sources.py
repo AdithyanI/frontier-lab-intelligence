@@ -43,7 +43,7 @@ def _record(**overrides):
         "website": "https://ada.example",
         "blog": "https://ada.example/blog",
         "session_titles": ("An excellent talk",),
-        "company_website": None,
+        "company_website": "https://example.ai",
         "company_x_candidate": None,
     }
     values.update(overrides)
@@ -191,6 +191,79 @@ def test_import_writes_lean_facts_affiliation_and_is_idempotent(tmp_path):
     ).fetchone()[0] == 1
 
 
+def test_import_keeps_unresolvable_company_as_person_fact_only(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+
+    result = conference_sources.import_records(
+        conn,
+        [_record(company="Unresolved Label", company_website=None)],
+    )
+
+    assert result["organizations_created"] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE kind = 'organization'"
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_affiliations"
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        """SELECT value FROM entity_source_facts
+           WHERE fact = 'speaker_company'"""
+    ).fetchone()[0] == "Unresolved Label"
+
+
+def test_consolidation_prunes_legacy_channel_less_company_identity(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    conference_sources.import_records(
+        conn,
+        [_record(company="Unresolved Label", company_website=None)],
+    )
+    person_id = conn.execute(
+        """SELECT entity_id FROM entity_channels ec
+           JOIN channels c ON c.id = ec.channel_id
+           WHERE c.kind = 'x' AND c.key = 'adaexample'"""
+    ).fetchone()[0]
+    organization_id = channels.upsert_entity(
+        conn,
+        kind="organization",
+        slug="unresolved-label",
+        name="Unresolved Label",
+        observed_at=SOURCE.observed_at,
+    )
+    channels.record_entity_fact(
+        conn,
+        entity_id=organization_id,
+        source=SOURCE.source_id,
+        fact="conference_company",
+        value="Unresolved Label",
+        observed_at=SOURCE.observed_at,
+        evidence_url=SOURCE.conference_url,
+    )
+    channels.record_affiliation(
+        conn,
+        person_entity_id=person_id,
+        organization_entity_id=organization_id,
+        relationship="listed_affiliation",
+        role_title="Research Engineer",
+        source=SOURCE.source_id,
+        observed_at=SOURCE.observed_at,
+        evidence_url=SOURCE.conference_url,
+    )
+
+    result = conference_sources.consolidate_conference_facts(conn)
+
+    assert result["unresolved_conference_affiliations_removed"] == 1
+    assert result["unresolved_conference_organizations_pruned"] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE id = ?", (organization_id,)
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        """SELECT value FROM entity_source_facts
+           WHERE entity_id = ? AND fact = 'speaker_company'""",
+        (person_id,),
+    ).fetchone()[0] == "Unresolved Label"
+
+
 def test_import_does_not_revive_an_existing_rejected_identity(tmp_path):
     conn = channels.connect(tmp_path / "test.db")
     record = _record()
@@ -224,6 +297,7 @@ def test_import_keeps_only_the_newest_conference_context_per_person(tmp_path):
         role="Old role",
         company="Old Company",
         bio="Old bio",
+        company_website="https://old.example",
         company_x_candidate="ambiguous_company_handle",
     )
     newer = _record(
@@ -233,6 +307,7 @@ def test_import_keeps_only_the_newest_conference_context_per_person(tmp_path):
         role="Current role",
         company="Current Company",
         bio="Current bio",
+        company_website="https://current.example",
     )
 
     conference_sources.import_records(conn, [older])
@@ -274,6 +349,43 @@ def test_import_keeps_only_the_newest_conference_context_per_person(tmp_path):
         """SELECT COUNT(*) FROM entity_source_facts
            WHERE fact = 'company_x_candidate'"""
     ).fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entities WHERE name = 'Old Company'"
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        "SELECT COUNT(*) FROM channels WHERE key = 'https://old.example'"
+    ).fetchone()[0] == 0
+    assert result["orphan_conference_organizations_pruned"] == 1
+
+
+def test_import_skips_historical_organization_when_newer_context_is_present(
+    tmp_path,
+):
+    conn = channels.connect(tmp_path / "test.db")
+    records = [
+        _record(
+            source_id="aie-worldsfair-2024",
+            observed_at="2024-06-27T23:59:59+00:00",
+            company="Historical Company",
+            company_website="https://historical.example",
+        ),
+        _record(
+            source_id="aie-worldsfair-2026",
+            observed_at="2026-07-02T23:59:59+00:00",
+            company="Current Company",
+            company_website="https://current.example",
+        ),
+    ]
+
+    result = conference_sources.import_records(conn, records)
+
+    assert result["organizations_created"] == 1
+    assert [
+        row[0]
+        for row in conn.execute(
+            "SELECT name FROM entities WHERE kind = 'organization'"
+        ).fetchall()
+    ] == ["Current Company"]
 
 
 def test_profile_hydration_is_raw_first_resumable_and_updates_account(tmp_path):

@@ -571,7 +571,7 @@ td.num {
 .ent-type-cell { width: 180px; }
 .ent-network-head,
 .ent-network-rank {
-  width: 140px;
+  width: 220px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -625,6 +625,34 @@ td.num {
   color: var(--ink-soft);
   font-family: var(--font-mono);
   font-size: 12px;
+}
+.ent-network-value {
+  display: inline-grid;
+  grid-template-columns: 12ch max-content 7ch;
+  align-items: baseline;
+  column-gap: 4px;
+  white-space: nowrap;
+}
+.ent-network-rank-value {
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+}
+.ent-network-separator {
+  color: var(--muted);
+  text-align: center;
+}
+.ent-network-magnitude {
+  color: var(--muted);
+  font-size: 10.5px;
+  text-align: left;
+}
+.registry-network-context {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
 }
 .ent-reach-value {
   display: inline-grid;

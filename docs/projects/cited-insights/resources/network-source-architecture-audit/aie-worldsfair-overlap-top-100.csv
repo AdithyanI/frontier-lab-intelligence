@@ -1,0 +1,101 @@
+algorithm,position,score_rank,score,x_id,handle,display_name,followers_count,cohort_follow_count,cohort_follow_share,registry_state,entity_id,entity_kind,entity_name,explanation
+entity-overlap-v3,1,1,2041.0,33836629,karpathy,Andrej Karpathy,3373646,2041,0.8095993653312178,active,11,person,Andrej Karpathy,Followed by 2041 of 2521 complete active Registry entities.
+entity-overlap-v3,2,2,1739.0,911297187664949248,jeffdean,Jeff Dean,448044,1739,0.6898056326854423,active,12,person,Jeff Dean,Followed by 1739 of 2521 complete active Registry entities.
+entity-overlap-v3,3,3,1615.0,1605,sama,Sam Altman,5492522,1615,0.6406188020626735,active,21,person,Sam Altman,Followed by 1615 of 2521 complete active Registry entities.
+entity-overlap-v3,4,4,1576.0,48008938,ylecun,Yann LeCun,1237660,1576,0.625148750495835,active,13,person,Yann LeCun,Followed by 1576 of 2521 complete active Registry entities.
+entity-overlap-v3,5,5,1566.0,1720046887,ilyasut,Ilya Sutskever,769664,1566,0.621182070606902,active,14,person,Ilya Sutskever,Followed by 1566 of 2521 complete active Registry entities.
+entity-overlap-v3,6,6,1563.0,4398626122,openai,OpenAI,5022838,1563,0.6199920666402221,active,6,organization,OpenAI,Followed by 1563 of 2521 complete active Registry entities.
+entity-overlap-v3,7,7,1461.0,216939636,andrewyng,Andrew Ng,1691847,1461,0.5795319317731059,active,44,person,Andrew Ng,Followed by 1461 of 2521 complete active Registry entities.
+entity-overlap-v3,8,8,1455.0,1482581556,demishassabis,Demis Hassabis,1400293,1455,0.5771519238397461,active,36,person,Demis Hassabis,Followed by 1455 of 2521 complete active Registry entities.
+entity-overlap-v3,9,9,1432.0,4783690002,googledeepmind,Google DeepMind,1474453,1432,0.5680285600952003,active,2,organization,Google DeepMind,Followed by 1432 of 2521 complete active Registry entities.
+entity-overlap-v3,10,10,1400.0,162124540,gdb,Greg Brockman,1008744,1400,0.5553351844506148,active,39,person,Greg Brockman,Followed by 1400 of 2521 complete active Registry entities.
+entity-overlap-v3,11,11,1356.0,1084212657761148928,geoffreyhinton,Geoffrey Hinton,620131,1356,0.5378817929393098,active,16,person,Geoffrey Hinton,Followed by 1356 of 2521 complete active Registry entities.
+entity-overlap-v3,12,12,1354.0,775449094739197953,goodfellow_ian,Ian Goodfellow,374539,1354,0.5370884569615232,active,15,person,Ian Goodfellow,Followed by 1354 of 2521 complete active Registry entities.
+entity-overlap-v3,13,13,1302.0,1353836358901501952,anthropicai,Anthropic,1527219,1302,0.5164617215390718,active,1,organization,Anthropic,Followed by 1302 of 2521 complete active Registry entities.
+entity-overlap-v3,14,14,1290.0,130745589,drfeifei,Fei-Fei Li,864193,1290,0.5117017056723523,active,18,person,Fei-Fei Li,Followed by 1290 of 2521 complete active Registry entities.
+entity-overlap-v3,15,15,1257.0,3918111614,oriolvinyalsml,Oriol Vinyals,203968,1257,0.49861166203887347,active,17,person,Oriol Vinyals,Followed by 1257 of 2521 complete active Registry entities.
+entity-overlap-v3,16,16,1253.0,2895499182,hardmaru,hardmaru,422284,1253,0.49702499008330026,active,25,person,hardmaru,Followed by 1253 of 2521 complete active Registry entities.
+entity-overlap-v3,17,17,1221.0,70831441,soumithchintala,Soumith Chintala,311931,1221,0.4843316144387148,active,62,person,Soumith Chintala,Followed by 1221 of 2521 complete active Registry entities.
+entity-overlap-v3,18,18,1217.0,96999384,lilianweng,Lilian Weng,268579,1217,0.4827449424831416,active,32,person,Lilian Weng,Followed by 1217 of 2521 complete active Registry entities.
+entity-overlap-v3,19,19,1216.0,246939962,thom_wolf,Thomas Wolf,119382,1216,0.48234827449424833,active,34,person,Thomas Wolf,Followed by 1216 of 2521 complete active Registry entities.
+entity-overlap-v3,20,20,1201.0,1388977636618080256,johnschulman2,John Schulman,77679,1201,0.4763982546608489,active,43,person,John Schulman,Followed by 1201 of 2521 complete active Registry entities.
+entity-overlap-v3,21,21,1192.0,731538535795163136,sarahookr,Sara Hooker,62557,1192,0.4728282427608092,active,20,person,Sara Hooker,Followed by 1192 of 2521 complete active Registry entities.
+entity-overlap-v3,22,22,1187.0,2465283662,_akhaliq,AK,511069,1187,0.4708449028163427,unknown,,,,Followed by 1187 of 2521 complete active Registry entities.
+entity-overlap-v3,23,23,1185.0,68746721,fchollet,François Chollet,705999,1185,0.47005156683855615,active,83,person,François Chollet,Followed by 1185 of 2521 complete active Registry entities.
+entity-overlap-v3,24,24,1176.0,33838201,googleai,Google AI,2429857,1176,0.46648155493851645,active,841,organization,Google,Followed by 1176 of 2521 complete active Registry entities.
+entity-overlap-v3,25,25,1170.0,2815077014,chrmanning,Christopher Manning,165766,1170,0.4641015470051567,active,24,person,Christopher Manning,Followed by 1170 of 2521 complete active Registry entities.
+entity-overlap-v3,26,26,1167.0,1007413134,drjimfan,Jim Fan,494162,1167,0.4629115430384768,active,72,person,Jim Fan,Followed by 1167 of 2521 complete active Registry entities.
+entity-overlap-v3,27,27,1150.0,153196789,ch402,Chris Olah,151986,1150,0.45616818722729074,active,26,person,Chris Olah,Followed by 1150 of 2521 complete active Registry entities.
+entity-overlap-v3,28,28,1138.0,825088493764407298,polynoamial,Noam Brown,150196,1138,0.4514081713605712,active,49,person,Noam Brown,Followed by 1138 of 2521 complete active Registry entities.
+entity-overlap-v3,29,29,1129.0,2577596593,chelseabfinn,Chelsea Finn,97285,1129,0.4478381594605315,active,19,person,Chelsea Finn,Followed by 1129 of 2521 complete active Registry entities.
+entity-overlap-v3,30,30,1114.0,4558314927,srush_nlp,Sasha Rush,81760,1114,0.4418881396271321,active,27,person,Sasha Rush,Followed by 1114 of 2521 complete active Registry entities.
+entity-overlap-v3,31,31,1108.0,175282603,jeremyphoward,Jeremy Howard,322438,1108,0.4395081316937723,active,96,person,Jeremy Howard,Followed by 1108 of 2521 complete active Registry entities.
+entity-overlap-v3,32,32,1087.0,1214528593,miles_brundage,Miles Brundage,73192,1087,0.4311781039270131,active,63,person,Miles Brundage,Followed by 1087 of 2521 complete active Registry entities.
+entity-overlap-v3,33,33,1086.0,86351835,jackclarksf,Jack Clark,136697,1086,0.4307814359381198,active,51,person,Jack Clark,Followed by 1086 of 2521 complete active Registry entities.
+entity-overlap-v3,34,34,1083.0,48642190,kchonyc,Kyunghyun Cho,86776,1083,0.4295914319714399,active,22,person,Kyunghyun Cho,Followed by 1083 of 2521 complete active Registry entities.
+entity-overlap-v3,35,34,1083.0,180993910,pabbeel,Pieter Abbeel,114344,1083,0.4295914319714399,active,28,person,Pieter Abbeel,Followed by 1083 of 2521 complete active Registry entities.
+entity-overlap-v3,36,35,1079.0,1034844617261248512,aiatmeta,AI at Meta,823402,1079,0.42800476001586674,active,3079,organization,Meta,Followed by 1079 of 2521 complete active Registry entities.
+entity-overlap-v3,37,36,1078.0,86481377,percyliang,Percy Liang,109700,1078,0.4276080920269734,active,31,person,Percy Liang,Followed by 1078 of 2521 complete active Registry entities.
+entity-overlap-v3,38,37,1036.0,29843511,nandodf,Nando de Freitas,109767,1036,0.41094803649345496,active,30,person,Nando de Freitas,Followed by 1036 of 2521 complete active Registry entities.
+entity-overlap-v3,39,38,1034.0,180115578,miramurati,Mira Murati,761439,1034,0.4101547005156684,active,52,person,Mira Murati,Followed by 1034 of 2521 complete active Registry entities.
+entity-overlap-v3,40,39,1028.0,2309105822,ericjang11,Eric Jang,136307,1028,0.4077746925823086,active,74,person,Eric Jang,Followed by 1028 of 2521 complete active Registry entities.
+entity-overlap-v3,41,40,1010.0,710610891058716673,janleike,Jan Leike,133975,1010,0.40063466878222925,active,46,person,Jan Leike,Followed by 1010 of 2521 complete active Registry entities.
+entity-overlap-v3,42,41,1004.0,183749519,paulg,Paul Graham,4051778,1004,0.3982546608488695,unknown,,,,Followed by 1004 of 2521 complete active Registry entities.
+entity-overlap-v3,43,42,1001.0,186420551,clementdelangue,clem 🤗,466238,1001,0.3970646568821896,active,115,person,clem 🤗,Followed by 1001 of 2521 complete active Registry entities.
+entity-overlap-v3,44,42,1001.0,338526004,sleepinyourhat,Sam Bowman,66709,1001,0.3970646568821896,active,35,person,Sam Bowman,Followed by 1001 of 2521 complete active Registry entities.
+entity-overlap-v3,45,43,997.0,990433714948661250,svlevine,Sergey Levine,131753,997,0.3954779849266164,active,33,person,Sergey Levine,Followed by 997 of 2521 complete active Registry entities.
+entity-overlap-v3,46,44,985.0,3333052551,hugo_larochelle,Hugo Larochelle,124494,985,0.39071796905989686,active,29,person,Hugo Larochelle,Followed by 985 of 2521 complete active Registry entities.
+entity-overlap-v3,47,45,984.0,1319101874532978690,_jasonwei,Jason Wei,109898,984,0.39032130107100355,active,54,person,Jason Wei,Followed by 984 of 2521 complete active Registry entities.
+entity-overlap-v3,48,46,979.0,5943622,pmarca,Marc Andreessen 🇺🇸,4702295,979,0.38833796112653707,unknown,,,,Followed by 979 of 2521 complete active Registry entities.
+entity-overlap-v3,49,47,971.0,778764142412984320,huggingface,Hugging Face,723146,971,0.3851646172153907,active,70,organization,Hugging Face,Followed by 971 of 2521 complete active Registry entities.
+entity-overlap-v3,50,48,963.0,13235832,natfriedman,Nat Friedman,385257,963,0.38199127330424437,active,69,person,Nat Friedman,Followed by 963 of 2521 complete active Registry entities.
+entity-overlap-v3,51,49,959.0,2956121356,rsalakhu,Russ Salakhutdinov,112415,959,0.38040460134867116,active,37,person,Russ Salakhutdinov,Followed by 959 of 2521 complete active Registry entities.
+entity-overlap-v3,52,50,958.0,18850305,zacharylipton,Zachary Lipton,67708,958,0.38000793335977784,active,38,person,Zachary Lipton,Followed by 958 of 2521 complete active Registry entities.
+entity-overlap-v3,53,51,956.0,1460283925,tszzl,roon,401457,956,0.37921459738199126,active,50,person,roon,Followed by 956 of 2521 complete active Registry entities.
+entity-overlap-v3,54,52,955.0,44196397,elonmusk,Elon Musk,240861632,955,0.378817929393098,active,58,person,Elon Musk,Followed by 955 of 2521 complete active Registry entities.
+entity-overlap-v3,55,53,954.0,898805695,alecrad,Alec Radford,71584,954,0.3784212614042047,active,100,person,Alec Radford,Followed by 954 of 2521 complete active Registry entities.
+entity-overlap-v3,56,54,950.0,284333988,officiallogank,Logan Kilpatrick,341463,950,0.3768345894486315,active,106,person,Logan Kilpatrick,Followed by 950 of 2521 complete active Registry entities.
+entity-overlap-v3,57,55,927.0,2939913921,natolambert,Nathan Lambert,92401,927,0.36771122570408565,active,86,person,Nathan Lambert,Followed by 927 of 2521 complete active Registry entities.
+entity-overlap-v3,58,56,923.0,1442906958,richardsocher,Richard Socher,120906,923,0.3661245537485125,active,55,person,Richard Socher,Followed by 923 of 2521 complete active Registry entities.
+entity-overlap-v3,59,57,922.0,1209960539390201864,dwarkesh_sp,Dwarkesh Patel,242423,922,0.3657278857596192,active,66,person,Dwarkesh Patel,Followed by 922 of 2521 complete active Registry entities.
+entity-overlap-v3,60,58,908.0,989251872107085824,quocleix,Quoc Le,63776,908,0.36017453391511306,active,41,person,Quoc Le,Followed by 908 of 2521 complete active Registry entities.
+entity-overlap-v3,61,59,906.0,138840988,neuripsconf,NeurIPS Conference,159296,906,0.3593811979373265,active,3002,organization,NeurIPS Conference,Followed by 906 of 2521 complete active Registry entities.
+entity-overlap-v3,62,60,898.0,2236047510,giffmana,Lucas Beyer (bl16),143141,898,0.3562078540261801,active,78,person,Lucas Beyer (bl16),Followed by 898 of 2521 complete active Registry entities.
+entity-overlap-v3,63,61,897.0,794433401591693312,arankomatsuzaki,Aran Komatsuzaki,183025,897,0.3558111860372868,active,73,person,Aran Komatsuzaki,Followed by 897 of 2521 complete active Registry entities.
+entity-overlap-v3,64,61,897.0,977687191202693125,woj_zaremba,Wojciech Zaremba,156092,897,0.3558111860372868,active,91,person,Wojciech Zaremba,Followed by 897 of 2521 complete active Registry entities.
+entity-overlap-v3,65,62,886.0,452384386,sebastienbubeck,Sebastien Bubeck,78265,886,0.3514478381594605,active,71,person,Sebastien Bubeck,Followed by 886 of 2521 complete active Registry entities.
+entity-overlap-v3,66,63,881.0,615818451,alexandr_wang,Alexandr Wang,554628,881,0.34946449821499403,active,80,person,Alexandr Wang,Followed by 881 of 2521 complete active Registry entities.
+entity-overlap-v3,67,64,878.0,872274950,tim_dettmers,Tim Dettmers,46035,878,0.34827449424831414,active,67,person,Tim Dettmers,Followed by 878 of 2521 complete active Registry entities.
+entity-overlap-v3,68,65,866.0,3237721718,chrszegedy,Christian Szegedy,44132,866,0.3435144783815946,active,113,person,Christian Szegedy,Followed by 866 of 2521 complete active Registry entities.
+entity-overlap-v3,69,66,858.0,747212842470891520,shaneguml,Shane Gu,50523,858,0.3403411344704482,active,64,person,Shane Gu,Followed by 858 of 2521 complete active Registry entities.
+entity-overlap-v3,70,67,853.0,25263396,dpkingma,Durk Kingma,54924,853,0.33835779452598175,active,53,person,Durk Kingma,Followed by 853 of 2521 complete active Registry entities.
+entity-overlap-v3,71,68,848.0,33521530,swyx,swyx,174496,848,0.33637445458151527,active,230,person,swyx,Followed by 848 of 2521 complete active Registry entities.
+entity-overlap-v3,72,69,839.0,2466279320,suchenzang,Susan Zhang,46780,839,0.33280444268147563,active,90,person,Susan Zhang,Followed by 839 of 2521 complete active Registry entities.
+entity-overlap-v3,73,70,835.0,50393960,billgates,Bill Gates,64127375,835,0.3312177707259024,unknown,,,,Followed by 835 of 2521 complete active Registry entities.
+entity-overlap-v3,74,71,826.0,118263124,stanfordnlp,Stanford NLP Group,189295,826,0.3276477588258628,active,3071,organization,Stanford AI Lab,Followed by 826 of 2521 complete active Registry entities.
+entity-overlap-v3,75,72,822.0,891077171673931776,berkeley_ai,Berkeley AI Research,279428,822,0.32606108687028956,active,3070,organization,Berkeley AI Research,Followed by 822 of 2521 complete active Registry entities.
+entity-overlap-v3,76,73,821.0,175624200,id_aa_carmack,John Carmack,2920380,821,0.32566441888139624,active,102,person,John Carmack,Followed by 821 of 2521 complete active Registry entities.
+entity-overlap-v3,77,74,820.0,14130366,sundarpichai,Sundar Pichai,9280502,820,0.325267750892503,active,111,person,Sundar Pichai,Followed by 820 of 2521 complete active Registry entities.
+entity-overlap-v3,78,75,812.0,759894532649545732,aravsrinivas,Aravind Srinivas,827794,812,0.3220944069813566,active,105,person,Aravind Srinivas,Followed by 812 of 2521 complete active Registry entities.
+entity-overlap-v3,79,76,805.0,1601593543,davidduvenaud,David Duvenaud,35588,805,0.31931773105910355,active,48,person,David Duvenaud,Followed by 805 of 2521 complete active Registry entities.
+entity-overlap-v3,80,76,805.0,1891523745929732096,thinkymachines,Thinking Machines,159011,805,0.31931773105910355,active,9,organization,Thinking Machines Lab,Followed by 805 of 2521 complete active Registry entities.
+entity-overlap-v3,81,77,803.0,885528008,liamfedus,Liam Fedus,35498,803,0.3185243950813169,active,104,person,Liam Fedus,Followed by 803 of 2521 complete active Registry entities.
+entity-overlap-v3,82,78,802.0,1273327266957688832,markchen90,Mark Chen,74409,802,0.31812772709242365,active,107,person,Mark Chen,Followed by 802 of 2521 complete active Registry entities.
+entity-overlap-v3,83,79,797.0,568879807,tri_dao,Tri Dao,42917,797,0.3161443871479572,active,118,person,Tri Dao,Followed by 797 of 2521 complete active Registry entities.
+entity-overlap-v3,84,80,796.0,2785337469,seb_ruder,Sebastian Ruder,98912,796,0.31574771915906386,active,61,person,Sebastian Ruder,Followed by 796 of 2521 complete active Registry entities.
+entity-overlap-v3,85,81,793.0,228792418,_rockt,Tim Rocktäschel,47030,793,0.31455771519238396,active,57,person,Tim Rocktäschel,Followed by 793 of 2521 complete active Registry entities.
+entity-overlap-v3,86,82,792.0,4939401,patrickc,Patrick Collison,1310988,792,0.3141610472034907,unknown,,,,Followed by 792 of 2521 complete active Registry entities.
+entity-overlap-v3,87,83,791.0,16535432,goodside,Riley Goodside,217531,791,0.3137643792145974,unknown,,,,Followed by 791 of 2521 complete active Registry entities.
+entity-overlap-v3,88,84,786.0,905399486,jekbradbury,James Bradbury,17131,786,0.3117810392701309,active,138,person,James Bradbury,Followed by 786 of 2521 complete active Registry entities.
+entity-overlap-v3,89,85,785.0,44073696,roydanroy,Dan Roy,66806,785,0.3113843712812376,active,56,person,Dan Roy,Followed by 785 of 2521 complete active Registry entities.
+entity-overlap-v3,90,86,784.0,968053955845484545,_sholtodouglas,Sholto Douglas,47592,784,0.3109877032923443,active,110,person,Sholto Douglas,Followed by 784 of 2521 complete active Registry entities.
+entity-overlap-v3,91,86,784.0,893882282175471616,yejinchoinka,Yejin Choi,30116,784,0.3109877032923443,active,59,person,Yejin Choi,Followed by 784 of 2521 complete active Registry entities.
+entity-overlap-v3,92,87,780.0,2210861,jacobandreas,Jacob Andreas,24223,780,0.3094010313367711,active,42,person,Jacob Andreas,Followed by 780 of 2521 complete active Registry entities.
+entity-overlap-v3,93,87,780.0,1163786515144724485,schmidhuberai,Jürgen Schmidhuber,205781,780,0.3094010313367711,active,92,person,Jürgen Schmidhuber,Followed by 780 of 2521 complete active Registry entities.
+entity-overlap-v3,94,88,779.0,938616384572948480,_arohan_,rohan anil,43570,779,0.30900436334787784,active,108,person,rohan anil,Followed by 779 of 2521 complete active Registry entities.
+entity-overlap-v3,95,88,779.0,746788615951355904,ofirpress,Ofir Press,18782,779,0.30900436334787784,active,84,person,Ofir Press,Followed by 779 of 2521 complete active Registry entities.
+entity-overlap-v3,96,89,774.0,2902658140,sedielem,Sander Dieleman,68893,774,0.30702102340341136,active,97,person,Sander Dieleman @ ICML 2026🇰🇷,Followed by 774 of 2521 complete active Registry entities.
+entity-overlap-v3,97,90,768.0,535358285,davidsholz,David,118878,768,0.30464101547005157,active,122,person,David,Followed by 768 of 2521 complete active Registry entities.
+entity-overlap-v3,98,90,768.0,12497,simonw,Simon Willison,197041,768,0.30464101547005157,active,206,person,Simon Willison,Followed by 768 of 2521 complete active Registry entities.
+entity-overlap-v3,99,91,766.0,768092862,tdietterich,Thomas G. Dietterich,62375,766,0.303847679492265,active,68,person,Thomas G. Dietterich,Followed by 766 of 2521 complete active Registry entities.
+entity-overlap-v3,100,92,762.0,65876824,jaschasd,Jascha Sohl-Dickstein,30403,762,0.3022610075366918,active,151,person,Jascha Sohl-Dickstein,Followed by 762 of 2521 complete active Registry entities.

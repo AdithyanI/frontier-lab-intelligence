@@ -1,0 +1,101 @@
+algorithm,position,score_rank,score,x_id,handle,display_name,followers_count,cohort_follow_count,cohort_follow_share,registry_state,entity_id,entity_kind,entity_name,explanation
+entity-overlap-v3,22,22,1187.0,2465283662,_akhaliq,AK,511069,1187,0.4708449028163427,unknown,,,,Followed by 1187 of 2521 complete active Registry entities.
+entity-overlap-v3,42,41,1004.0,183749519,paulg,Paul Graham,4051778,1004,0.3982546608488695,unknown,,,,Followed by 1004 of 2521 complete active Registry entities.
+entity-overlap-v3,48,46,979.0,5943622,pmarca,Marc Andreessen 🇺🇸,4702295,979,0.38833796112653707,unknown,,,,Followed by 979 of 2521 complete active Registry entities.
+entity-overlap-v3,73,70,835.0,50393960,billgates,Bill Gates,64127375,835,0.3312177707259024,unknown,,,,Followed by 835 of 2521 complete active Registry entities.
+entity-overlap-v3,86,82,792.0,4939401,patrickc,Patrick Collison,1310988,792,0.3141610472034907,unknown,,,,Followed by 792 of 2521 complete active Registry entities.
+entity-overlap-v3,87,83,791.0,16535432,goodside,Riley Goodside,217531,791,0.3137643792145974,unknown,,,,Followed by 791 of 2521 complete active Registry entities.
+entity-overlap-v3,107,99,726.0,427089628,lexfridman,Lex Fridman,5157626,726,0.2879809599365331,unknown,,,,Followed by 726 of 2521 complete active Registry entities.
+entity-overlap-v3,114,105,705.0,813286,barackobama,Barack Obama,119204822,705,0.2796509321697739,unknown,,,,Followed by 705 of 2521 complete active Registry entities.
+entity-overlap-v3,130,115,688.0,776585502606721024,pytorch,PyTorch,501402,688,0.27290757635858787,unknown,,,,Followed by 688 of 2521 complete active Registry entities.
+entity-overlap-v3,161,139,632.0,82364810,mit_csail,MIT CSAIL,347293,632,0.2506941689805633,unknown,,,,Followed by 632 of 2521 complete active Registry entities.
+entity-overlap-v3,178,152,606.0,13348,scobleizer,Robert Scoble,592118,606,0.24038080126933756,unknown,,,,Followed by 606 of 2521 complete active Registry entities.
+entity-overlap-v3,180,154,602.0,387156826,icmlconf,ICML Conference,86682,602,0.23879412931376437,unknown,,,,Followed by 602 of 2521 complete active Registry entities.
+entity-overlap-v3,183,156,599.0,1013971684624424960,iclr_conf,ICLR,60025,599,0.2376041253470845,unknown,,,,Followed by 599 of 2521 complete active Registry entities.
+entity-overlap-v3,191,163,588.0,15626406,michael_nielsen,Michael Nielsen,119897,588,0.23324077746925823,unknown,,,,Followed by 588 of 2521 complete active Registry entities.
+entity-overlap-v3,217,180,559.0,745273,naval,Naval,3628907,559,0.22173740579135265,unknown,,,,Followed by 559 of 2521 complete active Registry entities.
+entity-overlap-v3,223,184,549.0,1396491776739905542,techemails,Internal Tech Emails,594839,549,0.21777072590241967,unknown,,,,Followed by 549 of 2521 complete active Registry entities.
+entity-overlap-v3,228,187,543.0,42226885,vkhosla,Vinod Khosla,727103,543,0.2153907179690599,unknown,,,,Followed by 543 of 2521 complete active Registry entities.
+entity-overlap-v3,234,192,538.0,2877269376,3blue1brown,Grant Sanderson,446046,538,0.21340737802459342,unknown,,,,Followed by 538 of 2521 complete active Registry entities.
+entity-overlap-v3,241,196,533.0,1128159740599656448,nearcyan,near,194916,533,0.21142403808012694,unknown,,,,Followed by 533 of 2521 complete active Registry entities.
+entity-overlap-v3,256,205,522.0,149763,sriramk,Sriram Krishnan,311036,522,0.20706069020230067,unknown,,,,Followed by 522 of 2521 complete active Registry entities.
+entity-overlap-v3,257,206,521.0,168805139,ykilcher,Yannic Kilcher 🇸🇨,89524,521,0.20666402221340738,unknown,,,,Followed by 521 of 2521 complete active Registry entities.
+entity-overlap-v3,262,210,511.0,2178012643,balajis,Balaji,1853605,511,0.20269734232447442,unknown,,,,Followed by 511 of 2521 complete active Registry entities.
+entity-overlap-v3,275,218,500.0,783356145670852608,distillpub,Distill,39353,500,0.19833399444664815,unknown,,,,Followed by 500 of 2521 complete active Registry entities.
+entity-overlap-v3,281,222,496.0,295218901,vitalikbuterin,vitalik.eth,6983114,496,0.19674732249107496,unknown,,,,Followed by 496 of 2521 complete active Registry entities.
+entity-overlap-v3,289,226,492.0,636513296,nikitabier,Nikita Bier,1197912,492,0.19516065053550177,unknown,,,,Followed by 492 of 2521 complete active Registry entities.
+entity-overlap-v3,291,228,486.0,914061,levie,Aaron Levie,3067547,486,0.192780642602142,unknown,,,,Followed by 486 of 2521 complete active Registry entities.
+entity-overlap-v3,293,230,483.0,173157358,felixhill84,Felix Hill,12455,483,0.1915906386354621,unknown,,,,Followed by 483 of 2521 complete active Registry entities.
+entity-overlap-v3,294,230,483.0,3448284313,omarsar0,elvis,310916,483,0.1915906386354621,unknown,,,,Followed by 483 of 2521 complete active Registry entities.
+entity-overlap-v3,314,241,469.0,16017475,natesilver538,Nate Silver,3029791,469,0.18603728679095596,unknown,,,,Followed by 469 of 2521 complete active Registry entities.
+entity-overlap-v3,321,243,467.0,113130846,ycombinator,Y Combinator,1623504,467,0.18524395081316938,unknown,,,,Followed by 467 of 2521 complete active Registry entities.
+entity-overlap-v3,330,248,462.0,1504845539468263451,byjohnnylee,Johnny Lee,30416,462,0.1832606108687029,unknown,,,,Followed by 462 of 2521 complete active Registry entities.
+entity-overlap-v3,333,250,460.0,1526643050,slatestarcodex,Scott Alexander,166098,460,0.1824672748909163,unknown,,,,Followed by 460 of 2521 complete active Registry entities.
+entity-overlap-v3,337,253,457.0,16242081,bhorowitz,benahorowitz.eth,729335,457,0.18127727092423643,unknown,,,,Followed by 457 of 2521 complete active Registry entities.
+entity-overlap-v3,342,256,452.0,64844802,a16z,a16z,1022379,452,0.17929393097976992,unknown,,,,Followed by 452 of 2521 complete active Registry entities.
+entity-overlap-v3,356,262,445.0,11766442,dennybritz,Denny Britz,47133,445,0.17651725505751686,unknown,,,,Followed by 445 of 2521 complete active Registry entities.
+entity-overlap-v3,359,264,443.0,254107028,tensorflow,TensorFlow,376812,443,0.17572391907973026,unknown,,,,Followed by 443 of 2521 complete active Registry entities.
+entity-overlap-v3,360,265,442.0,1173552893003255808,yacinemtb,kache,321297,442,0.17532725109083697,unknown,,,,Followed by 442 of 2521 complete active Registry entities.
+entity-overlap-v3,365,269,438.0,8496762,tylercowen,tylercowen,352826,438,0.17374057913526378,unknown,,,,Followed by 438 of 2521 complete active Registry entities.
+entity-overlap-v3,367,270,437.0,3452911,kevinweil,Kevin Weil 🇺🇸,121254,437,0.1733439111463705,unknown,,,,Followed by 437 of 2521 complete active Registry entities.
+entity-overlap-v3,380,277,428.0,1577241403,levelsio,@levelsio,915139,428,0.16977389924633082,unknown,,,,Followed by 428 of 2521 complete active Registry entities.
+entity-overlap-v3,393,281,424.0,20844341,patio11,Patrick McKenzie,196363,424,0.16818722729075763,unknown,,,,Followed by 424 of 2521 complete active Registry entities.
+entity-overlap-v3,394,281,424.0,192201556,teortaxestex,Teortaxes▶️ (DeepSeek 推特🐋铁粉 2023 – ∞),69387,424,0.16818722729075763,unknown,,,,Followed by 424 of 2521 complete active Registry entities.
+entity-overlap-v3,401,283,421.0,17468569,bryan_johnson,Bryan Johnson,1674704,421,0.16699722332407774,unknown,,,,Followed by 421 of 2521 complete active Registry entities.
+entity-overlap-v3,408,286,418.0,9445792,zoink,Dylan Field,265990,418,0.16580721935739787,unknown,,,,Followed by 418 of 2521 complete active Registry entities.
+entity-overlap-v3,410,287,417.0,939091,joebiden,Joe Biden,37902931,417,0.16541055136850455,unknown,,,,Followed by 417 of 2521 complete active Registry entities.
+entity-overlap-v3,413,288,416.0,929791330519322624,black_in_ai,Black in AI,42503,416,0.16501388337961126,unknown,,,,Followed by 416 of 2521 complete active Registry entities.
+entity-overlap-v3,417,290,414.0,709543955126333440,boredyannlecun,Bored Yann LeCun,21873,414,0.16422054740182468,unknown,,,,Followed by 414 of 2521 complete active Registry entities.
+entity-overlap-v3,418,290,414.0,5418912,collision,John Collison,237452,414,0.16422054740182468,unknown,,,,Followed by 414 of 2521 complete active Registry entities.
+entity-overlap-v3,425,292,412.0,1538525334781370368,andrewcurran_,Andrew Curran,73812,412,0.16342721142403807,unknown,,,,Followed by 412 of 2521 complete active Registry entities.
+entity-overlap-v3,427,293,411.0,1282121312,waitbutwhy,Tim Urban,901039,411,0.16303054343514478,unknown,,,,Followed by 411 of 2521 complete active Registry entities.
+entity-overlap-v3,453,304,396.0,12901712,bchesky,Brian Chesky,1288223,396,0.15708052360174535,unknown,,,,Followed by 396 of 2521 complete active Registry entities.
+entity-overlap-v3,458,304,396.0,1838288550569349120,tbpn,TBPN,1009511,396,0.15708052360174535,unknown,,,,Followed by 396 of 2521 complete active Registry entities.
+entity-overlap-v3,463,306,394.0,1067218780806307841,stanfordhai,Stanford HAI,107470,394,0.15628718762395874,unknown,,,,Followed by 394 of 2521 complete active Registry entities.
+entity-overlap-v3,469,309,391.0,25073877,realdonaldtrump,Donald J. Trump,111752438,391,0.15509718365727887,unknown,,,,Followed by 391 of 2521 complete active Registry entities.
+entity-overlap-v3,470,310,390.0,281877818,noahpinion,Noah Smith 🐇🇺🇸🇺🇦🇹🇼,725336,390,0.15470051566838555,unknown,,,,Followed by 390 of 2521 complete active Registry entities.
+entity-overlap-v3,471,311,389.0,138203134,aoc,Alexandria Ocasio-Cortez,12699905,389,0.15430384767949226,unknown,,,,Followed by 389 of 2521 complete active Registry entities.
+entity-overlap-v3,480,315,384.0,3319762895,lulumeservey,Lulu Cheng Meservey,139241,384,0.15232050773502578,unknown,,,,Followed by 384 of 2521 complete active Registry entities.
+entity-overlap-v3,503,324,375.0,446719282,shivon,Shivon Zilis,450348,375,0.14875049583498612,unknown,,,,Followed by 375 of 2521 complete active Registry entities.
+entity-overlap-v3,504,324,375.0,23511272,tunguz,Bojan Tunguz,293003,375,0.14875049583498612,unknown,,,,Followed by 375 of 2521 complete active Registry entities.
+entity-overlap-v3,514,327,372.0,7958322,lennysan,Lenny Rachitsky,393408,372,0.14756049186830622,unknown,,,,Followed by 372 of 2521 complete active Registry entities.
+entity-overlap-v3,518,330,368.0,11518572,chrisalbon,Chris Albon,92177,368,0.14597381991273303,unknown,,,,Followed by 368 of 2521 complete active Registry entities.
+entity-overlap-v3,519,331,367.0,1546624215628910592,ai__pub,AI Pub,71453,367,0.14557715192383974,unknown,,,,Followed by 367 of 2521 complete active Registry entities.
+entity-overlap-v3,536,336,361.0,2865100348,wimlworkshop,WiML,17699,361,0.14319714399047997,unknown,,,,Followed by 361 of 2521 complete active Registry entities.
+entity-overlap-v3,548,339,358.0,1810393276287168516,eurekalabsai,Eureka Labs,87803,358,0.14200714002380008,unknown,,,,Followed by 358 of 2521 complete active Registry entities.
+entity-overlap-v3,551,341,355.0,18816166,kevinroose,Kevin Roose,172500,355,0.14081713605712018,unknown,,,,Followed by 355 of 2521 complete active Registry entities.
+entity-overlap-v3,552,341,355.0,1076526138736951298,paperswithcode,Papers with Code,113247,355,0.14081713605712018,unknown,,,,Followed by 355 of 2521 complete active Registry entities.
+entity-overlap-v3,560,343,353.0,816653,techcrunch,TechCrunch,10456417,353,0.1400238000793336,unknown,,,,Followed by 353 of 2521 complete active Registry entities.
+entity-overlap-v3,571,347,349.0,14230772,matt_levine,Matt Levine,324743,349,0.1384371281237604,unknown,,,,Followed by 349 of 2521 complete active Registry entities.
+entity-overlap-v3,588,350,346.0,12819682,mitchellh,Mitchell Hashimoto,214105,346,0.1372471241570805,unknown,,,,Followed by 346 of 2521 complete active Registry entities.
+entity-overlap-v3,589,350,346.0,11348282,nasa,NASA,92188147,346,0.1372471241570805,unknown,,,,Followed by 346 of 2521 complete active Registry entities.
+entity-overlap-v3,590,351,345.0,1274287728167915522,primeintellect,Prime Intellect,71697,345,0.13685045616818722,unknown,,,,Followed by 345 of 2521 complete active Registry entities.
+entity-overlap-v3,597,354,342.0,1113492634021048320,cohere_labs,Cohere Labs,26865,342,0.13566045220150733,unknown,,,,Followed by 342 of 2521 complete active Registry entities.
+entity-overlap-v3,603,355,341.0,2781430855,adampaulcoates,Adam Coates,30267,341,0.13526378421261404,unknown,,,,Followed by 341 of 2521 complete active Registry entities.
+entity-overlap-v3,605,355,341.0,1349149096909668363,potus46archive,President Biden Archived,35666356,341,0.13526378421261404,unknown,,,,Followed by 341 of 2521 complete active Registry entities.
+entity-overlap-v3,607,356,340.0,5763262,karaswisher,Kara Swisher,1714286,340,0.13486711622372075,unknown,,,,Followed by 340 of 2521 complete active Registry entities.
+entity-overlap-v3,608,356,340.0,591797093,sanhestpasmoi,Victor Sanh,9410,340,0.13486711622372075,unknown,,,,Followed by 340 of 2521 complete active Registry entities.
+entity-overlap-v3,625,360,336.0,3716745856,uwnlp,UW NLP,14769,336,0.13328044426814756,unknown,,,,Followed by 336 of 2521 complete active Registry entities.
+entity-overlap-v3,627,362,334.0,3283901,andrewchen,andrew chen,398443,334,0.13248710829036098,unknown,,,,Followed by 334 of 2521 complete active Registry entities.
+entity-overlap-v3,646,366,330.0,715582520197156865,taliaringer,Talia Ringer 🕊🪬,32834,330,0.1309004363347878,unknown,,,,Followed by 330 of 2521 complete active Registry entities.
+entity-overlap-v3,648,368,328.0,1008492120125030400,kelseytuoc,Kelsey Piper,65707,328,0.13010710035700118,unknown,,,,Followed by 328 of 2521 complete active Registry entities.
+entity-overlap-v3,653,369,327.0,1314686042,rowancheung,Rowan Cheung,593513,327,0.1297104323681079,unknown,,,,Followed by 327 of 2521 complete active Registry entities.
+entity-overlap-v3,661,373,323.0,3315205122,deepfates,🎭,62542,323,0.1281237604125347,unknown,,,,Followed by 323 of 2521 complete active Registry entities.
+entity-overlap-v3,674,376,320.0,4157611,willknight,Will Knight,21932,320,0.1269337564458548,unknown,,,,Followed by 320 of 2521 complete active Registry entities.
+entity-overlap-v3,676,377,319.0,999823638932189184,mila_quebec,Mila - Institut québécois d'IA,36449,319,0.12653708845696152,unknown,,,,Followed by 319 of 2521 complete active Registry entities.
+entity-overlap-v3,680,378,318.0,107225267,sapinker,Steven Pinker,857471,318,0.12614042046806823,unknown,,,,Followed by 318 of 2521 complete active Registry entities.
+entity-overlap-v3,683,379,317.0,1236101,benedictevans,Benedict Evans,350978,317,0.12574375247917494,unknown,,,,Followed by 317 of 2521 complete active Registry entities.
+entity-overlap-v3,684,379,317.0,2529971,cdixon,Chris Dixon,933344,317,0.12574375247917494,unknown,,,,Followed by 317 of 2521 complete active Registry entities.
+entity-overlap-v3,689,380,316.0,1123336792021897216,aclmeeting,ACL 2026,23729,316,0.12534708449028165,unknown,,,,Followed by 316 of 2521 complete active Registry entities.
+entity-overlap-v3,693,381,315.0,845968426011119616,vectorinst,Vector Institute,29637,315,0.12495041650138834,unknown,,,,Followed by 315 of 2521 complete active Registry entities.
+entity-overlap-v3,694,382,314.0,81961201,ashleevance,Ashlee Vance,201068,314,0.12455374851249504,unknown,,,,Followed by 314 of 2521 complete active Registry entities.
+entity-overlap-v3,697,382,314.0,747538968,hazyresearch,Hazy Research: Strip Mall AI Research Club,11250,314,0.12455374851249504,unknown,,,,Followed by 314 of 2521 complete active Registry entities.
+entity-overlap-v3,698,382,314.0,18691746,juliagalef,Julia Galef,109375,314,0.12455374851249504,unknown,,,,Followed by 314 of 2521 complete active Registry entities.
+entity-overlap-v3,714,385,311.0,3840,jason,@jason,1497559,311,0.12336374454581515,unknown,,,,Followed by 311 of 2521 complete active Registry entities.
+entity-overlap-v3,715,385,311.0,30354991,kamalaharris,Kamala Harris,20972500,311,0.12336374454581515,unknown,,,,Followed by 311 of 2521 complete active Registry entities.
+entity-overlap-v3,723,387,309.0,3511430425,fermatslibrary,Fermat's Library,790487,309,0.12257040856802856,unknown,,,,Followed by 309 of 2521 complete active Registry entities.
+entity-overlap-v3,727,388,308.0,18622869,ezraklein,Ezra Klein,2508506,308,0.12217374057913527,unknown,,,,Followed by 308 of 2521 complete active Registry entities.
+entity-overlap-v3,728,388,308.0,957374995721629696,gradientpub,The Gradient,21004,308,0.12217374057913527,unknown,,,,Followed by 308 of 2521 complete active Registry entities.
+entity-overlap-v3,730,388,308.0,395978320,typesfast,Ryan Petersen,558684,308,0.12217374057913527,unknown,,,,Followed by 308 of 2521 complete active Registry entities.
+entity-overlap-v3,734,390,306.0,1426476636,lishali88,Lisha,18599,306,0.12138040460134868,unknown,,,,Followed by 306 of 2521 complete active Registry entities.
+entity-overlap-v3,735,390,306.0,1083465257077608451,wtgowers,Timothy Gowers @wtgowers,56791,306,0.12138040460134868,unknown,,,,Followed by 306 of 2521 complete active Registry entities.

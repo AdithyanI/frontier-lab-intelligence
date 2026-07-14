@@ -1,6 +1,7 @@
 /* Ranking — the network orbit. Every dot is an account the screened Registry
-   collectively follows; distance from center is network rank, dot size is the
-   number of Registry sources that follow it. Filled ink = already in the Registry; hollow ring = an
+   collectively follows; distance from center is discovery position, dot size
+   is the number of voting Registry entities that follow it. Filled ink =
+   already in the Registry; hollow ring = an
    outsider the inside points at. Click a dot to trace who follows it; click
    its ranking row to open the account profile. Data: /api/rankings over the
    frozen following snapshot. */
@@ -265,20 +266,20 @@ export default function Ranking() {
         Who does the Network follow?
       </h2>
       <p className="network-view-sub">
-        Accounts are ranked by how many screened Registry sources follow them
-        — never by raw follower count.
+        Accounts are ordered for candidate discovery by how many screened
+        Registry entities follow them — never by raw follower count.
       </p>
       {run && (
         <div className="rank-context mono">
           <span>
             Top {fmt(N_FETCH)} of {fmt(run.ranked_accounts)} accounts ·{' '}
-            {fmt(run.sources)} screened sources
+            {fmt(run.source_entities)} voting entities
           </span>
           <details className="method-note">
             <summary>Method</summary>
             <p>
               {run.algorithm.toUpperCase()} · {run.snapshot_id.toUpperCase()} ·{' '}
-              {fmt(run.edges)} observed follow edges · {fmt(run.unknown_accounts)}
+              {fmt(run.source_accounts)} source accounts · {fmt(run.edges)} observed follow edges · {fmt(run.unknown_accounts)}
               {' '}accounts not yet in the Registry
             </p>
           </details>
@@ -290,7 +291,7 @@ export default function Ranking() {
           <svg
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             role="img"
-            aria-label="Network orbit: accounts arranged by network rank, best ranked at the center"
+            aria-label="Network orbit: accounts arranged by discovery position, strongest candidate at the center"
             onClick={(e) => {
               if (e.target === e.currentTarget) setSelected(null)
             }}
@@ -435,7 +436,7 @@ export default function Ranking() {
           </div>
           {sel && followers?.available ? (
             <p className="rank-arc-note mono">
-              {fmt(followers.total)} of {fmt(run?.sources)} screened sources follow @{sel.handle}
+              {fmt(followers.total)} of {fmt(run?.source_entities)} voting entities follow @{sel.handle}
               {' · '}
               {fmt(visibleArcs.length)} of them are in this view
             </p>
@@ -476,7 +477,7 @@ export default function Ranking() {
             {filtered.length === 0 && (
               <li className="rank-empty mono">
                 No one in the top {N_FETCH} matches — the account may rank
-                deeper in the full 463K.
+                deeper among all {fmt(run?.ranked_accounts)} discovered accounts.
               </li>
             )}
             {filtered.map((p) => (
@@ -529,11 +530,11 @@ export default function Ranking() {
         }
         context={
           cardOpen && sel ? (
-            <section className="ent-card-rank" aria-label="Network ranking">
+            <section className="ent-card-rank" aria-label="Account discovery evidence">
               <div className="ent-card-rank-stats">
                 <div className="stat">
                   <span className="v">#{sel.rank}</span>
-                  <span className="k">Network rank</span>
+                  <span className="k">Discovery position</span>
                 </div>
                 <div className="stat">
                   <span className="v">
@@ -542,7 +543,7 @@ export default function Ranking() {
                       {' '}· {(sel.cohort_follow_share * 100).toFixed(1)}%
                     </span>
                   </span>
-                  <span className="k">Registry sources</span>
+                  <span className="k">Voting Registry entities</span>
                 </div>
                 <div className="stat">
                   <span className="v">{fmt(sel.followers_count)}</span>

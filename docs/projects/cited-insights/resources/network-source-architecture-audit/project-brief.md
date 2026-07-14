@@ -271,10 +271,12 @@ supersedes the work board below where they conflict; the parent tracker's
 - Cohort cutoffs (500/1,000), tier taxonomy, and yield-based source
   evaluation. The ADR records the designed seed → discover → admit → measure
   yield → feed back loop and interview-ready limitation language instead.
-- Voting rights for newly admitted identities (requires a following-snapshot
-  v2 collection).
 - The four-lane independent review program (M2) is collapsed: the diagnosis
   above answered the audit's core question directly.
+
+Adi subsequently authorized a full incremental following refresh for the
+newly admitted identities. That refresh is complete; it does not change the
+remaining deferral on cohort cutoffs, tiers, or yield-based source policy.
 
 ### Architect opinion (for the reviewing engineer)
 
@@ -304,20 +306,20 @@ Superseded 2026-07-14 by the Decision Addendum above and the parent tracker's
 
 ## Audit Backlog / Remaining Work
 
-- [ ] Implement the Registry display delta: entity-union support with
+- [x] Implement the Registry display delta: entity-union support with
   denominator, tie-aware within-Registry ordinal, discovery ordering confined
   to the Ranking view; focused tests plus live UI verification.
-- [ ] Ingest the AIE World's Fair 2026 speaker directory per
+- [x] Ingest the AIE World's Fair 2026 and 2024 speaker directories per
   `aie-worldsfair-2026-source.md`: raw snapshot, identity resolution,
   pre-admission coverage query, direct admission with provenance and
   role/employer facts.
-- [ ] Write the coverage/miss report and the ADR (accepted deltas, deferrals,
+- [x] Write the coverage/miss report and the ADR (accepted deltas, deferrals,
   yield-feedback loop design, interview-ready language).
-- [ ] Update `PRODUCT.md`, `DESIGN.md`, `docs/architecture/overview.md`, and
+- [x] Update `PRODUCT.md`, `DESIGN.md`, `docs/architecture/overview.md`, and
   `docs/STATUS.md` only where the accepted conceptual boundary changes them.
 - [ ] Run focused tests, `scripts/check-fast.sh`, and live browser verification
   for any affected surface.
-- [ ] Review and finalize `learnings.md`, record residual risks, and close the
+- [x] Review the accepted boundary, record residual risks, and close the
   workstream in the parent tracker.
 
 ## Validation / Test Plan
@@ -360,3 +362,10 @@ Superseded 2026-07-14 by the Decision Addendum above and the parent tracker's
   before insertion, and deferral of cohort cutoffs/tiers/yield evaluation and
   new-admit voting to post-submission. See the Decision Addendum above and
   `aie-worldsfair-2026-source.md`.
+- 2026-07-14: [IMPLEMENTED] The accepted display correction and
+  `entity-overlap-v3` target union are live. The 2026/2024 import retained 423
+  people but only 96 channel-backed company identities; 195 unresolved company
+  labels remain person context rather than Registry organizations. The
+  incremental snapshot completed with 2,558 source accounts, 2,521 voting
+  entities, 2,832,858 edges, and explicit zero-support Registry rows. See
+  `architecture-decision.md`.

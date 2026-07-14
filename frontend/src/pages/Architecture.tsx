@@ -410,12 +410,12 @@ function NetworkRankFigure() {
         />
       ))}
       <rect x="296" y="138" width="174" height="60" fill={INK} />
-      <text x="320" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill="#fff">Account A</text>
+      <text x="320" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill="#fff">Entity A</text>
       <text x="296" y="222" fontFamily={MONO} fontSize="9" fill={BLUE_INK} letterSpacing="0.06em">COUNTED SUPPORT</text>
       {supportTicks.map((tick) => (
         <rect key={`a-tick-${tick}`} x={296 + tick * 29} y="232" width="23" height="8" fill={BLUE} />
       ))}
-      <text x="296" y="264" fontFamily={UI} fontSize="12.5" fontWeight="600" fill={INK}>5 counted → higher network rank</text>
+      <text x="296" y="264" fontFamily={UI} fontSize="12.5" fontWeight="600" fill={INK}>5 of the voter set → higher support</text>
 
       {/* Account B: the same follower field, with only one screened node. */}
       <text x="582" y="72" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">MANY FOLLOWERS OVERALL</text>
@@ -457,7 +457,7 @@ function NetworkRankFigure() {
         markerEnd="url(#rank-arrow)"
       />
       <rect x="804" y="138" width="174" height="60" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="828" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Account B</text>
+      <text x="828" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Entity B</text>
       <text x="804" y="222" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">COUNTED SUPPORT</text>
       {supportTicks.map((tick) => (
         <rect
@@ -472,7 +472,7 @@ function NetworkRankFigure() {
           opacity={tick === 0 ? 1 : 0.38}
         />
       ))}
-      <text x="804" y="264" fontFamily={UI} fontSize="12.5" fill={INK}>1 counted → lower network rank</text>
+      <text x="804" y="264" fontFamily={UI} fontSize="12.5" fill={INK}>1 of the voter set → lower support</text>
 
     </svg>
   )
@@ -490,12 +490,12 @@ function RankingMethods() {
         <p className="method-limit">Useful for reach. Not a trust score.</p>
       </div>
       <div className="method-row">
-        <div className="method-id mono"><span>ENTITY-OVERLAP-V2</span><strong>Network rank</strong></div>
+        <div className="method-id mono"><span>ENTITY-OVERLAP-V3</span><strong>Network support</strong></div>
         <div className="method-main">
           <p className="method-question">How many screened Registry entities point here?</p>
-          <div className="method-equation mono">rank = order by distinct active Registry entities following an account</div>
+          <div className="method-equation mono">support = distinct active Registry entities following any represented X account · self excluded · dense rank within Registry</div>
         </div>
-        <p className="method-limit">Public follower count is not an input. Rank is not relevance.</p>
+        <p className="method-limit">Registry shows N / voter denominator. Ranking keeps the global account discovery order. Neither is relevance.</p>
       </div>
       <div className="method-row method-row--attention">
         <div className="method-id mono"><span>ATTENTION-V1.1</span><strong>Daily score</strong></div>
@@ -565,7 +565,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--methods" id="ranking-methods">
         <div className="arch-section-head">
           <h2 className="arch-h">The numbers answer different questions</h2>
-          <p className="arch-p">Reach, network rank, and the daily score answer different questions so none can masquerade as quality.</p>
+          <p className="arch-p">Reach, network support, discovery position, and the daily score answer different questions so none can masquerade as quality.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><RankingMethods /></div>
       </section>

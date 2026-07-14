@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from fli import following_rankings, signal_feed
+from fli.web import rankings as rankings_store
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -55,14 +56,7 @@ def _db_version(path: Path) -> tuple[str, int, int, int, int]:
 
 
 def _latest_analysis_db() -> Path | None:
-    if not DEFAULT_DERIVED_ROOT.is_dir():
-        return None
-    candidates = sorted(
-        (p / "analysis.db" for p in DEFAULT_DERIVED_ROOT.iterdir() if (p / "analysis.db").is_file()),
-        key=lambda path: path.parent.name,
-        reverse=True,
-    )
-    return candidates[0] if candidates else None
+    return rankings_store.latest_analysis_db(DEFAULT_DERIVED_ROOT)
 
 
 def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:

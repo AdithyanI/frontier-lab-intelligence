@@ -1,0 +1,122 @@
+{
+  "schema_version": "following-snapshot-manifest-v1",
+  "snapshot_id": "registry-following-2026-07-14-aie-worldsfair-v2",
+  "snapshot_schema_version": "following-snapshot-v1",
+  "status": "complete",
+  "cohort": {
+    "cohort_id": "registry-active-2026-07-14-aie-worldsfair",
+    "source_count": 2564,
+    "cohort_sha256": "4b6a18cc3326eb2a8f4126e3ff95e77235b148cd7b27eb677f4e38195ed17c48",
+    "manifest_path": "data/following/cohorts/registry-active-2026-07-14-aie-worldsfair.json",
+    "checkpoint_commit": "2db16153a7a1f844573ce39f02236fc517f4096e",
+    "checkpoint_database_sha256": "812e0dc166156b46a0da57db85245522e72bdfe63e1a583d76e52b86e369daeb"
+  },
+  "provider": {
+    "name": "twitterapi_io",
+    "endpoint": "/twitter/user/followings",
+    "page_size": 200
+  },
+  "collection": {
+    "created_at": "2026-07-14T18:22:37+00:00",
+    "first_observation_at": "2026-07-11T14:49:41+00:00",
+    "last_observation_at": "2026-07-14T18:16:57+00:00",
+    "completed_at": "2026-07-14T18:24:31+00:00",
+    "workers": 20,
+    "requests_per_second": 9.0,
+    "source_statuses": {
+      "complete": 2558,
+      "protected": 3,
+      "missing": 3,
+      "unavailable": 0,
+      "failed": 0,
+      "pending": 0,
+      "in_progress": 0
+    },
+    "raw_profiles": 2561,
+    "raw_pages": 15470,
+    "raw_items": 2832858,
+    "normalized_accounts": 557363,
+    "directed_edges": 2832858,
+    "duplicate_or_skipped_items": 0,
+    "new_sources": 352,
+    "new_pages": 2116,
+    "new_page_items": 386428
+  },
+  "lineage": {
+    "parent_snapshot_id": "registry-following-2026-07-14-aie-worldsfair-v1",
+    "parent_database_path": "data/raw/following/registry-following-2026-07-14-aie-worldsfair-v1/snapshot.db",
+    "parent_database_sha256": "ae4cc6322ad89b18a5c2afbf21a08c6854a65f8e686ea67ef7999da21599015e",
+    "copied_at": "2026-07-14T18:22:56+00:00",
+    "copied_sources": 2564,
+    "copied_profiles": 2561,
+    "copied_pages": 15470,
+    "copied_accounts": 557363,
+    "copied_edges": 2832858,
+    "parent_collection_lineage": {
+      "parent_snapshot_id": "registry-following-2026-07-11-v1",
+      "parent_database_sha256": "3892fffeb5c1e8838fb5aed266e04ee8c1e3db12541ccea537e6f2d61b97225a",
+      "copied_sources": 2212,
+      "copied_profiles": 2209,
+      "copied_pages": 13354,
+      "copied_accounts": 463180,
+      "copied_edges": 2446430
+    },
+    "metadata_correction": "The v1 child collected the 352-source delta but recorded a stale checkpoint commit. V2 was initialized from the committed, checksum-identical cohort and copied every immutable evidence row from v1 without provider calls.",
+    "observation_boundary": "Incremental mixed-time snapshot: inherited evidence retains July 11 timestamps and new evidence retains July 14 timestamps."
+  },
+  "spend": {
+    "reported_cost_usd": null,
+    "cumulative_snapshot_estimated_provider_credits": 3206420,
+    "cumulative_snapshot_estimated_cost_usd": 32.0642,
+    "new_following_collection_estimated_provider_credits": 430662,
+    "new_following_collection_estimated_cost_usd": 4.30662,
+    "conference_profile_reconciliation_estimated_provider_credits": 6408,
+    "conference_profile_reconciliation_estimated_cost_usd": 0.06408,
+    "combined_new_provider_work_estimated_credits": 437070,
+    "combined_new_provider_work_estimated_cost_usd": 4.3707,
+    "basis": "Provider responses do not expose charged spend. New-work estimates use invocation telemetry. The cumulative estimate attributes cost to inherited and seeded evidence and must not be added to marginal spend."
+  },
+  "artifact": {
+    "database_path": "data/raw/following/registry-following-2026-07-14-aie-worldsfair-v2/snapshot.db",
+    "database_sha256": "ea85b4159bc1fdbb968b3cf757982b50d7ecf7a98e31527c719022fcbeaf95d1",
+    "database_bytes": 2484998144,
+    "tracked": false,
+    "recoverable_from_git": false,
+    "durable_object": null,
+    "durability_note": "Local ignored artifact only. No upload or public object was created because this session did not authorize external publication."
+  },
+  "validation": {
+    "valid": true,
+    "validation_failures": [],
+    "validated_at": "2026-07-14T18:47:54+00:00"
+  },
+  "commands": {
+    "validate": "PYTHONPATH=src .venv/bin/python -m fli.cli following-snapshot validate --snapshot-db data/raw/following/registry-following-2026-07-14-aie-worldsfair-v2/snapshot.db --no-input",
+    "ranking": "PYTHONPATH=src .venv/bin/python -m fli.cli following-ranking overlap --snapshot-db data/raw/following/registry-following-2026-07-14-aie-worldsfair-v2/snapshot.db --registry-db data/fli.db --export-csv docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100.csv --export-unknown-csv docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100-unknown.csv --no-input"
+  },
+  "outputs": {
+    "ranking": {
+      "analysis_schema_version": "following-analysis-v4",
+      "derived_database_path": "data/derived/following/registry-following-2026-07-14-aie-worldsfair-v2/analysis.db",
+      "derived_database_sha256": "f9073d98ef6163f5178009d19c9eb991f6a2c8a108f1817583175f486548bbda",
+      "derived_database_bytes": 455888896,
+      "algorithm": "entity-overlap-v3",
+      "context_id": "3e7d6ca83b779bdd5ea5e8cef8782dfabab8467a5d693320db6b66355db59b1b",
+      "run_id": "721cb2a540a9e3fe24ac4c297b21292ac13cbb5f2c565a9181db920ad647fd11",
+      "registry_transaction_snapshot_sha256": "43800aaab89cb99bc8951f86971a6c9b9bfa0132d6e4166978bfeef6cc5529d6",
+      "eligible_source_accounts": 2558,
+      "eligible_source_entities": 2521,
+      "eligible_edges": 2832858,
+      "eligible_entity_votes": 2831995,
+      "ranked_accounts": 557363,
+      "ranked_registry_entities": 2527,
+      "zero_support_registry_entities": 38,
+      "final_dense_support_rank": 663,
+      "review_artifacts": [
+        "docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100.csv",
+        "docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100-unknown.csv"
+      ],
+      "scope_note": "Registry support is entity-union overlap only. Personalized PageRank was not rebuilt because it remains diagnostic and is not product-facing."
+    }
+  }
+}

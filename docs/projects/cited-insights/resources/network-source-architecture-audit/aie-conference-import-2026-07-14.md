@@ -8,10 +8,13 @@ not a vote, a ranking boost, or proof that the cohort is optimal.
 
 The product Registry is intentionally lean. It retains one identity, one
 verified X channel, the best available conference-supplied role and bio, and
-one listed organization relationship per person. When the same person appears
-in both requested events, the 2026 claim replaces the 2024 claim. Event
-history, talks, LinkedIn, personal sites, and ambiguous organization X links
-remain only in the immutable raw source snapshots.
+one source-bound company label per person. A company label becomes a Registry
+organization and affiliation only when it resolves to an existing
+channel-backed organization or the conference supplies an official website.
+When the same person appears in both requested events, the 2026 claim replaces
+the 2024 claim. Event history, talks, LinkedIn, personal sites, unresolved
+company labels, and ambiguous organization X links remain outside the
+canonical organization set.
 
 ## Official evidence
 
@@ -36,13 +39,17 @@ X-addressable people; 26 appear in both years. The pre-write audit found 96
 already active identities, 327 new identities, and no rejected-handle
 collisions.
 
-The idempotent write produced the following current Registry boundary:
+The idempotent write and post-import resolution audit produced the following
+current Registry boundary:
 
 - 423 conference-sourced people, represented once each.
-- 327 new people and 253 new organization identities beyond the prior
-  Registry checkpoint.
-- 423 admission/source claims, 422 roles, 403 bios, 419 listed-company claims,
-  and 419 person-to-organization affiliations.
+- 327 new people and 58 net-new channel-backed organization identities beyond
+  the prior Registry checkpoint.
+- 423 admission/source claims, 422 roles, 403 bios, and 419 source-bound
+  company labels on people.
+- 96 resolved conference organization identities and 186 dated affiliations;
+  195 channel-less text labels and 233 corresponding affiliations were pruned
+  rather than presented as resolved organizations.
 - No `company_x_candidate`, talk, LinkedIn, personal-site, or repeated
   historical conference facts.
 
@@ -77,24 +84,36 @@ non-conference additions are retained because the new immutable cohort must
 describe the full current Registry boundary rather than a conference-only
 subset.
 
-## Next immutable network run
+## Immutable network refresh
 
-The next snapshot will:
+The completed refresh:
 
-1. Freeze the active 2,564-source Registry against a committed database hash.
-2. Copy unchanged terminal evidence for the 2,212 stable-ID sources shared
+1. Froze the active 2,564-source Registry against a committed database hash.
+2. Copied unchanged terminal evidence for the 2,212 stable-ID sources shared
    with `registry-following-2026-07-11-v1`.
-3. Seed the 330 newly fetched conference profile responses from the raw cache,
+3. Seeded the 330 newly fetched conference profile responses from the raw cache,
    avoiding duplicate paid profile calls.
-4. Collect outgoing-follow pages only for the 352 genuinely new active
-   sources, then finalize and validate the child snapshot.
-5. Build a new derived analysis with the new cohort and voting-entity
-   denominator disclosed explicitly.
+4. Collected outgoing-follow pages only for the 352 genuinely new active
+   sources, then finalized and validated the child snapshot.
+5. Built `registry-following-2026-07-14-aie-worldsfair-v2`: 2,558 complete,
+   three missing, and three protected sources; 15,470 raw pages; 557,363
+   observed target accounts; and 2,832,858 directed edges.
+6. Materialized entity-union Network support from 2,521 complete active voting
+   entities across 2,527 active X-addressable Registry targets. Self-support is
+   excluded, multiple channels are unioned, and 38 zero-support targets remain
+   visible instead of disappearing from the denominator.
 
 This is an incremental mixed-observation snapshot, not a claim that every edge
 was observed on one day. Inherited sources retain their 2026-07-11 evidence
 timestamps; new sources retain their actual 2026-07-14 timestamps. Snapshot
-lineage records the parent checksum and exact copied row counts.
+lineage records the parent checksum and exact copied row counts. The marginal
+following collection estimate is `$4.30662`; including the earlier conference
+profile reconciliation, the combined new-work estimate is `$4.37070`. Provider
+responses expose no exact charged spend.
+
+The qualitative comparison and limitations are recorded in
+`architecture-decision.md`; the tracked cohort and snapshot manifests bind the
+exact membership, checksums, lineage, costs, and derived run IDs.
 
 ## Reproduce
 

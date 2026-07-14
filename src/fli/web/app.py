@@ -148,7 +148,15 @@ def _add_registry_ranks(conn, entities: list[dict]) -> int:
                 "network_follow_share": (
                     rank["cohort_follow_share"] if rank else None
                 ),
-                "network_account_handle": rank["handle"] if rank else None,
+                "network_source_total": (
+                    rank["network_source_total"] if rank else None
+                ),
+                "network_rank_total": (
+                    rank["network_rank_total"] if rank else None
+                ),
+                "network_channel_count": (
+                    rank["channel_count"] if rank else None
+                ),
             }
         )
     return reach_rank_total
@@ -268,6 +276,7 @@ def registry(
                 "filtered_total": filtered_total,
                 "counts": counts,
                 "reach_rank_total": reach_rank_total,
+                "network_context": rankings_store.entity_network_context(),
                 "limit": limit,
                 "offset": offset,
                 "sort": sort,

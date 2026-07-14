@@ -44,7 +44,9 @@ export interface Entity {
   network_rank: number | null
   network_follow_count: number | null
   network_follow_share: number | null
-  network_account_handle: string | null
+  network_source_total: number | null
+  network_rank_total: number | null
+  network_channel_count: number | null
   bio: string | null
   channels: EntityChannel[]
 }
@@ -55,6 +57,14 @@ export interface Registry {
   filtered_total: number
   counts: Record<RegistryGroup, number>
   reach_rank_total: number
+  network_context: {
+    snapshot_id: string
+    snapshot_completed_at: string | null
+    network_source_total: number
+    network_rank_total: number
+    parent_snapshot_id: string | null
+    incremental: boolean
+  } | null
   limit: number
   offset: number
   sort: 'reach' | 'network'
@@ -79,7 +89,8 @@ export interface RankingRun {
   algorithm: string
   snapshot_id: string
   completed_at: string
-  sources: number
+  source_accounts: number
+  source_entities: number
   edges: number
   ranked_accounts: number
   active_accounts: number

@@ -29,6 +29,10 @@ def test_registry_returns_complete_typed_entity_universe():
     assert data["limit"] == 5000
     assert data["sort"] == "reach"
     assert data["direction"] == "asc"
+    if data["network_context"] is not None:
+        assert data["network_context"]["network_source_total"] > 0
+        assert data["network_context"]["network_rank_total"] > 0
+        assert data["network_context"]["snapshot_id"]
     assert data["reach_rank_total"] == data["total"] - data["counts"]["rejected"]
     assert data["counts"]["person"] > 0
     assert data["counts"]["organization"] >= 10
@@ -61,7 +65,9 @@ def test_registry_returns_complete_typed_entity_universe():
         "network_rank",
         "network_follow_count",
         "network_follow_share",
-        "network_account_handle",
+        "network_source_total",
+        "network_rank_total",
+        "network_channel_count",
         "name",
         "bio",
         "channels",
@@ -110,10 +116,15 @@ def test_registry_pages_filters_and_searches_on_the_server():
         entity for entity in organizations["entities"] if entity["slug"] == "openai"
     )
     assert openai["reach_rank"] == openai_as_organization["reach_rank"]
+    assert openai["network_rank"] == openai_as_organization["network_rank"]
+    assert (
+        openai["network_source_total"]
+        == openai_as_organization["network_source_total"]
+    )
     assert search["reach_rank_total"] == organizations["reach_rank_total"]
 
 
-def test_registry_can_sort_by_best_owned_account_network_rank(monkeypatch):
+def test_registry_can_sort_by_entity_union_network_support(monkeypatch):
     baseline = client.get("/api/registry?limit=2").json()["entities"]
     first_id, second_id = (entity["id"] for entity in baseline)
     monkeypatch.setattr(
@@ -124,13 +135,17 @@ def test_registry_can_sort_by_best_owned_account_network_rank(monkeypatch):
                 "network_rank": 7,
                 "cohort_follow_count": 12,
                 "cohort_follow_share": 0.1,
-                "handle": "first",
+                "network_source_total": 120,
+                "network_rank_total": 2,
+                "channel_count": 1,
             },
             second_id: {
                 "network_rank": 3,
                 "cohort_follow_count": 20,
                 "cohort_follow_share": 0.2,
-                "handle": "second",
+                "network_source_total": 120,
+                "network_rank_total": 2,
+                "channel_count": 2,
             },
         },
     )

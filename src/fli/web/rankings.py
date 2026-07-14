@@ -41,21 +41,42 @@ def _db_version(path: Path) -> tuple[str, int, int, int, int]:
     return str(path.resolve()), main_mtime, main_size, wal_mtime, wal_size
 
 
-def _latest_analysis_db() -> Path | None:
-    if not DEFAULT_DERIVED_ROOT.is_dir():
+def latest_analysis_db(root: Path = DEFAULT_DERIVED_ROOT) -> Path | None:
+    """Newest completed entity-overlap analysis, independent of directory names."""
+    if not root.is_dir():
         return None
-    candidates = sorted(
-        (p for p in DEFAULT_DERIVED_ROOT.iterdir() if (p / "analysis.db").is_file()),
-        key=lambda p: p.name,
-        reverse=True,
-    )
-    return candidates[0] / "analysis.db" if candidates else None
+    candidates: list[tuple[str, str, Path]] = []
+    for directory in root.iterdir():
+        path = directory / "analysis.db"
+        if not path.is_file():
+            continue
+        conn: sqlite3.Connection | None = None
+        try:
+            conn = _open_readonly(path)
+            has_entity_support = conn.execute(
+                """SELECT 1 FROM sqlite_master
+                   WHERE type = 'table' AND name = 'entity_support_result'"""
+            ).fetchone()
+            run = _latest_run(conn) if has_entity_support else None
+        except sqlite3.Error:
+            run = None
+        finally:
+            if conn is not None:
+                conn.close()
+        if run is not None:
+            candidates.append((run["completed_at"], directory.name, path))
+    return max(candidates)[2] if candidates else None
+
+
+def _latest_analysis_db() -> Path | None:
+    return latest_analysis_db(DEFAULT_DERIVED_ROOT)
 
 
 def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
     return conn.execute(
         """SELECT r.run_id, r.context_id, r.algorithm,
-                  r.eligible_source_account_count, r.eligible_edge_count,
+                  r.eligible_source_account_count,
+                  r.eligible_source_entity_count, r.eligible_edge_count,
                   r.ranked_node_count, r.completed_at,
                   c.snapshot_id
            FROM ranking_run r
@@ -135,7 +156,8 @@ def _rankings_payload_cached(
                 "algorithm": run["algorithm"],
                 "snapshot_id": run["snapshot_id"],
                 "completed_at": run["completed_at"],
-                "sources": run["eligible_source_account_count"],
+                "source_accounts": run["eligible_source_account_count"],
+                "source_entities": run["eligible_source_entity_count"],
                 "edges": run["eligible_edge_count"],
                 "ranked_accounts": run["ranked_node_count"],
                 "active_accounts": state_counts.get("active", 0),
@@ -161,7 +183,7 @@ def rankings_payload(limit: int, state: str, query: str) -> dict[str, Any]:
 def _entity_network_ranks_cached(
     version: tuple[str, int, int, int, int],
 ) -> dict[int, dict[str, Any]]:
-    """Best global account rank owned by each active Registry entity."""
+    """Tie-aware entity-union support within the active X Registry."""
     analysis_db = Path(version[0])
     if not analysis_db.is_file():
         return {}
@@ -171,34 +193,86 @@ def _entity_network_ranks_cached(
         if run is None:
             return {}
         rows = conn.execute(
-            """SELECT gn.entity_id, rr.position AS network_rank,
-                      rr.cohort_follow_count, rr.cohort_follow_share,
-                      gn.x_id, gn.handle
-               FROM ranking_result rr
-               JOIN graph_node gn
-                 ON gn.context_id = ? AND gn.x_id = rr.x_id
-               WHERE rr.run_id = ?
-                 AND gn.registry_state = 'active'
-                 AND gn.entity_id IS NOT NULL
-               ORDER BY rr.position""",
-            [run["context_id"], run["run_id"]],
+            """SELECT support.entity_id,
+                      support.support_rank AS network_rank,
+                      support.support_count AS cohort_follow_count,
+                      support.support_share AS cohort_follow_share,
+                      support.channel_count,
+                      run.eligible_source_entity_count AS network_source_total,
+                      COUNT(*) OVER () AS network_rank_total
+               FROM entity_support_result support
+               JOIN ranking_run run ON run.run_id = support.run_id
+               WHERE support.run_id = ?
+               ORDER BY support.support_rank, support.entity_id""",
+            [run["run_id"]],
         ).fetchall()
-        best: dict[int, dict[str, Any]] = {}
-        for row in rows:
-            entity_id = int(row["entity_id"])
-            if entity_id not in best:
-                best[entity_id] = dict(row)
-        return best
+        return {int(row["entity_id"]): dict(row) for row in rows}
     finally:
         conn.close()
 
 
 def entity_network_ranks() -> dict[int, dict[str, Any]]:
-    """Map an entity to the global rank of its best-ranked owned X account."""
+    """Map each X-addressable entity to union support and Registry rank."""
     analysis_db = _latest_analysis_db()
     if analysis_db is None:
         return {}
     return _entity_network_ranks_cached(_db_version(analysis_db))
+
+
+@lru_cache(maxsize=32)
+def _entity_network_context_cached(
+    version: tuple[str, int, int, int, int],
+) -> dict[str, Any] | None:
+    analysis_db = Path(version[0])
+    if not analysis_db.is_file():
+        return None
+    conn = _open_readonly(analysis_db)
+    try:
+        run = _latest_run(conn)
+        if run is None:
+            return None
+        ranked_entities = conn.execute(
+            "SELECT COUNT(*) FROM entity_support_result WHERE run_id = ?",
+            [run["run_id"]],
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    snapshot_db = RAW_FOLLOWING_ROOT / run["snapshot_id"] / "snapshot.db"
+    snapshot_completed_at = None
+    parent_snapshot_id = None
+    if snapshot_db.is_file():
+        snapshot = _open_readonly(snapshot_db)
+        try:
+            snapshot_completed_at = snapshot.execute(
+                "SELECT completed_at FROM snapshot_run"
+            ).fetchone()[0]
+            has_lineage = snapshot.execute(
+                """SELECT 1 FROM sqlite_master
+                   WHERE type = 'table' AND name = 'snapshot_lineage'"""
+            ).fetchone()
+            if has_lineage:
+                parent = snapshot.execute(
+                    "SELECT parent_snapshot_id FROM snapshot_lineage LIMIT 1"
+                ).fetchone()
+                parent_snapshot_id = parent[0] if parent else None
+        finally:
+            snapshot.close()
+    return {
+        "snapshot_id": run["snapshot_id"],
+        "snapshot_completed_at": snapshot_completed_at,
+        "network_source_total": run["eligible_source_entity_count"],
+        "network_rank_total": ranked_entities,
+        "parent_snapshot_id": parent_snapshot_id,
+        "incremental": parent_snapshot_id is not None,
+    }
+
+
+def entity_network_context() -> dict[str, Any] | None:
+    """Describe the exact evidence snapshot behind Registry support."""
+    analysis_db = _latest_analysis_db()
+    if analysis_db is None:
+        return None
+    return _entity_network_context_cached(_db_version(analysis_db))
 
 
 @lru_cache(maxsize=128)
@@ -230,20 +304,47 @@ def _followers_payload_cached(
             [f"file:{snapshot_db.as_posix()}?mode=ro"],
         )
         rows = conn.execute(
-            """SELECT gn.x_id, gn.handle, gn.display_name, gn.entity_name,
-                      rr.position AS rank, rr.cohort_follow_count
-               FROM snap.edge e
-               JOIN graph_node gn
-                 ON gn.context_id = ? AND gn.x_id = e.source_x_id
-               LEFT JOIN ranking_result rr
-                 ON rr.run_id = ? AND rr.x_id = e.source_x_id
-               WHERE e.target_x_id = ?
-               ORDER BY rr.position IS NULL, rr.position
+            """WITH eligible AS (
+                   SELECT gn.x_id, gn.handle, gn.display_name, gn.entity_name,
+                          gn.entity_id, rr.position AS rank,
+                          rr.cohort_follow_count,
+                          ROW_NUMBER() OVER (
+                              PARTITION BY gn.entity_id
+                              ORDER BY rr.position IS NULL, rr.position,
+                                       lower(gn.handle), gn.x_id
+                          ) AS entity_account_order
+                   FROM snap.edge edge
+                   JOIN snap.source_fetch source
+                     ON source.source_x_id = edge.source_x_id
+                    AND source.status = 'complete'
+                   JOIN graph_node gn
+                     ON gn.context_id = ? AND gn.x_id = edge.source_x_id
+                    AND gn.registry_state = 'active'
+                    AND gn.entity_id IS NOT NULL
+                   LEFT JOIN ranking_result rr
+                     ON rr.run_id = ? AND rr.x_id = edge.source_x_id
+                   WHERE edge.target_x_id = ?
+               )
+               SELECT x_id, handle, display_name, entity_name, rank,
+                      cohort_follow_count
+               FROM eligible
+               WHERE entity_account_order = 1
+               ORDER BY rank IS NULL, rank, lower(handle), x_id
                LIMIT ?""",
             [run["context_id"], run["run_id"], x_id, limit],
         ).fetchall()
         total = conn.execute(
-            "SELECT COUNT(*) FROM snap.edge WHERE target_x_id = ?", [x_id]
+            """SELECT COUNT(DISTINCT gn.entity_id)
+               FROM snap.edge edge
+               JOIN snap.source_fetch source
+                 ON source.source_x_id = edge.source_x_id
+                AND source.status = 'complete'
+               JOIN graph_node gn
+                 ON gn.context_id = ? AND gn.x_id = edge.source_x_id
+                AND gn.registry_state = 'active'
+                AND gn.entity_id IS NOT NULL
+               WHERE edge.target_x_id = ?""",
+            [run["context_id"], x_id],
         ).fetchone()[0]
         return {
             "available": True,

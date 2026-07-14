@@ -1,7 +1,11 @@
 # Network Source Architecture — Problem Statement
 
 Date: 2026-07-14  
-Status: frozen audit brief; no implementation decision yet.
+Status: frozen pre-change baseline; decision implemented.
+
+The counts below preserve the state that motivated the audit. The accepted
+decision, refreshed counts, and comparison evidence are in
+`architecture-decision.md`.
 
 ## The Exact Problem
 

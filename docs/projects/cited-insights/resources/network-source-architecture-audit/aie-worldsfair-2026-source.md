@@ -2,7 +2,7 @@
 
 Date: 2026-07-14
 
-Status: requested 2026 + 2024 cohort imported; network refresh in progress.
+Status: requested 2026 + 2024 cohort imported; network refresh complete.
 
 Decision context: `project-brief.md` Decision Addendum.
 
@@ -50,7 +50,8 @@ For each person, keep only:
 - canonical name and exact personal X channel;
 - one best available source-bound role;
 - one best available source-bound bio;
-- one listed company label and one person-to-organization affiliation;
+- one listed company label, plus an affiliation only when the organization is
+  independently channel-addressable;
 - the source/date/evidence needed to audit those claims.
 
 When both years contain a claim, prefer the newer 2026 observation. The full
@@ -59,9 +60,12 @@ LinkedIn, personal websites, conference frequency, or speculative organization
 X handles. Do not retain repeated year-specific copies of the same role, bio,
 company, or affiliation.
 
-Listed companies become organization identities only so the affiliation is
-resolvable. A conference listing does not establish an official organization X
-account or website and does not alter organization voting weight.
+The raw company label alone is not enough to create a Registry organization.
+Create or link an organization only when the label matches an existing
+channel-backed identity or the official conference record supplies a website;
+otherwise retain the label only on the person. A conference listing does not
+establish an organization X account and does not alter organization voting
+weight.
 
 ## Provider reconciliation
 
@@ -92,6 +96,14 @@ denominator but mixed evidence dates; documentation and analysis must say so.
 Seed the already cached conference profile responses into the mutable child
 before collection. Then collect only pending sources, finalize only when every
 source is terminal, and validate before deriving rankings.
+
+The completed child is
+`registry-following-2026-07-14-aie-worldsfair-v2`: 2,564 frozen source
+accounts, 2,558 complete sources, 2,832,858 edges, and 557,363 discovered
+targets. `entity-overlap-v3` resolves those sources to 2,521 voting entities
+and materializes entity-union support for 2,527 active stable-X Registry
+identities, including 38 explicit zero-support rows. Full lineage and checksums
+live in the tracked snapshot manifest.
 
 ## Validation
 

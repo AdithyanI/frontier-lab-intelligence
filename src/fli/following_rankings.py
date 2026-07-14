@@ -31,8 +31,8 @@ from fli import following_snapshots
 
 
 RESULT_SCHEMA_VERSION = "1.0"
-ANALYSIS_SCHEMA_VERSION = "following-analysis-v2"
-OVERLAP_ALGORITHM = "entity-overlap-v2"
+ANALYSIS_SCHEMA_VERSION = "following-analysis-v4"
+OVERLAP_ALGORITHM = "entity-overlap-v3"
 PAGERANK_ALGORITHM = "personalized-pagerank-v1"
 PERSONALIZATION_SCHEMA_VERSION = "following-personalization-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -145,6 +145,18 @@ CREATE TABLE IF NOT EXISTS ranking_result (
 );
 CREATE INDEX IF NOT EXISTS idx_ranking_result_order
     ON ranking_result(run_id, position);
+
+CREATE TABLE IF NOT EXISTS entity_support_result (
+    run_id TEXT NOT NULL REFERENCES ranking_run(run_id) ON DELETE CASCADE,
+    entity_id INTEGER NOT NULL,
+    support_rank INTEGER NOT NULL,
+    support_count INTEGER NOT NULL,
+    support_share REAL NOT NULL,
+    channel_count INTEGER NOT NULL,
+    PRIMARY KEY (run_id, entity_id)
+);
+CREATE INDEX IF NOT EXISTS idx_entity_support_result_order
+    ON entity_support_result(run_id, support_rank, entity_id);
 
 CREATE TABLE IF NOT EXISTS ranking_diagnostics (
     run_id TEXT PRIMARY KEY REFERENCES ranking_run(run_id) ON DELETE CASCADE,
@@ -423,8 +435,18 @@ def _validate_analysis_schema(conn: sqlite3.Connection) -> None:
     ranking_columns = {
         row[1] for row in conn.execute("PRAGMA table_info(ranking_result)")
     }
+    entity_support_columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(entity_support_result)")
+    }
     run_columns = {row[1] for row in conn.execute("PRAGMA table_info(ranking_run)")}
     required_ranking = {"position", "score_rank"}
+    required_entity_support = {
+        "entity_id",
+        "support_rank",
+        "support_count",
+        "support_share",
+        "channel_count",
+    }
     required_run = {
         "eligible_source_account_count",
         "eligible_source_entity_count",
@@ -433,6 +455,7 @@ def _validate_analysis_schema(conn: sqlite3.Connection) -> None:
     if (
         versions - {ANALYSIS_SCHEMA_VERSION}
         or not required_ranking <= ranking_columns
+        or not required_entity_support <= entity_support_columns
         or not required_run <= run_columns
     ):
         raise RankingCliError(
@@ -708,10 +731,53 @@ def _insert_overlap(
            FROM ranked""",
         (context_id, context_id, run_id, source_entities),
     )
+    conn.execute(
+        _eligible_source_cte()
+        + """, active_target AS (
+               SELECT DISTINCT entity_id, x_id
+               FROM registry_x
+               WHERE registry_state = 'active'
+           ), support_pair AS (
+               SELECT DISTINCT target.entity_id AS target_entity_id,
+                               source.entity_id AS source_entity_id
+               FROM snapshot.edge edge
+               JOIN eligible_source source
+                 ON source.source_x_id = edge.source_x_id
+               JOIN active_target target ON target.x_id = edge.target_x_id
+               WHERE source.entity_id != target.entity_id
+           ), entity_score AS (
+               SELECT target.entity_id,
+                      COUNT(DISTINCT target.x_id) AS channel_count,
+                      COUNT(DISTINCT pair.source_entity_id) AS support_count
+               FROM active_target target
+               LEFT JOIN support_pair pair
+                 ON pair.target_entity_id = target.entity_id
+               GROUP BY target.entity_id
+           ), ranked AS (
+               SELECT entity_id, channel_count, support_count,
+                      DENSE_RANK() OVER (
+                          ORDER BY support_count DESC
+                      ) AS support_rank
+               FROM entity_score
+           )
+           INSERT INTO entity_support_result
+             (run_id, entity_id, support_rank, support_count, support_share,
+              channel_count)
+           SELECT ?, entity_id, support_rank, support_count,
+                  CAST(support_count AS REAL) / ?, channel_count
+           FROM ranked""",
+        (run_id, source_entities),
+    )
     counts = conn.execute(
         """SELECT COUNT(*) AS ranked_nodes,
                   COALESCE(SUM(cohort_follow_count), 0) AS eligible_votes
            FROM ranking_result WHERE run_id = ?""",
+        (run_id,),
+    ).fetchone()
+    entity_counts = conn.execute(
+        """SELECT COUNT(*) AS ranked_entities,
+                  COALESCE(SUM(support_count), 0) AS support_votes
+           FROM entity_support_result WHERE run_id = ?""",
         (run_id,),
     ).fetchone()
     conn.execute(
@@ -732,6 +798,8 @@ def _insert_overlap(
         "eligible_edges": int(eligible_edges),
         "eligible_entity_votes": int(counts["eligible_votes"]),
         "ranked_accounts": int(counts["ranked_nodes"]),
+        "ranked_registry_entities": int(entity_counts["ranked_entities"]),
+        "registry_entity_support_votes": int(entity_counts["support_votes"]),
     }
 
 
@@ -874,6 +942,51 @@ def _validate_ranking_run(conn: sqlite3.Connection, run: sqlite3.Row) -> None:
                 hint="Delete the derived analysis database and rerun.",
                 exit_code=2,
             )
+        entity_support = conn.execute(
+            """SELECT COUNT(*) AS rows,
+                      COALESCE(MIN(support_rank), 0) AS min_rank
+               FROM entity_support_result WHERE run_id = ?""",
+            (run["run_id"],),
+        ).fetchone()
+        active_entities = conn.execute(
+            _registry_identity_cte()
+            + """SELECT COUNT(DISTINCT entity_id)
+                 FROM registry_x
+                 WHERE registry_state = 'active'"""
+        ).fetchone()[0]
+        bad_entity_metric = conn.execute(
+            """SELECT 1 FROM entity_support_result
+               WHERE run_id = ? AND (
+                   support_count < 0 OR channel_count < 1
+                   OR abs(support_share - CAST(support_count AS REAL) / ?) > 1e-15
+               ) LIMIT 1""",
+            (run["run_id"], run["eligible_source_entity_count"]),
+        ).fetchone()
+        bad_entity_rank = conn.execute(
+            """SELECT 1 FROM (
+                   SELECT support_rank,
+                          DENSE_RANK() OVER (
+                              ORDER BY support_count DESC
+                          ) AS expected_rank
+                   FROM entity_support_result
+                   WHERE run_id = ?
+               )
+               WHERE support_rank != expected_rank
+               LIMIT 1""",
+            (run["run_id"],),
+        ).fetchone()
+        if (
+            entity_support["rows"] != active_entities
+            or entity_support["min_rank"] != (1 if active_entities else 0)
+            or bad_entity_metric
+            or bad_entity_rank
+        ):
+            raise RankingCliError(
+                code="E_ANALYSIS_RECONCILIATION",
+                message="Stored entity-union support rows are inconsistent.",
+                hint="Delete the derived analysis database and rerun.",
+                exit_code=2,
+            )
     elif run["algorithm"] == PAGERANK_ALGORITHM:
         score_sum = conn.execute(
             "SELECT SUM(score) FROM ranking_result WHERE run_id = ?",
@@ -1005,6 +1118,12 @@ def run_overlap(
             "vote_unit": "registry_entity",
             "score": "cohort_follow_count",
             "score_rank": "dense",
+            "registry_entity_support": {
+                "target_unit": "registry_entity_union_of_x_channels",
+                "source_unit": "registry_entity",
+                "self_edges": "excluded",
+                "rank": "dense_within_active_x_addressable_registry",
+            },
             "display_order": [
                 "cohort_follow_count_desc",
                 "handle_asc",
@@ -1082,6 +1201,22 @@ def run_overlap(
                     ),
                     "ranked_accounts": int(existing_run["ranked_node_count"]),
                 }
+                entity_counts = conn.execute(
+                    """SELECT COUNT(*) AS ranked_entities,
+                              COALESCE(SUM(support_count), 0) AS support_votes
+                       FROM entity_support_result WHERE run_id = ?""",
+                    (run_id,),
+                ).fetchone()
+                counts.update(
+                    {
+                        "ranked_registry_entities": int(
+                            entity_counts["ranked_entities"]
+                        ),
+                        "registry_entity_support_votes": int(
+                            entity_counts["support_votes"]
+                        ),
+                    }
+                )
             stored_run = conn.execute(
                 "SELECT * FROM ranking_run WHERE run_id = ?", (run_id,)
             ).fetchone()

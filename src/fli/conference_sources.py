@@ -610,6 +610,15 @@ def _ensure_organization(
     entity_id = index.get(key)
     if entity_id is None and website_key:
         entity_id = website_index.get(website_key)
+    if entity_id is None and not record.company_website:
+        return None, False
+    if entity_id is not None and not record.company_website:
+        has_channel = conn.execute(
+            "SELECT 1 FROM entity_channels WHERE entity_id = ? LIMIT 1",
+            (entity_id,),
+        ).fetchone()
+        if has_channel is None:
+            return None, False
     created = False
     if entity_id is None:
         entity_id = channels.upsert_entity(
@@ -672,6 +681,36 @@ def _record_person_facts(
         )
 
 
+def _entity_has_foreign_reference(
+    conn: sqlite3.Connection, entity_id: int
+) -> bool:
+    """Return whether any current schema table still references an entity."""
+    tables = [
+        row[0]
+        for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table'"
+        ).fetchall()
+    ]
+    for table in tables:
+        columns = [
+            row[3]
+            for row in conn.execute(
+                f'PRAGMA foreign_key_list("{table.replace(chr(34), chr(34) * 2)}")'
+            ).fetchall()
+            if row[2] == "entities"
+        ]
+        quoted_table = table.replace('"', '""')
+        for column in columns:
+            quoted_column = column.replace('"', '""')
+            if conn.execute(
+                f'SELECT 1 FROM "{quoted_table}" '
+                f'WHERE "{quoted_column}" = ? LIMIT 1',
+                (entity_id,),
+            ).fetchone():
+                return True
+    return False
+
+
 def consolidate_conference_facts(conn: sqlite3.Connection) -> dict[str, int]:
     """Keep one best current conference claim per fact and person affiliation.
 
@@ -721,6 +760,99 @@ def consolidate_conference_facts(conn: sqlite3.Connection) -> dict[str, int]:
                WHERE row_number > 1
            )"""
     )
+    # Earlier importer versions promoted every free-text company label into an
+    # organization. A label without any independently addressable channel is
+    # useful person context, but not a resolved Registry identity. Remove only
+    # the conference-owned affiliation/fact; preserve the entity whenever any
+    # other schema table still references it.
+    unresolved_conference_organizations = [
+        int(row["entity_id"])
+        for row in conn.execute(
+            """SELECT DISTINCT fact.entity_id
+               FROM entity_source_facts fact
+               WHERE fact.source LIKE 'aie-%'
+                 AND fact.fact = 'conference_company'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM entity_channels ec
+                     WHERE ec.entity_id = fact.entity_id
+                 )"""
+        ).fetchall()
+    ]
+    unresolved_affiliations_removed = 0
+    unresolved_organizations_removed = 0
+    for entity_id in unresolved_conference_organizations:
+        unresolved_affiliations_removed += conn.execute(
+            """DELETE FROM entity_affiliations
+               WHERE organization_entity_id = ? AND source LIKE 'aie-%'""",
+            (entity_id,),
+        ).rowcount
+        conn.execute(
+            """DELETE FROM entity_source_facts
+               WHERE entity_id = ? AND source LIKE 'aie-%'
+                 AND fact = 'conference_company'""",
+            (entity_id,),
+        )
+        if not _entity_has_foreign_reference(conn, entity_id):
+            unresolved_organizations_removed += conn.execute(
+                "DELETE FROM entities WHERE id = ? AND kind = 'organization'",
+                (entity_id,),
+            ).rowcount
+    orphan_organizations = [
+        int(row["entity_id"])
+        for row in conn.execute(
+            """SELECT DISTINCT fact.entity_id
+               FROM entity_source_facts fact
+               WHERE fact.source LIKE 'aie-%'
+                 AND fact.fact = 'conference_company'
+                 AND NOT EXISTS (
+                     SELECT 1 FROM entity_affiliations affiliation
+                     WHERE affiliation.organization_entity_id = fact.entity_id
+                       AND affiliation.source LIKE 'aie-%'
+                 )"""
+        ).fetchall()
+    ]
+    orphan_website_links_removed = 0
+    orphan_organizations_removed = 0
+    for entity_id in orphan_organizations:
+        website_channel_ids = [
+            int(row["channel_id"])
+            for row in conn.execute(
+                """SELECT ec.channel_id
+                   FROM entity_channels ec
+                   JOIN channels channel ON channel.id = ec.channel_id
+                   WHERE ec.entity_id = ?
+                     AND channel.kind = 'website'
+                     AND (
+                         ec.evidence_url LIKE '%ai.engineer/%'
+                         OR ec.notes LIKE 'Official company link in AI Engineer%'
+                     )""",
+                (entity_id,),
+            ).fetchall()
+        ]
+        for channel_id in website_channel_ids:
+            orphan_website_links_removed += conn.execute(
+                "DELETE FROM entity_channels WHERE entity_id = ? AND channel_id = ?",
+                (entity_id, channel_id),
+            ).rowcount
+            conn.execute(
+                """DELETE FROM channels
+                   WHERE id = ?
+                     AND NOT EXISTS (
+                         SELECT 1 FROM entity_channels WHERE channel_id = ?
+                     )""",
+                (channel_id, channel_id),
+            )
+        conn.execute(
+            """DELETE FROM entity_source_facts
+               WHERE entity_id = ? AND source LIKE 'aie-%'
+                 AND fact = 'conference_company'""",
+            (entity_id,),
+        )
+        if not _entity_has_foreign_reference(conn, entity_id):
+            orphan_organizations_removed += conn.execute(
+                "DELETE FROM entities WHERE id = ? AND kind = 'organization'",
+                (entity_id,),
+            ).rowcount
     after_facts = conn.execute(
         "SELECT COUNT(*) FROM entity_source_facts WHERE source LIKE 'aie-%'"
     ).fetchone()[0]
@@ -730,6 +862,14 @@ def consolidate_conference_facts(conn: sqlite3.Connection) -> dict[str, int]:
     return {
         "conference_facts_removed": before_facts - after_facts,
         "conference_affiliations_removed": before_affiliations - after_affiliations,
+        "unresolved_conference_affiliations_removed": (
+            unresolved_affiliations_removed
+        ),
+        "unresolved_conference_organizations_pruned": (
+            unresolved_organizations_removed
+        ),
+        "orphan_conference_organizations_pruned": orphan_organizations_removed,
+        "orphan_conference_website_links_pruned": orphan_website_links_removed,
     }
 
 
@@ -760,7 +900,22 @@ def import_records(conn: sqlite3.Connection, records: Iterable[SpeakerRecord]) -
     affiliations = 0
     accounts_created = 0
     non_x_records = 0
-    for record in records:
+    current_company_index: dict[str, int] = {}
+    for index, record in enumerate(records):
+        if not record.x_handle or not record.company:
+            continue
+        current = current_company_index.get(record.x_handle)
+        if current is None or (
+            record.observed_at,
+            record.source_id,
+            record.company.casefold(),
+        ) > (
+            records[current].observed_at,
+            records[current].source_id,
+            (records[current].company or "").casefold(),
+        ):
+            current_company_index[record.x_handle] = index
+    for index, record in enumerate(records):
         if not record.x_handle:
             non_x_records += 1
             continue
@@ -770,9 +925,12 @@ def import_records(conn: sqlite3.Connection, records: Iterable[SpeakerRecord]) -
         created_people += person_created
         matched_people.add(person_id)
         _record_person_facts(conn, person_id, record)
-        organization_id, organization_created = _ensure_organization(
-            conn, record, organizations, organization_websites
-        )
+        organization_id = None
+        organization_created = False
+        if current_company_index.get(record.x_handle) == index:
+            organization_id, organization_created = _ensure_organization(
+                conn, record, organizations, organization_websites
+            )
         created_organizations += organization_created
         if organization_id is not None:
             channels.record_entity_fact(
@@ -1129,6 +1287,13 @@ def seed_following_snapshot_profiles(
             handle = record.x_handle
             if not handle:
                 continue
+            source = conn.execute(
+                "SELECT source_x_id FROM source_fetch WHERE source_handle = ?",
+                (handle,),
+            ).fetchone()
+            if source is None:
+                not_in_cohort += 1
+                continue
             path = _profile_cache_path(cache_root, handle)
             if not path.exists():
                 continue
@@ -1136,13 +1301,6 @@ def seed_following_snapshot_profiles(
                 profile, retrieved_at = _load_cached_profile(path, handle)
             except (ValueError, json.JSONDecodeError, OSError) as exc:
                 failures.append({"handle": handle, "message": str(exc)})
-                continue
-            source = conn.execute(
-                "SELECT source_x_id FROM source_fetch WHERE source_handle = ?",
-                (handle,),
-            ).fetchone()
-            if source is None:
-                not_in_cohort += 1
                 continue
             result = following_snapshots.record_profile(
                 conn,

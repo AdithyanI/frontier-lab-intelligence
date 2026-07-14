@@ -23,6 +23,12 @@ const compactFmt = new Intl.NumberFormat('en-US', {
 })
 const fmtCompact = (n: number | null | undefined) =>
   n == null ? '—' : compactFmt.format(n)
+const snapshotDate = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
 
 const registryURL = (
   kind: KindFilter,
@@ -162,6 +168,23 @@ export default function Registry() {
         Resolved people and organizations, with every observed channel attached
         to a single identity.
       </p>
+      {data?.network_context && (
+        <p
+          className="registry-network-context mono"
+          title={
+            data.network_context.incremental
+              ? `Incremental evidence snapshot. Unchanged source evidence was carried from ${data.network_context.parent_snapshot_id}; newly admitted sources were observed in ${data.network_context.snapshot_id}.`
+              : `Evidence snapshot ${data.network_context.snapshot_id}.`
+          }
+        >
+          Network support · {fmt(data.network_context.network_source_total)} voters
+          {' · '}
+          {data.network_context.incremental ? 'incremental ' : ''}snapshot{' '}
+          {data.network_context.snapshot_completed_at
+            ? snapshotDate.format(new Date(data.network_context.snapshot_completed_at))
+            : 'date unavailable'}
+        </p>
+      )}
 
       {error && (
         <div className="error-note">Could not load registry: {error}</div>
@@ -221,16 +244,16 @@ export default function Registry() {
                   <button
                     className="ent-sort"
                     type="button"
-                    aria-label={`Sort by network rank; ${
+                    aria-label={`Sort by network support; ${
                       sortField !== 'network'
                         ? 'not selected'
                         : sortDirection === 'asc'
-                          ? 'best rank first'
-                          : 'deepest rank first'
+                          ? 'highest support first'
+                          : 'lowest support first'
                     }`}
                     onClick={() => changeSort('network')}
                   >
-                    <span>Network rank</span>
+                    <span>Network support</span>
                     <span className="ent-sort-arrow" aria-hidden="true">
                       {sortField === 'network'
                         ? sortDirection === 'asc'
@@ -320,17 +343,25 @@ export default function Registry() {
                       className="ent-network-rank"
                       title={
                         entity.network_rank == null
-                          ? 'No owned X account appears in the current network ranking.'
-                          : `Best-ranked owned account${
-                              entity.network_account_handle
-                                ? `: @${entity.network_account_handle}`
-                                : ''
-                            }; ${fmt(entity.network_follow_count)} screened Registry sources follow it.`
+                          ? 'No entity-level support is available in the current network snapshot.'
+                          : `${fmt(entity.network_follow_count)} of ${fmt(entity.network_source_total)} complete active Registry entities follow at least one of its ${fmt(entity.network_channel_count)} verified Registry X accounts · tied #${fmt(entity.network_rank)} among ${fmt(entity.network_rank_total)} active Registry entities with stable X identity. Self-support is excluded.`
                       }
                     >
                       {entity.network_rank == null
                         ? '—'
-                        : `#${fmt(entity.network_rank)}`}
+                        : (
+                          <span className="ent-network-value">
+                            <span className="ent-network-rank-value">
+                              {fmt(entity.network_follow_count)}/{fmt(entity.network_source_total)}
+                            </span>
+                            <span className="ent-network-separator" aria-hidden="true">
+                              ·
+                            </span>
+                            <span className="ent-network-magnitude">
+                              #{fmt(entity.network_rank)}
+                            </span>
+                          </span>
+                        )}
                     </td>
                   )}
                   {showFollowerColumn && (

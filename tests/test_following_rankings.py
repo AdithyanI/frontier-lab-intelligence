@@ -47,6 +47,7 @@ def _snapshot(path, *, status="complete"):
         ("3", "5"),
         ("5", "3"),
         ("4", "1"),
+        ("1", "5"),
     ]
     edge_counts = {
         x_id: sum(1 for source_x_id, _ in edges if source_x_id == x_id)
@@ -171,6 +172,9 @@ def _registry(path):
     )
     _registry_identity(conn, x_id="10", handle="x", name="Known X")
     _registry_identity(conn, x_id="11", handle="y", name="Rejected Y", rejected=True)
+    _registry_identity(
+        conn, x_id="99", handle="zero_support", name="Zero Support"
+    )
     conn.commit()
     conn.close()
 
@@ -231,9 +235,11 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
     assert first["counts"] == {
         "eligible_source_accounts": 4,
         "eligible_source_entities": 3,
-        "eligible_edges": 13,
-        "eligible_entity_votes": 12,
+        "eligible_edges": 14,
+        "eligible_entity_votes": 13,
         "ranked_accounts": 10,
+        "ranked_registry_entities": 5,
+        "registry_entity_support_votes": 7,
         "active": 5,
         "rejected": 2,
         "unknown": 3,
@@ -243,10 +249,10 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
         for row in first["top"]
     ] == [
         ("x", 3, "active"),
+        ("alpha_alt", 2, "active"),
         ("y", 2, "rejected"),
         ("z", 2, "unknown"),
         ("alpha", 1, "active"),
-        ("alpha_alt", 1, "active"),
         ("beta", 1, "active"),
         ("charlie", 1, "active"),
         ("w", 1, "unknown"),
@@ -254,20 +260,32 @@ def test_overlap_is_deterministic_mapped_and_resumable(tmp_path):
         ("v", 0, "unknown"),
     ]
     assert [row["score_rank"] for row in first["top"]] == [
-        1, 2, 2, 3, 3, 3, 3, 3, 4, 4
+        1, 2, 2, 2, 3, 3, 3, 3, 4, 4
     ]
     with sqlite3.connect(analysis_db) as conn:
         assert conn.execute("SELECT COUNT(*) FROM analysis_context").fetchone()[0] == 1
         assert conn.execute("SELECT COUNT(*) FROM ranking_run").fetchone()[0] == 1
         assert conn.execute("SELECT COUNT(*) FROM ranking_result").fetchone()[0] == 10
+        entity_support = conn.execute(
+            """SELECT entity_id, support_rank, support_count, channel_count
+               FROM entity_support_result
+               ORDER BY support_rank, entity_id"""
+        ).fetchall()
+        assert entity_support == [
+            (5, 1, 3, 1),
+            (1, 2, 2, 2),
+            (2, 3, 1, 1),
+            (3, 3, 1, 1),
+            (7, 4, 0, 1),
+        ]
     with export_csv.open(newline="") as stream:
         rows = list(csv.DictReader(stream))
     assert [row["handle"] for row in rows] == [
-        "x", "y", "z", "alpha", "alpha_alt", "beta", "charlie", "w",
+        "x", "alpha_alt", "y", "z", "alpha", "beta", "charlie", "w",
         "private", "v"
     ]
     assert [row["handle"] for row in first["top_active"]] == [
-        "x", "alpha", "alpha_alt", "beta", "charlie"
+        "x", "alpha_alt", "alpha", "beta", "charlie"
     ]
     assert [row["handle"] for row in first["top_unknown"]] == ["z", "w", "v"]
     with export_unknown_csv.open(newline="") as stream:

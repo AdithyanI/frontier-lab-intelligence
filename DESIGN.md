@@ -118,9 +118,13 @@ Rules:
   reach** order. Each cell leads with the entity's ordinal among all active
   Registry entities and keeps the compact combined follower total as quieter
   scale evidence (`#24 · 3.3M`). Search, kind filters, and pagination only hide
-  rows; they never recompute this rank. The separate sortable Network rank is
-  the global entity-overlap position of the entity's best-ranked owned X
-  account. Neither ordinal is a new score, and the two scopes remain explicit.
+  rows; they never recompute this rank. The separate sortable **Network
+  support** column leads with `N / voter denominator` and keeps a quieter
+  tie-aware ordinal among active X-addressable Registry entities. Support is
+  the union of distinct active Registry entities following any represented X
+  account owned by the target entity; self-support is excluded. The global
+  account tiebreak position appears only in Ranking as candidate discovery.
+  Neither ordinal is a new score, and the scopes remain explicit.
   Both numeric headers are full-width, keyboard-accessible sort controls. These views hide channel handles to keep
   rows calm; every channel remains searchable
   and available in the detail card. Missing follower observations display as

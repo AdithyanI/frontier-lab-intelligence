@@ -318,7 +318,7 @@ original choice and are being retired in favor of the SPA.
 flowchart LR
     subgraph sources [Sources]
         XLISTS[X list memberships]
-        XFOLLOW[Registry following snapshot<br/>2.46M fresh edges]
+        XFOLLOW[Registry following snapshot<br/>2.83M immutable edges]
         XPOSTS[Stored X posts<br/>raw responses + normalized bundles]
         BLOGS[Lab blogs / RSS]
         ARXIV[arXiv]
@@ -490,18 +490,30 @@ snapshot contains 13,409 raw pages, 463,180 distinct target accounts, and
 `$27.81218`. The tracked manifest binds those facts to the local 2.0 GB database
 checksum.
 
+The 2026-07-14 incremental child freezes 2,564 stable-ID Registry sources,
+reuses 2,212 sources from that parent, and collects only the 352-source delta.
+It contains 15,470 raw pages, 557,363 target accounts, and 2,832,858 directed
+edges. Of 2,564 frozen accounts, 2,558 are complete, three missing, and three
+protected. Evidence retains its original July 11 or July 14 observation time;
+the child is not presented as a same-day crawl. Marginal profile/following work
+is estimated at `$4.37070`, while the `$32.06420` cumulative evidence estimate
+includes inherited rows.
+
 The first derived rankings are now live. `fli.following_rankings` materializes a
 snapshot- and Registry-checksummed active/rejected/unknown X-ID map in an
 ignored `analysis.db`, then ranks every discovered account by the number of
 distinct complete active Registry entities that follow it; multiple X channels
 owned by one organization contribute at most one vote. The command can read
 only the frozen snapshot edge table and an authorizer-limited set of Registry
-identity tables; it cannot read legacy `data/fli.db.graph_edges`. The first run
-reconciled 2,219 complete active source accounts, 2,197 voting entities,
-2,456,305 raw eligible edges, 2,456,084 deduplicated entity-target votes, and
-463,180 ranked accounts. Raw followers are display evidence, not an overlap
-input. Equal overlap counts share one dense score rank and use a separate
-deterministic display position.
+identity tables; it cannot read legacy `data/fli.db.graph_edges`. The current
+run reconciles 2,558 complete active source accounts, 2,521 voting entities,
+2,832,858 raw eligible edges, 2,831,995 deduplicated entity-target votes, and
+557,363 ranked accounts. It also materializes entity-union support for all
+2,527 active X-addressable Registry targets, including 38 zero-support targets;
+multiple target channels are unioned and self-support is excluded. Raw
+followers are display evidence, not an overlap input. Equal support counts
+share one dense score rank and use a separate deterministic account display
+position only in the global discovery view.
 
 An experimental 30-source personalized PageRank also runs over the same edge
 boundary and stores its direct comparison in the derived database. It
@@ -517,19 +529,23 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The Registry retains 2,831 classified entities: 2,434 active people, 361
+- The Registry retains 2,630 classified entities: 2,434 active people, 160
   active organizations, zero active unsure, and 36 reason-bearing rejections.
-  The 2,725 channels include official X, website, GitHub, and blog channels
+  The 2,718 channels include official X, website, GitHub, and blog channels
   consolidated into stable real-world organizations. The approved relevance
   manifest contains 689 exact one-X removals. The final organization pass
   applies Adi's temporary 10,000-follower floor; lower-reach organizations may
   be rediscovered later through trusted-follow PageRank evidence.
 - Official AI Engineer World's Fair 2026 and 2024 snapshots contribute 423
   unique X-addressable people. Canonical storage keeps one newest role, bio,
-  listed-company claim, and affiliation per person; repeated conference
-  history and non-X enrichment remain raw-only. Provider reconciliation leaves
-  410 active public identities and 13 explicit missing/suspended rejections.
-  Conference presence affects neither rank nor vote weight.
+  and listed-company label per person; an organization/affiliation is created
+  only when it resolves to an existing channel-backed entity or an official
+  conference website. The final boundary has 96 resolved conference
+  organizations and 186 affiliations; 195 channel-less labels were pruned as
+  Registry clutter. Repeated conference history and non-X enrichment remain
+  raw-only. Provider reconciliation leaves 410 active public identities and 13
+  explicit missing/suspended rejections. Conference presence affects neither
+  rank nor vote weight.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
   marker. The 1,853 accounts actually observed through Digg also carry one
   `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
@@ -570,13 +586,18 @@ Missing observations remain null and sort last. This is a public-reach proxy,
 not graph evidence or a canonical importance score.
 
 The Network workspace presents Ranking and Registry as related but distinct
-subviews. Registry may also sort on `network_rank`, a read-time projection of
-the latest immutable entity-overlap run: for an entity with multiple owned X
-accounts, the smallest global account position wins. Its supporting Registry
-source count and account handle travel with the row for explanation. This does
-not mutate Registry identity, combine follower reach into ranking, or create a
-new entity score; entities absent from the current ranking remain null and sort
-last.
+subviews. Registry may also sort on entity-level Network support materialized
+with the latest immutable entity-overlap run. The target is one real-world
+Registry entity: distinct complete active Registry entities following any X
+account mapped to that target count once, and self-support is excluded. The UI
+leads with `support_count / eligible_source_entity_count`, then shows a dense
+tie-aware ordinal among active X-addressable Registry entities. Snapshot date
+and denominator stay visible. Ranking alone retains the deterministic global
+account position for candidate discovery. This does not mutate Registry
+identity, combine public reach into support, or create an importance score;
+active identities with a stable X channel receive an explicit support row,
+including zero support. Identities without a stable X mapping remain null and
+sort last.
 
 ```mermaid
 erDiagram
@@ -714,12 +735,12 @@ erDiagram
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,725)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,718)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
     CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (11,599)"
-    ENTITIES ||--o{ ENTITY_SOURCE_FACTS : "evidenced facts (1,965)"
-    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "person role (419)"
-    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "organization affiliation (419)"
+    ENTITIES ||--o{ ENTITY_SOURCE_FACTS : "evidenced facts (1,763)"
+    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "person role (186)"
+    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "organization affiliation (186)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,300)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (1)"
@@ -732,9 +753,9 @@ erDiagram
 
 Table row counts: `raw_items` 1,599, `accounts` 2,600,
 `account_source_facts` 5,419, `graph_edges` 0, `labs` 10,
-`entities` 2,831, `channels` 2,725, `entity_channels` 2,725,
-`channel_observations` 11,599, `entity_source_facts` 1,965,
-`entity_affiliations` 419, `entity_kind_classification_runs` 10,
+`entities` 2,630, `channels` 2,718, `entity_channels` 2,718,
+`channel_observations` 11,599, `entity_source_facts` 1,763,
+`entity_affiliations` 186, `entity_kind_classification_runs` 10,
 `entity_kind_classifications` 2,300, `entity_kind_web_enrichments` 1,
 `entity_kind_classification_errors` 0, `entity_registry_rejections` 36, and
 `entity_merge_audit` 29, and `entity_override_audit` 1.
@@ -1027,8 +1048,8 @@ final score.
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.cited_insights` / `fli.cited_insight_runs` | minimal `insight-v1.1` model boundary, frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort, with checksum-bound parent reuse for unchanged stable-ID sources |
-| `fli.following_rankings` | derived entity-overlap baseline plus experimental personalized PageRank/comparison with deterministic runs and active/rejected/unknown mapping |
-| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; the Network workspace keeps Registry and Ranking as distinct current-state subviews and projects best-owned-account network rank into Registry at read time, while Feed/Event readers follow the explicit publication pointer and overlay current Registry curation; source in `frontend/` |
+| `fli.following_rankings` | deterministic account discovery ordering plus entity-union Network support (source and target both one entity/one vote, self excluded), with experimental personalized PageRank retained for comparison |
+| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; the Network workspace keeps Registry entity support and Ranking account discovery distinct, while Feed/Event readers share the newest completed analysis selection and overlay current Registry curation; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
