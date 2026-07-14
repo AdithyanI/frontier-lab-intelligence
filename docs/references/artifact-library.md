@@ -117,14 +117,18 @@ secret flags are deliberately absent.
 
 ## Operator inspection surface
 
-The always-on app exposes the catalog at `/artifacts`, backed by the read-only
-`/api/artifacts` projection. The initial surface is intentionally narrow: one
-chronological row per canonical artifact ordered by its latest source
-observation (never by mutable retrieval time), its fetch-oriented kind, the source
-observation that found it, and its current retrieval state. Expanding a row
-shows canonical and source URLs, first-seen time, retrieval method, snapshot
-size, and any current error. It does not rank, summarize, or classify artifact
-content; those are later cited-insight responsibilities.
+The always-on app exposes the catalog at `/artifacts`, backed by read-only
+`/api/artifacts/dates` and `/api/artifacts` projections. Its shared Feed-style
+seven-date navigator filters by the UTC publication day of the X source
+observation, never by retrieval time. Date counts are distinct canonical
+artifacts; an artifact appears on each day it was observed, and exact-day
+search matches every source observation for that artifact rather than only the
+representative latest one. Within a selected day, one chronological row per
+canonical artifact shows its fetch-oriented kind, representative source, and
+current retrieval state; bounded pagination keeps the surface fast. Expanding
+a row shows canonical and source URLs, first-seen time, retrieval method,
+snapshot size, and any current error. It does not rank, summarize, or classify
+artifact content; those are later cited-insight responsibilities.
 
 ## Artifact Store v1 evidence
 

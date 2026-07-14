@@ -267,6 +267,7 @@ reads first.
 | done | Reconcile the new artifact inspection boundary with the submission north star; decide the default ordering and the next end-to-end proof. | parent | [artifact library](../../references/artifact-library.md) |
 | done | Challenge the next-step plan against the case prompt, system status, milestones, and five-record oracle. | explorer | [oracle resume](resources/oracle-resume.md) |
 | done | Audit the live artifact catalog and index ordering for the smallest useful operator experience. | explorer | [artifact library](../../references/artifact-library.md) |
+| done | Add Feed-style Artifact navigation by the UTC publication date of the source post, with bounded search and pagination. | implementer | [artifact library](../../references/artifact-library.md) |
 | done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
 | todo | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle resume](resources/oracle-resume.md) |
 | todo | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
@@ -296,6 +297,16 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [ARTIFACT-SOURCE-DATE-NAVIGATION] Added the same seven-date
+  navigator used by Feed to the Artifact index, keyed strictly by the UTC
+  publication date of the X source observation rather than retrieval time.
+  The API exposes distinct per-day artifact counts, exact-day search and
+  bounded pagination; one canonical artifact may appear on every day it was
+  independently observed. Feed and Artifacts now share one navigator
+  component. Live browser proof selected a prior day and loaded 60 matching
+  rows; a final audit also fixed search across non-latest same-day source
+  observations.
 
 - 2026-07-14: [EXTRACTION-CONTRACT-DISTILLATION] Audited the post-artifact
   boundary before adding extraction code. The previous brief had leaked three

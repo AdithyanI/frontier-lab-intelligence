@@ -242,11 +242,14 @@ forms, robots-denied pages, authentication, and paywalls remain deferred. The
 observations; its 30-artifact cohort produced 19 native clean texts, then the
 Reader fallback recovered all three OpenAI HTTP-403 pages. Broad crawling,
 RSS/GitHub adapters and cited-insight generation remain deferred. The web
-layer now exposes the live catalog as a read-only `/api/artifacts` projection
-and a minimal `/artifacts` index: latest source observation first (independent
-of mutable retrieval time), one row per
-canonical artifact, with retrieval state and expandable provenance. This is an
-operator inspection surface, not a second Feed or an insight product.
+layer now exposes the live catalog through read-only `/api/artifacts/dates`
+and `/api/artifacts` projections plus a minimal `/artifacts` index. The shared
+Feed-style navigator selects the UTC publication day of the X observation
+(never mutable retrieval time); within a day, rows are newest source
+observation first, one row per canonical artifact, with retrieval state and
+expandable provenance. The same artifact may appear on multiple days when the
+network independently links it again. This is an operator inspection surface,
+not a second Feed or an insight product.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
