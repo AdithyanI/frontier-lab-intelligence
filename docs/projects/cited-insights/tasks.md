@@ -371,3 +371,9 @@ reads first.
   of Registry support, and Follow is now the single disclosure for exact quote,
   reply, continuation, retweet, and linked-post evidence. Backend amplifier
   evidence remains unchanged for scoring and audit logic.
+- 2026-07-14: [ARCHITECTURE-STORY-UPDATED] Extended the lead Architecture
+  diagram without adding another competing section. It now distinguishes the
+  live evidence path (Registry → X evidence → exact envelopes → Feed), the live
+  keep/drop routing gate, the live canonical artifact catalog, and the planned
+  cited-writing and delivery boundary. Registry intake, storage, and scoring
+  diagrams remain the deeper explanations below it.
