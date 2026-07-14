@@ -62,6 +62,18 @@ CREATE TABLE IF NOT EXISTS x_post (
 CREATE INDEX IF NOT EXISTS idx_x_post_author_time
     ON x_post (author_handle, published_at DESC, post_id);
 
+CREATE TABLE IF NOT EXISTS x_post_observation (
+    provider TEXT NOT NULL,
+    post_id TEXT NOT NULL,
+    observed_at TEXT NOT NULL,
+    raw_sha256 TEXT NOT NULL,
+    raw_json TEXT NOT NULL,
+    PRIMARY KEY (provider, post_id, observed_at, raw_sha256)
+);
+
+CREATE INDEX IF NOT EXISTS idx_x_post_observation_first
+    ON x_post_observation (provider, post_id, observed_at, raw_sha256);
+
 CREATE TABLE IF NOT EXISTS post_bundle (
     bundle_id TEXT PRIMARY KEY,
     provider TEXT NOT NULL,
@@ -129,6 +141,22 @@ def connect(path: Path | str = DEFAULT_DB_PATH) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(SCHEMA)
+    # Preserve the normalized value that predates this migration as the first
+    # immutable observation before any later provider refresh updates x_post.
+    with conn:
+        conn.execute(
+            """INSERT OR IGNORE INTO x_post_observation
+               (provider, post_id, observed_at, raw_sha256, raw_json)
+               SELECT post.provider, post.post_id, post.first_observed_at,
+                      post.raw_sha256, post.raw_json
+               FROM x_post post
+               WHERE NOT EXISTS (
+                   SELECT 1
+                   FROM x_post_observation observed
+                   WHERE observed.provider = post.provider
+                     AND observed.post_id = post.post_id
+               )"""
+        )
     return conn
 
 
@@ -268,6 +296,18 @@ class TwitterContentClient(sources.TwitterApiIoClient):
                     raw_json,
                     observed_at,
                     observed_at,
+                ),
+            )
+            self.db.execute(
+                """INSERT OR IGNORE INTO x_post_observation
+                   (provider, post_id, observed_at, raw_sha256, raw_json)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (
+                    sources.PROVIDER,
+                    post_id,
+                    observed_at,
+                    _sha256(raw_json),
+                    raw_json,
                 ),
             )
 

@@ -83,10 +83,28 @@ def _triage_payload_cached(
         return {"available": False, "run": None, "items": {}}
     conn = _open_readonly(path)
     meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+    columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(triage_item)").fetchall()
+    }
+    snapshot_expr = (
+        "snapshot_content_sha256"
+        if "snapshot_content_sha256" in columns
+        else "NULL"
+    )
+    reused_run_expr = (
+        "reused_from_run_id" if "reused_from_run_id" in columns else "NULL"
+    )
+    reused_event_expr = (
+        "reused_from_event_id" if "reused_from_event_id" in columns else "NULL"
+    )
     rows = conn.execute(
-        """SELECT event_id, decision, reason
-           FROM triage_item
-           WHERE status = 'complete'"""
+        f"""SELECT event_id, decision, reason, input_sha256,
+                   {snapshot_expr} AS snapshot_content_sha256,
+                   {reused_run_expr} AS reused_from_run_id,
+                   {reused_event_expr} AS reused_from_event_id
+            FROM triage_item
+            WHERE status = 'complete'"""
     ).fetchall()
     conn.close()
     if meta is None:
@@ -95,6 +113,22 @@ def _triage_payload_cached(
         str(row["event_id"]): {
             "decision": str(row["decision"]),
             "reason": str(row["reason"]),
+            "input_sha256": str(row["input_sha256"]),
+            "snapshot_content_sha256": (
+                str(row["snapshot_content_sha256"])
+                if row["snapshot_content_sha256"] is not None
+                else None
+            ),
+            "reused_from_run_id": (
+                str(row["reused_from_run_id"])
+                if row["reused_from_run_id"] is not None
+                else None
+            ),
+            "reused_from_event_id": (
+                str(row["reused_from_event_id"])
+                if row["reused_from_event_id"] is not None
+                else None
+            ),
         }
         for row in rows
     }

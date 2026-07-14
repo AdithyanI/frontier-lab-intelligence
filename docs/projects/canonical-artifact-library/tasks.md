@@ -44,9 +44,9 @@ provenance, and later source adapters would require a replacement schema.
 ## Context / Constraints
 
 - Date started: 2026-07-13.
-- This is a planning checkpoint only. Runtime implementation must not begin
-  until the active `temporal-event-projection` project has corrected recursive
-  quote relations and frozen trustworthy event snapshots.
+- The prerequisite `temporal-event-projection` project completed and archived
+  on 2026-07-14. Its corrected recursive relations and snapshot-bound kept
+  envelopes are now the trusted import boundary for this project.
 - Raw X evidence remains immutable in `data/raw/x/x-content.db`.
 - Ordinary X status URLs already live on `x_post.url`; the derived Feed also
   carries them on `feed_post.url`, and triage runs freeze the root URL. These
@@ -140,8 +140,6 @@ provenance, and later source adapters would require a replacement schema.
 
 ## Open Questions / Blockers
 
-- Blocked on the corrected temporal event projection before selecting and
-  importing the first kept-envelope oracle.
 - During M1, choose the exact content-addressed raw snapshot path after checking
   repository data-size conventions. This choice does not change the logical
   schema.
@@ -151,12 +149,12 @@ provenance, and later source adapters would require a replacement schema.
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Freeze the planning boundary: X-first now, source-aware later, with source post URLs separated from artifact URLs. | parent | [data-model.md](resources/data-model.md) |
-| blocked | Audit representative outbound URLs and freeze canonicalization fixtures after temporal-event rebuilding is complete. | parent | [data-model.md](resources/data-model.md) |
+| todo | Audit representative outbound URLs from corrected kept envelopes and freeze canonicalization fixtures. | parent | [data-model.md](resources/data-model.md) |
 
 ## Backlog / Remaining Work
 
-- [ ] Promote M1 only after `temporal-event-projection` passes its adversarial
-  review and the corrected kept-envelope inputs are available.
+- [x] Accept the archived `temporal-event-projection` adversarial proof and its
+  corrected kept-envelope inputs as the M1 source boundary.
 - [ ] Implement schema migrations, catalog queries, and deterministic import.
 - [ ] Implement bounded fetch/snapshot/replay behavior.
 - [ ] Connect the five-record cited-insights oracle.
@@ -183,3 +181,7 @@ provenance, and later source adapters would require a replacement schema.
 - 2026-07-13: [DONE] Created the project and froze an intentionally narrow
   X-first/source-aware boundary; no runtime code, database, network fetch, RSS,
   or GitHub ingestion was implemented.
+- 2026-07-14: [UNBLOCKED] The temporal projection repair completed with nine
+  deterministic days, zero structural audit failures, and snapshot-bound
+  triage. Representative URL fixture work can now begin from corrected kept
+  envelopes.

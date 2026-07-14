@@ -219,8 +219,10 @@ export interface EventEvidence {
   url: string
   post_type: 'original' | 'quote' | 'retweet' | 'reply'
   observed_directly: boolean
+  day: string
+  is_new_on_day: boolean
   relationship: 'reply' | 'quote' | 'retweet' | 'related'
-  relation_type: 'reply_parent' | 'same_conversation' | 'quote' | 'retweet' | null
+  relation_type: 'reply_parent' | 'quote' | 'retweet' | null
   target_post_id: string | null
   parent_post_id: string | null
   parent_missing: boolean
@@ -230,11 +232,21 @@ export interface EventEvidence {
 
 export interface SignalEvent {
   event_id: string
+  canonical_root_post_id: string
+  presentation_root_post_id: string
+  snapshot_cutoff: string
+  snapshot_content_sha256: string
+  first_activity_day: string
+  previous_activity_day: string | null
+  is_continuation: boolean
   is_grouped: boolean
   root: FeedItem
   why_grouped: string[]
-  anchor_types: Array<'same_target' | 'same_conversation'>
+  anchor_types: Array<'same_target' | 'reply_parent'>
   member_count: number
+  lifetime_member_count: number
+  day_member_count: number
+  prior_context_count: number
   link_count: number
   author_count: number
   registry_account_count: number

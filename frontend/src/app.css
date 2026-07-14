@@ -1427,6 +1427,21 @@ td.num {
   align-items: baseline;
 }
 
+.event-continuation-note {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 14px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 9.5px;
+}
+
+.event-continuation-note span:first-child { color: var(--blue-ink); }
+
 .event-triage {
   margin-top: 16px;
   padding-top: 12px;
@@ -1496,6 +1511,31 @@ td.num {
 .event-thread {
   border-top: 1px solid var(--border);
 }
+
+.event-thread-section {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.event-prior-context {
+  border-top: 1px solid var(--border);
+}
+
+.event-prior-context > summary {
+  padding: 12px 0;
+  color: var(--muted);
+  font-size: 9.5px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.event-prior-context > summary::-webkit-details-marker { display: none; }
+.event-prior-context > summary:hover { color: var(--blue-ink); }
+.event-prior-context[open] > summary { border-bottom: 1px solid var(--border); }
 
 .event-relationship {
   --thread-depth: 1;

@@ -281,15 +281,18 @@ function RetweetTrace({ items }: { items: EventEvidence[] }) {
 function EventEvidenceDetails({
   item,
   relationshipSummary,
-  narrative,
-  retweets,
 }: {
   item: SignalEvent
   relationshipSummary: string[]
-  narrative: EventEvidence[]
-  retweets: EventEvidence[]
 }) {
   const [open, setOpen] = useState(false)
+  const narrative = item.evidence.filter((evidence) => evidence.relationship !== 'retweet')
+  const retweets = item.evidence.filter((evidence) => evidence.relationship === 'retweet')
+  const currentNarrative = narrative.filter((evidence) => evidence.is_new_on_day)
+  const priorNarrative = narrative.filter((evidence) => !evidence.is_new_on_day)
+  const currentRetweets = retweets.filter((evidence) => evidence.is_new_on_day)
+  const priorRetweets = retweets.filter((evidence) => !evidence.is_new_on_day)
+  const priorCount = priorNarrative.length + priorRetweets.length
   return (
     <details
       className="event-evidence"
@@ -305,10 +308,26 @@ function EventEvidenceDetails({
       </summary>
       {open && (
         <div className="event-thread">
-          {narrative.map((evidence) => (
+          {item.is_continuation && (
+            <div className="event-thread-section mono">Added on this day</div>
+          )}
+          {currentNarrative.map((evidence) => (
             <RelationshipPost key={evidence.post_id} item={evidence} />
           ))}
-          <RetweetTrace items={retweets} />
+          <RetweetTrace items={currentRetweets} />
+          {priorCount > 0 && (
+            <details className="event-prior-context">
+              <summary className="mono">
+                Show earlier context · {priorCount} {priorCount === 1 ? 'post' : 'posts'}
+              </summary>
+              <div>
+                {priorNarrative.map((evidence) => (
+                  <RelationshipPost key={evidence.post_id} item={evidence} />
+                ))}
+                <RetweetTrace items={priorRetweets} />
+              </div>
+            </details>
+          )}
         </div>
       )}
     </details>
@@ -326,9 +345,6 @@ function EventRow({ item }: { item: SignalEvent }) {
   )
   const related = item.evidence.filter(
     (evidence) => evidence.relationship === 'related',
-  )
-  const narrative = item.evidence.filter(
-    (evidence) => evidence.relationship !== 'retweet',
   )
   const c = root.score_components
   const rationale = [
@@ -388,6 +404,17 @@ function EventRow({ item }: { item: SignalEvent }) {
           </div>
         )}
 
+        {item.is_continuation && item.previous_activity_day && (
+          <div className="event-continuation-note mono">
+            <span>
+              Continued from {shortDate.format(new Date(`${item.previous_activity_day}T12:00:00Z`))}
+            </span>
+            <span>
+              {item.day_member_count} new {item.day_member_count === 1 ? 'post' : 'posts'} today
+            </span>
+          </div>
+        )}
+
         <TriageNote item={item} />
 
         {!item.is_grouped && rationale.length > 0 && (
@@ -403,8 +430,6 @@ function EventRow({ item }: { item: SignalEvent }) {
           <EventEvidenceDetails
             item={item}
             relationshipSummary={relationshipSummary}
-            narrative={narrative}
-            retweets={retweets}
           />
         )}
 

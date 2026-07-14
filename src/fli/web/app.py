@@ -255,6 +255,7 @@ def events(
     sort: str = Query("attention", pattern="^(attention|recent|engagement)$"),
     q: str = Query("", max_length=200),
     triage: str = Query("all", pattern="^(all|keep|drop|not_evaluated)$"),
+    projection: str = Query("day", pattern="^(day|week)$"),
     limit: int = Query(40, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ) -> JSONResponse:
@@ -266,6 +267,7 @@ def events(
             sort=sort,
             query=q,
             triage_filter=triage,
+            projection=projection,
             limit=limit,
             offset=offset,
         )

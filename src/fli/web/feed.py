@@ -169,7 +169,8 @@ def _candidate_rows(
                  ON direct.run_id = rp.run_id
                 AND direct.provider = rp.provider AND direct.post_id = rp.post_id
                WHERE rp.run_id = ? AND rp.role = 'direct'
-                 AND direct.day = ? AND direct.post_type != 'retweet'
+                 AND direct.day = ? AND direct.first_discovered_day <= ?
+                 AND direct.post_type != 'retweet'
                UNION
                SELECT relation.provider, relation.target_post_id
                FROM feed_relation relation
@@ -177,7 +178,13 @@ def _candidate_rows(
                  ON source.run_id = relation.run_id
                 AND source.provider = relation.provider
                 AND source.post_id = relation.source_post_id
+               JOIN feed_run_post source_membership
+                 ON source_membership.run_id = relation.run_id
+                AND source_membership.provider = relation.provider
+                AND source_membership.post_id = relation.source_post_id
+                AND source_membership.role = 'direct'
                WHERE relation.run_id = ? AND source.day = ?
+                 AND relation.discovered_day <= ?
            )
            SELECT post.*,
                   EXISTS (
@@ -189,7 +196,7 @@ def _candidate_rows(
            JOIN feed_post post
              ON post.run_id = ? AND post.provider = candidate.provider
             AND post.post_id = candidate.post_id""",
-        (run_id, day, run_id, day, run_id, run_id),
+        (run_id, day, day, run_id, day, day, run_id, run_id),
     ).fetchall()
 
 
@@ -205,12 +212,19 @@ def _relation_rows(
              ON source.run_id = relation.run_id
             AND source.provider = relation.provider
             AND source.post_id = relation.source_post_id
+           JOIN feed_run_post source_membership
+             ON source_membership.run_id = relation.run_id
+            AND source_membership.provider = relation.provider
+            AND source_membership.post_id = relation.source_post_id
+            AND source_membership.role = 'direct'
            JOIN feed_post target
              ON target.run_id = relation.run_id
             AND target.provider = relation.provider
             AND target.post_id = relation.target_post_id
-           WHERE relation.run_id = ? AND source.day = ?""",
-        (run_id, day),
+           WHERE relation.run_id = ? AND source.day = ?
+             AND relation.discovered_day <= ?
+             AND target.first_discovered_day <= ?""",
+        (run_id, day, day, day),
     ).fetchall()
 
 
@@ -261,14 +275,18 @@ def _iso_day(value: str) -> str:
     return date.fromisoformat(value).isoformat()
 
 
-def dates_payload() -> dict[str, Any]:
+def dates_payload(*, run_id: str | None = None) -> dict[str, Any]:
     if not DEFAULT_FEED_DB.is_file():
         return {
             "available": False,
             "reason": "No Feed store found. Run `fli signal-feed refresh` first.",
         }
     conn = _open_readonly(DEFAULT_FEED_DB)
-    run = _latest_run(conn)
+    run = (
+        conn.execute("SELECT * FROM feed_run WHERE run_id = ?", (run_id,)).fetchone()
+        if run_id
+        else _latest_run(conn)
+    )
     if run is None:
         conn.close()
         return {"available": False, "reason": "Feed store has no materialized run."}
@@ -289,7 +307,7 @@ def dates_payload() -> dict[str, Any]:
     rows = []
     for day in days:
         relations = _relation_rows(conn, run["run_id"], day)
-        amplifier_entities: dict[str, set[int]] = defaultdict(set)
+        amplifier_entities: dict[tuple[str, str], set[int]] = defaultdict(set)
         for relation in relations:
             account = _registry_account(
                 relation["source_author_x_id"],
@@ -298,7 +316,9 @@ def dates_payload() -> dict[str, Any]:
                 by_x_id,
             )
             if account and account["registry_state"] == "active":
-                amplifier_entities[relation["target_post_id"]].add(
+                amplifier_entities[
+                    (str(relation["provider"]), str(relation["target_post_id"]))
+                ].add(
                     int(account["entity_id"])
                 )
         item_count = 0
@@ -319,7 +339,9 @@ def dates_payload() -> dict[str, Any]:
             author_id = int(author["entity_id"]) if author else None
             active_amplifiers = {
                 entity_id
-                for entity_id in amplifier_entities.get(candidate["post_id"], set())
+                for entity_id in amplifier_entities.get(
+                    (str(candidate["provider"]), str(candidate["post_id"])), set()
+                )
                 if entity_id != author_id
             }
             if direct_active or active_amplifiers:
@@ -344,12 +366,17 @@ def feed_payload(
     query: str,
     limit: int,
     offset: int,
+    run_id: str | None = None,
 ) -> dict[str, Any]:
     requested_day = _iso_day(day)
     if not DEFAULT_FEED_DB.is_file():
         return {"available": False, "reason": "No Feed store found."}
     conn = _open_readonly(DEFAULT_FEED_DB)
-    run = _latest_run(conn)
+    run = (
+        conn.execute("SELECT * FROM feed_run WHERE run_id = ?", (run_id,)).fetchone()
+        if run_id
+        else _latest_run(conn)
+    )
     if run is None:
         conn.close()
         return {"available": False, "reason": "Feed store has no materialized run."}
@@ -367,8 +394,8 @@ def feed_payload(
             active_entity_support[int(account["entity_id"])], support.get(x_id, 0)
         )
 
-    amplifiers: dict[str, dict[int, dict[str, Any]]] = defaultdict(dict)
-    contexts: dict[str, dict[str, Any]] = {}
+    amplifiers: dict[tuple[str, str], dict[int, dict[str, Any]]] = defaultdict(dict)
+    contexts: dict[tuple[str, str], dict[str, Any]] = {}
     for relation in relations:
         account = _registry_account(
             relation["source_author_x_id"],
@@ -378,7 +405,11 @@ def feed_payload(
         )
         if account and account["registry_state"] == "active":
             entity_id = int(account["entity_id"])
-            existing = amplifiers[relation["target_post_id"]].get(entity_id)
+            target_key = (
+                str(relation["provider"]),
+                str(relation["target_post_id"]),
+            )
+            existing = amplifiers[target_key].get(entity_id)
             candidate = {
                 "entity_id": entity_id,
                 "entity_name": account["entity_name"],
@@ -389,9 +420,11 @@ def feed_payload(
                 "source_url": relation["source_url"],
             }
             if existing is None or candidate["relation_type"] == "quote":
-                amplifiers[relation["target_post_id"]][entity_id] = candidate
+                amplifiers[target_key][entity_id] = candidate
         if relation["relation_type"] == "quote":
-            contexts[relation["source_post_id"]] = {
+            contexts[
+                (str(relation["provider"]), str(relation["source_post_id"]))
+            ] = {
                 "target_post_id": relation["target_post_id"],
                 "target_handle": relation["target_handle"],
             }
@@ -408,10 +441,11 @@ def feed_payload(
             and author_account
             and author_account["registry_state"] == "active"
         )
+        candidate_key = (str(row["provider"]), str(row["post_id"]))
         amp_values = sorted(
             (
                 amplifier
-                for entity_id, amplifier in amplifiers.get(row["post_id"], {}).items()
+                for entity_id, amplifier in amplifiers.get(candidate_key, {}).items()
                 if not author_account or entity_id != int(author_account["entity_id"])
             ),
             key=lambda item: (-item["network_support"], item["entity_name"]),
@@ -421,7 +455,9 @@ def feed_payload(
         author_support = support.get(str(row["author_x_id"] or ""), 0)
         items.append(
             {
+                "provider": row["provider"],
                 "post_id": row["post_id"],
+                "raw_sha256": row["raw_sha256"],
                 "author": {
                     "x_id": row["author_x_id"],
                     "handle": row["author_handle"],
@@ -435,7 +471,7 @@ def feed_payload(
                 "url": row["url"],
                 "post_type": row["post_type"],
                 "observed_directly": direct_active,
-                "context": contexts.get(row["post_id"]),
+                "context": contexts.get(candidate_key),
                 "amplifiers": amp_values,
                 "metrics": {
                     "likes": row["like_count"],

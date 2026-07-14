@@ -91,22 +91,34 @@ searching; the audit still rejects any response with no observed search action.
 
 Recent X content is local-first and queryable rather than a transient API
 bundle. `data/raw/x/x-content.db` preserves exact successful TwitterAPI.io JSON
-responses, normalizes every observed post into `x_post`, and records the ordered
-post membership of each `post_bundle`. The combined evaluator stores the bundle
-ID and evidence hash beside its result, so later analysis can query posts by
-account or time while still reconstructing the exact 20-post model input.
+responses, normalizes the latest known value of every observed post into
+`x_post`, and appends every distinct provider observation to the immutable
+`x_post_observation` ledger. The first normalized value was backfilled as an
+observation before later refreshes could update `x_post`. Ordered
+`post_bundle` membership still reconstructs an exact 20-post model input, while
+date-complete Feed rebuilds select immutable observations rather than mutable
+latest rows.
 `fli.db` remains the compact tracked identity/channel Registry; the larger,
 changing X-content database stays ignored and can later move to object storage
 or Parquet without changing bundle identity.
 
 The product-facing Feed is a separate, rebuildable read model over that raw
-evidence. `fli.signal_feed` materializes complete UTC calendar days into
-`data/derived/signal-feed/feed.db`: normalized direct posts, embedded
-quote/retweet targets, run membership, and explicit amplification relations.
-Pure retweet wrappers collapse into their referenced target; quote posts remain
-authored evidence and also point at the quoted target. A run pins the calendar
-range and an ordered fingerprint of every selected raw post hash. Re-running an
-unchanged range reuses the same run ID.
+evidence. `fli.signal_feed` materializes complete UTC calendar days under the
+`signal-feed-v8` contract into `data/derived/signal-feed/feed.db`. Starting from
+the selected top-level observations, it recursively follows every embedded
+quote/retweet payload it can render, preserves the exact immutable `raw_json`
+and hash of every direct or embedded post in the Feed snapshot, and records the
+full relation closure. Every post and relation also records when, and through
+which direct wrapper, it first became observable. A later rich wrapper can add
+new immutable history without leaking its embedded content or edges into an
+earlier daily cutoff. Provider-declared target IDs with no captured payload
+remain opaque `feed_anchor` rows instead of being discarded; multiple wrappers
+can therefore meet at a shared missing target without inventing text or an
+author. Pure retweet wrappers collapse into their referenced target; quote
+posts remain authored evidence and also point at the quoted target. A run pins
+the UTC range, selection contract, and ordered fingerprint of every selected
+observation. Re-running unchanged evidence reuses the same content-addressed
+run ID.
 
 `fli.web.feed` deliberately joins the current Registry at read time rather than
 copying curation state into the derived database. Rejected authors disappear
@@ -123,15 +135,38 @@ log-scaled. This avoids multiplying amplifier prominence into the same signal
 while keeping every input visible for later evaluation. The same API also exposes
 chronological and public-engagement orderings.
 
-`fli.signal_events` is a separate content-addressed projection over the frozen
-Feed run. `exact-structural-v1` joins only provider-declared quote/retweet
-targets, reply parents, and exact conversation IDs. The Event store persists
-only multi-post groups and their source/target links. At read time,
-`fli.web.events` overlays those groups on the complete visible Feed: unconsumed
-posts become one-member envelopes, broken groups degrade to singletons after a
-Registry rejection, and the root is removed from the related evidence list.
-This preserves the immutable post ledger without manufacturing stored events
-for every singleton.
+`fli.signal_events` is a separate content-addressed projection over one frozen
+Feed run. The `signal-events-v3` / `exact-structural-v5-provider-edges` contract
+joins only provider-declared quote/retweet targets and reply parents. A shared
+conversation ID is not itself a grouping edge. Renderable posts and opaque
+provider anchors participate in
+the same structural component, so wrappers around an uncaptured original still
+form one envelope. Canonical event IDs derive from a provider-qualified terminal
+post or opaque provider target—not the selected presentation root—so
+they remain stable across rebuilds of the same structural evidence. The Event
+store persists the multi-post components, members, links, anchors, and per-day
+membership. `signal_publication` is the single explicit pointer to the validated
+Event run and matching Feed run; readers never infer "live" from whichever run
+was created most recently.
+
+`fli.web.events` turns that published structure into cutoff-correct daily
+projections. A selected day includes only evidence both published and first
+disclosed through that UTC cutoff; its visible links obey the same boundary.
+A continuing event keeps its stable identity and cumulative prior
+context, while `day_member_count`, `prior_context_count`, `is_new_on_day`, and
+`previous_activity_day` distinguish that day's delta from history. The date
+strip reports envelope counts produced by this projection, not raw evidence-post
+counts. Registry curation remains dynamic: rejected renderable posts are
+removed, the surviving graph is re-componentized, rejected wrappers cannot
+bridge otherwise separate components, and opaque provider anchors continue to
+connect legitimate survivors. Unconsumed posts remain one-member envelopes.
+
+The weekly projection rolls the same daily revisions through a seven-day
+window. When a later exact relationship merges components that were separate
+earlier in the week, it supersedes every overlapping earlier state by
+provider-qualified visible membership. This retains one cumulative envelope,
+its active-day list, and peak daily attention/engagement without double-counting
+the same post or retaining a superseded event revision.
 
 The React `/feed` surface is one evidence browser rather than separate post,
 group, or lane modes. It offers complete-day navigation, search, the three
@@ -165,7 +200,12 @@ source are available; it is deliberately absent from this routing gate.
 
 The Feed exposes these completed decisions as an audit projection, not as a
 replacement ranking. `fli.web.triage` selects the newest fully completed run
-for the requested UTC day and joins it to envelopes by stable `event_id`.
+for the requested UTC day. A decision is displayed only when both its stable
+`event_id` and `snapshot_content_sha256` match the currently projected
+envelope; a decision for an older or differently connected snapshot cannot
+leak onto new evidence. Completed work is reusable only when the event ID,
+snapshot hash, and exact rendered-input hash all match, so repaired grouping
+reuses unchanged envelopes without reusing stale judgments.
 Attention, recency, and engagement still sort the same evidence independently;
 `keep`, `drop`, and `not evaluated` are separate filters with counts computed
 before pagination. The projection reads the run's existing
@@ -219,19 +259,23 @@ flowchart LR
     SCO[Scoring<br/>dimensions + validation]
     DEL[Delivery<br/>digests · alerts]
     UI[Web UI<br/>FastAPI + React SPA]
-    FEED[Evidence Feed<br/>exact envelopes · Registry attention · dates]
+    OBS[(Immutable X observations<br/>provider payload history)]
+    FEED[Feed v8<br/>posts · disclosure-dated relation closure · opaque anchors]
+    EVENTS[Events v3<br/>stable exact envelopes · cutoff projections]
+    PUB[Published read model<br/>explicit validated run pointer]
+    READ[Registry-aware projections<br/>daily delta · weekly dedupe · triage]
 
     XLISTS --> REG
     XFOLLOW --> REG
-    XPOSTS --> FEED
-    REG -->|current active/rejected state| FEED
+    XPOSTS --> OBS --> FEED --> EVENTS --> PUB --> READ
+    REG -->|current active/rejected state| READ
     REG -->|who to watch| ING
     BLOGS & ARXIV & GH --> ING
     ING --> EXT
     EXT --> SCO
     SCO --> DEL
     REG -.-> UI
-    FEED -.-> UI
+    READ -.-> UI
     SCO -.-> UI
     DEL -.-> UI
     ING -.->|discovered names| REG
@@ -293,8 +337,9 @@ data/following/cohorts/*.json       # frozen broad collection membership
 data/raw/following/*/snapshot.db    # ignored local raw pages + fresh edges
 data/raw/x/x-content.db             # ignored raw X responses + normalized posts/bundles
 data/derived/following/*/analysis.db # ignored recomputable rankings + identity map
-data/derived/signal-feed/feed.db     # ignored versioned Feed posts + relations
-data/derived/signal-events/events.db # ignored exact structural event projection
+data/derived/signal-feed/feed.db     # ignored signal-feed-v8 snapshots + discovery-cutoff relation closure
+data/derived/signal-events/events.db # ignored signal-events-v3 projection + live pointer
+data/derived/x-daily-collection.db   # ignored frozen-cohort collection manifests
 docs/references/digg-ranking-baseline.md
 ```
 
@@ -311,8 +356,11 @@ fli following-snapshot collect --snapshot-db <path> --handle <x-handle>
 fli following-snapshot collect --snapshot-db <path> --all --profiles-only
 fli following-snapshot collect --snapshot-db <path> --all --workers 20
 fli following-ranking overlap --snapshot-db <path> --registry-db data/fli.db
+fli x-daily-collection plan --start-day YYYY-MM-DD --end-day YYYY-MM-DD --no-input --json
+fli x-daily-collection execute --start-day YYYY-MM-DD --end-day YYYY-MM-DD --no-input --json
+fli x-daily-collection status --run-id <id> --no-input --json
 fli signal-feed refresh --days 7 [--through YYYY-MM-DD]
-fli signal-events refresh
+fli signal-events refresh --publish
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
@@ -835,9 +883,15 @@ final score.
 | `fli.labs` | internal curated source seed (10 historical rows); seeds official channels but does not define a public Registry kind/subtype |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io profile, timeline, X-list, and single-source outgoing-follow adapter; provenance only, no classification |
+| `fli.x_content` | immutable raw provider responses and `x_post_observation` history, plus mutable latest-post convenience rows and exact post bundles |
+| `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
+| `fli.signal_feed` | content-addressed `signal-feed-v8` snapshots with recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
+| `fli.signal_events` | `signal-events-v3` exact structural components with provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
+| `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts |
+| `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
 | `fli.following_rankings` | derived entity-overlap baseline plus experimental personalized PageRank/comparison with deterministic runs and active/rejected/unknown mapping |
-| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/rankings/followers/{x_id}`) + built SPA host; Registry is server-paged, reach-sorted, searchable by identity fields, and exposes people, organizations, unsure results, rejections, and classifier reasons; the Ranking tab renders the derived cohort-trust orbit read-only from `analysis.db` + the frozen snapshot; source in `frontend/` |
+| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; Registry and Ranking remain current-state views while Feed/Event readers follow the explicit publication pointer and overlay current Registry curation; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |

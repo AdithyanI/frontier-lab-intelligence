@@ -95,7 +95,7 @@ def test_exact_events_connect_partial_reply_to_present_parent(tmp_path):
     conn = signal_events.connect(events_db)
     assert {
         row[0] for row in conn.execute("SELECT DISTINCT anchor_type FROM event_anchor")
-    } == {"reply_parent", "same_conversation", "same_target"}
+    } == {"reply_parent", "same_target"}
     assert {
         row[0] for row in conn.execute("SELECT post_id FROM event_member")
     } == {"10", "11", "12"}
@@ -138,3 +138,268 @@ def test_exact_events_do_not_group_shared_urls(tmp_path):
     assert result["cluster_count"] == 0
     assert result["member_count"] == 0
     assert result["link_count"] == 0
+
+
+def test_exact_events_use_stable_canonical_root_for_nested_quote_chain(tmp_path):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    root = _tweet("100", "openai", "2026-07-10T08:00:00Z", "Launch")
+    middle = _tweet(
+        "101",
+        "gdb",
+        "2026-07-10T09:00:00Z",
+        "This is good",
+        relation="quote",
+        target=root,
+    )
+    wrapper = _tweet(
+        "102",
+        "benhylak",
+        "2026-07-11T10:00:00Z",
+        "It is great",
+        relation="quote",
+        target=middle,
+    )
+    with client.db:
+        for handle, tweet in (("gdb", middle), ("benhylak", wrapper)):
+            client._store_posts(
+                url=(
+                    "https://api.twitterapi.io/twitter/user/last_tweets"
+                    f"?userName={handle}&includeReplies=false"
+                ),
+                payload={"data": {"tweets": [tweet]}},
+                observed_at="2026-07-12T00:00:00+00:00",
+            )
+    client.close()
+
+    one_day_feed = signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 10), days=1
+    )
+    one_day = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=one_day_feed["run_id"]
+    )
+    two_day_feed = signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 11), days=2
+    )
+    two_day = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=two_day_feed["run_id"]
+    )
+
+    conn = signal_events.connect(events_db)
+    one = conn.execute(
+        """SELECT event_id, representative_post_id FROM event_cluster
+           WHERE run_id = ?""",
+        (one_day["run_id"],),
+    ).fetchone()
+    two = conn.execute(
+        """SELECT event_id, representative_post_id, member_count
+           FROM event_cluster WHERE run_id = ?""",
+        (two_day["run_id"],),
+    ).fetchone()
+    assert one["event_id"] == two["event_id"]
+    assert one["representative_post_id"] == "100"
+    assert two["representative_post_id"] == "100"
+    assert two["member_count"] == 3
+    conn.close()
+
+
+def test_exact_events_group_wrappers_through_shared_opaque_anchor(tmp_path):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    opaque = {"id": "deleted-900"}
+    first = _tweet(
+        "901", "alice", "2026-07-10T09:00:00Z", "Quoting missing evidence",
+        relation="quote", target=opaque,
+    )
+    second = _tweet(
+        "902", "carol", "2026-07-11T10:00:00Z", "Also quoting it later",
+        relation="quote", target=opaque,
+    )
+    with client.db:
+        for handle, tweet in (("alice", first), ("carol", second)):
+            client._store_posts(
+                url=(
+                    "https://api.twitterapi.io/twitter/user/last_tweets"
+                    f"?userName={handle}&includeReplies=false"
+                ),
+                payload={"data": {"tweets": [tweet]}},
+                observed_at="2026-07-12T00:00:00+00:00",
+            )
+    client.close()
+    first_feed = signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 10), days=1
+    )
+    first_result = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=first_feed["run_id"]
+    )
+    second_feed = signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 11), days=2
+    )
+    second_result = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=second_feed["run_id"]
+    )
+    assert first_result["cluster_count"] == 1
+    assert first_result["member_count"] == 1
+    assert first_result["link_count"] == 1
+    assert second_result["cluster_count"] == 1
+    assert second_result["member_count"] == 2
+    assert second_result["link_count"] == 2
+    conn = signal_events.connect(events_db)
+    first_cluster = conn.execute(
+        """SELECT canonical_identity_type, canonical_identity_value,
+                  event_id, representative_post_id, member_count, link_count
+           FROM event_cluster WHERE run_id = ?""",
+        (first_result["run_id"],),
+    ).fetchone()
+    second_cluster = conn.execute(
+        """SELECT canonical_identity_type, canonical_identity_value,
+                  event_id, representative_post_id, member_count, link_count
+           FROM event_cluster WHERE run_id = ?""",
+        (second_result["run_id"],),
+    ).fetchone()
+    assert first_cluster["event_id"] == second_cluster["event_id"]
+    assert tuple(first_cluster)[0:2] == ("post", "deleted-900")
+    assert tuple(second_cluster)[0:2] == ("post", "deleted-900")
+    assert tuple(first_cluster)[3:] == ("901", 1, 1)
+    assert tuple(second_cluster)[3:] == ("901", 2, 2)
+    link_counts = conn.execute(
+        """SELECT run_id, COUNT(*) FROM event_link
+           WHERE target_post_id = 'deleted-900' GROUP BY run_id"""
+    ).fetchall()
+    assert {row[0]: row[1] for row in link_counts} == {
+        first_result["run_id"]: 1,
+        second_result["run_id"]: 2,
+    }
+    conn.close()
+
+
+def test_shared_missing_reply_parent_is_a_stable_opaque_anchor(tmp_path):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    earlier = _tweet(
+        "900", "alice", "2026-07-10T08:00:00Z", "First captured reply"
+    )
+    earlier.update(
+        {
+            "conversationId": "missing-root",
+            "inReplyToId": "missing-root",
+            "isReply": True,
+        }
+    )
+    later_lower_id = _tweet(
+        "100", "alice", "2026-07-11T08:00:00Z", "Later captured reply"
+    )
+    later_lower_id.update(
+        {
+            "conversationId": "missing-root",
+            "inReplyToId": "missing-root",
+            "isReply": True,
+        }
+    )
+    with client.db:
+        client._store_posts(
+            url=(
+                "https://api.twitterapi.io/twitter/user/last_tweets"
+                "?userName=alice&includeReplies=false"
+            ),
+            payload={"data": {"tweets": [earlier, later_lower_id]}},
+            observed_at="2026-07-12T00:00:00+00:00",
+        )
+    client.close()
+
+    first_feed = signal_feed.materialize(
+        source_db=raw,
+        feed_db=feed_db,
+        through=date(2026, 7, 10),
+        days=1,
+    )
+    first_events = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=first_feed["run_id"]
+    )
+    second_feed = signal_feed.materialize(
+        source_db=raw,
+        feed_db=feed_db,
+        through=date(2026, 7, 11),
+        days=2,
+    )
+    second_events = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=second_feed["run_id"]
+    )
+    conn = signal_events.connect(events_db)
+    first = conn.execute(
+        "SELECT * FROM event_cluster WHERE run_id = ?", (first_events["run_id"],)
+    ).fetchone()
+    second = conn.execute(
+        "SELECT * FROM event_cluster WHERE run_id = ?", (second_events["run_id"],)
+    ).fetchone()
+    assert first["member_count"] == 1
+    assert first["link_count"] == 1
+    assert first["event_id"] == second["event_id"]
+    assert first["representative_post_id"] == "900"
+    assert second["representative_post_id"] == "900"
+    assert second["member_count"] == 2
+    assert second["link_count"] == 2
+    assert second["canonical_identity_type"] == "post"
+    assert second["canonical_identity_value"] == "missing-root"
+    conn.close()
+
+
+def test_same_conversation_does_not_merge_distinct_reply_parent_branches(tmp_path):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    tweets = []
+    for post_id, parent_id in (
+        ("a-1", "missing-a"),
+        ("a-2", "missing-a"),
+        ("b-1", "missing-b"),
+        ("b-2", "missing-b"),
+    ):
+        tweet = _tweet(
+            post_id,
+            "alice",
+            "2026-07-11T08:00:00Z",
+            f"Reply in branch {parent_id}",
+        )
+        tweet.update(
+            {
+                "conversationId": "wide-conversation",
+                "inReplyToId": parent_id,
+                "isReply": True,
+            }
+        )
+        tweets.append(tweet)
+    with client.db:
+        client._store_posts(
+            url=(
+                "https://api.twitterapi.io/twitter/user/last_tweets"
+                "?userName=alice&includeReplies=false"
+            ),
+            payload={"data": {"tweets": tweets}},
+            observed_at="2026-07-12T00:00:00+00:00",
+        )
+    client.close()
+
+    signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 11), days=1
+    )
+    result = signal_events.materialize(feed_db=feed_db, events_db=events_db)
+    assert result["cluster_count"] == 2
+    assert result["member_count"] == 4
+    conn = signal_events.connect(events_db)
+    clusters = conn.execute(
+        """SELECT canonical_identity_value, member_count
+           FROM event_cluster ORDER BY canonical_identity_value"""
+    ).fetchall()
+    assert [tuple(row) for row in clusters] == [
+        ("missing-a", 2),
+        ("missing-b", 2),
+    ]
+    conn.close()

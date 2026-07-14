@@ -59,6 +59,13 @@ def main(argv: list[str] | None = None) -> int:
         "insight-triage", help="Triage Feed envelopes for cited extraction."
     )
     insight_triage_p.add_argument("triage_args", nargs=argparse.REMAINDER)
+    x_daily_collection_p = sub.add_parser(
+        "x-daily-collection",
+        help="Plan or resume date-complete Registry X collection.",
+    )
+    x_daily_collection_p.add_argument(
+        "collection_args", nargs=argparse.REMAINDER
+    )
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -145,6 +152,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import insight_triage_runs
 
         return insight_triage_runs.main(args.triage_args)
+
+    if args.command == "x-daily-collection":
+        from fli import x_daily_collection
+
+        return x_daily_collection.main(args.collection_args)
 
     parser.print_help()
     return 0

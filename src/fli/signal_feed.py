@@ -21,8 +21,8 @@ from typing import Any, Iterable
 from fli import x_content
 
 
-SCHEMA_VERSION = "signal-feed-v3"
-SELECTION_CONTRACT = "complete-calendar-days-v3"
+SCHEMA_VERSION = "signal-feed-v8"
+SELECTION_CONTRACT = "complete-calendar-days-v7-discovery-cutoff"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SOURCE_DB = REPO_ROOT / "data" / "raw" / "x" / "x-content.db"
 DEFAULT_FEED_DB = REPO_ROOT / "data" / "derived" / "signal-feed" / "feed.db"
@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS feed_run (
     source_post_count INTEGER NOT NULL,
     normalized_post_count INTEGER NOT NULL,
     relation_count INTEGER NOT NULL,
+    opaque_target_count INTEGER NOT NULL,
+    shared_opaque_target_count INTEGER NOT NULL,
     created_at TEXT NOT NULL,
     UNIQUE (selection_contract, date_from, date_to, source_fingerprint)
 );
@@ -64,6 +66,11 @@ CREATE TABLE IF NOT EXISTS feed_post (
     view_count INTEGER,
     bookmark_count INTEGER,
     raw_sha256 TEXT NOT NULL,
+    raw_json TEXT NOT NULL,
+    canonical_priority TEXT NOT NULL,
+    first_discovered_at TEXT NOT NULL,
+    first_discovered_day TEXT NOT NULL,
+    disclosure_post_id TEXT NOT NULL,
     PRIMARY KEY (run_id, provider, post_id)
 );
 CREATE INDEX IF NOT EXISTS idx_feed_post_day
@@ -72,6 +79,18 @@ CREATE INDEX IF NOT EXISTS idx_feed_post_author
     ON feed_post(run_id, author_x_id, author_handle, day);
 CREATE INDEX IF NOT EXISTS idx_feed_post_conversation
     ON feed_post(run_id, conversation_id, in_reply_to_post_id);
+CREATE INDEX IF NOT EXISTS idx_feed_post_discovery
+    ON feed_post(run_id, first_discovered_day, provider, post_id);
+
+CREATE TABLE IF NOT EXISTS feed_anchor (
+    run_id TEXT NOT NULL REFERENCES feed_run(run_id) ON DELETE CASCADE,
+    provider TEXT NOT NULL,
+    anchor_id TEXT NOT NULL,
+    renderable INTEGER NOT NULL CHECK (renderable IN (0, 1)),
+    PRIMARY KEY (run_id, provider, anchor_id)
+);
+CREATE INDEX IF NOT EXISTS idx_feed_anchor_opaque
+    ON feed_anchor(run_id, renderable, provider, anchor_id);
 
 CREATE TABLE IF NOT EXISTS feed_run_post (
     run_id TEXT NOT NULL REFERENCES feed_run(run_id) ON DELETE CASCADE,
@@ -93,14 +112,19 @@ CREATE TABLE IF NOT EXISTS feed_relation (
     target_post_id TEXT NOT NULL,
     source_author_x_id TEXT,
     source_author_handle TEXT NOT NULL,
+    discovered_at TEXT NOT NULL,
+    discovered_day TEXT NOT NULL,
+    disclosure_post_id TEXT NOT NULL,
     PRIMARY KEY (run_id, provider, source_post_id, relation_type, target_post_id),
     FOREIGN KEY (run_id, provider, source_post_id)
         REFERENCES feed_post(run_id, provider, post_id),
     FOREIGN KEY (run_id, provider, target_post_id)
-        REFERENCES feed_post(run_id, provider, post_id)
+        REFERENCES feed_anchor(run_id, provider, anchor_id)
 );
 CREATE INDEX IF NOT EXISTS idx_feed_relation_target
     ON feed_relation(run_id, provider, target_post_id, relation_type);
+CREATE INDEX IF NOT EXISTS idx_feed_relation_discovery
+    ON feed_relation(run_id, discovered_day, provider, source_post_id);
 """
 
 
@@ -209,10 +233,45 @@ def _post_record(
         "retweet"
         if _embedded(tweet, "retweet") is not None
         else "reply"
-        if bool(tweet.get("isReply") or tweet.get("is_reply"))
+        if bool(
+            tweet.get("isReply")
+            or tweet.get("is_reply")
+            or tweet.get("inReplyToId")
+            or tweet.get("in_reply_to_post_id")
+        )
         else "quote"
         if _embedded(tweet, "quote") is not None
         else fallback_type
+    )
+    metric_values = [
+        _as_int(tweet.get(key))
+        for key in (
+            "likeCount",
+            "replyCount",
+            "retweetCount",
+            "quoteCount",
+            "viewCount",
+            "bookmarkCount",
+        )
+    ]
+    relation_richness = sum(
+        int(_embedded(tweet, relation) is not None)
+        for relation in ("retweet", "quote")
+    )
+    metadata_richness = sum(
+        int(bool(value))
+        for value in (
+            tweet.get("conversationId") or tweet.get("conversation_id"),
+            tweet.get("inReplyToId") or tweet.get("in_reply_to_post_id"),
+            author["x_id"],
+            author["name"],
+            tweet.get("url") or tweet.get("twitterUrl"),
+        )
+    ) + sum(value is not None for value in metric_values)
+    engagement_total = sum(value or 0 for value in metric_values)
+    canonical_priority = (
+        f"{relation_richness:04d}:{metadata_richness:04d}:"
+        f"{len(text):08d}:{engagement_total:020d}:{_sha256(raw_json)}"
     )
     return {
         "provider": "twitterapi.io",
@@ -244,6 +303,8 @@ def _post_record(
             tweet.get("bookmarkCount") or tweet.get("bookmark_count")
         ),
         "raw_sha256": _sha256(raw_json),
+        "raw_json": raw_json,
+        "canonical_priority": canonical_priority,
     }
 
 
@@ -261,9 +322,23 @@ def _embedded(tweet: dict[str, Any], relation: str) -> dict[str, Any] | None:
 
 
 def _insert_post(
-    conn: sqlite3.Connection, run_id: str, post: dict[str, Any]
+    conn: sqlite3.Connection,
+    run_id: str,
+    post: dict[str, Any],
+    *,
+    discovered_at: str,
+    disclosure_post_id: str,
 ) -> None:
-    value = {"run_id": run_id, **post}
+    discovery = _parse_datetime(discovered_at)
+    if discovery is None:
+        raise ValueError(f"Invalid discovery timestamp: {discovered_at!r}")
+    value = {
+        "run_id": run_id,
+        **post,
+        "first_discovered_at": discovery.isoformat(timespec="seconds"),
+        "first_discovered_day": discovery.date().isoformat(),
+        "disclosure_post_id": disclosure_post_id,
+    }
     columns = tuple(value)
     conn.execute(
         f"""INSERT INTO feed_post ({', '.join(columns)})
@@ -285,8 +360,35 @@ def _insert_post(
                 quote_count = excluded.quote_count,
                 view_count = excluded.view_count,
                 bookmark_count = excluded.bookmark_count,
-                raw_sha256 = excluded.raw_sha256""",
+                raw_sha256 = excluded.raw_sha256,
+                raw_json = excluded.raw_json,
+                canonical_priority = excluded.canonical_priority,
+                first_discovered_at = excluded.first_discovered_at,
+                first_discovered_day = excluded.first_discovered_day,
+                disclosure_post_id = excluded.disclosure_post_id
+            WHERE excluded.first_discovered_at < feed_post.first_discovered_at
+               OR (
+                    excluded.first_discovered_at = feed_post.first_discovered_at
+                    AND excluded.canonical_priority > feed_post.canonical_priority
+               )""",
         tuple(value[column] for column in columns),
+    )
+    conn.execute(
+        """INSERT INTO feed_anchor
+           (run_id, provider, anchor_id, renderable)
+           VALUES (?, ?, ?, 1)
+           ON CONFLICT(run_id, provider, anchor_id) DO UPDATE SET renderable = 1""",
+        (run_id, post["provider"], post["post_id"]),
+    )
+
+
+def _insert_opaque_anchor(
+    conn: sqlite3.Connection, run_id: str, provider: str, anchor_id: str
+) -> None:
+    conn.execute(
+        """INSERT OR IGNORE INTO feed_anchor
+           (run_id, provider, anchor_id, renderable) VALUES (?, ?, ?, 0)""",
+        (run_id, provider, anchor_id),
     )
 
 
@@ -297,9 +399,26 @@ def _selected_rows(
     # local corpus once. The raw table is indexed for author workflows, while
     # this derived refresh intentionally optimizes the product read path.
     for row in source.execute(
-        """SELECT provider, post_id, author_handle, post_type, raw_sha256, raw_json
-           FROM x_post
-           ORDER BY provider, post_id"""
+        """SELECT post.provider, post.post_id, post.author_handle,
+                  post.post_type, observed.raw_sha256, observed.raw_json
+           FROM x_post post
+           JOIN x_post_observation observed
+             ON observed.provider = post.provider
+            AND observed.post_id = post.post_id
+           WHERE NOT EXISTS (
+               SELECT 1
+               FROM x_post_observation earlier
+               WHERE earlier.provider = observed.provider
+                 AND earlier.post_id = observed.post_id
+                 AND (
+                     earlier.observed_at < observed.observed_at
+                     OR (
+                         earlier.observed_at = observed.observed_at
+                         AND earlier.raw_sha256 < observed.raw_sha256
+                     )
+                 )
+           )
+           ORDER BY post.provider, post.post_id"""
     ):
         try:
             tweet = json.loads(row["raw_json"])
@@ -324,6 +443,11 @@ def materialize(
     if not source_path.is_file():
         raise FileNotFoundError(source_path)
     start = through - timedelta(days=days - 1)
+    # Apply raw-store migrations before switching to the read-only scan. This
+    # also backfills the pre-migration normalized value as the first immutable
+    # observation, so a subsequent provider refresh cannot rewrite history.
+    migrated_source = x_content.connect(source_path)
+    migrated_source.close()
     source = sqlite3.connect(f"file:{source_path.as_posix()}?mode=ro", uri=True)
     source.row_factory = sqlite3.Row
     rows = list(_selected_rows(source, start, through))
@@ -354,8 +478,9 @@ def materialize(
             """INSERT INTO feed_run
                (run_id, schema_version, selection_contract, date_from, date_to,
                 source_db, source_fingerprint, source_post_count,
-                normalized_post_count, relation_count, created_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?)""",
+                normalized_post_count, relation_count, opaque_target_count,
+                shared_opaque_target_count, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?)""",
             (
                 run_id,
                 SCHEMA_VERSION,
@@ -381,7 +506,13 @@ def materialize(
             direct["provider"] = row["provider"]
             direct["raw_sha256"] = row["raw_sha256"]
             parsed.append((row, tweet, direct))
-            _insert_post(conn, run_id, direct)
+            _insert_post(
+                conn,
+                run_id,
+                direct,
+                discovered_at=direct["published_at"],
+                disclosure_post_id=direct["post_id"],
+            )
             normalized_ids.add((direct["provider"], direct["post_id"]))
             conn.execute(
                 """INSERT OR IGNORE INTO feed_run_post
@@ -391,60 +522,159 @@ def materialize(
 
         # Insert embedded targets only after every direct observation exists.
         # A direct provider snapshot is the canonical representation when the
-        # same post is also embedded in somebody else's wrapper.
+        # same post is also embedded in somebody else's wrapper. Provider
+        # payloads can contain quote-of-quote and retweet-of-quote chains, so
+        # walk the complete declared relationship tree rather than stopping at
+        # the first target. This derived traversal is cycle-safe and remains
+        # fully rebuildable from immutable raw payloads.
         direct_ids = {
             (direct["provider"], direct["post_id"])
             for _, _, direct in parsed
         }
+        direct_records = {
+            (direct["provider"], direct["post_id"]): direct
+            for _, _, direct in parsed
+        }
+        relation_keys: set[tuple[str, str, str, str]] = set()
+        opaque_target_sources: dict[tuple[str, str], set[str]] = {}
+
+        def walk_relations(
+            *,
+            provider: str,
+            source_tweet: dict[str, Any],
+            source: dict[str, Any],
+            ancestry: frozenset[str],
+            discovered_at: str,
+            disclosure_post_id: str,
+        ) -> None:
+            source_id = str(source["post_id"])
+            if source_id in ancestry:
+                return
+            next_ancestry = ancestry | {source_id}
+            for relation in ("retweet", "quote"):
+                target_tweet = _embedded(source_tweet, relation)
+                if target_tweet is None:
+                    continue
+                target_id = str(
+                    target_tweet.get("id") or target_tweet.get("tweetId") or ""
+                ).strip()
+                if not target_id or target_id == source_id:
+                    continue
+                target = _post_record(
+                    target_tweet,
+                    fallback_handle="unknown",
+                    fallback_type="original",
+                )
+                if target is None:
+                    _insert_opaque_anchor(conn, run_id, provider, target_id)
+                    opaque_target_sources.setdefault((provider, target_id), set()).add(
+                        source_id
+                    )
+                else:
+                    target["provider"] = provider
+                target_key = (provider, target_id)
+                if target is not None:
+                    if target_key not in direct_ids:
+                        _insert_post(
+                            conn,
+                            run_id,
+                            target,
+                            discovered_at=discovered_at,
+                            disclosure_post_id=disclosure_post_id,
+                        )
+                    normalized_ids.add(target_key)
+                    conn.execute(
+                        """INSERT OR IGNORE INTO feed_run_post
+                           (run_id, provider, post_id, role)
+                           VALUES (?, ?, ?, 'embedded')""",
+                        (run_id, provider, target_id),
+                    )
+                relation_key = (provider, source_id, relation, target_id)
+                discovery = _parse_datetime(discovered_at)
+                if discovery is None:
+                    raise ValueError(
+                        f"Invalid relation discovery timestamp: {discovered_at!r}"
+                    )
+                conn.execute(
+                        """INSERT INTO feed_relation
+                           (run_id, provider, source_post_id, relation_type,
+                            target_post_id, source_author_x_id,
+                            source_author_handle, discovered_at, discovered_day,
+                            disclosure_post_id)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                           ON CONFLICT(
+                               run_id, provider, source_post_id, relation_type,
+                               target_post_id
+                           ) DO UPDATE SET
+                               source_author_x_id = excluded.source_author_x_id,
+                               source_author_handle = excluded.source_author_handle,
+                               discovered_at = excluded.discovered_at,
+                               discovered_day = excluded.discovered_day,
+                               disclosure_post_id = excluded.disclosure_post_id
+                           WHERE excluded.discovered_at < feed_relation.discovered_at
+                              OR (
+                                  excluded.discovered_at = feed_relation.discovered_at
+                                  AND excluded.disclosure_post_id
+                                      < feed_relation.disclosure_post_id
+                              )""",
+                        (
+                            run_id,
+                            provider,
+                            source_id,
+                            relation,
+                            target_id,
+                            source["author_x_id"],
+                            source["author_handle"],
+                            discovery.isoformat(timespec="seconds"),
+                            discovery.date().isoformat(),
+                            disclosure_post_id,
+                        ),
+                    )
+                relation_keys.add(relation_key)
+                if target is None or target_id in next_ancestry:
+                    continue
+                # Every selected direct payload is traversed independently at
+                # its own publication cutoff. Nested relationships disclosed
+                # only by this wrapper inherit the wrapper's discovery time;
+                # pulling in another occurrence here would leak future
+                # evidence into an earlier daily projection.
+                relation_payloads = [target_tweet]
+                relation_source = direct_records.get(target_key, target)
+                for relation_payload in relation_payloads:
+                    walk_relations(
+                        provider=provider,
+                        source_tweet=relation_payload,
+                        source=relation_source,
+                        ancestry=next_ancestry,
+                        discovered_at=discovered_at,
+                        disclosure_post_id=disclosure_post_id,
+                    )
+
         for row, tweet, direct in parsed:
-            relation = (
-                "retweet"
-                if row["post_type"] == "retweet"
-                else "quote"
-                if row["post_type"] == "quote"
-                else None
+            walk_relations(
+                provider=str(row["provider"]),
+                source_tweet=tweet,
+                source=direct,
+                ancestry=frozenset(),
+                discovered_at=direct["published_at"],
+                disclosure_post_id=direct["post_id"],
             )
-            target_tweet = _embedded(tweet, relation) if relation else None
-            if relation is None or target_tweet is None:
-                continue
-            target = _post_record(
-                target_tweet,
-                fallback_handle="unknown",
-                fallback_type="original",
-            )
-            if target is None:
-                continue
-            target["provider"] = row["provider"]
-            target_key = (target["provider"], target["post_id"])
-            if target_key not in direct_ids:
-                _insert_post(conn, run_id, target)
-            normalized_ids.add((target["provider"], target["post_id"]))
-            conn.execute(
-                """INSERT OR IGNORE INTO feed_run_post
-                   (run_id, provider, post_id, role) VALUES (?, ?, ?, 'embedded')""",
-                (run_id, target["provider"], target["post_id"]),
-            )
-            conn.execute(
-                """INSERT OR IGNORE INTO feed_relation
-                   (run_id, provider, source_post_id, relation_type,
-                    target_post_id, source_author_x_id, source_author_handle)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    run_id,
-                    direct["provider"],
-                    direct["post_id"],
-                    relation,
-                    target["post_id"],
-                    direct["author_x_id"],
-                    direct["author_handle"],
-                ),
-            )
-            relation_count += 1
+        relation_count = len(relation_keys)
+        shared_opaque_count = sum(
+            len(source_ids) > 1 for source_ids in opaque_target_sources.values()
+        )
         conn.execute(
             """UPDATE feed_run
-               SET normalized_post_count = ?, relation_count = ?
+               SET normalized_post_count = ?, relation_count = ?,
+                   opaque_target_count = ?, shared_opaque_target_count = ?
                WHERE run_id = ?""",
-            (len(normalized_ids), relation_count, run_id),
+            (
+                len(normalized_ids),
+                relation_count,
+                len(opaque_target_sources),
+                shared_opaque_count,
+                run_id,
+            ),
         )
     result = dict(conn.execute("SELECT * FROM feed_run WHERE run_id = ?", (run_id,)).fetchone())
     result["reused"] = False

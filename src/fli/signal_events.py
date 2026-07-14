@@ -1,8 +1,10 @@
 """Content-addressed exact structural groups over one deterministic Feed run.
 
-Version one performs no topical inference. It connects posts only when the
-provider supplies the same quote/retweet target, reply parent, or conversation
-identifier. The post-level Feed remains the complete evidence ledger.
+This stage performs no topical inference. It connects posts only when the
+provider supplies an exact quote/retweet target or reply parent. A conversation
+identifier remains useful metadata, but is deliberately not a clustering edge:
+one X thread can contain several unrelated branches. The post-level Feed
+remains the complete evidence ledger.
 """
 
 from __future__ import annotations
@@ -19,8 +21,8 @@ from typing import Any
 from fli import signal_feed
 
 
-SCHEMA_VERSION = "signal-events-v1"
-CLUSTERING_CONTRACT = "exact-structural-v1"
+SCHEMA_VERSION = "signal-events-v3"
+CLUSTERING_CONTRACT = "exact-structural-v5-provider-edges"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_EVENTS_DB = REPO_ROOT / "data" / "derived" / "signal-events" / "events.db"
@@ -45,6 +47,10 @@ CREATE TABLE IF NOT EXISTS event_cluster (
     event_id TEXT NOT NULL,
     representative_provider TEXT NOT NULL,
     representative_post_id TEXT NOT NULL,
+    canonical_identity_type TEXT NOT NULL CHECK (
+        canonical_identity_type IN ('post')
+    ),
+    canonical_identity_value TEXT NOT NULL,
     anchor_types_json TEXT NOT NULL,
     started_at TEXT NOT NULL,
     last_activity_at TEXT NOT NULL,
@@ -67,6 +73,8 @@ CREATE TABLE IF NOT EXISTS event_member (
 );
 CREATE INDEX IF NOT EXISTS idx_event_member_post
     ON event_member(run_id, provider, post_id, event_id);
+CREATE INDEX IF NOT EXISTS idx_event_member_event
+    ON event_member(run_id, event_id, observed_directly, post_id);
 
 CREATE TABLE IF NOT EXISTS event_link (
     run_id TEXT NOT NULL,
@@ -75,9 +83,12 @@ CREATE TABLE IF NOT EXISTS event_link (
     source_post_id TEXT NOT NULL,
     target_post_id TEXT NOT NULL,
     link_type TEXT NOT NULL CHECK (
-        link_type IN ('quote', 'retweet', 'reply_parent', 'same_conversation')
+        link_type IN ('quote', 'retweet', 'reply_parent')
     ),
     anchor_value TEXT NOT NULL,
+    discovered_at TEXT NOT NULL,
+    discovered_day TEXT NOT NULL,
+    disclosure_post_id TEXT NOT NULL,
     PRIMARY KEY (
         run_id, event_id, provider, source_post_id, target_post_id, link_type
     ),
@@ -88,12 +99,17 @@ CREATE INDEX IF NOT EXISTS idx_event_link_source
     ON event_link(
         run_id, event_id, source_post_id, link_type, target_post_id
     );
+CREATE INDEX IF NOT EXISTS idx_event_link_discovery
+    ON event_link(
+        run_id, event_id, discovered_day, provider, source_post_id,
+        target_post_id
+    );
 
 CREATE TABLE IF NOT EXISTS event_anchor (
     run_id TEXT NOT NULL,
     event_id TEXT NOT NULL,
     anchor_type TEXT NOT NULL CHECK (
-        anchor_type IN ('same_target', 'same_conversation', 'reply_parent')
+        anchor_type IN ('same_target', 'reply_parent')
     ),
     anchor_value TEXT NOT NULL,
     PRIMARY KEY (run_id, event_id, anchor_type, anchor_value),
@@ -112,6 +128,12 @@ CREATE TABLE IF NOT EXISTS event_day (
 );
 CREATE INDEX IF NOT EXISTS idx_event_day
     ON event_day(run_id, day, event_id);
+
+CREATE TABLE IF NOT EXISTS signal_publication (
+    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+    event_run_id TEXT NOT NULL REFERENCES event_run(run_id),
+    published_at TEXT NOT NULL
+);
 """
 
 
@@ -126,6 +148,29 @@ def _sha256(value: str) -> str:
 def connect(path: Path | str = DEFAULT_EVENTS_DB) -> sqlite3.Connection:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        probe = sqlite3.connect(path)
+        try:
+            has_run = probe.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'event_run'"
+            ).fetchone()
+            versions = (
+                {
+                    row[0]
+                    for row in probe.execute(
+                        "SELECT DISTINCT schema_version FROM event_run"
+                    ).fetchall()
+                }
+                if has_run
+                else set()
+            )
+        finally:
+            probe.close()
+        if versions and versions != {SCHEMA_VERSION}:
+            found = ", ".join(sorted(versions))
+            raise RuntimeError(
+                f"Event store uses {found}; rebuild the derived store for {SCHEMA_VERSION}."
+            )
     conn = sqlite3.connect(path, timeout=60.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
@@ -156,6 +201,58 @@ class _UnionFind:
             self.parent[max(left_root, right_root)] = min(left_root, right_root)
 
 
+def _canonical_identity(
+    members: set[tuple[str, str]],
+    member_links: list[dict[str, str]],
+    posts: dict[tuple[str, str], sqlite3.Row],
+) -> tuple[tuple[str, str], str, str]:
+    """Choose one structural root and stable identity for an exact component.
+
+    Quote, retweet, and reply-parent edges point from a wrapper/child toward
+    the provider-declared target. Their terminal target is therefore the
+    canonical post. Missing provider-declared targets remain opaque component
+    members. Multiple children of the same uncaptured parent therefore share a
+    stable identity without treating every branch in the conversation as one
+    event.
+    """
+    structural_types = {"quote", "retweet", "reply_parent"}
+    outbound: dict[tuple[str, str], set[tuple[str, str]]] = defaultdict(set)
+    inbound: dict[tuple[str, str], int] = defaultdict(int)
+    for link in member_links:
+        source = (link["provider"], link["source_post_id"])
+        target = (link["provider"], link["target_post_id"])
+        if link["link_type"] in structural_types:
+            outbound[source].add(target)
+            inbound[target] += 1
+
+    renderable = [member for member in members if member in posts]
+    if not renderable:
+        raise ValueError("an event component must contain a renderable post")
+    terminal = sorted(member for member in members if not outbound.get(member))
+    identity_node = (terminal or sorted(members))[0]
+    has_structural_edges = bool(outbound)
+    identity_children = [
+        member
+        for member in renderable
+        if identity_node in outbound.get(member, set())
+    ]
+    representative = (
+        identity_node
+        if has_structural_edges and identity_node in posts
+        else min(
+            identity_children or renderable,
+            key=lambda key: (
+                str(posts[key]["first_discovered_at"]),
+                str(posts[key]["published_at"]),
+                -int(posts[key]["observed_directly"] or 0),
+                key,
+            ),
+        )
+    )
+
+    return representative, "post", identity_node[1]
+
+
 def _latest_feed_run(conn: sqlite3.Connection) -> sqlite3.Row:
     row = conn.execute(
         "SELECT * FROM feed_run ORDER BY created_at DESC, run_id DESC LIMIT 1"
@@ -168,6 +265,62 @@ def _latest_feed_run(conn: sqlite3.Connection) -> sqlite3.Row:
             f"for {signal_feed.SCHEMA_VERSION}."
         )
     return row
+
+
+def published_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
+    """Return the one Event run explicitly published to readers."""
+    return conn.execute(
+        """SELECT run.*
+           FROM signal_publication publication
+           JOIN event_run run ON run.run_id = publication.event_run_id
+           WHERE publication.singleton = 1"""
+    ).fetchone()
+
+
+def publish(
+    *,
+    events_db: Path | str = DEFAULT_EVENTS_DB,
+    feed_db: Path | str = DEFAULT_FEED_DB,
+    event_run_id: str,
+) -> dict[str, Any]:
+    """Atomically move the live pointer to one validated Feed/Event pair."""
+    conn = connect(events_db)
+    run = conn.execute(
+        "SELECT * FROM event_run WHERE run_id = ?", (event_run_id,)
+    ).fetchone()
+    if run is None:
+        conn.close()
+        raise ValueError(f"Unknown Event run: {event_run_id}")
+    feed_path = Path(feed_db).resolve()
+    if not feed_path.is_file():
+        conn.close()
+        raise FileNotFoundError(feed_path)
+    feed = sqlite3.connect(f"file:{feed_path.as_posix()}?mode=ro", uri=True)
+    matching_feed = feed.execute(
+        "SELECT 1 FROM feed_run WHERE run_id = ?", (run["feed_run_id"],)
+    ).fetchone()
+    feed.close()
+    if matching_feed is None:
+        conn.close()
+        raise RuntimeError(
+            f"Event run {event_run_id} references missing Feed run "
+            f"{run['feed_run_id']}."
+        )
+    published_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with conn:
+        conn.execute(
+            """INSERT INTO signal_publication
+               (singleton, event_run_id, published_at)
+               VALUES (1, ?, ?)
+               ON CONFLICT(singleton) DO UPDATE SET
+                   event_run_id = excluded.event_run_id,
+                   published_at = excluded.published_at""",
+            (event_run_id, published_at),
+        )
+    result = dict(run)
+    result["published_at"] = published_at
+    conn.close()
+    return result
 
 
 def materialize(
@@ -212,7 +365,8 @@ def materialize(
         (run_feed_id,),
     ).fetchall()
     relation_rows = feed.execute(
-        """SELECT provider, source_post_id, target_post_id, relation_type
+        """SELECT provider, source_post_id, target_post_id, relation_type,
+                  discovered_at, discovered_day, disclosure_post_id
            FROM feed_relation WHERE run_id = ?
            ORDER BY provider, source_post_id, relation_type, target_post_id""",
         (run_feed_id,),
@@ -231,6 +385,8 @@ def materialize(
                         row["raw_sha256"],
                         row["conversation_id"],
                         row["in_reply_to_post_id"],
+                        row["first_discovered_at"],
+                        row["disclosure_post_id"],
                     )
                     for row in post_rows
                 ],
@@ -253,7 +409,7 @@ def materialize(
 
     union = _UnionFind()
     links: dict[
-        tuple[str, str, str, str, str], dict[str, str]
+        tuple[str, str, str, str, str], dict[str, Any]
     ] = {}
 
     def add_link(
@@ -263,10 +419,13 @@ def materialize(
         link_type: str,
         anchor_type: str,
         anchor_value: str,
+        discovered_at: str,
+        discovered_day: str,
+        disclosure_post_id: str,
     ) -> None:
         source = (provider, source_post_id)
         target = (provider, target_post_id)
-        if source == target or source not in posts or target not in posts:
+        if source == target or source not in posts:
             return
         union.union(source, target)
         links[(provider, source_post_id, target_post_id, link_type, anchor_value)] = {
@@ -276,6 +435,9 @@ def materialize(
             "link_type": link_type,
             "anchor_type": anchor_type,
             "anchor_value": anchor_value,
+            "discovered_at": discovered_at,
+            "discovered_day": discovered_day,
+            "disclosure_post_id": disclosure_post_id,
         }
 
     for relation in relation_rows:
@@ -286,17 +448,16 @@ def materialize(
             relation["relation_type"],
             "same_target",
             relation["target_post_id"],
+            relation["discovered_at"],
+            relation["discovered_day"],
+            relation["disclosure_post_id"],
         )
 
-    replies_by_conversation: dict[str, list[tuple[str, str]]] = defaultdict(list)
-    for key, row in posts.items():
+    for row in posts.values():
         if row["post_type"] != "reply":
             continue
-        conversation_id = str(row["conversation_id"] or "")
         parent_id = str(row["in_reply_to_post_id"] or "")
-        if conversation_id:
-            replies_by_conversation[conversation_id].append(key)
-        if parent_id and (row["provider"], parent_id) in posts:
+        if parent_id:
             add_link(
                 row["provider"],
                 row["post_id"],
@@ -304,23 +465,10 @@ def materialize(
                 "reply_parent",
                 "reply_parent",
                 parent_id,
+                row["first_discovered_at"],
+                row["first_discovered_day"],
+                row["disclosure_post_id"],
             )
-
-    for conversation_id, replies in replies_by_conversation.items():
-        ordered = sorted(set(replies))
-        provider = ordered[0][0]
-        root = (provider, conversation_id)
-        anchor = root if root in posts else ordered[0]
-        for reply in ordered:
-            if reply != anchor:
-                add_link(
-                    provider,
-                    reply[1],
-                    anchor[1],
-                    "same_conversation",
-                    "same_conversation",
-                    conversation_id,
-                )
 
     groups: dict[tuple[str, str], set[tuple[str, str]]] = defaultdict(set)
     for node in union.parent:
@@ -329,8 +477,7 @@ def materialize(
     link_values = list(links.values())
     clusters: list[dict[str, Any]] = []
     for members in groups.values():
-        if len(members) < 2:
-            continue
+        renderable_members = {member for member in members if member in posts}
         member_links = [
             link
             for link in link_values
@@ -339,23 +486,29 @@ def materialize(
         ]
         if not member_links:
             continue
-        inbound: dict[tuple[str, str], int] = defaultdict(int)
-        for link in member_links:
-            inbound[(link["provider"], link["target_post_id"])] += 1
-        type_priority = {"original": 0, "reply": 1, "quote": 2, "retweet": 3}
-        representative = sorted(
-            members,
-            key=lambda key: (
-                -inbound[key],
-                type_priority.get(str(posts[key]["post_type"]), 9),
-                -int(posts[key]["observed_directly"] or 0),
-                str(posts[key]["published_at"]),
-                key,
-            ),
-        )[0]
-        event_id = _sha256(_canonical_json(sorted(members)))
-        direct_rows = [row for key in members if (row := posts[key])["observed_directly"]]
-        activity_rows = direct_rows or [posts[key] for key in members]
+        has_opaque_anchor = any(
+            (link["provider"], link["source_post_id"]) in renderable_members
+            and (link["provider"], link["target_post_id"]) not in posts
+            for link in member_links
+        )
+        if not renderable_members or (
+            len(renderable_members) == 1 and not has_opaque_anchor
+        ):
+            continue
+        representative, identity_kind, identity_value = _canonical_identity(
+            members, member_links, posts
+        )
+        # The provider identity value is deliberately independent of its
+        # current evidence type. A captured root post and a later-discovered
+        # conversation anchor normally share the same provider ID; adding the
+        # reply must not manufacture a new event ID on the next rebuild.
+        event_id = _sha256(_canonical_json([representative[0], identity_value]))
+        direct_rows = [
+            row
+            for key in renderable_members
+            if (row := posts[key])["observed_directly"]
+        ]
+        activity_rows = direct_rows or [posts[key] for key in renderable_members]
         days: dict[str, int] = defaultdict(int)
         for row in direct_rows:
             days[str(row["day"])] += 1
@@ -363,7 +516,9 @@ def materialize(
             {
                 "event_id": event_id,
                 "representative": representative,
-                "members": sorted(members),
+                "identity_kind": identity_kind,
+                "identity_value": identity_value,
+                "members": sorted(renderable_members),
                 "links": member_links,
                 "anchor_types": sorted({link["anchor_type"] for link in member_links}),
                 "started_at": min(str(row["published_at"]) for row in activity_rows),
@@ -400,14 +555,17 @@ def materialize(
             conn.execute(
                 """INSERT INTO event_cluster
                    (run_id, event_id, representative_provider,
-                    representative_post_id, anchor_types_json, started_at,
+                    representative_post_id, canonical_identity_type,
+                    canonical_identity_value, anchor_types_json, started_at,
                     last_activity_at, member_count, link_count)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     run_id,
                     cluster["event_id"],
                     representative[0],
                     representative[1],
+                    cluster["identity_kind"],
+                    cluster["identity_value"],
                     _canonical_json(cluster["anchor_types"]),
                     cluster["started_at"],
                     cluster["last_activity_at"],
@@ -436,8 +594,9 @@ def materialize(
                 conn.execute(
                     """INSERT INTO event_link
                        (run_id, event_id, provider, source_post_id,
-                        target_post_id, link_type, anchor_value)
-                       VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                        target_post_id, link_type, anchor_value, discovered_at,
+                        discovered_day, disclosure_post_id)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     (
                         run_id,
                         cluster["event_id"],
@@ -446,6 +605,9 @@ def materialize(
                         link["target_post_id"],
                         link["link_type"],
                         link["anchor_value"],
+                        link["discovered_at"],
+                        link["discovered_day"],
+                        link["disclosure_post_id"],
                     ),
                 )
                 conn.execute(
@@ -480,12 +642,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--feed-db", type=Path, default=DEFAULT_FEED_DB)
     parser.add_argument("--events-db", type=Path, default=DEFAULT_EVENTS_DB)
     parser.add_argument("--feed-run-id")
+    parser.add_argument(
+        "--publish",
+        action="store_true",
+        help="Atomically make the validated Feed/Event pair live.",
+    )
     args = parser.parse_args(argv)
     result = materialize(
         feed_db=args.feed_db,
         events_db=args.events_db,
         feed_run_id=args.feed_run_id,
     )
+    if args.publish:
+        result = {
+            **result,
+            "publication": publish(
+                events_db=args.events_db,
+                feed_db=args.feed_db,
+                event_run_id=result["run_id"],
+            ),
+        }
     print(json.dumps(result, sort_keys=True))
     return 0
 

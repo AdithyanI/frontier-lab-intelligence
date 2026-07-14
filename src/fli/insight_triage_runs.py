@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fli import entity_kinds, insight_triage, x_content
+from fli import entity_kinds, insight_triage, signal_feed, sources, x_content
 from fli.web.events import events_payload
 
 
@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS triage_item (
     envelope_json TEXT NOT NULL,
     input_text TEXT NOT NULL,
     input_sha256 TEXT NOT NULL,
+    snapshot_content_sha256 TEXT,
     prompt_cache_key TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'complete', 'failed')),
@@ -65,6 +66,11 @@ CREATE TABLE IF NOT EXISTS triage_item (
     error_type TEXT,
     error_message TEXT,
     completed_at TEXT,
+    reused_from_run_id TEXT,
+    reused_from_event_id TEXT,
+    reused_from_response_id TEXT,
+    reused_from_reported_cost_usd REAL,
+    reused_at TEXT,
     updated_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_triage_item_status_rank
@@ -73,7 +79,19 @@ CREATE INDEX IF NOT EXISTS idx_triage_item_decision_rank
     ON triage_item (decision, current_rank, event_id);
 CREATE INDEX IF NOT EXISTS idx_triage_item_cache_key_rank
     ON triage_item (prompt_cache_key, current_rank, event_id);
+CREATE INDEX IF NOT EXISTS idx_triage_item_input_reuse
+    ON triage_item (input_sha256, status, event_id);
 """
+
+
+_TRIAGE_ITEM_MIGRATIONS: dict[str, str] = {
+    "snapshot_content_sha256": "TEXT",
+    "reused_from_run_id": "TEXT",
+    "reused_from_event_id": "TEXT",
+    "reused_from_response_id": "TEXT",
+    "reused_from_reported_cost_usd": "REAL",
+    "reused_at": "TEXT",
+}
 
 
 def _now() -> str:
@@ -108,21 +126,63 @@ def connect_run(path: Path | str) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(RUN_SCHEMA)
+    existing_columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(triage_item)").fetchall()
+    }
+    for column, definition in _TRIAGE_ITEM_MIGRATIONS.items():
+        if column not in existing_columns:
+            conn.execute(
+                f"ALTER TABLE triage_item ADD COLUMN {column} {definition}"
+            )
+    conn.execute(
+        """CREATE INDEX IF NOT EXISTS idx_triage_item_input_reuse
+           ON triage_item (input_sha256, status, event_id)"""
+    )
+    conn.commit()
     return conn
 
 
 def _expanded_urls(
     conn: sqlite3.Connection,
-    post_ids: list[str],
-) -> dict[str, list[str]]:
-    if not post_ids:
+    post_refs: list[tuple[str, str, str]],
+    *,
+    feed_conn: sqlite3.Connection | None = None,
+    feed_run_id: str | None = None,
+) -> dict[tuple[str, str], list[str]]:
+    if not post_refs:
         return {}
-    placeholders = ",".join("?" for _ in post_ids)
-    rows = conn.execute(
-        f"SELECT post_id, raw_json FROM x_post WHERE post_id IN ({placeholders})",
-        post_ids,
-    ).fetchall()
-    found: dict[str, list[str]] = {}
+    predicates = " OR ".join(
+        "(provider = ? AND post_id = ? AND raw_sha256 = ?)"
+        for _ in post_refs
+    )
+    parameters = [value for post_ref in post_refs for value in post_ref]
+    rows = list(conn.execute(
+        f"""SELECT DISTINCT provider, post_id, raw_json
+            FROM x_post_observation
+            WHERE {predicates}""",
+        parameters,
+    ).fetchall())
+    found_refs = {(str(row["provider"]), str(row["post_id"])) for row in rows}
+    missing = [
+        post_ref for post_ref in post_refs
+        if (post_ref[0], post_ref[1]) not in found_refs
+    ]
+    if feed_conn is not None and feed_run_id and missing:
+        feed_predicates = " OR ".join(
+            "(provider = ? AND post_id = ? AND raw_sha256 = ?)"
+            for _ in missing
+        )
+        feed_parameters = [value for post_ref in missing for value in post_ref]
+        rows.extend(
+            feed_conn.execute(
+                f"""SELECT DISTINCT provider, post_id, raw_json
+                    FROM feed_post
+                    WHERE run_id = ? AND ({feed_predicates})""",
+                (feed_run_id, *feed_parameters),
+            ).fetchall()
+        )
+    found: dict[tuple[str, str], list[str]] = {}
     for row in rows:
         payload = json.loads(row["raw_json"])
         urls: list[str] = []
@@ -139,7 +199,9 @@ def _expanded_urls(
                 url = item.get("expanded_url") or item.get("url")
                 if isinstance(url, str) and url.startswith(("http://", "https://")):
                     urls.append(url)
-        found[str(row["post_id"])] = list(dict.fromkeys(urls))
+        found[(str(row["provider"]), str(row["post_id"]))] = list(
+            dict.fromkeys(urls)
+        )
     return found
 
 
@@ -156,15 +218,43 @@ def _card_value(card: dict[str, Any], key: str) -> str | None:
 
 def _provider_artifacts(
     conn: sqlite3.Connection,
-    post_ids: list[str],
+    post_refs: list[tuple[str, str, str]],
+    *,
+    feed_conn: sqlite3.Connection | None = None,
+    feed_run_id: str | None = None,
 ) -> list[dict[str, str]]:
-    if not post_ids:
+    if not post_refs:
         return []
-    placeholders = ",".join("?" for _ in post_ids)
-    rows = conn.execute(
-        f"SELECT post_id, raw_json FROM x_post WHERE post_id IN ({placeholders})",
-        post_ids,
-    ).fetchall()
+    predicates = " OR ".join(
+        "(provider = ? AND post_id = ? AND raw_sha256 = ?)"
+        for _ in post_refs
+    )
+    parameters = [value for post_ref in post_refs for value in post_ref]
+    rows = list(conn.execute(
+        f"""SELECT DISTINCT provider, post_id, raw_json
+            FROM x_post_observation
+            WHERE {predicates}""",
+        parameters,
+    ).fetchall())
+    found_refs = {(str(row["provider"]), str(row["post_id"])) for row in rows}
+    missing = [
+        post_ref for post_ref in post_refs
+        if (post_ref[0], post_ref[1]) not in found_refs
+    ]
+    if feed_conn is not None and feed_run_id and missing:
+        feed_predicates = " OR ".join(
+            "(provider = ? AND post_id = ? AND raw_sha256 = ?)"
+            for _ in missing
+        )
+        feed_parameters = [value for post_ref in missing for value in post_ref]
+        rows.extend(
+            feed_conn.execute(
+                f"""SELECT DISTINCT provider, post_id, raw_json
+                    FROM feed_post
+                    WHERE run_id = ? AND ({feed_predicates})""",
+                (feed_run_id, *feed_parameters),
+            ).fetchall()
+        )
     artifacts: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str]] = set()
     for row in rows:
@@ -225,13 +315,28 @@ def envelope_from_event(
     *,
     day: str,
     raw_conn: sqlite3.Connection,
+    feed_conn: sqlite3.Connection | None = None,
+    feed_run_id: str | None = None,
 ) -> insight_triage.EnvelopeInput:
     root = item["root"]
     related = tuple(
         post for post in item["evidence"] if post["relationship"] != "retweet"
     )
-    post_ids = [str(root["post_id"]), *(str(post["post_id"]) for post in related)]
-    urls_by_post = _expanded_urls(raw_conn, post_ids)
+    posts = (root, *related)
+    post_refs = [
+        (
+            str(post.get("provider") or sources.PROVIDER),
+            str(post["post_id"]),
+            str(post["raw_sha256"]),
+        )
+        for post in posts
+    ]
+    urls_by_post = _expanded_urls(
+        raw_conn,
+        post_refs,
+        feed_conn=feed_conn,
+        feed_run_id=feed_run_id,
+    )
     context = root.get("context") or {}
     return insight_triage.EnvelopeInput(
         event_id=str(item["event_id"]),
@@ -259,10 +364,17 @@ def envelope_from_event(
         ),
         urls=tuple(
             {"post_id": post_id, "url": url}
-            for post_id in post_ids
-            for url in urls_by_post.get(post_id, [])
+            for provider, post_id, _raw_sha256 in post_refs
+            for url in urls_by_post.get((provider, post_id), [])
         ),
-        embedded_artifacts=tuple(_provider_artifacts(raw_conn, post_ids)),
+        embedded_artifacts=tuple(
+            _provider_artifacts(
+                raw_conn,
+                post_refs,
+                feed_conn=feed_conn,
+                feed_run_id=feed_run_id,
+            )
+        ),
     )
 
 
@@ -288,6 +400,236 @@ def _envelope_from_payload(payload: dict[str, Any]) -> insight_triage.EnvelopeIn
     )
 
 
+def _freeze_candidates(
+    *,
+    day: str,
+    limit: int,
+) -> tuple[
+    list[tuple[int, dict[str, Any], insight_triage.EnvelopeInput]],
+    list[dict[str, Any]],
+]:
+    payload = events_payload(
+        day=day,
+        lane="all",
+        sort="attention",
+        query="",
+        limit=limit,
+        offset=0,
+    )
+    items = payload["items"][:limit]
+    missing_snapshot_ids = [
+        str(item.get("event_id"))
+        for item in items
+        if not item.get("snapshot_content_sha256")
+    ]
+    if missing_snapshot_ids:
+        raise ValueError(
+            "event projection is missing snapshot_content_sha256 for: "
+            + ", ".join(missing_snapshot_ids[:5])
+        )
+    raw_conn = sqlite3.connect(x_content.DEFAULT_DB_PATH)
+    raw_conn.row_factory = sqlite3.Row
+    feed_conn = sqlite3.connect(signal_feed.DEFAULT_FEED_DB)
+    feed_conn.row_factory = sqlite3.Row
+    feed_run_id = str((payload.get("run") or {}).get("feed_run_id") or "")
+    if not feed_run_id:
+        raw_conn.close()
+        feed_conn.close()
+        raise ValueError("event projection is missing its feed_run_id")
+    try:
+        frozen = [
+            (
+                rank,
+                item,
+                envelope_from_event(
+                    item,
+                    day=day,
+                    raw_conn=raw_conn,
+                    feed_conn=feed_conn,
+                    feed_run_id=feed_run_id,
+                ),
+            )
+            for rank, item in enumerate(items, start=1)
+        ]
+    finally:
+        raw_conn.close()
+        feed_conn.close()
+    cohort = [
+        {
+            "rank": rank,
+            "event_id": envelope.event_id,
+            "root_post_id": envelope.root["post_id"],
+            "input_sha256": envelope.input_sha256,
+            "snapshot_content_sha256": str(item["snapshot_content_sha256"]),
+            "prompt_cache_key": insight_triage.prompt_cache_key(envelope.event_id),
+        }
+        for rank, item, envelope in frozen
+    ]
+    return frozen, cohort
+
+
+def _current_run_path(conn: sqlite3.Connection) -> Path | None:
+    row = conn.execute("PRAGMA database_list").fetchone()
+    if row is None or not row["file"]:
+        return None
+    return Path(str(row["file"])).resolve()
+
+
+def _reuse_completed_inputs(
+    conn: sqlite3.Connection,
+    *,
+    run_root: Path | None = None,
+) -> int:
+    """Reuse exact completed model inputs from compatible, complete prior runs."""
+    run_root = DEFAULT_RUN_ROOT if run_root is None else run_root
+    meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+    if meta is None or not run_root.is_dir():
+        return 0
+    current_path = _current_run_path(conn)
+    candidates: dict[tuple[str, str], dict[str, Any]] = {}
+    for path in run_root.glob("*/triage.db"):
+        try:
+            if current_path is not None and path.resolve() == current_path:
+                continue
+            source = sqlite3.connect(
+                f"file:{path.resolve().as_posix()}?mode=ro", uri=True
+            )
+            source.row_factory = sqlite3.Row
+            source_meta = source.execute(
+                "SELECT * FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+            if source_meta is None or any(
+                source_meta[key] != meta[key]
+                for key in (
+                    "model",
+                    "reasoning_effort",
+                    "prompt_version",
+                    "prompt_sha256",
+                    "schema_version",
+                )
+            ):
+                source.close()
+                continue
+            completed_count, total_count = source.execute(
+                """SELECT SUM(status = 'complete'), COUNT(*)
+                   FROM triage_item"""
+            ).fetchone()
+            if (
+                int(completed_count or 0) != int(source_meta["expected_count"])
+                or int(total_count) != int(source_meta["expected_count"])
+            ):
+                source.close()
+                continue
+            source_columns = {
+                str(row["name"])
+                for row in source.execute("PRAGMA table_info(triage_item)").fetchall()
+            }
+            # Old triage runs predate temporal snapshot identity. They are not
+            # safe reuse sources because identical rendered text can represent
+            # different exact relationship topology.
+            if "snapshot_content_sha256" not in source_columns:
+                source.close()
+                continue
+            response_id_expr = (
+                "response_id" if "response_id" in source_columns else "NULL"
+            )
+            cost_expr = (
+                "reported_cost_usd"
+                if "reported_cost_usd" in source_columns
+                else "NULL"
+            )
+            rows = source.execute(
+                f"""SELECT event_id, input_sha256, snapshot_content_sha256,
+                           decision, reason,
+                           {response_id_expr} AS response_id,
+                           {cost_expr} AS reported_cost_usd,
+                           completed_at, updated_at
+                    FROM triage_item
+                    WHERE status = 'complete'
+                      AND decision IN ('keep', 'drop')
+                      AND reason IS NOT NULL
+                      AND snapshot_content_sha256 IS NOT NULL"""
+            ).fetchall()
+            source.close()
+        except (OSError, sqlite3.Error):
+            continue
+        for row in rows:
+            value = {
+                "run_id": str(source_meta["run_id"]),
+                "event_id": str(row["event_id"]),
+                "response_id": row["response_id"],
+                "source_cost": row["reported_cost_usd"],
+                "decision": str(row["decision"]),
+                "reason": str(row["reason"]),
+                "sort_key": (
+                    str(row["completed_at"] or row["updated_at"] or ""),
+                    str(source_meta["run_id"]),
+                    str(row["event_id"]),
+                ),
+            }
+            input_key = (
+                str(row["snapshot_content_sha256"]),
+                str(row["input_sha256"]),
+            )
+            if (
+                input_key not in candidates
+                or value["sort_key"] > candidates[input_key]["sort_key"]
+            ):
+                candidates[input_key] = value
+    if not candidates:
+        return 0
+
+    pending = conn.execute(
+        """SELECT event_id, input_sha256, snapshot_content_sha256
+           FROM triage_item
+           WHERE status = 'pending'
+             AND snapshot_content_sha256 IS NOT NULL
+           ORDER BY current_rank, event_id"""
+    ).fetchall()
+    now = _now()
+    reused = 0
+    with conn:
+        for row in pending:
+            source = candidates.get(
+                (
+                    str(row["snapshot_content_sha256"]),
+                    str(row["input_sha256"]),
+                )
+            )
+            if source is None:
+                continue
+            conn.execute(
+                """UPDATE triage_item
+                   SET status = 'complete', attempts = 0,
+                       decision = ?, reason = ?,
+                       response_id = NULL, response_model = ?,
+                       input_tokens = 0, cached_tokens = 0,
+                       cache_write_tokens = 0, output_tokens = 0,
+                       reported_cost_usd = 0.0, request_tags_json = '[]',
+                       error_type = NULL, error_message = NULL,
+                       completed_at = ?, reused_from_run_id = ?,
+                       reused_from_event_id = ?, reused_from_response_id = ?,
+                       reused_from_reported_cost_usd = ?, reused_at = ?,
+                       updated_at = ?
+                   WHERE event_id = ? AND status = 'pending'""",
+                (
+                    source["decision"],
+                    source["reason"],
+                    str(meta["model"]),
+                    now,
+                    source["run_id"],
+                    source["event_id"],
+                    source["response_id"],
+                    source["source_cost"],
+                    now,
+                    now,
+                    row["event_id"],
+                ),
+            )
+            reused += 1
+    return reused
+
+
 def freeze_run(
     conn: sqlite3.Connection,
     *,
@@ -299,6 +641,8 @@ def freeze_run(
 ) -> int:
     if limit < 1:
         raise ValueError("limit must be positive")
+    frozen, cohort = _freeze_candidates(day=day, limit=limit)
+    cohort_sha256 = _sha256(_canonical_json(cohort))
     existing = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
     if existing is not None:
         expected = {
@@ -319,36 +663,16 @@ def freeze_run(
                 "run database does not match current request: "
                 + ", ".join(mismatches)
             )
+        if (
+            int(existing["expected_count"]) != len(frozen)
+            or str(existing["cohort_sha256"]) != cohort_sha256
+        ):
+            raise ValueError(
+                "run database cohort no longer matches the current event projection; "
+                "use a new run_id"
+            )
+        _reuse_completed_inputs(conn)
         return int(existing["expected_count"])
-
-    payload = events_payload(
-        day=day,
-        lane="all",
-        sort="attention",
-        query="",
-        limit=limit,
-        offset=0,
-    )
-    items = payload["items"][:limit]
-    raw_conn = sqlite3.connect(x_content.DEFAULT_DB_PATH)
-    raw_conn.row_factory = sqlite3.Row
-    try:
-        frozen = [
-            (rank, item, envelope_from_event(item, day=day, raw_conn=raw_conn))
-            for rank, item in enumerate(items, start=1)
-        ]
-    finally:
-        raw_conn.close()
-    cohort = [
-        {
-            "rank": rank,
-            "event_id": envelope.event_id,
-            "root_post_id": envelope.root["post_id"],
-            "input_sha256": envelope.input_sha256,
-            "prompt_cache_key": insight_triage.prompt_cache_key(envelope.event_id),
-        }
-        for rank, _, envelope in frozen
-    ]
     now = _now()
     with conn:
         conn.execute(
@@ -367,7 +691,7 @@ def freeze_run(
                 insight_triage.prompt_sha256(),
                 insight_triage.SCHEMA_VERSION,
                 limit,
-                _sha256(_canonical_json(cohort)),
+                cohort_sha256,
                 len(frozen),
                 now,
                 now,
@@ -376,9 +700,10 @@ def freeze_run(
         conn.executemany(
             """INSERT INTO triage_item
                (event_id, current_rank, root_post_id, root_url,
-                envelope_json, input_text, input_sha256, prompt_cache_key,
+                envelope_json, input_text, input_sha256,
+                snapshot_content_sha256, prompt_cache_key,
                 updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             [
                 (
                     envelope.event_id,
@@ -388,12 +713,14 @@ def freeze_run(
                     _canonical_json(_envelope_payload(envelope)),
                     insight_triage.render_input(envelope),
                     envelope.input_sha256,
+                    str(item["snapshot_content_sha256"]),
                     insight_triage.prompt_cache_key(envelope.event_id),
                     now,
                 )
                 for rank, item, envelope in frozen
             ],
         )
+    _reuse_completed_inputs(conn)
     return len(frozen)
 
 
@@ -406,6 +733,7 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
                   SUM(status = 'pending') AS pending,
                   SUM(status = 'complete') AS complete,
                   SUM(status = 'failed') AS failed,
+                  SUM(reused_from_run_id IS NOT NULL) AS reused,
                   SUM(decision = 'keep') AS kept,
                   SUM(decision = 'drop') AS dropped,
                   SUM(COALESCE(input_tokens, 0)) AS input_tokens,
