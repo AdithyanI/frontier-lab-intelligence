@@ -114,7 +114,7 @@ function LiveSystemMap() {
   ]
   const nextLayer = [
     { x: 28, label: 'Primary artifacts', live: true },
-    { x: 370, label: 'Cited insights', live: false },
+    { x: 370, label: '4 verified insights', live: true },
     { x: 712, label: 'Investor + engineer delivery', live: false },
   ]
 
@@ -122,7 +122,7 @@ function LiveSystemMap() {
     <svg
       viewBox="0 0 1080 392"
       role="img"
-      aria-label="The live system: the screened Registry determines whose public X evidence is stored, exact relationships organize that evidence, the Feed makes it inspectable, triage routes each candidate to keep or drop with a reason, and kept evidence enters a canonical primary-artifact catalog. Cited insights and delivery are planned next."
+      aria-label="The live system: the screened Registry determines whose public X evidence is stored, exact relationships organize that evidence, the Feed makes it inspectable, triage routes each candidate, artifacts can strengthen accepted evidence, and cited extraction publishes only claims whose exact quote binds to a frozen source. Delivery is planned next."
     >
       <defs>
         <marker id="flow-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -160,7 +160,7 @@ function LiveSystemMap() {
       <Arrow x1={824} x2={846} />
 
       <line x1="28" y1="238" x2="1052" y2="238" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.45" />
-      <text x="28" y="266" fontFamily={MONO} fontSize="11" fill={MUTED} letterSpacing="0.08em">ARTIFACT CATALOG LIVE · CITED WRITING NEXT</text>
+      <text x="28" y="266" fontFamily={MONO} fontSize="11" fill={MUTED} letterSpacing="0.08em">ACCEPTED EVIDENCE · OPTIONAL ARTIFACT · EXACT CITATION</text>
       <g>
         {nextLayer.map((box, index) => (
           <g key={box.label} opacity={box.live ? 1 : 0.62}>
@@ -175,13 +175,14 @@ function LiveSystemMap() {
               strokeDasharray={box.live ? undefined : '5 5'}
             />
             <text x={box.x + 140} y="315" textAnchor="middle" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>{box.label}</text>
-            {index < nextLayer.length - 1 && (
-              <line x1={box.x + 280} y1="310" x2={nextLayer[index + 1].x - 8} y2="310" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" markerEnd="url(#flow-arrow-muted)" />
-            )}
+            {index < nextLayer.length - 1 && (() => {
+              const liveLink = box.live && nextLayer[index + 1].live
+              return <line x1={box.x + 280} y1="310" x2={nextLayer[index + 1].x - 8} y2="310" stroke={liveLink ? BLUE_MID : MUTED} strokeWidth="1.2" strokeDasharray={liveLink ? undefined : '5 5'} markerEnd={liveLink ? 'url(#flow-arrow)' : 'url(#flow-arrow-muted)'} />
+            })()}
           </g>
         ))}
       </g>
-      <text x="28" y="372" fontFamily={UI} fontSize="12.5" fill={MUTED}>Triage records keep or drop with a reason. Kept envelopes resolve into the artifact catalog; cited writing begins next.</text>
+      <text x="28" y="372" fontFamily={UI} fontSize="12.5" fill={MUTED}>The first proof published 4 of 5 candidates. One model-written quote was rejected because it did not exactly match frozen evidence.</text>
     </svg>
   )
 }
@@ -555,7 +556,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--lead" id="system-today">
         <div className="arch-section-head">
           <h2 className="arch-h">The evidence-to-insight path</h2>
-          <p className="arch-p">Evidence stays inspectable before judgment. Triage routes candidates, kept evidence enters the artifact catalog, and cited writing begins next.</p>
+          <p className="arch-p">Evidence stays inspectable before judgment. Accepted envelopes may gain artifact context; only claims with an exact source-bound quote reach Insights.</p>
         </div>
         <div className="arch-canvas"><LiveSystemMap /></div>
       </section>
