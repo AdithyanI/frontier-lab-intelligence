@@ -7,10 +7,12 @@ Capital AI Engineer case study.
 ## Start Here
 
 1. `docs/references/case-prompt.md` - external requirements.
-2. Active `docs/projects/<project>/tasks.md` - execution state; use `$project`.
-3. `docs/architecture/overview.md` - system map.
-4. `PRODUCT.md` / `DESIGN.md` - product and UI contracts.
-5. `docs/references/research-notes.md` / `docs/references/build-log.md` -
+2. `docs/STATUS.md` - conceptual handoff: what is proven, active, missing, and
+   deliberately deferred.
+3. Active `docs/projects/<project>/tasks.md` - execution state; use `$project`.
+4. `docs/architecture/overview.md` - system map.
+5. `PRODUCT.md` / `DESIGN.md` - product and UI contracts.
+6. `docs/references/research-notes.md` / `docs/references/build-log.md` -
    provenance and history.
 
 If docs conflict with chat, note it in the active tracker and follow the
@@ -55,6 +57,9 @@ does not improve rubric coverage, demo proof, or interview discussion. See
   from `cached_tokens`; do not assume an eligible prompt is getting cache hits.
 - Update `docs/architecture/overview.md` when pipeline, schema, source classes,
   or module boundaries change.
+- Update `docs/STATUS.md` only when the conceptual system status, active
+  critical path, or planned/proven boundary changes; do not turn it into a
+  second progress log.
 - Run `scripts/check-fast.sh` before handoff, or record why validation was
   skipped in the active tracker.
 

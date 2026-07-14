@@ -252,6 +252,12 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [SYSTEM-STATUS-HANDOFF] Added `docs/STATUS.md` as the concise
+  cross-project orientation for cold agents and system-level planning. It
+  distinguishes proven foundations, the active cited-insight boundary,
+  submission-critical missing work, and deliberate deferrals; `AGENTS.md` now
+  routes to it before the active tracker. The tracker remains the execution
+  source of truth and the build log remains chronological history.
 - 2026-07-14: [FEED-SEVEN-DATE-NAVIGATOR] Replaced the unbounded wrapping date
   grid with a fixed seven-date navigator anchored to the newest complete days.
   Older/newer buttons page through non-overlapping available-date windows,
