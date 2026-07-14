@@ -28,7 +28,7 @@ DEFAULT_TRIAGE_DB = (
     / "triage.db"
 )
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
-DEFAULT_RUN_ID = "insight-v1-oracle-2026-07-11"
+DEFAULT_RUN_ID = "insight-v1.1-oracle-2026-07-11"
 DEFAULT_DAY = "2026-07-11"
 ORACLE_EVENT_IDS = (
     "4eea8e96c4ba717b4ef2246b9ebaf3ef7849a00f484e95132a62210fa8e25e3a",
@@ -90,6 +90,7 @@ CREATE TABLE IF NOT EXISTS insight_item (
     output_tokens INTEGER,
     reported_cost_usd REAL,
     request_tags_json TEXT,
+    raw_output_text TEXT,
     error_type TEXT,
     error_message TEXT,
     completed_at TEXT,
@@ -142,6 +143,13 @@ def connect_run(path: Path | str) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(SCHEMA)
+    existing_columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(insight_item)").fetchall()
+    }
+    if "raw_output_text" not in existing_columns:
+        conn.execute("ALTER TABLE insight_item ADD COLUMN raw_output_text TEXT")
+        conn.commit()
     return conn
 
 
@@ -424,6 +432,7 @@ def _store_success(
                    response_model = ?, input_tokens = ?, cached_tokens = ?,
                    cache_write_tokens = ?, output_tokens = ?,
                    reported_cost_usd = ?, request_tags_json = ?,
+                   raw_output_text = ?,
                    error_type = NULL, error_message = NULL,
                    completed_at = ?, updated_at = ?
                WHERE event_id = ?""",
@@ -448,6 +457,7 @@ def _store_success(
                 result["output_tokens"],
                 result["reported_cost_usd"],
                 _canonical_json(result["request_tags"]),
+                result["raw_output_text"],
                 now,
                 now,
                 row["event_id"],
@@ -486,14 +496,56 @@ def run_pending(
             status = "complete"
         except Exception as exc:
             now = _now()
+            rejected = (
+                exc.result
+                if isinstance(exc, cited_insights.CitationVerificationError)
+                else None
+            )
             with conn:
-                conn.execute(
-                    """UPDATE insight_item
-                       SET status = 'failed', attempts = attempts + 1,
-                           error_type = ?, error_message = ?, updated_at = ?
-                       WHERE event_id = ?""",
-                    (type(exc).__name__, str(exc), now, row["event_id"]),
-                )
+                if rejected is None:
+                    conn.execute(
+                        """UPDATE insight_item
+                           SET status = 'failed', attempts = attempts + 1,
+                               error_type = ?, error_message = ?, updated_at = ?
+                           WHERE event_id = ?""",
+                        (type(exc).__name__, str(exc), now, row["event_id"]),
+                    )
+                else:
+                    conn.execute(
+                        """UPDATE insight_item
+                           SET status = 'failed', attempts = attempts + 1,
+                               outcome = ?, claim = ?, why_it_matters = ?,
+                               investment_implication = ?,
+                               engineering_implication = ?, supporting_quote = ?,
+                               response_id = ?, response_model = ?,
+                               input_tokens = ?, cached_tokens = ?,
+                               cache_write_tokens = ?, output_tokens = ?,
+                               reported_cost_usd = ?, request_tags_json = ?,
+                               raw_output_text = ?, error_type = ?,
+                               error_message = ?, updated_at = ?
+                           WHERE event_id = ?""",
+                        (
+                            rejected["outcome"],
+                            rejected["claim"],
+                            rejected["why_it_matters"],
+                            rejected["investment_implication"],
+                            rejected["engineering_implication"],
+                            rejected["supporting_quote"],
+                            rejected["response_id"],
+                            rejected["response_model"],
+                            rejected["input_tokens"],
+                            rejected["cached_tokens"],
+                            rejected["cache_write_tokens"],
+                            rejected["output_tokens"],
+                            rejected["reported_cost_usd"],
+                            _canonical_json(rejected["request_tags"]),
+                            rejected["raw_output_text"],
+                            type(exc).__name__,
+                            str(exc),
+                            now,
+                            row["event_id"],
+                        ),
+                    )
             status = "failed"
         print(
             _canonical_json(

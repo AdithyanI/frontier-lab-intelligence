@@ -15,6 +15,8 @@ The claim must be falsifiable or auditable. Name the relevant actor, model, prod
 <citation>
 Return one supporting_quote copied exactly and contiguously from one supplied evidence block. Do not paraphrase, repair spelling, expand contractions, decode HTML entities, normalize punctuation, add ellipses, combine fragments, or quote text that is not present verbatim. The application will reject the complete result unless the quote is an exact substring of a supplied block. Choose a quote that directly supports the claim rather than merely mentioning the topic.
 
+Text inside each VERBATIM_TEXT element is the literal source. Before returning, check supporting_quote against that text character for character. Preserve its leading words, capitalization, punctuation, apostrophes, and Unicode characters. If the useful sentence begins with a list marker or a connective such as “And,” either copy that opening exactly or choose a shorter contiguous fragment that does not require changing its first character. Never capitalize a lowercase source fragment to make it read like a standalone sentence. A precise fragment is better than a polished mismatch.
+
 You do not return source IDs or URLs. The application owns provenance and will bind the exact quote to the matching frozen source. If no exact supplied span can support a safe useful claim, return no_extractable_insight with every other field null.
 </citation>
 

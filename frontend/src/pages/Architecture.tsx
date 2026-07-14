@@ -353,57 +353,103 @@ function CurrentDataModel() {
 }
 
 function NetworkRankFigure() {
-  const insiders = [110, 142, 174, 206, 238]
-  const crowd = [
-    { x: 596, y: 96, r: 5 },
-    { x: 622, y: 118, r: 4 },
-    { x: 590, y: 142, r: 4.5 },
-    { x: 626, y: 164, r: 4 },
-    { x: 598, y: 188, r: 5 },
-    { x: 630, y: 210, r: 4 },
-    { x: 606, y: 230, r: 4.5 },
-  ]
+  const screenedFollowers = [108, 138, 168, 198, 228]
+  const publicCrowd = Array.from({ length: 35 }, (_, index) => ({
+    x: 582 + (index % 7) * 20,
+    y: 102 + Math.floor(index / 7) * 24,
+  }))
+  const screenedCrowdIndex = 25
+  const supportTicks = [0, 1, 2, 3, 4]
   return (
     <svg
-      viewBox="0 0 1080 300"
+      viewBox="0 0 1080 320"
       role="img"
-      aria-label="Why an account ranks high: an account followed by five screened Registry members ranks higher than an account followed by a large public crowd but only one screened member. Public follower count is not an input."
+      aria-label="Why an account ranks higher: five screened Registry followers count as five signals for Account A. Account B has a large public crowd, but only its one screened Registry follower counts. Public audience size is ignored."
     >
       <defs>
         <marker id="rank-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
         </marker>
       </defs>
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHY AN ACCOUNT RANKS HIGH · NETWORK RANK</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHY AN ACCOUNT RANKS HIGHER · COUNTED NETWORK SUPPORT</text>
+      <line x1="540" y1="60" x2="540" y2="276" stroke={MUTED} strokeWidth="1" opacity="0.22" />
 
-      {/* Account A: five screened insiders */}
-      <text x="100" y="76" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">SCREENED MEMBERS</text>
-      {insiders.map((y) => (
+      {/* Account A: every follower shown is screened and counted. */}
+      <text x="70" y="76" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">5 SCREENED REGISTRY FOLLOWERS</text>
+      {screenedFollowers.map((y) => (
         <g key={`in-${y}`}>
-          <circle cx="118" cy={y + 20} r="7" fill={BLUE} />
-          <line x1="130" y1={y + 20} x2="310" y2="168" stroke={BLUE_MID} strokeWidth="1.2" opacity="0.7" markerEnd="url(#rank-arrow)" />
+          <circle cx="82" cy={y} r="7" fill={BLUE} />
+          <line x1="94" y1={y} x2="286" y2="168" stroke={BLUE_MID} strokeWidth="1.2" opacity="0.72" markerEnd="url(#rank-arrow)" />
         </g>
       ))}
-      <rect x="318" y="140" width="150" height="56" fill={INK} />
-      <text x="343" y="173" fontFamily={UI} fontSize="15" fontWeight="600" fill="#fff">Account A</text>
-      <rect x="318" y="212" width="150" height="8" fill="none" stroke={MUTED} strokeWidth="1" opacity="0.5" />
-      <rect x="318" y="212" width="132" height="8" fill={BLUE} />
-      <text x="318" y="244" fontFamily={UI} fontSize="12.5" fill={INK}>5 screened followers → ranks high</text>
-
-      {/* Account B: big public crowd, one insider */}
-      <text x="588" y="76" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">PUBLIC CROWD</text>
-      {crowd.map((c) => (
-        <circle key={`cr-${c.x}-${c.y}`} cx={c.x} cy={c.y} r={c.r} fill="none" stroke={MUTED} strokeWidth="1.2" opacity="0.55" />
+      <rect x="296" y="138" width="174" height="60" fill={INK} />
+      <text x="320" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill="#fff">Account A</text>
+      <text x="296" y="222" fontFamily={MONO} fontSize="9" fill={BLUE_INK} letterSpacing="0.06em">COUNTED SUPPORT</text>
+      {supportTicks.map((tick) => (
+        <rect key={`a-tick-${tick}`} x={296 + tick * 29} y="232" width="23" height="8" fill={BLUE} />
       ))}
-      <circle cx="612" cy="258" r="7" fill={BLUE} />
-      <line x1="624" y1="256" x2="800" y2="180" stroke={BLUE_MID} strokeWidth="1.2" opacity="0.7" markerEnd="url(#rank-arrow)" />
-      <rect x="808" y="140" width="150" height="56" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="833" y="173" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Account B</text>
-      <rect x="808" y="212" width="150" height="8" fill="none" stroke={MUTED} strokeWidth="1" opacity="0.5" />
-      <rect x="808" y="212" width="26" height="8" fill={BLUE} />
-      <text x="808" y="244" fontFamily={UI} fontSize="12.5" fill={INK}>1 screened follower → ranks low</text>
+      <text x="296" y="264" fontFamily={UI} fontSize="12.5" fontWeight="600" fill={INK}>5 counted → higher network rank</text>
 
-      <text x="30" y="288" fontFamily={UI} fontSize="12.5" fill={MUTED}>Rank uses screened Registry sources only — a large public follower count is not an input.</text>
+      {/* Account B: the large public crowd follows it, but only one node is screened. */}
+      <text x="582" y="76" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">LARGE PUBLIC AUDIENCE</text>
+      {publicCrowd.map((node, index) => (
+        index === screenedCrowdIndex ? null : (
+          <line
+            key={`crowd-line-${index}`}
+            x1={node.x + 6}
+            y1={node.y}
+            x2="794"
+            y2="168"
+            stroke={MUTED}
+            strokeWidth="0.9"
+            strokeDasharray="2 5"
+            opacity="0.16"
+          />
+        )
+      ))}
+      {publicCrowd.map((node, index) => (
+        <circle
+          key={`crowd-node-${index}`}
+          cx={node.x}
+          cy={node.y}
+          r={index === screenedCrowdIndex ? 7 : 4.5}
+          fill={index === screenedCrowdIndex ? BLUE : '#fff'}
+          stroke={index === screenedCrowdIndex ? BLUE : MUTED}
+          strokeWidth={index === screenedCrowdIndex ? 0 : 1}
+          opacity={index === screenedCrowdIndex ? 1 : 0.52}
+        />
+      ))}
+      <line
+        x1={publicCrowd[screenedCrowdIndex].x + 12}
+        y1={publicCrowd[screenedCrowdIndex].y}
+        x2="794"
+        y2="168"
+        stroke={BLUE_MID}
+        strokeWidth="1.4"
+        markerEnd="url(#rank-arrow)"
+      />
+      <text x="582" y="232" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.04em">○ PUBLIC · NOT COUNTED</text>
+      <text x="582" y="250" fontFamily={MONO} fontSize="8.5" fill={BLUE_INK} letterSpacing="0.04em">● SCREENED · COUNTED ×1</text>
+
+      <rect x="804" y="138" width="174" height="60" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
+      <text x="828" y="174" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Account B</text>
+      <text x="804" y="222" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">COUNTED SUPPORT</text>
+      {supportTicks.map((tick) => (
+        <rect
+          key={`b-tick-${tick}`}
+          x={804 + tick * 29}
+          y="232"
+          width="23"
+          height="8"
+          fill={tick === 0 ? BLUE : '#fff'}
+          stroke={tick === 0 ? BLUE : MUTED}
+          strokeWidth={tick === 0 ? 0 : 1}
+          opacity={tick === 0 ? 1 : 0.38}
+        />
+      ))}
+      <text x="804" y="264" fontFamily={UI} fontSize="12.5" fill={INK}>1 counted → lower network rank</text>
+
+      <text x="30" y="306" fontFamily={UI} fontSize="12.5" fill={MUTED}>Five screened signals outrank one — regardless of public audience size.</text>
     </svg>
   )
 }

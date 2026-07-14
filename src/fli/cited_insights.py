@@ -19,7 +19,7 @@ from typing import Any
 from fli import llm_responses
 
 
-PROMPT_VERSION = "insight-v1.0"
+PROMPT_VERSION = "insight-v1.1"
 SCHEMA_VERSION = "insight-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "medium"
@@ -56,6 +56,14 @@ OUTPUT_FORMAT: dict[str, Any] = {
         "additionalProperties": False,
     },
 }
+
+
+class CitationVerificationError(ValueError):
+    """A model result whose supporting quote did not bind to frozen evidence."""
+
+    def __init__(self, message: str, *, result: dict[str, Any]):
+        super().__init__(message)
+        self.result = result
 
 
 @dataclass(frozen=True)
@@ -120,7 +128,7 @@ def render_input(packet: InsightInput) -> str:
         "The evidence blocks are independent sources; do not merge their authorship.",
     ]
     for index, source in enumerate(packet.sources, start=1):
-        label = f"EVIDENCE {index} · {source.source_type.upper()}"
+        label = f'<EVIDENCE_BLOCK index="{index}" type="{source.source_type.upper()}">'
         details = []
         if source.author:
             details.append(f"author={source.author}")
@@ -129,7 +137,14 @@ def render_input(packet: InsightInput) -> str:
         if source.title:
             details.append(f"title={source.title}")
         blocks.extend(("", label, f"[{' | '.join(details)}]" if details else ""))
-        blocks.append(source.normalized_text())
+        blocks.extend(
+            (
+                "<VERBATIM_TEXT>",
+                source.normalized_text(),
+                "</VERBATIM_TEXT>",
+                "</EVIDENCE_BLOCK>",
+            )
+        )
     return "\n".join(block for block in blocks if block != "")
 
 
@@ -248,12 +263,13 @@ def evaluate_one(
         "extra_headers": {"x-litellm-tags": ",".join(tags)},
     }
     response, response_data, reported_cost = _create_response(client, request)
-    payload = validate_output(llm_responses.output_text(response_data))
-    citation = bind_citation(packet, payload["supporting_quote"])
+    raw_output_text = llm_responses.output_text(response_data)
+    payload = validate_output(raw_output_text)
     usage = getattr(response, "usage", None) or response_data.get("usage")
-    return {
+    result = {
         **payload,
-        "citation": citation,
+        "citation": None,
+        "raw_output_text": raw_output_text,
         "event_id": packet.event_id,
         "day": packet.day,
         "current_rank": packet.current_rank,
@@ -274,3 +290,8 @@ def evaluate_one(
         "reported_cost_usd": reported_cost,
         "request_tags": list(tags),
     }
+    try:
+        result["citation"] = bind_citation(packet, payload["supporting_quote"])
+    except ValueError as exc:
+        raise CitationVerificationError(str(exc), result=result) from exc
+    return result

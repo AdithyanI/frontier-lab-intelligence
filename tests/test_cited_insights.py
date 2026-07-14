@@ -110,6 +110,19 @@ def test_non_exact_quote_is_rejected():
         cited_insights.bind_citation(make_packet(), "35 percent reduction")
 
 
+def test_evaluation_error_preserves_rejected_model_output_for_audit():
+    payload = insight_payload()
+    payload["supporting_quote"] = "35 percent reduction"
+    client = FakeClient(payload)
+
+    with pytest.raises(cited_insights.CitationVerificationError) as captured:
+        cited_insights.evaluate_one(client, make_packet(), run="oracle-run")
+
+    assert captured.value.result["supporting_quote"] == "35 percent reduction"
+    assert captured.value.result["response_id"] == "resp-insight-1"
+    assert captured.value.result["reported_cost_usd"] == pytest.approx(0.0031)
+
+
 def test_no_extractable_insight_requires_every_other_field_to_be_null():
     payload = {field: None for field in cited_insights.OUTPUT_FIELDS}
     payload["outcome"] = "no_extractable_insight"
@@ -138,4 +151,3 @@ def test_request_uses_cacheable_prefix_tags_and_verified_citation():
     assert result["citation"]["source_id"] == "post-1"
     assert result["cached_tokens"] == 1_280
     assert result["reported_cost_usd"] == pytest.approx(0.0031)
-

@@ -89,6 +89,7 @@ def test_run_is_resumable_and_persists_application_bound_citation(tmp_path, monk
             "output_tokens": 100,
             "reported_cost_usd": 0.01,
             "request_tags": ["app:frontier-lab-intelligence"],
+            "raw_output_text": '{"outcome":"insight"}',
         }
 
     monkeypatch.setattr(cited_insights, "evaluate_one", fake_evaluate)
