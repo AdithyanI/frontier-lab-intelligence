@@ -252,6 +252,14 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [FEED-MENUS-ALIGNED] Adi flagged that the open Audit and Sort
+  controls felt visually unrelated to the rest of the product. Reworked the
+  shared Feed disclosure treatment from floating rounded cards into the
+  established editorial vocabulary: square ink rules, flat hairline-separated
+  rows, sand hover, and ink selection. Both menus now open from their left
+  edge, keeping the Audit panel inside the narrower in-app Browser viewport;
+  live verification covered both open states, selected-state semantics,
+  outside-menu exclusivity, Escape dismissal, and browser logs.
 - 2026-07-13: [TRIAGE-V2-EXPANSION-STARTED] Adi asked for a simple, resumable
   full learning pass while away, bounded to the top 1,000 attention envelopes
   per complete day. Measured the exact cohort at 6,445 envelopes. Official
