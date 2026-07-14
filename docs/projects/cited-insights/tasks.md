@@ -99,13 +99,13 @@ reads first.
 
 ## Milestones
 
-- [ ] M1 — Extraction pipeline (target Mon–Tue 07-14/15). Acceptance:
+- [x] M1 — Extraction pipeline (target Mon–Tue 07-14/15). Acceptance:
   minimal versioned `insight-v1` schema + prompt, deterministic evidence
   bundles for the five-record oracle, application-bound citation verification,
   and a resumable run store with cost/usage telemetry; the 2026-07-11 run
   finds the audit's strong candidates. Validate: pytest fixtures + manual
   audit comparison.
-- [ ] M2 — Insights surface (target Wed 07-16). Acceptance: Insights page
+- [x] M2 — Insights surface (target Wed 07-16). Acceptance: Insights page
   with per-day 3–5 insights and citation click-through to the verified X or
   artifact source; desktop browser check. Validate: `scripts/check-fast.sh`
   + live check at 127.0.0.1:8797.
@@ -299,20 +299,20 @@ reads first.
 | done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
 | done | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle expectations](resources/insight-oracle-2026-07-11.md) |
 | done | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md) |
-| in_progress | Expose only the four citation-verified records through an Insights API and audit-first page; update the Architecture visual to show envelope evidence plus optional artifact strengthening. | parent | [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md) |
+| done | Expose only the four citation-verified records through a dated Insights API and audit-first page; update the Architecture visual to show envelope evidence plus optional artifact strengthening. | parent | [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md) |
 
 ## Backlog / Remaining Work
 
 - [x] Relevance/substance gate with recorded reasons per envelope.
 - [x] Cross-day run with the unchanged rubric (seven complete days, top 100 each).
-- [ ] Insights API + page with citation click-through.
+- [x] Insights API + page with citation click-through and materialized-day navigation.
 - [ ] Daily briefing renderer + CLI command.
 - [ ] Blind/stratified evaluation pass; record under `resources/`.
 - [ ] Local alert/outbox proof with no external send.
 - [ ] Workflow tokenomics summary across the final demonstrated paths.
 - [ ] `docs/final-report.md`, public reviewer README, and clean-checkout package
   smoke path; check against case-prompt requirements.
-- [ ] Architecture page: turn the dashed "cited insights" boxes solid when
+- [x] Architecture page: turn the dashed "cited insights" boxes solid when
   live; update `docs/architecture/overview.md`.
 - [ ] Closeout: review learnings, archive tracker.
 

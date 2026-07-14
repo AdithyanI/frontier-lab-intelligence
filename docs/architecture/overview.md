@@ -5,9 +5,11 @@ shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Current system: the Registry, immutable trusted-following snapshot, X evidence
 store, exact event projection, rank-first Feed view, keep/drop triage, and
-canonical artifact library are implemented and inspectable. The active product
-boundary is cited insight extraction: the repository has not yet demonstrated
-3–5 excellent primary-source-cited insights per day or their delivery. See
+canonical artifact library are implemented and inspectable. The first bounded
+cited-insight proof is also live: four of five frozen candidates passed exact
+application-owned citation binding and appear in a dated Insights audit
+surface. The active boundary is generalizing that quality to another day and
+delivery. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.

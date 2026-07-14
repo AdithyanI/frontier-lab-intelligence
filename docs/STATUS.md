@@ -41,7 +41,8 @@ Registry
 ```
 
 The stored-X and optional canonical-artifact evidence paths are implemented.
-Cited insight extraction and delivery are the active missing boundary.
+The first five-record cited-extraction proof and its audit UI are now live;
+generalizing that proof to another day and delivery remains the active boundary.
 
 ## Where the System Stands
 
@@ -54,8 +55,8 @@ Cited insight extraction and delivery are the active missing boundary.
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Keep/drop triage | Evaluated routing layer | `gpt-5.4-mini` through LiteLLM returns only `decision` and `reason`; runs are resumable, tagged, cache-aware, and auditable. The corrected run evaluated 8,097 envelopes with zero failures. This validates execution, not downstream insight quality. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Cited insights | Active project | The schema and implementation brief exist, but the five-record extraction oracle has not yet proved the full claim -> citation -> implication path. |
-| Insights UI + briefing | Not built | The final 3–5-insight daily surface, reproducible briefing artifact, persona framing, and evaluation evidence remain. |
+| Cited insights | Bounded proof live | `insight-v1.1` ran over the frozen five-record oracle through `gpt-5.4-mini`; application code published four exact-bound citations and retained one exact-span failure for calibration. Three of five cache-eligible calls read cached tokens; proxy-reported cost was $0.024084. |
+| Insights UI + briefing | Initial UI live; briefing missing | The Insights API and dated audit surface expose only the four citation-verified records with direct evidence links and both audience lenses. A blind second day, reproducible briefing, and broader evaluation remain. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -64,13 +65,15 @@ current databases or APIs before using them as present-tense product claims.
 ## The Most Important Unproven Claim
 
 The repository has proved collection, identity, graph support, exact grouping,
-temporal correctness, daily-score ordering, triage, and artifact storage. It has
-not yet proved that the resulting evidence reliably yields 3–5 excellent,
-primary-source-cited insights per day.
+temporal correctness, daily-score ordering, triage, artifact storage, and one
+bounded four-insight cited extraction. It has not yet proved that the same
+quality reliably yields 3–5 excellent, primary-source-cited insights across
+days.
 
-That is now the critical path. The next useful experiment is the five-record
-cited-extraction oracle over corrected snapshot-bound envelopes, strengthened
-by the shared artifact catalog when an artifact is available. It should answer:
+That is now the critical path. The next useful experiment is to review the
+first prompt/schema against its four published records and one honest citation
+miss, then run one blind day without weakening application-owned citation
+verification. It should answer:
 
 1. Can the system state a concrete claim without inventing evidence?
 2. Can every shipped claim quote and link to checkable primary evidence—an
@@ -87,8 +90,8 @@ redesign unless this oracle exposes a concrete dependency.
 
 The active tracker owns the detail. At system level, the remaining proof is:
 
-1. Run the five-record extraction oracle and freeze `insight-v1` only after
-   its citations survive inspection.
+1. Review the bounded `insight-v1.1` proof and freeze or revise the prompt only
+   from the recorded four successes and one exact-span miss.
 2. Produce 3–5 primary-source-cited insights for 2026-07-11 and one blind day.
 3. Ship the Insights surface and one reproducible daily briefing.
 4. Record citation validity, human worth-attention judgment, hallucination
@@ -117,9 +120,9 @@ case-study thesis.
 The only active tracker is
 [`docs/projects/cited-insights/tasks.md`](projects/cited-insights/tasks.md).
 Its current batch owns the executable next step: use the frozen
-[`five-record oracle resume packet`](projects/cited-insights/resources/oracle-resume.md)
-to run the extraction oracle, then build the Insights surface, one daily
-briefing, evaluation evidence, and the submission package.
+[`oracle evaluation`](projects/cited-insights/resources/insight-oracle-evaluation-2026-07-14.md)
+and live Insights surface to review the prompt/schema, then run one blind day,
+build one daily briefing, and finish the evaluation and submission package.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

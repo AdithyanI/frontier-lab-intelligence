@@ -178,7 +178,7 @@ export default function Insights() {
       </header>
 
       {(!dates || dates.available) && (
-        <section className="feed-calendar" aria-label="Available cited insight dates">
+        <section className="feed-calendar insight-calendar" aria-label="Available cited insight dates">
           <DateNavigator
             dates={visibleDates}
             selectedDate={selectedDate}
