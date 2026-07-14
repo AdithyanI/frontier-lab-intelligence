@@ -119,7 +119,8 @@ secret flags are deliberately absent.
 
 The always-on app exposes the catalog at `/artifacts`, backed by the read-only
 `/api/artifacts` projection. The initial surface is intentionally narrow: one
-chronological row per canonical artifact, its fetch-oriented kind, the source
+chronological row per canonical artifact ordered by its latest source
+observation (never by mutable retrieval time), its fetch-oriented kind, the source
 observation that found it, and its current retrieval state. Expanding a row
 shows canonical and source URLs, first-seen time, retrieval method, snapshot
 size, and any current error. It does not rank, summarize, or classify artifact

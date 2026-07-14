@@ -143,7 +143,11 @@ def artifacts_payload(
                LEFT JOIN ranked_fetch fetch
                  ON fetch.artifact_id = artifact.artifact_id
                 AND fetch.ordinal = 1
-               ORDER BY artifact.last_seen_at DESC, artifact.artifact_id
+               ORDER BY COALESCE(
+                            rollup.last_source_published_at,
+                            artifact.last_seen_at
+                        ) DESC,
+                        artifact.artifact_id
                LIMIT ? OFFSET ?""",
             (limit, offset),
         ).fetchall()

@@ -240,7 +240,8 @@ observations; its 30-artifact cohort produced 19 native clean texts, then the
 Reader fallback recovered all three OpenAI HTTP-403 pages. Broad crawling,
 RSS/GitHub adapters and cited-insight generation remain deferred. The web
 layer now exposes the live catalog as a read-only `/api/artifacts` projection
-and a minimal `/artifacts` index: newest observation first, one row per
+and a minimal `/artifacts` index: latest source observation first (independent
+of mutable retrieval time), one row per
 canonical artifact, with retrieval state and expandable provenance. This is an
 operator inspection surface, not a second Feed or an insight product.
 

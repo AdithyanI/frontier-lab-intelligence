@@ -247,9 +247,9 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Freeze the five oracle post IDs, corrected event/triage run identities, current decisions, artifact coverage, and known gaps into one cold-resume packet. | parent | [oracle resume](resources/oracle-resume.md) |
-| done | Add and prove a bounded Jina Reader fallback for eligible native public-page failures; preserve provider provenance and resumability. | parent | [artifact library](../../references/artifact-library.md) |
-| done | Expose the live canonical artifact catalog as a minimal chronological operator index with expandable provenance. | parent | [artifact library](../../references/artifact-library.md) |
+| done | Reconcile the new artifact inspection boundary with the submission north star; decide the default ordering and the next end-to-end proof. | parent | [artifact library](../../references/artifact-library.md) |
+| done | Challenge the next-step plan against the case prompt, system status, milestones, and five-record oracle. | explorer | [oracle resume](resources/oracle-resume.md) |
+| done | Audit the live artifact catalog and index ordering for the smallest useful operator experience. | explorer | [artifact library](../../references/artifact-library.md) |
 | todo | Hand-write the five expected `insight-v1` outcomes, including explicit misses where primary evidence is absent. | parent | [oracle resume](resources/oracle-resume.md) |
 | todo | Implement and run the smallest extraction path against those frozen inputs; audit citation spans before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
 
@@ -277,6 +277,16 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [POST-ARTIFACT-SEQUENCING] Reconciled the live catalog against
+  the assignment, `docs/STATUS.md`, and the five-record oracle. Two independent
+  read-only reviews agree that the next bottleneck is the cited claim → exact
+  primary span → audience implication proof, not broader artifact massage.
+  Corrected the Artifact index to use immutable source-observation recency:
+  redirect/fetch convergence had incorrectly promoted an older NVIDIA source
+  through mutable artifact metadata. Keep catalog chronology separate from a
+  future extraction queue; do not imply relevance or artifact quality through
+  retrieval state, observation count, or cross-day rank.
 
 - 2026-07-14: [ARTIFACT-INDEX] Added the first read-only Artifact Library
   surface at `/artifacts`, backed directly by the canonical SQLite catalog.

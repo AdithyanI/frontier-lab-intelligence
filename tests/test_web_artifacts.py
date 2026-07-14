@@ -24,9 +24,9 @@ def _artifact_fixture(path):
                 "article",
                 "A durable research result",
                 "2026-07-10T09:00:00+00:00",
+                "2026-07-12T10:01:00+00:00",
                 "2026-07-10T09:00:00+00:00",
-                "2026-07-10T09:00:00+00:00",
-                "2026-07-10T09:00:00+00:00",
+                "2026-07-12T10:01:00+00:00",
             ),
             (
                 "newer",
@@ -125,6 +125,9 @@ def test_artifacts_api_returns_newest_first_with_provenance(tmp_path, monkeypatc
         "fetching": 0,
     }
     assert [item["artifact_id"] for item in payload["items"]] == ["newer", "older"]
+    assert payload["items"][0]["last_source_published_at"] == (
+        "2026-07-11T10:00:00+00:00"
+    )
     assert payload["items"][0]["source_provider"] == "twitterapi_io"
     assert payload["items"][0]["fetch_state"] == "catalogued"
     assert payload["items"][1]["fetch_state"] == "ready"

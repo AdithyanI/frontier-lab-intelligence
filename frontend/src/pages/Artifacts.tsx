@@ -49,11 +49,13 @@ function sourceLabel(provider: string | null) {
 }
 
 function ArtifactRow({ item }: { item: ArtifactItem }) {
+  const latestObservationAt = item.last_source_published_at || item.last_seen_at
+
   return (
     <details className="artifact-row">
       <summary>
-        <time className="artifact-date mono" dateTime={item.last_seen_at}>
-          {observedAt.format(new Date(item.last_seen_at))}
+        <time className="artifact-date mono" dateTime={latestObservationAt}>
+          {observedAt.format(new Date(latestObservationAt))}
         </time>
         <span className="artifact-identity">
           <strong>{displayTitle(item)}</strong>
