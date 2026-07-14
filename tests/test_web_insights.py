@@ -76,3 +76,47 @@ def test_insights_read_model_is_honest_when_missing(tmp_path):
     payload = insight_store.insights_payload(db_path=tmp_path / "missing.db")
     assert payload["available"] is False
     assert payload["items"] == []
+
+
+def test_insight_dates_and_day_selection_use_latest_run_per_day(tmp_path):
+    older = tmp_path / "older" / "insights.db"
+    newer = tmp_path / "newer" / "insights.db"
+    _fixture(older)
+    _fixture(newer)
+    conn = sqlite3.connect(newer)
+    conn.execute(
+        "UPDATE run_meta SET run_id = 'newer-run', updated_at = 'tomorrow'"
+    )
+    conn.commit()
+    conn.close()
+
+    dates = insight_store.insight_dates_payload(
+        run_root=tmp_path,
+        default_db=tmp_path / "missing.db",
+    )
+    assert dates == {
+        "available": True,
+        "reason": None,
+        "latest_date": "2026-07-11",
+        "dates": [{"day": "2026-07-11", "item_count": 1}],
+    }
+    payload = insight_store.insights_payload(
+        day="2026-07-11",
+        run_root=tmp_path,
+    )
+    assert payload["run"]["run_id"] == "newer-run"
+
+
+def test_insight_dates_api_uses_materialized_runs(tmp_path, monkeypatch):
+    db = tmp_path / "run" / "insights.db"
+    _fixture(db)
+    monkeypatch.setattr(insight_store, "DEFAULT_INSIGHTS_ROOT", tmp_path)
+    monkeypatch.setattr(
+        insight_store, "DEFAULT_INSIGHTS_DB", tmp_path / "missing.db"
+    )
+
+    response = client.get("/api/insights/dates")
+    assert response.status_code == 200
+    assert response.json()["dates"] == [
+        {"day": "2026-07-11", "item_count": 1}
+    ]

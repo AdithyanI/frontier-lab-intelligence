@@ -418,6 +418,13 @@ export interface InsightsResponse {
   items: InsightItem[]
 }
 
+export interface InsightDates {
+  available: boolean
+  reason?: string | null
+  latest_date: string | null
+  dates: FeedDate[]
+}
+
 export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, init)
   if (!r.ok) throw new Error(`${url} → ${r.status}`)

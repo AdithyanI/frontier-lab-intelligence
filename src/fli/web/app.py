@@ -15,6 +15,7 @@ Endpoints:
 - /api/events                    Registry-aware exact structural event groups
 - /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
+- /api/insights/dates            materialized citation-verified insight dates
 - /api/insights                  citation-verified insight proof
 """
 
@@ -397,10 +398,22 @@ def artifact_dates() -> JSONResponse:
     return JSONResponse(artifact_store.artifact_dates_payload())
 
 
+@app.get("/api/insights/dates")
+def insight_dates() -> JSONResponse:
+    """Materialized cited-insight days and verified insight counts."""
+    return JSONResponse(insight_store.insight_dates_payload())
+
+
 @app.get("/api/insights")
-def insights() -> JSONResponse:
+def insights(
+    insight_date: calendar_date | None = Query(None, alias="date"),
+) -> JSONResponse:
     """Publishable insights whose citation spans were verified in application code."""
-    return JSONResponse(insight_store.insights_payload())
+    return JSONResponse(
+        insight_store.insights_payload(
+            day=insight_date.isoformat() if insight_date else None
+        )
+    )
 
 
 if DIST_DIR.exists():
