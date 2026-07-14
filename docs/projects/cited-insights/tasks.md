@@ -142,6 +142,15 @@ reads first.
 
 ## Decisions
 
+- 2026-07-14: Open a bounded **Network Source Architecture Audit** workstream
+  under this tracker rather than creating a second competing active project.
+  The audit freezes the distinction between Registry membership, monitoring
+  cohort, network support, source role/priority, X reach, and observed yield;
+  independent reviewers write separate resources and the parent synthesizes.
+  Keep all 2,197 active identities monitored and preserve Feed's flat
+  one-entity/one-vote rule until Adi accepts an architecture decision. See the
+  [audit brief](resources/network-source-architecture-audit/project-brief.md).
+
 - 2026-07-14: Make Registry public reach rank-first without discarding its
   magnitude. **X reach** is one stable ordinal across all active Registry
   entities and renders as `#rank · compact combined followers`; search, kind
@@ -288,18 +297,11 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Reconcile the new artifact inspection boundary with the submission north star; decide the default ordering and the next end-to-end proof. | parent | [artifact library](../../references/artifact-library.md) |
-| done | Challenge the next-step plan against the case prompt, system status, milestones, and five-record oracle. | explorer | [oracle resume](resources/oracle-resume.md) |
-| done | Audit the live artifact catalog and index ordering for the smallest useful operator experience. | explorer | [artifact library](../../references/artifact-library.md) |
-| done | Add Feed-style Artifact navigation by the UTC publication date of the source post, with bounded search and pagination. | implementer | [artifact library](../../references/artifact-library.md) |
-| done | Distill the Artifact index so collapsed rows show source time, artifact, URL-derived type, and discovery source; keep retrieval mechanics in expanded provenance. | parent | [artifact library](../../references/artifact-library.md) |
-| done | Align the Artifact index with Feed by ordering each selected day on the best inherited Feed rank, while keeping source time compact and visibly secondary. | parent | [artifact library](../../references/artifact-library.md) |
-| done | Link each Artifact observation back to its exact ranked Feed envelope so provenance opens in the existing evidence workspace. | parent | [artifact library](../../references/artifact-library.md) |
-| done | Group multiple canonical artifacts disclosed by one exact Feed envelope under one shared visual rank rail without merging their records or disclosures. | parent | [artifact library](../../references/artifact-library.md) |
-| done | Reconcile the extraction evidence contract: triage is the sole relevance gate; authored first-party X is primary evidence; artifacts are optional strengthening. | parent | [pipeline design](resources/pipeline-design.md) |
-| done | Hand-write the five expected `insight-v1` outcomes as `insight | no_extractable_insight`, using exact X or artifact spans. | parent | [oracle expectations](resources/insight-oracle-2026-07-11.md) |
-| done | Implement and run the smallest extraction path against those frozen inputs; bind and verify citation spans in application code before expanding to a day. | parent | [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md) |
-| done | Expose only the four citation-verified records through a dated Insights API and audit-first page; update the Architecture visual to show envelope evidence plus optional artifact strengthening. | parent | [oracle evaluation](resources/insight-oracle-evaluation-2026-07-14.md) |
+| todo | Reconcile the source/ranking code and live denominators, including snapshot freshness and multi-channel behavior. | explorer | [current-state audit](resources/network-source-architecture-audit/current-state-audit.md) |
+| todo | Independently assess the product/measurement architecture without assuming a 500/1,000 cutoff. | product reviewer | [product review](resources/network-source-architecture-audit/product-architecture-review.md) |
+| todo | Adversarially test selection bias, circularity, role treatment, and the strongest no-change case. | adversarial reviewer | [adversarial review](resources/network-source-architecture-audit/adversarial-review.md) |
+| todo | Design the smallest non-circular real-data comparison of broad, core, and tiered cohorts. | evaluation reviewer | [evaluation plan](resources/network-source-architecture-audit/evaluation-plan.md) |
+| todo | Synthesize the reviews into a decision for Adi; do not implement before acceptance, then return execution to M3 delivery. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
 
 ## Backlog / Remaining Work
 
@@ -314,6 +316,9 @@ reads first.
   smoke path; check against case-prompt requirements.
 - [x] Architecture page: turn the dashed "cited insights" boxes solid when
   live; update `docs/architecture/overview.md`.
+- [ ] Complete the bounded Network Source Architecture Audit review, record
+  Adi's decision, and implement only an accepted delta; do not let the audit
+  silently displace M3–M5 delivery work.
 - [ ] Closeout: review learnings, archive tracker.
 
 ## Validation / Test Plan
@@ -326,6 +331,14 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [NETWORK-SOURCE-ARCHITECTURE-AUDIT] Opened one bounded audit
+  workstream under this canonical tracker after the repository correctly
+  rejected a second active project owner. The frozen brief states the current
+  evidence and separates monitored membership, network support, source role,
+  source priority, reach, and yield. Four independent review lanes can now
+  write topic resources without changing Feed collection, voting, ranking, or
+  UI semantics before an accepted decision.
 
 - 2026-07-14: [FIVE-RECORD-INSIGHT-SKELETON] Froze the five handwritten
   oracle envelopes and ran `insight-v1.1` through `gpt-5.4-mini`. All five
