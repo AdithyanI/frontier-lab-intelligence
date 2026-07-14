@@ -7,6 +7,11 @@ import {
   type FeedItem,
   type SignalEvent,
 } from '../api'
+import {
+  getDateWindow,
+  shiftDateWindow,
+  type DateWindowDirection,
+} from '../dateWindow'
 
 type Sort = 'attention' | 'recent' | 'engagement'
 type TriageFilter = 'all' | 'keep' | 'drop' | 'not_evaluated'
@@ -462,14 +467,26 @@ export default function Feed() {
   const [items, setItems] = useState<SignalEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const activeViewKeyRef = useRef('')
   const availableDates = useMemo(() => dates?.dates ?? [], [dates])
+  const dateWindow = useMemo(
+    () => getDateWindow(dateWindowEnd, availableDates.length),
+    [dateWindowEnd, availableDates.length],
+  )
+  const visibleDates = useMemo(
+    () => availableDates.slice(dateWindow.start, dateWindow.end),
+    [availableDates, dateWindow],
+  )
+  const canShowOlderDates = dateWindow.start > 0
+  const canShowNewerDates = dateWindow.end < availableDates.length
 
   useEffect(() => {
     setLoading(true)
     getJSON<FeedDates>('/api/events/dates')
       .then((value) => {
         setDates(value)
+        setDateWindowEnd(value.dates?.length ?? 0)
         if (value.available && value.latest_complete_date) {
           setSelectedDate((current) =>
             value.dates?.some((date) => date.day === current)
@@ -534,7 +551,7 @@ export default function Feed() {
     if (!selectedDate || sort !== 'attention' || debouncedQuery) return
     let cancelled = false
     const timer = window.setTimeout(async () => {
-      for (const value of availableDates) {
+      for (const value of visibleDates) {
         if (cancelled || value.day === selectedDate) continue
         try {
           await requestEventPage({
@@ -553,9 +570,25 @@ export default function Feed() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [availableDates, selectedDate, sort, triageFilter, debouncedQuery])
+  }, [visibleDates, selectedDate, sort, triageFilter, debouncedQuery])
 
   const hasSearch = debouncedQuery.trim().length > 0
+
+  const moveDateWindow = (direction: DateWindowDirection) => {
+    const selectedIndex = availableDates.findIndex(
+      (value) => value.day === selectedDate,
+    )
+    const nextWindow = shiftDateWindow(
+      dateWindow.end,
+      availableDates.length,
+      selectedIndex,
+      direction,
+    )
+    if (nextWindow.end === dateWindow.end) return
+    setDateWindowEnd(nextWindow.end)
+    const nextDate = availableDates[nextWindow.selectedIndex]
+    if (nextDate) setSelectedDate(nextDate.day)
+  }
 
   const loadMore = () => {
     if (!data?.total || items.length >= data.total) return
@@ -622,19 +655,41 @@ export default function Feed() {
       </header>
 
       <section className="feed-calendar" aria-label="Available complete UTC days">
-        <div className="feed-days" role="group" aria-label="Feed date">
-          {availableDates.map((value) => (
-            <button
-              type="button"
-              key={value.day}
-              className={value.day === selectedDate ? 'is-active' : ''}
-              aria-pressed={value.day === selectedDate}
-              onClick={() => setSelectedDate(value.day)}
-            >
-              <span>{shortDate.format(new Date(`${value.day}T12:00:00Z`))}</span>
-              <span className="mono">{value.item_count.toLocaleString('en-US')}</span>
-            </button>
-          ))}
+        <div className="feed-date-navigator">
+          <button
+            type="button"
+            className="feed-date-page feed-date-page--previous"
+            aria-label="Show previous 7 available days"
+            disabled={!canShowOlderDates}
+            onClick={() => moveDateWindow('older')}
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+          <div className="feed-days" role="group" aria-label="Feed date">
+            {visibleDates.map((value) => (
+              <button
+                type="button"
+                key={value.day}
+                className={`feed-day${value.day === selectedDate ? ' is-active' : ''}`}
+                aria-pressed={value.day === selectedDate}
+                onClick={() => setSelectedDate(value.day)}
+              >
+                <span>{shortDate.format(new Date(`${value.day}T12:00:00Z`))}</span>
+                <span className="feed-day-count mono">
+                  {value.item_count.toLocaleString('en-US')}
+                </span>
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="feed-date-page feed-date-page--next"
+            aria-label="Show next 7 available days"
+            disabled={!canShowNewerDates}
+            onClick={() => moveDateWindow('newer')}
+          >
+            <span aria-hidden="true">→</span>
+          </button>
         </div>
       </section>
 

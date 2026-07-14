@@ -129,6 +129,9 @@ Rules:
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
 - **Evidence Feed:** default to the decision-ready `Kept` / `Attention` view.
+  Date navigation shows the newest seven available complete UTC days in one
+  ruled row; explicit older/newer controls page through non-overlapping
+  seven-date windows while keeping the selected column where possible.
   Audit and sort are compact labeled disclosures rather than persistent
   segmented bars; each option remains one click away and audit counts stay
   visible inside the menu. Per-envelope triage rationale is collapsed by

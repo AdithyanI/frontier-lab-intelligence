@@ -252,6 +252,17 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [FEED-SEVEN-DATE-NAVIGATOR] Replaced the unbounded wrapping date
+  grid with a fixed seven-date navigator anchored to the newest complete days.
+  Older/newer buttons page through non-overlapping available-date windows,
+  preserve the selected column where possible, expose explicit disabled and
+  focus states, and keep every target at least 44px. Background prefetch now
+  follows only the visible window instead of every historical date. Two
+  isolated layout checks agreed that the existing single-row density and
+  hierarchy should remain; the post-change detector is clean and three focused
+  frontend regression tests plus the production build pass. The in-app Browser
+  runtime still fails during connection setup, so no new live visual proof is
+  claimed for this batch.
 - 2026-07-14: [FEED-AUDIT-CRITICAL-FIXES] Kept the audit remediation narrow
   after Adi challenged a broad cleanup. The Feed now clears stale rows before
   uncached view changes, keys both foreground and pagination writes to the
