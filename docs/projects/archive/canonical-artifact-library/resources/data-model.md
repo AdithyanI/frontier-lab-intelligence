@@ -47,9 +47,11 @@ identity; the `t.co` form remains an alias showing exactly what was observed.
   substantive document itself.
 - X media self-links and author-profile links: not artifacts.
 
-## Minimal physical model
+## Physical model implemented in v1
 
-The initial catalog is proposed at `data/derived/artifacts/artifacts.db`.
+The catalog lives at `data/derived/artifacts/artifacts.db`. The operational
+contract and exact commands are documented in
+`docs/references/artifact-library.md`.
 
 ### `artifact`
 
@@ -60,7 +62,6 @@ artifact_id          SHA-256 of canonical_url
 canonical_url        UNIQUE
 host
 artifact_kind        paper | repository | announcement | article | video | other
-title                 nullable until fetched
 first_seen_at
 last_seen_at
 ```
@@ -95,7 +96,10 @@ source_provider       twitterapi_io initially
 source_external_id    X post ID initially
 source_url            X status permalink initially
 observed_url          exact URL present in the source record
-observed_at
+source_snapshot_sha256 immutable source observation identity
+source_published_at
+first_envelope_day
+best_source_rank
 relation              links_to | self_publishes
 UNIQUE(source_kind, source_provider, source_external_id, artifact_id, relation)
 ```
@@ -110,15 +114,20 @@ Append-only fetch attempts and content snapshot metadata.
 
 ```text
 fetch_id
+fetch_run_id
 artifact_id           -> artifact
-requested_at
+attempt_number
+status                 in_progress | success | failed_retryable | failed_terminal
+requested_url
 final_url
 http_status
 content_type
 body_sha256
 text_sha256
-snapshot_ref          content-addressed local path
-fetch_error
+raw_snapshot_ref       content-addressed local path
+text_snapshot_ref      content-addressed local path
+extracted_title
+error_code / message / retryable
 ```
 
 Successful identical bodies reuse the same content-addressed snapshot. Failures

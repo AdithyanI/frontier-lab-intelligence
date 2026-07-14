@@ -212,6 +212,28 @@ before pagination. The projection reads the run's existing
 `(decision, current_rank, event_id)` and `(status, current_rank, event_id)`
 indexes and never mutates the triage or Feed stores.
 
+`fli.artifacts` and `fli.artifact_urls` implement the next deterministic
+boundary after corrected kept envelopes. They traverse direct and embedded X
+records, bind each outbound URL to the post that actually contains it, and
+index every locally resolvable eligible candidate without fetching it. Ordinary
+X status/profile/media URLs remain source evidence; X long-form Articles are
+the explicit artifact exception. Conservative `artifact-url-v1`
+canonicalization removes only known tracking noise, retains every observed and
+expanded form as an alias, and never merges different URLs solely by content
+hash. Stable source-kind/provider/external-ID/snapshot observations preserve
+provenance independently of mutable event projections.
+
+`fli.artifact_fetch` freezes a bounded, stratified high-attention cohort and
+fetches it through a one-worker public-network safety boundary. Manual
+redirects, DNS checks, robots, size/time limits, append-only attempts, explicit
+retryable/terminal errors, and content-addressed raw/text snapshots make the
+stage resumable and replayable. HTML uses Trafilatura, PDFs use pypdf, and
+client-rendered error shells remain failures rather than false clean text. The
+2026-07-14 v1 proof indexed 1,566 canonical artifacts and 1,739 source
+observations; its 30-artifact cohort produced 19 usable clean texts, four
+terminal failures, and seven exhausted retryable outcomes. Broad crawling,
+RSS/GitHub adapters, artifact UI, and cited-insight generation remain deferred.
+
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
 version tokens, so a Registry change or rebuilt derived run invalidates the
@@ -264,14 +286,17 @@ flowchart LR
     EVENTS[Events v3<br/>stable exact envelopes · cutoff projections]
     PUB[Published read model<br/>explicit validated run pointer]
     READ[Registry-aware projections<br/>daily delta · weekly dedupe · triage]
+    ART[(Artifact catalog<br/>canonical URLs · aliases · source provenance)]
+    FETCH[Bounded artifact fetch<br/>raw body · title · clean text]
 
     XLISTS --> REG
     XFOLLOW --> REG
     XPOSTS --> OBS --> FEED --> EVENTS --> PUB --> READ
+    READ -->|corrected kept envelopes| ART --> FETCH --> EXT
     REG -->|current active/rejected state| READ
     REG -->|who to watch| ING
     BLOGS & ARXIV & GH --> ING
-    ING --> EXT
+    ING --> ART
     EXT --> SCO
     SCO --> DEL
     REG -.-> UI

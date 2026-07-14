@@ -66,6 +66,10 @@ def main(argv: list[str] | None = None) -> int:
     x_daily_collection_p.add_argument(
         "collection_args", nargs=argparse.REMAINDER
     )
+    artifacts_p = sub.add_parser(
+        "artifacts", help="Catalog and fetch canonical external artifacts."
+    )
+    artifacts_p.add_argument("artifact_args", nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
 
     if args.command == "web":
@@ -157,6 +161,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import x_daily_collection
 
         return x_daily_collection.main(args.collection_args)
+
+    if args.command == "artifacts":
+        from fli import artifacts
+
+        return artifacts.main(args.artifact_args)
 
     parser.print_help()
     return 0
