@@ -232,26 +232,20 @@ function CurrentDataModel() {
     { cx: 835, label: 'arXiv · A. Karpathy', plane: 'Papers', live: false },
   ]
   const CW = 250
-  const CH_TOP = 210
+  const CH_TOP = 174
   const CH_H = 76
-  const obsDots = [572, 634, 696, 758, 820, 882]
+  const obsDots = [370, 472, 574, 676, 778, 880]
   const rawCards = [
-    { x: 560, tag: 'post' },
-    { x: 660, tag: 'reply' },
-    { x: 760, tag: 'quote' },
-    { x: 860, tag: 'retweet' },
-  ]
-  const graphSpokes = [
-    { x: 160, y: 402 },
-    { x: 148, y: 446 },
-    { x: 330, y: 402 },
-    { x: 344, y: 450 },
+    { x: 340, tag: 'post' },
+    { x: 470, tag: 'reply' },
+    { x: 600, tag: 'quote' },
+    { x: 730, tag: 'retweet' },
   ]
   return (
     <svg
-      viewBox="0 0 1080 560"
+      viewBox="0 0 1080 444"
       role="img"
-      aria-label="Current data model: one real-world entity fans out to channels — the X channel is live, GitHub and arXiv are planned. X yields two streams: a fast-moving dated posts store, and a slow-moving follow graph whose Registry overlap decides who is tracked."
+      aria-label="Current data model: one real-world entity fans out to channels. X is live; GitHub and arXiv are planned. Dated, source-bound observations from every channel join one evidence stream."
     >
       <defs>
         <marker id="data-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -261,27 +255,26 @@ function CurrentDataModel() {
           <path d="M0,0 L8,4 L0,8 z" fill={MUTED} />
         </marker>
       </defs>
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE IDENTITY · CHANNELS PLUG IN · TWO STREAMS FROM X</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE IDENTITY · MANY CHANNELS · ONE EVIDENCE STREAM</text>
 
-      {/* entity (who) — faint stack behind = the whole Registry */}
-      <rect x="438" y="68" width="220" height="72" fill={INK} opacity="0.12" />
-      <rect x="430" y="60" width="220" height="72" fill={INK} />
-      <text x="450" y="90" fontFamily={MONO} fontSize="10" fill={BLUE}>ENTITY · WHO</text>
-      <text x="450" y="118" fontFamily={UI} fontSize="17" fontWeight="600" fill="#fff">Andrej Karpathy</text>
+      {/* the real-world identity */}
+      <rect x="430" y="58" width="220" height="72" fill={INK} />
+      <text x="450" y="88" fontFamily={MONO} fontSize="10" fill={BLUE}>ENTITY</text>
+      <text x="450" y="116" fontFamily={UI} fontSize="17" fontWeight="600" fill="#fff">Andrej Karpathy</text>
 
-      {/* entity → channel fan */}
+      {/* one identity fans out to platform-specific channels */}
       {channels.map((c) => (
         <line
           key={`fan-${c.plane}`}
           x1="540"
-          y1="132"
+          y1="130"
           x2={c.cx}
           y2={CH_TOP - 6}
           stroke={c.live ? BLUE_MID : MUTED}
           strokeWidth={c.live ? 1.6 : 1.2}
           strokeDasharray={c.live ? undefined : '5 5'}
           opacity={c.live ? 1 : 0.55}
-          markerEnd={c.live ? 'url(#data-arrow)' : undefined}
+          markerEnd={c.live ? 'url(#data-arrow)' : 'url(#data-arrow-muted)'}
         />
       ))}
 
@@ -305,50 +298,41 @@ function CurrentDataModel() {
         </g>
       ))}
 
-      {/* X → both stores */}
-      <line x1="245" y1={CH_TOP + CH_H} x2="245" y2="340" stroke={BLUE_MID} strokeWidth="1.6" markerEnd="url(#data-arrow)" />
-      <line x1="330" y1={CH_TOP + CH_H} x2="560" y2="340" stroke={BLUE_MID} strokeWidth="1.6" markerEnd="url(#data-arrow)" />
-      {/* planned channels → posts store only */}
-      <line x1="540" y1={CH_TOP + CH_H} x2="540" y2="340" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" opacity="0.35" />
-      <line x1="835" y1={CH_TOP + CH_H} x2="835" y2="340" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" opacity="0.35" />
-
-      {/* slow stream: the follow graph */}
-      <rect x="90" y="346" width="310" height="154" fill={SAND} />
-      <text x="112" y="374" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">FOLLOW GRAPH · SLOW</text>
-      {graphSpokes.map((s) => (
-        <g key={`spoke-${s.x}-${s.y}`}>
-          <line x1={s.x} y1={s.y} x2="245" y2="430" stroke={BLUE_MID} strokeWidth="1" opacity="0.55" />
-          <circle cx={s.x} cy={s.y} r="5" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
-        </g>
+      {/* every channel plugs into the same evidence stream */}
+      {channels.map((c) => (
+        <line
+          key={`stream-${c.plane}`}
+          x1={c.cx}
+          y1={CH_TOP + CH_H}
+          x2={c.cx}
+          y2="306"
+          stroke={c.live ? BLUE_MID : MUTED}
+          strokeWidth={c.live ? 1.6 : 1.2}
+          strokeDasharray={c.live ? undefined : '5 5'}
+          opacity={c.live ? 1 : 0.42}
+          markerEnd={c.live ? 'url(#data-arrow)' : 'url(#data-arrow-muted)'}
+        />
       ))}
-      <circle cx="245" cy="430" r="9" fill={INK} />
-      <text x="112" y="481" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">who follows whom → Registry overlap</text>
 
-      {/* fast stream: the dated posts store */}
-      <rect x="440" y="346" width="550" height="154" fill={SURFACE} />
-      <text x="462" y="374" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">POSTS · FAST</text>
-      <text x="968" y="374" fontFamily={MONO} fontSize="10" fill={MUTED} textAnchor="end">time →</text>
+      <rect x="90" y="312" width="900" height="110" fill={SURFACE} />
+      <text x="116" y="342" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">ONE EVIDENCE STREAM</text>
+      <text x="116" y="371" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Dated observations</text>
+      <text x="116" y="398" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.04em">source-bound · ordered in time</text>
+      <line x1="308" y1="332" x2="308" y2="402" stroke={MUTED} strokeWidth="1" opacity="0.24" />
 
-      <text x="462" y="412" fontFamily={MONO} fontSize="11.5" fill={INK}>observations</text>
-      <line x1="556" y1="408" x2="944" y2="408" stroke={MUTED} strokeWidth="1" opacity="0.5" markerEnd="url(#data-arrow)" />
+      <text x="340" y="340" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">LIVE FROM X</text>
+      <text x="956" y="340" fontFamily={MONO} fontSize="9.5" fill={MUTED} textAnchor="end">time →</text>
+      <line x1="340" y1="356" x2="948" y2="356" stroke={MUTED} strokeWidth="1" opacity="0.5" markerEnd="url(#data-arrow)" />
       {obsDots.map((x) => (
-        <circle key={`obs-${x}`} cx={x} cy="408" r="4" fill={BLUE} />
+        <circle key={`obs-${x}`} cx={x} cy="356" r="4" fill={BLUE} />
       ))}
 
-      <text x="462" y="450" fontFamily={MONO} fontSize="11.5" fill={INK}>raw posts</text>
       {rawCards.map((r) => (
         <g key={`raw-${r.tag}`}>
-          <rect x={r.x} y="432" width="74" height="24" fill="#fff" stroke={BLUE_MID} strokeWidth="1" />
-          <text x={r.x + 37} y="448" textAnchor="middle" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{r.tag}</text>
+          <rect x={r.x} y="378" width="96" height="24" fill="#fff" stroke={BLUE_MID} strokeWidth="1" />
+          <text x={r.x + 48} y="394" textAnchor="middle" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{r.tag}</text>
         </g>
       ))}
-      <text x="462" y="481" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">what they say, dated</text>
-
-      {/* the slow stream decides who we track */}
-      <path d="M 90 400 H 54 V 96 H 420" fill="none" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="4 5" opacity="0.6" markerEnd="url(#data-arrow)" />
-      <text x="70" y="86" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">DECIDES WHO WE TRACK</text>
-
-      <text x="90" y="537" fontFamily={UI} fontSize="12.5" fill={MUTED}>Two refresh loops: posts move daily, the follow graph slowly. Planned channels join the same posts store.</text>
     </svg>
   )
 }
@@ -369,14 +353,14 @@ function NetworkRankFigure() {
     <svg
       viewBox="0 0 1080 288"
       role="img"
-      aria-label="Why an account ranks higher: Account A has fewer public followers but five screened Registry followers, while Account B has many public followers but only one screened Registry follower. The five screened signals count, public audience size does not."
+      aria-label="X follow graph and network support: Account A has fewer public followers but five screened Registry followers, while Account B has many public followers but only one screened Registry follower. The five screened signals count, public audience size does not."
     >
       <defs>
         <marker id="rank-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
         </marker>
       </defs>
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHY AN ACCOUNT RANKS HIGHER · COUNTED NETWORK SUPPORT</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">X FOLLOW GRAPH · WHY AN ACCOUNT RANKS HIGHER</text>
       <line x1="540" y1="60" x2="540" y2="276" stroke={MUTED} strokeWidth="1" opacity="0.22" />
 
       {/* Account A: the same follower field, with five screened nodes. */}
@@ -571,7 +555,7 @@ export default function Architecture() {
       <section className="arch-section" id="data-model">
         <div className="arch-section-head">
           <h2 className="arch-h">One data model underneath</h2>
-          <p className="arch-p">X yields two streams: fast-moving posts and a slow-moving follow graph that decides who is tracked.</p>
+          <p className="arch-p">Channels produce dated evidence. The X follow graph separately supplies counted network support.</p>
         </div>
         <div className="arch-canvas"><CurrentDataModel /></div>
         <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
