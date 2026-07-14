@@ -192,16 +192,18 @@ reads first.
   evaluation) is deferred past submission; the audit records the designed
   yield-feedback loop and interview-ready limitation language instead.
 
-- 2026-07-14: **AI Engineer conferences become a bounded candidate source.**
-  Preserve the complete supported official snapshots, but admit only the first
-  20 unique X-addressable World's Fair 2026 speakers in source order for the
-  initial batch. Conference curation is provenance, not a ranking boost or a
-  claim that this is the optimal cohort. Match by X identity, keep canonical
-  fields lean (role, bio, listed organization/affiliation, source/date/evidence;
-  verified organization website only), and leave LinkedIn, talks, and personal
-  sites raw-only. The network coverage query ran before insertion. New admits
-  are monitored immediately but cannot vote until a future following-snapshot
-  collection includes their edges (post-submission).
+- 2026-07-14: **AI Engineer World's Fair 2026 + 2024 are direct-admission
+  Registry sources.** Preserve all four supported official snapshots, but
+  admit only the 423 unique X-addressable people from the two explicitly
+  accepted World's Fair directories; Europe 2026 and Summit 2023 remain
+  snapshot-only. Conference curation is provenance, not a ranking boost or a
+  claim that this is the optimal cohort. Match by exact X identity and keep one
+  lean current representation per person: name, X channel, newest available
+  role/bio, one listed organization affiliation, source/date/evidence. Talks,
+  LinkedIn, personal sites, conference frequency, repeated historical claims,
+  and speculative organization X accounts remain raw-only. Admission,
+  provider reconciliation, snapshot membership, and voting are separate
+  states. The pre-insertion coverage query remains preserved.
 
 - 2026-07-14: Make Registry public reach rank-first without discarding its
   magnitude. **X reach** is one stable ordinal across all active Registry
@@ -350,8 +352,8 @@ reads first.
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Diagnose the Network rank anomaly, denominators, tie semantics, and multi-channel projection against code and live data. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
-| in_progress | Expand direct admission to every X-addressable World's Fair 2026 and 2024 speaker; reconcile people, organizations, affiliations, and exact new-cohort counts. | parent | [conference import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
-| todo | Reconcile new identities against stored X profiles, daily content, and outgoing-follow coverage; collect only missing provider data with resumable telemetry. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
+| done | Expand direct admission to every X-addressable World's Fair 2026 and 2024 speaker; reconcile people, organizations, affiliations, and exact new-cohort counts. | parent | [conference import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
+| in_progress | Reconcile new identities against stored X profiles, daily content, and outgoing-follow coverage; collect only missing provider data with resumable telemetry. | parent | [conference import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
 | todo | Materialize a new immutable Registry-following snapshot and derived analysis run; preserve old snapshot semantics and disclose the new voting denominator. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
 | todo | Implement and validate the accepted display delta, compare old/new rankings qualitatively, and write the coverage/miss report plus ADR. | parent | [audit ADR](resources/network-source-architecture-audit/architecture-decision.md) |
 
@@ -396,7 +398,23 @@ reads first.
   collection completeness, and voting eligibility remain separate states so a
   Registry write cannot silently rewrite the frozen 2026-07-11 analysis.
 
-- 2026-07-14: [AIE-CONFERENCE-COHORT-20] Added a deterministic conference
+- 2026-07-14: [AIE-WORLDS-FAIR-423] Imported the complete requested World's
+  Fair 2026 + 2024 X-addressable cohort: 725 source records collapsed to 423
+  unique people, with 96 pre-existing and 327 new identities. The write added
+  253 organization identities for resolvable affiliations while retaining only
+  one newest role, bio, company claim, and affiliation per person; repeated
+  conference history, talks, LinkedIn, personal sites, and organization X
+  guesses remain raw-only. Provider reconciliation resolved 330 new public X
+  profiles and moved 12 missing plus one suspended handle into reason-bearing
+  rejection state. The active conference cohort is therefore 410, of whom 80
+  already occur in the prior following snapshot and 330 require new outgoing
+  evidence. Across the full active Registry, the next cohort has 2,564 stable
+  X sources: 2,212 shared with the prior snapshot and 352 new. Profile work
+  used 356 requests / 6,408 estimated credits (`$0.06408`) including the
+  terminal-cache retry. See the [final import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md).
+
+- 2026-07-14: [AIE-CONFERENCE-COHORT-20 — superseded by
+  AIE-WORLDS-FAIR-423] Added a deterministic conference
   source boundary over four official snapshots (World's Fair 2026, Europe
   2026, World's Fair 2024, Summit 2023). The pre-write audit found 945 records,
   528 unique X handles, 101 already active, 427 new, and zero rejected matches.

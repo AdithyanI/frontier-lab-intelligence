@@ -1,6 +1,6 @@
 import json
 
-from fli import channels, conference_sources, registry
+from fli import channels, conference_sources, following_snapshots, registry
 
 
 SOURCE = conference_sources.ConferenceSource(
@@ -11,6 +11,22 @@ SOURCE = conference_sources.ConferenceSource(
     format="speakers-json-v1",
     observed_at="2026-07-02T23:59:59+00:00",
 )
+
+
+class FakeProfileClient:
+    def __init__(self):
+        self.calls = []
+
+    def fetch_user(self, *, username):
+        self.calls.append(username)
+        return {
+            "id": f"id-{username}",
+            "userName": username,
+            "name": username.title(),
+            "description": f"Bio for {username}",
+            "followers": 123,
+            "following": 45,
+        }
 
 
 def _record(**overrides):
@@ -197,3 +213,224 @@ def test_import_does_not_revive_an_existing_rejected_identity(tmp_path):
         "SELECT COUNT(*) FROM entity_registry_rejections WHERE entity_id = ?",
         (entity_id,),
     ).fetchone()[0] == 1
+
+
+def test_import_keeps_only_the_newest_conference_context_per_person(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    older = _record(
+        source_id="aie-worldsfair-2024",
+        conference_name="AI Engineer World's Fair 2024",
+        observed_at="2024-06-27T23:59:59+00:00",
+        role="Old role",
+        company="Old Company",
+        bio="Old bio",
+        company_x_candidate="ambiguous_company_handle",
+    )
+    newer = _record(
+        source_id="aie-worldsfair-2026",
+        conference_name="AI Engineer World's Fair 2026",
+        observed_at="2026-07-02T23:59:59+00:00",
+        role="Current role",
+        company="Current Company",
+        bio="Current bio",
+    )
+
+    conference_sources.import_records(conn, [older])
+    result = conference_sources.import_records(conn, [newer])
+
+    person_id = conn.execute(
+        """SELECT ec.entity_id
+           FROM entity_channels ec
+           JOIN channels c ON c.id = ec.channel_id
+           WHERE c.kind = 'x' AND c.key = 'adaexample'"""
+    ).fetchone()[0]
+    facts = {
+        row["fact"]: row["value"]
+        for row in conn.execute(
+            """SELECT fact, value FROM entity_source_facts
+               WHERE entity_id = ?""",
+            (person_id,),
+        ).fetchall()
+    }
+    affiliation = conn.execute(
+        "SELECT * FROM entity_affiliations WHERE person_entity_id = ?",
+        (person_id,),
+    ).fetchone()
+    organization = conn.execute(
+        "SELECT name FROM entities WHERE id = ?",
+        (affiliation["organization_entity_id"],),
+    ).fetchone()[0]
+
+    assert facts == {
+        "conference_speaker": "AI Engineer World's Fair 2026",
+        "speaker_role": "Current role",
+        "speaker_company": "Current Company",
+        "speaker_bio": "Current bio",
+    }
+    assert organization == "Current Company"
+    assert result["conference_facts_removed"] >= 4
+    assert result["conference_affiliations_removed"] == 1
+    assert conn.execute(
+        """SELECT COUNT(*) FROM entity_source_facts
+           WHERE fact = 'company_x_candidate'"""
+    ).fetchone()[0] == 0
+
+
+def test_profile_hydration_is_raw_first_resumable_and_updates_account(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    record = _record()
+    conference_sources.import_records(conn, [record])
+    client = FakeProfileClient()
+    cache = tmp_path / "profile-cache"
+
+    first = conference_sources.hydrate_x_profiles(
+        conn,
+        [record],
+        cache_root=cache,
+        client=client,
+        workers=1,
+        requests_per_second=1000,
+    )
+    second = conference_sources.hydrate_x_profiles(
+        conn,
+        [record],
+        cache_root=cache,
+        client=client,
+        workers=1,
+        requests_per_second=1000,
+    )
+
+    account = conn.execute(
+        "SELECT * FROM accounts WHERE handle = 'adaexample'"
+    ).fetchone()
+    assert first["profiles_fetched"] == 1
+    assert first["failures"] == []
+    assert second["profiles_fetched"] == 0
+    assert second["already_hydrated"] == 1
+    assert client.calls == ["adaexample"]
+    assert account["x_id"] == "id-adaexample"
+    assert account["followers_count"] == 123
+    assert (cache / "adaexample.json").exists()
+
+
+def test_cached_verified_profile_seeds_following_snapshot_without_provider_call(
+    tmp_path,
+):
+    product_db = tmp_path / "product.db"
+    conn = channels.connect(product_db)
+    record = _record()
+    conference_sources.import_records(conn, [record])
+    cache = tmp_path / "profile-cache"
+    client = FakeProfileClient()
+    conference_sources.hydrate_x_profiles(
+        conn,
+        [record],
+        cache_root=cache,
+        client=client,
+        workers=1,
+        requests_per_second=1000,
+    )
+    conn.close()
+
+    cohort_path = tmp_path / "cohort.json"
+    following_snapshots.freeze_cohort(
+        product_db=product_db,
+        output_path=cohort_path,
+        cohort_id="conference-test-cohort",
+        created_at=SOURCE.observed_at,
+        checkpoint_commit="test-commit",
+    )
+    snapshot_db = tmp_path / "snapshot.db"
+    following_snapshots.initialize_snapshot(
+        snapshot_id="conference-test-snapshot",
+        cohort_path=cohort_path,
+        snapshot_db=snapshot_db,
+        created_at=SOURCE.observed_at,
+    )
+
+    first = conference_sources.seed_following_snapshot_profiles(
+        snapshot_db=snapshot_db,
+        records=[record],
+        cache_root=cache,
+    )
+    second = conference_sources.seed_following_snapshot_profiles(
+        snapshot_db=snapshot_db,
+        records=[record],
+        cache_root=cache,
+    )
+
+    snapshot = following_snapshots.connect_snapshot(snapshot_db)
+    raw_profile = snapshot.execute(
+        "SELECT * FROM raw_profile WHERE source_x_id = 'id-adaexample'"
+    ).fetchone()
+    snapshot.close()
+    assert first["profiles_seeded"] == 1
+    assert first["profiles_already_present"] == 0
+    assert first["failures"] == []
+    assert second["profiles_seeded"] == 0
+    assert second["profiles_already_present"] == 1
+    assert raw_profile is not None
+    assert client.calls == ["adaexample"]
+
+
+def test_provider_confirmed_unavailable_profile_is_reasonably_rejected(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    record = _record()
+    conference_sources.import_records(conn, [record])
+    cache = tmp_path / "profile-cache"
+    conference_sources._write_profile_failure(
+        cache,
+        handle="adaexample",
+        error=conference_sources.sources.SourceCliError(
+            code="E_PROVIDER_ERROR",
+            message="user not found",
+            hint="",
+            retryable=False,
+        ),
+    )
+
+    first = conference_sources.reject_unavailable_conference_profiles(
+        conn, [record], cache_root=cache
+    )
+    second = conference_sources.reject_unavailable_conference_profiles(
+        conn, [record], cache_root=cache
+    )
+
+    rejection = conn.execute(
+        "SELECT * FROM entity_registry_rejections"
+    ).fetchone()
+    assert first["rejected"] == 1
+    assert second["rejected"] == 0
+    assert rejection["reason_code"] == "conference_x_unavailable"
+    assert rejection["source"] == "twitterapi_io"
+
+
+def test_provider_confirmed_unavailable_profile_is_rejected_reasonably(tmp_path):
+    conn = channels.connect(tmp_path / "test.db")
+    record = _record()
+    conference_sources.import_records(conn, [record])
+    cache = tmp_path / "profile-cache"
+    cache.mkdir()
+    (cache / "adaexample.json").write_text(
+        json.dumps(
+            {
+                "requested_handle": "adaexample",
+                "retrieved_at": SOURCE.observed_at,
+                "profile": {
+                    "unavailable": True,
+                    "unavailableReason": "Suspended",
+                },
+            }
+        )
+    )
+
+    result = conference_sources.reject_unavailable_conference_profiles(
+        conn, [record], cache_root=cache
+    )
+
+    rejection = conn.execute(
+        "SELECT * FROM entity_registry_rejections"
+    ).fetchone()
+    assert result["rejected"] == 1
+    assert rejection["reason_code"] == "conference_x_unavailable"
+    assert "Suspended" in rejection["reason"]

@@ -13,6 +13,7 @@ import hashlib
 import json
 import re
 import sqlite3
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -21,11 +22,12 @@ from typing import Any, Iterable
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
-from fli import channels
+from fli import channels, following_snapshots, registry, sources
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO_ROOT / "data" / "registry" / "conference-sources.json"
 DEFAULT_RAW_ROOT = REPO_ROOT / "data" / "raw" / "conference-sources"
+DEFAULT_PROFILE_CACHE = DEFAULT_RAW_ROOT / "x-profile-cache-v1"
 DEFAULT_DB = REPO_ROOT / "data" / "fli.db"
 USER_AGENT = "FrontierLabIntelligence/0.1 conference-source"
 X_URL_RE = re.compile(
@@ -670,6 +672,67 @@ def _record_person_facts(
         )
 
 
+def consolidate_conference_facts(conn: sqlite3.Connection) -> dict[str, int]:
+    """Keep one best current conference claim per fact and person affiliation.
+
+    Full conference history stays in the raw snapshots. The product database
+    retains only the newest non-empty role/bio/company/source claim so repeated
+    appearances do not become UI or ranking noise.
+    """
+    before_facts = conn.execute(
+        "SELECT COUNT(*) FROM entity_source_facts WHERE source LIKE 'aie-%'"
+    ).fetchone()[0]
+    before_affiliations = conn.execute(
+        "SELECT COUNT(*) FROM entity_affiliations WHERE source LIKE 'aie-%'"
+    ).fetchone()[0]
+    conn.execute(
+        """DELETE FROM entity_source_facts
+           WHERE source LIKE 'aie-%' AND fact = 'company_x_candidate'"""
+    )
+    conn.execute(
+        """DELETE FROM entity_source_facts
+           WHERE id IN (
+               SELECT id
+               FROM (
+                   SELECT id,
+                          ROW_NUMBER() OVER (
+                              PARTITION BY entity_id, fact
+                              ORDER BY observed_at DESC, id DESC
+                          ) AS row_number
+                   FROM entity_source_facts
+                   WHERE source LIKE 'aie-%'
+               ) ranked
+               WHERE row_number > 1
+           )"""
+    )
+    conn.execute(
+        """DELETE FROM entity_affiliations
+           WHERE id IN (
+               SELECT id
+               FROM (
+                   SELECT id,
+                          ROW_NUMBER() OVER (
+                              PARTITION BY person_entity_id
+                              ORDER BY observed_at DESC, id DESC
+                          ) AS row_number
+                   FROM entity_affiliations
+                   WHERE source LIKE 'aie-%'
+               ) ranked
+               WHERE row_number > 1
+           )"""
+    )
+    after_facts = conn.execute(
+        "SELECT COUNT(*) FROM entity_source_facts WHERE source LIKE 'aie-%'"
+    ).fetchone()[0]
+    after_affiliations = conn.execute(
+        "SELECT COUNT(*) FROM entity_affiliations WHERE source LIKE 'aie-%'"
+    ).fetchone()[0]
+    return {
+        "conference_facts_removed": before_facts - after_facts,
+        "conference_affiliations_removed": before_affiliations - after_affiliations,
+    }
+
+
 def select_monitorable_records(
     records: Iterable[SpeakerRecord], *, limit: int | None = None
 ) -> list[SpeakerRecord]:
@@ -721,16 +784,6 @@ def import_records(conn: sqlite3.Connection, records: Iterable[SpeakerRecord]) -
                 observed_at=record.observed_at,
                 evidence_url=record.conference_url,
             )
-            if record.company_x_candidate:
-                channels.record_entity_fact(
-                    conn,
-                    entity_id=organization_id,
-                    source=record.source_id,
-                    fact="company_x_candidate",
-                    value=record.company_x_candidate,
-                    observed_at=record.observed_at,
-                    evidence_url=record.conference_url,
-                )
             channels.record_affiliation(
                 conn,
                 person_entity_id=person_id,
@@ -742,6 +795,7 @@ def import_records(conn: sqlite3.Connection, records: Iterable[SpeakerRecord]) -
                 evidence_url=record.conference_url,
             )
             affiliations += 1
+    consolidation = consolidate_conference_facts(conn)
     return {
         "records": len(records),
         "non_x_records_preserved_raw_only": non_x_records,
@@ -750,6 +804,363 @@ def import_records(conn: sqlite3.Connection, records: Iterable[SpeakerRecord]) -
         "accounts_created": accounts_created,
         "organizations_created": created_organizations,
         "affiliations_written": affiliations,
+        **consolidation,
+    }
+
+
+def _profile_handle(profile: dict[str, Any]) -> str | None:
+    value = profile.get("userName") or profile.get("username") or profile.get(
+        "screen_name"
+    )
+    if not isinstance(value, str):
+        return None
+    value = value.strip().removeprefix("@").casefold()
+    return value if re.fullmatch(r"[a-z0-9_]{1,15}", value) else None
+
+
+def _profile_cache_path(cache_root: Path, handle: str) -> Path:
+    return cache_root / f"{handle}.json"
+
+
+def _profile_failure_path(cache_root: Path, handle: str) -> Path:
+    return cache_root / "failures" / f"{handle}.json"
+
+
+def _load_terminal_profile_failure(
+    cache_root: Path, handle: str
+) -> dict[str, Any] | None:
+    path = _profile_failure_path(cache_root, handle)
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    if (
+        not isinstance(payload, dict)
+        or payload.get("handle") != handle
+        or payload.get("retryable") is not False
+    ):
+        return None
+    return payload
+
+
+def _write_profile_failure(
+    cache_root: Path, *, handle: str, error: sources.SourceCliError
+) -> None:
+    path = _profile_failure_path(cache_root, handle)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": "conference-x-profile-failure-v1",
+        "handle": handle,
+        "observed_at": _now(),
+        "code": error.code,
+        "message": error.message,
+        "retryable": error.retryable,
+    }
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
+    temporary.replace(path)
+
+
+def _load_cached_profile(path: Path, handle: str) -> tuple[dict[str, Any], str]:
+    payload = json.loads(path.read_text())
+    if not isinstance(payload, dict):
+        raise ValueError(f"invalid cached X profile for @{handle}: {path}")
+    profile = payload.get("profile")
+    if (
+        payload.get("requested_handle") != handle
+        or not isinstance(profile, dict)
+        or _profile_handle(profile) != handle
+    ):
+        raise ValueError(f"invalid cached X profile for @{handle}: {path}")
+    return profile, str(payload["retrieved_at"])
+
+
+def _write_cached_profile(
+    path: Path, *, handle: str, profile: dict[str, Any], retrieved_at: str
+) -> None:
+    profile_json = json.dumps(
+        profile, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+    )
+    payload = {
+        "schema_version": "conference-x-profile-cache-v1",
+        "requested_handle": handle,
+        "retrieved_at": retrieved_at,
+        "profile_sha256": hashlib.sha256(profile_json.encode()).hexdigest(),
+        "profile": profile,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
+    temporary.replace(path)
+
+
+def hydrate_x_profiles(
+    conn: sqlite3.Connection,
+    records: Iterable[SpeakerRecord],
+    *,
+    cache_root: Path = DEFAULT_PROFILE_CACHE,
+    client: Any | None = None,
+    workers: int = 10,
+    requests_per_second: float = 9.0,
+    key_file: Path = sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+    timeout_seconds: float = 30.0,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Hydrate missing stable X IDs/follower counts from a resumable raw cache."""
+    if workers < 1:
+        raise ValueError("workers must be at least 1")
+    if requests_per_second <= 0:
+        raise ValueError("requests_per_second must be positive")
+    handles = [
+        record.x_handle
+        for record in select_monitorable_records(records)
+        if record.x_handle
+    ]
+    account_state = {
+        row["handle"].casefold(): row
+        for row in conn.execute(
+            """SELECT lower(handle) AS handle, x_id, followers_count
+               FROM accounts WHERE platform = 'x'"""
+        ).fetchall()
+    }
+    missing = [
+        handle
+        for handle in handles
+        if handle not in account_state
+        or not account_state[handle]["x_id"]
+        or account_state[handle]["followers_count"] is None
+    ]
+    cached = [
+        handle
+        for handle in missing
+        if _profile_cache_path(cache_root, handle).exists()
+    ]
+    terminal_failures = {
+        handle: failure
+        for handle in missing
+        if (failure := _load_terminal_profile_failure(cache_root, handle))
+    }
+    work_handles = [handle for handle in missing if handle not in terminal_failures]
+    cached_set = set(cached)
+    to_fetch = [handle for handle in work_handles if handle not in cached_set]
+    if dry_run:
+        return {
+            "dry_run": True,
+            "conference_x_handles": len(handles),
+            "already_hydrated": len(handles) - len(missing),
+            "missing_profiles": len(missing),
+            "cached_profiles": len(cached),
+            "terminal_profile_failures": len(terminal_failures),
+            "profiles_to_fetch": len(to_fetch),
+            "estimated_provider_credits": len(to_fetch)
+            * following_snapshots.PROFILE_CREDITS,
+            "estimated_provider_cost_usd": round(
+                len(to_fetch) * following_snapshots.PROFILE_CREDITS / 100_000, 6
+            ),
+        }
+    if client is None:
+        client = sources.create_twitterapi_io_client(
+            key_file=key_file,
+            timeout=timeout_seconds,
+            page_sleep_seconds=0,
+        )
+    limited_client = following_snapshots.RateLimitedTwitterClient(
+        client,
+        following_snapshots.RequestStartLimiter(requests_per_second),
+    )
+
+    def load_or_fetch(handle: str) -> tuple[str, dict[str, Any], str, bool]:
+        path = _profile_cache_path(cache_root, handle)
+        if path.exists():
+            profile, retrieved_at = _load_cached_profile(path, handle)
+            return handle, profile, retrieved_at, True
+        profile = limited_client.fetch_user(username=handle)
+        retrieved_at = _now()
+        _write_cached_profile(
+            path, handle=handle, profile=profile, retrieved_at=retrieved_at
+        )
+        observed_handle = _profile_handle(profile)
+        if observed_handle != handle:
+            raise ValueError(
+                f"provider resolved @{handle} as @{observed_handle or 'unknown'}"
+            )
+        return handle, profile, retrieved_at, False
+
+    failures: list[dict[str, Any]] = list(terminal_failures.values())
+    hydrated = 0
+    cache_reused = 0
+    fetched = 0
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {
+            executor.submit(load_or_fetch, handle): handle for handle in work_handles
+        }
+        for future in as_completed(futures):
+            handle = futures[future]
+            try:
+                _, profile, retrieved_at, reused = future.result()
+                sources.persist_x_profile(
+                    conn,
+                    profile=profile,
+                    source="aie_conference_profile",
+                    observed_at=retrieved_at,
+                )
+            except sources.SourceCliError as exc:
+                if not exc.retryable:
+                    _write_profile_failure(
+                        cache_root, handle=handle, error=exc
+                    )
+                failures.append(
+                    {
+                        "handle": handle,
+                        "code": exc.code,
+                        "message": exc.message,
+                        "retryable": exc.retryable,
+                    }
+                )
+            except (ValueError, json.JSONDecodeError, OSError) as exc:
+                failures.append(
+                    {
+                        "handle": handle,
+                        "code": "E_PROFILE_CACHE_OR_IDENTITY",
+                        "message": str(exc),
+                        "retryable": False,
+                    }
+                )
+            else:
+                hydrated += 1
+                cache_reused += int(reused)
+                fetched += int(not reused)
+    return {
+        "dry_run": False,
+        "conference_x_handles": len(handles),
+        "already_hydrated": len(handles) - len(missing),
+        "profiles_hydrated": hydrated,
+        "provider_requests": len(to_fetch),
+        "profiles_fetched": fetched,
+        "profiles_reused_from_cache": cache_reused,
+        "failures": sorted(failures, key=lambda item: item["handle"]),
+        "estimated_provider_credits": len(to_fetch)
+        * following_snapshots.PROFILE_CREDITS,
+        "estimated_provider_cost_usd": round(
+            len(to_fetch) * following_snapshots.PROFILE_CREDITS / 100_000, 6
+        ),
+        "cache_root": str(cache_root),
+    }
+
+
+def reject_unavailable_conference_profiles(
+    conn: sqlite3.Connection,
+    records: Iterable[SpeakerRecord],
+    *,
+    cache_root: Path = DEFAULT_PROFILE_CACHE,
+    rejected_at: str | None = None,
+) -> dict[str, Any]:
+    """Move provider-confirmed missing/suspended conference X identities out of active use."""
+    rejected_at = rejected_at or _now()
+    handles = [
+        record.x_handle
+        for record in select_monitorable_records(records)
+        if record.x_handle
+    ]
+    decisions: list[dict[str, str]] = []
+    for handle in handles:
+        reason: str | None = None
+        cache_path = _profile_cache_path(cache_root, handle)
+        if cache_path.exists():
+            payload = json.loads(cache_path.read_text())
+            profile = payload.get("profile") if isinstance(payload, dict) else None
+            if isinstance(profile, dict) and profile.get("unavailable") is True:
+                detail = str(
+                    profile.get("unavailableReason")
+                    or profile.get("message")
+                    or "unavailable"
+                )
+                reason = f"TwitterAPI.io reports the conference-listed X account as {detail}."
+        failure = _load_terminal_profile_failure(cache_root, handle)
+        if reason is None and failure:
+            reason = (
+                "TwitterAPI.io could not resolve the conference-listed X account "
+                f"({failure.get('message') or failure.get('code')})."
+            )
+        if reason is None:
+            continue
+        entity = conn.execute(
+            """SELECT e.id
+               FROM entities e
+               JOIN entity_channels ec ON ec.entity_id = e.id
+               JOIN channels c ON c.id = ec.channel_id
+               WHERE c.kind = 'x' AND c.key = ?""",
+            (handle,),
+        ).fetchone()
+        if entity is None:
+            continue
+        if conn.execute(
+            "SELECT 1 FROM entity_registry_rejections WHERE entity_id = ?",
+            (entity["id"],),
+        ).fetchone():
+            continue
+        registry.reject_entity(
+            conn,
+            entity_id=entity["id"],
+            reason_code="conference_x_unavailable",
+            reason=reason,
+            source="twitterapi_io",
+            evidence_url=f"https://x.com/{handle}",
+            rejected_at=rejected_at,
+        )
+        decisions.append({"handle": handle, "reason": reason})
+    conn.commit()
+    return {"rejected": len(decisions), "decisions": decisions}
+
+
+def seed_following_snapshot_profiles(
+    *,
+    snapshot_db: Path,
+    records: Iterable[SpeakerRecord],
+    cache_root: Path = DEFAULT_PROFILE_CACHE,
+) -> dict[str, Any]:
+    """Seed verified conference profile responses into a mutable follow snapshot."""
+    conn = following_snapshots.connect_snapshot(snapshot_db)
+    seeded = 0
+    reused = 0
+    not_in_cohort = 0
+    failures: list[dict[str, str]] = []
+    try:
+        for record in select_monitorable_records(records):
+            handle = record.x_handle
+            if not handle:
+                continue
+            path = _profile_cache_path(cache_root, handle)
+            if not path.exists():
+                continue
+            try:
+                profile, retrieved_at = _load_cached_profile(path, handle)
+            except (ValueError, json.JSONDecodeError, OSError) as exc:
+                failures.append({"handle": handle, "message": str(exc)})
+                continue
+            source = conn.execute(
+                "SELECT source_x_id FROM source_fetch WHERE source_handle = ?",
+                (handle,),
+            ).fetchone()
+            if source is None:
+                not_in_cohort += 1
+                continue
+            result = following_snapshots.record_profile(
+                conn,
+                source_x_id=source["source_x_id"],
+                profile=profile,
+                retrieved_at=retrieved_at,
+            )
+            seeded += int(result["created"])
+            reused += int(not result["created"])
+    finally:
+        summary = following_snapshots.snapshot_summary(conn)
+        conn.close()
+    return {
+        "profiles_seeded": seeded,
+        "profiles_already_present": reused,
+        "profiles_not_in_cohort": not_in_cohort,
+        "failures": failures,
+        "snapshot": summary,
     }
 
 
@@ -759,10 +1170,30 @@ def _print(payload: dict[str, Any]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="fli conference-sources")
-    parser.add_argument("action", choices=["snapshot", "audit", "import"])
+    parser.add_argument(
+        "action",
+        choices=[
+            "snapshot",
+            "audit",
+            "import",
+            "hydrate-profiles",
+            "reject-unavailable",
+            "seed-snapshot-profiles",
+        ],
+    )
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--raw-root", type=Path, default=DEFAULT_RAW_ROOT)
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    parser.add_argument(
+        "--profile-cache", type=Path, default=DEFAULT_PROFILE_CACHE
+    )
+    parser.add_argument("--workers", type=int, default=10)
+    parser.add_argument("--requests-per-second", type=float, default=9.0)
+    parser.add_argument(
+        "--key-file", type=Path, default=sources.DEFAULT_TWITTERAPI_IO_KEY_FILE
+    )
+    parser.add_argument("--timeout-seconds", type=float, default=30.0)
+    parser.add_argument("--snapshot-db", type=Path)
     parser.add_argument(
         "--source",
         dest="source_ids",
@@ -777,13 +1208,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
     try:
-        sources = select_sources(load_manifest(args.manifest), args.source_ids)
+        manifest_sources = select_sources(
+            load_manifest(args.manifest), args.source_ids
+        )
     except ValueError as exc:
         parser.error(str(exc))
     if args.action == "snapshot":
-        _print({"status": "ok", "snapshots": snapshot_sources(sources, raw_root=args.raw_root)})
+        _print(
+            {
+                "status": "ok",
+                "snapshots": snapshot_sources(
+                    manifest_sources, raw_root=args.raw_root
+                ),
+            }
+        )
         return 0
-    records, snapshots = load_snapshots(sources, raw_root=args.raw_root)
+    records, snapshots = load_snapshots(
+        manifest_sources, raw_root=args.raw_root
+    )
     conn = channels.connect(args.db)
     if args.action == "audit":
         _print(
@@ -793,6 +1235,38 @@ def main(argv: list[str] | None = None) -> int:
                 "coverage": audit_records(conn, records),
             }
         )
+        return 0
+    if args.action == "hydrate-profiles":
+        try:
+            result = hydrate_x_profiles(
+                conn,
+                records,
+                cache_root=args.profile_cache,
+                workers=args.workers,
+                requests_per_second=args.requests_per_second,
+                key_file=args.key_file,
+                timeout_seconds=args.timeout_seconds,
+                dry_run=args.dry_run,
+            )
+        except ValueError as exc:
+            parser.error(str(exc))
+        _print({"status": "ok", "snapshots": snapshots, "result": result})
+        return 0
+    if args.action == "reject-unavailable":
+        result = reject_unavailable_conference_profiles(
+            conn, records, cache_root=args.profile_cache
+        )
+        _print({"status": "ok", "snapshots": snapshots, "result": result})
+        return 0
+    if args.action == "seed-snapshot-profiles":
+        if args.snapshot_db is None:
+            parser.error("--snapshot-db is required for seed-snapshot-profiles")
+        result = seed_following_snapshot_profiles(
+            snapshot_db=args.snapshot_db,
+            records=records,
+            cache_root=args.profile_cache,
+        )
+        _print({"status": "ok", "snapshots": snapshots, "result": result})
         return 0
     if args.limit is not None and args.limit < 1:
         parser.error("--limit must be at least 1")

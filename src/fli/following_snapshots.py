@@ -134,6 +134,18 @@ CREATE TABLE edge (
     PRIMARY KEY (source_x_id, target_x_id)
 );
 CREATE INDEX idx_edge_target ON edge (target_x_id, source_x_id);
+
+CREATE TABLE snapshot_lineage (
+    parent_snapshot_id TEXT PRIMARY KEY,
+    parent_database_path TEXT NOT NULL,
+    parent_database_sha256 TEXT NOT NULL,
+    copied_at TEXT NOT NULL,
+    copied_sources INTEGER NOT NULL,
+    copied_profiles INTEGER NOT NULL,
+    copied_pages INTEGER NOT NULL,
+    copied_accounts INTEGER NOT NULL,
+    copied_edges INTEGER NOT NULL
+);
 """
 
 
@@ -480,6 +492,203 @@ def initialize_snapshot(
         raise
     conn.close()
     return {**data, "database": str(snapshot_db), "created": True}
+
+
+def reuse_parent_snapshot(
+    conn: sqlite3.Connection,
+    *,
+    parent_snapshot_db: Path,
+    copied_at: str | None = None,
+) -> dict[str, Any]:
+    """Copy unchanged source evidence from one complete immutable snapshot.
+
+    The child keeps its own frozen cohort and database. Only stable X IDs shared
+    by both cohorts inherit evidence; new sources remain pending for collection.
+    """
+    _ensure_mutable(conn)
+    parent_snapshot_db = parent_snapshot_db.resolve()
+    if not parent_snapshot_db.exists():
+        raise SnapshotCliError(
+            code="E_NOT_FOUND",
+            message=f"Parent snapshot does not exist: {parent_snapshot_db}",
+            hint="Pass a finalized following-snapshot database.",
+            exit_code=3,
+        )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS snapshot_lineage (
+               parent_snapshot_id TEXT PRIMARY KEY,
+               parent_database_path TEXT NOT NULL,
+               parent_database_sha256 TEXT NOT NULL,
+               copied_at TEXT NOT NULL,
+               copied_sources INTEGER NOT NULL,
+               copied_profiles INTEGER NOT NULL,
+               copied_pages INTEGER NOT NULL,
+               copied_accounts INTEGER NOT NULL,
+               copied_edges INTEGER NOT NULL
+           )"""
+    )
+    existing = conn.execute("SELECT * FROM snapshot_lineage").fetchone()
+    parent_conn = connect_snapshot(parent_snapshot_db)
+    try:
+        parent_run = _snapshot_run(parent_conn)
+        if parent_run["status"] != "complete":
+            raise SnapshotCliError(
+                code="E_PARENT_INCOMPLETE",
+                message=f"Parent snapshot {parent_run['snapshot_id']} is not complete.",
+                hint="Finalize and validate the parent before reusing it.",
+                exit_code=4,
+            )
+        parent_validation = validate_snapshot(parent_conn)
+        if not parent_validation["valid"]:
+            raise SnapshotCliError(
+                code="E_PARENT_INVALID",
+                message="Parent snapshot failed integrity validation.",
+                hint="Do not reuse parent evidence until validation passes.",
+                exit_code=4,
+            )
+    finally:
+        parent_conn.close()
+    if existing:
+        if existing["parent_snapshot_id"] == parent_run["snapshot_id"]:
+            return {
+                "created": False,
+                "lineage": dict(existing),
+                "snapshot": snapshot_summary(conn),
+            }
+        raise SnapshotCliError(
+            code="E_IMMUTABLE_CONFLICT",
+            message="Child snapshot already reuses a different parent.",
+            hint="Create a new child snapshot ID for different lineage.",
+            exit_code=4,
+        )
+    has_evidence = any(
+        conn.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone()
+        for table in ("raw_profile", "raw_page", "account", "edge")
+    )
+    if has_evidence:
+        raise SnapshotCliError(
+            code="E_CHILD_NOT_EMPTY",
+            message="Parent evidence can only seed an empty initialized child.",
+            hint="Create a new child snapshot before collection begins.",
+            exit_code=4,
+        )
+
+    parent_sha256 = _sha256_file(parent_snapshot_db)
+    copied_at = copied_at or _now()
+    conn.execute("ATTACH DATABASE ? AS parent", (str(parent_snapshot_db),))
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute(
+            """INSERT INTO account
+               SELECT * FROM parent.account"""
+        )
+        conn.execute(
+            """UPDATE source_fetch
+               SET advertised_following_count = (
+                       SELECT p.advertised_following_count
+                       FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   next_cursor = (
+                       SELECT p.next_cursor FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   fetched_count = (
+                       SELECT p.fetched_count FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   raw_page_count = (
+                       SELECT p.raw_page_count FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   status = (
+                       SELECT p.status FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   attempts = (
+                       SELECT p.attempts FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   last_error_code = (
+                       SELECT p.last_error_code FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   last_error_message = (
+                       SELECT p.last_error_message FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   ),
+                   updated_at = (
+                       SELECT p.updated_at FROM parent.source_fetch p
+                       WHERE p.source_x_id = source_fetch.source_x_id
+                   )
+               WHERE EXISTS (
+                   SELECT 1 FROM parent.source_fetch p
+                   WHERE p.source_x_id = source_fetch.source_x_id
+               )"""
+        )
+        conn.execute(
+            """INSERT INTO raw_profile
+               SELECT p.* FROM parent.raw_profile p
+               JOIN source_fetch child ON child.source_x_id = p.source_x_id"""
+        )
+        conn.execute(
+            """INSERT INTO raw_page
+               SELECT p.* FROM parent.raw_page p
+               JOIN source_fetch child ON child.source_x_id = p.source_x_id"""
+        )
+        conn.execute(
+            """INSERT INTO edge
+               SELECT e.* FROM parent.edge e
+               JOIN source_fetch child ON child.source_x_id = e.source_x_id"""
+        )
+        counts = {
+            "copied_sources": conn.execute(
+                """SELECT COUNT(*) FROM source_fetch
+                   WHERE status != 'pending'"""
+            ).fetchone()[0],
+            "copied_profiles": conn.execute(
+                "SELECT COUNT(*) FROM raw_profile"
+            ).fetchone()[0],
+            "copied_pages": conn.execute("SELECT COUNT(*) FROM raw_page").fetchone()[0],
+            "copied_accounts": conn.execute("SELECT COUNT(*) FROM account").fetchone()[0],
+            "copied_edges": conn.execute("SELECT COUNT(*) FROM edge").fetchone()[0],
+        }
+        conn.execute(
+            """INSERT INTO snapshot_lineage
+               (parent_snapshot_id, parent_database_path, parent_database_sha256,
+                copied_at, copied_sources, copied_profiles, copied_pages,
+                copied_accounts, copied_edges)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                parent_run["snapshot_id"],
+                str(parent_snapshot_db),
+                parent_sha256,
+                copied_at,
+                counts["copied_sources"],
+                counts["copied_profiles"],
+                counts["copied_pages"],
+                counts["copied_accounts"],
+                counts["copied_edges"],
+            ),
+        )
+        cost = _snapshot_cost(conn)["estimated_provider_cost_usd"]
+        conn.execute(
+            """UPDATE snapshot_run
+               SET status = 'collecting', estimated_cost_usd = ?""",
+            (cost,),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.execute("DETACH DATABASE parent")
+    lineage = conn.execute("SELECT * FROM snapshot_lineage").fetchone()
+    return {
+        "created": True,
+        "lineage": dict(lineage),
+        "snapshot": snapshot_summary(conn),
+    }
 
 
 def _snapshot_run(conn: sqlite3.Connection) -> sqlite3.Row:
@@ -1850,6 +2059,15 @@ def snapshot_summary(conn: sqlite3.Connection) -> dict[str, Any]:
         "accounts": conn.execute("SELECT COUNT(*) FROM account").fetchone()[0],
         "edges": conn.execute("SELECT COUNT(*) FROM edge").fetchone()[0],
     }
+    has_lineage = conn.execute(
+        """SELECT 1 FROM sqlite_master
+           WHERE type = 'table' AND name = 'snapshot_lineage'"""
+    ).fetchone()
+    lineage = (
+        conn.execute("SELECT * FROM snapshot_lineage").fetchone()
+        if has_lineage
+        else None
+    )
     return {
         "snapshot_id": run["snapshot_id"],
         "cohort_id": run["cohort_id"],
@@ -1866,6 +2084,7 @@ def snapshot_summary(conn: sqlite3.Connection) -> dict[str, Any]:
         },
         "reported_cost_usd": run["reported_cost_usd"],
         "estimated_cost_usd": _snapshot_cost(conn)["estimated_provider_cost_usd"],
+        "lineage": dict(lineage) if lineage else None,
     }
 
 
@@ -2001,6 +2220,11 @@ def main(argv: list[str] | None = None) -> int:
     init_p.add_argument("--snapshot-id", required=True)
     init_p.add_argument("--cohort", type=Path, required=True)
     init_p.add_argument("--snapshot-db", type=Path)
+    init_p.add_argument(
+        "--reuse-from",
+        type=Path,
+        help="Reuse unchanged source evidence from a complete parent snapshot.",
+    )
     _common_output_arguments(init_p)
 
     collect_p = sub.add_parser(
@@ -2067,6 +2291,15 @@ def main(argv: list[str] | None = None) -> int:
                 cohort_path=args.cohort,
                 snapshot_db=snapshot_db,
             )
+            if args.reuse_from:
+                child_conn = connect_snapshot(snapshot_db)
+                try:
+                    reuse = reuse_parent_snapshot(
+                        child_conn, parent_snapshot_db=args.reuse_from
+                    )
+                finally:
+                    child_conn.close()
+                data = {**data, "reuse": reuse, "snapshot": reuse["snapshot"]}
         elif args.action == "collect":
             if not args.snapshot_db.exists():
                 raise SnapshotCliError(

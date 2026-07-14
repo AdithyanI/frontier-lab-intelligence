@@ -5,6 +5,10 @@
 - `raw/following/<snapshot-id>/snapshot.db` — ignored local SQLite database for
   a complete outgoing-follow crawl, including raw provider pages, resumable
   source state, normalized accounts, and directed edges.
+- `raw/conference-sources/x-profile-cache-v1/` — ignored raw-first cache for
+  exact conference-listed X profile responses and non-retryable resolution
+  failures. It supports zero-call Registry hydration reruns and can seed a new
+  mutable following snapshot before edge collection.
 - `raw/x/x-content.db` — ignored local SQLite content store for exact raw
   TwitterAPI.io responses, normalized queryable X posts, and ordered post
   bundles used by model evaluations. Raw-response freshness controls provider
@@ -26,8 +30,22 @@
 - `registry/conference-sources.json` — tracked official conference-source
   manifest. Full responses are preserved under ignored
   `raw/conference-sources/`; `fli conference-sources audit` measures coverage
-  before any Registry write, and `import --limit N` admits a bounded,
-  deterministic X-addressable cohort with source facts and affiliations.
+  before any Registry write. Import keeps one lean current representation per
+  X-addressable person: newest source-bound role/bio/company claim and one
+  affiliation. Repeated event history, talks, LinkedIn, personal sites, and
+  speculative organization X accounts remain raw-only. `hydrate-profiles`
+  reconciles only missing stable identities through the resumable cache;
+  `reject-unavailable` records provider-confirmed missing/suspended handles;
+  `seed-snapshot-profiles --snapshot-db <path>` reuses verified raw profiles
+  without another paid request.
+
+A new following snapshot can initialize with `--reuse-from <finalized-parent>`.
+Only stable source X IDs shared by the parent and child inherit terminal source
+state, raw profiles/pages, accounts, and edges; new cohort members remain
+pending. `snapshot_lineage` records the parent checksum and copied row counts,
+and inherited evidence retains its original observation timestamp. The child
+therefore has one explicit membership denominator but may contain evidence
+observed on different dates.
 
 `fli.db` is the current tracked, inspectable product/demo corpus. Keep the
 cleaned Registry and compact accepted outputs there; do not load the broad raw

@@ -48,7 +48,7 @@ generalizing that proof to another day and delivery remains the active boundary.
 
 | Layer | Status | What is established |
 | --- | --- | --- |
-| Registry | Implemented and inspectable | One entity can own multiple channels; structural kind and Registry admission are separate; rejected records remain reversible and reason-bearing. The current checkpoint contains 2,220 auditable identities. |
+| Registry | Implemented and inspectable | One entity can own multiple channels; structural kind and Registry admission are separate; rejected records remain reversible and reason-bearing. The current checkpoint contains 2,831 auditable identities, including a lean 423-person World's Fair 2026/2024 source cohort; 2,795 identities are active and 36 are reason-bearing rejections. Conference inclusion is provenance, not rank or vote weight. |
 | Trusted-following graph | Evaluated candidate generator | A fresh immutable snapshot contains 2,456,305 outgoing-follow edges. Entity overlap is the accepted inspectable support feature; personalized PageRank remains a diagnostic, not truth. |
 | X evidence store | Implemented source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
 | Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |

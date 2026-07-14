@@ -1,80 +1,114 @@
-# AI Engineer conference source import — 2026-07-14
+# AI Engineer conference Registry import — 2026-07-14
 
 ## Decision
 
-Preserve the complete supported official conference sources, but admit only a
-small deterministic first cohort: the first 20 unique X-addressable speakers
-in the World's Fair 2026 official response. Conference inclusion is source
-provenance, not a ranking boost, voting weight, or claim that these are the
-best 20 people in AI.
+Directly admit every X-addressable speaker in the official AI Engineer World's
+Fair 2026 and 2024 directories. Conference curation is an admission source,
+not a vote, a ranking boost, or proof that the cohort is optimal.
 
-## Pre-import coverage
+The product Registry is intentionally lean. It retains one identity, one
+verified X channel, the best available conference-supplied role and bio, and
+one listed organization relationship per person. When the same person appears
+in both requested events, the 2026 claim replaces the 2024 claim. Event
+history, talks, LinkedIn, personal sites, and ambiguous organization X links
+remain only in the immutable raw source snapshots.
 
-The coverage audit ran before the Registry write:
+## Official evidence
 
-- 945 records across four official sources.
-- 878 unique names and 528 unique X handles.
-- 101 X handles already in the active Registry; 427 were new; zero matched a
-  rejected identity.
-- 499 normalized company labels were available for later organization work.
-
-Supported snapshots:
-
-| Source | Records | X records | SHA-256 |
+| Source | Records | X-addressable | SHA-256 |
 |---|---:|---:|---|
 | AI Engineer World's Fair 2026 | 552 | 315 | `d05c46958f2a6cfa199dbc75e05f204e2b154fc8efe1c95279f8caccbafb4d32` |
-| AI Engineer Europe 2026 | 162 | 103 | `949fc1b2c827f65e4f7b0140fef9f5db6333610f7c0f6394fa2ab2f3a1df922c` |
 | AI Engineer World's Fair 2024 | 173 | 134 | `04722928a72ad601ad296c046bf67049cddb79d7f7dff427c60615e3537be02d` |
+| AI Engineer Europe 2026 | 162 | 103 | `949fc1b2c827f65e4f7b0140fef9f5db6333610f7c0f6394fa2ab2f3a1df922c` |
 | AI Engineer Summit 2023 | 58 | 34 | `cffd5e2426d3f44b7b5738e476dc8ec896eb981f2ab01bd0b5357cd8149178bb` |
 
-Raw responses live in ignored `data/raw/conference-sources/`; the tracked
-manifest at `data/registry/conference-sources.json` binds IDs, URLs, formats,
-and observation dates.
+Only the two World's Fair sources were admitted. Europe 2026 and Summit 2023
+remain available as raw, checksum-bound evidence for a future explicit
+decision. Raw responses and the resumable X-profile cache live under ignored
+`data/raw/conference-sources/`; the tracked
+`data/registry/conference-sources.json` manifest binds the supported URLs,
+formats, observation dates, and hashes.
 
-## Imported cohort
+## Admission result
 
-The stable source-order cohort was:
+The two requested directories contain 725 speaker records and 423 unique
+X-addressable people; 26 appear in both years. The pre-write audit found 96
+already active identities, 327 new identities, and no rejected-handle
+collisions.
 
-1. Abhishek Bhardwaj — `@abshkbh` — OpenAI
-2. Adam Azzam — `@aaazzam` — Modal
-3. Adam Huda — `@hudaman` — Uber
-4. Addy Osmani — `@addyosmani` — no organization listed
-5. Adi Singh — `@adisingh` — AgentMail
-6. Ahmad Osman — `@theahmadosman` — Osmantic
-7. Ahmed Ahres — `@boudatw` — Reactor
-8. Ajay Prakash — `@ajay_prakash_ai` — Linkedin
-9. Alex Atallah — `@alexatallah` — OpenRouter
-10. Alex Bauer — `@alexdbauer` — Upside
-11. Alex Cheema — `@alexocheema` — EXO Labs
-12. Alex Hancock — `@alexjhancock` — Block
-13. Alex Volkov — `@altryne` — W&B from CoreWeave
-14. Alexander Embiricos — `@embirico` — OpenAI
-15. Aman Gupta — `@aman2304` — Nubank
-16. Amit Navindgi — `@amitnavindgi` — Zoox
-17. Andrew Dai — `@andrewdai` — Elorian
-18. Andrew Orobator — `@aorobator` — Reddit
-19. Andrew Qu — `@andrewqu` — Vercel
-20. Ang Li — `@angli_ai` — Simular
+The idempotent write produced the following current Registry boundary:
 
-Four matched existing people; 16 people and 15 organizations were new. The
-write produced 20 conference-speaker facts, 20 roles, 20 bios, 19 company
-facts, and 19 dated listed affiliations. Re-running the command is idempotent
-and does not revive previously rejected entities.
+- 423 conference-sourced people, represented once each.
+- 327 new people and 253 new organization identities beyond the prior
+  Registry checkpoint.
+- 423 admission/source claims, 422 roles, 403 bios, 419 listed-company claims,
+  and 419 person-to-organization affiliations.
+- No `company_x_candidate`, talk, LinkedIn, personal-site, or repeated
+  historical conference facts.
 
-## Canonical boundary
+Organizations are useful resolution targets for affiliations, but conference
+inclusion gives neither people nor organizations special rank or voting
+weight.
 
-Canonical person data is limited to name, X identity, conference-supplied
-role, bio, company label, dated affiliation, and provenance. A verified
-official organization website may be attached where the source clearly
-provides one. LinkedIn, session titles, personal sites/blogs, and ambiguous
-company X links remain raw-only. New people are monitorable, but cannot vote in
-the frozen 2026-07-11 following snapshot.
+## X reconciliation
 
-Reproduce:
+The old immutable following snapshot already covered 80 of the 423 conference
+people. The remaining 343 conference handles needed stable provider identity
+evidence:
+
+- 330 public accounts were resolved and hydrated with stable X IDs and
+  follower counts.
+- 12 handles were confirmed missing and one was confirmed suspended.
+- Those 13 unavailable identities were moved to reason-bearing Registry
+  rejections; they are preserved for audit but excluded from active monitoring
+  and the next voting cohort.
+- 410 conference people therefore remain active and X-addressable; 330 are new
+  to the previous outgoing-follow snapshot.
+
+The two provider passes made 356 profile requests: 343 initial attempts plus a
+13-handle retry while terminal failure caching was added. At 18 provider
+credits per profile, the best available cost estimate is 6,408 credits, or
+`$0.06408`. Successful raw profile responses and terminal failures are cached,
+so normal reruns make zero provider requests.
+
+Across the whole active Registry, 2,564 X sources currently have stable IDs.
+Of these, 2,212 overlap the prior snapshot and 352 are new to it. The 22
+non-conference additions are retained because the new immutable cohort must
+describe the full current Registry boundary rather than a conference-only
+subset.
+
+## Next immutable network run
+
+The next snapshot will:
+
+1. Freeze the active 2,564-source Registry against a committed database hash.
+2. Copy unchanged terminal evidence for the 2,212 stable-ID sources shared
+   with `registry-following-2026-07-11-v1`.
+3. Seed the 330 newly fetched conference profile responses from the raw cache,
+   avoiding duplicate paid profile calls.
+4. Collect outgoing-follow pages only for the 352 genuinely new active
+   sources, then finalize and validate the child snapshot.
+5. Build a new derived analysis with the new cohort and voting-entity
+   denominator disclosed explicitly.
+
+This is an incremental mixed-observation snapshot, not a claim that every edge
+was observed on one day. Inherited sources retain their 2026-07-11 evidence
+timestamps; new sources retain their actual 2026-07-14 timestamps. Snapshot
+lineage records the parent checksum and exact copied row counts.
+
+## Reproduce
 
 ```bash
-PYTHONPATH=src .venv/bin/python -m fli.cli conference-sources snapshot
-PYTHONPATH=src .venv/bin/python -m fli.cli conference-sources audit
-PYTHONPATH=src .venv/bin/python -m fli.cli conference-sources import --limit 20
+PYTHONPATH=src .venv/bin/python -m fli.cli conference-sources audit \
+  --source aie-worldsfair-2026 --source aie-worldsfair-2024
+PYTHONPATH=src .venv/bin/python -m fli.cli conference-sources import \
+  --source aie-worldsfair-2026 --source aie-worldsfair-2024
+PYTHONPATH=src .venv/bin/python -m fli.cli conference-sources hydrate-profiles \
+  --source aie-worldsfair-2026 --source aie-worldsfair-2024
+PYTHONPATH=src .venv/bin/python -m fli.cli conference-sources reject-unavailable \
+  --source aie-worldsfair-2026 --source aie-worldsfair-2024
 ```
 
+The import and cache-replay paths are deterministic and idempotent. A new
+provider call still requires the configured TwitterAPI.io secret; raw-source
+parsing and Registry reconciliation do not.

@@ -462,6 +462,17 @@ non-interactive inspection/lifecycle commands. Initialization itself makes no
 external request. Ranking will require an explicit snapshot database rather
 than reading `data/fli.db` edges.
 
+A new cohort may initialize as an incremental child of a finalized snapshot.
+Parent reuse intersects only on stable source X ID and copies terminal source
+state, raw profiles/pages, normalized accounts, and edges into the child's own
+database. New cohort sources remain pending. `snapshot_lineage` records the
+parent path/checksum and exact copy counts, while inherited evidence preserves
+its original observation time. The child therefore has one explicit frozen
+membership denominator but can contain honestly disclosed mixed observation
+dates. Verified conference profile responses can be seeded from their raw
+cache before collection so a graph refresh does not pay for or overwrite the
+same provider evidence twice.
+
 Bounded collection is now implemented. Every paid run requires an explicit
 handle, source limit, or `--all`. Source profiles are cached before following
 pages, so profile and cursor evidence both survive interruption. Profile-only
@@ -506,13 +517,19 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The Registry retains 2,220 classified entities: 2,104 active people, 93
-  active organizations, zero active unsure, and 23 rejections. The
-  2,293 channels include official X, website, GitHub, and blog channels
+- The Registry retains 2,831 classified entities: 2,434 active people, 361
+  active organizations, zero active unsure, and 36 reason-bearing rejections.
+  The 2,725 channels include official X, website, GitHub, and blog channels
   consolidated into stable real-world organizations. The approved relevance
   manifest contains 689 exact one-X removals. The final organization pass
   applies Adi's temporary 10,000-follower floor; lower-reach organizations may
   be rediscovered later through trusted-follow PageRank evidence.
+- Official AI Engineer World's Fair 2026 and 2024 snapshots contribute 423
+  unique X-addressable people. Canonical storage keeps one newest role, bio,
+  listed-company claim, and affiliation per person; repeated conference
+  history and non-X enrichment remain raw-only. Provider reconciliation leaves
+  410 active public identities and 13 explicit missing/suspended rejections.
+  Conference presence affects neither rank nor vote weight.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
   marker. The 1,853 accounts actually observed through Digg also carry one
   `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
@@ -692,17 +709,17 @@ erDiagram
         string evidence_url
     }
 
-    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (4,660)"
+    ACCOUNTS ||--o{ ACCOUNT_SOURCE_FACTS : "has (5,419)"
     ACCOUNTS ||--o{ GRAPH_EDGES : "from_account_id"
     ACCOUNTS ||--o{ GRAPH_EDGES : "to_account_id (0 current)"
     LABS }o--|| ACCOUNTS : "x_account_id (legacy, optional)"
     LABS ||--|| ENTITIES : "internal seed provenance by slug"
-    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,310)"
+    ENTITIES ||--o{ ENTITY_CHANNELS : "has (2,725)"
     CHANNELS ||--|| ENTITY_CHANNELS : resolves_to
-    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (10,939)"
-    ENTITIES ||--o{ ENTITY_SOURCE_FACTS : "evidenced facts (97)"
-    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "person role (19)"
-    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "organization affiliation (19)"
+    CHANNELS ||--o{ CHANNEL_OBSERVATIONS : "observed_as (11,599)"
+    ENTITIES ||--o{ ENTITY_SOURCE_FACTS : "evidenced facts (1,965)"
+    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "person role (419)"
+    ENTITIES ||--o{ ENTITY_AFFILIATIONS : "organization affiliation (419)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATIONS : "produced (2,300)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_CLASSIFICATION_ERRORS : "records (0)"
     ENTITY_KIND_CLASSIFICATION_RUNS ||--o{ ENTITY_KIND_WEB_ENRICHMENTS : "stages (1)"
@@ -713,13 +730,13 @@ erDiagram
     ENTITIES ||--o{ ENTITY_OVERRIDE_AUDIT : "records reviewed corrections"
 ```
 
-Table row counts: `raw_items` 1,599, `accounts` 2,273,
-`account_source_facts` 4,660, `graph_edges` 0, `labs` 10,
-`entities` 2,251, `channels` 2,310, `entity_channels` 2,310,
-`channel_observations` 10,939, `entity_source_facts` 97,
-`entity_affiliations` 19, `entity_kind_classification_runs` 10,
+Table row counts: `raw_items` 1,599, `accounts` 2,600,
+`account_source_facts` 5,419, `graph_edges` 0, `labs` 10,
+`entities` 2,831, `channels` 2,725, `entity_channels` 2,725,
+`channel_observations` 11,599, `entity_source_facts` 1,965,
+`entity_affiliations` 419, `entity_kind_classification_runs` 10,
 `entity_kind_classifications` 2,300, `entity_kind_web_enrichments` 1,
-`entity_kind_classification_errors` 0, `entity_registry_rejections` 23, and
+`entity_kind_classification_errors` 0, `entity_registry_rejections` 36, and
 `entity_merge_audit` 29, and `entity_override_audit` 1.
 
 Note `raw_items` has no foreign keys into the rest of the schema yet — it is
@@ -752,6 +769,9 @@ lifecycle state. The 10 seeded rows in `labs` remain internal source provenance
 and do not create a public subtype. Source-specific role and bio claims live in
 `entity_source_facts`; dated person-to-organization claims live in
 `entity_affiliations`. Neither changes entity kind, voting weight, or rank.
+Conference imports consolidate those claims to the newest available non-empty
+fact and one affiliation per person; the immutable raw snapshots retain the
+complete event history without turning repeat appearances into product data.
 Rejection remains a separate curation state. An explicit protected-account flag is the first
 implemented rejection gate; broader relevance curation remains later.
 
@@ -997,6 +1017,7 @@ final score.
 | `fli.labs` | internal curated source seed (10 historical rows); seeds official channels but does not define a public Registry kind/subtype |
 | `fli.fetch` | raw fetch spike for blogs/sitemap, arXiv, GitHub releases |
 | `fli.sources` | machine-readable TwitterAPI.io profile, timeline, X-list, and single-source outgoing-follow adapter; provenance only, no classification |
+| `fli.conference_sources` | manifest-driven official conference snapshots, exact-X identity reconciliation, lean current role/bio/affiliation import, resumable raw profile hydration, unavailable-account rejection, and following-snapshot profile seeding |
 | `fli.x_content` | immutable raw provider responses and `x_post_observation` history, plus mutable latest-post convenience rows and exact post bundles |
 | `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
 | `fli.signal_feed` | content-addressed `signal-feed-v8` snapshots with recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
@@ -1005,7 +1026,7 @@ final score.
 | `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.cited_insights` / `fli.cited_insight_runs` | minimal `insight-v1.1` model boundary, frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
-| `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
+| `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort, with checksum-bound parent reuse for unchanged stable-ID sources |
 | `fli.following_rankings` | derived entity-overlap baseline plus experimental personalized PageRank/comparison with deterministic runs and active/rejected/unknown mapping |
 | `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; the Network workspace keeps Registry and Ranking as distinct current-state subviews and projects best-owned-account network rank into Registry at read time, while Feed/Event readers follow the explicit publication pointer and overlay current Registry curation; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |

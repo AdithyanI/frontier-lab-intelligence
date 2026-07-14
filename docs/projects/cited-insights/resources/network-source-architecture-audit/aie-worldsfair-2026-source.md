@@ -1,135 +1,117 @@
-# AIE World's Fair 2026 Speaker Source — Implementation Spec
+# AI Engineer World's Fair Registry Source — Implementation Contract
 
 Date: 2026-07-14
-Status: initial 20-person cohort imported; expansion remains reversible.
-Owner decision context: `project-brief.md` Decision Addendum.
 
-## What and why
+Status: requested 2026 + 2024 cohort imported; network refresh in progress.
 
-Ingest the speaker directory of the AI Engineer World's Fair 2026
-(https://www.ai.engineer/worldsfair/2026) as a new Registry candidate source
-with **bounded direct admission**. Each speaker entry carries name, exact role,
-employer, bio, and often an X profile link — three assets at once:
+Decision context: `project-brief.md` Decision Addendum.
 
-1. A curated candidate list from the premier AI-engineering conference, same
-   architectural class as the existing `digg` / `smol_ai` / AI High Signal
-   source facts.
-2. Free structured affiliation data ("Member of Technical Staff, Anthropic")
-   — the cheap version of lab-employee extraction, feeding the role/affiliation
-   plan.
-3. **An independent, non-circular validation cohort for the network audit** —
-   the only external label set available before the deadline. This is the
-   highest-value use and it constrains the execution order below.
+## Product role
 
-Adi's accepted trust policy: conference curation is a useful candidate screen,
-not a ranking weight. The first import is deliberately limited to the first 20
-unique X-addressable speakers in the official World's Fair 2026 response.
-Expansion requires another explicit bounded import; wrong admissions remain
-cheap to reject without discarding their source evidence.
+The official AI Engineer World's Fair speaker directories are a curated
+Registry admission source. They help seed the product with working AI
+researchers, builders, and organizations that the original bootstrap may have
+missed. They do not confer authority, prominence, network support, or a ranking
+bonus.
 
-## Hard ordering constraint
+Admission and voting are separate:
 
-**Run the coverage query before any insertion.** The statement "our trusted
-network already independently surfaced N% of AIE World's Fair speakers" is the
-audit's non-circular validation evidence. Admitting first makes coverage
-trivially 100% and destroys the experiment permanently. Sequence:
+- **Registry admission:** the person is a source the product may monitor.
+- **Profile reconciliation:** the listed X account resolves to a stable public
+  provider identity.
+- **Snapshot membership:** that stable X account is frozen into a particular
+  outgoing-follow collection.
+- **Voting:** the corresponding active canonical entity has complete outgoing
+  evidence in that snapshot.
 
-1. Snapshot raw directory.
-2. Parse + resolve identities (read-only against the Registry).
-3. Compute and persist the coverage/miss report.
-4. Then admit.
+The UI and derived analysis must never collapse these states.
 
-## Implementation steps
+## Accepted source scope
 
-### 1. Raw snapshot (data-first)
+Admit every unique X-addressable speaker from:
 
-- Fetch the official structured speaker response. World's Fair 2026 and Europe
-  2026 publish `speakers.json`; World's Fair 2024 and Summit 2023 preserve
-  structured `__NEXT_DATA__` in their official pages.
-- Preserve the as-fetched payloads under the repo's raw-data conventions
-  (follow the pattern of existing sources under `data/raw/`; one dated,
-  immutable snapshot directory with a manifest: URL, fetched_at, content
-  hash). Parsing runs from the stored snapshot, never live.
+- AI Engineer World's Fair 2026: 315 X-addressable records.
+- AI Engineer World's Fair 2024: 134 X-addressable records.
 
-### 2. Parse and normalize
+Together these resolve to 423 unique people because 26 occur in both years.
+Europe 2026 and Summit 2023 remain raw-only until a separate product decision.
 
-The canonical import is intentionally lean: `name`, `role_title`, `employer`,
-`bio`, `x_handle` (nullable), source ID, observation date, and evidence URL.
-Talk titles, LinkedIn, and personal website/blog fields remain only in the raw
-snapshot. Lowercase X handles per `accounts.handle` convention.
+The pre-admission audit is preserved in
+`aie-conference-import-2026-07-14.md`: 96 of the 423 identities were already
+active and 327 were new.
 
-### 3. Identity resolution (mechanical, not a review gate)
+## Canonical data boundary
 
-- Match against existing entities by X handle → `channels` (`kind='x'`, `key`)
-  → `entity_channels`. Do not merge people by name alone.
-- Many speakers are already in the 2,197 (e.g., Anthropic/OpenAI/DeepMind
-  staff). Do not create duplicates — duplicate entities would corrupt the
-  entity-union support aggregation being fixed in the same batch.
-- Speakers without X remain preserved in the raw snapshot and are not admitted.
-  Do not fabricate handles or introduce LinkedIn as a channel in this batch.
+Deterministically parse from stored official snapshots, never from a live page
+during import. Resolve by exact normalized X handle; never merge by name alone.
 
-### 4. Coverage/miss report (before admission)
+For each person, keep only:
 
-Persist as `resources/network-source-architecture-audit/aie-coverage-report.md`
-with reproducible SQL. Predeclared measures:
+- canonical name and exact personal X channel;
+- one best available source-bound role;
+- one best available source-bound bio;
+- one listed company label and one person-to-organization affiliation;
+- the source/date/evidence needed to audit those claims.
 
-- Fraction of speakers already in the active Registry.
-- Fraction of non-member speakers' X accounts appearing in the 463,180-target
-  discovery ranking, with their support counts (evidence the follow-graph
-  discovery engine surfaces them independently).
-- The misses: speakers with X accounts receiving little/no network support —
-  these are the interesting counterexamples either way.
-- Per-lab breakdown using parsed employers (coverage of frontier-lab
-  employees specifically, per the case prompt's emphasis).
+When both years contain a claim, prefer the newer 2026 observation. The full
+event history remains in raw snapshots. Do not canonicalize talk titles,
+LinkedIn, personal websites, conference frequency, or speculative organization
+X handles. Do not retain repeated year-specific copies of the same role, bio,
+company, or affiliation.
 
-### 5. Bounded direct admission
+Listed companies become organization identities only so the affiliation is
+resolvable. A conference listing does not establish an official organization X
+account or website and does not alter organization voting weight.
 
-- Admit the selected X-addressable cohort with provenance:
-  source facts per the `account_source_facts` pattern
-  (`source='aie_worldsfair_2026'`, facts: `role`, `employer`, `speaker`,
-  `evidence_url`), and an admission note naming the source.
-- Record `role_title`, bio, and employer as source-bound facts on existing
-  entities too. Store the listed person-to-organization relationship in
-  `entity_affiliations`; it does not imply a permanent/current employment fact.
-- Create or reuse the listed organization. Attach an organization website only
-  where the official source clearly identifies it; never infer an organization
-  X account from a speaker's personal profile.
-- New admits join daily X collection like any other Registry member.
-- **They do not vote.** The immutable following snapshot
-  (`registry-following-2026-07-11-v1`) predates them; voting eligibility
-  arrives only with a future snapshot v2 collection (post-submission). Ensure
-  derived views keep denominators honest (support denominators reference the
-  snapshot's 2,197 voting entities, not the enlarged Registry).
+## Provider reconciliation
 
-### 6. Validation
+Fetch only profiles missing a stable X ID or follower observation. Persist the
+complete provider response to the ignored resumable cache before updating the
+tracked Registry. Exact provider identity must match the requested handle.
 
-- Focused tests for parser behavior, stable limit/de-duplication, idempotent
-  source facts and affiliations, and preservation of prior rejections.
-- Reconcile counts: speakers parsed = matched + newly admitted +
-  unresolvable(listed).
-- `bash scripts/check-fast.sh`; verify the Registry UI shows new members with
-  their provenance at `http://127.0.0.1:8797` (always-on server; rebuild
-  frontend only if UI changes are involved).
-- Record spend/telemetry if any LLM assist is used for parsing (prefer none —
-  the page is structured; deterministic parsing beats extraction here).
+Provider-confirmed missing or suspended handles receive a reason-bearing
+Registry rejection. They remain auditable but are excluded from active
+monitoring and future cohort freezes. Retryable transport failures never become
+rejections.
+
+The accepted run resolved 330 newly needed public profiles and rejected 13
+unavailable identities. A cached rerun makes no external calls.
+
+## Incremental following snapshot
+
+Create a new frozen cohort for the complete active Registry, not a
+conference-only graph. The child snapshot may reuse a finalized parent only
+when the stable source X ID occurs in both cohorts. Copy terminal source state,
+raw profile/page evidence, normalized accounts, and edges without changing
+their original observation timestamps. New sources remain pending.
+
+Record parent path, checksum, copy time, and copied row counts in
+`snapshot_lineage`. The resulting snapshot has one explicit current membership
+denominator but mixed evidence dates; documentation and analysis must say so.
+
+Seed the already cached conference profile responses into the mutable child
+before collection. Then collect only pending sources, finalize only when every
+source is terminal, and validate before deriving rankings.
+
+## Validation
+
+- Parser coverage for both official JSON and historical `__NEXT_DATA__`.
+- Exact-handle de-duplication, idempotent import, newest-fact consolidation,
+  rejection preservation, and no ambiguous organization X candidates.
+- Profile cache identity checks, zero-call replay, terminal-failure caching,
+  and reason-bearing unavailable-account rejection.
+- Parent reuse validation, idempotency, shared-source intersection semantics,
+  preserved timestamps, and new-source pending state.
+- Frozen cohort, child snapshot, and derived analysis checksums recorded in
+  tracked manifests.
+- Old/new denominator and rank movement reported separately from public reach.
+- `bash scripts/check-fast.sh` plus a live Network UI proof before handoff.
 
 ## Non-goals
 
-- No cohort cutoff, tiering, or re-ranking based on this list.
-- No recursive expansion from speakers' follow graphs.
-- No new following-snapshot collection in this batch.
-- No LinkedIn storage or scraping, talk/session ingestion, or personal-site
-  canonicalization.
-- Do not let this displace cited-insights delivery work; this is a bounded
-  side batch (~half a day target).
-
-## Initial result
-
-The official snapshots contain 945 conference records across four supported
-events, resolving to 528 unique X handles. Before insertion, 101 of those
-handles were already present and active; none were rejected. The accepted
-first batch selected exactly 20 World's Fair 2026 handles in source order:
-4 matched existing people and 16 created new people. It wrote 19 listed
-affiliations, reused or created 18 organizations (15 new), and retained role,
-bio, company, source, date, and evidence URL. The other 508 X-addressable
-records and all non-X records remain snapshot-only until a later decision.
+- No claim that these are the best 423 people in AI.
+- No conference-frequency or year-count feature.
+- No recursive Registry expansion from every discovered follow target.
+- No blanket person/organization weighting.
+- No LinkedIn scraping, talk ingestion, or speculative organization channel
+  attachment.

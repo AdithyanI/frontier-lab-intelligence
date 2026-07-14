@@ -141,6 +141,81 @@ def test_initialize_snapshot_is_idempotent_and_frozen(tmp_path):
     assert first["source_statuses"]["pending"] == 2
 
 
+def test_child_snapshot_reuses_complete_parent_and_leaves_new_source_pending(
+    tmp_path,
+):
+    parent_db, _ = _snapshot(tmp_path)
+    parent = following_snapshots.connect_snapshot(parent_db)
+    following_snapshots.record_profile(
+        parent,
+        source_x_id="1",
+        profile={"id": "1", "userName": "alpha", "following": 1},
+    )
+    following_snapshots.record_page(
+        parent,
+        source_x_id="1",
+        request_cursor=None,
+        payload={
+            "followings": [{"id": "10", "userName": "target"}],
+            "has_next_page": False,
+        },
+    )
+    following_snapshots.mark_source(
+        parent,
+        source_x_id="2",
+        status="protected",
+        error_code="E_ACCOUNT_PROTECTED",
+        error_message="Protected.",
+    )
+    following_snapshots.finalize_snapshot(parent)
+    parent.close()
+
+    child_cohort_root = tmp_path / "child-cohort"
+    child_cohort_root.mkdir()
+    cohort_path, _ = _cohort(child_cohort_root)
+    cohort = json.loads(cohort_path.read_text())
+    cohort["sources"].append(
+        {
+            "x_id": "4",
+            "handle": "gamma",
+            "display_name": "Gamma",
+            "followers_count": 500,
+        }
+    )
+    cohort["source_count"] = len(cohort["sources"])
+    cohort["cohort_sha256"] = following_snapshots._cohort_hash(cohort["sources"])
+    child_cohort = tmp_path / "child.json"
+    child_cohort.write_text(json.dumps(cohort))
+    child_db = tmp_path / "child.db"
+    following_snapshots.initialize_snapshot(
+        snapshot_id="child-snapshot",
+        cohort_path=child_cohort,
+        snapshot_db=child_db,
+    )
+    child = following_snapshots.connect_snapshot(child_db)
+
+    first = following_snapshots.reuse_parent_snapshot(
+        child,
+        parent_snapshot_db=parent_db,
+        copied_at="2026-07-14T00:00:00+00:00",
+    )
+    second = following_snapshots.reuse_parent_snapshot(
+        child,
+        parent_snapshot_db=parent_db,
+    )
+
+    assert first["created"] is True
+    assert second["created"] is False
+    assert first["lineage"]["copied_sources"] == 2
+    assert first["lineage"]["copied_edges"] == 1
+    assert first["snapshot"]["source_statuses"]["complete"] == 1
+    assert first["snapshot"]["source_statuses"]["protected"] == 1
+    assert first["snapshot"]["source_statuses"]["pending"] == 1
+    assert child.execute("SELECT COUNT(*) FROM edge").fetchone()[0] == 1
+    assert following_snapshots.validate_snapshot(child)["valid"] is True
+    child.close()
+
+
 def test_record_page_persists_raw_first_and_resumes_by_cursor(tmp_path):
     snapshot_db, _ = _snapshot(tmp_path)
     conn = following_snapshots.connect_snapshot(snapshot_db)
