@@ -170,7 +170,15 @@ def artifacts_payload(
                     lower(COALESCE(artifact.title, '')) LIKE lower(?) ESCAPE '\\'
                  OR lower(artifact.host) LIKE lower(?) ESCAPE '\\'
                  OR lower(artifact.canonical_url) LIKE lower(?) ESCAPE '\\'
-                 OR lower(observation.source_url) LIKE lower(?) ESCAPE '\\'
+                 OR EXISTS (
+                      SELECT 1
+                      FROM artifact_observation matched_observation
+                      WHERE matched_observation.artifact_id = artifact.artifact_id
+                        AND substr(matched_observation.source_published_at, 1, 10)
+                            = substr(observation.source_published_at, 1, 10)
+                        AND lower(matched_observation.source_url)
+                            LIKE lower(?) ESCAPE '\\'
+                 )
                )"""
             search_params = (pattern, pattern, pattern, pattern)
 

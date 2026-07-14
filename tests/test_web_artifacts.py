@@ -205,6 +205,16 @@ def test_artifacts_api_filters_exact_source_day_and_search(tmp_path, monkeypatch
         "newer"
     ]
 
+    earlier_observer = client.get(
+        "/api/artifacts",
+        params={"date": "2026-07-11", "q": "status/3"},
+    )
+    assert earlier_observer.status_code == 200
+    assert earlier_observer.json()["matching_total"] == 1
+    assert [item["artifact_id"] for item in earlier_observer.json()["items"]] == [
+        "older"
+    ]
+
 
 def test_artifacts_api_is_honest_when_catalog_is_missing(tmp_path, monkeypatch):
     monkeypatch.setattr(
