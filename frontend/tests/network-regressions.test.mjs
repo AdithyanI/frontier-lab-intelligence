@@ -35,6 +35,7 @@ test('Network defaults to Ranking while preserving Registry terminology and reac
   assert.match(registrySource, /X reach/)
   assert.match(registrySource, /entity\.reach_rank/)
   assert.match(registrySource, /fmtCompact/)
+  assert.match(registrySource, /ent-reach-separator/)
   assert.match(registrySource, /Network rank/)
   assert.match(registrySource, /entity\.network_rank/)
   assert.match(registrySource, /sortField/)

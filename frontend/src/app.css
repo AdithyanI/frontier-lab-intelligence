@@ -627,16 +627,24 @@ td.num {
   font-size: 12px;
 }
 .ent-reach-value {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: 6ch max-content 6ch;
   align-items: baseline;
-  justify-content: flex-end;
-  gap: 4px;
+  column-gap: 4px;
   white-space: nowrap;
 }
-.ent-reach-rank { color: var(--ink-soft); }
+.ent-reach-rank {
+  color: var(--ink-soft);
+  text-align: right;
+}
+.ent-reach-separator {
+  color: var(--muted);
+  text-align: center;
+}
 .ent-reach-magnitude {
   color: var(--muted);
   font-size: 10.5px;
+  text-align: left;
 }
 .ent-name { display: block; font-weight: 500; color: var(--ink); }
 .ent-handles {

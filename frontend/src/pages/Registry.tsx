@@ -349,8 +349,11 @@ export default function Registry() {
                           <span className="ent-reach-rank">
                             #{fmt(entity.reach_rank)}
                           </span>
+                          <span className="ent-reach-separator" aria-hidden="true">
+                            ·
+                          </span>
                           <span className="ent-reach-magnitude">
-                            · {fmtCompact(entity.followers_count)}
+                            {fmtCompact(entity.followers_count)}
                           </span>
                         </span>
                       )}
