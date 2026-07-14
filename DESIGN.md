@@ -141,7 +141,8 @@ Rules:
   it must not average incomparable daily scores.
   Audit and sort are compact labeled disclosures rather than persistent
   segmented bars; each option remains one click away and audit counts stay
-  visible inside the menu. Per-envelope triage rationale is collapsed by
+  visible inside the menu. Search shares their 44px square hairline treatment
+  and stays width-bounded on desktop rather than consuming the toolbar. Per-envelope triage rationale is collapsed by
   default behind a quiet `View reason` disclosure so evidence remains the
   primary reading surface.
 - **Artifact index:** a flat, ruled list over the canonical artifact catalog.

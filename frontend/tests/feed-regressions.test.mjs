@@ -17,6 +17,11 @@ test('Feed uses semantic classes for optional menu and triage content', () => {
   assert.doesNotMatch(appStyles, /event-triage-heading span:first-child/)
 })
 
+test('Feed search matches the compact ruled control language', () => {
+  assert.match(appStyles, /grid-template-columns: minmax\(320px, 480px\) auto/)
+  assert.match(appStyles, /\.feed-search \{[\s\S]*?min-height: 44px;[\s\S]*?border: 1px solid var\(--border-strong\);[\s\S]*?border-radius: 0;/)
+})
+
 test('Feed preserves daily rank across audit filters and discloses score on demand', () => {
   assert.match(feedSource, /<strong>#\{rank\}<\/strong>/)
   assert.match(feedSource, /rank=\{item\.daily_rank\}/)

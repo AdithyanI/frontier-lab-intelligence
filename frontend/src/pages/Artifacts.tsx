@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   getJSON,
   type ArtifactDates,
@@ -92,6 +93,7 @@ function sourceLabel(provider: string | null) {
 
 function ArtifactRow({ item }: { item: ArtifactItem }) {
   const sourcePublishedAt = item.source_published_at || item.last_source_published_at || item.last_seen_at
+  const feedDate = sourcePublishedAt.slice(0, 10)
 
   return (
     <details className="artifact-row">
@@ -128,7 +130,11 @@ function ArtifactRow({ item }: { item: ArtifactItem }) {
           <div>
             <dt>Observed in</dt>
             <dd>
-              {item.source_url ? (
+              {item.source_event_id ? (
+                <Link to={`/feed?date=${feedDate}&event=${encodeURIComponent(item.source_event_id)}`}>
+                  Feed envelope →
+                </Link>
+              ) : item.source_url ? (
                 <a href={item.source_url} target="_blank" rel="noreferrer">
                   {sourceLabel(item.source_provider)} evidence ↗
                 </a>

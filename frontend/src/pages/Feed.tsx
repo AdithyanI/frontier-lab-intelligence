@@ -6,6 +6,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   getJSON,
   type EventEvidence,
@@ -43,6 +44,7 @@ interface EventPageRequest {
   sort: Sort
   triageFilter: TriageFilter
   query: string
+  eventId?: string
   offset?: number
 }
 
@@ -54,9 +56,10 @@ function eventPageKey({
   sort,
   triageFilter,
   query,
+  eventId,
   offset = 0,
 }: EventPageRequest) {
-  return `${date}\u0000${sort}\u0000${triageFilter}\u0000${query}\u0000${offset}`
+  return `${date}\u0000${sort}\u0000${triageFilter}\u0000${query}\u0000${eventId ?? ''}\u0000${offset}`
 }
 
 function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
@@ -71,6 +74,7 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
     sort: request.sort,
     triage: request.triageFilter,
     q: request.query,
+    event_id: request.eventId ?? '',
     limit: String(PAGE_SIZE),
     offset: String(request.offset ?? 0),
   })
@@ -498,6 +502,7 @@ function EventRow({
   scoreOpen,
   onToggleScore,
   onCloseScore,
+  focused,
 }: {
   item: SignalEvent
   rank: number
@@ -507,6 +512,7 @@ function EventRow({
   scoreOpen: boolean
   onToggleScore: () => void
   onCloseScore: () => void
+  focused: boolean
 }) {
   const root = item.root
   const replies = item.evidence.filter((evidence) => evidence.relationship === 'reply')
@@ -536,7 +542,10 @@ function EventRow({
   ].filter((part): part is string => part !== null)
 
   return (
-    <article className="feed-row event-row">
+    <article
+      className={`feed-row event-row${focused ? ' event-row--focused' : ''}`}
+      id={`event-${item.event_id}`}
+    >
       <ScoreDisclosure
         item={item}
         rank={rank}
@@ -608,6 +617,11 @@ function EventRow({
 }
 
 export default function Feed() {
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
+  const initialLinkedDate = useRef(urlSearchParams.get('date') ?? '')
+  const [targetEventId, setTargetEventId] = useState(
+    () => urlSearchParams.get('event') ?? '',
+  )
   const [dates, setDates] = useState<FeedDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [sort, setSort] = useState<Sort>('attention')
@@ -640,11 +654,13 @@ export default function Feed() {
         setDates(value)
         setDateWindowEnd(value.dates?.length ?? 0)
         if (value.available && value.latest_complete_date) {
-          setSelectedDate((current) =>
-            value.dates?.some((date) => date.day === current)
-              ? current
-              : value.latest_complete_date ?? '',
-          )
+          setSelectedDate((current) => {
+            if (value.dates?.some((date) => date.day === current)) return current
+            if (value.dates?.some((date) => date.day === initialLinkedDate.current)) {
+              return initialLinkedDate.current
+            }
+            return value.latest_complete_date ?? ''
+          })
         }
       })
       .catch(() => setError('Couldn’t load available Feed dates. Reload to try again.'))
@@ -664,6 +680,7 @@ export default function Feed() {
       sort,
       triageFilter,
       query: debouncedQuery,
+      eventId: targetEventId,
       offset: 0,
     }
     const viewKey = eventPageKey(request)
@@ -698,10 +715,10 @@ export default function Feed() {
     return () => {
       live = false
     }
-  }, [selectedDate, sort, triageFilter, debouncedQuery])
+  }, [selectedDate, sort, triageFilter, debouncedQuery, targetEventId])
 
   useEffect(() => {
-    if (!selectedDate || sort !== 'attention' || debouncedQuery) return
+    if (!selectedDate || sort !== 'attention' || debouncedQuery || targetEventId) return
     let cancelled = false
     const timer = window.setTimeout(async () => {
       for (const value of visibleDates) {
@@ -723,11 +740,23 @@ export default function Feed() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [visibleDates, selectedDate, sort, triageFilter, debouncedQuery])
+  }, [visibleDates, selectedDate, sort, triageFilter, debouncedQuery, targetEventId])
+
+  useEffect(() => {
+    if (!targetEventId || !items.some((item) => item.event_id === targetEventId)) return
+    document.getElementById(`event-${targetEventId}`)?.scrollIntoView({ block: 'start' })
+  }, [items, targetEventId])
+
+  const clearTargetEvent = () => {
+    if (!targetEventId) return
+    setTargetEventId('')
+    setUrlSearchParams({}, { replace: true })
+  }
 
   const hasSearch = debouncedQuery.trim().length > 0
 
   const moveDateWindow = (direction: DateWindowDirection) => {
+    clearTargetEvent()
     const selectedIndex = availableDates.findIndex(
       (value) => value.day === selectedDate,
     )
@@ -811,7 +840,10 @@ export default function Feed() {
         <DateNavigator
           dates={visibleDates}
           selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
+          onSelectDate={(day) => {
+            clearTargetEvent()
+            setSelectedDate(day)
+          }}
           canShowOlderDates={canShowOlderDates}
           canShowNewerDates={canShowNewerDates}
           onShowOlderDates={() => moveDateWindow('older')}
@@ -825,7 +857,10 @@ export default function Feed() {
           className="search feed-search"
           type="search"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            clearTargetEvent()
+            setQuery(event.target.value)
+          }}
           placeholder="Search author, handle, or post…"
           aria-label="Search Feed"
         />
@@ -833,7 +868,10 @@ export default function Feed() {
           <FeedMenuSelect
             label="AUDIT"
             value={triageFilter}
-            onChange={setTriageFilter}
+            onChange={(value) => {
+              clearTargetEvent()
+              setTriageFilter(value)
+            }}
             options={([
               ['keep', 'Kept', 'Kept for extraction'],
               ['drop', 'Dropped', 'Dropped before extraction'],
@@ -849,7 +887,10 @@ export default function Feed() {
           <FeedMenuSelect
             label="SORT"
             value={sort}
-            onChange={setSort}
+            onChange={(value) => {
+              clearTargetEvent()
+              setSort(value)
+            }}
             options={[
               { value: 'attention', label: 'Score', description: 'Daily score' },
               { value: 'recent', label: 'Recent', description: 'Most recent' },
@@ -890,6 +931,7 @@ export default function Feed() {
                   )
                 }
                 onCloseScore={() => setOpenScoreEventId(null)}
+                focused={targetEventId === item.event_id}
               />
             ))}
         {!loading && items.length === 0 && (

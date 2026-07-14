@@ -990,6 +990,7 @@ def events_payload(
     lane: str,
     sort: str,
     query: str,
+    event_id: str = "",
     triage_filter: str = "all",
     limit: int,
     offset: int,
@@ -1094,12 +1095,15 @@ def events_payload(
     else:
         items.sort(key=score_order_key, reverse=True)
 
+    if event_id:
+        items = [item for item in items if item["event_id"] == event_id]
     total = len(items)
     return {
         **{key: value for key, value in payload.items() if key != "items"},
         "lane": lane,
         "sort": sort,
         "query": query,
+        "event_id": event_id,
         "triage_filter": triage_filter,
         "projection": projection,
         "triage_counts": triage_counts,

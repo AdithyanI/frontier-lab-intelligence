@@ -192,6 +192,7 @@ export interface FeedResponse {
   lane?: 'all' | 'network' | 'firsthand'
   sort?: 'attention' | 'recent' | 'engagement'
   query?: string
+  event_id?: string
   total?: number
   limit?: number
   offset?: number
@@ -340,6 +341,7 @@ export interface ArtifactItem {
   source_kind: string | null
   source_provider: string | null
   source_url: string | null
+  source_event_id: string | null
   fetch_state: ArtifactFetchState
   fetch_method: string | null
   fetched_at: string | null

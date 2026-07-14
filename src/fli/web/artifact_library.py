@@ -242,6 +242,18 @@ def artifacts_payload(
                       observation.last_source_published_at,
                       observation.source_kind, observation.source_provider,
                       observation.source_url,
+                      (
+                          SELECT candidate.event_id
+                          FROM artifact_import_candidate candidate
+                          WHERE candidate.artifact_id = observation.artifact_id
+                            AND candidate.decision = 'accepted'
+                            AND candidate.envelope_day = ?
+                            AND candidate.source_provider = observation.source_provider
+                            AND candidate.source_external_id = observation.source_external_id
+                            AND candidate.source_snapshot_sha256 = observation.source_snapshot_sha256
+                          ORDER BY candidate.source_rank, candidate.event_id
+                          LIMIT 1
+                      ) AS source_event_id,
                       fetch.status AS fetch_status,
                       fetch.fetch_policy, fetch.completed_at AS fetched_at,
                       fetch.extractor_contract, fetch.text_char_count,
@@ -257,7 +269,7 @@ def artifacts_payload(
                         observation.source_published_at DESC,
                         artifact.artifact_id
                LIMIT ? OFFSET ?""",
-            (selected_day, *search_params, limit, offset),
+            (selected_day, selected_day, *search_params, limit, offset),
         ).fetchall()
 
         items = []

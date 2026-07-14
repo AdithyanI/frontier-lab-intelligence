@@ -1218,13 +1218,30 @@ td.num {
 .feed-tools {
   display: grid;
   grid-template-areas: 'search controls';
-  grid-template-columns: minmax(280px, 1fr) auto;
+  grid-template-columns: minmax(320px, 480px) auto;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   margin-top: 24px;
 }
 
-.feed-search { grid-area: search; width: 100%; }
+.feed-search {
+  grid-area: search;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+  background: var(--bg);
+  font-size: 12px;
+  transition: background 150ms var(--ease-out), border-color 150ms var(--ease-out);
+}
+
+.feed-search:hover { background: var(--surface); }
+
+.feed-search:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+}
 
 .feed-controls {
   grid-area: controls;
@@ -1829,7 +1846,7 @@ td.num {
 @media (max-width: 1260px) {
   .feed-tools {
     grid-template-areas: 'search controls';
-    grid-template-columns: minmax(240px, 1fr) auto;
+    grid-template-columns: minmax(280px, 420px) auto;
     row-gap: 12px;
   }
 }
