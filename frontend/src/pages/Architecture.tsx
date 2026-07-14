@@ -245,7 +245,7 @@ function CurrentDataModel() {
     <svg
       viewBox="0 0 1080 444"
       role="img"
-      aria-label="Current data model: one real-world entity fans out to channels. X is live; GitHub and arXiv are planned. Dated, source-bound observations from every channel join one evidence stream."
+      aria-label="Current data model: one real-world entity fans out to channels. X is live; GitHub and arXiv are planned. Dated, source-bound X output arrives as a daily event stream."
     >
       <defs>
         <marker id="data-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -320,7 +320,7 @@ function CurrentDataModel() {
       <text x="116" y="398" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.04em">source-bound · ordered in time</text>
       <line x1="308" y1="332" x2="308" y2="402" stroke={MUTED} strokeWidth="1" opacity="0.24" />
 
-      <text x="340" y="340" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">LIVE FROM X</text>
+      <text x="340" y="340" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">DATED X OUTPUT · DAILY STREAM</text>
       <text x="956" y="340" fontFamily={MONO} fontSize="9.5" fill={MUTED} textAnchor="end">time →</text>
       <line x1="340" y1="356" x2="948" y2="356" stroke={MUTED} strokeWidth="1" opacity="0.5" markerEnd="url(#data-arrow)" />
       {obsDots.map((x) => (
@@ -353,7 +353,7 @@ function NetworkRankFigure() {
     <svg
       viewBox="0 0 1080 288"
       role="img"
-      aria-label="X follow graph and network support: Account A has fewer public followers but five screened Registry followers, while Account B has many public followers but only one screened Registry follower. The five screened signals count, public audience size does not."
+      aria-label="X follow graph and network support, observed as a slow-moving snapshot: Account A has fewer public followers but five screened Registry followers, while Account B has many public followers but only one screened Registry follower. The five screened signals count, public audience size does not."
     >
       <defs>
         <marker id="rank-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -361,6 +361,7 @@ function NetworkRankFigure() {
         </marker>
       </defs>
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">X FOLLOW GRAPH · WHY AN ACCOUNT RANKS HIGHER</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">SLOW-MOVING SNAPSHOT</text>
       <line x1="540" y1="60" x2="540" y2="276" stroke={MUTED} strokeWidth="1" opacity="0.22" />
 
       {/* Account A: the same follower field, with five screened nodes. */}
@@ -539,7 +540,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--lead" id="data-model">
         <div className="arch-section-head">
           <h2 className="arch-h">The data model</h2>
-          <p className="arch-p">Channels produce dated evidence. The X follow graph separately supplies counted network support.</p>
+          <p className="arch-p">X is observed in two ways: dated output arrives daily; follow relationships change more slowly.</p>
         </div>
         <div className="arch-canvas"><CurrentDataModel /></div>
         <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
