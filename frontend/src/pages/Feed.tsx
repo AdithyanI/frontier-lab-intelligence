@@ -9,6 +9,7 @@ import {
 import { useSearchParams } from 'react-router-dom'
 import {
   getJSON,
+  getCachedJSON,
   type EventEvidence,
   type EventResponse,
   type FeedDates,
@@ -25,7 +26,7 @@ import DateNavigator from '../components/DateNavigator'
 type Sort = 'attention' | 'recent' | 'engagement'
 type TriageFilter = 'all' | 'keep' | 'drop' | 'not_evaluated'
 
-const PAGE_SIZE = 40
+const PAGE_SIZE = 20
 const shortDate = new Intl.DateTimeFormat('en-US', {
   weekday: 'short',
   month: 'short',
@@ -649,7 +650,7 @@ export default function Feed() {
 
   useEffect(() => {
     setLoading(true)
-    getJSON<FeedDates>('/api/events/dates')
+    getCachedJSON<FeedDates>('/api/events/dates')
       .then((value) => {
         setDates(value)
         setDateWindowEnd(value.dates?.length ?? 0)
@@ -718,7 +719,13 @@ export default function Feed() {
   }, [selectedDate, sort, triageFilter, debouncedQuery, targetEventId])
 
   useEffect(() => {
-    if (!selectedDate || sort !== 'attention' || debouncedQuery || targetEventId) return
+    if (
+      loading ||
+      !selectedDate ||
+      sort !== 'attention' ||
+      debouncedQuery ||
+      targetEventId
+    ) return
     let cancelled = false
     const timer = window.setTimeout(async () => {
       for (const value of visibleDates) {
@@ -735,12 +742,20 @@ export default function Feed() {
           // Prefetch is opportunistic; foreground requests still surface errors.
         }
       }
-    }, 350)
+    }, 1200)
     return () => {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [visibleDates, selectedDate, sort, triageFilter, debouncedQuery, targetEventId])
+  }, [
+    visibleDates,
+    selectedDate,
+    sort,
+    triageFilter,
+    debouncedQuery,
+    targetEventId,
+    loading,
+  ])
 
   useEffect(() => {
     if (!targetEventId || !items.some((item) => item.event_id === targetEventId)) return

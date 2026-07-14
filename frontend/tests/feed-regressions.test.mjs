@@ -44,6 +44,13 @@ test('Feed exposes the selected date and guards paginated responses by view iden
   assert.match(feedSource, /setItems\(\[\]\)/)
 })
 
+test('Feed prioritizes the visible page before background work', () => {
+  assert.match(feedSource, /const PAGE_SIZE = 20/)
+  assert.match(feedSource, /getCachedJSON<FeedDates>\('\/api\/events\/dates'\)/)
+  assert.match(feedSource, /loading \|\|[\s\S]*?for \(const value of visibleDates\)/)
+  assert.match(feedSource, /}, 1200\)/)
+})
+
 test('Feed pages through fixed seven-date windows with explicit boundary controls', () => {
   assert.deepEqual(getDateWindow(9, 9), { start: 2, end: 9 })
   assert.deepEqual(shiftDateWindow(9, 9, 8, 'older'), {

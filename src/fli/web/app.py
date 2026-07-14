@@ -19,8 +19,10 @@ Endpoints:
 - /api/insights                  citation-verified insight proof
 """
 
+from contextlib import asynccontextmanager
 from datetime import date as calendar_date
 from pathlib import Path
+from threading import Thread
 
 from fastapi import FastAPI, Query
 from fastapi.responses import FileResponse, JSONResponse
@@ -33,7 +35,21 @@ from fli.web import insights as insight_store
 
 DIST_DIR = Path(__file__).parent / "dist"
 
-app = FastAPI(title="Frontier Lab Intelligence")
+
+@asynccontextmanager
+async def _lifespan(_: FastAPI):
+    # The always-on local production service starts at login. Warm the one
+    # expensive immutable summary before a person opens Feed, without delaying
+    # health/static responses while it is being built.
+    Thread(
+        target=event_store.dates_payload,
+        name="fli-feed-date-warmup",
+        daemon=True,
+    ).start()
+    yield
+
+
+app = FastAPI(title="Frontier Lab Intelligence", lifespan=_lifespan)
 
 
 def _model_conn():

@@ -53,16 +53,40 @@ interface ArtifactPageRequest {
   offset?: number
 }
 
+interface ArtifactPageOptions {
+  refresh?: boolean
+}
+
 const artifactPageCache = new Map<string, ArtifactLibrary>()
 
 function artifactPageKey({ date, query, offset = 0 }: ArtifactPageRequest) {
   return `${date}\u0000${query}\u0000${offset}`
 }
 
-function requestArtifactPage(request: ArtifactPageRequest) {
+function compareArtifactsByFeedRank(left: ArtifactItem, right: ArtifactItem) {
+  const rankDifference = left.best_source_rank - right.best_source_rank
+  if (rankDifference !== 0) return rankDifference
+  const timeDifference = Date.parse(right.source_published_at)
+    - Date.parse(left.source_published_at)
+  if (timeDifference !== 0) return timeDifference
+  return left.artifact_id.localeCompare(right.artifact_id)
+}
+
+function sortArtifactsByFeedRank(items: ArtifactItem[]) {
+  return [...items].sort(compareArtifactsByFeedRank)
+}
+
+function normalizeArtifactPage(payload: ArtifactLibrary): ArtifactLibrary {
+  return { ...payload, items: sortArtifactsByFeedRank(payload.items) }
+}
+
+function requestArtifactPage(
+  request: ArtifactPageRequest,
+  { refresh = false }: ArtifactPageOptions = {},
+) {
   const key = artifactPageKey(request)
   const cached = artifactPageCache.get(key)
-  if (cached) return Promise.resolve(cached)
+  if (cached && !refresh) return Promise.resolve(cached)
   const params = new URLSearchParams({
     date: request.date,
     q: request.query,
@@ -70,8 +94,9 @@ function requestArtifactPage(request: ArtifactPageRequest) {
     offset: String(request.offset ?? 0),
   })
   return getJSON<ArtifactLibrary>(`/api/artifacts?${params}`).then((payload) => {
-    artifactPageCache.set(key, payload)
-    return payload
+    const normalized = normalizeArtifactPage(payload)
+    artifactPageCache.set(key, normalized)
+    return normalized
   })
 }
 
@@ -243,25 +268,24 @@ export default function Artifacts() {
     const viewKey = artifactPageKey(request)
     activeViewKeyRef.current = viewKey
     const cached = artifactPageCache.get(viewKey)
+    setError(null)
     if (cached) {
       setData(cached)
       setItems(cached.items)
       setLoading(false)
-      setError(null)
-      return
+    } else {
+      setLoading(true)
+      setData(null)
+      setItems([])
     }
-    setLoading(true)
-    setError(null)
-    setData(null)
-    setItems([])
-    requestArtifactPage(request)
+    requestArtifactPage(request, { refresh: true })
       .then((payload) => {
         if (!live || activeViewKeyRef.current !== viewKey) return
         setData(payload)
         setItems(payload.items)
       })
       .catch(() => {
-        if (live && activeViewKeyRef.current === viewKey) {
+        if (live && activeViewKeyRef.current === viewKey && !cached) {
           setError('Couldn’t load artifacts for this date. Change the date or reload.')
         }
       })
@@ -322,10 +346,10 @@ export default function Artifacts() {
       date: selectedDate,
       query: debouncedQuery,
       offset: items.length,
-    })
+    }, { refresh: true })
       .then((payload) => {
         if (activeViewKeyRef.current !== baseKey) return
-        setItems((current) => [...current, ...payload.items])
+        setItems((current) => sortArtifactsByFeedRank([...current, ...payload.items]))
       })
       .catch(() => {
         if (activeViewKeyRef.current === baseKey) {

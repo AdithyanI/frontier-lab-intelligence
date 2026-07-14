@@ -159,7 +159,7 @@ def _candidate_rows(
         """WITH candidate(provider, post_id) AS (
                SELECT rp.provider, rp.post_id
                FROM feed_run_post rp
-               JOIN feed_post direct
+               JOIN feed_post direct INDEXED BY idx_feed_post_day
                  ON direct.run_id = rp.run_id
                 AND direct.provider = rp.provider AND direct.post_id = rp.post_id
                WHERE rp.run_id = ? AND rp.role = 'direct'

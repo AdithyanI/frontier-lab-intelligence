@@ -67,10 +67,12 @@ evidence:
   follower counts.
 - 12 handles were confirmed missing and one was confirmed suspended.
 - Those 13 unavailable identities were moved to reason-bearing Registry
-  rejections; they are preserved for audit but excluded from active monitoring
-  and the next voting cohort.
-- 410 conference people therefore remain active and X-addressable; 330 are new
-  to the previous outgoing-follow snapshot.
+  rejections. The later frozen-following audit also rejected three protected
+  accounts because neither their posts nor outgoing-follow evidence is
+  observable. All 16 remain preserved for audit.
+- 407 conference people therefore remain active and X-addressable. The frozen
+  snapshot still records the exact earlier 2,564-source boundary, including
+  the three sources that ended in protected terminal state.
 
 The two provider passes made 356 profile requests: 343 initial attempts plus a
 13-handle retry while terminal failure caching was added. At 18 provider
@@ -78,8 +80,8 @@ credits per profile, the best available cost estimate is 6,408 credits, or
 `$0.06408`. Successful raw profile responses and terminal failures are cached,
 so normal reruns make zero provider requests.
 
-Across the whole active Registry, 2,564 X sources currently have stable IDs.
-Of these, 2,212 overlap the prior snapshot and 352 are new to it. The 22
+At snapshot freeze, 2,564 active Registry X sources had stable IDs. Of these,
+2,212 overlapped the prior snapshot and 352 were new to it. The 22
 non-conference additions are retained because the new immutable cohort must
 describe the full current Registry boundary rather than a conference-only
 subset.

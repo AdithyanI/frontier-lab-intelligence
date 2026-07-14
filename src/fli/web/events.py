@@ -8,6 +8,7 @@ import sqlite3
 from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 from fli import signal_events, signal_feed
@@ -18,6 +19,7 @@ DEFAULT_EVENTS_DB = signal_events.DEFAULT_EVENTS_DB
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 
 FeedKey = tuple[str, str]
+_dates_payload_lock = Lock()
 
 
 def _open_readonly(path: Path) -> sqlite3.Connection:
@@ -345,6 +347,18 @@ def _cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
     return (
         *(feed_store._db_version(path) for path in paths),
         *triage_store.cache_token(day),
+    )
+
+
+def _dates_cache_token() -> tuple[tuple[str, int, int, int, int], ...]:
+    """Invalidate date counts only when their structural inputs change."""
+    return tuple(
+        feed_store._db_version(path)
+        for path in (
+            DEFAULT_EVENTS_DB,
+            DEFAULT_FEED_DB,
+            feed_store.DEFAULT_REGISTRY_DB,
+        )
     )
 
 
@@ -1115,8 +1129,12 @@ def events_payload(
     }
 
 
-def dates_payload() -> dict[str, Any]:
+@lru_cache(maxsize=8)
+def _dates_payload_cached(
+    cache_token: tuple[tuple[str, int, int, int, int], ...],
+) -> dict[str, Any]:
     """Expose fast evidence-ledger counts for each complete Feed day."""
+    del cache_token
     if not DEFAULT_EVENTS_DB.is_file():
         return {
             "available": False,
@@ -1148,3 +1166,10 @@ def dates_payload() -> dict[str, Any]:
             }
         )
     return {**feed_dates, "dates": dates, "run_id": run["run_id"]}
+
+
+def dates_payload() -> dict[str, Any]:
+    """Expose event counts without rebuilding every day on repeat reads."""
+    cache_token = _dates_cache_token()
+    with _dates_payload_lock:
+        return _dates_payload_cached(cache_token)

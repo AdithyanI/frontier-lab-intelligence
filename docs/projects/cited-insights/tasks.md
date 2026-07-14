@@ -355,11 +355,8 @@ reads first.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Diagnose the Network rank anomaly, denominators, tie semantics, and multi-channel projection against code and live data. | parent | [audit brief](resources/network-source-architecture-audit/project-brief.md) |
-| done | Expand direct admission to every X-addressable World's Fair 2026 and 2024 speaker; reconcile people, organizations, affiliations, and exact new-cohort counts. | parent | [conference import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
-| done | Reconcile new identities against stored X profiles and outgoing-follow coverage; collect only missing provider data with resumable telemetry. | parent | [conference import report](resources/network-source-architecture-audit/aie-conference-import-2026-07-14.md) |
-| done | Materialize and validate the new immutable Registry-following snapshot and derived analysis run; preserve lineage and disclose the new voting denominator. | parent | [audit ADR](resources/network-source-architecture-audit/architecture-decision.md) |
-| done | Validate the accepted Network support display contract, finish terminology cleanup, and close the qualitative coverage/miss audit. | parent | [audit ADR](resources/network-source-architecture-audit/architecture-decision.md) |
+| done | Audit all zero-support Registry entities without conflating posting activity, graph usefulness, or relevance; keep the externally curated cohort. | parent | [activity audit](resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md) |
+| done | Reject only the three provider-confirmed protected accounts, refresh Registry-derived support, and validate current counts. | parent | [activity audit](resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md) |
 
 ## Backlog / Remaining Work
 
@@ -377,6 +374,9 @@ reads first.
 - [x] Complete the bounded Network Source Architecture Audit review, record
   Adi's decision, and implement only an accepted delta; do not let the audit
   silently displace M3–M5 delivery work.
+- [ ] Automate Registry-checksum invalidation and background rebuild of the
+  current materialized Network-support run after curation changes; never
+  recompute 2.8M-edge support inside a page request.
 - [ ] Closeout: review learnings, archive tracker.
 
 ## Validation / Test Plan
@@ -389,6 +389,22 @@ reads first.
 - `scripts/check-fast.sh` before every handoff; live browser check for UI.
 
 ## Progress Log
+
+- 2026-07-14: [ZERO-SUPPORT-ACTIVITY-AUDIT] Audited all 38 zero-support
+  Registry entities after Adi questioned empty timelines. Thirty-five came
+  from the newly admitted World's Fair cohort; the other three are established
+  AI researchers. A bounded 35-account TwitterAPI.io timeline pass returned
+  254 items for 28 accounts and empty pages for seven; three additional cached
+  profiles report zero lifetime statuses. Adi correctly separated posting
+  activity from graph value: inactivity alone does not reject a trusted person
+  because their outgoing follows can still add discovery signal. Reverted the
+  provisional three no-post rejections, then rejected only `@amitnavindgi`,
+  `@raymondmfeng`, and `@idangazit`, which the frozen snapshot independently
+  marks protected and therefore unobservable for both posts and follows. The
+  Registry now has 2,431 active people, 160 active organizations, and 39
+  rejections. Rebuilt entity support over the unchanged snapshot: 2,521 voting
+  entities, 2,524 active X-addressable Registry targets, and 38 retained
+  zero-support targets. See the [activity audit](resources/network-source-architecture-audit/zero-support-activity-audit-2026-07-14.md).
 
 - 2026-07-14: [AIE-REGISTRY-AND-NETWORK-GOAL] Adi expanded the bounded import
   into a persistent data-creation goal before stepping away: directly admit all

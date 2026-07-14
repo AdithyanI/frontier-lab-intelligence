@@ -508,6 +508,10 @@ only the frozen snapshot edge table and an authorizer-limited set of Registry
 identity tables; it cannot read legacy `data/fli.db.graph_edges`. The current
 run reconciles 2,558 complete active source accounts, 2,521 voting entities,
 2,832,858 raw eligible edges, 2,831,995 deduplicated entity-target votes, and
+2,524 active X-addressable Registry targets. The materialization is rebuilt
+after Registry curation so ranks and denominators stay internally consistent;
+automatic checksum invalidation/background refresh remains planned. It must
+not be recomputed inside an interactive page request.
 557,363 ranked accounts. It also materializes entity-union support for all
 2,527 active X-addressable Registry targets, including 38 zero-support targets;
 multiple target channels are unioned and self-support is excluded. Raw
@@ -529,8 +533,8 @@ Known data facts:
 - The active graph has zero edges. The 360,667 Digg edges, derived PageRank,
   graph-only candidates, raw edge artifacts, and exploratory personal
   following snapshot were removed on 2026-07-10.
-- The Registry retains 2,630 classified entities: 2,434 active people, 160
-  active organizations, zero active unsure, and 36 reason-bearing rejections.
+- The Registry retains 2,630 classified entities: 2,431 active people, 160
+  active organizations, zero active unsure, and 39 reason-bearing rejections.
   The 2,718 channels include official X, website, GitHub, and blog channels
   consolidated into stable real-world organizations. The approved relevance
   manifest contains 689 exact one-X removals. The final organization pass
@@ -543,9 +547,11 @@ Known data facts:
   conference website. The final boundary has 96 resolved conference
   organizations and 186 affiliations; 195 channel-less labels were pruned as
   Registry clutter. Repeated conference history and non-X enrichment remain
-  raw-only. Provider reconciliation leaves 410 active public identities and 13
-  explicit missing/suspended rejections. Conference presence affects neither
-  rank nor vote weight.
+  raw-only. Provider reconciliation and the frozen-following audit leave 407
+  active identities, 13 explicit missing/suspended rejections, and three
+  protected-account rejections. Conference presence affects neither rank nor
+  vote weight. Posting inactivity is not a rejection gate: a dormant but
+  observable expert can still contribute useful outgoing-follow evidence.
 - Every account carries a neutral `registry_bootstrap.retained_candidate`
   marker. The 1,853 accounts actually observed through Digg also carry one
   `digg_bootstrap.candidate_origin` value (`ranked`, `graph_node`, or both).
@@ -1043,7 +1049,7 @@ final score.
 | `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
 | `fli.signal_feed` | content-addressed `signal-feed-v8` snapshots with recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v3` exact structural components with provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
-| `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts |
+| `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
 | `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.cited_insights` / `fli.cited_insight_runs` | minimal `insight-v1.1` model boundary, frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |

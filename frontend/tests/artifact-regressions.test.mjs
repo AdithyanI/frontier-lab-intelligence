@@ -42,6 +42,11 @@ test('Artifacts inherit Feed rank while keeping source time secondary', () => {
   assert.match(artifactSource, /item\.best_source_rank/)
   assert.match(artifactSource, /<span>Source time<\/span>/)
   assert.match(artifactSource, /item\.source_published_at/)
+  assert.match(artifactSource, /compareArtifactsByFeedRank/)
+  assert.match(artifactSource, /left\.best_source_rank - right\.best_source_rank/)
+  assert.match(artifactSource, /normalizeArtifactPage\(payload\)/)
+  assert.match(artifactSource, /requestArtifactPage\(request, \{ refresh: true \}\)/)
+  assert.match(artifactSource, /sortArtifactsByFeedRank\(\[\.\.\.current, \.\.\.payload\.items\]\)/)
 })
 
 test('Artifacts from one exact Feed envelope share one visual rank rail', () => {

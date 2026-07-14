@@ -42,12 +42,13 @@ person fact only. The resolution audit pruned 195 channel-less company
 identities, 233 unresolvable affiliations, six superseded conference-created
 organizations, and seven stale website links; zero orphan company facts remain.
 
-Current canonical result: 2,630 auditable identities, 2,594 active identities,
-36 reason-bearing rejections, 423 conference people, 96 channel-backed
+Current canonical result: 2,630 auditable identities, 2,591 active identities,
+39 reason-bearing rejections, 423 conference people, 96 channel-backed
 conference-sourced organizations, and 186 resolvable affiliations. The other
 233 company labels remain source-bound context on people rather than false
-organization identities. Of the 423 people, 410 remain active and 13 are
-explicitly missing or suspended.
+organization identities. Of the 423 people, 407 remain active; 13 are
+explicitly missing or suspended and three are protected accounts whose posts
+and outgoing-follow graph cannot be observed.
 
 ## Immutable network refresh
 
@@ -86,7 +87,7 @@ Kolter, and Ben Recht.
 The conference cohort adds genuine AI-engineering breadth but is mostly
 peripheral in the existing graph:
 
-- support among 410 active conference people: p25 6, median 31, p75 124,
+- support among 407 active conference people: p25 6, median 31, p75 124,
   mean 102;
 - 35 have zero inbound support and remain visible as zero rather than being
   silently omitted;
@@ -115,6 +116,13 @@ speakers are the best possible voters or that equal voting is optimal.
 The practical next loop is: seed externally curated identities, monitor them,
 measure first-hand useful evidence and unique cited-insight yield, then change
 admission or priority policy only from that non-circular evidence.
+
+The zero-support activity audit reinforces the separation: 35 of the 38
+zero-support Registry identities came from the newly admitted conference
+cohort, while the other three are established AI researchers. Zero support and
+recent posting inactivity are therefore not removal evidence. Protected or
+unavailable accounts remain rejectable because neither public content nor
+outgoing-follow evidence is observable.
 
 ## Reproduction boundary
 

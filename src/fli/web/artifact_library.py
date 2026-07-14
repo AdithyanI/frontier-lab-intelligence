@@ -102,7 +102,7 @@ def artifacts_payload(
     offset: int = 0,
     db_path: Path | str | None = None,
 ) -> dict[str, Any]:
-    """Return artifacts observed on one source-evidence day, newest-first."""
+    """Return one source-evidence day ordered by best inherited Feed rank."""
     path = Path(db_path or DEFAULT_ARTIFACT_DB)
     if not path.is_file():
         return _missing_catalog(

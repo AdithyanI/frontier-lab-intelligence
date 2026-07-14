@@ -150,6 +150,27 @@ def test_events_api_preserves_ungrouped_posts_as_singletons(tmp_path, monkeypatc
     assert singleton["evidence"] == []
 
 
+def test_event_dates_cache_the_complete_summary(tmp_path, monkeypatch):
+    _event_fixture(tmp_path, monkeypatch)
+    original_dates_payload = feed_store.dates_payload
+    calls = 0
+
+    def counted_dates_payload(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original_dates_payload(*args, **kwargs)
+
+    monkeypatch.setattr(feed_store, "dates_payload", counted_dates_payload)
+    event_store._dates_payload_cached.cache_clear()
+
+    cache_token = event_store._dates_cache_token()
+    first = event_store._dates_payload_cached(cache_token)
+    second = event_store._dates_payload_cached(cache_token)
+
+    assert first == second
+    assert calls == 1
+
+
 def test_events_api_projects_and_filters_completed_triage(tmp_path, monkeypatch):
     _event_fixture(tmp_path, monkeypatch)
     baseline = client.get("/api/events?date=2026-07-11&limit=20").json()
