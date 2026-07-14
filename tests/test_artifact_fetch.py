@@ -10,10 +10,15 @@ def _global_resolver(_host: str, _port: int):
     return ["93.184.216.34"]
 
 
-def _seed_artifact(path: Path) -> str:
+def _seed_artifact(
+    path: Path,
+    *,
+    url: str = "https://example.com/article",
+    artifact_kind: str = "article",
+) -> str:
     conn = artifacts.connect(path)
-    url = "https://example.com/article"
     artifact_id = artifact_urls.artifact_id(url)
+    host = artifact_urls.canonicalize_url(url).split("/", 3)[2]
     now = "2026-07-14T00:00:00+00:00"
     with conn:
         conn.execute(
@@ -31,8 +36,18 @@ def _seed_artifact(path: Path) -> str:
             """INSERT INTO artifact
                (artifact_id, canonical_url, canonicalization_contract, host,
                 artifact_kind, first_seen_at, last_seen_at, created_at, updated_at)
-               VALUES (?, ?, ?, 'example.com', 'article', ?, ?, ?, ?)""",
-            (artifact_id, url, artifact_urls.CANONICALIZATION_CONTRACT, now, now, now, now),
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                artifact_id,
+                url,
+                artifact_urls.CANONICALIZATION_CONTRACT,
+                host,
+                artifact_kind,
+                now,
+                now,
+                now,
+                now,
+            ),
         )
         conn.execute(
             """INSERT INTO artifact_import_candidate
@@ -53,6 +68,21 @@ def _seed_artifact(path: Path) -> str:
         )
     conn.close()
     return artifact_id
+
+
+def _native_terminal_failure(db: Path) -> None:
+    def handler(request: httpx.Request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        return httpx.Response(403)
+
+    result = artifact_fetch.fetch_cohort(
+        db_path=db,
+        limit=1,
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(handler),
+    )
+    assert result["failed_terminal"] == 1
 
 
 def test_safe_get_revalidates_redirect_target():
@@ -209,6 +239,148 @@ def test_fetch_cohort_does_not_retry_terminal_failure(tmp_path):
     ).fetchone()[0]
     assert attempts == 1
     conn.close()
+
+
+def test_jina_reader_recovers_eligible_native_failure_with_provenance(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    artifact_id = _seed_artifact(db)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    _native_terminal_failure(db)
+    seen: list[httpx.Request] = []
+
+    def reader_handler(request: httpx.Request):
+        seen.append(request)
+        assert request.method == "POST"
+        assert request.url == httpx.URL(artifact_fetch.JINA_READER_URL)
+        assert request.headers["authorization"] == "Bearer test-reader-key"
+        assert request.headers["accept"] == "application/json"
+        assert json.loads(request.content) == {"url": "https://example.com/article"}
+        return httpx.Response(
+            200,
+            headers={"Content-Type": "application/json"},
+            json={
+                "code": 200,
+                "status": 20000,
+                "data": {
+                    "title": "Recovered announcement",
+                    "url": "https://example.com/article",
+                    "content": (
+                        "# Recovered announcement\n\nThis public announcement contains "
+                        "enough concrete technical substance to support later "
+                        "citation and extraction from the immutable Reader snapshot."
+                    ),
+                    "usage": {"tokens": 42},
+                },
+            },
+        )
+
+    first = artifact_fetch.recover_with_jina_reader(
+        db_path=db,
+        api_key="test-reader-key",
+        transport=httpx.MockTransport(reader_handler),
+    )
+    second = artifact_fetch.recover_with_jina_reader(
+        db_path=db,
+        api_key="test-reader-key",
+        transport=httpx.MockTransport(reader_handler),
+    )
+
+    assert first["success"] == 1
+    assert first["authenticated"] is True
+    assert second["expected_count"] == 0
+    assert second["reused"] is True
+    assert len(seen) == 1
+    conn = artifacts.connect(db)
+    fetch = conn.execute(
+        """SELECT * FROM artifact_fetch
+           WHERE artifact_id = ? AND fetch_policy = ?""",
+        (artifact_id, artifact_fetch.JINA_READER_POLICY),
+    ).fetchone()
+    assert fetch["status"] == "success"
+    assert fetch["extractor_contract"] == artifact_fetch.JINA_READER_EXTRACTOR
+    assert fetch["extracted_title"] == "Recovered announcement"
+    assert json.loads(fetch["response_headers_json"])["retrieval-provider"] == "jina_reader"
+    assert json.loads(fetch["response_headers_json"])["reader-usage-tokens"] == "42"
+    assert Path(fetch["raw_snapshot_ref"]).exists()
+    assert Path(fetch["text_snapshot_ref"]).read_text().startswith(
+        "# Recovered announcement"
+    )
+    conn.close()
+
+
+def test_jina_reader_excludes_deferred_provider_adapters(tmp_path):
+    db = tmp_path / "artifacts.db"
+    _seed_artifact(
+        db,
+        url="https://www.linkedin.com/posts/example",
+        artifact_kind="other",
+    )
+    _native_terminal_failure(db)
+    calls = 0
+
+    def reader_handler(_request: httpx.Request):
+        nonlocal calls
+        calls += 1
+        raise AssertionError("deferred providers must not reach Jina Reader")
+
+    result = artifact_fetch.recover_with_jina_reader(
+        db_path=db,
+        api_key="",
+        transport=httpx.MockTransport(reader_handler),
+    )
+
+    assert result["expected_count"] == 0
+    assert result["reused"] is True
+    assert calls == 0
+
+
+def test_jina_reader_rejects_thin_provider_output(tmp_path):
+    db = tmp_path / "artifacts.db"
+    _seed_artifact(db)
+    _native_terminal_failure(db)
+
+    def reader_handler(_request: httpx.Request):
+        return httpx.Response(
+            200,
+            json={
+                "code": 200,
+                "status": 20000,
+                "data": {
+                    "title": "Blocked",
+                    "url": "https://example.com/article",
+                    "content": "Enable JavaScript.",
+                },
+            },
+        )
+
+    result = artifact_fetch.recover_with_jina_reader(
+        db_path=db,
+        api_key="",
+        transport=httpx.MockTransport(reader_handler),
+    )
+
+    assert result["success"] == 0
+    assert result["failed_terminal"] == 1
+    conn = artifacts.connect(db)
+    fetch = conn.execute(
+        "SELECT * FROM artifact_fetch WHERE fetch_policy = ?",
+        (artifact_fetch.JINA_READER_POLICY,),
+    ).fetchone()
+    assert fetch["error_code"] == "jina_thin_content"
+    assert fetch["raw_snapshot_ref"] is None
+    conn.close()
+
+
+def test_jina_api_key_prefers_environment_then_repo_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".env"
+    env_file.write_text("JINA_API_KEY='repo-key'\n", encoding="utf-8")
+    monkeypatch.delenv("JINA_API_KEY", raising=False)
+    assert artifact_fetch.jina_api_key(env_path=env_file) == "repo-key"
+    monkeypatch.setenv("JINA_API_KEY", "environment-key")
+    assert artifact_fetch.jina_api_key(env_path=env_file) == "environment-key"
 
 
 def test_artifact_cli_has_stable_json_success_and_error_contract(tmp_path, capsys):

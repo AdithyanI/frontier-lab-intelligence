@@ -1221,6 +1221,12 @@ def main(argv: list[str] | None = None) -> int:
     fetch_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     fetch_parser.add_argument("--limit", type=int, default=30)
     _add_output_arguments(fetch_parser)
+    reader_parser = sub.add_parser(
+        "reader-fallback",
+        help="Recover eligible native-fetch failures through Jina Reader.",
+    )
+    reader_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    _add_output_arguments(reader_parser)
     fetch_inspect_parser = sub.add_parser(
         "inspect-fetches", help="Inspect artifact fetch outcomes."
     )
@@ -1244,6 +1250,10 @@ def main(argv: list[str] | None = None) -> int:
             from fli import artifact_fetch
 
             data = artifact_fetch.fetch_cohort(db_path=args.db, limit=args.limit)
+        elif args.action == "reader-fallback":
+            from fli import artifact_fetch
+
+            data = artifact_fetch.recover_with_jina_reader(db_path=args.db)
         elif args.action == "inspect-fetches":
             from fli import artifact_fetch
 

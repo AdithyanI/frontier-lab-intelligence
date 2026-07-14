@@ -1,8 +1,9 @@
 # Cited-Insights Pipeline — Design & Execution Plan
 
-Status: approved by Adi 2026-07-13 (session decision). This document is the
-implementation brief for the `cited-insights` project. Read
-[`../tasks.md`](../tasks.md) for milestones/tracking; this file is the *how*.
+Status: active implementation brief, updated 2026-07-14. This document is the
+technical *how* for the `cited-insights` project. The active
+[`../tasks.md`](../tasks.md) tracker owns scope, decisions, and execution state;
+implemented code and durable reference contracts override stale examples here.
 
 ---
 
@@ -96,46 +97,35 @@ Rules:
   reached zero false drops; see
   [`triage-spike-2026-07-13.md`](triage-spike-2026-07-13.md).
 
-### Stage 3 — Artifact resolution + fetch (new; no LLM)
+### Stage 3 — Canonical artifact library (implemented; no LLM)
 
-> 2026-07-13 amendment: the tables below are implemented by the shared
-> `canonical-artifact-library` project rather than being owned by one insight
-> run. The first use remains deliberately narrow: corrected kept X envelopes
-> needed by the extraction oracle. Ordinary X status permalinks remain source
-> evidence; outbound primary links become canonical artifacts; event
-> association is derived through stable post membership. RSS/GitHub/blog
-> adapters and an artifact Feed remain deferred.
-For each kept envelope's embedded URLs and provider artifacts, inspect the
-complete frozen envelope context:
-1. Resolve: take `expanded_url` from raw JSON (already there); follow HTTP
-   redirects max 3 hops for residual shorteners (goo.gle etc.).
-2. Canonicalize: lowercase host, strip tracking params (`utm_*`, `ref`,
-   `s`, `t`), strip fragments, arXiv: normalize `/abs/` vs `/pdf/` to
-   `/abs/`, strip version suffix into its own field.
-3. Fetch: HTTP GET, 15s timeout, one retry; HTML → clean text
-   (readability-style extraction); PDFs: extract text (arXiv abstracts can
-   come from the abs page HTML — cheaper than PDF parsing); GitHub: fetch
-   the repo README via raw.githubusercontent (no API token needed).
-4. Store:
-```
-artifact-v1 {
-  canonical_url (PK), kind: paper | code | blog | news | video | other,
-  title, site, fetched_at, http_status,
-  text: string (clean, capped ~50k chars), text_sha256,
-  fetch_error: string | null
-}
-post_artifact { post_id, canonical_url, envelope_id, run_id }   # many-to-many
-```
-Design intent (defend in write-up): canonical URL is the identity so that
-(a) multiple insiders linking the same paper **merge** — convergence
-signal; (b) future RSS/GitHub/arXiv pollers write rows into the *same*
-table (`source` column can be added then) — this is the dashed-boxes
-upgrade path on the Architecture page. X stays the only *discovery*
-channel for the submission; artifacts are the multi-source *substance*.
-- Fetch failures are recorded, never fatal: extraction falls back to
-  tweet-only with lower confidence.
-- Respect robots/timeouts; no auth-walled scraping. Paywalled/gated →
-  `fetch_error`, cite the URL anyway.
+This stage is shared infrastructure, not an insight-owned URL table. The
+implemented contract is documented in
+[`docs/references/artifact-library.md`](../../../references/artifact-library.md);
+its SQLite store is `data/derived/artifacts/artifacts.db` and fetched clean
+text is content-addressed under `data/derived/artifacts/text/sha256/`.
+
+The important boundaries are:
+
+1. `artifact` owns canonical resource identity and kind.
+2. `artifact_alias` preserves every observed URL spelling.
+3. `artifact_observation` links a source post to an artifact without assigning
+   artifact ownership to an event or insight.
+4. `artifact_disclosure` records first-seen provenance.
+5. `artifact_fetch` records every immutable attempt; extracted text is named by
+   checksum so runs remain replayable.
+
+Ordinary X status permalinks remain source evidence; outbound primary-resource
+links become artifacts. Event association is derived through stable post
+membership. Canonical URLs let multiple insiders converge on one resource and
+leave a clean future seam for RSS, GitHub, or arXiv writers without adding a
+second artifact model now.
+
+Fetch failures are reason-bearing and non-fatal to the daily pipeline, but they
+are fatal to the stronger claim that an output is a *primary-cited insight*.
+The oracle may record a tweet-only candidate or a missing-evidence outcome; it
+may not ship that record as primary-cited. Do not bypass robots,
+authentication, paywalls, or publisher controls.
 
 ### Stage 4 — Insight extraction (new; strong model)
 Input per kept envelope: everything triage saw + fetched artifact texts.
@@ -160,11 +150,15 @@ insight-v1 {
 }
 ```
 Hard rules (hallucination control — evaluated deliverable):
-- Every claim must carry ≥1 citation with a supporting quote that appears
-  verbatim (modulo whitespace) in the artifact text or post text —
-  **verified programmatically post-hoc**, failures drop the insight.
-- No artifact fetched → claim may only restate what the posts themselves
-  say, confidence ≤ medium.
+- Every shipped claim must carry at least one primary-artifact citation with a
+  supporting quote that appears verbatim (modulo whitespace) in the snapshotted
+  artifact text. This is verified programmatically post-hoc; failures drop the
+  insight.
+- Envelope/post citations preserve discovery and attribution, but do not
+  substitute for the primary artifact required by a shipped cited insight.
+- No inspectable artifact means no shipped primary-cited insight. Store an
+  explicit miss or tweet-only candidate for audit instead of weakening the
+  label.
 - One envelope may yield 0 insights (substance gate) — record why.
 - Per-day cap: rank kept insights, surface top 3–5, store the rest.
 
@@ -214,11 +208,12 @@ deliverable.
 | M4 eval + write-up | Fri–Sat 07-18/19 | Blind pass recorded; write-up draft (architecture, prompts+rationale, eval, tokenomics, limitations) |
 | M5 submission prep | Sun 07-20 | Package vs case-prompt checklist; **submission only with Adi's explicit approval** |
 
-Recommended first task (half a day, before any framework code): manually
-pull the 5 strong candidates' envelopes + links, fetch their artifacts by
-hand, and hand-write the 5 insight-v1 records they *should* produce. That
-gives the few-shot examples, the schema sanity check, and the oracle — all
-from real data. Data first, then code.
+Recommended first task (half a day, before any framework code): follow the
+frozen [`oracle resume packet`](oracle-resume.md), inspect the five corrected
+envelopes and existing artifact coverage, and hand-write the expected
+`insight-v1` outcomes. An explicit missing-evidence outcome is correct where a
+primary artifact is absent. Those records become the schema sanity check and
+oracle before any broad extraction run. Data first, then code.
 
 ## 7. Honest limitations (state, don't hide — for the write-up)
 

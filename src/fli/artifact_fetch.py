@@ -7,6 +7,7 @@ import io
 import json
 import os
 import re
+import shlex
 import socket
 import tempfile
 import time
@@ -21,7 +22,6 @@ from urllib.robotparser import RobotFileParser
 
 import httpx
 import trafilatura
-from lxml import etree
 from lxml import html as lxml_html
 from pypdf import PdfReader
 
@@ -29,9 +29,12 @@ from fli import artifact_urls, artifacts
 
 
 FETCH_POLICY = "bounded-public-v1"
-OPENAI_NEWS_RSS_POLICY = "openai-news-rss-v1"
-OPENAI_NEWS_RSS_SELECTION = "cloudflare-terminal-recovery-v1"
-OPENAI_NEWS_RSS_URL = "https://openai.com/news/rss.xml"
+JINA_READER_POLICY = "jina-reader-v1"
+JINA_READER_SELECTION = "native-public-failure-v1"
+JINA_READER_URL = "https://r.jina.ai/"
+JINA_READER_EXTRACTOR = "jina-reader-markdown-v1"
+JINA_API_KEY_ENV = "JINA_API_KEY"
+DEFAULT_REPO_ENV = artifacts.REPO_ROOT / ".env"
 EXTRACTOR_CONTRACT = "artifact-text-v1"
 USER_AGENT = "frontier-lab-intelligence/0.1 artifact-fetch (+local research project)"
 RAW_ROOT = artifacts.REPO_ROOT / "data" / "raw" / "artifacts" / "body" / "sha256"
@@ -46,6 +49,15 @@ MAX_ATTEMPTS = 3
 MAX_PDF_PAGES = 500
 MAX_TEXT_CHARS = 5_000_000
 MIN_HTML_TEXT_CHARS = 80
+JINA_ELIGIBLE_KINDS = frozenset({"announcement", "article", "other"})
+JINA_DEFERRED_HOST_SUFFIXES = (
+    "linkedin.com",
+    "paperform.co",
+    "twitter.com",
+    "x.com",
+    "youtu.be",
+    "youtube.com",
+)
 CLIENT_SHELL_MARKERS = frozenset(
     {
         "checking your network connection",
@@ -900,6 +912,348 @@ def _complete_run(
     return {"fetch_run_id": fetch_run_id, "expected_count": len(items), **states}
 
 
+def _repo_env_value(name: str, path: Path = DEFAULT_REPO_ENV) -> str | None:
+    """Read one explicitly named value from the ignored repo-local env file."""
+    if not path.exists():
+        return None
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line.removeprefix("export ")
+        key, separator, raw_value = line.partition("=")
+        if not separator or key.strip() != name:
+            continue
+        parsed = shlex.split(raw_value, posix=True)
+        if len(parsed) != 1:
+            raise ValueError(f"invalid value for {name} in {path}")
+        return parsed[0]
+    return None
+
+
+def jina_api_key(*, env_path: Path = DEFAULT_REPO_ENV) -> str | None:
+    """Return the optional Reader key without accepting secrets on CLI flags."""
+    return os.environ.get(JINA_API_KEY_ENV) or _repo_env_value(
+        JINA_API_KEY_ENV, env_path
+    )
+
+
+def _host_has_suffix(host: str, suffix: str) -> bool:
+    return host == suffix or host.endswith(f".{suffix}")
+
+
+def _jina_eligible(*, url: str, artifact_kind: str) -> bool:
+    """Keep Reader scoped to ordinary public pages, not deferred adapters."""
+    try:
+        canonical = artifact_urls.canonicalize_url(url)
+    except ValueError:
+        return False
+    split = urlsplit(canonical)
+    host = (split.hostname or "").lower()
+    return (
+        artifact_kind in JINA_ELIGIBLE_KINDS
+        and split.scheme in {"http", "https"}
+        and not any(
+            _host_has_suffix(host, suffix)
+            for suffix in JINA_DEFERRED_HOST_SUFFIXES
+        )
+    )
+
+
+def _jina_candidates(conn: Any) -> list[dict[str, Any]]:
+    """Select native-fetch failures that Reader may safely attempt once."""
+    rows = conn.execute(
+        """WITH native_outcome AS (
+               SELECT fetch.artifact_id, fetch.status, fetch.error_code,
+                      fetch.attempt_number,
+                      ROW_NUMBER() OVER (
+                          PARTITION BY fetch.artifact_id
+                          ORDER BY fetch.attempt_number DESC, fetch.started_at DESC
+                      ) AS ordinal
+               FROM artifact_fetch fetch
+               WHERE fetch.fetch_policy = ?
+           ), source AS (
+               SELECT item.artifact_id, item.source_day, item.source_rank,
+                      item.normalized_rank, item.source_event_id,
+                      ROW_NUMBER() OVER (
+                          PARTITION BY item.artifact_id
+                          ORDER BY item.source_rank, item.source_event_id
+                      ) AS ordinal
+               FROM artifact_fetch_run_item item
+               JOIN artifact_fetch_run run
+                 ON run.fetch_run_id = item.fetch_run_id
+               WHERE run.fetch_policy = ?
+           )
+           SELECT artifact.artifact_id, artifact.canonical_url,
+                  artifact.artifact_kind, artifact.host,
+                  native_outcome.status AS native_status,
+                  native_outcome.error_code AS native_error_code,
+                  source.source_day, source.source_rank,
+                  source.normalized_rank, source.source_event_id
+           FROM artifact
+           JOIN native_outcome
+             ON native_outcome.artifact_id = artifact.artifact_id
+            AND native_outcome.ordinal = 1
+           JOIN source
+             ON source.artifact_id = artifact.artifact_id
+            AND source.ordinal = 1
+           WHERE native_outcome.status IN ('failed_retryable', 'failed_terminal')
+             AND NOT EXISTS (
+                 SELECT 1 FROM artifact_fetch succeeded
+                 WHERE succeeded.artifact_id = artifact.artifact_id
+                   AND succeeded.status = 'success'
+             )
+           ORDER BY source.source_rank, artifact.canonical_url""",
+        (FETCH_POLICY, FETCH_POLICY),
+    ).fetchall()
+    return [
+        dict(row)
+        for row in rows
+        if _jina_eligible(
+            url=str(row["canonical_url"]),
+            artifact_kind=str(row["artifact_kind"]),
+        )
+    ]
+
+
+def _create_jina_run(
+    conn: Any, selection: list[dict[str, Any]]
+) -> tuple[str | None, bool]:
+    if not selection:
+        return None, True
+    payload = [
+        [item["artifact_id"], item["canonical_url"], item["native_error_code"]]
+        for item in selection
+    ]
+    fingerprint = hashlib.sha256(_canonical_json(payload).encode()).hexdigest()
+    fetch_run_id = hashlib.sha256(
+        _canonical_json(
+            [JINA_READER_POLICY, JINA_READER_SELECTION, fingerprint]
+        ).encode()
+    ).hexdigest()
+    existing = conn.execute(
+        "SELECT status FROM artifact_fetch_run WHERE fetch_run_id = ?",
+        (fetch_run_id,),
+    ).fetchone()
+    if existing is not None:
+        return fetch_run_id, str(existing["status"]) == "complete"
+    now = _now()
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact_fetch_run
+               (fetch_run_id, schema_version, fetch_policy, selection_policy,
+                input_fingerprint, expected_count, success_count,
+                failed_retryable_count, failed_terminal_count, started_at,
+                status)
+               VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, 'in_progress')""",
+            (
+                fetch_run_id,
+                artifacts.SCHEMA_VERSION,
+                JINA_READER_POLICY,
+                JINA_READER_SELECTION,
+                fingerprint,
+                len(selection),
+                now,
+            ),
+        )
+        conn.executemany(
+            """INSERT INTO artifact_fetch_run_item
+               (fetch_run_id, artifact_id, selection_rank, stratum,
+                selected_url, source_day, source_rank, normalized_rank,
+                source_event_id)
+               VALUES (?, ?, ?, 'jina_reader_fallback', ?, ?, ?, ?, ?)""",
+            [
+                (
+                    fetch_run_id,
+                    item["artifact_id"],
+                    rank,
+                    item["canonical_url"],
+                    item["source_day"],
+                    item["source_rank"],
+                    item["normalized_rank"],
+                    item["source_event_id"],
+                )
+                for rank, item in enumerate(selection, 1)
+            ],
+        )
+    return fetch_run_id, False
+
+
+def _jina_headers(api_key: str | None) -> dict[str, str]:
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+        "X-Engine": "auto",
+        "X-Respond-With": "markdown",
+        "X-Retain-Images": "none",
+        "X-Retain-Links": "all",
+        "X-Timeout": "30",
+    }
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    return headers
+
+
+def _jina_read(
+    client: httpx.Client, target_url: str, *, api_key: str | None
+) -> tuple[Retrieved, Extraction]:
+    try:
+        response = client.post(
+            JINA_READER_URL,
+            headers=_jina_headers(api_key),
+            json={"url": target_url},
+        )
+    except httpx.HTTPError as exc:
+        raise FetchFailure("jina_transport_error", str(exc), retryable=True) from exc
+    if response.status_code in RETRYABLE_HTTP:
+        raise FetchFailure(
+            f"jina_http_{response.status_code}",
+            f"Jina Reader HTTP {response.status_code}",
+            retryable=True,
+        )
+    if not 200 <= response.status_code < 300:
+        raise FetchFailure(
+            f"jina_http_{response.status_code}",
+            f"Jina Reader HTTP {response.status_code}",
+            retryable=False,
+        )
+    try:
+        payload = response.json()
+    except ValueError as exc:
+        raise FetchFailure(
+            "jina_invalid_json", "Jina Reader returned invalid JSON", retryable=False
+        ) from exc
+    data = payload.get("data") if isinstance(payload, dict) else None
+    if not isinstance(data, dict):
+        raise FetchFailure(
+            "jina_missing_data", "Jina Reader response has no data object", retryable=False
+        )
+    content = data.get("content")
+    if not isinstance(content, str):
+        raise FetchFailure(
+            "jina_missing_content", "Jina Reader response has no content", retryable=False
+        )
+    text_value = _normalize_text(content)
+    if len(text_value) < MIN_HTML_TEXT_CHARS:
+        raise FetchFailure(
+            "jina_thin_content",
+            f"Jina Reader returned only {len(text_value)} text characters",
+            retryable=False,
+        )
+    final_url = str(data.get("url") or target_url)
+    try:
+        final_url = artifact_urls.canonicalize_url(final_url)
+    except ValueError as exc:
+        raise FetchFailure("jina_unsafe_final_url", str(exc), retryable=False) from exc
+    title = str(data.get("title") or "").strip() or None
+    usage = data.get("usage") if isinstance(data.get("usage"), dict) else {}
+    headers = {
+        **_safe_headers(response),
+        "retrieval-provider": "jina_reader",
+    }
+    if usage.get("tokens") is not None:
+        headers["reader-usage-tokens"] = str(usage["tokens"])
+    retrieved = Retrieved(
+        final_url=final_url,
+        status_code=response.status_code,
+        redirect_chain=[],
+        headers=headers,
+        content_type="application/json",
+        charset="utf-8",
+        body=response.content,
+    )
+    extraction = Extraction(
+        success=True,
+        extractor_contract=JINA_READER_EXTRACTOR,
+        extractor_version="1",
+        title=title,
+        text=text_value,
+        declared_canonical_url=final_url,
+    )
+    return retrieved, extraction
+
+
+def recover_with_jina_reader(
+    *,
+    db_path: Path | str = artifacts.DEFAULT_DB,
+    api_key: str | None = None,
+    env_path: Path = DEFAULT_REPO_ENV,
+    transport: httpx.BaseTransport | None = None,
+) -> dict[str, Any]:
+    """Recover eligible native-fetch failures through Jina Reader.
+
+    The fallback is a separate immutable fetch policy. It never retries known
+    deferred adapters (X, LinkedIn, YouTube, forms) and never replaces native
+    fetch evidence.
+    """
+    conn = artifacts.connect(db_path)
+    selection = _jina_candidates(conn)
+    fetch_run_id, already_complete = _create_jina_run(conn, selection)
+    if fetch_run_id is None:
+        conn.close()
+        return {
+            "fetch_run_id": None,
+            "expected_count": 0,
+            "success": 0,
+            "failed_retryable": 0,
+            "failed_terminal": 0,
+            "reused": True,
+        }
+    if already_complete:
+        row = conn.execute(
+            "SELECT * FROM artifact_fetch_run WHERE fetch_run_id = ?",
+            (fetch_run_id,),
+        ).fetchone()
+        assert row is not None
+        result = dict(row)
+        result["reused"] = True
+        conn.close()
+        return result
+    resolved_key = api_key if api_key is not None else jina_api_key(env_path=env_path)
+    client = httpx.Client(
+        trust_env=False,
+        timeout=httpx.Timeout(45.0, connect=10.0, read=45.0, write=10.0, pool=10.0),
+        transport=transport,
+    )
+    try:
+        for item in selection:
+            artifact_id = str(item["artifact_id"])
+            requested_url = str(item["canonical_url"])
+            fetch_id = _claim(
+                conn,
+                fetch_run_id=fetch_run_id,
+                artifact_id=artifact_id,
+                requested_url=requested_url,
+                fetch_policy=JINA_READER_POLICY,
+            )
+            if fetch_id is None:
+                continue
+            try:
+                retrieved, extraction = _jina_read(
+                    client, requested_url, api_key=resolved_key
+                )
+                _finish_retrieved(
+                    conn,
+                    fetch_id=fetch_id,
+                    source_artifact_id=artifact_id,
+                    retrieved=retrieved,
+                    extraction=extraction,
+                )
+            except FetchFailure as failure:
+                _finish_failure(conn, fetch_id, failure)
+    finally:
+        client.close()
+    result = _complete_run(
+        conn, fetch_run_id, fetch_policy=JINA_READER_POLICY
+    )
+    result["reused"] = False
+    result["authenticated"] = bool(resolved_key)
+    conn.close()
+    return result
+
+
 def _openai_news_match_key(url: str) -> str:
     """Match RSS links to catalog URLs without changing catalog identity."""
     return artifact_urls.canonicalize_url(url).rstrip("/")
@@ -1320,7 +1674,8 @@ def inspect_fetches(conn: Any, *, fetch_run_id: str | None = None) -> list[dict[
     rows = conn.execute(
         f"""SELECT item.selection_rank, item.stratum, item.source_day,
                    item.source_rank, artifact.canonical_url, artifact.title,
-                   fetch.attempt_number, fetch.status, fetch.retryable,
+                   fetch.fetch_policy, fetch.attempt_number, fetch.status,
+                   fetch.retryable,
                    fetch.http_status, fetch.final_url,
                    fetch.content_type, fetch.text_char_count,
                    fetch.error_code, fetch.error_message,

@@ -121,7 +121,15 @@ Ask only if the answer materially changes the work.
 - Work location: **separate repo `/Users/dobby/GitHub/frontier-lab-intelligence`** (renamed from `bit-capital-case-study-2026` on 2026-07-08) per the default rule (runnable code, dependencies, tests, eval harness, agent pipeline). This Dobby project stays the career/control-plane tracker.
 - Reason: runnable code + demo + DB + web UI are explicitly required; the checklist rule mandates a separate implementation repo built from `agent-native-repo-template.md`.
 
-## First-day execution plan
+## Historical intake notes
+
+The sections below preserve the initial planning snapshot from 2026-07-08.
+They are provenance, not current execution state. For the present system status
+and assignment gap, read [`../STATUS.md`](../STATUS.md) and the active
+[`cited-insights` tracker](../projects/cited-insights/tasks.md). Do not rebuild
+the repository or interpret the `todo` values below as live status.
+
+## Initial first-day execution plan (historical)
 
 1. Reply to Lars: confirm receipt + the 2026-07-20 deadline (Adi approval before send).
 2. Re-read PDF + this brief; rebuild `tasks.md` Current Batch from the actual weighted rubric (registry/signal-noise/scoring first, UI last).
@@ -129,7 +137,7 @@ Ask only if the answer materially changes the work.
 4. Design pass on the top-3 weighted areas before any pipeline code: register schema + entity resolution approach; signal/noise filtering concept; scoring model + validation/ground-truth plan.
 5. Start build log (AI-tool usage + budget receipts) from hour one — both are explicitly examined.
 
-## Prompt requirements map
+## Initial prompt requirements map (historical)
 
 | Prompt requirement | Planned deliverable | Status | Evidence path |
 | --- | --- | --- | --- |

@@ -3,28 +3,30 @@
 Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
-Status: entity spine and entity-kind classification are complete. The active
-Registry retains the relevance-reviewed post-floor universe: 2,104 active
-people, 93 active organizations, zero active unsure, 23 rejected, and zero
-unknown.
-Rejected is a reason-bearing curation state, not a structural kind. The rejected Digg
-edge plane, its derived PageRank, and the exploratory personal following
-snapshot have been removed without deleting the classified nodes. The Digg
-1,000-account ranking survives only as an offline comparison CSV; the active
-graph is empty at the cleanup checkpoint. A frozen broad Registry-cohort
-outgoing-follow snapshot, entity-overlap baseline, and experimental PageRank
-comparison are complete; bounded human top-k evaluation is next. The `labs` table remains internal source/seed provenance
-because its 10 rows are not an
-exhaustive lab classification; it is not exposed as a Registry kind, badge,
-count, or filter.
-Reviewed organization consolidation and coverage are live: SpaceX owns
-`@spacex` and `@SpaceXAI`; reviewed group manifests consolidate redundant
-product/developer accounts; and the snapshot-pinned organization-coverage
-manifest creates stable parents such as Microsoft, Amazon, Apple, NVIDIA, AMD,
-and Intel while retaining their official subchannels. Every batch is
-manifest-driven, preflighted, transactional, idempotent, and audit-recorded. Relevance curation is complete
-for this checkpoint; production ingestion, extraction, and scoring remain later
-stages.
+Current system: the Registry, immutable trusted-following snapshot, X evidence
+store, exact event projection, Feed/attention view, keep/drop triage, and
+canonical artifact library are implemented and inspectable. The active product
+boundary is cited insight extraction: the repository has not yet demonstrated
+3–5 excellent primary-cited insights per day or their delivery. See
+[`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
+checkpoint counts; this document explains implementation shape rather than
+project status.
+
+The Registry retains the relevance-reviewed universe. Rejected is a
+reason-bearing curation state, not a structural kind. The `labs` table remains
+internal source/seed provenance because its rows are not an exhaustive lab
+classification; it is not exposed as a Registry kind, badge, count, or filter.
+Reviewed organization consolidation and coverage are manifest-driven,
+preflighted, transactional, idempotent, and audit-recorded.
+
+The retired Digg edge plane survives only as offline historical evidence. The
+live ranking evidence comes from a frozen Registry-cohort outgoing-follow
+snapshot; entity overlap is the accepted inspectable ranking feature and
+personalized PageRank remains diagnostic. Raw X provider evidence is immutable,
+exact quote/retweet/reply envelopes are cutoff-correct, and current Registry
+curation is overlaid at read time. Triage and canonical artifact storage are
+derived, replayable stages; cited insights must consume them without mutating
+upstream evidence.
 Exact human name/kind corrections are separately versioned in
 `data/registry/entity-overrides.json` and recorded in
 `entity_override_audit`; they never rewrite model-classification provenance.
@@ -914,21 +916,28 @@ final score.
 | `fli.signal_events` | `signal-events-v3` exact structural components with provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts |
 | `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
+| `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort |
 | `fli.following_rankings` | derived entity-overlap baseline plus experimental personalized PageRank/comparison with deterministic runs and active/rejected/unknown mapping |
 | `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; Registry and Ranking remain current-state views while Feed/Event readers follow the explicit publication pointer and overlay current Registry curation; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| `fli.ingest` | pending production ingestion; raw fetch spike exists |
-| `fli.extract` | pending |
-| `fli.scoring` | pending |
-| `fli.delivery` | pending |
+| Cited insight extraction | active project; five-record oracle not yet proved |
+| Insight scoring/evaluation | planned after the extraction schema survives the oracle |
+| Insights UI + briefing | planned submission-critical delivery boundary |
+| Local alert outbox | required package proof; no external sending without approval |
 
 ## Build Order
 
-1. Human-label the entity-overlap top-k and decide the bounded Registry candidate shortlist; PageRank remains diagnostic.
-2. Promote raw fetch into production ingestion around accepted entity channels.
-3. Extract and score real ingested data.
-4. Add validation harness and ground-truth labeling.
-5. Delivery and report UI.
+1. Freeze the five corrected snapshot-bound oracle envelopes, their current
+   triage decisions, and available canonical artifacts.
+2. Hand-write the expected records, then implement and run the smallest
+   `insight-v1` extraction path that can reproduce them without unsupported
+   claims.
+3. Validate every shipped claim against inspectable primary artifact text and
+   run one blind day; do not broaden ingestion to compensate for oracle misses.
+4. Ship the Insights surface and one reproducible daily briefing from the same
+   stored records.
+5. Finish evaluation, tokenomics, local alert/outbox proof, public reviewer
+   landing page, final report, and the package smoke path before 2026-07-20.

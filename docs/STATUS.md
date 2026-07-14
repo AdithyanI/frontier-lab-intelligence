@@ -22,8 +22,9 @@ The product thesis is:
 > evidence grouping, transparent routing, and primary-source citations can
 > turn that activity into intelligence a human can trust.
 
-Until submission, a narrow evaluated path from evidence to cited delivery is
-more valuable than broader crawling, a larger graph, or additional UI polish.
+The submission deadline is 2026-07-20. Until then, a narrow evaluated path
+from evidence to cited delivery is more valuable than broader crawling, a
+larger graph, or additional UI polish.
 
 ## Product Story
 
@@ -45,13 +46,13 @@ and delivery are the active missing boundary.
 
 | Layer | Status | What is established |
 | --- | --- | --- |
-| Registry | Proven foundation | One entity can own multiple channels; structural kind and Registry admission are separate; rejected records remain reversible and reason-bearing. The current checkpoint contains 2,220 auditable identities. |
-| Trusted-following graph | Proven candidate generator | A fresh immutable snapshot contains 2,456,305 outgoing-follow edges. Entity overlap is the accepted inspectable support feature; personalized PageRank remains a diagnostic, not truth. |
-| X evidence store | Proven source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
-| Exact event projection | Proven evidence boundary | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
-| Feed + attention | Proven audit surface | The Feed is date-filterable and orders evidence with transparent network, originator, and public-engagement inputs. Registry changes affect derived views without rewriting raw evidence. |
-| Keep/drop triage | Proven routing layer | `gpt-5.4-mini` through LiteLLM returns only `decision` and `reason`; runs are resumable, tagged, cache-aware, and auditable. The corrected run evaluated 8,097 envelopes with zero failures. |
-| Canonical artifact library | Bounded proof complete | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts; the first 30-resource fetch proof produced 19 usable clean-text records. |
+| Registry | Implemented and inspectable | One entity can own multiple channels; structural kind and Registry admission are separate; rejected records remain reversible and reason-bearing. The current checkpoint contains 2,220 auditable identities. |
+| Trusted-following graph | Evaluated candidate generator | A fresh immutable snapshot contains 2,456,305 outgoing-follow edges. Entity overlap is the accepted inspectable support feature; personalized PageRank remains a diagnostic, not truth. |
+| X evidence store | Implemented source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
+| Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
+| Feed + attention | Implemented audit surface | The Feed is date-filterable and orders evidence with transparent network, originator, and public-engagement inputs. Registry changes affect derived views without rewriting raw evidence. |
+| Keep/drop triage | Evaluated routing layer | `gpt-5.4-mini` through LiteLLM returns only `decision` and `reason`; runs are resumable, tagged, cache-aware, and auditable. The corrected run evaluated 8,097 envelopes with zero failures. This validates execution, not downstream insight quality. |
+| Canonical artifact library | Bounded implementation proof | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts; the first 30-resource fetch proof produced 19 usable clean-text records. |
 | Cited insights | Active project | The schema and implementation brief exist, but the five-record extraction oracle has not yet proved the full claim -> citation -> implication path. |
 | Insights UI + briefing | Not built | The final 3–5-insight daily surface, reproducible briefing artifact, persona framing, and evaluation evidence remain. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
@@ -80,6 +81,22 @@ artifact catalog. It should answer:
 Do not reopen broad Registry cleanup, graph tuning, corpus backfills, or Feed
 redesign unless this oracle exposes a concrete dependency.
 
+## Submission Finish Line
+
+The active tracker owns the detail. At system level, the remaining proof is:
+
+1. Run the five-record extraction oracle and freeze `insight-v1` only after
+   its citations survive inspection.
+2. Produce 3–5 primary-cited insights for 2026-07-11 and one blind day.
+3. Ship the Insights surface and one reproducible daily briefing.
+4. Record citation validity, human worth-attention judgment, hallucination
+   controls, and workflow tokenomics.
+5. Add the public reviewer landing page, local alert/outbox proof, final
+   report, and one package smoke path required by the assignment.
+
+External submission or alert delivery remains blocked without Adi's explicit
+current-session approval.
+
 ## What Is Deliberately Deferred
 
 - Broad RSS, blog, GitHub, arXiv, or second-source ingestion.
@@ -97,9 +114,10 @@ case-study thesis.
 
 The only active tracker is
 [`docs/projects/cited-insights/tasks.md`](projects/cited-insights/tasks.md).
-Its current batch owns the executable next step: return to the five-record
-extraction oracle, then build the Insights surface, one daily briefing,
-evaluation evidence, and the submission write-up.
+Its current batch owns the executable next step: use the frozen
+[`five-record oracle resume packet`](projects/cited-insights/resources/oracle-resume.md)
+to run the extraction oracle, then build the Insights surface, one daily
+briefing, evaluation evidence, and the submission package.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

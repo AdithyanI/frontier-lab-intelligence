@@ -86,8 +86,14 @@ reads first.
   the CLI.
 - [ ] Evaluation evidence recorded: citation validity, hallucination control,
   worth-attention agreement on a blind sample.
-- [ ] Submission write-up drafted covering rubric requirements, prompts with
-  rationale, limitations, and extension paths.
+- [ ] A local inspectable alert/outbox demonstrates persona routing without
+  sending anything externally.
+- [ ] Workflow tokenomics summarize provider-reported usage and cost for the
+  collection, triage, artifact, extraction, and delivery paths.
+- [ ] `docs/final-report.md` contains the rubric-mapped write-up, 3–5 real
+  insights, prompts with rationale, limitations, and extension paths.
+- [ ] A public reviewer `README.md` and one package smoke path reproduce the
+  local demo from a clean checkout without collection or model calls.
 - [ ] `scripts/check-fast.sh` passes; architecture docs and build log updated.
 
 ## Milestones
@@ -106,11 +112,13 @@ reads first.
   command; output visually checked. Freeze pipeline expansion after this
   milestone.
 - [ ] M4 — Evaluation + write-up (target Fri–Sat 07-18/19). Acceptance:
-  blind/stratified label pass recorded under `resources/`; write-up draft
-  covering rubric map, prompts, hallucination control, limitations.
+  blind/stratified label pass recorded under `resources/`; workflow
+  tokenomics summarized; `docs/final-report.md` covers the rubric map,
+  prompts, hallucination control, limitations, and 3–5 real insights.
 - [ ] M5 — Submission prep (target Sun 07-20). Acceptance: package reviewed
-  against `docs/references/case-prompt.md`; submission itself only with Adi's
-  explicit approval.
+  against `docs/references/case-prompt.md`; reviewer README, clean-checkout
+  smoke path, and local alert/outbox proof pass. Submission itself only with
+  Adi's explicit approval.
 
 ## Execution Rules
 
@@ -142,6 +150,12 @@ reads first.
   Resume only the narrow five-record oracle from the corrected, snapshot-bound
   kept envelopes; broad extraction remains out of scope until that proof is
   reviewed.
+
+- 2026-07-14: A shipped "primary-cited insight" must be supported by at least
+  one inspectable primary artifact. Tweet-only evidence may remain an
+  attributed candidate or explain an oracle miss, but it cannot satisfy the
+  submission's primary-citation proof. Artifact access failures are recorded;
+  the pipeline does not bypass publisher controls.
 
 - 2026-07-13: Adi explicitly reopened the earlier top-100/day stopping
   decision for one bounded learning run. Evaluate at most the top 1,000 exact
@@ -215,20 +229,19 @@ reads first.
 ## Open Questions / Blockers
 
 - Delivery artifact format (email-style HTML vs PDF) — pick during M3 based
-  on effort; PDF preferred by gap audit, HTML acceptable if PDF costs too
-  much time.
-- Persona split (investor vs AI-engineer views): gap audit wants two views;
-  timebox — ship one excellent general briefing first, add persona framing
-  only if M3 finishes early.
+  on the shortest reproducible path. A print-ready HTML briefing is acceptable
+  if it communicates the same evidence clearly.
+- Persona presentation — use one insight record with investment and
+  AI-engineering implications, then render two audience sections from the same
+  source of truth. Do not build two pipelines.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Harden the v2 runner for the bounded expansion: deterministic prompt-cache shards, bounded parallel model calls, single-writer resumability, compact progress, and audit telemetry. | parent | — |
-| done | Run a fresh bounded v2 calibration through LiteLLM; audit decisions and verify cache reads, tags, failures, resumability, and proxy-reported cost before expansion. | parent | — |
-| done | Freeze and triage the top 1,000 attention envelopes per complete day (6,445 total), resume any failures, and record the final keep/drop/cache/cost distribution. | parent | [expansion report](resources/triage-v2.2-top1000-expansion-2026-07-13.md) |
-| todo | Return to the five-record extraction oracle using corrected snapshot-bound envelopes and the shared canonical-artifact catalog. | parent | [pipeline-design.md](resources/pipeline-design.md) |
+| done | Freeze the five oracle post IDs, corrected event/triage run identities, current decisions, artifact coverage, and known gaps into one cold-resume packet. | parent | [oracle resume](resources/oracle-resume.md) |
+| todo | Hand-write the five expected `insight-v1` outcomes, including explicit misses where primary evidence is absent. | parent | [oracle resume](resources/oracle-resume.md) |
+| todo | Implement and run the smallest extraction path against those frozen inputs; audit citation spans before expanding to a day. | parent | [pipeline design](resources/pipeline-design.md) |
 
 ## Backlog / Remaining Work
 
@@ -237,7 +250,10 @@ reads first.
 - [ ] Insights API + page with citation click-through.
 - [ ] Daily briefing renderer + CLI command.
 - [ ] Blind/stratified evaluation pass; record under `resources/`.
-- [ ] Submission write-up draft; check against case prompt requirements.
+- [ ] Local alert/outbox proof with no external send.
+- [ ] Workflow tokenomics summary across the final demonstrated paths.
+- [ ] `docs/final-report.md`, public reviewer README, and clean-checkout package
+  smoke path; check against case-prompt requirements.
 - [ ] Architecture page: turn the dashed "cited insights" boxes solid when
   live; update `docs/architecture/overview.md`.
 - [ ] Closeout: review learnings, archive tracker.
@@ -252,6 +268,20 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [AGENT-NATIVE-HANDOFF-CONSOLIDATION] Adversarial cold-start,
+  harness, and submission-strategy reviews all recovered the same critical
+  path but found competing stale directions in Architecture, the historical
+  case-prompt plan, the reviewer guide, and the artifact section of this
+  project's implementation brief. Consolidated the durable route to
+  `AGENTS.md -> docs/STATUS.md -> this tracker`, replaced obsolete future-state
+  schemas and build order with implemented boundaries, added the missing
+  reviewer README/demo, local alert outbox, tokenomics, final-report, and
+  package-smoke acceptance proof, and froze an exact five-record oracle resume
+  packet. Current artifact coverage supports Mira's primary article; the other
+  four oracle records must resolve primary evidence or remain explicit misses.
+  Added a fast-check invariant that prevents multiple active trackers and
+  requires STATUS to name the active one. No product pipeline, Registry, graph,
+  Feed, or external system was changed.
 - 2026-07-14: [SYSTEM-STATUS-HANDOFF] Added `docs/STATUS.md` as the concise
   cross-project orientation for cold agents and system-level planning. It
   distinguishes proven foundations, the active cited-insight boundary,
