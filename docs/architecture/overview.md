@@ -4,7 +4,7 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Current system: the Registry, immutable trusted-following snapshot, X evidence
-store, exact event projection, Feed/attention view, keep/drop triage, and
+store, exact event projection, rank-first Feed view, keep/drop triage, and
 canonical artifact library are implemented and inspectable. The active product
 boundary is cited insight extraction: the repository has not yet demonstrated
 3–5 excellent primary-source-cited insights per day or their delivery. See
@@ -128,15 +128,21 @@ copying curation state into the derived database. Rejected authors disappear
 from the next response, and rejected amplifiers stop contributing, while the
 raw and historical normalized evidence remains unchanged. Each canonical
 Registry entity votes at most once and cannot amplify its own post. The
-provisional `attention-v1.1` score is an inspectable ordering aid—not an insight
-or quality judgment—and combines day-relative percentiles for Registry
-attention (55%), originator network support (25%), and public engagement (20%).
-Registry attention is breadth: every distinct active canonical entity contributes
+provisional daily score, implemented by the versioned `attention-v1.1`
+contract, is an inspectable ordering aid—not an insight, importance, or quality
+judgment. It combines day-relative percentiles for tracked amplification (55%),
+author network support (25%), and public engagement (20%). Tracked amplification
+is breadth: every distinct active canonical entity contributes
 one flat vote, independent of its network-support position. The originator's own
 entity-overlap support is the separate 25% component; public interactions are
 log-scaled. This avoids multiplying amplifier prominence into the same signal
 while keeping every input visible for later evaluation. The same API also exposes
-chronological and public-engagement orderings.
+chronological and public-engagement orderings. The Feed presents only the
+ordinal rank within the active sorted and filtered view (`#1`, `#2`, ...). A
+click reveals the underlying daily score, raw inputs, within-day percentiles,
+weights, and limitations. Grouped evidence carries the exact member post and
+components that produced its peak daily score so the disclosure never explains
+the wrong root post.
 
 `fli.signal_events` is a separate content-addressed projection over one frozen
 Feed run. The `signal-events-v3` / `exact-structural-v5-provider-edges` contract
@@ -168,7 +174,7 @@ The weekly projection rolls the same daily revisions through a seven-day
 window. When a later exact relationship merges components that were separate
 earlier in the week, it supersedes every overlapping earlier state by
 provider-qualified visible membership. This retains one cumulative envelope,
-its active-day list, and peak daily attention/engagement without double-counting
+its active-day list, and peak daily score/engagement without double-counting
 the same post or retaining a superseded event revision.
 
 The React `/feed` surface is one evidence browser rather than separate post,
@@ -183,8 +189,8 @@ inference. LLM relevance, semantic grouping, summaries, and cited insights
 remain later stages after this deterministic layer is audited.
 
 `fli.insight_triage` is the first implemented cited-insight boundary after the
-deterministic Feed. It receives a frozen top-attention envelope but deliberately
-does not receive its attention score, engagement, followers, Registry rank, or
+deterministic Feed. It receives a frozen top-ranked envelope but deliberately
+does not receive its daily score, engagement, followers, Registry rank, or
 amplifier prominence. One `gpt-5.4-mini`/medium Responses call through LiteLLM
 returns only the envelope-level `keep | drop` decision and one concise reason.
 The stable 1,024+ token instructions precede the variable envelope. Bulk runs
@@ -210,7 +216,7 @@ envelope; a decision for an older or differently connected snapshot cannot
 leak onto new evidence. Completed work is reusable only when the event ID,
 snapshot hash, and exact rendered-input hash all match, so repaired grouping
 reuses unchanged envelopes without reusing stale judgments.
-Attention, recency, and engagement still sort the same evidence independently;
+Daily score, recency, and engagement still sort the same evidence independently;
 `keep`, `drop`, and `not evaluated` are separate filters with counts computed
 before pagination. The projection reads the run's existing
 `(decision, current_rank, event_id)` and `(status, current_rank, event_id)`
@@ -228,7 +234,7 @@ expanded form as an alias, and never merges different URLs solely by content
 hash. Stable source-kind/provider/external-ID/snapshot observations preserve
 provenance independently of mutable event projections.
 
-`fli.artifact_fetch` freezes a bounded, stratified high-attention cohort and
+`fli.artifact_fetch` freezes a bounded, stratified top-ranked cohort and
 fetches it through a one-worker public-network safety boundary. Manual
 redirects, DNS checks, robots, size/time limits, append-only attempts, explicit
 retryable/terminal errors, and content-addressed raw/text snapshots make the
@@ -340,7 +346,7 @@ Target stages:
 flowchart TD
     S0[Source scoping<br/>curated source list]
     S1[Exact grouping<br/>replies · quotes · retweets]
-    S2[Attention ordering<br/>transparent candidate generation]
+    S2[Daily-score ordering<br/>transparent candidate generation]
     S3[Keep / drop triage<br/>sole relevance + substance gate]
     S4[Cited extraction<br/>X evidence + optional artifacts]
     S5[Persona framing<br/>investment vs AI team]

@@ -32,7 +32,7 @@ larger graph, or additional UI polish.
 Registry
   -> trusted X collection cohort
   -> exact quote / retweet / reply envelopes over time
-  -> transparent attention ordering
+  -> transparent daily-score ordering
   -> keep / drop evidence routing
   -> cited extraction from stored first-party X
        + optional canonical-artifact strengthening
@@ -51,7 +51,7 @@ Cited insight extraction and delivery are the active missing boundary.
 | Trusted-following graph | Evaluated candidate generator | A fresh immutable snapshot contains 2,456,305 outgoing-follow edges. Entity overlap is the accepted inspectable support feature; personalized PageRank remains a diagnostic, not truth. |
 | X evidence store | Implemented source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
 | Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
-| Feed + attention | Implemented audit surface | The Feed is date-filterable and orders evidence with transparent network, originator, and public-engagement inputs. Registry changes affect derived views without rewriting raw evidence. |
+| Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows ordinal view rank first, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Keep/drop triage | Evaluated routing layer | `gpt-5.4-mini` through LiteLLM returns only `decision` and `reason`; runs are resumable, tagged, cache-aware, and auditable. The corrected run evaluated 8,097 envelopes with zero failures. This validates execution, not downstream insight quality. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
 | Cited insights | Active project | The schema and implementation brief exist, but the five-record extraction oracle has not yet proved the full claim -> citation -> implication path. |
@@ -64,7 +64,7 @@ current databases or APIs before using them as present-tense product claims.
 ## The Most Important Unproven Claim
 
 The repository has proved collection, identity, graph support, exact grouping,
-temporal correctness, attention ordering, triage, and artifact storage. It has
+temporal correctness, daily-score ordering, triage, and artifact storage. It has
 not yet proved that the resulting evidence reliably yields 3–5 excellent,
 primary-source-cited insights per day.
 
@@ -103,7 +103,7 @@ current-session approval.
 
 - Broad RSS, blog, GitHub, arXiv, or second-source ingestion.
 - Semantic/topic event clustering beyond exact provider relations.
-- A learned ranking model or renewed attention-weight tuning.
+- A learned ranking model or renewed daily-score weight tuning.
 - Large discovered-account admission or recursive graph crawling.
 - Mobile/responsive polish.
 - Real external alerts, publishing, uploading, or submission without Adi's

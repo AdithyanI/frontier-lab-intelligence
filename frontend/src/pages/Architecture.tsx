@@ -428,27 +428,27 @@ function RankingMethods() {
         <p className="method-limit">Follower count is not an input. Support is not relevance.</p>
       </div>
       <div className="method-row method-row--attention">
-        <div className="method-id mono"><span>ATTENTION-V1.1</span><strong>Feed ordering</strong></div>
+        <div className="method-id mono"><span>ATTENTION-V1.1</span><strong>Daily score</strong></div>
         <div className="method-main">
-          <p className="method-question">Which evidence is the screened network noticing today?</p>
-          <div className="method-equation method-equation--large mono">100 × (0.55 network + 0.25 originator + 0.20 engagement)</div>
-          <div className="method-weight" aria-label="Feed attention weights">
-            <div className="method-weight-network"><b>55%</b><span>network</span></div>
-            <div className="method-weight-origin"><b>25%</b><span>originator</span></div>
-            <div className="method-weight-public"><b>20%</b><span>engagement</span></div>
+          <p className="method-question">How is evidence ordered within one observed day?</p>
+          <div className="method-equation method-equation--large mono">100 × (0.55 amplification + 0.25 author support + 0.20 engagement)</div>
+          <div className="method-weight" aria-label="Daily score weights">
+            <div className="method-weight-network"><b>55%</b><span>tracked amplification</span></div>
+            <div className="method-weight-origin"><b>25%</b><span>author support</span></div>
+            <div className="method-weight-public"><b>20%</b><span>public engagement</span></div>
           </div>
           <p className="method-explain">
-            <strong>Network</strong> counts every screened Registry member — person or
+            <strong>Tracked amplification</strong> counts every screened Registry member — person or
             organization — exactly once per post: Andrej Karpathy and the newest
-            member carry the same vote. This component measures breadth of Registry
-            attention; amplifier network position stays visible but does not multiply
-            the vote. <strong>Originator</strong> is the author&rsquo;s own network-support
-            percentile. <strong>Engagement</strong> is log-scaled public interactions,
+            member carry the same vote. Amplifier network position stays visible but
+            does not multiply the vote. <strong>Author network support</strong> is the
+            originator&rsquo;s own support percentile. <strong>Public engagement</strong> is
+            log-scaled likes, replies, reposts, and quotes,
             kept small as a tie-breaker. Each component is a percentile within the
             day&rsquo;s posts.
           </p>
         </div>
-        <p className="method-limit">A candidate-generation score. Not quality or truth.</p>
+        <p className="method-limit">The Feed shows view rank first; click it for this daily score. Not importance, quality, or truth.</p>
       </div>
     </div>
   )
@@ -495,7 +495,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--methods" id="ranking-methods">
         <div className="arch-section-head">
           <h2 className="arch-h">The numbers answer different questions</h2>
-          <p className="arch-p">Reach, network support, and attention are deliberately separate so none can masquerade as quality.</p>
+          <p className="arch-p">Reach, network support, and the daily score answer different questions so none can masquerade as quality.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><RankingMethods /></div>
       </section>

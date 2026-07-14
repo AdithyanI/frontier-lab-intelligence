@@ -124,14 +124,20 @@ Rules:
   X, website, GitHub, or blog. Multiple X accounts are equal links on
   one row; there is no privileged footer CTA. Preserve bio line breaks; label
   source-truncated snapshots honestly; bound long content with internal
-  scrolling while keeping close access fixed. Attention/ranking evidence stays
+  scrolling while keeping close access fixed. Daily-score/ranking evidence stays
   out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
-- **Evidence Feed:** default to the decision-ready `Kept` / `Attention` view.
+- **Evidence Feed:** default to the decision-ready `Kept` / `Score` view.
   Date navigation shows the newest seven available complete UTC days in one
   ruled row; explicit older/newer controls page through non-overlapping
   seven-date windows while keeping the selected column where possible.
+  The persistent left rail shows only ordinal position within the active view
+  (`#1`, `#2`, ...), never the composite decimal. Clicking the rank opens one
+  anchored, non-modal disclosure with the daily score, its exact score-producing
+  member post, raw component values, within-day percentiles, weights, and
+  limitations. Rank is scope-aware: a future weekly view labels a weekly rank;
+  it must not average incomparable daily scores.
   Audit and sort are compact labeled disclosures rather than persistent
   segmented bars; each option remains one click away and audit counts stay
   visible inside the menu. Per-envelope triage rationale is collapsed by
@@ -147,8 +153,9 @@ Rules:
   filters until a cited-insight consumer proves the need.
 - **Insight row (anticipated):** title, why-flagged rationale, score (mono),
   provenance line, persona tag; expandable.
-- **Score breakdown (anticipated):** inputs and weights visible on demand
-  next to any score. Trust through inspectability (PRODUCT.md #3).
+- **Score breakdown:** inputs and weights are visible only on demand from the
+  Feed rank. Trust through inspectability without making the decimal the primary
+  reading cue (PRODUCT.md #3).
 
 ## Motion
 

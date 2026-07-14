@@ -24,13 +24,13 @@ are explicit, resumable commands and are not part of the reviewer quick start.
    classification reason, and channels. Exact rules live in
    `docs/references/registry-curation.md`.
 2. **Signal-vs-noise (20%)** — inspect the immutable following snapshot,
-   entity-overlap ranking, exact event grouping, Feed attention inputs, and
+   entity-overlap ranking, exact event grouping, Feed daily-score inputs, and
    keep/drop decisions. The accepted overlap run covers 2,456,305 edges;
    PageRank remains a measured diagnostic. Triage evaluated 8,097 envelopes
    with reason-bearing decisions, but downstream insight quality remains the
    submission-critical test.
-3. **Scoring + validation (20%)** — attention is an explainable candidate
-   ordering, not truth. The missing proof is whether primary-cited extracted
+3. **Scoring + validation (20%)** — the daily score is an explainable candidate
+   ordering aid, not importance or truth. The missing proof is whether primary-cited extracted
    insights survive citation checks and human worth-attention judgment.
 4. **Actionable delivery (15%)** — the Insights surface, daily briefing, and
    local alert/outbox proof are the active missing delivery boundary. No

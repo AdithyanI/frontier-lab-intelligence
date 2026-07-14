@@ -25,9 +25,9 @@ SCORE_FORMULA = {
     "originator_support_weight": 0.25,
     "public_engagement_weight": 0.20,
     "note": (
-        "Experimental ordering aid, not a quality judgment. Network attention "
-        "counts each active Registry entity once — people and organizations "
-        "alike; public engagement is a tie-breaker."
+        "Experimental daily ordering aid, not an importance or quality judgment. "
+        "Tracked amplification counts each active Registry entity once — people "
+        "and organizations alike; public engagement is a tie-breaker."
     ),
 }
 

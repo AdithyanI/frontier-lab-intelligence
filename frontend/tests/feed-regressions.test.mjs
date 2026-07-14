@@ -17,6 +17,15 @@ test('Feed uses semantic classes for optional menu and triage content', () => {
   assert.doesNotMatch(appStyles, /event-triage-heading span:first-child/)
 })
 
+test('Feed leads with view rank and discloses the daily score on demand', () => {
+  assert.match(feedSource, /<strong>#\{rank\}<\/strong>/)
+  assert.match(feedSource, /Daily score \{basis\.attention_score\.toFixed\(1\)\}/)
+  assert.match(feedSource, /aria-expanded=\{open\}/)
+  assert.match(feedSource, /Higher than \{\(row\.percentile \* 100\)\.toFixed\(1\)\}%/)
+  assert.match(feedSource, /Scores from different\s+days are not directly comparable/)
+  assert.doesNotMatch(feedSource, /<span>attention<\/span>/)
+})
+
 test('Feed exposes the selected date and guards paginated responses by view identity', () => {
   assert.match(dateNavigatorSource, /aria-pressed=\{value\.day === selectedDate\}/)
   assert.match(feedSource, /activeViewKeyRef\.current !== viewKey/)

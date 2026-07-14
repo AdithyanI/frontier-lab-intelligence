@@ -9,7 +9,7 @@ implemented code and durable reference contracts override stale examples here.
 
 ## 1. What we are building, in one paragraph
 
-A daily pipeline that takes the top ~20 attention-ranked Feed envelopes, runs
+A daily pipeline that takes the top ~20 daily-score-ranked Feed envelopes, runs
 a cheap LLM **triage** (keep/drop + reason), optionally enriches kept envelopes
 with fetched primary artifacts (papers, repos, blog posts), then runs a strong
 LLM **extraction** over the accepted first-party X evidence plus any available
@@ -42,7 +42,7 @@ is DONE and frozen. Do not modify it. This project only *reads* from it.
 | Raw X evidence (immutable) | `data/raw/x/x-content.db` (`x_post`, `post_bundle`, `raw_request/response`) | 63,736 posts. `raw_json` per post. **Never mutate.** |
 | Resolved URLs already in raw JSON | `x_post.raw_json` → `entities.urls[] {url (t.co), expanded_url}` | 95% of posts containing t.co links carry expanded_url (21,316/22,342 checked). No new X API calls needed. Note: `extendedEntities.media[].expanded_url` is media self-links — ignore; author-bio urls — ignore. |
 | Derived envelope runs | `data/derived/` (content-addressed run dirs) | Exact-structural envelopes + attention features. |
-| Feed API | `src/fli/web/feed.py`, `GET /api/events?date=…&sort=attention` | `attention-v1.1`: 100×(0.55 network + 0.25 originator + 0.20 engagement), each a within-day percentile. Envelope sort key = `peak_attention_score`. |
+| Feed API | `src/fli/web/feed.py`, `GET /api/events?date=…&sort=attention` | Daily score under the `attention-v1.1` contract: 100×(0.55 tracked amplification + 0.25 author support + 0.20 public engagement), each a within-day percentile. The UI leads with view rank; the internal envelope sort key remains `peak_attention_score`. |
 | Eval seed (ground truth) | `docs/projects/archive/signal-intelligence-pipeline/resources/top-20-attention-audit-2026-07-11.md` | Human labels on the 2026-07-11 top-20: 12 worth-attention / 8 noise, **5 strong extraction candidates with post IDs**. This is the acceptance oracle for M1. |
 | Gap analysis | `.../resources/submission-gap-audit-2026-07-13.md` | Rubric map; why insights/delivery are the critical path. |
 | LLM plumbing | existing Registry pipeline code under `src/fli/` | LiteLLM endpoint, structured outputs, usage/cost capture, prompt cache, resumability — reuse, don't rebuild. |
@@ -59,7 +59,7 @@ is DONE and frozen. Do not modify it. This project only *reads* from it.
 ```
 
 ### Stage 1 — Candidate selection (exists)
-Top ~20 envelopes by `peak_attention_score` for the target day, from the
+Top ~20 envelopes by the daily score (`peak_attention_score` internally) for the target day, from the
 existing derived run / Feed API. Start day: **2026-07-11** (audited).
 Second day: 2026-07-09 or 07-10 (unaudited — good blind test).
 

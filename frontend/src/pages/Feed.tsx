@@ -283,9 +283,12 @@ function ScoreDisclosure({
       onClose()
       triggerRef.current?.focus()
     }
-    window.addEventListener('pointerdown', closeOnOutsideClick)
+    const outsideClickTimer = window.setTimeout(() => {
+      window.addEventListener('pointerdown', closeOnOutsideClick)
+    }, 0)
     window.addEventListener('keydown', closeOnEscape)
     return () => {
+      window.clearTimeout(outsideClickTimer)
       window.removeEventListener('pointerdown', closeOnOutsideClick)
       window.removeEventListener('keydown', closeOnEscape)
     }

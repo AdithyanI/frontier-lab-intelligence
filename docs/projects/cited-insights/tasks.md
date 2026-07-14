@@ -506,10 +506,22 @@ reads first.
   disclosure from Feed cards. The attention score remains the compact summary
   of Registry support, and Follow is now the single disclosure for exact quote,
   reply, continuation, retweet, and linked-post evidence. Backend amplifier
-  evidence remains unchanged for scoring and audit logic.
+  evidence remains unchanged for scoring and audit logic. This records the UI
+  terminology at that point; the 2026-07-14 rank-first decision below supersedes
+  it for the current product surface.
 - 2026-07-14: [ARCHITECTURE-STORY-UPDATED] Extended the lead Architecture
   diagram without adding another competing section. It now distinguishes the
   live evidence path (Registry → X evidence → exact envelopes → Feed), the live
   keep/drop routing gate, the live canonical artifact catalog, and the planned
   cited-writing and delivery boundary. Registry intake, storage, and scoring
   diagrams remain the deeper explanations below it.
+- 2026-07-14: [FEED-RANK-FIRST] Replaced the persistent composite decimal with
+  ordinal position in the active sorted and filtered Feed view (`#1`, `#2`,
+  ...). Clicking a rank reveals an anchored daily-score disclosure with the
+  exact score-producing member post, raw inputs, within-day percentiles,
+  weights, contributions, and limitations. Consolidated current terminology:
+  rank is the visible position; daily score is the `attention-v1.1` calculation;
+  tracked amplification, author network support, and public engagement are its
+  three inputs. Attention remains the broad product question, not the number's
+  UI label. A future weekly rank must declare its comparison scope and must not
+  average incomparable daily scores.
