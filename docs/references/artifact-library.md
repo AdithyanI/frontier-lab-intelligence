@@ -134,7 +134,10 @@ shown separately, and the inherited rank is provenance rather than a new
 artifact-quality score. Bounded pagination keeps the surface fast. Expanding a
 row shows the canonical URL and deep-links to the exact ranked Feed envelope
 that disclosed it; the Feed preserves the full evidence context and onward X
-link. Expanded provenance also shows first-seen time, retrieval state and
+link. When that exact envelope exposes multiple canonical artifacts, the UI
+keeps every artifact independently expandable while rendering their inherited
+rank once in a shared left rail; no catalog records are merged. Expanded
+provenance also shows first-seen time, retrieval state and
 method, snapshot size, and any current error. It does not summarize or classify
 artifact content; those are later cited-insight responsibilities.
 

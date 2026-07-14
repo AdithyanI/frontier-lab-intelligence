@@ -44,6 +44,13 @@ test('Artifacts inherit Feed rank while keeping source time secondary', () => {
   assert.match(artifactSource, /item\.source_published_at/)
 })
 
+test('Artifacts from one exact Feed envelope share one visual rank rail', () => {
+  assert.match(artifactSource, /previousGroup\?\.\[0\]\.source_event_id === item\.source_event_id/)
+  assert.match(artifactSource, /rankIsContinuation=\{index > 0\}/)
+  assert.match(artifactSource, /continuesRankGroup=\{index < group\.length - 1\}/)
+  assert.match(artifactSource, /!rankIsContinuation && <strong>#\{item\.best_source_rank\}<\/strong>/)
+})
+
 test('Artifact provenance deep-links to the exact ranked Feed envelope', () => {
   assert.match(artifactSource, /source_event_id/)
   assert.match(artifactSource, /Feed envelope/)

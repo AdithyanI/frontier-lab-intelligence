@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   getJSON,
@@ -91,15 +91,40 @@ function sourceLabel(provider: string | null) {
   return provider || 'Feed'
 }
 
-function ArtifactRow({ item }: { item: ArtifactItem }) {
+interface ArtifactRowProps {
+  item: ArtifactItem
+  continuesRankGroup: boolean
+  rankGroupSize: number
+  rankIsContinuation: boolean
+}
+
+function ArtifactRow({
+  item,
+  continuesRankGroup,
+  rankGroupSize,
+  rankIsContinuation,
+}: ArtifactRowProps) {
   const sourcePublishedAt = item.source_published_at || item.last_source_published_at || item.last_seen_at
   const feedDate = sourcePublishedAt.slice(0, 10)
+  const rowClassName = [
+    'artifact-row',
+    continuesRankGroup && 'artifact-row--rank-continues',
+    rankIsContinuation && 'artifact-row--rank-continuation',
+  ].filter(Boolean).join(' ')
 
   return (
-    <details className="artifact-row">
+    <details className={rowClassName}>
       <summary>
-        <span className="artifact-rank mono" aria-label={`Feed rank ${item.best_source_rank}`}>
-          <strong>#{item.best_source_rank}</strong>
+        <span
+          className="artifact-rank mono"
+          aria-hidden={rankIsContinuation || undefined}
+          aria-label={rankIsContinuation
+            ? undefined
+            : rankGroupSize > 1
+              ? `Feed rank ${item.best_source_rank}, shared by ${rankGroupSize} artifacts from one Feed envelope`
+              : `Feed rank ${item.best_source_rank}`}
+        >
+          {!rankIsContinuation && <strong>#{item.best_source_rank}</strong>}
         </span>
         <span className="artifact-identity">
           <strong>{displayTitle(item)}</strong>
@@ -314,6 +339,19 @@ export default function Artifacts() {
 
   const issueCount =
     (data?.counts?.retryable ?? 0) + (data?.counts?.unavailable ?? 0)
+  const artifactRankGroups = useMemo(() => {
+    const groups: ArtifactItem[][] = []
+    for (const item of items) {
+      const previousGroup = groups.at(-1)
+      const sharesExactEnvelope = Boolean(
+        item.source_event_id
+        && previousGroup?.[0].source_event_id === item.source_event_id,
+      )
+      if (sharesExactEnvelope && previousGroup) previousGroup.push(item)
+      else groups.push([item])
+    }
+    return groups
+  }, [items])
 
   return (
     <div className="page artifact-page">
@@ -378,8 +416,18 @@ export default function Artifacts() {
             <span />
           </div>
           <div className="artifact-list">
-            {items.map((item) => (
-              <ArtifactRow item={item} key={item.artifact_id} />
+            {artifactRankGroups.map((group) => (
+              <Fragment key={group[0].source_event_id || group[0].artifact_id}>
+                {group.map((item, index) => (
+                  <ArtifactRow
+                    item={item}
+                    key={item.artifact_id}
+                    continuesRankGroup={index < group.length - 1}
+                    rankGroupSize={group.length}
+                    rankIsContinuation={index > 0}
+                  />
+                ))}
+              </Fragment>
             ))}
           </div>
           {items.length === 0 && (

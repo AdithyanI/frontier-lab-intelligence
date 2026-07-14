@@ -1908,6 +1908,7 @@ td.num {
 }
 
 .artifact-row > summary {
+  position: relative;
   min-height: 76px;
   padding: 13px 16px;
   list-style: none;
@@ -1918,6 +1919,28 @@ td.num {
 .artifact-row > summary::-webkit-details-marker { display: none; }
 .artifact-row > summary:hover { background: var(--sand); }
 .artifact-row[open] > summary { background: var(--surface); }
+
+.artifact-row--rank-continues {
+  border-bottom: 0;
+}
+
+.artifact-row--rank-continues > summary::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  bottom: 0;
+  left: 124px;
+  height: 1px;
+  background: var(--border);
+}
+
+.artifact-row--rank-continues[open] {
+  border-bottom: 1px solid var(--border);
+}
+
+.artifact-row--rank-continues[open] > summary::after {
+  display: none;
+}
 
 .artifact-date {
   text-align: right;
@@ -1942,6 +1965,10 @@ td.num {
   font-size: 22px;
   font-weight: 500;
   line-height: 1;
+}
+
+.artifact-row--rank-continuation .artifact-rank {
+  color: transparent;
 }
 
 .artifact-identity {

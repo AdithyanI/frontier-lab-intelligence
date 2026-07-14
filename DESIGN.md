@@ -151,7 +151,10 @@ Rules:
   several accepted envelopes reveal the same artifact, the smallest rank wins.
   This is inherited provenance, not a second artifact score. Keep the default
   row to Feed rank, artifact title and host, fetch-oriented type, source, and a
-  compact source time. Native `<details>` expansion reveals
+  compact source time. When one Feed envelope reveals several canonical
+  artifacts, keep them as separate expandable rows but show their shared rank
+  once in one continuous left rail. Equal ranks from different envelopes do
+  not visually merge. Native `<details>` expansion reveals
   the canonical URL, a link back to the exact ranked Feed envelope that
   disclosed it, retrieval state, and snapshot provenance. The Feed envelope
   remains the evidence workspace and owns the onward X link; Artifacts does
