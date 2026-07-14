@@ -135,4 +135,7 @@ def test_import_does_not_revive_an_existing_rejected_identity(tmp_path):
 
     conference_sources.import_records(conn, [record])
 
-    assert registry.read_entities(conn)[0]["registry_state"] == "rejected"
+    assert conn.execute(
+        "SELECT COUNT(*) FROM entity_registry_rejections WHERE entity_id = ?",
+        (entity_id,),
+    ).fetchone()[0] == 1
