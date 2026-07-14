@@ -252,6 +252,15 @@ reads first.
 
 ## Progress Log
 
+- 2026-07-14: [FEED-AUDIT-CRITICAL-FIXES] Kept the audit remediation narrow
+  after Adi challenged a broad cleanup. The Feed now clears stale rows before
+  uncached view changes, keys both foreground and pagination writes to the
+  active date/filter/sort/search identity, surfaces scoped load failures, and
+  exposes the selected date with `aria-pressed`. Replaced the second broad
+  positional selector with an explicit triage-decision class. Added a
+  zero-dependency frontend regression suite for both selector leaks and the
+  evidence-state guards, and wired it into `check-fast.sh`. Mobile redesign,
+  broad target resizing, cache tuning, and cosmetic cleanup remain deferred.
 - 2026-07-14: [FEED-MENU-TYPE-CONSISTENCY] Adi caught that Sort option labels
   rendered smaller than Audit option labels. The shared `span:last-child`
   selector intended for Audit counts also matched Sort's only span, shrinking
