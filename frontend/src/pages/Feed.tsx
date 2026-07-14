@@ -12,11 +12,18 @@ import {
   shiftDateWindow,
   type DateWindowDirection,
 } from '../dateWindow'
+import DateNavigator from '../components/DateNavigator'
 
 type Sort = 'attention' | 'recent' | 'engagement'
 type TriageFilter = 'all' | 'keep' | 'drop' | 'not_evaluated'
 
 const PAGE_SIZE = 40
+const shortDate = new Intl.DateTimeFormat('en-US', {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+})
 const triageSummaryLabels: Record<TriageFilter, string> = {
   all: 'matching',
   keep: 'kept',
@@ -73,13 +80,6 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
 const compact = new Intl.NumberFormat('en-US', {
   notation: 'compact',
   maximumFractionDigits: 1,
-})
-
-const shortDate = new Intl.DateTimeFormat('en-US', {
-  weekday: 'short',
-  month: 'short',
-  day: 'numeric',
-  timeZone: 'UTC',
 })
 
 const time = new Intl.DateTimeFormat('en-US', {
@@ -655,42 +655,16 @@ export default function Feed() {
       </header>
 
       <section className="feed-calendar" aria-label="Available complete UTC days">
-        <div className="feed-date-navigator">
-          <button
-            type="button"
-            className="feed-date-page feed-date-page--previous"
-            aria-label="Show previous 7 available days"
-            disabled={!canShowOlderDates}
-            onClick={() => moveDateWindow('older')}
-          >
-            <span aria-hidden="true">←</span>
-          </button>
-          <div className="feed-days" role="group" aria-label="Feed date">
-            {visibleDates.map((value) => (
-              <button
-                type="button"
-                key={value.day}
-                className={`feed-day${value.day === selectedDate ? ' is-active' : ''}`}
-                aria-pressed={value.day === selectedDate}
-                onClick={() => setSelectedDate(value.day)}
-              >
-                <span>{shortDate.format(new Date(`${value.day}T12:00:00Z`))}</span>
-                <span className="feed-day-count mono">
-                  {value.item_count.toLocaleString('en-US')}
-                </span>
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="feed-date-page feed-date-page--next"
-            aria-label="Show next 7 available days"
-            disabled={!canShowNewerDates}
-            onClick={() => moveDateWindow('newer')}
-          >
-            <span aria-hidden="true">→</span>
-          </button>
-        </div>
+        <DateNavigator
+          dates={visibleDates}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          canShowOlderDates={canShowOlderDates}
+          canShowNewerDates={canShowNewerDates}
+          onShowOlderDates={() => moveDateWindow('older')}
+          onShowNewerDates={() => moveDateWindow('newer')}
+          ariaLabel="Feed date"
+        />
       </section>
 
       <div className="feed-tools">

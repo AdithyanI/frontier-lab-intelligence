@@ -4,6 +4,10 @@ import { test } from 'node:test'
 import { getDateWindow, shiftDateWindow } from '../src/dateWindow.ts'
 
 const feedSource = await readFile(new URL('../src/pages/Feed.tsx', import.meta.url), 'utf8')
+const dateNavigatorSource = await readFile(
+  new URL('../src/components/DateNavigator.tsx', import.meta.url),
+  'utf8',
+)
 const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
 
 test('Feed uses semantic classes for optional menu and triage content', () => {
@@ -14,7 +18,7 @@ test('Feed uses semantic classes for optional menu and triage content', () => {
 })
 
 test('Feed exposes the selected date and guards paginated responses by view identity', () => {
-  assert.match(feedSource, /aria-pressed=\{value\.day === selectedDate\}/)
+  assert.match(dateNavigatorSource, /aria-pressed=\{value\.day === selectedDate\}/)
   assert.match(feedSource, /activeViewKeyRef\.current !== viewKey/)
   assert.match(feedSource, /activeViewKeyRef\.current === viewKey/)
   assert.match(feedSource, /setData\(null\)/)
@@ -38,11 +42,12 @@ test('Feed pages through fixed seven-date windows with explicit boundary control
     end: 16,
     selectedIndex: 15,
   })
-  assert.match(feedSource, /visibleDates\.map/)
-  assert.match(feedSource, /disabled=\{!canShowOlderDates\}/)
-  assert.match(feedSource, /disabled=\{!canShowNewerDates\}/)
-  assert.match(feedSource, /aria-label="Show previous 7 available days"/)
-  assert.match(feedSource, /aria-label="Show next 7 available days"/)
+  assert.match(feedSource, /dates=\{visibleDates\}/)
+  assert.match(dateNavigatorSource, /dates\.map/)
+  assert.match(dateNavigatorSource, /disabled=\{!canShowOlderDates\}/)
+  assert.match(dateNavigatorSource, /disabled=\{!canShowNewerDates\}/)
+  assert.match(dateNavigatorSource, /aria-label="Show previous 7 available days"/)
+  assert.match(dateNavigatorSource, /aria-label="Show next 7 available days"/)
   assert.match(feedSource, /for \(const value of visibleDates\)/)
   assert.doesNotMatch(appStyles, /\.feed-days button span:last-child/)
 })

@@ -342,9 +342,21 @@ export interface ArtifactLibrary {
   reason?: string
   items: ArtifactItem[]
   total: number
+  matching_total: number
+  date?: string
+  query?: string
   counts?: Record<ArtifactFetchState, number>
   limit: number
   offset: number
+}
+
+export interface ArtifactDates {
+  available: boolean
+  reason?: string
+  latest_date?: string
+  date_from?: string
+  date_to?: string
+  dates: FeedDate[]
 }
 
 export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {

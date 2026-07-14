@@ -207,11 +207,13 @@ reads first.
   small cited-extraction oracle instead of broadening this pass. See the
   [expansion report](resources/triage-v2.2-top1000-expansion-2026-07-13.md).
 
-- 2026-07-13: Replace the calibration contract with one permissive
+- 2026-07-13 (category clause superseded by the 2026-07-14 extraction-contract
+  decision): Replace the calibration contract with one permissive
   `gpt-5.4-mini`/medium Responses call with no tools and the minimal strict
   output (`decision`, `reason`). The model routes the complete envelope; it
-  does not choose post IDs or assign a topic. Category belongs to each later
-  extracted insight, where the resolved claim and source are available. The
+  does not choose post IDs or assign a topic. Category was initially assigned
+  to the later extraction stage; it is now deferred until a real consumer is
+  proven. The
   obsolete v1 prompt and local v1 run stores were removed rather than supported
   through a compatibility path. Calibration reports remain historical evidence
   for the keep/drop rubric. Do not add a default reviewer model.

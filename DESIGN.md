@@ -140,9 +140,11 @@ Rules:
 - **Artifact index:** a flat, newest-first ruled list over the canonical
   artifact catalog. Keep the default row to observed date, artifact title and
   host, fetch-oriented type, source, and retrieval state. Native `<details>`
-  expansion reveals canonical/source URLs and snapshot provenance. Do not add
-  ranking, summaries, cards, or filters until a cited-insight consumer proves
-  the need.
+  expansion reveals canonical/source URLs and snapshot provenance. A single
+  Feed-style date navigator filters by the UTC day of the source post that
+  revealed the artifact, never by retrieval time; this is an inspection aid,
+  not a relevance rank. Do not add ranking, summaries, cards, or additional
+  filters until a cited-insight consumer proves the need.
 - **Insight row (anticipated):** title, why-flagged rationale, score (mono),
   provenance line, persona tag; expandable.
 - **Score breakdown (anticipated):** inputs and weights visible on demand

@@ -1751,8 +1751,14 @@ td.num {
 
 .artifact-page { max-width: 1360px; }
 
+.artifact-tools {
+  margin-top: 24px;
+}
+
+.artifact-search { width: 100%; }
+
 .artifact-index {
-  margin-top: 32px;
+  margin-top: 24px;
   border-top: 1px solid var(--border-strong);
 }
 
@@ -1907,6 +1913,14 @@ td.num {
   margin: 32px 0 0;
   padding: 18px 0;
   border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.artifact-empty {
+  margin: 0;
+  padding: 32px 16px;
   border-bottom: 1px solid var(--border);
   color: var(--muted);
   font-size: 11px;
