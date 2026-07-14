@@ -530,18 +530,19 @@ export default function Architecture() {
       <p className="page-sub">A visual map of what is live, where judgment enters, and what each number means.</p>
 
       <nav className="arch-chapters" aria-label="Architecture chapters">
-        <a href="#system-today">Pipeline</a>
-        <a href="#account-intake">Account intake</a>
         <a href="#data-model">Data model</a>
+        <a href="#account-intake">Account intake</a>
+        <a href="#system-today">Pipeline</a>
         <a href="#ranking-methods">Numbers</a>
       </nav>
 
-      <section className="arch-section arch-section--lead" id="system-today">
+      <section className="arch-section arch-section--lead" id="data-model">
         <div className="arch-section-head">
-          <h2 className="arch-h">The evidence-to-insight path</h2>
-          <p className="arch-p">Evidence stays inspectable before judgment. Accepted envelopes may gain artifact context; only claims with an exact source-bound quote reach Insights.</p>
+          <h2 className="arch-h">The data model</h2>
+          <p className="arch-p">Channels produce dated evidence. The X follow graph separately supplies counted network support.</p>
         </div>
-        <div className="arch-canvas"><LiveSystemMap /></div>
+        <div className="arch-canvas"><CurrentDataModel /></div>
+        <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
       </section>
 
       <section className="arch-section" id="account-intake">
@@ -552,13 +553,12 @@ export default function Architecture() {
         <div className="arch-canvas"><AccountIntake /></div>
       </section>
 
-      <section className="arch-section" id="data-model">
+      <section className="arch-section" id="system-today">
         <div className="arch-section-head">
-          <h2 className="arch-h">One data model underneath</h2>
-          <p className="arch-p">Channels produce dated evidence. The X follow graph separately supplies counted network support.</p>
+          <h2 className="arch-h">The evidence-to-insight path</h2>
+          <p className="arch-p">Evidence stays inspectable before judgment. Accepted envelopes may gain artifact context; only claims with an exact source-bound quote reach Insights.</p>
         </div>
-        <div className="arch-canvas"><CurrentDataModel /></div>
-        <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
+        <div className="arch-canvas"><LiveSystemMap /></div>
       </section>
 
       <section className="arch-section arch-section--methods" id="ranking-methods">
