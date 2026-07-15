@@ -28,8 +28,9 @@ That historical comparison remains relevant to the retired keep/drop boundary.
 For the live two-audience router, Adi authorized a quality-first comparison on
 GPT-5.4 mini. `high` produced grounded reasons near the requested length;
 `xhigh` did not change either decision and mostly over-deliberated. The live
-default is therefore `high`, pending Adi's qualitative audit of the 90-record
-cohort.
+default is therefore `high`. Adi accepted the contextual audit's two narrow
+boundary rules, and the final v7 five-packet rerun produced coherent labels
+without changing the model, effort, or output schema.
 
 The model string and reasoning effort are part of every run identity. Existing
 run databases and historical reports remain immutable evidence of the model
@@ -88,6 +89,12 @@ ran sequentially. An implicit-only two-call test missed twice; the single-key
 test read 1,280 tokens on call two. The nine-day top-10 run then returned 88
 cache-hit requests out of 90 and read 152,576 of 305,600 input tokens from the
 provider cache. This is the current proven audience-routing contract.
+
+The accepted v7 prompt revision was calibrated on exactly five disputed or
+borderline packets. Its cold request missed, while the next four requests each
+read 1,792 cached tokens. The run read 7,168 of 12,482 input tokens (57.43%)
+from the provider cache and cost $0.0256731. The result confirms that the same
+one-key sequential contract remains effective after a prompt version change.
 
 A final Luna-specific control removed the remaining sharding ambiguity: two
 different v4 evidence packets ran sequentially with the exact same forced

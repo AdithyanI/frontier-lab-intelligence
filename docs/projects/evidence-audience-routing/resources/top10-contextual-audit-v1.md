@@ -179,3 +179,13 @@ Then rerun only the two likely false negatives and the three access/rate-limit
 boundary cases. If those move coherently without weakening the clear
 negatives, the routing boundary is good enough to freeze before Insight
 generation.
+
+## Resolution
+
+Adi approved both boundary rules on 2026-07-15. The final
+`audience-routing-v7` targeted rerun moved both disputed claims to
+Investment-only, kept the pure temporary-access packet at neither, and routed
+the two access/limit packets with separate competitive or adoption evidence to
+Investment-only. All three access/limit packets were Engineering-negative.
+Exact outputs and telemetry are recorded in
+[`top10-boundary-rerun-v7.md`](top10-boundary-rerun-v7.md).

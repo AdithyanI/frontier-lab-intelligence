@@ -15,6 +15,11 @@
   boundary.
 - Starting with one visible envelope exposed data-linking and rank issues before
   bulk model work.
+- A stratified contextual audit found policy-boundary errors that aggregate
+  label counts and schema validation could not reveal.
+- Rerunning only five disputed/borderline packets made prompt calibration fast,
+  cheap, and interpretable while preserving the 90-record v4 run as immutable
+  evidence.
 
 ## What Slowed Things Down
 
@@ -45,6 +50,10 @@
 ### Validation / Feedback Loops
 
 - Require one-envelope human review and one-day audit before any bulk run.
+- When a qualitative audit proposes a threshold rule, encode it as a general
+  decision boundary and rerun the exact disputed cases plus nearby negatives.
+  Do not treat one rewritten prompt as accepted until the reasons—not only the
+  booleans—follow the intended policy.
 
 ### Delegation / Subagents
 
@@ -56,6 +65,9 @@
 - Treat `kept` as a UI/read-model derivation of the two audience booleans; do
   not add another model field or database authority for it.
 - Build the packet renderer before the first routing model call.
+- Start Insight generation as a separate project consuming positive routes;
+  do not extend this routing schema with summary, confidence, rank, or
+  publication fields.
 
 ## Notes For Future Runs
 
@@ -63,3 +75,7 @@
   contract.
 - A routing decision is not an Insight and should never contain generated
   claims or editorial ranking.
+- Prompt wording such as “may qualify” can leave an intended boundary
+  underdetermined. Put approved inclusion rules near the task definition, say
+  what evidence is sufficient, and name the stronger proof requirement the
+  model must not invent.

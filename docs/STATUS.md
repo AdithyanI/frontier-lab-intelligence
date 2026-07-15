@@ -60,7 +60,7 @@ deferred until this narrower routing boundary is qualitatively proven.
 | Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. One shared extraction validator rejects long placeholder-dominated HTML, text, PDF, Jina, and X Article bodies as `extraction_placeholder_content` before they become successful text snapshots; repository and video adapters remain deferred. The known Claude Code fetch was corrected to a terminal failure, leaving 880 successful snapshots with zero placeholder violations. The catalog contains 1,566 canonical artifacts and a read-only inspection page. |
-| Feed audience routing | Implemented; nine-day top-10 audit active | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. It consumes only successful artifact text and contains no artifact-quality heuristic. GPT-5.4 mini at high reasoning completed 90/90 top-ranked envelopes across July 5–13: 44 `both`, six Engineering-only, eight Investment-only, and 32 `neither`. The single stable prompt key produced 88 cache-hit requests and 152,576 cached tokens from 305,600 input tokens; 89 response-cost headers total $0.462966 and one is missing. Exact snapshot matches appear in Feed as `ENG`/`INV` marks with the two reasons in one disclosure. One derived Status control exposes Relevant, Not relevant, and Not evaluated without inventing a third judgment. Adi's audience-threshold decision remains. |
+| Feed audience routing | Implemented; routing boundary frozen | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. It consumes only successful artifact text and contains no artifact-quality heuristic. GPT-5.4 mini at high reasoning completed 90/90 top-ranked envelopes across July 5–13: 44 `both`, six Engineering-only, eight Investment-only, and 32 `neither`. The single stable prompt key produced 88 cache-hit requests and 152,576 cached tokens from 305,600 input tokens; 89 response-cost headers total $0.462966 and one is missing. A 26-packet contextual audit led to two approved v7 boundary rules: specific attributed Investment theses may qualify without independent verification when uncertainty is preserved, while temporary access/reset/limit news needs a persistent constraint or measured actionable effect to qualify for Engineering. The five-case targeted rerun produced two Investment-only disputed claims, two Investment-only access packets with separate commercial consequences, and one `neither` access-only packet; all three access packets were Engineering-negative. Exact snapshot matches appear in Feed as `ENG`/`INV` marks with the two reasons in one disclosure. One derived Status control exposes Relevant, Not relevant, and Not evaluated without inventing a third judgment. |
 | Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
@@ -72,30 +72,26 @@ current databases or APIs before using them as present-tense product claims.
 
 ## The Most Important Unproven Claim
 
-The repository has proved that one simple prompt/schema, versioned run store,
-and exact-match Feed projection can route a varied 90-record cohort. A
-26-packet contextual review agreed with 21 decisions, found three
-access/rate-limit boundary cases, and identified two likely Investment false
-negatives. The obvious garbled-artifact case now fails at the shared artifact
-extraction boundary, but Adi has not yet decided the two proposed audience-threshold
-clarifications. Previous multi-stage Insight results remain historical
-learning, not the active contract. That boundary decision—not Insight prose or
-a full-catalog expansion—is next.
+The repository has proved that one prompt/schema, versioned run store, and
+exact-match Feed projection can route a varied 90-record cohort, and the five
+disputed/borderline packets now behave coherently under the approved v7
+boundary. The next unproven claim is that positive audience routes can be
+converted into a small set of excellent, source-bound Insights without
+reviving the premature multi-stage stack or weakening attribution. Previous
+multi-stage Insight results remain historical learning, not the active
+contract.
 
 ## Submission Finish Line
 
-The active Evidence Audience Routing tracker owns the execution detail. At
-system level, the remaining proof is:
+The routing boundary is frozen. The active Evidence Audience Routing tracker
+owns final closeout and archive. At system level, the remaining proof is:
 
-1. Decide the two narrow Investment and Engineering threshold clarifications
-   from the 26-packet contextual audit.
-2. Rerun only the five disputed or borderline packets and verify that the
-   clarification does not weaken clear negatives.
-3. Use the 32 observed `neither` cases and 14 single-audience cases to calibrate
-   the threshold; add lower-ranked hard negatives only if the audit exposes a
-   real coverage gap.
-4. Freeze the routing contract before any full-catalog expansion.
-5. Open a separate Insight-generation project only after routing is accepted.
+1. Open a separate Insight-generation project with a deliberately small,
+   source-bound output contract.
+2. Produce and inspect 3–5 excellent cited Insights from positive v7 routes.
+3. Assemble the rubric-mapped submission package and limitations.
+4. Perform the final delivery review before requesting explicit approval for
+   any external submission.
 
 External submission or alert delivery remains blocked without Adi's explicit
 current-session approval.
@@ -117,9 +113,10 @@ case-study thesis.
 
 The active tracker is
 [`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
-Its first exact-envelope review and nine-day top-10 routing run are complete and
-inspectable in Feed. Adi's qualitative audit is next. Insight generation,
-full-catalog expansion, and delivery remain deliberately deferred.
+The first exact-envelope review, nine-day top-10 run, contextual audit, and
+targeted v7 boundary rerun are complete; the tracker owns final closeout and
+archive. The next project should be a fresh, narrow Insight-generation proof;
+full-catalog expansion and delivery remain deliberately deferred.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -139,7 +136,7 @@ handoff.
 | What happened chronologically, including spend and tools? | [`references/build-log.md`](references/build-log.md) |
 | How should an external reviewer inspect the repository? | [`references/reviewer-guide.md`](references/reviewer-guide.md) |
 
-If this brief conflicts with the active tracker, the tracker wins for execution
+If this brief conflicts with an active tracker, the tracker wins for execution
 state. If either conflicts with implemented behavior, stop, record the mismatch
 in the tracker, and reconcile the documentation before building on it.
 
@@ -148,8 +145,8 @@ in the tracker, and reconcile the documentation before building on it.
 A new architect or implementation agent should:
 
 1. Read this file and the case prompt.
-2. Read the active tracker's Goal, Decisions, Current Batch, blockers, and Done
-   When.
+2. If an active tracker exists, read its Goal, Decisions, Current Batch,
+   blockers, and Done When; otherwise use Current Direction above.
 3. Read only the architecture section and project resources relevant to the
    current batch.
 4. Inspect code and data at the named boundary before proposing a new

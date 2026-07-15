@@ -237,7 +237,13 @@ packet. The current low-rate runner uses one prompt-level cache key with
 sequential execution; it does not store per-item keys, shard traffic, pad the
 prompt, or request extended retention. The nine-day top-10 run read 152,576
 cached tokens across 305,600 input tokens. The current prompt asks for roughly
-40–50 words per reason as soft guidance, never a schema limit.
+40–50 words per reason as soft guidance, never a schema limit. The frozen v7
+boundary treats a specific attributed Investment thesis as potentially useful
+without independent verification when its uncertainty is preserved. Temporary
+model access, entitlement, reset, or usage-limit news does not qualify for AI
+Engineering by itself; it needs a persistent operational constraint or a
+measured actionable technical effect. The five-packet boundary rerun validated
+those rules without changing the two-judgment output schema.
 
 `fli.web.audience_routing` is the read-only audit projection. It selects the
 newest fully completed schema-compatible run for the requested UTC day.
@@ -1194,14 +1200,15 @@ final score.
 
 ## Current Build Order
 
-The active project is
-[`docs/projects/evidence-audience-routing/tasks.md`](../projects/evidence-audience-routing/tasks.md).
+The completed routing project is archived at
+[`docs/projects/archive/evidence-audience-routing/tasks.md`](../projects/archive/evidence-audience-routing/tasks.md).
 The direct Evidence routing boundary accepts one complete attributed envelope
 and returns exactly two independent judgments:
 AI Engineering relevance plus reason, and Investment relevance plus reason.
 The top 10 ranked envelopes for every complete day from July 5 through July 13
 are inspectable in Feed through quiet marks, one derived Status control, and one
 reason disclosure. All 90 GPT-5.4-mini/high records completed; 32 route to
-neither audience and 14 to exactly one. The current work is Adi's qualitative
-audit of that threshold—not a full-catalog run or new Insight generation. The archived v2
-review/publication stack is not the active build order.
+neither audience and 14 to exactly one. The v7 prompt also passed the targeted
+five-packet boundary rerun. The next build order is a fresh, narrow
+Insight-generation project—not a full-catalog routing run or restoration of the
+archived v2 review/publication stack.
