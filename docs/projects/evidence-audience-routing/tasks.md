@@ -252,12 +252,15 @@ Application invariants:
 | --- | --- | --- | --- |
 | done | Contextually audit 26 stratified packets against the exact stored evidence and approved audience standards. | parent | `resources/top10-contextual-audit-v1.md` |
 | done | Move the placeholder-only guard into shared artifact extraction, correct the one known live fetch, and remove routing-local cleanup. | parent | `resources/top10-contextual-audit-v1.md` |
+| done | Expose artifact content readiness and exact source time inside the existing Primary artifacts expansion. | parent | — |
 | in_progress | Decide whether to add the two narrow boundary clarifications and rerun only the five disputed/borderline packets. | parent | `resources/top10-contextual-audit-v1.md` |
 
 ## Backlog / Remaining Work
 
 - [x] Reject long placeholder-dominated bodies at artifact extraction without
   adding a subjective garbage-text heuristic.
+- [x] Explain ready, pending, unsupported, retryable, and unavailable artifact
+  content states inside expanded provenance without adding another list column.
 - [ ] Add broader packet-integrity or schema-consistency validation only when a
   concrete failure justifies a deterministic rule.
 - [x] Audit a stratified sample of both, single-audience, and `neither`
@@ -432,3 +435,8 @@ Application invariants:
   violations; focused tests keep short blocks, mixed prose, code, and progress
   bars. Repository/video behavior is unchanged, no historical routing result
   was rewritten, and no model call was made.
+- 2026-07-15: [VALIDATED] Primary artifacts now keeps the collapsed list to
+  Feed rank, artifact, type, and source. Expanded provenance presents a plain
+  content status and the exact source timestamp. Browser QA covered a ready
+  article, deferred repository support, and the preserved unusable Claude Code
+  extraction; no new filter, backend state, or database field was introduced.

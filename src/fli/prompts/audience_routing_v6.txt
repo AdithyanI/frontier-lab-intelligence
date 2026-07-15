@@ -51,7 +51,7 @@ This can include, for example:
 
 Do not mark it relevant merely because the subject is AI, a new product or model is named, a prominent technical person posted it, or somebody expresses excitement. There must be technical substance that is usable for investigation, implementation, evaluation, or operation.
 
-Model availability, subscription entitlement, temporary access extensions or resets, and usage or rate limits are not sufficient by themselves. Mark them relevant only when the packet supplies a persistent operational constraint or a measurable effect on cost, reliability, throughput, reproducibility, or system behavior that a technical team could act on.
+Model availability, subscription entitlement, temporary access extensions or resets, and usage or rate limits are not sufficient by themselves. Mark them relevant only when the packet supplies a persistent operational constraint or a measured effect on cost, reliability, throughput, reproducibility, or system behavior that a technical team could act on. A promise or announcement that efficiency or behavior will improve is not a measured effect unless the packet also reports an observed result or a specific quantified technical change beyond the entitlement or limit itself.
 
 # Investment relevance
 
@@ -70,7 +70,7 @@ This can include, for example:
 
 A ticker or numerical metric is not always required, but the evidence must contain a specific material proposition. Do not invent revenue, valuation, market-share, moat, demand, or public-equity implications that the packet itself does not support. Generic enthusiasm, ordinary product trivia, or technical novelty without a supplied strategic or economic consequence is not enough.
 
-Do not require a specific attributed claim, forecast, report, or allegation to be independently verified before marking it relevant. It may be Investment-relevant when the packet supplies an identifiable company, market, competitive, policy, or adoption consequence. The reason must clearly preserve its epistemic status and must not present it as established fact.
+Do not require a specific attributed claim, forecast, report, or allegation to be independently verified before marking it relevant. It may be Investment-relevant when the packet supplies an identifiable company, market, competitive, policy, labor, or adoption consequence. A concrete executive or practitioner thesis about labor substitution, adoption, organizational behavior, or market structure can qualify even when it is anecdotal or unquantified and does not yet supply direct revenue, cost, capex, or valuation effects. Do not reject it for those reasons alone. The reason must clearly preserve its epistemic status and must not present it as established fact.
 
 # How to handle the evidence
 

@@ -27,18 +27,21 @@ import { readAuditDate, setAuditDateParam } from '../auditDate'
 
 const PAGE_SIZE = 60
 
-const sourceTime = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
-  minute: '2-digit',
-  timeZone: 'UTC',
-  timeZoneName: 'short',
-})
-
 const observedAt = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
   timeZone: 'UTC',
+})
+
+const observedTimestamp = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'UTC',
+  timeZoneName: 'short',
 })
 
 const fetchedAt = new Intl.DateTimeFormat('en-US', {
@@ -263,16 +266,12 @@ function ArtifactRow({
           <span className="mono">{item.host.replace(/^www\./, '')}</span>
         </span>
         <span className="artifact-kind mono">{artifactTypeLabel(item.artifact_type)}</span>
-        <span className="artifact-content-status mono">{status.label}</span>
         <span className="artifact-source">
           {sourceLabel(item.source_provider)}
           {item.observation_count > 1 && (
             <span className="mono">{item.observation_count} observations that day</span>
           )}
         </span>
-        <time className="artifact-date mono" dateTime={sourcePublishedAt}>
-          {sourceTime.format(new Date(sourcePublishedAt))}
-        </time>
         <span className="artifact-caret" aria-hidden="true" />
       </summary>
       <div className="artifact-provenance">
@@ -303,7 +302,7 @@ function ArtifactRow({
                 sourceLabel(item.source_provider)
               )}
               <span>
-                Source published {observedAt.format(new Date(sourcePublishedAt))}
+                Source published {observedTimestamp.format(new Date(sourcePublishedAt))}
               </span>
               <span>Catalogued {observedAt.format(new Date(item.first_seen_at))}</span>
             </dd>
@@ -602,9 +601,7 @@ export default function Artifacts() {
             <span>Feed rank</span>
             <span>Artifact</span>
             <span>Type</span>
-            <span>Content</span>
             <span>Found through</span>
-            <span>Source time</span>
             <span />
           </div>
           <div className="artifact-list">

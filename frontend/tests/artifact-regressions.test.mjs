@@ -51,9 +51,9 @@ test('Artifacts search is debounced and visible source dates are prefetched', ()
   assert.match(artifactSource, /Search title, host, or URL/)
 })
 
-test('Artifact content readiness is visible in rows and explained in provenance', () => {
-  assert.match(artifactSource, /<span>Content<\/span>/)
-  assert.match(artifactSource, /className="artifact-content-status mono">\{status\.label\}/)
+test('Artifact content readiness is explained in expanded provenance without another column', () => {
+  assert.doesNotMatch(artifactSource, /<span>Content<\/span>/)
+  assert.doesNotMatch(artifactSource, /artifact-content-status/)
   assert.match(artifactSource, /<dt>Content status<\/dt>/)
   assert.match(artifactSource, /\{status\.detail\}/)
   assert.match(artifactSource, /Text ready/)
@@ -74,10 +74,11 @@ test('Artifacts expose stable user-facing types with X Articles distinct', () =>
   assert.doesNotMatch(artifactSource, /className="artifact-kind mono">\{item\.artifact_kind\}/)
 })
 
-test('Artifacts inherit Feed rank while keeping source time secondary', () => {
+test('Artifacts inherit Feed rank while keeping the source timestamp in provenance', () => {
   assert.match(artifactSource, /<span>Feed rank<\/span>/)
   assert.match(artifactSource, /item\.best_source_rank/)
-  assert.match(artifactSource, /<span>Source time<\/span>/)
+  assert.doesNotMatch(artifactSource, /<span>Source time<\/span>/)
+  assert.match(artifactSource, /Source published \{observedTimestamp\.format/)
   assert.match(artifactSource, /item\.source_published_at/)
   assert.match(artifactSource, /compareArtifactsByFeedRank/)
   assert.match(artifactSource, /left\.best_source_rank - right\.best_source_rank/)
