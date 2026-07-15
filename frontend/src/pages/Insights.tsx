@@ -12,11 +12,13 @@ import {
 import DateNavigator from '../components/DateNavigator'
 import CopyEnvelopeId from '../components/CopyEnvelopeId'
 import {
+  getDateWindowEndForSelection,
   getDateWindow,
   shiftDateWindow,
   type DateWindowDirection,
 } from '../dateWindow'
 import { decodeTextEntities } from '../textEntities'
+import { useAuditDate } from '../auditDateStore'
 
 const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'
 const AUDIENCE_ORDER: InsightAudience[] = ['ai_engineering', 'investment']
@@ -83,6 +85,11 @@ function sourceTypeLabel(sourceType: string) {
   if (sourceType === 'x_post') return 'X post'
   if (sourceType === 'artifact') return 'Primary artifact'
   return sourceType.replaceAll('_', ' ')
+}
+
+function displayInsightDay(day: string) {
+  const parsed = new Date(`${day}T12:00:00Z`)
+  return Number.isNaN(parsed.getTime()) ? day : insightDay.format(parsed)
 }
 
 function sourceLabel(item: DisplayItem) {
@@ -264,6 +271,7 @@ function ExtractedInsightRow({ audience, item }: {
 
 export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { rememberDate } = useAuditDate()
   const audience = parseAudience(searchParams.get('audience'))
   const selectedDate = searchParams.get('date') ?? ''
   const [dates, setDates] = useState<InsightDates | null>(null)
@@ -318,11 +326,13 @@ export default function Insights() {
       .then((payload) => {
         if (!live || activeDatesViewRef.current !== viewKey) return
         setDates(payload)
-        setDateWindowEnd(payload.dates.length)
         const linkedDate = searchParamsRef.current.get('date') ?? ''
-        const nextDate = payload.dates.some((value) => value.day === linkedDate)
-          ? linkedDate
-          : payload.latest_date ?? ''
+        const nextDate = linkedDate || payload.latest_date || ''
+        const selectedIndex = payload.dates.findIndex((value) => value.day === nextDate)
+        setDateWindowEnd(
+          getDateWindowEndForSelection(payload.dates.length, selectedIndex),
+        )
+        rememberDate(nextDate)
         const nextParams = new URLSearchParams(searchParamsRef.current)
         nextParams.set('audience', audience)
         nextParams.delete('view')
@@ -335,7 +345,7 @@ export default function Insights() {
         setDatesError(`Couldn’t load ${copy.noun} insight dates. Try the request again.`)
       })
     return () => { live = false }
-  }, [audience, copy.noun, datesRetryKey, setSearchParams])
+  }, [audience, copy.noun, datesRetryKey, rememberDate, setSearchParams])
 
   useEffect(() => {
     if (
@@ -367,6 +377,7 @@ export default function Insights() {
   }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate])
 
   const setView = (nextAudience: InsightAudience, nextDate: string) => {
+    rememberDate(nextDate)
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('audience', nextAudience)
     nextParams.delete('view')
@@ -395,6 +406,9 @@ export default function Insights() {
   const dataLoading = currentDates?.available === true &&
     currentDates.dates.some((value) => value.day === selectedDate) &&
     currentData === null && dataError === null
+  const selectedDateUnavailable = currentDates?.available === true &&
+    selectedDate !== '' &&
+    !currentDates.dates.some((value) => value.day === selectedDate)
 
   return (
     <div className="page insight-page">
@@ -464,6 +478,12 @@ export default function Insights() {
         <InsightState
           title={`No ${copy.itemLabel} are available yet`}
           detail={currentDates.reason || 'No classified audience insight days exist yet.'}
+        />
+      )}
+      {selectedDateUnavailable && !datesError && (
+        <InsightState
+          title={copy.emptyTitle}
+          detail={`No ${copy.itemLabel} are available for ${displayInsightDay(selectedDate)}.`}
         />
       )}
       {currentData && !currentData.available && !dataError && (

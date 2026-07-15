@@ -14,7 +14,8 @@ const evidenceSource = await readFile(
 const appSource = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8')
 
 test('Feed and Primary artifacts are separate views of one Evidence workspace', () => {
-  assert.match(appSource, /<NavLink to="\/evidence">Evidence<\/NavLink>/)
+  assert.match(appSource, /useAuditDatePath\('\/evidence\/feed'\)/)
+  assert.match(appSource, /<NavLink to=\{evidencePath\}>Evidence<\/NavLink>/)
   assert.match(appSource, /<Route path="\/evidence" element=\{<Evidence \/>\}>/)
   assert.match(appSource, /<Route index element=\{<Navigate to="feed" replace \/>\} \/>/)
   assert.match(appSource, /<Route path="feed" element=\{<Feed \/>\} \/>/)
@@ -22,8 +23,10 @@ test('Feed and Primary artifacts are separate views of one Evidence workspace', 
   assert.doesNotMatch(appSource, /<NavLink to="\/feed">Feed<\/NavLink>/)
   assert.doesNotMatch(appSource, /<NavLink to="\/artifacts">Artifacts<\/NavLink>/)
   assert.match(evidenceSource, /Inspect what the tracked network amplified/)
-  assert.match(evidenceSource, /<NavLink to="\/evidence\/feed">Feed<\/NavLink>/)
-  assert.match(evidenceSource, /<NavLink to="\/evidence\/artifacts">Primary artifacts<\/NavLink>/)
+  assert.match(evidenceSource, /useAuditDatePath\('\/evidence\/feed'\)/)
+  assert.match(evidenceSource, /useAuditDatePath\('\/evidence\/artifacts'\)/)
+  assert.match(evidenceSource, /<NavLink to=\{feedPath\}>Feed<\/NavLink>/)
+  assert.match(evidenceSource, /<NavLink to=\{artifactsPath\}>Primary artifacts<\/NavLink>/)
 })
 
 test('Feed and Artifacts share the same seven-date navigator', () => {

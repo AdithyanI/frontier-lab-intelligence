@@ -19,6 +19,25 @@ export function getDateWindow(windowEnd: number, itemCount: number): DateWindow 
   }
 }
 
+export function getDateWindowEndForSelection(
+  itemCount: number,
+  selectedIndex: number,
+): number {
+  const latestWindow = getDateWindow(itemCount, itemCount)
+  if (
+    selectedIndex < 0 ||
+    selectedIndex >= itemCount ||
+    selectedIndex >= latestWindow.start
+  ) {
+    return latestWindow.end
+  }
+
+  const windowsBack = Math.ceil(
+    (latestWindow.start - selectedIndex) / DATE_WINDOW_SIZE,
+  )
+  return Math.max(0, itemCount - windowsBack * DATE_WINDOW_SIZE)
+}
+
 export function shiftDateWindow(
   windowEnd: number,
   itemCount: number,

@@ -1,6 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuditDatePath } from '../auditDateStore'
 
 export default function Evidence() {
+  const feedPath = useAuditDatePath('/evidence/feed')
+  const artifactsPath = useAuditDatePath('/evidence/artifacts')
+
   return (
     <div className="page evidence-page">
       <header className="evidence-head">
@@ -10,8 +14,8 @@ export default function Evidence() {
           those posts revealed.
         </p>
         <nav className="evidence-tabs" aria-label="Evidence views">
-          <NavLink to="/evidence/feed">Feed</NavLink>
-          <NavLink to="/evidence/artifacts">Primary artifacts</NavLink>
+          <NavLink to={feedPath}>Feed</NavLink>
+          <NavLink to={artifactsPath}>Primary artifacts</NavLink>
         </nav>
       </header>
       <Outlet />

@@ -4,11 +4,14 @@ import { BrowserRouter } from 'react-router-dom'
 import './tokens.css'
 import './app.css'
 import App from './App'
+import { AuditDateProvider } from './AuditDateContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <AuditDateProvider>
+        <App />
+      </AuditDateProvider>
     </BrowserRouter>
   </StrictMode>,
 )

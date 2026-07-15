@@ -518,20 +518,20 @@ def _artifact_sources(
     artifact_conn: sqlite3.Connection,
     *,
     event_id: str,
-    primary_post_ids: set[str],
     include_reviewed_supplements: bool = False,
     max_total_chars: int = 600_000,
 ) -> list[audience_insights.EvidenceSource]:
-    placeholders = ",".join("?" for _ in primary_post_ids)
     artifact_ids = {
         str(row["artifact_id"])
         for row in artifact_conn.execute(
-            f"""SELECT DISTINCT artifact_id
-               FROM artifact_import_candidate
-               WHERE event_id = ? AND decision = 'accepted'
-                 AND artifact_id IS NOT NULL
-                 AND source_external_id IN ({placeholders})""",
-            (event_id, *sorted(primary_post_ids)),
+            """SELECT DISTINCT candidate.artifact_id
+               FROM artifact_import_candidate AS candidate
+               JOIN artifact_import_run AS import_run USING (import_run_id)
+               WHERE candidate.event_id = ?
+                 AND candidate.decision = 'accepted'
+                 AND candidate.artifact_id IS NOT NULL
+                 AND import_run.selection_policy = ?""",
+            (event_id, artifacts.PRIMARY_AUTHOR_SELECTION_POLICY),
         ).fetchall()
     }
     has_supplements = (
@@ -625,7 +625,6 @@ def _packet_from_row(
         _artifact_sources(
             artifact_conn,
             event_id=str(row["event_id"]),
-            primary_post_ids=primary_post_ids,
         )
     )
     return audience_insights.EvidencePacket(

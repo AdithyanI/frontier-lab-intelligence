@@ -48,8 +48,11 @@ def _source_databases(tmp_path):
     artifact_db = tmp_path / "artifacts.db"
     artifact = sqlite3.connect(artifact_db)
     artifact.executescript(
-        """CREATE TABLE artifact_import_candidate (
-               event_id TEXT, decision TEXT, artifact_id TEXT,
+        """CREATE TABLE artifact_import_run (
+               import_run_id TEXT PRIMARY KEY, selection_policy TEXT
+           );
+           CREATE TABLE artifact_import_candidate (
+               import_run_id TEXT, event_id TEXT, decision TEXT, artifact_id TEXT,
                source_external_id TEXT
            );
            CREATE TABLE artifact (
@@ -60,6 +63,16 @@ def _source_databases(tmp_path):
                text_snapshot_ref TEXT, text_sha256 TEXT,
                completed_at TEXT
            );"""
+    )
+    artifact.execute(
+        "INSERT INTO artifact_import_run VALUES (?, ?)",
+        (
+            "strict-run",
+            audience_insight_runs.artifacts.PRIMARY_AUTHOR_SELECTION_POLICY,
+        ),
+    )
+    artifact.execute(
+        "INSERT INTO artifact_import_run VALUES ('legacy-run', 'legacy-unscoped')"
     )
     artifact.commit()
     artifact.close()
@@ -105,9 +118,12 @@ def test_frozen_packet_excludes_other_author_reactions_and_artifacts(tmp_path):
     ):
         snapshot = tmp_path / f"{artifact_id}.txt"
         snapshot.write_text(text)
+        import_run_id = (
+            "legacy-run" if artifact_id == "artifact-reaction" else "strict-run"
+        )
         artifact.execute(
-            "INSERT INTO artifact_import_candidate VALUES (?, 'accepted', ?, ?)",
-            ("event-1", artifact_id, post_id),
+            "INSERT INTO artifact_import_candidate VALUES (?, ?, 'accepted', ?, ?)",
+            (import_run_id, "event-1", artifact_id, post_id),
         )
         artifact.execute(
             "INSERT INTO artifact VALUES (?, ?, ?)",

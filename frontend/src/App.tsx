@@ -8,8 +8,12 @@ import Feed from './pages/Feed'
 import Artifacts from './pages/Artifacts'
 import Insights from './pages/Insights'
 import Architecture from './pages/Architecture'
+import { useAuditDatePath } from './auditDateStore'
 
 export default function App() {
+  const evidencePath = useAuditDatePath('/evidence/feed')
+  const insightsPath = useAuditDatePath('/insights')
+
   return (
     <div className="shell">
       <header className="topbar">
@@ -19,8 +23,8 @@ export default function App() {
         </div>
         <nav aria-label="Main">
           <NavLink to="/network">Network</NavLink>
-          <NavLink to="/evidence">Evidence</NavLink>
-          <NavLink to="/insights">Insights</NavLink>
+          <NavLink to={evidencePath}>Evidence</NavLink>
+          <NavLink to={insightsPath}>Insights</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
         </nav>
       </header>

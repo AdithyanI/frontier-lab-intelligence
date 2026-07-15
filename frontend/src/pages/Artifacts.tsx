@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   getJSON,
   type ArtifactDates,
@@ -9,10 +9,13 @@ import {
 } from '../api'
 import DateNavigator from '../components/DateNavigator'
 import {
+  getDateWindowEndForSelection,
   getDateWindow,
   shiftDateWindow,
   type DateWindowDirection,
 } from '../dateWindow'
+import { useAuditDate } from '../auditDateStore'
+import { readAuditDate, setAuditDateParam } from '../auditDate'
 
 const PAGE_SIZE = 60
 
@@ -216,6 +219,14 @@ function ArtifactRow({
 }
 
 export default function Artifacts() {
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
+  const { rememberDate } = useAuditDate()
+  const initialSearchParams = useRef(new URLSearchParams(urlSearchParams))
+  const initialLinkedDate = useRef(readAuditDate(initialSearchParams.current))
+  const rememberDateRef = useRef(rememberDate)
+  const setUrlSearchParamsRef = useRef(setUrlSearchParams)
+  rememberDateRef.current = rememberDate
+  setUrlSearchParamsRef.current = setUrlSearchParams
   const [dates, setDates] = useState<ArtifactDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
@@ -243,12 +254,17 @@ export default function Artifacts() {
     getJSON<ArtifactDates>('/api/artifacts/dates')
       .then((payload) => {
         setDates(payload)
-        setDateWindowEnd(payload.dates?.length ?? 0)
         if (payload.available && payload.latest_date) {
-          setSelectedDate((current) =>
-            payload.dates?.some((date) => date.day === current)
-              ? current
-              : payload.latest_date ?? '',
+          const nextDate = initialLinkedDate.current || payload.latest_date
+          const selectedIndex = payload.dates.findIndex((date) => date.day === nextDate)
+          setDateWindowEnd(
+            getDateWindowEndForSelection(payload.dates.length, selectedIndex),
+          )
+          setSelectedDate(nextDate)
+          rememberDateRef.current(nextDate)
+          setUrlSearchParamsRef.current(
+            setAuditDateParam(initialSearchParams.current, nextDate),
+            { replace: true },
           )
         }
       })
@@ -316,6 +332,15 @@ export default function Artifacts() {
     }
   }, [visibleDates, selectedDate, debouncedQuery])
 
+  const selectDate = (day: string) => {
+    setSelectedDate(day)
+    rememberDate(day)
+    setUrlSearchParams(
+      setAuditDateParam(urlSearchParams, day),
+      { replace: true },
+    )
+  }
+
   const moveDateWindow = (direction: DateWindowDirection) => {
     const selectedIndex = availableDates.findIndex(
       (value) => value.day === selectedDate,
@@ -329,7 +354,7 @@ export default function Artifacts() {
     if (nextWindow.end === dateWindow.end) return
     setDateWindowEnd(nextWindow.end)
     const nextDate = availableDates[nextWindow.selectedIndex]
-    if (nextDate) setSelectedDate(nextDate.day)
+    if (nextDate) selectDate(nextDate.day)
   }
 
   const loadMore = () => {
@@ -403,7 +428,7 @@ export default function Artifacts() {
           <DateNavigator
             dates={visibleDates}
             selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
+            onSelectDate={selectDate}
             canShowOlderDates={canShowOlderDates}
             canShowNewerDates={canShowNewerDates}
             onShowOlderDates={() => moveDateWindow('older')}

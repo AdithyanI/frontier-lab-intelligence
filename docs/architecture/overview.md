@@ -1176,7 +1176,7 @@ final score.
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
 | Audience insight extraction | split audience contracts calibrated and production runs materialized chronologically; failed/superseded attempts remain immutable provenance |
 | Insight evaluation | independent item/day review, adjacent publication audit, exact false-negative adjudication, bounded recall widening, and deterministic production reconciliation implemented |
-| Insights UI | separate stable audience views implemented with exact passages and honest thin/unavailable states; final production QA waits for the canonical reconciliation pair |
+| Insights UI | one Feed-ranked audience surface remains implemented; generated Insight data was explicitly reset pending a simpler schema and prompt |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order

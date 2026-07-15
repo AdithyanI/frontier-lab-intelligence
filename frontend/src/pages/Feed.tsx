@@ -17,12 +17,15 @@ import {
   type SignalEvent,
 } from '../api'
 import {
+  getDateWindowEndForSelection,
   getDateWindow,
   shiftDateWindow,
   type DateWindowDirection,
 } from '../dateWindow'
 import DateNavigator from '../components/DateNavigator'
 import CopyEnvelopeId from '../components/CopyEnvelopeId'
+import { useAuditDate } from '../auditDateStore'
+import { readAuditDate, setAuditDateParam } from '../auditDate'
 
 type Sort = 'attention' | 'recent' | 'engagement'
 type TriageFilter = 'all' | 'keep' | 'drop' | 'not_evaluated'
@@ -623,7 +626,13 @@ function EventRow({
 
 export default function Feed() {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams()
-  const initialLinkedDate = useRef(urlSearchParams.get('date') ?? '')
+  const { rememberDate } = useAuditDate()
+  const initialSearchParams = useRef(new URLSearchParams(urlSearchParams))
+  const initialLinkedDate = useRef(readAuditDate(initialSearchParams.current))
+  const rememberDateRef = useRef(rememberDate)
+  const setUrlSearchParamsRef = useRef(setUrlSearchParams)
+  rememberDateRef.current = rememberDate
+  setUrlSearchParamsRef.current = setUrlSearchParams
   const [targetEventId, setTargetEventId] = useState(
     () => urlSearchParams.get('event') ?? '',
   )
@@ -657,15 +666,19 @@ export default function Feed() {
     getCachedJSON<FeedDates>('/api/events/dates')
       .then((value) => {
         setDates(value)
-        setDateWindowEnd(value.dates?.length ?? 0)
         if (value.available && value.latest_complete_date) {
-          setSelectedDate((current) => {
-            if (value.dates?.some((date) => date.day === current)) return current
-            if (value.dates?.some((date) => date.day === initialLinkedDate.current)) {
-              return initialLinkedDate.current
-            }
-            return value.latest_complete_date ?? ''
-          })
+          const feedDates = value.dates ?? []
+          const nextDate = initialLinkedDate.current || value.latest_complete_date
+          const selectedIndex = feedDates.findIndex((date) => date.day === nextDate)
+          setDateWindowEnd(
+            getDateWindowEndForSelection(feedDates.length, selectedIndex),
+          )
+          setSelectedDate(nextDate)
+          rememberDateRef.current(nextDate)
+          setUrlSearchParamsRef.current(
+            setAuditDateParam(initialSearchParams.current, nextDate),
+            { replace: true },
+          )
         }
       })
       .catch(() => setError('Couldn’t load available Feed dates. Reload to try again.'))
@@ -766,10 +779,22 @@ export default function Feed() {
     document.getElementById(`event-${targetEventId}`)?.scrollIntoView({ block: 'start' })
   }, [items, targetEventId])
 
+  const selectDate = (day: string) => {
+    setTargetEventId('')
+    setSelectedDate(day)
+    rememberDate(day)
+    setUrlSearchParams(
+      setAuditDateParam(urlSearchParams, day, ['event']),
+      { replace: true },
+    )
+  }
+
   const clearTargetEvent = () => {
     if (!targetEventId) return
     setTargetEventId('')
-    setUrlSearchParams({}, { replace: true })
+    const nextParams = new URLSearchParams(urlSearchParams)
+    nextParams.delete('event')
+    setUrlSearchParams(nextParams, { replace: true })
   }
 
   const hasSearch = debouncedQuery.trim().length > 0
@@ -788,7 +813,7 @@ export default function Feed() {
     if (nextWindow.end === dateWindow.end) return
     setDateWindowEnd(nextWindow.end)
     const nextDate = availableDates[nextWindow.selectedIndex]
-    if (nextDate) setSelectedDate(nextDate.day)
+    if (nextDate) selectDate(nextDate.day)
   }
 
   const loadMore = () => {
@@ -863,10 +888,7 @@ export default function Feed() {
         <DateNavigator
           dates={visibleDates}
           selectedDate={selectedDate}
-          onSelectDate={(day) => {
-            clearTargetEvent()
-            setSelectedDate(day)
-          }}
+          onSelectDate={selectDate}
           canShowOlderDates={canShowOlderDates}
           canShowNewerDates={canShowNewerDates}
           onShowOlderDates={() => moveDateWindow('older')}

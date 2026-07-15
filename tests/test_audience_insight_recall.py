@@ -52,7 +52,12 @@ def _artifact_db(
 ) -> Path:
     conn = sqlite3.connect(path)
     conn.executescript(
-        """CREATE TABLE artifact_import_candidate (
+        """CREATE TABLE artifact_import_run (
+               import_run_id TEXT PRIMARY KEY,
+               selection_policy TEXT
+           );
+           CREATE TABLE artifact_import_candidate (
+               import_run_id TEXT,
                envelope_day TEXT,
                event_id TEXT,
                decision TEXT,
@@ -74,13 +79,17 @@ def _artifact_db(
                completed_at TEXT
            );"""
     )
+    conn.execute(
+        "INSERT INTO artifact_import_run VALUES (?, ?)",
+        ("strict-run", "kept-envelope-primary-author-thread-artifacts-v1"),
+    )
     for day, event_id, artifact_id, source_external_id in article_edges:
         conn.execute(
             "INSERT INTO artifact VALUES (?, ?, 'x.com', ?)",
             (artifact_id, f"http://x.com/i/article/{artifact_id}", artifact_id),
         )
         conn.execute(
-            "INSERT INTO artifact_import_candidate VALUES (?, ?, 'accepted', ?, ?)",
+            "INSERT INTO artifact_import_candidate VALUES ('strict-run', ?, ?, 'accepted', ?, ?)",
             (day, event_id, artifact_id, source_external_id),
         )
     conn.commit()

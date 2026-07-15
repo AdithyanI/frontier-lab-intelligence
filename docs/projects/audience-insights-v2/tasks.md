@@ -353,6 +353,12 @@ finish with an honest quality assessment, limitations, and the next best test.
   remains preserved in the pipeline but is not exposed as a second UI mode.
   Do not resume canonical publication finalization until the minimal extraction
   schema and prompt have been reviewed together.
+- 2026-07-15: Adi explicitly discarded the entire generated
+  `data/derived/audience-insights-v2/` tree so the next Insight run starts from a
+  clean data boundary. Preserve the implementation, prompt history, evaluations,
+  tracker, and learnings as design evidence; do not treat any superseded run,
+  audit, calibration, recall, or finalization output as live data. The new
+  canonical schema and prompt will be designed together before regeneration.
 - 2026-07-15: Corrected production chronology must pass every exact earlier
   canonical run DB through repeated `--prior-run-db` arguments in ascending day
   order. The runner validates the whole chain plus adjacent audits/finalizations
@@ -361,21 +367,22 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 ## Open Questions / Blockers
 
-- No product-contract or implementation blocker. The independent audience,
-  citation, editorial, quality-gate, ticker, thin-day, cohort-width, model, and
-  autonomy rules are frozen in `resources/audience-contracts.md`.
+- The minimal canonical Insight schema and first extraction prompt are
+  intentionally reopened for step-by-step product review with Adi. No generated
+  Audience Insights data exists until those contracts are agreed and rerun.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | in_progress | Remove reaction evidence from artifact admission and Insight packets; rebuild associations and prove the Satya/Eve envelope resolves only to Satya's primary evidence. | parent | `data/derived/artifacts/artifacts.db` |
-| pending | Regenerate the simple Feed-ranked Insights from the cleaned evidence boundary and inspect affected days with Adi before resuming editorial closeout. | parent | `data/derived/audience-insights-v2/` |
-| done | Prepare conceptual status, architecture, evaluation, tracker, and project learnings for exact final-count insertion; do not archive before the canonical report and browser proof. | documenter | `resources/quality-evaluation.md` |
-| pending | Materialize the canonical 18-cell manifest/report, build the live SPA, perform rendered two-audience QA with `agent-browser`, reconcile exact spend/cache evidence, run check-fast, and archive. | parent | `resources/quality-evaluation.md` |
+| in_progress | Agree the minimal canonical result schema and first audience-classification/extraction prompt with Adi; do not regenerate data ahead of that review. | parent | `resources/audience-contracts.md` |
+| done | Remove all generated Audience Insights v2 databases and dependent run artifacts while preserving code and durable learnings. | parent | `data/derived/audience-insights-v2/` |
 
 ## Backlog / Remaining Work
 
+- [ ] After the schema and prompt are agreed, regenerate a small inspected day
+  before expanding to the nine-day window.
 - [ ] Complete M4–M6 in order; no production cell is final until its adjacent
   audit/finalization and chronological predecessor chain validate.
 - [ ] Replace the explicit pending totals in `resources/quality-evaluation.md`
@@ -408,6 +415,12 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 ## Progress Log
 
+- 2026-07-15: [DATA RESET] At Adi's explicit direction, deleted the untracked
+  171 MB generated Audience Insights v2 tree: 419 derived files including 128
+  SQLite databases, plus dependent audit/finalization/calibration/recall output.
+  Code, prompts, tests, evaluation notes, and project learnings remain. The live
+  product is intentionally empty until the minimal schema and prompt are agreed
+  and rerun from cleaned evidence.
 - 2026-07-15: [PRODUCT RESET] Removed the public Feed-ranked / Reviewed brief
   split and returned Insights to one Feed-ranked extraction view. Old `view`
   parameters normalize away; reviewed/audit data remains preserved but is not

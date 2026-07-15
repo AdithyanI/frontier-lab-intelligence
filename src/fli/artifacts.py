@@ -21,6 +21,7 @@ from fli import artifact_urls, evidence_lineage, signal_events, signal_feed, sou
 SCHEMA_VERSION = "artifact-store-v1"
 RESULT_SCHEMA_VERSION = "1.0"
 REVIEWED_SUPPLEMENT_CONTRACT = "artifact-reviewed-supplement-v1"
+PRIMARY_AUTHOR_SELECTION_POLICY = "kept-envelope-primary-author-thread-artifacts-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = REPO_ROOT / "data" / "derived" / "artifacts" / "artifacts.db"
 DEFAULT_TRIAGE_ROOT = (
@@ -526,15 +527,48 @@ def _iter_frozen_candidates(
                 feed_run_id=feed_run_id,
                 envelope=envelope,
             )
-            for post_id, targets in _candidate_targets(envelope).items():
-                if post_id not in primary_post_ids:
-                    continue
+            frozen_targets = _candidate_targets(envelope)
+            for post_id in sorted(primary_post_ids):
+                targets = list(frozen_targets.get(post_id, []))
                 post = feed.execute(
                     """SELECT * FROM feed_post
                        WHERE run_id = ? AND provider = 'twitterapi_io'
                          AND post_id = ?""",
                     (feed_run_id, post_id),
                 ).fetchone()
+                if post is not None:
+                    for evidence in artifact_urls.url_evidence(
+                        json.loads(str(post["raw_json"]))
+                    ):
+                        decision = artifact_urls.classify_candidate(
+                            evidence.observed_url,
+                            evidence.expanded_url,
+                        )
+                        targets.append(
+                            {
+                                "url": evidence.expanded_url,
+                                "source": evidence.source,
+                                "title": "",
+                                "kind": (
+                                    "x_article"
+                                    if decision.reason_code == "x_longform_article"
+                                    else ""
+                                ),
+                            }
+                        )
+                    targets_by_url: dict[str, dict[str, str]] = {}
+                    for target in targets:
+                        existing = targets_by_url.get(target["url"])
+                        if existing is None or (
+                            target["kind"] == "x_article"
+                            and existing["kind"] != "x_article"
+                        ):
+                            targets_by_url[target["url"]] = target
+                        elif not existing["title"] and target["title"]:
+                            existing["title"] = target["title"]
+                    targets = list(targets_by_url.values())
+                if not targets:
+                    continue
                 if post is None:
                     for target in targets:
                         candidates.append(
@@ -796,7 +830,7 @@ def import_kept_envelopes(
             feed_run["run_id"],
             event_run["run_id"],
             _canonical_json(manifest),
-            "kept-envelope-primary-author-thread-artifacts-v1",
+            PRIMARY_AUTHOR_SELECTION_POLICY,
             fingerprint,
             len(candidates),
             stable_time,
