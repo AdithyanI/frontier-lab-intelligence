@@ -5,11 +5,14 @@ shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Current system: the Registry, immutable trusted-following snapshot, X evidence
 store, exact event projection, rank-first Feed view, keep/drop triage, and
-canonical artifact library are implemented and inspectable. The first bounded
-cited-insight proof is also live: four of five frozen candidates passed exact
-application-owned citation binding and appear in a dated Insights audit
-surface. The active boundary is generalizing that quality to another day and
-delivery. See
+canonical artifact library are implemented and inspectable. Audience Insights
+v2 now runs two independent audience contracts over one immutable evidence and
+application-owned citation core, with rank-blind item review, ID-only daily
+editing, separate publication audit, immutable disqualification sidecars, and
+an explicit production reconciliation boundary. The active boundary is
+freezing the last chronological runs and materializing the canonical
+two-audience/nine-day manifest/report pair required by the production read
+model; external delivery is deferred. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.
@@ -335,6 +338,18 @@ state, or nonterminal bound Articles, and emits deterministic per-run and
 aggregate count, token, cache, cost, audit-hash, and finalization-hash evidence.
 An Article cohort not explicitly bound is reported as unbound rather than
 silently inferred.
+
+Production publication is deliberately stricter than local fixture discovery.
+`fli.web.insights` accepts only the adjacent
+`production-reconciliation-v2/manifest.json` and `report.json` pair. On every
+read it evaluates the manifest again, requires the stored report to equal the
+fresh canonical report byte-for-byte, then revalidates each exact run/audit/
+finalization projection before returning a date or item. A missing pair,
+partial replacement, contract or telemetry drift, source/audit hash change,
+unbound false negative, path escape, or X Article snapshot drift produces an
+unavailable product rather than a best-effort fallback. An explicit `run_root`
+is reserved for isolated fixture/test discovery and is not a production
+compatibility path.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
@@ -1105,28 +1120,33 @@ final score.
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
 | `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
-| `fli.cited_insights` / `fli.cited_insight_runs` | minimal `insight-v1.1` model boundary, frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
+| `fli.cited_insights` / `fli.cited_insight_runs` | historical minimal `insight-v1.1` proof: frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
+| `fli.audience_insights` / `fli.audience_insight_runs` | independent Investment and AI Engineering extraction/schema/cache contracts, exact citation binding, resumable attempt ledgers, all-five-pass item filtering, ID-only daily editing, day-set review, and audited-history inputs |
+| `fli.audience_insight_publication_audit` | isolated rank-blind selected/reject audit, hash-bound false-negative adjudication, and immutable publication-disqualification sidecars |
+| `fli.audience_insight_recall` | frozen 73-packet lower-rank/X-Article/drop census with audience-specific extraction/review and exact final-set comparison fields |
+| `fli.audience_insight_production_reconciliation` | strict explicit 18-cell manifest evaluator binding contracts, source runs, adjacent audits, finalizations, chronological history, complete telemetry, and the exact X Article cohort into one deterministic report |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort, with checksum-bound parent reuse for unchanged stable-ID sources |
 | `fli.following_rankings` | deterministic account discovery ordering plus entity-union Network support (source and target both one entity/one vote, self excluded), with experimental personalized PageRank retained for comparison |
-| `fli.web` | JSON API (`/api/status`, `/api/registry`, `/api/rankings`, `/api/events`, `/api/events/dates`) + built SPA host; the Network workspace keeps Registry entity support and Ranking account discovery distinct, while Feed/Event readers share the newest completed analysis selection and overlay current Registry curation; source in `frontend/` |
+| `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed/Event readers share the newest completed analysis selection, and Insights publishes only runs proven by the fresh canonical reconciliation pair; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Cited insight extraction | first bounded proof live: four verified citations published, one exact-span rejection retained for calibration |
-| Insight scoring/evaluation | planned after the extraction schema survives the oracle |
-| Insights UI | first four-record audit surface live; daily selection and briefing remain planned |
+| Audience insight extraction | split audience contracts calibrated and production runs materialized chronologically; failed/superseded attempts remain immutable provenance |
+| Insight evaluation | independent item/day review, adjacent publication audit, exact false-negative adjudication, bounded recall widening, and deterministic production reconciliation implemented |
+| Insights UI | separate stable audience views implemented with exact passages and honest thin/unavailable states; final production QA waits for the canonical reconciliation pair |
 | Local alert outbox | required package proof; no external sending without approval |
 
-## Build Order
+## Current Build Order
 
-1. Freeze the five corrected snapshot-bound oracle envelopes, their current
-   triage decisions, and available canonical artifacts.
-2. Hand-write the expected records, then implement and run the smallest
-   `insight-v1` extraction path that can reproduce them without unsupported
-   claims.
-3. Validate every shipped claim against frozen authored-X or artifact text and
-   run one blind day; do not broaden ingestion to compensate for oracle misses.
-4. Ship the Insights surface and one reproducible daily briefing from the same
-   stored records.
-5. Finish evaluation, tokenomics, local alert/outbox proof, public reviewer
-   landing page, final report, and the package smoke path before 2026-07-20.
+1. Finish the corrected chronological production suffix without allowing an
+   unaudited day into later editorial history.
+2. Bind the exact 18 audience/day source runs, adjacent audits, finalizations,
+   and 22 X Article snapshots into the final manifest; write its canonical
+   deterministic report only after fresh evaluation passes.
+3. Build the SPA and prove Investment and AI Engineering date/item/empty states,
+   exact citations, navigation, accessibility, and console cleanliness against
+   the live reconciled read model.
+4. Reconcile exact counts, token/cache/cost telemetry, quality results, and
+   limitations; pass repo checks and archive Audience Insights v2.
+5. Resume briefing, alert/outbox, reviewer landing, final report, and package
+   smoke work as a successor submission project before 2026-07-20.

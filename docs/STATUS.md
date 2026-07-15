@@ -1,6 +1,6 @@
 # System Status
 
-Last verified: 2026-07-14
+Last verified: 2026-07-15
 
 This is the conceptual handoff for Frontier Lab Intelligence. Read it before
 planning across projects or changing the system direction. It explains what
@@ -36,13 +36,20 @@ Registry
   -> keep / drop evidence routing
   -> cited extraction from stored first-party X
        + optional canonical-artifact strengthening
-  -> primary-source-cited insights
-  -> investor + AI-engineer briefing
+  -> independent Investment + AI Engineering extraction/review/editorial paths
+  -> exact adjacent publication audit
+  -> explicit 18-cell production reconciliation
+  -> separate primary-source-cited Insights views
 ```
 
 The stored-X and optional canonical-artifact evidence paths are implemented.
-The first five-record cited-extraction proof and its audit UI are now live;
-generalizing that proof to another day and delivery remains the active boundary.
+Audience Insights v2 has replaced the blended five-record prototype with two
+versioned editorial products over one frozen evidence/citation substrate. The
+calibration gate, recall protocol, independent publication audit, immutable
+finalization sidecar, fail-closed reconciliation boundary, and separate UI are
+implemented. The active boundary is freezing the last chronological production
+runs and materializing the one canonical manifest/report pair that production
+reads require; briefing/export delivery is deliberately deferred.
 
 ## Where the System Stands
 
@@ -55,8 +62,10 @@ generalizing that proof to another day and delivery remains the active boundary.
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Keep/drop triage | Evaluated routing layer | The current default is `gpt-5.6-luna`/medium through LiteLLM and still returns only `decision` and `reason`; a 64-envelope migration cohort matched the accepted mini-medium decisions 64/64 and observed a 61.86% cache-read ratio. The historical corrected mini run evaluated 8,097 envelopes with zero failures. This validates execution, not downstream insight quality. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Cited insights | Bounded proof live | The current `insight-v1.1` default is `gpt-5.6-luna`/medium. On the same frozen five-record oracle, Luna produced five application-verified exact citations; the historical mini proof published four and retained one exact-span failure. This is a bounded migration result, not yet the required blind-day quality proof. |
-| Insights UI + briefing | Initial UI live; briefing missing | The Insights API and dated audit surface expose only the four citation-verified records with direct evidence links and both audience lenses. A blind second day, reproducible briefing, and broader evaluation remain. |
+| Audience insight engine | Implemented and calibrated; production closeout active | Investment and AI Engineering have independent prompt/schema/cache contracts, item filters, ID-only daily editors, and day-set review over the same immutable evidence packets and application-owned citation binder. The frozen gate passed AI Engineering as `standard_pass` and Investment as `audited_sparse` without lowering the ordinary yield bar. Failed and superseded runs remain provenance. |
+| Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
+| Production publication boundary | Implemented; canonical pair pending | `audience-insight-production-reconciliation-v2` requires an explicit two-audience/nine-day manifest, validates every source run, adjacent audit, finalization, chronological-history hash, telemetry ledger, and bound X Article, then emits a byte-stable report. The production API publishes nothing unless the adjacent canonical manifest/report pair exists and exactly matches a fresh evaluation. The pair is intentionally absent until the last superseding runs are frozen. |
+| Insights UI | Separate views implemented; final live QA pending | Stable Investment and AI Engineering state, audience-specific fields, exact passages, Feed provenance, date navigation, and honest zero/thin/error states are implemented. The live Architecture page now shows the shared evidence path followed by the two independent editorial/audit branches. Final browser proof waits for the canonical production pair. Briefing/export delivery is out of this project. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -64,40 +73,37 @@ current databases or APIs before using them as present-tense product claims.
 
 ## The Most Important Unproven Claim
 
-The repository has proved collection, identity, graph support, exact grouping,
-temporal correctness, daily-score ordering, triage, artifact storage, and one
-bounded four-insight cited extraction. It has not yet proved that the same
-quality reliably yields 3–5 excellent, primary-source-cited insights across
-days.
+The repository now proves the split-audience execution and safety boundaries,
+including honest sparse days, but has not yet proved the exact final nine-day
+publication set as one reconciled immutable object. That is a data-finalization
+claim, not another schema exercise: the last superseding runs must complete in
+chronological order, every effective item must survive independent product and
+publication review, and the canonical 18-cell manifest/report must validate
+byte-for-byte before the UI can publish.
 
-That is now the critical path. The next useful experiment is to review the
-first prompt/schema against its four published records and one honest citation
-miss, then run one blind day without weakening application-owned citation
-verification. It should answer:
-
-1. Can the system state a concrete claim without inventing evidence?
-2. Can every shipped claim quote and link to checkable primary evidence—an
-   authored first-party X source or an external artifact?
-3. Can it explain why the claim matters without disguising hypotheses as
-   facts?
-4. Does the result help the investment or AI-engineering audience make a
-   decision?
-
-Do not reopen broad Registry cleanup, graph tuning, corpus backfills, or Feed
-redesign unless this oracle exposes a concrete dependency.
+The remaining product risk is asymmetric. The AI Engineering lane has produced
+concrete experiments and implementation decisions after bounded recall widening.
+The social-first evidence mix is much thinner for public-equity work; its frozen
+calibration passed only the explicitly named `audited_sparse` branch. A primary
+commercial-evidence recovery is justified only when it supplies exact filing,
+IR, contract, pricing, adoption, or regulatory evidence. Do not lower the
+Investment bar, preserve a mechanically passing but weak item for yield, or
+broaden the Registry without a measured coverage miss.
 
 ## Submission Finish Line
 
 The active tracker owns the detail. At system level, the remaining proof is:
 
-1. Review the bounded `insight-v1.1` proof and freeze or revise the prompt only
-   from the recorded four successes and one exact-span miss.
-2. Produce 3–5 primary-source-cited insights for 2026-07-11 and one blind day.
-3. Ship the Insights surface and one reproducible daily briefing.
-4. Record citation validity, human worth-attention judgment, hallucination
-   controls, and workflow tokenomics.
-5. Add the public reviewer landing page, local alert/outbox proof, final
-   report, and one package smoke path required by the assignment.
+1. Freeze the final chronological Investment and AI Engineering production
+   run for every complete day from 2026-07-05 through 2026-07-13.
+2. Bind those exact 18 source/audit cells, all finalizations, and the 22 fetched
+   X Articles into the final reconciliation manifest and byte-stable report.
+3. Prove both live audience views with `agent-browser`, including zero/thin,
+   citation, date, navigation, accessibility, and console/error states.
+4. Record exact production counts, tokens, cache behavior, provider-reported
+   cost, audit outcomes, and limitations in the evaluation and build log.
+5. Pass the repo checks, archive the completed tracker, then resume the wider
+   submission package as a successor project.
 
 External submission or alert delivery remains blocked without Adi's explicit
 current-session approval.
@@ -119,10 +125,10 @@ case-study thesis.
 
 The only active tracker is
 [`docs/projects/audience-insights-v2/tasks.md`](projects/audience-insights-v2/tasks.md).
-Its current batch owns the executable next step: freeze separate Investment and
-AI Engineering contracts, close the X Article evidence gap, pass a known-day
-plus blind-day quality gate, then materialize both audience products across all
-nine complete days. Delivery is deliberately deferred until this split is proven.
+Its current batch owns the executable next step: settle the last chronological
+production runs, materialize and validate the canonical 18-cell reconciliation
+pair, prove both rendered audience views, synchronize exact evaluation evidence,
+and archive. Delivery remains deliberately deferred to a successor project.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

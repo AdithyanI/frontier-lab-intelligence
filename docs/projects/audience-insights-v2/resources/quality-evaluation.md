@@ -1,6 +1,7 @@
 # Audience Insights v2 quality evaluation
 
-Status: calibration complete; chronological production in progress.
+Status: calibration and recall decisions complete; corrected chronological
+production and canonical reconciliation in progress.
 
 This is the immutable evaluation record for the two audience products. It
 records failed attempts, frozen contracts, exact audits, and the expansion
@@ -77,6 +78,15 @@ editor excluded it because it was standing context rather than a new product,
 contract, customer result, financial disclosure, regulatory event, or dated
 catalyst. Two independent exact-item reviewers agreed it would not enter.
 
+The Jul 9 Muse Spark/Box item remains valid evidence of the calibration
+mechanism, but a later senior-reader product review found that its immutable
+analysis promoted a partner testimonial inside Meta's launch post into a
+stronger demand/adoption signal than the primary evidence supports. It must not
+survive the final production set merely to preserve nonzero yield. The
+production closeout is therefore testing a primary-source commercial recovery
+and otherwise keeps Investment honestly sparse; calibration history is not
+rewritten.
+
 ### AI Engineering
 
 | Day | Role | Selected | Adjacent audit | Interpretation |
@@ -147,19 +157,30 @@ bar or admitting thesis commentary into the daily signal set.
 ## Rank-blind recall audit
 
 Run:
-`audience-insights-v2-recall-final-2026-07-15`
+`audience-insights-v2-recall-current-contract-2026-07-15`
 
 Database:
-`data/derived/audience-insights-v2/recall/audience-insights-v2-recall-final-2026-07-15/recall.db`
+`data/derived/audience-insights-v2/recall/audience-insights-v2-recall-current-contract-2026-07-15/recall.db`
 
 - Frozen sample: 73 evidence packets / 146 audience evaluations.
 - Strata: 36 lower-kept ranks 51–100, 10 additional X Articles, and 27 dropped
   candidates across all nine days.
-- AI Engineering: 28 extracted insights; 15 passed all five isolated item
-  dimensions and still require exact comparison with the corresponding final
-  production day before any widening decision.
-- Investment: eight extracted insights; none passed all five. No dropped sample
-  produced an insight for either audience.
+- The current-contract replay completed 144 determinate evaluations and
+  retained two deterministic schema-terminal cells as unknown rather than
+  negative evidence: AI Engineering Jul 6 rank 69 and Investment Jul 13 rank
+  80. Their predeclared containment windows were top 75 and top 100.
+- AI Engineering produced two all-five-pass lower-rank items. Exact comparison
+  found both `would_enter`: Jul 5 rank 84 entered the validated widened top-100
+  day, and Jul 9 rank 100 entered the corrected-history top-100 day. Each
+  affected chronological suffix was rebuilt rather than mixing old history
+  with a widened day.
+- Investment produced one all-five-pass lower-rank item, Jul 6 rank 69. Exact
+  adjudication found `would_not_enter`: the partnership announcement was useful
+  standing thesis context but did not contain a bounded daily public-equity
+  implication or observable disclosure.
+- No dropped sample justified publication for either audience. The result does
+  not support global top-100 expansion; it supports only the exact bounded cells
+  above.
 
 Passing an isolated item rubric does not justify widening. A lower-ranked item
 must actually enter or materially diversify its final higher-ranked daily set.
@@ -169,12 +190,33 @@ because audited editorial history changes.
 ## Production and closeout
 
 Fresh production runs materialize chronologically from Jul 5 through Jul 13.
-Both audiences may run in parallel on one date, but the next date starts only
-after each current run has an adjacent audit, any exact adjudication, and strict
-read-only validation. That rule ensures later duplicate/history decisions use
-only externally audited prior selections.
+The next date starts only after the current run has an adjacent audit, any exact
+adjudication/finalization, and strict read-only validation. Recall widening on
+AI Jul 5 changed prior editorial history, so the affected AI suffix is being
+rebuilt against the corrected audited history instead of accepting the earlier
+otherwise-valid runs by recency.
 
-After production: finish recall comparison, reconcile counts/tokens/cache/cost
-and X Article terminal states, build the SPA, use `agent-browser` against the
-live local app for rendered two-audience QA, update architecture/status and
-learnings, run `scripts/check-fast.sh`, and archive the project.
+The final web product is fail-closed behind one adjacent
+`production-reconciliation-v2/manifest.json` and `report.json` pair. The
+manifest must name all 18 audience/day cells, exact adjacent audits, optional
+finalizations, and all 22 X Article snapshots. The stored report must equal a
+fresh canonical evaluation byte-for-byte. Until that pair exists and validates,
+the live Insights API intentionally reports unavailable rather than guessing
+which superseding directory is current.
+
+Exact closeout values intentionally remain pending until the canonical report
+exists; copy them from that report, never from a directory scan:
+
+- Base and effective published-item totals: **PENDING CANONICAL REPORT**.
+- Candidate, completed, rejected, and failed totals: **PENDING CANONICAL REPORT**.
+- Extraction/review/editor/audit input, output, cached, and cache-write tokens:
+  **PENDING CANONICAL REPORT**.
+- Provider-reported LLM cost and bound X Article credits: **PENDING CANONICAL
+  REPORT**.
+- Finalization count and exact per-audience/per-day yield: **PENDING CANONICAL
+  REPORT**.
+
+After reconciliation: build the SPA, use `agent-browser` against the live local
+app for rendered two-audience QA, inspect every effective item at the senior-
+reader product bar, update the exact values above, run `scripts/check-fast.sh`,
+and archive the project.

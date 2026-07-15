@@ -744,6 +744,57 @@ def test_manifest_and_run_contracts_are_bound_to_current_code(tmp_path):
         reconciliation.evaluate_manifest(manifest)
 
 
+@pytest.mark.parametrize(
+    ("sql", "message"),
+    (
+        (
+            "UPDATE candidate_item SET input_text = input_text || ' drift'",
+            "frozen model input drift",
+        ),
+        (
+            "UPDATE candidate_item SET input_sha256 = 'wrong'",
+            "frozen model input drift",
+        ),
+        (
+            "UPDATE candidate_item SET prompt_cache_key = 'wrong'",
+            "extraction cache key drift",
+        ),
+        (
+            "UPDATE run_meta SET cohort_sha256 = 'wrong'",
+            "frozen cohort binding drift",
+        ),
+    ),
+)
+def test_frozen_cohort_reconstruction_fails_closed(tmp_path, sql, message):
+    manifest, payload = _manifest(tmp_path)
+    source = Path(payload["runs"][0]["source_run_db"])
+    conn = sqlite3.connect(source)
+    conn.execute(sql)
+    conn.commit()
+    conn.close()
+
+    with pytest.raises(reconciliation.ProductionReconciliationError, match=message):
+        reconciliation.evaluate_manifest(manifest)
+
+
+def test_request_tags_must_match_the_exact_stage_contract(tmp_path):
+    manifest, payload = _manifest(tmp_path)
+    source = Path(payload["runs"][0]["source_run_db"])
+    conn = sqlite3.connect(source)
+    conn.execute(
+        "UPDATE candidate_attempt SET request_tags_json = ?",
+        (json.dumps(["app:frontier-lab-intelligence", "job:wrong"]),),
+    )
+    conn.commit()
+    conn.close()
+
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match="extraction request tags do not match the frozen contract",
+    ):
+        reconciliation.evaluate_manifest(manifest)
+
+
 def _duplicate_extraction_attempt(
     source: Path, *, attempt_number: int, expected_attempts: int
 ) -> None:
@@ -955,6 +1006,30 @@ def test_explicit_x_article_cohort_reports_terminal_state(tmp_path):
     assert cohort["items"][0]["status"] == "success"
     assert cohort["items"][0]["raw_sha256"]
     assert cohort["items"][0]["text_sha256"]
+
+
+def test_x_article_provider_mapping_drift_fails_closed(tmp_path):
+    artifact_db = tmp_path / "artifacts.db"
+    artifact_id = _seed_terminal_x_article(artifact_db)
+    manifest, _payload = _manifest(
+        tmp_path,
+        x_article_cohort={
+            "artifact_db": str(artifact_db),
+            "artifact_ids": [artifact_id],
+        },
+    )
+    conn = sqlite3.connect(artifact_db)
+    conn.execute(
+        "UPDATE artifact_x_article_fetch SET request_post_id = '999'"
+    )
+    conn.commit()
+    conn.close()
+
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match="X Article provider provenance is invalid.*request_post_id",
+    ):
+        reconciliation.evaluate_manifest(manifest)
 
 
 def test_default_web_rejects_same_identity_source_and_audit_replacement(

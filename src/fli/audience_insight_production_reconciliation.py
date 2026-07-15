@@ -138,6 +138,49 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _database_binding_sha256(
+    conn: sqlite3.Connection,
+    tables: Iterable[str],
+) -> str:
+    """Hash complete visible table state, including uncheckpointed WAL rows."""
+    payload: dict[str, Any] = {}
+    for table in sorted(tables):
+        if re.fullmatch(r"[a-z_]+", table) is None:
+            raise ValueError(f"unsafe table name: {table!r}")
+        columns = [
+            str(row["name"])
+            for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+        ]
+        if not columns:
+            raise ProductionReconciliationError(
+                f"binding table is missing: {table}"
+            )
+        rows = [
+            [row[column] for column in columns]
+            for row in conn.execute(f"SELECT * FROM {table}").fetchall()
+        ]
+        rows.sort(key=_canonical_json)
+        payload[table] = {"columns": columns, "rows": rows}
+    return _sha256(_canonical_json(payload))
+
+
+SOURCE_BINDING_TABLES = (
+    "run_meta",
+    "candidate_item",
+    "candidate_attempt",
+    "editor_run",
+    "daily_selection",
+    "publication_selection",
+    "suppressed_duplicate",
+    "item_review",
+    "day_set_review",
+    "selection_reconciliation",
+    "reconciled_day_set_review",
+    "quality_gate",
+)
+AUDIT_BINDING_TABLES = ("audit_run", "audit_item", "audit_attempt")
+
+
 def _open_readonly(path: Path) -> sqlite3.Connection:
     if not path.is_file():
         raise FileNotFoundError(path)
@@ -1220,8 +1263,16 @@ def _inspect_run(
             "source_run_id": str(meta["run_id"]),
             "source_run_db": str(source_path),
             "source_run_db_sha256": _file_sha256(source_path),
+            "source_binding_sha256": _database_binding_sha256(
+                source,
+                SOURCE_BINDING_TABLES,
+            ),
             "audit_db": str(audit_path),
             "audit_db_sha256": _file_sha256(audit_path),
+            "audit_binding_sha256": _database_binding_sha256(
+                audit,
+                AUDIT_BINDING_TABLES,
+            ),
             "rank_limit": int(meta["rank_limit"]),
             "contracts": observed_contract,
             "frozen_cohort": frozen_cohort,

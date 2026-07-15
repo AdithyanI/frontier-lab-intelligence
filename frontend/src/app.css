@@ -821,6 +821,11 @@ td.num {
   border-top: 1px solid var(--border);
 }
 
+.registry-card-metrics + .ent-card-profile {
+  padding-top: 0;
+  border-top: 0;
+}
+
 .ent-card-rank {
   margin-top: 24px;
   padding-top: 20px;
