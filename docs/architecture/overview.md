@@ -346,13 +346,14 @@ artifacts; independently authored reactions and pure reposts stay available
 only in the upstream Feed activity ledger and human audit.
 That first-party view is wrapped as the final variable block after one stable
 audience prompt. Investment and AI Engineering have separate versioned prompts and cache keys but share one
-strict output schema: `decision`, freeform nullable `suppression_reason`, and
-nullable `summary`, `implication`, and `next_step`. A surfaced result requires
-all three content fields and no suppression reason; a suppressed result requires
-one concrete reason and no audience content. No quote, confidence score,
+strict output schema: `decision`, freeform nullable `suppression_reason`, a
+required `title`, and nullable `summary`, `implication`, and `next_step`. Every
+decision gets a short reader-oriented title. A surfaced result requires all
+three content fields and no suppression reason; a suppressed result requires
+one concrete reason and no audience content beyond its neutral title. No quote, confidence score,
 model-authored identifier, or ranking field exists in the schema.
 
-The two stable prompts are naturally cache eligible at roughly 1.27k and 1.31k
+The two stable v4 prompts are naturally cache eligible at roughly 1.43k and 1.46k
 `o200k_base` tokens. `build_request` constructs the shared LiteLLM Responses
 payload with stable metadata/tags and provider cache kwargs; `evaluate` executes
 and validates one request without owning persistence. `publish` binds surfaced
@@ -365,7 +366,8 @@ hashes, and input hash before any model call. Each audience completes or fails
 independently, exact completed rows are reused on resume, and response IDs,
 raw output, token/cache telemetry, reported cost, and errors remain auditable.
 `fli insights run` is the repeated-envelope operator path; `contract`,
-`summary`, `inspect`, and `import-result` are JSON-first inspection commands.
+`summary`, `inspect`, and current-contract-only `import-result` are JSON-first
+inspection commands.
 `fli insights refresh` is the thin batch coordinator over that same primitive.
 It reads only complete routing databases tied to the currently published Event
 and Feed runs, selects positive routes in Feed-rank order, and freezes one
@@ -380,11 +382,12 @@ The superseded cited-extraction, multi-stage audience extraction, item/day
 review, editor, audit, recall, and production-reconciliation modules and CLI
 commands have been deleted. Their historical decisions remain in archived
 project documentation, but live code has no compatibility read or old-schema
-fallback. `fli.web.insights` reads only the successor store for both the
-canonical and existing `/api/insights/extracted*` UI routes. A row is current
-only when its source routing database proves the exact current prompt version,
-prompt hash, schema version, and completed Event packet. The UI never reanchors
-or relabels a legacy result. It deduplicates later reruns by event/audience,
+fallback. `fli.web.insights` reads only the successor store through
+`/api/insights/dates` and `/api/insights`; the former `extracted` aliases were
+deleted. A row is current only when it matches the exact current Insight prompt
+version/hash/schema and its source routing database proves the exact current
+routing prompt version/hash/schema, run identity, and completed Event packet.
+The UI never reanchors or relabels an old result. It deduplicates later reruns by event/audience,
 orders solely by the already-frozen canonical Feed rank, includes
 all evaluated days even when zero items were kept, and exposes `kept`,
 `suppressed`, and `all` decision views. The UI uses implication as the surfaced
@@ -1171,8 +1174,8 @@ final score.
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Audience Insight generation | durable first-party-only Terra path with exact frozen requests and resumable per-audience execution; current v9 cohort is 492 Events / 751 requests and awaits Adi's clean run |
-| Insights UI | current-source-qualified Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links; honestly empty until the fresh Insight database is published |
+| Audience Insight generation | durable first-party-only Terra path with exact frozen requests and resumable per-audience execution; current v9 cohort is 492 Events / 751 requests, the active v4 prompt prefixes are 1,425 Investment and 1,459 Engineering tokens, and the clean run has begun with six current decisions over three Events |
+| Insights UI | current-v4-and-v9-qualified Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links; the partial clean run is inspectable while the remaining cohort runs; no duplicate API or old-schema read remains |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order
@@ -1182,8 +1185,8 @@ The active routing closeout is tracked in
 The direct Evidence boundary accepts one complete attributed envelope and
 returns exactly two independent judgments: AI Engineering relevance plus
 reason, and Investment relevance plus reason. The corrected July 5–13 audit is
-inspectable in Feed: all 900 GPT-5.4-mini/high records completed, with 344 both,
-112 Engineering-only, 141 Investment-only, and 303 neither; 38 repeated exact
-inputs have zero label conflicts. The next unproven claim is that positive
-routes can become a small set of excellent source-bound Insights without
-restoring the archived multi-stage stack or weakening attribution.
+inspectable in Feed: all 900 current-v9 GPT-5.4-mini/high records completed,
+with 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither. The
+next unproven claim is that the approved 492-Event / 751-request Terra refresh
+can turn positive routes into a small set of excellent source-bound Insights
+without restoring the archived multi-stage stack or weakening attribution.

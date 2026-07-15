@@ -52,7 +52,7 @@ def _routing_source(source_db: str) -> dict[str, Any]:
         return {"current": False, "packets": {}}
     try:
         meta = conn.execute(
-            """SELECT prompt_version, prompt_sha256, schema_version
+            """SELECT run_id, prompt_version, prompt_sha256, schema_version
                FROM run_meta WHERE singleton = 1"""
         ).fetchone()
         if meta is None or (
@@ -77,7 +77,7 @@ def _routing_source(source_db: str) -> dict[str, Any]:
             continue
         if isinstance(packet, dict):
             packets[str(row["event_id"])] = packet
-    return {"current": True, "packets": packets}
+    return {"current": True, "run_id": str(meta["run_id"]), "packets": packets}
 
 
 def _source_payload(row: dict[str, Any]) -> dict[str, Any]:
@@ -112,26 +112,41 @@ def _source_payload(row: dict[str, Any]) -> dict[str, Any]:
 def _current_rows(
     conn: sqlite3.Connection, *, audience: str
 ) -> list[dict[str, Any]]:
+    prompt = insight_generation.contract(audience)
     rows = conn.execute(
         """WITH ranked AS (
                  SELECT item.*, run.source_routing_run_id, run.source_routing_db,
                         ROW_NUMBER() OVER (
                             PARTITION BY item.event_id, item.audience
                             ORDER BY item.completed_at DESC, item.run_id DESC
-                        ) AS revision
+                        ) AS recency_order
                  FROM insight_item AS item
                  JOIN insight_run AS run ON run.run_id = item.run_id
-                 WHERE item.status = 'complete' AND item.audience = ?
+                 WHERE item.status = 'complete'
+                   AND item.audience = ?
+                   AND item.prompt_version = ?
+                   AND item.prompt_sha256 = ?
+                   AND item.schema_version = ?
+                   AND item.title IS NOT NULL
              )
-             SELECT * FROM ranked WHERE revision = 1
+             SELECT * FROM ranked WHERE recency_order = 1
              ORDER BY feed_rank, event_id""",
-        (audience,),
+        (
+            audience,
+            prompt.version,
+            prompt.sha256,
+            insight_generation.SCHEMA_VERSION,
+        ),
     ).fetchall()
     projected: list[dict[str, Any]] = []
     for row in rows:
         item = dict(row)
         source = _routing_source(str(row["source_routing_db"]))
-        if not source["current"] or str(row["event_id"]) not in source["packets"]:
+        if (
+            not source["current"]
+            or str(row["source_routing_run_id"]) != source.get("run_id")
+            or str(row["event_id"]) not in source["packets"]
+        ):
             continue
         projected.append(item)
     projected.sort(key=lambda item: (int(item["feed_rank"]), str(item["event_id"])))
@@ -192,7 +207,7 @@ def _item_payload(row: dict[str, Any]) -> dict[str, Any]:
             if decision == "suppress"
             else str(implication)
         ),
-        "title": str(row["title"]) if row["title"] is not None else None,
+        "title": str(row["title"]),
         "summary": str(row["summary"]) if row["summary"] is not None else None,
         "implication": str(implication) if implication is not None else None,
         "next_step": str(row["next_step"]) if row["next_step"] is not None else None,
@@ -285,31 +300,3 @@ def insights_payload(
         "run": run,
         "items": [_item_payload(row) for row in rows],
     }
-
-
-def extraction_dates_payload(
-    *,
-    audience: str = DEFAULT_AUDIENCE,
-    db_path: object | None = None,
-    run_root: object | None = None,
-) -> dict[str, Any]:
-    return insight_dates_payload(
-        audience=audience, db_path=db_path, run_root=run_root
-    )
-
-
-def extraction_insights_payload(
-    *,
-    audience: str = DEFAULT_AUDIENCE,
-    day: str | None = None,
-    status: str = "kept",
-    db_path: object | None = None,
-    run_root: object | None = None,
-) -> dict[str, Any]:
-    return insights_payload(
-        audience=audience,
-        day=day,
-        status=status,
-        db_path=db_path,
-        run_root=run_root,
-    )

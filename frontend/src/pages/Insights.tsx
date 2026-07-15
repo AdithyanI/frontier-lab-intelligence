@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
-  type ExtractedInsightItem,
-  type ExtractedInsightsResponse,
   type InsightAudience,
   type InsightDates,
+  type InsightItem,
   type InsightStatus,
+  type InsightsResponse,
 } from '../api'
 import CopyEnvelopeId from '../components/CopyEnvelopeId'
 import DateNavigator from '../components/DateNavigator'
@@ -184,10 +184,10 @@ function InsightStatusMenu({
   )
 }
 
-function InsightRow({ item }: { item: ExtractedInsightItem }) {
+function InsightRow({ item }: { item: InsightItem }) {
   const isKept = item.decision === 'surface'
   const feedRankLabel = `Feed rank ${item.feed_rank}`
-  const title = item.title ?? 'Suppressed at the final editorial gate'
+  const title = item.title
   const accessibleName = `${feedRankLabel}: ${decodeTextEntities(title)}`
   const titleId = `${item.audience}-${item.candidate_id}-title`
   const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
@@ -286,7 +286,7 @@ export default function Insights() {
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const [dataView, setDataView] = useState<{
     viewKey: string
-    payload: ExtractedInsightsResponse
+    payload: InsightsResponse
   } | null>(null)
   const [datesError, setDatesError] = useState<string | null>(null)
   const [dataError, setDataError] = useState<string | null>(null)
@@ -336,7 +336,7 @@ export default function Insights() {
     setDataView(null)
     setDatesError(null)
     setDataError(null)
-    getCachedJSON<InsightDates>(`/api/insights/extracted/dates?audience=${audience}`)
+    getCachedJSON<InsightDates>(`/api/insights/dates?audience=${audience}`)
       .then((payload) => {
         if (!live || activeDatesViewRef.current !== viewKey) return
         setDates(payload)
@@ -375,8 +375,8 @@ export default function Insights() {
     activeDataViewRef.current = viewKey
     setDataView(null)
     setDataError(null)
-    getCachedJSON<ExtractedInsightsResponse>(
-      `/api/insights/extracted?audience=${audience}&date=${selectedDate}&status=${status}`,
+    getCachedJSON<InsightsResponse>(
+      `/api/insights?audience=${audience}&date=${selectedDate}&status=${status}`,
     )
       .then((payload) => {
         if (!live || activeDataViewRef.current !== viewKey) return

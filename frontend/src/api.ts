@@ -440,7 +440,7 @@ export interface InsightItem {
   audience: InsightAudience
   decision: InsightDecision
   decision_reason: string
-  title: string | null
+  title: string
   summary: string | null
   implication: string | null
   next_step: string | null
@@ -452,9 +452,7 @@ export interface InsightItem {
   artifacts: Array<{ title: string; url: string }>
 }
 
-export type ExtractedInsightItem = InsightItem
-
-export interface ExtractedInsightRun {
+export interface InsightRun {
   run_id: string
   day: string
   audience: InsightAudience
@@ -470,13 +468,13 @@ export interface ExtractedInsightRun {
   counts: Record<InsightStatus, number>
 }
 
-export interface ExtractedInsightsResponse {
+export interface InsightsResponse {
   available: boolean
   reason?: string | null
   audience: InsightAudience
   status: InsightStatus
-  run: ExtractedInsightRun | null
-  items: ExtractedInsightItem[]
+  run: InsightRun | null
+  items: InsightItem[]
 }
 
 export interface InsightDate extends FeedDate {

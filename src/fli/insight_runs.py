@@ -128,32 +128,27 @@ def _request_contract(
         raise ValueError(f"{audience} request has no instructions")
     if request.get("text", {}).get("format") != insight_generation.OUTPUT_FORMAT:
         raise ValueError(f"{audience} request does not match the current output schema")
-    if recorded is None:
-        if instructions != prompt.instructions():
-            raise ValueError(f"{audience} request does not match the current prompt")
-        if request.get("prompt_cache_key") != prompt.cache_key:
-            raise ValueError(f"{audience} request has the wrong prompt cache key")
-        prompt_version = prompt.version
-        prompt_sha256 = prompt.sha256
-        schema_version = insight_generation.SCHEMA_VERSION
-    else:
-        prompt_version = recorded["prompt_version"]
-        prompt_sha256 = recorded["prompt_sha256"]
-        schema_version = recorded["schema_version"]
-        if _sha256(instructions) != prompt_sha256:
-            raise ValueError(f"{audience} imported prompt hash does not match")
-        if _sha256(input_text) != recorded["input_sha256"]:
-            raise ValueError(f"{audience} imported input hash does not match")
+    if instructions != prompt.instructions():
+        raise ValueError(f"{audience} request does not match the current prompt")
+    if request.get("prompt_cache_key") != prompt.cache_key:
+        raise ValueError(f"{audience} request has the wrong prompt cache key")
+    if recorded is not None and recorded != {
+        "prompt_version": prompt.version,
+        "prompt_sha256": prompt.sha256,
+        "schema_version": insight_generation.SCHEMA_VERSION,
+        "input_sha256": _sha256(input_text),
+    }:
+        raise ValueError(f"{audience} imported request is not from the current contract")
     cache_key = request.get("prompt_cache_key")
     if not isinstance(cache_key, str) or not cache_key:
         raise ValueError(f"{audience} request has no prompt cache key")
     return {
         "input_text": input_text,
         "input_sha256": _sha256(input_text),
-        "prompt_version": prompt_version,
-        "prompt_sha256": prompt_sha256,
+        "prompt_version": prompt.version,
+        "prompt_sha256": prompt.sha256,
         "prompt_cache_key": cache_key,
-        "schema_version": schema_version,
+        "schema_version": insight_generation.SCHEMA_VERSION,
     }
 
 

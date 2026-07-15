@@ -64,6 +64,7 @@ def _routing_db(tmp_path, *, current=True):
         """
         CREATE TABLE run_meta (
             singleton INTEGER PRIMARY KEY,
+            run_id TEXT NOT NULL,
             prompt_version TEXT NOT NULL,
             prompt_sha256 TEXT NOT NULL,
             schema_version TEXT NOT NULL
@@ -76,7 +77,7 @@ def _routing_db(tmp_path, *, current=True):
         """
     )
     conn.execute(
-        "INSERT INTO run_meta VALUES (1, ?, ?, ?)",
+        "INSERT INTO run_meta VALUES (1, 'routing-run', ?, ?, ?)",
         (
             audience_routing.PROMPT_VERSION if current else "audience-routing-v8",
             audience_routing.prompt_sha256() if current else "superseded",
@@ -163,7 +164,7 @@ def _insight_db(tmp_path, *, current_routing=True):
             {
                 "decision": "suppress",
                 "suppression_reason": "No company adoption or public-equity transmission path is evidenced.",
-                "title": None,
+                "title": "A technical method without investment transmission",
                 "summary": None,
                 "implication": None,
                 "next_step": None,
@@ -291,15 +292,41 @@ def test_superseded_routing_contract_cannot_publish_current_insights(tmp_path):
     assert items["items"] == []
 
 
+def test_superseded_insight_contract_cannot_publish_current_insights(tmp_path):
+    db = _insight_db(tmp_path)
+    conn = sqlite3.connect(db)
+    conn.execute(
+        """UPDATE insight_item
+           SET prompt_version = 'ai-engineering-insight-v3',
+               prompt_sha256 = 'superseded',
+               schema_version = 'audience-insight-output-v2'
+           WHERE audience = 'ai_engineering'"""
+    )
+    conn.commit()
+    conn.close()
+
+    dates = insight_store.insight_dates_payload(
+        audience="ai_engineering", db_path=db
+    )
+    items = insight_store.insights_payload(
+        audience="ai_engineering", day="2026-07-13", status="all", db_path=db
+    )
+
+    assert dates["available"] is False
+    assert dates["dates"] == []
+    assert items["available"] is False
+    assert items["items"] == []
+
+
 def test_current_ui_routes_read_the_durable_store(tmp_path, monkeypatch):
     db = _insight_db(tmp_path)
     monkeypatch.setattr(insight_runs, "DEFAULT_DB", db)
 
     dates = client.get(
-        "/api/insights/extracted/dates?audience=ai_engineering"
+        "/api/insights/dates?audience=ai_engineering"
     ).json()
     items = client.get(
-        "/api/insights/extracted?audience=investment&date=2026-07-13&status=suppressed"
+        "/api/insights?audience=investment&date=2026-07-13&status=suppressed"
     ).json()
 
     assert dates["available"] is True

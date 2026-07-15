@@ -108,8 +108,8 @@ Neither rebuild command makes a provider or LLM call.
 
 - `GET /api/events/dates` lists complete materialized dates and the number of
   projected envelopes on each date. The number is not a raw post count.
-- `GET /api/events?date=YYYY-MM-DD` returns one unified Registry-aware page of
-  evidence envelopes at that UTC cutoff. An unrelated non-reply post is a
+- `GET /api/events?date=YYYY-MM-DD` returns the Registry-aware Events whose
+  canonical source day is that date. An unrelated non-reply post is a
   singleton. Provider-declared quote and retweet wrappers attach to one source,
   and same-author reply-parent links extend only that source's thread.
   Third-party replies remain in the lower-level ledger and are not projected as
@@ -125,29 +125,24 @@ Neither rebuild command makes a provider or LLM call.
 Each grouped response contains one `root` and a related `evidence` list. The
 root never repeats in that list. Its `event_id` comes from a stable
 provider-qualified canonical post or opaque target rather than the presentation
-root. Related rows expose their exact relationship, target or parent post ID,
-reply depth, and `is_new_on_day` flag. Posts and links must also have been
-disclosed by that cutoff; a relationship embedded in a later wrapper cannot
-rewrite an earlier day. The selected-day projection is cumulative through that cutoff: an event continuing from a prior
-day includes its earlier context, while `day_member_count`,
-`prior_context_count`, `previous_activity_day`, and `is_continuation` expose the
-new daily delta. Selecting Monday cannot see Tuesday evidence; selecting
-Tuesday may show both the Monday context and Tuesday additions.
+root. Related rows expose their exact relationship and target or parent post
+ID. Every Event appears on exactly one canonical source date and keeps the rank
+calculated on that date. Posts disclosed later append to the same Event's
+activity ledger and `activity_days`; they do not create a later candidate,
+rerank the Event, or change the first-party semantic snapshot unless the
+original author supplied new authored material. Selecting a later activity date
+therefore does not show a duplicate Event card.
 
-The UI renders replies parent-first, labels same-account replies as thread
-continuations, keeps unique quote commentary, and collapses retweets into one
-traceable amplification strip. Captured parents precede descendants and
-siblings are chronological. A reply whose parent was not captured appears as
-an explicit unparented branch; the reader never guesses a parent from timing or
-text. No URL, embedding, model, or semantic similarity is used to form these
-components.
+The UI renders one flat expandable activity ledger. Same-author replies and
+quote commentary are labeled as author updates; independent reactions remain
+attributed activity; retweets collapse into one traceable amplification strip.
+There is no current/prior split, continuation badge, or guessed semantic parent.
+No URL, embedding, model, or semantic similarity is used to form components.
 
-The weekly projection groups daily revisions by stable root-owned Event ID and
-retains the richest visible revision. A later day may surface only an existing
-root again when an excluded reply quotes it; that day still counts as network
-attention but cannot replace the earlier envelope with a thinner singleton.
-`active_days`, `weekly_active_day_count`, and peak daily attention/interaction
-values remain available for inspection.
+The weekly projection deduplicates canonical Event publications by stable
+root-owned Event ID. Later activity contributes `active_days`,
+`weekly_active_day_count`, and peak attention/interaction facts without
+introducing another daily row or replacing the canonical Event.
 
 Registry rejection changes are dynamic. On the next request, a rejected author
 is absent and a rejected amplifier no longer votes. Raw/derived evidence is not
@@ -159,13 +154,14 @@ provider target remains a valid shared anchor.
 ## Audience Routing Projection
 
 Completed AI Engineering and Investment judgments are snapshot-bound audit
-metadata, not event identity and not a replacement ranking. The UI displays a
-route only when the completed row's `event_id` and
-`snapshot_content_sha256` match the current cutoff projection. The runner
-reuses prior work only when event ID, snapshot hash, and exact rendered
-`input_sha256` all match; structural repairs therefore retain unchanged routes
-but cannot attach an old judgment to newly merged or expanded evidence. The API
-derives kept/not-kept/not-evaluated and audience counts before pagination.
+metadata, not event identity and not a replacement ranking. The v9 semantic
+snapshot contains the root, same-author authored updates, and accepted
+first-party artifacts; independently authored reactions and pure reposts are
+excluded. The UI displays a route only when the completed row's `event_id` and
+semantic `snapshot_content_sha256` match the canonical Event. Later third-party
+activity does not trigger rerouting. The runner reuses work only when Event ID,
+snapshot hash, and exact rendered `input_sha256` match. The API derives
+kept/not-kept/not-evaluated and audience counts before pagination.
 
 ## Read Performance
 

@@ -1,24 +1,30 @@
-# First Live Successor Insight Run
+# Historical First Successor Insight Run
 
 Date: 2026-07-15
 
 ## Frozen Candidate
 
 - Event ID: `1dc9cd728dd09f5b4de81423c5d3757d5410b6df59e365386c8770fa7ad7e89a`
-- Selected revision: 2026-07-13, Feed rank 45.
+- Historical selected revision: 2026-07-13, Feed rank 45. Under the current
+  canonical Event contract this source belongs only to 2026-07-07 at Feed rank
+  1, with later activity appended there.
 - Source routing run:
   `audience-routing-v8-gpt-5-4-mini-2026-07-13-top100-high-cc76958510dd`.
 - Model: `gpt-5.6-terra`, reasoning effort `high`.
 - Run ID: `insight-spike-1dc9cd72-terra-v1` (retained as immutable historical
   identity even though the public operator command is now `fli insights`).
-- Store: `data/derived/insights/insights.db`.
+- Historical store: deleted during the clean v4 cutover; this document retains
+  the calibration evidence and spend record.
 - Model view: root, same-author continuations, and linked primary artifacts;
   12 independent reactions were retained upstream but omitted from final
   Insight synthesis.
 
-The packet contains Lilian Weng's post and the complete Lil'Log harness
-engineering survey. The full variable view was 10,723 tokens before removing
-independent reactions and 9,690 tokens after removal.
+This run is retained as calibration evidence only. Its v8 source routing
+directory was removed during the clean v9 replacement, so the result is not a
+current publication and must not be dynamically re-anchored. The packet
+contained Lilian Weng's post and the complete Lil'Log harness engineering
+survey. The full variable view was 10,723 tokens before removing independent
+reactions and 9,690 tokens after removal.
 
 ## Decisions
 
@@ -74,6 +80,7 @@ records the zero rather than assuming eligibility produced a hit.
   client for those rows.
 - `fli insights import-result` imported this already-paid result dump without
   another call. `summary` and `inspect` expose the stored state as stable JSON.
-- The API deduplicates later revisions by event/day/audience and orders only by
-  frozen Feed rank. The UI exposes kept, suppressed, and all decisions, with
-  the Feed week rail and exact-envelope deep links.
+- The current API requires the source routing prompt version, prompt hash,
+  schema, and completed packet to match v9. This historical row therefore
+  fails closed. A new Terra run must consume the clean v9 routes rather than
+  reuse or re-anchor this result.

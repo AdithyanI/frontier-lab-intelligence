@@ -1192,32 +1192,6 @@ def current_daily_rank_by_event_id(*, day: str) -> dict[str, int]:
     return _daily_rank_by_event_id(payload["items"])
 
 
-def canonical_event_location(event_id: str) -> dict[str, str | int] | None:
-    """Return the one public Feed location for an Event."""
-    if not DEFAULT_EVENTS_DB.is_file():
-        return None
-    conn = _open_readonly(DEFAULT_EVENTS_DB)
-    try:
-        run = _latest_run(conn)
-        if run is None:
-            return None
-        row = conn.execute(
-            """SELECT MIN(day) AS canonical_day
-               FROM event_day
-               WHERE run_id = ? AND event_id = ?""",
-            (str(run["run_id"]), event_id),
-        ).fetchone()
-    finally:
-        conn.close()
-    if row is None or row["canonical_day"] is None:
-        return None
-    day = str(row["canonical_day"])
-    rank = current_daily_rank_by_event_id(day=day).get(event_id)
-    if rank is None:
-        return None
-    return {"day": day, "feed_rank": rank}
-
-
 def _relationship_counts(item: dict[str, Any]) -> dict[str, int]:
     counts = {
         "author_updates": 0,

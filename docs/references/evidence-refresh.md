@@ -77,7 +77,9 @@ The defaults are GPT-5.4-mini/high, nine days, 100 envelopes per day, 24 item
 workers per day, and up to nine model-running days in parallel. The command
 first freezes each day's packets sequentially against one published Event/Feed
 pair, then starts bounded parallel model work only after every packet is
-stable. This keeps local CPU/GIL-heavy packet rendering fast while preserving
+stable. The current v9 packet contains the root, same-author authored updates,
+and accepted first-party artifacts; independently authored reactions and pure
+reposts remain Feed activity only. This keeps local CPU/GIL-heavy packet rendering fast while preserving
 parallel network throughput. Deterministic run IDs resume complete rows in
 place, and the result reports packet-packaging time plus the exact number of
 model requests. `--replace` removes older routing directories only after all
@@ -88,6 +90,32 @@ LiteLLM/OpenAI prompt caching still applies to the stable instruction prefix;
 the run databases provide the stronger exact-response reuse when the source
 publication and frozen cohort are unchanged. A changed envelope correctly
 produces a new request rather than reusing a stale judgment.
+
+## Refresh audience Insights
+
+After every requested routing database is complete and current, inspect the
+fresh all-positive Insight cohort without a model call:
+
+```bash
+fli insights refresh \
+  --through 2026-07-13 \
+  --days 9 \
+  --all-routed \
+  --audience all \
+  --model gpt-5.6-terra \
+  --reasoning-effort high \
+  --dry-run --json --no-input
+```
+
+For a clean replacement, run the same command without `--dry-run` against a
+new `--db` path under `tmp/` and a new `--dump-dir`. Validate the exact expected
+request count, zero pending/failed rows, SQLite integrity, prompt/schema/source
+lineage, cache telemetry, and cost before atomically replacing
+`data/derived/insights/insights.db`. Do not append a new semantic contract to an
+old production database. The production store accepts only the current v4
+Insight prompts/output schema over current v9 routing; its first clean
+checkpoint contains six completed decisions over three Events. The complete
+plan is 492 unique Events and 751 audience requests.
 
 ## Output
 

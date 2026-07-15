@@ -50,10 +50,10 @@ keep/drop gate, its generated databases, and its live API/UI/CLI surfaces were
 removed on 2026-07-15. The Feed derives `kept` only when either audience is
 relevant; it is not a third judgment. A successor Insight foundation defines
 two audience prompts and one small surface-or-suppress schema. Historical Terra
-calibrations remain inspectable, but they were produced from a superseded v8
-route and are no longer eligible for publication. The production path freezes
+calibrations remain documented, but their generated rows were deleted because
+they used superseded source and output contracts. The production path freezes
 first-party-only requests into one resumable SQLite store; a fresh v9-qualified
-Insight run is the remaining model step.
+Insight run with the current v4 prompts is the remaining model step.
 
 ## Where the System Stands
 
@@ -66,8 +66,8 @@ Insight run is the remaining model step.
 | Feed + daily score | Implemented audit surface | Daily collection includes authored replies and tracked reactions. The Feed is date-filterable, shows one frozen canonical-day rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Later reactions remain available in one flat activity disclosure but do not republish or rerank the source Event. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The reply-inclusive catalog converges to 2,735 artifacts with zero lineage violations; 2,507 have usable text, including all 221 arXiv metadata/abstract records and all 167 cached X Articles. Videos remain deferred and 65 non-video pages are unavailable or retryable. One shared extraction validator rejects placeholder-dominated bodies before they become successful snapshots. |
 | Feed audience routing | Current v9 nine-day top-100 audit complete | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons. Its semantic packet contains the root, same-author replies/thread/quote commentary, and accepted first-party artifacts; independently authored reactions and pure reposts remain outside model input. The clean July 5–13 replacement completed all 900 envelopes: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither. All 900 requests were cache-eligible, 805 reported cache reads (1,442,560 cached tokens), zero failed, and proxy-reported cost was $4.1366515. Only nine v9 run directories remain. |
-| Audience Insight generation | Implementation complete; clean run pending | Separate Investment and AI Engineering prompts share one strict decision/reason/summary/implication/next-step schema. Model input uses the same first-party semantic boundary as routing. `fli insights` freezes exact requests before execution, rejects non-current routing sources, resumes completed audiences without another call, and records result/cache/cost telemetry. The current v9 routes yield 492 unique positive Events and 751 audience requests. Adi stopped the full Terra execution to run it himself; no partial candidate was retained and the old production database remains historical only. |
-| Insights UI | Ready; awaiting current Insight database | The Investment and AI Engineering views share the Feed-style date rail, inherit the frozen canonical Feed rank, and expose `Kept`, `Suppressed`, and `All` status views. The API publishes only rows backed by a completed current routing item whose prompt version, prompt hash, and schema match v9; old v8 Terra results fail closed instead of being re-anchored or relabeled. |
+| Audience Insight generation | Implementation complete; clean v4 run in progress | Separate Investment and AI Engineering v4 prompts share one strict decision/title/reason/summary/implication/next-step schema. Every decision has a neutral reader-facing title; suppressed decisions carry only that title and a free-form reason. Model input uses the same first-party semantic boundary as routing. `fli insights` freezes exact requests before execution, rejects non-current source or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The current v9 routes yield 492 unique positive Events and 751 audience requests. The production Insight store was reset to remove all v3 rows; its first clean checkpoint contains six v4 decisions over three Events, with four 1,280-token cache reads. |
+| Insights UI | Ready and showing the current partial v4 run | The Investment and AI Engineering views share the Feed-style date rail, inherit the frozen canonical Feed rank, and expose `Kept`, `Suppressed`, and `All` status views. `/api/insights/dates` and `/api/insights` are the only live endpoints. Publication requires both the exact current v4 Insight prompt/hash/schema and a completed current v9 routing item; no old row is re-anchored, relabeled, or read through a compatibility route. The current checkpoint exposes two kept and four suppressed decisions across both audiences. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -116,9 +116,10 @@ case-study thesis.
 The active tracker is
 [`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
 The canonical Event rebuild and v9 nine-day top-100 routing replacement are
-complete. The old v8 routing directories are gone, and historical Insight rows
-cannot publish under the current source contract. The active tracker owns the
-fresh Terra Insight run, UI proof, and closeout; Adi is executing that paid run.
+complete. The old v8 routing directories, v3 Insight prompts/results, duplicate
+Insight API routes, and Event re-anchoring helper are gone. The active tracker
+owns the clean v4 Terra Insight run, UI proof, and closeout; Adi is executing
+that paid run.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

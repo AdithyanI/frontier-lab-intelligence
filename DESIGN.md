@@ -224,18 +224,22 @@ Rules:
 - **Audience Insights:** one stable Feed-ranked surface with an explicit
   Investment / AI Engineering switch in URL state. Each day is a flat
   editorial list, not a card grid. The left rail shows the envelope's current
-  daily Feed rank and links directly to that exact envelope; it is inherited
+  canonical-day Feed rank and links directly to that exact envelope; it is inherited
   ordering, not a second insight score. Reuse the Feed's seven-day navigator;
   its number is the kept count, but retain evaluated zero-kept days so rejected
   decisions remain inspectable. A Feed-style Status disclosure switches among
   `Kept`, `Suppressed`, and `All`, with counts and URL-backed state.
-  A kept row leads with the concise summary, then shows a quiet `Why kept`
-  rationale and one concrete next step. A suppressed row says it stopped at the
-  final editorial gate and shows the model's freeform `Why suppressed` reason.
-  Both states retain model/prompt provenance, envelope copy action, and the
-  exact Feed link. Do not revive the retired quote block, claim-posture fields,
-  cards, or a second editorial rank. Honest zero/thin views use plain editorial
-  empty states and must never be padded.
+  Both decisions lead with a short evidence-specific title so the list remains
+  scannable. A kept row then shows its concise summary, a quiet `Why kept`
+  rationale, and one concrete next step. A suppressed row follows the same
+  hierarchy but contains only the model's freeform `Why suppressed` reason; the
+  title names what was evaluated without implying it cleared the gate. Both
+  states retain model/prompt provenance, envelope copy action, and the exact
+  Feed link. Publish a row only when both its Insight prompt/hash/schema and its
+  source routing prompt/hash/schema, run identity, and completed Event packet
+  match the current contracts; never re-anchor old output at read time. Do not revive the retired quote
+  block, claim-posture fields, cards, or a second editorial rank. Honest
+  zero/thin views use plain editorial empty states and must never be padded.
 - **Score breakdown:** inputs and weights are visible only on demand from the
   Feed rank. Trust through inspectability without making the decimal the primary
   reading cue (PRODUCT.md #3).

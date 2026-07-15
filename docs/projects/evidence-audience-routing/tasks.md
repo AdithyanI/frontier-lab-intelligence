@@ -275,18 +275,17 @@ Application invariants:
 
 ## Open Questions / Blockers
 
-- GPT-5.5 and GPT-5.6 still return zero prefix reads on the controlled v4 path,
-  but GPT-5.4 mini is proven working. The current clean 900-row run produced
-  779 cache-hit requests and read 1,399,040 of 3,418,560 input tokens. Keep this
-  model-specific evidence visible; do not generalize one deployment's result
-  to another.
+- GPT-5.4 mini prompt caching is proven on the current v9 route. The clean
+  900-row run produced 805 cache-hit requests and read 1,442,560 of 2,760,202
+  input tokens. The Terra Insight prompts are eligible and were warmed once,
+  but their cold warm-up calls do not prove a read; keep model-specific evidence
+  visible rather than generalizing one deployment's result to another.
 - The broader artifact retrieval gaps remain upstream limitations. Do not add
   model-side web search or routing-local text-quality heuristics until the next
   Insight stage demonstrates a concrete need.
-- The pre-repair 900-route cohort remains invalid historical evidence. Its clean
-  replacement is complete against Event run
-  `cc76958510ddf90c14863d1c5b8de1d40881a6bf12396671dfd264a6e2df210d`;
-  consumers must select only those source-qualified v8 run IDs.
+- All v8 routing cohorts are invalid historical evidence and their directories
+  have been removed. Consumers must select only current source-qualified v9
+  run IDs against Event run `cc76958510ddf90c14863d1c5b8de1d40881a6bf12396671dfd264a6e2df210d`.
 
 ## Current Batch
 
@@ -302,10 +301,11 @@ Application invariants:
 | complete | Replace the obsolete Insight backend with the two-prompt, shared-schema, non-executing successor foundation; preserve the empty UI transport and Feed-rank metadata. | parent | — |
 | complete | Run both successor prompts against envelope `9412a377…` on its latest corrected July 12 revision; inspect raw structured output, cache, and cost before designing storage. | parent | `resources/first-successor-insight-spike.md` |
 | complete | Move the successor Insight path into durable SQLite-backed generation; import the first-party-only Terra result, expose kept/suppressed decisions through the API, and add Feed-style date/status audit controls to the existing UI. | parent | `resources/first-live-insight-run.md` |
-| complete | Rerun and review the 900 routes against the repaired Event publication; remove the local packaging bottleneck. | parent | `resources/top100-contextual-audit-v2.md` |
-| in_progress | Replace daily continuation publication with one canonical Event day while retaining later activity on the Event. | parent | — |
-| pending | Reduce routing and Insight packets to first-party-authored source material plus accepted first-party artifacts and enforce one candidate per Event/audience. | parent | — |
-| pending | Reanchor the existing live Insight to the canonical Event day/rank without another model call; rebuild and verify Feed/Insight UI. | parent | `resources/first-live-insight-run.md` |
+| invalidated | Rerun and review the 900 v8 routes against the repaired Event publication; superseded when the semantic input boundary changed. | parent | `resources/top100-contextual-audit-v2.md` |
+| complete | Replace daily continuation publication with one canonical Event day/rank while retaining later activity on the Event. | parent | — |
+| complete | Reduce routing and Insight packets to first-party-authored source material plus accepted first-party artifacts and enforce one candidate per Event/audience. | parent | — |
+| complete | Rebuild clean one-run Feed/Event stores and replace all routing data with nine v9 top-100 runs; prove cache telemetry and remove v8 directories. | parent | `../../../references/model-routing.md` |
+| pending | Adi runs the clean 492-Event / 751-request Terra Insight refresh with the v4 prompts into a fresh database; then publish, rebuild, and verify the Insight UI. | parent | `resources/first-live-insight-run.md` |
 
 ## Backlog / Remaining Work
 
@@ -613,3 +613,31 @@ Application invariants:
   durable store contains one run/two completed items, $0.0757825 reported cost,
   and zero cached tokens. Focused Python tests, all frontend tests, lint, build,
   live API checks, and rendered kept/suppressed browser flows pass.
+- 2026-07-15: [VALIDATED] Simplified Event publication to one canonical source
+  day and frozen Feed rank. Later replies, quotes, and reposts append to the
+  same Event activity ledger and never create a later Feed candidate, routing
+  request, or Insight candidate. The production Feed/Event stores were rebuilt
+  from raw evidence into fresh one-run databases. Event `1dc9cd72…` is now only
+  the July 7 rank-1 Event with 35 lifetime members active on July 7/8/11/13; it
+  is absent from the later three daily candidate lists.
+- 2026-07-15: [VALIDATED] Promoted audience routing v9 with a shared
+  first-party-only semantic boundary: root, same-author replies/thread/quote
+  commentary, and accepted first-party artifacts. Independently authored
+  reactions and pure reposts remain Feed activity only. A two-request probe
+  proved the 1,861-token stable prefix with a 1,792-token cache read. The clean
+  July 5–13 top-100 replacement completed 900/900 with zero failures: 259 both,
+  100 Engineering-only, 133 Investment-only, and 408 neither. It recorded 805
+  cache-hit requests, 1,442,560 cached of 2,760,202 input tokens, and
+  $4.1366515 proxy-reported cost; all v8 routing directories were removed.
+- 2026-07-15: [HANDOFF] The current v9 routes produce 492 unique positive
+  Events and 751 audience requests (359 Engineering, 392 Investment). The
+  active Terra v4 prompts are cache-eligible at 1,459 Engineering and 1,425
+  Investment instruction tokens and require a title for every decision. Adi
+  stopped the earlier full refresh and will execute the clean v4 run himself.
+  The partial candidate database/dumps, all v3 production rows, the v3 prompt
+  files, duplicate `extracted` API routes/types, stale temporary database
+  aliases, and the unused Event re-anchoring helper were deleted. The live
+  first clean v4 checkpoint now contains six decisions over three Events, with
+  two surfaced, four suppressed, and four 1,280-token cache reads. Next:
+  complete the remaining cohort, reconcile all requests, then perform final
+  UI/browser proof.

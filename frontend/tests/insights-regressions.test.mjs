@@ -23,10 +23,10 @@ test('Insights keeps audience, date, and decision status in the URL', () => {
 })
 
 test('Insights uses the durable successor API and guards status-specific responses', () => {
-  assert.match(insightSource, /`\/api\/insights\/extracted\/dates\?audience=\$\{audience\}`/)
+  assert.match(insightSource, /`\/api\/insights\/dates\?audience=\$\{audience\}`/)
   assert.match(
     insightSource,
-    /`\/api\/insights\/extracted\?audience=\$\{audience\}&date=\$\{selectedDate\}&status=\$\{status\}`/,
+    /`\/api\/insights\?audience=\$\{audience\}&date=\$\{selectedDate\}&status=\$\{status\}`/,
   )
   assert.match(insightSource, /dataView\.payload\.status === status/)
   assert.match(insightSource, /activeDatesViewRef\.current !== viewKey/)
@@ -64,7 +64,8 @@ test('Insights inherits Feed rank and links every decision to its exact envelope
 test('Insights shows an explicit rationale for both decisions without reviving quotes', () => {
   assert.match(insightSource, /item\.decision_reason/)
   assert.match(insightSource, /'Why kept' : 'Why suppressed'/)
-  assert.match(insightSource, /item\.title \?\? 'Suppressed at the final editorial gate'/)
+  assert.match(insightSource, /const title = item\.title/)
+  assert.doesNotMatch(insightSource, /Suppressed at the final editorial gate/)
   assert.match(insightSource, /<h3 className="mono">Summary<\/h3>/)
   assert.match(insightSource, /decodeTextEntities\(item\.summary\)/)
   assert.match(insightSource, /item\.next_step/)

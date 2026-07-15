@@ -18,7 +18,7 @@ from typing import Any
 from fli import audience_routing, llm_responses
 
 
-SCHEMA_VERSION = "audience-insight-output-v2"
+SCHEMA_VERSION = "audience-insight-output-v3"
 MAX_OUTPUT_TOKENS = 4_096
 _PROMPT_ROOT = Path(__file__).with_name("prompts")
 _OUTPUT_FIELDS = (
@@ -59,22 +59,22 @@ class PromptContract:
 PROMPT_CONTRACTS = {
     InsightAudience.INVESTMENT: PromptContract(
         audience=InsightAudience.INVESTMENT,
-        version="investment-insight-v3",
-        path=_PROMPT_ROOT / "investment_insight_v3.txt",
-        cache_key="fli:insights:investment:v3",
+        version="investment-insight-v4",
+        path=_PROMPT_ROOT / "investment_insight_v4.txt",
+        cache_key="fli:insights:investment:v4",
     ),
     InsightAudience.AI_ENGINEERING: PromptContract(
         audience=InsightAudience.AI_ENGINEERING,
-        version="ai-engineering-insight-v3",
-        path=_PROMPT_ROOT / "ai_engineering_insight_v3.txt",
-        cache_key="fli:insights:ai-engineering:v3",
+        version="ai-engineering-insight-v4",
+        path=_PROMPT_ROOT / "ai_engineering_insight_v4.txt",
+        cache_key="fli:insights:ai-engineering:v4",
     ),
 }
 
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_insight_v2",
+    "name": "audience_insight_v3",
     "strict": True,
     "schema": {
         "type": "object",
@@ -84,7 +84,7 @@ OUTPUT_FORMAT: dict[str, Any] = {
                 "enum": [decision.value for decision in InsightDecision],
             },
             "suppression_reason": {"type": ["string", "null"]},
-            "title": {"type": ["string", "null"]},
+            "title": {"type": "string"},
             "summary": {"type": ["string", "null"]},
             "implication": {"type": ["string", "null"]},
             "next_step": {"type": ["string", "null"]},
@@ -136,7 +136,7 @@ class InsightCandidate:
 class InsightResult:
     decision: InsightDecision
     suppression_reason: str | None
-    title: str | None
+    title: str
     summary: str | None
     implication: str | None
     next_step: str | None
@@ -287,12 +287,9 @@ def validate_output(output: str | dict[str, Any]) -> InsightResult:
         for field in _OUTPUT_FIELDS
         if field != "decision"
     }
-    content = (
-        values["title"],
-        values["summary"],
-        values["implication"],
-        values["next_step"],
-    )
+    if values["title"] is None:
+        raise ValueError("title is required for every Insight decision")
+    content = (values["summary"], values["implication"], values["next_step"])
     if decision is InsightDecision.SURFACE:
         if values["suppression_reason"] is not None:
             raise ValueError("surface requires a null suppression_reason")
@@ -302,7 +299,7 @@ def validate_output(output: str | dict[str, Any]) -> InsightResult:
         if values["suppression_reason"] is None:
             raise ValueError("suppress requires a concrete suppression_reason")
         if any(value is not None for value in content):
-            raise ValueError("suppress requires null audience content fields")
+            raise ValueError("suppress requires null summary, implication, and next_step")
 
     return InsightResult(decision=decision, **values)
 

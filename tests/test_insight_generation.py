@@ -56,8 +56,8 @@ def test_contracts_are_separate_and_share_one_schema():
     investment = insight_generation.contract("investment")
     engineering = insight_generation.contract("ai_engineering")
 
-    assert investment.version == "investment-insight-v3"
-    assert engineering.version == "ai-engineering-insight-v3"
+    assert investment.version == "investment-insight-v4"
+    assert engineering.version == "ai-engineering-insight-v4"
     assert investment.cache_key != engineering.cache_key
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
@@ -112,7 +112,7 @@ def test_build_request_is_pure_and_keeps_variable_evidence_last():
         "investment"
     ).instructions()
     assert request["input"] == insight_generation.render_input(candidate)
-    assert request["prompt_cache_key"] == "fli:insights:investment:v3"
+    assert request["prompt_cache_key"] == "fli:insights:investment:v4"
     assert request["text"]["format"] == insight_generation.OUTPUT_FORMAT
     assert request["store"] is False
     assert "audience:investment" in request["extra_body"]["metadata"]["tags"]
@@ -139,7 +139,7 @@ def test_suppress_output_keeps_freeform_reason_and_null_content():
                 "The post names a method but supplies no artifact, behavior, "
                 "or implementation detail from which to derive a concrete test."
             ),
-            "title": None,
+            "title": "A method announcement without testable evidence",
             "summary": None,
             "implication": None,
             "next_step": None,
@@ -148,6 +148,7 @@ def test_suppress_output_keeps_freeform_reason_and_null_content():
 
     assert result.decision is insight_generation.InsightDecision.SUPPRESS
     assert result.suppression_reason.startswith("The post names")
+    assert result.title == "A method announcement without testable evidence"
 
     with pytest.raises(ValueError, match="concrete suppression_reason"):
         insight_generation.validate_output(
@@ -156,13 +157,15 @@ def test_suppress_output_keeps_freeform_reason_and_null_content():
                 "suppression_reason": "   ",
             }
         )
-    with pytest.raises(ValueError, match="null audience content"):
+    with pytest.raises(ValueError, match="null summary"):
         insight_generation.validate_output(
             {
                 **result.as_dict(),
                 "summary": "A partial summary should not leak through.",
             }
         )
+    with pytest.raises(ValueError, match="title is required"):
+        insight_generation.validate_output({**result.as_dict(), "title": None})
 
 
 def test_publish_binds_model_content_to_application_owned_feed_metadata():
@@ -188,7 +191,7 @@ def test_publish_binds_model_content_to_application_owned_feed_metadata():
         {
             "decision": "suppress",
             "suppression_reason": "The evidence is too thin to act on.",
-            "title": None,
+            "title": "A thinly evidenced technical claim",
             "summary": None,
             "implication": None,
             "next_step": None,

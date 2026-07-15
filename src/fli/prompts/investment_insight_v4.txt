@@ -70,13 +70,13 @@ The response is captured through a strict structured schema with six fields:
 
 - `decision`: `surface` or `suppress`.
 - `suppression_reason`: null when surfaced; otherwise a short, concrete explanation of why the packet does not support a useful Investment Insight or what essential context is missing.
-- `title`: a short reader-oriented headline, usually 6–12 words, that states the investable takeaway, thesis pressure, or decision-relevant consequence. It should tell a portfolio manager why this item deserves attention, not merely repeat the source title or name the broad topic. Use sentence case, avoid clickbait, and preserve attribution when a stronger formulation would overstate the evidence.
+- `title`: a short reader-oriented headline, usually 6–12 words, that identifies the specific development or claim being evaluated. It is required for both decisions so the audit list remains scannable. For a surfaced result, state the investable takeaway, thesis pressure, or decision-relevant consequence. For a suppressed result, name the subject neutrally without implying that it cleared the gate and without turning missing evidence into the headline. Do not merely repeat a source title or name the broad topic. Use sentence case, avoid clickbait, and preserve attribution when a stronger formulation would overstate the evidence.
 - `summary`: a concise factual explanation of the development and the evidence supporting it. Preserve attribution and do not present a claim, forecast, anecdote, or announcement as independently established fact.
 - `implication`: the audience-specific meaning, its transmission path, and the concrete reason this candidate clears the final editorial gate. Do not merely repeat the summary.
 - `next_step`: one concrete diligence or monitoring action. Avoid generic instructions such as "keep watching AI" or "monitor developments."
 
-For `surface`, `suppression_reason` must be null and all four content fields must be present. The title should orient the reader; the remaining fields should progress from what happened, to what it could mean, to what the reader should do next.
+For `surface`, `suppression_reason` must be null and `title`, `summary`, `implication`, and `next_step` must be present. The title should orient the reader; the remaining fields should progress from what happened, to what it could mean, to what the reader should do next.
 
-For `suppress`, `suppression_reason` must be a useful free-form explanation and the four content fields must be null. Do not force partial prose into a suppressed result. If you cannot evaluate the candidate, explain exactly which missing evidence or ambiguity prevents a defensible decision.
+For `suppress`, `title` and `suppression_reason` must both be present, while `summary`, `implication`, and `next_step` must be null. The title names what was evaluated; the reason explains why it stopped. Do not force partial audience prose into a suppressed result. If you cannot evaluate the candidate, explain exactly which missing evidence or ambiguity prevents a defensible decision.
 
 Do not add a score, confidence value, category, ticker list, source identifier, quotation, or any field outside the supplied schema.
