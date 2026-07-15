@@ -59,7 +59,11 @@ CREATE TABLE IF NOT EXISTS run_meta (
     prompt_version TEXT NOT NULL,
     prompt_sha256 TEXT NOT NULL,
     input_render_version TEXT NOT NULL CHECK (
-        input_render_version IN ('verbatim-v1', 'provider-safe-v2')
+        input_render_version IN (
+            'verbatim-v1',
+            'provider-safe-v2',
+            'citation-safe-v3'
+        )
     ),
     schema_version TEXT NOT NULL,
     editor_model TEXT NOT NULL,

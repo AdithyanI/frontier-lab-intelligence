@@ -42,9 +42,11 @@ EDITOR_PROMPT_CACHE_SHARDS = 1
 
 INPUT_RENDER_VERBATIM_V1 = "verbatim-v1"
 INPUT_RENDER_PROVIDER_SAFE_V2 = "provider-safe-v2"
+INPUT_RENDER_CITATION_SAFE_V3 = "citation-safe-v3"
 INPUT_RENDER_VERSIONS = (
     INPUT_RENDER_VERBATIM_V1,
     INPUT_RENDER_PROVIDER_SAFE_V2,
+    INPUT_RENDER_CITATION_SAFE_V3,
 )
 DEFAULT_INPUT_RENDER_VERSION = INPUT_RENDER_PROVIDER_SAFE_V2
 
@@ -550,9 +552,20 @@ def render_model_input(packet: EvidencePacket, *, version: str) -> str:
         "Evaluate this accepted evidence packet for the audience in the instructions.",
         "Each numbered block has independent authorship. Return the one-based block index for the exact quote.",
     ]
+    if version == INPUT_RENDER_CITATION_SAFE_V3:
+        blocks.append(
+            "Citation-safe mode: supporting_quote must be one contiguous, "
+            "character-for-character substring copied from one VERBATIM_TEXT "
+            "block. Similar sentences are not interchangeable: never splice, "
+            "merge, or paraphrase them. Narrow the claim or return "
+            "no_extractable_insight if one exact span cannot support it."
+        )
     for block_index, source in enumerate(packet.sources, start=1):
         source_text = source.normalized_text()
-        if version == INPUT_RENDER_PROVIDER_SAFE_V2:
+        if version in {
+            INPUT_RENDER_PROVIDER_SAFE_V2,
+            INPUT_RENDER_CITATION_SAFE_V3,
+        }:
             source_text = _MODEL_INPUT_EXPLETIVE.sub(
                 _MODEL_INPUT_EXPLETIVE_MARKER,
                 source_text,
@@ -575,6 +588,17 @@ def render_model_input(packet: EvidencePacket, *, version: str) -> str:
                 source_text,
                 "</VERBATIM_TEXT>",
                 "</EVIDENCE_BLOCK>",
+            )
+        )
+    if version == INPUT_RENDER_CITATION_SAFE_V3:
+        blocks.extend(
+            (
+                "",
+                "<FINAL_CITATION_CHECK>",
+                "Before returning, search the chosen VERBATIM_TEXT for the "
+                "complete supporting_quote. If it is not present exactly once "
+                "as one contiguous span, do not return that insight.",
+                "</FINAL_CITATION_CHECK>",
             )
         )
     return "\n".join(block for block in blocks if block != "")

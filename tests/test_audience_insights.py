@@ -336,14 +336,25 @@ def test_model_input_render_versions_are_deterministic_and_preserve_packet():
         packet,
         version=audience_insights.INPUT_RENDER_PROVIDER_SAFE_V2,
     )
+    citation_safe = audience_insights.render_model_input(
+        packet,
+        version=audience_insights.INPUT_RENDER_CITATION_SAFE_V3,
+    )
 
     assert "thank fucking god" in legacy
     assert "thank [EXPLETIVE] god" in first
     assert "fucking" not in first.lower()
     assert packet.sources[0].text == "thank fucking god"
     assert first == second
+    assert "Citation-safe mode" in citation_safe
+    assert "never splice, merge, or paraphrase" in citation_safe
+    assert "<FINAL_CITATION_CHECK>" in citation_safe
+    assert "thank [EXPLETIVE] god" in citation_safe
+    assert "fucking" not in citation_safe.lower()
+    assert citation_safe.count("thank [EXPLETIVE] god") == 1
     assert packet.input_sha256 == audience_insights._sha256(legacy)
     assert packet.input_sha256 != audience_insights._sha256(first)
+    assert audience_insights._sha256(citation_safe) != audience_insights._sha256(first)
 
 
 def test_citation_across_model_input_normalization_still_fails_closed():

@@ -177,6 +177,30 @@ def test_new_run_persists_provider_safe_input_render_version(tmp_path):
     )
 
 
+def test_new_run_persists_citation_safe_input_render_version(tmp_path):
+    triage_db, artifact_db = _source_databases(tmp_path)
+    conn = audience_insight_runs.connect_run(
+        tmp_path / "citation-safe-versioned" / "insights.db"
+    )
+
+    audience_insight_runs.freeze_run(
+        conn,
+        run_id="citation-safe-versioned",
+        audience="investment",
+        day="2026-07-11",
+        triage_db=triage_db,
+        artifact_db=artifact_db,
+        input_render_version=audience_insights.INPUT_RENDER_CITATION_SAFE_V3,
+    )
+
+    assert audience_insight_runs.declared_input_render_version(conn) == (
+        audience_insights.INPUT_RENDER_CITATION_SAFE_V3
+    )
+    assert audience_insight_runs.summary(conn)["run"]["input_render_version"] == (
+        audience_insights.INPUT_RENDER_CITATION_SAFE_V3
+    )
+
+
 def test_pre_column_run_is_explicitly_classified_as_verbatim_v1():
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row
