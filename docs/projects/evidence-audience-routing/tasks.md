@@ -252,10 +252,9 @@ Application invariants:
   inconsistent Engineering boundary for temporary access/rate-limit changes.
   Adi must decide whether to adopt the narrow clarification proposed in
   `resources/top10-contextual-audit-v1.md` before a targeted rerun.
-- Artifact catalog import still depends on the deleted legacy keep/drop triage
-  runs. The corrected Gemma envelope now exposes its arXiv reply, but attaching
-  or fetching that document under the new routing-first workflow requires a
-  triage-independent primary-artifact import boundary.
+- The corrected envelope hashes invalidate the old routing cohort by design.
+  A targeted rerun should follow Adi's prompt-boundary decision rather than
+  silently reusing judgments made over incomplete reply-free packets.
 
 ## Current Batch
 
@@ -263,7 +262,8 @@ Application invariants:
 | --- | --- | --- | --- |
 | complete | Collect authored replies and admit only replies whose conversation root is captured. | parent | — |
 | complete | Rebuild and publish Feed/events; prove Gemma and Muse include their first-party continuations. | parent | — |
-| in_progress | Replace legacy-triage-gated artifact import, then rerun routing against corrected envelope hashes. | parent | `resources/top10-contextual-audit-v1.md` |
+| complete | Replace legacy-triage-gated artifact import with published Feed/Event discovery. | parent | `../../../references/evidence-refresh.md` |
+| in_progress | Decide the prompt-boundary clarification, then rerun only the intended invalidated routing cohort. | parent | `resources/top10-contextual-audit-v1.md` |
 
 ## Backlog / Remaining Work
 
@@ -277,8 +277,9 @@ Application invariants:
   unrelated reply noise to the daily Feed.
 - [x] Rebuild the affected Feed/Event projections and verify Gemma and Muse
   continuations against corrected envelopes.
-- [ ] Decouple primary-artifact catalog import from the deleted legacy triage
-  store, associate the Gemma arXiv report, and rerun only invalidated routes.
+- [x] Decouple primary-artifact catalog import from the deleted legacy triage
+  store, rebuild the reply-inclusive catalog, and add one cache-aware Evidence
+  refresh command.
 - [x] Audit a stratified sample of both, single-audience, and `neither`
   outcomes from the authorized top-10 cohort.
 - [ ] After the current boundary decision, audit a bounded sample of difficult
@@ -456,3 +457,14 @@ Application invariants:
   content status and the exact source timestamp. Browser QA covered a ready
   article, deferred repository support, and the preserved unusable Claude Code
   extraction; no new filter, backend state, or database field was introduced.
+- 2026-07-15: [VALIDATED] Completed the reply-capable collection for all 2,561
+  tracked accounts (2,558 fetched, three cached, zero failures), then rebuilt
+  Feed v9 and Events v4 into 37,079 normalized posts and 7,815 envelopes. The
+  Cohere Arabic ASR envelope now contains its three first-party replies; its
+  leaderboard and model-weight artifacts both resolve to Feed rank 15 and have
+  successful text snapshots. Replaced `import-kept` with direct published
+  Feed/Event artifact discovery: 3,384 decisions produce 3,035 verified
+  observations and 2,703 canonical artifacts with zero lineage violations.
+  Added `fli evidence-refresh` as the cache-aware operator path. A full replay
+  reused all 2,561 account page chains and made zero provider requests; Feed,
+  Events, and artifact import also reused their content-addressed runs.

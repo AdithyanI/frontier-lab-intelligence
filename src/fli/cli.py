@@ -111,6 +111,19 @@ def main(argv: list[str] | None = None) -> int:
     x_daily_collection_p.add_argument(
         "collection_args", nargs=argparse.REMAINDER
     )
+    evidence_refresh_p = sub.add_parser(
+        "evidence-refresh",
+        help="Refresh Evidence, envelopes, and primary artifacts end to end.",
+    )
+    evidence_refresh_p.add_argument("--through", required=True)
+    evidence_refresh_p.add_argument("--days", type=int, default=9)
+    evidence_refresh_p.add_argument("--workers", type=int, default=32)
+    evidence_refresh_p.add_argument("--artifact-limit", type=int, default=30)
+    evidence_refresh_p.add_argument("--x-article-limit", type=int, default=20)
+    evidence_refresh_p.add_argument("--skip-collection", action="store_true")
+    evidence_refresh_p.add_argument("--no-reader-fallback", action="store_true")
+    evidence_refresh_p.add_argument("--key-file")
+    evidence_refresh_p.add_argument("--json", action="store_true")
     artifacts_p = sub.add_parser(
         "artifacts", help="Catalog and fetch canonical external artifacts."
     )
@@ -242,6 +255,31 @@ def main(argv: list[str] | None = None) -> int:
         from fli import x_daily_collection
 
         return x_daily_collection.main(args.collection_args)
+
+    if args.command == "evidence-refresh":
+        from fli import evidence_refresh
+
+        refresh_args = [
+            "--through",
+            args.through,
+            "--days",
+            str(args.days),
+            "--workers",
+            str(args.workers),
+            "--artifact-limit",
+            str(args.artifact_limit),
+            "--x-article-limit",
+            str(args.x_article_limit),
+        ]
+        if args.skip_collection:
+            refresh_args.append("--skip-collection")
+        if args.no_reader_fallback:
+            refresh_args.append("--no-reader-fallback")
+        if args.key_file:
+            refresh_args.extend(["--key-file", args.key_file])
+        if args.json:
+            refresh_args.append("--json")
+        return evidence_refresh.main(refresh_args)
 
     if args.command == "artifacts":
         from fli import artifacts

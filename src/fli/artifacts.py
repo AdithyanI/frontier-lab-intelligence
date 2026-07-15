@@ -1,4 +1,4 @@
-"""Canonical artifact catalog over outbound links in kept X envelopes."""
+"""Canonical artifact catalog over primary-author links in Feed envelopes."""
 
 from __future__ import annotations
 
@@ -10,23 +10,20 @@ import sys
 import time
 import uuid
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import urlsplit
 
-from fli import artifact_urls, evidence_lineage, signal_events, signal_feed, sources
+from fli import artifact_urls, signal_events, signal_feed, sources
 
 
 SCHEMA_VERSION = "artifact-store-v1"
 RESULT_SCHEMA_VERSION = "1.0"
 REVIEWED_SUPPLEMENT_CONTRACT = "artifact-reviewed-supplement-v1"
-PRIMARY_AUTHOR_SELECTION_POLICY = "kept-envelope-primary-author-thread-artifacts-v1"
+PRIMARY_AUTHOR_SELECTION_POLICY = "feed-envelope-primary-author-thread-artifacts-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = REPO_ROOT / "data" / "derived" / "artifacts" / "artifacts.db"
-DEFAULT_TRIAGE_ROOT = (
-    REPO_ROOT / "data" / "derived" / "cited-insights" / "triage"
-)
 
 SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS artifact_import_run (
@@ -378,37 +375,6 @@ def _open_readonly(path: Path) -> sqlite3.Connection:
     return conn
 
 
-def _latest_complete_triage_run(root: Path, day: str) -> tuple[Path, dict[str, Any]]:
-    candidates: list[tuple[str, str, Path, dict[str, Any]]] = []
-    for path in root.glob("*/triage.db"):
-        try:
-            source = _open_readonly(path)
-            meta = source.execute(
-                "SELECT * FROM run_meta WHERE singleton = 1"
-            ).fetchone()
-            if meta is None or str(meta["day"]) != day:
-                source.close()
-                continue
-            complete = int(
-                source.execute(
-                    "SELECT COUNT(*) FROM triage_item WHERE status = 'complete'"
-                ).fetchone()[0]
-            )
-            source.close()
-            if complete != int(meta["expected_count"]):
-                continue
-            payload = dict(meta)
-            candidates.append(
-                (str(meta["updated_at"]), str(meta["run_id"]), path, payload)
-            )
-        except (OSError, sqlite3.Error):
-            continue
-    if not candidates:
-        raise FileNotFoundError(f"No complete triage run for {day} under {root}")
-    _updated, _run_id, path, payload = max(candidates)
-    return path, payload
-
-
 def _published_context(
     events_db: Path, feed_db: Path
 ) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -427,59 +393,23 @@ def _published_context(
     return dict(event_run), dict(feed_run)
 
 
-def _candidate_targets(envelope: dict[str, Any]) -> dict[str, list[dict[str, str]]]:
-    targets: dict[str, list[dict[str, str]]] = defaultdict(list)
-    for item in envelope.get("urls") or []:
-        if isinstance(item, dict) and item.get("post_id") and item.get("url"):
-            targets[str(item["post_id"])].append(
-                {
-                    "url": str(item["url"]),
-                    "source": "envelope_url",
-                    "title": "",
-                    "kind": "",
-                }
-            )
-    previews: dict[tuple[str, str], dict[str, str]] = {}
-    for item in envelope.get("embedded_artifacts") or []:
-        if isinstance(item, dict) and item.get("post_id") and item.get("url"):
-            previews[(str(item["post_id"]), str(item["url"]))] = {
-                "source": str(item.get("kind") or "embedded_artifact"),
-                "title": str(item.get("title") or ""),
-                "kind": str(item.get("kind") or ""),
-            }
-    for post_id, values in targets.items():
-        for value in values:
-            preview = previews.get((post_id, value["url"]))
-            if preview is not None:
-                value.update(preview)
-        targets[post_id] = list(
-            {
-                (value["url"], value["source"], value["title"], value["kind"]): value
-                for value in values
-            }.values()
-        )
-    return targets
-
-
 def _matching_evidence(
     raw_json: str, target_url: str
 ) -> artifact_urls.UrlEvidence | None:
-    payload = json.loads(raw_json)
-    evidence = artifact_urls.url_evidence(payload)
+    evidence = artifact_urls.url_evidence(json.loads(raw_json))
     for item in evidence:
         if item.expanded_url == target_url or item.observed_url == target_url:
             return item
     try:
         target_canonical = artifact_urls.canonicalize_url(target_url)
     except ValueError:
-        target_canonical = None
-    if target_canonical is not None:
-        for item in evidence:
-            try:
-                if artifact_urls.canonicalize_url(item.expanded_url) == target_canonical:
-                    return item
-            except ValueError:
-                continue
+        return None
+    for item in evidence:
+        try:
+            if artifact_urls.canonicalize_url(item.expanded_url) == target_canonical:
+                return item
+        except ValueError:
+            continue
     return None
 
 
@@ -494,181 +424,160 @@ def _matching_primary_evidence(
     )
 
 
-def _iter_frozen_candidates(
+def _iter_feed_candidates(
     *,
     feed_db: Path,
     feed_run_id: str,
-    triage_runs: list[tuple[str, Path, dict[str, Any]]],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    events_db: Path,
+    event_run_id: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Collect links owned by each envelope root and its same-author replies."""
     feed = _open_readonly(feed_db)
-    candidates: list[dict[str, Any]] = []
-    manifest: list[dict[str, Any]] = []
-    for day, path, meta in triage_runs:
-        triage = _open_readonly(path)
-        rows = triage.execute(
-            """SELECT event_id, current_rank, envelope_json, input_sha256,
-                      snapshot_content_sha256
-               FROM triage_item
-               WHERE status = 'complete' AND decision = 'keep'
-               ORDER BY current_rank, event_id"""
+    events = _open_readonly(events_db)
+    posts = {
+        str(row["post_id"]): row
+        for row in feed.execute(
+            """SELECT * FROM feed_post
+               WHERE run_id = ? AND provider = 'twitterapi_io'
+               ORDER BY post_id""",
+            (feed_run_id,),
         ).fetchall()
-        manifest.append(
-            {
-                "day": day,
-                "run_id": str(meta["run_id"]),
-                "path": str(path.relative_to(REPO_ROOT)),
-                "prompt_version": str(meta["prompt_version"]),
-                "kept_count": len(rows),
-                "items": [
-                    [
-                        str(row["event_id"]),
-                        str(row["input_sha256"]),
-                        str(row["snapshot_content_sha256"] or ""),
-                    ]
-                    for row in rows
-                ],
-            }
+    }
+    members: dict[str, list[str]] = defaultdict(list)
+    for row in events.execute(
+        """SELECT event_id, post_id
+           FROM event_member
+           WHERE run_id = ? AND provider = 'twitterapi_io'
+           ORDER BY event_id, post_id""",
+        (event_run_id,),
+    ).fetchall():
+        members[str(row["event_id"])].append(str(row["post_id"]))
+    clusters = events.execute(
+        """SELECT event_id, representative_post_id
+           FROM event_cluster
+           WHERE run_id = ?
+           ORDER BY event_id""",
+        (event_run_id,),
+    ).fetchall()
+
+    candidates: list[dict[str, Any]] = []
+    for cluster in clusters:
+        event_id = str(cluster["event_id"])
+        primary_posts: list[sqlite3.Row] = []
+        for post_id in members.get(event_id, []):
+            post = posts.get(post_id)
+            if post is None:
+                continue
+            if str(post["post_type"]) == "original":
+                primary_posts.append(post)
+                continue
+            if str(post["post_type"]) != "reply":
+                continue
+            conversation_root = posts.get(str(post["conversation_id"] or ""))
+            if conversation_root is None:
+                continue
+            author = str(post["author_x_id"] or post["author_handle"]).lower()
+            root_author = str(
+                conversation_root["author_x_id"]
+                or conversation_root["author_handle"]
+            ).lower()
+            if author == root_author:
+                primary_posts.append(post)
+
+        for post in primary_posts:
+            post_id = str(post["post_id"])
+            disclosure_id = str(post["disclosure_post_id"] or post_id)
+            disclosure = posts.get(disclosure_id) or post
+            for evidence in artifact_urls.url_evidence(
+                json.loads(str(post["raw_json"]))
+            ):
+                if evidence.owner_external_id != post_id:
+                    continue
+                preliminary = artifact_urls.classify_candidate(
+                    evidence.observed_url,
+                    evidence.expanded_url,
+                )
+                candidates.append(
+                    {
+                        "envelope_day": str(post["first_discovered_day"]),
+                        "event_id": event_id,
+                        "source_rank": 0,
+                        "day_candidate_count": 0,
+                        "source_kind": "x_post",
+                        "source_provider": str(post["provider"]),
+                        "source_external_id": post_id,
+                        "source_snapshot_sha256": str(post["raw_sha256"]),
+                        "source_url": str(post["url"]),
+                        "disclosure_external_id": str(disclosure["post_id"]),
+                        "disclosure_snapshot_sha256": str(disclosure["raw_sha256"]),
+                        "disclosure_url": str(disclosure["url"]),
+                        "disclosure_published_at": str(disclosure["published_at"]),
+                        "source_published_at": str(post["published_at"]),
+                        "observed_url": evidence.observed_url,
+                        "expanded_url": evidence.expanded_url,
+                        "candidate_source": evidence.source,
+                        "title_hint": "",
+                        "relation": (
+                            "self_publishes"
+                            if preliminary.reason_code == "x_longform_article"
+                            else "links_to"
+                        ),
+                        "forced_failure": None,
+                    }
+                )
+
+    candidates.sort(
+        key=lambda item: (
+            item["envelope_day"],
+            item["event_id"],
+            item["source_published_at"],
+            item["source_external_id"],
+            item["expanded_url"],
         )
-        for row in rows:
-            envelope = json.loads(row["envelope_json"])
-            primary_post_ids = evidence_lineage.verified_primary_post_ids(
-                feed,
-                feed_run_id=feed_run_id,
-                envelope=envelope,
-            )
-            frozen_targets = _candidate_targets(envelope)
-            for post_id in sorted(primary_post_ids):
-                targets = list(frozen_targets.get(post_id, []))
-                post = feed.execute(
-                    """SELECT * FROM feed_post
-                       WHERE run_id = ? AND provider = 'twitterapi_io'
-                         AND post_id = ?""",
-                    (feed_run_id, post_id),
-                ).fetchone()
-                if post is not None:
-                    for evidence in artifact_urls.url_evidence(
-                        json.loads(str(post["raw_json"]))
-                    ):
-                        if evidence.owner_external_id != post_id:
-                            continue
-                        decision = artifact_urls.classify_candidate(
-                            evidence.observed_url,
-                            evidence.expanded_url,
-                        )
-                        targets.append(
-                            {
-                                "url": evidence.expanded_url,
-                                "source": evidence.source,
-                                "title": "",
-                                "kind": (
-                                    "x_article"
-                                    if decision.reason_code == "x_longform_article"
-                                    else ""
-                                ),
-                            }
-                        )
-                    targets_by_url: dict[str, dict[str, str]] = {}
-                    for target in targets:
-                        existing = targets_by_url.get(target["url"])
-                        if existing is None or (
-                            target["kind"] == "x_article"
-                            and existing["kind"] != "x_article"
-                        ):
-                            targets_by_url[target["url"]] = target
-                        elif not existing["title"] and target["title"]:
-                            existing["title"] = target["title"]
-                    targets = list(targets_by_url.values())
-                if not targets:
-                    continue
-                if post is None:
-                    for target in targets:
-                        candidates.append(
-                            {
-                                "envelope_day": day,
-                                "event_id": str(row["event_id"]),
-                                "source_rank": int(row["current_rank"]),
-                                "day_candidate_count": int(meta["expected_count"]),
-                                "source_kind": "x_post",
-                                "source_provider": "twitterapi_io",
-                                "source_external_id": post_id,
-                                "source_snapshot_sha256": "missing",
-                                "source_url": f"https://x.com/i/status/{post_id}",
-                                "disclosure_external_id": post_id,
-                                "disclosure_snapshot_sha256": "missing",
-                                "disclosure_url": f"https://x.com/i/status/{post_id}",
-                                "disclosure_published_at": day,
-                                "source_published_at": day,
-                                "observed_url": target["url"],
-                                "expanded_url": target["url"],
-                                "candidate_source": target["source"],
-                                "title_hint": target["title"],
-                                "relation": "links_to",
-                                "forced_failure": "missing_source_snapshot",
-                            }
-                        )
-                    continue
-                for target in targets:
-                    evidence = _matching_primary_evidence(
-                        str(post["raw_json"]),
-                        target["url"],
-                        post_id=post_id,
-                    )
-                    if evidence is None:
-                        continue
-                    owner = feed.execute(
-                        """SELECT * FROM feed_post
-                           WHERE run_id = ? AND provider = 'twitterapi_io'
-                             AND post_id = ?""",
-                        (feed_run_id, evidence.owner_external_id),
-                    ).fetchone()
-                    if owner is None:
-                        owner = post
-                    disclosure_id = str(owner["disclosure_post_id"] or post_id)
-                    disclosure = feed.execute(
-                        """SELECT * FROM feed_post
-                           WHERE run_id = ? AND provider = 'twitterapi_io'
-                             AND post_id = ?""",
-                        (feed_run_id, disclosure_id),
-                    ).fetchone()
-                    if disclosure is None:
-                        disclosure = post
-                    candidates.append(
-                        {
-                            "envelope_day": day,
-                            "event_id": str(row["event_id"]),
-                            "source_rank": int(row["current_rank"]),
-                            "day_candidate_count": int(meta["expected_count"]),
-                            "source_kind": "x_post",
-                            "source_provider": str(post["provider"]),
-                            "source_external_id": str(owner["post_id"]),
-                            "source_snapshot_sha256": str(owner["raw_sha256"]),
-                            "source_url": str(owner["url"]),
-                            "disclosure_external_id": str(disclosure["post_id"]),
-                            "disclosure_snapshot_sha256": str(
-                                disclosure["raw_sha256"]
-                            ),
-                            "disclosure_url": str(disclosure["url"]),
-                            "disclosure_published_at": str(
-                                disclosure["published_at"]
-                            ),
-                            "source_published_at": str(owner["published_at"]),
-                            "observed_url": evidence.observed_url,
-                            "expanded_url": evidence.expanded_url,
-                            "candidate_source": (
-                                target["source"]
-                                if target["source"] != "envelope_url"
-                                else evidence.source
-                            ),
-                            "title_hint": target["title"],
-                            "relation": (
-                                "self_publishes"
-                                if target["kind"] == "x_article"
-                                else "links_to"
-                            ),
-                            "forced_failure": None,
-                        }
-                    )
-        triage.close()
+    )
+    day_events: dict[str, list[str]] = defaultdict(list)
+    for candidate in candidates:
+        day = str(candidate["envelope_day"])
+        event_id = str(candidate["event_id"])
+        if event_id not in day_events[day]:
+            day_events[day].append(event_id)
+    day_ranks: dict[str, dict[str, int]] = {}
+    if (
+        feed_db.resolve() == Path(signal_feed.DEFAULT_FEED_DB).resolve()
+        and events_db.resolve() == Path(signal_events.DEFAULT_EVENTS_DB).resolve()
+    ):
+        from fli.web import events as event_store
+
+        day_ranks = {
+            day: event_store.current_daily_rank_by_event_id(day=day)
+            for day in day_events
+        }
+    for day, event_ids in day_events.items():
+        fallback = {
+            event_id: rank for rank, event_id in enumerate(event_ids, start=1)
+        }
+        if not day_ranks.get(day):
+            day_ranks[day] = fallback
+        else:
+            next_rank = max(day_ranks[day].values(), default=0) + 1
+            for event_id in event_ids:
+                if event_id not in day_ranks[day]:
+                    day_ranks[day][event_id] = next_rank
+                    next_rank += 1
+    for candidate in candidates:
+        day = str(candidate["envelope_day"])
+        candidate["source_rank"] = day_ranks[day][str(candidate["event_id"])]
+        candidate["day_candidate_count"] = len(day_ranks[day])
+
+    manifest = {
+        "feed_run_id": feed_run_id,
+        "event_run_id": event_run_id,
+        "selection_policy": PRIMARY_AUTHOR_SELECTION_POLICY,
+        "candidate_days": {
+            day: len(event_ids) for day, event_ids in sorted(day_events.items())
+        },
+    }
+    events.close()
     feed.close()
     return candidates, manifest
 
@@ -768,31 +677,20 @@ def _candidate_identity(candidate: dict[str, Any]) -> list[Any]:
     ]
 
 
-def import_kept_envelopes(
+def import_feed_envelopes(
     *,
     db_path: Path | str = DEFAULT_DB,
     feed_db: Path | str = signal_feed.DEFAULT_FEED_DB,
     events_db: Path | str = signal_events.DEFAULT_EVENTS_DB,
-    triage_root: Path | str = DEFAULT_TRIAGE_ROOT,
 ) -> dict[str, Any]:
     feed_path = Path(feed_db)
     events_path = Path(events_db)
-    triage_path = Path(triage_root)
     event_run, feed_run = _published_context(events_path, feed_path)
-    start = datetime.fromisoformat(str(feed_run["date_from"])).date()
-    end = datetime.fromisoformat(str(feed_run["date_to"])).date()
-    days = []
-    current = start
-    while current <= end:
-        days.append(current.isoformat())
-        current += timedelta(days=1)
-    triage_runs = [
-        (day, *_latest_complete_triage_run(triage_path, day)) for day in days
-    ]
-    candidates, manifest = _iter_frozen_candidates(
+    candidates, manifest = _iter_feed_candidates(
         feed_db=feed_path,
         feed_run_id=str(feed_run["run_id"]),
-        triage_runs=triage_runs,
+        events_db=events_path,
+        event_run_id=str(event_run["run_id"]),
     )
     candidates = list(
         {
@@ -807,7 +705,7 @@ def import_kept_envelopes(
                 "feed_run_id": feed_run["run_id"],
                 "event_run_id": event_run["run_id"],
                 "canonicalization_contract": artifact_urls.CANONICALIZATION_CONTRACT,
-                "triage": manifest,
+                "source_manifest": manifest,
                 "candidates": candidates,
             }
         )
@@ -827,7 +725,7 @@ def import_kept_envelopes(
         conn.close()
         return result
 
-    stable_time = max(str(item[2]["updated_at"]) for item in triage_runs)
+    stable_time = str(event_run["created_at"])
     conn.execute(
         """INSERT INTO artifact_import_run
            (import_run_id, schema_version, canonicalization_contract,
@@ -969,9 +867,7 @@ def import_kept_envelopes(
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                            ON CONFLICT(observation_id) DO UPDATE SET
                                artifact_id = excluded.artifact_id,
-                               best_source_rank = MIN(
-                                   best_source_rank, excluded.best_source_rank
-                               ),
+                               best_source_rank = excluded.best_source_rank,
                                first_envelope_day = MIN(
                                    first_envelope_day, excluded.first_envelope_day
                                ),
@@ -1046,6 +942,38 @@ def import_kept_envelopes(
                SET accepted_count = ?, excluded_count = ?, failed_count = ?
                WHERE import_run_id = ?""",
             (counts["accepted"], counts["excluded"], counts["failed"], import_run_id),
+        )
+        conn.execute(
+            """DELETE FROM artifact_observation AS observation
+               WHERE NOT EXISTS (
+                   SELECT 1
+                   FROM artifact_import_candidate AS candidate
+                   WHERE candidate.import_run_id = ?
+                     AND candidate.decision = 'accepted'
+                     AND candidate.artifact_id = observation.artifact_id
+                     AND candidate.source_kind = observation.source_kind
+                     AND candidate.source_provider = observation.source_provider
+                     AND candidate.source_external_id = observation.source_external_id
+                     AND candidate.source_snapshot_sha256 = observation.source_snapshot_sha256
+                     AND candidate.observed_url = observation.observed_url
+                     AND candidate.relation = observation.relation
+               )""",
+            (import_run_id,),
+        )
+        conn.execute(
+            "DELETE FROM artifact_import_run WHERE import_run_id != ?",
+            (import_run_id,),
+        )
+        conn.execute(
+            """DELETE FROM artifact
+               WHERE NOT EXISTS (
+                   SELECT 1 FROM artifact_observation
+                   WHERE artifact_observation.artifact_id = artifact.artifact_id
+               )
+                 AND NOT EXISTS (
+                   SELECT 1 FROM artifact_event_supplement
+                   WHERE artifact_event_supplement.artifact_id = artifact.artifact_id
+               )"""
         )
     result = dict(
         conn.execute(
@@ -1825,11 +1753,13 @@ def main(argv: list[str] | None = None) -> int:
     command = "artifacts"
     parser = sources.JsonArgumentParser(prog="fli artifacts")
     sub = parser.add_subparsers(dest="action", required=True)
-    import_parser = sub.add_parser("import-kept", help="Index URLs from kept envelopes.")
+    import_parser = sub.add_parser(
+        "import-feed",
+        help="Index primary-author URLs from the published Feed envelopes.",
+    )
     import_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     import_parser.add_argument("--feed-db", type=Path, default=signal_feed.DEFAULT_FEED_DB)
     import_parser.add_argument("--events-db", type=Path, default=signal_events.DEFAULT_EVENTS_DB)
-    import_parser.add_argument("--triage-root", type=Path, default=DEFAULT_TRIAGE_ROOT)
     _add_output_arguments(import_parser)
     supplement_parser = sub.add_parser(
         "import-reviewed-supplements",
@@ -1906,12 +1836,11 @@ def main(argv: list[str] | None = None) -> int:
         parsed_limit = getattr(args, "limit", None)
         if parsed_limit is not None and parsed_limit <= 0:
             raise ValueError("limit must be greater than zero")
-        if args.action == "import-kept":
-            data = import_kept_envelopes(
+        if args.action == "import-feed":
+            data = import_feed_envelopes(
                 db_path=args.db,
                 feed_db=args.feed_db,
                 events_db=args.events_db,
-                triage_root=args.triage_root,
             )
         elif args.action == "import-reviewed-supplements":
             data = import_reviewed_supplements(

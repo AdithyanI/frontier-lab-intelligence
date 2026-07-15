@@ -160,7 +160,7 @@ Commands are non-interactive and emit a stable JSON envelope by default. Use
 `--plain` only for local inspection.
 
 ```bash
-fli artifacts import-kept --no-input
+fli artifacts import-feed --no-input
 fli artifacts import-reviewed-supplements \
   --manifest path/to/supplements.json \
   --triage-db path/to/triage.db \
@@ -221,15 +221,17 @@ artifact content; those are later cited-insight responsibilities.
 ## Current primary-author rebuild
 
 The 2026-07-15 clean rebuild applied
-`kept-envelope-primary-author-thread-artifacts-v1` across the complete stored
-Feed. It produced 1,897 candidate decisions (1,859 accepted and 38 excluded),
-1,432 source observations/disclosures, and 1,334 canonical artifacts. A
+`feed-envelope-primary-author-thread-artifacts-v1` across the complete stored
+Feed. It produced 3,384 candidate decisions (3,035 accepted and 349 excluded),
+3,035 source observations/disclosures, and 2,703 canonical artifacts. A
 corpus-wide lineage audit found zero foreign-author or wrong-conversation rows
-and zero missing source/root records. The repeatable `audit-lineage` guard also
-found zero unbound raw URLs, stale snapshots, orphan observations, undisclosed
-observations, or artifacts without lineage. The clean store retained 32
-still-eligible successful snapshots, including all 22 fetched X Articles; old
-failures and reviewed supplements were not carried forward.
+and zero missing source/root records. Root posts and same-author replies are
+selected directly from the published Feed/Event pair; no keep/drop or audience
+routing database participates in artifact discovery. The repeatable
+`audit-lineage` guard also found zero unbound raw URLs, stale snapshots, orphan
+observations, undisclosed observations, or artifacts without lineage. Later
+imports prune observations absent from the current Feed/Event snapshot while
+retaining successful content snapshots for canonical artifacts that remain.
 
 Anthropic's global-workspace envelope retains the Anthropic research page and
 the later Neuronpedia demo linked from Anthropic's own reply thread. Satya

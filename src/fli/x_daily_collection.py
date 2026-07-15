@@ -296,7 +296,8 @@ def freeze_run(
     cohort, excluded = _cohort(registry_path)
     cohort_sha = _sha256(_canonical_json(cohort))
     run_id = run_id or (
-        f"x-daily-{start.isoformat()}-{end.isoformat()}-{cohort_sha[:12]}"
+        f"x-daily-{start.isoformat()}-{end.isoformat()}-"
+        f"{_sha256(_canonical_json([COLLECTION_CONTRACT, cohort_sha]))[:12]}"
     )
     now = _now()
     conn = connect_manifest(manifest_path)

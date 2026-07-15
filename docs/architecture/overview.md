@@ -303,10 +303,13 @@ Unicode-replacement placeholders. This produces the terminal reason
 garbage-text heuristic. Ordinary fetches, Jina recoveries, and X Articles use
 the same check. Repository and video support remain unchanged and deferred.
 The
-2026-07-15 primary-author rebuild indexes 1,334 canonical artifacts and 1,432
-source observations from 1,897 decisions, with zero foreign-author or
-wrong-conversation lineage violations across the stored Feed. It retains 32
-still-eligible successful snapshots, including 22 X Articles. Broad crawling,
+2026-07-15 reply-inclusive primary-author rebuild indexes 2,703 canonical
+artifacts and 3,035 source observations from 3,384 decisions, with zero
+foreign-author or wrong-conversation lineage violations across the stored
+Feed. Artifact discovery reads the published Feed/Event pair directly and does
+not depend on keep/drop or audience-routing data. Later imports prune stale
+observations while retaining successful fetch snapshots for canonical
+artifacts that remain current. Broad crawling,
 RSS/GitHub adapters and cited-insight generation remain deferred. The web
 layer now exposes the live catalog through read-only `/api/artifacts/dates`
 and `/api/artifacts` projections plus a minimal `/evidence/artifacts` index. The shared
@@ -577,6 +580,7 @@ fli x-daily-collection execute --start-day YYYY-MM-DD --end-day YYYY-MM-DD --no-
 fli x-daily-collection status --run-id <id> --no-input --json
 fli signal-feed refresh --days 7 [--through YYYY-MM-DD]
 fli signal-events refresh --publish
+fli evidence-refresh --through YYYY-MM-DD --days 9 --workers 32 --json
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
@@ -1185,6 +1189,7 @@ final score.
 | `fli.conference_sources` | manifest-driven official conference snapshots, exact-X identity reconciliation, lean current role/bio/affiliation import, resumable raw profile hydration, unavailable-account rejection, and following-snapshot profile seeding |
 | `fli.x_content` | immutable raw provider responses and `x_post_observation` history, plus mutable latest-post convenience rows and exact post bundles |
 | `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
+| `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, and bounded supported artifact extraction |
 | `fli.signal_feed` | content-addressed `signal-feed-v9` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v4` exact structural components with same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |

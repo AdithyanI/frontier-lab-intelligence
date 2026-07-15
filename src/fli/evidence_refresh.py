@@ -1,0 +1,184 @@
+"""One resumable refresh path for Evidence, envelopes, and primary artifacts."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from typing import Any
+
+from fli import (
+    artifact_fetch,
+    artifact_x_articles,
+    artifacts,
+    signal_events,
+    signal_feed,
+    sources,
+    store,
+    x_content,
+    x_daily_collection,
+)
+
+
+def _day(value: str | date) -> date:
+    return value if isinstance(value, date) else datetime.strptime(value, "%Y-%m-%d").date()
+
+
+def refresh_evidence(
+    *,
+    through: str | date,
+    days: int = 9,
+    workers: int = 32,
+    artifact_limit: int = 30,
+    x_article_limit: int = 20,
+    reader_fallback: bool = True,
+    collect: bool = True,
+    registry_db: Path | str = store.DEFAULT_DB_PATH,
+    raw_db: Path | str = x_content.DEFAULT_DB_PATH,
+    collection_db: Path | str = x_daily_collection.DEFAULT_MANIFEST_PATH,
+    feed_db: Path | str = signal_feed.DEFAULT_FEED_DB,
+    events_db: Path | str = signal_events.DEFAULT_EVENTS_DB,
+    artifact_db: Path | str = artifacts.DEFAULT_DB,
+    key_file: Path = sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+) -> dict[str, Any]:
+    """Refresh every deterministic Evidence stage, reusing valid cached work."""
+    end = _day(through)
+    if days < 1 or days > 90:
+        raise ValueError("days must be between 1 and 90")
+    if workers < 1 or workers > 64:
+        raise ValueError("workers must be between 1 and 64")
+    if artifact_limit < 0 or x_article_limit < 0:
+        raise ValueError("artifact limits cannot be negative")
+    start = end - timedelta(days=days - 1)
+
+    collection: dict[str, Any]
+    if collect:
+        client = x_content.create_client(
+            db_path=raw_db,
+            key_file=key_file.expanduser(),
+            timeout=30.0,
+            page_sleep_seconds=0.0,
+        )
+        try:
+            collection = x_daily_collection.execute_collection(
+                client=client,
+                registry_path=registry_db,
+                raw_path=raw_db,
+                manifest_path=collection_db,
+                start_day=start,
+                end_day=end,
+                workers=workers,
+            )
+        finally:
+            client.close()
+        if int(collection.get("failures", 0)) or int(
+            collection.get("unfinished_accounts", 0)
+        ):
+            raise RuntimeError(
+                "X collection is incomplete; resume the same refresh after fixing "
+                "the reported account failures."
+            )
+    else:
+        collection = {
+            "status": "skipped",
+            "start_day": start.isoformat(),
+            "end_day": end.isoformat(),
+        }
+
+    feed = signal_feed.materialize(
+        source_db=raw_db,
+        feed_db=feed_db,
+        through=end,
+        days=days,
+    )
+    events = signal_events.materialize(
+        feed_db=feed_db,
+        events_db=events_db,
+        feed_run_id=str(feed["run_id"]),
+    )
+    publication = signal_events.publish(
+        events_db=events_db,
+        feed_db=feed_db,
+        event_run_id=str(events["run_id"]),
+    )
+    catalog = artifacts.import_feed_envelopes(
+        db_path=artifact_db,
+        feed_db=feed_db,
+        events_db=events_db,
+    )
+
+    content: dict[str, Any] | None = None
+    if artifact_limit:
+        content = artifact_fetch.fetch_cohort(
+            db_path=artifact_db,
+            limit=artifact_limit,
+        )
+    x_articles: dict[str, Any] | None = None
+    if x_article_limit:
+        x_articles = artifact_x_articles.fetch_x_articles(
+            db_path=artifact_db,
+            limit=x_article_limit,
+            key_file=key_file.expanduser(),
+        )
+    fallback: dict[str, Any] | None = None
+    if reader_fallback and artifact_limit:
+        fallback = artifact_fetch.recover_with_jina_reader(db_path=artifact_db)
+
+    return {
+        "range": {"start_day": start.isoformat(), "end_day": end.isoformat()},
+        "collection": collection,
+        "feed": feed,
+        "events": events,
+        "publication": publication,
+        "artifacts": catalog,
+        "content_fetch": content,
+        "x_article_fetch": x_articles,
+        "reader_fallback": fallback,
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="fli evidence-refresh",
+        description=(
+            "Refresh raw X evidence, Feed envelopes, primary links, and supported "
+            "artifact text with cache reuse at every stage."
+        ),
+    )
+    parser.add_argument("--through", required=True, help="Latest complete UTC day.")
+    parser.add_argument("--days", type=int, default=9)
+    parser.add_argument("--workers", type=int, default=32)
+    parser.add_argument("--artifact-limit", type=int, default=30)
+    parser.add_argument("--x-article-limit", type=int, default=20)
+    parser.add_argument("--skip-collection", action="store_true")
+    parser.add_argument("--no-reader-fallback", action="store_true")
+    parser.add_argument("--key-file", type=Path, default=sources.DEFAULT_TWITTERAPI_IO_KEY_FILE)
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args(argv)
+    try:
+        result = refresh_evidence(
+            through=args.through,
+            days=args.days,
+            workers=args.workers,
+            artifact_limit=args.artifact_limit,
+            x_article_limit=args.x_article_limit,
+            reader_fallback=not args.no_reader_fallback,
+            collect=not args.skip_collection,
+            key_file=args.key_file,
+        )
+    except Exception as exc:
+        payload = {
+            "status": "error",
+            "command": "evidence-refresh",
+            "error": {"code": type(exc).__name__, "message": str(exc)},
+        }
+        print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+        return 1
+    payload = {"status": "ok", "command": "evidence-refresh", "data": result}
+    print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
