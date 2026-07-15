@@ -212,7 +212,7 @@ Application invariants:
 | done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
 | done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
 | done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
-| in_progress | Review the exact, unexecuted Satya v2 request with Adi; run it only after the hierarchical input is accepted. | parent | `resources/satya-routing-v2-attempt.md`; `../../../src/fli/prompts/audience_routing_v2.txt` |
+| in_progress | Review the completed Satya v2 result with Adi before routing the next kept envelope. | parent | `resources/satya-routing-v2-result.md`; `resources/satya-routing-v2-attempt.md` |
 
 ## Backlog / Remaining Work
 
@@ -282,3 +282,10 @@ Application invariants:
   runtime prompt and rendered input, including its hashes and 8-reaction
   count. `scripts/check-fast.sh` passed with 473 Python and 37 frontend tests;
   the four existing Fast Refresh lint warnings remain non-blocking.
+- 2026-07-15: [IN-PROGRESS] With Adi's explicit approval, ran exactly the
+  reviewed Satya v2 request through Luna-medium. Both audiences were relevant.
+  The call used 3,171 input and 119 output tokens, cost $0.003885, and completed
+  in 4.172 seconds. It reported zero cache reads and zero cache-write tokens,
+  so caching remains unproven until one approved next envelope reuses the same
+  prefix. SQLite integrity is `ok`; exact results are in
+  `resources/satya-routing-v2-result.md`.
