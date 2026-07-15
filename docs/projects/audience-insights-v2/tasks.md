@@ -376,6 +376,7 @@ finish with an honest quality assessment, limitations, and the next best test.
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Remove reaction evidence from artifact admission and Insight packets; rebuild associations and prove the Satya/Eve envelope resolves only to Satya's primary evidence. | parent | `data/derived/artifacts/artifacts.db` |
+| done | Add a deterministic primary-author lineage audit, fail closed on envelope-only URLs, guard local catalogs in `check-fast`, and remove empty legacy Artifact DB placeholders. | parent | `fli artifacts audit-lineage --no-input` |
 | in_progress | Agree the minimal canonical result schema and first audience-classification/extraction prompt with Adi; do not regenerate data ahead of that review. | parent | `resources/audience-contracts.md` |
 | done | Remove all generated Audience Insights v2 databases and dependent run artifacts while preserving code and durable learnings. | parent | `data/derived/audience-insights-v2/` |
 
@@ -423,6 +424,13 @@ finish with an honest quality assessment, limitations, and the next best test.
   found zero foreign-author/wrong-conversation rows and zero missing records.
   Anthropic retains both its research page and later Neuronpedia reply link;
   Satya retains his X Article and no Eve reaction artifact.
+- 2026-07-15: [ARTIFACT HARNESS] Promoted the one-off lineage review into
+  `fli artifacts audit-lineage --no-input`, a read-only versioned JSON command
+  with a nonzero integrity exit. It checks the complete active catalog for
+  author/conversation drift, raw-URL ownership, stale snapshots, orphaned
+  observations, missing disclosures, and artifacts without provenance. The
+  live 1,859-candidate / 1,432-observation catalog passes with zero violations;
+  `check-fast` now enforces the audit when local derived data exists.
 - 2026-07-15: [DATA RESET] At Adi's explicit direction, deleted the untracked
   171 MB generated Audience Insights v2 tree: 419 derived files including 128
   SQLite databases, plus dependent audit/finalization/calibration/recall output.

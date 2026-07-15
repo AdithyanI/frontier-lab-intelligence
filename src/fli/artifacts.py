@@ -9,7 +9,7 @@ import sqlite3
 import sys
 import time
 import uuid
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -462,8 +462,8 @@ def _candidate_targets(envelope: dict[str, Any]) -> dict[str, list[dict[str, str
 
 
 def _matching_evidence(
-    raw_json: str, target_url: str, *, fallback_owner_external_id: str
-) -> artifact_urls.UrlEvidence:
+    raw_json: str, target_url: str
+) -> artifact_urls.UrlEvidence | None:
     payload = json.loads(raw_json)
     evidence = artifact_urls.url_evidence(payload)
     for item in evidence:
@@ -480,20 +480,18 @@ def _matching_evidence(
                     return item
             except ValueError:
                 continue
-    return artifact_urls.UrlEvidence(
-        target_url, target_url, "envelope", fallback_owner_external_id
-    )
+    return None
 
 
 def _matching_primary_evidence(
     raw_json: str, target_url: str, *, post_id: str
 ) -> artifact_urls.UrlEvidence | None:
-    evidence = _matching_evidence(
-        raw_json,
-        target_url,
-        fallback_owner_external_id=post_id,
+    evidence = _matching_evidence(raw_json, target_url)
+    return (
+        evidence
+        if evidence is not None and evidence.owner_external_id == post_id
+        else None
     )
-    return evidence if evidence.owner_external_id == post_id else None
 
 
 def _iter_frozen_candidates(
@@ -1469,6 +1467,235 @@ def converge_artifact(
     return target_id
 
 
+def audit_primary_author_lineage(
+    *,
+    db_path: Path | str = DEFAULT_DB,
+    feed_db: Path | str = signal_feed.DEFAULT_FEED_DB,
+) -> dict[str, Any]:
+    """Verify that the live catalog is derivable from primary-account posts."""
+
+    catalog = _open_readonly(Path(db_path))
+    import_run = catalog.execute(
+        """SELECT * FROM artifact_import_run
+           ORDER BY completed_at DESC, import_run_id DESC LIMIT 1"""
+    ).fetchone()
+    if import_run is None:
+        catalog.close()
+        raise ValueError("artifact catalog has no import run to audit")
+
+    candidates = catalog.execute(
+        """SELECT * FROM artifact_import_candidate
+           WHERE import_run_id = ? AND decision = 'accepted'
+           ORDER BY candidate_id""",
+        (import_run["import_run_id"],),
+    ).fetchall()
+    observations = catalog.execute(
+        """SELECT observation_id, artifact_id, source_external_id,
+                  source_snapshot_sha256, observed_url
+           FROM artifact_observation
+           ORDER BY observation_id"""
+    ).fetchall()
+    artifacts_without_lineage = catalog.execute(
+        """SELECT artifact_id FROM artifact artifact_row
+           WHERE NOT EXISTS (
+               SELECT 1 FROM artifact_observation observation
+               WHERE observation.artifact_id = artifact_row.artifact_id
+           ) AND NOT EXISTS (
+               SELECT 1 FROM artifact_event_supplement supplement
+               WHERE supplement.artifact_id = artifact_row.artifact_id
+           )
+           ORDER BY artifact_id"""
+    ).fetchall()
+    observations_without_disclosure = catalog.execute(
+        """SELECT observation_id, source_external_id
+           FROM artifact_observation observation
+           WHERE NOT EXISTS (
+               SELECT 1 FROM artifact_disclosure disclosure
+               WHERE disclosure.observation_id = observation.observation_id
+           )
+           ORDER BY observation_id"""
+    ).fetchall()
+    artifact_count = int(catalog.execute("SELECT COUNT(*) FROM artifact").fetchone()[0])
+    supplement_count = int(
+        catalog.execute("SELECT COUNT(*) FROM artifact_event_supplement").fetchone()[0]
+    )
+    catalog.close()
+
+    violations: list[dict[str, str]] = []
+
+    def add_violation(
+        reason_code: str,
+        *,
+        candidate_id: str = "",
+        event_id: str = "",
+        root_external_id: str = "",
+        source_external_id: str = "",
+    ) -> None:
+        violations.append(
+            {
+                "reason_code": reason_code,
+                "candidate_id": candidate_id,
+                "event_id": event_id,
+                "root_external_id": root_external_id,
+                "source_external_id": source_external_id,
+            }
+        )
+
+    selection_policy = str(import_run["selection_policy"])
+    if selection_policy != PRIMARY_AUTHOR_SELECTION_POLICY:
+        add_violation("unexpected_selection_policy")
+
+    event_roots: dict[tuple[str, str], str] = {}
+    for run in json.loads(str(import_run["triage_runs_json"])):
+        run_day = str(run["day"])
+        triage_path = Path(str(run["path"]))
+        if not triage_path.is_absolute():
+            triage_path = REPO_ROOT / triage_path
+        if not triage_path.is_file():
+            add_violation("missing_triage_db")
+            continue
+        triage = _open_readonly(triage_path)
+        for row in triage.execute(
+            """SELECT event_id, envelope_json FROM triage_item
+               WHERE status = 'complete' AND decision = 'keep'
+               ORDER BY event_id"""
+        ).fetchall():
+            event_id = str(row["event_id"])
+            root_id = str(json.loads(str(row["envelope_json"]))["root"]["post_id"])
+            event_key = (run_day, event_id)
+            existing = event_roots.get(event_key)
+            if existing is not None and existing != root_id:
+                add_violation(
+                    "conflicting_event_root",
+                    event_id=event_id,
+                    root_external_id=root_id,
+                )
+            else:
+                event_roots[event_key] = root_id
+        triage.close()
+
+    feed = _open_readonly(Path(feed_db))
+    feed_rows = {
+        str(row["post_id"]): row
+        for row in feed.execute(
+            """SELECT post_id, author_x_id, conversation_id, post_type,
+                      raw_sha256, raw_json
+               FROM feed_post
+               WHERE run_id = ? AND provider = 'twitterapi_io'
+               ORDER BY post_id""",
+            (import_run["source_feed_run_id"],),
+        ).fetchall()
+    }
+    feed.close()
+
+    accepted_observation_keys: set[tuple[str, str, str, str]] = set()
+    for candidate in candidates:
+        candidate_id = str(candidate["candidate_id"])
+        event_id = str(candidate["event_id"])
+        envelope_day = str(candidate["envelope_day"])
+        source_id = str(candidate["source_external_id"])
+        root_id = event_roots.get((envelope_day, event_id), "")
+        common = {
+            "candidate_id": candidate_id,
+            "event_id": event_id,
+            "root_external_id": root_id,
+            "source_external_id": source_id,
+        }
+        if str(candidate["source_kind"]) != "x_post" or str(
+            candidate["source_provider"]
+        ) != "twitterapi_io":
+            add_violation("unexpected_source_provider", **common)
+        if candidate["artifact_id"] is None:
+            add_violation("accepted_candidate_missing_artifact", **common)
+        if not root_id:
+            add_violation("missing_event_envelope", **common)
+            continue
+        root = feed_rows.get(root_id)
+        if root is None:
+            add_violation("missing_root_post", **common)
+            continue
+        source = feed_rows.get(source_id)
+        if source is None:
+            add_violation("missing_source_post", **common)
+            continue
+        if str(source["raw_sha256"]) != str(candidate["source_snapshot_sha256"]):
+            add_violation("stale_source_snapshot", **common)
+        if source_id != root_id:
+            root_author = str(root["author_x_id"] or "")
+            source_author = str(source["author_x_id"] or "")
+            if not root_author or source_author != root_author:
+                add_violation("foreign_author", **common)
+            if str(source["post_type"] or "") != "reply":
+                add_violation("non_reply_continuation", **common)
+            root_conversation = str(root["conversation_id"] or root_id)
+            source_conversation = str(source["conversation_id"] or source_id)
+            if source_conversation != root_conversation:
+                add_violation("wrong_conversation", **common)
+        if _matching_primary_evidence(
+            str(source["raw_json"]),
+            str(candidate["expanded_url"]),
+            post_id=source_id,
+        ) is None:
+            add_violation("unbound_source_url", **common)
+        accepted_observation_keys.add(
+            (
+                str(candidate["artifact_id"]),
+                source_id,
+                str(candidate["source_snapshot_sha256"]),
+                str(candidate["observed_url"]),
+            )
+        )
+
+    for observation in observations:
+        key = (
+            str(observation["artifact_id"]),
+            str(observation["source_external_id"]),
+            str(observation["source_snapshot_sha256"]),
+            str(observation["observed_url"]),
+        )
+        if key not in accepted_observation_keys:
+            add_violation(
+                "orphan_observation",
+                source_external_id=str(observation["source_external_id"]),
+            )
+    for row in artifacts_without_lineage:
+        add_violation(
+            "artifact_without_lineage",
+            candidate_id=str(row["artifact_id"]),
+        )
+    for row in observations_without_disclosure:
+        add_violation(
+            "observation_without_disclosure",
+            candidate_id=str(row["observation_id"]),
+            source_external_id=str(row["source_external_id"]),
+        )
+    violations.sort(
+        key=lambda item: (
+            item["reason_code"],
+            item["event_id"],
+            item["source_external_id"],
+            item["candidate_id"],
+        )
+    )
+    reason_counts = dict(sorted(Counter(v["reason_code"] for v in violations).items()))
+    return {
+        "passed": not violations,
+        "import_run_id": str(import_run["import_run_id"]),
+        "source_feed_run_id": str(import_run["source_feed_run_id"]),
+        "selection_policy": selection_policy,
+        "counts": {
+            "accepted_candidates": len(candidates),
+            "artifacts": artifact_count,
+            "observations": len(observations),
+            "reviewed_supplements": supplement_count,
+            "violations": len(violations),
+        },
+        "violation_reasons": reason_counts,
+        "violations": violations[:100],
+        "violations_truncated": len(violations) > 100,
+    }
+
+
 def summary(conn: sqlite3.Connection) -> dict[str, Any]:
     counts = {
         "imports": int(conn.execute("SELECT COUNT(*) FROM artifact_import_run").fetchone()[0]),
@@ -1641,6 +1868,15 @@ def main(argv: list[str] | None = None) -> int:
     inspect_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     inspect_parser.add_argument("--limit", type=int, default=20)
     _add_output_arguments(inspect_parser)
+    audit_parser = sub.add_parser(
+        "audit-lineage",
+        help="Verify that live artifacts come only from primary-account posts.",
+    )
+    audit_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    audit_parser.add_argument(
+        "--feed-db", type=Path, default=signal_feed.DEFAULT_FEED_DB
+    )
+    _add_output_arguments(audit_parser)
     fetch_parser = sub.add_parser("fetch", help="Fetch a bounded artifact cohort.")
     fetch_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     fetch_parser.add_argument("--limit", type=int, default=None)
@@ -1739,6 +1975,32 @@ def main(argv: list[str] | None = None) -> int:
                 conn, fetch_run_id=args.fetch_run_id
             )
             conn.close()
+        elif args.action == "audit-lineage":
+            data = audit_primary_author_lineage(
+                db_path=args.db,
+                feed_db=args.feed_db,
+            )
+            if not data["passed"]:
+                _print_result(
+                    _result(
+                        command=command,
+                        status="error",
+                        data=data,
+                        error={
+                            "code": "E_INTEGRITY",
+                            "message": "Artifact primary-author lineage audit failed.",
+                            "retryable": False,
+                            "hint": (
+                                "Inspect data.violation_reasons and rebuild the "
+                                "catalog from the canonical Feed."
+                            ),
+                        },
+                        started=started,
+                        request_id=request_id,
+                    ),
+                    plain=args.plain,
+                )
+                return 1
         else:
             conn = connect(args.db)
             if args.action == "summary":

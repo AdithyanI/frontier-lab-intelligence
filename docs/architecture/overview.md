@@ -263,8 +263,12 @@ account in the same conversation. Other authors' replies, quotes, retweets, and
 nested links remain visible reactions but cannot create artifact associations
 or enter Insight evidence. Conversation identity spans locally missing
 intermediate replies without relaxing the author boundary. Eligible URLs are
-bound to the post that actually contains them and indexed without fetching the
-whole corpus.
+bound to the post that actually contains them in the immutable raw payload and
+indexed without fetching the whole corpus; an envelope-only preview fails
+closed. The read-only `fli artifacts audit-lineage` command mechanically checks
+the active policy, author/conversation identity, snapshot hashes, raw URL
+ownership, observation support, disclosure presence, and artifact provenance.
+The fast repo check runs it whenever the local derived catalog exists.
 Ordinary
 X status/profile/media URLs remain source evidence; X long-form Articles are
 the explicit artifact exception. Conservative `artifact-url-v1`

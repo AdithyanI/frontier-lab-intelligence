@@ -86,6 +86,16 @@ if find src tests -type f -name '*.py' 2>/dev/null | grep -q .; then
   fi
 fi
 
+# A local Artifact Store is optional in clean clones. When present, prove that
+# every live observation still resolves to the primary X account's raw post or
+# one of that account's replies in the same conversation.
+artifact_db="data/derived/artifacts/artifacts.db"
+if [ -f "$artifact_db" ]; then
+  "$PYTHON" -m fli.cli artifacts audit-lineage \
+    --db "$artifact_db" \
+    --no-input >/dev/null
+fi
+
 if [ -f frontend/package.json ]; then
   npm --prefix frontend run test --if-present
   npm --prefix frontend run lint
