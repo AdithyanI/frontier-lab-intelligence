@@ -24,7 +24,14 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
                 "text": "An independently authored reaction.",
                 "relationship": "quote",
                 "same_author_as_root": False,
-            }
+            },
+            {
+                "post_id": "post-3",
+                "author": {"handle": "alice"},
+                "text": "RT @bob: An independently authored reaction.",
+                "relationship": "retweet",
+                "same_author_as_root": True,
+            },
         ],
     }
     monkeypatch.setattr(

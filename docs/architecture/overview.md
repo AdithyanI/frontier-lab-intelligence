@@ -286,8 +286,9 @@ expanded form as an alias, and never merges different URLs solely by content
 hash. Stable source-kind/provider/external-ID/snapshot observations preserve
 provenance independently of mutable event projections.
 
-`fli.artifact_fetch` freezes a bounded, stratified top-ranked cohort and
-fetches it through a one-worker public-network safety boundary. Manual
+`fli.artifact_fetch` supports both frozen validation cohorts and a complete
+current-catalog pass. Complete retrieval is sequential per origin and parallel
+across independent hosts. Manual
 redirects, DNS checks, robots, size/time limits, append-only attempts, explicit
 retryable/terminal errors, and content-addressed raw/text snapshots make the
 stage resumable and replayable. HTML uses Trafilatura, PDFs use pypdf, and
@@ -302,14 +303,16 @@ Unicode-replacement placeholders. This produces the terminal reason
 `extraction_placeholder_content`; it is deliberately not a general
 garbage-text heuristic. Ordinary fetches, Jina recoveries, and X Articles use
 the same check. Repository and video support remain unchanged and deferred.
-The
-2026-07-15 reply-inclusive primary-author rebuild indexes 2,703 canonical
-artifacts and 3,035 source observations from 3,384 decisions, with zero
+The 2026-07-15 reply-inclusive primary-author rebuild indexes 3,087 source
+observations from 3,210 decisions, with zero
 foreign-author or wrong-conversation lineage violations across the stored
 Feed. Artifact discovery reads the published Feed/Event pair directly and does
 not depend on keep/drop or audience-routing data. Later imports prune stale
 observations while retaining successful fetch snapshots for canonical
-artifacts that remain current. Broad crawling,
+artifacts that remain current. Redirect convergence leaves 2,735 canonical
+artifacts: 2,507 have usable text, including all 221 arXiv artifacts and all
+167 X Articles. Videos remain deferred; 65 non-video pages are unavailable or
+retryable. Broad crawling,
 RSS/GitHub adapters and cited-insight generation remain deferred. The web
 layer now exposes the live catalog through read-only `/api/artifacts/dates`
 and `/api/artifacts` projections plus a minimal `/evidence/artifacts` index. The shared
@@ -1189,12 +1192,13 @@ final score.
 | `fli.conference_sources` | manifest-driven official conference snapshots, exact-X identity reconciliation, lean current role/bio/affiliation import, resumable raw profile hydration, unavailable-account rejection, and following-snapshot profile seeding |
 | `fli.x_content` | immutable raw provider responses and `x_post_observation` history, plus mutable latest-post convenience rows and exact post bundles |
 | `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
-| `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, and bounded supported artifact extraction |
+| `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, and complete supported artifact extraction |
 | `fli.signal_feed` | content-addressed `signal-feed-v9` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v4` exact structural components with same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
 | `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, sequential execution, and resumable cache/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
+| `fli.artifact_arxiv` | official batch-feed title, author, category, date, and abstract extraction for catalogued arXiv papers; PDFs remain optional future work |
 | `fli.cited_insights` / `fli.cited_insight_runs` | historical minimal `insight-v1.1` proof: frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
 | `fli.audience_insights` / `fli.audience_insight_runs` | independent Investment and AI Engineering extraction/schema/cache contracts, exact citation binding, resumable attempt ledgers, all-five-pass item filtering, ID-only daily editing, day-set review, and audited-history inputs |
 | `fli.audience_insight_publication_audit` | isolated rank-blind selected/reject audit, hash-bound false-negative adjudication, and immutable publication-disqualification sidecars |

@@ -475,3 +475,10 @@ Application invariants:
   The focused frontend suite, production build, and rendered check against the
   first prompt-design envelope all pass, with the linked Satya envelope visible
   at its stable daily rank #2.
+- 2026-07-15: [VALIDATED] Completed the clean primary-artifact expansion. The
+  zero-violation catalog has 3,087 observations and converges to 2,735
+  artifacts; 2,507 have usable text. All 221 arXiv artifacts use batch
+  metadata/abstract text and all 167 X Articles are cached locally. Videos are
+  the only structurally deferred kind; 65 non-video pages remain unavailable
+  or retryable. `fli evidence-refresh` performs this supported pass by default
+  with one artifact store and source-specific adapters hidden behind one CLI.

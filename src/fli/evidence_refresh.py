@@ -137,7 +137,10 @@ def refresh_evidence(
         )
     fallback: dict[str, Any] | None = None
     if reader_fallback and artifact_limit != 0:
-        fallback = artifact_fetch.recover_with_jina_reader(db_path=artifact_db)
+        fallback = artifact_fetch.recover_with_jina_reader(
+            db_path=artifact_db,
+            workers=min(workers, 16),
+        )
 
     return {
         "range": {"start_day": start.isoformat(), "end_day": end.isoformat()},

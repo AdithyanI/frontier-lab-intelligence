@@ -138,9 +138,13 @@ def test_x_article_fetch_preserves_raw_blocks_and_body_only(
         "failed_terminal": 0,
         "provider_request_attempts": 1,
         "estimated_provider_credits": 100,
+        "provider_request_attempts_this_call": 1,
+        "estimated_provider_credits_this_call": 100,
         "reused": False,
     }
     assert second["reused"] is True
+    assert second["provider_request_attempts_this_call"] == 0
+    assert second["estimated_provider_credits_this_call"] == 0
     assert len(requests) == 1
 
     conn = artifacts.connect(db)

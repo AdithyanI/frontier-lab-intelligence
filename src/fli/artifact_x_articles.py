@@ -1000,6 +1000,8 @@ def fetch_x_articles(
             "failed_terminal": 0,
             "provider_request_attempts": 0,
             "estimated_provider_credits": 0,
+            "provider_request_attempts_this_call": 0,
+            "estimated_provider_credits_this_call": 0,
             "reused": True,
         }
     if already_complete:
@@ -1015,11 +1017,14 @@ def fetch_x_articles(
             "failed_retryable": int(row["failed_retryable_count"]),
             "failed_terminal": int(row["failed_terminal_count"]),
             **_result_telemetry(conn, fetch_run_id),
+            "provider_request_attempts_this_call": 0,
+            "estimated_provider_credits_this_call": 0,
             "reused": True,
         }
         conn.close()
         return result
 
+    prior_telemetry = _result_telemetry(conn, fetch_run_id)
     needs_key = any(item["mapping_error"] is None for item in selection)
     resolved_key = api_key
     if needs_key and resolved_key is None:
@@ -1115,6 +1120,14 @@ def fetch_x_articles(
         conn, fetch_run_id, fetch_policy=FETCH_POLICY
     )
     result.update(_result_telemetry(conn, fetch_run_id))
+    result["provider_request_attempts_this_call"] = (
+        result["provider_request_attempts"]
+        - prior_telemetry["provider_request_attempts"]
+    )
+    result["estimated_provider_credits_this_call"] = (
+        result["estimated_provider_credits"]
+        - prior_telemetry["estimated_provider_credits"]
+    )
     result["reused"] = False
     conn.close()
     return result

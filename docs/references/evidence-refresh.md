@@ -16,16 +16,17 @@ fli evidence-refresh \
   --through 2026-07-13 \
   --days 9 \
   --workers 32 \
-  --artifact-limit 30 \
-  --x-article-limit 20 \
   --json
 ```
 
 `--through` is the latest complete UTC day. `--days` defines the inclusive
-window. Collection uses up to `--workers` account requests concurrently. The
-artifact limits choose bounded, rank-stratified content-extraction cohorts;
-all primary links are catalogued regardless of those limits. A limit of `0`
-skips that content-fetch adapter without skipping link discovery.
+window. Collection uses up to `--workers` account requests concurrently. By
+default, every supported current artifact is extracted: ordinary hosts are
+sharded by origin, arXiv metadata/abstracts use the official batch feed, X
+Articles use their provider adapter, and eligible ordinary-page failures use
+the Reader fallback. `--artifact-limit` and `--x-article-limit` are bounded
+calibration overrides; a limit of `0` skips that adapter without skipping link
+discovery.
 
 Use `--skip-collection` only when raw X coverage is already known to be
 complete and the operator deliberately wants to rebuild downstream views.
@@ -47,8 +48,10 @@ HTML cohort.
   A new import prunes observations absent from the current Feed/Event snapshot
   while retaining successful content snapshots for artifacts that still exist.
 - **Artifact text:** successful and terminal fetch attempts are reused. Only
-  missing or retryable items in the selected bounded cohort perform network
-  work. X Articles and the public-HTML fallback keep separate fetch policies.
+  missing or retryable items perform network work. Direct retrieval is
+  sequential per origin but parallel across origins. arXiv abstracts, X
+  Articles, and the public-HTML fallback keep separate fetch policies and
+  caches. Videos remain explicitly deferred.
 
 The pipeline does not rerun audience routing automatically. Rebuilt envelope
 hashes make stale routing results disappear from the Feed; a later explicit

@@ -1494,6 +1494,7 @@ def recover_with_jina_reader(
     api_key: str | None = None,
     env_path: Path = DEFAULT_REPO_ENV,
     transport: httpx.BaseTransport | None = None,
+    workers: int = 1,
 ) -> dict[str, Any]:
     """Recover eligible native-fetch failures through Jina Reader.
 
@@ -1501,6 +1502,8 @@ def recover_with_jina_reader(
     deferred adapters (X, LinkedIn, YouTube, forms) and never replaces native
     fetch evidence.
     """
+    if workers < 1 or workers > 32:
+        raise ValueError("workers must be between 1 and 32")
     conn = artifacts.connect(db_path)
     resumable = _resume_jina_run(conn)
     if resumable is not None:
@@ -1530,39 +1533,55 @@ def recover_with_jina_reader(
         conn.close()
         return result
     resolved_key = api_key if api_key is not None else jina_api_key(env_path=env_path)
-    client = httpx.Client(
-        trust_env=False,
-        timeout=httpx.Timeout(45.0, connect=10.0, read=45.0, write=10.0, pool=10.0),
-        transport=transport,
-    )
-    try:
-        for item in selection:
-            artifact_id = str(item["artifact_id"])
-            requested_url = str(item["canonical_url"])
-            fetch_id = _claim(
-                conn,
-                fetch_run_id=fetch_run_id,
-                artifact_id=artifact_id,
-                requested_url=requested_url,
-                fetch_policy=JINA_READER_POLICY,
-            )
-            if fetch_id is None:
-                continue
-            try:
-                retrieved, extraction = _jina_read(
-                    client, requested_url, api_key=resolved_key
+    worker_count = 1 if transport is not None else min(workers, len(selection))
+    chunks = [selection[index::worker_count] for index in range(worker_count)]
+
+    def process_chunk(items: list[dict[str, Any]]) -> None:
+        worker_conn = sqlite3.connect(Path(db_path), timeout=60.0)
+        worker_conn.row_factory = sqlite3.Row
+        worker_conn.execute("PRAGMA foreign_keys = ON")
+        worker_conn.execute("PRAGMA busy_timeout = 60000")
+        client = httpx.Client(
+            trust_env=False,
+            timeout=httpx.Timeout(
+                45.0, connect=10.0, read=45.0, write=10.0, pool=10.0
+            ),
+            transport=transport,
+        )
+        try:
+            for item in items:
+                artifact_id = str(item["artifact_id"])
+                requested_url = str(item["canonical_url"])
+                fetch_id = _claim(
+                    worker_conn,
+                    fetch_run_id=fetch_run_id,
+                    artifact_id=artifact_id,
+                    requested_url=requested_url,
+                    fetch_policy=JINA_READER_POLICY,
                 )
-                _finish_retrieved(
-                    conn,
-                    fetch_id=fetch_id,
-                    source_artifact_id=artifact_id,
-                    retrieved=retrieved,
-                    extraction=extraction,
-                )
-            except FetchFailure as failure:
-                _finish_failure(conn, fetch_id, failure)
-    finally:
-        client.close()
+                if fetch_id is None:
+                    continue
+                try:
+                    retrieved, extraction = _jina_read(
+                        client, requested_url, api_key=resolved_key
+                    )
+                    _finish_retrieved(
+                        worker_conn,
+                        fetch_id=fetch_id,
+                        source_artifact_id=artifact_id,
+                        retrieved=retrieved,
+                        extraction=extraction,
+                    )
+                except FetchFailure as failure:
+                    _finish_failure(worker_conn, fetch_id, failure)
+        finally:
+            client.close()
+            worker_conn.close()
+
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        futures = [executor.submit(process_chunk, chunk) for chunk in chunks]
+        for future in as_completed(futures):
+            future.result()
     result = _complete_run(
         conn, fetch_run_id, fetch_policy=JINA_READER_POLICY
     )

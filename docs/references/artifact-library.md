@@ -220,10 +220,14 @@ artifact content; those are later cited-insight responsibilities.
 
 ## Current primary-author rebuild
 
-The 2026-07-15 clean rebuild applied
+The final 2026-07-15 clean rebuild applied
 `feed-envelope-primary-author-thread-artifacts-v1` across the complete stored
-Feed. It produced 3,384 candidate decisions (3,035 accepted and 349 excluded),
-3,035 source observations/disclosures, and 2,703 canonical artifacts. A
+Feed. It produced 3,210 candidate decisions (3,088 accepted, 119 excluded, and
+three failed), 3,087 source observations/disclosures, and 2,790 initially
+canonical artifacts. Redirect convergence leaves 2,735 canonical artifacts;
+2,507 have usable text. All 221 arXiv artifacts have metadata/abstract text and
+all 167 X Articles are locally cached. The remaining 163 videos are deferred,
+while 65 non-video pages are terminally unavailable or retryable. A
 corpus-wide lineage audit found zero foreign-author or wrong-conversation rows
 and zero missing source/root records. Root posts and same-author replies are
 selected directly from the published Feed/Event pair; no keep/drop or audience

@@ -272,13 +272,14 @@ def packet_from_event(
             "text": str(evidence.get("text") or ""),
         }
         post_id = str(post["post_id"])
+        relationship = str(evidence.get("relationship") or "related")
+        if relationship == "retweet":
+            continue
         relation = (
             "same_author_continuation"
             if evidence.get("same_author_as_root")
-            else str(evidence.get("relationship") or "related")
+            else relationship
         )
-        if relation == "retweet":
-            continue
         post_authors[post_id] = str(post.get("author") or "")
         sources.append(_x_source(post, relation=relation))
     sources.extend(
