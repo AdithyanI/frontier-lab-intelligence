@@ -165,11 +165,14 @@ Responses-specific failure in July and reported it resolved on July 13; these
 live controls show that reliable caching is still not observable on the current
 5.5/5.6 routes on July 15.
 
-Keep the proven request shape, 32 stable lanes, sequential per-lane scheduling,
-and cache telemetry. Do not pad the prompt or block the catalog run waiting for
-a cache fix; budget it as uncached and treat any observed reads as upside. Exact
-reruns still benefit from LiteLLM's full-response cache, while different catalog
-items must be costed as uncached until `cached_tokens` becomes nonzero again.
+The production follow-up chose GPT-5.4 mini with one prompt-level key, no
+sharding, no padding, and no retention override. An implicit-only two-call
+control returned no read; the same production path with the single stable key
+read 1,280 tokens on call two. The nine-day top-10 run then produced 88 cache
+hits across 90 sequential requests and read 152,576 of 305,600 input tokens
+from cache. Keep that minimal contract and telemetry. Partition a key only if
+future throughput approaches the documented routing threshold; do not add
+shards speculatively.
 
 References:
 

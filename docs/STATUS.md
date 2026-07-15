@@ -42,7 +42,7 @@ The stored-X and canonical-artifact evidence paths are implemented. The earlier
 multi-stage Audience Insights v2 implementation remains in code and has been
 archived, while all generated outputs were explicitly discarded on 2026-07-15.
 The successor now starts directly from ranked Feed evidence: one versioned
-Luna-medium call makes independent AI Engineering and Investment relevance
+GPT-5.4-mini/high call makes independent AI Engineering and Investment relevance
 judgments over a complete attributed evidence packet. The former model-based
 keep/drop gate, its generated databases, and its live API/UI/CLI surfaces were
 removed on 2026-07-15. The Feed derives `kept` only when either audience is
@@ -60,7 +60,7 @@ deferred until this narrower routing boundary is qualitatively proven.
 | Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Feed audience routing | Implemented; July 12 review cohort active | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. The migrated eight-record July 12 review cohort contains five `both`, one AI-only, two Investment-only, and zero `neither`; the original calls used 21,365 input tokens, reported zero provider-cache reads, and cost $0.037241. Exact snapshot matches appear in Feed as `ENG`/`INV` marks with the two reasons in one disclosure. One derived Status control exposes the mutually exclusive Relevant, Not relevant, and Not evaluated states without inventing a third judgment. Adi's qualitative review and a bounded hard-negative sample remain. |
+| Feed audience routing | Implemented; nine-day top-10 audit active | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. GPT-5.4 mini at high reasoning completed 90/90 top-ranked envelopes across July 5–13: 44 `both`, six Engineering-only, eight Investment-only, and 32 `neither`. The single stable prompt key produced 88 cache-hit requests and 152,576 cached tokens from 305,600 input tokens; 89 response-cost headers total $0.462966 and one is missing. Exact snapshot matches appear in Feed as `ENG`/`INV` marks with the two reasons in one disclosure. One derived Status control exposes Relevant, Not relevant, and Not evaluated without inventing a third judgment. Adi's qualitative review remains. |
 | Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
@@ -73,25 +73,25 @@ current databases or APIs before using them as present-tense product claims.
 ## The Most Important Unproven Claim
 
 The repository has proved that one simple prompt/schema, versioned run store,
-and exact-match Feed projection can route a small positive-biased cohort. It has
-not yet proved the audience threshold: the first eight review envelopes
-contained no `neither` result, and two AI Engineering positives are borderline
-operational signals rather than clear technical evidence. Previous multi-stage
-Insight results remain historical learning, not the active contract. The next
-step is Adi's qualitative audit followed by a bounded hard-negative/`neither`
-sample—not Insight prose or a nine-day publication apparatus.
+and exact-match Feed projection can route a varied 90-record cohort. It has not
+yet proved that the audience threshold is editorially correct: 32 top-ranked
+envelopes route to neither audience and 14 route to exactly one, but Adi has not
+audited a representative slice of those reasons. Previous multi-stage Insight
+results remain historical learning, not the active contract. The next step is
+that qualitative audit—not Insight prose or a full-catalog expansion.
 
 ## Submission Finish Line
 
 The active Evidence Audience Routing tracker owns the execution detail. At
 system level, the remaining proof is:
 
-1. Audit the July 12 eight-record outputs and reason quality with Adi in Feed.
+1. Audit representative `both`, single-audience, and `neither` outputs from the
+   July 5–13 top-10 cohort with Adi in Feed.
 2. Correct any packet, prompt, or threshold ambiguity revealed by that audit.
-3. Calibrate a bounded hard-negative sample containing plausible `neither`
-   cases and explicit audience disagreements.
-4. Freeze the routing contract and run only the smallest additional cohort
-   needed for the case-study proof.
+3. Use the 32 observed `neither` cases and 14 single-audience cases to calibrate
+   the threshold; add lower-ranked hard negatives only if the audit exposes a
+   real coverage gap.
+4. Freeze the routing contract before any full-catalog expansion.
 5. Open a separate Insight-generation project only after routing is accepted.
 
 External submission or alert delivery remains blocked without Adi's explicit
@@ -114,10 +114,9 @@ case-study thesis.
 
 The active tracker is
 [`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
-Its first exact-envelope review and frozen July 12 top-eight routing run are
-complete and inspectable in Feed. Adi's qualitative audit and a bounded
-hard-negative calibration sample are next. Insight generation and delivery
-remain deliberately deferred.
+Its first exact-envelope review and nine-day top-10 routing run are complete and
+inspectable in Feed. Adi's qualitative audit is next. Insight generation,
+full-catalog expansion, and delivery remain deliberately deferred.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

@@ -224,7 +224,7 @@ inference. Audience routing, semantic grouping, summaries, and cited insights
 remain later stages after this deterministic layer is audited.
 
 `fli.audience_routing` is the sole live model judgment over ranked Feed
-evidence. One Luna-medium call receives the readable attributed packet and
+evidence. One GPT-5.4-mini/high call receives the readable attributed packet and
 returns two independently reasoned booleans: AI Engineering relevance and
 Investment relevance. Feed rank, score, engagement, prominence, and the
 derived audit state are not model inputs. `fli.audience_routing_runs`
@@ -233,8 +233,11 @@ versions, model output, cache telemetry, cost, and failures in one resumable
 SQLite database. The run records its source event/feed run IDs and selection
 policy directly; it does not depend on a source classification run or read the
 superseded Audience Insights tables. Stable instructions precede the variable
-packet, and cache telemetry is observed rather than assumed. The current prompt
-asks for roughly 40–50 words per reason as soft guidance, never a schema limit.
+packet. The current low-rate runner uses one prompt-level cache key with
+sequential execution; it does not store per-item keys, shard traffic, pad the
+prompt, or request extended retention. The nine-day top-10 run read 152,576
+cached tokens across 305,600 input tokens. The current prompt asks for roughly
+40–50 words per reason as soft guidance, never a schema limit.
 
 `fli.web.audience_routing` is the read-only audit projection. It selects the
 newest fully completed schema-compatible run for the requested UTC day.
@@ -1164,7 +1167,7 @@ final score.
 | `fli.signal_feed` | content-addressed `signal-feed-v8` snapshots with recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v3` exact structural components with provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
-| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one Luna-medium call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with direct event/feed provenance, versioned prompt/schema hashes, and resumable cache/cost telemetry |
+| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, sequential execution, and resumable cache/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.cited_insights` / `fli.cited_insight_runs` | historical minimal `insight-v1.1` proof: frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
 | `fli.audience_insights` / `fli.audience_insight_runs` | independent Investment and AI Engineering extraction/schema/cache contracts, exact citation binding, resumable attempt ledgers, all-five-pass item filtering, ID-only daily editing, day-set review, and audited-history inputs |
@@ -1189,10 +1192,9 @@ The active project is
 The direct Evidence routing boundary accepts one complete attributed envelope
 and returns exactly two independent judgments:
 AI Engineering relevance plus reason, and Investment relevance plus reason.
-The migrated July 12 eight-record review cohort is inspectable in Feed through
-quiet marks, derived Audit/Audience controls, and one reason disclosure. Future
-runs use the v4 prompt's soft 40–50-word guidance; stored v3 outputs retain their
-true provenance. The current work is Adi's
-qualitative audit followed by a bounded hard-negative/`neither` calibration
-sample—not a broad run or new Insight generation. The archived v2
+The top 10 ranked envelopes for every complete day from July 5 through July 13
+are inspectable in Feed through quiet marks, one derived Status control, and one
+reason disclosure. All 90 GPT-5.4-mini/high records completed; 32 route to
+neither audience and 14 to exactly one. The current work is Adi's qualitative
+audit of that threshold—not a full-catalog run or new Insight generation. The archived v2
 review/publication stack is not the active build order.

@@ -199,10 +199,10 @@ Application invariants:
 - Adi superseded the Feed keep/drop gate after seeing both judgments together.
   Audience routing now runs directly over ranked Evidence and is the only live
   model decision shown in Feed.
-- One combined Luna-medium call returns two independent audience judgments and
+- One combined GPT-5.4-mini/high call returns two independent audience judgments and
   separate reasons. “Independent” does not mean separate routing calls.
-- The first proof is one envelope followed by a small frozen top-kept cohort,
-  not a full day or all available data.
+- After the first proof, Adi authorized the top 10 ranked envelopes for every
+  complete Feed day from July 5–13 as the qualitative audit cohort.
 - Feed rank remains display/order provenance and must not influence the model's
   routing judgment.
 - Insight generation remains a separate follow-up stage and may use a higher
@@ -222,24 +222,17 @@ Application invariants:
   no schema maximum. Its stable instructions are 8,188 characters and 1,180
   whitespace-delimited words, comfortably beyond the 1,024-token cache
   threshold without padding.
-- Catalog execution uses the same 32 stable prompt-cache lanes and sequential
-  per-lane scheduling as the previously proven Feed triage runner. This keeps
-  each key below provider routing pressure during concurrent bulk execution.
+- Audience routing uses one stable prompt-level key and sequential execution.
+  It stores no per-item key or sharding column, adds no padding, and requests no
+  retention override. Partitioning is justified only if future throughput
+  approaches the documented routing threshold.
 
 ## Open Questions / Blockers
 
-- Azure prompt-prefix caching is currently unobservable on both the Luna and
-  GPT-5.5 Responses deployments. A 2026-07-15 v3 cold call and different-input
-  same-prefix call reported zero Luna reads, the previously successful
-  1,670-word Feed-triage Luna prefix returned zero reads for two fresh inputs,
-  and the same v3 different-input control returned zero reads on GPT-5.5.
-  LiteLLM's exact-response Redis cache does work, but it cannot reuse a prefix
-  across different catalog items. Keep telemetry visible and do not claim
-  prefix-cache savings until Azure again returns nonzero `cached_tokens`. The
-  July 12 LiteLLM 1.92.0 upgrade is not an adequate causal explanation because
-  the successful July 14 cache run already used that image; source and live
-  transform inspection also show the Responses cache fields are still
-  forwarded. Do not roll back on this evidence alone.
+- GPT-5.5 and GPT-5.6 still return zero prefix reads on the controlled v4 path,
+  but GPT-5.4 mini is proven working: the nine-day run produced 88 hits across
+  90 requests and a 49.93% token read ratio. Keep this model-specific evidence
+  visible; do not generalize one deployment's result to another.
 - Which reply and quote-post blocks belong in the model packet, and when does a
   deterministic size bound become necessary? Inspect real packet sizes before
   choosing a top-N rule.
@@ -253,16 +246,16 @@ Application invariants:
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Simplify production audience routing to GPT-5.4 mini with one stable prompt key, sequential execution, and no sharding, retention override, or padding. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
-| in_progress | Freeze and route the top 10 ranked Evidence envelopes for every available Feed day at high reasoning. | parent | `resources/top10-every-day-v4-mini.md` |
-| todo | Verify per-day completeness, cache reads, cost, audience distribution, and existing Feed projection. | parent | `resources/top10-every-day-v4-mini.md` |
-| todo | Hand the multi-day cohort to Adi for qualitative audit before Insight generation. | parent | — |
+| done | Freeze and route the top 10 ranked Evidence envelopes for every available Feed day at high reasoning. | parent | `resources/top10-every-day-v4-mini.md` |
+| done | Verify per-day completeness, cache reads, cost, audience distribution, and existing Feed projection. | parent | `resources/top10-every-day-v4-mini.md` |
+| in_progress | Hand the multi-day cohort to Adi for qualitative audit before Insight generation or full-catalog expansion. | parent | `resources/top10-every-day-v4-mini.md` |
 
 ## Backlog / Remaining Work
 
 - [ ] Add deterministic packet-integrity and schema-consistency validation.
 - [ ] Audit a bounded sample of difficult low-ranked Evidence to calibrate
   `neither`; there is no upstream model gate to sample from.
-- [ ] Expand beyond the first cohort only after Adi's qualitative review.
+- [x] Expand the audit cohort to the authorized top 10 for every complete day.
 - [x] Add the read-only API projection and compact positive Feed audience marks
   and reasons without reading archived Insight data.
 - [x] Update architecture, status, model-routing/prompt references, and build log.
@@ -392,3 +385,16 @@ Application invariants:
   request and shared LiteLLM path are sound and localizes the miss to the
   current GPT-5.5/GPT-5.6 routes or backing deployments. The two mini calls
   cost $0.00592950.
+- 2026-07-15: [VALIDATED] Removed event sharding, per-item cache keys, prompt
+  padding, and the retention override from the live audience router. A clean
+  implicit-only mini canary missed twice; adding one stable prompt-level key
+  produced a 1,280-token read on call two. OpenAI, Azure, and LiteLLM docs agree
+  that the key is an optional routing hint, while the live A/B establishes it
+  as the minimal reliable control on this route.
+- 2026-07-15: [VALIDATED] Routed the top 10 ranked envelopes for all nine
+  complete Feed days with GPT-5.4 mini at high reasoning. All 90 completed with
+  zero failures: 44 both, six Engineering-only, eight Investment-only, and 32
+  neither. Eighty-eight requests hit the provider cache, reading 152,576 of
+  305,600 input tokens. Eighty-nine cost headers total $0.462966; one July 13
+  call omitted the header. All databases have integrity `ok`, no sharding
+  column, and the Feed API selects the exact 10-record run on every day.

@@ -13,7 +13,7 @@ where broader research quality is the evaluated boundary.
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Evidence audience routing | `gpt-5.6-luna` | `medium` | Two independent relevance judgments require enough reasoning to distinguish technical from strategic evidence; the first eight-record review run is qualitatively inspectable. |
+| Evidence audience routing | `gpt-5.4-mini` | `high` | The nine-day top-10 run completed 90/90 with useful audience disagreement and 32 `neither` results; a same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
 | Cited insight extraction | `gpt-5.6-luna` | `medium` | Requires claim synthesis plus exact quotation; the five-item migration oracle passed citation verification 5/5. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |
@@ -24,9 +24,12 @@ the lowest effort that still meets the task, preserving the prior effort as a
 migration baseline, and testing one level lower. That comparison matters here:
 Luna-low agreed with the retired mini-medium keep/drop decisions on 63/64
 envelopes but dropped a post that named a specific Thinking Machines Lab essay.
-That historical comparison supports retaining `medium` as the starting effort
-for audience routing; the new two-judgment contract still requires its own
-bounded qualitative calibration.
+That historical comparison remains relevant to the retired keep/drop boundary.
+For the live two-audience router, Adi authorized a quality-first comparison on
+GPT-5.4 mini. `high` produced grounded reasons near the requested length;
+`xhigh` did not change either decision and mostly over-deliberated. The live
+default is therefore `high`, pending Adi's qualitative audit of the 90-record
+cohort.
 
 The model string and reasoning effort are part of every run identity. Existing
 run databases and historical reports remain immutable evidence of the model
@@ -79,6 +82,13 @@ schema, and explicit cache key are therefore valid; the observed miss belongs
 to the current GPT-5.5/GPT-5.6 routes or their backing Azure deployments, not
 the application contract or shared proxy in general.
 
+The production follow-up removed event sharding, per-item keys, padding, and
+the retention override. GPT-5.4 mini received one stable prompt-level key and
+ran sequentially. An implicit-only two-call test missed twice; the single-key
+test read 1,280 tokens on call two. The nine-day top-10 run then returned 88
+cache-hit requests out of 90 and read 152,576 of 305,600 input tokens from the
+provider cache. This is the current proven audience-routing contract.
+
 A final Luna-specific control removed the remaining sharding ambiguity: two
 different v4 evidence packets ran sequentially with the exact same forced
 cache key and an 8,284-character / 1,516-token stable prefix. The 3,289-token cold request
@@ -95,9 +105,11 @@ different catalog items. On such a full-response hit, LiteLLM 1.92.0 replays
 the original `x-litellm-response-cost` header even though its persisted spend
 record is zero, so use the persisted proxy record when reconciling that case.
 
-Keep stable 1,024+ token content first, use deterministic sharded
-`prompt_cache_key` lanes, limit each lane to one in-flight request, and record
-`cached_tokens`, `cache_write_tokens`, and LiteLLM's reported response cost.
+Keep stable 1,024+ token content first, reuse one stable `prompt_cache_key` for
+requests sharing that prefix, and record `cached_tokens`, `cache_write_tokens`,
+and LiteLLM's reported response cost. Partition traffic only when one key
+approaches the documented roughly 15-request-per-minute routing threshold;
+do not introduce shards for low-rate sequential work.
 GPT-5.6 cache writes can cost more than ordinary input, so cache telemetry—not
 the presence of a cache parameter—is the cost evidence.
 
