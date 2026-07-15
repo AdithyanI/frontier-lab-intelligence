@@ -36,15 +36,17 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
             },
         ],
     }
-    monkeypatch.setattr(
-        event_store,
-        "events_payload",
-        lambda **_: {
+    event_requests = []
+
+    def events_payload(**kwargs):
+        event_requests.append(kwargs)
+        return {
             "available": True,
             "run": {"run_id": "event-run-1", "feed_run_id": "feed-run-1"},
             "items": [item],
-        },
-    )
+        }
+
+    monkeypatch.setattr(event_store, "events_payload", events_payload)
 
     conn = audience_routing_runs.connect_run(tmp_path / "routing.db")
     count = audience_routing_runs.freeze_run(
@@ -79,6 +81,7 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     assert "prompt_cache_key" not in item_columns
     assert frozen["event_id"] == "event-1"
     assert frozen["feed_rank"] == 3
+    assert event_requests[0]["limit"] == 1
     packet = json.loads(frozen["packet_json"])
     assert [source["relation"] for source in packet["sources"]] == ["root", "quote"]
 
@@ -119,6 +122,11 @@ def test_refresh_dry_run_freezes_one_published_source_without_writes(
         "_execute_refresh_day",
         lambda *args, **kwargs: pytest.fail("dry-run must not execute routing"),
     )
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_freeze_refresh_day",
+        lambda *args, **kwargs: pytest.fail("dry-run must not freeze packets"),
+    )
 
     result = audience_routing_runs.refresh_all_days(
         through="2026-07-07",
@@ -146,10 +154,22 @@ def test_refresh_replaces_old_runs_only_after_every_day_completes(
     (run_root / "old-run").mkdir(parents=True)
     source = {"event_run_id": "event-run-abcdef", "feed_run_id": "feed-run-1"}
     monkeypatch.setattr(audience_routing_runs, "_published_event_source", lambda: source)
+    frozen_days = []
+
+    def freeze(item, **_kwargs):
+        frozen_days.append(item["day"])
+        return 4.0
+
+    monkeypatch.setattr(audience_routing_runs, "_freeze_refresh_day", freeze)
 
     def execute(item, **kwargs):
+        assert frozen_days == ["2026-07-05", "2026-07-06"]
         (kwargs["run_root"] / item["run_id"]).mkdir(parents=True)
-        return _refresh_summary(item["day"])
+        return {
+            **_refresh_summary(item["day"]),
+            "packaging_duration_ms": kwargs["packaging_duration_ms"],
+            "model_requests": 2,
+        }
 
     monkeypatch.setattr(audience_routing_runs, "_execute_refresh_day", execute)
 
@@ -167,11 +187,50 @@ def test_refresh_replaces_old_runs_only_after_every_day_completes(
     assert result["counts"]["both"] == 2
     assert result["counts"]["cache_hit_requests"] == 2
     assert result["counts"]["reported_cost_usd"] == pytest.approx(0.02)
+    assert result["packaging"] == {
+        "total_duration_ms": 8.0,
+        "max_day_duration_ms": 4.0,
+    }
+    assert result["will_call_model"] is True
+    assert result["model_requests"] == 4
+    assert frozen_days == ["2026-07-05", "2026-07-06"]
     assert result["pruned_runs"] == ["old-run"]
     assert not (run_root / "old-run").exists()
     assert {path.name for path in run_root.iterdir()} == {
         item["run_id"] for item in result["plan"]
     }
+
+
+def test_refresh_reports_zero_model_requests_for_complete_resumed_runs(
+    tmp_path, monkeypatch
+):
+    source = {"event_run_id": "event-run-abcdef", "feed_run_id": "feed-run-1"}
+    monkeypatch.setattr(audience_routing_runs, "_published_event_source", lambda: source)
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_freeze_refresh_day",
+        lambda *args, **kwargs: 3.0,
+    )
+
+    def execute(item, **kwargs):
+        return {
+            **_refresh_summary(item["day"]),
+            "packaging_duration_ms": kwargs["packaging_duration_ms"],
+            "model_requests": 0,
+        }
+
+    monkeypatch.setattr(audience_routing_runs, "_execute_refresh_day", execute)
+
+    result = audience_routing_runs.refresh_all_days(
+        through="2026-07-05",
+        days=1,
+        top_ranked=1,
+        run_root=tmp_path / "runs",
+    )
+
+    assert result["will_call_model"] is False
+    assert result["model_requests"] == 0
+    assert result["packaging"]["total_duration_ms"] == 3.0
 
 
 def test_refresh_failure_retains_old_runs_for_retry(tmp_path, monkeypatch):
@@ -181,6 +240,11 @@ def test_refresh_failure_retains_old_runs_for_retry(tmp_path, monkeypatch):
         audience_routing_runs,
         "_published_event_source",
         lambda: {"event_run_id": "event-run-abcdef", "feed_run_id": "feed-run-1"},
+    )
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_freeze_refresh_day",
+        lambda *args, **kwargs: 4.0,
     )
 
     def execute(item, **kwargs):

@@ -10,8 +10,9 @@ routing freezes ranked Evidence directly and returns independent AI Engineering
 and Investment relevance judgments; the Feed derives its audit states from
 those two booleans. The former model-based keep/drop gate and the older
 multi-stage Insight backends were removed rather than retained as compatibility
-layers. The successor Insight prompt/schema boundary is implemented but has no
-runner, store, or generated output yet. External delivery is also deferred. See
+layers. The successor Insight prompt/schema boundary is implemented and has one
+isolated mini/Terra comparison, but no runner, store, or live publication yet.
+External delivery is also deferred. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.
@@ -1128,11 +1129,11 @@ final score.
 | `fli.conference_sources` | manifest-driven official conference snapshots, exact-X identity reconciliation, lean current role/bio/affiliation import, resumable raw profile hydration, unavailable-account rejection, and following-snapshot profile seeding |
 | `fli.x_content` | immutable raw provider responses and `x_post_observation` history, plus mutable latest-post convenience rows and exact post bundles |
 | `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
-| `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, and complete supported artifact extraction |
+| `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, complete supported artifact extraction, SQLite optimization, and visible-day view warmup |
 | `fli.signal_feed` | content-addressed `signal-feed-v10` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v6` root-owned structural forests with one-parent enforcement, same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
-| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with full immutable evidence, a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, bounded parallel execution, resumable cache/cost telemetry, and one publication-bound multi-day refresh command |
+| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with full immutable evidence, a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, sequential packet freezing followed by bounded parallel model execution, resumable cache/cost telemetry, and one publication-bound multi-day refresh command |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.artifact_arxiv` | official batch-feed title, author, category, date, and abstract extraction for catalogued arXiv papers; PDFs remain optional future work |
 | `fli.insight_generation` | non-executing successor boundary with separate Investment and AI Engineering prompts/cache keys, one strict surface-or-suppress schema, exact routed Evidence reuse, deterministic validation, and application-owned Event/day/Feed-rank publication metadata |
@@ -1142,21 +1143,19 @@ final score.
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Audience Insight generation | prompt/schema/request foundation only; no model call, runner, run store, or generated result yet |
+| Audience Insight generation | prompt/schema/request foundation plus one isolated four-call mini/Terra suppression comparison; no runner, run store, or live publication yet |
 | Insights UI | one Feed-ranked audience surface remains implemented and intentionally empty; the successor API preserves its transport while refusing legacy reads |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order
 
-The completed routing project is archived at
-[`docs/projects/archive/evidence-audience-routing/tasks.md`](../projects/archive/evidence-audience-routing/tasks.md).
-The direct Evidence routing boundary accepts one complete attributed envelope
-and returns exactly two independent judgments:
-AI Engineering relevance plus reason, and Investment relevance plus reason.
-The top 10 ranked envelopes for every complete day from July 5 through July 13
-are inspectable in Feed through quiet marks, one derived Status control, and one
-reason disclosure. All 90 GPT-5.4-mini/high records completed; 32 route to
-neither audience and 14 to exactly one. The v7 prompt also passed the targeted
-five-packet boundary rerun. The next build order is a fresh, narrow
-Insight-generation project—not a full-catalog routing run or restoration of the
-archived v2 review/publication stack.
+The active routing closeout is tracked in
+[`docs/projects/evidence-audience-routing/tasks.md`](../projects/evidence-audience-routing/tasks.md).
+The direct Evidence boundary accepts one complete attributed envelope and
+returns exactly two independent judgments: AI Engineering relevance plus
+reason, and Investment relevance plus reason. The corrected July 5–13 audit is
+inspectable in Feed: all 900 GPT-5.4-mini/high records completed, with 344 both,
+112 Engineering-only, 141 Investment-only, and 303 neither; 38 repeated exact
+inputs have zero label conflicts. The next unproven claim is that positive
+routes can become a small set of excellent source-bound Insights without
+restoring the archived multi-stage stack or weakening attribution.

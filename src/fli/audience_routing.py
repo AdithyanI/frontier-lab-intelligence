@@ -13,7 +13,7 @@ import json
 import re
 import unicodedata
 from dataclasses import dataclass
-from difflib import SequenceMatcher
+from math import ceil
 from pathlib import Path
 from typing import Any
 
@@ -195,14 +195,14 @@ def _duplicates_primary_text(text: str, primary_texts: list[str]) -> bool:
     """Reject reactions whose substance is already present in primary evidence."""
     if len(text) < _PRIMARY_DUPLICATE_MIN_CHARS:
         return False
+    required = max(1, ceil(len(text) * _PRIMARY_DUPLICATE_RATIO))
     for primary_text in primary_texts:
-        match = SequenceMatcher(
-            None,
-            text,
-            primary_text,
-            autojunk=False,
-        ).find_longest_match()
-        if match.size / len(text) >= _PRIMARY_DUPLICATE_RATIO:
+        if len(primary_text) < required:
+            continue
+        if any(
+            text[start : start + required] in primary_text
+            for start in range(len(text) - required + 1)
+        ):
             return True
     return False
 

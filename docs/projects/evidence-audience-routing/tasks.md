@@ -127,12 +127,12 @@ Application invariants:
 
 ## Done When
 
-- [ ] Adi approves a documented envelope-input contract, including the exact
+- [x] Adi approves a documented envelope-input contract, including the exact
   treatment of root text, same-author continuations, replies, quotes, and
   artifacts.
 - [x] Adi approves the routing semantics: one combined call and two independent
   audience judgments with separate reasons; no general keep/drop judgment.
-- [ ] Adi reviews the short prompt and exact first-cohort outputs.
+- [x] Adi reviews the short prompt and exact first-cohort outputs.
 - [x] One versioned routing path stores and returns one authoritative pair of
   audience judgments per envelope/run with evidence hash, prompt version,
   model, cost, and rationales; no live product reads old Insight tables.
@@ -152,7 +152,7 @@ Application invariants:
 
 ## Milestones
 
-- [ ] Milestone 1 — Freeze and implement the first-cohort architecture.
+- [x] Milestone 1 — Freeze and implement the first-cohort architecture.
   Acceptance: exact input blocks, approved schema, short prompt, immutable
   run storage, and API projection work on the Satya envelope. Validate:
   focused packet/runner/API tests and exact record inspection.
@@ -229,10 +229,11 @@ Application invariants:
   no schema maximum. Its stable instructions are 8,188 characters and 1,180
   whitespace-delimited words, comfortably beyond the 1,024-token cache
   threshold without padding.
-- Audience routing uses one stable prompt-level key and bounded parallel execution.
-  It stores no per-item key or sharding column, adds no padding, and requests no
-  retention override. Independent run workers may execute frozen packets in
-  parallel without changing that single stable prefix contract.
+- Audience routing uses one stable prompt-level key. It stores no per-item key
+  or sharding column, adds no padding, and requests no retention override. The
+  multi-day refresh freezes packets sequentially for fast local assembly, then
+  runs pending model requests in bounded parallelism without changing that
+  single stable prefix contract.
 - The immutable packet and evidence hash always retain the complete evidence.
   The derived model view is capped at 20,000 `o200k_base` tokens, with primary
   evidence ordered before reactions and an explicit `TRUNCATED_EVIDENCE`
@@ -252,16 +253,17 @@ Application invariants:
 ## Open Questions / Blockers
 
 - GPT-5.5 and GPT-5.6 still return zero prefix reads on the controlled v4 path,
-  but GPT-5.4 mini is proven working: the nine-day run produced 88 hits across
-  90 requests and a 49.93% token read ratio. Keep this model-specific evidence
-  visible; do not generalize one deployment's result to another.
+  but GPT-5.4 mini is proven working. The current clean 900-row run produced
+  779 cache-hit requests and read 1,399,040 of 3,418,560 input tokens. Keep this
+  model-specific evidence visible; do not generalize one deployment's result
+  to another.
 - The broader artifact retrieval gaps remain upstream limitations. Do not add
   model-side web search or routing-local text-quality heuristics until the next
   Insight stage demonstrates a concrete need.
-- The 900-route cohort is invalidated as evaluation evidence. The deterministic
-  Event boundary is now repaired and published as a root-owned, one-parent
-  forest; do not reuse the pre-repair labels. The next routing refresh must bind
-  to Event run `cc76958510ddf90c14863d1c5b8de1d40881a6bf12396671dfd264a6e2df210d`.
+- The pre-repair 900-route cohort remains invalid historical evidence. Its clean
+  replacement is complete against Event run
+  `cc76958510ddf90c14863d1c5b8de1d40881a6bf12396671dfd264a6e2df210d`;
+  consumers must select only those source-qualified v8 run IDs.
 
 ## Current Batch
 
@@ -275,7 +277,9 @@ Application invariants:
 | complete | Add one resumable publication-bound command for the next nine-day top-100 routing refresh. | parent | `../../../references/evidence-refresh.md` |
 | complete | Replace unrestricted Event components with root-owned one-parent envelopes; rebuild July 5–13 and prove the Anthropic root is restored. | parent | `../../../references/signal-feed.md` |
 | complete | Replace the obsolete Insight backend with the two-prompt, shared-schema, non-executing successor foundation; preserve the empty UI transport and Feed-rank metadata. | parent | — |
-| pending | Rerun and review the 900 routes against the repaired Event publication. | parent | — |
+| complete | Run both successor prompts against envelope `9412a377…` on its latest corrected July 12 revision; inspect raw structured output, cache, and cost before designing storage. | parent | `resources/first-successor-insight-spike.md` |
+| in_progress | Move the successor Insight path into durable SQLite-backed generation; import the first-party-only Terra result, expose kept/suppressed decisions through the API, and add Feed-style date/status audit controls to the existing UI. | parent | — |
+| complete | Rerun and review the 900 routes against the repaired Event publication; remove the local packaging bottleneck. | parent | `resources/top100-contextual-audit-v2.md` |
 
 ## Backlog / Remaining Work
 
@@ -294,7 +298,7 @@ Application invariants:
   refresh command.
 - [x] Audit a stratified sample of both, single-audience, and `neither`
   outcomes from the authorized top-10 cohort.
-- [ ] After the current boundary decision, audit a bounded sample of difficult
+- [x] After the current boundary decision, audit a bounded sample of difficult
   low-ranked Evidence before any full-catalog expansion.
 - [x] Expand the current audit surface to the top 100 envelopes for all nine
   complete days with a deterministic 20,000-token model-input ceiling.
@@ -539,3 +543,35 @@ Application invariants:
   routes now return an honest empty successor state and never read legacy data.
   Focused tests and the full 334-test Python suite pass; the first live envelope
   remains explicitly deferred until Adi supplies its ID.
+- 2026-07-15: [VALIDATED] Ran the first successor spike on the latest corrected
+  July 12 revision of envelope `9412a377…`, which routes to both audiences at
+  Feed rank 5. Mini-high and Terra-high each evaluated the unchanged Investment
+  and AI Engineering prompts over the exact same evidence; all four validly
+  suppressed the mission statement rather than manufacturing an actionable
+  Insight. Terra's Investment rationale was strongest, while mini's Engineering
+  rationale was more precise about the packet's existing essay artifact. The
+  four calls cost $0.05248125 total. Each model/audience pair was cold, so zero
+  cache reads do not test repeat-prefix behavior. Exact outputs and the next
+  surfaceable-envelope comparison are recorded in
+  `resources/first-successor-insight-spike.md`; no store or UI publication was
+  added.
+- 2026-07-15: [VALIDATED] Replaced all invalid pre-repair labels with nine
+  source-qualified v8 top-100 runs over Event publication `cc76958510dd…`.
+  All 900 GPT-5.4-mini/high packets completed with zero failures: 344 both,
+  112 Engineering-only, 141 Investment-only, and 303 neither. The run recorded
+  779 prompt-cache hits, 1,399,040 cached of 3,418,560 input tokens, and
+  $5.28797975 proxy-reported cost. Thirty-eight repeated exact inputs have zero
+  label conflicts. A 20-packet rank/outcome-stratified audit found 17 clear and
+  three soft-but-defensible judgments; Gemma, Cohere Arabic ASR, Muse, and the
+  restored Anthropic root now consume the intended first-party evidence and
+  route coherently. Exact review evidence is in
+  `resources/top100-contextual-audit-v2.md`.
+- 2026-07-15: [VALIDATED] Removed the local audience-refresh packaging
+  bottleneck. Replaced quadratic artifact/reaction comparison, stopped asking
+  the Event API for 5,000 rows when only the selected cohort is needed, and
+  split the operator path into sequential packet freezing followed by parallel
+  model requests. A complete cached nine-day replay now reports packet time
+  separately, truthfully reports `model_requests: 0`, preserves all 900 exact
+  outputs, and completes in 8.267 seconds instead of roughly 8 minutes 49
+  seconds. Focused routing tests pass (23), and the live Feed shows the current
+  July 7 counts and repaired envelopes with no browser console errors.

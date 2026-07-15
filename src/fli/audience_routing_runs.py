@@ -177,20 +177,20 @@ def _refresh_plan(
     ]
 
 
-def _execute_refresh_day(
+def _freeze_refresh_day(
     item: dict[str, Any],
     *,
     top_ranked: int,
     artifact_db: Path,
     model: str,
     effort: str,
-    workers: int,
     expected_event_run_id: str,
     run_root: Path,
-) -> dict[str, Any]:
+) -> float:
     run_db = run_root / str(item["run_id"]) / "routing.db"
     conn = connect_run(run_db)
     try:
+        packaging_started = time.monotonic()
         freeze_run(
             conn,
             run_id=str(item["run_id"]),
@@ -201,11 +201,36 @@ def _execute_refresh_day(
             model=model,
             effort=effort,
         )
+        packaging_duration_ms = round(
+            (time.monotonic() - packaging_started) * 1000,
+            3,
+        )
         meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
         if meta is None or str(meta["source_event_run_id"]) != expected_event_run_id:
             raise RuntimeError(
                 f"{item['day']} froze a different Event publication; rerun the refresh."
             )
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        return packaging_duration_ms
+    finally:
+        conn.close()
+
+
+def _execute_refresh_day(
+    item: dict[str, Any],
+    *,
+    workers: int,
+    run_root: Path,
+    packaging_duration_ms: float,
+) -> dict[str, Any]:
+    run_db = run_root / str(item["run_id"]) / "routing.db"
+    conn = connect_run(run_db)
+    try:
+        model_requests = int(
+            conn.execute(
+                "SELECT COUNT(*) FROM routing_item WHERE status != 'complete'"
+            ).fetchone()[0]
+        )
         client = entity_kinds.create_litellm_client()
         if hasattr(client, "with_options"):
             client = client.with_options(max_retries=0, timeout=180.0)
@@ -216,7 +241,11 @@ def _execute_refresh_day(
                 "rerun the same refresh to retry them."
             )
         conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
-        return result
+        return {
+            **result,
+            "packaging_duration_ms": packaging_duration_ms,
+            "model_requests": model_requests,
+        }
     finally:
         conn.close()
 
@@ -277,6 +306,24 @@ def refresh_all_days(
         return {**base, "dry_run": True, "will_call_model": False}
 
     run_root.mkdir(parents=True, exist_ok=True)
+    packaging_by_day: dict[str, float] = {}
+    for item in plan:
+        packaging_by_day[str(item["day"])] = _freeze_refresh_day(
+            item,
+            top_ranked=top_ranked,
+            artifact_db=artifact_db,
+            model=model,
+            effort=effort,
+            expected_event_run_id=source["event_run_id"],
+            run_root=run_root,
+        )
+
+    if _published_event_source() != source:
+        raise RuntimeError(
+            "The published Event run changed while audience packets were frozen; "
+            "model calls were not started. Rerun the refresh."
+        )
+
     results: dict[str, dict[str, Any]] = {}
     errors: list[str] = []
     with ThreadPoolExecutor(max_workers=min(day_workers, len(plan))) as executor:
@@ -284,13 +331,9 @@ def refresh_all_days(
             executor.submit(
                 _execute_refresh_day,
                 item,
-                top_ranked=top_ranked,
-                artifact_db=artifact_db,
-                model=model,
-                effort=effort,
                 workers=workers,
-                expected_event_run_id=source["event_run_id"],
                 run_root=run_root,
+                packaging_duration_ms=packaging_by_day[str(item["day"])],
             ): item
             for item in plan
         }
@@ -347,10 +390,33 @@ def refresh_all_days(
         if counts["input_tokens"]
         else 0.0
     )
+    model_requests = sum(
+        int(result.get("model_requests") or 0) for result in results.values()
+    )
     return {
         **base,
         "dry_run": False,
-        "will_call_model": True,
+        "will_call_model": model_requests > 0,
+        "model_requests": model_requests,
+        "packaging": {
+            "total_duration_ms": round(
+                sum(
+                    float(result.get("packaging_duration_ms") or 0)
+                    for result in results.values()
+                ),
+                3,
+            ),
+            "max_day_duration_ms": round(
+                max(
+                    (
+                        float(result.get("packaging_duration_ms") or 0)
+                        for result in results.values()
+                    ),
+                    default=0.0,
+                ),
+                3,
+            ),
+        },
         "counts": counts,
         "runs": [results[day] for day in sorted(results)],
         "pruned_runs": pruned,
@@ -563,7 +629,7 @@ def freeze_run(
         query="",
         event_id=event_id or "",
         routing_filter="all",
-        limit=5000,
+        limit=1 if event_id else top_ranked,
         offset=0,
     )
     if not payload.get("available"):

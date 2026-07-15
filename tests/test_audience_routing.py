@@ -265,6 +265,29 @@ def test_render_input_keeps_short_reactions_and_cleans_duplicates_and_links():
     assert "Duplicate Reaction" not in rendered
 
 
+def test_duplicate_detection_preserves_eighty_percent_overlap_boundary():
+    reaction = ("A" * 10) + ("B" * 80) + ("C" * 10)
+
+    assert audience_routing._duplicates_primary_text(
+        reaction,
+        ["prefix " + ("B" * 80) + " suffix"],
+    )
+    assert not audience_routing._duplicates_primary_text(
+        reaction,
+        ["prefix " + ("B" * 79) + " suffix"],
+    )
+
+
+def test_duplicate_detection_handles_large_artifact_without_quadratic_diff():
+    reaction = ("distinct operational reaction " * 10)[:240]
+    large_artifact = "measured artifact evidence " * 20_000
+
+    assert not audience_routing._duplicates_primary_text(
+        reaction,
+        [large_artifact],
+    )
+
+
 def test_render_input_caps_only_model_view_and_marks_truncation():
     packet = make_packet()
     oversized_artifact = replace(

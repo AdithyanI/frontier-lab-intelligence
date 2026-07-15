@@ -74,12 +74,15 @@ fli audience-routing refresh --through 2026-07-13 --replace
 ```
 
 The defaults are GPT-5.4-mini/high, nine days, 100 envelopes per day, 24 item
-workers per day, and nine days in parallel. The command binds every daily run
-to the same published Event/Feed pair, uses deterministic run IDs so an
-interrupted invocation resumes in place, and checks that publication did not
-change while it ran. `--replace` removes older routing directories only after
-all requested days complete successfully. Use `--dry-run` to print the exact
-run plan without calling the model.
+workers per day, and up to nine model-running days in parallel. The command
+first freezes each day's packets sequentially against one published Event/Feed
+pair, then starts bounded parallel model work only after every packet is
+stable. This keeps local CPU/GIL-heavy packet rendering fast while preserving
+parallel network throughput. Deterministic run IDs resume complete rows in
+place, and the result reports packet-packaging time plus the exact number of
+model requests. `--replace` removes older routing directories only after all
+requested days complete successfully. Use `--dry-run` to print the exact run
+plan without packaging packets or calling the model.
 
 LiteLLM/OpenAI prompt caching still applies to the stable instruction prefix;
 the run databases provide the stronger exact-response reuse when the source

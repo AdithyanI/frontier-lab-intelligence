@@ -66,6 +66,10 @@ def main(argv: list[str] | None = None) -> int:
         "audience-routing", help="Route Evidence envelopes by audience."
     )
     audience_routing_p.add_argument("audience_routing_args", nargs=argparse.REMAINDER)
+    insight_spike_p = sub.add_parser(
+        "insight-spike", help="Calibrate one successor Insight envelope."
+    )
+    insight_spike_p.add_argument("insight_spike_args", nargs=argparse.REMAINDER)
     x_daily_collection_p = sub.add_parser(
         "x-daily-collection",
         help="Plan or resume date-complete Registry X collection.",
@@ -185,6 +189,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli import audience_routing_runs
 
         return audience_routing_runs.main(args.audience_routing_args)
+
+    if args.command == "insight-spike":
+        from fli import insight_spike
+
+        return insight_spike.main(args.insight_spike_args)
 
     if args.command == "x-daily-collection":
         from fli import x_daily_collection

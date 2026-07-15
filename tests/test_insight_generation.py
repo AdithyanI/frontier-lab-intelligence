@@ -27,6 +27,14 @@ def _packet() -> audience_routing.RoutingPacket:
                 title="Recovery evaluation",
                 relation="self_published_artifact",
             ),
+            audience_routing.EvidenceSource(
+                source_type="x_post",
+                source_id="post-reaction",
+                url="https://x.com/bob/status/post-reaction",
+                text="This looks exciting, but I have not tested it.",
+                author="@bob",
+                relation="quote",
+            ),
         ),
     )
 
@@ -76,6 +84,8 @@ def test_candidate_input_reuses_attributed_envelope_without_rank_or_router_reaso
     assert rendered.endswith("\n</candidate_evidence>")
     assert 'author: "@alice"' in rendered
     assert "kind: authored_artifact" in rendered
+    assert "This looks exciting" not in rendered
+    assert "independent_reactions" not in rendered
     assert "feed_rank" not in rendered
     assert "routing" not in rendered
     assert candidate.feed_rank == 7
