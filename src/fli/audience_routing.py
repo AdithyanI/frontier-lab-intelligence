@@ -14,6 +14,7 @@ import json
 import re
 import unicodedata
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,11 @@ PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v2.txt"
 AUDIENCES = ("ai_engineering", "investment")
 JUDGMENT_FIELDS = ("relevant", "reason")
 _URL_ONLY_RE = re.compile(r"(?:https?://\S+\s*)+", re.IGNORECASE)
+_OPAQUE_X_URL_RE = re.compile(r"https?://t\.co/\S+", re.IGNORECASE)
+_MULTISPACE_RE = re.compile(r"[ \t]{2,}")
+_MIN_REACTION_CHARS = 40
+_PRIMARY_DUPLICATE_MIN_CHARS = 80
+_PRIMARY_DUPLICATE_RATIO = 0.80
 
 _JUDGMENT_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -158,7 +164,11 @@ def request_tags(*, run: str, day: str) -> tuple[str, ...]:
 
 def _display_text(source: EvidenceSource) -> str:
     """Return readable evidence text without changing stored source evidence."""
-    return html.unescape(source.normalized_text()).strip()
+    text = html.unescape(source.normalized_text()).strip()
+    text = _OPAQUE_X_URL_RE.sub("", text)
+    return "\n".join(
+        _MULTISPACE_RE.sub(" ", line).strip() for line in text.splitlines()
+    ).strip()
 
 
 def _yaml_value(value: str) -> str:
@@ -180,6 +190,22 @@ def _is_transport_only(text: str) -> bool:
     return not text or _URL_ONLY_RE.fullmatch(text) is not None
 
 
+def _duplicates_primary_text(text: str, primary_texts: list[str]) -> bool:
+    """Reject reactions whose substance is already present in primary evidence."""
+    if len(text) < _PRIMARY_DUPLICATE_MIN_CHARS:
+        return False
+    for primary_text in primary_texts:
+        match = SequenceMatcher(
+            None,
+            text,
+            primary_text,
+            autojunk=False,
+        ).find_longest_match()
+        if match.size / len(text) >= _PRIMARY_DUPLICATE_RATIO:
+            return True
+    return False
+
+
 def render_input(packet: RoutingPacket) -> str:
     """Render a readable YAML-style hierarchy without internal provenance."""
     roots = [source for source in packet.sources if source.relation == "root"]
@@ -195,14 +221,27 @@ def render_input(packet: RoutingPacket) -> str:
     artifacts = [
         source for source in packet.sources if source.source_type == "artifact"
     ]
-    reactions = [
-        source
-        for source in packet.sources
-        if source.source_type == "x_post"
-        and source.relation
-        not in {"root", "same_author_continuation", "retweet"}
-        and not _is_transport_only(_display_text(source))
+    primary_texts = [
+        text
+        for source in (root, *continuations, *artifacts)
+        if (text := _display_text(source)) and not _is_transport_only(text)
     ]
+    reactions: list[EvidenceSource] = []
+    for source in packet.sources:
+        if source.source_type != "x_post" or source.relation in {
+            "root",
+            "same_author_continuation",
+            "retweet",
+        }:
+            continue
+        text = _display_text(source)
+        if (
+            _is_transport_only(text)
+            or len(text) < _MIN_REACTION_CHARS
+            or _duplicates_primary_text(text, primary_texts)
+        ):
+            continue
+        reactions.append(source)
 
     lines = ["evidence_packet:", "  primary_source:"]
     if root.author:
@@ -221,7 +260,8 @@ def render_input(packet: RoutingPacket) -> str:
         lines.append("    continuations:")
         for source in continuations:
             text = _display_text(source)
-            lines.append("      - kind: " + ("artifact_link" if _is_transport_only(text) else "x_post"))
+            kind = "artifact_link" if _is_transport_only(text) else "x_post"
+            lines.append(f"      - kind: {kind}")
             if not _is_transport_only(text):
                 lines.extend(_literal_field("text", text, indent="        "))
 

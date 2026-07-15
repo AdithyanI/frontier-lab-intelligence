@@ -171,6 +171,66 @@ def test_render_input_replaces_link_only_post_and_omits_transport_reaction():
     assert "https://t.co/another-link" not in rendered
 
 
+def test_render_input_cleans_opaque_links_short_reactions_and_primary_duplicates():
+    packet = make_packet()
+    inline_link = audience_routing.EvidenceSource(
+        source_type="x_post",
+        source_id="inline-link",
+        url="https://example.com/inline-link",
+        author="Useful Reaction",
+        relation="quote",
+        text=(
+            "This adds a distinct reliability implication "
+            "https://t.co/opaque for production evaluation."
+        ),
+    )
+    short_reaction = audience_routing.EvidenceSource(
+        source_type="x_post",
+        source_id="short-reaction",
+        url="https://example.com/short-reaction",
+        author="Short Reaction",
+        relation="quote",
+        text="Good, but late.",
+    )
+    duplicate_reaction = audience_routing.EvidenceSource(
+        source_type="x_post",
+        source_id="duplicate-reaction",
+        url="https://example.com/duplicate-reaction",
+        author="Duplicate Reaction",
+        relation="quote",
+        text=(
+            "Tests report lower latency and lower serving cost. "
+            "Tests report lower latency and lower serving cost."
+        ),
+    )
+    artifact = replace(
+        packet.sources[1],
+        text=(
+            "Tests report lower latency and lower serving cost. "
+            "Tests report lower latency and lower serving cost."
+        ),
+    )
+    rendered = audience_routing.render_input(
+        replace(
+            packet,
+            sources=(
+                packet.sources[0],
+                artifact,
+                packet.sources[2],
+                inline_link,
+                short_reaction,
+                duplicate_reaction,
+            ),
+        )
+    )
+
+    assert "Useful Reaction" in rendered
+    assert "distinct reliability implication" in rendered
+    assert "https://t.co/opaque" not in rendered
+    assert "Short Reaction" not in rendered
+    assert "Duplicate Reaction" not in rendered
+
+
 def test_evidence_hash_binds_hidden_provenance_while_input_hash_does_not():
     packet = make_packet()
     changed_source = replace(
