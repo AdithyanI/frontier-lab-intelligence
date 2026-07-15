@@ -1,9 +1,8 @@
-"""Audience-routing model boundary for Feed-kept evidence packets.
+"""Audience-routing model boundary for complete attributed evidence packets.
 
-Feed triage has already made the general keep/drop decision. This module asks
-one model call for two audience-specific relevance judgments and does not
-generate Insight prose or expose ranking and provenance identifiers to the
-model.
+One model call makes two audience-specific relevance judgments directly over
+Evidence. It does not generate Insight prose or expose ranking and provenance
+identifiers to the model.
 """
 
 from __future__ import annotations
@@ -21,12 +20,12 @@ from typing import Any
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v3"
+PROMPT_VERSION = "audience-routing-v4"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "medium"
 PROMPT_CACHE_SHARDS = 32
-PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v3.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v4.txt"
 
 AUDIENCES = ("ai_engineering", "investment")
 JUDGMENT_FIELDS = ("relevant", "reason")
@@ -48,7 +47,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v3",
+    "name": "audience_routing_v4",
     "strict": True,
     "schema": {
         "type": "object",

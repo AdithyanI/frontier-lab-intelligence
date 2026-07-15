@@ -42,7 +42,7 @@ def _complete_run(path: Path, day: str) -> tuple[str, str] | None:
         if (
             meta is None
             or str(meta["day"]) != day
-            or str(meta["prompt_version"]) != audience_routing.PROMPT_VERSION
+            or str(meta["schema_version"]) != audience_routing.SCHEMA_VERSION
         ):
             conn.close()
             return None
@@ -128,7 +128,14 @@ def _routing_payload_cached(
             "model": str(meta["model"]),
             "reasoning_effort": str(meta["reasoning_effort"]),
             "prompt_version": str(meta["prompt_version"]),
-            "source_triage_run_id": str(meta["source_triage_run_id"]),
+            "source_event_run_id": str(meta["source_event_run_id"]),
+            "source_feed_run_id": str(meta["source_feed_run_id"]),
+            "selection_kind": str(meta["selection_kind"]),
+            "selection_limit": (
+                int(meta["selection_limit"])
+                if meta["selection_limit"] is not None
+                else None
+            ),
             "expected_count": int(meta["expected_count"]),
             "completed_count": len(items),
             "updated_at": str(meta["updated_at"]),

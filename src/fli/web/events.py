@@ -13,7 +13,7 @@ from typing import Any
 
 from fli import signal_events, signal_feed
 from fli.web import audience_routing as audience_routing_store
-from fli.web import feed as feed_store, triage as triage_store
+from fli.web import feed as feed_store
 
 
 DEFAULT_EVENTS_DB = signal_events.DEFAULT_EVENTS_DB
@@ -347,7 +347,6 @@ def _cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
         paths.append(analysis)
     return (
         *(feed_store._db_version(path) for path in paths),
-        *triage_store.cache_token(day),
         *audience_routing_store.cache_token(day),
     )
 
@@ -745,8 +744,6 @@ def _events_day_cached(
     for link in link_rows:
         links_by_event.setdefault(link["event_id"], []).append(link)
 
-    triage_payload = triage_store.triage_payload(day)
-    triage_items = triage_payload["items"]
     routing_payload = audience_routing_store.routing_payload(day)
     routing_items = routing_payload["items"]
     items: list[dict[str, Any]] = []
@@ -845,32 +842,17 @@ def _events_day_cached(
         _singleton(item) for item in feed_items if _feed_key(item) not in consumed
     )
     for item in items:
-        decision = triage_items.get(item["event_id"])
-        item["triage"] = (
-            decision
-            if decision
-            and decision.get("snapshot_content_sha256")
-            == item["snapshot_content_sha256"]
-            else None
-        )
         route = routing_items.get(item["event_id"])
         item["audience_routing"] = (
             route
             if route
-            and item["triage"]
-            and item["triage"]["decision"] == "keep"
             and route.get("snapshot_content_sha256")
             == item["snapshot_content_sha256"]
-            and routing_payload.get("run")
-            and triage_payload.get("run")
-            and routing_payload["run"]["source_triage_run_id"]
-            == triage_payload["run"]["run_id"]
             else None
         )
     return {
         "available": True,
         "date": day,
-        "triage_run": triage_payload["run"],
         "audience_routing_run": routing_payload["run"],
         "run": {
             "run_id": run["run_id"],
@@ -995,7 +977,7 @@ def _events_week_cached(
                     separators=(",", ":"),
                 ).encode()
             ).hexdigest(),
-            "triage": None,
+            "audience_routing": None,
             "active_days": active_days,
             "weekly_active_day_count": len(active_days),
             "peak_attention_score": state["peak_attention_score"],
@@ -1012,7 +994,7 @@ def _events_week_cached(
         "projection": "week",
         "window_from": start.isoformat(),
         "window_to": end.isoformat(),
-        "triage_run": None,
+        "audience_routing_run": None,
         "items": items,
     }
 
@@ -1051,7 +1033,6 @@ def events_payload(
     sort: str,
     query: str,
     event_id: str = "",
-    triage_filter: str = "all",
     limit: int,
     offset: int,
     projection: str = "day",
@@ -1066,8 +1047,8 @@ def events_payload(
     if not payload.get("available"):
         return payload
 
-    # Audit and search are visibility controls, not separate competitions.
-    # Freeze one score rank over the complete projection before applying them.
+    # Search is a visibility control, not a separate competition. Freeze one
+    # score rank over the complete projection before applying it.
     daily_rank_by_event_id = _daily_rank_by_event_id(payload["items"])
     daily_rank_total = len(daily_rank_by_event_id)
     needle = query.strip().lower()
@@ -1095,35 +1076,6 @@ def events_payload(
             ).lower()
         )
     ]
-    triage_counts = {
-        "all": len(items),
-        "keep": sum(
-            item["triage"] is not None
-            and item["triage"]["decision"] == "keep"
-            for item in items
-        ),
-        "drop": sum(
-            item["triage"] is not None
-            and item["triage"]["decision"] == "drop"
-            for item in items
-        ),
-        "not_evaluated": sum(item["triage"] is None for item in items),
-    }
-    if triage_filter == "keep":
-        items = [
-            item
-            for item in items
-            if item["triage"] and item["triage"]["decision"] == "keep"
-        ]
-    elif triage_filter == "drop":
-        items = [
-            item
-            for item in items
-            if item["triage"] and item["triage"]["decision"] == "drop"
-        ]
-    elif triage_filter == "not_evaluated":
-        items = [item for item in items if item["triage"] is None]
-
     if sort == "recent":
         items.sort(
             key=lambda item: (item["latest_evidence_at"], item["event_id"]),
@@ -1150,9 +1102,7 @@ def events_payload(
         "sort": sort,
         "query": query,
         "event_id": event_id,
-        "triage_filter": triage_filter,
         "projection": projection,
-        "triage_counts": triage_counts,
         "daily_rank_total": daily_rank_total,
         "total": total,
         "limit": limit,

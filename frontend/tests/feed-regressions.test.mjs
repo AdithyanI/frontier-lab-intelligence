@@ -14,15 +14,15 @@ const copyEnvelopeSource = await readFile(
 )
 const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
 
-test('Feed uses semantic classes for optional menu and triage content', () => {
+test('Feed uses semantic classes for optional menu and routing content', () => {
   assert.match(feedSource, /className="feed-menu-option-count mono"/)
-  assert.match(feedSource, /className="event-triage-decision"/)
+  assert.match(feedSource, /className="event-routing-status"/)
   assert.doesNotMatch(appStyles, /feed-menu-panel button > span:last-child/)
-  assert.doesNotMatch(appStyles, /event-triage-heading span:first-child/)
+  assert.doesNotMatch(appStyles, /event-routing-heading span:first-child/)
 })
 
-test('Feed keeps extraction status secondary and exposes the exact envelope ID', () => {
-  assert.ok(feedSource.indexOf('<EventEvidenceDetails') < feedSource.indexOf('<TriageNote item={item} />'))
+test('Feed keeps routing secondary and exposes the exact envelope ID', () => {
+  assert.ok(feedSource.indexOf('<EventEvidenceDetails') < feedSource.indexOf('<RoutingNote item={item} />'))
   assert.match(feedSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
   assert.match(copyEnvelopeSource, /navigator\.clipboard\.writeText\(envelopeId\)/)
   assert.match(copyEnvelopeSource, /Copy envelope ID/)
@@ -34,11 +34,13 @@ test('Feed shows positive audience marks and keeps both routing reasons auditabl
   assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">AI</)
   assert.match(feedSource, /routing\.investment\.relevant/)
   assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">INV</)
-  assert.match(feedSource, /Routed to AI Engineering/)
-  assert.match(feedSource, /Routed to Investment/)
+  assert.match(feedSource, /Relevant to AI Engineering/)
+  assert.match(feedSource, /Relevant to Investment/)
   assert.match(feedSource, /AI Engineering · \{routing\.ai_engineering\.relevant \? 'Relevant' : 'Not relevant'\}/)
   assert.match(feedSource, /Investment · \{routing\.investment\.relevant \? 'Relevant' : 'Not relevant'\}/)
   assert.doesNotMatch(feedSource, /audienceFilter/)
+  assert.doesNotMatch(feedSource, /Feed triage|Kept for extraction|Dropped before extraction/)
+  assert.doesNotMatch(feedSource, /label="AUDIT"/)
   assert.match(appStyles, /\.event-audience-mark \{[\s\S]*?border: 1px solid var\(--border\);/)
 })
 
@@ -49,7 +51,7 @@ test('Feed search matches the compact ruled control language', () => {
   assert.match(appStyles, /\.feed-search \{[\s\S]*?min-height: 44px;[\s\S]*?border: 1px solid var\(--border-strong\);[\s\S]*?border-radius: 0;/)
 })
 
-test('Feed preserves daily rank across audit filters and discloses score on demand', () => {
+test('Feed preserves daily rank across search and discloses score on demand', () => {
   assert.match(feedSource, /<strong>#\{rank\}<\/strong>/)
   assert.match(feedSource, /rank=\{item\.daily_rank\}/)
   assert.match(feedSource, /Daily rank #\{rank\} of \{total\.toLocaleString/)

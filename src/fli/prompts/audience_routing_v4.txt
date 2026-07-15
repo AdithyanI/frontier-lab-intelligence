@@ -85,12 +85,12 @@ Return exactly one structured object with two judgments:
 {
   "ai_engineering": {
     "relevant": true or false,
-    "reason": "One concise, evidence-grounded sentence explaining the judgment."
+    "reason": "A concise, evidence-grounded explanation, usually 40 to 50 words."
   },
   "investment": {
     "relevant": true or false,
-    "reason": "One concise, evidence-grounded sentence explaining the judgment."
+    "reason": "A concise, evidence-grounded explanation, usually 40 to 50 words."
   }
 }
 
-For a positive judgment, identify the specific supplied substance and why it is decision-useful to that audience. For a negative judgment, briefly identify what kind of decision-useful substance is missing. Keep the two reasons distinct. Do not add a general summary, score, confidence value, recommendation, or any fields outside this schema.
+For a positive judgment, identify the specific supplied substance and why it is decision-useful to that audience. For a negative judgment, identify what kind of decision-useful substance is missing. Keep the two reasons distinct. Aim for roughly 40 to 50 words for each reason. This is guidance, not a hard limit: use more when needed to preserve a material distinction or caveat, and never truncate, reject, or add filler merely to hit the range. Do not add a general summary, score, confidence value, recommendation, or any fields outside this schema.

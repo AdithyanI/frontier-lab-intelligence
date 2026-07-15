@@ -28,7 +28,6 @@ import { useAuditDate } from '../auditDateStore'
 import { readAuditDate, setAuditDateParam } from '../auditDate'
 
 type Sort = 'attention' | 'recent' | 'engagement'
-type TriageFilter = 'all' | 'keep' | 'drop' | 'not_evaluated'
 
 const PAGE_SIZE = 20
 const shortDate = new Intl.DateTimeFormat('en-US', {
@@ -37,17 +36,9 @@ const shortDate = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
   timeZone: 'UTC',
 })
-const triageSummaryLabels: Record<TriageFilter, string> = {
-  all: 'matching',
-  keep: 'kept',
-  drop: 'dropped',
-  not_evaluated: 'not evaluated',
-}
-
 interface EventPageRequest {
   date: string
   sort: Sort
-  triageFilter: TriageFilter
   query: string
   eventId?: string
   offset?: number
@@ -59,12 +50,11 @@ const eventPageRequests = new Map<string, Promise<EventResponse>>()
 function eventPageKey({
   date,
   sort,
-  triageFilter,
   query,
   eventId,
   offset = 0,
 }: EventPageRequest) {
-  return `${date}\u0000${sort}\u0000${triageFilter}\u0000${query}\u0000${eventId ?? ''}\u0000${offset}`
+  return `${date}\u0000${sort}\u0000${query}\u0000${eventId ?? ''}\u0000${offset}`
 }
 
 function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
@@ -77,7 +67,6 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
     date: request.date,
     lane: 'all',
     sort: request.sort,
-    triage: request.triageFilter,
     q: request.query,
     event_id: request.eventId ?? '',
     limit: String(PAGE_SIZE),
@@ -213,66 +202,54 @@ function FeedMenuSelect<T extends string>({
   )
 }
 
-function TriageNote({ item }: { item: SignalEvent }) {
-  if (!item.triage) return null
-  const { decision, reason } = item.triage
-  const routing = decision === 'keep' ? item.audience_routing : null
-  const decisionLabel = decision === 'keep' ? 'Kept for extraction' : 'Dropped before extraction'
-  const hasAudienceReasons = routing !== null
+function RoutingNote({ item }: { item: SignalEvent }) {
+  const routing = item.audience_routing
+  if (!routing) return null
+  const routedToNeither =
+    !routing.ai_engineering.relevant && !routing.investment.relevant
 
   return (
-    <details className={`event-triage event-triage--${decision}`}>
-      <summary className="event-triage-heading mono">
-        <span className="event-triage-status">
-          <span className="event-triage-decision">{decisionLabel}</span>
-          {routing && (
-            <span className="event-audience-marks">
-              {routing.ai_engineering.relevant && (
-                <>
-                  <span className="event-audience-mark" aria-hidden="true">AI</span>
-                  <span className="sr-only">Routed to AI Engineering. </span>
-                </>
-              )}
-              {routing.investment.relevant && (
-                <>
-                  <span className="event-audience-mark" aria-hidden="true">INV</span>
-                  <span className="sr-only">Routed to Investment. </span>
-                </>
-              )}
-            </span>
-          )}
+    <details className="event-routing">
+      <summary className="event-routing-heading mono">
+        <span className="event-routing-status">
+          <span className="sr-only">Audience routing. </span>
+          <span className="event-audience-marks">
+            {routing.ai_engineering.relevant && (
+              <>
+                <span className="event-audience-mark" aria-hidden="true">AI</span>
+                <span className="sr-only">Relevant to AI Engineering. </span>
+              </>
+            )}
+            {routing.investment.relevant && (
+              <>
+                <span className="event-audience-mark" aria-hidden="true">INV</span>
+                <span className="sr-only">Relevant to Investment. </span>
+              </>
+            )}
+            {routedToNeither && (
+              <span className="event-routing-neither">Neither audience</span>
+            )}
+          </span>
         </span>
-        <span className="event-triage-action">
-          <span className="event-triage-view">
-            {hasAudienceReasons ? 'View reasons' : 'View reason'}
-          </span>
-          <span className="event-triage-hide">
-            {hasAudienceReasons ? 'Hide reasons' : 'Hide reason'}
-          </span>
-          <span className="event-triage-caret" aria-hidden="true" />
+        <span className="event-routing-action">
+          <span className="event-routing-view">View reasons</span>
+          <span className="event-routing-hide">Hide reasons</span>
+          <span className="event-routing-caret" aria-hidden="true" />
         </span>
       </summary>
-      <div className="event-triage-reasons">
-        <div className="event-triage-reason">
-          <span className="event-triage-reason-label mono">Feed triage</span>
-          <p>{reason}</p>
+      <div className="event-routing-reasons">
+        <div className="event-routing-reason">
+          <span className="event-routing-reason-label mono">
+            AI Engineering · {routing.ai_engineering.relevant ? 'Relevant' : 'Not relevant'}
+          </span>
+          <p>{routing.ai_engineering.reason}</p>
         </div>
-        {routing && (
-          <>
-            <div className="event-triage-reason">
-              <span className="event-triage-reason-label mono">
-                AI Engineering · {routing.ai_engineering.relevant ? 'Relevant' : 'Not relevant'}
-              </span>
-              <p>{routing.ai_engineering.reason}</p>
-            </div>
-            <div className="event-triage-reason">
-              <span className="event-triage-reason-label mono">
-                Investment · {routing.investment.relevant ? 'Relevant' : 'Not relevant'}
-              </span>
-              <p>{routing.investment.reason}</p>
-            </div>
-          </>
-        )}
+        <div className="event-routing-reason">
+          <span className="event-routing-reason-label mono">
+            Investment · {routing.investment.relevant ? 'Relevant' : 'Not relevant'}
+          </span>
+          <p>{routing.investment.reason}</p>
+        </div>
       </div>
     </details>
   )
@@ -648,7 +625,7 @@ function EventRow({
           />
         )}
 
-        <TriageNote item={item} />
+        <RoutingNote item={item} />
 
         <footer className="feed-footer mono">
           <div className="feed-metrics">
@@ -684,7 +661,6 @@ export default function Feed() {
   const [dates, setDates] = useState<FeedDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [sort, setSort] = useState<Sort>('attention')
-  const [triageFilter, setTriageFilter] = useState<TriageFilter>('keep')
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [data, setData] = useState<EventResponse | null>(null)
@@ -741,7 +717,6 @@ export default function Feed() {
     const request = {
       date: selectedDate,
       sort,
-      triageFilter,
       query: debouncedQuery,
       eventId: targetEventId,
       offset: 0,
@@ -778,7 +753,7 @@ export default function Feed() {
     return () => {
       live = false
     }
-  }, [selectedDate, sort, triageFilter, debouncedQuery, targetEventId])
+  }, [selectedDate, sort, debouncedQuery, targetEventId])
 
   useEffect(() => {
     if (
@@ -796,7 +771,6 @@ export default function Feed() {
           await requestEventPage({
             date: value.day,
             sort: 'attention',
-            triageFilter,
             query: '',
             offset: 0,
           })
@@ -813,7 +787,6 @@ export default function Feed() {
     visibleDates,
     selectedDate,
     sort,
-    triageFilter,
     debouncedQuery,
     targetEventId,
     loading,
@@ -873,7 +846,6 @@ export default function Feed() {
     const viewKey = eventPageKey({
       date: selectedDate,
       sort,
-      triageFilter,
       query: debouncedQuery,
       offset: 0,
     })
@@ -883,7 +855,6 @@ export default function Feed() {
     requestEventPage({
       date: selectedDate,
       sort,
-      triageFilter,
       query: debouncedQuery,
       offset: items.length,
     })
@@ -964,25 +935,6 @@ export default function Feed() {
         />
         <div className="feed-controls">
           <FeedMenuSelect
-            label="AUDIT"
-            value={triageFilter}
-            onChange={(value) => {
-              clearTargetEvent()
-              setTriageFilter(value)
-            }}
-            options={([
-              ['keep', 'Kept', 'Kept for extraction'],
-              ['drop', 'Dropped', 'Dropped before extraction'],
-              ['not_evaluated', 'Not evaluated', 'Not evaluated by triage'],
-              ['all', 'All', 'All evidence'],
-            ] as const).map(([value, label, description]) => ({
-              value,
-              label,
-              description,
-              count: data?.triage_counts?.[value],
-            }))}
-          />
-          <FeedMenuSelect
             label="SORT"
             value={sort}
             onChange={(value) => {
@@ -1001,7 +953,7 @@ export default function Feed() {
       {hasSearch && (
         <div className="feed-summary mono">
           {(data?.total ?? 0).toLocaleString('en-US')}{' '}
-          {triageSummaryLabels[triageFilter]} Feed items
+          matching Feed items
         </div>
       )}
 
@@ -1019,7 +971,7 @@ export default function Feed() {
                 key={item.event_id}
                 item={item}
                 rank={item.daily_rank}
-                total={data?.daily_rank_total ?? data?.triage_counts?.all ?? items.length}
+                total={data?.daily_rank_total ?? items.length}
                 date={selectedDate}
                 formula={data?.score_formula}
                 scoreOpen={openScoreEventId === item.event_id}
@@ -1036,7 +988,7 @@ export default function Feed() {
           <div className="registry-empty">
             {selectedDate && !selectedDateIsAvailable
               ? `No complete Feed view is available for ${selectedDateLabel}. This audit date remains preserved across views.`
-              : 'No evidence matches these audit filters. Try another day or clear the filters.'}
+              : 'No evidence matches this search. Try another day or clear the search.'}
           </div>
         )}
       </section>

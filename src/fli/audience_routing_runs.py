@@ -1,4 +1,4 @@
-"""Freeze and route a small cohort of Feed-kept Evidence envelopes."""
+"""Freeze and route ranked Evidence envelopes directly by audience."""
 
 from __future__ import annotations
 
@@ -19,9 +19,8 @@ from fli import artifacts, audience_routing, entity_kinds
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RUN_ROOT = REPO_ROOT / "data" / "derived" / "audience-routing"
-DEFAULT_TRIAGE_ROOT = REPO_ROOT / "data" / "derived" / "cited-insights" / "triage"
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
-DEFAULT_TOP_KEPT = 8
+DEFAULT_TOP_RANKED = 8
 DEFAULT_WORKERS = 2
 
 RUN_SCHEMA = """
@@ -34,10 +33,12 @@ CREATE TABLE IF NOT EXISTS run_meta (
     prompt_version TEXT NOT NULL,
     prompt_sha256 TEXT NOT NULL,
     schema_version TEXT NOT NULL,
-    source_triage_db TEXT NOT NULL,
-    source_triage_run_id TEXT NOT NULL,
+    source_event_run_id TEXT NOT NULL,
+    source_feed_run_id TEXT NOT NULL,
     source_artifact_db TEXT NOT NULL,
-    top_kept_limit INTEGER NOT NULL,
+    selection_kind TEXT NOT NULL
+        CHECK (selection_kind IN ('top_ranked', 'single_event', 'review_cohort')),
+    selection_limit INTEGER,
     requested_event_id TEXT,
     cohort_sha256 TEXT NOT NULL,
     expected_count INTEGER NOT NULL,
@@ -114,14 +115,6 @@ def default_run_db(run_id: str) -> Path:
     ):
         raise ValueError("run_id may contain only letters, numbers, '-', '_', and '.'")
     return DEFAULT_RUN_ROOT / run_id / "routing.db"
-
-
-def canonical_triage_db(day: str) -> Path:
-    return (
-        DEFAULT_TRIAGE_ROOT
-        / f"triage-v2.2-canonical-v8-{day}-top1000"
-        / "triage.db"
-    )
 
 
 def connect_run(path: Path | str) -> sqlite3.Connection:
@@ -263,22 +256,31 @@ def _artifact_sources(
     return sources
 
 
-def packet_from_triage_row(
-    row: sqlite3.Row,
+def packet_from_event(
+    item: dict[str, Any],
     *,
+    day: str,
     artifact_conn: sqlite3.Connection,
 ) -> audience_routing.RoutingPacket:
-    envelope = json.loads(str(row["envelope_json"]))
-    root = dict(envelope["root"])
+    root_item = dict(item["root"])
+    root = {
+        "post_id": str(root_item["post_id"]),
+        "author": "@" + str(root_item["author"]["handle"]),
+        "text": str(root_item.get("text") or ""),
+    }
     sources = [_x_source(root, relation="root")]
     post_authors = {str(root["post_id"]): str(root.get("author") or "")}
-    for related in envelope.get("related_posts") or []:
-        post = dict(related)
+    for evidence in item.get("evidence") or []:
+        post = {
+            "post_id": str(evidence["post_id"]),
+            "author": "@" + str(evidence["author"]["handle"]),
+            "text": str(evidence.get("text") or ""),
+        }
         post_id = str(post["post_id"])
         relation = (
             "same_author_continuation"
-            if post.get("same_author_as_root")
-            else str(post.get("relation") or "related")
+            if evidence.get("same_author_as_root")
+            else str(evidence.get("relationship") or "related")
         )
         if relation == "retweet":
             continue
@@ -287,13 +289,13 @@ def packet_from_triage_row(
     sources.extend(
         _artifact_sources(
             artifact_conn,
-            event_id=str(row["event_id"]),
+            event_id=str(item["event_id"]),
             post_authors=post_authors,
         )
     )
     return audience_routing.RoutingPacket(
-        event_id=str(row["event_id"]),
-        day=str(envelope["day"]),
+        event_id=str(item["event_id"]),
+        day=day,
         sources=tuple(sources),
     )
 
@@ -303,72 +305,66 @@ def freeze_run(
     *,
     run_id: str,
     day: str,
-    top_kept: int,
+    top_ranked: int,
     event_id: str | None,
-    triage_db: Path,
     artifact_db: Path,
     model: str,
     effort: str,
 ) -> int:
-    if top_kept < 1:
-        raise ValueError("top_kept must be positive")
-    triage = _open_readonly(triage_db)
+    if top_ranked < 1:
+        raise ValueError("top_ranked must be positive")
+    from fli.web import events as event_store
+
+    payload = event_store.events_payload(
+        day=day,
+        lane="all",
+        sort="attention",
+        query="",
+        event_id=event_id or "",
+        limit=5000,
+        offset=0,
+    )
+    if not payload.get("available"):
+        raise ValueError(str(payload.get("reason") or "Evidence is unavailable"))
+    source_run = dict(payload.get("run") or {})
+    if not source_run.get("run_id") or not source_run.get("feed_run_id"):
+        raise ValueError("Evidence projection is missing run provenance")
+    items = list(payload.get("items") or [])
+    if event_id:
+        items = [item for item in items if item["event_id"] == event_id]
+    else:
+        items = items[:top_ranked]
+    if not items:
+        raise ValueError("Evidence projection has no matching envelopes")
+    missing_hashes = [
+        str(item["event_id"])
+        for item in items
+        if not item.get("snapshot_content_sha256")
+    ]
+    if missing_hashes:
+        raise ValueError(
+            "Evidence envelopes are missing snapshot hashes: "
+            + ", ".join(missing_hashes)
+        )
+
     artifact_conn = _open_readonly(artifact_db)
     try:
-        triage_meta = triage.execute(
-            "SELECT * FROM run_meta WHERE singleton = 1"
-        ).fetchone()
-        if triage_meta is None:
-            raise ValueError("source triage database has no run metadata")
-        if str(triage_meta["day"]) != day:
-            raise ValueError("source triage day does not match requested day")
-        if event_id:
-            rows = triage.execute(
-                """SELECT event_id, current_rank, root_url, envelope_json,
-                          snapshot_content_sha256
-                   FROM triage_item
-                   WHERE status = 'complete' AND decision = 'keep'
-                     AND event_id = ?""",
-                (event_id,),
-            ).fetchall()
-        else:
-            rows = triage.execute(
-                """SELECT event_id, current_rank, root_url, envelope_json,
-                          snapshot_content_sha256
-                   FROM triage_item
-                   WHERE status = 'complete' AND decision = 'keep'
-                   ORDER BY current_rank, event_id
-                   LIMIT ?""",
-                (top_kept,),
-            ).fetchall()
-        if not rows:
-            raise ValueError("source triage database has no completed kept envelopes")
-        missing_hashes = [
-            str(row["event_id"])
-            for row in rows
-            if not row["snapshot_content_sha256"]
-        ]
-        if missing_hashes:
-            raise ValueError(
-                "source triage rows are missing snapshot hashes: "
-                + ", ".join(missing_hashes)
-            )
         packets = [
-            packet_from_triage_row(row, artifact_conn=artifact_conn) for row in rows
+            packet_from_event(item, day=day, artifact_conn=artifact_conn)
+            for item in items
         ]
     finally:
-        triage.close()
         artifact_conn.close()
 
     cohort = [
         {
             "event_id": packet.event_id,
-            "feed_rank": int(row["current_rank"]),
-            "snapshot_content_sha256": str(row["snapshot_content_sha256"]),
+            "feed_rank": int(item["daily_rank"]),
+            "snapshot_content_sha256": str(item["snapshot_content_sha256"]),
             "evidence_sha256": packet.evidence_sha256,
             "input_sha256": packet.input_sha256,
         }
-        for row, packet in zip(rows, packets, strict=True)
+        for item, packet in zip(items, packets, strict=True)
     ]
     cohort_sha256 = _sha256(_canonical_json(cohort))
     existing = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
@@ -380,10 +376,11 @@ def freeze_run(
         "prompt_version": audience_routing.PROMPT_VERSION,
         "prompt_sha256": audience_routing.prompt_sha256(),
         "schema_version": audience_routing.SCHEMA_VERSION,
-        "source_triage_db": _display_path(triage_db),
-        "source_triage_run_id": str(triage_meta["run_id"]),
+        "source_event_run_id": str(source_run["run_id"]),
+        "source_feed_run_id": str(source_run["feed_run_id"]),
         "source_artifact_db": _display_path(artifact_db),
-        "top_kept_limit": top_kept,
+        "selection_kind": "single_event" if event_id else "top_ranked",
+        "selection_limit": None if event_id else top_ranked,
         "requested_event_id": event_id,
         "cohort_sha256": cohort_sha256,
         "expected_count": len(packets),
@@ -403,16 +400,18 @@ def freeze_run(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
                 prompt_version, prompt_sha256, schema_version,
-                source_triage_db, source_triage_run_id, source_artifact_db,
-                top_kept_limit, requested_event_id, cohort_sha256, expected_count,
+                source_event_run_id, source_feed_run_id, source_artifact_db,
+                selection_kind, selection_limit, requested_event_id,
+                cohort_sha256, expected_count,
                 created_at, updated_at)
                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 expected["run_id"], expected["day"], expected["model"],
                 expected["reasoning_effort"], expected["prompt_version"],
                 expected["prompt_sha256"], expected["schema_version"],
-                expected["source_triage_db"], expected["source_triage_run_id"],
-                expected["source_artifact_db"], expected["top_kept_limit"],
+                expected["source_event_run_id"], expected["source_feed_run_id"],
+                expected["source_artifact_db"], expected["selection_kind"],
+                expected["selection_limit"],
                 expected["requested_event_id"], expected["cohort_sha256"],
                 expected["expected_count"], now, now,
             ),
@@ -426,9 +425,9 @@ def freeze_run(
             [
                 (
                     packet.event_id,
-                    int(row["current_rank"]),
-                    str(row["root_url"]),
-                    str(row["snapshot_content_sha256"]),
+                    int(item["daily_rank"]),
+                    str(item["root"]["url"]),
+                    str(item["snapshot_content_sha256"]),
                     _canonical_json(_packet_payload(packet)),
                     packet.evidence_sha256,
                     audience_routing.render_input(packet),
@@ -436,7 +435,7 @@ def freeze_run(
                     audience_routing.prompt_cache_key(packet.event_id),
                     now,
                 )
-                for row, packet in zip(rows, packets, strict=True)
+                for item, packet in zip(items, packets, strict=True)
             ],
         )
     return len(packets)
@@ -624,13 +623,12 @@ def _result(command: str, data: Any) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="fli audience-routing")
     sub = parser.add_subparsers(dest="action", required=True)
-    run_parser = sub.add_parser("run", help="Route a frozen top-kept cohort.")
+    run_parser = sub.add_parser("run", help="Route ranked Evidence directly.")
     run_parser.add_argument("--run-id", required=True)
     run_parser.add_argument("--run-db", type=Path)
     run_parser.add_argument("--day", required=True)
-    run_parser.add_argument("--top-kept", type=int, default=DEFAULT_TOP_KEPT)
+    run_parser.add_argument("--top-ranked", type=int, default=DEFAULT_TOP_RANKED)
     run_parser.add_argument("--event-id")
-    run_parser.add_argument("--triage-db", type=Path)
     run_parser.add_argument("--artifact-db", type=Path, default=DEFAULT_ARTIFACT_DB)
     run_parser.add_argument("--model", default=audience_routing.DEFAULT_MODEL)
     run_parser.add_argument(
@@ -651,9 +649,8 @@ def main(argv: list[str] | None = None) -> int:
                 "run_id": args.run_id,
                 "run_db": str(args.run_db or default_run_db(args.run_id)),
                 "day": args.day,
-                "top_kept": args.top_kept,
+                "top_ranked": args.top_ranked,
                 "event_id": args.event_id,
-                "triage_db": str(args.triage_db or canonical_triage_db(args.day)),
                 "artifact_db": str(args.artifact_db),
                 "model": args.model,
                 "reasoning_effort": args.reasoning_effort,
@@ -665,15 +662,13 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.action == "run":
             run_db = args.run_db or default_run_db(args.run_id)
-            triage_db = args.triage_db or canonical_triage_db(args.day)
             conn = connect_run(run_db)
             freeze_run(
                 conn,
                 run_id=args.run_id,
                 day=args.day,
-                top_kept=args.top_kept,
+                top_ranked=args.top_ranked,
                 event_id=args.event_id,
-                triage_db=triage_db,
                 artifact_db=args.artifact_db,
                 model=args.model,
                 effort=args.reasoning_effort,

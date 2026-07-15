@@ -120,13 +120,13 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v3_prompt_requests_three_to_four_sentences_without_padding():
+def test_v4_prompt_uses_soft_reason_word_guidance_without_truncation():
     prompt = audience_routing.instructions()
 
-    assert audience_routing.PROMPT_VERSION == "audience-routing-v3"
-    assert "usually three to four sentences" in prompt
-    assert "do not add filler merely to reach that length" in prompt
-    assert "One concise, evidence-grounded sentence" not in prompt
+    assert audience_routing.PROMPT_VERSION == "audience-routing-v4"
+    assert "Aim for roughly 40 to 50 words" in prompt
+    assert "guidance, not a hard limit" in prompt
+    assert "never truncate, reject, or add filler" in prompt
 
 
 def test_render_input_uses_readable_hierarchy_before_separate_reactions():
@@ -292,7 +292,7 @@ def test_request_uses_luna_medium_cache_adapter_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v3",
+        "prompt:audience-routing-v4",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True

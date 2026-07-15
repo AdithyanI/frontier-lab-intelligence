@@ -62,12 +62,8 @@ def main(argv: list[str] | None = None) -> int:
         "signal-events", help="Group exact structural Feed evidence."
     )
     signal_events_p.add_argument("event_args", nargs=argparse.REMAINDER)
-    insight_triage_p = sub.add_parser(
-        "insight-triage", help="Triage Feed envelopes for cited extraction."
-    )
-    insight_triage_p.add_argument("triage_args", nargs=argparse.REMAINDER)
     audience_routing_p = sub.add_parser(
-        "audience-routing", help="Route kept Feed envelopes by audience."
+        "audience-routing", help="Route Evidence envelopes by audience."
     )
     audience_routing_p.add_argument("audience_routing_args", nargs=argparse.REMAINDER)
     cited_insights_p = sub.add_parser(
@@ -205,11 +201,6 @@ def main(argv: list[str] | None = None) -> int:
         from fli import signal_events
 
         return signal_events.main(args.event_args)
-
-    if args.command == "insight-triage":
-        from fli import insight_triage_runs
-
-        return insight_triage_runs.main(args.triage_args)
 
     if args.command == "audience-routing":
         from fli import audience_routing_runs

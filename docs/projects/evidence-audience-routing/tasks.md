@@ -3,9 +3,10 @@
 ## Goal
 
 Define and prove the smallest auditable decision that assigns one complete,
-correctly attributed, Feed-kept Evidence envelope to AI Engineering,
-Investment, both, or neither before any new Insight generation is designed or
-run. Existing Feed triage remains the sole general keep/drop gate.
+correctly attributed Evidence envelope to AI Engineering, Investment, both, or
+neither before any new Insight generation is designed or run. Audience routing
+is the only live model judgment over Feed evidence; the superseded general
+keep/drop gate is removed rather than displayed or maintained in parallel.
 
 ## Why / Impact
 
@@ -14,7 +15,7 @@ editorial selection, verification, reconciliation, and publication before the
 first product decision was easy to inspect. That made failures hard to reason
 about with Adi and created multiple apparent sources of truth.
 
-This project restores one visible boundary: inspect kept Evidence, make two
+This project restores one visible boundary: inspect Evidence, make two
 audience-specific relevance judgments in one model call, and prove them on
 real envelopes. If this boundary is wrong, every later Insight is noise; if it
 is clear and stable, a separate Insight-generation project can consume only
@@ -31,8 +32,9 @@ positive routes without reviving the old stack.
   judgments: AI Engineering relevant/not relevant and Investment relevant/not
   relevant, each with a concise evidence-grounded explanation that is usually
   three to four sentences.
-- Keep existing Feed triage as the only keep/drop decision. The audience
-  router does not write a second keep/drop field.
+- Remove the superseded Feed keep/drop model, live projection, filter, reason,
+  CLI entry point, and generated run data. Do not preserve a compatibility
+  read or let new routing depend on its records.
 - Write the routing prompt with Adi, keeping the two audience standards
   distinct and excluding Feed rank, engagement, prominence, and other outcome
   hints from the model input.
@@ -52,6 +54,7 @@ positive routes without reviving the old stack.
 - Writing or publishing audience Insight prose.
 - Restoring the deleted Audience Insights v2 databases or treating archived
   reviewer/editor/publication machinery as the current contract.
+- Preserving the superseded Feed keep/drop path for backward compatibility.
 - Daily editorial ranking, independent publication audit, reconciliation,
   briefing/export, alerts, or delivery.
 - Bulk nine-day generation before the one-envelope and one-day reviews pass.
@@ -69,8 +72,9 @@ positive routes without reviving the old stack.
   [`../archive/audience-insights-v2/tasks.md`](../archive/audience-insights-v2/tasks.md).
 - The prior design draft is historical input, not authority:
   [`../archive/audience-insights-v2/resources/minimal-envelope-routing-v0.md`](../archive/audience-insights-v2/resources/minimal-envelope-routing-v0.md).
-  Its recommendation that Feed alone owns keep/drop was reconfirmed with Adi
-  on 2026-07-15. The new router lives downstream of kept Feed envelopes.
+  Its recommendation that Feed owns keep/drop was superseded by Adi on
+  2026-07-15 after reviewing the combined UI. The router now consumes ranked
+  Evidence envelopes directly and is the only live model judgment in Feed.
 - Generated Audience Insights v2 data was intentionally deleted. Do not add
   compatibility reads, dual writes, old-schema fallbacks, or legacy database
   migrations unless Adi explicitly requests them.
@@ -108,8 +112,8 @@ Application invariants:
 - Both judgments are required and independently reasoned in one model call.
 - The application derives the convenient audience list and the four display
   outcomes; the model does not author those redundant fields.
-- A `neither` audience result remains a valid result for a Feed-kept envelope;
-  it does not rewrite or contradict Feed triage.
+- A `neither` audience result remains a valid completed routing result. It is
+  distinct from an envelope that has not yet been routed.
 - IDs, hashes, prompt versions, model/run telemetry, and timestamps are
   application-owned fields, never model-authored fields.
 - The reason schema requires a non-empty string but imposes no maximum length.
@@ -123,8 +127,8 @@ Application invariants:
 - [ ] Adi approves a documented envelope-input contract, including the exact
   treatment of root text, same-author continuations, replies, quotes, and
   artifacts.
-- [x] Adi approves the routing semantics: one combined call, two independent
-  audience judgments with separate reasons, and no second keep/drop field.
+- [x] Adi approves the routing semantics: one combined call and two independent
+  audience judgments with separate reasons; no general keep/drop judgment.
 - [ ] Adi reviews the short prompt and exact first-cohort outputs.
 - [x] One versioned routing path stores and returns one authoritative pair of
   audience judgments per envelope/run with evidence hash, prompt version,
@@ -135,7 +139,9 @@ Application invariants:
   prompt-cache reads, response cost, and qualitative disagreements are
   recorded before any expansion.
 - [x] Feed exposes positive audience marks and compact reasons without generating
-  Insight prose or changing the existing triage result.
+  Insight prose or displaying the superseded triage result.
+- [ ] The live Feed, API, routing runner, CLI, and generated current data contain
+  no dependency on or link to the superseded keep/drop run.
 - [x] Focused tests, `bash scripts/check-fast.sh`, live API proof, and rendered
   desktop QA pass; architecture/status docs reflect the final boundary.
 - [ ] Project learnings are finalized and the tracker is archived before the
@@ -152,8 +158,13 @@ Application invariants:
   qualitative review are recorded. Validate: resumable rerun and direct
   database/API comparison.
 - [x] Milestone 3 — Expose routing in Feed. Acceptance: existing triage filters
-  remain authoritative while positive audience marks and short reasons make
-  the cohort inspectable. Validate: production build and rendered desktop QA.
+  are absent while positive audience marks and short reasons make the cohort
+  inspectable. Validate: production build and rendered desktop QA.
+- [ ] Milestone 3b — Remove the superseded keep/drop path. Acceptance: routing
+  freezes ranked Evidence directly; the live API/UI/CLI expose no triage fields,
+  controls, or reasons; current routing records carry only Evidence/run
+  provenance. Validate: repository search, direct-run tests, API proof, and
+  rendered desktop QA.
 - [ ] Milestone 4 — Freeze the routing boundary and close out. Acceptance:
   architecture, status, model/prompt references, evaluation evidence, and
   limitations are current; Insight generation is a separate explicit next
@@ -184,8 +195,9 @@ Application invariants:
   historical evidence, not an active tracker to resume.
 - Routing comes before Insight generation; no Insight prose belongs in this
   project.
-- Feed triage remains the sole general keep/drop gate. Audience routing runs
-  downstream on kept envelopes and never overwrites triage.
+- Adi superseded the Feed keep/drop gate after seeing both judgments together.
+  Audience routing now runs directly over ranked Evidence and is the only live
+  model decision shown in Feed.
 - One combined Luna-medium call returns two independent audience judgments and
   separate reasons. “Independent” does not mean separate routing calls.
 - The first proof is one envelope followed by a small frozen top-kept cohort,
@@ -245,13 +257,15 @@ Application invariants:
 | done | Remove the unsafe short-reaction cutoff and expand each audience reason to roughly three to four sentences without a schema maximum. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
 | done | Run the frozen July 12 top-eight kept cohort sequentially through Luna-medium and record distribution, quality, cache, cost, and limitations. | parent | `resources/jul12-top8-v3-routing.md` |
 | done | Expose exact-match routing records as quiet positive marks and separate reasons in the existing Feed disclosure; add no audience filter or Insight prose. | parent | `resources/jul12-top8-v3-routing.md` |
-| in_progress | Adi audits the July 12 Feed outputs; then freeze corrections and choose a bounded hard-negative/`neither` sample before any broad run. | parent | `resources/jul12-top8-v3-routing.md` |
+| in_progress | Remove the superseded keep/drop projection, controls, CLI/runtime path, generated data, and all new-router dependencies on it. | parent | — |
+| todo | Migrate the current audience-routing records to direct Evidence/run provenance and verify the simplified July 12 Feed. | parent | `resources/jul12-top8-v3-routing.md` |
+| todo | Resume Adi's qualitative audit, then choose a bounded hard-negative/`neither` sample before any broad run. | parent | `resources/jul12-top8-v3-routing.md` |
 
 ## Backlog / Remaining Work
 
 - [ ] Add deterministic packet-integrity and schema-consistency validation.
-- [ ] Audit a bounded sample of existing Feed drops later to estimate whether
-  the upstream gate hides audience-relevant evidence.
+- [ ] Audit a bounded sample of difficult low-ranked Evidence to calibrate
+  `neither`; there is no upstream model gate to sample from.
 - [ ] Expand beyond the first cohort only after Adi's qualitative review.
 - [x] Add the read-only API projection and compact positive Feed audience marks
   and reasons without reading archived Insight data.
@@ -355,3 +369,10 @@ Application invariants:
   fast check, production build, and rendered desktop inspection passed. Adi's
   qualitative audit and a later bounded hard-negative sample remain the live
   resume point; exact evidence is in `resources/jul12-top8-v3-routing.md`.
+- 2026-07-15: [REPLANNED] After reviewing the combined disclosure, Adi rejected
+  the old Feed keep/drop judgment as redundant and asked for a clean migration
+  with no useless live links. Audience routing is now the only model judgment
+  over Feed evidence. The active batch removes the legacy filter/reason/API/CLI
+  and generated triage data, changes the routing runner to freeze ranked
+  Evidence directly, and migrates the current new outputs to Evidence/run-only
+  provenance before qualitative review resumes.

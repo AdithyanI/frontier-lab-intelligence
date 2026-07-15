@@ -72,16 +72,15 @@ function EnvelopeGlyph({ x, y }: { x: number; y: number }) {
   )
 }
 
-function TriageGlyph({ x, y }: { x: number; y: number }) {
+function AudienceRoutingGlyph({ x, y }: { x: number; y: number }) {
   return (
     <g>
-      <line x1={x} y1={y} x2={x + 30} y2={y} stroke={BLUE_MID} strokeWidth="1.3" />
-      <line x1={x + 30} y1={y} x2={x + 58} y2={y - 15} stroke={BLUE_MID} strokeWidth="1.3" />
-      <line x1={x + 30} y1={y} x2={x + 58} y2={y + 15} stroke={BLUE_MID} strokeWidth="1.3" />
-      <rect x={x + 58} y={y - 21} width={48} height={13} fill={BLUE} />
-      <rect x={x + 58} y={y + 8} width={48} height={13} fill="none" stroke={MUTED} strokeWidth="1" />
-      <text x={x + 82} y={y - 11.5} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={INK}>KEEP</text>
-      <text x={x + 82} y={y + 18} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED}>DROP</text>
+      <line x1={x} y1={y} x2={x + 38} y2={y} stroke={BLUE_MID} strokeWidth="1.3" />
+      <rect x={x + 38} y={y - 18} width={32} height={18} fill="none" stroke={BLUE} strokeWidth="1" />
+      <rect x={x + 76} y={y - 18} width={42} height={18} fill="none" stroke={BLUE} strokeWidth="1" />
+      <text x={x + 54} y={y - 5} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill="#fff">AI</text>
+      <text x={x + 97} y={y - 5} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill="#fff">INV</text>
+      <text x={x + 38} y={y + 20} fontFamily={MONO} fontSize="8" fill={MUTED}>OR NEITHER</text>
     </g>
   )
 }
@@ -105,15 +104,15 @@ function EvidenceInputMap() {
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
     { x: 234, kicker: 'SOURCE', title: 'X posts + threads', glyph: 'days' },
     { x: 440, kicker: 'STRUCTURE', title: 'Exact envelopes', glyph: 'envelope' },
-    { x: 646, kicker: 'ROUTE', title: 'Feed + keep / drop', glyph: 'triage', dark: true },
-    { x: 852, kicker: 'EVIDENCE', title: 'Accepted evidence', glyph: 'accepted' },
+    { x: 646, kicker: 'ROUTE', title: 'Audience relevance', glyph: 'audience', dark: true },
+    { x: 852, kicker: 'EVIDENCE', title: 'Routed evidence', glyph: 'accepted' },
   ]
 
   return (
     <svg
       viewBox="0 0 1080 224"
       role="img"
-      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact envelopes enter the Feed for keep or drop routing. Kept items become accepted evidence, optionally enriched with artifacts."
+      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact envelopes are routed independently for AI Engineering and Investment. Routed evidence may be enriched with artifacts."
     >
       <defs>
         <marker id="flow-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -138,7 +137,7 @@ function EvidenceInputMap() {
           {stage.glyph === 'roster' && <RosterGlyph x={stage.x + 18} y={144} dark />}
           {stage.glyph === 'days' && <DaysGlyph x={stage.x + 18} y={158} />}
           {stage.glyph === 'envelope' && <EnvelopeGlyph x={stage.x + 18} y={158} />}
-          {stage.glyph === 'triage' && <TriageGlyph x={stage.x + 18} y={158} />}
+          {stage.glyph === 'audience' && <AudienceRoutingGlyph x={stage.x + 18} y={158} />}
           {stage.glyph === 'accepted' && <AcceptedEvidenceGlyph x={stage.x + 18} y={152} />}
         </g>
       ))}

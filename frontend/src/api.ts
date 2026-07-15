@@ -297,10 +297,6 @@ export interface SignalEvent {
   peak_public_interactions: number
   latest_evidence_at: string
   evidence: EventEvidence[]
-  triage: {
-    decision: 'keep' | 'drop'
-    reason: string
-  } | null
   audience_routing: {
     feed_rank: number
     snapshot_content_sha256: string
@@ -324,29 +320,16 @@ export interface EventResponse {
   lane?: 'all' | 'network' | 'firsthand'
   sort?: 'attention' | 'recent' | 'engagement'
   query?: string
-  triage_filter?: 'all' | 'keep' | 'drop' | 'not_evaluated'
-  triage_counts?: {
-    all: number
-    keep: number
-    drop: number
-    not_evaluated: number
-  }
   daily_rank_total?: number
-  triage_run?: {
-    run_id: string
-    model: string
-    reasoning_effort: string
-    prompt_version: string
-    expected_count: number
-    completed_count: number
-    updated_at: string
-  } | null
   audience_routing_run?: {
     run_id: string
     model: string
     reasoning_effort: string
     prompt_version: string
-    source_triage_run_id: string
+    source_event_run_id: string
+    source_feed_run_id: string
+    selection_kind: 'top_ranked' | 'single_event' | 'review_cohort'
+    selection_limit: number | null
     expected_count: number
     completed_count: number
     updated_at: string

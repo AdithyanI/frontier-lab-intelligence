@@ -1642,7 +1642,7 @@ td.num {
 }
 
 .feed-menu-caret,
-.event-triage-caret {
+.event-routing-caret {
   width: 6px;
   height: 6px;
   flex: none;
@@ -1653,7 +1653,7 @@ td.num {
 }
 
 .feed-menu[open] .feed-menu-caret,
-.event-triage[open] .event-triage-caret {
+.event-routing[open] .event-routing-caret {
   transform: translateY(2px) rotate(225deg);
 }
 
@@ -1999,13 +1999,13 @@ td.num {
 
 .event-continuation-note span:first-child { color: var(--blue-ink); }
 
-.event-triage {
+.event-routing {
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
 
-.event-triage-heading {
+.event-routing-heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -2018,17 +2018,14 @@ td.num {
   cursor: pointer;
 }
 
-.event-triage-heading::-webkit-details-marker { display: none; }
+.event-routing-heading::-webkit-details-marker { display: none; }
 
-.event-triage-status {
+.event-routing-status {
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
   min-width: 0;
 }
-
-.event-triage--keep .event-triage-decision { color: var(--positive); }
-.event-triage--drop .event-triage-decision { color: var(--negative); }
 
 .event-audience-marks {
   display: inline-flex;
@@ -2045,7 +2042,11 @@ td.num {
   line-height: 1.35;
 }
 
-.event-triage-action {
+.event-routing-neither {
+  color: var(--muted);
+}
+
+.event-routing-action {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -2053,29 +2054,29 @@ td.num {
   white-space: nowrap;
 }
 
-.event-triage-hide { display: none; }
-.event-triage[open] .event-triage-view { display: none; }
-.event-triage[open] .event-triage-hide { display: inline; }
+.event-routing-hide { display: none; }
+.event-routing[open] .event-routing-view { display: none; }
+.event-routing[open] .event-routing-hide { display: inline; }
 
-.event-triage-reasons {
+.event-routing-reasons {
   max-width: 72ch;
   margin-top: 12px;
 }
 
-.event-triage-reason + .event-triage-reason {
+.event-routing-reason + .event-routing-reason {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
 
-.event-triage-reason-label {
+.event-routing-reason-label {
   color: var(--blue-ink);
   font-size: 9.5px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.event-triage-reason p {
+.event-routing-reason p {
   margin: 4px 0 0;
   color: var(--ink-soft);
   font-size: 13px;
