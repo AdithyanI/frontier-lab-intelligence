@@ -1452,12 +1452,9 @@ def test_explicit_history_rejects_out_of_order_days(tmp_path, monkeypatch):
     monkeypatch.setattr(
         audience_insight_runs.audience_insight_publication_audit,
         "validated_publication_projection",
-        lambda source_run_db, **_kwargs: {
-            "mode": "audit_pass",
-            "base_selected_ids": [f"candidate-{source_run_db.parent.name}"],
-            "effective_selected_ids": [f"candidate-{source_run_db.parent.name}"],
-            "finalization": None,
-        },
+        lambda **_kwargs: pytest.fail(
+            "malformed chain must fail before publication sidecar validation"
+        ),
     )
 
     with pytest.raises(ValueError, match="strictly increasing"):
