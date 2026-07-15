@@ -59,15 +59,15 @@ class PromptContract:
 PROMPT_CONTRACTS = {
     InsightAudience.INVESTMENT: PromptContract(
         audience=InsightAudience.INVESTMENT,
-        version="investment-insight-v4",
-        path=_PROMPT_ROOT / "investment_insight_v4.txt",
-        cache_key="fli:insights:investment:v4",
+        version="investment-insight-v6",
+        path=_PROMPT_ROOT / "investment_insight_v6.txt",
+        cache_key="fli:insights:investment:v6",
     ),
     InsightAudience.AI_ENGINEERING: PromptContract(
         audience=InsightAudience.AI_ENGINEERING,
-        version="ai-engineering-insight-v4",
-        path=_PROMPT_ROOT / "ai_engineering_insight_v4.txt",
-        cache_key="fli:insights:ai-engineering:v4",
+        version="ai-engineering-insight-v5",
+        path=_PROMPT_ROOT / "ai_engineering_insight_v5.txt",
+        cache_key="fli:insights:ai-engineering:v5",
     ),
 }
 

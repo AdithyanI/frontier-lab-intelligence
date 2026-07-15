@@ -56,11 +56,15 @@ def test_contracts_are_separate_and_share_one_schema():
     investment = insight_generation.contract("investment")
     engineering = insight_generation.contract("ai_engineering")
 
-    assert investment.version == "investment-insight-v4"
-    assert engineering.version == "ai-engineering-insight-v4"
+    assert investment.version == "investment-insight-v6"
+    assert engineering.version == "ai-engineering-insight-v5"
     assert investment.cache_key != engineering.cache_key
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
+    assert "assignment-critical Investment signal" in investment.instructions()
+    assert "do not require disclosed funding" in investment.instructions()
+    assert "sharp internal research note" in investment.instructions()
+    assert "precise internal engineering review" in engineering.instructions()
     assert "AI Engineering decision standard" in engineering.instructions()
     assert audience_routing.input_token_count(investment.instructions()) >= 1_024
     assert audience_routing.input_token_count(engineering.instructions()) >= 1_024
@@ -112,7 +116,7 @@ def test_build_request_is_pure_and_keeps_variable_evidence_last():
         "investment"
     ).instructions()
     assert request["input"] == insight_generation.render_input(candidate)
-    assert request["prompt_cache_key"] == "fli:insights:investment:v4"
+    assert request["prompt_cache_key"] == "fli:insights:investment:v6"
     assert request["text"]["format"] == insight_generation.OUTPUT_FORMAT
     assert request["store"] is False
     assert "audience:investment" in request["extra_body"]["metadata"]["tags"]

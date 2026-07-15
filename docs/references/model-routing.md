@@ -1,6 +1,6 @@
 # Model Routing and Prompt Caching
 
-Last verified: 2026-07-15
+Last verified: 2026-07-16
 
 ## Current Policy
 
@@ -15,7 +15,7 @@ is the active boundary.
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
 | Evidence audience routing | `gpt-5.4-mini` | `high` | The current v9 nine-day top-100 run completed 900/900 with zero failures: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither. All requests were cache-eligible; 805 reported cache reads totaling 1,442,560 tokens. The v9 semantic input is first-party only. A prior same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
-| Audience Insight generation | `gpt-5.6-terra` | `high` | Quality-first default confirmed by Adi. The Investment and Engineering v4 prompts contain roughly 1.43k and 1.46k stable instruction tokens and use separate stable cache keys. In the current six-request sample, the first request for each audience warmed its prefix and all four later requests reported 1,280 cached tokens each (5,120 total). A Luna/high control produced coherent decisions but zero cache reads across six calls and one less-polished title, so it is not the active default. |
+| Audience Insight generation | `gpt-5.6-terra` | `high` | Quality-first default confirmed by Adi. Investment v6 and Engineering v5 use separate stable cache keys, remain above the prompt-cache threshold, and address BIT's actual readers with distinct internal-research and production-engineering voices. Investment protects the assignment's explicit researcher-departure/company-formation signal from an overly strict product-or-funding gate. In the current ten-decision calibration, five of six Investment requests each read 1,792 cached tokens (8,960 total), while all four Engineering requests reported zero reads despite being eligible; cache telemetry remains audience-prefix specific rather than assumed. A Luna/high control produced coherent decisions but zero cache reads across six calls and one less-polished title, so it is not the active default. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |
 | Full web-grounded relevance audit | `gpt-5.6-terra` | `high` | Complex research boundary; not part of the Luna-for-efficient-work migration. |

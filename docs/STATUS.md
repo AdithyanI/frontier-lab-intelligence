@@ -52,8 +52,9 @@ relevant; it is not a third judgment. A successor Insight foundation defines
 two audience prompts and one small surface-or-suppress schema. Historical Terra
 calibrations remain documented, but their generated rows were deleted because
 they used superseded source and output contracts. The production path freezes
-first-party-only requests into one resumable SQLite store; a fresh v9-qualified
-Insight run with the current v4 prompts is the remaining model step.
+first-party-only requests into one resumable SQLite store. Investment v6 and
+AI Engineering v5 are now calibrated on a bounded five-Insight review set;
+the remaining catalog is deliberately paused for Adi's qualitative review.
 
 ## Where the System Stands
 
@@ -66,8 +67,8 @@ Insight run with the current v4 prompts is the remaining model step.
 | Feed + daily score | Implemented audit surface | Daily collection includes authored replies and tracked reactions. The Feed is date-filterable, shows one frozen canonical-day rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Later reactions remain available in one flat activity disclosure but do not republish or rerank the source Event. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The reply-inclusive catalog converges to 2,735 artifacts with zero lineage violations; 2,507 have usable text, including all 221 arXiv metadata/abstract records and all 167 cached X Articles. Videos remain deferred and 65 non-video pages are unavailable or retryable. One shared extraction validator rejects placeholder-dominated bodies before they become successful snapshots. |
 | Feed audience routing | Current v9 nine-day top-100 audit complete | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons. Its semantic packet contains the root, same-author replies/thread/quote commentary, and accepted first-party artifacts; independently authored reactions and pure reposts remain outside model input. The clean July 5–13 replacement completed all 900 envelopes: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither. All 900 requests were cache-eligible, 805 reported cache reads (1,442,560 cached tokens), zero failed, and proxy-reported cost was $4.1366515. Only nine v9 run directories remain. |
-| Audience Insight generation | Implementation complete; clean v4 run in progress | Separate Investment and AI Engineering v4 prompts share one strict decision/title/reason/summary/implication/next-step schema. Every decision has a neutral reader-facing title; suppressed decisions carry only that title and a free-form reason. Model input uses the same first-party semantic boundary as routing. `fli insights` freezes exact requests before execution, rejects non-current source or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The current v9 routes yield 492 unique positive Events and 751 audience requests. The production Insight store was reset to remove all v3 rows; its first clean checkpoint contains six v4 decisions over three Events, with four 1,280-token cache reads. |
-| Insights UI | Ready and showing the current partial v4 run | The Investment and AI Engineering views share the Feed-style date rail, inherit the frozen canonical Feed rank, and expose `Kept`, `Suppressed`, and `All` status views. `/api/insights/dates` and `/api/insights` are the only live endpoints. Publication requires both the exact current v4 Insight prompt/hash/schema and a completed current v9 routing item; no old row is re-anchored, relabeled, or read through a compatibility route. The current checkpoint exposes two kept and four suppressed decisions across both audiences. |
+| Audience Insight generation | Implementation complete; bounded persona calibration ready for review | Investment v6 and AI Engineering v5 share one strict decision/title/reason/summary/implication/next-step schema but address distinct readers: a technically fluent bottom-up public-tech investor and a senior product-minded production AI engineer. Model input uses the same first-party semantic boundary as routing. `fli insights` freezes exact requests before execution, rejects non-current source or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The current v9 routes yield 492 unique positive Events and 751 possible audience requests, but only a fixed six-Event calibration has run under the current contracts: ten decisions, five surfaced, five suppressed, 8,960 cached tokens, and $0.122210 proxy-reported cost. |
+| Insights UI | Ready for the bounded v6/v5 review | The Investment and AI Engineering views share the Feed-style date rail, inherit the frozen canonical Feed rank, and expose `Kept`, `Suppressed`, and `All` status views. `/api/insights/dates` and `/api/insights` are the only live endpoints. Publication requires the exact current audience prompt/hash/schema and a completed current v9 routing item; no old row is re-anchored, relabeled, or read through a compatibility route. The current checkpoint exposes five kept and five suppressed decisions across the two audiences. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -77,20 +78,22 @@ current databases or APIs before using them as present-tense product claims.
 
 The repository has proved that one prompt/schema, versioned run store, and
 canonical Feed projection can route a complete nine-day top-100 cohort under a
-first-party-only semantic boundary. The next unproven claim is that positive audience routes can be
-converted into a small set of excellent, source-bound Insights without
-reviving the premature multi-stage stack or weakening attribution. Previous
-multi-stage Insight results remain historical learning, not the active
-contract.
+first-party-only semantic boundary. A bounded Terra calibration has also
+produced five distinct, source-bound Insights while suppressing five weak
+audience candidates. The next unproven claim is human: whether these five are
+good enough for the final 3–5 submission proof or reveal a repeatable editorial
+failure that warrants one more prompt change. Previous multi-stage Insight
+results remain historical learning, not the active contract.
 
 ## Submission Finish Line
 
 The routing boundary is frozen. The active Evidence Audience Routing tracker
 owns final closeout and archive. At system level, the remaining proof is:
 
-1. Complete the approved 492-Event / 751-request clean Terra Insight refresh
-   into a fresh database and publish it only after full reconciliation.
-2. Inspect and select 3–5 excellent Insights in Feed-rank order.
+1. Inspect the bounded five-Insight Investment/Engineering calibration and
+   accept the prompt contracts or identify a repeatable failure.
+2. Select the strongest 3–5 Insights in Feed-rank order; expand the run only if
+   the submission proof still has a concrete coverage gap.
 3. Assemble the rubric-mapped submission package and limitations.
 4. Perform the final delivery review before requesting explicit approval for
    any external submission.

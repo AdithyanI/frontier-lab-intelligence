@@ -305,7 +305,8 @@ Application invariants:
 | complete | Replace daily continuation publication with one canonical Event day/rank while retaining later activity on the Event. | parent | — |
 | complete | Reduce routing and Insight packets to first-party-authored source material plus accepted first-party artifacts and enforce one candidate per Event/audience. | parent | — |
 | complete | Rebuild clean one-run Feed/Event stores and replace all routing data with nine v9 top-100 runs; prove cache telemetry and remove v8 directories. | parent | `../../../references/model-routing.md` |
-| pending | Complete the clean 492-Event / 751-request Terra Insight refresh from the reset v4-only store; then reconcile and perform final Insight UI proof. | parent | `resources/first-live-insight-run.md` |
+| complete | Calibrate Investment v6 and AI Engineering v5 against BIT's public reader context and the assignment's explicit researcher-formation case; run only a bounded six-Event review set and stop at five surfaced Insights. | parent | `../../references/insight-persona-calibration.md` |
+| pending | Adi reviews the five current Insights and decides whether the prompt contract is accepted; do not run the remaining 751-request catalog before that review. | parent | `../../references/insight-persona-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -334,6 +335,8 @@ Application invariants:
 - [x] Update architecture, status, model-routing/prompt references, and build log.
 - [x] Run focused tests, `bash scripts/check-fast.sh`, API proof, and desktop QA.
 - [ ] Review and finalize `learnings.md`, then archive this project.
+- [ ] After Adi's bounded Insight review, either freeze the current v6/v5
+  contracts or record one repeatable editorial failure before any broader run.
 
 ## Validation / Test Plan
 
@@ -641,3 +644,15 @@ Application invariants:
   two surfaced, four suppressed, and four 1,280-token cache reads. Next:
   complete the remaining cohort, reconcile all requests, then perform final
   UI/browser proof.
+- 2026-07-16: [VALIDATED] Replaced the planned full-catalog Insight run with a
+  bounded persona calibration for human review. Investment v6 now addresses a
+  technically fluent bottom-up BIT investor and protects the assignment's
+  explicit researcher-departure/company-formation signal; AI Engineering v5
+  addresses a senior product-minded engineer operating production extraction,
+  agent, evaluation, and integration systems. Across six Events, Terra/high
+  produced ten decisions: five surfaced and five suppressed, with 8,960 cached
+  tokens and $0.122210 proxy-reported cost. Sutton/Oak Lab surfaced only for
+  Investment, while Satya and METR produced appropriately distinct outputs for
+  both audiences. The remaining 751-request catalog is paused pending Adi's
+  qualitative review; evidence is in
+  `../../references/insight-persona-calibration.md`.

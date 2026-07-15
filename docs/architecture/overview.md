@@ -353,8 +353,15 @@ three content fields and no suppression reason; a suppressed result requires
 one concrete reason and no audience content beyond its neutral title. No quote, confidence score,
 model-authored identifier, or ranking field exists in the schema.
 
-The two stable v4 prompts are naturally cache eligible at roughly 1.43k and 1.46k
-`o200k_base` tokens. `build_request` constructs the shared LiteLLM Responses
+The stable Investment v6 and Engineering v5 prompts are naturally cache eligible
+under `o200k_base`, with both exceeding the 1,024-token boundary. Investment v6 explicitly preserves the case
+assignment's researcher-movement signal: a specific first-party departure or
+company formation around a concrete direction can clear the final gate as an
+early competitive-map watchpoint before funding or product evidence exists.
+Their distinct editorial voices reflect the real consumers: a technically
+fluent bottom-up public-equity investor looking for thesis-changing observables,
+and a senior production AI engineer looking for reproducible build decisions.
+`build_request` constructs the shared LiteLLM Responses
 payload with stable metadata/tags and provider cache kwargs; `evaluate` executes
 and validates one request without owning persistence. `publish` binds surfaced
 prose back to the frozen event/day/Feed rank for the UI.
