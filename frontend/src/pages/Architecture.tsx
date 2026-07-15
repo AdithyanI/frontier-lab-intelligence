@@ -100,7 +100,7 @@ function AcceptedEvidenceGlyph({ x, y }: { x: number; y: number }) {
   )
 }
 
-function LiveSystemMap() {
+function EvidenceInputMap() {
   const stages = [
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
     { x: 234, kicker: 'SOURCE', title: 'X posts + threads', glyph: 'days' },
@@ -111,9 +111,9 @@ function LiveSystemMap() {
 
   return (
     <svg
-      viewBox="0 0 1080 492"
+      viewBox="0 0 1080 224"
       role="img"
-      aria-label="Current evidence-to-insight architecture. A screened Registry supplies dated X posts and threads. Exact envelopes enter the Feed for keep or drop routing. Accepted evidence, optionally enriched with artifacts, enters one shared citation-bound insight engine. The flow then splits: Investment and AI Engineering each use their own prompt and editorial judgment, independent publication audit, and separate daily view."
+      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact envelopes enter the Feed for keep or drop routing. Kept items become accepted evidence, optionally enriched with artifacts."
     >
       <defs>
         <marker id="flow-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -121,7 +121,7 @@ function LiveSystemMap() {
         </marker>
       </defs>
 
-      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">SHARED EVIDENCE · INSPECTABLE BEFORE JUDGMENT</text>
+      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">EVIDENCE INPUT · INSPECTABLE BEFORE JUDGMENT</text>
       {stages.map((stage) => (
         <g key={stage.title}>
           <rect
@@ -146,49 +146,74 @@ function LiveSystemMap() {
       <Arrow x1={412} x2={434} />
       <Arrow x1={618} x2={640} />
       <Arrow x1={824} x2={846} />
+    </svg>
+  )
+}
 
-      <path d="M941 190 V218 H540 V242" fill="none" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#flow-arrow)" />
+function InsightGenerationMap() {
+  return (
+    <svg
+      viewBox="0 0 1080 360"
+      role="img"
+      aria-label="Insight generation path. Accepted evidence enters one shared citation-bound insight engine. Investment and AI Engineering then use separate audience prompts and editorial judgment, independent publication audits, and separate daily insight views."
+    >
+      <defs>
+        <marker id="insight-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+        </marker>
+      </defs>
+
+      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">FROM ACCEPTED EVIDENCE TO DAILY INSIGHTS</text>
 
       <g>
-        <rect x="280" y="248" width="520" height="72" fill={INK} />
-        <text x="302" y="270" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
-        <text x="302" y="293" fontFamily={UI} fontSize="18" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
-        <text x="302" y="310" fontFamily={MONO} fontSize="8.5" fill="#fff" opacity="0.68">FROZEN EVIDENCE · EXACT PASSAGES · SHARED PROVENANCE · OPTIONAL ARTIFACTS</text>
+        <rect x="28" y="56" width="220" height="100" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+        <text x="46" y="82" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">INPUT</text>
+        <text x="46" y="109" fontFamily={UI} fontSize="18" fontWeight="600" fill={INK}>Accepted evidence</text>
+        <text x="46" y="134" fontFamily={MONO} fontSize="9" fill={MUTED}>OPTIONAL ARTIFACT CONTEXT</text>
       </g>
 
-      <path d="M540 320 V342 H162 V358" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#flow-arrow)" />
-      <path d="M540 342 H686 V358" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#flow-arrow)" />
+      <line x1="248" y1="106" x2="298" y2="106" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#insight-arrow)" />
 
       <g>
-        <text x="28" y="352" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">INVESTMENT</text>
-        <rect x="28" y="364" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="42" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
-        <text x="42" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
-        <line x1="176" y1="399" x2="188" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
-        <rect x="194" y="364" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="208" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
-        <text x="208" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
-        <line x1="322" y1="399" x2="334" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
-        <rect x="340" y="364" width="160" height="70" fill={INK} />
-        <text x="354" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
-        <text x="354" y="411" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
-
-        <text x="552" y="352" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">AI ENGINEERING</text>
-        <rect x="552" y="364" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="566" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
-        <text x="566" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
-        <line x1="700" y1="399" x2="712" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
-        <rect x="718" y="364" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="732" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
-        <text x="732" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
-        <line x1="846" y1="399" x2="858" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
-        <rect x="864" y="364" width="188" height="70" fill={INK} />
-        <text x="878" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
-        <text x="878" y="411" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
+        <rect x="306" y="56" width="448" height="100" fill={INK} />
+        <text x="326" y="82" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
+        <text x="326" y="109" fontFamily={UI} fontSize="18" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
+        <text x="326" y="134" fontFamily={MONO} fontSize="8.5" fill="#fff" opacity="0.65">FROZEN EVIDENCE · EXACT PASSAGES · SHARED PROVENANCE</text>
       </g>
 
-      <line x1="28" y1="462" x2="1052" y2="462" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
-      <text x="28" y="483" fontFamily={UI} fontSize="12" fill={MUTED}>Evidence and citation rules stay shared. Audience prompts, judgment, audits, and published views do not.</text>
+      <path d="M754 106 H786 V192 H240 V210" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
+      <path d="M786 192 V210" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
+
+      <g>
+        <text x="28" y="204" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">INVESTMENT</text>
+        <rect x="28" y="216" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="42" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
+        <text x="42" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
+        <line x1="176" y1="251" x2="188" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
+        <rect x="194" y="216" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="208" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
+        <text x="208" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
+        <line x1="322" y1="251" x2="334" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
+        <rect x="340" y="216" width="160" height="70" fill={INK} />
+        <text x="354" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
+        <text x="354" y="263" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
+
+        <text x="552" y="204" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">AI ENGINEERING</text>
+        <rect x="552" y="216" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="566" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
+        <text x="566" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
+        <line x1="700" y1="251" x2="712" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
+        <rect x="718" y="216" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="732" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
+        <text x="732" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
+        <line x1="846" y1="251" x2="858" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
+        <rect x="864" y="216" width="188" height="70" fill={INK} />
+        <text x="878" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
+        <text x="878" y="263" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
+      </g>
+
+      <line x1="28" y1="322" x2="1052" y2="322" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
+      <text x="28" y="343" fontFamily={UI} fontSize="12" fill={MUTED}>Evidence and citation rules stay shared. Audience prompts, judgment, audits, and published views do not.</text>
     </svg>
   )
 }
@@ -565,7 +590,8 @@ export default function Architecture() {
           <h2 className="arch-h">The evidence-to-insight path</h2>
           <p className="arch-p">One evidence core preserves exact provenance. Investment and AI Engineering then use separate prompts, editorial judgment, publication audits, and daily views.</p>
         </div>
-        <div className="arch-canvas"><LiveSystemMap /></div>
+        <div className="arch-canvas"><EvidenceInputMap /></div>
+        <div className="arch-canvas arch-canvas--sub"><InsightGenerationMap /></div>
       </section>
 
       <section className="arch-section arch-section--methods" id="ranking-methods">

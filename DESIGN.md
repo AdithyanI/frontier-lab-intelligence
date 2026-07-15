@@ -87,9 +87,10 @@ Rules:
   unavailable future destinations do not occupy the navigation.
 - Registry and Ranking share one top-level **Network** destination because they
   are two views of the same source system. Ranking is the default subview;
-  Registry remains an explicit term and subview because it is the assignment's
-  screened identity register. Use a ruled secondary navigation, not another
-  row of top-level pills.
+  Registry remains an explicit term because it is the assignment's screened
+  identity register. A third **Add Profile** subview owns manual admission as
+  an operator action. Use one ruled secondary navigation for all three, not
+  another row of top-level pills.
 - Home is an editorial split: statement + hero numerals on the left, live
   pipeline rail on the right, divided by an ink rule.
 - Density first: tables and lists over cards. Cards only where an item is
@@ -131,9 +132,9 @@ Rules:
   an em dash and sort last. Rejected remains a reason-bearing review view.
   Internal source seeds such as the curated `labs` table do not create public
   kinds, badges, or filters.
-- **Registry profile intake:** one `Add profile` action belongs in the Registry
-  heading, not in the Network subview tabs. It expands a full-width inline
-  operator panel with a single X URL field and two plain admission paths:
+- **Registry profile intake:** `Add Profile` is an explicit Network subview next
+  to Ranking and Registry. It presents one full-width operator form with a
+  single X URL field and two plain admission paths:
   `Screen normally` and `Add directly`. Direct admission reveals one required
   reason field. Keep the collection limitation visible, make long-running
   evaluation state explicit, and return the existing/active/rejected reason in

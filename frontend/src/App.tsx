@@ -2,6 +2,7 @@ import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import Network from './pages/Network'
 import Registry from './pages/Registry'
 import Ranking from './pages/Ranking'
+import AddProfile from './pages/AddProfile'
 import Feed from './pages/Feed'
 import Artifacts from './pages/Artifacts'
 import Insights from './pages/Insights'
@@ -30,6 +31,7 @@ export default function App() {
             <Route index element={<Navigate to="ranking" replace />} />
             <Route path="ranking" element={<Ranking />} />
             <Route path="registry" element={<Registry />} />
+            <Route path="add-profile" element={<AddProfile />} />
           </Route>
           <Route path="/feed" element={<Feed />} />
           <Route path="/artifacts" element={<Artifacts />} />

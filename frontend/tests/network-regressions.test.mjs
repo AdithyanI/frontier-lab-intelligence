@@ -11,21 +11,28 @@ const registrySource = await readFile(
   new URL('../src/pages/Registry.tsx', import.meta.url),
   'utf8',
 )
+const addProfileSource = await readFile(
+  new URL('../src/pages/AddProfile.tsx', import.meta.url),
+  'utf8',
+)
 const rankingSource = await readFile(
   new URL('../src/pages/Ranking.tsx', import.meta.url),
   'utf8',
 )
 const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
 
-test('Network owns Registry and Ranking as explicit subviews', () => {
+test('Network owns Ranking, Registry, and Add Profile as explicit subviews', () => {
   assert.match(appSource, /<NavLink to="\/network">Network<\/NavLink>/)
   assert.match(appSource, /<Route path="\/network" element=\{<Network \/>\}>/)
   assert.match(appSource, /<Route path="ranking" element=\{<Ranking \/>\} \/>/)
   assert.match(appSource, /<Route path="registry" element=\{<Registry \/>\} \/>/)
+  assert.match(appSource, /<Route path="add-profile" element=\{<AddProfile \/>\} \/>/)
   assert.doesNotMatch(appSource, /<NavLink to="\/ranking">Ranking<\/NavLink>/)
   assert.match(networkSource, /The Registry defines the screened source set/)
   assert.match(networkSource, /<NavLink to="\/network\/ranking">Ranking<\/NavLink>/)
   assert.match(networkSource, /<NavLink to="\/network\/registry">Registry<\/NavLink>/)
+  assert.match(networkSource, /<NavLink to="\/network\/add-profile">Add Profile<\/NavLink>/)
+  assert.match(addProfileSource, /id="add-profile-title">Add Profile<\/h2>/)
 })
 
 test('Network defaults to Ranking while preserving Registry terminology and reach', () => {

@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   getJSON,
-  postJSON,
   type Entity,
-  type RegistryIntakeResult,
   type RegistryGroup,
   type Registry as RegistryData,
 } from '../api'
@@ -51,180 +49,25 @@ const registryURL = (
   return `/api/registry?${params}`
 }
 
-function RegistryIntake({
-  onComplete,
-}: {
-  onComplete: (result: RegistryIntakeResult) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [profile, setProfile] = useState('')
-  const [mode, setMode] = useState<'screen' | 'direct'>('screen')
-  const [reason, setReason] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [result, setResult] = useState<RegistryIntakeResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (submitting) return
-    setSubmitting(true)
-    setError(null)
-    setResult(null)
-    postJSON<RegistryIntakeResult>(
-      '/api/registry/intake',
-      { profile, mode, reason: mode === 'direct' ? reason : null },
-    )
-      .then((intakeResult) => {
-        setResult(intakeResult)
-        onComplete(intakeResult)
-      })
-      .catch((cause: unknown) => setError((cause as Error).message))
-      .finally(() => setSubmitting(false))
-  }
-
-  return (
-    <div className="registry-intake-wrap">
-      <button
-        className="registry-intake-toggle"
-        type="button"
-        aria-expanded={open}
-        aria-controls="registry-intake-panel"
-        onClick={() => setOpen((current) => !current)}
-      >
-        {open ? 'Close intake' : 'Add profile'}
-      </button>
-      {open && (
-        <form
-          className="registry-intake"
-          id="registry-intake-panel"
-          onSubmit={submit}
-        >
-          <div className="registry-intake-head">
-            <div>
-              <h3>Add an X profile</h3>
-              <p>
-                Resolve one identity, then screen it normally or record a direct
-                human admission.
-              </p>
-            </div>
-            <span className="mono">Operator action</span>
-          </div>
-
-          <div className="registry-intake-fields">
-            <label className="registry-intake-field registry-intake-profile">
-              <span>X profile</span>
-              <input
-                type="url"
-                inputMode="url"
-                placeholder="https://x.com/handle"
-                value={profile}
-                onChange={(event) => setProfile(event.target.value)}
-                required
-                disabled={submitting}
-              />
-            </label>
-          </div>
-
-          <fieldset className="registry-intake-modes">
-            <legend>Admission path</legend>
-            <label className={mode === 'screen' ? 'is-selected' : undefined}>
-              <input
-                type="radio"
-                name="intake-mode"
-                value="screen"
-                checked={mode === 'screen'}
-                onChange={() => setMode('screen')}
-                disabled={submitting}
-              />
-              <span>
-                <strong>Screen normally</strong>
-                <small>
-                  Apply collection gates and the evidence-based Registry evaluator.
-                </small>
-              </span>
-            </label>
-            <label className={mode === 'direct' ? 'is-selected' : undefined}>
-              <input
-                type="radio"
-                name="intake-mode"
-                value="direct"
-                checked={mode === 'direct'}
-                onChange={() => setMode('direct')}
-                disabled={submitting}
-              />
-              <span>
-                <strong>Add directly</strong>
-                <small>
-                  Skip relevance and follower filtering; keep identity resolution
-                  and audit provenance.
-                </small>
-              </span>
-            </label>
-          </fieldset>
-
-          {mode === 'direct' && (
-            <label className="registry-intake-field registry-intake-reason">
-              <span>Why override the normal screen?</span>
-              <textarea
-                value={reason}
-                onChange={(event) => setReason(event.target.value)}
-                placeholder="Specific reason this source belongs in the Registry…"
-                minLength={8}
-                maxLength={500}
-                required
-                disabled={submitting}
-              />
-            </label>
-          )}
-
-          <div className="registry-intake-actions">
-            <button
-              type="submit"
-              disabled={submitting || !profile || (mode === 'direct' && reason.trim().length < 8)}
-            >
-              {submitting
-                ? 'Fetching and evaluating…'
-                : mode === 'screen'
-                  ? 'Screen profile'
-                  : 'Add to Registry'}
-            </button>
-            <span>
-              Protected profiles remain ineligible because their evidence cannot be
-              collected.
-            </span>
-          </div>
-
-          {error && <div className="registry-intake-error" role="alert">{error}</div>}
-          {result && (
-            <div className={`registry-intake-result is-${result.outcome}`} role="status">
-              <strong>
-                {result.outcome === 'existing'
-                  ? `@${result.handle} is already in the Registry.`
-                  : result.outcome === 'active'
-                    ? `@${result.handle} is now active.`
-                    : `@${result.handle} was retained in Rejected.`}
-              </strong>
-              <span>{result.decision_reason}</span>
-              {result.entity && (
-                <button type="button" onClick={() => onComplete(result)}>
-                  Open profile
-                </button>
-              )}
-            </div>
-          )}
-        </form>
-      )}
-    </div>
-  )
-}
-
 export default function Registry() {
-  const initialQuery = new URLSearchParams(window.location.search).get('q') ?? ''
+  const initialParams = new URLSearchParams(window.location.search)
+  const initialQuery = initialParams.get('q') ?? ''
+  const requestedKind = initialParams.get('group')
+  const initialKind: KindFilter = [
+    'all',
+    'person',
+    'organization',
+    'unsure',
+    'unknown',
+    'rejected',
+  ].includes(requestedKind ?? '')
+    ? requestedKind as KindFilter
+    : 'all'
   const [data, setData] = useState<RegistryData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
-  const [kind, setKind] = useState<KindFilter>('all')
+  const [kind, setKind] = useState<KindFilter>(initialKind)
   const [sortField, setSortField] = useState<SortField>('reach')
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('asc')
@@ -329,24 +172,13 @@ export default function Registry() {
     setSortField(field)
     setSortDirection('asc')
   }
-  const intakeComplete = (result: RegistryIntakeResult) => {
-    if (result.entity) setSelected(result.entity)
-    setQuery(result.handle)
-    setKind(result.outcome === 'rejected' ? 'rejected' : 'all')
-  }
-
   return (
     <section className="network-view registry-view" aria-labelledby="registry-title">
-      <div className="registry-heading">
-        <div>
-          <h2 className="network-view-title" id="registry-title">Registry</h2>
-          <p className="network-view-sub">
-            Resolved people and organizations, with every observed channel attached
-            to a single identity.
-          </p>
-        </div>
-        <RegistryIntake onComplete={intakeComplete} />
-      </div>
+      <h2 className="network-view-title" id="registry-title">Registry</h2>
+      <p className="network-view-sub">
+        Resolved people and organizations, with every observed channel attached
+        to a single identity.
+      </p>
       {data?.network_context && (
         <p
           className="registry-network-context mono"

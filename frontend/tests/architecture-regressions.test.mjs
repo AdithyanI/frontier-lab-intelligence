@@ -5,6 +5,9 @@ import test from 'node:test'
 const architecture = readFileSync(new URL('../src/pages/Architecture.tsx', import.meta.url), 'utf8')
 
 test('Architecture maps one evidence core into two independently audited audience views', () => {
+  assert.match(architecture, /function EvidenceInputMap/)
+  assert.match(architecture, /function InsightGenerationMap/)
+  assert.match(architecture, /FROM ACCEPTED EVIDENCE TO DAILY INSIGHTS/)
   assert.match(architecture, /Citation-bound insight engine/)
   assert.match(architecture, />INVESTMENT</)
   assert.match(architecture, />AI ENGINEERING</)
