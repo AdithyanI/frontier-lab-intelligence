@@ -798,6 +798,13 @@ export default function Feed() {
   }
 
   const hasSearch = debouncedQuery.trim().length > 0
+  const selectedDateIsAvailable = availableDates.some(
+    (value) => value.day === selectedDate,
+  )
+  const selectedDateLabel = (() => {
+    const parsed = new Date(`${selectedDate}T12:00:00Z`)
+    return Number.isNaN(parsed.getTime()) ? selectedDate : shortDate.format(parsed)
+  })()
 
   const moveDateWindow = (direction: DateWindowDirection) => {
     clearTargetEvent()
@@ -982,7 +989,9 @@ export default function Feed() {
             ))}
         {!loading && items.length === 0 && (
           <div className="registry-empty">
-            No evidence matches these audit filters. Try another day or clear the filters.
+            {selectedDate && !selectedDateIsAvailable
+              ? `No complete Feed view is available for ${selectedDateLabel}. This audit date remains preserved across views.`
+              : 'No evidence matches these audit filters. Try another day or clear the filters.'}
           </div>
         )}
       </section>
