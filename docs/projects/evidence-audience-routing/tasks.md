@@ -197,6 +197,13 @@ Application invariants:
 
 ## Open Questions / Blockers
 
+- Prompt caching is not observable on the current Azure/LiteLLM configuration:
+  two consecutive eligible v2 calls used the same prompt hash and cache key,
+  but both reported zero cached and zero cache-write tokens. Investigate the
+  shared adapter before claiming caching works.
+- The reaction minimum-length filter is unsafe. It removed the specific claim
+  “Grok 4.5 is Opus class for browser use” solely because it was under 40
+  characters. Remove the length-only rule before routing a third envelope.
 - Which reply and quote-post blocks belong in the model packet, and when does a
   deterministic size bound become necessary? Inspect real packet sizes before
   choosing a top-N rule.
@@ -212,7 +219,7 @@ Application invariants:
 | done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
 | done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
 | done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
-| in_progress | Review the completed Satya v2 result with Adi before routing the next kept envelope. | parent | `resources/satya-routing-v2-result.md`; `resources/satya-routing-v2-attempt.md` |
+| in_progress | Review the rank-1 result, failed cache-read test, and unsafe short-reaction filter with Adi before a third envelope. | parent | `resources/rank1-routing-v2-result.md`; `resources/satya-routing-v2-result.md` |
 
 ## Backlog / Remaining Work
 
@@ -289,3 +296,10 @@ Application invariants:
   so caching remains unproven until one approved next envelope reuses the same
   prefix. SQLite integrity is `ok`; exact results are in
   `resources/satya-routing-v2-result.md`.
+- 2026-07-15: [IN-PROGRESS] With Adi's approval, routed exactly one next kept
+  envelope: Feed rank 1, an attributed browser-use model comparison. Both
+  audiences were relevant. The call used 1,860 input and 121 output tokens,
+  cost $0.002586, and again reported zero cached and zero cache-write tokens
+  despite reusing the exact v2 prompt hash and cache key. The run also exposed
+  that a length-only reaction filter can discard a specific material claim;
+  exact evidence is in `resources/rank1-routing-v2-result.md`.
