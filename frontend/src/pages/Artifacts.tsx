@@ -51,11 +51,71 @@ const fetchedAt = new Intl.DateTimeFormat('en-US', {
 })
 
 const fetchLabels: Record<ArtifactFetchState, string> = {
-  catalogued: 'Catalogued',
-  fetching: 'Fetching',
-  ready: 'Ready',
-  retryable: 'Retryable',
+  catalogued: 'Not extracted',
+  fetching: 'Extracting',
+  ready: 'Text ready',
+  retryable: 'Retry needed',
   unavailable: 'Unavailable',
+}
+
+interface ContentStatus {
+  label: string
+  detail: string
+}
+
+function contentStatus(item: ArtifactItem): ContentStatus {
+  if (item.fetch_state === 'ready') {
+    return {
+      label: fetchLabels.ready,
+      detail: 'Usable text is available for downstream analysis.',
+    }
+  }
+  if (item.fetch_state === 'fetching') {
+    return {
+      label: fetchLabels.fetching,
+      detail: 'Text extraction is in progress.',
+    }
+  }
+  if (item.fetch_state === 'retryable') {
+    return {
+      label: fetchLabels.retryable,
+      detail: 'Text extraction failed temporarily and can be retried.',
+    }
+  }
+  if (item.fetch_state === 'unavailable') {
+    if (item.error_code === 'extraction_placeholder_content') {
+      return {
+        label: fetchLabels.unavailable,
+        detail: 'The extracted text was unusable. The raw source was preserved for a later retry.',
+      }
+    }
+    if (item.error_code === 'jina_thin_content') {
+      return {
+        label: fetchLabels.unavailable,
+        detail: 'The source did not yield enough usable text.',
+      }
+    }
+    return {
+      label: fetchLabels.unavailable,
+      detail: 'No usable text could be extracted from this source.',
+    }
+  }
+  if (item.artifact_type === 'repository') {
+    return {
+      label: 'Not supported yet',
+      detail: 'Repository text extraction is not supported yet.',
+    }
+  }
+  if (item.artifact_type === 'video') {
+    return {
+      label: 'Not supported yet',
+      detail: 'Video transcript extraction is not supported yet.',
+    }
+  }
+  return {
+    label: fetchLabels.catalogued,
+    detail: 'The source is catalogued, but text has not been extracted yet.',
+  }
 }
 
 interface ArtifactPageRequest {
@@ -162,6 +222,7 @@ function ArtifactRow({
   const textUrl = `/api/artifacts/${encodeURIComponent(item.artifact_id)}/text`
   const textCharCount = item.text_char_count
   const hasReadableText = item.fetch_state === 'ready' && textCharCount != null
+  const status = contentStatus(item)
   const rowClassName = [
     'artifact-row',
     continuesRankGroup && 'artifact-row--rank-continues',
@@ -202,6 +263,7 @@ function ArtifactRow({
           <span className="mono">{item.host.replace(/^www\./, '')}</span>
         </span>
         <span className="artifact-kind mono">{artifactTypeLabel(item.artifact_type)}</span>
+        <span className="artifact-content-status mono">{status.label}</span>
         <span className="artifact-source">
           {sourceLabel(item.source_provider)}
           {item.observation_count > 1 && (
@@ -247,15 +309,15 @@ function ArtifactRow({
             </dd>
           </div>
           <div>
-            <dt>Retrieval</dt>
+            <dt>Content status</dt>
             <dd>
-              <span>{fetchLabels[item.fetch_state]}</span>
+              <span>{status.label}</span>
+              <span>{status.detail}</span>
               {item.fetch_method && <span>{item.fetch_method}</span>}
               {item.text_char_count != null && (
                 <span>{item.text_char_count.toLocaleString('en-US')} characters</span>
               )}
               {item.fetched_at && <span>{fetchedAt.format(new Date(item.fetched_at))}</span>}
-              {item.error_code && <span>{item.error_code.replaceAll('_', ' ')}</span>}
             </dd>
           </div>
         </dl>
@@ -540,6 +602,7 @@ export default function Artifacts() {
             <span>Feed rank</span>
             <span>Artifact</span>
             <span>Type</span>
+            <span>Content</span>
             <span>Found through</span>
             <span>Source time</span>
             <span />

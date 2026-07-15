@@ -194,13 +194,16 @@ Rules:
   Within the selected source day, order by the best originating Feed rank; if
   several accepted envelopes reveal the same artifact, the smallest rank wins.
   This is inherited provenance, not a second artifact score. Keep the default
-  row to Feed rank, artifact title and host, fetch-oriented type, source, and a
-  compact source time. When one Feed envelope reveals several canonical
+  row to Feed rank, artifact title and host, fetch-oriented type, a compact
+  content status, source, and source time. When one Feed envelope reveals several canonical
   artifacts, keep them as separate expandable rows but show their shared rank
   once in one continuous left rail. Equal ranks from different envelopes do
   not visually merge. Native `<details>` expansion reveals
   the canonical URL, a link back to the exact ranked Feed envelope that
-  disclosed it, retrieval state, and snapshot provenance. The Feed envelope
+  disclosed it, content status, and snapshot provenance. The compact status is
+  one of text ready, not extracted, not supported yet, extracting, retry needed,
+  or unavailable; expanded provenance explains that state in plain language
+  rather than exposing an internal error code. The Feed envelope
   remains the evidence workspace and owns the onward X link; Artifacts does
   not duplicate that context. A single
   Feed-style date navigator filters by the UTC day of the source post that

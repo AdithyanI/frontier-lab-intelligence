@@ -2344,7 +2344,7 @@ td.num {
 .artifact-columns,
 .artifact-row > summary {
   display: grid;
-  grid-template-columns: 88px minmax(280px, 1fr) 112px 150px 108px 16px;
+  grid-template-columns: 88px minmax(280px, 1fr) 96px 132px 140px 108px 16px;
   gap: 20px;
   align-items: center;
 }
@@ -2456,6 +2456,11 @@ td.num {
   color: var(--ink-soft);
   font-size: 10px;
   text-transform: capitalize;
+}
+
+.artifact-content-status {
+  color: var(--ink-soft);
+  font-size: 10px;
 }
 
 .artifact-source {

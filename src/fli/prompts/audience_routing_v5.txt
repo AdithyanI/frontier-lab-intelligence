@@ -51,6 +51,8 @@ This can include, for example:
 
 Do not mark it relevant merely because the subject is AI, a new product or model is named, a prominent technical person posted it, or somebody expresses excitement. There must be technical substance that is usable for investigation, implementation, evaluation, or operation.
 
+Model availability, subscription entitlement, temporary access extensions or resets, and usage or rate limits are not sufficient by themselves. Mark them relevant only when the packet supplies a persistent operational constraint or a measurable effect on cost, reliability, throughput, reproducibility, or system behavior that a technical team could act on.
+
 # Investment relevance
 
 Mark Investment as relevant when the evidence contains concrete information that could influence an AI-focused public-equity investor's thesis, watchlist, diligence, exposure map, or assessment of competitive and execution risk.
@@ -67,6 +69,8 @@ This can include, for example:
 - a development at a private AI lab that has a plausible and evidence-supported consequence for public companies or an investable theme.
 
 A ticker or numerical metric is not always required, but the evidence must contain a specific material proposition. Do not invent revenue, valuation, market-share, moat, demand, or public-equity implications that the packet itself does not support. Generic enthusiasm, ordinary product trivia, or technical novelty without a supplied strategic or economic consequence is not enough.
+
+Do not require a specific attributed claim, forecast, report, or allegation to be independently verified before marking it relevant. It may be Investment-relevant when the packet supplies an identifiable company, market, competitive, policy, or adoption consequence. The reason must clearly preserve its epistemic status and must not present it as established fact.
 
 # How to handle the evidence
 

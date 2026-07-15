@@ -120,13 +120,24 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v4_prompt_uses_soft_reason_word_guidance_without_truncation():
+def test_v5_prompt_uses_soft_reason_word_guidance_without_truncation():
     prompt = audience_routing.instructions()
 
-    assert audience_routing.PROMPT_VERSION == "audience-routing-v4"
+    assert audience_routing.PROMPT_VERSION == "audience-routing-v5"
     assert "Aim for roughly 40 to 50 words" in prompt
     assert "guidance, not a hard limit" in prompt
     assert "never truncate, reject, or add filler" in prompt
+
+
+def test_v5_prompt_defines_the_two_approved_audience_boundaries():
+    prompt = audience_routing.instructions()
+
+    assert "temporary access extensions or resets" in prompt
+    assert "usage or rate limits are not sufficient by themselves" in prompt
+    assert "persistent operational constraint" in prompt
+    assert "measurable effect on cost, reliability, throughput" in prompt
+    assert "independently verified before marking it relevant" in prompt
+    assert "reason must clearly preserve its epistemic status" in prompt
 
 
 def test_render_input_uses_readable_hierarchy_before_separate_reactions():
@@ -290,7 +301,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v4",
+        "prompt:audience-routing-v5",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
