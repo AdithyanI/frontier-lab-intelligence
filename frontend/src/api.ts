@@ -253,7 +253,6 @@ export interface EventEvidence {
   post_type: 'original' | 'quote' | 'retweet' | 'reply'
   observed_directly: boolean
   day: string
-  is_new_on_day: boolean
   relationship: 'reply' | 'quote' | 'retweet' | 'related'
   relation_type: 'reply_parent' | 'quote' | 'retweet' | null
   target_post_id: string | null
@@ -270,16 +269,12 @@ export interface SignalEvent {
   snapshot_cutoff: string
   snapshot_content_sha256: string
   first_activity_day: string
-  previous_activity_day: string | null
-  is_continuation: boolean
   is_grouped: boolean
   root: FeedItem
   why_grouped: string[]
   anchor_types: Array<'same_target' | 'reply_parent'>
   member_count: number
   lifetime_member_count: number
-  day_member_count: number
-  prior_context_count: number
   link_count: number
   author_count: number
   registry_account_count: number
@@ -298,7 +293,7 @@ export interface SignalEvent {
   latest_evidence_at: string
   evidence: EventEvidence[]
   relationship_counts: {
-    continuations: number
+    author_updates: number
     replies: number
     quotes: number
     retweets: number

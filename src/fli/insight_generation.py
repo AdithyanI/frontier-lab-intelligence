@@ -125,8 +125,7 @@ class InsightCandidate:
 
     @property
     def candidate_id(self) -> str:
-        value = f"{self.audience.value}:{self.packet.day}:{self.packet.event_id}"
-        return hashlib.sha256(value.encode()).hexdigest()
+        return candidate_id(self.audience, self.packet.event_id)
 
     @property
     def input_sha256(self) -> str:
@@ -192,6 +191,12 @@ def require_audience(value: str | InsightAudience) -> InsightAudience:
         raise ValueError(f"unsupported Insight audience: {value!r}") from error
 
 
+def candidate_id(audience: str | InsightAudience, event_id: str) -> str:
+    """Identify one publishable decision per Event and audience."""
+    value = f"{require_audience(audience).value}:{event_id}"
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
 def contract(audience: str | InsightAudience) -> PromptContract:
     return PROMPT_CONTRACTS[require_audience(audience)]
 
@@ -199,10 +204,10 @@ def contract(audience: str | InsightAudience) -> PromptContract:
 def render_input(candidate: InsightCandidate) -> str:
     """Render first-party evidence only after the stable prompt prefix.
 
-    The complete routed packet remains immutable on ``candidate``. Independent
-    replies and quote-posts help upstream routing and human inspection, but the
-    first Insight contract excludes them to avoid popularity, repetition, and
-    third-party attribution leaking into final synthesis.
+    The complete routed packet contains only first-party-authored posts and
+    accepted primary artifacts. The filter below is defense in depth so old or
+    manually assembled packets cannot leak independent reactions into final
+    synthesis.
     """
     model_packet = audience_routing.RoutingPacket(
         event_id=candidate.packet.event_id,

@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import date, datetime, timedelta, timezone
+import hashlib
 import json
 from pathlib import Path
+import re
 import sqlite3
 import sys
 import time
@@ -28,6 +31,9 @@ DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_EFFORT = "high"
 DEFAULT_TIMEOUT_SECONDS = 180.0
 DEFAULT_DUMP_ROOT = audience_routing_runs.REPO_ROOT / "tmp" / "insight-runs"
+DEFAULT_REFRESH_DAYS = 1
+DEFAULT_REFRESH_LIMIT_PER_DAY = 10
+DEFAULT_REFRESH_WORKERS = 8
 AUDIENCE_ALL = "all"
 AUDIENCE_CHOICES = (
     AUDIENCE_ALL,
@@ -86,12 +92,13 @@ def _error(
     hint: str,
     request_id: str,
     started: float,
+    data: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "schema_version": CLI_SCHEMA_VERSION,
         "command": command,
         "status": "error",
-        "data": None,
+        "data": data,
         "error": {
             "code": code,
             "message": message,
@@ -100,6 +107,14 @@ def _error(
         },
         "meta": _meta(request_id=request_id, started=started),
     }
+
+
+class InsightRefreshIncomplete(RuntimeError):
+    """A batch finished its independent work but one or more requests failed."""
+
+    def __init__(self, result: dict[str, Any]):
+        super().__init__("Insight refresh completed with failed requests.")
+        self.result = result
 
 
 def contract_payload(audience: str = AUDIENCE_ALL) -> dict[str, Any]:
@@ -111,7 +126,7 @@ def contract_payload(audience: str = AUDIENCE_ALL) -> dict[str, Any]:
     return {
         "schema_version": insight_generation.SCHEMA_VERSION,
         "output_format": insight_generation.OUTPUT_FORMAT,
-        "model_view": "root_same_author_continuations_and_artifacts_only",
+        "model_view": "first_party_authored_posts_and_artifacts_only",
         "prompts": [
             {
                 "audience": value.value,
@@ -139,6 +154,7 @@ def resolve_envelope(
     event_id: str,
     day: str | None,
     routing_root: Path,
+    source_routing_run_id: str | None = None,
 ) -> dict[str, Any]:
     matches: list[dict[str, Any]] = []
     for path in sorted(routing_root.glob("*/routing.db")):
@@ -159,17 +175,21 @@ def resolve_envelope(
             or str(meta["prompt_version"]) != audience_routing.PROMPT_VERSION
             or str(row["status"]) != "complete"
             or (day is not None and str(meta["day"]) != day)
+            or (
+                source_routing_run_id is not None
+                and str(meta["run_id"]) != source_routing_run_id
+            )
         ):
             continue
         matches.append({"path": path, "meta": dict(meta), "row": dict(row)})
     if not matches:
         suffix = f" on {day}" if day else ""
         raise ValueError(f"no completed current routing envelope found for {event_id}{suffix}")
-    selected = max(
+    selected = min(
         matches,
         key=lambda value: (
             str(value["meta"]["day"]),
-            str(value["meta"]["updated_at"]),
+            -datetime.fromisoformat(str(value["meta"]["updated_at"])).timestamp(),
             str(value["meta"]["run_id"]),
         ),
     )
@@ -218,12 +238,15 @@ def run_spike(
     dry_run: bool,
     timeout_seconds: float,
     progress: str,
+    source_routing_run_id: str | None = None,
+    prepare_only: bool = False,
     client_factory: Callable[[], Any] = entity_kinds.create_litellm_client,
 ) -> dict[str, Any]:
     resolved = resolve_envelope(
         event_id=event_id,
         day=day,
         routing_root=routing_root,
+        source_routing_run_id=source_routing_run_id,
     )
     row = resolved["row"]
     packet = resolved["packet"]
@@ -254,7 +277,8 @@ def run_spike(
         "run_id": run_id,
         "db": _display_path(db_path),
         "dry_run": dry_run,
-        "will_call_model": not dry_run,
+        "prepare_only": prepare_only,
+        "will_call_model": not dry_run and not prepare_only,
         "event_id": event_id,
         "day": packet.day,
         "feed_rank": int(row["feed_rank"]),
@@ -293,8 +317,18 @@ def run_spike(
                 for value in audiences
             ),
         )
+        if prepare_only:
+            prepared = {
+                **base,
+                "evaluations": [],
+                "telemetry": None,
+                "store": insight_runs.run_payload(conn, run_id),
+            }
+            _write_json(dump_dir / "result.json", prepared)
+            return prepared
         client = None
         evaluations = []
+        model_requested_audiences: set[str] = set()
         for value in audiences:
             evaluation = insight_runs.completed_evaluation(
                 conn, run_id=run_id, audience=value.value
@@ -313,6 +347,7 @@ def run_spike(
                         flush=True,
                     )
                 try:
+                    model_requested_audiences.add(value.value)
                     evaluation = insight_generation.evaluate(
                         client,
                         candidates[value.value],
@@ -357,6 +392,31 @@ def run_spike(
             value["cached_tokens"] > 0 for value in evaluations
         ),
         "request_count": len(evaluations),
+        "model_requests": len(model_requested_audiences),
+        "reused_results": len(evaluations) - len(model_requested_audiences),
+        "incremental_input_tokens": sum(
+            value["input_tokens"]
+            for value in evaluations
+            if value["audience"] in model_requested_audiences
+        ),
+        "incremental_cached_tokens": sum(
+            value["cached_tokens"]
+            for value in evaluations
+            if value["audience"] in model_requested_audiences
+        ),
+        "incremental_output_tokens": sum(
+            value["output_tokens"]
+            for value in evaluations
+            if value["audience"] in model_requested_audiences
+        ),
+        "incremental_reported_cost_usd": round(
+            sum(
+                float(value["reported_cost_usd"] or 0)
+                for value in evaluations
+                if value["audience"] in model_requested_audiences
+            ),
+            8,
+        ),
     }
     result = {
         **base,
@@ -365,6 +425,428 @@ def run_spike(
         "store": stored_run,
     }
     _write_json(dump_dir / "result.json", result)
+    return result
+
+
+def _refresh_days(through: str, days: int) -> list[str]:
+    if days < 1 or days > 90:
+        raise ValueError("days must be between 1 and 90")
+    end = date.fromisoformat(through)
+    start = end - timedelta(days=days - 1)
+    return [(start + timedelta(days=offset)).isoformat() for offset in range(days)]
+
+
+def _slug(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+
+
+def _stable_run_id(
+    *,
+    event_id: str,
+    audience: insight_generation.InsightAudience,
+    source_routing_run_id: str,
+    model: str,
+    effort: str,
+) -> str:
+    prompt = insight_generation.contract(audience)
+    identity = _canonical_json(
+        {
+            "event_id": event_id,
+            "audience": audience.value,
+            "source_routing_run_id": source_routing_run_id,
+            "model": model,
+            "reasoning_effort": effort,
+            "prompt_version": prompt.version,
+            "prompt_sha256": prompt.sha256,
+            "schema_version": insight_generation.SCHEMA_VERSION,
+        }
+    )
+    digest = hashlib.sha256(identity.encode()).hexdigest()[:12]
+    audience_label = (
+        "eng"
+        if audience is insight_generation.InsightAudience.AI_ENGINEERING
+        else "inv"
+    )
+    return (
+        f"insight-{_slug(prompt.version)}-{audience_label}-"
+        f"{event_id[:8]}-{digest}"
+    )
+
+
+def _current_routing_runs(
+    *,
+    days: list[str],
+    routing_root: Path,
+) -> tuple[dict[str, str], dict[str, dict[str, Any]]]:
+    source = audience_routing_runs._published_event_source()
+    requested = set(days)
+    matches: dict[str, list[dict[str, Any]]] = {day: [] for day in days}
+    for path in sorted(routing_root.glob("*/routing.db")):
+        try:
+            conn = _open_readonly(path)
+            meta_row = conn.execute(
+                "SELECT * FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+            if meta_row is None:
+                conn.close()
+                continue
+            meta = dict(meta_row)
+            day = str(meta["day"])
+            if (
+                day not in requested
+                or str(meta["prompt_version"]) != audience_routing.PROMPT_VERSION
+                or str(meta["schema_version"]) != audience_routing.SCHEMA_VERSION
+                or str(meta["source_event_run_id"]) != source["event_run_id"]
+                or str(meta["source_feed_run_id"]) != source["feed_run_id"]
+            ):
+                conn.close()
+                continue
+            counts = conn.execute(
+                """SELECT COUNT(*) AS total,
+                          SUM(status = 'complete') AS complete
+                   FROM routing_item"""
+            ).fetchone()
+            conn.close()
+        except sqlite3.Error:
+            continue
+        if counts is None or int(counts["total"] or 0) != int(meta["expected_count"]):
+            continue
+        if int(counts["complete"] or 0) != int(meta["expected_count"]):
+            continue
+        matches[day].append({"path": path, "meta": meta})
+
+    selected: dict[str, dict[str, Any]] = {}
+    for day in days:
+        if not matches[day]:
+            raise ValueError(
+                f"no complete current routing run found for {day}; "
+                "rerun audience routing first"
+            )
+        selected[day] = max(
+            matches[day],
+            key=lambda value: (
+                str(value["meta"]["updated_at"]),
+                str(value["meta"]["run_id"]),
+            ),
+        )
+    return source, selected
+
+
+def plan_refresh(
+    *,
+    through: str,
+    days: int,
+    limit_per_day: int | None,
+    audience: str,
+    model: str,
+    effort: str,
+    routing_root: Path,
+) -> dict[str, Any]:
+    if limit_per_day is not None and limit_per_day < 1:
+        raise ValueError("limit_per_day must be positive")
+    selected_days = _refresh_days(through, days)
+    source, routing_runs = _current_routing_runs(
+        days=selected_days,
+        routing_root=routing_root,
+    )
+    requested_audiences = (
+        tuple(insight_generation.InsightAudience)
+        if audience == AUDIENCE_ALL
+        else (insight_generation.require_audience(audience),)
+    )
+    requests: list[dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
+    seen_events: dict[str, str] = {}
+    sources: list[dict[str, Any]] = []
+    for day in selected_days:
+        route = routing_runs[day]
+        meta = route["meta"]
+        conn = _open_readonly(route["path"])
+        try:
+            rows = conn.execute(
+                """SELECT event_id, feed_rank,
+                          ai_engineering_relevant, investment_relevant
+                   FROM routing_item
+                   WHERE status = 'complete'
+                     AND (ai_engineering_relevant = 1 OR investment_relevant = 1)
+                   ORDER BY feed_rank, event_id"""
+            ).fetchall()
+        finally:
+            conn.close()
+        chosen: list[tuple[sqlite3.Row, list[insight_generation.InsightAudience]]] = []
+        for row in rows:
+            relevant = [
+                value
+                for value in requested_audiences
+                if int(row[f"{value.value}_relevant"] or 0) == 1
+            ]
+            if not relevant:
+                continue
+            chosen.append((row, relevant))
+            if limit_per_day is not None and len(chosen) >= limit_per_day:
+                break
+        for row, relevant in chosen:
+            event_id = str(row["event_id"])
+            previous_day = seen_events.get(event_id)
+            if previous_day is not None and previous_day != day:
+                raise ValueError(
+                    f"Event {event_id} appears on both {previous_day} and {day}; "
+                    "repair canonical Event publication before generating Insights"
+                )
+            seen_events[event_id] = day
+            event_requests = []
+            for value in relevant:
+                run_id = _stable_run_id(
+                    event_id=event_id,
+                    audience=value,
+                    source_routing_run_id=str(meta["run_id"]),
+                    model=model,
+                    effort=effort,
+                )
+                request = {
+                    "run_id": run_id,
+                    "event_id": event_id,
+                    "day": day,
+                    "feed_rank": int(row["feed_rank"]),
+                    "audience": value.value,
+                    "source_routing_run_id": str(meta["run_id"]),
+                    "source_routing_db": _display_path(route["path"]),
+                }
+                requests.append(request)
+                event_requests.append({"audience": value.value, "run_id": run_id})
+            events.append(
+                {
+                    "event_id": event_id,
+                    "day": day,
+                    "feed_rank": int(row["feed_rank"]),
+                    "requests": event_requests,
+                }
+            )
+        sources.append(
+            {
+                "day": day,
+                "run_id": str(meta["run_id"]),
+                "run_db": _display_path(route["path"]),
+                "source_event_run_id": str(meta["source_event_run_id"]),
+                "source_feed_run_id": str(meta["source_feed_run_id"]),
+            }
+        )
+
+    cohort_payload = {
+        "source_event_run_id": source["event_run_id"],
+        "source_feed_run_id": source["feed_run_id"],
+        "through": through,
+        "days": days,
+        "limit_per_day": limit_per_day,
+        "audience": audience,
+        "model": model,
+        "reasoning_effort": effort,
+        "requests": requests,
+    }
+    cohort_sha256 = hashlib.sha256(
+        _canonical_json(cohort_payload).encode()
+    ).hexdigest()
+    return {
+        **cohort_payload,
+        "refresh_id": f"insight-refresh-{cohort_sha256[:16]}",
+        "cohort_sha256": cohort_sha256,
+        "routing_runs": sources,
+        "event_count": len(events),
+        "request_count": len(requests),
+        "events": events,
+    }
+
+
+def refresh_insights(
+    *,
+    through: str,
+    days: int = DEFAULT_REFRESH_DAYS,
+    limit_per_day: int | None = DEFAULT_REFRESH_LIMIT_PER_DAY,
+    audience: str = AUDIENCE_ALL,
+    model: str = DEFAULT_MODEL,
+    effort: str = DEFAULT_EFFORT,
+    workers: int = DEFAULT_REFRESH_WORKERS,
+    db_path: Path = insight_runs.DEFAULT_DB,
+    routing_root: Path = audience_routing_runs.DEFAULT_RUN_ROOT,
+    dump_root: Path = DEFAULT_DUMP_ROOT / "refreshes",
+    dry_run: bool = False,
+    timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+    progress: str = "plain",
+    client_factory: Callable[[], Any] = entity_kinds.create_litellm_client,
+) -> dict[str, Any]:
+    if workers < 1 or workers > 64:
+        raise ValueError("workers must be between 1 and 64")
+    if timeout_seconds <= 0:
+        raise ValueError("timeout must be positive")
+    plan = plan_refresh(
+        through=through,
+        days=days,
+        limit_per_day=limit_per_day,
+        audience=audience,
+        model=model,
+        effort=effort,
+        routing_root=routing_root,
+    )
+    base = {
+        **plan,
+        "db": _display_path(db_path),
+        "workers": min(workers, max(plan["request_count"], 1)),
+        "timeout_seconds": timeout_seconds,
+        "dry_run": dry_run,
+        "will_call_model": False if dry_run else None,
+    }
+    if dry_run:
+        return {**base, "results": [], "errors": [], "telemetry": None}
+
+    current_source = audience_routing_runs._published_event_source()
+    if current_source != {
+        "event_run_id": plan["source_event_run_id"],
+        "feed_run_id": plan["source_feed_run_id"],
+    }:
+        raise RuntimeError(
+            "The published Event run changed after the Insight cohort was "
+            "planned; retry."
+        )
+
+    refresh_dir = dump_root / str(plan["refresh_id"])
+    refresh_dir.mkdir(parents=True, exist_ok=True)
+    _write_json(refresh_dir / "plan.json", plan)
+    results: list[dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
+
+    # Freeze every exact request before any model work starts. This turns a
+    # cohort into an auditable immutable unit and makes publication drift fail
+    # before spend rather than halfway through execution.
+    for item in plan["requests"]:
+        run_spike(
+            event_id=str(item["event_id"]),
+            day=str(item["day"]),
+            audience=str(item["audience"]),
+            model=model,
+            effort=effort,
+            run_id=str(item["run_id"]),
+            db_path=db_path,
+            routing_root=routing_root,
+            dump_dir=refresh_dir / str(item["run_id"]),
+            dry_run=False,
+            timeout_seconds=timeout_seconds,
+            progress="off",
+            source_routing_run_id=str(item["source_routing_run_id"]),
+            prepare_only=True,
+            client_factory=client_factory,
+        )
+
+    if audience_routing_runs._published_event_source() != current_source:
+        raise RuntimeError(
+            "The published Event run changed while Insight requests were "
+            "frozen; no model calls were started. Retry."
+        )
+
+    def execute(item: dict[str, Any]) -> dict[str, Any]:
+        return run_spike(
+            event_id=str(item["event_id"]),
+            day=str(item["day"]),
+            audience=str(item["audience"]),
+            model=model,
+            effort=effort,
+            run_id=str(item["run_id"]),
+            db_path=db_path,
+            routing_root=routing_root,
+            dump_dir=refresh_dir / str(item["run_id"]),
+            dry_run=False,
+            timeout_seconds=timeout_seconds,
+            progress="off",
+            source_routing_run_id=str(item["source_routing_run_id"]),
+            prepare_only=False,
+            client_factory=client_factory,
+        )
+
+    with ThreadPoolExecutor(max_workers=base["workers"]) as executor:
+        futures = {executor.submit(execute, item): item for item in plan["requests"]}
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                completed = future.result()
+                evaluation = completed["evaluations"][0]
+                result = evaluation["result"]
+                results.append(
+                    {
+                        **item,
+                        "decision": result["decision"],
+                        "title": result["title"],
+                        "model_requests": completed["telemetry"]["model_requests"],
+                        "reused_results": completed["telemetry"]["reused_results"],
+                        "input_tokens": completed["telemetry"][
+                            "incremental_input_tokens"
+                        ],
+                        "cached_tokens": completed["telemetry"][
+                            "incremental_cached_tokens"
+                        ],
+                        "output_tokens": completed["telemetry"][
+                            "incremental_output_tokens"
+                        ],
+                        "reported_cost_usd": completed["telemetry"][
+                            "incremental_reported_cost_usd"
+                        ],
+                    }
+                )
+                if progress == "plain":
+                    print(
+                        "insights: "
+                        f"{len(results) + len(errors)}/{plan['request_count']} "
+                        f"{item['day']} rank {item['feed_rank']} "
+                        f"{item['audience']} complete",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+            except Exception as error:
+                errors.append(
+                    {
+                        **item,
+                        "error_type": type(error).__name__,
+                        "error_message": str(error),
+                    }
+                )
+                if progress == "plain":
+                    print(
+                        "insights: "
+                        f"{len(results) + len(errors)}/{plan['request_count']} "
+                        f"{item['day']} rank {item['feed_rank']} "
+                        f"{item['audience']} failed",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+
+    results.sort(key=lambda item: (item["day"], item["feed_rank"], item["audience"]))
+    errors.sort(key=lambda item: (item["day"], item["feed_rank"], item["audience"]))
+    telemetry = {
+        "model_requests": sum(int(item["model_requests"]) for item in results),
+        "reused_results": sum(int(item["reused_results"]) for item in results),
+        "input_tokens": sum(int(item["input_tokens"]) for item in results),
+        "cached_tokens": sum(int(item["cached_tokens"]) for item in results),
+        "output_tokens": sum(int(item["output_tokens"]) for item in results),
+        "reported_cost_usd": round(
+            sum(float(item["reported_cost_usd"] or 0) for item in results), 8
+        ),
+    }
+    result = {
+        **base,
+        "will_call_model": telemetry["model_requests"] > 0,
+        "counts": {
+            "requests": plan["request_count"],
+            "complete": len(results),
+            "failed": len(errors),
+            "surfaced": sum(item["decision"] == "surface" for item in results),
+            "suppressed": sum(item["decision"] == "suppress" for item in results),
+        },
+        "results": results,
+        "errors": errors,
+        "telemetry": telemetry,
+        "dump_dir": _display_path(refresh_dir),
+    }
+    _write_json(refresh_dir / "result.json", result)
+    if errors:
+        raise InsightRefreshIncomplete(result)
     return result
 
 
@@ -400,6 +882,41 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--progress", choices=("off", "plain"), default="plain")
     run.add_argument("--dry-run", action="store_true")
     _add_output_flags(run)
+    refresh = sub.add_parser(
+        "refresh",
+        help="Generate a resumable batch from current positive audience routes.",
+    )
+    refresh.add_argument("--through", required=True)
+    refresh.add_argument("--days", type=int, default=DEFAULT_REFRESH_DAYS)
+    selection = refresh.add_mutually_exclusive_group()
+    selection.add_argument(
+        "--limit-per-day",
+        type=int,
+        default=DEFAULT_REFRESH_LIMIT_PER_DAY,
+        help="Select this many positively routed Events per day (default: 10).",
+    )
+    selection.add_argument(
+        "--all-routed",
+        action="store_true",
+        help="Select every positively routed Event in each requested day.",
+    )
+    refresh.add_argument(
+        "--audience", choices=AUDIENCE_CHOICES, default=AUDIENCE_ALL
+    )
+    refresh.add_argument("--model", default=DEFAULT_MODEL)
+    refresh.add_argument("--reasoning-effort", default=DEFAULT_EFFORT)
+    refresh.add_argument("--workers", type=int, default=DEFAULT_REFRESH_WORKERS)
+    refresh.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
+    refresh.add_argument(
+        "--routing-root", type=Path, default=audience_routing_runs.DEFAULT_RUN_ROOT
+    )
+    refresh.add_argument(
+        "--dump-dir", type=Path, default=DEFAULT_DUMP_ROOT / "refreshes"
+    )
+    refresh.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS)
+    refresh.add_argument("--progress", choices=("off", "plain"), default="plain")
+    refresh.add_argument("--dry-run", action="store_true")
+    _add_output_flags(refresh)
     imported = sub.add_parser(
         "import-result", help="Persist an exact completed request dump without a model call."
     )
@@ -422,8 +939,26 @@ def _plain(payload: dict[str, Any]) -> str:
     data = payload["data"]
     if payload["command"] == "insights.contract":
         return _canonical_json(data, pretty=True)
-    if payload["command"] in {"insights.summary", "insights.inspect", "insights.import-result"}:
+    if payload["command"] in {
+        "insights.summary",
+        "insights.inspect",
+        "insights.import-result",
+    }:
         return _canonical_json(data, pretty=True)
+    if payload["command"] == "insights.refresh":
+        if payload["status"] == "error":
+            return f"{payload['error']['code']}: {payload['error']['message']}"
+        if data["dry_run"]:
+            return (
+                f"{data['refresh_id']} · {data['event_count']} Events · "
+                f"{data['request_count']} requests · no model calls"
+            )
+        return (
+            f"{data['refresh_id']} · {data['counts']['complete']}/"
+            f"{data['counts']['requests']} complete · "
+            f"{data['telemetry']['model_requests']} model requests · "
+            f"${data['telemetry']['reported_cost_usd']:.6f}"
+        )
     lines = [
         f"event {data['event_id']} · {data['day']} · Feed rank {data['feed_rank']}",
         f"model {data['model']} · dump {data['dump_dir']}",
@@ -469,6 +1004,23 @@ def main(
                     data = insight_runs.import_result_file(conn, args.result_file)
             finally:
                 conn.close()
+        elif args.action == "refresh":
+            data = refresh_insights(
+                through=args.through,
+                days=args.days,
+                limit_per_day=None if args.all_routed else args.limit_per_day,
+                audience=args.audience,
+                model=args.model,
+                effort=args.reasoning_effort,
+                workers=args.workers,
+                db_path=args.db,
+                routing_root=args.routing_root,
+                dump_root=args.dump_dir,
+                dry_run=args.dry_run,
+                timeout_seconds=args.timeout,
+                progress=args.progress,
+                client_factory=client_factory,
+            )
         else:
             if args.timeout <= 0:
                 raise ValueError("timeout must be positive")
@@ -496,6 +1048,21 @@ def main(
         payload = _success(
             command, data, request_id=request_id, started=started
         )
+    except InsightRefreshIncomplete as exc:
+        exit_code = 1
+        payload = _error(
+            command,
+            code="E_PARTIAL_FAILURE",
+            message=str(exc),
+            retryable=True,
+            hint=(
+                "Rerun the identical command; completed requests are reused "
+                "and failed requests retry."
+            ),
+            request_id=request_id,
+            started=started,
+            data=exc.result,
+        )
     except KeyboardInterrupt:
         exit_code = 5
         payload = _error(
@@ -518,7 +1085,7 @@ def main(
             request_id=request_id,
             started=started,
         )
-    except (AuthenticationError, RuntimeError) as exc:
+    except AuthenticationError as exc:
         exit_code = 3
         payload = _error(
             command,
@@ -548,6 +1115,20 @@ def main(
             message=str(exc),
             retryable=True,
             hint="Check the shared LiteLLM endpoint and retry.",
+            request_id=request_id,
+            started=started,
+        )
+    except RuntimeError as exc:
+        exit_code = 1
+        payload = _error(
+            command,
+            code="E_EXECUTION",
+            message=str(exc),
+            retryable=True,
+            hint=(
+                "Retry the same command after the current Event and routing "
+                "publication is stable."
+            ),
             request_id=request_id,
             started=started,
         )

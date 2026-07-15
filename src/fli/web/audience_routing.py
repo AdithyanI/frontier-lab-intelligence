@@ -42,6 +42,8 @@ def _complete_run(path: Path, day: str) -> tuple[str, str] | None:
         if (
             meta is None
             or str(meta["day"]) != day
+            or str(meta["prompt_version"]) != audience_routing.PROMPT_VERSION
+            or str(meta["prompt_sha256"]) != audience_routing.prompt_sha256()
             or str(meta["schema_version"]) != audience_routing.SCHEMA_VERSION
         ):
             conn.close()

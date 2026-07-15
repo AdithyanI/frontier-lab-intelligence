@@ -54,51 +54,63 @@ def _all_feed_candidates(*, day: str, run_id: str) -> dict[str, Any]:
 
 def _event_rows(
     events: sqlite3.Connection, run_id: str, day: str
-) -> tuple[list[sqlite3.Row], list[sqlite3.Row], list[sqlite3.Row]]:
+) -> tuple[
+    list[sqlite3.Row],
+    list[sqlite3.Row],
+    list[sqlite3.Row],
+    set[FeedKey],
+]:
+    """Return Events published on their one canonical day.
+
+    ``event_day`` remains the append-only activity ledger. Selecting clusters
+    active on ``day`` lets the read model recover independently rooted
+    components even when a later disclosure joined their storage cluster.
+    """
     clusters = events.execute(
         """SELECT cluster.*,
                   active.direct_member_count AS selected_day_member_count,
                   (SELECT MIN(first.day) FROM event_day first
                    WHERE first.run_id = cluster.run_id
                      AND first.event_id = cluster.event_id)
-                      AS first_activity_day,
-                  (SELECT MAX(previous.day) FROM event_day previous
-                   WHERE previous.run_id = cluster.run_id
-                     AND previous.event_id = cluster.event_id
-                     AND previous.day < active.day)
-                      AS previous_activity_day
-           FROM event_day day
+                      AS first_activity_day
+           FROM event_day active
            JOIN event_cluster cluster
-             ON cluster.run_id = day.run_id AND cluster.event_id = day.event_id
-           JOIN event_day active
-             ON active.run_id = day.run_id AND active.event_id = day.event_id
-            AND active.day = day.day
-           WHERE day.run_id = ? AND day.day = ?
+             ON cluster.run_id = active.run_id
+            AND cluster.event_id = active.event_id
+           WHERE active.run_id = ? AND active.day = ?
            ORDER BY cluster.event_id""",
         (run_id, day),
     ).fetchall()
+    claimed_members = {
+        (str(row["provider"]), str(row["post_id"]))
+        for row in events.execute(
+            """SELECT provider, post_id FROM event_member
+               WHERE run_id = ?""",
+            (run_id,),
+        ).fetchall()
+    }
     if not clusters:
-        return [], [], []
+        return [], [], [], claimed_members
+    selected_event_ids = [str(row["event_id"]) for row in clusters]
+    placeholders = ",".join("?" for _ in selected_event_ids)
     members = events.execute(
-        """SELECT member.*
+        f"""SELECT member.*
            FROM event_member member
-           JOIN event_day day
-             ON day.run_id = member.run_id AND day.event_id = member.event_id
-           WHERE member.run_id = ? AND day.day = ?
+           WHERE member.run_id = ?
+             AND member.event_id IN ({placeholders})
            ORDER BY member.event_id, member.provider, member.post_id""",
-        (run_id, day),
+        (run_id, *selected_event_ids),
     ).fetchall()
     links = events.execute(
-        """SELECT link.*
+        f"""SELECT link.*
            FROM event_link link
-           JOIN event_day day
-             ON day.run_id = link.run_id AND day.event_id = link.event_id
-           WHERE link.run_id = ? AND day.day = ?
+           WHERE link.run_id = ?
+             AND link.event_id IN ({placeholders})
            ORDER BY link.event_id, link.link_type, link.provider,
                     link.source_post_id, link.target_post_id""",
-        (run_id, day),
+        (run_id, *selected_event_ids),
     ).fetchall()
-    return clusters, members, links
+    return clusters, members, links, claimed_members
 
 
 def _root_post_id(
@@ -278,8 +290,6 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
         "snapshot_cutoff": f"{item['published_at'][:10]}T23:59:59.999999+00:00",
         "snapshot_content_sha256": snapshot_hash,
         "first_activity_day": item["published_at"][:10],
-        "previous_activity_day": None,
-        "is_continuation": False,
         "is_grouped": False,
         "root": item,
         "why_grouped": [],
@@ -287,7 +297,7 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
         "member_count": 1,
         "lifetime_member_count": 1,
         "day_member_count": 1,
-        "prior_context_count": 0,
+        "activity_days": [item["published_at"][:10]],
         "link_count": 0,
         "author_count": 1,
         "registry_account_count": 1 if item["author"]["entity_id"] is not None else 0,
@@ -613,7 +623,26 @@ def _project_component(
     # separate from the visible presentation root used by the card.
     canonical_root_post_id = identity_value
 
-    visible_identity = sorted(
+    # The route/Insight freshness hash binds only first-party semantic
+    # evidence. Independent reactions may append forever without invalidating
+    # the one audience decision for this Event.
+    root_author_handle = str(root["author"]["handle"]).lower()
+    semantic_members = [
+        member
+        for member in visible_members
+        if (
+            member["post_id"] == root_post_id
+            or (
+                str(member["author"]["handle"]).lower() == root_author_handle
+                and member["post_type"] != "retweet"
+            )
+        )
+    ]
+    semantic_keys = {
+        (str(member["provider"]), str(member["post_id"]))
+        for member in semantic_members
+    }
+    semantic_identity = sorted(
         (
             member["provider"],
             member["post_id"],
@@ -623,9 +652,9 @@ def _project_component(
             member["disclosure_post_id"],
             int(member["observed_directly"]),
         )
-        for member in visible_members
+        for member in semantic_members
     )
-    visible_topology = sorted(
+    semantic_topology = sorted(
         (
             str(link["provider"]),
             str(link["source_post_id"]),
@@ -633,6 +662,7 @@ def _project_component(
             str(link["link_type"]),
         )
         for link in current_links
+        if (str(link["provider"]), str(link["source_post_id"])) in semantic_keys
     )
     snapshot_content_sha256 = hashlib.sha256(
         json.dumps(
@@ -642,8 +672,8 @@ def _project_component(
                 identity_type,
                 identity_value,
                 root_post_id,
-                visible_identity,
-                visible_topology,
+                semantic_identity,
+                semantic_topology,
             ],
             ensure_ascii=False,
             separators=(",", ":"),
@@ -657,23 +687,19 @@ def _project_component(
         }
     )
     first_activity_day = direct_days[0] if direct_days else str(cluster["first_activity_day"])
-    previous_days = [value for value in direct_days if value < day]
-    previous_activity_day = previous_days[-1] if previous_days else None
-    day_member_count = sum(int(member["is_new_on_day"]) for member in visible_members)
-    prior_context_count = sum(
-        1
+    day_member_count = sum(
+        int(member["observed_directly"] and str(member["day"]) == day)
         for member in visible_members
-        if member["post_id"] != root_post_id and str(member["day"]) < day
     )
     return {
         "event_id": projected_event_id,
         "canonical_root_post_id": canonical_root_post_id,
         "presentation_root_post_id": root_post_id,
-        "snapshot_cutoff": f"{day}T23:59:59.999999+00:00",
+        "snapshot_cutoff": max(
+            str(member["published_at"]) for member in visible_members
+        ),
         "snapshot_content_sha256": snapshot_content_sha256,
         "first_activity_day": first_activity_day,
-        "previous_activity_day": previous_activity_day,
-        "is_continuation": previous_activity_day is not None,
         "is_grouped": len(visible_members) > 1,
         "root": root,
         "why_grouped": why_grouped,
@@ -681,7 +707,7 @@ def _project_component(
         "member_count": len(visible_members),
         "lifetime_member_count": len(visible_members),
         "day_member_count": day_member_count,
-        "prior_context_count": prior_context_count,
+        "activity_days": direct_days,
         "link_count": len(current_links),
         "author_count": len({member["author"]["handle"] for member in visible_members}),
         "registry_account_count": len(registry_entity_ids),
@@ -703,7 +729,11 @@ def _events_day_cached(
     day: str,
     cache_token: tuple[tuple[str, int, int, int, int], ...],
 ) -> dict[str, Any]:
-    """Build one cutoff-correct day projection over exact relationships."""
+    """Build the Events canonically published on one day.
+
+    The card includes the Event's lifetime activity, while its score and rank
+    remain frozen from the canonical publication day.
+    """
     del cache_token  # used only to invalidate this read-model cache
     if not DEFAULT_EVENTS_DB.is_file():
         return {
@@ -718,7 +748,9 @@ def _events_day_cached(
     if run is None:
         events.close()
         return {"available": False, "reason": "Event store has no materialized run."}
-    clusters, member_rows, link_rows = _event_rows(events, run["run_id"], day)
+    clusters, member_rows, link_rows, claimed_member_keys = _event_rows(
+        events, run["run_id"], day
+    )
     events.close()
 
     feed_result = _all_feed_candidates(day=day, run_id=run["feed_run_id"])
@@ -800,22 +832,26 @@ def _events_day_cached(
         visible_members: list[dict[str, Any]] = []
         cutoff_keys: set[tuple[str, str]] = set()
         visible_keys: set[tuple[str, str]] = set()
+        all_member_keys: set[tuple[str, str]] = set()
         for member in members_by_event.get(event_id, []):
             row = posts.get((member["provider"], member["post_id"]))
-            if (
-                row is None
-                or str(row["day"]) > day
-                or str(row["first_discovered_day"]) > day
-            ):
+            if row is None:
                 continue
             member_key = (member["provider"], member["post_id"])
-            cutoff_keys.add(member_key)
+            all_member_keys.add(member_key)
+            in_canonical_revision = (
+                str(row["day"]) <= day
+                and str(row["first_discovered_day"]) <= day
+            )
+            if in_canonical_revision:
+                cutoff_keys.add(member_key)
             account = feed_store._registry_account(
                 row["author_x_id"], row["author_handle"], by_handle, by_x_id
             )
             if account and account["registry_state"] == "rejected":
                 continue
-            visible_keys.add(member_key)
+            if in_canonical_revision:
+                visible_keys.add(member_key)
             visible_members.append(
                 {
                     "provider": row["provider"],
@@ -840,14 +876,16 @@ def _events_day_cached(
                     "first_discovered_day": row["first_discovered_day"],
                     "disclosure_post_id": row["disclosure_post_id"],
                     "observed_directly": bool(member["observed_directly"]),
-                    "is_new_on_day": bool(
-                        member["observed_directly"] and str(row["day"]) == day
-                    ),
                 }
             )
-        current_links = [
+        all_links = [
             link
             for link in links_by_event.get(event_id, [])
+            if (link["provider"], link["source_post_id"]) in all_member_keys
+        ]
+        canonical_links = [
+            link
+            for link in all_links
             if str(link["discovered_day"]) <= day
             and (link["provider"], link["source_post_id"]) in cutoff_keys
         ]
@@ -859,10 +897,100 @@ def _events_day_cached(
             (member["provider"], member["post_id"]): member
             for member in visible_members
         }
-        for component_keys, component_links in _visible_components(
-            visible_keys, cutoff_keys, current_links, posts
+        canonical_components = _visible_components(
+            visible_keys, cutoff_keys, canonical_links, posts
+        )
+        if not canonical_components:
+            continue
+
+        # Freeze the canonical components, then assign each later member to
+        # the first canonical node reached by its one structural parent chain.
+        # A future disclosure from an already-canonical post cannot merge or
+        # reidentify those components.
+        owner_by_node: dict[tuple[str, str], int] = {}
+        extended_keys = [set(keys) for keys, _ in canonical_components]
+        for index, (component_keys, component_links) in enumerate(
+            canonical_components
         ):
-            component_members = [member_by_key[key] for key in sorted(component_keys)]
+            for key in component_keys:
+                owner_by_node[key] = index
+            for link in component_links:
+                owner_by_node.setdefault(
+                    (str(link["provider"]), str(link["target_post_id"])), index
+                )
+        parent_by_source = {
+            (str(link["provider"]), str(link["source_post_id"])): (
+                str(link["provider"]),
+                str(link["target_post_id"]),
+            )
+            for link in all_links
+        }
+
+        def owner_for(key: tuple[str, str]) -> int | None:
+            seen: set[tuple[str, str]] = set()
+            current = key
+            while current not in seen:
+                seen.add(current)
+                target = parent_by_source.get(current)
+                if target is None:
+                    return None
+                owner = owner_by_node.get(target)
+                if owner is not None:
+                    return owner
+                current = target
+            return None
+
+        later_keys = set(member_by_key) - visible_keys
+        for key in later_keys:
+            owner = owner_for(key)
+            if owner is not None:
+                extended_keys[owner].add(key)
+
+        for index, (component_keys, component_links) in enumerate(
+            canonical_components
+        ):
+            final_keys = extended_keys[index]
+            component_members = [member_by_key[key] for key in sorted(final_keys)]
+            direct_days = [
+                str(member["day"])
+                for member in component_members
+                if member["observed_directly"]
+            ]
+            if not direct_days or min(direct_days) != day:
+                continue
+            canonical_link_keys = {
+                (
+                    str(link["provider"]),
+                    str(link["source_post_id"]),
+                    str(link["target_post_id"]),
+                    str(link["link_type"]),
+                )
+                for link in component_links
+            }
+            final_links = [
+                link
+                for link in all_links
+                if (
+                    (
+                        str(link["provider"]),
+                        str(link["source_post_id"]),
+                        str(link["target_post_id"]),
+                        str(link["link_type"]),
+                    )
+                    in canonical_link_keys
+                    or (
+                        (str(link["provider"]), str(link["source_post_id"]))
+                        in (final_keys - component_keys)
+                        and owner_for(
+                            (
+                                str(link["provider"]),
+                                str(link["source_post_id"]),
+                            )
+                        )
+                        == index
+                    )
+                )
+            ]
             presentation_root_key = _component_root(
                 component_keys=component_keys,
                 links=component_links,
@@ -872,7 +1000,7 @@ def _events_day_cached(
             item = _project_component(
                 cluster=cluster,
                 visible_members=component_members,
-                current_links=component_links,
+                current_links=final_links,
                 presentation_root_key=presentation_root_key,
                 canonical_root_key=canonical_root_key,
                 candidates=candidates,
@@ -890,6 +1018,7 @@ def _events_day_cached(
         for item in feed_items
         if _feed_key(item) not in consumed
         and _feed_key(item) not in reply_candidate_keys
+        and _feed_key(item) not in claimed_member_keys
     )
     for item in items:
         route = routing_items.get(item["event_id"])
@@ -977,7 +1106,14 @@ def _events_week_cached(
                 richest_item = previous["item"]
             weekly_states[event_id] = {
                 "item": richest_item,
-                "active_days": {*inherited_days, day},
+                "active_days": {
+                    *inherited_days,
+                    *(
+                        activity_day
+                        for activity_day in item.get("activity_days", [day])
+                        if start.isoformat() <= activity_day <= end.isoformat()
+                    ),
+                },
                 "peak_attention_score": peak_score,
                 "daily_score_basis": peak_state["daily_score_basis"],
                 "peak_public_interactions": peak_interaction,
@@ -1028,11 +1164,13 @@ def _events_week_cached(
 
 
 def _score_order_key(item: dict[str, Any]) -> tuple[Any, ...]:
+    """Order by canonical-day score inputs, never later appended activity."""
+    score_components = item["daily_score_basis"]["score_components"]
     return (
         item["peak_attention_score"],
-        item["registry_account_count"],
-        item["member_count"],
-        item["latest_evidence_at"],
+        score_components["registry_amplifiers"],
+        item["day_member_count"],
+        item["daily_score_basis"]["published_at"],
         item["event_id"],
     )
 
@@ -1054,9 +1192,35 @@ def current_daily_rank_by_event_id(*, day: str) -> dict[str, int]:
     return _daily_rank_by_event_id(payload["items"])
 
 
+def canonical_event_location(event_id: str) -> dict[str, str | int] | None:
+    """Return the one public Feed location for an Event."""
+    if not DEFAULT_EVENTS_DB.is_file():
+        return None
+    conn = _open_readonly(DEFAULT_EVENTS_DB)
+    try:
+        run = _latest_run(conn)
+        if run is None:
+            return None
+        row = conn.execute(
+            """SELECT MIN(day) AS canonical_day
+               FROM event_day
+               WHERE run_id = ? AND event_id = ?""",
+            (str(run["run_id"]), event_id),
+        ).fetchone()
+    finally:
+        conn.close()
+    if row is None or row["canonical_day"] is None:
+        return None
+    day = str(row["canonical_day"])
+    rank = current_daily_rank_by_event_id(day=day).get(event_id)
+    if rank is None:
+        return None
+    return {"day": day, "feed_rank": rank}
+
+
 def _relationship_counts(item: dict[str, Any]) -> dict[str, int]:
     counts = {
-        "continuations": 0,
+        "author_updates": 0,
         "replies": 0,
         "quotes": 0,
         "retweets": 0,
@@ -1064,8 +1228,10 @@ def _relationship_counts(item: dict[str, Any]) -> dict[str, int]:
     }
     for evidence in item["evidence"]:
         relationship = evidence["relationship"]
-        if relationship == "reply":
-            key = "continuations" if evidence["same_author_as_root"] else "replies"
+        if evidence["same_author_as_root"] and relationship != "retweet":
+            key = "author_updates"
+        elif relationship == "reply":
+            key = "replies"
         elif relationship == "quote":
             key = "quotes"
         elif relationship == "retweet":

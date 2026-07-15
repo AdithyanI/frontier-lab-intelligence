@@ -34,6 +34,13 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
                 "relationship": "retweet",
                 "same_author_as_root": True,
             },
+            {
+                "post_id": "post-4",
+                "author": {"handle": "alice"},
+                "text": "My additional first-party interpretation.",
+                "relationship": "quote",
+                "same_author_as_root": True,
+            },
         ],
     }
     event_requests = []
@@ -83,7 +90,10 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     assert frozen["feed_rank"] == 3
     assert event_requests[0]["limit"] == 1
     packet = json.loads(frozen["packet_json"])
-    assert [source["relation"] for source in packet["sources"]] == ["root", "quote"]
+    assert [source["relation"] for source in packet["sources"]] == [
+        "root",
+        "same_author_continuation",
+    ]
 
 
 def _refresh_summary(day: str) -> dict:

@@ -363,6 +363,15 @@ independently, exact completed rows are reused on resume, and response IDs,
 raw output, token/cache telemetry, reported cost, and errors remain auditable.
 `fli insights run` is the repeated-envelope operator path; `contract`,
 `summary`, `inspect`, and `import-result` are JSON-first inspection commands.
+`fli insights refresh` is the thin batch coordinator over that same primitive.
+It reads only complete routing databases tied to the currently published Event
+and Feed runs, selects positive routes in Feed-rank order, and freezes one
+deterministic run per Event/audience. The run identity does not include the
+batch size, so a reviewed ten-Event calibration can expand to the full routed
+cohort without regenerating completed results. Independent requests execute in
+bounded parallel, commit immediately, and resume after interruption. Dry-run is
+read-only. Artifact retrieval and Event construction remain upstream concerns;
+the Insight client never refetches or reconstructs evidence.
 
 The superseded cited-extraction, multi-stage audience extraction, item/day
 review, editor, audit, recall, and production-reconciliation modules and CLI
@@ -1149,7 +1158,7 @@ final score.
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.artifact_arxiv` | official batch-feed title, author, category, date, and abstract extraction for catalogued arXiv papers; PDFs remain optional future work |
 | `fli.insight_generation` | successor generation boundary with separate Investment and AI Engineering prompts/cache keys, one strict surface-or-suppress schema, first-party-only routed Evidence view, deterministic execution/validation, and application-owned Event/day/Feed-rank publication metadata |
-| `fli.insight_runs` | immutable, resumable SQLite Insight runs with exact request/result provenance, per-audience retry state, cache/cost telemetry, and JSON-first operator inspection |
+| `fli.insight_runs` / `fli.insight_cli` | immutable SQLite Insight runs plus a JSON-first single-item and publication-qualified batch client; exact requests freeze before execution, each Event/audience resumes independently, ten-item calibrations expand without duplicate calls, and cache/cost telemetry distinguishes new model work from reused local results |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort, with checksum-bound parent reuse for unchanged stable-ID sources |
 | `fli.following_rankings` | deterministic account discovery ordering plus entity-union Network support (source and target both one entity/one vote, self excluded), with experimental personalized PageRank retained for comparison |
 | `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed/Event readers share the newest completed analysis selection, and Insights projects kept/suppressed successor decisions without legacy reads; source in `frontend/` |

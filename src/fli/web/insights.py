@@ -9,6 +9,7 @@ import sqlite3
 from typing import Any, Literal
 
 from fli import insight_generation, insight_runs
+from fli.web import events as event_store
 
 
 DEFAULT_AUDIENCE = insight_generation.InsightAudience.INVESTMENT.value
@@ -67,7 +68,7 @@ def _routing_packets(source_db: str) -> dict[str, dict[str, Any]]:
     return packets
 
 
-def _source_payload(row: sqlite3.Row) -> dict[str, Any]:
+def _source_payload(row: dict[str, Any]) -> dict[str, Any]:
     packet = _routing_packets(str(row["source_routing_db"])).get(
         str(row["event_id"]), {}
     )
@@ -98,28 +99,38 @@ def _source_payload(row: sqlite3.Row) -> dict[str, Any]:
 
 
 def _current_rows(
-    conn: sqlite3.Connection, *, audience: str, day: str | None = None
-) -> list[sqlite3.Row]:
-    day_clause = "AND item.day = ?" if day else ""
-    params: tuple[str, ...] = (audience, day) if day else (audience,)
-    return conn.execute(
-        f"""WITH ranked AS (
+    conn: sqlite3.Connection, *, audience: str
+) -> list[dict[str, Any]]:
+    rows = conn.execute(
+        """WITH ranked AS (
                  SELECT item.*, run.source_routing_run_id, run.source_routing_db,
                         ROW_NUMBER() OVER (
-                            PARTITION BY item.day, item.event_id, item.audience
+                            PARTITION BY item.event_id, item.audience
                             ORDER BY item.completed_at DESC, item.run_id DESC
                         ) AS revision
                  FROM insight_item AS item
                  JOIN insight_run AS run ON run.run_id = item.run_id
-                 WHERE item.status = 'complete' AND item.audience = ? {day_clause}
+                 WHERE item.status = 'complete' AND item.audience = ?
              )
              SELECT * FROM ranked WHERE revision = 1
              ORDER BY feed_rank, event_id""",
-        params,
+        (audience,),
     ).fetchall()
+    projected: list[dict[str, Any]] = []
+    for row in rows:
+        item = dict(row)
+        location = event_store.canonical_event_location(str(row["event_id"]))
+        if location is not None:
+            item.update(location)
+            item["candidate_id"] = insight_generation.candidate_id(
+                str(row["audience"]), str(row["event_id"])
+            )
+        projected.append(item)
+    projected.sort(key=lambda item: (int(item["feed_rank"]), str(item["event_id"])))
+    return projected
 
 
-def _dates_payload(audience: str, rows: list[sqlite3.Row]) -> dict[str, Any]:
+def _dates_payload(audience: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     by_day: dict[str, dict[str, int | str]] = {}
     for row in rows:
         day = str(row["day"])
@@ -158,7 +169,7 @@ def insight_dates_payload(
         conn.close()
 
 
-def _item_payload(row: sqlite3.Row) -> dict[str, Any]:
+def _item_payload(row: dict[str, Any]) -> dict[str, Any]:
     decision = str(row["decision"])
     implication = row["implication"]
     return {
@@ -208,18 +219,13 @@ def insights_payload(
             "items": [],
         }
     try:
-        selected_day = day
-        if selected_day is None:
-            selected_day = conn.execute(
-                """SELECT MAX(day) FROM insight_item
-                   WHERE audience = ? AND status = 'complete'""",
-                (selected_audience,),
-            ).fetchone()[0]
-        all_rows = (
-            _current_rows(conn, audience=selected_audience, day=str(selected_day))
-            if selected_day
-            else []
+        current_rows = _current_rows(conn, audience=selected_audience)
+        selected_day = day or max(
+            (str(row["day"]) for row in current_rows), default=None
         )
+        all_rows = [
+            row for row in current_rows if str(row["day"]) == selected_day
+        ]
     finally:
         conn.close()
     if not all_rows:

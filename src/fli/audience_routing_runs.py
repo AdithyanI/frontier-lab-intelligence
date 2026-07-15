@@ -505,6 +505,7 @@ def _artifact_sources(
     *,
     event_id: str,
     post_authors: dict[str, str],
+    primary_author: str,
 ) -> list[audience_routing.EvidenceSource]:
     """Load full accepted primary-author artifacts without old Insight state."""
     rows = conn.execute(
@@ -539,7 +540,7 @@ def _artifact_sources(
         text = snapshot.read_text()
         relation = str(row["relation"])
         author = (
-            post_authors.get(str(row["source_external_id"]))
+            post_authors.get(str(row["source_external_id"]), primary_author)
             if relation == "self_publishes"
             else None
         )
@@ -577,20 +578,18 @@ def packet_from_event(
     sources = [_x_source(root, relation="root")]
     post_authors = {str(root["post_id"]): str(root.get("author") or "")}
     for evidence in item.get("evidence") or []:
+        if (
+            not evidence.get("same_author_as_root")
+            or str(evidence.get("relationship") or "related") == "retweet"
+        ):
+            continue
         post = {
             "post_id": str(evidence["post_id"]),
             "author": "@" + str(evidence["author"]["handle"]),
             "text": str(evidence.get("text") or ""),
         }
         post_id = str(post["post_id"])
-        relationship = str(evidence.get("relationship") or "related")
-        if relationship == "retweet":
-            continue
-        relation = (
-            "same_author_continuation"
-            if evidence.get("same_author_as_root")
-            else relationship
-        )
+        relation = "same_author_continuation"
         post_authors[post_id] = str(post.get("author") or "")
         sources.append(_x_source(post, relation=relation))
     sources.extend(
@@ -598,6 +597,7 @@ def packet_from_event(
             artifact_conn,
             event_id=str(item["event_id"]),
             post_authors=post_authors,
+            primary_author=str(root.get("author") or ""),
         )
     )
     return audience_routing.RoutingPacket(

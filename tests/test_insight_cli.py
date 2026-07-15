@@ -8,10 +8,10 @@ from fli import audience_routing, audience_routing_runs, insight_cli
 EVENT_ID = "event-spike-1"
 
 
-def _packet():
+def _packet(*, event_id: str = EVENT_ID, day: str = "2026-07-13"):
     return audience_routing.RoutingPacket(
-        event_id=EVENT_ID,
-        day="2026-07-13",
+        event_id=event_id,
+        day=day,
         sources=(
             audience_routing.EvidenceSource(
                 source_type="x_post",
@@ -41,10 +41,16 @@ def _packet():
     )
 
 
-def _routing_fixture(root: Path) -> Path:
-    path = root / "current-run" / "routing.db"
+def _routing_fixture(
+    root: Path,
+    *,
+    run_id: str = "current-run",
+    day: str = "2026-07-13",
+    event_id: str = EVENT_ID,
+) -> Path:
+    path = root / run_id / "routing.db"
     conn = audience_routing_runs.connect_run(path)
-    packet = _packet()
+    packet = _packet(event_id=event_id, day=day)
     now = "2026-07-15T20:00:00+00:00"
     with conn:
         conn.execute(
@@ -54,11 +60,13 @@ def _routing_fixture(root: Path) -> Path:
                 source_event_run_id, source_feed_run_id, source_artifact_db,
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count, created_at, updated_at)
-               VALUES (1, 'current-run', '2026-07-13', 'gpt-5.4-mini', 'high',
+               VALUES (1, ?, ?, 'gpt-5.4-mini', 'high',
                        ?, 'prompt-sha', ?, 'event-run', 'feed-run',
                        'artifacts.db', 'top_ranked', 100, NULL,
                        'cohort-sha', 1, ?, ?)""",
             (
+                run_id,
+                day,
                 audience_routing.PROMPT_VERSION,
                 audience_routing.SCHEMA_VERSION,
                 now,
@@ -76,7 +84,7 @@ def _routing_fixture(root: Path) -> Path:
                        ?, ?, ?, ?, 'complete', 1, 1, 'Useful to engineers.',
                        1, 'Useful to investors.', ?)""",
             (
-                EVENT_ID,
+                event_id,
                 audience_routing_runs._canonical_json(
                     audience_routing_runs._packet_payload(packet)
                 ),
@@ -88,6 +96,63 @@ def _routing_fixture(root: Path) -> Path:
         )
     conn.close()
     return path
+
+
+def _add_routed_event(
+    path: Path,
+    *,
+    event_id: str,
+    feed_rank: int,
+    ai_engineering_relevant: bool,
+    investment_relevant: bool,
+) -> None:
+    packet = audience_routing.RoutingPacket(
+        event_id=event_id,
+        day="2026-07-13",
+        sources=(
+            audience_routing.EvidenceSource(
+                source_type="x_post",
+                source_id=f"root-{event_id}",
+                url=f"https://x.com/alice/status/root-{event_id}",
+                text=f"Measured evidence for {event_id}.",
+                author="@alice",
+                relation="root",
+            ),
+        ),
+    )
+    conn = audience_routing_runs.connect_run(path)
+    now = "2026-07-15T20:00:00+00:00"
+    with conn:
+        conn.execute(
+            """UPDATE run_meta
+               SET expected_count = expected_count + 1
+               WHERE singleton = 1"""
+        )
+        conn.execute(
+            """INSERT INTO routing_item
+               (event_id, feed_rank, root_url, snapshot_content_sha256,
+                packet_json, evidence_sha256, input_text, input_sha256,
+                status, attempts, ai_engineering_relevant,
+                ai_engineering_reason, investment_relevant,
+                investment_reason, updated_at)
+               VALUES (?, ?, ?, 'snapshot', ?, ?, ?, ?, 'complete', 1, ?,
+                       'Engineering reason.', ?, 'Investment reason.', ?)""",
+            (
+                event_id,
+                feed_rank,
+                f"https://x.com/alice/status/root-{event_id}",
+                audience_routing_runs._canonical_json(
+                    audience_routing_runs._packet_payload(packet)
+                ),
+                packet.evidence_sha256,
+                audience_routing.render_input(packet),
+                packet.input_sha256,
+                int(ai_engineering_relevant),
+                int(investment_relevant),
+                now,
+            ),
+        )
+    conn.close()
 
 
 class _RawResponse:
@@ -220,7 +285,18 @@ def test_run_records_results_cache_and_cost(tmp_path, capsys):
     payload = json.loads(capsys.readouterr().out)
 
     assert exit_code == 0
-    assert payload["data"]["telemetry"] == {
+    assert {
+        key: payload["data"]["telemetry"][key]
+        for key in (
+            "input_tokens",
+            "cached_tokens",
+            "cache_write_tokens",
+            "output_tokens",
+            "reported_cost_usd",
+            "cache_hit_requests",
+            "request_count",
+        )
+    } == {
         "input_tokens": 4_800,
         "cached_tokens": 2_560,
         "cache_write_tokens": 0,
@@ -278,3 +354,150 @@ def test_missing_envelope_uses_stable_validation_error(tmp_path, capsys):
     assert payload["status"] == "error"
     assert payload["error"]["code"] == "E_INVALID_INPUT"
     assert payload["error"]["retryable"] is False
+
+
+def test_refresh_dry_run_plans_current_routes_without_writes(
+    tmp_path, capsys, monkeypatch
+):
+    routing_root = tmp_path / "routing"
+    _routing_fixture(routing_root)
+    db = tmp_path / "insights.db"
+    dump = tmp_path / "dump"
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_published_event_source",
+        lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
+    )
+
+    exit_code = insight_cli.main(
+        [
+            "refresh",
+            "--through",
+            "2026-07-13",
+            "--limit-per-day",
+            "10",
+            "--routing-root",
+            str(routing_root),
+            "--db",
+            str(db),
+            "--dump-dir",
+            str(dump),
+            "--dry-run",
+            "--progress",
+            "off",
+            "--json",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["data"]["event_count"] == 1
+    assert payload["data"]["request_count"] == 2
+    assert payload["data"]["will_call_model"] is False
+    assert payload["data"]["workers"] == 2
+    assert not db.exists()
+    assert not dump.exists()
+
+
+def test_refresh_scales_from_ten_to_all_and_reuses_completed_requests(
+    tmp_path, capsys, monkeypatch
+):
+    routing_root = tmp_path / "routing"
+    run_db = _routing_fixture(routing_root)
+    _add_routed_event(
+        run_db,
+        event_id="event-spike-2",
+        feed_rank=7,
+        ai_engineering_relevant=True,
+        investment_relevant=False,
+    )
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_published_event_source",
+        lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
+    )
+    client = _Client()
+    db = tmp_path / "insights.db"
+    common = [
+        "refresh",
+        "--through",
+        "2026-07-13",
+        "--routing-root",
+        str(routing_root),
+        "--db",
+        str(db),
+        "--dump-dir",
+        str(tmp_path / "dump"),
+        "--workers",
+        "3",
+        "--progress",
+        "off",
+        "--json",
+    ]
+
+    assert insight_cli.main(
+        [*common, "--limit-per-day", "1"], client_factory=lambda: client
+    ) == 0
+    first = json.loads(capsys.readouterr().out)["data"]
+    assert first["request_count"] == 2
+    assert first["telemetry"]["model_requests"] == 2
+    assert len(client.raw_api.calls) == 2
+
+    assert insight_cli.main(
+        [*common, "--limit-per-day", "1"], client_factory=lambda: client
+    ) == 0
+    resumed = json.loads(capsys.readouterr().out)["data"]
+    assert resumed["telemetry"]["model_requests"] == 0
+    assert resumed["telemetry"]["reused_results"] == 2
+    assert resumed["telemetry"]["reported_cost_usd"] == 0
+    assert len(client.raw_api.calls) == 2
+
+    assert insight_cli.main(
+        [*common, "--all-routed"], client_factory=lambda: client
+    ) == 0
+    expanded = json.loads(capsys.readouterr().out)["data"]
+    assert expanded["event_count"] == 2
+    assert expanded["request_count"] == 3
+    assert expanded["telemetry"]["model_requests"] == 1
+    assert expanded["telemetry"]["reused_results"] == 2
+    assert len(client.raw_api.calls) == 3
+
+
+def test_refresh_rejects_same_event_on_multiple_days(tmp_path, capsys, monkeypatch):
+    routing_root = tmp_path / "routing"
+    _routing_fixture(
+        routing_root,
+        run_id="route-day-one",
+        day="2026-07-12",
+    )
+    _routing_fixture(
+        routing_root,
+        run_id="route-day-two",
+        day="2026-07-13",
+    )
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_published_event_source",
+        lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
+    )
+
+    exit_code = insight_cli.main(
+        [
+            "refresh",
+            "--through",
+            "2026-07-13",
+            "--days",
+            "2",
+            "--routing-root",
+            str(routing_root),
+            "--dry-run",
+            "--progress",
+            "off",
+            "--json",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 2
+    assert payload["error"]["code"] == "E_INVALID_INPUT"
+    assert "appears on both" in payload["error"]["message"]

@@ -25,11 +25,11 @@ positive routes without reviving the old stack.
 
 ### In Scope
 
-- Define the exact immutable Evidence-envelope blocks presented to the router,
-  preserving the author, relationship, source URL, and provenance of each
-  root, continuation, reply, quote-post, and accepted artifact block.
-- Enrich selected root posts with same-author replies from the same X
-  conversation before event, artifact, and routing projections are frozen.
+- Define the exact immutable Evidence-envelope blocks presented to the router:
+  one original source post, substantive posts authored by that same author
+  (including replies, thread continuations, and quote-post commentary), and
+  accepted first-party artifacts. Independently authored reactions and pure
+  reposts remain Feed activity evidence but never enter the semantic packet.
 - Use one combined routing call with two independently reasoned audience
   judgments: AI Engineering relevant/not relevant and Investment relevant/not
   relevant, each with a concise evidence-grounded explanation. The current
@@ -172,6 +172,12 @@ Application invariants:
   architecture, status, model/prompt references, evaluation evidence, and
   limitations are current; Insight generation is a separate explicit next
   project. Validate: `bash scripts/check-fast.sh` and archive this tracker.
+- [ ] Milestone 4b — Publish each semantic envelope once. Acceptance: every
+  Event has one canonical Feed day and rank; later activity appends to that
+  Event without another routing or Insight candidate; routing and Insight
+  packets contain only the original source and accepted first-party artifacts.
+  Validate: focused projection/packet tests, rebuilt live data, API proof, and
+  rendered Feed/Insight QA.
 
 ## Execution Rules
 
@@ -216,10 +222,17 @@ Application invariants:
   is a foundation checkpoint only, not bulk generation or publication.
 - Adi later authorized live Terra/high evaluation on two supplied envelope IDs,
   then approved moving the proven path into production storage and the existing
-  UI. Insight model input now excludes independent replies and quote-posts but
-  keeps root, same-author continuations, and primary artifacts. Audience routing
-  retains reactions until a bounded routing A/B justifies changing that separate
-  relevance boundary.
+  UI. On 2026-07-15 he simplified both model boundaries: routing and Insight
+  generation use only the original source post, substantive posts by that same
+  author (including replies, thread continuations, and quote-post commentary),
+  and accepted first-party artifacts. Independently authored reactions and
+  pure reposts remain Feed activity context and scoring evidence; they cannot
+  change the semantic packet, create a later-day candidate, reroute, or
+  regenerate an Insight.
+- Each Event is published on exactly one canonical day: the original/root
+  source day. Its Feed rank is frozen on that day. Later activity appends to the
+  Event's inspectable evidence and attention history, but the Event does not
+  reappear on the later day.
 - The date rail counts kept Insights but retains every evaluated day. UI status
   is one mutually exclusive `Kept` / `Suppressed` / `All` audit control. A
   surfaced implication is shown as `Why kept`; a suppression reason is shown as
@@ -290,6 +303,9 @@ Application invariants:
 | complete | Run both successor prompts against envelope `9412a377…` on its latest corrected July 12 revision; inspect raw structured output, cache, and cost before designing storage. | parent | `resources/first-successor-insight-spike.md` |
 | complete | Move the successor Insight path into durable SQLite-backed generation; import the first-party-only Terra result, expose kept/suppressed decisions through the API, and add Feed-style date/status audit controls to the existing UI. | parent | `resources/first-live-insight-run.md` |
 | complete | Rerun and review the 900 routes against the repaired Event publication; remove the local packaging bottleneck. | parent | `resources/top100-contextual-audit-v2.md` |
+| in_progress | Replace daily continuation publication with one canonical Event day while retaining later activity on the Event. | parent | — |
+| pending | Reduce routing and Insight packets to first-party-authored source material plus accepted first-party artifacts and enforce one candidate per Event/audience. | parent | — |
+| pending | Reanchor the existing live Insight to the canonical Event day/rank without another model call; rebuild and verify Feed/Insight UI. | parent | `resources/first-live-insight-run.md` |
 
 ## Backlog / Remaining Work
 

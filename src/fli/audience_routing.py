@@ -13,7 +13,6 @@ import json
 import re
 import unicodedata
 from dataclasses import dataclass
-from math import ceil
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +21,7 @@ import tiktoken
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v8"
+PROMPT_VERSION = "audience-routing-v9"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "high"
@@ -35,7 +34,7 @@ TRUNCATION_MARKER = (
     "routing input limit. Remaining lower-priority evidence was omitted "
     "from this model call."
 )
-PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v8.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v9.txt"
 PROMPT_CACHE_KEY = f"fli:audience-routing:{PROMPT_VERSION}"
 
 AUDIENCES = ("ai_engineering", "investment")
@@ -43,8 +42,6 @@ JUDGMENT_FIELDS = ("relevant", "reason")
 _URL_ONLY_RE = re.compile(r"(?:https?://\S+\s*)+", re.IGNORECASE)
 _OPAQUE_X_URL_RE = re.compile(r"https?://t\.co/\S+", re.IGNORECASE)
 _MULTISPACE_RE = re.compile(r"[ \t]{2,}")
-_PRIMARY_DUPLICATE_MIN_CHARS = 80
-_PRIMARY_DUPLICATE_RATIO = 0.80
 
 _JUDGMENT_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -58,7 +55,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v8",
+    "name": "audience_routing_v9",
     "strict": True,
     "schema": {
         "type": "object",
@@ -191,24 +188,8 @@ def _is_transport_only(text: str) -> bool:
     return not text or _URL_ONLY_RE.fullmatch(text) is not None
 
 
-def _duplicates_primary_text(text: str, primary_texts: list[str]) -> bool:
-    """Reject reactions whose substance is already present in primary evidence."""
-    if len(text) < _PRIMARY_DUPLICATE_MIN_CHARS:
-        return False
-    required = max(1, ceil(len(text) * _PRIMARY_DUPLICATE_RATIO))
-    for primary_text in primary_texts:
-        if len(primary_text) < required:
-            continue
-        if any(
-            text[start : start + required] in primary_text
-            for start in range(len(text) - required + 1)
-        ):
-            return True
-    return False
-
-
 def _render_full_input(packet: RoutingPacket) -> str:
-    """Render the complete readable hierarchy without internal provenance."""
+    """Render first-party semantic evidence without internal provenance."""
     roots = [source for source in packet.sources if source.relation == "root"]
     if len(roots) != 1:
         raise ValueError("routing packet must contain exactly one root source")
@@ -222,27 +203,6 @@ def _render_full_input(packet: RoutingPacket) -> str:
     artifacts = [
         source for source in packet.sources if source.source_type == "artifact"
     ]
-    primary_texts = [
-        text
-        for source in (root, *continuations, *artifacts)
-        if (text := _display_text(source)) and not _is_transport_only(text)
-    ]
-    reactions: list[EvidenceSource] = []
-    for source in packet.sources:
-        if source.source_type != "x_post" or source.relation in {
-            "root",
-            "same_author_continuation",
-            "retweet",
-        }:
-            continue
-        text = _display_text(source)
-        if (
-            _is_transport_only(text)
-            or _duplicates_primary_text(text, primary_texts)
-        ):
-            continue
-        reactions.append(source)
-
     lines = ["evidence_packet:", "  primary_source:"]
     if root.author:
         lines.append(f"    author: {_yaml_value(root.author)}")
@@ -282,22 +242,6 @@ def _render_full_input(packet: RoutingPacket) -> str:
                 _literal_field("text", _display_text(source), indent="        ")
             )
 
-    if reactions:
-        reaction_kinds = {
-            "quote": "quote_post",
-            "reply": "reply_post",
-        }
-        lines.append("  independent_reactions:")
-        for source in reactions:
-            lines.append(
-                "    - kind: "
-                + reaction_kinds.get(source.relation or "", "related_post")
-            )
-            if source.author:
-                lines.append(f"      author: {_yaml_value(source.author)}")
-            lines.extend(
-                _literal_field("text", _display_text(source), indent="      ")
-            )
     return "\n".join(lines)
 
 

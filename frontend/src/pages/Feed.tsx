@@ -445,20 +445,22 @@ function RelationshipPost({ item }: { item: EventEvidence }) {
   const label =
     item.relationship === 'reply'
       ? item.same_author_as_root
-        ? 'Thread continuation'
+        ? 'Author reply'
         : 'Reply'
       : item.relationship === 'quote'
-        ? 'Quote'
-        : 'Related post'
+        ? item.same_author_as_root
+          ? 'Author quote'
+          : 'Quote'
+        : item.same_author_as_root
+          ? 'Author update'
+          : 'Related post'
   const style = {
     '--thread-depth': Math.max(1, item.depth),
   } as CSSProperties
 
   return (
     <article
-      className={`event-relationship event-relationship--${item.relationship}${
-        item.same_author_as_root ? ' event-relationship--continuation' : ''
-      }`}
+      className={`event-relationship event-relationship--${item.relationship}`}
       style={style}
     >
       <header>
@@ -525,11 +527,6 @@ function EventEvidenceDetails({
   const [evidenceError, setEvidenceError] = useState('')
   const narrative = evidence.filter((value) => value.relationship !== 'retweet')
   const retweets = evidence.filter((value) => value.relationship === 'retweet')
-  const currentNarrative = narrative.filter((evidence) => evidence.is_new_on_day)
-  const priorNarrative = narrative.filter((evidence) => !evidence.is_new_on_day)
-  const currentRetweets = retweets.filter((evidence) => evidence.is_new_on_day)
-  const priorRetweets = retweets.filter((evidence) => !evidence.is_new_on_day)
-  const priorCount = priorNarrative.length + priorRetweets.length
   return (
     <details
       className="event-evidence"
@@ -550,7 +547,7 @@ function EventEvidenceDetails({
     >
       <summary>
         <span>
-          Follow {relationshipSummary.join(' · ') || `${item.member_count - 1} related posts`}
+          View activity · {relationshipSummary.join(' · ') || `${item.member_count - 1} related posts`}
         </span>
         <span className="mono">
           {item.author_count} {item.author_count === 1 ? 'author' : 'authors'}
@@ -560,26 +557,10 @@ function EventEvidenceDetails({
         <div className="event-thread">
           {evidenceLoading && <p className="mono muted">Loading evidence…</p>}
           {evidenceError && <p className="error-note">{evidenceError}</p>}
-          {item.is_continuation && (
-            <div className="event-thread-section mono">Added on this day</div>
-          )}
-          {currentNarrative.map((evidence) => (
+          {narrative.map((evidence) => (
             <RelationshipPost key={evidence.post_id} item={evidence} />
           ))}
-          <RetweetTrace items={currentRetweets} />
-          {priorCount > 0 && (
-            <details className="event-prior-context">
-              <summary className="mono">
-                Show earlier context · {priorCount} {priorCount === 1 ? 'post' : 'posts'}
-              </summary>
-              <div>
-                {priorNarrative.map((evidence) => (
-                  <RelationshipPost key={evidence.post_id} item={evidence} />
-                ))}
-                <RetweetTrace items={priorRetweets} />
-              </div>
-            </details>
-          )}
+          <RetweetTrace items={retweets} />
         </div>
       )}
     </details>
@@ -610,8 +591,8 @@ function EventRow({
   const root = item.root
   const counts = item.relationship_counts
   const relationshipSummary = [
-    counts.continuations
-      ? `${counts.continuations} thread ${counts.continuations === 1 ? 'continuation' : 'continuations'}`
+    counts.author_updates
+      ? `${counts.author_updates} author ${counts.author_updates === 1 ? 'update' : 'updates'}`
       : null,
     counts.replies
       ? `${counts.replies} ${counts.replies === 1 ? 'reply' : 'replies'}`
@@ -661,17 +642,6 @@ function EventRow({
         {root.context && !item.is_grouped && (
           <div className="feed-context mono">
             Quotes @{root.context.target_handle} · post {root.context.target_post_id}
-          </div>
-        )}
-
-        {item.is_continuation && item.previous_activity_day && (
-          <div className="event-continuation-note mono">
-            <span>
-              Continued from {shortDate.format(new Date(`${item.previous_activity_day}T12:00:00Z`))}
-            </span>
-            <span>
-              {item.day_member_count} new {item.day_member_count === 1 ? 'post' : 'posts'} today
-            </span>
           </div>
         )}
 

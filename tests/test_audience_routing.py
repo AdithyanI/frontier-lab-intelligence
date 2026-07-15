@@ -120,16 +120,16 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v8_prompt_uses_soft_reason_word_guidance_without_truncation():
+def test_v9_prompt_uses_soft_reason_word_guidance_without_truncation():
     prompt = audience_routing.instructions()
 
-    assert audience_routing.PROMPT_VERSION == "audience-routing-v8"
+    assert audience_routing.PROMPT_VERSION == "audience-routing-v9"
     assert "Aim for roughly 40 to 50 words" in prompt
     assert "guidance, not a hard limit" in prompt
     assert "never truncate, reject, or add filler" in prompt
 
 
-def test_v8_prompt_defines_the_approved_audience_boundaries():
+def test_v9_prompt_defines_the_approved_audience_boundaries():
     prompt = audience_routing.instructions()
 
     assert "temporary access extensions or resets" in prompt
@@ -149,7 +149,7 @@ def test_v8_prompt_defines_the_approved_audience_boundaries():
     assert "explicitly corrects, retracts, or disproves it" in prompt
 
 
-def test_render_input_uses_readable_hierarchy_before_separate_reactions():
+def test_render_input_uses_readable_first_party_hierarchy_only():
     rendered = audience_routing.render_input(make_packet())
 
     assert "evidence_packet:" in rendered
@@ -159,14 +159,13 @@ def test_render_input_uses_readable_hierarchy_before_separate_reactions():
     assert "      kind: x_post" in rendered
     assert "      - kind: authored_artifact" in rendered
     assert '        title: "Serving system report"' in rendered
-    assert "  independent_reactions:" in rendered
-    assert "    - kind: quote_post" in rendered
-    assert '      author: "Independent Engineer"' in rendered
-    assert "burst traffic & load" in rendered
+    assert "independent_reactions" not in rendered
+    assert "Independent Engineer" not in rendered
+    assert "burst traffic & load" not in rendered
     assert "&amp;" not in rendered
     assert rendered.index("    post:") < rendered.index(
         "      - kind: authored_artifact"
-    ) < rendered.index("  independent_reactions:")
+    )
     assert "reduced inference latency" in rendered
     assert "event-secret-42" not in rendered
     assert "source-secret-root" not in rendered
@@ -204,14 +203,14 @@ def test_render_input_replaces_link_only_post_and_omits_transport_reaction():
     assert "https://t.co/another-link" not in rendered
 
 
-def test_render_input_keeps_short_reactions_and_cleans_duplicates_and_links():
+def test_render_input_keeps_same_author_updates_and_omits_independent_reactions():
     packet = make_packet()
-    inline_link = audience_routing.EvidenceSource(
+    author_update = audience_routing.EvidenceSource(
         source_type="x_post",
-        source_id="inline-link",
-        url="https://example.com/inline-link",
-        author="Useful Reaction",
-        relation="quote",
+        source_id="author-update",
+        url="https://example.com/author-update",
+        author="Satya Nadella",
+        relation="same_author_continuation",
         text=(
             "This adds a distinct reliability implication "
             "https://t.co/opaque for production evaluation."
@@ -224,17 +223,6 @@ def test_render_input_keeps_short_reactions_and_cleans_duplicates_and_links():
         author="Short Reaction",
         relation="quote",
         text="Good, but late.",
-    )
-    duplicate_reaction = audience_routing.EvidenceSource(
-        source_type="x_post",
-        source_id="duplicate-reaction",
-        url="https://example.com/duplicate-reaction",
-        author="Duplicate Reaction",
-        relation="quote",
-        text=(
-            "Tests report lower latency and lower serving cost. "
-            "Tests report lower latency and lower serving cost."
-        ),
     )
     artifact = replace(
         packet.sources[1],
@@ -250,42 +238,17 @@ def test_render_input_keeps_short_reactions_and_cleans_duplicates_and_links():
                 packet.sources[0],
                 artifact,
                 packet.sources[2],
-                inline_link,
+                author_update,
                 short_reaction,
-                duplicate_reaction,
             ),
         )
     )
 
-    assert "Useful Reaction" in rendered
+    assert "continuations:" in rendered
     assert "distinct reliability implication" in rendered
     assert "https://t.co/opaque" not in rendered
-    assert "Short Reaction" in rendered
-    assert "Good, but late." in rendered
-    assert "Duplicate Reaction" not in rendered
-
-
-def test_duplicate_detection_preserves_eighty_percent_overlap_boundary():
-    reaction = ("A" * 10) + ("B" * 80) + ("C" * 10)
-
-    assert audience_routing._duplicates_primary_text(
-        reaction,
-        ["prefix " + ("B" * 80) + " suffix"],
-    )
-    assert not audience_routing._duplicates_primary_text(
-        reaction,
-        ["prefix " + ("B" * 79) + " suffix"],
-    )
-
-
-def test_duplicate_detection_handles_large_artifact_without_quadratic_diff():
-    reaction = ("distinct operational reaction " * 10)[:240]
-    large_artifact = "measured artifact evidence " * 20_000
-
-    assert not audience_routing._duplicates_primary_text(
-        reaction,
-        [large_artifact],
-    )
+    assert "Short Reaction" not in rendered
+    assert "Good, but late." not in rendered
 
 
 def test_render_input_caps_only_model_view_and_marks_truncation():
@@ -365,7 +328,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v8",
+        "prompt:audience-routing-v9",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
@@ -420,10 +383,10 @@ def test_prompt_explains_product_evidence_and_independent_audience_job():
 
     assert "frontier lab intelligence" in prompt
     assert "current system collects public posts from x" in prompt
-    assert "groups connected material into one evidence packet" in prompt
+    assert "groups all connected activity into one event" in prompt
     assert "primary post" in prompt
     assert "full text of an available artifact" in prompt
-    assert "separate reactions" in prompt
+    assert "independently authored replies" in prompt
     assert "ai engineering" in prompt
     assert "investment" in prompt
     assert "decide independently" in prompt

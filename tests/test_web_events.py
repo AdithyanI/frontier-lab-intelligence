@@ -142,11 +142,12 @@ def _write_audience_routing_run(root, *, items):
             requested_event_id, cohort_sha256, expected_count,
             created_at, updated_at)
            VALUES (1, 'audience-run-1', '2026-07-11', 'gpt-5.4-mini',
-                   'xhigh', ?, 'prompt-hash', ?, 'event-run-1',
+                   'xhigh', ?, ?, ?, 'event-run-1',
                    'feed-run-1', 'artifacts.db', 'review_cohort', ?, NULL,
                    'cohort-hash', ?, ?, ?)""",
         (
             audience_routing.PROMPT_VERSION,
+            audience_routing.prompt_sha256(),
             audience_routing.SCHEMA_VERSION,
             len(items),
             len(items),
@@ -210,7 +211,7 @@ def test_events_api_returns_root_once_with_exact_relationships(tmp_path, monkeyp
     assert target_group["evidence"][0]["relationship"] == "retweet"
     assert target_group["evidence"][0]["target_post_id"] == "1"
     assert target_group["relationship_counts"] == {
-        "continuations": 0,
+            "author_updates": 0,
         "replies": 0,
         "quotes": 0,
         "retweets": 1,
@@ -367,7 +368,7 @@ def test_events_api_projects_completed_audience_routing_directly(
     assert neither["items"][0]["event_id"] == all_items["items"][1]["event_id"]
 
 
-def test_events_api_uses_stable_cumulative_cutoff_revisions(tmp_path, monkeypatch):
+def test_events_api_publishes_once_and_appends_later_activity(tmp_path, monkeypatch):
     raw = tmp_path / "x-content.db"
     feed_db = tmp_path / "feed.db"
     events_db = tmp_path / "events.db"
@@ -414,22 +415,11 @@ def test_events_api_uses_stable_cumulative_cutoff_revisions(tmp_path, monkeypatc
     monday = client.get("/api/events?date=2026-07-10&limit=20").json()
     tuesday = client.get("/api/events?date=2026-07-11&limit=20").json()
     monday_event = next(item for item in monday["items"] if item["root"]["post_id"] == "200")
-    tuesday_event = next(item for item in tuesday["items"] if item["root"]["post_id"] == "200")
-
-    assert monday_event["event_id"] == tuesday_event["event_id"]
+    assert not any(item["root"]["post_id"] == "200" for item in tuesday["items"])
     assert monday_event["canonical_root_post_id"] == "200"
-    assert monday_event["member_count"] == 1
-    assert monday_event["evidence"] == []
-    assert monday_event["is_continuation"] is False
-    assert all(member["published_at"][:10] <= "2026-07-10" for member in monday_event["evidence"])
-
-    assert tuesday_event["member_count"] == 2
-    assert tuesday_event["day_member_count"] == 1
-    assert tuesday_event["prior_context_count"] == 0
-    assert tuesday_event["is_continuation"] is True
-    assert tuesday_event["previous_activity_day"] == "2026-07-10"
-    assert [member["post_id"] for member in tuesday_event["evidence"]] == ["201"]
-    assert tuesday_event["evidence"][0]["is_new_on_day"] is True
+    assert monday_event["member_count"] == 2
+    assert monday_event["activity_days"] == ["2026-07-10", "2026-07-11"]
+    assert [member["post_id"] for member in monday_event["evidence"]] == ["201"]
 
     weekly = client.get(
         "/api/events?date=2026-07-11&projection=week&limit=20"
@@ -445,7 +435,6 @@ def test_events_api_uses_stable_cumulative_cutoff_revisions(tmp_path, monkeypatc
     assert weekly_event["audience_routing"] is None
     assert weekly_event["snapshot_content_sha256"] not in {
         monday_event["snapshot_content_sha256"],
-        tuesday_event["snapshot_content_sha256"],
     }
 
 
@@ -724,7 +713,7 @@ def _materialize_published_events(*, raw, feed_db, events_db, through, days):
     return event_run
 
 
-def test_future_evidence_does_not_rewrite_an_earlier_event_revision(
+def test_future_reaction_appends_without_republishing_or_rerouting(
     tmp_path, monkeypatch
 ):
     raw = tmp_path / "x-content.db"
@@ -792,14 +781,18 @@ def test_future_evidence_does_not_rewrite_an_earlier_event_revision(
         item for item in after["items"] if item["root"]["post_id"] == "future-root"
     )
 
-    assert after_event == before_event
-    assert after_event["snapshot_content_sha256"] == before_event[
-        "snapshot_content_sha256"
+    assert after_event["event_id"] == before_event["event_id"]
+    assert after_event["snapshot_content_sha256"] == before_event["snapshot_content_sha256"]
+    assert after_event["daily_rank"] == before_event["daily_rank"]
+    assert [item["post_id"] for item in after_event["evidence"]] == [
+        "future-monday-quote",
+        "future-wednesday-quote",
     ]
-    assert after_event["lifetime_member_count"] == 2
-    assert "future-wednesday-quote" not in {
-        member["post_id"] for member in after_event["evidence"]
-    }
+    wednesday = client.get("/api/events?date=2026-07-15&limit=20").json()
+    assert not any(
+        item["event_id"] == after_event["event_id"] for item in wednesday["items"]
+    )
+    assert after_event["lifetime_member_count"] == 3
 
 
 def test_future_reply_quote_does_not_merge_or_reidentify_source_components(
@@ -921,7 +914,7 @@ def test_future_reply_quote_does_not_merge_or_reidentify_source_components(
     assert set(weekly_components) == expected_components
     assert weekly_components[
         frozenset({"historical-left", "historical-left-quote"})
-    ]["active_days"] == ["2026-07-13", "2026-07-15"]
+    ]["active_days"] == ["2026-07-13"]
     assert weekly_components[
         frozenset({"historical-right", "historical-right-quote"})
     ]["active_days"] == ["2026-07-13"]
@@ -1014,7 +1007,21 @@ def test_relationship_disclosed_by_future_wrapper_does_not_rewrite_monday(
         for item in after["items"]
         if item["root"]["post_id"] in {"disclosed-a", "disclosed-b"}
     }
-    assert after_items == before_items
+    assert set(after_items) == set(before_items)
+    assert after_items["disclosed-b"] == before_items["disclosed-b"]
+    for key in (
+        "event_id",
+        "canonical_root_post_id",
+        "presentation_root_post_id",
+        "daily_rank",
+    ):
+        assert after_items["disclosed-a"][key] == before_items["disclosed-a"][key]
+    assert after_items["disclosed-a"]["snapshot_content_sha256"] != before_items[
+        "disclosed-a"
+    ]["snapshot_content_sha256"]
+    assert [
+        member["post_id"] for member in after_items["disclosed-a"]["evidence"]
+    ] == ["disclosure-wrapper"]
 
     feed = signal_feed.connect(feed_db)
     disclosed = feed.execute(
@@ -1046,16 +1053,14 @@ def test_relationship_disclosed_by_future_wrapper_does_not_rewrite_monday(
     feed.close()
 
     wednesday = client.get("/api/events?date=2026-07-15&limit=20").json()
-    merged = next(
-        item
-        for item in wednesday["items"]
-        if {"disclosed-a", "disclosed-b", "disclosure-wrapper"}
-        <= {
+    assert not any(
+        {"disclosed-a", "disclosed-b", "disclosure-wrapper"}
+        & {
             item["root"]["post_id"],
             *[member["post_id"] for member in item["evidence"]],
         }
+        for item in wednesday["items"]
     )
-    assert merged["is_grouped"] is True
 
 
 def test_rejected_reply_quote_never_bridges_surviving_source_components(
@@ -1172,7 +1177,7 @@ def test_rejected_reply_quote_never_bridges_surviving_source_components(
     )
 
 
-def test_relationship_topology_changes_snapshot_hash_without_changing_members(
+def test_independent_reaction_topology_does_not_change_semantic_snapshot_hash(
     tmp_path, monkeypatch
 ):
     fixture = _event_fixture(tmp_path, monkeypatch)
@@ -1202,7 +1207,7 @@ def test_relationship_topology_changes_snapshot_hash_without_changing_members(
         *[member["post_id"] for member in after_event["evidence"]],
     }
     assert after_members == before_members
-    assert after_event["snapshot_content_sha256"] != before_event[
+    assert after_event["snapshot_content_sha256"] == before_event[
         "snapshot_content_sha256"
     ]
 
@@ -1344,13 +1349,12 @@ def test_future_renderable_target_does_not_rewrite_prior_opaque_projection(
         "canonical_root_post_id",
         "presentation_root_post_id",
         "snapshot_content_sha256",
-        "member_count",
-        "link_count",
         "anchor_types",
         "why_grouped",
     ):
         assert long_item[key] == short_item[key]
-    assert long_item["link_count"] == 1
+    assert long_item["member_count"] > short_item["member_count"]
+    assert long_item["link_count"] == 2
     assert long_item["event_id"] == event_store._canonical_event_id(
         "twitterapi_io", "later-root"
     )
