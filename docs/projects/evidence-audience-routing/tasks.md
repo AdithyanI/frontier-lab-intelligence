@@ -2,10 +2,10 @@
 
 ## Goal
 
-Define and prove the smallest auditable decision that turns one complete,
-correctly attributed Evidence envelope into a keep/drop result and explicit
-AI Engineering and/or Investment audience assignments, before any new Insight
-generation is designed or run.
+Define and prove the smallest auditable decision that assigns one complete,
+correctly attributed, Feed-kept Evidence envelope to AI Engineering,
+Investment, both, or neither before any new Insight generation is designed or
+run. Existing Feed triage remains the sole general keep/drop gate.
 
 ## Why / Impact
 
@@ -14,11 +14,11 @@ editorial selection, verification, reconciliation, and publication before the
 first product decision was easy to inspect. That made failures hard to reason
 about with Adi and created multiple apparent sources of truth.
 
-This project restores one visible boundary: inspect the Evidence, make one
-small structured routing decision, and prove it on real envelopes. If this
-boundary is wrong, every later Insight is noise; if it is clear and stable, a
-separate Insight-generation project can build on it without reviving the old
-stack.
+This project restores one visible boundary: inspect kept Evidence, make two
+audience-specific relevance judgments in one model call, and prove them on
+real envelopes. If this boundary is wrong, every later Insight is noise; if it
+is clear and stable, a separate Insight-generation project can consume only
+positive routes without reviving the old stack.
 
 ## Scope / Non-Goals
 
@@ -27,18 +27,21 @@ stack.
 - Define the exact immutable Evidence-envelope blocks presented to the router,
   preserving the author, relationship, source URL, and provenance of each
   root, continuation, reply, quote-post, and accepted artifact block.
-- Decide the minimal structured routing schema. The current candidate has an
-  explicit `decision` (`keep` or `drop`) and `audiences` containing zero, one,
-  or both of `ai_engineering` and `investment`.
-- Decide whether keep/drop is an independent model judgment or an
-  application-derived consequence of audience assignment.
+- Use one combined routing call with two independently reasoned audience
+  judgments: AI Engineering relevant/not relevant and Investment relevant/not
+  relevant, each with one short evidence-grounded reason.
+- Keep existing Feed triage as the only keep/drop decision. The audience
+  router does not write a second keep/drop field.
 - Write the routing prompt with Adi, keeping the two audience standards
   distinct and excluding Feed rank, engagement, prominence, and other outcome
   hints from the model input.
 - Implement one authoritative, versioned storage/API path only after the input,
   schema, and prompt are approved.
-- Inspect one exact envelope end to end, calibrate representative Engineering,
-  Investment, both, and neither cases, then run and audit one complete day.
+- Inspect one exact envelope end to end, then run a small frozen cohort of
+  top-ranked kept envelopes to inspect Engineering, Investment, both, and
+  neither behavior before broader evaluation.
+- Add a compact Feed audience filter and per-envelope routing disclosure so
+  Adi can inspect the first real outputs in the existing evidence workspace.
 - Keep the decision traceable from the UI/API back to the exact Evidence
   envelope and model/run provenance.
 
@@ -64,8 +67,8 @@ stack.
   [`../archive/audience-insights-v2/tasks.md`](../archive/audience-insights-v2/tasks.md).
 - The prior design draft is historical input, not authority:
   [`../archive/audience-insights-v2/resources/minimal-envelope-routing-v0.md`](../archive/audience-insights-v2/resources/minimal-envelope-routing-v0.md).
-  It assumed Feed alone owned keep/drop; Adi's current proposal reopens that
-  boundary and may store keep/drop beside audience assignment.
+  Its recommendation that Feed alone owns keep/drop was reconfirmed with Adi
+  on 2026-07-15. The new router lives downstream of kept Feed envelopes.
 - Generated Audience Insights v2 data was intentionally deleted. Do not add
   compatibility reads, dual writes, old-schema fallbacks, or legacy database
   migrations unless Adi explicitly requests them.
@@ -83,21 +86,28 @@ stack.
   telemetry. Stable long prefixes should follow the repository's cache-key
   contract.
 
-## Candidate Schema — Not Frozen
+## Routing Schema — Approved For First Cohort
 
 ```json
 {
-  "decision": "keep",
-  "audiences": ["ai_engineering", "investment"],
-  "reason": "Short evidence-grounded explanation."
+  "ai_engineering": {
+    "relevant": true,
+    "reason": "Short evidence-grounded explanation."
+  },
+  "investment": {
+    "relevant": false,
+    "reason": "Short evidence-grounded explanation."
+  }
 }
 ```
 
-Candidate application invariants to review:
+Application invariants:
 
-- `drop` implies an empty `audiences` list.
-- `keep` implies at least one audience.
-- “Both” is represented by the two audience values, not a special third value.
+- Both judgments are required and independently reasoned in one model call.
+- The application derives the convenient audience list and the four display
+  outcomes; the model does not author those redundant fields.
+- A `neither` audience result remains a valid result for a Feed-kept envelope;
+  it does not rewrite or contradict Feed triage.
 - IDs, hashes, prompt versions, model/run telemetry, and timestamps are
   application-owned fields, never model-authored fields.
 - Mechanically invalid evidence packets fail before routing; they are not
@@ -108,17 +118,19 @@ Candidate application invariants to review:
 - [ ] Adi approves a documented envelope-input contract, including the exact
   treatment of root text, same-author continuations, replies, quotes, and
   artifacts.
-- [ ] Adi approves the minimal routing schema, semantics, consistency rules,
-  and short prompt after inspecting the exact first envelope.
-- [ ] One versioned routing path stores and returns a single authoritative
-  decision per envelope/run with evidence hash, prompt version, model, cost,
-  and rationale; no live product reads old Insight tables for this decision.
+- [x] Adi approves the routing semantics: one combined call, two independent
+  audience judgments with separate reasons, and no second keep/drop field.
+- [ ] Adi reviews the short prompt and exact first-cohort outputs.
+- [ ] One versioned routing path stores and returns one authoritative pair of
+  audience judgments per envelope/run with evidence hash, prompt version,
+  model, cost, and rationales; no live product reads old Insight tables.
 - [ ] The first envelope is routed and reviewed with Adi, with its input blocks
   and output visible and traceable in the UI/API.
-- [ ] A small calibration set covers Engineering only, Investment only, both,
-  and neither; disagreements and prompt changes are recorded.
-- [ ] One complete day is routed and every output is human-audited before any
-  bulk expansion.
+- [ ] A small frozen top-kept cohort is routed with Luna-medium; outcomes,
+  prompt-cache reads, response cost, and qualitative disagreements are
+  recorded before any expansion.
+- [ ] Feed exposes audience filters and compact reasons without generating
+  Insight prose or changing the existing triage result.
 - [ ] Focused tests, `bash scripts/check-fast.sh`, live API proof, and rendered
   desktop QA pass; architecture/status docs reflect the final boundary.
 - [ ] Project learnings are finalized and the tracker is archived before the
@@ -126,18 +138,17 @@ Candidate application invariants to review:
 
 ## Milestones
 
-- [ ] Milestone 1 — Freeze the one-envelope architecture with Adi. Acceptance:
-  exact input blocks, schema semantics, consistency rules, and prompt are
-  documented and approved. Validate: render and inspect envelope
-  `56ec1710...bef56d`; make no bulk model call.
-- [ ] Milestone 2 — Implement one-envelope vertical slice. Acceptance: one
-  authoritative run/storage/API path returns a traceable structured decision
-  for the approved packet. Validate: focused unit/API tests plus manual record
-  inspection.
-- [ ] Milestone 3 — Calibrate and audit one day. Acceptance: the four audience
-  outcomes are represented or explicitly assessed, every routed envelope is
-  reviewed, and prompt/schema changes are versioned. Validate: deterministic
-  rerun, reconciliation query, and rendered UI audit.
+- [ ] Milestone 1 — Freeze and implement the first-cohort architecture.
+  Acceptance: exact input blocks, approved schema, short prompt, immutable
+  run storage, and API projection work on the Satya envelope. Validate:
+  focused packet/runner/API tests and exact record inspection.
+- [ ] Milestone 2 — Run and inspect a small top-kept cohort. Acceptance:
+  Luna-medium outputs, cache/cost telemetry, outcome distribution, and
+  qualitative review are recorded. Validate: resumable rerun and direct
+  database/API comparison.
+- [ ] Milestone 3 — Expose routing in Feed. Acceptance: existing triage filters
+  remain authoritative while audience filters, badges, and short reasons make
+  the cohort inspectable. Validate: production build and rendered desktop QA.
 - [ ] Milestone 4 — Freeze the routing boundary and close out. Acceptance:
   architecture, status, model/prompt references, evaluation evidence, and
   limitations are current; Insight generation is a separate explicit next
@@ -148,9 +159,8 @@ Candidate application invariants to review:
 - Keep work scoped to the current milestone; do not restore the archived
   multi-stage pipeline to solve a routing problem.
 - Work sequentially across shared contracts: input packet, schema, prompt,
-  storage, one envelope, then one day.
-- Stop for Adi's decision before freezing schema/prompt semantics or scaling
-  beyond the first envelope.
+  storage, first envelope, then the small frozen cohort.
+- Stop for Adi's qualitative review before scaling beyond the first cohort.
 - Prefer one source of truth and a clean migration. Do not add compatibility
   shims or silent fallback reads.
 - Preserve evidence exactly. The model may classify it but may not rewrite,
@@ -169,49 +179,44 @@ Candidate application invariants to review:
   historical evidence, not an active tracker to resume.
 - Routing comes before Insight generation; no Insight prose belongs in this
   project.
-- The first proof is one envelope, followed by one day—not all available data.
+- Feed triage remains the sole general keep/drop gate. Audience routing runs
+  downstream on kept envelopes and never overwrites triage.
+- One combined Luna-medium call returns two independent audience judgments and
+  separate reasons. “Independent” does not mean separate routing calls.
+- The first proof is one envelope followed by a small frozen top-kept cohort,
+  not a full day or all available data.
 - Feed rank remains display/order provenance and must not influence the model's
   routing judgment.
-- The current two-field schema is a candidate, not a frozen contract.
-- The next engineer must surface disagreements with the archived design rather
-  than inheriting its assumption that Feed alone owns keep/drop.
+- Insight generation remains a separate follow-up stage and may use a higher
+  reasoning effort only after routing is qualitatively understood.
 
 ## Open Questions / Blockers
 
-- Should `decision` be a genuinely independent keep/drop judgment, or should
-  the application derive it from whether `audiences` is empty? Storing both is
-  easy to understand but creates invalid combinations unless one is derived or
-  strict validation rejects contradictions.
-- Should `audiences` be one array or two independent audience booleans? The
-  array is compact; independent booleans can preserve separate reasoning.
-- Is one shared `reason` enough, or does each audience need its own short
-  reason—especially when an envelope is useful for one audience but not the
-  other?
 - Which reply and quote-post blocks belong in the model packet, and when does a
   deterministic size bound become necessary? Inspect real packet sizes before
   choosing a top-N rule.
-- Does the new routing decision replace the current Feed triage result, coexist
-  as an explicit comparison during calibration, or live only downstream of
-  accepted Feed envelopes? Decide before naming the table/API fields.
 - Where should the new authoritative routing records live? Choose one clean
   database/schema and prohibit UI fallback to archived Insight data.
+- What small cohort size is sufficient for the first qualitative review? Start
+  with the top kept envelopes and stop before a broad run.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Inspect and render the exact first envelope from current Evidence and artifact stores, listing every attributed block and packet-size fact. | parent | `resources/first-envelope-audit.md` |
-| todo | Review with Adi whether keep/drop is independent or derived, then freeze the smallest consistent schema and rationale shape. | parent | `resources/routing-contract.md` |
-| todo | Draft the shortest audience-routing prompt from the approved contract; do not run it until Adi reviews the exact input and output shape. | parent | `resources/routing-prompt.md` |
+| in_progress | Implement the approved packet/schema/prompt and minimal resumable Luna-medium run record for a quick qualitative sample. | parent | `resources/routing-contract.md` |
+| delegated | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
+| delegated | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/routing-prompt.md` |
+| todo | Run the Satya envelope and a small frozen top-kept cohort; record outputs, cache/cost telemetry, and qualitative review. | parent | `resources/first-cohort-review.md` |
 
 ## Backlog / Remaining Work
 
-- [ ] Implement the approved one-envelope runner, storage contract, and API.
 - [ ] Add deterministic packet-integrity and schema-consistency validation.
-- [ ] Run the first envelope and record human review plus any prompt revision.
-- [ ] Build a small four-outcome calibration set from current Evidence.
-- [ ] Route and audit one complete day before any bulk expansion.
-- [ ] Add the minimal inspectable UI only after API/storage semantics are stable.
+- [ ] Audit a bounded sample of existing Feed drops later to estimate whether
+  the upstream gate hides audience-relevant evidence.
+- [ ] Expand beyond the first cohort only after Adi's qualitative review.
+- [ ] Add the read-only API projection and compact Feed audience filters,
+  badges, and reasons only after Adi reviews the quick sample.
 - [ ] Update architecture, status, model-routing/prompt references, and build log.
 - [ ] Run focused tests, `bash scripts/check-fast.sh`, API proof, and desktop QA.
 - [ ] Review and finalize `learnings.md`, then archive this project.
@@ -235,3 +240,9 @@ Candidate application invariants to review:
   the disagreement with the archived keep/drop assumption, the first exact
   envelope, strict non-goals, milestone gates, and the cold-resume sequence for
   another engineer.
+- 2026-07-15: [REPLANNED] Adi clarified the intended stepwise product boundary:
+  existing Feed triage remains the sole keep/drop gate; one Luna-medium call
+  assigns each kept envelope independently to AI Engineering and Investment;
+  Insight generation follows later only for positive routes. Replaced the
+  full-day promise with a small frozen top-kept cohort and made Feed inspection
+  part of the first proof.
