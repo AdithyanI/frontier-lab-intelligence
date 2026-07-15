@@ -3,8 +3,8 @@
 > Archived 2026-07-14 as a successful shared-insight prototype. The original
 > delivery, alert, final-report, and submission milestones were not completed;
 > they were explicitly descoped when the product contract changed from one
-> blended record to two audience-specific editorial products. The successor is
-> `docs/projects/audience-insights-v2/tasks.md`. Durable v1 resources now live
+> blended record to two audience-specific editorial products. Its now-archived
+> successor is `docs/projects/archive/audience-insights-v2/tasks.md`. Durable v1 resources now live
 > beside this archived tracker under `resources/`; tracked manifest references
 > were migrated with them on 2026-07-15.
 

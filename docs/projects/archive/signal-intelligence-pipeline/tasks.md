@@ -355,5 +355,7 @@ instead of expanding the graph or processing the complete X history.
   glyph flows (entity→channel fan with LIVE/PLANNED distinction, system map
   with in-box glyphs and a dashed planned boundary, intake with an explicit
   reject branch), and centered the page shell on wide screens. M4 recorded as
-  KEEP; remaining insight work moved to `docs/projects/cited-insights/`.
+  KEEP; remaining insight work moved to the now-archived
+  `docs/projects/archive/cited-insights-v1/` project and then to its active v2
+  successor.
   `scripts/check-fast.sh` passes. Archived.

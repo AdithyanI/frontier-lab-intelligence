@@ -27,7 +27,7 @@ from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from fli import channels, entity_kinds, registry as entity_registry, registry_intake, sources
@@ -468,6 +468,22 @@ def artifact_library(
 def artifact_dates() -> JSONResponse:
     """Available source-evidence dates with distinct artifact counts."""
     return JSONResponse(artifact_store.artifact_dates_payload())
+
+
+@app.get("/api/artifacts/{artifact_id}/text")
+def artifact_text(artifact_id: str) -> PlainTextResponse:
+    """Readable normalized text for one successfully retrieved artifact."""
+    payload = artifact_store.artifact_text_payload(artifact_id)
+    if not payload["available"]:
+        raise HTTPException(status_code=404, detail=payload["reason"])
+    return PlainTextResponse(
+        payload["text"],
+        headers={
+            "Cache-Control": "private, max-age=31536000, immutable",
+            "X-Artifact-Extractor": str(payload["extractor_contract"] or "unknown"),
+            "X-Artifact-Format": str(payload["format"]),
+        },
+    )
 
 
 @app.get("/api/insights/dates")

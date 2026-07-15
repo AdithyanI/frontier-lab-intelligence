@@ -33,19 +33,18 @@ Registry
   -> trusted X collection cohort
   -> exact quote / retweet / reply envelopes over time
   -> transparent daily-score ordering
-  -> keep / drop evidence routing
-  -> audience usefulness classification + cited extraction from stored X
-       + optional canonical-artifact strengthening
-  -> separate Feed-ranked Investment + AI Engineering views
+  -> next routing contract pending architecture review
+  -> later cited extraction from stored X + canonical artifacts
+  -> eventual separate Investment + AI Engineering views
 ```
 
-The stored-X and optional canonical-artifact evidence paths are implemented.
-The earlier multi-stage Audience Insights v2 implementation remains in code and
-its evaluation lessons remain documented, but all generated outputs were
-explicitly discarded on 2026-07-15. The active boundary is intentionally
-smaller: agree one minimal canonical result schema and the first audience prompt
-with Adi, then prove one inspected day before expanding. Publication auditing,
-reconciliation, briefing, and export are not current product layers.
+The stored-X and canonical-artifact evidence paths are implemented. The earlier
+multi-stage Audience Insights v2 implementation remains in code and has been
+archived, while all generated outputs were explicitly discarded on 2026-07-15.
+No successor contract is frozen yet. The next architecture review will start
+from a minimal structured Feed decision—candidate fields are explicit keep/drop
+and audience assignment—before any Insight writing, publication auditing,
+reconciliation, briefing, or export resumes.
 
 ## Where the System Stands
 
@@ -56,9 +55,10 @@ reconciliation, briefing, and export are not current product layers.
 | X evidence store | Implemented source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
 | Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
-| Keep/drop triage | Evaluated routing layer | The current default is `gpt-5.6-luna`/medium through LiteLLM and still returns only `decision` and `reason`; a 64-envelope migration cohort matched the accepted mini-medium decisions 64/64 and observed a 61.86% cache-read ratio. The historical corrected mini run evaluated 8,097 envelopes with zero failures. This validates execution, not downstream insight quality. |
+| Legacy keep/drop triage | Implemented comparison baseline | The existing Luna decision/reason runs remain inspectable, but the active product is testing a cleaner audience-first contract. During calibration, the legacy result is preserved for comparison and is not silently overwritten. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Audience insight engine | Implementation preserved; generated data reset | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain documented. Adi explicitly discarded all generated run data on 2026-07-15 so the minimal canonical schema and first prompt can be redesigned together before any new Insight result is treated as live. |
+| Feed audience routing | Pending architecture review | Candidate shape is explicit keep/drop plus a structured audience assignment (`ai_engineering`, `investment`, both, or neither). Exact fields, consistency rules, evidence input, and prompt are not frozen. |
+| Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
 | Insights UI | One Feed-ranked path; intentionally empty | Investment and AI Engineering URL state, Feed provenance, citations, date navigation, and empty/error handling remain implemented. The premature Feed-ranked/Reviewed selector was removed. The surface stays empty until a new agreed schema and prompt produce inspected results. |
@@ -70,23 +70,23 @@ current databases or APIs before using them as present-tense product claims.
 ## The Most Important Unproven Claim
 
 The repository has not yet proved that one simple prompt and schema can reliably
-turn each cleaned evidence envelope into the correct audience outcome: useful
-for AI Engineering, useful for Investment, useful for both, or useful for
-neither—with an exact citation when useful. Previous multi-stage results are
-learning evidence, not live product data. The next proof is one small,
-human-inspected run, not a nine-day publication apparatus.
+decide whether each cleaned evidence envelope should be kept and which audience
+it serves. Previous keep/drop and multi-stage Insight results are comparison and
+learning evidence, not the active contract. The next step is an architecture
+review, followed by one envelope and one human-inspected day—not Insight prose
+or a nine-day publication apparatus.
 
 ## Submission Finish Line
 
-The active tracker owns the detail. At system level, the remaining proof is:
+No active tracker owns this work yet. At system level, the remaining proof is:
 
-1. Agree the minimal canonical Insight result schema and first audience prompt.
-2. Run it over one cleaned evidence day and inspect every outcome with Adi.
-3. Correct the prompt/schema from concrete errors, then repeat until the small
-   cohort is trustworthy.
-4. Expand to the complete nine-day window only after that gate passes.
-5. Record exact evaluation, telemetry, limitations, browser proof, and checks
-   before deciding whether any review/publication layer is actually necessary.
+1. Open a fresh architecture-review project with Adi.
+2. Decide the exact evidence blocks and structured keep/drop plus audience
+   schema on one envelope.
+3. Calibrate clear Engineering, Investment, both, and neither examples.
+4. Run one cleaned evidence day and inspect every routing outcome with Adi.
+5. Freeze the routing contract before opening a separate Insight-generation
+   project.
 
 External submission or alert delivery remains blocked without Adi's explicit
 current-session approval.
@@ -106,11 +106,10 @@ case-study thesis.
 
 ## Current Direction
 
-The only active tracker is
-[`docs/projects/audience-insights-v2/tasks.md`](projects/audience-insights-v2/tasks.md).
-Its current batch owns the executable next step: finish the evidence-lineage
-cleanup, agree the minimal Insight schema and prompt with Adi, and regenerate
-one inspected day. Delivery remains deliberately deferred.
+There is intentionally no active tracker after archiving Audience Insights v2.
+The next session should use `$project` to open one fresh architecture-review
+project before implementing or running any routing prompt. Insight generation
+and delivery remain deliberately deferred.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -123,7 +122,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | Active [`projects/<project>/tasks.md`](projects/audience-insights-v2/tasks.md) |
+| What should be done next, exactly? | Open a fresh architecture-review tracker with `$project`; no active tracker currently exists. |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |

@@ -1,4 +1,13 @@
-# Audience Insights v2
+# Audience Insights v2 — Archived Superseded Experiment
+
+> Archived 2026-07-15 before completion. The project proved useful evidence,
+> artifact, citation, prompt, audit, and UI lessons, but its multi-stage product
+> contract became too complex to remain the active path. Generated run data had
+> already been deliberately deleted. No successor project was opened during
+> closeout. The next architecture review will decide a fresh minimal Feed
+> routing contract; the current candidate is an explicit keep/drop field plus
+> a structured audience assignment, with consistency enforced by the
+> application.
 
 ## Goal
 

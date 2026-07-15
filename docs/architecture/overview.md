@@ -316,7 +316,8 @@ read-only `/api/insights` projection. The first proof published four verified
 insights from five candidates; its one rejected citation, usage, prompt-cache
 reads, proxy cost, and raw output remain auditable in the run database.
 
-Audience Insights v2 replaces the compromise audience framing with two
+The archived Audience Insights v2 implementation replaced the compromise
+audience framing with two
 independent products over the same frozen evidence and application-owned
 citation binder. `fli.audience_insight_runs` gives Investment and AI
 Engineering separate extraction prompts, schemas, run databases, cache
@@ -1191,15 +1192,9 @@ final score.
 
 ## Current Build Order
 
-1. Finish the corrected chronological production suffix without allowing an
-   unaudited day into later editorial history.
-2. Bind the exact 18 audience/day source runs, adjacent audits, finalizations,
-   and 22 X Article snapshots into the final manifest; write its canonical
-   deterministic report only after fresh evaluation passes.
-3. Build the SPA and prove Investment and AI Engineering date/item/empty states,
-   exact citations, navigation, accessibility, and console cleanliness against
-   the live reconciled read model.
-4. Reconcile exact counts, token/cache/cost telemetry, quality results, and
-   limitations; pass repo checks and archive Audience Insights v2.
-5. Resume briefing, alert/outbox, reviewer landing, final report, and package
-   smoke work as a successor submission project before 2026-07-20.
+No build order is active immediately after the Audience Insights v2 archive.
+The next project begins with an architecture review of one complete Feed
+envelope. A candidate minimal output has two structured judgments—keep/drop and
+audience assignment—but the exact schema, evidence blocks, consistency rules,
+and prompt are intentionally unfrozen until that review. The archived v2
+review/publication stack is not the active build order.

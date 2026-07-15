@@ -9,6 +9,7 @@ from fli import artifacts
 
 
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
+DEFAULT_REPO_ROOT = artifacts.REPO_ROOT
 
 
 def _fetch_state(status: str | None) -> str:
@@ -50,6 +51,76 @@ def _like_pattern(query: str) -> str:
         query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
     )
     return f"%{escaped}%"
+
+
+def artifact_text_payload(
+    artifact_id: str,
+    *,
+    db_path: Path | str | None = None,
+    repo_root: Path | str | None = None,
+) -> dict[str, Any]:
+    """Return one successful normalized text snapshot without exposing its path."""
+    path = Path(db_path or DEFAULT_ARTIFACT_DB)
+    if not path.is_file():
+        return {
+            "available": False,
+            "reason": "No artifact catalog has been materialized yet.",
+        }
+
+    conn = artifacts.connect(path)
+    try:
+        row = conn.execute(
+            """SELECT artifact.artifact_id, artifact.title,
+                      fetch.extractor_contract, fetch.text_snapshot_ref,
+                      fetch.text_char_count, fetch.text_truncated
+               FROM artifact
+               JOIN artifact_fetch fetch
+                 ON fetch.artifact_id = artifact.artifact_id
+               WHERE artifact.artifact_id = ?
+                 AND fetch.status = 'success'
+                 AND fetch.text_snapshot_ref IS NOT NULL
+               ORDER BY COALESCE(fetch.completed_at, fetch.started_at) DESC,
+                        fetch.attempt_number DESC, fetch.fetch_id DESC
+               LIMIT 1""",
+            (artifact_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    if row is None:
+        return {
+            "available": False,
+            "reason": "No readable text snapshot exists for this artifact.",
+        }
+
+    root = Path(repo_root or DEFAULT_REPO_ROOT).resolve()
+    snapshot_ref = Path(str(row["text_snapshot_ref"]))
+    snapshot_path = (
+        snapshot_ref.resolve()
+        if snapshot_ref.is_absolute()
+        else (root / snapshot_ref).resolve()
+    )
+    if not snapshot_path.is_relative_to(root) or not snapshot_path.is_file():
+        return {
+            "available": False,
+            "reason": "The artifact text snapshot is missing or invalid.",
+        }
+
+    text = snapshot_path.read_text(encoding="utf-8")
+    return {
+        "available": True,
+        "artifact_id": str(row["artifact_id"]),
+        "title": row["title"],
+        "text": text,
+        "format": (
+            "markdown"
+            if row["extractor_contract"] == "jina-reader-markdown-v1"
+            else "text"
+        ),
+        "extractor_contract": row["extractor_contract"],
+        "text_char_count": int(row["text_char_count"] or len(text)),
+        "text_truncated": bool(row["text_truncated"] or False),
+    }
 
 
 def artifact_dates_payload(

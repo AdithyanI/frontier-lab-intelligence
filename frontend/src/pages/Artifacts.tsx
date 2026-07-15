@@ -1,4 +1,11 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Fragment,
+  type SyntheticEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getJSON,
@@ -119,6 +126,16 @@ function sourceLabel(provider: string | null) {
   return provider || 'Feed'
 }
 
+function extractedContentLabel(item: ArtifactItem) {
+  if (item.extractor_contract === 'jina-reader-markdown-v1') return 'Normalized Markdown'
+  if (item.extractor_contract === 'pdf-pypdf-v1') return 'Extracted PDF text'
+  if (item.extractor_contract === 'twitterapi-io-x-article-body-v1') {
+    return 'Normalized X Article text'
+  }
+  if (item.extractor_contract === 'html-trafilatura-v1') return 'Extracted article text'
+  return 'Normalized text'
+}
+
 interface ArtifactRowProps {
   item: ArtifactItem
   continuesRankGroup: boolean
@@ -132,16 +149,36 @@ function ArtifactRow({
   rankGroupSize,
   rankIsContinuation,
 }: ArtifactRowProps) {
+  const [extractedText, setExtractedText] = useState<string | null>(null)
+  const [textState, setTextState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const sourcePublishedAt = item.source_published_at || item.last_source_published_at || item.last_seen_at
   const feedDate = sourcePublishedAt.slice(0, 10)
+  const textUrl = `/api/artifacts/${encodeURIComponent(item.artifact_id)}/text`
+  const textCharCount = item.text_char_count
+  const hasReadableText = item.fetch_state === 'ready' && textCharCount != null
   const rowClassName = [
     'artifact-row',
     continuesRankGroup && 'artifact-row--rank-continues',
     rankIsContinuation && 'artifact-row--rank-continuation',
   ].filter(Boolean).join(' ')
 
+  const loadExtractedText = (event: SyntheticEvent<HTMLDetailsElement>) => {
+    if (!event.currentTarget.open || !hasReadableText || textState !== 'idle') return
+    setTextState('loading')
+    fetch(textUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Artifact text returned ${response.status}`)
+        return response.text()
+      })
+      .then((text) => {
+        setExtractedText(text)
+        setTextState('ready')
+      })
+      .catch(() => setTextState('error'))
+  }
+
   return (
-    <details className={rowClassName}>
+    <details className={rowClassName} onToggle={loadExtractedText}>
       <summary>
         <span
           className="artifact-rank mono"
@@ -213,6 +250,32 @@ function ArtifactRow({
             </dd>
           </div>
         </dl>
+        {hasReadableText && (
+          <section className="artifact-extracted" aria-label="Extracted artifact content">
+            <header>
+              <div>
+                <h3>Extracted content</h3>
+                <p className="mono">
+                  {extractedContentLabel(item)} · {textCharCount?.toLocaleString('en-US')} characters
+                </p>
+              </div>
+              <a href={textUrl} target="_blank" rel="noreferrer">
+                Open full text ↗
+              </a>
+            </header>
+            {textState === 'loading' && (
+              <p className="artifact-extracted-state mono">Loading extracted content…</p>
+            )}
+            {textState === 'error' && (
+              <p className="artifact-extracted-state mono">
+                Couldn’t load the extracted content. Open the full text to retry.
+              </p>
+            )}
+            {textState === 'ready' && extractedText != null && (
+              <pre>{extractedText}</pre>
+            )}
+          </section>
+        )}
       </div>
     </details>
   )

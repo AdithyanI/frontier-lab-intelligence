@@ -56,6 +56,10 @@ test('Artifact retrieval state is disclosed only in expanded provenance', () => 
   assert.doesNotMatch(artifactSource, /<span>Retrieval<\/span>/)
   assert.match(artifactSource, /<dt>Retrieval<\/dt>/)
   assert.match(artifactSource, /fetchLabels\[item\.fetch_state\]/)
+  assert.match(artifactSource, /Extracted content/)
+  assert.match(artifactSource, /Open full text/)
+  assert.match(artifactSource, /\/api\/artifacts\/\$\{encodeURIComponent\(item\.artifact_id\)\}\/text/)
+  assert.match(artifactSource, /onToggle=\{loadExtractedText\}/)
 })
 
 test('Artifacts inherit Feed rank while keeping source time secondary', () => {

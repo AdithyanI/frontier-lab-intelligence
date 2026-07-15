@@ -204,6 +204,52 @@ def test_artifacts_api_defaults_to_latest_source_day_with_provenance(
     assert payload["items"][1]["text_char_count"] == 4200
 
 
+def test_artifact_text_api_returns_normalized_snapshot_without_exposing_path(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    _artifact_fixture(db)
+    snapshot = tmp_path / "data" / "derived" / "artifacts" / "text" / "snapshot.txt"
+    snapshot.parent.mkdir(parents=True)
+    snapshot.write_text("# Extracted title\n\nExact normalized evidence.\n")
+    conn = artifacts.connect(db)
+    conn.execute(
+        """UPDATE artifact_fetch
+           SET text_snapshot_ref = ?, extractor_contract = 'jina-reader-markdown-v1',
+               text_char_count = ?, text_truncated = 0
+           WHERE fetch_id = 'fetch'""",
+        (str(snapshot.relative_to(tmp_path)), len(snapshot.read_text())),
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setattr(artifact_store, "DEFAULT_ARTIFACT_DB", db)
+    monkeypatch.setattr(artifact_store, "DEFAULT_REPO_ROOT", tmp_path)
+
+    response = client.get("/api/artifacts/older/text")
+
+    assert response.status_code == 200
+    assert response.text == "# Extracted title\n\nExact normalized evidence.\n"
+    assert response.headers["x-artifact-format"] == "markdown"
+    assert response.headers["x-artifact-extractor"] == "jina-reader-markdown-v1"
+    assert "snapshot.txt" not in response.text
+
+
+def test_artifact_text_api_is_honest_when_snapshot_is_unavailable(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    _artifact_fixture(db)
+    monkeypatch.setattr(artifact_store, "DEFAULT_ARTIFACT_DB", db)
+    monkeypatch.setattr(artifact_store, "DEFAULT_REPO_ROOT", tmp_path)
+
+    response = client.get("/api/artifacts/older/text")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == (
+        "No readable text snapshot exists for this artifact."
+    )
+
+
 def test_artifact_dates_are_source_dates_with_distinct_counts(tmp_path, monkeypatch):
     db = tmp_path / "artifacts.db"
     _artifact_fixture(db)
