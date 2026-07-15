@@ -214,10 +214,11 @@ Application invariants:
 
 ## Open Questions / Blockers
 
-- Azure prompt-prefix caching is currently intermittent or regressed on the
-  Luna Responses deployment. A 2026-07-15 v3 cold call and different-input
-  same-prefix call reported zero reads, and the previously successful
-  1,670-word Feed-triage prefix also returned zero reads for two fresh inputs.
+- Azure prompt-prefix caching is currently unobservable on both the Luna and
+  GPT-5.5 Responses deployments. A 2026-07-15 v3 cold call and different-input
+  same-prefix call reported zero Luna reads, the previously successful
+  1,670-word Feed-triage Luna prefix returned zero reads for two fresh inputs,
+  and the same v3 different-input control returned zero reads on GPT-5.5.
   LiteLLM's exact-response Redis cache does work, but it cannot reuse a prefix
   across different catalog items. Keep telemetry visible and do not claim
   prefix-cache savings until Azure again returns nonzero `cached_tokens`.
@@ -330,3 +331,9 @@ Application invariants:
   for both the v3 different-input test and two fresh inputs through the
   previously successful Feed-triage prefix. The adapter fields and cache key
   were forwarded unchanged to one deployment, isolating the miss upstream.
+- 2026-07-15: [VALIDATED] Repeated the v3 different-input test on the available
+  GPT-5.5 Responses deployment with an explicit shared cache key and 24-hour
+  retention. The 1,920-token cold request and 3,256-token follow-up both
+  returned zero cached tokens, broadening the failure from Luna-specific to the
+  Azure Responses cache path or its current interaction through LiteLLM. The
+  two calls cost $0.058070; no further paid cache probes are justified now.

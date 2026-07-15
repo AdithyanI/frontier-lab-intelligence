@@ -65,6 +65,9 @@ retention, instructions, and structured schema unchanged to one deployment.
 Treat this as an upstream operational limitation, not a reason to pad prompts
 or change classification quality. The exact diagnostic is recorded in
 `docs/projects/evidence-audience-routing/resources/audience-routing-v3-cache-diagnostic.md`.
+The same v3 different-input control also returned zero reads on the available
+GPT-5.5 Azure Responses deployment despite an explicit shared key and `24h`
+retention, so the live failure is not isolated to the Luna model alias.
 
 The proxy also has a separate Redis full-response cache. An exact complete
 request repeat can therefore return instantly at zero proxy spend while still

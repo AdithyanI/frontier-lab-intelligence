@@ -52,14 +52,30 @@ inspection showed that `prompt_cache_key`, `prompt_cache_retention="24h"`, the
 complete instructions, and the structured-output schema were forwarded
 unchanged, with no retry or fallback.
 
+## GPT-5.5 control
+
+At Adi's request, the same v3 different-input test was repeated through the
+available `gpt-5.5` Azure Responses deployment. Both requests explicitly used
+the same prompt cache key and `prompt_cache_retention="24h"`.
+
+| Request | Total input tokens | Azure cached tokens | Proxy spend | Duration |
+| --- | ---: | ---: | ---: | ---: |
+| GPT-5.5 rank 1, cold | 1,920 | 0 | $0.026820 | 10.419s |
+| GPT-5.5 Satya, same prefix | 3,256 | 0 | $0.031250 | 8.814s |
+
+GPT-5.5 also failed to reuse the different-input prefix. This broadens the
+diagnosis from a Luna-specific regression to the Azure Responses caching path
+or its current interaction through the shared proxy.
+
 ## Conclusion
 
 The miss is not caused by the 1,024-token threshold, v3 prompt length, cache-key
-instability, multiple deployments, parallel calls within one lane, or a dropped
-adapter field. Azure's GPT-5.6 Responses prompt-prefix cache is currently
-intermittent or regressed on this deployment. Microsoft documented the same
-Responses-specific failure in July and reported it resolved on July 13; this
-live control shows that the behavior is not reliable again on July 15.
+instability, parallel calls within one lane, or a dropped adapter field. Both
+GPT-5.5 and GPT-5.6 failed the different-input test, so the Azure Responses
+prompt-prefix cache or its current proxy interaction is not functioning
+reliably. Microsoft documented a GPT-5.6 Responses-specific failure in July and
+reported it resolved on July 13; these live controls show that reliable caching
+is still not observable on July 15.
 
 Keep the proven request shape, 32 stable lanes, sequential per-lane scheduling,
 and cache telemetry. Do not pad the prompt or claim prefix-cache savings. Exact
