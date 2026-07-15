@@ -305,7 +305,7 @@ Application invariants:
 | complete | Replace daily continuation publication with one canonical Event day/rank while retaining later activity on the Event. | parent | — |
 | complete | Reduce routing and Insight packets to first-party-authored source material plus accepted first-party artifacts and enforce one candidate per Event/audience. | parent | — |
 | complete | Rebuild clean one-run Feed/Event stores and replace all routing data with nine v9 top-100 runs; prove cache telemetry and remove v8 directories. | parent | `../../../references/model-routing.md` |
-| pending | Adi runs the clean 492-Event / 751-request Terra Insight refresh with the v4 prompts into a fresh database; then publish, rebuild, and verify the Insight UI. | parent | `resources/first-live-insight-run.md` |
+| pending | Complete the clean 492-Event / 751-request Terra Insight refresh from the reset v4-only store; then reconcile and perform final Insight UI proof. | parent | `resources/first-live-insight-run.md` |
 
 ## Backlog / Remaining Work
 

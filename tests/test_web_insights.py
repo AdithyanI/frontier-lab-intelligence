@@ -333,6 +333,8 @@ def test_current_ui_routes_read_the_durable_store(tmp_path, monkeypatch):
     assert items["available"] is True
     assert items["status"] == "suppressed"
     assert items["items"][0]["decision"] == "suppress"
+    assert client.get("/api/insights/extracted").status_code == 404
+    assert client.get("/api/insights/extracted/dates").status_code == 404
 
 
 def test_invalid_audiences_and_statuses_are_rejected(tmp_path):

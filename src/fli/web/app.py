@@ -521,6 +521,8 @@ if DIST_DIR.exists():
 
     @app.get("/{path:path}")
     def spa(path: str) -> FileResponse:
+        if path == "api" or path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API route not found")
         candidate = DIST_DIR / path
         if path and candidate.is_file():
             return FileResponse(candidate)
