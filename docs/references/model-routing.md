@@ -82,6 +82,11 @@ Keep stable 1,024+ token content first, use deterministic sharded
 GPT-5.6 cache writes can cost more than ordinary input, so cache telemetry—not
 the presence of a cache parameter—is the cost evidence.
 
+Azure rejects `prompt_cache_key` values longer than 64 characters. The shared
+key helper preserves readable keys when they fit and compacts longer
+namespace/version identities into a stable hash-backed key. All callers must
+use that helper rather than constructing cache keys directly.
+
 ## Source Guidance
 
 - [OpenAI GPT-5.6 migration guidance](https://developers.openai.com/api/docs/guides/latest-model#update-api-and-model-parameters)

@@ -58,7 +58,7 @@ deferred until this narrower routing boundary is qualitatively proven.
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Legacy keep/drop triage | Implemented comparison baseline | The existing Luna decision/reason runs remain inspectable, but the active product is testing a cleaner audience-first contract. During calibration, the legacy result is preserved for comparison and is not silently overwritten. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Feed audience routing | Implemented model boundary; small-cohort review active | Existing Feed triage remains the only keep/drop gate. Runtime v3 returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. Two distinct envelopes route to both audiences; a third is paused while Adi reviews quality. Azure Responses prefix caching is currently intermittent despite a cache-eligible stable prompt and the proven shared adapter. |
+| Feed audience routing | Implemented; July 12 top-eight audit active | Existing Feed triage remains the only keep/drop gate. Runtime v3 returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. The frozen July 12 top-eight kept cohort completed with five `both`, one AI-only, two Investment-only, and zero `neither`; 21,365 input tokens produced zero reported provider-cache reads and $0.037241 proxy cost. Exact-match records now appear in Feed as positive-only `AI`/`INV` marks with all three reasons in the existing disclosure. Adi's qualitative review and a bounded hard-negative sample remain. |
 | Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
@@ -70,25 +70,27 @@ current databases or APIs before using them as present-tense product claims.
 
 ## The Most Important Unproven Claim
 
-The repository has not yet proved that one simple prompt and schema can reliably
-decide whether each cleaned evidence envelope should be kept and which audience
-it serves. Previous keep/drop and multi-stage Insight results are comparison and
-learning evidence, not the active contract. The next step is an architecture
-review, followed by one envelope and one human-inspected day—not Insight prose
-or a nine-day publication apparatus.
+The repository has proved that one simple prompt/schema, versioned run store,
+and exact-match Feed projection can route a small positive-biased cohort. It has
+not yet proved the audience threshold: the first eight top-kept envelopes
+contained no `neither` result, and two AI Engineering positives are borderline
+operational signals rather than clear technical evidence. Previous multi-stage
+Insight results remain historical learning, not the active contract. The next
+step is Adi's qualitative audit followed by a bounded hard-negative/`neither`
+sample—not Insight prose or a nine-day publication apparatus.
 
 ## Submission Finish Line
 
 The active Evidence Audience Routing tracker owns the execution detail. At
 system level, the remaining proof is:
 
-1. Inspect one exact complete envelope with Adi.
-2. Decide the exact evidence blocks and structured keep/drop plus audience
-   schema on one envelope.
-3. Calibrate clear Engineering, Investment, both, and neither examples.
-4. Run one cleaned evidence day and inspect every routing outcome with Adi.
-5. Freeze the routing contract before opening a separate Insight-generation
-   project.
+1. Audit the July 12 top-eight outputs and reason quality with Adi in Feed.
+2. Correct any packet, prompt, or threshold ambiguity revealed by that audit.
+3. Calibrate a bounded hard-negative sample containing plausible `neither`
+   cases and explicit audience disagreements.
+4. Freeze the routing contract and run only the smallest additional cohort
+   needed for the case-study proof.
+5. Open a separate Insight-generation project only after routing is accepted.
 
 External submission or alert delivery remains blocked without Adi's explicit
 current-session approval.
@@ -110,8 +112,10 @@ case-study thesis.
 
 The active tracker is
 [`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
-It begins with one exact-envelope architecture review before any routing model
-run. Insight generation and delivery remain deliberately deferred.
+Its first exact-envelope review and frozen July 12 top-eight routing run are
+complete and inspectable in Feed. Adi's qualitative audit and a bounded
+hard-negative calibration sample are next. Insight generation and delivery
+remain deliberately deferred.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

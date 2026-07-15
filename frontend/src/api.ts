@@ -301,6 +301,20 @@ export interface SignalEvent {
     decision: 'keep' | 'drop'
     reason: string
   } | null
+  audience_routing: {
+    feed_rank: number
+    snapshot_content_sha256: string
+    evidence_sha256: string
+    input_sha256: string
+    ai_engineering: {
+      relevant: boolean
+      reason: string
+    }
+    investment: {
+      relevant: boolean
+      reason: string
+    }
+  } | null
 }
 
 export interface EventResponse {
@@ -323,6 +337,16 @@ export interface EventResponse {
     model: string
     reasoning_effort: string
     prompt_version: string
+    expected_count: number
+    completed_count: number
+    updated_at: string
+  } | null
+  audience_routing_run?: {
+    run_id: string
+    model: string
+    reasoning_effort: string
+    prompt_version: string
+    source_triage_run_id: string
     expected_count: number
     completed_count: number
     updated_at: string

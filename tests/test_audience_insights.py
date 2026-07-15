@@ -425,8 +425,9 @@ def test_extraction_request_uses_audience_prompt_cache_tags_and_luna_medium(
     assert request["text"]["format"] == audience_insights.output_format(audience)
     assert request["store"] is False
     assert request["prompt_cache_key"].startswith(
-        f"fli:audience-insights-v2-{cache_namespace}-extraction:"
+        f"fli:audience-insights-v2-{cache_namespace[:3]}"
     )
+    assert len(request["prompt_cache_key"]) <= 64
     assert f"audience:{namespace}" in result["request_tags"]
     assert result["citation"]["source_id"] == "artifact-2"
     assert result["audience_fields"]
@@ -549,9 +550,8 @@ def test_editor_request_uses_id_only_schema_luna_high_and_stable_cache_lane():
     assert request["text"]["format"] == audience_insights.editor_output_format(
         audience_insights.INVESTMENT
     )
-    assert request["prompt_cache_key"].startswith(
-        "fli:audience-insights-v2-investment-editor:"
-    )
+    assert request["prompt_cache_key"].startswith("fli:audience-insights-v2-inv")
+    assert len(request["prompt_cache_key"]) <= 64
     assert "candidate-1" in request["input"]
     assert "feed_rank" not in request["input"]
     assert "supporting_quote" not in request["input"]

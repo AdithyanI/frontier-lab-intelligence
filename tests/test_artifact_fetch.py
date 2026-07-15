@@ -124,6 +124,19 @@ def test_extract_content_rejects_client_rendered_error_shell():
     assert result.text is None
 
 
+def test_extract_content_rejects_empty_html_without_raising():
+    result = artifact_fetch.extract_content(
+        b"",
+        content_type="text/html",
+        charset="utf-8",
+        final_url="https://example.com/empty",
+        artifact_kind="other",
+    )
+
+    assert result.success is False
+    assert result.error_code == "extraction_empty_or_client_rendered"
+
+
 def test_extract_content_uses_scoped_sec_archives_fallback():
     body = b"""<DOCUMENT><TYPE>EX-99.1<SEQUENCE>2<FILENAME>filing.htm
     <DESCRIPTION>EXHIBIT 99.1<TEXT><HTML><HEAD><TITLE></TITLE></HEAD><BODY>

@@ -181,7 +181,11 @@ Rules:
   but remains a separate left-aligned input; the paired Audit/Sort controls
   anchor the right edge. They stack only on narrow screens. Per-envelope triage rationale is collapsed by
   default behind a quiet `View reason` disclosure so evidence remains the
-  primary reading surface.
+  primary reading surface. Downstream audience routing adds no second toolbar
+  filter: a kept envelope shows neutral hairline `AI` and/or `INV` marks only
+  for positive judgments, directly beside its triage status. The same
+  disclosure then presents the Feed reason and the two audience-specific
+  decisions and reasons. Unrouted, stale, and dropped envelopes show no marks.
 - **Artifact index:** a flat, ruled list over the canonical artifact catalog.
   Within the selected source day, order by the best originating Feed rank; if
   several accepted envelopes reveal the same artifact, the smallest rank wins.

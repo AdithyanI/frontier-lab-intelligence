@@ -216,19 +216,64 @@ function FeedMenuSelect<T extends string>({
 function TriageNote({ item }: { item: SignalEvent }) {
   if (!item.triage) return null
   const { decision, reason } = item.triage
+  const routing = decision === 'keep' ? item.audience_routing : null
   const decisionLabel = decision === 'keep' ? 'Kept for extraction' : 'Dropped before extraction'
+  const hasAudienceReasons = routing !== null
 
   return (
     <details className={`event-triage event-triage--${decision}`}>
       <summary className="event-triage-heading mono">
-        <span className="event-triage-decision">{decisionLabel}</span>
+        <span className="event-triage-status">
+          <span className="event-triage-decision">{decisionLabel}</span>
+          {routing && (
+            <span className="event-audience-marks">
+              {routing.ai_engineering.relevant && (
+                <>
+                  <span className="event-audience-mark" aria-hidden="true">AI</span>
+                  <span className="sr-only">Routed to AI Engineering. </span>
+                </>
+              )}
+              {routing.investment.relevant && (
+                <>
+                  <span className="event-audience-mark" aria-hidden="true">INV</span>
+                  <span className="sr-only">Routed to Investment. </span>
+                </>
+              )}
+            </span>
+          )}
+        </span>
         <span className="event-triage-action">
-          <span className="event-triage-view">View reason</span>
-          <span className="event-triage-hide">Hide reason</span>
+          <span className="event-triage-view">
+            {hasAudienceReasons ? 'View reasons' : 'View reason'}
+          </span>
+          <span className="event-triage-hide">
+            {hasAudienceReasons ? 'Hide reasons' : 'Hide reason'}
+          </span>
           <span className="event-triage-caret" aria-hidden="true" />
         </span>
       </summary>
-      <p>{reason}</p>
+      <div className="event-triage-reasons">
+        <div className="event-triage-reason">
+          <span className="event-triage-reason-label mono">Feed triage</span>
+          <p>{reason}</p>
+        </div>
+        {routing && (
+          <>
+            <div className="event-triage-reason">
+              <span className="event-triage-reason-label mono">
+                AI Engineering · {routing.ai_engineering.relevant ? 'Relevant' : 'Not relevant'}
+              </span>
+              <p>{routing.ai_engineering.reason}</p>
+            </div>
+            <div className="event-triage-reason">
+              <span className="event-triage-reason-label mono">
+                Investment · {routing.investment.relevant ? 'Relevant' : 'Not relevant'}
+              </span>
+              <p>{routing.investment.reason}</p>
+            </div>
+          </>
+        )}
+      </div>
     </details>
   )
 }

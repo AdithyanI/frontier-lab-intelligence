@@ -41,8 +41,9 @@ positive routes without reviving the old stack.
 - Inspect one exact envelope end to end, then run a small frozen cohort of
   top-ranked kept envelopes to inspect Engineering, Investment, both, and
   neither behavior before broader evaluation.
-- Add a compact Feed audience filter and per-envelope routing disclosure so
-  Adi can inspect the first real outputs in the existing evidence workspace.
+- Add compact, positive-only per-envelope audience marks and routing disclosure
+  so Adi can inspect the first real outputs in the existing evidence workspace
+  without adding a second filter system.
 - Keep the decision traceable from the UI/API back to the exact Evidence
   envelope and model/run provenance.
 
@@ -125,17 +126,17 @@ Application invariants:
 - [x] Adi approves the routing semantics: one combined call, two independent
   audience judgments with separate reasons, and no second keep/drop field.
 - [ ] Adi reviews the short prompt and exact first-cohort outputs.
-- [ ] One versioned routing path stores and returns one authoritative pair of
+- [x] One versioned routing path stores and returns one authoritative pair of
   audience judgments per envelope/run with evidence hash, prompt version,
   model, cost, and rationales; no live product reads old Insight tables.
-- [ ] The first envelope is routed and reviewed with Adi, with its input blocks
+- [x] The first envelope is routed and reviewed with Adi, with its input blocks
   and output visible and traceable in the UI/API.
-- [ ] A small frozen top-kept cohort is routed with Luna-medium; outcomes,
+- [x] A small frozen top-kept cohort is routed with Luna-medium; outcomes,
   prompt-cache reads, response cost, and qualitative disagreements are
   recorded before any expansion.
-- [ ] Feed exposes audience filters and compact reasons without generating
+- [x] Feed exposes positive audience marks and compact reasons without generating
   Insight prose or changing the existing triage result.
-- [ ] Focused tests, `bash scripts/check-fast.sh`, live API proof, and rendered
+- [x] Focused tests, `bash scripts/check-fast.sh`, live API proof, and rendered
   desktop QA pass; architecture/status docs reflect the final boundary.
 - [ ] Project learnings are finalized and the tracker is archived before the
   next Insight-generation project begins.
@@ -146,12 +147,12 @@ Application invariants:
   Acceptance: exact input blocks, approved schema, short prompt, immutable
   run storage, and API projection work on the Satya envelope. Validate:
   focused packet/runner/API tests and exact record inspection.
-- [ ] Milestone 2 — Run and inspect a small top-kept cohort. Acceptance:
+- [x] Milestone 2 — Run and inspect a small top-kept cohort. Acceptance:
   Luna-medium outputs, cache/cost telemetry, outcome distribution, and
   qualitative review are recorded. Validate: resumable rerun and direct
   database/API comparison.
-- [ ] Milestone 3 — Expose routing in Feed. Acceptance: existing triage filters
-  remain authoritative while audience filters, badges, and short reasons make
+- [x] Milestone 3 — Expose routing in Feed. Acceptance: existing triage filters
+  remain authoritative while positive audience marks and short reasons make
   the cohort inspectable. Validate: production build and rendered desktop QA.
 - [ ] Milestone 4 — Freeze the routing boundary and close out. Acceptance:
   architecture, status, model/prompt references, evaluation evidence, and
@@ -229,10 +230,10 @@ Application invariants:
 - Which reply and quote-post blocks belong in the model packet, and when does a
   deterministic size bound become necessary? Inspect real packet sizes before
   choosing a top-N rule.
-- Where should the new authoritative routing records live? Choose one clean
-  database/schema and prohibit UI fallback to archived Insight data.
-- What small cohort size is sufficient for the first qualitative review? Start
-  with the top kept envelopes and stop before a broad run.
+- The first eight top-kept envelopes are enough to review the mechanics and
+  positive audience splits, but not the `neither` threshold. After Adi's UI
+  audit, choose a bounded hard-negative sample rather than expanding the full
+  catalog automatically.
 
 ## Current Batch
 
@@ -242,7 +243,9 @@ Application invariants:
 | done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
 | done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
 | done | Remove the unsafe short-reaction cutoff and expand each audience reason to roughly three to four sentences without a schema maximum. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
-| in_progress | Review v3 qualitative output and the isolated Azure prefix-cache regression with Adi before routing a third distinct envelope. | parent | `resources/audience-routing-v3-cache-diagnostic.md`; `resources/rank1-routing-v2-result.md` |
+| done | Run the frozen July 12 top-eight kept cohort sequentially through Luna-medium and record distribution, quality, cache, cost, and limitations. | parent | `resources/jul12-top8-v3-routing.md` |
+| done | Expose exact-match routing records as quiet positive marks and separate reasons in the existing Feed disclosure; add no audience filter or Insight prose. | parent | `resources/jul12-top8-v3-routing.md` |
+| in_progress | Adi audits the July 12 Feed outputs; then freeze corrections and choose a bounded hard-negative/`neither` sample before any broad run. | parent | `resources/jul12-top8-v3-routing.md` |
 
 ## Backlog / Remaining Work
 
@@ -250,10 +253,10 @@ Application invariants:
 - [ ] Audit a bounded sample of existing Feed drops later to estimate whether
   the upstream gate hides audience-relevant evidence.
 - [ ] Expand beyond the first cohort only after Adi's qualitative review.
-- [ ] Add the read-only API projection and compact Feed audience filters,
-  badges, and reasons only after Adi reviews the quick sample.
-- [ ] Update architecture, status, model-routing/prompt references, and build log.
-- [ ] Run focused tests, `bash scripts/check-fast.sh`, API proof, and desktop QA.
+- [x] Add the read-only API projection and compact positive Feed audience marks
+  and reasons without reading archived Insight data.
+- [x] Update architecture, status, model-routing/prompt references, and build log.
+- [x] Run focused tests, `bash scripts/check-fast.sh`, API proof, and desktop QA.
 - [ ] Review and finalize `learnings.md`, then archive this project.
 
 ## Validation / Test Plan
@@ -341,3 +344,14 @@ Application invariants:
   returned zero cached tokens, broadening the failure from Luna-specific to the
   Azure Responses cache path or its current interaction through LiteLLM. The
   two calls cost $0.058070; no further paid cache probes are justified now.
+- 2026-07-15: [VALIDATED] Routed the frozen July 12 top-eight kept cohort
+  sequentially through Luna-medium and projected it into the existing Feed.
+  All eight records completed: five route to both audiences, one to AI
+  Engineering only, two to Investment only, and none to neither. The run used
+  21,365 input and 2,646 output tokens, cost $0.037241, and again reported zero
+  provider cache reads or writes. The Feed now shows 13 positive-only `AI`/`INV`
+  marks and keeps Feed triage plus both audience reasons in one disclosure. The
+  API returned all eight exact snapshot-bound records; focused tests, the full
+  fast check, production build, and rendered desktop inspection passed. Adi's
+  qualitative audit and a later bounded hard-negative sample remain the live
+  resume point; exact evidence is in `resources/jul12-top8-v3-routing.md`.

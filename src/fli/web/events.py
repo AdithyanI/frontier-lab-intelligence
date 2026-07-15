@@ -12,6 +12,7 @@ from threading import Lock
 from typing import Any
 
 from fli import signal_events, signal_feed
+from fli.web import audience_routing as audience_routing_store
 from fli.web import feed as feed_store, triage as triage_store
 
 
@@ -347,6 +348,7 @@ def _cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
     return (
         *(feed_store._db_version(path) for path in paths),
         *triage_store.cache_token(day),
+        *audience_routing_store.cache_token(day),
     )
 
 
@@ -745,6 +747,8 @@ def _events_day_cached(
 
     triage_payload = triage_store.triage_payload(day)
     triage_items = triage_payload["items"]
+    routing_payload = audience_routing_store.routing_payload(day)
+    routing_items = routing_payload["items"]
     items: list[dict[str, Any]] = []
     consumed: set[FeedKey] = set()
     for cluster in clusters:
@@ -849,10 +853,25 @@ def _events_day_cached(
             == item["snapshot_content_sha256"]
             else None
         )
+        route = routing_items.get(item["event_id"])
+        item["audience_routing"] = (
+            route
+            if route
+            and item["triage"]
+            and item["triage"]["decision"] == "keep"
+            and route.get("snapshot_content_sha256")
+            == item["snapshot_content_sha256"]
+            and routing_payload.get("run")
+            and triage_payload.get("run")
+            and routing_payload["run"]["source_triage_run_id"]
+            == triage_payload["run"]["run_id"]
+            else None
+        )
     return {
         "available": True,
         "date": day,
         "triage_run": triage_payload["run"],
+        "audience_routing_run": routing_payload["run"],
         "run": {
             "run_id": run["run_id"],
             "feed_run_id": run["feed_run_id"],

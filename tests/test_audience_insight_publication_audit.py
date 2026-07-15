@@ -8,6 +8,7 @@ from fli import (
     audience_insight_evaluations,
     audience_insight_publication_audit as publication_audit,
     audience_insight_runs,
+    llm_responses,
 )
 
 
@@ -406,8 +407,11 @@ def test_prompt_and_cache_namespace_are_independent():
         audience_insight_evaluations.DAY_SET_PROMPT_VERSION,
     }
     key = publication_audit.prompt_cache_key("investment", "audit-123")
-    assert "publication-audit" in key
-    assert "evaluation" not in key
+    evaluation_key = audience_insight_evaluations.item_prompt_cache_key(
+        "investment", "audit-123"
+    )
+    assert key != evaluation_key
+    assert len(key) <= llm_responses.AZURE_PROMPT_CACHE_KEY_MAX_LENGTH
     assert publication_audit.DEFAULT_REASONING_EFFORT == "high"
     assert publication_audit.DEFAULT_MODEL == "gpt-5.6-luna"
 
@@ -492,7 +496,10 @@ def test_evaluate_item_uses_independent_strict_luna_high_request():
         "enum": [item_id],
     }
     assert request["store"] is False
-    assert "publication-audit" in request["prompt_cache_key"]
+    assert request["prompt_cache_key"] == publication_audit.prompt_cache_key(
+        "investment", item_id
+    )
+    assert len(request["prompt_cache_key"]) <= 64
     assert "job:publication-calibration-audit" in request["extra_body"]["metadata"]["tags"]
     assert result["reported_cost_usd"] == 0.004
     assert result["cached_tokens"] == 900

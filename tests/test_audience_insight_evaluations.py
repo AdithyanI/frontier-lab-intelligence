@@ -183,9 +183,8 @@ def test_item_request_uses_luna_high_isolated_tags_and_four_lane_namespace():
     assert request["text"]["format"] == evaluations.item_review_format(
         "candidate-1"
     )
-    assert request["prompt_cache_key"].startswith(
-        "fli:audience-insights-v2-investment-evaluation:"
-    )
+    assert request["prompt_cache_key"].startswith("fli:audience-insights-v2-inv")
+    assert len(request["prompt_cache_key"]) <= 64
     assert "job:quality-evaluation" in result["request_tags"]
     assert "audience:investment" in result["request_tags"]
     assert "Feed rank" not in request["input"]
@@ -311,9 +310,8 @@ def test_day_set_request_canonicalizes_order_and_uses_engineering_namespace():
 
     request = client.responses.with_raw_response.calls[0]
     assert request["reasoning"] == {"effort": "high"}
-    assert request["prompt_cache_key"].startswith(
-        "fli:audience-insights-v2-engineering-evaluation:"
-    )
+    assert request["prompt_cache_key"].startswith("fli:audience-insights-v2-eng")
+    assert len(request["prompt_cache_key"]) <= 64
     assert "audience:ai-engineering" in result["request_tags"]
     decoded = json.loads(request["input"])
     assert [item["candidate_id"] for item in decoded["selected"]] == [

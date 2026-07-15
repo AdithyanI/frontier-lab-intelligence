@@ -256,6 +256,27 @@ before pagination. The projection reads the run's existing
 `(decision, current_rank, event_id)` and `(status, current_rank, event_id)`
 indexes and never mutates the triage or Feed stores.
 
+`fli.audience_routing` is a separate downstream decision over Feed-kept
+envelopes. One Luna-medium call receives the readable attributed packet and
+returns two independently reasoned booleans: AI Engineering relevance and
+Investment relevance. Feed rank, score, engagement, prominence, and the
+upstream keep decision are not model inputs. `fli.audience_routing_runs`
+freezes the exact cohort, snapshot/evidence/input hashes, prompt and schema
+versions, model output, cache telemetry, cost, and failures in one resumable
+SQLite database; it does not read or write the superseded Audience Insights
+tables.
+
+`fli.web.audience_routing` is the read-only audit projection. It selects the
+newest fully completed run for the requested UTC day and current prompt
+contract. `fli.web.events` attaches a route only when the current envelope is
+still kept, its `snapshot_content_sha256` matches the routing record, and the
+routing run names the same selected source-triage run. Display rank is not an
+identity key. The Feed renders only positive `AI` and `INV` marks beside the
+existing triage status and places the Feed reason plus both audience decisions
+and rationales inside the existing disclosure. Unrouted, stale, and dropped
+envelopes receive no marks. This surface adds neither an audience filter nor
+Insight prose.
+
 `fli.artifacts`, `fli.artifact_urls`, and `fli.evidence_lineage` implement a
 parallel deterministic enrichment boundary for corrected kept envelopes. They
 admit outbound URLs only from the root X post or replies by the same stable X
@@ -1198,6 +1219,8 @@ The active project is
 Existing Feed triage owns keep/drop. The downstream runtime v3 boundary accepts
 one complete attributed envelope and returns exactly two independent judgments:
 AI Engineering relevance plus reason, and Investment relevance plus reason.
-The current work is a small sequential qualitative review before Feed UI or any
-new Insight generation. The archived v2 review/publication stack is not the
-active build order.
+The frozen July 12 top-eight cohort is now inspectable in Feed through quiet
+positive marks and the existing reason disclosure. The current work is Adi's
+qualitative audit followed by a bounded hard-negative/`neither` calibration
+sample—not a broad run or new Insight generation. The archived v2
+review/publication stack is not the active build order.

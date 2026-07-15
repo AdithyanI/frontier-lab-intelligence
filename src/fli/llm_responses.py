@@ -10,6 +10,10 @@ from typing import Any
 DEFAULT_PROMPT_CACHE_SHARDS = 64
 DEFAULT_EFFICIENT_MODEL = "gpt-5.6-luna"
 AZURE_GPT56_PROMPT_CACHE_RETENTION = "24h"
+AZURE_PROMPT_CACHE_KEY_MAX_LENGTH = 64
+_CACHE_NAMESPACE_PREVIEW_LENGTH = 24
+_CACHE_VERSION_PREVIEW_LENGTH = 8
+_CACHE_IDENTITY_HEX_LENGTH = 20
 
 
 def litellm_prompt_cache_kwargs(model: str) -> dict[str, str]:
@@ -32,12 +36,25 @@ def sharded_prompt_cache_key(
     scope_key: str | int,
     shards: int = DEFAULT_PROMPT_CACHE_SHARDS,
 ) -> str:
-    """Return one stable cache-routing key from the shared repo convention."""
+    """Return one stable cache-routing key accepted by the Azure Responses API."""
     if shards < 1:
         raise ValueError("prompt cache shards must be at least 1")
     digest = hashlib.sha256(str(scope_key).encode()).digest()
     shard = int.from_bytes(digest[:8], "big") % shards
-    return f"fli:{namespace}:{prompt_version}:shard-{shard:02d}"
+    readable_key = f"fli:{namespace}:{prompt_version}:shard-{shard:02d}"
+    if len(readable_key) <= AZURE_PROMPT_CACHE_KEY_MAX_LENGTH:
+        return readable_key
+
+    identity = hashlib.sha256(
+        f"{namespace}\0{prompt_version}".encode()
+    ).hexdigest()[:_CACHE_IDENTITY_HEX_LENGTH]
+    compact_key = (
+        f"fli:{namespace[:_CACHE_NAMESPACE_PREVIEW_LENGTH]}:"
+        f"{prompt_version[:_CACHE_VERSION_PREVIEW_LENGTH]}:{identity}:s{shard:02d}"
+    )
+    if len(compact_key) > AZURE_PROMPT_CACHE_KEY_MAX_LENGTH:
+        raise AssertionError("compacted prompt cache key exceeds Azure's limit")
+    return compact_key
 
 
 def reported_cost(headers: Any) -> float | None:

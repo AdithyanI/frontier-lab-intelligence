@@ -2,7 +2,16 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
-from fli import channels, insight_triage_runs, signal_events, signal_feed, x_content
+from fli import (
+    audience_routing,
+    audience_routing_runs,
+    channels,
+    insight_triage_runs,
+    signal_events,
+    signal_feed,
+    x_content,
+)
+from fli.web import audience_routing as audience_routing_store
 from fli.web import events as event_store, feed as feed_store
 from fli.web import triage as triage_store
 from fli.web.app import app
@@ -54,12 +63,17 @@ def _event_fixture(tmp_path, monkeypatch, *, include_singleton=False):
     empty_rankings.mkdir()
     triage_root = tmp_path / "triage"
     triage_root.mkdir()
+    routing_root = tmp_path / "audience-routing"
+    routing_root.mkdir()
     monkeypatch.setattr(feed_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(feed_store, "DEFAULT_REGISTRY_DB", registry)
     monkeypatch.setattr(feed_store, "DEFAULT_DERIVED_ROOT", empty_rankings)
     monkeypatch.setattr(event_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(event_store, "DEFAULT_EVENTS_DB", events_db)
     monkeypatch.setattr(triage_store, "DEFAULT_TRIAGE_ROOT", triage_root)
+    monkeypatch.setattr(
+        audience_routing_store, "DEFAULT_ROUTING_ROOT", routing_root
+    )
     return {
         "registry": registry,
         "raw": raw,
@@ -98,6 +112,50 @@ def _write_triage_run(root, *, items):
                 item["snapshot_content_sha256"],
                 decision,
                 "Concrete evidence." if decision == "keep" else "Off-topic evidence.",
+                now,
+            ),
+        )
+    conn.commit()
+    conn.close()
+
+
+def _write_audience_routing_run(root, *, items):
+    path = root / "audience-run-1" / "routing.db"
+    conn = audience_routing_runs.connect_run(path)
+    now = "2026-07-13T10:05:00+00:00"
+    conn.execute(
+        """INSERT INTO run_meta
+           (singleton, run_id, day, model, reasoning_effort, prompt_version,
+            prompt_sha256, schema_version, source_triage_db,
+            source_triage_run_id, source_artifact_db, top_kept_limit,
+            requested_event_id, cohort_sha256, expected_count,
+            created_at, updated_at)
+           VALUES (1, 'audience-run-1', '2026-07-11', 'gpt-5.6-luna',
+                   'medium', ?, 'prompt-hash', 'schema-v1', 'triage.db',
+                   'run-1', 'artifacts.db', ?, NULL, 'cohort-hash', ?, ?, ?)""",
+        (audience_routing.PROMPT_VERSION, len(items), len(items), now, now),
+    )
+    for rank, item in enumerate(items, start=1):
+        conn.execute(
+            """INSERT INTO routing_item
+               (event_id, feed_rank, root_url, snapshot_content_sha256,
+                packet_json, evidence_sha256, input_text, input_sha256,
+                prompt_cache_key, status, attempts,
+                ai_engineering_relevant, ai_engineering_reason,
+                investment_relevant, investment_reason,
+                completed_at, updated_at)
+               VALUES (?, ?, 'https://x.com/a/status/1', ?, '{}',
+                       'evidence-hash', 'input', 'input-hash', 'cache-key',
+                       'complete', 1, ?, ?, ?, ?, ?, ?)""",
+            (
+                item["event_id"],
+                rank,
+                item["snapshot_content_sha256"],
+                int(rank == 1),
+                "Concrete engineering relevance." if rank == 1 else "Not useful for engineering.",
+                int(rank != 1),
+                "Not material for investment." if rank == 1 else "Concrete investment relevance.",
+                now,
                 now,
             ),
         )
@@ -175,6 +233,10 @@ def test_events_api_projects_and_filters_completed_triage(tmp_path, monkeypatch)
     _event_fixture(tmp_path, monkeypatch)
     baseline = client.get("/api/events?date=2026-07-11&limit=20").json()
     _write_triage_run(triage_store.DEFAULT_TRIAGE_ROOT, items=baseline["items"])
+    _write_audience_routing_run(
+        audience_routing_store.DEFAULT_ROUTING_ROOT,
+        items=baseline["items"],
+    )
 
     all_items = client.get("/api/events?date=2026-07-11&limit=20").json()
     assert all_items["triage_counts"] == {
@@ -184,7 +246,27 @@ def test_events_api_projects_and_filters_completed_triage(tmp_path, monkeypatch)
         "not_evaluated": 0,
     }
     assert all_items["triage_run"]["run_id"] == "run-1"
+    assert all_items["audience_routing_run"]["run_id"] == "audience-run-1"
     assert all_items["items"][0]["triage"]["reason"] == "Concrete evidence."
+    routed = next(
+        item
+        for item in all_items["items"]
+        if item["triage"]["decision"] == "keep"
+    )
+    assert routed["audience_routing"]["ai_engineering"] == {
+        "relevant": True,
+        "reason": "Concrete engineering relevance.",
+    }
+    assert routed["audience_routing"]["investment"] == {
+        "relevant": False,
+        "reason": "Not material for investment.",
+    }
+    dropped_route = next(
+        item
+        for item in all_items["items"]
+        if item["triage"]["decision"] == "drop"
+    )
+    assert dropped_route["audience_routing"] is None
     assert all_items["daily_rank_total"] == 2
     daily_rank_by_event_id = {
         item["event_id"]: item["daily_rank"] for item in all_items["items"]

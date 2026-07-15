@@ -29,6 +29,19 @@ test('Feed keeps extraction status secondary and exposes the exact envelope ID',
   assert.match(copyEnvelopeSource, /aria-live="polite"/)
 })
 
+test('Feed shows positive audience marks and keeps both routing reasons auditable', () => {
+  assert.match(feedSource, /routing\.ai_engineering\.relevant/)
+  assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">AI</)
+  assert.match(feedSource, /routing\.investment\.relevant/)
+  assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">INV</)
+  assert.match(feedSource, /Routed to AI Engineering/)
+  assert.match(feedSource, /Routed to Investment/)
+  assert.match(feedSource, /AI Engineering · \{routing\.ai_engineering\.relevant \? 'Relevant' : 'Not relevant'\}/)
+  assert.match(feedSource, /Investment · \{routing\.investment\.relevant \? 'Relevant' : 'Not relevant'\}/)
+  assert.doesNotMatch(feedSource, /audienceFilter/)
+  assert.match(appStyles, /\.event-audience-mark \{[\s\S]*?border: 1px solid var\(--border\);/)
+})
+
 test('Feed search matches the compact ruled control language', () => {
   assert.match(appStyles, /grid-template-columns: minmax\(320px, 400px\) 1fr/)
   assert.match(appStyles, /\.feed-controls \{[\s\S]*?justify-self: end;[\s\S]*?gap: 8px;/)

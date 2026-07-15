@@ -22,7 +22,7 @@ from urllib.robotparser import RobotFileParser
 
 import httpx
 import trafilatura
-from lxml import html as lxml_html
+from lxml import etree, html as lxml_html
 from pypdf import PdfReader
 
 from fli import artifact_urls, artifacts
@@ -342,7 +342,7 @@ def _normalize_text(value: str) -> str:
 def _html_metadata(body: bytes, final_url: str) -> tuple[str | None, str | None]:
     try:
         tree = lxml_html.fromstring(body, base_url=final_url)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, etree.ParserError):
         return None, None
     titles = [str(value).strip() for value in tree.xpath("//title/text()") if str(value).strip()]
     canonicals = tree.xpath(
@@ -362,7 +362,7 @@ def _sec_archives_text(body: bytes, final_url: str) -> str | None:
         return None
     try:
         tree = lxml_html.fromstring(body, base_url=final_url)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, etree.ParserError):
         return None
     for node in tree.xpath("//script|//style|//noscript"):
         node.drop_tree()
