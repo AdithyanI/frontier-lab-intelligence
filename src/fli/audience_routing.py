@@ -17,6 +17,8 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
+import tiktoken
+
 from fli import llm_responses
 
 
@@ -24,7 +26,15 @@ PROMPT_VERSION = "audience-routing-v8"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "high"
-MAX_OUTPUT_TOKENS = 8_192
+MAX_OUTPUT_TOKENS = 32_768
+MAX_INPUT_TOKENS = 20_000
+INPUT_ENCODING = "o200k_base"
+TRUNCATION_MARKER = (
+    "\n\n---\n"
+    "TRUNCATED_EVIDENCE: The evidence packet exceeded the 20,000-token "
+    "routing input limit. Remaining lower-priority evidence was omitted "
+    "from this model call."
+)
 PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v8.txt"
 PROMPT_CACHE_KEY = f"fli:audience-routing:{PROMPT_VERSION}"
 
@@ -197,8 +207,8 @@ def _duplicates_primary_text(text: str, primary_texts: list[str]) -> bool:
     return False
 
 
-def render_input(packet: RoutingPacket) -> str:
-    """Render a readable YAML-style hierarchy without internal provenance."""
+def _render_full_input(packet: RoutingPacket) -> str:
+    """Render the complete readable hierarchy without internal provenance."""
     roots = [source for source in packet.sources if source.relation == "root"]
     if len(roots) != 1:
         raise ValueError("routing packet must contain exactly one root source")
@@ -291,6 +301,35 @@ def render_input(packet: RoutingPacket) -> str:
     return "\n".join(lines)
 
 
+def _input_encoding() -> Any:
+    return tiktoken.get_encoding(INPUT_ENCODING)
+
+
+def input_token_count(text: str) -> int:
+    """Count model-facing input tokens with the GPT-5 family encoding."""
+    return len(_input_encoding().encode(text))
+
+
+def _truncate_input(text: str) -> str:
+    """Bound only the model-facing view while retaining an explicit marker."""
+    encoding = _input_encoding()
+    tokens = encoding.encode(text)
+    if len(tokens) <= MAX_INPUT_TOKENS:
+        return text
+    marker_tokens = encoding.encode(TRUNCATION_MARKER)
+    prefix_tokens = tokens[: MAX_INPUT_TOKENS - len(marker_tokens)]
+    return encoding.decode(prefix_tokens).rstrip() + TRUNCATION_MARKER
+
+
+def render_input(packet: RoutingPacket) -> str:
+    """Render a readable model view capped at ``MAX_INPUT_TOKENS`` tokens.
+
+    ``RoutingPacket`` and its evidence hash continue to bind the complete
+    evidence. Only this derived model-facing view is truncated.
+    """
+    return _truncate_input(_render_full_input(packet))
+
+
 def _validate_output(output_text: str) -> dict[str, Any]:
     payload = json.loads(output_text)
     if not isinstance(payload, dict) or set(payload) != set(AUDIENCES):
@@ -365,10 +404,11 @@ def evaluate_one(
 ) -> dict[str, Any]:
     """Route one frozen packet without tools or canonical-state mutation."""
     tags = request_tags(run=run, day=packet.day)
+    model_input = render_input(packet)
     request = {
         "model": model,
         "instructions": instructions(),
-        "input": render_input(packet),
+        "input": model_input,
         "prompt_cache_key": PROMPT_CACHE_KEY,
         **llm_responses.litellm_prompt_cache_kwargs(model),
         "reasoning": {"effort": effort},
@@ -388,7 +428,7 @@ def evaluate_one(
         "event_id": packet.event_id,
         "day": packet.day,
         "evidence_sha256": packet.evidence_sha256,
-        "input_sha256": packet.input_sha256,
+        "input_sha256": _sha256(model_input),
         "model": model,
         "reasoning_effort": effort,
         "prompt_version": PROMPT_VERSION,

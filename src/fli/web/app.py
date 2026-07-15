@@ -431,6 +431,7 @@ def events(
         pattern="^(all|relevant|not_relevant|not_evaluated)$",
     ),
     projection: str = Query("day", pattern="^(day|week)$"),
+    include_evidence: bool = Query(True),
     limit: int = Query(40, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ) -> JSONResponse:
@@ -444,6 +445,7 @@ def events(
             event_id=event_id,
             routing_filter=routing,
             projection=projection,
+            include_evidence=include_evidence,
             limit=limit,
             offset=offset,
         )

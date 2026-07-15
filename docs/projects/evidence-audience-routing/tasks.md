@@ -224,10 +224,15 @@ Application invariants:
   no schema maximum. Its stable instructions are 8,188 characters and 1,180
   whitespace-delimited words, comfortably beyond the 1,024-token cache
   threshold without padding.
-- Audience routing uses one stable prompt-level key and sequential execution.
+- Audience routing uses one stable prompt-level key and bounded parallel execution.
   It stores no per-item key or sharding column, adds no padding, and requests no
-  retention override. Partitioning is justified only if future throughput
-  approaches the documented routing threshold.
+  retention override. Independent run workers may execute frozen packets in
+  parallel without changing that single stable prefix contract.
+- The immutable packet and evidence hash always retain the complete evidence.
+  The derived model view is capped at 20,000 `o200k_base` tokens, with primary
+  evidence ordered before reactions and an explicit `TRUNCATED_EVIDENCE`
+  marker when the lower-priority tail is omitted. This is an inference bound,
+  not source deletion.
 - Artifact text readiness belongs upstream of routing. The shared extraction
   boundary rejects a body before snapshot success only when it has at least 100
   visible characters and at least 90% are exact `█` or Unicode-replacement
@@ -245,16 +250,9 @@ Application invariants:
   but GPT-5.4 mini is proven working: the nine-day run produced 88 hits across
   90 requests and a 49.93% token read ratio. Keep this model-specific evidence
   visible; do not generalize one deployment's result to another.
-- Which reply and quote-post blocks belong in the model packet, and when does a
-  deterministic size bound become necessary? Inspect real packet sizes before
-  choosing a top-N rule.
-- The contextual audit found two likely Investment false negatives and an
-  inconsistent Engineering boundary for temporary access/rate-limit changes.
-  Adi must decide whether to adopt the narrow clarification proposed in
-  `resources/top10-contextual-audit-v1.md` before a targeted rerun.
-- The corrected envelope hashes invalidate the old routing cohort by design.
-  A targeted rerun should follow Adi's prompt-boundary decision rather than
-  silently reusing judgments made over incomplete reply-free packets.
+- The broader artifact retrieval gaps remain upstream limitations. Do not add
+  model-side web search or routing-local text-quality heuristics until the next
+  Insight stage demonstrates a concrete need.
 
 ## Current Batch
 
@@ -263,7 +261,9 @@ Application invariants:
 | complete | Collect authored replies and admit only replies whose conversation root is captured. | parent | — |
 | complete | Rebuild and publish Feed/events; prove Gemma and Muse include their first-party continuations. | parent | — |
 | complete | Replace legacy-triage-gated artifact import with published Feed/Event discovery. | parent | `../../../references/evidence-refresh.md` |
-| in_progress | Decide the prompt-boundary clarification, then rerun only the intended invalidated routing cohort. | parent | `resources/top10-contextual-audit-v1.md` |
+| complete | Bound only the model-facing packet at 20,000 tokens and preserve an explicit truncation notice. | parent | — |
+| complete | Replace all stale routes with GPT-5.4-mini/high top-100 runs for July 5–13. | parent | — |
+| in_progress | Review the 900 current routes with Adi, then freeze the boundary for the separate Insight stage. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -284,6 +284,8 @@ Application invariants:
   outcomes from the authorized top-10 cohort.
 - [ ] After the current boundary decision, audit a bounded sample of difficult
   low-ranked Evidence before any full-catalog expansion.
+- [x] Expand the current audit surface to the top 100 envelopes for all nine
+  complete days with a deterministic 20,000-token model-input ceiling.
 - [x] Expand the audit cohort to the authorized top 10 for every complete day.
 - [x] Add the read-only API projection and compact positive Feed audience marks
   and reasons without reading archived Insight data.
@@ -482,3 +484,12 @@ Application invariants:
   the only structurally deferred kind; 65 non-video pages remain unavailable
   or retryable. `fli evidence-refresh` performs this supported pass by default
   with one artifact store and source-specific adapters hidden behind one CLI.
+- 2026-07-15: [VALIDATED] Replaced every stale audience route with nine current
+  GPT-5.4-mini/high top-100 runs over the corrected Evidence projection. All
+  900 packets completed: 357 both, 99 Engineering-only, 147 Investment-only,
+  and 297 neither. Sixteen packets exceeded the new 20,000-token variable-input
+  boundary and were explicitly marked after truncating only the lower-priority
+  model-facing tail; complete packet JSON and evidence hashes remain intact.
+  The run produced 814 cache-hit requests, 1,463,296 cached tokens, and
+  $5.506914 in proxy-reported cost. Twenty-eight repeated exact model inputs
+  had zero label conflicts.

@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
+
+import httpx
 
 from fli import (
     artifact_arxiv,
@@ -22,8 +26,131 @@ from fli import (
 )
 
 
+DEFAULT_VIEW_BASE_URL = "http://127.0.0.1:8797"
+
+
 def _day(value: str | date) -> date:
     return value if isinstance(value, date) else datetime.strptime(value, "%Y-%m-%d").date()
+
+
+def _optimize_stores(stores: dict[str, Path | str]) -> dict[str, Any]:
+    """Refresh SQLite planner statistics after the materialized writes."""
+    results: dict[str, Any] = {}
+    for label, value in stores.items():
+        path = Path(value)
+        if not path.is_file():
+            results[label] = {"status": "missing", "path": str(path)}
+            continue
+        started = time.monotonic()
+        conn = sqlite3.connect(path, timeout=60.0)
+        try:
+            index_count = int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type = 'index'"
+                ).fetchone()[0]
+            )
+            conn.execute("PRAGMA optimize")
+        finally:
+            conn.close()
+        results[label] = {
+            "status": "optimized",
+            "path": str(path),
+            "index_count": index_count,
+            "duration_ms": round((time.monotonic() - started) * 1000, 3),
+        }
+    return results
+
+
+def _warm_evidence_views(
+    *,
+    base_url: str = DEFAULT_VIEW_BASE_URL,
+    transport: httpx.BaseTransport | None = None,
+) -> dict[str, Any]:
+    """Warm the always-on app after a new publication invalidates its caches."""
+    normalized = base_url.rstrip("/")
+    started = time.monotonic()
+    requests: list[dict[str, Any]] = []
+    try:
+        with httpx.Client(
+            base_url=normalized,
+            timeout=httpx.Timeout(30.0, connect=3.0),
+            transport=transport,
+        ) as client:
+            dates_started = time.monotonic()
+            dates_response = client.get("/api/events/dates")
+            dates_response.raise_for_status()
+            dates_payload = dates_response.json()
+            requests.append(
+                {
+                    "path": "/api/events/dates",
+                    "status_code": dates_response.status_code,
+                    "duration_ms": round(
+                        (time.monotonic() - dates_started) * 1000, 3
+                    ),
+                }
+            )
+            date_from = str(dates_payload.get("date_from") or "")
+            date_to = str(dates_payload.get("date_to") or "")
+            current_days = [
+                str(item["day"])
+                for item in dates_payload.get("dates") or []
+                if date_from <= str(item.get("day") or "") <= date_to
+            ]
+            for day in current_days:
+                request_started = time.monotonic()
+                response = client.get(
+                    "/api/events",
+                    params={
+                        "date": day,
+                        "lane": "all",
+                        "sort": "attention",
+                        "routing": "relevant",
+                        "q": "",
+                        "event_id": "",
+                        "include_evidence": "false",
+                        "limit": 20,
+                        "offset": 0,
+                    },
+                )
+                response.raise_for_status()
+                requests.append(
+                    {
+                        "path": "/api/events",
+                        "day": day,
+                        "status_code": response.status_code,
+                        "duration_ms": round(
+                            (time.monotonic() - request_started) * 1000, 3
+                        ),
+                    }
+                )
+            artifact_started = time.monotonic()
+            artifact_response = client.get("/api/artifacts/dates")
+            artifact_response.raise_for_status()
+            requests.append(
+                {
+                    "path": "/api/artifacts/dates",
+                    "status_code": artifact_response.status_code,
+                    "duration_ms": round(
+                        (time.monotonic() - artifact_started) * 1000, 3
+                    ),
+                }
+            )
+    except (httpx.HTTPError, ValueError) as exc:
+        return {
+            "status": "unavailable",
+            "base_url": normalized,
+            "error": f"{type(exc).__name__}: {exc}",
+            "requests": requests,
+            "duration_ms": round((time.monotonic() - started) * 1000, 3),
+        }
+    return {
+        "status": "ready",
+        "base_url": normalized,
+        "event_run_id": dates_payload.get("run_id"),
+        "days_warmed": len(current_days),
+        "requests": requests,
+        "duration_ms": round((time.monotonic() - started) * 1000, 3),
+    }
 
 
 def refresh_evidence(
@@ -42,6 +169,8 @@ def refresh_evidence(
     events_db: Path | str = signal_events.DEFAULT_EVENTS_DB,
     artifact_db: Path | str = artifacts.DEFAULT_DB,
     key_file: Path = sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+    view_warmup: bool = True,
+    view_base_url: str = DEFAULT_VIEW_BASE_URL,
 ) -> dict[str, Any]:
     """Refresh every deterministic Evidence stage, reusing valid cached work."""
     end = _day(through)
@@ -141,6 +270,14 @@ def refresh_evidence(
             db_path=artifact_db,
             workers=min(workers, 16),
         )
+    index_maintenance = _optimize_stores(
+        {"feed": feed_db, "events": events_db, "artifacts": artifact_db}
+    )
+    view_cache = (
+        _warm_evidence_views(base_url=view_base_url)
+        if view_warmup
+        else {"status": "skipped", "base_url": view_base_url}
+    )
 
     return {
         "range": {"start_day": start.isoformat(), "end_day": end.isoformat()},
@@ -153,6 +290,8 @@ def refresh_evidence(
         "arxiv_fetch": arxiv,
         "x_article_fetch": x_articles,
         "reader_fallback": fallback,
+        "index_maintenance": index_maintenance,
+        "view_cache": view_cache,
     }
 
 
@@ -181,6 +320,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--skip-collection", action="store_true")
     parser.add_argument("--no-reader-fallback", action="store_true")
+    parser.add_argument("--no-view-warmup", action="store_true")
+    parser.add_argument("--view-base-url", default=DEFAULT_VIEW_BASE_URL)
     parser.add_argument("--key-file", type=Path, default=sources.DEFAULT_TWITTERAPI_IO_KEY_FILE)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -194,6 +335,8 @@ def main(argv: list[str] | None = None) -> int:
             reader_fallback=not args.no_reader_fallback,
             collect=not args.skip_collection,
             key_file=args.key_file,
+            view_warmup=not args.no_view_warmup,
+            view_base_url=args.view_base_url,
         )
     except Exception as exc:
         payload = {

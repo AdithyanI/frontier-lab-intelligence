@@ -1,4 +1,7 @@
+import sqlite3
 from pathlib import Path
+
+import httpx
 
 from fli import evidence_refresh
 
@@ -68,6 +71,16 @@ def test_refresh_evidence_runs_cached_pipeline_in_dependency_order(monkeypatch):
         "recover_with_jina_reader",
         lambda **kwargs: (calls.append(("fallback", kwargs)), {"success": 0})[1],
     )
+    monkeypatch.setattr(
+        evidence_refresh,
+        "_optimize_stores",
+        lambda stores: (calls.append(("optimize", stores)), {"status": "ok"})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh,
+        "_warm_evidence_views",
+        lambda **kwargs: (calls.append(("warm", kwargs)), {"status": "ready"})[1],
+    )
 
     result = evidence_refresh.refresh_evidence(
         through="2026-07-13",
@@ -89,6 +102,8 @@ def test_refresh_evidence_runs_cached_pipeline_in_dependency_order(monkeypatch):
         "arxiv",
         "x_articles",
         "fallback",
+        "optimize",
+        "warm",
     ]
     assert calls[1][1]["start_day"].isoformat() == "2026-07-05"
     assert calls[1][1]["workers"] == 48
@@ -121,6 +136,14 @@ def test_refresh_evidence_can_rebuild_without_collection_or_content(monkeypatch)
         evidence_refresh.artifacts,
         "import_feed_envelopes",
         lambda **kwargs: {"artifact_count": 3},
+    )
+    monkeypatch.setattr(
+        evidence_refresh, "_optimize_stores", lambda stores: {"status": "ok"}
+    )
+    monkeypatch.setattr(
+        evidence_refresh,
+        "_warm_evidence_views",
+        lambda **kwargs: {"status": "ready"},
     )
 
     result = evidence_refresh.refresh_evidence(
@@ -179,6 +202,14 @@ def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):
         "recover_with_jina_reader",
         lambda **kwargs: {"success": 0},
     )
+    monkeypatch.setattr(
+        evidence_refresh, "_optimize_stores", lambda stores: {"status": "ok"}
+    )
+    monkeypatch.setattr(
+        evidence_refresh,
+        "_warm_evidence_views",
+        lambda **kwargs: {"status": "ready"},
+    )
 
     evidence_refresh.refresh_evidence(
         through="2026-07-13",
@@ -197,4 +228,56 @@ def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):
                 "key_file": evidence_refresh.sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
             },
         ),
+    ]
+
+
+def test_optimize_stores_reports_materialized_indexes(tmp_path):
+    db = tmp_path / "indexed.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(
+        "CREATE TABLE item (id INTEGER PRIMARY KEY, value TEXT);"
+        "CREATE INDEX idx_item_value ON item(value);"
+    )
+    conn.close()
+
+    result = evidence_refresh._optimize_stores({"feed": db})
+
+    assert result["feed"]["status"] == "optimized"
+    assert result["feed"]["index_count"] == 1
+
+
+def test_warm_evidence_views_warms_current_days_and_artifacts():
+    requested: list[tuple[str, str | None]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        day = request.url.params.get("date")
+        requested.append((request.url.path, day))
+        if request.url.path == "/api/events/dates":
+            return httpx.Response(
+                200,
+                json={
+                    "run_id": "event-1",
+                    "date_from": "2026-07-05",
+                    "date_to": "2026-07-06",
+                    "dates": [
+                        {"day": "2025-01-01", "item_count": 1},
+                        {"day": "2026-07-05", "item_count": 10},
+                        {"day": "2026-07-06", "item_count": 11},
+                    ],
+                },
+            )
+        return httpx.Response(200, json={"available": True})
+
+    result = evidence_refresh._warm_evidence_views(
+        transport=httpx.MockTransport(handler)
+    )
+
+    assert result["status"] == "ready"
+    assert result["event_run_id"] == "event-1"
+    assert result["days_warmed"] == 2
+    assert requested == [
+        ("/api/events/dates", None),
+        ("/api/events", "2026-07-05"),
+        ("/api/events", "2026-07-06"),
+        ("/api/artifacts/dates", None),
     ]

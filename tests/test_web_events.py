@@ -209,6 +209,37 @@ def test_events_api_returns_root_once_with_exact_relationships(tmp_path, monkeyp
     assert [item["post_id"] for item in target_group["evidence"]] == ["2"]
     assert target_group["evidence"][0]["relationship"] == "retweet"
     assert target_group["evidence"][0]["target_post_id"] == "1"
+    assert target_group["relationship_counts"] == {
+        "continuations": 0,
+        "replies": 0,
+        "quotes": 0,
+        "retweets": 1,
+        "related": 0,
+    }
+
+
+def test_events_api_can_omit_heavy_evidence_from_list_rows(tmp_path, monkeypatch):
+    _event_fixture(tmp_path, monkeypatch)
+
+    payload = client.get(
+        "/api/events?date=2026-07-11&limit=20&include_evidence=false"
+    ).json()
+    target_group = next(item for item in payload["items"] if item["root"]["post_id"] == "1")
+
+    assert payload["include_evidence"] is False
+    assert target_group["evidence"] == []
+    assert target_group["relationship_counts"]["retweets"] == 1
+
+    detail = client.get(
+        "/api/events",
+        params={
+            "date": "2026-07-11",
+            "event_id": target_group["event_id"],
+            "include_evidence": "true",
+            "limit": 1,
+        },
+    ).json()
+    assert [item["post_id"] for item in detail["items"][0]["evidence"]] == ["2"]
 
 
 def test_events_api_preserves_ungrouped_posts_as_singletons(tmp_path, monkeypatch):

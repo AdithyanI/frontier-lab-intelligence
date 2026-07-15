@@ -58,6 +58,8 @@ interface EventPageRequest {
 
 const eventPageCache = new Map<string, EventResponse>()
 const eventPageRequests = new Map<string, Promise<EventResponse>>()
+const eventEvidenceCache = new Map<string, EventEvidence[]>()
+const eventEvidenceRequests = new Map<string, Promise<EventEvidence[]>>()
 
 function eventPageKey({
   date,
@@ -83,6 +85,7 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
     routing: request.routingFilter,
     q: request.query,
     event_id: request.eventId ?? '',
+    include_evidence: 'false',
     limit: String(PAGE_SIZE),
     offset: String(request.offset ?? 0),
   })
@@ -93,6 +96,34 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
     })
     .finally(() => eventPageRequests.delete(key))
   eventPageRequests.set(key, pending)
+  return pending
+}
+
+function requestEventEvidence(date: string, eventId: string): Promise<EventEvidence[]> {
+  const key = `${date}\u0000${eventId}`
+  const cached = eventEvidenceCache.get(key)
+  if (cached) return Promise.resolve(cached)
+  const inFlight = eventEvidenceRequests.get(key)
+  if (inFlight) return inFlight
+  const params = new URLSearchParams({
+    date,
+    lane: 'all',
+    sort: 'attention',
+    routing: 'all',
+    q: '',
+    event_id: eventId,
+    include_evidence: 'true',
+    limit: '1',
+    offset: '0',
+  })
+  const pending = getJSON<EventResponse>(`/api/events?${params}`)
+    .then((value) => {
+      const evidence = value.items?.[0]?.evidence ?? []
+      eventEvidenceCache.set(key, evidence)
+      return evidence
+    })
+    .finally(() => eventEvidenceRequests.delete(key))
+  eventEvidenceRequests.set(key, pending)
   return pending
 }
 
@@ -480,14 +511,20 @@ function RetweetTrace({ items }: { items: EventEvidence[] }) {
 
 function EventEvidenceDetails({
   item,
+  date,
   relationshipSummary,
 }: {
   item: SignalEvent
+  date: string
   relationshipSummary: string[]
 }) {
   const [open, setOpen] = useState(false)
-  const narrative = item.evidence.filter((evidence) => evidence.relationship !== 'retweet')
-  const retweets = item.evidence.filter((evidence) => evidence.relationship === 'retweet')
+  const [evidence, setEvidence] = useState(item.evidence)
+  const [evidenceLoaded, setEvidenceLoaded] = useState(item.evidence.length > 0)
+  const [evidenceLoading, setEvidenceLoading] = useState(false)
+  const [evidenceError, setEvidenceError] = useState('')
+  const narrative = evidence.filter((value) => value.relationship !== 'retweet')
+  const retweets = evidence.filter((value) => value.relationship === 'retweet')
   const currentNarrative = narrative.filter((evidence) => evidence.is_new_on_day)
   const priorNarrative = narrative.filter((evidence) => !evidence.is_new_on_day)
   const currentRetweets = retweets.filter((evidence) => evidence.is_new_on_day)
@@ -496,7 +533,20 @@ function EventEvidenceDetails({
   return (
     <details
       className="event-evidence"
-      onToggle={(event) => setOpen(event.currentTarget.open)}
+      onToggle={(event) => {
+        const nextOpen = event.currentTarget.open
+        setOpen(nextOpen)
+        if (!nextOpen || evidenceLoaded || evidenceLoading) return
+        setEvidenceLoading(true)
+        setEvidenceError('')
+        requestEventEvidence(date, item.event_id)
+          .then((value) => {
+            setEvidence(value)
+            setEvidenceLoaded(true)
+          })
+          .catch(() => setEvidenceError('Couldn’t load the related evidence. Close and retry.'))
+          .finally(() => setEvidenceLoading(false))
+      }}
     >
       <summary>
         <span>
@@ -508,6 +558,8 @@ function EventEvidenceDetails({
       </summary>
       {open && (
         <div className="event-thread">
+          {evidenceLoading && <p className="mono muted">Loading evidence…</p>}
+          {evidenceError && <p className="error-note">{evidenceError}</p>}
           {item.is_continuation && (
             <div className="event-thread-section mono">Added on this day</div>
           )}
@@ -556,29 +608,20 @@ function EventRow({
   focused: boolean
 }) {
   const root = item.root
-  const replies = item.evidence.filter((evidence) => evidence.relationship === 'reply')
-  const continuations = replies.filter((evidence) => evidence.same_author_as_root)
-  const externalReplies = replies.filter((evidence) => !evidence.same_author_as_root)
-  const quotes = item.evidence.filter((evidence) => evidence.relationship === 'quote')
-  const retweets = item.evidence.filter(
-    (evidence) => evidence.relationship === 'retweet',
-  )
-  const related = item.evidence.filter(
-    (evidence) => evidence.relationship === 'related',
-  )
+  const counts = item.relationship_counts
   const relationshipSummary = [
-    continuations.length
-      ? `${continuations.length} thread ${continuations.length === 1 ? 'continuation' : 'continuations'}`
+    counts.continuations
+      ? `${counts.continuations} thread ${counts.continuations === 1 ? 'continuation' : 'continuations'}`
       : null,
-    externalReplies.length
-      ? `${externalReplies.length} ${externalReplies.length === 1 ? 'reply' : 'replies'}`
+    counts.replies
+      ? `${counts.replies} ${counts.replies === 1 ? 'reply' : 'replies'}`
       : null,
-    quotes.length ? `${quotes.length} ${quotes.length === 1 ? 'quote' : 'quotes'}` : null,
-    retweets.length
-      ? `${retweets.length} ${retweets.length === 1 ? 'retweet' : 'retweets'}`
+    counts.quotes ? `${counts.quotes} ${counts.quotes === 1 ? 'quote' : 'quotes'}` : null,
+    counts.retweets
+      ? `${counts.retweets} ${counts.retweets === 1 ? 'retweet' : 'retweets'}`
       : null,
-    related.length
-      ? `${related.length} linked ${related.length === 1 ? 'post' : 'posts'}`
+    counts.related
+      ? `${counts.related} linked ${counts.related === 1 ? 'post' : 'posts'}`
       : null,
   ].filter((part): part is string => part !== null)
 
@@ -635,6 +678,7 @@ function EventRow({
         {item.is_grouped && (
           <EventEvidenceDetails
             item={item}
+            date={date}
             relationshipSummary={relationshipSummary}
           />
         )}

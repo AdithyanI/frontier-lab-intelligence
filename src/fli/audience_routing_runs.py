@@ -353,15 +353,19 @@ def freeze_run(
     finally:
         artifact_conn.close()
 
+    rendered_inputs = [audience_routing.render_input(packet) for packet in packets]
+
     cohort = [
         {
             "event_id": packet.event_id,
             "feed_rank": int(item["daily_rank"]),
             "snapshot_content_sha256": str(item["snapshot_content_sha256"]),
             "evidence_sha256": packet.evidence_sha256,
-            "input_sha256": packet.input_sha256,
+            "input_sha256": _sha256(input_text),
         }
-        for item, packet in zip(items, packets, strict=True)
+        for item, packet, input_text in zip(
+            items, packets, rendered_inputs, strict=True
+        )
     ]
     cohort_sha256 = _sha256(_canonical_json(cohort))
     existing = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
@@ -427,11 +431,13 @@ def freeze_run(
                     str(item["snapshot_content_sha256"]),
                     _canonical_json(_packet_payload(packet)),
                     packet.evidence_sha256,
-                    audience_routing.render_input(packet),
-                    packet.input_sha256,
+                    input_text,
+                    _sha256(input_text),
                     now,
                 )
-                for item, packet in zip(items, packets, strict=True)
+                for item, packet, input_text in zip(
+                    items, packets, rendered_inputs, strict=True
+                )
             ],
         )
     return len(packets)

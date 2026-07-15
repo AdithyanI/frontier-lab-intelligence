@@ -297,6 +297,13 @@ export interface SignalEvent {
   peak_public_interactions: number
   latest_evidence_at: string
   evidence: EventEvidence[]
+  relationship_counts: {
+    continuations: number
+    replies: number
+    quotes: number
+    retweets: number
+    related: number
+  }
   audience_routing: {
     feed_rank: number
     snapshot_content_sha256: string
@@ -348,6 +355,7 @@ export interface EventResponse {
   total?: number
   limit?: number
   offset?: number
+  include_evidence?: boolean
   run?: {
     run_id: string
     feed_run_id: string

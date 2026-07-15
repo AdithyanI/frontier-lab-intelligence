@@ -95,6 +95,10 @@ test('Feed exposes the selected date and guards paginated responses by view iden
 test('Feed prioritizes the visible page before background work', () => {
   assert.match(feedSource, /const PAGE_SIZE = 20/)
   assert.match(feedSource, /getCachedJSON<FeedDates>\('\/api\/events\/dates'\)/)
+  assert.match(feedSource, /include_evidence: 'false'/)
+  assert.match(feedSource, /function requestEventEvidence/)
+  assert.match(feedSource, /include_evidence: 'true'/)
+  assert.match(feedSource, /const counts = item\.relationship_counts/)
   assert.match(feedSource, /loading \|\|[\s\S]*?for \(const value of visibleDates\)/)
   assert.match(feedSource, /}, 1200\)/)
 })

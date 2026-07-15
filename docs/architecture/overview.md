@@ -242,9 +242,13 @@ SQLite database. The run records its source event/feed run IDs and selection
 policy directly; it does not depend on a source classification run or read the
 superseded Audience Insights tables. Stable instructions precede the variable
 packet. The current low-rate runner uses one prompt-level cache key with
-sequential execution; it does not store per-item keys, shard traffic, pad the
-prompt, or request extended retention. The nine-day top-10 run read 152,576
-cached tokens across 305,600 input tokens. The current prompt asks for roughly
+bounded parallel workers; it does not store per-item keys, shard traffic, pad
+the prompt, or request extended retention. Full packet JSON remains immutable,
+while the derived model view is capped at 20,000 `o200k_base` tokens. Primary
+evidence precedes reactions, and an explicit `TRUNCATED_EVIDENCE` marker
+replaces only an omitted lower-priority tail. The current nine-day top-100 run
+completed 900/900 packets; 16 required this bound. It read 1,463,296 cached
+tokens across 3,634,944 input tokens. The current prompt asks for roughly
 40–50 words per reason as soft guidance, never a schema limit. The frozen v7
 boundary treats a specific attributed Investment thesis as potentially useful
 without independent verification when its uncertainty is preserved. Temporary
@@ -1196,7 +1200,7 @@ final score.
 | `fli.signal_feed` | content-addressed `signal-feed-v9` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v4` exact structural components with same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
-| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, sequential execution, and resumable cache/cost telemetry |
+| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with full immutable evidence, a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, bounded parallel execution, and resumable cache/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.artifact_arxiv` | official batch-feed title, author, category, date, and abstract extraction for catalogued arXiv papers; PDFs remain optional future work |
 | `fli.cited_insights` / `fli.cited_insight_runs` | historical minimal `insight-v1.1` proof: frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |

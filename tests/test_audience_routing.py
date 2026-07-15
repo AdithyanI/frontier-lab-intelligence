@@ -265,6 +265,37 @@ def test_render_input_keeps_short_reactions_and_cleans_duplicates_and_links():
     assert "Duplicate Reaction" not in rendered
 
 
+def test_render_input_caps_only_model_view_and_marks_truncation():
+    packet = make_packet()
+    oversized_artifact = replace(
+        packet.sources[1],
+        text=("measured inference evidence " * 30_000) + "UNRENDERED_TAIL",
+    )
+    oversized_packet = replace(
+        packet,
+        sources=(packet.sources[0], oversized_artifact, packet.sources[2]),
+    )
+
+    rendered = audience_routing.render_input(oversized_packet)
+
+    assert audience_routing.input_token_count(rendered) <= 20_000
+    assert "TRUNCATED_EVIDENCE:" in rendered
+    assert "Remaining lower-priority evidence was omitted" in rendered
+    assert "UNRENDERED_TAIL" not in rendered
+    assert "UNRENDERED_TAIL" in audience_routing._render_full_input(
+        oversized_packet
+    )
+    assert "reduced inference latency" in rendered
+    assert oversized_packet.evidence_sha256 != packet.evidence_sha256
+
+
+def test_render_input_does_not_mark_packet_within_budget():
+    rendered = audience_routing.render_input(make_packet())
+
+    assert audience_routing.input_token_count(rendered) < 20_000
+    assert "TRUNCATED_EVIDENCE:" not in rendered
+
+
 def test_evidence_hash_binds_hidden_provenance_while_input_hash_does_not():
     packet = make_packet()
     changed_source = replace(

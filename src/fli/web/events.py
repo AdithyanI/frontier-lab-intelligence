@@ -1045,6 +1045,28 @@ def current_daily_rank_by_event_id(*, day: str) -> dict[str, int]:
     return _daily_rank_by_event_id(payload["items"])
 
 
+def _relationship_counts(item: dict[str, Any]) -> dict[str, int]:
+    counts = {
+        "continuations": 0,
+        "replies": 0,
+        "quotes": 0,
+        "retweets": 0,
+        "related": 0,
+    }
+    for evidence in item["evidence"]:
+        relationship = evidence["relationship"]
+        if relationship == "reply":
+            key = "continuations" if evidence["same_author_as_root"] else "replies"
+        elif relationship == "quote":
+            key = "quotes"
+        elif relationship == "retweet":
+            key = "retweets"
+        else:
+            key = "related"
+        counts[key] += 1
+    return counts
+
+
 def events_payload(
     *,
     day: str,
@@ -1056,6 +1078,7 @@ def events_payload(
     limit: int,
     offset: int,
     projection: str = "day",
+    include_evidence: bool = True,
 ) -> dict[str, Any]:
     """Return a state-aware view over one cached day projection."""
     token = _cache_token(day)
@@ -1150,6 +1173,12 @@ def events_payload(
     if event_id:
         items = [item for item in items if item["event_id"] == event_id]
     total = len(items)
+    page_items = []
+    for item in items[offset : offset + limit]:
+        projected = {**item, "relationship_counts": _relationship_counts(item)}
+        if not include_evidence:
+            projected["evidence"] = []
+        page_items.append(projected)
     return {
         **{key: value for key, value in payload.items() if key != "items"},
         "lane": lane,
@@ -1163,7 +1192,8 @@ def events_payload(
         "total": total,
         "limit": limit,
         "offset": offset,
-        "items": items[offset : offset + limit],
+        "include_evidence": include_evidence,
+        "items": page_items,
     }
 
 

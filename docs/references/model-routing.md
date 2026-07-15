@@ -13,7 +13,7 @@ where broader research quality is the evaluated boundary.
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Evidence audience routing | `gpt-5.4-mini` | `high` | The nine-day top-10 run completed 90/90 with useful audience disagreement and 32 `neither` results; a same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
+| Evidence audience routing | `gpt-5.4-mini` | `high` | The current nine-day top-100 run completed 900/900 with 297 `neither` results, 814 cache-hit requests, and zero label conflicts across 28 repeated exact inputs. Sixteen model views required the explicit 20,000-token ceiling. A prior same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
 | Cited insight extraction | `gpt-5.6-luna` | `medium` | Requires claim synthesis plus exact quotation; the five-item migration oracle passed citation verification 5/5. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |

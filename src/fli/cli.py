@@ -122,6 +122,10 @@ def main(argv: list[str] | None = None) -> int:
     evidence_refresh_p.add_argument("--x-article-limit", type=int, default=None)
     evidence_refresh_p.add_argument("--skip-collection", action="store_true")
     evidence_refresh_p.add_argument("--no-reader-fallback", action="store_true")
+    evidence_refresh_p.add_argument("--no-view-warmup", action="store_true")
+    evidence_refresh_p.add_argument(
+        "--view-base-url", default="http://127.0.0.1:8797"
+    )
     evidence_refresh_p.add_argument("--key-file")
     evidence_refresh_p.add_argument("--json", action="store_true")
     artifacts_p = sub.add_parser(
@@ -275,6 +279,9 @@ def main(argv: list[str] | None = None) -> int:
             refresh_args.append("--skip-collection")
         if args.no_reader_fallback:
             refresh_args.append("--no-reader-fallback")
+        if args.no_view_warmup:
+            refresh_args.append("--no-view-warmup")
+        refresh_args.extend(["--view-base-url", args.view_base_url])
         if args.key_file:
             refresh_args.extend(["--key-file", args.key_file])
         if args.json:
