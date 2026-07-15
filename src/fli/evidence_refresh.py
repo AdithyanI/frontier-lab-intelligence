@@ -50,12 +50,20 @@ def _optimize_stores(stores: dict[str, Path | str]) -> dict[str, Any]:
                 ).fetchone()[0]
             )
             conn.execute("PRAGMA optimize")
+            conn.commit()
+            checkpoint_row = conn.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
         finally:
             conn.close()
+        checkpoint = tuple(int(value) for value in checkpoint_row)
         results[label] = {
             "status": "optimized",
             "path": str(path),
             "index_count": index_count,
+            "wal_checkpoint": {
+                "busy": checkpoint[0],
+                "log_frames": checkpoint[1],
+                "checkpointed_frames": checkpoint[2],
+            },
             "duration_ms": round((time.monotonic() - started) * 1000, 3),
         }
     return results

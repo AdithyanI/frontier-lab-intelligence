@@ -244,6 +244,7 @@ def test_optimize_stores_reports_materialized_indexes(tmp_path):
 
     assert result["feed"]["status"] == "optimized"
     assert result["feed"]["index_count"] == 1
+    assert result["feed"]["wal_checkpoint"]["busy"] == 0
 
 
 def test_warm_evidence_views_warms_current_days_and_artifacts():
