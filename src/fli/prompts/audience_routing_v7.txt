@@ -35,6 +35,13 @@ The same packet may be relevant to both audiences, only one audience, or neither
 
 Relevance means that the evidence contains enough concrete substance that a capable member of the audience could reasonably change what they investigate, monitor, test, build, or consider. Relevance does not require the evidence to be conclusive or already verified. A specific attributed claim, report, experience, or forecast can itself be useful, provided that you describe it as such rather than silently presenting it as established fact.
 
+# Approved boundary decisions
+
+Apply these two inclusion boundaries directly:
+
+1. For Investment, mark a clear directional thesis from an identifiable company, executive, researcher, or practitioner as relevant when the packet also supplies a specific named actor, observed behavior, quantified adoption signal, policy claim, or identifiable company or market consequence. One concrete material proposition is enough; do not require a complete financial case. The evidence may be anecdotal, unquantified, or unverified, but the reason must preserve that limitation. In particular, do not reject an otherwise specific labor, adoption, organizational-behavior, or market-structure thesis merely because it lacks direct revenue, cost, capex, retention, valuation, or market-share evidence.
+2. For AI Engineering, model availability, subscription entitlement, temporary access extensions or resets, and usage or rate limits are not sufficient by themselves. Mark them relevant only when the packet supplies a persistent operational constraint or a measured effect on cost, reliability, throughput, reproducibility, or system behavior that a technical team could act on. A promise or announcement that efficiency or behavior will improve is not a measured effect unless the packet also reports an observed result or a specific quantified technical change beyond the entitlement or limit itself. This rule applies only to AI Engineering; evaluate any separate Investment consequence independently.
+
 # AI Engineering relevance
 
 Mark AI Engineering as relevant when the evidence contains concrete technical information that could influence engineering or research work on frontier-AI systems.
@@ -50,8 +57,6 @@ This can include, for example:
 - a concrete technical thesis or forecast that identifies something practitioners should test or monitor.
 
 Do not mark it relevant merely because the subject is AI, a new product or model is named, a prominent technical person posted it, or somebody expresses excitement. There must be technical substance that is usable for investigation, implementation, evaluation, or operation.
-
-Model availability, subscription entitlement, temporary access extensions or resets, and usage or rate limits are not sufficient by themselves. Mark them relevant only when the packet supplies a persistent operational constraint or a measured effect on cost, reliability, throughput, reproducibility, or system behavior that a technical team could act on. A promise or announcement that efficiency or behavior will improve is not a measured effect unless the packet also reports an observed result or a specific quantified technical change beyond the entitlement or limit itself.
 
 # Investment relevance
 
@@ -70,7 +75,7 @@ This can include, for example:
 
 A ticker or numerical metric is not always required, but the evidence must contain a specific material proposition. Do not invent revenue, valuation, market-share, moat, demand, or public-equity implications that the packet itself does not support. Generic enthusiasm, ordinary product trivia, or technical novelty without a supplied strategic or economic consequence is not enough.
 
-Do not require a specific attributed claim, forecast, report, or allegation to be independently verified before marking it relevant. It may be Investment-relevant when the packet supplies an identifiable company, market, competitive, policy, labor, or adoption consequence. A concrete executive or practitioner thesis about labor substitution, adoption, organizational behavior, or market structure can qualify even when it is anecdotal or unquantified and does not yet supply direct revenue, cost, capex, or valuation effects. Do not reject it for those reasons alone. The reason must clearly preserve its epistemic status and must not present it as established fact.
+Do not require a specific attributed claim, forecast, report, or allegation to be independently verified before marking it relevant. The reason must clearly preserve its epistemic status and must not present it as established fact.
 
 # How to handle the evidence
 
