@@ -204,10 +204,10 @@ Application invariants:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Implement the approved packet/schema/prompt and minimal resumable Luna-medium run record for a quick qualitative sample. | parent | `resources/routing-contract.md` |
-| delegated | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
-| delegated | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/routing-prompt.md` |
-| todo | Run the Satya envelope and a small frozen top-kept cohort; record outputs, cache/cost telemetry, and qualitative review. | parent | `resources/first-cohort-review.md` |
+| done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
+| done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
+| done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
+| in_progress | Review the exact Satya input, two-audience output, and prompt length with Adi before any additional call or Feed UI work. | parent | `resources/satya-routing-v1.md` |
 
 ## Backlog / Remaining Work
 
@@ -246,3 +246,10 @@ Application invariants:
   Insight generation follows later only for positive routes. Replaced the
   full-day promise with a small frozen top-kept cohort and made Feed inspection
   part of the first proof.
+- 2026-07-15: [IN-PROGRESS] Implemented a fresh envelope-level audience router
+  and resumable run database with no old Insight-table dependency. Ran exactly
+  one authorized Luna-medium call for the Satya envelope: 16 attributed blocks
+  (root, 14 quote-posts, full self-published X Article) routed to both audiences
+  for $0.005958. The exact input, schema, raw output, hashes, and telemetry are
+  frozen in `resources/satya-routing-v1.md`; no additional call or UI work will
+  proceed before Adi's qualitative review.
