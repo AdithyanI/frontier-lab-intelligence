@@ -110,6 +110,25 @@ The fresh retry also produced no provider cache read or cache-write telemetry.
 This reproduces the miss on GPT-5.5 with the exact current prompt and removes
 the remaining concern that the earlier result was specific to v3.
 
+## GPT-5.4 mini positive control
+
+The exact v4 canary was then repeated through `gpt-5.4-mini`, again with two
+different packets, fully sequential calls, and one fresh forced key,
+`fli:audience-routing:v4:gpt54mini-canary-00`.
+
+| Request | Total input tokens | Azure cached tokens | Proxy spend | Duration |
+| --- | ---: | ---: | ---: | ---: |
+| GPT-5.4 mini v4, cold | 3,289 | 0 | $0.00390225 | 4.873s |
+| GPT-5.4 mini v4, same prefix and key | 1,953 | 1,280 | $0.00202725 | 3.334s |
+
+This is a successful provider prefix-cache read. It proves that the current v4
+prompt, structured schema, explicit cache key, sequential request shape, and
+shared LiteLLM Responses path are cacheable. Neither call reported explicit
+cache-write tokens, so that field's absence is not evidence that no cache entry
+was created. The remaining failure is localized to the current GPT-5.5 and
+GPT-5.6 routes or their backing Azure deployments rather than the application
+request contract or shared proxy in general.
+
 ## LiteLLM version audit
 
 The shared proxy is running LiteLLM 1.92.0. The automatic stable-version
@@ -138,12 +157,13 @@ channels.
 
 The miss is not caused by the 1,024-token threshold, prompt length, cache-key
 instability, sharding, parallel calls within one lane, a dropped adapter field,
-or the 1.92.0 image upgrade alone. Both
-GPT-5.5 and GPT-5.6 failed the different-input test, so the Azure Responses
-prompt-prefix cache or its current proxy interaction is not functioning
-reliably. Microsoft documented a GPT-5.6 Responses-specific failure in July and
-reported it resolved on July 13; these live controls show that reliable caching
-is still not observable on July 15.
+or the application request shape. GPT-5.4 mini returned 1,280 cached tokens for
+the identical v4 control through the same proxy, while GPT-5.5 and GPT-5.6
+returned zero. The remaining failure is therefore specific to those model
+routes or their backing Azure deployments. Microsoft documented a GPT-5.6
+Responses-specific failure in July and reported it resolved on July 13; these
+live controls show that reliable caching is still not observable on the current
+5.5/5.6 routes on July 15.
 
 Keep the proven request shape, 32 stable lanes, sequential per-lane scheduling,
 and cache telemetry. Do not pad the prompt or block the catalog run waiting for

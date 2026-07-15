@@ -72,12 +72,21 @@ The same v3 different-input control also returned zero reads on the available
 GPT-5.5 Azure Responses deployment despite an explicit shared key and `24h`
 retention, so the live failure is not isolated to the Luna model alias.
 
+A same-day positive control localized the failure further. The exact current
+v4 request shape sent through `gpt-5.4-mini` returned 1,280 cached tokens on the
+second different-input call. The shared LiteLLM Responses path, v4 prompt,
+schema, and explicit cache key are therefore valid; the observed miss belongs
+to the current GPT-5.5/GPT-5.6 routes or their backing Azure deployments, not
+the application contract or shared proxy in general.
+
 A final Luna-specific control removed the remaining sharding ambiguity: two
 different v4 evidence packets ran sequentially with the exact same forced
 cache key and an 8,284-character / 1,516-token stable prefix. The 3,289-token cold request
 and 1,953-token follow-up both returned zero cached tokens. Catalog jobs must
-therefore be budgeted as uncached; keep telemetry and treat any future reads as
-measured upside rather than a prerequisite.
+therefore be budgeted as uncached when using the GPT-5.6 Luna route; keep
+telemetry and treat any future reads as measured upside rather than a
+prerequisite. Do not switch models for cache savings alone—the routing model
+decision remains accuracy-first.
 
 The proxy also has a separate Redis full-response cache. An exact complete
 request repeat can therefore return instantly at zero proxy spend while still

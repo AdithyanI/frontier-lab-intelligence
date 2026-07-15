@@ -390,3 +390,10 @@ Application invariants:
   returned zero cached tokens and zero cache-write telemetry. This rules out
   the earlier GPT-5.5 miss being an obsolete-v3 artifact. The retry cost
   $0.049730.
+- 2026-07-15: [VALIDATED] The identical current-prompt canary succeeded on
+  GPT-5.4 mini. Its cold call read zero cached tokens; the sequential
+  different-input follow-up used the same fresh key and read 1,280 of 1,953
+  input tokens from the provider cache. This positive control proves the v4
+  request and shared LiteLLM path are sound and localizes the miss to the
+  current GPT-5.5/GPT-5.6 routes or backing deployments. The two mini calls
+  cost $0.00592950.
