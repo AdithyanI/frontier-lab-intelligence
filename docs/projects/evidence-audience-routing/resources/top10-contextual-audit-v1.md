@@ -151,10 +151,17 @@ blocks of `████` characters. The reason explicitly noticed that the arti
 effectively redacted.
 
 This is not a routing-model error. It is an input-integrity failure that hides
-what is probably the most substantive part of the packet. Artifact validation
-should detect redacted/garbled content and mark the packet incomplete for
-refetch or human inspection instead of allowing the absence of usable content
-to look like a substantive `neither` judgment.
+what is probably the most substantive part of the packet. The routing boundary
+now omits only long artifact bodies whose visible characters are at least 90%
+exact extraction placeholders (`█` or the Unicode replacement character). The
+immutable packet still retains the exact source and evidence hash. A scan of
+881 successful artifact snapshots flagged exactly this 621-character Claude
+Code extraction.
+
+The rule intentionally does not attempt to detect arbitrary gibberish, shell
+pages, poor prose, code, foreign languages, or suspicious text. Those remain in
+the packet until a separate evidence-readiness contract is justified by real
+failures.
 
 ## Recommendation
 

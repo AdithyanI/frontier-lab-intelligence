@@ -227,7 +227,13 @@ remain later stages after this deterministic layer is audited.
 evidence. One GPT-5.4-mini/high call receives the readable attributed packet and
 returns two independently reasoned booleans: AI Engineering relevance and
 Investment relevance. Feed rank, score, engagement, prominence, and the
-derived audit state are not model inputs. `fli.audience_routing_runs`
+derived audit state are not model inputs. Artifact bodies that are at least 100
+visible characters and at least 90% exact extraction-placeholder characters
+(`█` or the Unicode replacement character) are omitted from the readable model
+input. This is deliberately not a general garbage-text heuristic: unusual,
+short, mixed, foreign-language, code, and diagram text remains. The immutable
+packet and evidence hash retain the exact omitted source for audit.
+`fli.audience_routing_runs`
 freezes the exact cohort, snapshot/evidence/input hashes, prompt and schema
 versions, model output, cache telemetry, cost, and failures in one resumable
 SQLite database. The run records its source event/feed run IDs and selection

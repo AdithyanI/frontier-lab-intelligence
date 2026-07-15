@@ -245,6 +245,73 @@ def test_render_input_keeps_short_reactions_and_cleans_duplicates_and_links():
     assert "Duplicate Reaction" not in rendered
 
 
+def test_render_input_omits_only_placeholder_dominated_artifacts():
+    packet = make_packet()
+    garbled_artifact = replace(
+        packet.sources[1],
+        title="Broken extraction",
+        text=(("\u2588" * 12 + " ") * 50) + "BY ANTHROPIC",
+    )
+    rendered = audience_routing.render_input(
+        replace(packet, sources=(packet.sources[0], garbled_artifact))
+    )
+
+    assert "Broken extraction" not in rendered
+    assert "BY ANTHROPIC" not in rendered
+    assert "\u2588" not in rendered
+    assert "    artifacts:" not in rendered
+
+
+def test_omitted_artifact_does_not_make_a_link_only_root_an_artifact_link():
+    packet = make_packet()
+    root = replace(packet.sources[0], text="https://t.co/broken-artifact")
+    garbled_artifact = replace(
+        packet.sources[1],
+        text=(("\u2588" * 12 + " ") * 50) + "BY ANTHROPIC",
+    )
+    rendered = audience_routing.render_input(
+        replace(packet, sources=(root, garbled_artifact))
+    )
+
+    assert "      kind: link_only" in rendered
+    assert "      kind: artifact_link" not in rendered
+    assert "    artifacts:" not in rendered
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "\u2588" * 99,
+        ("\u2588" * 90) + ("valid prose " * 12),
+        "\ufffd" * 99,
+        "print('valid code')\n" + ("# \u2588 rendered progress bar\n" * 20),
+    ],
+)
+def test_render_input_keeps_short_or_mixed_unusual_artifact_text(text):
+    packet = make_packet()
+    unusual_artifact = replace(packet.sources[1], text=text)
+    rendered = audience_routing.render_input(
+        replace(packet, sources=(packet.sources[0], unusual_artifact))
+    )
+
+    assert "    artifacts:" in rendered
+    assert text.splitlines()[0].strip() in rendered
+
+
+def test_omitted_artifact_remains_bound_to_packet_provenance():
+    packet = make_packet()
+    first = replace(
+        packet.sources[1],
+        text=(("\u2588" * 12 + " ") * 50) + "BY ANTHROPIC",
+    )
+    second = replace(first, text=first.text + "\u2588")
+    first_packet = replace(packet, sources=(packet.sources[0], first))
+    second_packet = replace(packet, sources=(packet.sources[0], second))
+
+    assert first_packet.evidence_sha256 != second_packet.evidence_sha256
+    assert first_packet.input_sha256 == second_packet.input_sha256
+
+
 def test_evidence_hash_binds_hidden_provenance_while_input_hash_does_not():
     packet = make_packet()
     changed_source = replace(

@@ -60,7 +60,7 @@ deferred until this narrower routing boundary is qualitatively proven.
 | Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Feed audience routing | Implemented; nine-day top-10 audit active | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. GPT-5.4 mini at high reasoning completed 90/90 top-ranked envelopes across July 5–13: 44 `both`, six Engineering-only, eight Investment-only, and 32 `neither`. The single stable prompt key produced 88 cache-hit requests and 152,576 cached tokens from 305,600 input tokens; 89 response-cost headers total $0.462966 and one is missing. Exact snapshot matches appear in Feed as `ENG`/`INV` marks with the two reasons in one disclosure. One derived Status control exposes Relevant, Not relevant, and Not evaluated without inventing a third judgment. Adi's qualitative review remains. |
+| Feed audience routing | Implemented; nine-day top-10 audit active | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. A conservative input guard now omits only long artifact bodies dominated by exact extraction placeholders while retaining their immutable source evidence; it flagged one of 881 successful artifact snapshots. GPT-5.4 mini at high reasoning completed 90/90 top-ranked envelopes across July 5–13: 44 `both`, six Engineering-only, eight Investment-only, and 32 `neither`. The single stable prompt key produced 88 cache-hit requests and 152,576 cached tokens from 305,600 input tokens; 89 response-cost headers total $0.462966 and one is missing. Exact snapshot matches appear in Feed as `ENG`/`INV` marks with the two reasons in one disclosure. One derived Status control exposes Relevant, Not relevant, and Not evaluated without inventing a third judgment. Adi's audience-threshold decision remains. |
 | Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
@@ -73,21 +73,24 @@ current databases or APIs before using them as present-tense product claims.
 ## The Most Important Unproven Claim
 
 The repository has proved that one simple prompt/schema, versioned run store,
-and exact-match Feed projection can route a varied 90-record cohort. It has not
-yet proved that the audience threshold is editorially correct: 32 top-ranked
-envelopes route to neither audience and 14 route to exactly one, but Adi has not
-audited a representative slice of those reasons. Previous multi-stage Insight
-results remain historical learning, not the active contract. The next step is
-that qualitative audit—not Insight prose or a full-catalog expansion.
+and exact-match Feed projection can route a varied 90-record cohort. A
+26-packet contextual review agreed with 21 decisions, found three
+access/rate-limit boundary cases, and identified two likely Investment false
+negatives. The obvious garbled-artifact case now has a narrow mechanical input
+guard, but Adi has not yet decided the two proposed audience-threshold
+clarifications. Previous multi-stage Insight results remain historical
+learning, not the active contract. That boundary decision—not Insight prose or
+a full-catalog expansion—is next.
 
 ## Submission Finish Line
 
 The active Evidence Audience Routing tracker owns the execution detail. At
 system level, the remaining proof is:
 
-1. Audit representative `both`, single-audience, and `neither` outputs from the
-   July 5–13 top-10 cohort with Adi in Feed.
-2. Correct any packet, prompt, or threshold ambiguity revealed by that audit.
+1. Decide the two narrow Investment and Engineering threshold clarifications
+   from the 26-packet contextual audit.
+2. Rerun only the five disputed or borderline packets and verify that the
+   clarification does not weaken clear negatives.
 3. Use the 32 observed `neither` cases and 14 single-audience cases to calibrate
    the threshold; add lower-ranked hard negatives only if the audit exposes a
    real coverage gap.

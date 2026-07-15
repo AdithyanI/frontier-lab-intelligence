@@ -226,6 +226,11 @@ Application invariants:
   It stores no per-item key or sharding column, adds no padding, and requests no
   retention override. Partitioning is justified only if future throughput
   approaches the documented routing threshold.
+- Routing input omits an artifact body only when it has at least 100 visible
+  characters and at least 90% are exact extraction placeholders (`█` or the
+  Unicode replacement character). This is not a general garbage detector. The
+  immutable packet and evidence hash retain the exact source even when its
+  unreadable body is absent from the model view.
 
 ## Open Questions / Blockers
 
@@ -240,23 +245,21 @@ Application invariants:
   inconsistent Engineering boundary for temporary access/rate-limit changes.
   Adi must decide whether to adopt the narrow clarification proposed in
   `resources/top10-contextual-audit-v1.md` before a targeted rerun.
-- One Claude Code article was extracted as redacted block characters. Add
-  deterministic artifact-content validation so an incomplete packet does not
-  silently look like a substantive `neither` result.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Simplify production audience routing to GPT-5.4 mini with one stable prompt key, sequential execution, and no sharding, retention override, or padding. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
-| done | Freeze and route the top 10 ranked Evidence envelopes for every available Feed day at high reasoning. | parent | `resources/top10-every-day-v4-mini.md` |
-| done | Verify per-day completeness, cache reads, cost, audience distribution, and existing Feed projection. | parent | `resources/top10-every-day-v4-mini.md` |
 | done | Contextually audit 26 stratified packets against the exact stored evidence and approved audience standards. | parent | `resources/top10-contextual-audit-v1.md` |
+| done | Add a conservative placeholder-only artifact guard and verify it against all 881 successful text snapshots. | parent | `resources/top10-contextual-audit-v1.md` |
 | in_progress | Decide whether to add the two narrow boundary clarifications and rerun only the five disputed/borderline packets. | parent | `resources/top10-contextual-audit-v1.md` |
 
 ## Backlog / Remaining Work
 
-- [ ] Add deterministic packet-integrity and schema-consistency validation.
+- [x] Omit long artifact bodies dominated by exact extraction placeholders
+  without adding a subjective garbage-text heuristic.
+- [ ] Add broader packet-integrity or schema-consistency validation only when a
+  concrete failure justifies a deterministic rule.
 - [x] Audit a stratified sample of both, single-audience, and `neither`
   outcomes from the authorized top-10 cohort.
 - [ ] After the current boundary decision, audit a bounded sample of difficult
@@ -415,3 +418,10 @@ Application invariants:
   proposed narrow clarification and exact cases are recorded in
   `resources/top10-contextual-audit-v1.md`; Adi's boundary decision remains the
   project closeout blocker.
+- 2026-07-15: [VALIDATED] Added a deliberately narrow routing-input guard for
+  artifact bodies with at least 100 visible characters and at least 90% exact
+  `█`/Unicode-replacement placeholders. The immutable packet and evidence hash
+  still bind the omitted source. Tests prove short blocks, mixed prose, code,
+  and progress-bar text remain; a scan of all 881 successful artifact
+  snapshots flagged only the known 621-character Claude Code extraction. No
+  existing routing result was rewritten and no model call was made.
