@@ -33,7 +33,7 @@ Registry
   -> trusted X collection cohort
   -> exact quote / retweet / reply envelopes over time
   -> transparent daily-score ordering
-  -> next routing contract pending architecture review
+  -> independent AI Engineering + Investment routing
   -> later cited extraction from stored X + canonical artifacts
   -> eventual separate Investment + AI Engineering views
 ```
@@ -41,9 +41,12 @@ Registry
 The stored-X and canonical-artifact evidence paths are implemented. The earlier
 multi-stage Audience Insights v2 implementation remains in code and has been
 archived, while all generated outputs were explicitly discarded on 2026-07-15.
-The successor now starts downstream of the existing Feed keep/drop decision:
-one versioned Luna-medium call makes independent AI Engineering and Investment
-relevance judgments over a complete attributed evidence packet. Insight
+The successor now starts directly from ranked Feed evidence: one versioned
+Luna-medium call makes independent AI Engineering and Investment relevance
+judgments over a complete attributed evidence packet. The former model-based
+keep/drop gate, its generated databases, and its live API/UI/CLI surfaces were
+removed on 2026-07-15. The Feed derives `kept` only when either audience is
+relevant; it is not a third judgment. Insight
 writing, publication auditing, reconciliation, briefing, and export remain
 deferred until this narrower routing boundary is qualitatively proven.
 
@@ -56,9 +59,8 @@ deferred until this narrower routing boundary is qualitatively proven.
 | X evidence store | Implemented source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
 | Exact event projection | Implemented and regression-tested | Provider-declared quote, retweet, and reply relations form stable envelopes with cutoff-correct daily snapshots and deduplicated weekly views. The current nine-day run contains 20,159 posts and 5,202 exact events. |
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
-| Legacy keep/drop triage | Implemented comparison baseline | The existing Luna decision/reason runs remain inspectable, but the active product is testing a cleaner audience-first contract. During calibration, the legacy result is preserved for comparison and is not silently overwritten. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Feed audience routing | Implemented; July 12 top-eight audit active | Existing Feed triage remains the only keep/drop gate. Runtime v3 returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. The frozen July 12 top-eight kept cohort completed with five `both`, one AI-only, two Investment-only, and zero `neither`; 21,365 input tokens produced zero reported provider-cache reads and $0.037241 proxy cost. Exact-match records now appear in Feed as positive-only `AI`/`INV` marks with all three reasons in the existing disclosure. Adi's qualitative review and a bounded hard-negative sample remain. |
+| Feed audience routing | Implemented; July 12 review cohort active | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. The migrated eight-record July 12 review cohort contains five `both`, one AI-only, two Investment-only, and zero `neither`; the original calls used 21,365 input tokens, reported zero provider-cache reads, and cost $0.037241. Exact snapshot matches appear in Feed as `ENG`/`INV` marks with the two reasons in one disclosure. One derived Status control exposes the mutually exclusive Relevant, Not relevant, and Not evaluated states without inventing a third judgment. Adi's qualitative review and a bounded hard-negative sample remain. |
 | Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
@@ -72,7 +74,7 @@ current databases or APIs before using them as present-tense product claims.
 
 The repository has proved that one simple prompt/schema, versioned run store,
 and exact-match Feed projection can route a small positive-biased cohort. It has
-not yet proved the audience threshold: the first eight top-kept envelopes
+not yet proved the audience threshold: the first eight review envelopes
 contained no `neither` result, and two AI Engineering positives are borderline
 operational signals rather than clear technical evidence. Previous multi-stage
 Insight results remain historical learning, not the active contract. The next
@@ -84,7 +86,7 @@ sample—not Insight prose or a nine-day publication apparatus.
 The active Evidence Audience Routing tracker owns the execution detail. At
 system level, the remaining proof is:
 
-1. Audit the July 12 top-eight outputs and reason quality with Adi in Feed.
+1. Audit the July 12 eight-record outputs and reason quality with Adi in Feed.
 2. Correct any packet, prompt, or threshold ambiguity revealed by that audit.
 3. Calibrate a bounded hard-negative sample containing plausible `neither`
    cases and explicit audience disagreements.

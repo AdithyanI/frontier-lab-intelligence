@@ -2,7 +2,7 @@
 
 ## Summary
 
-- This project defines one small routing boundary between accepted Evidence
+- This project defines one small routing boundary between ranked Evidence
   envelopes and any future audience-specific Insight generation.
 - Capture learnings continuously because the preceding project accumulated
   costly complexity before the first product judgment was jointly understood.
@@ -53,8 +53,8 @@
 
 ## Recommended Follow-Ups
 
-- Decide whether keep/drop is independent or derived before implementing the
-  database schema.
+- Treat `kept` as a UI/read-model derivation of the two audience booleans; do
+  not add another model field or database authority for it.
 - Build the packet renderer before the first routing model call.
 
 ## Notes For Future Runs

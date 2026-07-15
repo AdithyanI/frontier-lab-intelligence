@@ -321,6 +321,7 @@ def freeze_run(
         sort="attention",
         query="",
         event_id=event_id or "",
+        routing_filter="all",
         limit=5000,
         offset=0,
     )
@@ -404,7 +405,7 @@ def freeze_run(
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count,
                 created_at, updated_at)
-               VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 expected["run_id"], expected["day"], expected["model"],
                 expected["reasoning_effort"], expected["prompt_version"],

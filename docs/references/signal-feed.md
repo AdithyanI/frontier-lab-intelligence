@@ -143,16 +143,16 @@ model re-componentizes the surviving structural graph: a rejected renderable
 wrapper cannot bridge two otherwise separate envelopes, while an opaque
 provider target remains a valid shared anchor.
 
-## Triage Projection
+## Audience Routing Projection
 
-Completed `keep | drop` judgments are snapshot-bound audit metadata, not event
-identity and not a replacement ranking. The UI displays a judgment only when
-the completed row's `event_id` and `snapshot_content_sha256` match the current
-cutoff projection. The runner reuses prior work only when event ID, snapshot
-hash, and exact rendered `input_sha256` all match; structural repairs therefore
-retain unchanged decisions but cannot attach an old decision to newly merged or
-expanded evidence. The API computes keep/drop/not-evaluated counts before
-pagination.
+Completed AI Engineering and Investment judgments are snapshot-bound audit
+metadata, not event identity and not a replacement ranking. The UI displays a
+route only when the completed row's `event_id` and
+`snapshot_content_sha256` match the current cutoff projection. The runner
+reuses prior work only when event ID, snapshot hash, and exact rendered
+`input_sha256` all match; structural repairs therefore retain unchanged routes
+but cannot attach an old judgment to newly merged or expanded evidence. The API
+derives kept/not-kept/not-evaluated and audience counts before pagination.
 
 ## Read Performance
 

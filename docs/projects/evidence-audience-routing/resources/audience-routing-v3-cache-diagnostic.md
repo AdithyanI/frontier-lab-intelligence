@@ -35,6 +35,32 @@ The Satya request is the cache behavior the catalog needs: different variable
 evidence after the same stable prompt and schema. It received no Azure prefix
 cache read.
 
+One limitation was identified during the clean-routing review: the v3 Rank 1
+and Satya requests followed their normal event-derived 32-shard keys, so that
+pair alone did not prove reuse within one cache lane. The later GPT-5.5 control
+did force one shared key, but the Luna conclusion needed the same exact test.
+
+## Same-lane v4 follow-up
+
+A minimal follow-up used `audience-routing-v4` with two different July 12
+evidence packets and the exact same forced cache key:
+`fli:audience-routing:audience-routing-v4:diagnostic-00`. The calls were fully
+sequential. The stable prompt was 8,284 characters / 1,201 words and measured
+1,516 tokens with `o200k_base`, comfortably above the 1,024-token eligibility
+threshold before the stable structured-output schema is counted. Request input
+hashes were different, so the
+second response could not be a LiteLLM exact-response replay.
+
+| Request | Input tokens | Azure cached tokens | Proxy spend | Duration |
+| --- | ---: | ---: | ---: | ---: |
+| Same lane, evidence 1 | 3,289 | 0 | $0.005065 | 4.617s |
+| Same lane, evidence 2 | 1,953 | 0 | $0.003561 | 2.995s |
+
+Both requests reached `gpt-5.6-luna` and reported no cache-write telemetry.
+This closes the sharding ambiguity: even within one explicit key, after the
+cold request completed, Azure did not report a prefix read for the different
+input.
+
 ## Known-working-path control
 
 To distinguish a v3 prompt problem from an upstream problem, two fresh variable
@@ -93,9 +119,9 @@ channels.
 
 ## Conclusion
 
-The miss is not caused by the 1,024-token threshold, v3 prompt length, cache-key
-instability, parallel calls within one lane, a dropped adapter field, or the
-1.92.0 image upgrade alone. Both
+The miss is not caused by the 1,024-token threshold, prompt length, cache-key
+instability, sharding, parallel calls within one lane, a dropped adapter field,
+or the 1.92.0 image upgrade alone. Both
 GPT-5.5 and GPT-5.6 failed the different-input test, so the Azure Responses
 prompt-prefix cache or its current proxy interaction is not functioning
 reliably. Microsoft documented a GPT-5.6 Responses-specific failure in July and
@@ -103,7 +129,8 @@ reported it resolved on July 13; these live controls show that reliable caching
 is still not observable on July 15.
 
 Keep the proven request shape, 32 stable lanes, sequential per-lane scheduling,
-and cache telemetry. Do not pad the prompt or claim prefix-cache savings. Exact
+and cache telemetry. Do not pad the prompt or block the catalog run waiting for
+a cache fix; budget it as uncached and treat any observed reads as upside. Exact
 reruns still benefit from LiteLLM's full-response cache, while different catalog
 items must be costed as uncached until `cached_tokens` becomes nonzero again.
 

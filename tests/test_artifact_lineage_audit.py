@@ -185,6 +185,12 @@ def _fixture(tmp_path):
 def test_primary_author_lineage_audit_passes_same_author_reply(tmp_path):
     artifact_db, feed_db = _fixture(tmp_path)
 
+    # The import manifest preserves triage provenance, but the lineage proof is
+    # intentionally self-contained once the candidate and raw Feed post have
+    # been frozen. Historical triage databases may be cleaned up later.
+    (tmp_path / "older-triage.db").unlink()
+    (tmp_path / "triage.db").unlink()
+
     report = artifacts.audit_primary_author_lineage(
         db_path=artifact_db,
         feed_db=feed_db,
@@ -231,3 +237,23 @@ def test_primary_author_lineage_cli_fails_with_structured_foreign_author_report(
     assert payload["error"]["code"] == "E_INTEGRITY"
     assert payload["data"]["passed"] is False
     assert payload["data"]["violation_reasons"] == {"foreign_author": 1}
+
+
+def test_primary_author_lineage_reports_missing_frozen_root_as_coverage(tmp_path):
+    artifact_db, feed_db = _fixture(tmp_path)
+    feed = sqlite3.connect(feed_db)
+    feed.execute("DELETE FROM feed_post WHERE post_id = 'root'")
+    feed.commit()
+    feed.close()
+
+    report = artifacts.audit_primary_author_lineage(
+        db_path=artifact_db,
+        feed_db=feed_db,
+    )
+
+    assert report["passed"] is True
+    assert report["coverage"] == {
+        "conversation_roots_verified": 0,
+        "conversation_roots_frozen_import_only": 1,
+    }
+    assert report["violation_reasons"] == {}

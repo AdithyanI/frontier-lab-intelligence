@@ -426,6 +426,10 @@ def events(
     sort: str = Query("attention", pattern="^(attention|recent|engagement)$"),
     q: str = Query("", max_length=200),
     event_id: str = Query("", max_length=128),
+    routing: str = Query(
+        "all",
+        pattern="^(all|relevant|not_relevant|not_evaluated)$",
+    ),
     projection: str = Query("day", pattern="^(day|week)$"),
     limit: int = Query(40, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -438,6 +442,7 @@ def events(
             sort=sort,
             query=q,
             event_id=event_id,
+            routing_filter=routing,
             projection=projection,
             limit=limit,
             offset=offset,

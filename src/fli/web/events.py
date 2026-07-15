@@ -1033,6 +1033,7 @@ def events_payload(
     sort: str,
     query: str,
     event_id: str = "",
+    routing_filter: str = "all",
     limit: int,
     offset: int,
     projection: str = "day",
@@ -1076,6 +1077,40 @@ def events_payload(
             ).lower()
         )
     ]
+
+    def audiences(item: dict[str, Any]) -> tuple[bool, bool] | None:
+        route = item.get("audience_routing")
+        if route is None:
+            return None
+        return (
+            bool(route["ai_engineering"]["relevant"]),
+            bool(route["investment"]["relevant"]),
+        )
+
+    routing_counts = {
+        "all": len(items),
+        "relevant": sum(
+            result is not None and (result[0] or result[1])
+            for result in map(audiences, items)
+        ),
+        "not_relevant": sum(
+            result == (False, False) for result in map(audiences, items)
+        ),
+        "not_evaluated": sum(
+            result is None for result in map(audiences, items)
+        ),
+    }
+    if routing_filter == "relevant":
+        items = [
+            item
+            for item in items
+            if (result := audiences(item)) is not None
+            and (result[0] or result[1])
+        ]
+    elif routing_filter == "not_relevant":
+        items = [item for item in items if audiences(item) == (False, False)]
+    elif routing_filter == "not_evaluated":
+        items = [item for item in items if audiences(item) is None]
     if sort == "recent":
         items.sort(
             key=lambda item: (item["latest_evidence_at"], item["event_id"]),
@@ -1102,7 +1137,9 @@ def events_payload(
         "sort": sort,
         "query": query,
         "event_id": event_id,
+        "routing_filter": routing_filter,
         "projection": projection,
+        "routing_counts": routing_counts,
         "daily_rank_total": daily_rank_total,
         "total": total,
         "limit": limit,

@@ -186,10 +186,15 @@ secret flags are deliberately absent.
 `summary` reports artifact outcomes separately from network attempts.
 `audit-lineage` is read-only and exits nonzero with `E_INTEGRITY` when the live
 catalog contains a foreign author, wrong conversation, unbound URL, stale
-snapshot, unsupported observation, or artifact without provenance. It emits
-the same versioned JSON envelope as the other commands. `scripts/check-fast.sh`
-runs it automatically when the ignored local catalog exists; clean clones
-without derived data skip the guard.
+snapshot, unsupported observation, or artifact without provenance. The proof
+uses the frozen import candidate and its raw Feed conversation, so historical
+triage databases may be removed without disabling the guard. It emits the same
+versioned JSON envelope as the other commands. `scripts/check-fast.sh` runs it
+automatically when the ignored local catalog exists; clean clones without
+derived data skip the guard. The report's `coverage` object distinguishes roots
+rechecked directly from replies whose roots were not retained in the frozen
+Feed run; those replies still require an unchanged accepted import candidate,
+raw source snapshot, URL owner, observation, and disclosure.
 
 ## Operator inspection surface
 

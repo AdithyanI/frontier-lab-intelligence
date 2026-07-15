@@ -2,11 +2,14 @@
 
 ## Frozen Run
 
-- Run: `audience-routing-v3-2026-07-12-top8`
-- Database: `data/derived/audience-routing/audience-routing-v3-2026-07-12-top8/routing.db`
-- Cohort: the first eight Feed-kept envelopes by the source triage run's frozen
-  rank on `2026-07-12`
-- Source triage: `triage-v2.2-canonical-v8-2026-07-12-top1000`
+- Run: `audience-routing-v3-2026-07-12-review8`
+- Database: `data/derived/audience-routing/audience-routing-v3-2026-07-12-review8/routing.db`
+- Cohort: an eight-envelope review cohort on `2026-07-12`. These exact records
+  were originally chosen from the former positive gate, then migrated without
+  changing model output into the direct Evidence routing schema.
+- Source event run: `f8999fcd2b674bf46557023ec8dcab2ac4a8bc115fea8158b4b713a276b588a9`
+- Source feed run: `adb2b4949de74a7a3120e71b62366acfcdca0656d0b49c07af10d4e5323f7f96`
+- Selection: `review_cohort`, limit 8; no source-triage reference or column
 - Model: `gpt-5.6-luna`, medium reasoning
 - Prompt/schema: `audience-routing-v3` / `audience-routing-output-v1`
 - Prompt hash: `0fb63b9f2106a3dba3412ae4380f359c8ccd36010422e879bd75d2286caf0fd0`
@@ -44,32 +47,31 @@ run; retain the stable prefix and instrumentation for a larger catalog run.
 | 10 | Riley Goodside binary-noise model behavior | yes | no | Strong concrete model-behavior failure for Engineering and no supplied commercial signal for Investment. |
 
 Distribution: five `both`, one `AI Engineering only`, two `Investment only`,
-and zero `neither`. The absence of `neither` is not threshold evidence: this
-cohort is deliberately biased toward the highest-ranked envelopes already kept
-by the legacy Feed gate. A later bounded calibration sample should include
-hard negatives before the routing contract is treated as broadly proven.
+and zero `neither`. The absence of `neither` is not threshold evidence: the
+review cohort was originally biased toward strong evidence. A later bounded
+calibration sample should include hard negatives before the routing contract
+is treated as broadly proven.
 
 ## Product Projection
 
-The read-only Feed projection selects only a fully completed run for the exact
-UTC day and current prompt contract. It attaches a judgment only when the
-current envelope snapshot hash and selected source-triage run both match the
-frozen routing record. It never changes Feed keep/drop.
+The read-only Feed projection selects a fully completed, schema-compatible run
+for the exact UTC day. It attaches a judgment only when the current envelope
+snapshot hash matches the frozen routing record; display rank is not identity.
 
-The July 12 Feed now shows positive-only, neutral hairline `AI` and `INV` marks
-beside `Kept for extraction`. The existing disclosure contains the Feed triage
-reason followed by separate AI Engineering and Investment decisions and
-reasons. Unrouted and dropped envelopes receive no audience marks; no new
-audience filter or Insight prose was introduced.
+The July 12 Feed shows neutral hairline `ENG` and `INV` marks and exposes the
+two audience decisions and reasons in one disclosure. One derived Status
+control selects the mutually exclusive Relevant, Not relevant, or Not
+evaluated state. No third model judgment or Insight prose is
+introduced.
 
 Live proof after rebuilding and restarting the always-on service:
 
-- API selected the exact run above and returned 8 / 8 routing records.
-- The kept view contained 314 envelopes, 8 routed envelopes, and 13 positive
-  marks, matching the stored distribution.
+- API selected the exact migrated run above and returned 8 / 8 routing records.
+- Before routing-derived filters, the day contained 737 matching envelopes: 8
+  relevant, 0 not relevant, and 729 not evaluated.
 - Current displayed Feed ranks were `1, 2, 4, 5, 6, 8, 9, 10`; these may differ
   from the run's frozen source ranks as the Registry-backed projection changes.
   Snapshot-hash matching, not display rank, binds each route.
-- Rendered desktop inspection found the expected marks and three reason blocks,
-  no horizontal page overflow, and no browser-console errors.
-
+- Future calls use `audience-routing-v4`, which adds soft 40–50-word reason
+  guidance without truncation or schema rejection. These stored v3 results
+  retain their true prompt provenance.

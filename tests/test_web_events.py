@@ -120,8 +120,8 @@ def _write_audience_routing_run(root, *, items):
                 item["snapshot_content_sha256"],
                 int(rank == 1),
                 "Concrete engineering relevance." if rank == 1 else "Not useful for engineering.",
-                int(rank != 1),
-                "Not material for investment." if rank == 1 else "Concrete investment relevance.",
+                int(rank == 1),
+                "Concrete investment relevance." if rank == 1 else "Not material for investment.",
                 now,
                 now,
             ),
@@ -215,12 +215,18 @@ def test_events_api_projects_completed_audience_routing_directly(
         "reason": "Concrete engineering relevance.",
     }
     assert routed["audience_routing"]["investment"] == {
-        "relevant": False,
-        "reason": "Not material for investment.",
+        "relevant": True,
+        "reason": "Concrete investment relevance.",
     }
     second_route = all_items["items"][1]["audience_routing"]
     assert second_route["ai_engineering"]["relevant"] is False
-    assert second_route["investment"]["relevant"] is True
+    assert second_route["investment"]["relevant"] is False
+    assert all_items["routing_counts"] == {
+        "all": 2,
+        "relevant": 1,
+        "not_relevant": 1,
+        "not_evaluated": 0,
+    }
     assert all_items["daily_rank_total"] == 2
     daily_rank_by_event_id = {
         item["event_id"]: item["daily_rank"] for item in all_items["items"]
@@ -263,6 +269,17 @@ def test_events_api_projects_completed_audience_routing_directly(
     assert focused["items"][0]["event_id"] == search_target["event_id"]
     assert focused["items"][0]["daily_rank"] == search_target["daily_rank"]
     assert focused["daily_rank_total"] == all_items["daily_rank_total"]
+
+    relevant = client.get(
+        "/api/events?date=2026-07-11&routing=relevant&limit=20"
+    ).json()
+    assert relevant["total"] == 1
+    assert relevant["items"][0]["event_id"] == routed["event_id"]
+    neither = client.get(
+        "/api/events?date=2026-07-11&routing=not_relevant&limit=20"
+    ).json()
+    assert neither["total"] == 1
+    assert neither["items"][0]["event_id"] == all_items["items"][1]["event_id"]
 
 
 def test_events_api_uses_stable_cumulative_cutoff_revisions(tmp_path, monkeypatch):

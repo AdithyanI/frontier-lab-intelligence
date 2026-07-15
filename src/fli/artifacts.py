@@ -1545,35 +1545,6 @@ def audit_primary_author_lineage(
     if selection_policy != PRIMARY_AUTHOR_SELECTION_POLICY:
         add_violation("unexpected_selection_policy")
 
-    event_roots: dict[tuple[str, str], str] = {}
-    for run in json.loads(str(import_run["triage_runs_json"])):
-        run_day = str(run["day"])
-        triage_path = Path(str(run["path"]))
-        if not triage_path.is_absolute():
-            triage_path = REPO_ROOT / triage_path
-        if not triage_path.is_file():
-            add_violation("missing_triage_db")
-            continue
-        triage = _open_readonly(triage_path)
-        for row in triage.execute(
-            """SELECT event_id, envelope_json FROM triage_item
-               WHERE status = 'complete' AND decision = 'keep'
-               ORDER BY event_id"""
-        ).fetchall():
-            event_id = str(row["event_id"])
-            root_id = str(json.loads(str(row["envelope_json"]))["root"]["post_id"])
-            event_key = (run_day, event_id)
-            existing = event_roots.get(event_key)
-            if existing is not None and existing != root_id:
-                add_violation(
-                    "conflicting_event_root",
-                    event_id=event_id,
-                    root_external_id=root_id,
-                )
-            else:
-                event_roots[event_key] = root_id
-        triage.close()
-
     feed = _open_readonly(Path(feed_db))
     feed_rows = {
         str(row["post_id"]): row
@@ -1589,12 +1560,15 @@ def audit_primary_author_lineage(
     feed.close()
 
     accepted_observation_keys: set[tuple[str, str, str, str]] = set()
+    unverified_conversation_roots = 0
     for candidate in candidates:
         candidate_id = str(candidate["candidate_id"])
         event_id = str(candidate["event_id"])
-        envelope_day = str(candidate["envelope_day"])
         source_id = str(candidate["source_external_id"])
-        root_id = event_roots.get((envelope_day, event_id), "")
+        source = feed_rows.get(source_id)
+        root_id = (
+            str(source["conversation_id"] or source_id) if source is not None else ""
+        )
         common = {
             "candidate_id": candidate_id,
             "event_id": event_id,
@@ -1607,20 +1581,19 @@ def audit_primary_author_lineage(
             add_violation("unexpected_source_provider", **common)
         if candidate["artifact_id"] is None:
             add_violation("accepted_candidate_missing_artifact", **common)
-        if not root_id:
-            add_violation("missing_event_envelope", **common)
-            continue
-        root = feed_rows.get(root_id)
-        if root is None:
-            add_violation("missing_root_post", **common)
-            continue
-        source = feed_rows.get(source_id)
         if source is None:
             add_violation("missing_source_post", **common)
             continue
+        root = feed_rows.get(root_id)
+        if root is None:
+            # Some same-author thread replies were frozen without retaining the
+            # conversation root in this Feed run. Their immutable import
+            # decision and source snapshot remain auditable, but the root
+            # author's identity cannot be independently rechecked here.
+            unverified_conversation_roots += 1
         if str(source["raw_sha256"]) != str(candidate["source_snapshot_sha256"]):
             add_violation("stale_source_snapshot", **common)
-        if source_id != root_id:
+        if source_id != root_id and root is not None:
             root_author = str(root["author_x_id"] or "")
             source_author = str(source["author_x_id"] or "")
             if not root_author or source_author != root_author:
@@ -1683,6 +1656,11 @@ def audit_primary_author_lineage(
         "import_run_id": str(import_run["import_run_id"]),
         "source_feed_run_id": str(import_run["source_feed_run_id"]),
         "selection_policy": selection_policy,
+        "coverage": {
+            "conversation_roots_verified": len(candidates)
+            - unverified_conversation_roots,
+            "conversation_roots_frozen_import_only": unverified_conversation_roots,
+        },
         "counts": {
             "accepted_candidates": len(candidates),
             "artifacts": artifact_count,

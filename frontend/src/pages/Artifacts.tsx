@@ -486,7 +486,7 @@ export default function Artifacts() {
           Primary artifacts
         </h2>
         <p className="evidence-view-sub">
-          Durable source links selected from kept Feed evidence, by source date.
+          Durable source links selected from Feed evidence, by source date.
         </p>
         {data?.available && (
           <p className="page-method-line mono">

@@ -28,6 +28,10 @@ import { useAuditDate } from '../auditDateStore'
 import { readAuditDate, setAuditDateParam } from '../auditDate'
 
 type Sort = 'attention' | 'recent' | 'engagement'
+type RoutingFilter =
+  | 'relevant'
+  | 'not_relevant'
+  | 'not_evaluated'
 
 const PAGE_SIZE = 20
 const shortDate = new Intl.DateTimeFormat('en-US', {
@@ -36,9 +40,15 @@ const shortDate = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
   timeZone: 'UTC',
 })
+const routingSummaryLabels: Record<RoutingFilter, string> = {
+  relevant: 'relevant',
+  not_relevant: 'not-relevant',
+  not_evaluated: 'not-evaluated',
+}
 interface EventPageRequest {
   date: string
   sort: Sort
+  routingFilter: RoutingFilter
   query: string
   eventId?: string
   offset?: number
@@ -50,11 +60,12 @@ const eventPageRequests = new Map<string, Promise<EventResponse>>()
 function eventPageKey({
   date,
   sort,
+  routingFilter,
   query,
   eventId,
   offset = 0,
 }: EventPageRequest) {
-  return `${date}\u0000${sort}\u0000${query}\u0000${eventId ?? ''}\u0000${offset}`
+  return `${date}\u0000${sort}\u0000${routingFilter}\u0000${query}\u0000${eventId ?? ''}\u0000${offset}`
 }
 
 function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
@@ -67,6 +78,7 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
     date: request.date,
     lane: 'all',
     sort: request.sort,
+    routing: request.routingFilter,
     q: request.query,
     event_id: request.eventId ?? '',
     limit: String(PAGE_SIZE),
@@ -216,8 +228,8 @@ function RoutingNote({ item }: { item: SignalEvent }) {
           <span className="event-audience-marks">
             {routing.ai_engineering.relevant && (
               <>
-                <span className="event-audience-mark" aria-hidden="true">AI</span>
-                <span className="sr-only">Relevant to AI Engineering. </span>
+                <span className="event-audience-mark" aria-hidden="true">ENG</span>
+                <span className="sr-only">Relevant to Engineering. </span>
               </>
             )}
             {routing.investment.relevant && (
@@ -240,7 +252,7 @@ function RoutingNote({ item }: { item: SignalEvent }) {
       <div className="event-routing-reasons">
         <div className="event-routing-reason">
           <span className="event-routing-reason-label mono">
-            AI Engineering · {routing.ai_engineering.relevant ? 'Relevant' : 'Not relevant'}
+            Engineering · {routing.ai_engineering.relevant ? 'Relevant' : 'Not relevant'}
           </span>
           <p>{routing.ai_engineering.reason}</p>
         </div>
@@ -661,6 +673,7 @@ export default function Feed() {
   const [dates, setDates] = useState<FeedDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [sort, setSort] = useState<Sort>('attention')
+  const [routingFilter, setRoutingFilter] = useState<RoutingFilter>('relevant')
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [data, setData] = useState<EventResponse | null>(null)
@@ -717,6 +730,7 @@ export default function Feed() {
     const request = {
       date: selectedDate,
       sort,
+      routingFilter,
       query: debouncedQuery,
       eventId: targetEventId,
       offset: 0,
@@ -753,7 +767,7 @@ export default function Feed() {
     return () => {
       live = false
     }
-  }, [selectedDate, sort, debouncedQuery, targetEventId])
+  }, [selectedDate, sort, routingFilter, debouncedQuery, targetEventId])
 
   useEffect(() => {
     if (
@@ -771,6 +785,7 @@ export default function Feed() {
           await requestEventPage({
             date: value.day,
             sort: 'attention',
+            routingFilter,
             query: '',
             offset: 0,
           })
@@ -787,6 +802,7 @@ export default function Feed() {
     visibleDates,
     selectedDate,
     sort,
+    routingFilter,
     debouncedQuery,
     targetEventId,
     loading,
@@ -846,6 +862,7 @@ export default function Feed() {
     const viewKey = eventPageKey({
       date: selectedDate,
       sort,
+      routingFilter,
       query: debouncedQuery,
       offset: 0,
     })
@@ -855,6 +872,7 @@ export default function Feed() {
     requestEventPage({
       date: selectedDate,
       sort,
+      routingFilter,
       query: debouncedQuery,
       offset: items.length,
     })
@@ -935,6 +953,19 @@ export default function Feed() {
         />
         <div className="feed-controls">
           <FeedMenuSelect
+            label="STATUS"
+            value={routingFilter}
+            onChange={(value) => {
+              clearTargetEvent()
+              setRoutingFilter(value)
+            }}
+            options={[
+              { value: 'relevant', label: 'Relevant', description: 'Engineering or Investment', count: data?.routing_counts?.relevant },
+              { value: 'not_relevant', label: 'Not relevant', description: 'Evaluated, but relevant to neither audience', count: data?.routing_counts?.not_relevant },
+              { value: 'not_evaluated', label: 'Not evaluated', description: 'No audience-routing result', count: data?.routing_counts?.not_evaluated },
+            ]}
+          />
+          <FeedMenuSelect
             label="SORT"
             value={sort}
             onChange={(value) => {
@@ -953,7 +984,7 @@ export default function Feed() {
       {hasSearch && (
         <div className="feed-summary mono">
           {(data?.total ?? 0).toLocaleString('en-US')}{' '}
-          matching Feed items
+          {routingSummaryLabels[routingFilter]} Feed items
         </div>
       )}
 

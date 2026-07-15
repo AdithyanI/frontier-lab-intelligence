@@ -4,15 +4,15 @@ Living map of Frontier Lab Intelligence. Update this file when the system
 shape changes: new pipeline stage, schema boundary, source class, or module.
 
 Current system: the Registry, immutable trusted-following snapshot, X evidence
-store, exact event projection, rank-first Feed view, keep/drop triage, and
-canonical artifact library are implemented and inspectable. Audience Insights
-v2 now runs two independent audience contracts over one immutable evidence and
-application-owned citation core, with rank-blind item review, ID-only daily
-editing, separate publication audit, immutable disqualification sidecars, and
-an explicit production reconciliation boundary. The active boundary is
-freezing the last chronological runs and materializing the canonical
-two-audience/nine-day manifest/report pair required by the production read
-model; external delivery is deferred. See
+store, exact event projection, rank-first Feed view, canonical artifact library,
+and direct audience-routing boundary are implemented and inspectable. Audience
+routing freezes ranked Evidence directly and returns independent AI Engineering
+and Investment relevance judgments; the Feed derives its audit states from
+those two booleans. The former model-based keep/drop gate and its generated data
+were removed rather than retained as a compatibility layer. The older Audience
+Insights v2 implementation remains historical code with no generated outputs or
+live product read path; new Insight generation is deferred until routing is
+qualitatively accepted. External delivery is also deferred. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.
@@ -29,13 +29,13 @@ live ranking evidence comes from a frozen Registry-cohort outgoing-follow
 snapshot; entity overlap is the accepted inspectable ranking feature and
 personalized PageRank remains diagnostic. Raw X provider evidence is immutable,
 exact quote/retweet/reply envelopes are cutoff-correct, and current Registry
-curation is overlaid at read time. Triage and canonical artifact storage are
-derived, replayable stages. Extraction consumes accepted first-party X
+curation is overlaid at read time. Audience routing and canonical artifact
+storage are derived, replayable stages. Extraction consumes accepted first-party X
 evidence directly and may join canonical artifact text as optional
 strengthening; it never mutates upstream evidence. Rare primary-source
 recovery is explicit rather than synthetic: `artifact_event_supplement` binds
-one human-reviewed official document to one exact frozen kept event and its
-triage hashes, while the ordinary artifact candidate ledger remains derived
+one human-reviewed official document to one exact frozen event and its source
+hashes, while the ordinary artifact candidate ledger remains derived
 only from observed source links.
 Exact human name/kind corrections are separately versioned in
 `data/registry/entity-overrides.json` and recorded in
@@ -99,7 +99,8 @@ same-evidence Luna-high comparison again observed zero cache reads. Cache
 behavior is therefore model/deployment-specific and always measured rather
 than assumed. That comparison predates Azure's 2026-07-13 Responses cache fix.
 The current shared adapter explicitly requests 24-hour retention for GPT-5.6
-on the Azure-backed LiteLLM route; a fresh 64-envelope Luna-medium triage run
+on the Azure-backed LiteLLM route; a historical 64-envelope Luna-medium
+classification run
 observed 103,936 cached tokens across 168,022 input tokens. Historical run
 telemetry remains unchanged.
 
@@ -118,8 +119,8 @@ Responses calls. It extracts only final message text, tolerates nullable blocks
 from translated responses, owns stable prompt-cache sharding and LiteLLM cost
 header parsing, supplies the Azure-compatible GPT-5.6 cache-retention adapter,
 and normalizes hosted-search actions and cited URLs. Luna is the default
-efficient model for the structured triage, extraction, and Registry boundaries;
-triage and extraction use medium reasoning, while grounded identity and
+efficient model for structured routing, extraction, and Registry boundaries;
+routing and extraction use medium reasoning, while grounded identity and
 Registry evaluation use high. The durable routing and evaluation evidence live
 in `docs/references/model-routing.md`.
 Claude-native web search uses `tool_choice=auto` so the model can finish after
@@ -219,66 +220,36 @@ parent-first order, unique quote commentary, and a compact retweeter trace.
 Captured parents always precede their descendants and sibling branches are
 chronological. A reply whose exact parent is absent stays as a visibly
 unparented branch rather than being attached by conversation or timing
-inference. LLM relevance, semantic grouping, summaries, and cited insights
+inference. Audience routing, semantic grouping, summaries, and cited insights
 remain later stages after this deterministic layer is audited.
 
-`fli.insight_triage` is the first implemented cited-insight boundary after the
-deterministic Feed. It receives a frozen top-ranked envelope but deliberately
-does not receive its daily score, engagement, followers, Registry rank, or
-amplifier prominence. One `gpt-5.4-mini`/medium Responses call through LiteLLM
-returns only the envelope-level `keep | drop` decision and one concise reason.
-The stable 1,024+ token instructions precede the variable envelope. Bulk runs
-use deterministic cache-key shards with at most one in-flight request per key,
-parallelize across keys, and persist completed responses through one SQLite
-writer so interrupted work resumes without repeating successful calls.
-Provider-supplied article/card title, preview, and
-URL already stored in raw X JSON are joined before triage so link-only primary
-artifacts are not mistaken for empty posts; no artifact body is fetched or
-interpreted at this stage. `fli.insight_triage_runs` freezes the cohort,
-prompt/schema hashes, exact input, response, usage, cache reads, LiteLLM tags,
-proxy cost, and explicit failures in a resumable derived SQLite run. Kept
-envelopes continue whole to cited extraction and may join resolved artifact
-text when available. Category/event type is deliberately absent from both the
-routing gate and the first extraction contract until a proven consumer needs
-it.
-
-The Feed exposes these completed decisions as an audit projection, not as a
-replacement ranking. `fli.web.triage` selects the newest fully completed run
-for the requested UTC day. A decision is displayed only when both its stable
-`event_id` and `snapshot_content_sha256` match the currently projected
-envelope; a decision for an older or differently connected snapshot cannot
-leak onto new evidence. Completed work is reusable only when the event ID,
-snapshot hash, and exact rendered-input hash all match, so repaired grouping
-reuses unchanged envelopes without reusing stale judgments.
-Daily score, recency, and engagement still sort the same evidence independently;
-`keep`, `drop`, and `not evaluated` are separate filters with counts computed
-before pagination. The projection reads the run's existing
-`(decision, current_rank, event_id)` and `(status, current_rank, event_id)`
-indexes and never mutates the triage or Feed stores.
-
-`fli.audience_routing` is a separate downstream decision over Feed-kept
-envelopes. One Luna-medium call receives the readable attributed packet and
+`fli.audience_routing` is the sole live model judgment over ranked Feed
+evidence. One Luna-medium call receives the readable attributed packet and
 returns two independently reasoned booleans: AI Engineering relevance and
 Investment relevance. Feed rank, score, engagement, prominence, and the
-upstream keep decision are not model inputs. `fli.audience_routing_runs`
+derived audit state are not model inputs. `fli.audience_routing_runs`
 freezes the exact cohort, snapshot/evidence/input hashes, prompt and schema
 versions, model output, cache telemetry, cost, and failures in one resumable
-SQLite database; it does not read or write the superseded Audience Insights
-tables.
+SQLite database. The run records its source event/feed run IDs and selection
+policy directly; it does not depend on a source classification run or read the
+superseded Audience Insights tables. Stable instructions precede the variable
+packet, and cache telemetry is observed rather than assumed. The current prompt
+asks for roughly 40–50 words per reason as soft guidance, never a schema limit.
 
 `fli.web.audience_routing` is the read-only audit projection. It selects the
-newest fully completed run for the requested UTC day and current prompt
-contract. `fli.web.events` attaches a route only when the current envelope is
-still kept, its `snapshot_content_sha256` matches the routing record, and the
-routing run names the same selected source-triage run. Display rank is not an
-identity key. The Feed renders only positive `AI` and `INV` marks beside the
-existing triage status and places the Feed reason plus both audience decisions
-and rationales inside the existing disclosure. Unrouted, stale, and dropped
-envelopes receive no marks. This surface adds neither an audience filter nor
-Insight prose.
+newest fully completed schema-compatible run for the requested UTC day.
+`fli.web.events` attaches a route only when its stable `event_id` and current
+`snapshot_content_sha256` match the frozen record; display rank is not an
+identity key. The Feed renders positive `ENG` and `INV` marks, or `Neither
+audience` when both judgments are false, with the two reasons in one disclosure.
+The UI presents the derived states as one mutually exclusive Status control:
+Relevant, Not relevant, and Not evaluated. Audience-specific `ENG`/`INV` marks
+remain quiet row-level detail rather than another filter.
+Counts are computed before filtering and pagination. No
+third relevance judgment or Insight prose is generated.
 
 `fli.artifacts`, `fli.artifact_urls`, and `fli.evidence_lineage` implement a
-parallel deterministic enrichment boundary for corrected kept envelopes. They
+parallel deterministic enrichment boundary for selected Feed envelopes. They
 admit outbound URLs only from the root X post or replies by the same stable X
 account in the same conversation. Other authors' replies, quotes, retweets, and
 nested links remain visible reactions but cannot create artifact associations
@@ -430,7 +401,7 @@ The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
 version tokens, so a Registry change or rebuilt derived run invalidates the
 affected cache. Exact-envelope assembly is cached once per complete Feed day;
-search, sort, pagination, and triage filters are then applied over that shared
+search, sort, pagination, and routing-derived filters are then applied over that shared
 projection instead of rebuilding its SQLite joins. The SPA deduplicates and
 prefetches complete Feed days and
 lazy-mounts closed evidence trees. Registry list reads stay uncached in the
@@ -477,14 +448,14 @@ flowchart LR
     FEED[Feed v8<br/>posts · disclosure-dated relation closure · opaque anchors]
     EVENTS[Events v3<br/>stable exact envelopes · cutoff projections]
     PUB[Published read model<br/>explicit validated run pointer]
-    READ[Registry-aware projections<br/>daily delta · weekly dedupe · triage]
+    READ[Registry-aware projections<br/>daily delta · weekly dedupe · audience routing]
     ART[(Artifact catalog<br/>canonical URLs · aliases · source provenance)]
     FETCH[Bounded artifact fetch<br/>raw body · title · clean text]
 
     XLISTS --> REG
     XFOLLOW --> REG
     XPOSTS --> OBS --> FEED --> EVENTS --> PUB --> READ
-    READ -->|accepted envelopes + first-party X| EXT
+    READ -->|audience-relevant envelopes + first-party X| EXT
     READ -->|outbound links| ART --> FETCH
     FETCH -.->|optional primary evidence| EXT
     REG -->|current active/rejected state| READ
@@ -516,7 +487,7 @@ flowchart TD
     S0[Source scoping<br/>curated source list]
     S1[Exact grouping<br/>replies · quotes · retweets]
     S2[Daily-score ordering<br/>transparent candidate generation]
-    S3[Keep / drop triage<br/>sole relevance + substance gate]
+    S3[Audience routing<br/>AI Engineering · Investment]
     S4[Cited extraction<br/>X evidence + optional artifacts]
     S5[Persona framing<br/>investment vs AI team]
     OUT1[Alert tier]
@@ -1193,8 +1164,7 @@ final score.
 | `fli.signal_feed` | content-addressed `signal-feed-v8` snapshots with recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v3` exact structural components with provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
-| `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
-| `fli.audience_routing` / `fli.audience_routing_runs` | downstream audience assignment for Feed-kept envelopes: one Luna-medium call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with versioned prompt/schema hashes and resumable cache/cost provenance |
+| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one Luna-medium call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with direct event/feed provenance, versioned prompt/schema hashes, and resumable cache/cost telemetry |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.cited_insights` / `fli.cited_insight_runs` | historical minimal `insight-v1.1` proof: frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
 | `fli.audience_insights` / `fli.audience_insight_runs` | independent Investment and AI Engineering extraction/schema/cache contracts, exact citation binding, resumable attempt ledgers, all-five-pass item filtering, ID-only daily editing, day-set review, and audited-history inputs |
@@ -1216,11 +1186,13 @@ final score.
 
 The active project is
 [`docs/projects/evidence-audience-routing/tasks.md`](../projects/evidence-audience-routing/tasks.md).
-Existing Feed triage owns keep/drop. The downstream runtime v3 boundary accepts
-one complete attributed envelope and returns exactly two independent judgments:
+The direct Evidence routing boundary accepts one complete attributed envelope
+and returns exactly two independent judgments:
 AI Engineering relevance plus reason, and Investment relevance plus reason.
-The frozen July 12 top-eight cohort is now inspectable in Feed through quiet
-positive marks and the existing reason disclosure. The current work is Adi's
+The migrated July 12 eight-record review cohort is inspectable in Feed through
+quiet marks, derived Audit/Audience controls, and one reason disclosure. Future
+runs use the v4 prompt's soft 40–50-word guidance; stored v3 outputs retain their
+true provenance. The current work is Adi's
 qualitative audit followed by a bounded hard-negative/`neither` calibration
 sample—not a broad run or new Insight generation. The archived v2
 review/publication stack is not the active build order.

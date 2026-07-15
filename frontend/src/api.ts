@@ -320,6 +320,17 @@ export interface EventResponse {
   lane?: 'all' | 'network' | 'firsthand'
   sort?: 'attention' | 'recent' | 'engagement'
   query?: string
+  routing_filter?:
+    | 'all'
+    | 'relevant'
+    | 'not_relevant'
+    | 'not_evaluated'
+  routing_counts?: {
+    all: number
+    relevant: number
+    not_relevant: number
+    not_evaluated: number
+  }
   daily_rank_total?: number
   audience_routing_run?: {
     run_id: string

@@ -30,8 +30,8 @@ positive routes without reviving the old stack.
   root, continuation, reply, quote-post, and accepted artifact block.
 - Use one combined routing call with two independently reasoned audience
   judgments: AI Engineering relevant/not relevant and Investment relevant/not
-  relevant, each with a concise evidence-grounded explanation that is usually
-  three to four sentences.
+  relevant, each with a concise evidence-grounded explanation. The current
+  prompt aims for roughly 40–50 words but treats that as guidance, not a limit.
 - Remove the superseded Feed keep/drop model, live projection, filter, reason,
   CLI entry point, and generated run data. Do not preserve a compatibility
   read or let new routing depend on its records.
@@ -40,12 +40,12 @@ positive routes without reviving the old stack.
   hints from the model input.
 - Implement one authoritative, versioned storage/API path only after the input,
   schema, and prompt are approved.
-- Inspect one exact envelope end to end, then run a small frozen cohort of
-  top-ranked kept envelopes to inspect Engineering, Investment, both, and
-  neither behavior before broader evaluation.
-- Add compact, positive-only per-envelope audience marks and routing disclosure
-  so Adi can inspect the first real outputs in the existing evidence workspace
-  without adding a second filter system.
+- Inspect one exact envelope end to end, then run a small frozen review cohort
+  to inspect Engineering, Investment, both, and neither behavior before broader
+  evaluation.
+- Add compact per-envelope audience marks, a routing disclosure, and one
+  derived Status control so Adi can inspect the first real outputs in the
+  existing evidence workspace without creating another model judgment.
 - Keep the decision traceable from the UI/API back to the exact Evidence
   envelope and model/run provenance.
 
@@ -98,11 +98,11 @@ positive routes without reviving the old stack.
 {
   "ai_engineering": {
     "relevant": true,
-    "reason": "Concise evidence-grounded explanation, usually three to four sentences."
+    "reason": "Concise evidence-grounded explanation, aiming for roughly 40 to 50 words."
   },
   "investment": {
     "relevant": false,
-    "reason": "Concise evidence-grounded explanation, usually three to four sentences."
+    "reason": "Concise evidence-grounded explanation, aiming for roughly 40 to 50 words."
   }
 }
 ```
@@ -117,8 +117,9 @@ Application invariants:
 - IDs, hashes, prompt versions, model/run telemetry, and timestamps are
   application-owned fields, never model-authored fields.
 - The reason schema requires a non-empty string but imposes no maximum length.
-  The three-to-four-sentence guidance is a prompt preference, not a truncation
-  rule; the model should not add filler to reach it.
+  The roughly 40–50-word guidance is a prompt preference, not a truncation or
+  rejection rule; the model should use more when clarity requires it and should
+  not add filler to reach it.
 - Mechanically invalid evidence packets fail before routing; they are not
   classified as `drop`.
 
@@ -135,12 +136,12 @@ Application invariants:
   model, cost, and rationales; no live product reads old Insight tables.
 - [x] The first envelope is routed and reviewed with Adi, with its input blocks
   and output visible and traceable in the UI/API.
-- [x] A small frozen top-kept cohort is routed with Luna-medium; outcomes,
+- [x] A small frozen review cohort is routed with Luna-medium; outcomes,
   prompt-cache reads, response cost, and qualitative disagreements are
   recorded before any expansion.
-- [x] Feed exposes positive audience marks and compact reasons without generating
-  Insight prose or displaying the superseded triage result.
-- [ ] The live Feed, API, routing runner, CLI, and generated current data contain
+- [x] Feed exposes audience marks, one derived Status control, and compact
+  reasons without generating Insight prose or displaying a superseded result.
+- [x] The live Feed, API, routing runner, CLI, and generated current data contain
   no dependency on or link to the superseded keep/drop run.
 - [x] Focused tests, `bash scripts/check-fast.sh`, live API proof, and rendered
   desktop QA pass; architecture/status docs reflect the final boundary.
@@ -153,14 +154,14 @@ Application invariants:
   Acceptance: exact input blocks, approved schema, short prompt, immutable
   run storage, and API projection work on the Satya envelope. Validate:
   focused packet/runner/API tests and exact record inspection.
-- [x] Milestone 2 — Run and inspect a small top-kept cohort. Acceptance:
+- [x] Milestone 2 — Run and inspect a small review cohort. Acceptance:
   Luna-medium outputs, cache/cost telemetry, outcome distribution, and
   qualitative review are recorded. Validate: resumable rerun and direct
   database/API comparison.
-- [x] Milestone 3 — Expose routing in Feed. Acceptance: existing triage filters
-  are absent while positive audience marks and short reasons make the cohort
-  inspectable. Validate: production build and rendered desktop QA.
-- [ ] Milestone 3b — Remove the superseded keep/drop path. Acceptance: routing
+- [x] Milestone 3 — Expose routing in Feed. Acceptance: audience marks, derived
+  controls, and short reasons make the cohort inspectable. Validate: production
+  build and rendered desktop QA.
+- [x] Milestone 3b — Remove the superseded keep/drop path. Acceptance: routing
   freezes ranked Evidence directly; the live API/UI/CLI expose no triage fields,
   controls, or reasons; current routing records carry only Evidence/run
   provenance. Validate: repository search, direct-run tests, API proof, and
@@ -254,12 +255,12 @@ Application invariants:
 | done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
 | done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
 | done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
-| done | Remove the unsafe short-reaction cutoff and expand each audience reason to roughly three to four sentences without a schema maximum. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
-| done | Run the frozen July 12 top-eight kept cohort sequentially through Luna-medium and record distribution, quality, cache, cost, and limitations. | parent | `resources/jul12-top8-v3-routing.md` |
-| done | Expose exact-match routing records as quiet positive marks and separate reasons in the existing Feed disclosure; add no audience filter or Insight prose. | parent | `resources/jul12-top8-v3-routing.md` |
-| in_progress | Remove the superseded keep/drop projection, controls, CLI/runtime path, generated data, and all new-router dependencies on it. | parent | — |
-| todo | Migrate the current audience-routing records to direct Evidence/run provenance and verify the simplified July 12 Feed. | parent | `resources/jul12-top8-v3-routing.md` |
-| todo | Resume Adi's qualitative audit, then choose a bounded hard-negative/`neither` sample before any broad run. | parent | `resources/jul12-top8-v3-routing.md` |
+| done | Remove the unsafe short-reaction cutoff and keep reason length advisory rather than schema-limited; v4 now suggests roughly 40–50 words. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
+| done | Run the frozen July 12 eight-record cohort sequentially through Luna-medium and record distribution, quality, cache, cost, and limitations. | parent | `resources/jul12-top8-v3-routing.md` |
+| done | Expose exact-match routing records as quiet marks and separate reasons in the Feed disclosure, with one derived Status control and no Insight prose. | parent | `resources/jul12-top8-v3-routing.md` |
+| done | Remove the superseded keep/drop projection, controls, CLI/runtime path, generated data, and all new-router dependencies on it. | parent | — |
+| done | Migrate the current audience-routing records to direct Evidence/run provenance and verify the simplified July 12 Feed. | parent | `resources/jul12-top8-v3-routing.md` |
+| in_progress | Resume Adi's qualitative audit, then choose a bounded hard-negative/`neither` sample before any broad run. | parent | `resources/jul12-top8-v3-routing.md` |
 
 ## Backlog / Remaining Work
 
@@ -376,3 +377,10 @@ Application invariants:
   and generated triage data, changes the routing runner to freeze ranked
   Evidence directly, and migrates the current new outputs to Evidence/run-only
   provenance before qualitative review resumes.
+- 2026-07-15: [VALIDATED] Closed the remaining prompt-cache diagnostic gap with
+  a two-request Luna-medium v4 canary. Different packets used the exact same
+  forced cache key sequentially; the 3,289-token cold request and 1,953-token
+  follow-up both reported zero cached tokens. The stable prompt and runner are
+  correct, but Azure prefix reuse is not currently observable. A broader run
+  should be budgeted as uncached while retaining the 32-lane schedule and cache
+  telemetry; the two calls cost $0.008626.

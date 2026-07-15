@@ -29,19 +29,28 @@ test('Feed keeps routing secondary and exposes the exact envelope ID', () => {
   assert.match(copyEnvelopeSource, /aria-live="polite"/)
 })
 
-test('Feed shows positive audience marks and keeps both routing reasons auditable', () => {
+test('Feed shows audience marks and keeps both routing reasons auditable', () => {
   assert.match(feedSource, /routing\.ai_engineering\.relevant/)
-  assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">AI</)
+  assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">ENG</)
   assert.match(feedSource, /routing\.investment\.relevant/)
   assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">INV</)
-  assert.match(feedSource, /Relevant to AI Engineering/)
+  assert.match(feedSource, /Relevant to Engineering/)
   assert.match(feedSource, /Relevant to Investment/)
-  assert.match(feedSource, /AI Engineering · \{routing\.ai_engineering\.relevant \? 'Relevant' : 'Not relevant'\}/)
+  assert.match(feedSource, /Engineering · \{routing\.ai_engineering\.relevant \? 'Relevant' : 'Not relevant'\}/)
   assert.match(feedSource, /Investment · \{routing\.investment\.relevant \? 'Relevant' : 'Not relevant'\}/)
-  assert.doesNotMatch(feedSource, /audienceFilter/)
   assert.doesNotMatch(feedSource, /Feed triage|Kept for extraction|Dropped before extraction/)
-  assert.doesNotMatch(feedSource, /label="AUDIT"/)
   assert.match(appStyles, /\.event-audience-mark \{[\s\S]*?border: 1px solid var\(--border\);/)
+})
+
+test('Feed exposes one mutually exclusive routing Status control', () => {
+  assert.match(feedSource, /label="STATUS"/)
+  assert.match(feedSource, /value: 'relevant'/)
+  assert.match(feedSource, /value: 'not_relevant'/)
+  assert.match(feedSource, /value: 'not_evaluated'/)
+  assert.match(feedSource, /routing: request\.routingFilter/)
+  assert.doesNotMatch(feedSource, /label="AUDIT"|label="AUDIENCE"/)
+  assert.doesNotMatch(feedSource, /value: 'engineering'|value: 'investment'|value: 'both'/)
+  assert.doesNotMatch(feedSource, /triageFilter|triage_counts|auditFilter|audienceFilter/)
 })
 
 test('Feed search matches the compact ruled control language', () => {

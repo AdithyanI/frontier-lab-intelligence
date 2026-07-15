@@ -13,7 +13,7 @@ where broader research quality is the evaluated boundary.
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Feed envelope triage | `gpt-5.6-luna` | `medium` | Simple output, but false drops are costly; the 64-item migration cohort matched the accepted mini baseline 64/64. |
+| Evidence audience routing | `gpt-5.6-luna` | `medium` | Two independent relevance judgments require enough reasoning to distinguish technical from strategic evidence; the first eight-record review run is qualitatively inspectable. |
 | Cited insight extraction | `gpt-5.6-luna` | `medium` | Requires claim synthesis plus exact quotation; the five-item migration oracle passed citation verification 5/5. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |
@@ -22,9 +22,11 @@ where broader research quality is the evaluated boundary.
 Do not lower reasoning effort merely to reduce spend. OpenAI recommends using
 the lowest effort that still meets the task, preserving the prior effort as a
 migration baseline, and testing one level lower. That comparison matters here:
-Luna-low agreed with the accepted mini-medium triage decisions on 63/64 current
+Luna-low agreed with the retired mini-medium keep/drop decisions on 63/64
 envelopes but dropped a post that named a specific Thinking Machines Lab essay.
-Luna-medium agreed 64/64, so `medium` remains the triage default.
+That historical comparison supports retaining `medium` as the starting effort
+for audience routing; the new two-judgment contract still requires its own
+bounded qualitative calibration.
 
 The model string and reasoning effort are part of every run identity. Existing
 run databases and historical reports remain immutable evidence of the model
@@ -51,7 +53,8 @@ The 2026-07-14 migration checks established:
 
 - an exact-repeat Luna canary read 1,792 cached tokens from a 1,990-token input
   when `24h` was explicit;
-- the 64-envelope Luna-medium triage run had 58 cache-hit requests and read
+- the historical 64-envelope Luna-medium classification run had 58 cache-hit
+  requests and read
   103,936 cached tokens from 168,022 input tokens (61.86%);
 - the five-item Luna extraction oracle recorded zero cache reads, so eligibility
   is never treated as proof of a hit.
@@ -68,6 +71,13 @@ or change classification quality. The exact diagnostic is recorded in
 The same v3 different-input control also returned zero reads on the available
 GPT-5.5 Azure Responses deployment despite an explicit shared key and `24h`
 retention, so the live failure is not isolated to the Luna model alias.
+
+A final Luna-specific control removed the remaining sharding ambiguity: two
+different v4 evidence packets ran sequentially with the exact same forced
+cache key and an 8,284-character / 1,516-token stable prefix. The 3,289-token cold request
+and 1,953-token follow-up both returned zero cached tokens. Catalog jobs must
+therefore be budgeted as uncached; keep telemetry and treat any future reads as
+measured upside rather than a prerequisite.
 
 The proxy also has a separate Redis full-response cache. An exact complete
 request repeat can therefore return instantly at zero proxy spend while still

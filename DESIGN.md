@@ -94,8 +94,8 @@ Rules:
 - Feed and Primary artifacts share one top-level **Evidence** destination
   because they are two inspection views over the same evidence layer. Feed is
   the first and default subview: it owns daily rank, score disclosure, and
-  keep/drop triage. Primary artifacts follows as the canonical source and
-  retrieval-provenance index derived from kept Feed evidence. Keep the two
+  direct audience routing. Primary artifacts follows as the canonical source
+  and retrieval-provenance index derived from selected Feed evidence. Keep the two
   object types in separate ruled views; do not blend events and artifacts into
   one list.
 - Home is an editorial split: statement + hero numerals on the left, live
@@ -157,7 +157,9 @@ Rules:
   out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
-- **Evidence Feed:** default to the decision-ready `Kept` / `Score` view.
+- **Evidence Feed:** default to the decision-ready `Relevant` / `Score` view.
+  `Relevant` is a derived display state—Engineering, Investment, or both—not
+  a separate model judgment.
   Date navigation shows the newest seven available complete UTC days in one
   ruled row; explicit older/newer controls page through non-overlapping
   seven-date windows while keeping the selected column where possible. At
@@ -170,22 +172,22 @@ Rules:
   state rather than silently selecting a different day.
   The persistent left rail shows the event's stable daily score rank across all
   evidence for the selected day (`#1`, `#2`, ...), never the composite decimal.
-  Audit filters and search hide rows without restarting that rank. Clicking it opens one
+  Status filters and search hide rows without restarting that rank. Clicking it opens one
   anchored, non-modal disclosure with the daily score, its exact score-producing
   member post, raw component values, within-day percentiles, weights, and
   limitations. Rank is scope-aware: a future weekly view labels a weekly rank;
   it must not average incomparable daily scores.
-  Audit and sort are compact labeled disclosures rather than persistent
-  segmented bars; each option remains one click away and audit counts stay
+  Status and sort are compact labeled disclosures rather than persistent
+  segmented bars; each option remains one click away and routing counts stay
   visible inside the menu. Search shares their 44px square hairline treatment
-  but remains a separate left-aligned input; the paired Audit/Sort controls
-  anchor the right edge. They stack only on narrow screens. Per-envelope triage rationale is collapsed by
-  default behind a quiet `View reason` disclosure so evidence remains the
-  primary reading surface. Downstream audience routing adds no second toolbar
-  filter: a kept envelope shows neutral hairline `AI` and/or `INV` marks only
-  for positive judgments, directly beside its triage status. The same
-  disclosure then presents the Feed reason and the two audience-specific
-  decisions and reasons. Unrouted, stale, and dropped envelopes show no marks.
+  but remains a separate left-aligned input; the Status/Sort controls
+  anchor the right edge. They stack only on narrow screens. Per-envelope routing rationale is collapsed by
+  default behind a quiet `View reasons` disclosure so evidence remains the
+  primary reading surface. A routed envelope shows neutral hairline `ENG`
+  and/or `INV` marks, or the quiet `Neither audience`
+  state when both judgments are negative. The disclosure presents only the
+  two audience-specific decisions and reasons. Unrouted or stale envelopes
+  show no routing status.
 - **Artifact index:** a flat, ruled list over the canonical artifact catalog.
   Within the selected source day, order by the best originating Feed rank; if
   several accepted envelopes reveal the same artifact, the smallest rank wins.
