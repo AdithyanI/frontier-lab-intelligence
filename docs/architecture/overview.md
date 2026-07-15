@@ -340,17 +340,38 @@ mechanically valid item in duplicate-suppression history, so later editors do
 not rediscover the same weak framing and already-frozen downstream runs do not
 need to be rewritten. An audit disqualification remains absent from both the
 released projection and later history.
+
+New chronological runs receive that history through explicit command inputs,
+not a “newest directory” guess. Repeated `--prior-run-db` values must name one
+internally passed run per earlier day, in strictly increasing order, for the
+same audience. Before any model client is created, the runner validates the
+entire audience/day/order chain, then revalidates each source's exact adjacent
+`publication-audit-v1/audit.db` and optional immutable finalization. The
+resolved mode, exact sources, projection modes, item count, and history hash are
+returned in command JSON. `--history-mode auto` remains an explicit
+non-production escape hatch; `--history-mode none` is reserved for an explicit
+history origin. Omitting both a mode and exact prior databases is an error.
+
 `fli.audience_insight_production_reconciliation` then provides the production
 closeout boundary. Its strict explicit manifest
 names every required audience/day, exact source database, adjacent audit,
 expected base selection count, optional finalization, and—when available—the
-exact X Article artifact cohort. It discovers no runs by recency or directory
-scan, opens all SQLite inputs read-only, fails closed on missing or duplicate
-cells, immutable-contract drift, unresolved false negatives, incomplete stage
-state, or nonterminal bound Articles, and emits deterministic per-run and
-aggregate count, token, cache, cost, audit-hash, and finalization-hash evidence.
-An Article cohort not explicitly bound is reported as unbound rather than
-silently inferred.
+exact X Article artifact cohort. The Article origin union is also explicit:
+ordinary items must derive from the declared production-run event IDs, while
+the two lower-rank census Articles are admitted only through exact sample IDs
+in the frozen recall database. That recall origin binds the complete
+`recall_run` / `recall_sample` / `recall_replacement` ledger hash, revalidates
+the sample protocol, selection hash, packet identity, accepted artifact-event
+edge, and source artifact database, and rejects overlap with run-derived
+events. It is therefore not a general artifact superset escape hatch. The
+reconciler discovers no runs by recency or directory scan, opens all SQLite
+inputs read-only, fails closed on missing or duplicate cells,
+immutable-contract drift, unresolved false negatives, incomplete stage state,
+unknown proxy cost, or nonterminal bound Articles, and emits deterministic
+per-run and aggregate count, token, cache, cost, audit-hash, and
+finalization-hash evidence. A numeric provider-reported zero cost remains
+valid; NULL remains unknown and requires a superseding run. An Article cohort
+not explicitly bound is reported as unbound rather than silently inferred.
 
 Production publication is deliberately stricter than local fixture discovery.
 `fli.web.insights` accepts only the adjacent

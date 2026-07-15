@@ -345,6 +345,11 @@ finish with an honest quality assessment, limitations, and the next best test.
   extractions directly from production run databases, ordered by original Feed
   rank across Jul 5–13. “Reviewed brief” remains a separate view for direct
   comparison once the canonical publication pair is materialized.
+- 2026-07-15: Corrected production chronology must pass every exact earlier
+  canonical run DB through repeated `--prior-run-db` arguments in ascending day
+  order. The runner validates the whole chain plus adjacent audits/finalizations
+  before any model call and records the resolved explicit mode and history hash
+  in command JSON. Directory-recency history is now opt-in `auto` only.
 
 ## Open Questions / Blockers
 
@@ -537,6 +542,14 @@ finish with an honest quality assessment, limitations, and the next best test.
   the complete 82-test Audience Insights backend slice pass. The final manifest
   remains intentionally unmaterialized until every superseding production run
   is frozen.
+- 2026-07-15: [RECONCILIATION] Closed three strict-manifest blockers without
+  rewriting production stores. Initial and padding-reconciled day reviews now
+  require their distinct exact runner-owned request tags; unknown proxy cost is
+  never coerced to zero, making AI Jul 10 provider-safe r4 the valid successor
+  to the empty-response r2/r3 runs; and the 22-Article boundary is the exact
+  union of run-derived Articles plus two hash-bound frozen recall census samples
+  (Jul 10 rank 71 and Jul 11 rank 83). Broad artifact supersets, arbitrary recall
+  samples, origin overlap, and recall-ledger drift all fail closed.
 - 2026-07-15: [RECALL] Completed exact final-set adjudication against the
   current contracts. AI Engineering Jul 5 rank 84 and Jul 9 rank 100 entered
   their bounded widened production days; Investment Jul 6 rank 69 remained

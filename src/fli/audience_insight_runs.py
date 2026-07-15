@@ -2452,8 +2452,7 @@ def _explicit_prior_history(
     if len(paths) != len(set(paths)):
         raise ValueError("explicit history contains a duplicate prior run database")
 
-    history: list[dict[str, Any]] = []
-    sources: list[dict[str, Any]] = []
+    chain: list[dict[str, Any]] = []
     seen_days: set[str] = set()
     previous_day: date | None = None
     for path in paths:
@@ -2500,31 +2499,52 @@ def _explicit_prior_history(
                 raise ValueError(f"prior run editor is not complete: {path}")
             if gate is None or int(gate["passed"] or 0) != 1:
                 raise ValueError(f"prior run quality gate did not pass: {path}")
-
-            audit_db = path.parent / ADJACENT_PUBLICATION_AUDIT
-            finalization_path = (
-                audience_insight_publication_audit.default_finalization_path(path)
+            chain.append(
+                {
+                    "path": path,
+                    "run_id": str(run["run_id"]),
+                    "day": run_day_text,
+                }
             )
-            try:
-                projection = (
-                    audience_insight_publication_audit.validated_publication_projection(
-                        source_run_db=path,
-                        audit_db=audit_db,
-                    )
+            seen_days.add(run_day_text)
+            previous_day = run_day
+        finally:
+            conn.close()
+
+    # Validate publication provenance only after the complete command-level
+    # chain has passed audience/day/ordering checks. A malformed chain should
+    # fail for its own deterministic input error, not whichever sidecar happens
+    # to be inspected first.
+    history: list[dict[str, Any]] = []
+    sources: list[dict[str, Any]] = []
+    for entry in chain:
+        path = entry["path"]
+        audit_db = path.parent / ADJACENT_PUBLICATION_AUDIT
+        finalization_path = (
+            audience_insight_publication_audit.default_finalization_path(path)
+        )
+        try:
+            projection = (
+                audience_insight_publication_audit.validated_publication_projection(
+                    source_run_db=path,
+                    audit_db=audit_db,
                 )
-            except (
-                FileNotFoundError,
-                IndexError,
-                KeyError,
-                OSError,
-                TypeError,
-                ValueError,
-                sqlite3.Error,
-            ) as exc:
-                raise ValueError(
-                    "prior run has a missing or stale adjacent audit/finalization: "
-                    f"{path}: {exc}"
-                ) from exc
+            )
+        except (
+            FileNotFoundError,
+            IndexError,
+            KeyError,
+            OSError,
+            TypeError,
+            ValueError,
+            sqlite3.Error,
+        ) as exc:
+            raise ValueError(
+                "prior run has a missing or stale adjacent audit/finalization: "
+                f"{path}: {exc}"
+            ) from exc
+        conn = _open_readonly(path)
+        try:
             history_ids = _history_projection_ids(projection)
             selected = selected_history_row(conn, candidate_ids=history_ids)
             if [str(item["selected_item_id"]) for item in selected] != history_ids:
@@ -2535,8 +2555,8 @@ def _explicit_prior_history(
             sources.append(
                 {
                     "run_db": _display_path(path),
-                    "run_id": str(run["run_id"]),
-                    "day": run_day_text,
+                    "run_id": entry["run_id"],
+                    "day": entry["day"],
                     "audit_db": _display_path(audit_db),
                     "finalization": (
                         _display_path(finalization_path)
@@ -2547,8 +2567,6 @@ def _explicit_prior_history(
                     "history_item_count": len(selected),
                 }
             )
-            seen_days.add(run_day_text)
-            previous_day = run_day
         finally:
             conn.close()
     return history, {

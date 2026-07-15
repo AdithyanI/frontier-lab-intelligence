@@ -1405,7 +1405,7 @@ def test_explicit_history_rejects_current_or_future_day(tmp_path):
         )
 
 
-def test_explicit_history_rejects_duplicate_day(tmp_path, monkeypatch):
+def test_explicit_history_rejects_duplicate_day(tmp_path):
     root = tmp_path / "runs"
     first = _history_run(
         root,
@@ -1423,17 +1423,6 @@ def test_explicit_history_rejects_duplicate_day(tmp_path, monkeypatch):
         passed=True,
         claim="Second.",
     )
-    monkeypatch.setattr(
-        audience_insight_runs.audience_insight_publication_audit,
-        "validated_publication_projection",
-        lambda source_run_db, **_kwargs: {
-            "mode": "audit_pass",
-            "base_selected_ids": [f"candidate-{source_run_db.parent.name}"],
-            "effective_selected_ids": [f"candidate-{source_run_db.parent.name}"],
-            "finalization": None,
-        },
-    )
-
     with pytest.raises(ValueError, match="duplicate day"):
         audience_insight_runs._explicit_prior_history(
             prior_run_dbs=[first, second],

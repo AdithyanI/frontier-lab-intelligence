@@ -199,10 +199,18 @@ otherwise-valid runs by recency.
 The final web product is fail-closed behind one adjacent
 `production-reconciliation-v2/manifest.json` and `report.json` pair. The
 manifest must name all 18 audience/day cells, exact adjacent audits, optional
-finalizations, and all 22 X Article snapshots. The stored report must equal a
-fresh canonical evaluation byte-for-byte. Until that pair exists and validates,
-the live Insights API intentionally reports unavailable rather than guessing
-which superseding directory is current.
+finalizations, and all 22 X Article snapshots. Twenty Articles must derive
+exactly from the declared production-run event union. The Jul 10 rank-71
+isRecord and Jul 11 rank-83 Loop Engineering Articles are the only additional
+origins: their exact recall sample IDs and complete frozen recall-ledger hash
+are manifest-bound, and they cannot be replaced by an arbitrary artifact
+superset. The stored report must equal a fresh canonical evaluation
+byte-for-byte. Until that pair exists and validates, the live Insights API
+intentionally reports unavailable rather than guessing which superseding
+directory is current. Runs with NULL proxy-reported cost remain ineligible;
+only a numeric provider-reported zero is a known zero. The provider-safe AI
+Engineering Jul 10 r4 rerun supersedes r2/r3, whose empty Nova fallback
+responses left their exact costs unknown.
 
 Exact closeout values intentionally remain pending until the canonical report
 exists; copy them from that report, never from a directory scan:
