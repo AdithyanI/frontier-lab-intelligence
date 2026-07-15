@@ -44,6 +44,7 @@ test('Feed shows audience marks and keeps both routing reasons auditable', () =>
 
 test('Feed exposes one mutually exclusive routing Status control', () => {
   assert.match(feedSource, /label="STATUS"/)
+  assert.match(feedSource, /value: 'all', label: 'All'/)
   assert.match(feedSource, /value: 'relevant'/)
   assert.match(feedSource, /value: 'not_relevant'/)
   assert.match(feedSource, /value: 'not_evaluated'/)

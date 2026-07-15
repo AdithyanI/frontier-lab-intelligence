@@ -29,6 +29,7 @@ import { readAuditDate, setAuditDateParam } from '../auditDate'
 
 type Sort = 'attention' | 'recent' | 'engagement'
 type RoutingFilter =
+  | 'all'
   | 'relevant'
   | 'not_relevant'
   | 'not_evaluated'
@@ -41,6 +42,7 @@ const shortDate = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
 })
 const routingSummaryLabels: Record<RoutingFilter, string> = {
+  all: 'all',
   relevant: 'relevant',
   not_relevant: 'not-relevant',
   not_evaluated: 'not-evaluated',
@@ -960,6 +962,7 @@ export default function Feed() {
               setRoutingFilter(value)
             }}
             options={[
+              { value: 'all', label: 'All', description: 'All Feed items', count: data?.routing_counts?.all },
               { value: 'relevant', label: 'Relevant', description: 'Engineering or Investment', count: data?.routing_counts?.relevant },
               { value: 'not_relevant', label: 'Not relevant', description: 'Evaluated, but relevant to neither audience', count: data?.routing_counts?.not_relevant },
               { value: 'not_evaluated', label: 'Not evaluated', description: 'No audience-routing result', count: data?.routing_counts?.not_evaluated },

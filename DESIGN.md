@@ -179,7 +179,9 @@ Rules:
   it must not average incomparable daily scores.
   Status and sort are compact labeled disclosures rather than persistent
   segmented bars; each option remains one click away and routing counts stay
-  visible inside the menu. Search shares their 44px square hairline treatment
+  visible inside the menu. Status begins with `All`, which removes the routing
+  filter without inventing another evaluation state, followed by Relevant,
+  Not relevant, and Not evaluated. Search shares their 44px square hairline treatment
   but remains a separate left-aligned input; the Status/Sort controls
   anchor the right edge. They stack only on narrow screens. Per-envelope routing rationale is collapsed by
   default behind a quiet `View reasons` disclosure so evidence remains the
