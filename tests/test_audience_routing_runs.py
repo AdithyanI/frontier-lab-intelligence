@@ -53,6 +53,10 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     columns = {
         row["name"] for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
     }
+    item_columns = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(routing_item)").fetchall()
+    }
     frozen = conn.execute("SELECT * FROM routing_item").fetchone()
     conn.close()
 
@@ -63,8 +67,8 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     assert meta["selection_limit"] == 1
     assert "source_triage_db" not in columns
     assert "source_triage_run_id" not in columns
+    assert "prompt_cache_key" not in item_columns
     assert frozen["event_id"] == "event-1"
     assert frozen["feed_rank"] == 3
     packet = json.loads(frozen["packet_json"])
     assert [source["relation"] for source in packet["sources"]] == ["root", "quote"]
-

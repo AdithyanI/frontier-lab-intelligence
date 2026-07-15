@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 import argparse
-import concurrent.futures
 import hashlib
 import json
 import sqlite3
 import sys
 import time
-from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -20,8 +18,7 @@ from fli import artifacts, audience_routing, entity_kinds
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RUN_ROOT = REPO_ROOT / "data" / "derived" / "audience-routing"
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
-DEFAULT_TOP_RANKED = 8
-DEFAULT_WORKERS = 2
+DEFAULT_TOP_RANKED = 10
 
 RUN_SCHEMA = """
 CREATE TABLE IF NOT EXISTS run_meta (
@@ -55,7 +52,6 @@ CREATE TABLE IF NOT EXISTS routing_item (
     evidence_sha256 TEXT NOT NULL,
     input_text TEXT NOT NULL,
     input_sha256 TEXT NOT NULL,
-    prompt_cache_key TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'complete', 'failed')),
     attempts INTEGER NOT NULL DEFAULT 0,
@@ -83,8 +79,6 @@ CREATE INDEX IF NOT EXISTS idx_routing_item_audiences_rank
     ON routing_item(
         ai_engineering_relevant, investment_relevant, feed_rank, event_id
     );
-CREATE INDEX IF NOT EXISTS idx_routing_item_cache_key_rank
-    ON routing_item(prompt_cache_key, feed_rank, event_id);
 """
 
 
@@ -421,8 +415,8 @@ def freeze_run(
             """INSERT INTO routing_item
                (event_id, feed_rank, root_url, snapshot_content_sha256,
                 packet_json, evidence_sha256, input_text, input_sha256,
-                prompt_cache_key, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             [
                 (
                     packet.event_id,
@@ -433,7 +427,6 @@ def freeze_run(
                     packet.evidence_sha256,
                     audience_routing.render_input(packet),
                     packet.input_sha256,
-                    audience_routing.prompt_cache_key(packet.event_id),
                     now,
                 )
                 for item, packet in zip(items, packets, strict=True)
@@ -466,7 +459,6 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
                       SUM(COALESCE(output_tokens, 0)) AS output_tokens,
                       SUM(COALESCE(reported_cost_usd, 0)) AS reported_cost_usd,
                       SUM(reported_cost_usd IS NOT NULL) AS reported_cost_count,
-                      COUNT(DISTINCT prompt_cache_key) AS prompt_cache_keys,
                       SUM(COALESCE(input_tokens, 0) >= 1024) AS cache_eligible_requests,
                       SUM(COALESCE(cached_tokens, 0) > 0) AS cache_hit_requests
                FROM routing_item"""
@@ -485,10 +477,7 @@ def run_pending(
     conn: sqlite3.Connection,
     *,
     client: Any,
-    workers: int = DEFAULT_WORKERS,
 ) -> dict[str, Any]:
-    if workers < 1:
-        raise ValueError("workers must be at least 1")
     meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
     if meta is None:
         raise ValueError("run database has not been prepared")
@@ -513,92 +502,62 @@ def run_pending(
         except Exception as exc:
             return row, None, exc
 
-    lanes: dict[str, deque[sqlite3.Row]] = {}
-    for row in rows:
-        lanes.setdefault(str(row["prompt_cache_key"]), deque()).append(row)
-    waiting = deque(lanes)
-    executor = concurrent.futures.ThreadPoolExecutor(
-        max_workers=min(workers, len(lanes))
-    )
-    active: dict[concurrent.futures.Future, str] = {}
-
-    def start_next(cache_key: str) -> None:
-        active[executor.submit(evaluate, lanes[cache_key].popleft())] = cache_key
-
-    while waiting and len(active) < workers:
-        start_next(waiting.popleft())
-
-    def outcomes():
-        while active:
-            done, _ = concurrent.futures.wait(
-                active, return_when=concurrent.futures.FIRST_COMPLETED
-            )
-            for future in done:
-                cache_key = active.pop(future)
-                yield future.result()
-                if lanes[cache_key]:
-                    start_next(cache_key)
-                elif waiting:
-                    start_next(waiting.popleft())
-
-    try:
-        for processed, (row, result, error) in enumerate(outcomes(), start=1):
-            now = _now()
-            if result is not None:
-                with conn:
-                    conn.execute(
-                        """UPDATE routing_item
-                           SET status = 'complete', attempts = attempts + 1,
-                               ai_engineering_relevant = ?,
-                               ai_engineering_reason = ?,
-                               investment_relevant = ?, investment_reason = ?,
-                               raw_output_text = ?, response_id = ?,
-                               response_model = ?, input_tokens = ?,
-                               cached_tokens = ?, cache_write_tokens = ?,
-                               output_tokens = ?, reported_cost_usd = ?,
-                               request_tags_json = ?, error_type = NULL,
-                               error_message = NULL, completed_at = ?, updated_at = ?
-                           WHERE event_id = ?""",
-                        (
-                            int(result["ai_engineering"]["relevant"]),
-                            result["ai_engineering"]["reason"],
-                            int(result["investment"]["relevant"]),
-                            result["investment"]["reason"],
-                            result["raw_output_text"], result["response_id"],
-                            result["response_model"], result["input_tokens"],
-                            result["cached_tokens"], result["cache_write_tokens"],
-                            result["output_tokens"], result["reported_cost_usd"],
-                            _canonical_json(result["request_tags"]), now, now,
-                            row["event_id"],
-                        ),
-                    )
-                status = "complete"
-            else:
-                assert error is not None
-                with conn:
-                    conn.execute(
-                        """UPDATE routing_item
-                           SET status = 'failed', attempts = attempts + 1,
-                               error_type = ?, error_message = ?, updated_at = ?
-                           WHERE event_id = ?""",
-                        (type(error).__name__, str(error), now, row["event_id"]),
-                    )
-                status = "failed"
-            print(
-                _canonical_json(
-                    {
-                        "event_id": row["event_id"],
-                        "rank": row["feed_rank"],
-                        "status": status,
-                        "processed": processed,
-                        "pending_batch": len(rows),
-                    }
-                ),
-                file=sys.stderr,
-                flush=True,
-            )
-    finally:
-        executor.shutdown(wait=True)
+    for processed, row in enumerate(rows, start=1):
+        row, result, error = evaluate(row)
+        now = _now()
+        if result is not None:
+            with conn:
+                conn.execute(
+                    """UPDATE routing_item
+                       SET status = 'complete', attempts = attempts + 1,
+                           ai_engineering_relevant = ?,
+                           ai_engineering_reason = ?,
+                           investment_relevant = ?, investment_reason = ?,
+                           raw_output_text = ?, response_id = ?,
+                           response_model = ?, input_tokens = ?,
+                           cached_tokens = ?, cache_write_tokens = ?,
+                           output_tokens = ?, reported_cost_usd = ?,
+                           request_tags_json = ?, error_type = NULL,
+                           error_message = NULL, completed_at = ?, updated_at = ?
+                       WHERE event_id = ?""",
+                    (
+                        int(result["ai_engineering"]["relevant"]),
+                        result["ai_engineering"]["reason"],
+                        int(result["investment"]["relevant"]),
+                        result["investment"]["reason"],
+                        result["raw_output_text"], result["response_id"],
+                        result["response_model"], result["input_tokens"],
+                        result["cached_tokens"], result["cache_write_tokens"],
+                        result["output_tokens"], result["reported_cost_usd"],
+                        _canonical_json(result["request_tags"]), now, now,
+                        row["event_id"],
+                    ),
+                )
+            status = "complete"
+        else:
+            assert error is not None
+            with conn:
+                conn.execute(
+                    """UPDATE routing_item
+                       SET status = 'failed', attempts = attempts + 1,
+                           error_type = ?, error_message = ?, updated_at = ?
+                       WHERE event_id = ?""",
+                    (type(error).__name__, str(error), now, row["event_id"]),
+                )
+            status = "failed"
+        print(
+            _canonical_json(
+                {
+                    "event_id": row["event_id"],
+                    "rank": row["feed_rank"],
+                    "status": status,
+                    "processed": processed,
+                    "pending_batch": len(rows),
+                }
+            ),
+            file=sys.stderr,
+            flush=True,
+        )
     return summary(conn)
 
 
@@ -635,7 +594,6 @@ def main(argv: list[str] | None = None) -> int:
     run_parser.add_argument(
         "--reasoning-effort", default=audience_routing.DEFAULT_REASONING_EFFORT
     )
-    run_parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     run_parser.add_argument("--dry-run", action="store_true")
     summary_parser = sub.add_parser("summary", help="Inspect a frozen run.")
     summary_parser.add_argument("--run-db", type=Path, required=True)
@@ -656,7 +614,8 @@ def main(argv: list[str] | None = None) -> int:
                 "model": args.model,
                 "reasoning_effort": args.reasoning_effort,
                 "prompt_version": audience_routing.PROMPT_VERSION,
-                "prompt_cache_shards": audience_routing.PROMPT_CACHE_SHARDS,
+                "prompt_caching": "single_stable_prefix_key",
+                "execution": "sequential",
                 "will_call_model": False,
             }
             print(_canonical_json(_result("audience-routing.run", data)))
@@ -677,7 +636,7 @@ def main(argv: list[str] | None = None) -> int:
             client = entity_kinds.create_litellm_client()
             if hasattr(client, "with_options"):
                 client = client.with_options(max_retries=0, timeout=180.0)
-            data = run_pending(conn, client=client, workers=args.workers)
+            data = run_pending(conn, client=client)
             conn.close()
             command = "audience-routing.run"
         elif args.action == "summary":

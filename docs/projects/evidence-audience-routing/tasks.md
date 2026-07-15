@@ -252,15 +252,10 @@ Application invariants:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
-| done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
-| done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
-| done | Remove the unsafe short-reaction cutoff and keep reason length advisory rather than schema-limited; v4 now suggests roughly 40–50 words. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
-| done | Run the frozen July 12 eight-record cohort sequentially through Luna-medium and record distribution, quality, cache, cost, and limitations. | parent | `resources/jul12-top8-v3-routing.md` |
-| done | Expose exact-match routing records as quiet marks and separate reasons in the Feed disclosure, with one derived Status control and no Insight prose. | parent | `resources/jul12-top8-v3-routing.md` |
-| done | Remove the superseded keep/drop projection, controls, CLI/runtime path, generated data, and all new-router dependencies on it. | parent | — |
-| done | Migrate the current audience-routing records to direct Evidence/run provenance and verify the simplified July 12 Feed. | parent | `resources/jul12-top8-v3-routing.md` |
-| in_progress | Resume Adi's qualitative audit, then choose a bounded hard-negative/`neither` sample before any broad run. | parent | `resources/jul12-top8-v3-routing.md` |
+| done | Simplify production audience routing to GPT-5.4 mini with one stable prompt key, sequential execution, and no sharding, retention override, or padding. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
+| in_progress | Freeze and route the top 10 ranked Evidence envelopes for every available Feed day at high reasoning. | parent | `resources/top10-every-day-v4-mini.md` |
+| todo | Verify per-day completeness, cache reads, cost, audience distribution, and existing Feed projection. | parent | `resources/top10-every-day-v4-mini.md` |
+| todo | Hand the multi-day cohort to Adi for qualitative audit before Insight generation. | parent | — |
 
 ## Backlog / Remaining Work
 

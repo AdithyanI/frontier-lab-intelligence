@@ -22,10 +22,10 @@ from fli import llm_responses
 
 PROMPT_VERSION = "audience-routing-v4"
 SCHEMA_VERSION = "audience-routing-output-v1"
-DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
-DEFAULT_REASONING_EFFORT = "medium"
-PROMPT_CACHE_SHARDS = 32
+DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_REASONING_EFFORT = "high"
 PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v4.txt"
+PROMPT_CACHE_KEY = f"fli:audience-routing:{PROMPT_VERSION}"
 
 AUDIENCES = ("ai_engineering", "investment")
 JUDGMENT_FIELDS = ("relevant", "reason")
@@ -137,16 +137,6 @@ def instructions() -> str:
 
 def prompt_sha256() -> str:
     return _sha256(instructions())
-
-
-def prompt_cache_key(scope_key: str | int) -> str:
-    """Route calls over a small stable set of cache lanes for the first cohort."""
-    return llm_responses.sharded_prompt_cache_key(
-        namespace="audience-routing",
-        prompt_version=PROMPT_VERSION,
-        scope_key=scope_key,
-        shards=PROMPT_CACHE_SHARDS,
-    )
 
 
 def request_tags(*, run: str, day: str) -> tuple[str, ...]:
@@ -378,7 +368,7 @@ def evaluate_one(
         "model": model,
         "instructions": instructions(),
         "input": render_input(packet),
-        "prompt_cache_key": prompt_cache_key(packet.event_id),
+        "prompt_cache_key": PROMPT_CACHE_KEY,
         **llm_responses.litellm_prompt_cache_kwargs(model),
         "reasoning": {"effort": effort},
         "text": {"format": OUTPUT_FORMAT},
@@ -402,7 +392,6 @@ def evaluate_one(
         "prompt_version": PROMPT_VERSION,
         "schema_version": SCHEMA_VERSION,
         "prompt_sha256": prompt_sha256(),
-        "prompt_cache_key": request["prompt_cache_key"],
         "response_id": getattr(response, "id", None) or response_data.get("id"),
         "response_model": getattr(response, "model", None)
         or response_data.get("model"),

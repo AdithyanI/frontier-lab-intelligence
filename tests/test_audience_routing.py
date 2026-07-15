@@ -261,7 +261,7 @@ def test_evidence_hash_binds_hidden_provenance_while_input_hash_does_not():
     assert changed_packet.input_sha256 == packet.input_sha256
 
 
-def test_request_uses_luna_medium_cache_adapter_tags_and_telemetry():
+def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
     client = FakeClient(routing_payload())
 
     result = audience_routing.evaluate_one(
@@ -271,15 +271,13 @@ def test_request_uses_luna_medium_cache_adapter_tags_and_telemetry():
     )
 
     request = client.responses.with_raw_response.calls[0]
-    assert request["model"] == "gpt-5.6-luna"
-    assert request["reasoning"] == {"effort": "medium"}
-    assert request["prompt_cache_retention"] == "24h"
+    assert request["model"] == "gpt-5.4-mini"
+    assert request["reasoning"] == {"effort": "high"}
+    assert "prompt_cache_retention" not in request
+    assert request["prompt_cache_key"] == audience_routing.PROMPT_CACHE_KEY
     assert request["instructions"] == audience_routing.instructions()
     assert len(request["instructions"].split()) >= 1_024
     assert request["input"] == audience_routing.render_input(make_packet())
-    assert request["prompt_cache_key"] == audience_routing.prompt_cache_key(
-        make_packet().event_id
-    )
     assert request["text"]["format"] == audience_routing.OUTPUT_FORMAT
     assert request["store"] is False
     assert "tools" not in request
@@ -334,22 +332,12 @@ def test_output_rejects_non_exact_or_invalid_judgments(mutate, error):
         audience_routing._validate_output(json.dumps(payload))
 
 
-def test_output_normalizes_reasons_and_cache_keys_use_stable_catalog_lanes():
+def test_output_normalizes_reasons():
     payload = routing_payload()
     payload["investment"]["reason"] = "  Cost   changes\nunit economics.  "
 
     result = audience_routing._validate_output(json.dumps(payload))
-    keys = {
-        audience_routing.prompt_cache_key(f"event-{index}")
-        for index in range(512)
-    }
-
     assert result["investment"]["reason"] == "Cost changes unit economics."
-    assert len(keys) == audience_routing.PROMPT_CACHE_SHARDS == 32
-    assert audience_routing.prompt_cache_key("event-1") == (
-        audience_routing.prompt_cache_key("event-1")
-    )
-    assert all(key.startswith("fli:audience-routing:") for key in keys)
 
 
 def test_prompt_explains_product_evidence_and_independent_audience_job():

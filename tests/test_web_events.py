@@ -89,8 +89,8 @@ def _write_audience_routing_run(root, *, items):
             selection_limit,
             requested_event_id, cohort_sha256, expected_count,
             created_at, updated_at)
-           VALUES (1, 'audience-run-1', '2026-07-11', 'gpt-5.6-luna',
-                   'medium', ?, 'prompt-hash', ?, 'event-run-1',
+           VALUES (1, 'audience-run-1', '2026-07-11', 'gpt-5.4-mini',
+                   'xhigh', ?, 'prompt-hash', ?, 'event-run-1',
                    'feed-run-1', 'artifacts.db', 'review_cohort', ?, NULL,
                    'cohort-hash', ?, ?, ?)""",
         (
@@ -107,13 +107,13 @@ def _write_audience_routing_run(root, *, items):
             """INSERT INTO routing_item
                (event_id, feed_rank, root_url, snapshot_content_sha256,
                 packet_json, evidence_sha256, input_text, input_sha256,
-                prompt_cache_key, status, attempts,
+                status, attempts,
                 ai_engineering_relevant, ai_engineering_reason,
                 investment_relevant, investment_reason,
                 completed_at, updated_at)
                VALUES (?, ?, 'https://x.com/a/status/1', ?, '{}',
-                       'evidence-hash', 'input', 'input-hash', 'cache-key',
-                       'complete', 1, ?, ?, ?, ?, ?, ?)""",
+                       'evidence-hash', 'input', 'input-hash', 'complete', 1,
+                       ?, ?, ?, ?, ?, ?)""",
             (
                 item["event_id"],
                 rank,
