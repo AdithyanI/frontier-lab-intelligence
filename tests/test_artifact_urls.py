@@ -1,4 +1,6 @@
-from fli import artifact_urls
+import json
+
+from fli import artifact_urls, artifacts
 
 
 def test_canonicalization_is_conservative_and_tracks_reviewed_equivalence():
@@ -59,3 +61,26 @@ def test_url_evidence_binds_nested_link_to_actual_owner():
     assert evidence[0].source == "quoted_entity"
     assert evidence[0].expanded_url == "https://arxiv.org/abs/2603.18073"
 
+
+def test_artifact_admission_rejects_a_link_owned_by_a_quoted_reaction():
+    payload = {
+        "id": "root",
+        "entities": {"urls": []},
+        "quoted_tweet": {
+            "id": "other-author",
+            "entities": {
+                "urls": [
+                    {
+                        "url": "https://t.co/tool",
+                        "expanded_url": "https://example.com/unrelated-tool",
+                    }
+                ]
+            },
+        },
+    }
+
+    assert artifacts._matching_primary_evidence(
+        json.dumps(payload),
+        "https://example.com/unrelated-tool",
+        post_id="root",
+    ) is None

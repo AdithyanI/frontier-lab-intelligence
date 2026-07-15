@@ -164,6 +164,10 @@ Rules:
   narrower desktop widths, date labels compact without wrapping while counts
   remain visible; the same seven-cell structure appears as a quiet skeleton
   during the initial date request so the page does not jump from an empty rail.
+  The selected UTC audit day is URL-backed and shared across Feed, Primary
+  artifacts, and Insights. Switching between those views preserves the day;
+  when a target view has no data for it, keep the date and show an honest empty
+  state rather than silently selecting a different day.
   The persistent left rail shows the event's stable daily score rank across all
   evidence for the selected day (`#1`, `#2`, ...), never the composite decimal.
   Audit filters and search hide rows without restarting that rank. Clicking it opens one

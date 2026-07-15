@@ -485,6 +485,17 @@ def _matching_evidence(
     )
 
 
+def _matching_primary_evidence(
+    raw_json: str, target_url: str, *, post_id: str
+) -> artifact_urls.UrlEvidence | None:
+    evidence = _matching_evidence(
+        raw_json,
+        target_url,
+        fallback_owner_external_id=post_id,
+    )
+    return evidence if evidence.owner_external_id == post_id else None
+
+
 def _iter_frozen_candidates(
     *,
     feed_db: Path,
@@ -540,6 +551,8 @@ def _iter_frozen_candidates(
                     for evidence in artifact_urls.url_evidence(
                         json.loads(str(post["raw_json"]))
                     ):
+                        if evidence.owner_external_id != post_id:
+                            continue
                         decision = artifact_urls.classify_candidate(
                             evidence.observed_url,
                             evidence.expanded_url,
@@ -597,11 +610,13 @@ def _iter_frozen_candidates(
                         )
                     continue
                 for target in targets:
-                    evidence = _matching_evidence(
+                    evidence = _matching_primary_evidence(
                         str(post["raw_json"]),
                         target["url"],
-                        fallback_owner_external_id=post_id,
+                        post_id=post_id,
                     )
+                    if evidence is None:
+                        continue
                     owner = feed.execute(
                         """SELECT * FROM feed_post
                            WHERE run_id = ? AND provider = 'twitterapi_io'
