@@ -13,8 +13,8 @@ def test_gpt56_litellm_routes_use_verified_azure_cache_retention():
 
 def test_long_prompt_cache_keys_are_stable_and_azure_compatible():
     kwargs = {
-        "namespace": "audience-insights-v2-investment-extraction",
-        "prompt_version": "investment-insight-v2.0",
+        "namespace": "insights-investment",
+        "prompt_version": "investment-insight-v1",
         "scope_key": "candidate-123",
     }
 

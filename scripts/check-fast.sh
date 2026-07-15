@@ -49,34 +49,6 @@ if ! git diff --quiet -- docs/references/build-log.md 2>/dev/null; then
   git add docs/references/build-log.md
 fi
 
-# A canonical Audience Insights publication is valid only as an exact
-# manifest/report pair. Clean clones have neither and skip this fast guardrail;
-# once either exists, recompute the report and require byte-for-byte identity.
-reconciliation_dir="data/derived/audience-insights-v2/production-reconciliation-v2"
-reconciliation_manifest="$reconciliation_dir/manifest.json"
-reconciliation_report="$reconciliation_dir/report.json"
-if [ -e "$reconciliation_manifest" ] || [ -e "$reconciliation_report" ]; then
-  if [ ! -f "$reconciliation_manifest" ] || [ ! -f "$reconciliation_report" ]; then
-    echo "Canonical Audience Insights publication requires both manifest.json and report.json."
-    exit 1
-  fi
-  mkdir -p tmp
-  reconciliation_tmp=$(mktemp "tmp/production-reconciliation-report.XXXXXX")
-  cleanup_reconciliation_tmp() {
-    rm -f "$reconciliation_tmp"
-  }
-  trap cleanup_reconciliation_tmp EXIT
-  "$PYTHON" -m fli.cli audience-insight-production-reconciliation \
-    --manifest "$reconciliation_manifest" \
-    --output "$reconciliation_tmp"
-  if ! cmp -s "$reconciliation_tmp" "$reconciliation_report"; then
-    echo "Canonical Audience Insights report is stale; regenerate it from manifest.json."
-    exit 1
-  fi
-  cleanup_reconciliation_tmp
-  trap - EXIT
-fi
-
 if find src tests -type f -name '*.py' 2>/dev/null | grep -q .; then
   if [ ! -f pyproject.toml ]; then
     echo "Python files exist but pyproject.toml is missing; add pyproject or document a different validation path."

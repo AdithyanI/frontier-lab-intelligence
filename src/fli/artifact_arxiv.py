@@ -97,10 +97,30 @@ def _create_run(
     run_id = hashlib.sha256(
         _canonical_json([FETCH_POLICY, SELECTION_POLICY, fingerprint]).encode()
     ).hexdigest()
+    run_items = [
+        (
+            run_id,
+            item["artifact_id"],
+            rank,
+            "paper",
+            item["selected_url"],
+            item["envelope_day"],
+            item["source_rank"],
+            item["normalized_rank"],
+            item["event_id"],
+        )
+        for rank, item in enumerate(selection, start=1)
+    ]
     existing = conn.execute(
         "SELECT status FROM artifact_fetch_run WHERE fetch_run_id = ?", (run_id,)
     ).fetchone()
     if existing is not None:
+        if artifact_fetch.restore_pruned_run_items(
+            conn,
+            fetch_run_id=run_id,
+            run_items=run_items,
+        ):
+            return run_id, False
         return run_id, str(existing["status"]) == "complete"
     now = artifact_fetch._now()
     with conn:
@@ -127,20 +147,7 @@ def _create_run(
                 selected_url, source_day, source_rank, normalized_rank,
                 source_event_id)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            [
-                (
-                    run_id,
-                    item["artifact_id"],
-                    rank,
-                    "paper",
-                    item["selected_url"],
-                    item["envelope_day"],
-                    item["source_rank"],
-                    item["normalized_rank"],
-                    item["event_id"],
-                )
-                for rank, item in enumerate(selection, start=1)
-            ],
+            run_items,
         )
     return run_id, False
 

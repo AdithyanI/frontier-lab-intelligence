@@ -16,8 +16,8 @@ Endpoints:
 - /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
 - /api/artifacts/{id}/text       normalized readable artifact snapshot
-- /api/insights/dates            materialized citation-verified insight dates
-- /api/insights                  citation-verified insight proof
+- /api/insights/dates            successor audience Insight dates
+- /api/insights                  successor audience Insights
 """
 
 from contextlib import asynccontextmanager
@@ -496,7 +496,7 @@ def artifact_text(artifact_id: str) -> PlainTextResponse:
 def insight_dates(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
-    """Complete daily selected-set counts for one insight audience."""
+    """Available successor Insight dates for one audience."""
     return JSONResponse(insight_store.insight_dates_payload(audience=audience))
 
 
@@ -504,7 +504,7 @@ def insight_dates(
 def extracted_insight_dates(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
-    """Existing first-stage audience extractions, grouped by Feed date."""
+    """Current UI date route backed by the successor Insight boundary."""
     return JSONResponse(insight_store.extraction_dates_payload(audience=audience))
 
 
@@ -513,7 +513,7 @@ def insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
-    """Editor-selected insights with mechanically bound source quotations."""
+    """Successor audience Insights ordered by application-owned Feed rank."""
     return JSONResponse(
         insight_store.insights_payload(
             audience=audience,
@@ -527,7 +527,7 @@ def extracted_insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
-    """Citation-bound first-stage insights ordered by original Feed rank."""
+    """Current UI item route backed by the successor Insight boundary."""
     return JSONResponse(
         insight_store.extraction_insights_payload(
             audience=audience,

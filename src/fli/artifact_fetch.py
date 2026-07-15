@@ -726,6 +726,54 @@ def select_explicit_artifacts(
     return selected
 
 
+def restore_pruned_run_items(
+    conn: Any,
+    *,
+    fetch_run_id: str,
+    run_items: list[tuple[Any, ...]],
+) -> bool:
+    """Restore deterministic run membership removed by catalog pruning.
+
+    ``artifact`` deletion cascades into run items and fetch attempts, while the
+    parent run remains as immutable history. Reimporting the same canonical
+    artifact can therefore recreate the same deterministic run id with missing
+    children. The current selection is authoritative in that case.
+    """
+    selected_ids = {str(item[1]) for item in run_items}
+    surviving_ids = {
+        str(row["artifact_id"])
+        for row in conn.execute(
+            """SELECT artifact_id FROM artifact_fetch_run_item
+               WHERE fetch_run_id = ?""",
+            (fetch_run_id,),
+        ).fetchall()
+    }
+    if surviving_ids == selected_ids:
+        return False
+    with conn:
+        conn.execute(
+            "DELETE FROM artifact_fetch_run_item WHERE fetch_run_id = ?",
+            (fetch_run_id,),
+        )
+        conn.executemany(
+            """INSERT INTO artifact_fetch_run_item
+               (fetch_run_id, artifact_id, selection_rank, stratum,
+                selected_url, source_day, source_rank, normalized_rank,
+                source_event_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            run_items,
+        )
+        conn.execute(
+            """UPDATE artifact_fetch_run
+               SET expected_count = ?, success_count = 0,
+                   failed_retryable_count = 0, failed_terminal_count = 0,
+                   completed_at = NULL, status = 'in_progress'
+               WHERE fetch_run_id = ?""",
+            (len(run_items), fetch_run_id),
+        )
+    return True
+
+
 def _create_explicit_fetch_run(
     conn: Any, selection: list[dict[str, Any]]
 ) -> tuple[str, bool]:
@@ -758,42 +806,11 @@ def _create_explicit_fetch_run(
         (fetch_run_id,),
     ).fetchone()
     if existing is not None:
-        surviving_ids = {
-            str(row["artifact_id"])
-            for row in conn.execute(
-                """SELECT artifact_id FROM artifact_fetch_run_item
-                   WHERE fetch_run_id = ?""",
-                (fetch_run_id,),
-            ).fetchall()
-        }
-        selected_ids = {str(item["artifact_id"]) for item in selection}
-        if surviving_ids != selected_ids:
-            # A catalog refresh can prune an artifact and cascade-delete both
-            # its fetch outcome and its membership in this deterministic run.
-            # Reimporting the same artifact recreates the same run id, so the
-            # surviving membership—not the stale complete flag—is authoritative.
-            with conn:
-                conn.execute(
-                    "DELETE FROM artifact_fetch_run_item WHERE fetch_run_id = ?",
-                    (fetch_run_id,),
-                )
-                conn.executemany(
-                    """INSERT INTO artifact_fetch_run_item
-                       (fetch_run_id, artifact_id, selection_rank, stratum,
-                        selected_url, source_day, source_rank, normalized_rank,
-                        source_event_id)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    run_items,
-                )
-                conn.execute(
-                    """UPDATE artifact_fetch_run
-                       SET expected_count = ?, success_count = 0,
-                           failed_retryable_count = 0,
-                           failed_terminal_count = 0,
-                           completed_at = NULL, status = 'in_progress'
-                       WHERE fetch_run_id = ?""",
-                    (len(selection), fetch_run_id),
-                )
+        if restore_pruned_run_items(
+            conn,
+            fetch_run_id=fetch_run_id,
+            run_items=run_items,
+        ):
             return fetch_run_id, False
         if str(existing["status"]) != "complete":
             return fetch_run_id, False
@@ -1326,11 +1343,31 @@ def _create_jina_run(
             [JINA_READER_POLICY, JINA_READER_SELECTION, fingerprint]
         ).encode()
     ).hexdigest()
+    run_items = [
+        (
+            fetch_run_id,
+            item["artifact_id"],
+            rank,
+            "jina_reader_fallback",
+            item["canonical_url"],
+            item["source_day"],
+            item["source_rank"],
+            item["normalized_rank"],
+            item["source_event_id"],
+        )
+        for rank, item in enumerate(selection, 1)
+    ]
     existing = conn.execute(
         "SELECT status FROM artifact_fetch_run WHERE fetch_run_id = ?",
         (fetch_run_id,),
     ).fetchone()
     if existing is not None:
+        if restore_pruned_run_items(
+            conn,
+            fetch_run_id=fetch_run_id,
+            run_items=run_items,
+        ):
+            return fetch_run_id, False
         return fetch_run_id, str(existing["status"]) == "complete"
     now = _now()
     with conn:
@@ -1356,20 +1393,8 @@ def _create_jina_run(
                (fetch_run_id, artifact_id, selection_rank, stratum,
                 selected_url, source_day, source_rank, normalized_rank,
                 source_event_id)
-               VALUES (?, ?, ?, 'jina_reader_fallback', ?, ?, ?, ?, ?)""",
-            [
-                (
-                    fetch_run_id,
-                    item["artifact_id"],
-                    rank,
-                    item["canonical_url"],
-                    item["source_day"],
-                    item["source_rank"],
-                    item["normalized_rank"],
-                    item["source_event_id"],
-                )
-                for rank, item in enumerate(selection, 1)
-            ],
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            run_items,
         )
     return fetch_run_id, False
 

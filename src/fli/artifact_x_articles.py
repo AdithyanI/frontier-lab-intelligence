@@ -601,11 +601,31 @@ def _create_run(
     fetch_run_id = hashlib.sha256(
         _canonical_json([FETCH_POLICY, SELECTION_POLICY, fingerprint]).encode()
     ).hexdigest()
+    run_items = [
+        (
+            fetch_run_id,
+            item["artifact_id"],
+            item["selection_rank"],
+            "x_article",
+            item["canonical_url"],
+            item["source_day"],
+            item["source_rank"],
+            item["normalized_rank"],
+            item["source_event_id"],
+        )
+        for item in selection
+    ]
     existing = conn.execute(
         "SELECT status FROM artifact_fetch_run WHERE fetch_run_id = ?",
         (fetch_run_id,),
     ).fetchone()
     if existing is not None:
+        if artifact_fetch.restore_pruned_run_items(
+            conn,
+            fetch_run_id=fetch_run_id,
+            run_items=run_items,
+        ):
+            return fetch_run_id, False
         if str(existing["status"]) == "in_progress":
             return fetch_run_id, False
         pending = conn.execute(
@@ -667,20 +687,8 @@ def _create_run(
                (fetch_run_id, artifact_id, selection_rank, stratum,
                 selected_url, source_day, source_rank, normalized_rank,
                 source_event_id)
-               VALUES (?, ?, ?, 'x_article', ?, ?, ?, ?, ?)""",
-            [
-                (
-                    fetch_run_id,
-                    item["artifact_id"],
-                    item["selection_rank"],
-                    item["canonical_url"],
-                    item["source_day"],
-                    item["source_rank"],
-                    item["normalized_rank"],
-                    item["source_event_id"],
-                )
-                for item in selection
-            ],
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            run_items,
         )
     return fetch_run_id, False
 
