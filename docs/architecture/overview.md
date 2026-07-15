@@ -227,13 +227,7 @@ remain later stages after this deterministic layer is audited.
 evidence. One GPT-5.4-mini/high call receives the readable attributed packet and
 returns two independently reasoned booleans: AI Engineering relevance and
 Investment relevance. Feed rank, score, engagement, prominence, and the
-derived audit state are not model inputs. Artifact bodies that are at least 100
-visible characters and at least 90% exact extraction-placeholder characters
-(`█` or the Unicode replacement character) are omitted from the readable model
-input. This is deliberately not a general garbage-text heuristic: unusual,
-short, mixed, foreign-language, code, and diagram text remains. The immutable
-packet and evidence hash retain the exact omitted source for audit.
-`fli.audience_routing_runs`
+derived audit state are not model inputs. `fli.audience_routing_runs`
 freezes the exact cohort, snapshot/evidence/input hashes, prompt and schema
 versions, model output, cache telemetry, cost, and failures in one resumable
 SQLite database. The run records its source event/feed run IDs and selection
@@ -288,6 +282,13 @@ replaceable `jina-reader-v1` fallback handles only ordinary public HTML pages
 that failed the native boundary; its separate fetch policy and raw JSON
 snapshot preserve provider provenance, while X, LinkedIn, YouTube, hosted
 forms, robots-denied pages, authentication, and paywalls remain deferred. The
+shared extraction boundary also rejects a body before text-snapshot creation
+when it has at least 100 visible characters and at least 90% are exact `█` or
+Unicode-replacement placeholders. This produces the terminal reason
+`extraction_placeholder_content`; it is deliberately not a general
+garbage-text heuristic. Ordinary fetches, Jina recoveries, and X Articles use
+the same check. Repository and video support remain unchanged and deferred.
+The
 2026-07-15 primary-author rebuild indexes 1,334 canonical artifacts and 1,432
 source observations from 1,897 decisions, with zero foreign-author or
 wrong-conversation lineage violations across the stored Feed. It retains 32

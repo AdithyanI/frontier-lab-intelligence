@@ -34,9 +34,6 @@ _OPAQUE_X_URL_RE = re.compile(r"https?://t\.co/\S+", re.IGNORECASE)
 _MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 _PRIMARY_DUPLICATE_MIN_CHARS = 80
 _PRIMARY_DUPLICATE_RATIO = 0.80
-_ARTIFACT_PLACEHOLDER_CHARS = frozenset({"\u2588", "\ufffd"})
-_ARTIFACT_PLACEHOLDER_MIN_VISIBLE_CHARS = 100
-_ARTIFACT_PLACEHOLDER_RATIO = 0.90
 
 _JUDGMENT_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -183,21 +180,6 @@ def _is_transport_only(text: str) -> bool:
     return not text or _URL_ONLY_RE.fullmatch(text) is not None
 
 
-def _is_placeholder_dominated_artifact(source: EvidenceSource) -> bool:
-    """Omit only obvious extraction placeholders, never subjective gibberish."""
-    if source.source_type != "artifact":
-        return False
-    visible_chars = [
-        char for char in source.normalized_text() if not char.isspace()
-    ]
-    if len(visible_chars) < _ARTIFACT_PLACEHOLDER_MIN_VISIBLE_CHARS:
-        return False
-    placeholder_count = sum(
-        char in _ARTIFACT_PLACEHOLDER_CHARS for char in visible_chars
-    )
-    return placeholder_count / len(visible_chars) >= _ARTIFACT_PLACEHOLDER_RATIO
-
-
 def _duplicates_primary_text(text: str, primary_texts: list[str]) -> bool:
     """Reject reactions whose substance is already present in primary evidence."""
     if len(text) < _PRIMARY_DUPLICATE_MIN_CHARS:
@@ -227,10 +209,7 @@ def render_input(packet: RoutingPacket) -> str:
         if source.relation == "same_author_continuation"
     ]
     artifacts = [
-        source
-        for source in packet.sources
-        if source.source_type == "artifact"
-        and not _is_placeholder_dominated_artifact(source)
+        source for source in packet.sources if source.source_type == "artifact"
     ]
     primary_texts = [
         text

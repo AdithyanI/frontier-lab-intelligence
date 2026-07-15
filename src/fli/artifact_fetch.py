@@ -12,7 +12,7 @@ import socket
 import tempfile
 import time
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from importlib.metadata import version
 from pathlib import Path
@@ -50,6 +50,10 @@ MAX_ATTEMPTS = 3
 MAX_PDF_PAGES = 500
 MAX_TEXT_CHARS = 5_000_000
 MIN_HTML_TEXT_CHARS = 80
+PLACEHOLDER_MIN_VISIBLE_CHARS = 100
+PLACEHOLDER_CHAR_RATIO = 0.90
+PLACEHOLDER_CHARS = frozenset({"\u2588", "\ufffd"})
+PLACEHOLDER_ERROR_CODE = "extraction_placeholder_content"
 JINA_ELIGIBLE_KINDS = frozenset({"announcement", "article", "other"})
 JINA_DEFERRED_HOST_SUFFIXES = (
     "linkedin.com",
@@ -114,6 +118,38 @@ class Extraction:
     declared_canonical_url: str | None
     error_code: str | None = None
     error_message: str | None = None
+
+
+def extracted_text_issue(text: str) -> tuple[str, str] | None:
+    """Return one narrow extraction error for placeholder-dominated bodies."""
+    visible_chars = [char for char in text if not char.isspace()]
+    if len(visible_chars) < PLACEHOLDER_MIN_VISIBLE_CHARS:
+        return None
+    placeholder_count = sum(char in PLACEHOLDER_CHARS for char in visible_chars)
+    if placeholder_count / len(visible_chars) < PLACEHOLDER_CHAR_RATIO:
+        return None
+    return (
+        PLACEHOLDER_ERROR_CODE,
+        "Extracted text is dominated by placeholder characters rather than "
+        "readable artifact content",
+    )
+
+
+def validate_extraction(extraction: Extraction) -> Extraction:
+    """Fail a successful extraction only for a mechanical placeholder body."""
+    if not extraction.success or extraction.text is None:
+        return extraction
+    issue = extracted_text_issue(extraction.text)
+    if issue is None:
+        return extraction
+    error_code, error_message = issue
+    return replace(
+        extraction,
+        success=False,
+        text=None,
+        error_code=error_code,
+        error_message=error_message,
+    )
 
 
 class FetchFailure(Exception):
@@ -1023,6 +1059,7 @@ def _finish_retrieved(
     retrieved: Retrieved,
     extraction: Extraction,
 ) -> str:
+    extraction = validate_extraction(extraction)
     now = _now()
     raw_sha = _sha256_bytes(retrieved.body)
     raw_ref = _write_snapshot(RAW_ROOT, raw_sha, ".bin", retrieved.body)

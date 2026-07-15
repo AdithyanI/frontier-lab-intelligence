@@ -924,6 +924,19 @@ def _response_outcome(
             "x_article_body_missing",
             "Article contents contain no body text; title and preview were not used",
         )
+    issue = artifact_fetch.extracted_text_issue(text)
+    if issue is not None:
+        error_code, error_message = issue
+        return (
+            "failed_terminal",
+            provider_status,
+            provider_message,
+            title,
+            contents,
+            None,
+            error_code,
+            error_message,
+        )
     return (
         "success",
         provider_status,

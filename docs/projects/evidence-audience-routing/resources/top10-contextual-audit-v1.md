@@ -150,13 +150,14 @@ the supplied evidence, but the linked Anthropic artifact had been extracted as
 blocks of `████` characters. The reason explicitly noticed that the article was
 effectively redacted.
 
-This is not a routing-model error. It is an input-integrity failure that hides
-what is probably the most substantive part of the packet. The routing boundary
-now omits only long artifact bodies whose visible characters are at least 90%
-exact extraction placeholders (`█` or the Unicode replacement character). The
-immutable packet still retains the exact source and evidence hash. A scan of
-881 successful artifact snapshots flagged exactly this 621-character Claude
-Code extraction.
+This is not a routing-model error. It is an artifact-extraction failure that
+hides what is probably the most substantive part of the packet. The shared
+artifact boundary now rejects a body before successful text-snapshot creation
+when its visible characters are at least 90% exact extraction placeholders
+(`█` or the Unicode replacement character). The known Claude Code fetch was
+corrected from `success` to terminal
+`extraction_placeholder_content`; its immutable raw response remains stored.
+A scan of the remaining 880 successful text snapshots found zero violations.
 
 The rule intentionally does not attempt to detect arbitrary gibberish, shell
 pages, poor prose, code, foreign languages, or suspicious text. Those remain in

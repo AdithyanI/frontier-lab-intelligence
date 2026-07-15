@@ -212,6 +212,52 @@ def test_x_article_preview_only_is_terminal_and_never_body_evidence(
     conn.close()
 
 
+def test_x_article_placeholder_body_is_terminal_and_never_text_evidence(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    _seed_x_article(db)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+
+    def handler(_request: httpx.Request):
+        return httpx.Response(
+            200,
+            json={
+                "article": {
+                    "title": "Broken extraction",
+                    "contents": [
+                        {
+                            "type": "unstyled",
+                            "text": (("\u2588" * 12 + " ") * 50)
+                            + "BY PUBLISHER",
+                        }
+                    ],
+                },
+                "status": "success",
+                "message": "ok",
+            },
+        )
+
+    result = artifact_x_articles.fetch_x_articles(
+        db_path=db,
+        limit=1,
+        api_key="test-key",
+        transport=httpx.MockTransport(handler),
+    )
+
+    assert result["failed_terminal"] == 1
+    conn = artifacts.connect(db)
+    fetch = conn.execute(
+        "SELECT * FROM artifact_fetch WHERE fetch_policy = ?",
+        (artifact_x_articles.FETCH_POLICY,),
+    ).fetchone()
+    conn.close()
+    assert fetch["error_code"] == artifact_fetch.PLACEHOLDER_ERROR_CODE
+    assert fetch["raw_snapshot_ref"] is not None
+    assert fetch["text_snapshot_ref"] is None
+
+
 def test_x_article_fetch_retries_http_failure_and_preserves_both_attempts(
     tmp_path, monkeypatch
 ):

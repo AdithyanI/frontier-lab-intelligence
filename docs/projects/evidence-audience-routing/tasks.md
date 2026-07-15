@@ -226,11 +226,11 @@ Application invariants:
   It stores no per-item key or sharding column, adds no padding, and requests no
   retention override. Partitioning is justified only if future throughput
   approaches the documented routing threshold.
-- Routing input omits an artifact body only when it has at least 100 visible
-  characters and at least 90% are exact extraction placeholders (`█` or the
-  Unicode replacement character). This is not a general garbage detector. The
-  immutable packet and evidence hash retain the exact source even when its
-  unreadable body is absent from the model view.
+- Artifact text readiness belongs upstream of routing. The shared extraction
+  boundary rejects a body before snapshot success only when it has at least 100
+  visible characters and at least 90% are exact `█` or Unicode-replacement
+  placeholders. Routing contains no artifact-quality heuristic and consumes
+  only successful text snapshots.
 
 ## Open Questions / Blockers
 
@@ -251,13 +251,13 @@ Application invariants:
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | done | Contextually audit 26 stratified packets against the exact stored evidence and approved audience standards. | parent | `resources/top10-contextual-audit-v1.md` |
-| done | Add a conservative placeholder-only artifact guard and verify it against all 881 successful text snapshots. | parent | `resources/top10-contextual-audit-v1.md` |
+| done | Move the placeholder-only guard into shared artifact extraction, correct the one known live fetch, and remove routing-local cleanup. | parent | `resources/top10-contextual-audit-v1.md` |
 | in_progress | Decide whether to add the two narrow boundary clarifications and rerun only the five disputed/borderline packets. | parent | `resources/top10-contextual-audit-v1.md` |
 
 ## Backlog / Remaining Work
 
-- [x] Omit long artifact bodies dominated by exact extraction placeholders
-  without adding a subjective garbage-text heuristic.
+- [x] Reject long placeholder-dominated bodies at artifact extraction without
+  adding a subjective garbage-text heuristic.
 - [ ] Add broader packet-integrity or schema-consistency validation only when a
   concrete failure justifies a deterministic rule.
 - [x] Audit a stratified sample of both, single-audience, and `neither`
@@ -418,10 +418,17 @@ Application invariants:
   proposed narrow clarification and exact cases are recorded in
   `resources/top10-contextual-audit-v1.md`; Adi's boundary decision remains the
   project closeout blocker.
-- 2026-07-15: [VALIDATED] Added a deliberately narrow routing-input guard for
-  artifact bodies with at least 100 visible characters and at least 90% exact
-  `█`/Unicode-replacement placeholders. The immutable packet and evidence hash
-  still bind the omitted source. Tests prove short blocks, mixed prose, code,
-  and progress-bar text remain; a scan of all 881 successful artifact
-  snapshots flagged only the known 621-character Claude Code extraction. No
-  existing routing result was rewritten and no model call was made.
+- 2026-07-15: [SUPERSEDED] Initially added the narrow placeholder check inside
+  the routing renderer. Adi correctly moved the responsibility upstream so
+  every artifact consumer receives the same extraction result rather than
+  accumulating consumer-specific cleanup.
+- 2026-07-15: [VALIDATED] Shared ordinary artifact, Jina, and X Article
+  extraction now rejects bodies with at least 100 visible characters and at
+  least 90% exact `█`/Unicode-replacement placeholders as terminal
+  `extraction_placeholder_content` before creating a text snapshot. Removed
+  all routing-local quality logic. Corrected the known Claude Code fetch from
+  success to terminal failure while preserving its raw response and consistent
+  run counters. The remaining 880 successful snapshots have zero placeholder
+  violations; focused tests keep short blocks, mixed prose, code, and progress
+  bars. Repository/video behavior is unchanged, no historical routing result
+  was rewritten, and no model call was made.

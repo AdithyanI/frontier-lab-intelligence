@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import httpx
+import pytest
 
 from fli import artifact_fetch, artifact_urls, artifacts
 
@@ -122,6 +123,53 @@ def test_extract_content_rejects_client_rendered_error_shell():
     assert result.success is False
     assert result.error_code == "extraction_client_rendered_shell"
     assert result.text is None
+
+
+def test_fetch_rejects_placeholder_dominated_text_before_snapshot(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    _seed_artifact(db)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+
+    def handler(request: httpx.Request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        return httpx.Response(
+            200,
+            headers={"Content-Type": "text/plain; charset=utf-8"},
+            content=(("\u2588" * 12 + " ") * 50 + "BY PUBLISHER").encode(),
+        )
+
+    result = artifact_fetch.fetch_cohort(
+        db_path=db,
+        limit=1,
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(handler),
+    )
+
+    assert result["failed_terminal"] == 1
+    conn = artifacts.connect(db)
+    fetch = conn.execute("SELECT * FROM artifact_fetch").fetchone()
+    conn.close()
+    assert fetch["error_code"] == artifact_fetch.PLACEHOLDER_ERROR_CODE
+    assert fetch["raw_snapshot_ref"] is not None
+    assert fetch["text_snapshot_ref"] is None
+    assert fetch["text_sha256"] is None
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "\u2588" * 99,
+        ("\u2588" * 90) + ("valid prose " * 12),
+        "\ufffd" * 99,
+        "print('valid code')\n" + ("# \u2588 rendered progress bar\n" * 20),
+    ],
+)
+def test_placeholder_validation_keeps_short_or_mixed_text(text):
+    assert artifact_fetch.extracted_text_issue(text) is None
 
 
 def test_extract_content_rejects_empty_html_without_raising():
