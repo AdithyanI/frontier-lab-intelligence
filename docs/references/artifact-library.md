@@ -2,7 +2,8 @@
 
 The Artifact Library is the deterministic boundary between **where a resource
 was observed** and **the underlying resource itself**. It indexes outbound
-links from corrected, kept X envelopes without fetching the whole corpus, then
+links from the root X account's kept post and same-account reply thread without
+fetching the whole corpus, then
 fetches a deliberately bounded cohort into replayable raw and clean-text
 snapshots.
 
@@ -67,9 +68,13 @@ The displayed artifact kind is a deterministic URL-shape hint, not a semantic
 content classification. Known hosts and paths identify papers, repositories,
 videos, articles, and announcement-like URLs; unmatched URLs remain `other`.
 
-Nested quoted and retweeted payloads are traversed recursively. A URL belongs
-to the post that actually contains it, not to the outer wrapper that disclosed
-that post.
+Artifact admission is narrower than the visible envelope. A URL is eligible
+only when its owning post is the root post or a reply from the same stable X
+account in the same root conversation. Other accounts' replies, quotes,
+retweets, and nested links remain visible reactions in Evidence but cannot
+create an artifact association or enter an Insight packet. Conversation
+identity retains valid same-account links when an intermediate reply is absent
+from the Feed snapshot.
 
 ## Fetch contract
 
@@ -186,9 +191,25 @@ provenance also shows first-seen time, retrieval state and
 method, snapshot size, and any current error. It does not summarize or classify
 artifact content; those are later cited-insight responsibilities.
 
-## Artifact Store v1 evidence
+## Current primary-author rebuild
 
-The 2026-07-14 rebuild indexed 3,072 candidate decisions from the corrected
+The 2026-07-15 clean rebuild applied
+`kept-envelope-primary-author-thread-artifacts-v1` across the complete stored
+Feed. It produced 1,897 candidate decisions (1,859 accepted and 38 excluded),
+1,432 source observations/disclosures, and 1,334 canonical artifacts. A
+corpus-wide lineage audit found zero foreign-author or wrong-conversation rows
+and zero missing source/root records. The clean store retained 32 still-eligible
+successful snapshots, including all 22 fetched X Articles; old failures and
+reviewed supplements were not carried forward.
+
+Anthropic's global-workspace envelope retains the Anthropic research page and
+the later Neuronpedia demo linked from Anthropic's own reply thread. Satya
+Nadella's envelope retains only his X Article; the Eve link from another
+account's reaction is absent.
+
+## Historical Artifact Store v1 evidence
+
+The superseded 2026-07-14 rebuild indexed 3,072 candidate decisions from the corrected
 kept envelopes: 2,911 accepted occurrences, 161 exclusions, 1,739 source
 observations/disclosures, and 1,566 final canonical artifacts after redirect
 convergence. The frozen 30-artifact cohort produced 19 clean-text successes,

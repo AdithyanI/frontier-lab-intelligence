@@ -375,7 +375,7 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Remove reaction evidence from artifact admission and Insight packets; rebuild associations and prove the Satya/Eve envelope resolves only to Satya's primary evidence. | parent | `data/derived/artifacts/artifacts.db` |
+| done | Remove reaction evidence from artifact admission and Insight packets; rebuild associations and prove the Satya/Eve envelope resolves only to Satya's primary evidence. | parent | `data/derived/artifacts/artifacts.db` |
 | in_progress | Agree the minimal canonical result schema and first audience-classification/extraction prompt with Adi; do not regenerate data ahead of that review. | parent | `resources/audience-contracts.md` |
 | done | Remove all generated Audience Insights v2 databases and dependent run artifacts while preserving code and durable learnings. | parent | `data/derived/audience-insights-v2/` |
 
@@ -415,6 +415,14 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 ## Progress Log
 
+- 2026-07-15: [PRIMARY-AUTHOR ARTIFACT REBUILD] Replaced the leaky Artifact
+  Store with one deterministic import over the complete Feed. Only the root X
+  account and its same-account replies in the same conversation may contribute
+  links. The clean store has 1,897 decisions, 1,334 artifacts, 1,432 source
+  observations, and 32 retained successful snapshots. A full lineage audit
+  found zero foreign-author/wrong-conversation rows and zero missing records.
+  Anthropic retains both its research page and later Neuronpedia reply link;
+  Satya retains his X Article and no Eve reaction artifact.
 - 2026-07-15: [DATA RESET] At Adi's explicit direction, deleted the untracked
   171 MB generated Audience Insights v2 tree: 419 derived files including 128
   SQLite databases, plus dependent audit/finalization/calibration/recall output.

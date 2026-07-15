@@ -256,10 +256,15 @@ before pagination. The projection reads the run's existing
 `(decision, current_rank, event_id)` and `(status, current_rank, event_id)`
 indexes and never mutates the triage or Feed stores.
 
-`fli.artifacts` and `fli.artifact_urls` implement a parallel deterministic
-enrichment boundary for corrected kept envelopes. They traverse direct and
-embedded X records, bind each outbound URL to the post that actually contains
-it, and index every locally resolvable eligible candidate without fetching it.
+`fli.artifacts`, `fli.artifact_urls`, and `fli.evidence_lineage` implement a
+parallel deterministic enrichment boundary for corrected kept envelopes. They
+admit outbound URLs only from the root X post or replies by the same stable X
+account in the same conversation. Other authors' replies, quotes, retweets, and
+nested links remain visible reactions but cannot create artifact associations
+or enter Insight evidence. Conversation identity spans locally missing
+intermediate replies without relaxing the author boundary. Eligible URLs are
+bound to the post that actually contains them and indexed without fetching the
+whole corpus.
 Ordinary
 X status/profile/media URLs remain source evidence; X long-form Articles are
 the explicit artifact exception. Conservative `artifact-url-v1`
@@ -278,9 +283,10 @@ replaceable `jina-reader-v1` fallback handles only ordinary public HTML pages
 that failed the native boundary; its separate fetch policy and raw JSON
 snapshot preserve provider provenance, while X, LinkedIn, YouTube, hosted
 forms, robots-denied pages, authentication, and paywalls remain deferred. The
-2026-07-14 v1 proof indexed 1,566 canonical artifacts and 1,739 source
-observations; its 30-artifact cohort produced 19 native clean texts, then the
-Reader fallback recovered all three OpenAI HTTP-403 pages. Broad crawling,
+2026-07-15 primary-author rebuild indexes 1,334 canonical artifacts and 1,432
+source observations from 1,897 decisions, with zero foreign-author or
+wrong-conversation lineage violations across the stored Feed. It retains 32
+still-eligible successful snapshots, including 22 X Articles. Broad crawling,
 RSS/GitHub adapters and cited-insight generation remain deferred. The web
 layer now exposes the live catalog through read-only `/api/artifacts/dates`
 and `/api/artifacts` projections plus a minimal `/evidence/artifacts` index. The shared
