@@ -1790,6 +1790,263 @@ def create_publication_finalization(
     }
 
 
+def _normalize_editorial_review(
+    review: Mapping[str, Any], *, base_ids: list[str]
+) -> dict[str, Any]:
+    """Validate and canonically order one human-owned release decision."""
+    expected_fields = {"schema_version", "review_id", "reviewer", "removals"}
+    if not isinstance(review, Mapping) or set(review) != expected_fields:
+        raise ValueError("editorial review has an invalid schema")
+    if review["schema_version"] != EDITORIAL_REVIEW_SCHEMA_VERSION:
+        raise ValueError("editorial review has an unsupported schema version")
+    review_id = review["review_id"]
+    reviewer = review["reviewer"]
+    if not isinstance(review_id, str) or not review_id.strip():
+        raise ValueError("editorial review requires review_id")
+    if not isinstance(reviewer, str) or not reviewer.strip():
+        raise ValueError("editorial review requires reviewer")
+    removals = review["removals"]
+    if not isinstance(removals, list) or not removals:
+        raise ValueError("editorial review requires at least one removal")
+    by_id: dict[str, dict[str, str]] = {}
+    for removal in removals:
+        if not isinstance(removal, Mapping) or set(removal) != {
+            "candidate_id",
+            "reason_code",
+            "rationale",
+        }:
+            raise ValueError("editorial review removal is malformed")
+        candidate_id = removal["candidate_id"]
+        reason_code = removal["reason_code"]
+        rationale = removal["rationale"]
+        if not isinstance(candidate_id, str) or not candidate_id:
+            raise ValueError("editorial review removal requires candidate_id")
+        if candidate_id in by_id:
+            raise ValueError("editorial review removal IDs must be unique")
+        if candidate_id not in base_ids:
+            raise ValueError(
+                "editorial review may remove only an active selected candidate"
+            )
+        if reason_code not in EDITORIAL_REMOVAL_REASON_CODES:
+            raise ValueError("editorial review removal has an invalid reason_code")
+        if not isinstance(rationale, str) or not rationale.strip():
+            raise ValueError("editorial review removal requires a rationale")
+        by_id[candidate_id] = {
+            "candidate_id": candidate_id,
+            "reason_code": str(reason_code),
+            "rationale": rationale.strip(),
+        }
+    return {
+        "schema_version": EDITORIAL_REVIEW_SCHEMA_VERSION,
+        "review_id": review_id.strip(),
+        "reviewer": reviewer.strip(),
+        "removals": [by_id[candidate_id] for candidate_id in base_ids if candidate_id in by_id],
+    }
+
+
+def _editorial_finalization_evidence(
+    *,
+    source_path: Path,
+    audit_path: Path,
+    audit_report: Mapping[str, Any],
+    editorial_review: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Bind a stricter editorial removal to an exact passing publication set."""
+    if not bool(audit_report["passed"]):
+        raise ValueError(
+            "senior editorial finalization requires the independent audit to pass"
+        )
+    source = _open_readonly(source_path)
+    try:
+        run = _required_singleton(source, "run_meta")
+        gate = _required_singleton(source, "quality_gate")
+        base_selection = source.execute(
+            "SELECT * FROM publication_selection ORDER BY publication_rank"
+        ).fetchall()
+        daily_selection = source.execute(
+            "SELECT * FROM daily_selection ORDER BY editorial_rank"
+        ).fetchall()
+        if not base_selection:
+            raise ValueError("senior editorial finalization requires an active item")
+        base_ids = [str(row["candidate_id"]) for row in base_selection]
+        if [int(row["publication_rank"]) for row in base_selection] != list(
+            range(1, len(base_selection) + 1)
+        ):
+            raise ValueError(
+                "senior editorial finalization requires contiguous publication ranks"
+            )
+        review = _normalize_editorial_review(editorial_review, base_ids=base_ids)
+        removed_ids = [item["candidate_id"] for item in review["removals"]]
+        effective_ids = [
+            candidate_id for candidate_id in base_ids if candidate_id not in removed_ids
+        ]
+        adjudication = audit_report["false_negative_adjudication"]
+        return {
+            "schema_version": EDITORIAL_FINALIZATION_SCHEMA_VERSION,
+            "reason_code": EDITORIAL_FINALIZATION_REASON_CODE,
+            "source_run_db": str(source_path),
+            "source_run_id": str(run["run_id"]),
+            "audience": str(run["audience"]),
+            "day": str(run["day"]),
+            "source_gate_sha256": _row_sha256(gate),
+            "source_editor_selection_sha256": _sha256(
+                _canonical_json([dict(row) for row in daily_selection])
+            ),
+            "base_selection_sha256": _sha256(
+                _canonical_json([dict(row) for row in base_selection])
+            ),
+            "base_selected_ids": base_ids,
+            "removed_candidate_ids": removed_ids,
+            "effective_selected_ids": effective_ids,
+            "editorial_review": review,
+            "editorial_review_sha256": _sha256(_canonical_json(review)),
+            "audit_db": str(audit_path),
+            "audit_id": str(audit_report["audit_id"]),
+            "audit_cohort_sha256": str(audit_report["audit_cohort_sha256"]),
+            "audit_result_sha256": str(audit_report["audit_result_sha256"]),
+            "source_contract_sha256": str(audit_report["source_contract_sha256"]),
+            "false_negative_adjudication_sha256": adjudication.get("sha256"),
+        }
+    finally:
+        source.close()
+
+
+def create_editorial_publication_finalization(
+    *,
+    source_run_db: Path | str,
+    audit_db: Path | str,
+    editorial_review: Mapping[str, Any],
+    finalization_path: Path | str | None = None,
+) -> dict[str, Any]:
+    """Write one immutable, source-bound senior editorial release decision.
+
+    This is a stricter gate after the independent publication audit. It may
+    remove exact active selected IDs, but cannot alter the audit or source run,
+    promote a rejected candidate, substitute an item, or reorder survivors.
+    """
+    source_path = Path(source_run_db).resolve()
+    audit_path = Path(audit_db).resolve()
+    path = Path(finalization_path or default_finalization_path(source_path)).resolve()
+    if path.exists():
+        raise ValueError("publication finalization already exists for this run")
+    source = _open_readonly(source_path)
+    try:
+        base_ids = [
+            str(row[0])
+            for row in source.execute(
+                "SELECT candidate_id FROM publication_selection "
+                "ORDER BY publication_rank"
+            ).fetchall()
+        ]
+    finally:
+        source.close()
+    audit_report = validate_readonly_publication_audit(
+        source_run_db=source_path,
+        audit_db=audit_path,
+        expected_selected_count=len(base_ids),
+    )
+    evidence = _editorial_finalization_evidence(
+        source_path=source_path,
+        audit_path=audit_path,
+        audit_report=audit_report,
+        editorial_review=editorial_review,
+    )
+    payload = {**evidence, "created_at": _now()}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        with temporary.open("x", encoding="utf-8") as handle:
+            handle.write(_canonical_json(payload) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return {
+        "created": True,
+        "reason_code": EDITORIAL_FINALIZATION_REASON_CODE,
+        "path": str(path),
+        "effective_selected_ids": list(evidence["effective_selected_ids"]),
+        "finalization_sha256": _sha256(path.read_text()),
+    }
+
+
+def _validate_readonly_editorial_publication_finalization(
+    *,
+    source_path: Path,
+    audit_path: Path,
+    path: Path,
+    payload: Mapping[str, Any],
+) -> dict[str, Any]:
+    expected_fields = {
+        "schema_version",
+        "reason_code",
+        "source_run_db",
+        "source_run_id",
+        "audience",
+        "day",
+        "source_gate_sha256",
+        "source_editor_selection_sha256",
+        "base_selection_sha256",
+        "base_selected_ids",
+        "removed_candidate_ids",
+        "effective_selected_ids",
+        "editorial_review",
+        "editorial_review_sha256",
+        "audit_db",
+        "audit_id",
+        "audit_cohort_sha256",
+        "audit_result_sha256",
+        "source_contract_sha256",
+        "false_negative_adjudication_sha256",
+        "created_at",
+    }
+    if set(payload) != expected_fields:
+        raise ValueError("publication finalization has an invalid schema")
+    if not isinstance(payload["created_at"], str) or not payload["created_at"].strip():
+        raise ValueError("publication finalization requires created_at")
+    source = _open_readonly(source_path)
+    try:
+        base_ids = [
+            str(row[0])
+            for row in source.execute(
+                "SELECT candidate_id FROM publication_selection "
+                "ORDER BY publication_rank"
+            ).fetchall()
+        ]
+    finally:
+        source.close()
+    audit_report = validate_readonly_publication_audit(
+        source_run_db=source_path,
+        audit_db=audit_path,
+        expected_selected_count=len(base_ids),
+    )
+    expected = _editorial_finalization_evidence(
+        source_path=source_path,
+        audit_path=audit_path,
+        audit_report=audit_report,
+        editorial_review=payload["editorial_review"],
+    )
+    mismatches = [field for field, value in expected.items() if payload[field] != value]
+    if mismatches:
+        raise ValueError(
+            "publication finalization no longer matches its evidence: "
+            + ", ".join(mismatches)
+        )
+    return {
+        "passed": True,
+        "reason_code": EDITORIAL_FINALIZATION_REASON_CODE,
+        "path": str(path),
+        "finalization_sha256": _sha256(path.read_text()),
+        "base_selected_ids": list(payload["base_selected_ids"]),
+        "removed_candidate_ids": list(payload["removed_candidate_ids"]),
+        "effective_selected_ids": list(payload["effective_selected_ids"]),
+        "failed_dimensions": {},
+        "editorial_review": dict(payload["editorial_review"]),
+        "audit": audit_report,
+    }
+
+
 def validate_readonly_publication_finalization(
     *,
     source_run_db: Path | str,
@@ -1801,6 +2058,15 @@ def validate_readonly_publication_finalization(
     audit_path = Path(audit_db).resolve()
     path = Path(finalization_path or default_finalization_path(source_path)).resolve()
     payload = json.loads(path.read_text())
+    if not isinstance(payload, dict):
+        raise ValueError("publication finalization has an invalid schema")
+    if payload.get("schema_version") == EDITORIAL_FINALIZATION_SCHEMA_VERSION:
+        return _validate_readonly_editorial_publication_finalization(
+            source_path=source_path,
+            audit_path=audit_path,
+            path=path,
+            payload=payload,
+        )
     expected_fields = {
         "schema_version",
         "reason_code",
@@ -1899,9 +2165,16 @@ def validated_publication_projection(
         )
         if finalization["base_selected_ids"] != base_ids:
             raise ValueError("publication finalization base selection is stale")
+        editorial = (
+            finalization["reason_code"] == EDITORIAL_FINALIZATION_REASON_CODE
+        )
         return {
             "mode": (
-                "audit_disqualified_zero"
+                "editorial_disqualified_zero"
+                if editorial and not finalization["effective_selected_ids"]
+                else "editorial_disqualified_trim"
+                if editorial
+                else "audit_disqualified_zero"
                 if not finalization["effective_selected_ids"]
                 else "audit_disqualified_trim"
             ),
