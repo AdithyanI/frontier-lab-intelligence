@@ -15,6 +15,7 @@ import {
   type ArtifactLibrary,
 } from '../api'
 import DateNavigator from '../components/DateNavigator'
+import CopyEnvelopeId from '../components/CopyEnvelopeId'
 import {
   getDateWindowEndForSelection,
   getDateWindow,
@@ -221,9 +222,12 @@ function ArtifactRow({
             <dt>Observed in</dt>
             <dd>
               {item.source_event_id ? (
-                <Link to={`/evidence/feed?date=${feedDate}&event=${encodeURIComponent(item.source_event_id)}`}>
-                  Feed envelope →
-                </Link>
+                <>
+                  <Link to={`/evidence/feed?date=${feedDate}&event=${encodeURIComponent(item.source_event_id)}`}>
+                    Feed envelope →
+                  </Link>
+                  <CopyEnvelopeId envelopeId={item.source_event_id} />
+                </>
               ) : item.source_url ? (
                 <a href={item.source_url} target="_blank" rel="noreferrer">
                   {sourceLabel(item.source_provider)} evidence ↗
