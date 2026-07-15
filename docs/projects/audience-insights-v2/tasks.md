@@ -193,12 +193,12 @@ loop below; no stretch work may delay or destabilize the morning MVP.
   adapter that preserves request Post ID, canonical Article identity, raw
   response, block order, normalized text, hashes, and fetch time in the artifact
   library. Validate: focused provider/artifact tests plus a small real canary.
-- [ ] M2 — Audience contracts and calibration. Acceptance: freeze independent
+- [x] M2 — Audience contracts and calibration. Acceptance: freeze independent
   prompt/schema contracts and quality rubrics; calibrate on Jul 9 and Jul 11,
   then run untouched Jul 13 for both audiences; audit a small kept lower-rank and dropped sample;
   retain prompt-version comparisons and exact-citation results. Validate:
   fixtures, an independent Luna-high rubric pass, and an agent spot-check.
-- [ ] M3 — Resumable audience runs and daily editor. Acceptance: freeze selected
+- [x] M3 — Resumable audience runs and daily editor. Acceptance: freeze selected
   cohorts, run both audiences independently, select runner-owned IDs into 3–5
   item daily sets without duplicate stories, and preserve full telemetry.
   Validate: two-day gate, resumability tests, and deterministic selection checks.
@@ -328,6 +328,17 @@ finish with an honest quality assessment, limitations, and the next best test.
   earnings, regulation, named contracts, pricing, adoption metrics, and linked
   primary-report resolution—using the Jul 6 Anthropic/TeraWulf secondary
   summary as the concrete recovery case.
+- 2026-07-15: Production publication never discovers a “latest” run. The final
+  Insights read model requires one explicit 18-cell reconciliation manifest and
+  its adjacent byte-stable report; every request freshly validates the exact
+  runs, audits, finalizations, chronological history, contracts, telemetry, and
+  bound X Article snapshots. A missing, partial, replaced, or stale pair fails
+  closed as unavailable.
+- 2026-07-15: Mechanical citation/rubric success is necessary but not the final
+  product bar. Independent senior-reader review found the Jul 9 Muse Spark/Box
+  Investment analysis too willing to promote a partner testimonial into
+  demand/adoption validation. Do not retain it for nonzero yield. Recover a
+  genuinely primary commercial disclosure or preserve the honest sparse set.
 
 ## Open Questions / Blockers
 
@@ -347,15 +358,20 @@ finish with an honest quality assessment, limitations, and the next best test.
 | done | Implement independent Luna-high item/day evaluation and deterministic expansion gate. | implementer | `src/fli/audience_insight_evaluations.py` |
 | done | Build the separate Investment and AI Engineering Insights UI over editor-selected, quality-gated rows only. | implementer | `frontend/src/pages/Insights.tsx` |
 | done | Preserve all failed calibration evidence; finish final-contract Jul 9 and Jul 11 for both audiences, then run untouched Jul 13 through editor, reviewer, publication audit, and the versioned standard/audited-sparse combined gate. | parent | `resources/quality-evaluation.md` |
-| in_progress | Complete the frozen rank-blind lower-kept/article/drop recall adjudication; widen only day/audience cells whose lower-ranked candidate would enter or materially diversify the final top-50 set. | parent | `resources/quality-evaluation.md` |
-| in_progress | Materialize fresh production runs chronologically from Jul 5 through Jul 13 for both audiences, preserving audited-only prior history. | parent | `data/derived/audience-insights-v2/` |
-| pending | Build the live SPA, perform rendered two-audience QA with `agent-browser`, reconcile all run/spend/cache evidence, update durable docs, run check-fast, and archive. | parent | `resources/quality-evaluation.md` |
+| done | Complete the frozen 73-packet/146-evaluation rank-blind recall comparison. Two AI items entered exact widened days, one Investment item did not, and two schema-terminal cells remain bounded unknowns. | parent | `resources/quality-evaluation.md` |
+| in_progress | Freeze the corrected chronological production suffix, including exact adjacent audits/finalizations and the Investment product-quality recovery decision. | parent | `data/derived/audience-insights-v2/` |
+| delegated | Prepare conceptual status, architecture, evaluation, tracker, and project learnings for exact final-count insertion; do not archive before the canonical report and browser proof. | documenter | `resources/quality-evaluation.md` |
+| pending | Materialize the canonical 18-cell manifest/report, build the live SPA, perform rendered two-audience QA with `agent-browser`, reconcile exact spend/cache evidence, run check-fast, and archive. | parent | `resources/quality-evaluation.md` |
 
 ## Backlog / Remaining Work
 
-- [ ] Complete M2–M6 in order, respecting the two-day gate.
-- [ ] Record provider and LLM spend after every paid batch.
-- [ ] Review and finalize `learnings.md` before archive.
+- [ ] Complete M4–M6 in order; no production cell is final until its adjacent
+  audit/finalization and chronological predecessor chain validate.
+- [ ] Replace the explicit pending totals in `resources/quality-evaluation.md`
+  only from the final canonical reconciliation report.
+- [ ] Perform final Insights browser QA after the canonical pair is live.
+- [ ] Run `scripts/check-fast.sh`, finalize `learnings.md`, and archive this
+  tracker in the same completion batch.
 - [ ] Revisit delivery only in a successor project after v2 is proven.
 
 ## Validation / Test Plan
@@ -524,3 +540,25 @@ finish with an honest quality assessment, limitations, and the next best test.
   the complete 82-test Audience Insights backend slice pass. The final manifest
   remains intentionally unmaterialized until every superseding production run
   is frozen.
+- 2026-07-15: [RECALL] Completed exact final-set adjudication against the
+  current contracts. AI Engineering Jul 5 rank 84 and Jul 9 rank 100 entered
+  their bounded widened production days; Investment Jul 6 rank 69 remained
+  useful standing context but did not clear the daily publication bar. Two
+  deterministic schema-terminal cells remain explicit unknowns contained by
+  their predeclared top-75/top-100 runs; no global widening was authorized.
+- 2026-07-15: [PRODUCT REVIEW] A separate senior-reader audit rejected the
+  otherwise mechanically passing Muse Spark/Box Investment item because its
+  analysis overstated what a partner testimonial inside a launch post proves.
+  The final production set will remove/supersede it and test a primary filing
+  recovery rather than lower the audience bar or preserve output for yield.
+- 2026-07-15: [UI/ARCHITECTURE] Replaced the single blended evidence diagram
+  with two high-level panels: Registry-to-accepted-evidence, then one shared
+  citation-bound engine branching into independent Investment and AI
+  Engineering prompts, audits, and daily views. Live browser inspection found
+  and corrected the compact-layout collisions; the corrected diagram has no
+  horizontal overflow or console errors.
+- 2026-07-15: [DOCS] Prepared status, architecture, evaluation, tracker, and
+  project learnings for closeout. Exact production counts/tokens/cache/cost and
+  per-day yields remain deliberately marked pending until the canonical
+  manifest/report is materialized and freshly validated; the tracker remains
+  active until final browser proof and repo checks pass.
