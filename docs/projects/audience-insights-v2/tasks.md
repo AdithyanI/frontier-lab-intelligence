@@ -339,6 +339,12 @@ finish with an honest quality assessment, limitations, and the next best test.
   Investment analysis too willing to promote a partner testimonial into
   demand/adoption validation. Do not retain it for nonzero yield. Recover a
   genuinely primary commercial disclosure or preserve the honest sparse set.
+- 2026-07-15: Keep the existing reviewed publication pipeline intact, but make
+  the simpler baseline inspectable first. Insights now defaults to a
+  “Feed-ranked” comparison that reads existing citation-bound `candidate_item`
+  extractions directly from production run databases, ordered by original Feed
+  rank across Jul 5–13. “Reviewed brief” remains a separate view for direct
+  comparison once the canonical publication pair is materialized.
 
 ## Open Questions / Blockers
 

@@ -360,6 +360,15 @@ unavailable product rather than a best-effort fallback. An explicit `run_root`
 is reserved for isolated fixture/test discovery and is not a production
 compatibility path.
 
+The Insights product also exposes an explicit pre-editor comparison view. Its
+`/api/insights/extracted*` read model opens the existing per-run `insights.db`
+files read-only, chooses the most complete production extraction for each
+audience/day, and returns only citation-bound `candidate_item` insights ordered
+by their original Feed rank. This view stops before item review, daily editing,
+publication audit, and reconciliation; the UI labels it “Feed-ranked” and keeps
+the fail-closed canonical publication projection as the separate “Reviewed
+brief” view. No extraction data is copied or regenerated for this comparison.
+
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
 version tokens, so a Registry change or rebuilt derived run invalidates the
