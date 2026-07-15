@@ -165,10 +165,12 @@ def request_tags(*, run: str, day: str) -> tuple[str, ...]:
 def _display_text(source: EvidenceSource) -> str:
     """Return readable evidence text without changing stored source evidence."""
     text = html.unescape(source.normalized_text()).strip()
-    text = _OPAQUE_X_URL_RE.sub("", text)
-    return "\n".join(
-        _MULTISPACE_RE.sub(" ", line).strip() for line in text.splitlines()
-    ).strip()
+    if _URL_ONLY_RE.fullmatch(text):
+        return ""
+    if source.source_type == "x_post":
+        text = _OPAQUE_X_URL_RE.sub("[link]", text)
+        text = _MULTISPACE_RE.sub(" ", text)
+    return text
 
 
 def _yaml_value(value: str) -> str:

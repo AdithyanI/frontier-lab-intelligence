@@ -189,6 +189,11 @@ Application invariants:
   routing judgment.
 - Insight generation remains a separate follow-up stage and may use a higher
   reasoning effort only after routing is qualitatively understood.
+- The v2 review renderer uses a human-readable YAML-style hierarchy rather
+  than XML/CDATA. It decodes HTML entities, represents link-only primary posts
+  by their artifact relationship, omits pure retweets and transport-only
+  links, excludes reactions shorter than 40 characters, and removes reactions
+  whose text is at least 80% duplicated by supplied primary evidence.
 
 ## Open Questions / Blockers
 
@@ -268,3 +273,12 @@ Application invariants:
   internal refs and pure retweets are omitted from model input. Frozen the
   exact unexecuted Satya request in `resources/satya-routing-v2-attempt.md` for
   Adi's review before any v2 model call.
+- 2026-07-15: [IN-PROGRESS] Replaced the XML/CDATA attempt with readable YAML
+  and conservative deterministic cleanup. The frozen Satya request now renders
+  8 substantive reactions from 14 collected quote-posts after removing one
+  URL-only reaction, two sub-40-character reactions, and three reactions that
+  mostly repeated the full supplied article. No v2 model call has been made.
+- 2026-07-15: [VALIDATED] Confirmed the attempt file exactly matches the
+  runtime prompt and rendered input, including its hashes and 8-reaction
+  count. `scripts/check-fast.sh` passed with 473 Python and 37 frontend tests;
+  the four existing Fast Refresh lint warnings remain non-blocking.
