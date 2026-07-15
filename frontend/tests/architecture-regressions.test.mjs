@@ -11,6 +11,10 @@ test('Architecture chapters share the ruled secondary navigation primitive', () 
   assert.doesNotMatch(appStyles, /\.arch-chapters a\.active/)
 })
 
+test('Architecture chapters are separated by one full-width structural rule', () => {
+  assert.match(appStyles, /\.arch-section:not\(\.arch-section--lead\) \{[\s\S]*?margin-top: 32px;[\s\S]*?padding-top: 32px;[\s\S]*?border-top: 1px solid var\(--border-strong\);/)
+})
+
 test('Architecture ends with the current end-to-end stack', () => {
   assert.match(architecture, /function SystemOverview/)
   assert.match(architecture, /Public sources/)

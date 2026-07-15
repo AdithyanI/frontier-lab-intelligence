@@ -316,6 +316,12 @@ td.num {
 
 .arch-section--lead { margin-top: 48px; }
 
+.arch-section:not(.arch-section--lead) {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-strong);
+}
+
 .arch-section-head {
   max-width: 860px;
 }
