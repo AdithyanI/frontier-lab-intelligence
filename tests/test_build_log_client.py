@@ -94,6 +94,7 @@ def test_add_emits_json_and_exact_retry_is_idempotent(client, capsys: pytest.Cap
 def test_usage_failure_is_structured_and_nonzero(client, capsys: pytest.CaptureFixture[str]):
     assert client.main(["add", "--title", "Incomplete"]) == 2
     result = json.loads(capsys.readouterr().out)
+    assert result["command"] == "build-log add"
     assert result["status"] == "error"
     assert result["data"] is None
     assert result["error"]["code"] == "E_USAGE"

@@ -508,6 +508,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     request_id = str(uuid.uuid4())
     started = time.monotonic()
     command = "build-log"
+    for token in raw_argv:
+        if token in {"add", "recent", "search", "validate", "render"}:
+            command = f"build-log {token}"
+            break
     try:
         args = build_parser().parse_args(raw_argv)
         command = f"build-log {args.command}"
