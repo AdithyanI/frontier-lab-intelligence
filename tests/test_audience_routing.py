@@ -293,6 +293,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
     request = client.responses.with_raw_response.calls[0]
     assert request["model"] == "gpt-5.4-mini"
     assert request["reasoning"] == {"effort": "high"}
+    assert request["max_output_tokens"] == audience_routing.MAX_OUTPUT_TOKENS
     assert "prompt_cache_retention" not in request
     assert request["prompt_cache_key"] == audience_routing.PROMPT_CACHE_KEY
     assert request["instructions"] == audience_routing.instructions()

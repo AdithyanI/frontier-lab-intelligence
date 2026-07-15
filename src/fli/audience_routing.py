@@ -24,6 +24,7 @@ PROMPT_VERSION = "audience-routing-v8"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "high"
+MAX_OUTPUT_TOKENS = 8_192
 PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v8.txt"
 PROMPT_CACHE_KEY = f"fli:audience-routing:{PROMPT_VERSION}"
 
@@ -371,6 +372,7 @@ def evaluate_one(
         "prompt_cache_key": PROMPT_CACHE_KEY,
         **llm_responses.litellm_prompt_cache_kwargs(model),
         "reasoning": {"effort": effort},
+        "max_output_tokens": MAX_OUTPUT_TOKENS,
         "text": {"format": OUTPUT_FORMAT},
         "store": False,
         "extra_body": {"metadata": {"tags": list(tags)}},

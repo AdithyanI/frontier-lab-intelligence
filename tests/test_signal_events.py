@@ -431,3 +431,111 @@ def test_same_author_reply_with_missing_parent_bridges_to_conversation_root(tmp_
     ).fetchone()
     assert tuple(anchor) == ("conversation_root", "root")
     conn.close()
+
+
+def test_primary_thread_root_remains_identity_when_continuation_quotes_older_post(
+    tmp_path,
+):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    quoted = _tweet(
+        "100", "alice", "2026-07-10T08:00:00Z", "Earlier related research"
+    )
+    root = _tweet("900", "lab", "2026-07-11T08:00:00Z", "New report. Thread below")
+    root["conversationId"] = "900"
+    continuation = _tweet(
+        "901",
+        "lab",
+        "2026-07-11T08:05:00Z",
+        "The first result",
+        relation="quote",
+        target=quoted,
+    )
+    continuation.update(
+        {
+            "conversationId": "900",
+            "inReplyToId": "missing-intermediate",
+            "isReply": True,
+        }
+    )
+    with client.db:
+        client._store_posts(
+            url=(
+                "https://api.twitterapi.io/twitter/user/last_tweets"
+                "?userName=lab&includeReplies=true"
+            ),
+            payload={"data": {"tweets": [root, continuation]}},
+            observed_at="2026-07-12T00:00:00+00:00",
+        )
+    client.close()
+
+    feed = signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 11), days=1
+    )
+    result = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=feed["run_id"]
+    )
+
+    conn = signal_events.connect(events_db)
+    cluster = conn.execute(
+        """SELECT canonical_identity_value, representative_post_id
+           FROM event_cluster WHERE run_id = ?""",
+        (result["run_id"],),
+    ).fetchone()
+    assert tuple(cluster) == ("900", "900")
+    conn.close()
+
+
+def test_reaction_thread_does_not_replace_the_post_its_root_quotes(tmp_path):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    primary = _tweet("100", "lab", "2026-07-11T08:00:00Z", "Primary launch")
+    reaction = _tweet(
+        "900",
+        "alice",
+        "2026-07-11T09:00:00Z",
+        "Trying the launch",
+        relation="quote",
+        target=primary,
+    )
+    reaction["conversationId"] = "900"
+    continuation = _tweet(
+        "901", "alice", "2026-07-11T09:05:00Z", "It failed with three users"
+    )
+    continuation.update(
+        {
+            "conversationId": "900",
+            "inReplyToId": "missing-intermediate",
+            "isReply": True,
+        }
+    )
+    with client.db:
+        client._store_posts(
+            url=(
+                "https://api.twitterapi.io/twitter/user/last_tweets"
+                "?userName=alice&includeReplies=true"
+            ),
+            payload={"data": {"tweets": [reaction, continuation]}},
+            observed_at="2026-07-12T00:00:00+00:00",
+        )
+    client.close()
+
+    feed = signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 11), days=1
+    )
+    result = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=feed["run_id"]
+    )
+
+    conn = signal_events.connect(events_db)
+    cluster = conn.execute(
+        """SELECT canonical_identity_value, representative_post_id
+           FROM event_cluster WHERE run_id = ?""",
+        (result["run_id"],),
+    ).fetchone()
+    assert tuple(cluster) == ("100", "100")
+    conn.close()

@@ -20,6 +20,58 @@ from test_web_feed import _registry_fixture
 client = TestClient(app)
 
 
+def test_cutoff_component_identity_prefers_primary_thread_over_quoted_target():
+    identity = event_store._component_identity(
+        component_keys={
+            ("twitterapi_io", "100"),
+            ("twitterapi_io", "900"),
+            ("twitterapi_io", "901"),
+        },
+        links=[
+            {
+                "provider": "twitterapi_io",
+                "source_post_id": "901",
+                "target_post_id": "900",
+                "link_type": "primary_thread",
+            },
+            {
+                "provider": "twitterapi_io",
+                "source_post_id": "901",
+                "target_post_id": "100",
+                "link_type": "quote",
+            },
+        ],
+    )
+
+    assert identity == ("twitterapi_io", "post", "900")
+
+
+def test_cutoff_component_identity_keeps_source_above_reaction_thread():
+    identity = event_store._component_identity(
+        component_keys={
+            ("twitterapi_io", "100"),
+            ("twitterapi_io", "900"),
+            ("twitterapi_io", "901"),
+        },
+        links=[
+            {
+                "provider": "twitterapi_io",
+                "source_post_id": "901",
+                "target_post_id": "900",
+                "link_type": "primary_thread",
+            },
+            {
+                "provider": "twitterapi_io",
+                "source_post_id": "900",
+                "target_post_id": "100",
+                "link_type": "quote",
+            },
+        ],
+    )
+
+    assert identity == ("twitterapi_io", "post", "100")
+
+
 def _event_fixture(tmp_path, monkeypatch, *, include_singleton=False):
     raw = tmp_path / "x-content.db"
     feed_db = tmp_path / "feed.db"

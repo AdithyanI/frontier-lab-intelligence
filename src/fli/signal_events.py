@@ -21,8 +21,8 @@ from typing import Any
 from fli import signal_feed
 
 
-SCHEMA_VERSION = "signal-events-v4"
-CLUSTERING_CONTRACT = "exact-structural-v6-primary-author-threads"
+SCHEMA_VERSION = "signal-events-v6"
+CLUSTERING_CONTRACT = "exact-structural-v8-terminal-thread-root-identity"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_EVENTS_DB = REPO_ROOT / "data" / "derived" / "signal-events" / "events.db"
@@ -228,8 +228,17 @@ def _canonical_identity(
     renderable = [member for member in members if member in posts]
     if not renderable:
         raise ValueError("an event component must contain a renderable post")
+    thread_roots = sorted(
+        (link["provider"], link["target_post_id"])
+        for link in member_links
+        if link["link_type"] == "primary_thread"
+    )
     terminal = sorted(member for member in members if not outbound.get(member))
-    identity_node = (terminal or sorted(members))[0]
+    # A first-party thread can quote several older posts. Those quotes enrich
+    # the envelope but must not replace the thread root as its stable identity
+    # or presentation post merely because an older quoted ID sorts first.
+    terminal_thread_roots = [root for root in thread_roots if not outbound.get(root)]
+    identity_node = (terminal_thread_roots or terminal or sorted(members))[0]
     has_structural_edges = bool(outbound)
     identity_children = [
         member

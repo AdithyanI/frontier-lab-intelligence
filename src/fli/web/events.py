@@ -481,6 +481,7 @@ def _component_identity(
     structural = {"quote", "retweet", "reply_parent", "primary_thread"}
     nodes = set(component_keys)
     outbound: set[tuple[str, str]] = set()
+    thread_roots: set[tuple[str, str]] = set()
     for link in links:
         provider = str(link["provider"])
         source = (provider, str(link["source_post_id"]))
@@ -488,7 +489,10 @@ def _component_identity(
         nodes.update((source, target))
         if str(link["link_type"]) in structural:
             outbound.add(source)
-    identity_node = min(nodes - outbound or nodes)
+        if str(link["link_type"]) == "primary_thread":
+            thread_roots.add(target)
+    terminal_thread_roots = thread_roots - outbound
+    identity_node = min(terminal_thread_roots or nodes - outbound or nodes)
     return identity_node[0], "post", identity_node[1]
 
 

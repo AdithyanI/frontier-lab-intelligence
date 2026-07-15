@@ -21,8 +21,8 @@ from typing import Any, Iterable
 from fli import x_content
 
 
-SCHEMA_VERSION = "signal-feed-v9"
-SELECTION_CONTRACT = "complete-calendar-days-v8-primary-author-threads"
+SCHEMA_VERSION = "signal-feed-v10"
+SELECTION_CONTRACT = "complete-calendar-days-v9-embedded-root-threads"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SOURCE_DB = REPO_ROOT / "data" / "raw" / "x" / "x-content.db"
 DEFAULT_FEED_DB = REPO_ROOT / "data" / "derived" / "signal-feed" / "feed.db"
@@ -435,7 +435,23 @@ def _selected_rows(
     # are otherwise absent from our evidence corpus. Keep a reply only when its
     # conversation root is present in this materialization window; the envelope
     # later distinguishes same-author continuation from tracked-author reaction.
-    roots: dict[str, dict[str, Any]] = {}
+    roots: set[str] = set()
+
+    def add_embedded_roots(tweet: dict[str, Any]) -> None:
+        for relation in ("retweet", "quote"):
+            target = _embedded(tweet, relation)
+            if target is None:
+                continue
+            target_id = str(target.get("id") or target.get("tweetId") or "").strip()
+            conversation_id = str(
+                target.get("conversationId") or target.get("conversation_id") or ""
+            ).strip()
+            if conversation_id:
+                roots.add(conversation_id)
+            elif target_id:
+                roots.add(target_id)
+            add_embedded_roots(target)
+
     for _row, tweet in candidates:
         if bool(
             tweet.get("isReply")
@@ -446,7 +462,60 @@ def _selected_rows(
             continue
         post_id = str(tweet.get("id") or tweet.get("tweetId") or "").strip()
         if post_id:
-            roots[post_id] = tweet
+            roots.add(post_id)
+        add_embedded_roots(tweet)
+
+    # A root first discovered as an embedded quote/retweet can have been
+    # published just before this materialization window. Its authored thread
+    # is still part of the newly discovered envelope, so recover stored replies
+    # up to the window cutoff instead of silently reducing the packet to the
+    # embedded root. The upper bound prevents future-reply leakage.
+    selected_keys = {(row["provider"], row["post_id"]) for row, _tweet in candidates}
+    if roots:
+        for row in source.execute(
+            """SELECT post.provider, post.post_id, post.author_handle,
+                      post.post_type, observed.raw_sha256, observed.raw_json
+               FROM x_post post
+               JOIN x_post_observation observed
+                 ON observed.provider = post.provider
+                AND observed.post_id = post.post_id
+               WHERE post.post_type = 'reply'
+                 AND NOT EXISTS (
+                     SELECT 1
+                     FROM x_post_observation earlier
+                     WHERE earlier.provider = observed.provider
+                       AND earlier.post_id = observed.post_id
+                       AND (
+                           earlier.observed_at < observed.observed_at
+                           OR (
+                               earlier.observed_at = observed.observed_at
+                               AND earlier.raw_sha256 < observed.raw_sha256
+                           )
+                       )
+                 )
+               ORDER BY post.provider, post.post_id"""
+        ):
+            key = (row["provider"], row["post_id"])
+            if key in selected_keys:
+                continue
+            try:
+                tweet = json.loads(row["raw_json"])
+            except (TypeError, json.JSONDecodeError):
+                continue
+            published = _parse_datetime(
+                tweet.get("createdAt") or tweet.get("created_at")
+            )
+            conversation_id = str(
+                tweet.get("conversationId") or tweet.get("conversation_id") or ""
+            ).strip()
+            if (
+                published is not None
+                and published.date() < start
+                and published.date() <= end
+                and conversation_id in roots
+            ):
+                candidates.append((row, tweet))
+                selected_keys.add(key)
 
     for row, tweet in candidates:
         is_reply = bool(

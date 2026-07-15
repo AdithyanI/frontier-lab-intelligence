@@ -466,7 +466,7 @@ def _iter_feed_candidates(
     current = start
     candidates: list[dict[str, Any]] = []
     day_counts: dict[str, int] = {}
-    seen_sources: set[tuple[str, str, str]] = set()
+    seen_sources: set[tuple[str, str]] = set()
     while current <= end:
         day = current.isoformat()
         payload = event_store.events_payload(
@@ -508,9 +508,14 @@ def _iter_feed_candidates(
                     primary_ids = set()
             for post_id in primary_ids:
                 post = posts.get(post_id)
-                if post is None or str(post["first_discovered_day"]) != day:
+                if post is None:
                     continue
-                source_key = (day, event_id, post_id)
+                # Process each primary source on the first day its envelope is
+                # visible in this run. A quoted root and its stored thread may
+                # predate the window even though the envelope is first
+                # discovered inside it; source publication day must not erase
+                # those first-party artifact links.
+                source_key = (event_id, post_id)
                 if source_key in seen_sources:
                     continue
                 seen_sources.add(source_key)
@@ -753,31 +758,33 @@ def import_feed_envelopes(
                 target_artifact_id = artifact_urls.artifact_id(decision.canonical_url)
                 seen_at = str(candidate["source_published_at"])
                 host = str(urlsplit(decision.canonical_url).hostname or "")
-                conflicting_alias = next(
-                    (
-                        alias
-                        for alias in {
-                            decision.canonical_url,
-                            str(candidate["observed_url"]),
-                            str(candidate["expanded_url"]),
-                        }
-                        if (
-                            existing_alias := conn.execute(
-                                "SELECT artifact_id FROM artifact_alias "
-                                "WHERE alias_url = ?",
-                                (alias,),
-                            ).fetchone()
-                        )
-                        is not None
-                        and str(existing_alias["artifact_id"]) != target_artifact_id
-                    ),
-                    None,
-                )
-                if conflicting_alias is not None:
+                alias_targets = {
+                    str(existing_alias["artifact_id"])
+                    for alias in {
+                        decision.canonical_url,
+                        str(candidate["observed_url"]),
+                        str(candidate["expanded_url"]),
+                    }
+                    if (
+                        existing_alias := conn.execute(
+                            "SELECT artifact_id FROM artifact_alias "
+                            "WHERE alias_url = ?",
+                            (alias,),
+                        ).fetchone()
+                    )
+                    is not None
+                }
+                if len(alias_targets) > 1:
                     decision = artifact_urls.CandidateDecision(
                         "failed", "alias_conflict"
                     )
                     target_artifact_id = None
+                elif alias_targets:
+                    # A previous successful fetch may have proven a redirect
+                    # and converged the preliminary artifact into its final
+                    # identity. Reimports must follow that durable alias rather
+                    # than resurrecting the pre-redirect ID or failing replay.
+                    target_artifact_id = next(iter(alias_targets))
             if decision.decision == "accepted":
                 assert decision.canonical_url and decision.artifact_kind
                 assert target_artifact_id is not None
