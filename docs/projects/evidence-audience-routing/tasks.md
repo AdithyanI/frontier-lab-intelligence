@@ -384,3 +384,9 @@ Application invariants:
   correct, but Azure prefix reuse is not currently observable. A broader run
   should be budgeted as uncached while retaining the 32-lane schedule and cache
   telemetry; the two calls cost $0.008626.
+- 2026-07-15: [VALIDATED] Repeated the same current-prompt canary live on
+  GPT-5.5 at Adi's request. Two different v4 packets used one fresh forced key
+  sequentially; the 3,289-token cold call and 1,953-token follow-up again
+  returned zero cached tokens and zero cache-write telemetry. This rules out
+  the earlier GPT-5.5 miss being an obsolete-v3 artifact. The retry cost
+  $0.049730.

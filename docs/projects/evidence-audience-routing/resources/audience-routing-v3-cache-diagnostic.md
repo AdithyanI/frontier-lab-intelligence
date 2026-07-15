@@ -93,6 +93,23 @@ GPT-5.5 also failed to reuse the different-input prefix. This broadens the
 diagnosis from a Luna-specific regression to the Azure Responses caching path
 or its current interaction through the shared proxy.
 
+### Fresh GPT-5.5 v4 retry
+
+Adi asked for a live retry because GPT-5.5 prompt caching is otherwise known to
+work. Two fresh July 12 packets used the current `audience-routing-v4` prompt,
+the same structured-output schema, and one new forced key,
+`fli:audience-routing:v4:gpt55-retry-00`. The calls were fully sequential and
+their variable-input hashes differed.
+
+| Request | Total input tokens | Azure cached tokens | Proxy spend | Duration |
+| --- | ---: | ---: | ---: | ---: |
+| GPT-5.5 v4, cold | 3,289 | 0 | $0.027905 | 7.407s |
+| GPT-5.5 v4, same prefix and key | 1,953 | 0 | $0.021825 | 12.364s |
+
+The fresh retry also produced no provider cache read or cache-write telemetry.
+This reproduces the miss on GPT-5.5 with the exact current prompt and removes
+the remaining concern that the earlier result was specific to v3.
+
 ## LiteLLM version audit
 
 The shared proxy is running LiteLLM 1.92.0. The automatic stable-version
