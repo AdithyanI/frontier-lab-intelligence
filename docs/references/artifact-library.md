@@ -65,11 +65,13 @@ Canonicalization is conservative and versioned as `artifact-url-v1`:
 - do not guess the target of a card-only `t.co` URL.
 
 The stored artifact kind is a deterministic, fetch-oriented URL-shape hint,
-not a semantic content classification. The product deliberately exposes only
-four stable types: `web`, `document`, `repository`, and `video`. Papers map to
-`document`; articles, announcements, and unmatched HTML pages map to `web`.
-This keeps the UI honest without requiring fragile Article-versus-page
-inference, while the stored kind can still route specialized fetchers.
+not a semantic content classification. The product exposes five stable types:
+`web`, `x_article`, `document`, `repository`, and `video`. X long-form Article
+URLs map to `x_article` because they have an exact URL identity and dedicated
+retrieval contract. Papers map to `document`; ordinary articles,
+announcements, and unmatched HTML pages map to `web`. This keeps the UI honest
+without requiring fragile Article-versus-page inference, while preserving the
+one article subtype that is operationally exact.
 
 Artifact admission is narrower than the visible envelope. A URL is eligible
 only when its owning post is the root post or a reply from the same stable X

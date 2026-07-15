@@ -8,6 +8,15 @@ from fli.web.app import app
 client = TestClient(app)
 
 
+def test_product_artifact_type_keeps_x_articles_distinct():
+    assert artifact_store._artifact_type(
+        "article", "http://x.com/i/article/2073093772817453056"
+    ) == "x_article"
+    assert artifact_store._artifact_type(
+        "article", "https://example.com/research"
+    ) == "web"
+
+
 def _artifact_fixture(path):
     conn = artifacts.connect(path)
     conn.executemany(

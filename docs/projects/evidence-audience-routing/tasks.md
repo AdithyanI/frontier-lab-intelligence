@@ -207,7 +207,7 @@ Application invariants:
 | done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
 | done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
 | done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
-| in_progress | Review the exact Satya input and context-first v2 prompt draft with Adi before any additional call, renderer integration, or Feed UI work. | parent | `resources/satya-routing-v1.md`; `../../../src/fli/prompts/audience_routing_v2_draft.txt` |
+| in_progress | Review the exact, unexecuted Satya v2 request with Adi; run it only after the hierarchical input is accepted. | parent | `resources/satya-routing-v2-attempt.md`; `../../../src/fli/prompts/audience_routing_v2.txt` |
 
 ## Backlog / Remaining Work
 
@@ -258,3 +258,13 @@ Application invariants:
   The draft explains the product, current X evidence collection, packet
   assembly, artifacts and reactions, then defines the two audience decisions
   and approved schema. It is intentionally not wired or executed yet.
+- 2026-07-15: [APPROVED] Adi approved the context-first v2 prompt for the first
+  comparison and requested sequential review of top kept envelopes. The first
+  v2 run is limited to the Satya envelope; it will establish the shared cache
+  prefix, and the next envelope will run only after qualitative review.
+- 2026-07-15: [IN-PROGRESS] Wired the approved prompt to a semantic hierarchy
+  that groups the primary post, first-party artifact, and continuations before
+  separately authored reactions. The first cohort uses one stable cache lane;
+  internal refs and pure retweets are omitted from model input. Frozen the
+  exact unexecuted Satya request in `resources/satya-routing-v2-attempt.md` for
+  Adi's review before any v2 model call.

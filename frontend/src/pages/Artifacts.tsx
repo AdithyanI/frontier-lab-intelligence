@@ -127,6 +127,11 @@ function sourceLabel(provider: string | null) {
   return provider || 'Feed'
 }
 
+function artifactTypeLabel(type: ArtifactItem['artifact_type']) {
+  if (type === 'x_article') return 'X Article'
+  return type
+}
+
 function extractedContentLabel(item: ArtifactItem) {
   if (item.extractor_contract === 'jina-reader-markdown-v1') return 'Normalized Markdown'
   if (item.extractor_contract === 'pdf-pypdf-v1') return 'Extracted PDF text'
@@ -196,7 +201,7 @@ function ArtifactRow({
           <strong>{displayTitle(item)}</strong>
           <span className="mono">{item.host.replace(/^www\./, '')}</span>
         </span>
-        <span className="artifact-kind mono">{item.artifact_type}</span>
+        <span className="artifact-kind mono">{artifactTypeLabel(item.artifact_type)}</span>
         <span className="artifact-source">
           {sourceLabel(item.source_provider)}
           {item.observation_count > 1 && (

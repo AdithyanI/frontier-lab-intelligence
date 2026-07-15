@@ -66,16 +66,24 @@ def make_packet():
                 text="The new system reduced inference latency under our workload.",
             ),
             audience_routing.EvidenceSource(
-                source_type="x_article_section",
+                source_type="artifact",
                 source_id="source-secret-article",
                 url="https://example.com/private-article",
-                author="Research Team",
+                author="Satya Nadella",
                 title="Serving system report",
-                relation="artifact",
+                relation="self_published_artifact",
                 text="Tests report lower latency and lower serving cost.",
                 section_ordinal=2,
                 source_char_start=100,
                 source_char_end=154,
+            ),
+            audience_routing.EvidenceSource(
+                source_type="x_post",
+                source_id="source-secret-reaction",
+                url="https://example.com/private-reaction",
+                author="Independent Engineer",
+                relation="quote",
+                text="This serving result should be tested under burst traffic.",
             ),
         ),
     )
@@ -108,18 +116,25 @@ def test_schema_requires_only_two_exact_audience_judgments():
         assert judgment["properties"]["relevant"] == {"type": "boolean"}
 
 
-def test_render_input_preserves_numbered_authorship_but_omits_provenance_hints():
+def test_render_input_groups_primary_evidence_before_separate_reactions():
     rendered = audience_routing.render_input(make_packet())
 
-    assert '<EVIDENCE_BLOCK index="1">' in rendered
-    assert '<EVIDENCE_BLOCK index="2">' in rendered
-    assert "type=x_post | author=Satya Nadella | relation=root" in rendered
-    assert "title=Serving system report" in rendered
+    assert '<PRIMARY_SOURCE author="Satya Nadella">' in rendered
+    assert "<PRIMARY_POST>" in rendered
+    assert '<AUTHORED_ARTIFACT title="Serving system report">' in rendered
+    assert "<RELATED_REACTIONS>" in rendered
+    assert '<QUOTE_POST author="Independent Engineer">' in rendered
+    assert rendered.index("<PRIMARY_POST>") < rendered.index(
+        "<AUTHORED_ARTIFACT"
+    ) < rendered.index("<RELATED_REACTIONS>")
     assert "reduced inference latency" in rendered
     assert "event-secret-42" not in rendered
     assert "source-secret-root" not in rendered
     assert "source-secret-article" not in rendered
+    assert "source-secret-reaction" not in rendered
     assert "https://example.com" not in rendered
+    assert "relation=" not in rendered
+    assert "ref=" not in rendered
     assert "section_ordinal" not in rendered
     assert "source_char_start" not in rendered
     assert "feed_rank" not in rendered
@@ -133,7 +148,10 @@ def test_evidence_hash_binds_hidden_provenance_while_input_hash_does_not():
         source_id="different-source-id",
         url="https://example.com/different-url",
     )
-    changed_packet = replace(packet, sources=(changed_source, packet.sources[1]))
+    changed_packet = replace(
+        packet,
+        sources=(changed_source, *packet.sources[1:]),
+    )
 
     assert changed_packet.evidence_sha256 != packet.evidence_sha256
     assert changed_packet.input_sha256 == packet.input_sha256
@@ -170,7 +188,7 @@ def test_request_uses_luna_medium_cache_adapter_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v1",
+        "prompt:audience-routing-v2",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
@@ -212,7 +230,7 @@ def test_output_rejects_non_exact_or_invalid_judgments(mutate, error):
         audience_routing._validate_output(json.dumps(payload))
 
 
-def test_output_normalizes_reasons_and_cache_keys_are_stable_and_sharded():
+def test_output_normalizes_reasons_and_first_cohort_uses_one_cache_lane():
     payload = routing_payload()
     payload["investment"]["reason"] = "  Cost   changes\nunit economics.  "
 
@@ -223,21 +241,25 @@ def test_output_normalizes_reasons_and_cache_keys_are_stable_and_sharded():
     }
 
     assert result["investment"]["reason"] == "Cost changes unit economics."
-    assert 1 < len(keys) <= audience_routing.PROMPT_CACHE_SHARDS
+    assert len(keys) == audience_routing.PROMPT_CACHE_SHARDS == 1
     assert audience_routing.prompt_cache_key("event-1") == (
         audience_routing.prompt_cache_key("event-1")
     )
     assert all(key.startswith("fli:audience-routing:") for key in keys)
 
 
-def test_prompt_keeps_audiences_distinct_and_forbids_downstream_work():
+def test_prompt_explains_product_evidence_and_independent_audience_job():
     prompt = audience_routing.instructions().lower()
 
+    assert "frontier lab intelligence" in prompt
+    assert "current system collects public posts from x" in prompt
+    assert "groups connected material into one evidence packet" in prompt
+    assert "primary post" in prompt
+    assert "full text of an available artifact" in prompt
+    assert "separate reactions" in prompt
     assert "ai engineering" in prompt
     assert "investment" in prompt
-    assert "make the two judgments independently" in prompt
-    assert "does not reconsider the earlier keep/drop decision" in prompt
-    assert "do not write insight prose" in prompt
-    assert "do not quote evidence, cite block numbers, create citations" in prompt
-    assert "do not infer relevance from popularity" in prompt
-    assert "return no keep/drop field" in prompt
+    assert "decide independently" in prompt
+    assert "earlier feed stage" not in prompt
+    assert "keep/drop" not in prompt
+    assert "insight prose" not in prompt

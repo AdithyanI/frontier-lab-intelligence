@@ -275,12 +275,14 @@ def packet_from_triage_row(
     for related in envelope.get("related_posts") or []:
         post = dict(related)
         post_id = str(post["post_id"])
-        post_authors[post_id] = str(post.get("author") or "")
         relation = (
             "same_author_continuation"
             if post.get("same_author_as_root")
             else str(post.get("relation") or "related")
         )
+        if relation == "retweet":
+            continue
+        post_authors[post_id] = str(post.get("author") or "")
         sources.append(_x_source(post, relation=relation))
     sources.extend(
         _artifact_sources(

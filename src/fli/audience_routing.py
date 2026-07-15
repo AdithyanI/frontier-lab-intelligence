@@ -14,16 +14,17 @@ import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from xml.sax.saxutils import quoteattr
 
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v1"
+PROMPT_VERSION = "audience-routing-v2"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "medium"
-PROMPT_CACHE_SHARDS = 2
-PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v1.txt"
+PROMPT_CACHE_SHARDS = 1
+PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v2.txt"
 
 AUDIENCES = ("ai_engineering", "investment")
 JUDGMENT_FIELDS = ("relevant", "reason")
@@ -40,7 +41,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v1",
+    "name": "audience_routing_v2",
     "strict": True,
     "schema": {
         "type": "object",
@@ -153,32 +154,105 @@ def request_tags(*, run: str, day: str) -> tuple[str, ...]:
     )
 
 
-def render_input(packet: RoutingPacket) -> str:
-    """Render attributed sources without IDs, URLs, rank, or triage outcome."""
-    blocks = [
-        "Route this Feed-kept evidence packet by audience.",
-        "Judge each numbered source independently before judging the full packet.",
+def _cdata(text: str) -> str:
+    """Preserve source text inside an XML-like prompt without closing CDATA."""
+    return text.replace("]]>", "]]]]><![CDATA[>")
+
+
+def _source_element(
+    tag: str,
+    source: EvidenceSource,
+    *,
+    indent: str,
+    include_author: bool = False,
+    include_title: bool = False,
+) -> list[str]:
+    attributes = ""
+    if include_author and source.author:
+        attributes += f" author={quoteattr(source.author)}"
+    if include_title and source.title:
+        attributes += f" title={quoteattr(source.title)}"
+    return [
+        f"{indent}<{tag}{attributes}>",
+        f"{indent}  <TEXT><![CDATA[",
+        _cdata(source.normalized_text()),
+        f"]]></TEXT>",
+        f"{indent}</{tag}>",
     ]
-    for index, source in enumerate(packet.sources, start=1):
-        details = [f"type={source.source_type}"]
-        if source.author:
-            details.append(f"author={source.author}")
-        if source.relation:
-            details.append(f"relation={source.relation}")
-        if source.title:
-            details.append(f"title={source.title}")
-        blocks.extend(
-            (
-                "",
-                f'<EVIDENCE_BLOCK index="{index}">',
-                f"[{' | '.join(details)}]",
-                "<VERBATIM_TEXT>",
-                source.normalized_text(),
-                "</VERBATIM_TEXT>",
-                "</EVIDENCE_BLOCK>",
+
+
+def render_input(packet: RoutingPacket) -> str:
+    """Render one semantic evidence hierarchy without internal provenance."""
+    roots = [source for source in packet.sources if source.relation == "root"]
+    if len(roots) != 1:
+        raise ValueError("routing packet must contain exactly one root source")
+    root = roots[0]
+
+    continuations = [
+        source
+        for source in packet.sources
+        if source.relation == "same_author_continuation"
+    ]
+    artifacts = [
+        source for source in packet.sources if source.source_type == "artifact"
+    ]
+    reactions = [
+        source
+        for source in packet.sources
+        if source.source_type == "x_post"
+        and source.relation
+        not in {"root", "same_author_continuation", "retweet"}
+    ]
+
+    root_attributes = f" author={quoteattr(root.author)}" if root.author else ""
+    lines = ["<EVIDENCE_PACKET>", f"  <PRIMARY_SOURCE{root_attributes}>"]
+    lines.extend(_source_element("PRIMARY_POST", root, indent="    "))
+
+    if continuations:
+        lines.append("    <SAME_AUTHOR_CONTINUATIONS>")
+        for source in continuations:
+            lines.extend(_source_element("CONTINUATION", source, indent="      "))
+        lines.append("    </SAME_AUTHOR_CONTINUATIONS>")
+
+    if artifacts:
+        lines.append("    <CONNECTED_ARTIFACTS>")
+        for source in artifacts:
+            tag = (
+                "AUTHORED_ARTIFACT"
+                if source.relation == "self_published_artifact"
+                else "LINKED_ARTIFACT"
             )
-        )
-    return "\n".join(blocks)
+            lines.extend(
+                _source_element(
+                    tag,
+                    source,
+                    indent="      ",
+                    include_author=tag == "LINKED_ARTIFACT",
+                    include_title=True,
+                )
+            )
+        lines.append("    </CONNECTED_ARTIFACTS>")
+    lines.append("  </PRIMARY_SOURCE>")
+
+    if reactions:
+        reaction_tags = {
+            "quote": "QUOTE_POST",
+            "reply": "REPLY_POST",
+        }
+        lines.append("  <RELATED_REACTIONS>")
+        for source in reactions:
+            lines.extend(
+                _source_element(
+                    reaction_tags.get(source.relation or "", "RELATED_POST"),
+                    source,
+                    indent="    ",
+                    include_author=True,
+                )
+            )
+        lines.append("  </RELATED_REACTIONS>")
+
+    lines.append("</EVIDENCE_PACKET>")
+    return "\n".join(lines)
 
 
 def _validate_output(output_text: str) -> dict[str, Any]:

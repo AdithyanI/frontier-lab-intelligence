@@ -32,8 +32,10 @@ def _fetch_method(fetch_policy: str | None) -> str | None:
     return fetch_policy
 
 
-def _artifact_type(artifact_kind: str) -> str:
-    """Return the deliberately coarse user-facing artifact classification."""
+def _artifact_type(artifact_kind: str, canonical_url: str) -> str:
+    """Return the stable user-facing artifact classification."""
+    if canonical_url.startswith(("http://x.com/i/article/", "https://x.com/i/article/")):
+        return "x_article"
     if artifact_kind == "paper":
         return "document"
     if artifact_kind == "repository":
@@ -358,7 +360,9 @@ def artifacts_payload(
         for row in rows:
             item = dict(row)
             item["observation_count"] = int(item["observation_count"] or 0)
-            item["artifact_type"] = _artifact_type(str(item["artifact_kind"]))
+            item["artifact_type"] = _artifact_type(
+                str(item["artifact_kind"]), str(item["canonical_url"])
+            )
             item["fetch_state"] = _fetch_state(item.pop("fetch_status"))
             item["fetch_method"] = _fetch_method(item.pop("fetch_policy"))
             items.append(item)

@@ -350,7 +350,7 @@ export type ArtifactKind =
   | 'video'
   | 'other'
 
-export type ArtifactType = 'web' | 'document' | 'repository' | 'video'
+export type ArtifactType = 'web' | 'x_article' | 'document' | 'repository' | 'video'
 
 export type ArtifactFetchState =
   | 'catalogued'

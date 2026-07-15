@@ -63,8 +63,10 @@ test('Artifact retrieval state is disclosed only in expanded provenance', () => 
   assert.doesNotMatch(artifactSource, /className=\{rowClassName\} onToggle/)
 })
 
-test('Artifacts expose a deliberately coarse user-facing type', () => {
+test('Artifacts expose stable user-facing types with X Articles distinct', () => {
   assert.match(artifactSource, /item\.artifact_type/)
+  assert.match(artifactSource, /type === 'x_article'/)
+  assert.match(artifactSource, /return 'X Article'/)
   assert.doesNotMatch(artifactSource, /className="artifact-kind mono">\{item\.artifact_kind\}/)
 })
 
