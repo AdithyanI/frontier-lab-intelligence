@@ -110,7 +110,11 @@ class InsightCandidate:
         packet: audience_routing.RoutingPacket,
         feed_rank: int,
     ) -> "InsightCandidate":
-        if feed_rank < 1:
+        if (
+            isinstance(feed_rank, bool)
+            or not isinstance(feed_rank, int)
+            or feed_rank < 1
+        ):
             raise ValueError("feed_rank must be a positive integer")
         return cls(
             audience=require_audience(audience),

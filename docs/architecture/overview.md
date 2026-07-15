@@ -8,11 +8,10 @@ store, exact event projection, rank-first Feed view, canonical artifact library,
 and direct audience-routing boundary are implemented and inspectable. Audience
 routing freezes ranked Evidence directly and returns independent AI Engineering
 and Investment relevance judgments; the Feed derives its audit states from
-those two booleans. The former model-based keep/drop gate and its generated data
-were removed rather than retained as a compatibility layer. The older Audience
-Insights v2 implementation remains historical code with no generated outputs or
-live product read path; new Insight generation is deferred until routing is
-qualitatively accepted. External delivery is also deferred. See
+those two booleans. The former model-based keep/drop gate and the older
+multi-stage Insight backends were removed rather than retained as compatibility
+layers. The successor Insight prompt/schema boundary is implemented but has no
+runner, store, or generated output yet. External delivery is also deferred. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.
@@ -334,105 +333,35 @@ score. The same artifact
 may appear on multiple days when the network independently links it again. This
 is an operator inspection surface, not a second Feed or an insight product.
 
-`fli.cited_insight_runs` now freezes the first five accepted envelopes into a
-separate resumable extraction run. `insight-v1.1` gives the model the complete
-accepted first-party X envelope plus any available artifact text, but asks it
-to return only one claim, three compact analytical fields, and one verbatim
-supporting quote. The application—not the model—binds that quote to the frozen
-X post or artifact identity and URL. A result whose quote is not an exact
-substring is retained as a failed calibration row and never reaches the
-read-only `/api/insights` projection. The first proof published four verified
-insights from five candidates; its one rejected citation, usage, prompt-cache
-reads, proxy cost, and raw output remain auditable in the run database.
+`fli.insight_generation` is the clean successor boundary. A candidate contains
+one immutable `RoutingPacket`, one positive audience, and its application-owned
+Feed rank. Event ID, day, candidate ID, and rank remain outside model input.
+The model receives the same attributed Evidence hierarchy used by routing,
+wrapped as the final variable block after one stable audience prompt. Investment
+and AI Engineering have separate versioned prompts and cache keys but share one
+strict output schema: `decision`, freeform nullable `suppression_reason`, and
+nullable `summary`, `implication`, and `next_step`. A surfaced result requires
+all three content fields and no suppression reason; a suppressed result requires
+one concrete reason and no audience content. No quote, confidence score,
+model-authored identifier, or ranking field exists in the schema.
 
-The archived Audience Insights v2 implementation replaced the compromise
-audience framing with two
-independent products over the same frozen evidence and application-owned
-citation binder. `fli.audience_insight_runs` gives Investment and AI
-Engineering separate extraction prompts, schemas, run databases, cache
-namespaces, pre-editor item filters, daily editors, and day-set gates. The
-editor can select only runner-owned IDs that passed every item-review
-dimension; it cannot rewrite a claim or citation. Feed rank chooses a bounded
-candidate cohort but is absent from extraction, review, and editorial inputs.
+The two stable prompts are naturally cache eligible at roughly 1.27k and 1.31k
+`o200k_base` tokens. `build_request` only constructs the shared LiteLLM Responses
+payload with stable metadata/tags and provider cache kwargs; it does not choose
+a model, execute a request, or persist a result. `publish` binds surfaced prose
+back to the frozen event/day/Feed rank for the UI. The runner and store will be
+designed after one user-selected envelope is evaluated and inspected.
 
-`fli.audience_insight_publication_audit` is a second, isolated calibration
-boundary so the pre-editor filter is not reused as proof of its own quality. A
-separate SQLite audit freezes every published selection and a deterministic
-small sample of the highest-Feed-ranked filter rejects. Its Luna-high prompt,
-strict schema, cache namespace, request tags, attempts, and telemetry are
-independent. The auditor sees sanitized evidence and item content under an
-opaque ID, never rank, selection state, prior judgments/rationale, or editor
-metadata. It reports zero-tolerance citation/attribution failures, the 80%
-selected usefulness/actionability/specificity threshold, and false-negative
-reject counts. Duplicate and padding judgments remain exclusively in the
-separate day-set gate.
-
-A source run and its audit are never rewritten. An adjacent immutable
-publication-finalization sidecar may only make the release boundary stricter:
-it either removes exact audit-failed selected IDs, or records an exact senior
-editorial disqualification after the independent audit has passed. The latter
-binds a review ID, reviewer, enumerated reason, and rationale to exact active
-candidate IDs. Neither mode can promote a reject, substitute content, or
-reorder survivors. Every read revalidates the source selection and audit
-bindings; canonical reconciliation additionally binds the sidecar bytes. A
-senior editorial veto changes the released projection but retains that
-mechanically valid item in duplicate-suppression history, so later editors do
-not rediscover the same weak framing and already-frozen downstream runs do not
-need to be rewritten. An audit disqualification remains absent from both the
-released projection and later history.
-
-New chronological runs receive that history through explicit command inputs,
-not a “newest directory” guess. Repeated `--prior-run-db` values must name one
-internally passed run per earlier day, in strictly increasing order, for the
-same audience. Before any model client is created, the runner validates the
-entire audience/day/order chain, then revalidates each source's exact adjacent
-`publication-audit-v1/audit.db` and optional immutable finalization. The
-resolved mode, exact sources, projection modes, item count, and history hash are
-returned in command JSON. `--history-mode auto` remains an explicit
-non-production escape hatch; `--history-mode none` is reserved for an explicit
-history origin. Omitting both a mode and exact prior databases is an error.
-
-`fli.audience_insight_production_reconciliation` then provides the production
-closeout boundary. Its strict explicit manifest
-names every required audience/day, exact source database, adjacent audit,
-expected base selection count, optional finalization, and—when available—the
-exact X Article artifact cohort. The Article origin union is also explicit:
-ordinary items must derive from the declared production-run event IDs, while
-the two lower-rank census Articles are admitted only through exact sample IDs
-in the frozen recall database. That recall origin binds the complete
-`recall_run` / `recall_sample` / `recall_replacement` ledger hash, revalidates
-the sample protocol, selection hash, packet identity, accepted artifact-event
-edge, and source artifact database, and rejects overlap with run-derived
-events. It is therefore not a general artifact superset escape hatch. The
-reconciler discovers no runs by recency or directory scan, opens all SQLite
-inputs read-only, fails closed on missing or duplicate cells,
-immutable-contract drift, unresolved false negatives, incomplete stage state,
-unknown proxy cost, or nonterminal bound Articles, and emits deterministic
-per-run and aggregate count, token, cache, cost, audit-hash, and
-finalization-hash evidence. A numeric provider-reported zero cost remains
-valid; NULL remains unknown and requires a superseding run. An Article cohort
-not explicitly bound is reported as unbound rather than silently inferred.
-
-Production publication is deliberately stricter than local fixture discovery.
-`fli.web.insights` accepts only the adjacent
-`production-reconciliation-v2/manifest.json` and `report.json` pair. On every
-read it evaluates the manifest again, requires the stored report to equal the
-fresh canonical report byte-for-byte, then revalidates each exact run/audit/
-finalization projection before returning a date or item. A missing pair,
-partial replacement, contract or telemetry drift, source/audit hash change,
-unbound false negative, path escape, or X Article snapshot drift produces an
-unavailable product rather than a best-effort fallback. An explicit `run_root`
-is reserved for isolated fixture/test discovery and is not a production
-compatibility path.
-
-The Insights product also exposes an explicit pre-editor comparison view. Its
-`/api/insights/extracted*` read model opens the existing per-run `insights.db`
-files read-only, chooses the most complete production extraction for each
-audience/day, and returns only citation-bound `candidate_item` insights ordered
-by their original Feed rank. This view stops before item review, daily editing,
-publication audit, and reconciliation; the UI labels it “Feed-ranked” and keeps
-the fail-closed canonical publication projection as the separate “Reviewed
-brief” view. No extraction data is copied or regenerated for this comparison.
+The superseded cited-extraction, multi-stage audience extraction, item/day
+review, editor, audit, recall, and production-reconciliation modules and CLI
+commands have been deleted. Their historical decisions remain in archived
+project documentation, but live code has no compatibility read or old-schema
+fallback. `fli.web.insights` currently returns an honest empty successor state
+for both the canonical and existing `/api/insights/extracted*` UI routes. This
+keeps the Investment/AI Engineering screen, date transport, and empty states
+stable without reading a legacy database. The first successor store will expose
+date, audience, event ID, Feed rank, summary, implication, and next step; item
+rendering is intentionally deferred until the first real output is approved.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
@@ -1206,20 +1135,15 @@ final score.
 | `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with full immutable evidence, a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, bounded parallel execution, resumable cache/cost telemetry, and one publication-bound multi-day refresh command |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.artifact_arxiv` | official batch-feed title, author, category, date, and abstract extraction for catalogued arXiv papers; PDFs remain optional future work |
-| `fli.cited_insights` / `fli.cited_insight_runs` | historical minimal `insight-v1.1` proof: frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
-| `fli.audience_insights` / `fli.audience_insight_runs` | independent Investment and AI Engineering extraction/schema/cache contracts, exact citation binding, resumable attempt ledgers, all-five-pass item filtering, ID-only daily editing, day-set review, and audited-history inputs |
-| `fli.audience_insight_publication_audit` | isolated rank-blind selected/reject audit, hash-bound false-negative adjudication, and immutable publication-disqualification sidecars |
-| `fli.audience_insight_recall` | frozen 73-packet lower-rank/X-Article/drop census with audience-specific extraction/review and exact final-set comparison fields |
-| `fli.audience_insight_production_reconciliation` | strict explicit 18-cell manifest evaluator binding contracts, source runs, adjacent audits, finalizations, chronological history, complete telemetry, and the exact X Article cohort into one deterministic report |
+| `fli.insight_generation` | non-executing successor boundary with separate Investment and AI Engineering prompts/cache keys, one strict surface-or-suppress schema, exact routed Evidence reuse, deterministic validation, and application-owned Event/day/Feed-rank publication metadata |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort, with checksum-bound parent reuse for unchanged stable-ID sources |
 | `fli.following_rankings` | deterministic account discovery ordering plus entity-union Network support (source and target both one entity/one vote, self excluded), with experimental personalized PageRank retained for comparison |
-| `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed/Event readers share the newest completed analysis selection, and Insights publishes only runs proven by the fresh canonical reconciliation pair; source in `frontend/` |
+| `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed/Event readers share the newest completed analysis selection, and Insights returns an honest empty successor state until a new run store exists; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Audience insight extraction | split audience contracts calibrated and production runs materialized chronologically; failed/superseded attempts remain immutable provenance |
-| Insight evaluation | independent item/day review, adjacent publication audit, exact false-negative adjudication, bounded recall widening, and deterministic production reconciliation implemented |
-| Insights UI | one Feed-ranked audience surface remains implemented; generated Insight data was explicitly reset pending a simpler schema and prompt |
+| Audience Insight generation | prompt/schema/request foundation only; no model call, runner, run store, or generated result yet |
+| Insights UI | one Feed-ranked audience surface remains implemented and intentionally empty; the successor API preserves its transport while refusing legacy reads |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order

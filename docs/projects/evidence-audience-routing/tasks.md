@@ -209,6 +209,11 @@ Application invariants:
   routing judgment.
 - Insight generation remains a separate follow-up stage and may use a higher
   reasoning effort only after routing is qualitatively understood.
+- On 2026-07-15 Adi explicitly authorized a narrow successor Insight bootstrap
+  while the repaired-Event routing refresh continues: delete the obsolete
+  backend, define two audience prompts plus one shared schema, preserve the
+  current UI shell and Feed-rank metadata, and stop before any model call. This
+  is a foundation checkpoint only, not bulk generation or publication.
 - The v2 review renderer introduced a human-readable YAML-style hierarchy
   rather than XML/CDATA. It decoded HTML entities, represented link-only
   primary posts by their artifact relationship, omitted pure retweets and
@@ -269,6 +274,7 @@ Application invariants:
 | invalidated | Replace all stale routes with GPT-5.4-mini/high top-100 runs for July 5–13. | parent | — |
 | complete | Add one resumable publication-bound command for the next nine-day top-100 routing refresh. | parent | `../../../references/evidence-refresh.md` |
 | complete | Replace unrestricted Event components with root-owned one-parent envelopes; rebuild July 5–13 and prove the Anthropic root is restored. | parent | `../../../references/signal-feed.md` |
+| complete | Replace the obsolete Insight backend with the two-prompt, shared-schema, non-executing successor foundation; preserve the empty UI transport and Feed-rank metadata. | parent | — |
 | pending | Rerun and review the 900 routes against the repaired Event publication. | parent | — |
 
 ## Backlog / Remaining Work
@@ -524,3 +530,12 @@ Application invariants:
   multi-event members. Anthropic post `2074185348142280912` is restored as the
   July 7 rank-1 root with 108 cutoff-correct related posts; Ryan Brewer's post
   remains a separate 14-member Event. All 490 Python and 40 frontend tests pass.
+- 2026-07-15: [VALIDATED] Bootstrapped the clean successor Insight boundary
+  without executing a model. Deleted the obsolete cited/multi-stage extraction,
+  review, editor, recall, audit, reconciliation, CLI, prompt, and test stack.
+  Added separate naturally cache-eligible Investment and AI Engineering prompts,
+  one shared strict surface-or-suppress schema, deterministic validation, and
+  application-owned Event/day/Feed-rank publication metadata. The existing UI
+  routes now return an honest empty successor state and never read legacy data.
+  Focused tests and the full 334-test Python suite pass; the first live envelope
+  remains explicitly deferred until Adi supplies its ID.

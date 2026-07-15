@@ -36,21 +36,21 @@ Registry
   -> exact quote / retweet / reply envelopes over time
   -> transparent daily-score ordering
   -> independent AI Engineering + Investment routing
-  -> later cited extraction from stored X + canonical artifacts
-  -> eventual separate Investment + AI Engineering views
+  -> audience-specific surface-or-suppress Insight pass
+  -> separate Investment + AI Engineering views
 ```
 
 The stored-X and canonical-artifact evidence paths are implemented. The earlier
-multi-stage Audience Insights v2 implementation remains in code and has been
-archived, while all generated outputs were explicitly discarded on 2026-07-15.
+multi-stage Audience Insights v2 implementation and generated outputs were
+explicitly discarded on 2026-07-15; its learnings remain archived in docs.
 The successor now starts directly from ranked Feed evidence: one versioned
 GPT-5.4-mini/high call makes independent AI Engineering and Investment relevance
 judgments over a complete attributed evidence packet. The former model-based
 keep/drop gate, its generated databases, and its live API/UI/CLI surfaces were
 removed on 2026-07-15. The Feed derives `kept` only when either audience is
-relevant; it is not a third judgment. Insight
-writing, publication auditing, reconciliation, briefing, and export remain
-deferred until this narrower routing boundary is qualitatively proven.
+relevant; it is not a third judgment. A non-executing successor Insight
+foundation now defines two audience prompts and one small surface-or-suppress
+schema. No model call, run database, or live Insight has been produced yet.
 
 ## Where the System Stands
 
@@ -63,10 +63,8 @@ deferred until this narrower routing boundary is qualitatively proven.
 | Feed + daily score | Implemented audit surface | Daily collection includes authored replies; the ledger preserves replies whose conversation root is captured, while the product projection admits only first-party continuations and treats trusted quotes/retweets as reactions. The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The reply-inclusive catalog converges to 2,735 artifacts with zero lineage violations; 2,507 have usable text, including all 221 arXiv metadata/abstract records and all 167 cached X Articles. Videos remain deferred and 65 non-video pages are unavailable or retryable. One shared extraction validator rejects placeholder-dominated bodies before they become successful snapshots. |
 | Feed audience routing | Runtime implemented; rerun pending after Event repair | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact packet/input/model/cost provenance. The complete packet remains immutable; only the model-facing view is capped at 20,000 tokens with an explicit truncation marker. The first top-100-by-nine-day run is invalid evaluation evidence because it predates the root-owned Event repair; corrected snapshot hashes fail closed and expose those envelopes as not evaluated. `fli audience-routing refresh --through <day> --replace` provides one resumable publication-bound rerun across all requested days and prunes older routing data only after complete success. |
-| Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
-| Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
-| Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
-| Insights UI | One Feed-ranked path; intentionally empty | Investment and AI Engineering URL state, Feed provenance, citations, date navigation, and empty/error handling remain implemented. The premature Feed-ranked/Reviewed selector was removed. The surface stays empty until a new agreed schema and prompt produce inspected results. |
+| Audience Insight generation | Successor foundation only; not executed | Separate Investment and AI Engineering prompts reuse the exact attributed routing packet and share one strict decision/reason/summary/implication/next-step schema. The application owns event ID, date, Feed rank, and candidate ID. The old extraction/reviewer/editor/audit/reconciliation backend is deleted. No runner, store, model call, or result exists yet. |
+| Insights UI | One Feed-ranked path; intentionally empty | Investment and AI Engineering URL state, date navigation, Feed links, and empty/error handling remain implemented. Its API now returns the honest successor empty state and never reads old Insight databases. Item rendering will be adapted after the first envelope output is approved. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -88,9 +86,10 @@ contract.
 The routing boundary is frozen. The active Evidence Audience Routing tracker
 owns final closeout and archive. At system level, the remaining proof is:
 
-1. Open a separate Insight-generation project with a deliberately small,
-   source-bound output contract.
-2. Produce and inspect 3–5 excellent cited Insights from positive v7 routes.
+1. Evaluate one user-selected positive envelope with each applicable successor
+   prompt and inspect both the surfaced content and any suppression reason.
+2. Add the smallest run store only after that output contract is accepted, then
+   produce and inspect 3–5 excellent Insights in Feed-rank order.
 3. Assemble the rubric-mapped submission package and limitations.
 4. Perform the final delivery review before requesting explicit approval for
    any external submission.
@@ -116,9 +115,10 @@ case-study thesis.
 The active tracker is
 [`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
 The first exact-envelope review, nine-day top-100 run, contextual audit, and
-targeted v7 boundary rerun are complete; the tracker owns final closeout and
-archive. The next project should be a fresh, narrow Insight-generation proof;
-full-catalog expansion and delivery remain deliberately deferred.
+targeted v7 boundary rerun are complete; the tracker owns the repaired-Event
+routing refresh and closeout. Adi has authorized the narrow successor Insight
+prompt/schema bootstrap in parallel, but not a model run. Full-catalog
+generation and delivery remain deliberately deferred.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

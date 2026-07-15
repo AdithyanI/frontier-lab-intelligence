@@ -53,6 +53,8 @@ def test_contracts_are_separate_and_share_one_schema():
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
     assert "AI Engineering decision standard" in engineering.instructions()
+    assert audience_routing.input_token_count(investment.instructions()) >= 1_024
+    assert audience_routing.input_token_count(engineering.instructions()) >= 1_024
     assert insight_generation.OUTPUT_FORMAT["strict"] is True
     assert set(insight_generation.OUTPUT_FORMAT["schema"]["properties"]) == {
         "decision",
@@ -191,4 +193,8 @@ def test_validation_rejects_unknown_fields_and_audiences():
     with pytest.raises(ValueError, match="positive integer"):
         insight_generation.InsightCandidate.create(
             audience="investment", packet=_packet(), feed_rank=0
+        )
+    with pytest.raises(ValueError, match="positive integer"):
+        insight_generation.InsightCandidate.create(
+            audience="investment", packet=_packet(), feed_rank=True
         )
