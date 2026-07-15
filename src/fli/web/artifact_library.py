@@ -32,6 +32,17 @@ def _fetch_method(fetch_policy: str | None) -> str | None:
     return fetch_policy
 
 
+def _artifact_type(artifact_kind: str) -> str:
+    """Return the deliberately coarse user-facing artifact classification."""
+    if artifact_kind == "paper":
+        return "document"
+    if artifact_kind == "repository":
+        return "repository"
+    if artifact_kind == "video":
+        return "video"
+    return "web"
+
+
 def _missing_catalog(
     reason: str, *, limit: int = 60, offset: int = 0
 ) -> dict[str, Any]:
@@ -347,6 +358,7 @@ def artifacts_payload(
         for row in rows:
             item = dict(row)
             item["observation_count"] = int(item["observation_count"] or 0)
+            item["artifact_type"] = _artifact_type(str(item["artifact_kind"]))
             item["fetch_state"] = _fetch_state(item.pop("fetch_status"))
             item["fetch_method"] = _fetch_method(item.pop("fetch_policy"))
             items.append(item)

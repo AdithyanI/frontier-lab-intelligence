@@ -188,12 +188,14 @@ def test_artifacts_api_defaults_to_latest_source_day_with_provenance(
     assert payload["matching_total"] == 2
     assert [item["artifact_id"] for item in payload["items"]] == ["newer", "older"]
     assert payload["items"][0]["best_source_rank"] == 2
+    assert payload["items"][0]["artifact_type"] == "repository"
     assert payload["items"][0]["source_published_at"] == (
         "2026-07-11T10:00:00+00:00"
     )
     assert payload["items"][0]["source_event_id"] == "event-newer"
     assert payload["items"][0]["fetch_state"] == "catalogued"
     assert payload["items"][1]["best_source_rank"] == 3
+    assert payload["items"][1]["artifact_type"] == "web"
     assert payload["items"][1]["last_source_published_at"] == (
         "2026-07-11T11:30:00+00:00"
     )

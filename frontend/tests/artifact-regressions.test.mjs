@@ -63,6 +63,11 @@ test('Artifact retrieval state is disclosed only in expanded provenance', () => 
   assert.doesNotMatch(artifactSource, /className=\{rowClassName\} onToggle/)
 })
 
+test('Artifacts expose a deliberately coarse user-facing type', () => {
+  assert.match(artifactSource, /item\.artifact_type/)
+  assert.doesNotMatch(artifactSource, /className="artifact-kind mono">\{item\.artifact_kind\}/)
+})
+
 test('Artifacts inherit Feed rank while keeping source time secondary', () => {
   assert.match(artifactSource, /<span>Feed rank<\/span>/)
   assert.match(artifactSource, /item\.best_source_rank/)

@@ -196,7 +196,7 @@ function ArtifactRow({
           <strong>{displayTitle(item)}</strong>
           <span className="mono">{item.host.replace(/^www\./, '')}</span>
         </span>
-        <span className="artifact-kind mono">{item.artifact_kind}</span>
+        <span className="artifact-kind mono">{item.artifact_type}</span>
         <span className="artifact-source">
           {sourceLabel(item.source_provider)}
           {item.observation_count > 1 && (

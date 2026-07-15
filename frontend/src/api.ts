@@ -350,6 +350,8 @@ export type ArtifactKind =
   | 'video'
   | 'other'
 
+export type ArtifactType = 'web' | 'document' | 'repository' | 'video'
+
 export type ArtifactFetchState =
   | 'catalogued'
   | 'fetching'
@@ -362,6 +364,7 @@ export interface ArtifactItem {
   canonical_url: string
   host: string
   artifact_kind: ArtifactKind
+  artifact_type: ArtifactType
   title: string | null
   first_seen_at: string
   last_seen_at: string
