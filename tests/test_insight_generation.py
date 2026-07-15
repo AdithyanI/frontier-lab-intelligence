@@ -43,6 +43,7 @@ def _payload(**overrides):
     payload = {
         "decision": "surface",
         "suppression_reason": None,
+        "title": "Test recovery where agents actually fail",
         "summary": "Alice reports a new agent-recovery evaluation method.",
         "implication": "It could expose reliability failures hidden by success-only benchmarks.",
         "next_step": "Run the method against one current tool-using workflow.",
@@ -55,8 +56,8 @@ def test_contracts_are_separate_and_share_one_schema():
     investment = insight_generation.contract("investment")
     engineering = insight_generation.contract("ai_engineering")
 
-    assert investment.version == "investment-insight-v2"
-    assert engineering.version == "ai-engineering-insight-v2"
+    assert investment.version == "investment-insight-v3"
+    assert engineering.version == "ai-engineering-insight-v3"
     assert investment.cache_key != engineering.cache_key
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
@@ -67,6 +68,7 @@ def test_contracts_are_separate_and_share_one_schema():
     assert set(insight_generation.OUTPUT_FORMAT["schema"]["properties"]) == {
         "decision",
         "suppression_reason",
+        "title",
         "summary",
         "implication",
         "next_step",
@@ -110,7 +112,7 @@ def test_build_request_is_pure_and_keeps_variable_evidence_last():
         "investment"
     ).instructions()
     assert request["input"] == insight_generation.render_input(candidate)
-    assert request["prompt_cache_key"] == "fli:insights:investment:v2"
+    assert request["prompt_cache_key"] == "fli:insights:investment:v3"
     assert request["text"]["format"] == insight_generation.OUTPUT_FORMAT
     assert request["store"] is False
     assert "audience:investment" in request["extra_body"]["metadata"]["tags"]
@@ -137,6 +139,7 @@ def test_suppress_output_keeps_freeform_reason_and_null_content():
                 "The post names a method but supplies no artifact, behavior, "
                 "or implementation detail from which to derive a concrete test."
             ),
+            "title": None,
             "summary": None,
             "implication": None,
             "next_step": None,
@@ -176,6 +179,7 @@ def test_publish_binds_model_content_to_application_owned_feed_metadata():
         "day": "2026-07-15",
         "audience": "investment",
         "feed_rank": 3,
+        "title": _payload()["title"],
         "summary": _payload()["summary"],
         "implication": _payload()["implication"],
         "next_step": _payload()["next_step"],
@@ -184,6 +188,7 @@ def test_publish_binds_model_content_to_application_owned_feed_metadata():
         {
             "decision": "suppress",
             "suppression_reason": "The evidence is too thin to act on.",
+            "title": None,
             "summary": None,
             "implication": None,
             "next_step": None,

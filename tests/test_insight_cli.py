@@ -108,6 +108,7 @@ class _RawAPI:
         output = {
             "decision": "surface",
             "suppression_reason": None,
+            "title": "Make agent recovery measurable",
             "summary": "Alice reports a measured harness-recovery improvement.",
             "implication": "The harness design may improve agent reliability.",
             "next_step": "Reproduce the evaluation on one internal workflow.",

@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS insight_item (
     attempts INTEGER NOT NULL DEFAULT 0,
     decision TEXT CHECK (decision IN ('surface', 'suppress')),
     suppression_reason TEXT,
+    title TEXT,
     summary TEXT,
     implication TEXT,
     next_step TEXT,
@@ -324,7 +325,7 @@ def complete_item(
     conn.execute(
         """UPDATE insight_item
            SET status = 'complete', attempts = attempts + 1,
-               decision = ?, suppression_reason = ?, summary = ?, implication = ?,
+               decision = ?, suppression_reason = ?, title = ?, summary = ?, implication = ?,
                next_step = ?, raw_output_text = ?, published_json = ?,
                evaluation_json = ?, response_id = ?, response_model = ?,
                input_tokens = ?, cached_tokens = ?, cache_write_tokens = ?,
@@ -334,6 +335,7 @@ def complete_item(
         (
             result.decision.value,
             result.suppression_reason,
+            result.title,
             result.summary,
             result.implication,
             result.next_step,
@@ -397,7 +399,7 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
         raise ValueError(f"Insight run {run_id!r} does not exist")
     items = conn.execute(
         """SELECT audience, candidate_id, status, decision, suppression_reason,
-                  summary, implication, next_step, attempts, prompt_version,
+                  title, summary, implication, next_step, attempts, prompt_version,
                   input_sha256, response_id, response_model, input_tokens,
                   cached_tokens, cache_write_tokens, output_tokens,
                   reported_cost_usd, error_type, error_message, completed_at

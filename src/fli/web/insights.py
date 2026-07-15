@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
+import json
 from pathlib import Path
 import sqlite3
 from typing import Any, Literal
@@ -38,6 +40,61 @@ def _open(path: Path) -> sqlite3.Connection | None:
     conn = sqlite3.connect(f"file:{path.resolve()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+@lru_cache(maxsize=32)
+def _routing_packets(source_db: str) -> dict[str, dict[str, Any]]:
+    path = Path(source_db)
+    if not path.is_absolute():
+        path = insight_runs.REPO_ROOT / path
+    conn = _open(path)
+    if conn is None:
+        return {}
+    try:
+        rows = conn.execute("SELECT event_id, packet_json FROM routing_item").fetchall()
+    except sqlite3.DatabaseError:
+        return {}
+    finally:
+        conn.close()
+    packets: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        try:
+            packet = json.loads(str(row["packet_json"]))
+        except (TypeError, ValueError):
+            continue
+        if isinstance(packet, dict):
+            packets[str(row["event_id"])] = packet
+    return packets
+
+
+def _source_payload(row: sqlite3.Row) -> dict[str, Any]:
+    packet = _routing_packets(str(row["source_routing_db"])).get(
+        str(row["event_id"]), {}
+    )
+    sources = packet.get("sources", [])
+    if not isinstance(sources, list):
+        sources = []
+    root_source_url = None
+    artifacts: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        url = str(source.get("url") or "").strip()
+        if not url:
+            continue
+        if source.get("relation") == "root" and root_source_url is None:
+            root_source_url = url
+        if source.get("source_type") != "artifact" or url in seen_urls:
+            continue
+        seen_urls.add(url)
+        artifacts.append(
+            {
+                "title": str(source.get("title") or "Primary artifact"),
+                "url": url,
+            }
+        )
+    return {"root_source_url": root_source_url, "artifacts": artifacts}
 
 
 def _current_rows(
@@ -116,6 +173,7 @@ def _item_payload(row: sqlite3.Row) -> dict[str, Any]:
             if decision == "suppress"
             else str(implication)
         ),
+        "title": str(row["title"]) if row["title"] is not None else None,
         "summary": str(row["summary"]) if row["summary"] is not None else None,
         "implication": str(implication) if implication is not None else None,
         "next_step": str(row["next_step"]) if row["next_step"] is not None else None,
@@ -123,6 +181,7 @@ def _item_payload(row: sqlite3.Row) -> dict[str, Any]:
         "reasoning_effort": str(row["reasoning_effort"]),
         "prompt_version": str(row["prompt_version"]),
         "source_routing_run_id": str(row["source_routing_run_id"]),
+        **_source_payload(row),
     }
 
 

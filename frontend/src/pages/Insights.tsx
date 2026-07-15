@@ -187,7 +187,7 @@ function InsightStatusMenu({
 function InsightRow({ item }: { item: ExtractedInsightItem }) {
   const isKept = item.decision === 'surface'
   const feedRankLabel = `Feed rank ${item.feed_rank}`
-  const title = item.summary ?? 'Suppressed at the final editorial gate'
+  const title = item.title ?? 'Suppressed at the final editorial gate'
   const accessibleName = `${feedRankLabel}: ${decodeTextEntities(title)}`
   const titleId = `${item.audience}-${item.candidate_id}-title`
   const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
@@ -225,8 +225,37 @@ function InsightRow({ item }: { item: ExtractedInsightItem }) {
             >
               Open envelope ↗
             </Link>
+            {item.root_source_url && (
+              <a
+                href={item.root_source_url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Open the original source post for ${accessibleName}`}
+              >
+                Open source ↗
+              </a>
+            )}
+            {item.artifacts.map((artifact, index) => (
+              <a
+                href={artifact.url}
+                target="_blank"
+                rel="noreferrer"
+                title={decodeTextEntities(artifact.title)}
+                aria-label={`Read artifact: ${decodeTextEntities(artifact.title)}`}
+                key={artifact.url}
+              >
+                {item.artifacts.length === 1 ? 'Read artifact ↗' : `Read artifact ${index + 1} ↗`}
+              </a>
+            ))}
           </div>
         </header>
+
+        {isKept && item.summary && (
+          <section className="insight-summary" aria-label={`Summary for ${accessibleName}`}>
+            <h3 className="mono">Summary</h3>
+            <p>{decodeTextEntities(item.summary)}</p>
+          </section>
+        )}
 
         <section
           className={`insight-decision-reason insight-decision-reason--${isKept ? 'kept' : 'suppressed'}`}

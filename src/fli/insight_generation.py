@@ -18,12 +18,13 @@ from typing import Any
 from fli import audience_routing, llm_responses
 
 
-SCHEMA_VERSION = "audience-insight-output-v1"
+SCHEMA_VERSION = "audience-insight-output-v2"
 MAX_OUTPUT_TOKENS = 4_096
 _PROMPT_ROOT = Path(__file__).with_name("prompts")
 _OUTPUT_FIELDS = (
     "decision",
     "suppression_reason",
+    "title",
     "summary",
     "implication",
     "next_step",
@@ -58,22 +59,22 @@ class PromptContract:
 PROMPT_CONTRACTS = {
     InsightAudience.INVESTMENT: PromptContract(
         audience=InsightAudience.INVESTMENT,
-        version="investment-insight-v2",
-        path=_PROMPT_ROOT / "investment_insight_v2.txt",
-        cache_key="fli:insights:investment:v2",
+        version="investment-insight-v3",
+        path=_PROMPT_ROOT / "investment_insight_v3.txt",
+        cache_key="fli:insights:investment:v3",
     ),
     InsightAudience.AI_ENGINEERING: PromptContract(
         audience=InsightAudience.AI_ENGINEERING,
-        version="ai-engineering-insight-v2",
-        path=_PROMPT_ROOT / "ai_engineering_insight_v2.txt",
-        cache_key="fli:insights:ai-engineering:v2",
+        version="ai-engineering-insight-v3",
+        path=_PROMPT_ROOT / "ai_engineering_insight_v3.txt",
+        cache_key="fli:insights:ai-engineering:v3",
     ),
 }
 
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_insight_v1",
+    "name": "audience_insight_v2",
     "strict": True,
     "schema": {
         "type": "object",
@@ -83,6 +84,7 @@ OUTPUT_FORMAT: dict[str, Any] = {
                 "enum": [decision.value for decision in InsightDecision],
             },
             "suppression_reason": {"type": ["string", "null"]},
+            "title": {"type": ["string", "null"]},
             "summary": {"type": ["string", "null"]},
             "implication": {"type": ["string", "null"]},
             "next_step": {"type": ["string", "null"]},
@@ -135,6 +137,7 @@ class InsightCandidate:
 class InsightResult:
     decision: InsightDecision
     suppression_reason: str | None
+    title: str | None
     summary: str | None
     implication: str | None
     next_step: str | None
@@ -143,6 +146,7 @@ class InsightResult:
         return {
             "decision": self.decision.value,
             "suppression_reason": self.suppression_reason,
+            "title": self.title,
             "summary": self.summary,
             "implication": self.implication,
             "next_step": self.next_step,
@@ -162,6 +166,7 @@ class PublishedInsight:
     day: str
     audience: InsightAudience
     feed_rank: int
+    title: str
     summary: str
     implication: str
     next_step: str
@@ -173,6 +178,7 @@ class PublishedInsight:
             "day": self.day,
             "audience": self.audience.value,
             "feed_rank": self.feed_rank,
+            "title": self.title,
             "summary": self.summary,
             "implication": self.implication,
             "next_step": self.next_step,
@@ -276,7 +282,12 @@ def validate_output(output: str | dict[str, Any]) -> InsightResult:
         for field in _OUTPUT_FIELDS
         if field != "decision"
     }
-    content = (values["summary"], values["implication"], values["next_step"])
+    content = (
+        values["title"],
+        values["summary"],
+        values["implication"],
+        values["next_step"],
+    )
     if decision is InsightDecision.SURFACE:
         if values["suppression_reason"] is not None:
             raise ValueError("surface requires a null suppression_reason")
@@ -296,6 +307,7 @@ def publish(candidate: InsightCandidate, result: InsightResult) -> PublishedInsi
     if result.decision is not InsightDecision.SURFACE:
         raise ValueError("suppressed results cannot be published")
     assert result.summary is not None
+    assert result.title is not None
     assert result.implication is not None
     assert result.next_step is not None
     return PublishedInsight(
@@ -304,6 +316,7 @@ def publish(candidate: InsightCandidate, result: InsightResult) -> PublishedInsi
         day=candidate.packet.day,
         audience=candidate.audience,
         feed_rank=candidate.feed_rank,
+        title=result.title,
         summary=result.summary,
         implication=result.implication,
         next_step=result.next_step,

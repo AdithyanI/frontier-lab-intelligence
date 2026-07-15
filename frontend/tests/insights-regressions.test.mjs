@@ -56,13 +56,17 @@ test('Insights inherits Feed rank and links every decision to its exact envelope
   assert.match(insightSource, /const envelopeUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
   assert.match(insightSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
   assert.match(insightSource, /Open envelope ↗/)
+  assert.match(insightSource, /Open source ↗/)
+  assert.match(insightSource, /Read artifact ↗/)
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)
 })
 
 test('Insights shows an explicit rationale for both decisions without reviving quotes', () => {
   assert.match(insightSource, /item\.decision_reason/)
   assert.match(insightSource, /'Why kept' : 'Why suppressed'/)
-  assert.match(insightSource, /item\.summary \?\? 'Suppressed at the final editorial gate'/)
+  assert.match(insightSource, /item\.title \?\? 'Suppressed at the final editorial gate'/)
+  assert.match(insightSource, /<h3 className="mono">Summary<\/h3>/)
+  assert.match(insightSource, /decodeTextEntities\(item\.summary\)/)
   assert.match(insightSource, /item\.next_step/)
   assert.doesNotMatch(insightSource, /Exact source passage/)
   assert.doesNotMatch(insightSource, /citation\.quote/)

@@ -2819,6 +2819,29 @@ td.num {
   text-underline-offset: 3px;
 }
 
+.insight-summary {
+  max-width: 920px;
+  margin-top: 24px;
+}
+
+.insight-summary h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.insight-summary p {
+  max-width: 78ch;
+  margin: 7px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.58;
+  text-wrap: pretty;
+}
+
 .insight-decision-reason {
   max-width: 920px;
   margin-top: 24px;

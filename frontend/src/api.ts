@@ -445,6 +445,7 @@ export interface InsightItem {
   audience: InsightAudience
   decision: InsightDecision
   decision_reason: string
+  title: string | null
   summary: string | null
   implication: string | null
   next_step: string | null
@@ -452,6 +453,8 @@ export interface InsightItem {
   reasoning_effort: string
   prompt_version: string
   source_routing_run_id: string
+  root_source_url: string | null
+  artifacts: Array<{ title: string; url: string }>
 }
 
 export type ExtractedInsightItem = InsightItem

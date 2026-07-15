@@ -1,4 +1,5 @@
 import json
+import sqlite3
 
 import pytest
 from fastapi.testclient import TestClient
@@ -98,6 +99,7 @@ def _insight_db(tmp_path):
             {
                 "decision": "surface",
                 "suppression_reason": None,
+                "title": "Test harness changes against held-out failures",
                 "summary": "A bounded harness-improvement loop improved held-out tasks.",
                 "implication": "The method is concrete and testable on an internal workflow.",
                 "next_step": "Run it on one frozen held-in and held-out split.",
@@ -112,6 +114,7 @@ def _insight_db(tmp_path):
             {
                 "decision": "suppress",
                 "suppression_reason": "No company adoption or public-equity transmission path is evidenced.",
+                "title": None,
                 "summary": None,
                 "implication": None,
                 "next_step": None,
@@ -159,6 +162,9 @@ def test_status_views_expose_kept_and_suppressed_rationales(tmp_path):
     )
 
     assert kept["items"][0]["decision"] == "surface"
+    assert kept["items"][0]["title"] == "Test harness changes against held-out failures"
+    assert kept["items"][0]["root_source_url"] is None
+    assert kept["items"][0]["artifacts"] == []
     assert kept["items"][0]["decision_reason"].startswith("The method is concrete")
     assert suppressed["items"][0]["decision"] == "suppress"
     assert suppressed["items"][0]["decision_reason"].startswith("No company adoption")
@@ -166,6 +172,60 @@ def test_status_views_expose_kept_and_suppressed_rationales(tmp_path):
     assert empty_kept["available"] is True
     assert empty_kept["items"] == []
     assert "final editorial gate" in empty_kept["reason"]
+
+
+def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
+    db = _insight_db(tmp_path)
+    routing_db = tmp_path / "routing.db"
+    routing = sqlite3.connect(routing_db)
+    routing.execute(
+        "CREATE TABLE routing_item (event_id TEXT PRIMARY KEY, packet_json TEXT NOT NULL)"
+    )
+    routing.execute(
+        "INSERT INTO routing_item VALUES (?, ?)",
+        (
+            "event-insight-1",
+            json.dumps(
+                {
+                    "sources": [
+                        {
+                            "source_type": "x_post",
+                            "relation": "root",
+                            "url": "https://x.com/alice/status/post-1",
+                        },
+                        {
+                            "source_type": "artifact",
+                            "relation": "linked_artifact",
+                            "title": "Recovery evaluation",
+                            "url": "https://example.com/recovery-evaluation",
+                        },
+                    ]
+                }
+            ),
+        ),
+    )
+    routing.commit()
+    routing.close()
+    conn = insight_runs.connect(db)
+    conn.execute(
+        "UPDATE insight_run SET source_routing_db = ?",
+        (str(routing_db),),
+    )
+    conn.commit()
+    conn.close()
+    insight_store._routing_packets.cache_clear()
+
+    kept = insight_store.insights_payload(
+        audience="ai_engineering", day="2026-07-13", status="kept", db_path=db
+    )
+
+    assert kept["items"][0]["root_source_url"] == "https://x.com/alice/status/post-1"
+    assert kept["items"][0]["artifacts"] == [
+        {
+            "title": "Recovery evaluation",
+            "url": "https://example.com/recovery-evaluation",
+        }
+    ]
 
 
 def test_current_ui_routes_read_the_durable_store(tmp_path, monkeypatch):
