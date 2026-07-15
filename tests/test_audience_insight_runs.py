@@ -1292,6 +1292,246 @@ def test_prior_history_retains_senior_editorial_veto_for_duplicate_suppression(
     ]
 
 
+def test_explicit_history_preserves_exact_order_and_projection_semantics(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "runs"
+    audit_veto = _history_run(
+        root,
+        day="2026-07-06",
+        run_id="audit-veto",
+        computed_at="2026-07-06T10:00:00+00:00",
+        passed=True,
+        claim="Audit-vetoed framing.",
+    )
+    editorial_veto = _history_run(
+        root,
+        day="2026-07-07",
+        run_id="editorial-veto-explicit",
+        computed_at="2026-07-07T10:00:00+00:00",
+        passed=True,
+        claim="Editorially vetoed framing retained for suppression.",
+    )
+    calls = []
+
+    def projection(*, source_run_db, audit_db):
+        calls.append((source_run_db, audit_db))
+        candidate_id = f"candidate-{source_run_db.parent.name}"
+        if source_run_db == audit_veto.resolve():
+            return {
+                "mode": "audit_disqualified_zero",
+                "base_selected_ids": [candidate_id],
+                "effective_selected_ids": [],
+                "finalization": {"reason_code": "audit_disqualification"},
+            }
+        return {
+            "mode": "editorial_disqualified_zero",
+            "base_selected_ids": [candidate_id],
+            "effective_selected_ids": [],
+            "finalization": {
+                "reason_code": audience_insight_runs.audience_insight_publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
+            },
+        }
+
+    monkeypatch.setattr(
+        audience_insight_runs.audience_insight_publication_audit,
+        "validated_publication_projection",
+        projection,
+    )
+
+    history, resolved = audience_insight_runs._explicit_prior_history(
+        prior_run_dbs=[audit_veto, editorial_veto],
+        audience="investment",
+        day="2026-07-08",
+    )
+
+    assert [item["claim"] for item in history] == [
+        "Editorially vetoed framing retained for suppression."
+    ]
+    assert [source["day"] for source in resolved["sources"]] == [
+        "2026-07-06",
+        "2026-07-07",
+    ]
+    assert [source["projection_mode"] for source in resolved["sources"]] == [
+        "audit_disqualified_zero",
+        "editorial_disqualified_zero",
+    ]
+    assert calls == [
+        (
+            audit_veto.resolve(),
+            audit_veto.parent / "publication-audit-v1" / "audit.db",
+        ),
+        (
+            editorial_veto.resolve(),
+            editorial_veto.parent / "publication-audit-v1" / "audit.db",
+        ),
+    ]
+
+
+def test_explicit_history_rejects_wrong_audience(tmp_path):
+    run_db = _history_run(
+        tmp_path / "runs",
+        day="2026-07-06",
+        run_id="engineering-run",
+        computed_at="2026-07-06T10:00:00+00:00",
+        passed=True,
+        claim="Engineering claim.",
+        audience="ai_engineering",
+    )
+
+    with pytest.raises(ValueError, match="audience does not match"):
+        audience_insight_runs._explicit_prior_history(
+            prior_run_dbs=[run_db],
+            audience="investment",
+            day="2026-07-07",
+        )
+
+
+def test_explicit_history_rejects_current_or_future_day(tmp_path):
+    run_db = _history_run(
+        tmp_path / "runs",
+        day="2026-07-08",
+        run_id="not-prior",
+        computed_at="2026-07-08T10:00:00+00:00",
+        passed=True,
+        claim="Not prior.",
+    )
+
+    with pytest.raises(ValueError, match="must be earlier"):
+        audience_insight_runs._explicit_prior_history(
+            prior_run_dbs=[run_db],
+            audience="investment",
+            day="2026-07-08",
+        )
+
+
+def test_explicit_history_rejects_duplicate_day(tmp_path, monkeypatch):
+    root = tmp_path / "runs"
+    first = _history_run(
+        root,
+        day="2026-07-06",
+        run_id="first",
+        computed_at="2026-07-06T10:00:00+00:00",
+        passed=True,
+        claim="First.",
+    )
+    second = _history_run(
+        root,
+        day="2026-07-06",
+        run_id="second",
+        computed_at="2026-07-06T11:00:00+00:00",
+        passed=True,
+        claim="Second.",
+    )
+    monkeypatch.setattr(
+        audience_insight_runs.audience_insight_publication_audit,
+        "validated_publication_projection",
+        lambda source_run_db, **_kwargs: {
+            "mode": "audit_pass",
+            "base_selected_ids": [f"candidate-{source_run_db.parent.name}"],
+            "effective_selected_ids": [f"candidate-{source_run_db.parent.name}"],
+            "finalization": None,
+        },
+    )
+
+    with pytest.raises(ValueError, match="duplicate day"):
+        audience_insight_runs._explicit_prior_history(
+            prior_run_dbs=[first, second],
+            audience="investment",
+            day="2026-07-08",
+        )
+
+
+def test_explicit_history_rejects_out_of_order_days(tmp_path, monkeypatch):
+    root = tmp_path / "runs"
+    earlier = _history_run(
+        root,
+        day="2026-07-06",
+        run_id="earlier",
+        computed_at="2026-07-06T10:00:00+00:00",
+        passed=True,
+        claim="Earlier.",
+    )
+    later = _history_run(
+        root,
+        day="2026-07-07",
+        run_id="later",
+        computed_at="2026-07-07T10:00:00+00:00",
+        passed=True,
+        claim="Later.",
+    )
+    monkeypatch.setattr(
+        audience_insight_runs.audience_insight_publication_audit,
+        "validated_publication_projection",
+        lambda source_run_db, **_kwargs: {
+            "mode": "audit_pass",
+            "base_selected_ids": [f"candidate-{source_run_db.parent.name}"],
+            "effective_selected_ids": [f"candidate-{source_run_db.parent.name}"],
+            "finalization": None,
+        },
+    )
+
+    with pytest.raises(ValueError, match="strictly increasing"):
+        audience_insight_runs._explicit_prior_history(
+            prior_run_dbs=[later, earlier],
+            audience="investment",
+            day="2026-07-08",
+        )
+
+
+@pytest.mark.parametrize("failure", ["stale audit", "stale finalization"])
+def test_explicit_history_fails_closed_on_stale_publication_sidecar(
+    tmp_path, monkeypatch, failure
+):
+    run_db = _history_run(
+        tmp_path / "runs",
+        day="2026-07-06",
+        run_id="stale-sidecar",
+        computed_at="2026-07-06T10:00:00+00:00",
+        passed=True,
+        claim="Stale sidecar claim.",
+    )
+    monkeypatch.setattr(
+        audience_insight_runs.audience_insight_publication_audit,
+        "validated_publication_projection",
+        lambda **_kwargs: (_ for _ in ()).throw(ValueError(failure)),
+    )
+
+    with pytest.raises(ValueError, match="missing or stale"):
+        audience_insight_runs._explicit_prior_history(
+            prior_run_dbs=[run_db],
+            audience="investment",
+            day="2026-07-07",
+        )
+
+
+def test_run_rejects_implicit_history_before_creating_model_client(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.setattr(
+        audience_insight_runs.entity_kinds,
+        "create_litellm_client",
+        lambda: pytest.fail("model client must not be created"),
+    )
+
+    assert audience_insight_runs.main(
+        [
+            "run",
+            "--run-id",
+            "implicit-history",
+            "--run-db",
+            str(tmp_path / "run" / "insights.db"),
+            "--audience",
+            "investment",
+            "--day",
+            "2026-07-08",
+        ]
+    ) == 2
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["error"]["code"] == "E_INVALID_INPUT"
+    assert "must not use implicit directory recency" in payload["error"]["message"]
+
+
 def test_long_text_sectioning_is_verbatim_and_lossless():
     text = ("a" * 40_000) + "\n\n" + ("b" * 40_000) + "\n\n" + ("c" * 40_000)
     sections = audience_insight_runs._section_text(text)

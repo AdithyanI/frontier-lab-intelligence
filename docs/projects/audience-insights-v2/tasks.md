@@ -234,7 +234,7 @@ loop below; no stretch work may delay or destabilize the morning MVP.
 - Use `agent-browser` for the rendered QA loop. The remote in-app Browser bridge
   is unavailable, but a host-local `agent-browser` session was proven on
   2026-07-14 by opening `/insights`, reading the rendered accessibility tree,
-  clicking Feed, and observing the `/feed` navigation.
+  clicking Feed, and observing the `/evidence/feed` navigation.
 
 ## Post-MVP Stretch Loop
 

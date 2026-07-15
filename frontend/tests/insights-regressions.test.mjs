@@ -49,10 +49,10 @@ test('Insights makes editorial rank primary and Feed rank secondary provenance',
 })
 
 test('Insights links every Feed rank to its exact dated Feed envelope', () => {
-  assert.match(insightSource, /to=\{`\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`\}/)
+  assert.match(insightSource, /to=\{`\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`\}/)
   assert.match(insightSource, /Open exact Feed envelope/)
   assert.match(insightSource, /Feed rank ↗/)
-  assert.match(insightSource, /const envelopeUrl = `\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
+  assert.match(insightSource, /const envelopeUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
   assert.match(insightSource, /Open the exact Feed envelope for/)
   assert.match(appStyles, /\.insight-feed-link:focus-visible/)
 })
@@ -77,12 +77,16 @@ test('Insights safely decodes source entities for display without interpreting m
     'A & B: old -> new → done',
   )
   assert.equal(decodeTextEntities('&lt;script&gt;alert(1)&lt;/script&gt;'), '<script>alert(1)</script>')
+  assert.equal(decodeTextEntities('Microsoft\u0092s model'), 'Microsoft’s model')
   assert.equal(decodeTextEntities('&unknown; stays'), '&unknown; stays')
   assert.equal(decodeTextEntities('invalid &#xD800; value'), 'invalid &#xD800; value')
 })
 
 test('Insights gives each analysis region and source link an insight-specific name', () => {
-  assert.match(insightSource, /const accessibleName = `editorial rank \$\{item\.editorial_rank\}: \$\{item\.claim\}`/)
+  assert.match(
+    insightSource,
+    /const accessibleName = `editorial rank \$\{item\.editorial_rank\}: \$\{decodeTextEntities\(item\.claim\)\}`/,
+  )
   assert.match(insightSource, /aria-label=\{`Investment analysis for \$\{accessibleName\}`\}/)
   assert.match(insightSource, /aria-label=\{`AI engineering analysis for \$\{accessibleName\}`\}/)
   assert.match(insightSource, /aria-label=\{`Open the exact Feed envelope for \$\{accessibleName\}`\}/)

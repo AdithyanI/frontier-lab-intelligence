@@ -7,6 +7,24 @@ const artifactSource = await readFile(
   'utf8',
 )
 const feedSource = await readFile(new URL('../src/pages/Feed.tsx', import.meta.url), 'utf8')
+const evidenceSource = await readFile(
+  new URL('../src/pages/Evidence.tsx', import.meta.url),
+  'utf8',
+)
+const appSource = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8')
+
+test('Feed and Primary artifacts are separate views of one Evidence workspace', () => {
+  assert.match(appSource, /<NavLink to="\/evidence">Evidence<\/NavLink>/)
+  assert.match(appSource, /<Route path="\/evidence" element=\{<Evidence \/>\}>/)
+  assert.match(appSource, /<Route index element=\{<Navigate to="feed" replace \/>\} \/>/)
+  assert.match(appSource, /<Route path="feed" element=\{<Feed \/>\} \/>/)
+  assert.match(appSource, /<Route path="artifacts" element=\{<Artifacts \/>\} \/>/)
+  assert.doesNotMatch(appSource, /<NavLink to="\/feed">Feed<\/NavLink>/)
+  assert.doesNotMatch(appSource, /<NavLink to="\/artifacts">Artifacts<\/NavLink>/)
+  assert.match(evidenceSource, /Inspect what the tracked network amplified/)
+  assert.match(evidenceSource, /<NavLink to="\/evidence\/feed">Feed<\/NavLink>/)
+  assert.match(evidenceSource, /<NavLink to="\/evidence\/artifacts">Primary artifacts<\/NavLink>/)
+})
 
 test('Feed and Artifacts share the same seven-date navigator', () => {
   assert.match(feedSource, /<DateNavigator/)
@@ -59,7 +77,7 @@ test('Artifacts from one exact Feed envelope share one visual rank rail', () => 
 test('Artifact provenance deep-links to the exact ranked Feed envelope', () => {
   assert.match(artifactSource, /source_event_id/)
   assert.match(artifactSource, /Feed envelope/)
-  assert.match(artifactSource, /\/feed\?date=/)
+  assert.match(artifactSource, /\/evidence\/feed\?date=/)
   assert.match(feedSource, /useSearchParams/)
   assert.match(feedSource, /event_id:/)
   assert.match(feedSource, /targetEventId/)

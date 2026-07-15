@@ -1031,18 +1031,21 @@ td.num {
   font-size: 14px;
 }
 
-/* ---- Network: Registry + ranking workspace ---- */
+/* ---- Network and Evidence workspaces ---- */
 
-.network-page { max-width: 1360px; }
+.network-page,
+.evidence-page { max-width: 1360px; }
 
-.network-tabs {
+.network-tabs,
+.evidence-tabs {
   display: flex;
   margin-top: 28px;
   border-top: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border);
 }
 
-.network-tabs a {
+.network-tabs a,
+.evidence-tabs a {
   min-width: 160px;
   padding: 11px 16px;
   border-right: 1px solid var(--border);
@@ -1053,17 +1056,21 @@ td.num {
   transition: background 150ms var(--ease-out), color 150ms var(--ease-out);
 }
 
-.network-tabs a:hover {
+.network-tabs a:hover,
+.evidence-tabs a:hover {
   background: var(--surface);
   color: var(--ink);
 }
 
-.network-tabs a.active {
+.network-tabs a.active,
+.evidence-tabs a.active {
   background: var(--ink);
   color: #fff;
 }
 
 .network-view { margin-top: 36px; }
+
+.evidence-view { margin-top: 36px; }
 
 .network-view-title {
   letter-spacing: -0.015em;
@@ -1072,6 +1079,19 @@ td.num {
 }
 
 .network-view-sub {
+  max-width: 62ch;
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.evidence-view-title {
+  letter-spacing: -0.015em;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.evidence-view-sub {
   max-width: 62ch;
   margin: 8px 0 0;
   color: var(--ink-soft);
@@ -1439,7 +1459,7 @@ td.num {
 
 /* ---- Feed: deterministic evidence browser ---- */
 
-.feed-page { max-width: 1360px; }
+.feed-page { max-width: 100%; }
 
 .feed-calendar {
   margin-top: 24px;
@@ -2212,7 +2232,7 @@ td.num {
 
 /* ---- primary artifact index ---- */
 
-.artifact-page { max-width: 1360px; }
+.artifact-page { max-width: 100%; }
 
 .artifact-tools {
   margin-top: 24px;

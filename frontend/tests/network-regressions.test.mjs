@@ -57,7 +57,7 @@ test('Network defaults to Registry while preserving Ranking and reach', () => {
 })
 
 test('Network subviews use one ruled secondary navigation language', () => {
-  assert.match(appStyles, /\.network-tabs \{[\s\S]*?border-top: 1px solid var\(--border-strong\);[\s\S]*?border-bottom: 1px solid var\(--border\);/)
-  assert.match(appStyles, /\.network-tabs a\.active \{[\s\S]*?background: var\(--ink\);[\s\S]*?color: #fff;/)
+  assert.match(appStyles, /\.network-tabs,[\s\S]*?\.evidence-tabs \{[\s\S]*?border-top: 1px solid var\(--border-strong\);[\s\S]*?border-bottom: 1px solid var\(--border\);/)
+  assert.match(appStyles, /\.network-tabs a\.active,[\s\S]*?\.evidence-tabs a\.active \{[\s\S]*?background: var\(--ink\);[\s\S]*?color: #fff;/)
   assert.match(appStyles, /\.network-view \{ margin-top: 36px; \}/)
 })

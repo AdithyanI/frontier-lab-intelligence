@@ -166,7 +166,7 @@ secret flags are deliberately absent.
 
 ## Operator inspection surface
 
-The always-on app exposes the catalog at `/artifacts`, backed by read-only
+The always-on app exposes the catalog at `/evidence/artifacts`, backed by read-only
 `/api/artifacts/dates` and `/api/artifacts` projections. Its shared Feed-style
 seven-date navigator filters by the UTC publication day of the X source
 observation, never by retrieval time. Date counts are distinct canonical

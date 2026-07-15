@@ -116,8 +116,8 @@ function sourceTypeLabel(sourceType: string) {
 
 function sourceLabel(item: DisplayItem) {
   const { author, title, source_type: sourceType } = item.citation
-  if (author && title) return `${author} · ${title}`
-  return author || title || sourceTypeLabel(sourceType)
+  if (author && title) return decodeTextEntities(`${author} · ${title}`)
+  return decodeTextEntities(author || title || sourceTypeLabel(sourceType))
 }
 
 function InsightState({
@@ -172,16 +172,16 @@ function AudienceAnalysis({
       >
         <div className="insight-analysis-primary">
           <h3 className="mono">Why it matters</h3>
-          <p>{item.why_it_matters}</p>
+          <p>{decodeTextEntities(item.why_it_matters)}</p>
         </div>
         <div className="insight-analysis-grid">
           <div>
             <h3 className="mono">Investment implication</h3>
-            <p>{fields.investment_implication}</p>
+            <p>{decodeTextEntities(fields.investment_implication)}</p>
           </div>
           <div>
             <h3 className="mono">What to watch</h3>
-            <p>{fields.what_to_watch}</p>
+            <p>{decodeTextEntities(fields.what_to_watch)}</p>
           </div>
         </div>
       </section>
@@ -196,16 +196,16 @@ function AudienceAnalysis({
     >
       <div className="insight-analysis-primary">
         <h3 className="mono">Why it matters</h3>
-        <p>{item.why_it_matters}</p>
+        <p>{decodeTextEntities(item.why_it_matters)}</p>
       </div>
       <div className="insight-analysis-grid">
         <div>
           <h3 className="mono">Recommended action</h3>
-          <p>{fields.engineering_action}</p>
+          <p>{decodeTextEntities(fields.engineering_action)}</p>
         </div>
         <div>
           <h3 className="mono">Validation boundary</h3>
-          <p>{fields.validation_boundary}</p>
+          <p>{decodeTextEntities(fields.validation_boundary)}</p>
         </div>
       </div>
     </section>
@@ -213,7 +213,7 @@ function AudienceAnalysis({
 }
 
 function Citation({ item, accessibleName }: { item: DisplayItem; accessibleName: string }) {
-  const envelopeUrl = `/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
+  const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
   return (
     <blockquote className="insight-citation" cite={envelopeUrl}>
       <div className="insight-citation-head">
@@ -237,7 +237,7 @@ function ItemHeader({ item, accessibleName, titleId }: {
 }) {
   return (
     <header className="insight-head">
-      <h2 id={titleId}>{item.claim}</h2>
+      <h2 id={titleId}>{decodeTextEntities(item.claim)}</h2>
       <div className="insight-provenance mono">
         <a
           href={item.citation.url}
@@ -261,14 +261,14 @@ function ExtractedInsightRow({ audience, item }: {
   audience: InsightAudience
   item: ExtractedInsightItem
 }) {
-  const accessibleName = `Feed rank ${item.feed_rank}: ${item.claim}`
+  const accessibleName = `Feed rank ${item.feed_rank}: ${decodeTextEntities(item.claim)}`
   const titleId = `${audience}-extracted-${item.feed_rank}-title`
   return (
     <article className="insight-row" aria-labelledby={titleId}>
       <div className="insight-rank mono">
         <Link
           className="insight-feed-link"
-          to={`/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
+          to={`/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
           aria-label={`Open Feed rank ${item.feed_rank} in its exact Feed envelope`}
           title="Open exact Feed envelope"
         >
@@ -292,7 +292,7 @@ function InsightRow({ audience, item }: {
   const fields = audience === 'ai_engineering'
     ? (item.audience_fields as EngineeringInsightFields)
     : null
-  const accessibleName = `editorial rank ${item.editorial_rank}: ${item.claim}`
+  const accessibleName = `editorial rank ${item.editorial_rank}: ${decodeTextEntities(item.claim)}`
   const titleId = `${audience}-insight-${item.editorial_rank}-title`
   return (
     <article className="insight-row" aria-labelledby={titleId}>
@@ -304,7 +304,7 @@ function InsightRow({ audience, item }: {
         <span>Editorial rank</span>
         <Link
           className="insight-feed-rank insight-feed-rank--link"
-          to={`/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
+          to={`/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
           aria-label={`Open Feed rank ${item.feed_rank} in its exact Feed envelope`}
           title="Open exact Feed envelope"
         >

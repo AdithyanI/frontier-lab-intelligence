@@ -91,6 +91,13 @@ Rules:
   follows as its network-discovery view. A third **Add Profile** subview owns
   manual admission as an operator action. Use one ruled secondary navigation
   for all three, not another row of top-level pills.
+- Feed and Primary artifacts share one top-level **Evidence** destination
+  because they are two inspection views over the same evidence layer. Feed is
+  the first and default subview: it owns daily rank, score disclosure, and
+  keep/drop triage. Primary artifacts follows as the canonical source and
+  retrieval-provenance index derived from kept Feed evidence. Keep the two
+  object types in separate ruled views; do not blend events and artifacts into
+  one list.
 - Home is an editorial split: statement + hero numerals on the left, live
   pipeline rail on the right, divided by an ink rule.
 - Density first: tables and lists over cards. Cards only where an item is

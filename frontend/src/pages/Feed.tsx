@@ -831,18 +831,22 @@ export default function Feed() {
 
   if (dates && !dates.available) {
     return (
-      <div className="page feed-page">
-        <h1 className="page-title">What is the network paying attention to?</h1>
+      <section className="evidence-view feed-page" aria-labelledby="feed-title">
+        <h2 className="evidence-view-title" id="feed-title">
+          What is the network paying attention to?
+        </h2>
         <p className="page-sub mono">{dates.reason}</p>
-      </div>
+      </section>
     )
   }
 
   return (
-    <div className="page feed-page">
+    <section className="evidence-view feed-page" aria-labelledby="feed-title">
       <header className="page-head">
-        <h1 className="page-title">What is the network paying attention to?</h1>
-        <p className="page-sub">
+        <h2 className="evidence-view-title" id="feed-title">
+          What is the network paying attention to?
+        </h2>
+        <p className="evidence-view-sub">
           Each day&rsquo;s posts from tracked labs and people, ranked by who in
           the network amplified them — not by raw engagement.
         </p>
@@ -964,6 +968,6 @@ export default function Feed() {
             : `Load ${Math.min(PAGE_SIZE, data.total - items.length)} more`}
         </button>
       )}
-    </div>
+    </section>
   )
 }

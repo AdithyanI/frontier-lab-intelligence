@@ -3,6 +3,7 @@ import Network from './pages/Network'
 import Registry from './pages/Registry'
 import Ranking from './pages/Ranking'
 import AddProfile from './pages/AddProfile'
+import Evidence from './pages/Evidence'
 import Feed from './pages/Feed'
 import Artifacts from './pages/Artifacts'
 import Insights from './pages/Insights'
@@ -18,8 +19,7 @@ export default function App() {
         </div>
         <nav aria-label="Main">
           <NavLink to="/network">Network</NavLink>
-          <NavLink to="/feed">Feed</NavLink>
-          <NavLink to="/artifacts">Artifacts</NavLink>
+          <NavLink to="/evidence">Evidence</NavLink>
           <NavLink to="/insights">Insights</NavLink>
           <NavLink to="/architecture">Architecture</NavLink>
         </nav>
@@ -33,8 +33,11 @@ export default function App() {
             <Route path="ranking" element={<Ranking />} />
             <Route path="add-profile" element={<AddProfile />} />
           </Route>
-          <Route path="/feed" element={<Feed />} />
-          <Route path="/artifacts" element={<Artifacts />} />
+          <Route path="/evidence" element={<Evidence />}>
+            <Route index element={<Navigate to="feed" replace />} />
+            <Route path="feed" element={<Feed />} />
+            <Route path="artifacts" element={<Artifacts />} />
+          </Route>
           <Route path="/insights" element={<Insights />} />
           <Route path="/architecture" element={<Architecture />} />
           <Route path="*" element={<Navigate to="/network/registry" replace />} />

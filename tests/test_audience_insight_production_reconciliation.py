@@ -615,6 +615,74 @@ def _seed_terminal_x_article(
     return artifact_id
 
 
+def _seed_frozen_recall_origin(
+    path: Path,
+    *,
+    artifact_db: Path,
+    event_id: str,
+    artifact_id: str,
+    day: str = DAY,
+    feed_rank: int = 83,
+) -> tuple[str, str]:
+    sample_id = audience_insight_recall._sample_id(day, event_id)
+    band = audience_insight_recall.X_ARTICLE_51_100
+    packet = {
+        "event_id": event_id,
+        "day": day,
+        "feed_rank": feed_rank,
+        "sources": [],
+    }
+    conn = audience_insight_recall.connect(path)
+    with conn:
+        conn.execute(
+            """INSERT INTO recall_run
+               (singleton, run_id, protocol_version, days_json,
+                source_triage_dbs_json, source_artifact_db, extraction_model,
+                extraction_reasoning_effort, review_model,
+                review_reasoning_effort, contract_sha256, sample_set_sha256,
+                expected_sample_count, expected_evaluation_count,
+                created_at, updated_at)
+               VALUES (1, 'frozen-recall-proof', ?, ?, '{}', ?,
+                       'gpt-5.6-luna', 'medium', 'gpt-5.6-luna', 'high',
+                       ?, ?, 1, 2, ?, ?)""",
+            (
+                audience_insight_recall.PROTOCOL_VERSION,
+                json.dumps([day], separators=(",", ":")),
+                str(artifact_db.resolve()),
+                "a" * 64,
+                "b" * 64,
+                NOW,
+                NOW,
+            ),
+        )
+        conn.execute(
+            """INSERT INTO recall_sample
+               (sample_id, selection_order, day, event_id, band, sample_kind,
+                triage_decision, feed_rank, selection_sha256,
+                article_artifact_ids_json, packet_json, evidence_sha256,
+                extraction_input_text, extraction_input_sha256, created_at)
+               VALUES (?, 1, ?, ?, ?, 'x_article_census', 'keep', ?, ?, ?, ?,
+                       ?, 'rank-blind input', ?, ?)""",
+            (
+                sample_id,
+                day,
+                event_id,
+                band,
+                feed_rank,
+                audience_insight_recall.selection_sha256(
+                    day=day, band=band, event_id=event_id
+                ),
+                json.dumps([artifact_id], separators=(",", ":")),
+                json.dumps(packet, sort_keys=True, separators=(",", ":")),
+                "c" * 64,
+                "d" * 64,
+                NOW,
+            ),
+        )
+    conn.close()
+    return sample_id, reconciliation.frozen_recall_origin_binding_sha256(path)
+
+
 def test_report_is_deterministic_and_counts_every_stage(tmp_path):
     manifest, _payload = _manifest(tmp_path)
 
@@ -1080,7 +1148,6 @@ def test_telemetry_rejects_missing_surplus_and_noncontiguous_attempts(tmp_path):
         "cached_tokens",
         "output_tokens",
         "request_tags_json",
-        "reported_cost_usd",
     ),
 )
 def test_telemetry_rejects_null_required_fields(tmp_path, field):
@@ -1091,16 +1158,45 @@ def test_telemetry_rejects_null_required_fields(tmp_path, field):
     conn.commit()
     conn.close()
 
-    expected = (
-        "missing proxy-reported cost"
-        if field == "reported_cost_usd"
-        else rf"telemetry has null required fields.*{field}"
-    )
     with pytest.raises(
         reconciliation.ProductionReconciliationError,
-        match=expected,
+        match=rf"telemetry has null required fields.*{field}",
     ):
         reconciliation.evaluate_manifest(manifest)
+
+
+def test_proxy_reported_zero_cost_is_valid_but_unknown_cost_requires_supersession(
+    tmp_path,
+):
+    zero_manifest, zero_payload = _manifest(tmp_path / "reported-zero")
+    zero_source = Path(zero_payload["runs"][0]["source_run_db"])
+    conn = sqlite3.connect(zero_source)
+    conn.execute("UPDATE candidate_attempt SET reported_cost_usd = 0.0")
+    conn.commit()
+    conn.close()
+
+    report = reconciliation.evaluate_manifest(zero_manifest)
+
+    zero_run = next(
+        row for row in report["runs"] if row["source_run_db"] == str(zero_source)
+    )
+    assert zero_run["telemetry"]["extraction"]["proxy_reported_cost_usd"] == 0.0
+    assert zero_run["telemetry"]["extraction"]["proxy_cost_records"] == 1
+
+    unknown_manifest, unknown_payload = _manifest(tmp_path / "unknown")
+    unknown_source = Path(unknown_payload["runs"][0]["source_run_db"])
+    conn = sqlite3.connect(unknown_source)
+    conn.execute("UPDATE candidate_attempt SET reported_cost_usd = NULL")
+    conn.commit()
+    conn.close()
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match=(
+            "missing proxy-reported cost.*unknown cost cannot be coerced to zero.*"
+            "must be superseded"
+        ),
+    ):
+        reconciliation.evaluate_manifest(unknown_manifest)
 
 
 def test_optional_cache_write_tokens_are_counted_without_coercion(tmp_path):
@@ -1225,6 +1321,152 @@ def test_explicit_x_article_cohort_reports_terminal_state(tmp_path):
     assert cohort["items"][0]["status"] == "success"
     assert cohort["items"][0]["raw_sha256"]
     assert cohort["items"][0]["text_sha256"]
+
+
+def test_x_article_cohort_binds_exact_run_and_frozen_recall_origin_union(tmp_path):
+    artifact_db = tmp_path / "artifacts.db"
+    run_artifact_id = _seed_terminal_x_article(artifact_db)
+    recall_event_id = "recall-extra-event"
+    recall_artifact_id = _seed_terminal_x_article(
+        artifact_db,
+        event_id=recall_event_id,
+        article_number="789",
+        request_post_id="987",
+    )
+    recall_db = tmp_path / "recall.db"
+    sample_id, binding_sha256 = _seed_frozen_recall_origin(
+        recall_db,
+        artifact_db=artifact_db,
+        event_id=recall_event_id,
+        artifact_id=recall_artifact_id,
+    )
+    manifest, _payload = _manifest(
+        tmp_path,
+        x_article_cohort={
+            "artifact_db": str(artifact_db),
+            "artifact_ids": [run_artifact_id, recall_artifact_id],
+            "frozen_recall_origin": {
+                "recall_db": str(recall_db),
+                "binding_sha256": binding_sha256,
+                "sample_ids": [sample_id],
+            },
+        },
+    )
+
+    report = reconciliation.evaluate_manifest(manifest)
+
+    binding = report["x_article_cohort"]["binding"]
+    assert binding["derived_artifact_count"] == 1
+    assert binding["frozen_recall_artifact_count"] == 1
+    assert binding["frozen_recall_origin"]["sample_count"] == 1
+    assert binding["frozen_recall_origin"]["items"][0]["sample_id"] == sample_id
+    assert {
+        item["artifact_id"]: item["origin"]
+        for item in report["x_article_cohort"]["items"]
+    } == {
+        run_artifact_id: "production_run_event",
+        recall_artifact_id: "frozen_recall_x_article_census",
+    }
+
+
+def test_frozen_recall_x_article_origin_rejects_drift_and_broad_supersets(tmp_path):
+    artifact_db = tmp_path / "artifacts.db"
+    run_artifact_id = _seed_terminal_x_article(artifact_db)
+    recall_event_id = "recall-extra-event"
+    recall_artifact_id = _seed_terminal_x_article(
+        artifact_db,
+        event_id=recall_event_id,
+        article_number="789",
+        request_post_id="987",
+    )
+    recall_db = tmp_path / "recall.db"
+    sample_id, binding_sha256 = _seed_frozen_recall_origin(
+        recall_db,
+        artifact_db=artifact_db,
+        event_id=recall_event_id,
+        artifact_id=recall_artifact_id,
+    )
+    manifest, payload = _manifest(
+        tmp_path,
+        x_article_cohort={
+            "artifact_db": str(artifact_db),
+            "artifact_ids": [run_artifact_id, recall_artifact_id],
+            "frozen_recall_origin": {
+                "recall_db": str(recall_db),
+                "binding_sha256": binding_sha256,
+                "sample_ids": [sample_id],
+            },
+        },
+    )
+
+    payload["x_article_cohort"]["artifact_ids"].append("0" * 64)
+    manifest.write_text(json.dumps(payload))
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match="does not match the exact origin union.*extra=",
+    ):
+        reconciliation.evaluate_manifest(manifest)
+
+    payload["x_article_cohort"]["artifact_ids"].pop()
+    conn = sqlite3.connect(recall_db)
+    conn.execute(
+        "UPDATE recall_sample SET feed_rank = feed_rank + 1 WHERE sample_id = ?",
+        (sample_id,),
+    )
+    conn.commit()
+    conn.close()
+    manifest.write_text(json.dumps(payload))
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match="frozen recall origin binding does not match the manifest",
+    ):
+        reconciliation.evaluate_manifest(manifest)
+
+
+def test_frozen_recall_origin_cannot_relabel_an_arbitrary_sample(tmp_path):
+    artifact_db = tmp_path / "artifacts.db"
+    run_artifact_id = _seed_terminal_x_article(artifact_db)
+    recall_event_id = "recall-extra-event"
+    recall_artifact_id = _seed_terminal_x_article(
+        artifact_db,
+        event_id=recall_event_id,
+        article_number="789",
+        request_post_id="987",
+    )
+    recall_db = tmp_path / "recall.db"
+    sample_id, _binding_sha256 = _seed_frozen_recall_origin(
+        recall_db,
+        artifact_db=artifact_db,
+        event_id=recall_event_id,
+        artifact_id=recall_artifact_id,
+    )
+    conn = sqlite3.connect(recall_db)
+    conn.execute(
+        "UPDATE recall_sample SET sample_kind = 'lower_kept' WHERE sample_id = ?",
+        (sample_id,),
+    )
+    conn.commit()
+    conn.close()
+    manifest, _payload = _manifest(
+        tmp_path,
+        x_article_cohort={
+            "artifact_db": str(artifact_db),
+            "artifact_ids": [run_artifact_id, recall_artifact_id],
+            "frozen_recall_origin": {
+                "recall_db": str(recall_db),
+                "binding_sha256": (
+                    reconciliation.frozen_recall_origin_binding_sha256(recall_db)
+                ),
+                "sample_ids": [sample_id],
+            },
+        },
+    )
+
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match="is not an accepted X Article census sample",
+    ):
+        reconciliation.evaluate_manifest(manifest)
 
 
 def test_x_article_provider_mapping_drift_fails_closed(tmp_path):

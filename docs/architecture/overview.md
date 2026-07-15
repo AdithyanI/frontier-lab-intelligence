@@ -211,7 +211,7 @@ provider-qualified visible membership. This retains one cumulative envelope,
 its active-day list, and peak daily score/engagement without double-counting
 the same post or retaining a superseded event revision.
 
-The React `/feed` surface is one evidence browser rather than separate post,
+The React `/evidence/feed` surface is one evidence browser rather than separate post,
 group, or lane modes. It offers complete-day navigation, search, the three
 transparent sort orders, score inputs, raw engagement, and direct X
 provenance. Each envelope renders the root once, then exact replies in
@@ -283,7 +283,7 @@ observations; its 30-artifact cohort produced 19 native clean texts, then the
 Reader fallback recovered all three OpenAI HTTP-403 pages. Broad crawling,
 RSS/GitHub adapters and cited-insight generation remain deferred. The web
 layer now exposes the live catalog through read-only `/api/artifacts/dates`
-and `/api/artifacts` projections plus a minimal `/artifacts` index. The shared
+and `/api/artifacts` projections plus a minimal `/evidence/artifacts` index. The shared
 Feed-style navigator selects the UTC publication day of the X observation
 (never mutable retrieval time); within a day, one row per canonical artifact
 inherits the best originating Feed rank, with source time shown separately and

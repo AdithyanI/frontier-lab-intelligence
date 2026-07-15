@@ -181,7 +181,7 @@ function ArtifactRow({
             <dt>Observed in</dt>
             <dd>
               {item.source_event_id ? (
-                <Link to={`/feed?date=${feedDate}&event=${encodeURIComponent(item.source_event_id)}`}>
+                <Link to={`/evidence/feed?date=${feedDate}&event=${encodeURIComponent(item.source_event_id)}`}>
                   Feed envelope →
                 </Link>
               ) : item.source_url ? (
@@ -378,10 +378,15 @@ export default function Artifacts() {
   }, [items])
 
   return (
-    <div className="page artifact-page">
+    <section
+      className="evidence-view artifact-page"
+      aria-labelledby="artifacts-title"
+    >
       <header className="page-head">
-        <h1 className="page-title">Primary artifacts</h1>
-        <p className="page-sub">
+        <h2 className="evidence-view-title" id="artifacts-title">
+          Primary artifacts
+        </h2>
+        <p className="evidence-view-sub">
           Durable source links selected from kept Feed evidence, by source date.
         </p>
         {data?.available && (
@@ -483,6 +488,6 @@ export default function Artifacts() {
       {!dates && !error && loading && (
         <div className="artifact-loading skeleton" aria-label="Loading artifact dates" />
       )}
-    </div>
+    </section>
   )
 }
