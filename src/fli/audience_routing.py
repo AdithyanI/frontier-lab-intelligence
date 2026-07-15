@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from fli import audience_insights, llm_responses
+from fli import llm_responses
 
 
 PROMPT_VERSION = "audience-routing-v1"
@@ -61,12 +62,35 @@ def _sha256(value: str) -> str:
 
 
 @dataclass(frozen=True)
+class EvidenceSource:
+    """One immutable, independently attributed routing source block."""
+
+    source_type: str
+    source_id: str
+    url: str
+    text: str
+    author: str | None = None
+    title: str | None = None
+    relation: str | None = None
+    source_sha256: str | None = None
+    section_ordinal: int | None = None
+    source_char_start: int | None = None
+    source_char_end: int | None = None
+
+    def normalized_text(self) -> str:
+        return unicodedata.normalize("NFC", self.text)
+
+    def effective_source_sha256(self) -> str:
+        return self.source_sha256 or _sha256(self.normalized_text())
+
+
+@dataclass(frozen=True)
 class RoutingPacket:
     """One immutable Evidence packet presented to the audience router."""
 
     event_id: str
     day: str
-    sources: tuple[audience_insights.EvidenceSource, ...]
+    sources: tuple[EvidenceSource, ...]
 
     @property
     def evidence_sha256(self) -> str:

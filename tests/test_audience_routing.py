@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from fli import audience_insights, audience_routing
+from fli import audience_routing
 
 
 class FakeRawResponse:
@@ -57,7 +57,7 @@ def make_packet():
         event_id="event-secret-42",
         day="2026-07-12",
         sources=(
-            audience_insights.EvidenceSource(
+            audience_routing.EvidenceSource(
                 source_type="x_post",
                 source_id="source-secret-root",
                 url="https://example.com/private-root",
@@ -65,7 +65,7 @@ def make_packet():
                 relation="root",
                 text="The new system reduced inference latency under our workload.",
             ),
-            audience_insights.EvidenceSource(
+            audience_routing.EvidenceSource(
                 source_type="x_article_section",
                 source_id="source-secret-article",
                 url="https://example.com/private-article",
