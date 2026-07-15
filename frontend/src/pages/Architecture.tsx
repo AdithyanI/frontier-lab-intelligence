@@ -95,7 +95,7 @@ function AcceptedEvidenceGlyph({ x, y }: { x: number; y: number }) {
       <line x1={x + 8} y1={y + 2} x2={x + 26} y2={y + 2} stroke={MUTED} strokeWidth="1" />
       <line x1={x + 58} y1={y} x2={x + 80} y2={y} stroke={MUTED} strokeWidth="1" />
       <line x1={x + 58} y1={y + 8} x2={x + 76} y2={y + 8} stroke={MUTED} strokeWidth="1" />
-      <text x={x + 44} y={y + 38} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED}>+ ARTIFACT</text>
+      <text x={x + 44} y={y + 33} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED}>+ ARTIFACT</text>
     </g>
   )
 }
