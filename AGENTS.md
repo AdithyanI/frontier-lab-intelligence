@@ -10,8 +10,8 @@ Capital AI Engineer case study.
 2. `docs/STATUS.md` - conceptual handoff: what is proven, active, missing, and
    deliberately deferred.
 3. Active `docs/projects/<project>/tasks.md` - execution state; use `$project`.
-4. `docs/architecture/overview.md` - system map.
-5. `PRODUCT.md` / `DESIGN.md` - product and UI contracts.
+4. Relevant section of `docs/architecture/overview.md` - system map.
+5. `PRODUCT.md` / `DESIGN.md` when changing product or UI behavior.
 
 If docs conflict with chat, note it in the active tracker and follow the
 preserved prompt until Adi decides.
@@ -44,12 +44,14 @@ does not improve rubric coverage, demo proof, or interview discussion. See
   change model choice, or block in-scope work because of cost unless Adi sets
   an explicit cap for that work.
 - The build log is historical submission evidence, not current state or a
-  cold-start document. Do not read the complete rendered log during normal
-  work. After a validated milestone, material decision, external spend, or
-  important learning, append one entry with `scripts/build-log.py add`; do not
-  log routine agent turns. Use its bounded `recent` or `search` commands when
-  history is actually relevant. `scripts/check-fast.sh` validates the shards
-  and renders the complete reviewer artifact.
+  cold-start document. Default to no entry; the active tracker is the normal
+  work record. Use `scripts/build-log.py add` only when a tracker milestone
+  closes, a decision changes product or architecture direction, a completed
+  external run records material spend, or a learning changes future operating
+  policy. Batch related work into one entry; routine UI polish, refactors,
+  tests, reviews, and agent turns are not separate entries. When uncertain, do
+  not log. Use bounded `recent` or `search` only when history is relevant;
+  `scripts/check-fast.sh` validates and renders the reviewer artifact.
 - Route every LLM call through the shared LiteLLM endpoint with stable
   `metadata.tags` for app, pipeline, job, scope, prompt, and run. Capture the
   proxy-reported response cost as the operational source of truth. Use a dated

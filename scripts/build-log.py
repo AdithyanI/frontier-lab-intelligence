@@ -13,6 +13,7 @@ import fcntl
 import json
 import os
 import sys
+import tempfile
 import time
 import uuid
 from contextlib import contextmanager
@@ -34,7 +35,18 @@ END = "<!-- END GENERATED -->"
 REQUIRED = ("date", "title", "intent", "action", "evidence", "impact_next", "tools_spend")
 SCHEMA_VERSION = "1.0"
 CURRENT_MAX_BYTES = 64 * 1024
-MAX_QUERY_LIMIT = 50
+DEFAULT_QUERY_LIMIT = 5
+MAX_QUERY_LIMIT = 20
+MAX_ENTRY_CHARS = 4_000
+FIELD_MAX_CHARS = {
+    "date": 10,
+    "title": 160,
+    "intent": 800,
+    "action": 2_000,
+    "evidence": 1_500,
+    "impact_next": 800,
+    "tools_spend": 800,
+}
 
 
 @dataclass(frozen=True)
@@ -122,7 +134,22 @@ def validate_entry(raw: object, *, location: str) -> dict[str, str]:
             hint=f"Use {parsed_date.isoformat()}.",
         )
 
-    return {field: raw[field].strip() for field in REQUIRED}
+    entry = {field: raw[field].strip() for field in REQUIRED}
+    oversized = [
+        f"{field} ({len(entry[field])}>{FIELD_MAX_CHARS[field]})"
+        for field in REQUIRED
+        if len(entry[field]) > FIELD_MAX_CHARS[field]
+    ]
+    serialized_chars = len(json.dumps(entry, ensure_ascii=False, separators=(",", ":")))
+    if oversized or serialized_chars > MAX_ENTRY_CHARS:
+        detail = ", ".join(oversized) if oversized else f"entry ({serialized_chars}>{MAX_ENTRY_CHARS})"
+        raise ClientError(
+            "E_ENTRY_TOO_LARGE",
+            f"{location}: build-log content is too long: {detail}",
+            hint="Summarize the milestone and keep detailed execution state in the active tracker.",
+        )
+
+    return entry
 
 
 def records_from_path(path: Path) -> list[Record]:
@@ -198,15 +225,52 @@ def append_lock() -> Iterator[None]:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
+def atomic_write_text(path: Path, text: str) -> None:
+    """Replace a text file without exposing a partial write."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mode = path.stat().st_mode & 0o777 if path.exists() else 0o644
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            delete=False,
+        ) as temp_file:
+            temp_path = Path(temp_file.name)
+            temp_file.write(text)
+            temp_file.flush()
+            os.fsync(temp_file.fileno())
+        os.chmod(temp_path, mode)
+        os.replace(temp_path, path)
+        temp_path = None
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
+
+
+def archive_sequence(path: Path) -> int:
+    prefix, separator, _ = path.name.partition("-")
+    if separator and len(prefix) == 6 and prefix.isdigit():
+        return int(prefix)
+    raise ClientError(
+        "E_INVALID_LOG",
+        f"{display_path(path)}: archive name lacks a six-digit sequence prefix",
+        hint="Rename archive shards to NNNNNN-<date-range>.jsonl in chronological order.",
+    )
+
+
 def next_archive_path(records: Sequence[Record]) -> Path:
     first_date = records[0].entry["date"]
     last_date = records[-1].entry["date"]
     stem = first_date if first_date == last_date else f"{first_date}--{last_date}"
-    candidate = ARCHIVE_DIR / f"{stem}.jsonl"
-    suffix = 2
+    existing = sorted(ARCHIVE_DIR.glob("*.jsonl")) if ARCHIVE_DIR.exists() else []
+    sequence = max((archive_sequence(path) for path in existing), default=0) + 1
+    candidate = ARCHIVE_DIR / f"{sequence:06d}-{stem}.jsonl"
     while candidate.exists():
-        candidate = ARCHIVE_DIR / f"{stem}.part-{suffix:02d}.jsonl"
-        suffix += 1
+        sequence += 1
+        candidate = ARCHIVE_DIR / f"{sequence:06d}-{stem}.jsonl"
     return candidate
 
 
@@ -220,7 +284,7 @@ def rotate_current_if_needed() -> Path | None:
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
     target = next_archive_path(current_records)
     CURRENT.replace(target)
-    CURRENT.touch()
+    atomic_write_text(CURRENT, "")
     return target
 
 
@@ -264,17 +328,10 @@ def add_entry(args: argparse.Namespace) -> dict[str, object]:
 
         rotated_to = rotate_current_if_needed()
         serialized = json.dumps(entry, ensure_ascii=False, separators=(",", ":"))
-        with CURRENT.open("a+", encoding="utf-8") as current_file:
-            current_file.seek(0, os.SEEK_END)
-            if current_file.tell() > 0:
-                current_file.seek(current_file.tell() - 1)
-                if current_file.read(1) != "\n":
-                    current_file.seek(0, os.SEEK_END)
-                    current_file.write("\n")
-            current_file.seek(0, os.SEEK_END)
-            current_file.write(serialized + "\n")
-            current_file.flush()
-            os.fsync(current_file.fileno())
+        current_text = CURRENT.read_text(encoding="utf-8")
+        if current_text and not current_text.endswith("\n"):
+            current_text += "\n"
+        atomic_write_text(CURRENT, current_text + serialized + "\n")
 
         line = len(records_from_path(CURRENT))
         return {
@@ -359,15 +416,21 @@ def render_timeline(entries: Sequence[dict[str, str]]) -> str:
     lines = [
         BEGIN,
         "",
-        "| Date | Intent / trigger | Decision / action | Evidence | Impact / next | Tools / spend |",
+        "| Date | Outcome / intent | Decision / action | Evidence | Impact / next | Tools / spend |",
         "| --- | --- | --- | --- | --- | --- |",
     ]
     for entry in entries:
         lines.append(
             "| "
             + " | ".join(
-                cell(entry[field])
-                for field in ("date", "intent", "action", "evidence", "impact_next", "tools_spend")
+                (
+                    cell(entry["date"]),
+                    f"**{cell(entry['title'])}** — {cell(entry['intent'])}",
+                    cell(entry["action"]),
+                    cell(entry["evidence"]),
+                    cell(entry["impact_next"]),
+                    cell(entry["tools_spend"]),
+                )
             )
             + " |"
         )
@@ -410,12 +473,15 @@ def render_log(_args: argparse.Namespace) -> dict[str, object]:
 
         changed = rendered != text
         if changed:
-            MD.write_text(rendered, encoding="utf-8")
+            atomic_write_text(MD, rendered)
     return {"changed": changed, "entry_count": len(entries), "output": display_path(MD)}
 
 
 def build_parser() -> MachineArgumentParser:
-    parser = MachineArgumentParser(description=__doc__)
+    parser = MachineArgumentParser(
+        description=__doc__,
+        epilog="Example: scripts/build-log.py --plain recent --limit 5",
+    )
     output = parser.add_mutually_exclusive_group()
     output.add_argument("--json", action="store_true", help="emit the default JSON result envelope")
     output.add_argument("--plain", action="store_true", help="emit concise operator-oriented text")
@@ -424,21 +490,31 @@ def build_parser() -> MachineArgumentParser:
 
     add = subparsers.add_parser("add", help="append one validated milestone entry")
     add.add_argument("--date", help="entry date in YYYY-MM-DD; defaults to today")
-    add.add_argument("--title", required=True)
-    add.add_argument("--intent", required=True)
-    add.add_argument("--action", required=True)
-    add.add_argument("--evidence", required=True)
-    add.add_argument("--impact-next", dest="impact_next", required=True)
-    add.add_argument("--tools-spend", dest="tools_spend", required=True)
+    add.add_argument("--title", required=True, help="concise outcome label")
+    add.add_argument("--intent", required=True, help="goal or trigger, not a progress note")
+    add.add_argument("--action", required=True, help="completed decision or change")
+    add.add_argument("--evidence", required=True, help="checks, files, or counts that prove the outcome")
+    add.add_argument("--impact-next", dest="impact_next", required=True, help="why it matters and what follows")
+    add.add_argument("--tools-spend", dest="tools_spend", required=True, help="tools/providers and observed spend")
     add.set_defaults(handler=add_entry)
 
     recent = subparsers.add_parser("recent", help="return the newest bounded set of entries")
-    recent.add_argument("--limit", type=int, default=10)
+    recent.add_argument(
+        "--limit",
+        type=int,
+        default=DEFAULT_QUERY_LIMIT,
+        help=f"entries to return (default: {DEFAULT_QUERY_LIMIT}; range: 1-{MAX_QUERY_LIMIT})",
+    )
     recent.set_defaults(handler=recent_entries)
 
     search = subparsers.add_parser("search", help="search all fields and return bounded recent matches")
     search.add_argument("query")
-    search.add_argument("--limit", type=int, default=10)
+    search.add_argument(
+        "--limit",
+        type=int,
+        default=DEFAULT_QUERY_LIMIT,
+        help=f"matches to return (default: {DEFAULT_QUERY_LIMIT}; range: 1-{MAX_QUERY_LIMIT})",
+    )
     search.set_defaults(handler=search_entries)
 
     validate = subparsers.add_parser("validate", help="validate every source shard without writing")
@@ -487,8 +563,13 @@ def emit(result: dict[str, object], *, plain: bool) -> None:
     data = result["data"]
     assert isinstance(data, dict)
     if command in {"build-log recent", "build-log search"}:
-        for entry in data["entries"]:
-            print(f"{entry['date']} — {entry['title']}")
+        if data["entries"]:
+            for entry in data["entries"]:
+                print(f"{entry['date']} — {entry['title']}")
+        elif command == "build-log search":
+            print("No matching build-log entries.")
+        else:
+            print("No build-log entries.")
     elif command == "build-log add":
         verb = "appended" if data["appended"] else "already present"
         print(f"build-log add: {verb} — {data['entry']['title']}")
@@ -504,14 +585,16 @@ def emit(result: dict[str, object], *, plain: bool) -> None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     raw_argv = list(argv if argv is not None else sys.argv[1:])
-    plain = "--plain" in raw_argv
     request_id = str(uuid.uuid4())
     started = time.monotonic()
     command = "build-log"
-    for token in raw_argv:
+    command_index = len(raw_argv)
+    for index, token in enumerate(raw_argv):
         if token in {"add", "recent", "search", "validate", "render"}:
             command = f"build-log {token}"
+            command_index = index
             break
+    plain = "--plain" in raw_argv[:command_index]
     try:
         args = build_parser().parse_args(raw_argv)
         command = f"build-log {args.command}"

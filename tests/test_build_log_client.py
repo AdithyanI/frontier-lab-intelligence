@@ -100,9 +100,16 @@ def test_usage_failure_is_structured_and_nonzero(client, capsys: pytest.CaptureF
     assert result["error"]["code"] == "E_USAGE"
     assert result["error"]["retryable"] is False
 
+    oversized = entry("Too verbose")
+    oversized["action"] = "x" * 4_001
+    assert client.main(add_args(oversized)) == 2
+    result = json.loads(capsys.readouterr().out)
+    assert result["error"]["code"] == "E_ENTRY_TOO_LARGE"
+    assert client.CURRENT.read_text(encoding="utf-8") == ""
+
 
 def test_recent_search_validate_and_render_are_bounded(client, capsys: pytest.CaptureFixture[str]):
-    archive = client.ARCHIVE_DIR / "2026-07-14.jsonl"
+    archive = client.ARCHIVE_DIR / "000001-2026-07-14.jsonl"
     archive.write_text(json.dumps(entry("Archived routing", day="2026-07-14")) + "\n", encoding="utf-8")
     client.CURRENT.write_text(
         json.dumps(entry("Current routing")) + "\n" + json.dumps(entry("UI polish")) + "\n",
@@ -128,6 +135,8 @@ def test_recent_search_validate_and_render_are_bounded(client, capsys: pytest.Ca
     assert rendered["data"]["changed"] is True
     markdown = client.MD.read_text(encoding="utf-8")
     assert markdown.index("Archived routing") < markdown.index("Current routing")
+    assert "| Date | Outcome / intent |" in markdown
+    assert "**Archived routing**" in markdown
     assert "Preserved notes." in markdown
 
     assert client.main(["recent", "--limit", "51"]) == 2
@@ -141,7 +150,7 @@ def test_add_rotates_large_current_shard_under_lock(client, monkeypatch: pytest.
 
     assert client.main(add_args(entry("After rotation"))) == 0
     result = json.loads(capsys.readouterr().out)
-    assert result["data"]["rotated_to"].endswith("2026-07-15.jsonl")
+    assert result["data"]["rotated_to"].endswith("000001-2026-07-15.jsonl")
     assert [record.entry["title"] for record in client.load_records()] == [
         "Before rotation",
         "After rotation",
@@ -155,3 +164,31 @@ def test_plain_mode_is_explicit_operator_output(client, capsys: pytest.CaptureFi
     captured = capsys.readouterr()
     assert captured.out == "2026-07-15 — Visible summary\n"
     assert captured.err == ""
+
+    assert client.main(["--plain", "search", "missing"]) == 0
+    assert capsys.readouterr().out == "No matching build-log entries.\n"
+
+    assert client.main(["search", "--", "--plain"]) == 0
+    assert json.loads(capsys.readouterr().out)["status"] == "ok"
+
+
+def test_rotated_archives_keep_explicit_sequence_order(client, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(client, "CURRENT_MAX_BYTES", 1)
+    client.CURRENT.write_text(json.dumps(entry("First shard")) + "\n", encoding="utf-8")
+    first = client.rotate_current_if_needed()
+    assert first and first.name == "000001-2026-07-15.jsonl"
+
+    client.CURRENT.write_text(
+        json.dumps(entry("Second shard start"))
+        + "\n"
+        + json.dumps(entry("Second shard end", day="2026-07-16"))
+        + "\n",
+        encoding="utf-8",
+    )
+    second = client.rotate_current_if_needed()
+    assert second and second.name == "000002-2026-07-15--2026-07-16.jsonl"
+    assert [record.entry["title"] for record in client.load_records()] == [
+        "First shard",
+        "Second shard start",
+        "Second shard end",
+    ]

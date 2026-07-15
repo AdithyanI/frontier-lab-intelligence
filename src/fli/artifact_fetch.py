@@ -739,11 +739,62 @@ def _create_explicit_fetch_run(
             [FETCH_POLICY, EXPLICIT_SELECTION_POLICY, fingerprint]
         ).encode()
     ).hexdigest()
+    run_items = [
+        (
+            fetch_run_id,
+            item["artifact_id"],
+            item["selection_rank"],
+            item["stratum"],
+            item["selected_url"],
+            item["envelope_day"],
+            item["source_rank"],
+            item["normalized_rank"],
+            item["event_id"],
+        )
+        for item in selection
+    ]
     existing = conn.execute(
         "SELECT status FROM artifact_fetch_run WHERE fetch_run_id = ?",
         (fetch_run_id,),
     ).fetchone()
     if existing is not None:
+        surviving_ids = {
+            str(row["artifact_id"])
+            for row in conn.execute(
+                """SELECT artifact_id FROM artifact_fetch_run_item
+                   WHERE fetch_run_id = ?""",
+                (fetch_run_id,),
+            ).fetchall()
+        }
+        selected_ids = {str(item["artifact_id"]) for item in selection}
+        if surviving_ids != selected_ids:
+            # A catalog refresh can prune an artifact and cascade-delete both
+            # its fetch outcome and its membership in this deterministic run.
+            # Reimporting the same artifact recreates the same run id, so the
+            # surviving membership—not the stale complete flag—is authoritative.
+            with conn:
+                conn.execute(
+                    "DELETE FROM artifact_fetch_run_item WHERE fetch_run_id = ?",
+                    (fetch_run_id,),
+                )
+                conn.executemany(
+                    """INSERT INTO artifact_fetch_run_item
+                       (fetch_run_id, artifact_id, selection_rank, stratum,
+                        selected_url, source_day, source_rank, normalized_rank,
+                        source_event_id)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    run_items,
+                )
+                conn.execute(
+                    """UPDATE artifact_fetch_run
+                       SET expected_count = ?, success_count = 0,
+                           failed_retryable_count = 0,
+                           failed_terminal_count = 0,
+                           completed_at = NULL, status = 'in_progress'
+                       WHERE fetch_run_id = ?""",
+                    (len(selection), fetch_run_id),
+                )
+            return fetch_run_id, False
         if str(existing["status"]) != "complete":
             return fetch_run_id, False
         pending = conn.execute(
@@ -800,20 +851,7 @@ def _create_explicit_fetch_run(
                 selected_url, source_day, source_rank, normalized_rank,
                 source_event_id)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            [
-                (
-                    fetch_run_id,
-                    item["artifact_id"],
-                    item["selection_rank"],
-                    item["stratum"],
-                    item["selected_url"],
-                    item["envelope_day"],
-                    item["source_rank"],
-                    item["normalized_rank"],
-                    item["event_id"],
-                )
-                for item in selection
-            ],
+            run_items,
         )
     return fetch_run_id, False
 

@@ -475,6 +475,84 @@ def test_fetch_cohort_exact_artifact_id_does_not_widen_scope(tmp_path, monkeypat
     conn.close()
 
 
+def test_explicit_fetch_rebuilds_items_pruned_with_reimported_artifact(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    artifact_url = "https://example.com/article"
+    artifact_id = _seed_artifact(db, url=artifact_url)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    body = b"""<html><head><title>Restored source</title></head><body><article>
+    <h1>Restored source</h1><p>This public artifact contains enough concrete
+    evidence to prove that a reimported catalog row is fetched again after its
+    prior run membership and fetch outcome were removed by cascading deletes.
+    </p></article></body></html>"""
+    calls = {"artifact": 0}
+
+    def handler(request: httpx.Request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        calls["artifact"] += 1
+        return httpx.Response(
+            200, headers={"Content-Type": "text/html"}, content=body
+        )
+
+    transport = httpx.MockTransport(handler)
+    first = artifact_fetch.fetch_cohort(
+        db_path=db,
+        artifact_ids=[artifact_id],
+        resolver=_global_resolver,
+        transport=transport,
+    )
+    assert first["success"] == 1
+
+    conn = artifacts.connect(db)
+    now = "2026-07-15T08:00:00+00:00"
+    with conn:
+        conn.execute("DELETE FROM artifact WHERE artifact_id = ?", (artifact_id,))
+        assert conn.execute(
+            "SELECT COUNT(*) FROM artifact_fetch_run_item"
+        ).fetchone()[0] == 0
+        assert conn.execute("SELECT COUNT(*) FROM artifact_fetch").fetchone()[0] == 0
+        conn.execute(
+            """INSERT INTO artifact
+               (artifact_id, canonical_url, canonicalization_contract, host,
+                artifact_kind, first_seen_at, last_seen_at, created_at, updated_at)
+               VALUES (?, ?, ?, 'example.com', 'article', ?, ?, ?, ?)""",
+            (
+                artifact_id,
+                artifact_url,
+                artifact_urls.CANONICALIZATION_CONTRACT,
+                now,
+                now,
+                now,
+                now,
+            ),
+        )
+        conn.execute(
+            "UPDATE artifact_import_candidate SET artifact_id = ?",
+            (artifact_id,),
+        )
+    conn.close()
+
+    second = artifact_fetch.fetch_cohort(
+        db_path=db,
+        artifact_ids=[artifact_id],
+        resolver=_global_resolver,
+        transport=transport,
+    )
+
+    assert second["reused"] is False
+    assert second["success"] == 1
+    assert calls["artifact"] == 2
+    conn = artifacts.connect(db)
+    assert conn.execute(
+        "SELECT COUNT(*) FROM artifact_fetch_run_item"
+    ).fetchone()[0] == 1
+    conn.close()
+
+
 def test_jina_reader_recovers_eligible_native_failure_with_provenance(
     tmp_path, monkeypatch
 ):

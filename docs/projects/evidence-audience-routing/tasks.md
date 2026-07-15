@@ -185,9 +185,9 @@ Application invariants:
 - Preserve evidence exactly. The model may classify it but may not rewrite,
   merge authors, or manufacture source attribution.
 - Run validation after each risky batch and fix failures before advancing.
-- Append validated milestones, material decisions, spend, or important
-  learnings with `scripts/build-log.py add`; do not log routine agent turns.
-  Update architecture/status when the boundary changes.
+- Treat this tracker as the normal work record and follow the root `AGENTS.md`
+  build-log threshold; do not separately log routine work. Update
+  architecture/status when the boundary changes.
 - Keep `Current Batch` as the live resume point and update this tracker before
   every handoff.
 - Finalize `learnings.md` and archive the project when `Done When` is met.
