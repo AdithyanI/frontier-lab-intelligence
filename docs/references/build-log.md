@@ -1,11 +1,27 @@
 # Build Log
 
-Chronological record of how this system was built. This combines the previous
-working log, build journal, tool/budget notes, and learning notes.
+Complete chronological reviewer artifact for how this system was built. This
+combines the previous working log, build journal, tool/budget notes, and
+learning notes. It is submission evidence, not current-state or cold-start
+context; agents should use `docs/STATUS.md` and the active tracker for handoff.
 
-The Build Timeline below is **generated**: append entries as JSON lines to
-`build-log.jsonl` (same directory), then run `scripts/render-build-log.py`
-(check-fast also runs it). Do not hand-edit the generated table. Each entry:
+The Build Timeline below is **generated** from sharded JSONL sources under
+`build-log/`. Do not open or edit those sources directly. Use the bounded,
+non-interactive client instead:
+
+```bash
+scripts/build-log.py recent --limit 10
+scripts/build-log.py search "audience routing" --limit 10
+scripts/build-log.py add --title "..." --intent "..." --action "..." \
+  --evidence "..." --impact-next "..." --tools-spend "..."
+```
+
+The client defaults to structured JSON, accepts `--plain` before the command
+for concise operator output, serializes concurrent appends, ignores exact
+retries, and automatically rotates the current shard at 64 KB. Append only
+after a validated milestone, material decision, external spend, or important
+learning—not after routine agent turns. `scripts/check-fast.sh` validates all
+shards and regenerates this artifact. Each entry records:
 
 - **intent:** what Adi asked for or what changed.
 - **action:** what the agent changed.
@@ -15,7 +31,7 @@ The Build Timeline below is **generated**: append entries as JSON lines to
 
 ## Build Timeline
 
-<!-- BEGIN GENERATED: build timeline (edit build-log.jsonl, then run scripts/render-build-log.py) -->
+<!-- BEGIN GENERATED: build timeline (use scripts/build-log.py) -->
 
 | Date | Intent / trigger | Decision / action | Evidence | Impact / next | Tools / spend |
 | --- | --- | --- | --- | --- | --- |
@@ -260,6 +276,8 @@ The Build Timeline below is **generated**: append entries as JSON lines to
 | 2026-07-15 | Make the required rerun after an Event-envelope correction a repeatable operation instead of another hand-written nine-process shell batch. | Added `fli audience-routing refresh` with deterministic source-qualified run IDs, two-level bounded concurrency, publication consistency checks, resumable daily databases, aggregate cache/cost telemetry, dry-run planning, and success-gated replacement of older routing directories. | Twenty focused routing tests pass. A real dry-run against the published Event/Feed pair produced the exact July 5–13 top-100 plan with GPT-5.4-mini/high, 24 item workers per day, nine parallel days, and zero model calls or filesystem writes. | After the reply/quote Event bridge fix is published, run `fli audience-routing refresh --through 2026-07-13 --replace`, inspect the new cohort, and discard the invalidated 900-route evaluation claims. | Local implementation, tests, and dry-run only; no model calls and $0 model spend. |
 | 2026-07-15 | Give a new reader one accurate, memorable top-level picture after the Architecture page establishes its data-model, pipeline, and scoring detail. | Added a final System at a glance figure showing public sources, Python, SQLite, FastAPI, React, and the LiteLLM model boundary that returns structured judgments to storage. Polished it down to one short job per layer, moved its chapter anchor to the end, and added regression coverage for content and section order. | All 41 frontend regressions pass, Oxlint completes with only four pre-existing Fast Refresh warnings, the TypeScript/Vite production build succeeds, and rendered in-app browser QA at 1280px confirms the overview is the final section, fully legible, with no horizontal overflow or browser console warnings/errors. | Use the closing overview to summarize the interview stack; retain the preceding sections for deeper questions about identity, evidence flow, audience routing, and scoring. | Local implementation, tests, production build, and in-app browser QA only; no model calls and $0 model spend. |
 | 2026-07-15 | Prevent valid reply and quote edges from transitively absorbing unrelated source posts into one misleading Evidence envelope. | Replaced unrestricted connected-component grouping with a root-owned contract: quote/retweet reactions attach to one source, only the source author's replies extend its thread, third-party replies remain in the Feed ledger without rendering or grouping, and every Event member has at most one structural parent. Weekly aggregation now retains the richest revision for a stable root instead of allowing a later thin snapshot to erase earlier evidence. | The repaired July 5–13 publication contains 7,515 grouped envelopes, 28,625 members, and 21,368 links with zero multi-parent sources and zero posts assigned to multiple Events. Anthropic post 2074185348142280912 is restored as the July 7 rank-1 root with 108 cutoff-correct related posts; Ryan Brewer's post is a separate 14-member Event. All 490 Python tests, 40 frontend tests, production build, local API proof, and rendered browser proof pass with no browser errors. | Rerun the invalidated nine-day audience-routing cohort against Event run cc76958510ddf90c14863d1c5b8de1d40881a6bf12396671dfd264a6e2df210d; corrected snapshot hashes deliberately expose old routes as not evaluated. | Local deterministic rebuild, tests, API/UI validation, and cache-aware artifact restoration only; no LLM calls. |
+| 2026-07-15 | Make the Architecture chapter strip feel like the same product primitive as the Network subview strip. | Introduced one shared full-width ruled-nav CSS primitive for Architecture, Network, and Evidence; retained black active-route state only for routed workspaces. | 42 frontend tests pass; lint and production build pass; live 1280px browser comparison measured identical 1184px rails and 160x42px cells with no page overflow. | Secondary navigation now uses one implementation and visual vocabulary while preserving the semantic difference between in-page anchors and mutually exclusive views. | Codex Desktop + Impeccable + in-app Browser; EUR0. |
+| 2026-07-15 | Stop cold agents from loading a growing duplicated build history or editing a large shared JSONL file merely to record one outcome. | Archived the 241-entry source, introduced a locked machine-primary build-log client with bounded recent/search reads, exact-retry idempotency, validation, full rendering, and automatic 64 KB rotation; removed the full log from cold-start routing and narrowed logging to validated milestones, material decisions, spend, or important learning. | The archived shard preserves all 241 prior entries, and the current shard now contains only post-archive milestones. Five focused client-contract tests pass, and scripts/check-fast.sh passes 495 Python tests, 42 frontend regressions, lint, the production build, log validation, and idempotent rendering. | Use STATUS.md and the active tracker for handoff. Use scripts/build-log.py recent or search only when history matters, and add one entry after meaningful validated outcomes rather than routine agent turns. | Codex Desktop with agent-native-repo-playbook and client-interface-guidelines; local implementation and validation only, no model API calls and $0 product spend. |
 
 <!-- END GENERATED -->
 

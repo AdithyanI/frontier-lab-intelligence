@@ -655,7 +655,7 @@ export default function Architecture() {
       <h1 className="page-title">Architecture</h1>
       <p className="page-sub">A visual map of what is live, where judgment enters, and what each number means.</p>
 
-      <nav className="arch-chapters" aria-label="Architecture chapters">
+      <nav className="ruled-nav arch-chapters" aria-label="Architecture chapters">
         <a href="#data-model">Data model</a>
         <a href="#account-intake">Account intake</a>
         <a href="#system-today">Pipeline</a>

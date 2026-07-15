@@ -13,7 +13,7 @@ export default function Evidence() {
           Inspect what the tracked network amplified and the primary sources
           those posts revealed.
         </p>
-        <nav className="evidence-tabs" aria-label="Evidence views">
+        <nav className="ruled-nav evidence-tabs" aria-label="Evidence views">
           <NavLink to={feedPath}>Feed</NavLink>
           <NavLink to={artifactsPath}>Primary artifacts</NavLink>
         </nav>

@@ -6,7 +6,8 @@ test -f PRODUCT.md
 test -f DESIGN.md
 test -f docs/references/case-prompt.md
 test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf
-test -f docs/references/build-log.jsonl
+test -f docs/references/build-log/current.jsonl
+test -d docs/references/build-log/archive
 test -f docs/architecture/overview.md
 test -f docs/STATUS.md
 
@@ -38,9 +39,10 @@ else
   PYTHON=python
 fi
 
-# Build log is generated: JSONL is the source of truth, markdown is rendered.
-# Renderer is idempotent (<100ms); regenerate and stage only when it changed.
-"$PYTHON" scripts/render-build-log.py
+# Build-log history is sharded and machine-maintained. Validate every shard,
+# render the complete reviewer artifact, and stage it only when it changed.
+"$PYTHON" scripts/build-log.py --plain validate
+"$PYTHON" scripts/build-log.py --plain render
 if ! git diff --quiet -- docs/references/build-log.md 2>/dev/null; then
   git add docs/references/build-log.md
 fi

@@ -10,7 +10,7 @@ export default function Network() {
           accounts that set follows. Add Profile admits a source through normal
           screening or a direct audited override.
         </p>
-        <nav className="network-tabs" aria-label="Network views">
+        <nav className="ruled-nav network-tabs" aria-label="Network views">
           <NavLink to="/network/registry">Registry</NavLink>
           <NavLink to="/network/ranking">Ranking</NavLink>
           <NavLink to="/network/add-profile">Add Profile</NavLink>

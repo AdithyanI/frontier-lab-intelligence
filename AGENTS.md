@@ -12,8 +12,6 @@ Capital AI Engineer case study.
 3. Active `docs/projects/<project>/tasks.md` - execution state; use `$project`.
 4. `docs/architecture/overview.md` - system map.
 5. `PRODUCT.md` / `DESIGN.md` - product and UI contracts.
-6. `docs/references/research-notes.md` / `docs/references/build-log.md` -
-   provenance and history.
 
 If docs conflict with chat, note it in the active tracker and follow the
 preserved prompt until Adi decides.
@@ -45,8 +43,13 @@ does not improve rubric coverage, demo proof, or interview discussion. See
   not as a product or execution gate: record spend, but do not lower quality,
   change model choice, or block in-scope work because of cost unless Adi sets
   an explicit cap for that work.
-- Build log: append one JSON object to `docs/references/build-log.jsonl` after
-  meaningful chunks; `scripts/check-fast.sh` renders markdown.
+- The build log is historical submission evidence, not current state or a
+  cold-start document. Do not read the complete rendered log during normal
+  work. After a validated milestone, material decision, external spend, or
+  important learning, append one entry with `scripts/build-log.py add`; do not
+  log routine agent turns. Use its bounded `recent` or `search` commands when
+  history is actually relevant. `scripts/check-fast.sh` validates the shards
+  and renders the complete reviewer artifact.
 - Route every LLM call through the shared LiteLLM endpoint with stable
   `metadata.tags` for app, pipeline, job, scope, prompt, and run. Capture the
   proxy-reported response cost as the operational source of truth. Use a dated

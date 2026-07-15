@@ -3,6 +3,13 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 const architecture = readFileSync(new URL('../src/pages/Architecture.tsx', import.meta.url), 'utf8')
+const appStyles = readFileSync(new URL('../src/app.css', import.meta.url), 'utf8')
+
+test('Architecture chapters share the ruled secondary navigation primitive', () => {
+  assert.match(architecture, /className="ruled-nav arch-chapters"/)
+  assert.match(appStyles, /\.ruled-nav \{[\s\S]*?width: 100%;[\s\S]*?border-top: 1px solid var\(--border-strong\);[\s\S]*?border-bottom: 1px solid var\(--border\);/)
+  assert.doesNotMatch(appStyles, /\.arch-chapters a\.active/)
+})
 
 test('Architecture ends with the current end-to-end stack', () => {
   assert.match(architecture, /function SystemOverview/)

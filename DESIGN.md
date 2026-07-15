@@ -107,6 +107,9 @@ Rules:
 - Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 72.
 - Architecture sections use descriptive headings, not decorative sequence
   numbers. Numbers remain only where order itself carries meaning.
+- Secondary navigation uses one full-width ruled strip across workspaces and
+  Architecture. Routed views use the ink-filled active cell; in-page chapter
+  anchors remain neutral because they do not replace the current view.
 - Provenance line (source, date, entity) sits directly under every insight
   title in mono — first-class, not a footnote.
 - **Desktop-first (2026-07-09):** the primary target is the desktop view

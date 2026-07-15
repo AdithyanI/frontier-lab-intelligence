@@ -8,7 +8,9 @@ the product is, what is already real, what remains unproven, and which durable
 document answers each deeper question.
 
 This file is not the execution tracker and not a chronological log. The active
-project tracker owns detailed work state; the build log owns history.
+project tracker owns detailed work state; the build log owns historical
+submission evidence. Query that history with `scripts/build-log.py recent` or
+`search` only when needed; do not load the complete artifact during handoff.
 
 ## North Star
 
@@ -133,7 +135,7 @@ handoff.
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |
-| What happened chronologically, including spend and tools? | [`references/build-log.md`](references/build-log.md) |
+| What happened chronologically, including spend and tools? | `scripts/build-log.py recent` / `search`; complete reviewer artifact at [`references/build-log.md`](references/build-log.md) |
 | How should an external reviewer inspect the repository? | [`references/reviewer-guide.md`](references/reviewer-guide.md) |
 
 If this brief conflicts with an active tracker, the tracker wins for execution

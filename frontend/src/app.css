@@ -342,30 +342,6 @@ td.num {
 
 .arch-canvas svg { display: block; width: 100%; height: auto; }
 
-.arch-chapters {
-  display: inline-flex;
-  align-items: stretch;
-  margin-top: 28px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.arch-chapters a {
-  display: flex;
-  align-items: center;
-  padding: 10px 18px;
-  color: var(--ink-soft);
-  font-size: 12.5px;
-  font-weight: 500;
-  text-decoration: none;
-  border-right: 1px solid var(--border);
-  transition: color 150ms var(--ease-out), background 150ms var(--ease-out);
-}
-
-.arch-chapters a:last-child { border-right: 0; }
-.arch-chapters a:hover { color: var(--blue-ink); background: var(--surface); }
-.arch-chapters a:focus-visible { outline: 2px solid var(--blue-mid); outline-offset: 2px; }
-
 .arch-section--methods {
   margin-bottom: 0;
   scroll-margin-top: 84px;
@@ -1031,22 +1007,21 @@ td.num {
   font-size: 14px;
 }
 
-/* ---- Network and Evidence workspaces ---- */
+/* ---- Ruled secondary navigation ---- */
 
-.network-page,
-.evidence-page { max-width: 1360px; }
-
-.network-tabs,
-.evidence-tabs {
+.ruled-nav {
   display: flex;
+  width: 100%;
   margin-top: 28px;
+  overflow-x: auto;
   border-top: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border);
 }
 
-.network-tabs a,
-.evidence-tabs a {
+.ruled-nav a {
+  display: flex;
   min-width: 160px;
+  align-items: center;
   padding: 11px 16px;
   border-right: 1px solid var(--border);
   color: var(--muted);
@@ -1056,11 +1031,22 @@ td.num {
   transition: background 150ms var(--ease-out), color 150ms var(--ease-out);
 }
 
-.network-tabs a:hover,
-.evidence-tabs a:hover {
+.ruled-nav a:hover {
   background: var(--surface);
   color: var(--ink);
 }
+
+.ruled-nav a:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+}
+
+/* ---- Network and Evidence workspaces ---- */
+
+.network-page,
+.evidence-page { max-width: 1360px; }
 
 .network-tabs a.active,
 .evidence-tabs a.active {
