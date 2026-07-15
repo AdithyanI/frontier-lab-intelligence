@@ -53,6 +53,8 @@ test('Network defaults to Registry while preserving Ranking and reach', () => {
   assert.match(registrySource, /screened Registry entities follow this entity/)
   assert.match(registrySource, /combined X followers/)
   assert.match(registrySource, /sortField/)
+  assert.match(registrySource, /useState<SortField>\('network'\)/)
+  assert.match(registrySource, /useRef\('all\\0network\\0asc'\)/)
   assert.doesNotMatch(registrySource, /Registry follows/)
 })
 

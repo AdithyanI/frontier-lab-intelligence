@@ -122,8 +122,8 @@ Rules:
   search + All/People/Organizations/Unsure/Rejected segmented filter with live
   counts, load-more; rejected rows expose their reason in the table, while
   active rows show identity + truthful kind and open a detail card.
-  All, People, and Organizations default to one stable Registry-wide **X
-  reach** order. Each metric cell shows only the entity's stable ordinal among
+  All, People, and Organizations default to the stable Registry-wide **Network
+  support** order. Each metric cell shows only the entity's stable ordinal among
   active Registry entities (`#24`) so the table remains scannable. Hovering a
   metric reveals its compact underlying count in place; opening the entity
   profile shows the exact count and rank together. Search, kind filters, and

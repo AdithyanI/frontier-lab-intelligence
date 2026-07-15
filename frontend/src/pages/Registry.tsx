@@ -87,13 +87,13 @@ export default function Registry() {
   const [query, setQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [kind, setKind] = useState<KindFilter>(initialKind)
-  const [sortField, setSortField] = useState<SortField>('reach')
+  const [sortField, setSortField] = useState<SortField>('network')
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('asc')
   const [selected, setSelected] = useState<Entity | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const viewRef = useRef('all\0reach\0asc')
+  const viewRef = useRef('all\0network\0asc')
 
   useEffect(() => {
     const timer = window.setTimeout(

@@ -1178,6 +1178,8 @@ def events_payload(
         projected = {**item, "relationship_counts": _relationship_counts(item)}
         if not include_evidence:
             projected["evidence"] = []
+            projected["amplifiers"] = []
+            projected["root"] = {**item["root"], "amplifiers": []}
         page_items.append(projected)
     return {
         **{key: value for key, value in payload.items() if key != "items"},

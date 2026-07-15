@@ -228,6 +228,8 @@ def test_events_api_can_omit_heavy_evidence_from_list_rows(tmp_path, monkeypatch
 
     assert payload["include_evidence"] is False
     assert target_group["evidence"] == []
+    assert target_group["amplifiers"] == []
+    assert target_group["root"]["amplifiers"] == []
     assert target_group["relationship_counts"]["retweets"] == 1
 
     detail = client.get(
