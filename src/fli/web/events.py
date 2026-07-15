@@ -998,6 +998,33 @@ def _events_week_cached(
     }
 
 
+def _score_order_key(item: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        item["peak_attention_score"],
+        item["registry_account_count"],
+        item["member_count"],
+        item["latest_evidence_at"],
+        item["event_id"],
+    )
+
+
+def _daily_rank_by_event_id(items: list[dict[str, Any]]) -> dict[str, int]:
+    return {
+        str(item["event_id"]): rank
+        for rank, item in enumerate(
+            sorted(items, key=_score_order_key, reverse=True), start=1
+        )
+    }
+
+
+def current_daily_rank_by_event_id(*, day: str) -> dict[str, int]:
+    """Return the authoritative displayed Feed rank for every event on one day."""
+    payload = _events_day_cached(day=day, cache_token=_cache_token(day))
+    if not payload.get("available"):
+        return {}
+    return _daily_rank_by_event_id(payload["items"])
+
+
 def events_payload(
     *,
     day: str,
@@ -1020,23 +1047,9 @@ def events_payload(
     if not payload.get("available"):
         return payload
 
-    def score_order_key(item: dict[str, Any]) -> tuple[Any, ...]:
-        return (
-            item["peak_attention_score"],
-            item["registry_account_count"],
-            item["member_count"],
-            item["latest_evidence_at"],
-            item["event_id"],
-        )
-
     # Audit and search are visibility controls, not separate competitions.
     # Freeze one score rank over the complete projection before applying them.
-    daily_rank_by_event_id = {
-        item["event_id"]: rank
-        for rank, item in enumerate(
-            sorted(payload["items"], key=score_order_key, reverse=True), start=1
-        )
-    }
+    daily_rank_by_event_id = _daily_rank_by_event_id(payload["items"])
     daily_rank_total = len(daily_rank_by_event_id)
     needle = query.strip().lower()
     items = [
@@ -1107,7 +1120,7 @@ def events_payload(
             reverse=True,
         )
     else:
-        items.sort(key=score_order_key, reverse=True)
+        items.sort(key=_score_order_key, reverse=True)
 
     if event_id:
         items = [item for item in items if item["event_id"] == event_id]

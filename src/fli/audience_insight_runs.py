@@ -1444,15 +1444,14 @@ def _history_projection_ids(projection: Mapping[str, Any]) -> list[str]:
     mechanically valid framing remains in history so a later editor cannot
     rediscover it as a fresh story.
     """
-    history_ids = [str(value) for value in projection["effective_selected_ids"]]
-    finalization = projection.get("finalization")
-    if (
-        isinstance(finalization, Mapping)
-        and finalization.get("reason_code")
-        == audience_insight_publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
+    history_ids = projection.get("history_selected_ids")
+    if not isinstance(history_ids, list) or any(
+        not isinstance(value, str) or not value for value in history_ids
     ):
-        history_ids = [str(value) for value in projection["base_selected_ids"]]
-    return history_ids
+        raise ValueError("publication projection is missing explicit history IDs")
+    if len(history_ids) != len(set(history_ids)):
+        raise ValueError("publication projection history IDs are not unique")
+    return list(history_ids)
 
 
 def _quality_item_payload(
@@ -2525,7 +2524,7 @@ def _explicit_prior_history(
         path = entry["path"]
         audit_db = path.parent / ADJACENT_PUBLICATION_AUDIT
         finalization_path = (
-            audience_insight_publication_audit.default_finalization_path(path)
+            audience_insight_publication_audit.terminal_finalization_path(path)
         )
         try:
             projection = (

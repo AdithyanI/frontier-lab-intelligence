@@ -265,18 +265,21 @@ function ExtractedInsightRow({ audience, item }: {
   audience: InsightAudience
   item: ExtractedInsightItem
 }) {
-  const accessibleName = `Feed rank ${item.feed_rank}: ${decodeTextEntities(item.claim)}`
-  const titleId = `${audience}-extracted-${item.feed_rank}-title`
+  const feedRankLabel = item.feed_rank === null
+    ? 'Feed rank unavailable'
+    : `Feed rank ${item.feed_rank}`
+  const accessibleName = `${feedRankLabel}: ${decodeTextEntities(item.claim)}`
+  const titleId = `${audience}-extracted-${item.candidate_id}-title`
   return (
     <article className="insight-row" aria-labelledby={titleId}>
       <div className="insight-rank mono">
         <Link
           className="insight-feed-link"
           to={`/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
-          aria-label={`Open Feed rank ${item.feed_rank} in its exact Feed envelope`}
+          aria-label={`Open ${feedRankLabel.toLowerCase()} in its exact Feed envelope`}
           title="Open exact Feed envelope"
         >
-          <strong>#{item.feed_rank}</strong>
+          <strong>{item.feed_rank === null ? '—' : `#${item.feed_rank}`}</strong>
           <span>Feed rank ↗</span>
         </Link>
       </div>
@@ -298,21 +301,24 @@ function InsightRow({ audience, item }: {
     : null
   const accessibleName = `editorial rank ${item.editorial_rank}: ${decodeTextEntities(item.claim)}`
   const titleId = `${audience}-insight-${item.editorial_rank}-title`
+  const feedRankLabel = item.feed_rank === null
+    ? 'Feed rank unavailable'
+    : `Feed rank ${item.feed_rank}`
   return (
     <article className="insight-row" aria-labelledby={titleId}>
       <div
         className="insight-rank mono"
-        aria-label={`Editorial rank ${item.editorial_rank}; Feed rank ${item.feed_rank}`}
+        aria-label={`Editorial rank ${item.editorial_rank}; ${feedRankLabel}`}
       >
         <strong>#{item.editorial_rank}</strong>
         <span>Editorial rank</span>
         <Link
           className="insight-feed-rank insight-feed-rank--link"
           to={`/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
-          aria-label={`Open Feed rank ${item.feed_rank} in its exact Feed envelope`}
+          aria-label={`Open ${feedRankLabel.toLowerCase()} in its exact Feed envelope`}
           title="Open exact Feed envelope"
         >
-          Feed #{item.feed_rank} ↗
+          {item.feed_rank === null ? 'Open Feed envelope ↗' : `Feed #${item.feed_rank} ↗`}
         </Link>
       </div>
       <div className="insight-body">

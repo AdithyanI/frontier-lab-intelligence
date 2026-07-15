@@ -1932,6 +1932,80 @@ def _editorial_finalization_evidence(
         source.close()
 
 
+def _composed_editorial_finalization_evidence(
+    *,
+    source_path: Path,
+    audit_path: Path,
+    prerequisite_path: Path,
+    prerequisite: Mapping[str, Any],
+    editorial_review: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Bind an editorial veto after an immutable audit-disqualification layer."""
+    if prerequisite.get("reason_code") != FINALIZATION_REASON_CODE:
+        raise ValueError(
+            "composed editorial finalization requires an audit-disqualification prerequisite"
+        )
+    expected_prerequisite = default_finalization_path(source_path).resolve()
+    if prerequisite_path.resolve() != expected_prerequisite:
+        raise ValueError(
+            "composed editorial finalization prerequisite is not the adjacent audit layer"
+        )
+    post_audit_ids = [
+        str(value) for value in prerequisite["effective_selected_ids"]
+    ]
+    base_ids = [str(value) for value in prerequisite["base_selected_ids"]]
+    if not post_audit_ids:
+        raise ValueError(
+            "composed editorial finalization requires a remaining audit-cleared item"
+        )
+    review = _normalize_editorial_review(
+        editorial_review,
+        base_ids=post_audit_ids,
+    )
+    removed_ids = [item["candidate_id"] for item in review["removals"]]
+    effective_ids = [
+        candidate_id
+        for candidate_id in post_audit_ids
+        if candidate_id not in removed_ids
+    ]
+    audit_report = prerequisite["audit"]
+    source = _open_readonly(source_path)
+    try:
+        run = _required_singleton(source, "run_meta")
+    finally:
+        source.close()
+    adjudication = audit_report["false_negative_adjudication"]
+    return {
+        "schema_version": COMPOSED_EDITORIAL_FINALIZATION_SCHEMA_VERSION,
+        "reason_code": EDITORIAL_FINALIZATION_REASON_CODE,
+        "source_run_db": str(source_path),
+        "source_run_id": str(run["run_id"]),
+        "audience": str(run["audience"]),
+        "day": str(run["day"]),
+        "audit_db": str(audit_path),
+        "audit_id": str(audit_report["audit_id"]),
+        "audit_cohort_sha256": str(audit_report["audit_cohort_sha256"]),
+        "audit_result_sha256": str(audit_report["audit_result_sha256"]),
+        "source_contract_sha256": str(audit_report["source_contract_sha256"]),
+        "false_negative_adjudication_sha256": adjudication.get("sha256"),
+        "prerequisite_finalization_path": str(prerequisite_path),
+        "prerequisite_finalization_sha256": str(
+            prerequisite["finalization_sha256"]
+        ),
+        "prerequisite_reason_code": str(prerequisite["reason_code"]),
+        "prerequisite_effective_selected_ids": post_audit_ids,
+        "base_selected_ids": base_ids,
+        "post_audit_selected_ids": post_audit_ids,
+        "removed_candidate_ids": removed_ids,
+        "effective_selected_ids": effective_ids,
+        # Audit-disqualified candidates never enter history. Editorially vetoed
+        # audit survivors do, so later editors cannot rediscover the framing.
+        "history_selected_ids": post_audit_ids,
+        "editorial_review": review,
+        "editorial_review_sha256": _sha256(_canonical_json(review)),
+    }
+
+
 def create_editorial_publication_finalization(
     *,
     source_run_db: Path | str,
@@ -1947,7 +2021,59 @@ def create_editorial_publication_finalization(
     """
     source_path = Path(source_run_db).resolve()
     audit_path = Path(audit_db).resolve()
-    path = Path(finalization_path or default_finalization_path(source_path)).resolve()
+    prerequisite_path = default_finalization_path(source_path).resolve()
+    if prerequisite_path.is_file():
+        prerequisite = validate_readonly_publication_finalization(
+            source_run_db=source_path,
+            audit_db=audit_path,
+            finalization_path=prerequisite_path,
+        )
+        if prerequisite["reason_code"] != FINALIZATION_REASON_CODE:
+            raise ValueError(
+                "composed editorial finalization prerequisite must be an "
+                "audit-disqualification finalization"
+            )
+        path = Path(
+            finalization_path or default_editorial_finalization_path(source_path)
+        ).resolve()
+        if path != default_editorial_finalization_path(source_path).resolve():
+            raise ValueError(
+                "composed editorial finalization must use the adjacent editorial layer"
+            )
+        if path.exists():
+            raise ValueError("editorial finalization already exists for this run")
+        evidence = _composed_editorial_finalization_evidence(
+            source_path=source_path,
+            audit_path=audit_path,
+            prerequisite_path=prerequisite_path,
+            prerequisite=prerequisite,
+            editorial_review=editorial_review,
+        )
+        payload = {**evidence, "created_at": _now()}
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        try:
+            with temporary.open("x", encoding="utf-8") as handle:
+                handle.write(_canonical_json(payload) + "\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
+        return {
+            "created": True,
+            "reason_code": EDITORIAL_FINALIZATION_REASON_CODE,
+            "path": str(path),
+            "prerequisite_finalization_path": str(prerequisite_path),
+            "prerequisite_finalization_sha256": prerequisite[
+                "finalization_sha256"
+            ],
+            "effective_selected_ids": list(evidence["effective_selected_ids"]),
+            "history_selected_ids": list(evidence["history_selected_ids"]),
+            "finalization_sha256": _sha256(path.read_text()),
+        }
+
+    path = Path(finalization_path or prerequisite_path).resolve()
     if path.exists():
         raise ValueError("publication finalization already exists for this run")
     source = _open_readonly(source_path)
@@ -2060,11 +2186,101 @@ def _validate_readonly_editorial_publication_finalization(
         "path": str(path),
         "finalization_sha256": _sha256(path.read_text()),
         "base_selected_ids": list(payload["base_selected_ids"]),
+        "post_audit_selected_ids": list(payload["base_selected_ids"]),
         "removed_candidate_ids": list(payload["removed_candidate_ids"]),
         "effective_selected_ids": list(payload["effective_selected_ids"]),
+        "history_selected_ids": list(payload["base_selected_ids"]),
         "failed_dimensions": {},
         "editorial_review": dict(payload["editorial_review"]),
         "audit": audit_report,
+    }
+
+
+def _validate_readonly_composed_editorial_publication_finalization(
+    *,
+    source_path: Path,
+    audit_path: Path,
+    path: Path,
+    payload: Mapping[str, Any],
+) -> dict[str, Any]:
+    expected_fields = {
+        "schema_version",
+        "reason_code",
+        "source_run_db",
+        "source_run_id",
+        "audience",
+        "day",
+        "audit_db",
+        "audit_id",
+        "audit_cohort_sha256",
+        "audit_result_sha256",
+        "source_contract_sha256",
+        "false_negative_adjudication_sha256",
+        "prerequisite_finalization_path",
+        "prerequisite_finalization_sha256",
+        "prerequisite_reason_code",
+        "prerequisite_effective_selected_ids",
+        "base_selected_ids",
+        "post_audit_selected_ids",
+        "removed_candidate_ids",
+        "effective_selected_ids",
+        "history_selected_ids",
+        "editorial_review",
+        "editorial_review_sha256",
+        "created_at",
+    }
+    if set(payload) != expected_fields:
+        raise ValueError("publication finalization has an invalid schema")
+    if not isinstance(payload["created_at"], str) or not payload["created_at"].strip():
+        raise ValueError("publication finalization requires created_at")
+    expected_path = default_editorial_finalization_path(source_path).resolve()
+    if path.resolve() != expected_path:
+        raise ValueError(
+            "composed editorial finalization is not the adjacent terminal layer"
+        )
+    prerequisite_path = default_finalization_path(source_path).resolve()
+    stored_prerequisite_path = Path(
+        str(payload["prerequisite_finalization_path"])
+    ).resolve()
+    if stored_prerequisite_path != prerequisite_path:
+        raise ValueError("editorial prerequisite finalization path drift")
+    prerequisite = validate_readonly_publication_finalization(
+        source_run_db=source_path,
+        audit_db=audit_path,
+        finalization_path=prerequisite_path,
+    )
+    if prerequisite["reason_code"] != FINALIZATION_REASON_CODE:
+        raise ValueError(
+            "composed editorial finalization prerequisite must be an "
+            "audit-disqualification finalization"
+        )
+    expected = _composed_editorial_finalization_evidence(
+        source_path=source_path,
+        audit_path=audit_path,
+        prerequisite_path=prerequisite_path,
+        prerequisite=prerequisite,
+        editorial_review=payload["editorial_review"],
+    )
+    mismatches = [field for field, value in expected.items() if payload[field] != value]
+    if mismatches:
+        raise ValueError(
+            "publication finalization no longer matches its evidence: "
+            + ", ".join(mismatches)
+        )
+    return {
+        "passed": True,
+        "reason_code": EDITORIAL_FINALIZATION_REASON_CODE,
+        "path": str(path),
+        "finalization_sha256": _sha256(path.read_text()),
+        "base_selected_ids": list(payload["base_selected_ids"]),
+        "post_audit_selected_ids": list(payload["post_audit_selected_ids"]),
+        "removed_candidate_ids": list(payload["removed_candidate_ids"]),
+        "effective_selected_ids": list(payload["effective_selected_ids"]),
+        "history_selected_ids": list(payload["history_selected_ids"]),
+        "failed_dimensions": {},
+        "editorial_review": dict(payload["editorial_review"]),
+        "prerequisite_finalization": prerequisite,
+        "audit": prerequisite["audit"],
     }
 
 
@@ -2077,12 +2293,19 @@ def validate_readonly_publication_finalization(
     """Recompute every sidecar binding and return the effective selected set."""
     source_path = Path(source_run_db).resolve()
     audit_path = Path(audit_db).resolve()
-    path = Path(finalization_path or default_finalization_path(source_path)).resolve()
+    path = Path(finalization_path or terminal_finalization_path(source_path)).resolve()
     payload = json.loads(path.read_text())
     if not isinstance(payload, dict):
         raise ValueError("publication finalization has an invalid schema")
     if payload.get("schema_version") == EDITORIAL_FINALIZATION_SCHEMA_VERSION:
         return _validate_readonly_editorial_publication_finalization(
+            source_path=source_path,
+            audit_path=audit_path,
+            path=path,
+            payload=payload,
+        )
+    if payload.get("schema_version") == COMPOSED_EDITORIAL_FINALIZATION_SCHEMA_VERSION:
+        return _validate_readonly_composed_editorial_publication_finalization(
             source_path=source_path,
             audit_path=audit_path,
             path=path,
@@ -2151,8 +2374,10 @@ def validate_readonly_publication_finalization(
         "path": str(path),
         "finalization_sha256": _sha256(path.read_text()),
         "base_selected_ids": list(payload["base_selected_ids"]),
+        "post_audit_selected_ids": list(payload["effective_selected_ids"]),
         "removed_candidate_ids": list(payload["removed_candidate_ids"]),
         "effective_selected_ids": list(payload["effective_selected_ids"]),
+        "history_selected_ids": list(payload["effective_selected_ids"]),
         "failed_dimensions": dict(payload["failed_dimensions"]),
         "audit": audit_report,
     }
@@ -2167,7 +2392,7 @@ def validated_publication_projection(
     """Return the only publishable ID projection, validating all provenance."""
     source_path = Path(source_run_db).resolve()
     audit_path = Path(audit_db).resolve()
-    path = Path(finalization_path or default_finalization_path(source_path)).resolve()
+    path = Path(finalization_path or terminal_finalization_path(source_path)).resolve()
     source = _open_readonly(source_path)
     try:
         base_ids = [
@@ -2178,6 +2403,8 @@ def validated_publication_projection(
         ]
     finally:
         source.close()
+    if finalization_path is not None and not path.is_file():
+        raise FileNotFoundError(path)
     if path.is_file():
         finalization = validate_readonly_publication_finalization(
             source_run_db=source_path,
@@ -2186,12 +2413,15 @@ def validated_publication_projection(
         )
         if finalization["base_selected_ids"] != base_ids:
             raise ValueError("publication finalization base selection is stale")
-        editorial = (
-            finalization["reason_code"] == EDITORIAL_FINALIZATION_REASON_CODE
-        )
+        editorial = finalization["reason_code"] == EDITORIAL_FINALIZATION_REASON_CODE
+        composed = "prerequisite_finalization" in finalization
         return {
             "mode": (
-                "editorial_disqualified_zero"
+                "audit_then_editorial_disqualified_zero"
+                if composed and not finalization["effective_selected_ids"]
+                else "audit_then_editorial_disqualified_trim"
+                if composed
+                else "editorial_disqualified_zero"
                 if editorial and not finalization["effective_selected_ids"]
                 else "editorial_disqualified_trim"
                 if editorial
@@ -2200,9 +2430,13 @@ def validated_publication_projection(
                 else "audit_disqualified_trim"
             ),
             "base_selected_ids": base_ids,
+            "post_audit_selected_ids": list(
+                finalization["post_audit_selected_ids"]
+            ),
             "effective_selected_ids": list(
                 finalization["effective_selected_ids"]
             ),
+            "history_selected_ids": list(finalization["history_selected_ids"]),
             "selected_count": len(finalization["effective_selected_ids"]),
             "audit": finalization["audit"],
             "finalization": finalization,
@@ -2215,7 +2449,9 @@ def validated_publication_projection(
     return {
         "mode": "audit_pass",
         "base_selected_ids": base_ids,
+        "post_audit_selected_ids": base_ids,
         "effective_selected_ids": base_ids,
+        "history_selected_ids": base_ids,
         "selected_count": len(base_ids),
         "audit": audit_report,
         "finalization": None,

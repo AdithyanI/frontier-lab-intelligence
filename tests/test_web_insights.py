@@ -453,6 +453,11 @@ def test_insights_api_returns_only_selected_verified_audience_rows(
         "evaluate_manifest",
         lambda _path: report,
     )
+    monkeypatch.setattr(
+        insight_store.event_store,
+        "current_daily_rank_by_event_id",
+        lambda *, day: {"event-1": 9},
+    )
 
     response = client.get("/api/insights?audience=investment&date=2026-07-11")
     assert response.status_code == 200
@@ -467,7 +472,7 @@ def test_insights_api_returns_only_selected_verified_audience_rows(
     assert payload["run"]["reported_cost_usd"] == 0.035
     assert [item["event_id"] for item in payload["items"]] == ["event-1"]
     assert payload["items"][0]["editorial_rank"] == 1
-    assert payload["items"][0]["feed_rank"] == 4
+    assert payload["items"][0]["feed_rank"] == 9
     assert payload["items"][0]["citation"]["quote"] == "Exact quote"
 
 
@@ -558,11 +563,16 @@ def test_insights_read_model_is_honest_when_missing(tmp_path):
     assert payload["items"] == []
 
 
-def test_feed_ranked_extraction_view_reads_existing_candidate_rows(tmp_path):
+def test_feed_ranked_extraction_view_reads_current_feed_rank(tmp_path, monkeypatch):
     db = tmp_path / "2026-07-11" / "investment" / "run" / "insights.db"
     _fixture(
         db,
         run_id="audience-insights-v2-production-investment-2026-07-11-test",
+    )
+    monkeypatch.setattr(
+        insight_store.event_store,
+        "current_daily_rank_by_event_id",
+        lambda *, day: {"event-1": 9},
     )
 
     dates = insight_store.extraction_dates_payload(
@@ -575,7 +585,7 @@ def test_feed_ranked_extraction_view_reads_existing_candidate_rows(tmp_path):
     assert dates["dates"] == [{"day": "2026-07-11", "item_count": 1}]
     assert payload["available"] is True
     assert payload["run"]["complete_count"] == 1
-    assert [item["feed_rank"] for item in payload["items"]] == [4]
+    assert [item["feed_rank"] for item in payload["items"]] == [9]
     assert "editorial_rank" not in payload["items"][0]
     assert payload["items"][0]["citation"]["quote"] == "Exact quote"
 

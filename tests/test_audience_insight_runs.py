@@ -1260,6 +1260,7 @@ def test_prior_history_consumes_effective_finalized_zero_projection(
         return {
             "mode": "audit_disqualified_zero",
             "effective_selected_ids": [],
+            "history_selected_ids": [],
         }
 
     monkeypatch.setattr(
@@ -1301,6 +1302,7 @@ def test_prior_history_retains_senior_editorial_veto_for_duplicate_suppression(
             "mode": "editorial_disqualified_zero",
             "base_selected_ids": [candidate_id],
             "effective_selected_ids": [],
+            "history_selected_ids": [candidate_id],
             "finalization": {"reason_code": finalization_reason},
         },
     )
@@ -1346,12 +1348,14 @@ def test_explicit_history_preserves_exact_order_and_projection_semantics(
                 "mode": "audit_disqualified_zero",
                 "base_selected_ids": [candidate_id],
                 "effective_selected_ids": [],
+                "history_selected_ids": [],
                 "finalization": {"reason_code": "audit_disqualification"},
             }
         return {
             "mode": "editorial_disqualified_zero",
             "base_selected_ids": [candidate_id],
             "effective_selected_ids": [],
+            "history_selected_ids": [candidate_id],
             "finalization": {
                 "reason_code": audience_insight_runs.audience_insight_publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
             },

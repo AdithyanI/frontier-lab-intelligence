@@ -450,7 +450,7 @@ export interface InsightItem {
   event_id: string
   day: string
   editorial_rank: number
-  feed_rank: number
+  feed_rank: number | null
   decision_value: string
   claim: string
   claim_posture: InsightClaimPosture

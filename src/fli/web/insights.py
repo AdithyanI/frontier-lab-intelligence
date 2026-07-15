@@ -13,6 +13,7 @@ from fli import (
     audience_insight_runs,
     audience_insights,
 )
+from fli.web import events as event_store
 
 
 DEFAULT_INSIGHTS_ROOT = audience_insight_runs.DEFAULT_RUN_ROOT
@@ -363,32 +364,46 @@ def extraction_insights_payload(
                  AND supporting_quote IS NOT NULL
                ORDER BY feed_rank, event_id"""
         ).fetchall()
-        items = [
-            {
-                "candidate_id": str(row["candidate_id"]),
-                "event_id": str(row["event_id"]),
-                "day": str(row["day"]),
-                "feed_rank": int(row["feed_rank"]),
-                "claim": str(row["claim"]),
-                "claim_posture": str(row["claim_posture"]),
-                "why_it_matters": str(row["why_it_matters"]),
-                "audience_fields": json.loads(str(row["audience_fields_json"])),
-                "citation": {
-                    "quote": str(row["supporting_quote"]),
-                    "url": str(row["citation_source_url"]),
-                    "source_type": str(row["citation_source_type"]),
-                    "source_id": str(row["citation_source_id"]),
-                    "author": row["citation_source_author"],
-                    "title": row["citation_source_title"],
-                    "source_sha256": str(row["citation_source_sha256"]),
-                    "block_index": int(row["citation_block_index"]),
-                    "section_ordinal": row["citation_section_ordinal"],
-                    "char_start": int(row["citation_char_start"]),
-                    "char_end": int(row["citation_char_end"]),
-                },
-            }
-            for row in rows
-        ]
+        feed_ranks = event_store.current_daily_rank_by_event_id(
+            day=str(summary["day"])
+        )
+        items = []
+        for row in rows:
+            event_id = str(row["event_id"])
+            items.append(
+                {
+                    "candidate_id": str(row["candidate_id"]),
+                    "event_id": event_id,
+                    "day": str(row["day"]),
+                    "feed_rank": feed_ranks.get(event_id),
+                    "claim": str(row["claim"]),
+                    "claim_posture": str(row["claim_posture"]),
+                    "why_it_matters": str(row["why_it_matters"]),
+                    "audience_fields": json.loads(
+                        str(row["audience_fields_json"])
+                    ),
+                    "citation": {
+                        "quote": str(row["supporting_quote"]),
+                        "url": str(row["citation_source_url"]),
+                        "source_type": str(row["citation_source_type"]),
+                        "source_id": str(row["citation_source_id"]),
+                        "author": row["citation_source_author"],
+                        "title": row["citation_source_title"],
+                        "source_sha256": str(row["citation_source_sha256"]),
+                        "block_index": int(row["citation_block_index"]),
+                        "section_ordinal": row["citation_section_ordinal"],
+                        "char_start": int(row["citation_char_start"]),
+                        "char_end": int(row["citation_char_end"]),
+                    },
+                }
+            )
+        items.sort(
+            key=lambda item: (
+                item["feed_rank"] is None,
+                item["feed_rank"] if item["feed_rank"] is not None else 0,
+                item["event_id"],
+            )
+        )
         return {
             "available": bool(items),
             "reason": None if items else "No useful citation-bound items were extracted.",
@@ -526,35 +541,38 @@ def insights_payload(
                  AND item.citation_source_sha256 IS NOT NULL
                ORDER BY published.publication_rank"""
         ).fetchall()
-        base_items = [
-            {
-                "candidate_id": str(row["candidate_id"]),
-                "event_id": str(row["event_id"]),
-                "day": str(row["day"]),
-                "editorial_rank": int(row["editorial_rank"]),
-                "original_editorial_rank": int(row["original_editorial_rank"]),
-                "feed_rank": int(row["feed_rank"]),
-                "decision_value": str(row["decision_value"]),
-                "claim": str(row["claim"]),
-                "claim_posture": str(row["claim_posture"]),
-                "why_it_matters": str(row["why_it_matters"]),
-                "audience_fields": json.loads(row["audience_fields_json"]),
-                "citation": {
-                    "quote": str(row["supporting_quote"]),
-                    "url": str(row["citation_source_url"]),
-                    "source_type": str(row["citation_source_type"]),
-                    "source_id": str(row["citation_source_id"]),
-                    "author": row["citation_source_author"],
-                    "title": row["citation_source_title"],
-                    "source_sha256": str(row["citation_source_sha256"]),
-                    "block_index": int(row["citation_block_index"]),
-                    "section_ordinal": row["citation_section_ordinal"],
-                    "char_start": int(row["citation_char_start"]),
-                    "char_end": int(row["citation_char_end"]),
-                },
-            }
-            for row in rows
-        ]
+        feed_ranks = event_store.current_daily_rank_by_event_id(day=str(run["day"]))
+        base_items = []
+        for row in rows:
+            event_id = str(row["event_id"])
+            base_items.append(
+                {
+                    "candidate_id": str(row["candidate_id"]),
+                    "event_id": event_id,
+                    "day": str(row["day"]),
+                    "editorial_rank": int(row["editorial_rank"]),
+                    "original_editorial_rank": int(row["original_editorial_rank"]),
+                    "feed_rank": feed_ranks.get(event_id),
+                    "decision_value": str(row["decision_value"]),
+                    "claim": str(row["claim"]),
+                    "claim_posture": str(row["claim_posture"]),
+                    "why_it_matters": str(row["why_it_matters"]),
+                    "audience_fields": json.loads(row["audience_fields_json"]),
+                    "citation": {
+                        "quote": str(row["supporting_quote"]),
+                        "url": str(row["citation_source_url"]),
+                        "source_type": str(row["citation_source_type"]),
+                        "source_id": str(row["citation_source_id"]),
+                        "author": row["citation_source_author"],
+                        "title": row["citation_source_title"],
+                        "source_sha256": str(row["citation_source_sha256"]),
+                        "block_index": int(row["citation_block_index"]),
+                        "section_ordinal": row["citation_section_ordinal"],
+                        "char_start": int(row["citation_char_start"]),
+                        "char_end": int(row["citation_char_end"]),
+                    },
+                }
+            )
         gate_result = json.loads(str(gate["result_json"]))
         base_selected_count = int(gate_result.get("selected_count", -1))
         if base_selected_count != len(base_items):

@@ -472,6 +472,190 @@ def _refreeze_passing_audit(source: Path, audit_db: Path) -> None:
     audit.close()
 
 
+def _make_two_item_audit_then_editorial_run(
+    source: Path,
+    audit_db: Path,
+) -> tuple[str, str]:
+    """Expand one fixture run, then freeze one audit fail and one survivor."""
+    conn = audience_insight_runs.connect_run(source)
+    first = conn.execute(
+        "SELECT * FROM candidate_item ORDER BY feed_rank, event_id LIMIT 1"
+    ).fetchone()
+    assert first is not None
+    first_id = str(first["candidate_id"])
+    packet_payload = json.loads(str(first["packet_json"]))
+    second_event = f"{first['event_id']}-second"
+    packet_payload["event_id"] = second_event
+    packet_payload["feed_rank"] = int(first["feed_rank"]) + 1
+    packet_payload["sources"][0]["source_id"] += "-second"
+    packet_payload["sources"][0]["url"] += "-second"
+    packet = audience_insight_runs._packet_from_payload(packet_payload)
+    canonical_packet = audience_insight_runs._packet_payload(packet)
+    packet_text = reconciliation._canonical_json(canonical_packet)
+    render_version = audience_insight_runs.declared_input_render_version(conn)
+    model_input = audience_insights.render_model_input(
+        packet,
+        version=render_version,
+    )
+    audience = str(
+        conn.execute(
+            "SELECT audience FROM run_meta WHERE singleton = 1"
+        ).fetchone()[0]
+    )
+    second_id = audience_insight_runs._candidate_id(
+        str(first["day"]), audience, second_event
+    )
+    candidate = dict(first)
+    candidate.update(
+        {
+            "candidate_id": second_id,
+            "event_id": second_event,
+            "feed_rank": int(first["feed_rank"]) + 1,
+            "packet_json": packet_text,
+            "input_text": model_input,
+            "input_sha256": reconciliation._sha256(model_input),
+            "prompt_cache_key": audience_insights.prompt_cache_key(
+                audience, second_event
+            ),
+            "claim": "A second bounded result cleared extraction.",
+            "supporting_quote": canonical_packet["sources"][0]["text"],
+            "citation_source_id": canonical_packet["sources"][0]["source_id"],
+            "citation_source_url": canonical_packet["sources"][0]["url"],
+            "response_id": "resp-extract-second",
+        }
+    )
+    candidate_columns = list(candidate)
+    with conn:
+        conn.execute(
+            f"INSERT INTO candidate_item ({','.join(candidate_columns)}) "
+            f"VALUES ({','.join('?' for _ in candidate_columns)})",
+            tuple(candidate[column] for column in candidate_columns),
+        )
+        attempt = dict(
+            conn.execute(
+                "SELECT * FROM candidate_attempt WHERE candidate_id = ?",
+                (first_id,),
+            ).fetchone()
+        )
+        attempt.update(
+            {"candidate_id": second_id, "response_id": "resp-extract-second"}
+        )
+        attempt_columns = list(attempt)
+        conn.execute(
+            f"INSERT INTO candidate_attempt ({','.join(attempt_columns)}) "
+            f"VALUES ({','.join('?' for _ in attempt_columns)})",
+            tuple(attempt[column] for column in attempt_columns),
+        )
+        review = dict(
+            conn.execute(
+                "SELECT * FROM item_review WHERE candidate_id = ?",
+                (first_id,),
+            ).fetchone()
+        )
+        review.update(
+            {
+                "candidate_id": second_id,
+                "prompt_cache_key": "review-cache-second",
+                "response_id": "resp-review-second",
+            }
+        )
+        review_columns = list(review)
+        conn.execute(
+            f"INSERT INTO item_review ({','.join(review_columns)}) "
+            f"VALUES ({','.join('?' for _ in review_columns)})",
+            tuple(review[column] for column in review_columns),
+        )
+        conn.execute(
+            "INSERT INTO daily_selection "
+            "(editorial_rank, candidate_id, decision_value, audit_reason) "
+            "VALUES (2, ?, 'experiment_or_benchmark', 'Second exact survivor.')",
+            (second_id,),
+        )
+        conn.execute(
+            "INSERT INTO publication_selection "
+            "(publication_rank, original_editorial_rank, candidate_id, activated_at) "
+            "VALUES (2, 2, ?, ?)",
+            (second_id, NOW),
+        )
+        review_input = json.dumps(
+            {
+                "selected": [
+                    {"candidate_id": first_id},
+                    {"candidate_id": second_id},
+                ]
+            },
+            sort_keys=True,
+        )
+        conn.execute(
+            "UPDATE day_set_review SET input_text = ?, input_sha256 = ? "
+            "WHERE singleton = 1",
+            (review_input, reconciliation._sha256(review_input)),
+        )
+        conn.execute(
+            "UPDATE editor_run SET selected_count = 2 WHERE singleton = 1"
+        )
+        gate = json.loads(
+            str(
+                conn.execute(
+                    "SELECT result_json FROM quality_gate WHERE singleton = 1"
+                ).fetchone()[0]
+            )
+        )
+        gate["selected_count"] = 2
+        conn.execute(
+            "UPDATE quality_gate SET result_json = ? WHERE singleton = 1",
+            (reconciliation._canonical_json(gate),),
+        )
+        packets = [
+            json.loads(str(row[0]))
+            for row in conn.execute(
+                "SELECT packet_json FROM candidate_item ORDER BY feed_rank, event_id"
+            ).fetchall()
+        ]
+        event_ids = [packet["event_id"] for packet in packets]
+        conn.execute(
+            "UPDATE run_meta SET expected_count = 2, event_ids_json = ?, "
+            "cohort_sha256 = ? WHERE singleton = 1",
+            (
+                reconciliation._canonical_json(event_ids),
+                reconciliation._sha256(reconciliation._canonical_json(packets)),
+            ),
+        )
+    conn.close()
+
+    shutil.rmtree(audit_db.parent)
+    audit = publication_audit.connect(audit_db)
+    publication_audit.freeze_audit(
+        audit,
+        audit_id="publication-audit-composed-finalization",
+        source_run_db=source,
+        reject_sample_limit=0,
+    )
+    meta = audit.execute("SELECT * FROM audit_run WHERE singleton = 1").fetchone()
+    rows = audit.execute("SELECT * FROM audit_item ORDER BY audit_item_id").fetchall()
+    for row in rows:
+        result = _passing_audit_result(str(row["audit_item_id"]), meta)
+        if str(row["source_candidate_id"]) == first_id:
+            result.update(
+                {
+                    "actionability": "fail",
+                    "specificity": "fail",
+                    "failure_codes": ["generic_engineering_action"],
+                    "rationale": "The first item fails the external publication audit.",
+                }
+            )
+            result["raw_output_text"] = json.dumps(
+                {
+                    field: result[field]
+                    for field in publication_audit.OUTPUT_FIELDS
+                },
+                sort_keys=True,
+            )
+        publication_audit._store_success(audit, row, meta, result)
+    audit.close()
+    return first_id, second_id
+
+
 def _seed_terminal_x_article(
     path: Path,
     *,
@@ -814,6 +998,75 @@ def test_reconciliation_accepts_exact_editorial_disqualification(tmp_path):
         if row["audience"] == "investment" and row["day"] == "2026-07-12"
     )
     assert next_investment["history"]["prior_item_count"] == 1
+
+
+def test_reconciliation_binds_composed_audit_and_editorial_finalizations(tmp_path):
+    manifest, payload = _manifest(tmp_path)
+    entry = payload["runs"][0]
+    source = Path(entry["source_run_db"])
+    audit = Path(entry["audit_db"])
+    audit_failed_id, editorial_id = _make_two_item_audit_then_editorial_run(
+        source, audit
+    )
+    entry["expected_selected_count"] = 2
+
+    publication_audit.create_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+    )
+    prerequisite = publication_audit.default_finalization_path(source)
+    prerequisite_sha = reconciliation._file_sha256(prerequisite)
+    publication_audit.create_editorial_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+        editorial_review={
+            "schema_version": publication_audit.EDITORIAL_REVIEW_SCHEMA_VERSION,
+            "review_id": "senior-product-review-composed",
+            "reviewer": "product-owner",
+            "removals": [
+                {
+                    "candidate_id": editorial_id,
+                    "reason_code": "insufficient_decision_value",
+                    "rationale": "The audit survivor does not sharpen a decision.",
+                }
+            ],
+        },
+    )
+    terminal = publication_audit.default_editorial_finalization_path(source)
+    entry["finalization_path"] = str(terminal)
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+    report = reconciliation.evaluate_manifest(manifest)
+
+    assert report["passed"] is True
+    finalized = next(
+        row for row in report["runs"] if row["source_run_db"] == str(source)
+    )
+    assert finalized["audit"]["passed"] is False
+    assert finalized["audit"]["status"] == (
+        "failed_selected_audit_and_editorial_finalized"
+    )
+    assert finalized["selection"]["base_ids"] == [audit_failed_id, editorial_id]
+    assert finalized["selection"]["post_audit_ids"] == [editorial_id]
+    assert finalized["selection"]["effective_ids"] == []
+    assert finalized["selection"]["history_ids"] == [editorial_id]
+    assert finalized["finalization"]["path"] == str(terminal)
+    assert finalized["finalization"]["sha256"] == reconciliation._file_sha256(
+        terminal
+    )
+    assert finalized["finalization"]["prerequisite"] == {
+        "path": str(prerequisite),
+        "reason_code": publication_audit.FINALIZATION_REASON_CODE,
+        "sha256": prerequisite_sha,
+        "effective_selected_ids": [editorial_id],
+    }
+
+    prerequisite.write_text(prerequisite.read_text() + " ")
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match="finalization validation failed",
+    ):
+        reconciliation.evaluate_manifest(manifest)
 
 
 def test_write_report_atomically_replaces_existing_bytes(tmp_path, monkeypatch):

@@ -1071,6 +1071,194 @@ def test_editorial_finalization_fails_closed_on_substitution_or_tampering(tmp_pa
         )
 
 
+def _audit_then_editorial_chain(tmp_path):
+    source = _finalizable_source_run(
+        tmp_path / "run" / "insights.db", active_count=2
+    )
+    audit = _complete_finalization_audit(
+        source,
+        source.parent / "publication-audit-v1" / "audit.db",
+        failed_selected_ids={"unselected-pass"},
+    )
+    publication_audit.create_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+    )
+    prerequisite = publication_audit.default_finalization_path(source)
+    prerequisite_bytes = prerequisite.read_bytes()
+    review = {
+        "schema_version": publication_audit.EDITORIAL_REVIEW_SCHEMA_VERSION,
+        "review_id": "senior-product-review-composed",
+        "reviewer": "product-owner",
+        "removals": [
+            {
+                "candidate_id": "selected",
+                "reason_code": "insufficient_decision_value",
+                "rationale": "The audit survivor does not sharpen a decision.",
+            }
+        ],
+    }
+    result = publication_audit.create_editorial_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+        editorial_review=review,
+    )
+    return source, audit, prerequisite, prerequisite_bytes, review, result
+
+
+def test_composed_editorial_layer_preserves_audit_sidecar_and_history(tmp_path):
+    source, audit, prerequisite, prerequisite_bytes, review, result = (
+        _audit_then_editorial_chain(tmp_path)
+    )
+
+    terminal = publication_audit.default_editorial_finalization_path(source)
+    assert result["path"] == str(terminal)
+    assert result["prerequisite_finalization_path"] == str(prerequisite)
+    assert result["prerequisite_finalization_sha256"] == publication_audit._sha256(
+        prerequisite_bytes.decode()
+    )
+    assert prerequisite.read_bytes() == prerequisite_bytes
+    assert terminal.is_file()
+
+    validation = publication_audit.validate_readonly_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+    )
+    assert validation["base_selected_ids"] == ["selected", "unselected-pass"]
+    assert validation["post_audit_selected_ids"] == ["selected"]
+    assert validation["removed_candidate_ids"] == ["selected"]
+    assert validation["effective_selected_ids"] == []
+    assert validation["history_selected_ids"] == ["selected"]
+    assert validation["editorial_review"] == review
+    assert validation["prerequisite_finalization"]["removed_candidate_ids"] == [
+        "unselected-pass"
+    ]
+
+    projection = publication_audit.validated_publication_projection(
+        source_run_db=source,
+        audit_db=audit,
+    )
+    assert projection["mode"] == "audit_then_editorial_disqualified_zero"
+    assert projection["base_selected_ids"] == ["selected", "unselected-pass"]
+    assert projection["post_audit_selected_ids"] == ["selected"]
+    assert projection["effective_selected_ids"] == []
+    assert projection["history_selected_ids"] == ["selected"]
+
+
+def test_composed_editorial_layer_rejects_audit_failed_candidate(tmp_path):
+    source = _finalizable_source_run(
+        tmp_path / "run" / "insights.db", active_count=2
+    )
+    audit = _complete_finalization_audit(
+        source,
+        source.parent / "publication-audit-v1" / "audit.db",
+        failed_selected_ids={"unselected-pass"},
+    )
+    publication_audit.create_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+    )
+    review = {
+        "schema_version": publication_audit.EDITORIAL_REVIEW_SCHEMA_VERSION,
+        "review_id": "invalid-audit-failed-removal",
+        "reviewer": "product-owner",
+        "removals": [
+            {
+                "candidate_id": "unselected-pass",
+                "reason_code": "insufficient_decision_value",
+                "rationale": "This item was already removed by the audit.",
+            }
+        ],
+    }
+    with pytest.raises(ValueError, match="active selected candidate"):
+        publication_audit.create_editorial_publication_finalization(
+            source_run_db=source,
+            audit_db=audit,
+            editorial_review=review,
+        )
+
+
+def test_composed_editorial_layer_fails_on_prerequisite_drift_or_removal(tmp_path):
+    source, audit, prerequisite, prerequisite_bytes, _review, _result = (
+        _audit_then_editorial_chain(tmp_path)
+    )
+
+    payload = json.loads(prerequisite.read_text())
+    payload["effective_selected_ids"] = ["selected", "unselected-pass"]
+    prerequisite.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="effective_selected_ids"):
+        publication_audit.validated_publication_projection(
+            source_run_db=source,
+            audit_db=audit,
+        )
+
+    prerequisite.write_bytes(prerequisite_bytes)
+    prerequisite.unlink()
+    with pytest.raises(FileNotFoundError):
+        publication_audit.validated_publication_projection(
+            source_run_db=source,
+            audit_db=audit,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("effective_selected_ids", ["unselected-pass"]),
+        ("post_audit_selected_ids", ["unselected-pass", "selected"]),
+        ("history_selected_ids", ["unselected-pass"]),
+    ],
+)
+def test_composed_editorial_layer_rejects_promotion_substitution_or_reordering(
+    tmp_path, field, replacement
+):
+    source, audit, _prerequisite, _bytes, _review, _result = (
+        _audit_then_editorial_chain(tmp_path)
+    )
+    terminal = publication_audit.default_editorial_finalization_path(source)
+    payload = json.loads(terminal.read_text())
+    payload[field] = replacement
+    terminal.write_text(json.dumps(payload))
+
+    with pytest.raises(ValueError, match=field):
+        publication_audit.validated_publication_projection(
+            source_run_db=source,
+            audit_db=audit,
+        )
+
+
+def test_composed_editorial_layer_rejects_editorial_prerequisite(tmp_path):
+    source = _finalizable_source_run(tmp_path / "run" / "insights.db")
+    audit = _complete_finalization_audit(
+        source,
+        source.parent / "publication-audit-v1" / "audit.db",
+        selected_passes=True,
+    )
+    review = {
+        "schema_version": publication_audit.EDITORIAL_REVIEW_SCHEMA_VERSION,
+        "review_id": "first-editorial-review",
+        "reviewer": "product-owner",
+        "removals": [
+            {
+                "candidate_id": "selected",
+                "reason_code": "insufficient_decision_value",
+                "rationale": "The item does not sharpen a decision.",
+            }
+        ],
+    }
+    publication_audit.create_editorial_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+        editorial_review=review,
+    )
+    with pytest.raises(ValueError, match="prerequisite must be an audit"):
+        publication_audit.create_editorial_publication_finalization(
+            source_run_db=source,
+            audit_db=audit,
+            editorial_review=review,
+        )
+
+
 def test_finalization_blocks_unresolved_false_negative_and_stale_source(tmp_path):
     source = _finalizable_source_run(tmp_path / "unresolved" / "insights.db")
     audit = _complete_finalization_audit(

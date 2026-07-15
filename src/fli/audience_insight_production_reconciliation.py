@@ -61,6 +61,10 @@ ADJACENT_FINALIZATION = (
     Path(publication_audit.FINALIZATION_DIR)
     / publication_audit.FINALIZATION_FILENAME
 )
+ADJACENT_EDITORIAL_FINALIZATION = (
+    Path(publication_audit.EDITORIAL_FINALIZATION_DIR)
+    / publication_audit.FINALIZATION_FILENAME
+)
 _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _ARTIFACT_ID = re.compile(r"^[0-9a-f]{64}$")
 _RECALL_SAMPLE_ID = re.compile(r"^recall-sample-[0-9a-f]{20}$")
@@ -419,9 +423,11 @@ def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
                 manifest_path=manifest_path,
                 label=f"runs[{index}].finalization_path",
             )
-            if finalization_path != (
-                source_path.parent / ADJACENT_FINALIZATION
-            ).resolve():
+            allowed_finalization_paths = {
+                (source_path.parent / ADJACENT_FINALIZATION).resolve(),
+                (source_path.parent / ADJACENT_EDITORIAL_FINALIZATION).resolve(),
+            }
+            if finalization_path not in allowed_finalization_paths:
                 raise ProductionReconciliationError(
                     f"runs[{index}].finalization_path is not adjacent to source_run_db"
                 )
@@ -1281,40 +1287,66 @@ def _inspect_run(
                     f"quality gate padding reconciliation drift: {source_path}"
                 )
 
-        default_finalization = publication_audit.default_finalization_path(source_path)
+        default_editorial_finalization = (
+            publication_audit.default_editorial_finalization_path(source_path)
+        )
+        terminal_finalization = publication_audit.terminal_finalization_path(
+            source_path
+        )
         if finalization_path is None:
-            if default_finalization.exists():
+            if terminal_finalization.exists():
                 raise ProductionReconciliationError(
-                    f"manifest omitted existing finalization: {default_finalization}"
+                    f"manifest omitted existing finalization: {terminal_finalization}"
                 )
-            audit_report = publication_audit.validate_readonly_publication_audit(
+            projection = publication_audit.validated_publication_projection(
                 source_run_db=source_path,
                 audit_db=audit_path,
-                expected_selected_count=expected_selected,
             )
-            effective_ids = base_ids
-            finalization_report = None
         else:
-            finalization_report = (
-                publication_audit.validate_readonly_publication_finalization(
+            if (
+                default_editorial_finalization.exists()
+                and finalization_path != default_editorial_finalization
+            ):
+                raise ProductionReconciliationError(
+                    f"manifest finalization is not the terminal editorial layer: "
+                    f"{source_path}"
+                )
+            try:
+                projection = publication_audit.validated_publication_projection(
                     source_run_db=source_path,
                     audit_db=audit_path,
                     finalization_path=finalization_path,
                 )
-            )
-            if finalization_report["base_selected_ids"] != base_ids:
+            except (
+                FileNotFoundError,
+                IndexError,
+                KeyError,
+                OSError,
+                TypeError,
+                ValueError,
+                sqlite3.Error,
+            ) as exc:
                 raise ProductionReconciliationError(
-                    f"finalization base selection drift: {source_path}"
+                    f"finalization validation failed: {source_path}: {exc}"
+                ) from exc
+        if projection["base_selected_ids"] != base_ids:
+            raise ProductionReconciliationError(
+                f"finalization base selection drift: {source_path}"
+            )
+        audit_report = projection["audit"]
+        finalization_report = projection["finalization"]
+        post_audit_ids = list(projection["post_audit_selected_ids"])
+        effective_ids = list(projection["effective_selected_ids"])
+        history_ids = list(projection["history_selected_ids"])
+        for label, ids in (
+            ("post-audit", post_audit_ids),
+            ("effective", effective_ids),
+            ("history", history_ids),
+        ):
+            if len(ids) != len(set(ids)) or any(value not in base_ids for value in ids):
+                raise ProductionReconciliationError(
+                    f"{label} publication projection is invalid: {source_path}"
                 )
-            audit_report = finalization_report["audit"]
-            effective_ids = list(finalization_report["effective_selected_ids"])
-        history_ids = (
-            base_ids
-            if finalization_report is not None
-            and finalization_report["reason_code"]
-            == publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
-            else effective_ids
-        )
 
         audit_meta = audit.execute(
             "SELECT selected_count, reject_sample_count FROM audit_run WHERE singleton = 1"
@@ -1349,6 +1381,21 @@ def _inspect_run(
             raise ProductionReconciliationError(
                 f"source event_ids_json is not an exact unique ID list: {source_path}"
             )
+        prerequisite_report = (
+            finalization_report.get("prerequisite_finalization")
+            if finalization_report is not None
+            else None
+        )
+        audit_status = "passed"
+        if prerequisite_report is not None:
+            audit_status = "failed_selected_audit_and_editorial_finalized"
+        elif finalization_report is not None:
+            audit_status = (
+                "passed_selected_editorial_finalized"
+                if finalization_report["reason_code"]
+                == publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
+                else "failed_selected_finalized"
+            )
         return {
             "audience": str(meta["audience"]),
             "day": str(meta["day"]),
@@ -1376,20 +1423,20 @@ def _inspect_run(
                 "effective_publication": len(effective_ids),
             },
             "selection": {
+                "base_ids": base_ids,
                 "base_ids_sha256": _sha256(_canonical_json(base_ids)),
+                "post_audit_ids": post_audit_ids,
+                "post_audit_ids_sha256": _sha256(
+                    _canonical_json(post_audit_ids)
+                ),
+                "effective_ids": effective_ids,
                 "effective_ids_sha256": _sha256(_canonical_json(effective_ids)),
+                "history_ids": history_ids,
+                "history_ids_sha256": _sha256(_canonical_json(history_ids)),
             },
             "telemetry": source_telemetry,
             "audit": {
-                "status": (
-                    "passed_selected_editorial_finalized"
-                    if finalization_report is not None
-                    and finalization_report["reason_code"]
-                    == publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
-                    else "failed_selected_finalized"
-                    if finalization_report is not None
-                    else "passed"
-                ),
+                "status": audit_status,
                 "passed": bool(audit_report["passed"]),
                 "audit_id": str(audit_report["audit_id"]),
                 "selected_count": int(audit_meta["selected_count"]),
@@ -1412,6 +1459,20 @@ def _inspect_run(
                     "removed_candidate_ids": list(
                         finalization_report["removed_candidate_ids"]
                     ),
+                    "prerequisite": (
+                        {
+                            "path": str(prerequisite_report["path"]),
+                            "reason_code": str(prerequisite_report["reason_code"]),
+                            "sha256": str(
+                                prerequisite_report["finalization_sha256"]
+                            ),
+                            "effective_selected_ids": list(
+                                prerequisite_report["effective_selected_ids"]
+                            ),
+                        }
+                        if prerequisite_report is not None
+                        else None
+                    ),
                 }
                 if finalization_report is not None
                 else {
@@ -1420,6 +1481,7 @@ def _inspect_run(
                     "reason_code": None,
                     "sha256": None,
                     "removed_candidate_ids": [],
+                    "prerequisite": None,
                 }
             ),
             "_event_ids": event_ids,
