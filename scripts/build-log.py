@@ -298,7 +298,8 @@ def bounded_limit(value: int) -> int:
 
 def recent_entries(args: argparse.Namespace) -> dict[str, object]:
     limit = bounded_limit(args.limit)
-    records = load_records()
+    with append_lock():
+        records = load_records()
     selected = records[-limit:]
     return {
         "total_count": len(records),
@@ -318,7 +319,8 @@ def search_entries(args: argparse.Namespace) -> dict[str, object]:
             hint="Provide a word or phrase to search across all build-log fields.",
         )
     needle = query.casefold()
-    records = load_records()
+    with append_lock():
+        records = load_records()
     matches = [
         record
         for record in records
@@ -335,8 +337,9 @@ def search_entries(args: argparse.Namespace) -> dict[str, object]:
 
 
 def validate_log(_args: argparse.Namespace) -> dict[str, object]:
-    records = load_records()
-    paths = source_paths()
+    with append_lock():
+        records = load_records()
+        paths = source_paths()
     return {
         "entry_count": len(records),
         "source_count": len(paths),
@@ -373,40 +376,41 @@ def render_timeline(entries: Sequence[dict[str, str]]) -> str:
 
 
 def render_log(_args: argparse.Namespace) -> dict[str, object]:
-    records = load_records()
-    entries = [record.entry for record in records]
-    timeline = render_timeline(entries)
-    try:
-        text = MD.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise ClientError(
-            "E_IO",
-            f"Could not read {display_path(MD)}: {exc}",
-            hint="Restore the Markdown build-log shell before rendering.",
-            exit_code=1,
-            retryable=True,
-        ) from exc
-
-    if BEGIN in text and END in text:
-        head, rest = text.split(BEGIN, 1)
-        _, tail = rest.split(END, 1)
-        rendered = head + timeline + tail
-    else:
-        heading = "## Build Timeline"
-        next_section = "## Learning Notes"
-        if heading not in text or next_section not in text:
+    with append_lock():
+        records = load_records()
+        entries = [record.entry for record in records]
+        timeline = render_timeline(entries)
+        try:
+            text = MD.read_text(encoding="utf-8")
+        except OSError as exc:
             raise ClientError(
-                "E_INVALID_MARKDOWN_SHELL",
-                f"{display_path(MD)} is missing its timeline or learning-notes heading",
-                hint="Restore both headings, then rerun render.",
-            )
-        head, rest = text.split(heading, 1)
-        _, tail = rest.split(next_section, 1)
-        rendered = head + heading + "\n\n" + timeline + "\n\n" + next_section + tail
+                "E_IO",
+                f"Could not read {display_path(MD)}: {exc}",
+                hint="Restore the Markdown build-log shell before rendering.",
+                exit_code=1,
+                retryable=True,
+            ) from exc
 
-    changed = rendered != text
-    if changed:
-        MD.write_text(rendered, encoding="utf-8")
+        if BEGIN in text and END in text:
+            head, rest = text.split(BEGIN, 1)
+            _, tail = rest.split(END, 1)
+            rendered = head + timeline + tail
+        else:
+            heading = "## Build Timeline"
+            next_section = "## Learning Notes"
+            if heading not in text or next_section not in text:
+                raise ClientError(
+                    "E_INVALID_MARKDOWN_SHELL",
+                    f"{display_path(MD)} is missing its timeline or learning-notes heading",
+                    hint="Restore both headings, then rerun render.",
+                )
+            head, rest = text.split(heading, 1)
+            _, tail = rest.split(next_section, 1)
+            rendered = head + heading + "\n\n" + timeline + "\n\n" + next_section + tail
+
+        changed = rendered != text
+        if changed:
+            MD.write_text(rendered, encoding="utf-8")
     return {"changed": changed, "entry_count": len(entries), "output": display_path(MD)}
 
 

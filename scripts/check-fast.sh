@@ -8,6 +8,8 @@ test -f docs/references/case-prompt.md
 test -f docs/references/source-material/BIT_Capital-Case_Study-Frontier_Lab_Intelligence.pdf
 test -f docs/references/build-log/current.jsonl
 test -d docs/references/build-log/archive
+test ! -e docs/references/build-log.jsonl
+test ! -e scripts/render-build-log.py
 test -f docs/architecture/overview.md
 test -f docs/STATUS.md
 
