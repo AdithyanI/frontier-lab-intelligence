@@ -10,65 +10,67 @@ const insightSource = await readFile(
 const apiSource = await readFile(new URL('../src/api.ts', import.meta.url), 'utf8')
 const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
 
-test('Insights keeps Investment and AI engineering as independent URL-backed views', () => {
+test('Insights keeps audience, date, and decision status in the URL', () => {
   assert.match(apiSource, /export type InsightAudience = 'investment' \| 'ai_engineering'/)
+  assert.match(apiSource, /export type InsightStatus = 'kept' \| 'suppressed' \| 'all'/)
   assert.match(insightSource, /const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'/)
-  assert.match(
-    insightSource,
-    /const AUDIENCE_ORDER: InsightAudience\[\] = \['ai_engineering', 'investment'\]/,
-  )
-  assert.match(insightSource, /label: 'Investment thesis'/)
+  assert.match(insightSource, /const DEFAULT_STATUS: InsightStatus = 'kept'/)
   assert.match(insightSource, /searchParams\.get\('audience'\)/)
   assert.match(insightSource, /searchParams\.get\('date'\)/)
-  assert.match(insightSource, /nextParams\.set\('audience', nextAudience\)/)
-  assert.match(insightSource, /nextParams\.set\('date', nextDate\)/)
-  assert.match(insightSource, /Investment intelligence/)
-  assert.match(insightSource, /AI engineering brief/)
+  assert.match(insightSource, /searchParams\.get\('status'\)/)
+  assert.match(insightSource, /nextParams\.set\('status', nextStatus\)/)
   assert.match(insightSource, /aria-label="Insight audience"/)
 })
 
-test('Insights exposes one Feed-ranked path and guards audience-specific responses', () => {
+test('Insights uses the durable successor API and guards status-specific responses', () => {
   assert.match(insightSource, /`\/api\/insights\/extracted\/dates\?audience=\$\{audience\}`/)
-  assert.match(insightSource, /`\/api\/insights\/extracted\?audience=\$\{audience\}&date=\$\{selectedDate\}`/)
-  assert.doesNotMatch(insightSource, /Reviewed brief/)
-  assert.doesNotMatch(insightSource, /Insight processing view/)
-  assert.match(insightSource, /nextParams\.delete\('view'\)/)
+  assert.match(
+    insightSource,
+    /`\/api\/insights\/extracted\?audience=\$\{audience\}&date=\$\{selectedDate\}&status=\$\{status\}`/,
+  )
+  assert.match(insightSource, /dataView\.payload\.status === status/)
   assert.match(insightSource, /activeDatesViewRef\.current !== viewKey/)
   assert.match(insightSource, /activeDataViewRef\.current !== viewKey/)
-  assert.match(insightSource, /dataView\?\.viewKey === selectedViewKey/)
   assert.match(insightSource, /loading=\{datesLoading\}/)
 })
 
-test('Insights makes the current Feed rank the only displayed rank', () => {
-  assert.match(insightSource, /<strong>\{item\.feed_rank === null \? '—' : `#\$\{item\.feed_rank\}`\}<\/strong>/)
+test('Insights reuses the Feed week strip and gives it kept counts', () => {
+  assert.match(insightSource, /<DateNavigator/)
+  assert.match(insightSource, /Day pills count kept Insights/)
+  assert.match(insightSource, /itemLabel=\{copy\.itemLabel\}/)
+  assert.match(appStyles, /\.insight-calendar \.feed-day:only-child \{ grid-column: 7; \}/)
+})
+
+test('Insights exposes kept, suppressed, and all decisions in a Feed-style status menu', () => {
+  assert.match(insightSource, /const STATUS_ORDER: InsightStatus\[\] = \['kept', 'suppressed', 'all'\]/)
+  assert.match(insightSource, /<span className="feed-menu-label mono">STATUS<\/span>/)
+  assert.match(insightSource, /role="menuitemradio"/)
+  assert.match(insightSource, /counts=\{run\?\.counts\}/)
+  assert.match(appStyles, /\.insight-tools \.feed-menu > summary \{ min-width: 190px; \}/)
+})
+
+test('Insights inherits Feed rank and links every decision to its exact envelope', () => {
+  assert.match(insightSource, /<strong>#\{item\.feed_rank\}<\/strong>/)
   assert.match(insightSource, /<span>Feed rank ↗<\/span>/)
   assert.doesNotMatch(insightSource, /Editorial rank/)
+  assert.match(insightSource, /const envelopeUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
+  assert.match(insightSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
+  assert.match(insightSource, /Open envelope ↗/)
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)
 })
 
-test('Insights links every Feed rank to its exact dated Feed envelope', () => {
-  assert.match(insightSource, /to=\{`\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`\}/)
-  assert.match(insightSource, /Open exact Feed envelope/)
-  assert.match(insightSource, /Feed rank ↗/)
-  assert.match(insightSource, /const envelopeUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
-  assert.match(insightSource, /Open the exact Feed envelope for/)
-  assert.match(insightSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
-  assert.match(appStyles, /\.insight-feed-link:focus-visible/)
-})
-
-test('Insights exposes audience decisions and exact citation evidence in plain language', () => {
-  assert.match(insightSource, /investment_implication/)
-  assert.match(insightSource, /what_to_watch/)
-  assert.match(insightSource, /engineering_action/)
-  assert.match(insightSource, /validation_boundary/)
-  assert.match(insightSource, /Exact source passage/)
-  assert.match(insightSource, /decodeTextEntities\(item\.citation\.quote\)/)
-  assert.match(insightSource, /Open envelope ↗/)
+test('Insights shows an explicit rationale for both decisions without reviving quotes', () => {
+  assert.match(insightSource, /item\.decision_reason/)
+  assert.match(insightSource, /'Why kept' : 'Why suppressed'/)
+  assert.match(insightSource, /item\.summary \?\? 'Suppressed at the final editorial gate'/)
+  assert.match(insightSource, /item\.next_step/)
+  assert.doesNotMatch(insightSource, /Exact source passage/)
+  assert.doesNotMatch(insightSource, /citation\.quote/)
   assert.doesNotMatch(insightSource, /dangerouslySetInnerHTML/)
-  assert.doesNotMatch(insightSource, /investment_implication.*engineering_implication/s)
+  assert.match(appStyles, /\.insight-decision-reason--suppressed/)
 })
 
-test('Insights safely decodes source entities for display without interpreting markup', () => {
+test('Insights safely decodes model prose without interpreting markup', () => {
   assert.equal(
     decodeTextEntities('A &amp; B: old -&gt; new &#x2192; done'),
     'A & B: old -> new → done',
@@ -79,22 +81,12 @@ test('Insights safely decodes source entities for display without interpreting m
   assert.equal(decodeTextEntities('invalid &#xD800; value'), 'invalid &#xD800; value')
 })
 
-test('Insights gives each analysis region and source link an insight-specific name', () => {
-  assert.match(
-    insightSource,
-    /const accessibleName = `\$\{feedRankLabel\}: \$\{decodeTextEntities\(item\.claim\)\}`/,
-  )
-  assert.match(insightSource, /aria-label=\{`Investment analysis for \$\{accessibleName\}`\}/)
-  assert.match(insightSource, /aria-label=\{`AI engineering analysis for \$\{accessibleName\}`\}/)
-  assert.match(insightSource, /aria-label=\{`Open the exact Feed envelope for \$\{accessibleName\}`\}/)
-})
-
-test('Insights has honest audience-aware loading, error, and thin-day states', () => {
+test('Insights keeps honest loading, error, and thin-filter states', () => {
   assert.match(insightSource, /Insight dates are unavailable/)
   assert.match(insightSource, /This brief did not load/)
-  assert.match(insightSource, /No useful investment insight was extracted today/)
-  assert.match(insightSource, /No useful engineering insight was extracted today/)
-  assert.match(insightSource, /No citation-bound insight is available for this day/)
+  assert.match(insightSource, /No useful investment insight was kept today/)
+  assert.match(insightSource, /No useful engineering insight was kept today/)
+  assert.match(insightSource, /No completed decision matches this status/)
   assert.match(insightSource, /aria-busy="true"/)
 })
 

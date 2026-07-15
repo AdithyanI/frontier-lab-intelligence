@@ -433,65 +433,28 @@ export interface ArtifactDates {
   dates: FeedDate[]
 }
 
-export interface InsightCitation {
-  quote: string
-  url: string
-  source_type: string
-  source_id: string
-  author: string | null
-  title: string | null
-  source_sha256: string
-  block_index: number
-  section_ordinal: number | null
-  char_start: number
-  char_end: number
-}
-
 export type InsightAudience = 'investment' | 'ai_engineering'
-
-export type InsightClaimPosture =
-  | 'directly_documented'
-  | 'first_party_report'
-  | 'third_party_observation'
-  | 'opinion_or_forecast'
-
-export interface InvestmentInsightFields {
-  investment_implication: string
-  what_to_watch: string
-}
-
-export type EngineeringActionType =
-  | 'investigate'
-  | 'reproduce'
-  | 'benchmark'
-  | 'prototype'
-  | 'regression_test'
-  | 'monitor'
-
-export interface EngineeringInsightFields {
-  action_type: EngineeringActionType
-  engineering_action: string
-  validation_boundary: string
-}
+export type InsightDecision = 'surface' | 'suppress'
+export type InsightStatus = 'kept' | 'suppressed' | 'all'
 
 export interface InsightItem {
   candidate_id: string
   event_id: string
   day: string
-  editorial_rank: number
-  feed_rank: number | null
-  decision_value: string
-  claim: string
-  claim_posture: InsightClaimPosture
-  why_it_matters: string
-  audience_fields: InvestmentInsightFields | EngineeringInsightFields
-  citation: InsightCitation
+  feed_rank: number
+  audience: InsightAudience
+  decision: InsightDecision
+  decision_reason: string
+  summary: string | null
+  implication: string | null
+  next_step: string | null
+  model: string
+  reasoning_effort: string
+  prompt_version: string
+  source_routing_run_id: string
 }
 
-export type ExtractedInsightItem = Omit<
-  InsightItem,
-  'editorial_rank' | 'decision_value'
->
+export type ExtractedInsightItem = InsightItem
 
 export interface ExtractedInsightRun {
   run_id: string
@@ -499,39 +462,28 @@ export interface ExtractedInsightRun {
   audience: InsightAudience
   candidate_count: number
   complete_count: number
-  extracted_count: number
+  surfaced_count: number
+  suppressed_count: number
+  model: string
+  prompt_version: string
+  input_tokens: number
+  cached_tokens: number
+  reported_cost_usd: number
+  counts: Record<InsightStatus, number>
 }
 
 export interface ExtractedInsightsResponse {
   available: boolean
   reason?: string | null
   audience: InsightAudience
+  status: InsightStatus
   run: ExtractedInsightRun | null
   items: ExtractedInsightItem[]
 }
 
-export interface InsightRun {
-  run_id: string
-  day: string
-  audience: InsightAudience
-  prompt_version: string
-  editor_prompt_version: string
-  model: string
-  candidate_count: number
-  extracted_count: number
-  selected_count: number
-  failed_count: number
-  reported_cost_usd: number
-  cache_hit_requests: number
-  cache_eligible_requests: number
-}
-
-export interface InsightsResponse {
-  available: boolean
-  reason?: string | null
-  audience: InsightAudience
-  run: InsightRun | null
-  items: InsightItem[]
+export interface InsightDate extends FeedDate {
+  suppressed_count: number
+  evaluated_count: number
 }
 
 export interface InsightDates {
@@ -539,7 +491,7 @@ export interface InsightDates {
   reason?: string | null
   audience: InsightAudience
   latest_date: string | null
-  dates: FeedDate[]
+  dates: InsightDate[]
 }
 
 export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {

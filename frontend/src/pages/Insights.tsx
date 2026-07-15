@@ -2,15 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
-  type EngineeringInsightFields,
   type ExtractedInsightItem,
   type ExtractedInsightsResponse,
   type InsightAudience,
   type InsightDates,
-  type InvestmentInsightFields,
+  type InsightStatus,
 } from '../api'
-import DateNavigator from '../components/DateNavigator'
 import CopyEnvelopeId from '../components/CopyEnvelopeId'
+import DateNavigator from '../components/DateNavigator'
 import {
   getDateWindowEndForSelection,
   getDateWindow,
@@ -21,8 +20,9 @@ import { decodeTextEntities } from '../textEntities'
 import { useAuditDate } from '../auditDateStore'
 
 const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'
+const DEFAULT_STATUS: InsightStatus = 'kept'
 const AUDIENCE_ORDER: InsightAudience[] = ['ai_engineering', 'investment']
-type DisplayItem = ExtractedInsightItem
+const STATUS_ORDER: InsightStatus[] = ['kept', 'suppressed', 'all']
 
 const insightDay = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -31,19 +31,7 @@ const insightDay = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
 })
 
-const AUDIENCE_COPY: Record<
-  InsightAudience,
-  {
-    label: string
-    noun: string
-    switchDescription: string
-    title: string
-    subtitle: string
-    dateLabel: string
-    itemLabel: string
-    emptyTitle: string
-  }
-> = {
+const AUDIENCE_COPY = {
   investment: {
     label: 'Investment thesis',
     noun: 'investment',
@@ -52,8 +40,8 @@ const AUDIENCE_COPY: Record<
     subtitle:
       'Position-relevant frontier AI changes for theses, diligence, exposures, and competitive risk.',
     dateLabel: 'Investment insight date',
-    itemLabel: 'investment insights',
-    emptyTitle: 'No useful investment insight was extracted today',
+    itemLabel: 'kept investment insights',
+    emptyTitle: 'No useful investment insight was kept today',
   },
   ai_engineering: {
     label: 'AI engineering',
@@ -63,16 +51,24 @@ const AUDIENCE_COPY: Record<
     subtitle:
       'Techniques, models, and tooling changes for experiments, implementation choices, and reliability work.',
     dateLabel: 'AI engineering insight date',
-    itemLabel: 'AI engineering insights',
-    emptyTitle: 'No useful engineering insight was extracted today',
+    itemLabel: 'kept AI engineering insights',
+    emptyTitle: 'No useful engineering insight was kept today',
   },
-}
+} satisfies Record<InsightAudience, {
+  label: string
+  noun: string
+  switchDescription: string
+  title: string
+  subtitle: string
+  dateLabel: string
+  itemLabel: string
+  emptyTitle: string
+}>
 
-const CLAIM_POSTURE_LABELS: Record<ExtractedInsightItem['claim_posture'], string> = {
-  directly_documented: 'Direct documentation',
-  first_party_report: 'First-party report',
-  third_party_observation: 'Third-party observation',
-  opinion_or_forecast: 'Opinion or forecast',
+const STATUS_COPY: Record<InsightStatus, { label: string; description: string }> = {
+  kept: { label: 'Kept', description: 'Published audience Insights' },
+  suppressed: { label: 'Suppressed', description: 'Rejected at the final editorial gate' },
+  all: { label: 'All', description: 'Every completed editorial decision' },
 }
 
 function parseAudience(value: string | null): InsightAudience {
@@ -81,21 +77,15 @@ function parseAudience(value: string | null): InsightAudience {
     : DEFAULT_AUDIENCE
 }
 
-function sourceTypeLabel(sourceType: string) {
-  if (sourceType === 'x_post') return 'X post'
-  if (sourceType === 'artifact') return 'Primary artifact'
-  return sourceType.replaceAll('_', ' ')
+function parseStatus(value: string | null): InsightStatus {
+  return value === 'kept' || value === 'suppressed' || value === 'all'
+    ? value
+    : DEFAULT_STATUS
 }
 
 function displayInsightDay(day: string) {
   const parsed = new Date(`${day}T12:00:00Z`)
   return Number.isNaN(parsed.getTime()) ? day : insightDay.format(parsed)
-}
-
-function sourceLabel(item: DisplayItem) {
-  const { author, title, source_type: sourceType } = item.citation
-  if (author && title) return decodeTextEntities(`${author} · ${title}`)
-  return decodeTextEntities(author || title || sourceTypeLabel(sourceType))
 }
 
 function InsightState({
@@ -132,138 +122,126 @@ function InsightState({
   )
 }
 
-function AudienceAnalysis({
-  audience,
-  item,
-  accessibleName,
+function InsightStatusMenu({
+  value,
+  counts,
+  onChange,
 }: {
-  audience: InsightAudience
-  item: DisplayItem
-  accessibleName: string
+  value: InsightStatus
+  counts?: Record<InsightStatus, number>
+  onChange: (value: InsightStatus) => void
 }) {
-  if (audience === 'investment') {
-    const fields = item.audience_fields as InvestmentInsightFields
-    return (
-      <section
-        className="insight-analysis"
-        aria-label={`Investment analysis for ${accessibleName}`}
-      >
-        <div className="insight-analysis-primary">
-          <h3 className="mono">Why it matters</h3>
-          <p>{decodeTextEntities(item.why_it_matters)}</p>
-        </div>
-        <div className="insight-analysis-grid">
-          <div>
-            <h3 className="mono">Investment implication</h3>
-            <p>{decodeTextEntities(fields.investment_implication)}</p>
-          </div>
-          <div>
-            <h3 className="mono">What to watch</h3>
-            <p>{decodeTextEntities(fields.what_to_watch)}</p>
-          </div>
-        </div>
-      </section>
-    )
-  }
+  const detailsRef = useRef<HTMLDetailsElement>(null)
+  const selected = STATUS_COPY[value]
 
-  const fields = item.audience_fields as EngineeringInsightFields
-  return (
-    <section
-      className="insight-analysis"
-      aria-label={`AI engineering analysis for ${accessibleName}`}
-    >
-      <div className="insight-analysis-primary">
-        <h3 className="mono">Why it matters</h3>
-        <p>{decodeTextEntities(item.why_it_matters)}</p>
-      </div>
-      <div className="insight-analysis-grid">
-        <div>
-          <h3 className="mono">Recommended action</h3>
-          <p>{decodeTextEntities(fields.engineering_action)}</p>
-        </div>
-        <div>
-          <h3 className="mono">Validation boundary</h3>
-          <p>{decodeTextEntities(fields.validation_boundary)}</p>
-        </div>
-      </div>
-    </section>
-  )
-}
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!detailsRef.current?.contains(event.target as Node)) {
+        detailsRef.current?.removeAttribute('open')
+      }
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') detailsRef.current?.removeAttribute('open')
+    }
+    window.addEventListener('pointerdown', closeOnOutsideClick)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.removeEventListener('pointerdown', closeOnOutsideClick)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [])
 
-function Citation({ item, accessibleName }: { item: DisplayItem; accessibleName: string }) {
-  const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
   return (
-    <blockquote className="insight-citation" cite={envelopeUrl}>
-      <div className="insight-citation-head">
-        <span className="mono">Exact source passage</span>
-        <span className="insight-citation-actions">
-          <CopyEnvelopeId envelopeId={item.event_id} />
-          <Link
-            to={envelopeUrl}
-            aria-label={`Open the exact Feed envelope for ${accessibleName}`}
+    <details className="feed-menu" ref={detailsRef}>
+      <summary aria-label={`STATUS: ${selected.description}`}>
+        <span className="feed-menu-label mono">STATUS</span>
+        <span className="feed-menu-value">{selected.label}</span>
+        {counts && <span className="feed-menu-count mono">{counts[value]}</span>}
+        <span className="feed-menu-caret" aria-hidden="true" />
+      </summary>
+      <div className="feed-menu-panel" role="menu" aria-label="Insight status">
+        {STATUS_ORDER.map((status) => (
+          <button
+            type="button"
+            className={status === value ? 'is-active' : ''}
+            role="menuitemradio"
+            aria-checked={status === value}
+            title={STATUS_COPY[status].description}
+            onClick={() => {
+              onChange(status)
+              detailsRef.current?.removeAttribute('open')
+            }}
+            key={status}
           >
-            Open envelope ↗
-          </Link>
-        </span>
+            <span>{STATUS_COPY[status].label}</span>
+            {counts && (
+              <span className="feed-menu-option-count mono">{counts[status]}</span>
+            )}
+          </button>
+        ))}
       </div>
-      <p>“{decodeTextEntities(item.citation.quote)}”</p>
-    </blockquote>
+    </details>
   )
 }
 
-function ItemHeader({ item, accessibleName, titleId }: {
-  item: DisplayItem
-  accessibleName: string
-  titleId: string
-}) {
-  return (
-    <header className="insight-head">
-      <h2 id={titleId}>{decodeTextEntities(item.claim)}</h2>
-      <div className="insight-provenance mono">
-        <a
-          href={item.citation.url}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Open ${sourceLabel(item)} for ${accessibleName} in a new tab`}
-        >
-          {sourceLabel(item)}
-        </a>
-        <span>{sourceTypeLabel(item.citation.source_type)}</span>
-        <span>{CLAIM_POSTURE_LABELS[item.claim_posture]}</span>
-        <time dateTime={item.day}>
-          {insightDay.format(new Date(`${item.day}T00:00:00Z`))}
-        </time>
-      </div>
-    </header>
-  )
-}
+function InsightRow({ item }: { item: ExtractedInsightItem }) {
+  const isKept = item.decision === 'surface'
+  const feedRankLabel = `Feed rank ${item.feed_rank}`
+  const title = item.summary ?? 'Suppressed at the final editorial gate'
+  const accessibleName = `${feedRankLabel}: ${decodeTextEntities(title)}`
+  const titleId = `${item.audience}-${item.candidate_id}-title`
+  const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
 
-function ExtractedInsightRow({ audience, item }: {
-  audience: InsightAudience
-  item: ExtractedInsightItem
-}) {
-  const feedRankLabel = item.feed_rank === null
-    ? 'Feed rank unavailable'
-    : `Feed rank ${item.feed_rank}`
-  const accessibleName = `${feedRankLabel}: ${decodeTextEntities(item.claim)}`
-  const titleId = `${audience}-extracted-${item.candidate_id}-title`
   return (
-    <article className="insight-row" aria-labelledby={titleId}>
+    <article
+      className={`insight-row insight-row--${isKept ? 'kept' : 'suppressed'}`}
+      aria-labelledby={titleId}
+    >
       <div className="insight-rank mono">
         <Link
           className="insight-feed-link"
-          to={`/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
+          to={envelopeUrl}
           aria-label={`Open ${feedRankLabel.toLowerCase()} in its exact Feed envelope`}
           title="Open exact Feed envelope"
         >
-          <strong>{item.feed_rank === null ? '—' : `#${item.feed_rank}`}</strong>
+          <strong>#{item.feed_rank}</strong>
           <span>Feed rank ↗</span>
         </Link>
       </div>
       <div className="insight-body">
-        <ItemHeader item={item} accessibleName={accessibleName} titleId={titleId} />
-        <AudienceAnalysis audience={audience} item={item} accessibleName={accessibleName} />
-        <Citation item={item} accessibleName={accessibleName} />
+        <header className="insight-head">
+          <div className={`insight-decision-mark insight-decision-mark--${isKept ? 'kept' : 'suppressed'} mono`}>
+            {isKept ? 'Kept' : 'Suppressed'}
+          </div>
+          <h2 id={titleId}>{decodeTextEntities(title)}</h2>
+          <div className="insight-provenance mono">
+            <time dateTime={item.day}>{displayInsightDay(item.day)}</time>
+            <span>{item.model}</span>
+            <span>{item.prompt_version}</span>
+            <CopyEnvelopeId envelopeId={item.event_id} />
+            <Link
+              to={envelopeUrl}
+              aria-label={`Open the exact Feed envelope for ${accessibleName}`}
+            >
+              Open envelope ↗
+            </Link>
+          </div>
+        </header>
+
+        <section
+          className={`insight-decision-reason insight-decision-reason--${isKept ? 'kept' : 'suppressed'}`}
+          aria-label={`${isKept ? 'Why kept' : 'Why suppressed'}: ${accessibleName}`}
+        >
+          <h3 className="mono">{isKept ? 'Why kept' : 'Why suppressed'}</h3>
+          <p>{decodeTextEntities(item.decision_reason)}</p>
+        </section>
+
+        {isKept && item.next_step && (
+          <section className="insight-analysis" aria-label={`Next step for ${accessibleName}`}>
+            <h3 className="mono">Next step</h3>
+            <p>{decodeTextEntities(item.next_step)}</p>
+          </section>
+        )}
       </div>
     </article>
   )
@@ -273,6 +251,7 @@ export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { rememberDate } = useAuditDate()
   const audience = parseAudience(searchParams.get('audience'))
+  const status = parseStatus(searchParams.get('status'))
   const selectedDate = searchParams.get('date') ?? ''
   const [dates, setDates] = useState<InsightDates | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
@@ -290,8 +269,9 @@ export default function Insights() {
   searchParamsRef.current = searchParams
 
   const currentDates = dates?.audience === audience ? dates : null
-  const selectedViewKey = `${audience}:${selectedDate}`
-  const currentData = dataView?.viewKey === selectedViewKey && dataView.payload.audience === audience
+  const selectedViewKey = `${audience}:${selectedDate}:${status}`
+  const currentData = dataView?.viewKey === selectedViewKey &&
+      dataView.payload.audience === audience && dataView.payload.status === status
     ? dataView.payload
     : null
   const availableDates = useMemo(() => currentDates?.dates ?? [], [currentDates])
@@ -306,12 +286,17 @@ export default function Insights() {
   const copy = AUDIENCE_COPY[audience]
 
   useEffect(() => {
-    if (searchParams.get('audience') === audience && !searchParams.has('view')) return
+    if (
+      searchParams.get('audience') === audience &&
+      searchParams.get('status') === status &&
+      !searchParams.has('view')
+    ) return
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('audience', audience)
+    nextParams.set('status', status)
     nextParams.delete('view')
     setSearchParams(nextParams, { replace: true })
-  }, [audience, searchParams, setSearchParams])
+  }, [audience, searchParams, setSearchParams, status])
 
   useEffect(() => {
     const viewKey = `dates:${audience}`
@@ -329,12 +314,11 @@ export default function Insights() {
         const linkedDate = searchParamsRef.current.get('date') ?? ''
         const nextDate = linkedDate || payload.latest_date || ''
         const selectedIndex = payload.dates.findIndex((value) => value.day === nextDate)
-        setDateWindowEnd(
-          getDateWindowEndForSelection(payload.dates.length, selectedIndex),
-        )
+        setDateWindowEnd(getDateWindowEndForSelection(payload.dates.length, selectedIndex))
         rememberDate(nextDate)
         const nextParams = new URLSearchParams(searchParamsRef.current)
         nextParams.set('audience', audience)
+        nextParams.set('status', parseStatus(nextParams.get('status')))
         nextParams.delete('view')
         if (nextDate) nextParams.set('date', nextDate)
         else nextParams.delete('date')
@@ -357,13 +341,13 @@ export default function Insights() {
       setDataView(null)
       return
     }
-    const viewKey = `${audience}:${selectedDate}`
+    const viewKey = `${audience}:${selectedDate}:${status}`
     let live = true
     activeDataViewRef.current = viewKey
     setDataView(null)
     setDataError(null)
     getCachedJSON<ExtractedInsightsResponse>(
-      `/api/insights/extracted?audience=${audience}&date=${selectedDate}`,
+      `/api/insights/extracted?audience=${audience}&date=${selectedDate}&status=${status}`,
     )
       .then((payload) => {
         if (!live || activeDataViewRef.current !== viewKey) return
@@ -374,12 +358,17 @@ export default function Insights() {
         setDataError(`Couldn’t load the ${copy.noun} brief for this date. Try the request again.`)
       })
     return () => { live = false }
-  }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate])
+  }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate, status])
 
-  const setView = (nextAudience: InsightAudience, nextDate: string) => {
+  const setView = (
+    nextAudience: InsightAudience,
+    nextDate: string,
+    nextStatus: InsightStatus = status,
+  ) => {
     rememberDate(nextDate)
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('audience', nextAudience)
+    nextParams.set('status', nextStatus)
     nextParams.delete('view')
     if (nextDate) nextParams.set('date', nextDate)
     else nextParams.delete('date')
@@ -417,9 +406,10 @@ export default function Insights() {
         <p className="page-sub">{copy.subtitle}</p>
         {run && (
           <p className="page-method-line mono">
-            <span>{run.extracted_count.toLocaleString('en-US')} useful</span>
+            <span>{run.surfaced_count.toLocaleString('en-US')} kept</span>
+            <span>{run.suppressed_count.toLocaleString('en-US')} suppressed</span>
             <span>{run.complete_count.toLocaleString('en-US')} classified</span>
-            <span>{run.candidate_count.toLocaleString('en-US')} Feed envelopes</span>
+            <span>{run.model}</span>
           </p>
         )}
       </header>
@@ -456,6 +446,19 @@ export default function Insights() {
         </section>
       )}
 
+      {currentDates?.available && (
+        <div className="insight-tools">
+          <p className="mono">Day pills count kept Insights. Audit every decision here.</p>
+          <div className="feed-controls">
+            <InsightStatusMenu
+              value={status}
+              counts={run?.counts}
+              onChange={(nextStatus) => setView(audience, selectedDate, nextStatus)}
+            />
+          </div>
+        </div>
+      )}
+
       {datesError && (
         <InsightState
           title="Insight dates are unavailable"
@@ -487,18 +490,19 @@ export default function Insights() {
         />
       )}
       {currentData && !currentData.available && !dataError && (
-        <InsightState title={copy.emptyTitle} detail={currentData.reason || 'No useful item cleared this view.'} />
+        <InsightState title={copy.emptyTitle} detail={currentData.reason || 'No editorial decision is available.'} />
       )}
 
       {currentData?.available && items.length > 0 && (
-        <section className="insight-list" aria-label={`${copy.label} insights`}>
-          {items.map((item) => (
-            <ExtractedInsightRow audience={audience} item={item} key={item.candidate_id} />
-          ))}
+        <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
+          {items.map((item) => <InsightRow item={item} key={item.candidate_id} />)}
         </section>
       )}
       {currentData?.available && items.length === 0 && (
-        <InsightState title={copy.emptyTitle} detail="No citation-bound insight is available for this day." />
+        <InsightState
+          title={status === 'kept' ? copy.emptyTitle : `No ${STATUS_COPY[status].label.toLowerCase()} decisions today`}
+          detail={currentData.reason || 'No completed decision matches this status.'}
+        />
       )}
       {dataLoading && (
         <div className="insight-loading" aria-label={`Loading ${copy.itemLabel}`} aria-busy="true">

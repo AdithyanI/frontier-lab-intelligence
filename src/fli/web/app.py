@@ -512,12 +512,14 @@ def extracted_insight_dates(
 def insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
+    status: Literal["kept", "suppressed", "all"] = "kept",
 ) -> JSONResponse:
     """Successor audience Insights ordered by application-owned Feed rank."""
     return JSONResponse(
         insight_store.insights_payload(
             audience=audience,
             day=insight_date.isoformat() if insight_date else None,
+            status=status,
         )
     )
 
@@ -526,12 +528,14 @@ def insights(
 def extracted_insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
+    status: Literal["kept", "suppressed", "all"] = "kept",
 ) -> JSONResponse:
     """Current UI item route backed by the successor Insight boundary."""
     return JSONResponse(
         insight_store.extraction_insights_payload(
             audience=audience,
             day=insight_date.isoformat() if insight_date else None,
+            status=status,
         )
     )
 

@@ -55,8 +55,8 @@ def test_contracts_are_separate_and_share_one_schema():
     investment = insight_generation.contract("investment")
     engineering = insight_generation.contract("ai_engineering")
 
-    assert investment.version == "investment-insight-v1"
-    assert engineering.version == "ai-engineering-insight-v1"
+    assert investment.version == "investment-insight-v2"
+    assert engineering.version == "ai-engineering-insight-v2"
     assert investment.cache_key != engineering.cache_key
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
@@ -110,7 +110,7 @@ def test_build_request_is_pure_and_keeps_variable_evidence_last():
         "investment"
     ).instructions()
     assert request["input"] == insight_generation.render_input(candidate)
-    assert request["prompt_cache_key"] == "fli:insights:investment:v1"
+    assert request["prompt_cache_key"] == "fli:insights:investment:v2"
     assert request["text"]["format"] == insight_generation.OUTPUT_FORMAT
     assert request["store"] is False
     assert "audience:investment" in request["extra_body"]["metadata"]["tags"]

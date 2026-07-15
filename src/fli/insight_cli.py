@@ -1,4 +1,4 @@
-"""Machine-first CLI for repeated single-envelope Insight calibration."""
+"""Machine-first CLI for durable, repeated single-envelope Insight runs."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from fli import (
     audience_routing_runs,
     entity_kinds,
     insight_generation,
+    insight_runs,
 )
 
 
@@ -26,7 +27,7 @@ CLI_SCHEMA_VERSION = "1.0"
 DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_EFFORT = "high"
 DEFAULT_TIMEOUT_SECONDS = 180.0
-DEFAULT_DUMP_ROOT = audience_routing_runs.REPO_ROOT / "tmp" / "insight-spikes"
+DEFAULT_DUMP_ROOT = audience_routing_runs.REPO_ROOT / "tmp" / "insight-runs"
 AUDIENCE_ALL = "all"
 AUDIENCE_CHOICES = (
     AUDIENCE_ALL,
@@ -211,6 +212,7 @@ def run_spike(
     model: str,
     effort: str,
     run_id: str,
+    db_path: Path,
     routing_root: Path,
     dump_dir: Path,
     dry_run: bool,
@@ -228,6 +230,7 @@ def run_spike(
     audiences = _selected_audiences(row, audience)
     dump_dir.mkdir(parents=True, exist_ok=True)
     request_paths: dict[str, str] = {}
+    requests: dict[str, dict[str, Any]] = {}
     candidates: dict[str, insight_generation.InsightCandidate] = {}
     for value in audiences:
         candidate = insight_generation.InsightCandidate.create(
@@ -245,9 +248,11 @@ def run_spike(
         request_path = dump_dir / f"{value.value}-request.json"
         _write_json(request_path, request)
         request_paths[value.value] = _display_path(request_path)
+        requests[value.value] = request
 
     base = {
         "run_id": run_id,
+        "db": _display_path(db_path),
         "dry_run": dry_run,
         "will_call_model": not dry_run,
         "event_id": event_id,
@@ -267,26 +272,76 @@ def run_spike(
         _write_json(dump_dir / "result.json", {**base, "evaluations": []})
         return {**base, "evaluations": [], "telemetry": None}
 
-    client = client_factory()
-    if hasattr(client, "with_options"):
-        client = client.with_options(max_retries=0, timeout=timeout_seconds)
-    evaluations = []
-    for value in audiences:
-        if progress == "plain":
-            print(
-                f"insight-spike: evaluating {value.value} with {model}",
-                file=sys.stderr,
-                flush=True,
-            )
-        evaluation = insight_generation.evaluate(
-            client,
-            candidates[value.value],
+    conn = insight_runs.connect(db_path)
+    try:
+        insight_runs.prepare_run(
+            conn,
+            run_id=run_id,
+            event_id=event_id,
+            day=packet.day,
+            feed_rank=int(row["feed_rank"]),
+            source_routing_run_id=str(resolved["meta"]["run_id"]),
+            source_routing_db=_display_path(resolved["path"]),
             model=model,
-            effort=effort,
-            run=run_id,
+            reasoning_effort=effort,
+            items=(
+                {
+                    "audience": value.value,
+                    "candidate_id": candidates[value.value].candidate_id,
+                    "request": requests[value.value],
+                }
+                for value in audiences
+            ),
         )
-        evaluations.append(evaluation)
-        _write_json(dump_dir / f"{value.value}-result.json", evaluation)
+        client = None
+        evaluations = []
+        for value in audiences:
+            evaluation = insight_runs.completed_evaluation(
+                conn, run_id=run_id, audience=value.value
+            )
+            if evaluation is None:
+                if client is None:
+                    client = client_factory()
+                    if hasattr(client, "with_options"):
+                        client = client.with_options(
+                            max_retries=0, timeout=timeout_seconds
+                        )
+                if progress == "plain":
+                    print(
+                        f"insights: evaluating {value.value} with {model}",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+                try:
+                    evaluation = insight_generation.evaluate(
+                        client,
+                        candidates[value.value],
+                        model=model,
+                        effort=effort,
+                        run=run_id,
+                    )
+                    insight_runs.complete_item(
+                        conn, run_id=run_id, evaluation=evaluation
+                    )
+                except Exception as error:
+                    insight_runs.fail_item(
+                        conn,
+                        run_id=run_id,
+                        audience=value.value,
+                        error=error,
+                    )
+                    raise
+            elif progress == "plain":
+                print(
+                    f"insights: reusing completed {value.value} result from {run_id}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            evaluations.append(evaluation)
+            _write_json(dump_dir / f"{value.value}-result.json", evaluation)
+        stored_run = insight_runs.run_payload(conn, run_id)
+    finally:
+        conn.close()
     telemetry = {
         "input_tokens": sum(value["input_tokens"] for value in evaluations),
         "cached_tokens": sum(value["cached_tokens"] for value in evaluations),
@@ -303,7 +358,12 @@ def run_spike(
         ),
         "request_count": len(evaluations),
     }
-    result = {**base, "evaluations": evaluations, "telemetry": telemetry}
+    result = {
+        **base,
+        "evaluations": evaluations,
+        "telemetry": telemetry,
+        "store": stored_run,
+    }
     _write_json(dump_dir / "result.json", result)
     return result
 
@@ -317,8 +377,8 @@ def _add_output_flags(parser: argparse.ArgumentParser) -> None:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="fli insight-spike",
-        description="Inspect or run one successor Insight envelope without a run store.",
+        prog="fli insights",
+        description="Inspect, run, resume, and audit successor Insight generation.",
     )
     sub = parser.add_subparsers(dest="action", required=True)
     contract = sub.add_parser("contract", help="Inspect prompts and output schema.")
@@ -331,6 +391,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--model", default=DEFAULT_MODEL)
     run.add_argument("--reasoning-effort", default=DEFAULT_EFFORT)
     run.add_argument("--run-id")
+    run.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
     run.add_argument(
         "--routing-root", type=Path, default=audience_routing_runs.DEFAULT_RUN_ROOT
     )
@@ -339,6 +400,19 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--progress", choices=("off", "plain"), default="plain")
     run.add_argument("--dry-run", action="store_true")
     _add_output_flags(run)
+    imported = sub.add_parser(
+        "import-result", help="Persist an exact completed request dump without a model call."
+    )
+    imported.add_argument("--result-file", type=Path, required=True)
+    imported.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
+    _add_output_flags(imported)
+    summary = sub.add_parser("summary", help="Inspect aggregate durable run state.")
+    summary.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
+    _add_output_flags(summary)
+    inspect = sub.add_parser("inspect", help="Inspect one durable run.")
+    inspect.add_argument("--run-id", required=True)
+    inspect.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
+    _add_output_flags(inspect)
     return parser
 
 
@@ -346,7 +420,9 @@ def _plain(payload: dict[str, Any]) -> str:
     if payload["status"] == "error":
         return f"{payload['error']['code']}: {payload['error']['message']}"
     data = payload["data"]
-    if payload["command"] == "insight-spike.contract":
+    if payload["command"] == "insights.contract":
+        return _canonical_json(data, pretty=True)
+    if payload["command"] in {"insights.summary", "insights.inspect", "insights.import-result"}:
         return _canonical_json(data, pretty=True)
     lines = [
         f"event {data['event_id']} · {data['day']} · Feed rank {data['feed_rank']}",
@@ -369,16 +445,35 @@ def main(
     args = _parser().parse_args(argv)
     started = time.monotonic()
     request_id = str(uuid4())
-    command = f"insight-spike.{args.action}"
+    command = f"insights.{args.action}"
     exit_code = 0
     try:
         if args.action == "contract":
             data = contract_payload(args.audience)
+        elif args.action in {"summary", "inspect", "import-result"}:
+            if args.action in {"summary", "inspect"} and not args.db.is_file():
+                raise FileNotFoundError(args.db)
+            conn = insight_runs.connect(args.db)
+            try:
+                if args.action == "summary":
+                    data = {
+                        "db": _display_path(args.db),
+                        **insight_runs.summary_payload(conn),
+                    }
+                elif args.action == "inspect":
+                    data = {
+                        "db": _display_path(args.db),
+                        "run": insight_runs.run_payload(conn, args.run_id),
+                    }
+                else:
+                    data = insight_runs.import_result_file(conn, args.result_file)
+            finally:
+                conn.close()
         else:
             if args.timeout <= 0:
                 raise ValueError("timeout must be positive")
             timestamp = _now().strftime("%Y%m%dT%H%M%SZ")
-            run_id = args.run_id or f"insight-spike-{args.event_id[:8]}-{timestamp}"
+            run_id = args.run_id or f"insight-{args.event_id[:8]}-{timestamp}"
             dump_dir = args.dump_dir or (
                 DEFAULT_DUMP_ROOT
                 / f"{args.event_id[:8]}-{args.day or 'latest'}-{args.model}-{timestamp}"
@@ -390,6 +485,7 @@ def main(
                 model=args.model,
                 effort=args.reasoning_effort,
                 run_id=run_id,
+                db_path=args.db,
                 routing_root=args.routing_root,
                 dump_dir=dump_dir,
                 dry_run=args.dry_run,

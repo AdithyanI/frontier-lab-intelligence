@@ -225,16 +225,17 @@ Rules:
   Investment / AI Engineering switch in URL state. Each day is a flat
   editorial list, not a card grid. The left rail shows the envelope's current
   daily Feed rank and links directly to that exact envelope; it is inherited
-  ordering, not a second insight score. Reviewed publication data may remain
-  available to the pipeline, but it is not exposed as a second product view
-  while the extraction contract is rebuilt step by step.
-  Every row puts the exact claim first, then a mono provenance line with linked
-  source, source type, claim posture, and source day. A compact decision-value
-  band precedes audience-specific analysis: Investment shows why it matters,
-  implication, and what to watch; AI Engineering shows why it matters,
-  recommended action, validation boundary, and action type. The exact source
-  passage is always visible with a direct source link. Honest zero/thin days
-  use plain editorial empty states and must never be padded.
+  ordering, not a second insight score. Reuse the Feed's seven-day navigator;
+  its number is the kept count, but retain evaluated zero-kept days so rejected
+  decisions remain inspectable. A Feed-style Status disclosure switches among
+  `Kept`, `Suppressed`, and `All`, with counts and URL-backed state.
+  A kept row leads with the concise summary, then shows a quiet `Why kept`
+  rationale and one concrete next step. A suppressed row says it stopped at the
+  final editorial gate and shows the model's freeform `Why suppressed` reason.
+  Both states retain model/prompt provenance, envelope copy action, and the
+  exact Feed link. Do not revive the retired quote block, claim-posture fields,
+  cards, or a second editorial rank. Honest zero/thin views use plain editorial
+  empty states and must never be padded.
 - **Score breakdown:** inputs and weights are visible only on demand from the
   Feed rank. Trust through inspectability without making the decimal the primary
   reading cue (PRODUCT.md #3).

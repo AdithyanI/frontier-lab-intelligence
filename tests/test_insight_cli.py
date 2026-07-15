@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
-from fli import audience_routing, audience_routing_runs, insight_spike
+from fli import audience_routing, audience_routing_runs, insight_cli
 
 
 EVENT_ID = "event-spike-1"
@@ -145,13 +145,13 @@ class _Client:
 
 
 def test_contract_command_exposes_exact_schema(capsys):
-    assert insight_spike.main(["contract", "--json"]) == 0
+    assert insight_cli.main(["contract", "--json"]) == 0
 
     payload = json.loads(capsys.readouterr().out)
 
     assert payload["status"] == "ok"
     assert payload["schema_version"] == "1.0"
-    assert payload["data"]["output_format"] == insight_spike.insight_generation.OUTPUT_FORMAT
+    assert payload["data"]["output_format"] == insight_cli.insight_generation.OUTPUT_FORMAT
     assert payload["data"]["model_view"].endswith("artifacts_only")
 
 
@@ -162,7 +162,7 @@ def test_dry_run_resolves_latest_route_and_dumps_first_party_requests(
     _routing_fixture(routing_root)
     dump = tmp_path / "dump"
 
-    exit_code = insight_spike.main(
+    exit_code = insight_cli.main(
         [
             "run",
             "--event-id",
@@ -186,7 +186,7 @@ def test_dry_run_resolves_latest_route_and_dumps_first_party_requests(
     assert payload["data"]["will_call_model"] is False
     assert "Harness evaluation" in request["input"]
     assert "Huge if true" not in request["input"]
-    assert request["text"]["format"] == insight_spike.insight_generation.OUTPUT_FORMAT
+    assert request["text"]["format"] == insight_cli.insight_generation.OUTPUT_FORMAT
     assert request["prompt_cache_retention"] == "24h"
 
 
@@ -195,8 +195,9 @@ def test_run_records_results_cache_and_cost(tmp_path, capsys):
     _routing_fixture(routing_root)
     dump = tmp_path / "dump"
     client = _Client()
+    db = tmp_path / "insights.db"
 
-    exit_code = insight_spike.main(
+    exit_code = insight_cli.main(
         [
             "run",
             "--event-id",
@@ -205,6 +206,10 @@ def test_run_records_results_cache_and_cost(tmp_path, capsys):
             str(routing_root),
             "--dump-dir",
             str(dump),
+            "--db",
+            str(db),
+            "--run-id",
+            "test-insight-run",
             "--progress",
             "off",
             "--json",
@@ -227,9 +232,35 @@ def test_run_records_results_cache_and_cost(tmp_path, capsys):
     assert (dump / "result.json").is_file()
     assert len(client.raw_api.calls) == 2
 
+    second_exit = insight_cli.main(
+        [
+            "run",
+            "--event-id",
+            EVENT_ID,
+            "--routing-root",
+            str(routing_root),
+            "--dump-dir",
+            str(tmp_path / "resumed-dump"),
+            "--db",
+            str(db),
+            "--run-id",
+            "test-insight-run",
+            "--progress",
+            "off",
+            "--json",
+        ],
+        client_factory=lambda: (_ for _ in ()).throw(
+            AssertionError("resume must not create a model client")
+        ),
+    )
+    capsys.readouterr()
+
+    assert second_exit == 0
+    assert len(client.raw_api.calls) == 2
+
 
 def test_missing_envelope_uses_stable_validation_error(tmp_path, capsys):
-    exit_code = insight_spike.main(
+    exit_code = insight_cli.main(
         [
             "run",
             "--event-id",

@@ -51,7 +51,9 @@ removed on 2026-07-15. The Feed derives `kept` only when either audience is
 relevant; it is not a third judgment. A successor Insight foundation defines
 two audience prompts and one small surface-or-suppress schema. Its first frozen
 envelope comparison produced four valid suppressions across mini and Terra;
-there is still no run database or live Insight publication.
+the production path now freezes first-party-only requests into one resumable
+SQLite store. A second Terra run produced one kept AI Engineering Insight and
+one suppressed Investment decision, both live in the Feed-ranked UI.
 
 ## Where the System Stands
 
@@ -64,8 +66,8 @@ there is still no run database or live Insight publication.
 | Feed + daily score | Implemented audit surface | Daily collection includes authored replies; the ledger preserves replies whose conversation root is captured, while the product projection admits only first-party continuations and treats trusted quotes/retweets as reactions. The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The reply-inclusive catalog converges to 2,735 artifacts with zero lineage violations; 2,507 have usable text, including all 221 arXiv metadata/abstract records and all 167 cached X Articles. Videos remain deferred and 65 non-video pages are unavailable or retryable. One shared extraction validator rejects placeholder-dominated bodies before they become successful snapshots. |
 | Feed audience routing | Current nine-day top-100 audit complete | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact packet/input/model/cost provenance. The complete packet remains immutable; only the model-facing view is capped at 20,000 tokens with an explicit truncation marker. The corrected July 5–13 run completed all 900 envelopes against the root-owned Event publication: 344 both, 112 Engineering-only, 141 Investment-only, and 303 neither. Thirty-eight repeated exact inputs have zero label conflicts. The publication-bound refresh freezes packets sequentially, then runs only pending model requests in bounded parallelism and prunes obsolete runs only after complete success. |
-| Audience Insight generation | First one-envelope comparison complete | Separate Investment and AI Engineering prompts reuse the exact attributed routing packet and share one strict decision/reason/summary/implication/next-step schema. The application owns event ID, date, Feed rank, and candidate ID. Mini and Terra both suppressed the first dual-relevant mission-statement envelope for both audiences, proving relevance does not force publication. There is no runner, store, or live Insight yet. |
-| Insights UI | One Feed-ranked path; intentionally empty | Investment and AI Engineering URL state, date navigation, Feed links, and empty/error handling remain implemented. Its API now returns the honest successor empty state and never reads old Insight databases. Item rendering will be adapted after the first envelope output is approved. |
+| Audience Insight generation | Durable first production run complete | Separate Investment and AI Engineering prompts share one strict decision/reason/summary/implication/next-step schema. The full routed packet stays immutable, while model input keeps only the root, same-author continuations, and linked primary artifacts. `fli insights` freezes exact requests before execution, resumes completed audiences without another call, and records result/cache/cost telemetry in `data/derived/insights/insights.db`. The first production Terra run kept AI Engineering and suppressed Investment for envelope `1dc9cd72…`; both requests had zero cache reads. |
+| Insights UI | Live Feed-ranked decision audit | The Investment and AI Engineering views share the Feed-style date rail, inherit the source envelope rank, and expose `Kept`, `Suppressed`, and `All` status views. Each row explains why it was kept or suppressed and links to the exact Feed envelope; the retired quote/citation layout and old Insight databases are not read. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -116,11 +118,11 @@ case-study thesis.
 The active tracker is
 [`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
 The repaired-Event nine-day top-100 routing refresh and its bounded contextual
-review are complete. The first successor Insight comparison is also complete
-and correctly suppressed a weak dual-relevant candidate across both audiences
-and models. The active tracker now owns routing closeout and selection of a
-stronger surfaceable Insight candidate. Full-catalog generation and delivery
-remain deliberately deferred.
+review are complete. The successor Insight path now has one durable production
+run: a substantive harness-engineering envelope produced a kept AI Engineering
+Insight and an auditable Investment suppression. The active tracker owns the
+next small calibration set and routing closeout. Full-catalog generation and
+delivery remain deliberately deferred.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

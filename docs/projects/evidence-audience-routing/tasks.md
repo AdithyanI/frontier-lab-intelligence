@@ -214,6 +214,16 @@ Application invariants:
   backend, define two audience prompts plus one shared schema, preserve the
   current UI shell and Feed-rank metadata, and stop before any model call. This
   is a foundation checkpoint only, not bulk generation or publication.
+- Adi later authorized live Terra/high evaluation on two supplied envelope IDs,
+  then approved moving the proven path into production storage and the existing
+  UI. Insight model input now excludes independent replies and quote-posts but
+  keeps root, same-author continuations, and primary artifacts. Audience routing
+  retains reactions until a bounded routing A/B justifies changing that separate
+  relevance boundary.
+- The date rail counts kept Insights but retains every evaluated day. UI status
+  is one mutually exclusive `Kept` / `Suppressed` / `All` audit control. A
+  surfaced implication is shown as `Why kept`; a suppression reason is shown as
+  `Why suppressed`. Neither state introduces a model quote or another rank.
 - The v2 review renderer introduced a human-readable YAML-style hierarchy
   rather than XML/CDATA. It decoded HTML entities, represented link-only
   primary posts by their artifact relationship, omitted pure retweets and
@@ -278,7 +288,7 @@ Application invariants:
 | complete | Replace unrestricted Event components with root-owned one-parent envelopes; rebuild July 5–13 and prove the Anthropic root is restored. | parent | `../../../references/signal-feed.md` |
 | complete | Replace the obsolete Insight backend with the two-prompt, shared-schema, non-executing successor foundation; preserve the empty UI transport and Feed-rank metadata. | parent | — |
 | complete | Run both successor prompts against envelope `9412a377…` on its latest corrected July 12 revision; inspect raw structured output, cache, and cost before designing storage. | parent | `resources/first-successor-insight-spike.md` |
-| in_progress | Move the successor Insight path into durable SQLite-backed generation; import the first-party-only Terra result, expose kept/suppressed decisions through the API, and add Feed-style date/status audit controls to the existing UI. | parent | — |
+| complete | Move the successor Insight path into durable SQLite-backed generation; import the first-party-only Terra result, expose kept/suppressed decisions through the API, and add Feed-style date/status audit controls to the existing UI. | parent | `resources/first-live-insight-run.md` |
 | complete | Rerun and review the 900 routes against the repaired Event publication; remove the local packaging bottleneck. | parent | `resources/top100-contextual-audit-v2.md` |
 
 ## Backlog / Remaining Work
@@ -575,3 +585,15 @@ Application invariants:
   outputs, and completes in 8.267 seconds instead of roughly 8 minutes 49
   seconds. Focused routing tests pass (23), and the live Feed shows the current
   July 7 counts and repaired envelopes with no browser console errors.
+- 2026-07-15: [VALIDATED] Promoted successor Insights from spike output to the
+  production path. Added an immutable/resumable SQLite store, JSON-first
+  `fli insights` run/import/inspect/summary commands, exact first-party-only
+  request freezing, per-audience result reuse, and API projections for kept,
+  suppressed, and all decisions. Imported the existing Terra/high run for
+  envelope `1dc9cd72…` without another model call: AI Engineering kept one
+  Feed-rank-45 harness-engineering Insight; Investment suppressed the same
+  evidence. The UI reuses the Feed week rail and Status control, explains why
+  each decision was kept or suppressed, and links to the exact envelope. The
+  durable store contains one run/two completed items, $0.0757825 reported cost,
+  and zero cached tokens. Focused Python tests, all frontend tests, lint, build,
+  live API checks, and rendered kept/suppressed browser flows pass.

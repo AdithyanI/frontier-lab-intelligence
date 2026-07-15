@@ -1,10 +1,9 @@
 """Prompt and schema boundary for the successor audience Insight stage.
 
-This module deliberately stops before model execution or run storage. It owns
-the two audience prompt contracts, the shared structured output, the exact
-Evidence input view, and deterministic application validation. A later runner
-can load one positively routed envelope and call ``build_request`` without
-reviving the superseded multi-stage Insight stack.
+This module owns the two audience prompt contracts, shared structured output,
+exact first-party Evidence input view, model request execution, and
+deterministic application validation. Durable run state lives separately in
+``fli.insight_runs`` so generation logic never owns publication metadata.
 """
 
 from __future__ import annotations
@@ -59,15 +58,15 @@ class PromptContract:
 PROMPT_CONTRACTS = {
     InsightAudience.INVESTMENT: PromptContract(
         audience=InsightAudience.INVESTMENT,
-        version="investment-insight-v1",
-        path=_PROMPT_ROOT / "investment_insight_v1.txt",
-        cache_key="fli:insights:investment:v1",
+        version="investment-insight-v2",
+        path=_PROMPT_ROOT / "investment_insight_v2.txt",
+        cache_key="fli:insights:investment:v2",
     ),
     InsightAudience.AI_ENGINEERING: PromptContract(
         audience=InsightAudience.AI_ENGINEERING,
-        version="ai-engineering-insight-v1",
-        path=_PROMPT_ROOT / "ai_engineering_insight_v1.txt",
-        cache_key="fli:insights:ai-engineering:v1",
+        version="ai-engineering-insight-v2",
+        path=_PROMPT_ROOT / "ai_engineering_insight_v2.txt",
+        cache_key="fli:insights:ai-engineering:v2",
     ),
 }
 
@@ -338,7 +337,7 @@ def evaluate(
     effort: str,
     run: str,
 ) -> dict[str, Any]:
-    """Execute one spike request without adding a run-store contract."""
+    """Execute and validate one request; callers own durable run state."""
     request = build_request(candidate, model=model, effort=effort, run=run)
     raw_api = getattr(client.responses, "with_raw_response", None)
     if raw_api is None:

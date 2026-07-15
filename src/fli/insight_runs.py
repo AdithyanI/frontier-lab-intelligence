@@ -112,24 +112,46 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     return conn
 
 
-def _request_contract(request: dict[str, Any], audience: str) -> dict[str, str]:
+def _request_contract(
+    request: dict[str, Any],
+    audience: str,
+    recorded: dict[str, str] | None = None,
+) -> dict[str, str]:
     prompt = insight_generation.contract(audience)
     input_text = request.get("input")
     if not isinstance(input_text, str) or not input_text:
         raise ValueError(f"{audience} request has no input text")
-    if request.get("instructions") != prompt.instructions():
-        raise ValueError(f"{audience} request does not match the current prompt")
+    instructions = request.get("instructions")
+    if not isinstance(instructions, str) or not instructions:
+        raise ValueError(f"{audience} request has no instructions")
     if request.get("text", {}).get("format") != insight_generation.OUTPUT_FORMAT:
         raise ValueError(f"{audience} request does not match the current output schema")
-    if request.get("prompt_cache_key") != prompt.cache_key:
-        raise ValueError(f"{audience} request has the wrong prompt cache key")
+    if recorded is None:
+        if instructions != prompt.instructions():
+            raise ValueError(f"{audience} request does not match the current prompt")
+        if request.get("prompt_cache_key") != prompt.cache_key:
+            raise ValueError(f"{audience} request has the wrong prompt cache key")
+        prompt_version = prompt.version
+        prompt_sha256 = prompt.sha256
+        schema_version = insight_generation.SCHEMA_VERSION
+    else:
+        prompt_version = recorded["prompt_version"]
+        prompt_sha256 = recorded["prompt_sha256"]
+        schema_version = recorded["schema_version"]
+        if _sha256(instructions) != prompt_sha256:
+            raise ValueError(f"{audience} imported prompt hash does not match")
+        if _sha256(input_text) != recorded["input_sha256"]:
+            raise ValueError(f"{audience} imported input hash does not match")
+    cache_key = request.get("prompt_cache_key")
+    if not isinstance(cache_key, str) or not cache_key:
+        raise ValueError(f"{audience} request has no prompt cache key")
     return {
         "input_text": input_text,
         "input_sha256": _sha256(input_text),
-        "prompt_version": prompt.version,
-        "prompt_sha256": prompt.sha256,
-        "prompt_cache_key": prompt.cache_key,
-        "schema_version": insight_generation.SCHEMA_VERSION,
+        "prompt_version": prompt_version,
+        "prompt_sha256": prompt_sha256,
+        "prompt_cache_key": cache_key,
+        "schema_version": schema_version,
     }
 
 
@@ -196,7 +218,17 @@ def prepare_run(
         request = item["request"]
         if not isinstance(request, dict):
             raise ValueError(f"{audience} request must be an object")
-        contract = _request_contract(request, audience)
+        recorded_contract = (
+            {
+                "prompt_version": str(item["prompt_version"]),
+                "prompt_sha256": str(item["prompt_sha256"]),
+                "schema_version": str(item["schema_version"]),
+                "input_sha256": str(item["input_sha256"]),
+            }
+            if "prompt_version" in item
+            else None
+        )
+        contract = _request_contract(request, audience, recorded_contract)
         if request.get("model") != model:
             raise ValueError(f"{audience} request model does not match the run")
         if request.get("reasoning", {}).get("effort") != reasoning_effort:
@@ -426,6 +458,10 @@ def import_result_file(
                 "audience": audience,
                 "candidate_id": evaluation["candidate_id"],
                 "request": request,
+                "prompt_version": evaluation["prompt_version"],
+                "prompt_sha256": evaluation["prompt_sha256"],
+                "schema_version": evaluation["schema_version"],
+                "input_sha256": evaluation["input_sha256"],
             }
         )
     prepare_run(

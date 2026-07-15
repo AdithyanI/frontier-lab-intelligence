@@ -5,16 +5,17 @@ Last verified: 2026-07-15
 ## Current Policy
 
 Use `gpt-5.6-luna` as the default efficient model for bounded structured
-classification, routing, extraction, and Registry evaluation. This is an
+classification, routing, and Registry evaluation. This is an
 accuracy-first default, not a rule that the cheapest model or lowest reasoning
-effort always wins. Keep `gpt-5.6-terra` for the web-grounded relevance audit,
-where broader research quality is the evaluated boundary.
+effort always wins. Keep `gpt-5.6-terra` for the web-grounded relevance audit
+and the current audience Insight calibration, where broader synthesis quality
+is the active boundary.
 
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
 | Evidence audience routing | `gpt-5.4-mini` | `high` | The current nine-day top-100 run completed 900/900 with 297 `neither` results, 814 cache-hit requests, and zero label conflicts across 28 repeated exact inputs. Sixteen model views required the explicit 20,000-token ceiling. A prior same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
-| Cited insight extraction | `gpt-5.6-luna` | `medium` | Requires claim synthesis plus exact quotation; the five-item migration oracle passed citation verification 5/5. |
+| Audience Insight generation | `gpt-5.6-terra` | `high` | Provisional calibration default chosen by Adi. The first first-party-only production run correctly kept a concrete Engineering workflow and suppressed the same packet for Investment. Both calls had zero cache reads, so Terra cache behavior is still unproven and must remain visible in telemetry. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |
 | Full web-grounded relevance audit | `gpt-5.6-terra` | `high` | Complex research boundary; not part of the Luna-for-efficient-work migration. |

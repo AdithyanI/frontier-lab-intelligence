@@ -10,9 +10,10 @@ routing freezes ranked Evidence directly and returns independent AI Engineering
 and Investment relevance judgments; the Feed derives its audit states from
 those two booleans. The former model-based keep/drop gate and the older
 multi-stage Insight backends were removed rather than retained as compatibility
-layers. The successor Insight prompt/schema boundary is implemented and has one
-isolated mini/Terra comparison, but no runner, store, or live publication yet.
-External delivery is also deferred. See
+layers. The successor Insight path now has separate audience prompts, a
+first-party-only model view, one resumable SQLite run store, a machine-first
+operator CLI, and a live kept/suppressed UI projection. External delivery is
+still deferred. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.
@@ -337,9 +338,11 @@ is an operator inspection surface, not a second Feed or an insight product.
 `fli.insight_generation` is the clean successor boundary. A candidate contains
 one immutable `RoutingPacket`, one positive audience, and its application-owned
 Feed rank. Event ID, day, candidate ID, and rank remain outside model input.
-The model receives the same attributed Evidence hierarchy used by routing,
-wrapped as the final variable block after one stable audience prompt. Investment
-and AI Engineering have separate versioned prompts and cache keys but share one
+The complete routed packet remains immutable, but the model view retains only
+the root, same-author continuations, and linked primary artifacts; independent
+quote-posts and replies stay available upstream for routing and human audit.
+That first-party view is wrapped as the final variable block after one stable
+audience prompt. Investment and AI Engineering have separate versioned prompts and cache keys but share one
 strict output schema: `decision`, freeform nullable `suppression_reason`, and
 nullable `summary`, `implication`, and `next_step`. A surfaced result requires
 all three content fields and no suppression reason; a suppressed result requires
@@ -347,22 +350,31 @@ one concrete reason and no audience content. No quote, confidence score,
 model-authored identifier, or ranking field exists in the schema.
 
 The two stable prompts are naturally cache eligible at roughly 1.27k and 1.31k
-`o200k_base` tokens. `build_request` only constructs the shared LiteLLM Responses
-payload with stable metadata/tags and provider cache kwargs; it does not choose
-a model, execute a request, or persist a result. `publish` binds surfaced prose
-back to the frozen event/day/Feed rank for the UI. The runner and store will be
-designed after one user-selected envelope is evaluated and inspected.
+`o200k_base` tokens. `build_request` constructs the shared LiteLLM Responses
+payload with stable metadata/tags and provider cache kwargs; `evaluate` executes
+and validates one request without owning persistence. `publish` binds surfaced
+prose back to the frozen event/day/Feed rank for the UI.
+
+`fli.insight_runs` owns the canonical
+`data/derived/insights/insights.db` store. A run freezes its source routing run,
+event/day/Feed rank, audiences, model, effort, exact request JSON, prompt/schema
+hashes, and input hash before any model call. Each audience completes or fails
+independently, exact completed rows are reused on resume, and response IDs,
+raw output, token/cache telemetry, reported cost, and errors remain auditable.
+`fli insights run` is the repeated-envelope operator path; `contract`,
+`summary`, `inspect`, and `import-result` are JSON-first inspection commands.
 
 The superseded cited-extraction, multi-stage audience extraction, item/day
 review, editor, audit, recall, and production-reconciliation modules and CLI
 commands have been deleted. Their historical decisions remain in archived
 project documentation, but live code has no compatibility read or old-schema
-fallback. `fli.web.insights` currently returns an honest empty successor state
-for both the canonical and existing `/api/insights/extracted*` UI routes. This
-keeps the Investment/AI Engineering screen, date transport, and empty states
-stable without reading a legacy database. The first successor store will expose
-date, audience, event ID, Feed rank, summary, implication, and next step; item
-rendering is intentionally deferred until the first real output is approved.
+fallback. `fli.web.insights` reads only the successor store for both the
+canonical and existing `/api/insights/extracted*` UI routes. It deduplicates
+later reruns by event/day/audience, orders solely by frozen Feed rank, includes
+all evaluated days even when zero items were kept, and exposes `kept`,
+`suppressed`, and `all` decision views. The UI uses implication as the surfaced
+decision rationale (`Why kept`) and the freeform suppression reason as `Why
+suppressed`; no model quote or second ranking is introduced.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
@@ -1136,15 +1148,16 @@ final score.
 | `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with full immutable evidence, a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, sequential packet freezing followed by bounded parallel model execution, resumable cache/cost telemetry, and one publication-bound multi-day refresh command |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.artifact_arxiv` | official batch-feed title, author, category, date, and abstract extraction for catalogued arXiv papers; PDFs remain optional future work |
-| `fli.insight_generation` | non-executing successor boundary with separate Investment and AI Engineering prompts/cache keys, one strict surface-or-suppress schema, exact routed Evidence reuse, deterministic validation, and application-owned Event/day/Feed-rank publication metadata |
+| `fli.insight_generation` | successor generation boundary with separate Investment and AI Engineering prompts/cache keys, one strict surface-or-suppress schema, first-party-only routed Evidence view, deterministic execution/validation, and application-owned Event/day/Feed-rank publication metadata |
+| `fli.insight_runs` | immutable, resumable SQLite Insight runs with exact request/result provenance, per-audience retry state, cache/cost telemetry, and JSON-first operator inspection |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort, with checksum-bound parent reuse for unchanged stable-ID sources |
 | `fli.following_rankings` | deterministic account discovery ordering plus entity-union Network support (source and target both one entity/one vote, self excluded), with experimental personalized PageRank retained for comparison |
-| `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed/Event readers share the newest completed analysis selection, and Insights returns an honest empty successor state until a new run store exists; source in `frontend/` |
+| `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed/Event readers share the newest completed analysis selection, and Insights projects kept/suppressed successor decisions without legacy reads; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Audience Insight generation | prompt/schema/request foundation plus one isolated four-call mini/Terra suppression comparison; no runner, run store, or live publication yet |
-| Insights UI | one Feed-ranked audience surface remains implemented and intentionally empty; the successor API preserves its transport while refusing legacy reads |
+| Audience Insight generation | durable first-party-only Terra path with exact frozen requests, resumable per-audience execution, one kept Engineering result, one Investment suppression, and measured zero-cache telemetry |
+| Insights UI | live Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order
