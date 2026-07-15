@@ -21,19 +21,18 @@ from typing import Any
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v2"
+PROMPT_VERSION = "audience-routing-v3"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "medium"
 PROMPT_CACHE_SHARDS = 1
-PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v2.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v3.txt"
 
 AUDIENCES = ("ai_engineering", "investment")
 JUDGMENT_FIELDS = ("relevant", "reason")
 _URL_ONLY_RE = re.compile(r"(?:https?://\S+\s*)+", re.IGNORECASE)
 _OPAQUE_X_URL_RE = re.compile(r"https?://t\.co/\S+", re.IGNORECASE)
 _MULTISPACE_RE = re.compile(r"[ \t]{2,}")
-_MIN_REACTION_CHARS = 40
 _PRIMARY_DUPLICATE_MIN_CHARS = 80
 _PRIMARY_DUPLICATE_RATIO = 0.80
 
@@ -49,7 +48,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v2",
+    "name": "audience_routing_v3",
     "strict": True,
     "schema": {
         "type": "object",
@@ -239,7 +238,6 @@ def render_input(packet: RoutingPacket) -> str:
         text = _display_text(source)
         if (
             _is_transport_only(text)
-            or len(text) < _MIN_REACTION_CHARS
             or _duplicates_primary_text(text, primary_texts)
         ):
             continue

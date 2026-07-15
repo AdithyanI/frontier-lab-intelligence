@@ -187,6 +187,80 @@ def test_fetch_cohort_snapshots_text_and_reuses_success(tmp_path, monkeypatch):
     conn.close()
 
 
+def test_claim_repairs_resurrected_redirect_source(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    short_url = "https://go.example/launch"
+    final_url = "https://example.com/launch"
+    source_id = _seed_artifact(db, url=short_url)
+    target_id = artifact_urls.artifact_id(final_url)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    body = b"""<html><head><title>Launch</title></head><body><article>
+    <h1>Launch</h1><p>This redirect target contains enough concrete public text
+    for the bounded extractor to preserve as reusable evidence.</p></article></body></html>"""
+
+    def handler(request: httpx.Request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        if request.url.host == "go.example":
+            return httpx.Response(302, headers={"Location": final_url})
+        return httpx.Response(
+            200, headers={"Content-Type": "text/html"}, content=body
+        )
+
+    first = artifact_fetch.fetch_cohort(
+        db_path=db,
+        limit=1,
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(handler),
+    )
+    assert first["success"] == 1
+
+    conn = artifacts.connect(db)
+    fetch_run_id = str(
+        conn.execute("SELECT fetch_run_id FROM artifact_fetch_run").fetchone()[0]
+    )
+    now = "2026-07-15T08:00:00+00:00"
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact
+               (artifact_id, canonical_url, canonicalization_contract, host,
+                artifact_kind, first_seen_at, last_seen_at, created_at, updated_at)
+               VALUES (?, ?, ?, 'go.example', 'article', ?, ?, ?, ?)""",
+            (
+                source_id,
+                short_url,
+                artifact_urls.CANONICALIZATION_CONTRACT,
+                now,
+                now,
+                now,
+                now,
+            ),
+        )
+
+    claimed = artifact_fetch._claim(
+        conn,
+        fetch_run_id=fetch_run_id,
+        artifact_id=source_id,
+        requested_url=short_url,
+    )
+
+    assert claimed is None
+    assert conn.execute(
+        "SELECT 1 FROM artifact WHERE artifact_id = ?", (source_id,)
+    ).fetchone() is None
+    assert conn.execute(
+        "SELECT 1 FROM artifact WHERE artifact_id = ?", (target_id,)
+    ).fetchone() is not None
+    fetches = conn.execute(
+        "SELECT artifact_id, status FROM artifact_fetch"
+    ).fetchall()
+    assert [(row["artifact_id"], row["status"]) for row in fetches] == [
+        (target_id, "success")
+    ]
+    conn.close()
+
+
 def test_fetch_cohort_resumes_only_retryable_items(tmp_path, monkeypatch):
     db = tmp_path / "artifacts.db"
     artifact_id = _seed_artifact(db)

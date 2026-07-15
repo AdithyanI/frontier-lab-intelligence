@@ -949,6 +949,34 @@ def _claim(
         fetch_id = hashlib.sha256(
             _canonical_json([request_key, attempt]).encode()
         ).hexdigest()
+        prior_converged_fetch = conn.execute(
+            """SELECT request_key, status, final_url
+               FROM artifact_fetch WHERE fetch_id = ?""",
+            (fetch_id,),
+        ).fetchone()
+        if prior_converged_fetch is not None:
+            if (
+                str(prior_converged_fetch["request_key"]) == request_key
+                and str(prior_converged_fetch["status"])
+                in {"success", "failed_terminal"}
+                and prior_converged_fetch["final_url"]
+            ):
+                # A previous attempt can move to its redirect target during
+                # convergence. If a later catalog import recreates the source
+                # short-link row, repair that identity instead of inserting the
+                # same deterministic fetch ID a second time.
+                artifacts.converge_artifact(
+                    conn,
+                    source_artifact_id=artifact_id,
+                    final_url=str(prior_converged_fetch["final_url"]),
+                    seen_at=now,
+                )
+                conn.commit()
+                return None
+            raise RuntimeError(
+                "deterministic fetch identity already exists without a reusable "
+                "redirect convergence"
+            )
         lease = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat(timespec="seconds")
         conn.execute(
             """INSERT INTO artifact_fetch

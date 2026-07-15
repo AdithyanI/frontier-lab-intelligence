@@ -247,9 +247,20 @@ announcements. It produced 82,476 clean-text characters total with zero Reader
 failures; the original three HTTP 403 attempts remain in the ledger alongside
 the three successful Reader attempts.
 
-The catalog intentionally stops there. Fetching the remaining long tail across
-hundreds of hosts would turn this proof into a general crawler before a cited
-consumer has demonstrated that breadth is useful.
+On 2026-07-15, a second frozen proof tested only ordinary Web artifacts. The
+30 selected source identities converged to 29 canonical pages; native bounded
+retrieval extracted 27 and the existing Reader fallback recovered the two
+native terminal failures. Twenty-six snapshots contain at least 1,000
+characters and the cohort contains 428,942 extracted characters total. The
+three thin results are interactive/profile shells rather than evidence-rich
+pages. A repeated Meta short-link exposed and now has regression coverage for
+an idempotency edge: when a later catalog import recreates a redirect source,
+the fetcher reconnects it to the already-fetched canonical target instead of
+creating a duplicate deterministic fetch attempt.
+
+The remaining long tail is still not fetched indiscriminately. Further
+expansion should remain source-class specific and should follow demonstrated
+use by the cited-insight consumer.
 
 ## Future sources
 

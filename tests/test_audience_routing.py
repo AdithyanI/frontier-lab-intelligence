@@ -114,6 +114,19 @@ def test_schema_requires_only_two_exact_audience_judgments():
         assert judgment["required"] == ["relevant", "reason"]
         assert judgment["additionalProperties"] is False
         assert judgment["properties"]["relevant"] == {"type": "boolean"}
+        assert judgment["properties"]["reason"] == {
+            "type": "string",
+            "minLength": 1,
+        }
+
+
+def test_v3_prompt_requests_three_to_four_sentences_without_padding():
+    prompt = audience_routing.instructions()
+
+    assert audience_routing.PROMPT_VERSION == "audience-routing-v3"
+    assert "usually three to four sentences" in prompt
+    assert "do not add filler merely to reach that length" in prompt
+    assert "One concise, evidence-grounded sentence" not in prompt
 
 
 def test_render_input_uses_readable_hierarchy_before_separate_reactions():
@@ -171,7 +184,7 @@ def test_render_input_replaces_link_only_post_and_omits_transport_reaction():
     assert "https://t.co/another-link" not in rendered
 
 
-def test_render_input_cleans_opaque_links_short_reactions_and_primary_duplicates():
+def test_render_input_keeps_short_reactions_and_cleans_duplicates_and_links():
     packet = make_packet()
     inline_link = audience_routing.EvidenceSource(
         source_type="x_post",
@@ -227,7 +240,8 @@ def test_render_input_cleans_opaque_links_short_reactions_and_primary_duplicates
     assert "Useful Reaction" in rendered
     assert "distinct reliability implication" in rendered
     assert "https://t.co/opaque" not in rendered
-    assert "Short Reaction" not in rendered
+    assert "Short Reaction" in rendered
+    assert "Good, but late." in rendered
     assert "Duplicate Reaction" not in rendered
 
 
@@ -278,7 +292,7 @@ def test_request_uses_luna_medium_cache_adapter_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v2",
+        "prompt:audience-routing-v3",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
