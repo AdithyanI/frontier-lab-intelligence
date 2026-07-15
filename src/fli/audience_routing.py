@@ -9,12 +9,13 @@ model.
 from __future__ import annotations
 
 import hashlib
+import html
 import json
+import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from xml.sax.saxutils import quoteattr
 
 from fli import llm_responses
 
@@ -28,6 +29,7 @@ PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v2.txt"
 
 AUDIENCES = ("ai_engineering", "investment")
 JUDGMENT_FIELDS = ("relevant", "reason")
+_URL_ONLY_RE = re.compile(r"(?:https?://\S+\s*)+", re.IGNORECASE)
 
 _JUDGMENT_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -154,35 +156,32 @@ def request_tags(*, run: str, day: str) -> tuple[str, ...]:
     )
 
 
-def _cdata(text: str) -> str:
-    """Preserve source text inside an XML-like prompt without closing CDATA."""
-    return text.replace("]]>", "]]]]><![CDATA[>")
+def _display_text(source: EvidenceSource) -> str:
+    """Return readable evidence text without changing stored source evidence."""
+    return html.unescape(source.normalized_text()).strip()
 
 
-def _source_element(
-    tag: str,
-    source: EvidenceSource,
+def _yaml_value(value: str) -> str:
+    return json.dumps(value, ensure_ascii=False)
+
+
+def _literal_field(
+    field: str,
+    text: str,
     *,
     indent: str,
-    include_author: bool = False,
-    include_title: bool = False,
 ) -> list[str]:
-    attributes = ""
-    if include_author and source.author:
-        attributes += f" author={quoteattr(source.author)}"
-    if include_title and source.title:
-        attributes += f" title={quoteattr(source.title)}"
-    return [
-        f"{indent}<{tag}{attributes}>",
-        f"{indent}  <TEXT><![CDATA[",
-        _cdata(source.normalized_text()),
-        f"]]></TEXT>",
-        f"{indent}</{tag}>",
-    ]
+    lines = [f"{indent}{field}: |"]
+    lines.extend(f"{indent}  {line}" if line else "" for line in text.splitlines())
+    return lines
+
+
+def _is_transport_only(text: str) -> bool:
+    return not text or _URL_ONLY_RE.fullmatch(text) is not None
 
 
 def render_input(packet: RoutingPacket) -> str:
-    """Render one semantic evidence hierarchy without internal provenance."""
+    """Render a readable YAML-style hierarchy without internal provenance."""
     roots = [source for source in packet.sources if source.relation == "root"]
     if len(roots) != 1:
         raise ValueError("routing packet must contain exactly one root source")
@@ -202,56 +201,63 @@ def render_input(packet: RoutingPacket) -> str:
         if source.source_type == "x_post"
         and source.relation
         not in {"root", "same_author_continuation", "retweet"}
+        and not _is_transport_only(_display_text(source))
     ]
 
-    root_attributes = f" author={quoteattr(root.author)}" if root.author else ""
-    lines = ["<EVIDENCE_PACKET>", f"  <PRIMARY_SOURCE{root_attributes}>"]
-    lines.extend(_source_element("PRIMARY_POST", root, indent="    "))
+    lines = ["evidence_packet:", "  primary_source:"]
+    if root.author:
+        lines.append(f"    author: {_yaml_value(root.author)}")
+    lines.append("    post:")
+    root_text = _display_text(root)
+    if _is_transport_only(root_text):
+        lines.append(
+            "      kind: artifact_link" if artifacts else "      kind: link_only"
+        )
+    else:
+        lines.append("      kind: x_post")
+        lines.extend(_literal_field("text", root_text, indent="      "))
 
     if continuations:
-        lines.append("    <SAME_AUTHOR_CONTINUATIONS>")
+        lines.append("    continuations:")
         for source in continuations:
-            lines.extend(_source_element("CONTINUATION", source, indent="      "))
-        lines.append("    </SAME_AUTHOR_CONTINUATIONS>")
+            text = _display_text(source)
+            lines.append("      - kind: " + ("artifact_link" if _is_transport_only(text) else "x_post"))
+            if not _is_transport_only(text):
+                lines.extend(_literal_field("text", text, indent="        "))
 
     if artifacts:
-        lines.append("    <CONNECTED_ARTIFACTS>")
+        lines.append("    artifacts:")
         for source in artifacts:
-            tag = (
-                "AUTHORED_ARTIFACT"
+            kind = (
+                "authored_artifact"
                 if source.relation == "self_published_artifact"
-                else "LINKED_ARTIFACT"
+                else "linked_artifact"
             )
+            lines.append(f"      - kind: {kind}")
+            if kind == "linked_artifact" and source.author:
+                lines.append(f"        author: {_yaml_value(source.author)}")
+            if source.title:
+                lines.append(f"        title: {_yaml_value(source.title)}")
             lines.extend(
-                _source_element(
-                    tag,
-                    source,
-                    indent="      ",
-                    include_author=tag == "LINKED_ARTIFACT",
-                    include_title=True,
-                )
+                _literal_field("text", _display_text(source), indent="        ")
             )
-        lines.append("    </CONNECTED_ARTIFACTS>")
-    lines.append("  </PRIMARY_SOURCE>")
 
     if reactions:
-        reaction_tags = {
-            "quote": "QUOTE_POST",
-            "reply": "REPLY_POST",
+        reaction_kinds = {
+            "quote": "quote_post",
+            "reply": "reply_post",
         }
-        lines.append("  <RELATED_REACTIONS>")
+        lines.append("  independent_reactions:")
         for source in reactions:
-            lines.extend(
-                _source_element(
-                    reaction_tags.get(source.relation or "", "RELATED_POST"),
-                    source,
-                    indent="    ",
-                    include_author=True,
-                )
+            lines.append(
+                "    - kind: "
+                + reaction_kinds.get(source.relation or "", "related_post")
             )
-        lines.append("  </RELATED_REACTIONS>")
-
-    lines.append("</EVIDENCE_PACKET>")
+            if source.author:
+                lines.append(f"      author: {_yaml_value(source.author)}")
+            lines.extend(
+                _literal_field("text", _display_text(source), indent="      ")
+            )
     return "\n".join(lines)
 
 

@@ -83,7 +83,7 @@ def make_packet():
                 url="https://example.com/private-reaction",
                 author="Independent Engineer",
                 relation="quote",
-                text="This serving result should be tested under burst traffic.",
+                text="This serving result should be tested under burst traffic &amp; load.",
             ),
         ),
     )
@@ -116,29 +116,59 @@ def test_schema_requires_only_two_exact_audience_judgments():
         assert judgment["properties"]["relevant"] == {"type": "boolean"}
 
 
-def test_render_input_groups_primary_evidence_before_separate_reactions():
+def test_render_input_uses_readable_hierarchy_before_separate_reactions():
     rendered = audience_routing.render_input(make_packet())
 
-    assert '<PRIMARY_SOURCE author="Satya Nadella">' in rendered
-    assert "<PRIMARY_POST>" in rendered
-    assert '<AUTHORED_ARTIFACT title="Serving system report">' in rendered
-    assert "<RELATED_REACTIONS>" in rendered
-    assert '<QUOTE_POST author="Independent Engineer">' in rendered
-    assert rendered.index("<PRIMARY_POST>") < rendered.index(
-        "<AUTHORED_ARTIFACT"
-    ) < rendered.index("<RELATED_REACTIONS>")
+    assert "evidence_packet:" in rendered
+    assert "  primary_source:" in rendered
+    assert '    author: "Satya Nadella"' in rendered
+    assert "    post:" in rendered
+    assert "      kind: x_post" in rendered
+    assert "      - kind: authored_artifact" in rendered
+    assert '        title: "Serving system report"' in rendered
+    assert "  independent_reactions:" in rendered
+    assert "    - kind: quote_post" in rendered
+    assert '      author: "Independent Engineer"' in rendered
+    assert "burst traffic & load" in rendered
+    assert "&amp;" not in rendered
+    assert rendered.index("    post:") < rendered.index(
+        "      - kind: authored_artifact"
+    ) < rendered.index("  independent_reactions:")
     assert "reduced inference latency" in rendered
     assert "event-secret-42" not in rendered
     assert "source-secret-root" not in rendered
     assert "source-secret-article" not in rendered
     assert "source-secret-reaction" not in rendered
     assert "https://example.com" not in rendered
-    assert "relation=" not in rendered
-    assert "ref=" not in rendered
+    assert "relation:" not in rendered
+    assert "ref:" not in rendered
+    assert "CDATA" not in rendered
+    assert "<QUOTE_POST" not in rendered
     assert "section_ordinal" not in rendered
     assert "source_char_start" not in rendered
     assert "feed_rank" not in rendered
     assert "triage" not in rendered.lower()
+
+
+def test_render_input_replaces_link_only_post_and_omits_transport_reaction():
+    packet = make_packet()
+    root = replace(packet.sources[0], text="https://t.co/example")
+    transport_reaction = audience_routing.EvidenceSource(
+        source_type="x_post",
+        source_id="transport-reaction",
+        url="https://example.com/transport-reaction",
+        author="Link Only",
+        relation="quote",
+        text="https://t.co/another-link",
+    )
+    rendered = audience_routing.render_input(
+        replace(packet, sources=(root, *packet.sources[1:], transport_reaction))
+    )
+
+    assert "      kind: artifact_link" in rendered
+    assert "https://t.co/example" not in rendered
+    assert "Link Only" not in rendered
+    assert "https://t.co/another-link" not in rendered
 
 
 def test_evidence_hash_binds_hidden_provenance_while_input_hash_does_not():
