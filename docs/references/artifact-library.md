@@ -258,6 +258,15 @@ an idempotency edge: when a later catalog import recreates a redirect source,
 the fetcher reconnects it to the already-fetched canonical target instead of
 creating a duplicate deterministic fetch attempt.
 
+A rendered-source audit then compared 18 varied Web pages with their stored
+snapshots. Native Trafilatura snapshots consistently retained the substantive
+source text while removing navigation and page chrome. The two Jina Reader
+recoveries also retained the complete underlying Nature and OpenAI content,
+but were less selective: the Nature paper begins after roughly 4,400
+characters of cookie/navigation material, and the OpenAI article begins after
+roughly 1,500 characters of navigation. Reader output is therefore a strong
+availability fallback, not a cleaner default than native extraction.
+
 The remaining long tail is still not fetched indiscriminately. Further
 expansion should remain source-class specific and should follow demonstrated
 use by the cited-insight consumer.
