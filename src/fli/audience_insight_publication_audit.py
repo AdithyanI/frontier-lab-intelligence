@@ -44,6 +44,9 @@ FINALIZATION_REASON_CODE = "publication_audit_disqualification"
 EDITORIAL_FINALIZATION_SCHEMA_VERSION = (
     "audience-insight-editorial-finalization-v1"
 )
+COMPOSED_EDITORIAL_FINALIZATION_SCHEMA_VERSION = (
+    "audience-insight-composed-editorial-finalization-v1"
+)
 EDITORIAL_FINALIZATION_REASON_CODE = "senior_editorial_disqualification"
 EDITORIAL_REVIEW_SCHEMA_VERSION = "audience-insight-editorial-review-v1"
 EDITORIAL_REMOVAL_REASON_CODES = (
@@ -55,6 +58,7 @@ EDITORIAL_REMOVAL_REASON_CODES = (
     "other",
 )
 FINALIZATION_DIR = "publication-finalization-v1"
+EDITORIAL_FINALIZATION_DIR = "publication-editorial-finalization-v1"
 FINALIZATION_FILENAME = "finalization.json"
 PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_insight_publication_auditor_v1.txt"
 
@@ -1467,6 +1471,23 @@ def validate_readonly_publication_audit(
 def default_finalization_path(source_run_db: Path | str) -> Path:
     """Return the immutable publication-finalization sidecar for one run."""
     return Path(source_run_db).resolve().parent / FINALIZATION_DIR / FINALIZATION_FILENAME
+
+
+def default_editorial_finalization_path(source_run_db: Path | str) -> Path:
+    """Return the immutable terminal editorial layer for one finalized run."""
+    return (
+        Path(source_run_db).resolve().parent
+        / EDITORIAL_FINALIZATION_DIR
+        / FINALIZATION_FILENAME
+    )
+
+
+def terminal_finalization_path(source_run_db: Path | str) -> Path:
+    """Return the terminal adjacent sidecar, preferring a composed editorial layer."""
+    editorial = default_editorial_finalization_path(source_run_db)
+    if editorial.is_file():
+        return editorial
+    return default_finalization_path(source_run_db)
 
 
 def _row_sha256(row: sqlite3.Row) -> str:

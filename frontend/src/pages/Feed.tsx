@@ -22,6 +22,7 @@ import {
   type DateWindowDirection,
 } from '../dateWindow'
 import DateNavigator from '../components/DateNavigator'
+import CopyEnvelopeId from '../components/CopyEnvelopeId'
 
 type Sort = 'attention' | 'recent' | 'engagement'
 type TriageFilter = 'all' | 'keep' | 'drop' | 'not_evaluated'
@@ -592,14 +593,14 @@ function EventRow({
           </div>
         )}
 
-        <TriageNote item={item} />
-
         {item.is_grouped && (
           <EventEvidenceDetails
             item={item}
             relationshipSummary={relationshipSummary}
           />
         )}
+
+        <TriageNote item={item} />
 
         <footer className="feed-footer mono">
           <div className="feed-metrics">
@@ -608,9 +609,12 @@ function EventRow({
             <Metric label="replies" value={root.metrics.replies} />
             <Metric label="views" value={root.metrics.views} />
           </div>
-          <a href={root.url} target="_blank" rel="noreferrer">
-            Open root post on X ↗
-          </a>
+          <div className="feed-footer-actions">
+            <CopyEnvelopeId envelopeId={item.event_id} />
+            <a href={root.url} target="_blank" rel="noreferrer">
+              Open root post on X ↗
+            </a>
+          </div>
         </footer>
       </div>
     </article>

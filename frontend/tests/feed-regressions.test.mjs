@@ -8,6 +8,10 @@ const dateNavigatorSource = await readFile(
   new URL('../src/components/DateNavigator.tsx', import.meta.url),
   'utf8',
 )
+const copyEnvelopeSource = await readFile(
+  new URL('../src/components/CopyEnvelopeId.tsx', import.meta.url),
+  'utf8',
+)
 const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
 
 test('Feed uses semantic classes for optional menu and triage content', () => {
@@ -15,6 +19,14 @@ test('Feed uses semantic classes for optional menu and triage content', () => {
   assert.match(feedSource, /className="event-triage-decision"/)
   assert.doesNotMatch(appStyles, /feed-menu-panel button > span:last-child/)
   assert.doesNotMatch(appStyles, /event-triage-heading span:first-child/)
+})
+
+test('Feed keeps extraction status secondary and exposes the exact envelope ID', () => {
+  assert.ok(feedSource.indexOf('<EventEvidenceDetails') < feedSource.indexOf('<TriageNote item={item} />'))
+  assert.match(feedSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
+  assert.match(copyEnvelopeSource, /navigator\.clipboard\.writeText\(envelopeId\)/)
+  assert.match(copyEnvelopeSource, /Copy envelope ID/)
+  assert.match(copyEnvelopeSource, /aria-live="polite"/)
 })
 
 test('Feed search matches the compact ruled control language', () => {

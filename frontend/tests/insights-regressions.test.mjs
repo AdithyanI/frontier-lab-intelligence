@@ -54,6 +54,7 @@ test('Insights links every Feed rank to its exact dated Feed envelope', () => {
   assert.match(insightSource, /Feed rank ↗/)
   assert.match(insightSource, /const envelopeUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
   assert.match(insightSource, /Open the exact Feed envelope for/)
+  assert.match(insightSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
   assert.match(appStyles, /\.insight-feed-link:focus-visible/)
 })
 

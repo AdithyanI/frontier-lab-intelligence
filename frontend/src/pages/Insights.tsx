@@ -13,6 +13,7 @@ import {
   type InvestmentInsightFields,
 } from '../api'
 import DateNavigator from '../components/DateNavigator'
+import CopyEnvelopeId from '../components/CopyEnvelopeId'
 import {
   getDateWindow,
   shiftDateWindow,
@@ -218,12 +219,15 @@ function Citation({ item, accessibleName }: { item: DisplayItem; accessibleName:
     <blockquote className="insight-citation" cite={envelopeUrl}>
       <div className="insight-citation-head">
         <span className="mono">Exact source passage</span>
-        <Link
-          to={envelopeUrl}
-          aria-label={`Open the exact Feed envelope for ${accessibleName}`}
-        >
-          Open envelope ↗
-        </Link>
+        <span className="insight-citation-actions">
+          <CopyEnvelopeId envelopeId={item.event_id} />
+          <Link
+            to={envelopeUrl}
+            aria-label={`Open the exact Feed envelope for ${accessibleName}`}
+          >
+            Open envelope ↗
+          </Link>
+        </span>
       </div>
       <p>“{decodeTextEntities(item.citation.quote)}”</p>
     </blockquote>

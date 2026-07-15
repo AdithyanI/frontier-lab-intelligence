@@ -1934,6 +1934,50 @@ td.num {
 .feed-footer > a { flex: none; text-decoration: none; }
 .feed-footer > a:hover { text-decoration: underline; }
 
+.feed-footer-actions,
+.insight-citation-actions {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.feed-footer-actions > a { flex: none; text-decoration: none; }
+.feed-footer-actions > a:hover { text-decoration: underline; }
+
+.copy-envelope-id {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.copy-envelope-id button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--blue-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.copy-envelope-id button:hover,
+.copy-envelope-id button:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.copy-envelope-id button:focus-visible {
+  outline: 1px solid var(--blue-mid);
+  outline-offset: 3px;
+}
+
+.copy-envelope-status {
+  min-width: 38px;
+  color: var(--positive);
+  font-size: 9px;
+}
+
 .feed-skeleton { height: 180px; margin-top: 1px; }
 
 .event-proof {
@@ -2768,6 +2812,11 @@ td.num {
 .insight-citation a:focus-visible {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.insight-citation-actions .copy-envelope-id {
+  color: var(--blue-ink);
+  font-size: 10px;
 }
 
 .insight-citation p {
