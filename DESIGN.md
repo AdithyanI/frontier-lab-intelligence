@@ -197,8 +197,9 @@ Rules:
   not duplicate that context. A single
   Feed-style date navigator filters by the UTC day of the source post that
   revealed the artifact, never by retrieval time; this is an inspection aid,
-  not an independent artifact relevance model. Ready rows lazily expose the
-  exact normalized text snapshot inside the existing provenance expansion,
+  not an independent artifact relevance model. Ready rows expose the exact
+  normalized text snapshot behind a second, default-collapsed Preview control
+  inside the existing provenance expansion,
   with its format, character count, and one link to the complete text response;
   catalogued-only rows do not imply that content was retrieved. Do not add
   summaries, cards, or additional filters until a cited-insight consumer proves

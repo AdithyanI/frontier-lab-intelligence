@@ -1192,9 +1192,10 @@ final score.
 
 ## Current Build Order
 
-No build order is active immediately after the Audience Insights v2 archive.
-The next project begins with an architecture review of one complete Feed
-envelope. A candidate minimal output has two structured judgments—keep/drop and
-audience assignment—but the exact schema, evidence blocks, consistency rules,
-and prompt are intentionally unfrozen until that review. The archived v2
-review/publication stack is not the active build order.
+The active project is
+[`docs/projects/evidence-audience-routing/tasks.md`](../projects/evidence-audience-routing/tasks.md).
+It begins with an architecture review of one complete Feed envelope. A
+candidate minimal output has two structured judgments—keep/drop and audience
+assignment—but the exact schema, evidence blocks, consistency rules, and prompt
+are intentionally unfrozen until Adi reviews the first envelope. The archived
+v2 review/publication stack is not the active build order.

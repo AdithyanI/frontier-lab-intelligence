@@ -125,10 +125,10 @@ Ask only if the answer materially changes the work.
 
 The sections below preserve the initial planning snapshot from 2026-07-08.
 They are provenance, not current execution state. For the present system status
-and assignment gap, read [`../STATUS.md`](../STATUS.md). There is intentionally
-no active project immediately after the 2026-07-15 Audience Insights v2
-archive; open the next architecture-review tracker with `$project`. Do not
-rebuild the repository or interpret the `todo` values below as live status.
+and assignment gap, read [`../STATUS.md`](../STATUS.md). The active project is
+[`../projects/evidence-audience-routing/tasks.md`](../projects/evidence-audience-routing/tasks.md),
+which starts with one exact-envelope architecture review. Do not rebuild the
+repository or interpret the `todo` values below as live status.
 
 ## Initial first-day execution plan (historical)
 

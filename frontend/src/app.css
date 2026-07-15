@@ -2474,37 +2474,58 @@ td.num {
 
 .artifact-extracted {
   margin-top: 18px;
-  padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 
-.artifact-extracted > header {
+.artifact-extracted > summary {
   display: flex;
-  align-items: flex-start;
+  min-height: 52px;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
+  padding: 10px 0;
+  list-style: none;
+  cursor: pointer;
 }
 
-.artifact-extracted h3 {
-  margin: 0;
+.artifact-extracted > summary::-webkit-details-marker { display: none; }
+
+.artifact-extracted > summary::after {
+  content: 'Preview ↓';
+  flex: none;
+  color: var(--blue-ink);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+.artifact-extracted[open] > summary::after { content: 'Hide ↑'; }
+
+.artifact-extracted > summary strong {
   color: var(--ink);
   font-size: 12px;
   font-weight: 600;
 }
 
-.artifact-extracted header p {
+.artifact-extracted > summary p {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 9px;
 }
 
-.artifact-extracted > header > a {
-  flex: none;
+.artifact-extracted-body {
+  padding: 0 0 16px;
+  border-top: 1px solid var(--border);
+}
+
+.artifact-extracted-body > a {
+  display: block;
+  width: fit-content;
+  margin: 12px 0 0 auto;
   font-family: var(--font-mono);
   font-size: 9.5px;
 }
 
-.artifact-extracted pre {
+.artifact-extracted-body pre {
   max-height: 360px;
   margin: 14px 0 0;
   padding: 16px 18px;

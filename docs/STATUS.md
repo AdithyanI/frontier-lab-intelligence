@@ -57,7 +57,7 @@ reconciliation, briefing, or export resumes.
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Legacy keep/drop triage | Implemented comparison baseline | The existing Luna decision/reason runs remain inspectable, but the active product is testing a cleaner audience-first contract. During calibration, the legacy result is preserved for comparison and is not silently overwritten. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Feed audience routing | Pending architecture review | Candidate shape is explicit keep/drop plus a structured audience assignment (`ai_engineering`, `investment`, both, or neither). Exact fields, consistency rules, evidence input, and prompt are not frozen. |
+| Feed audience routing | Active architecture review | The active project is deciding a minimal keep/drop plus audience-assignment contract on one exact envelope. Exact fields, consistency rules, evidence input, and prompt remain unfrozen until Adi reviews them. |
 | Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
@@ -78,9 +78,10 @@ or a nine-day publication apparatus.
 
 ## Submission Finish Line
 
-No active tracker owns this work yet. At system level, the remaining proof is:
+The active Evidence Audience Routing tracker owns the execution detail. At
+system level, the remaining proof is:
 
-1. Open a fresh architecture-review project with Adi.
+1. Inspect one exact complete envelope with Adi.
 2. Decide the exact evidence blocks and structured keep/drop plus audience
    schema on one envelope.
 3. Calibrate clear Engineering, Investment, both, and neither examples.
@@ -106,10 +107,10 @@ case-study thesis.
 
 ## Current Direction
 
-There is intentionally no active tracker after archiving Audience Insights v2.
-The next session should use `$project` to open one fresh architecture-review
-project before implementing or running any routing prompt. Insight generation
-and delivery remain deliberately deferred.
+The active tracker is
+[`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
+It begins with one exact-envelope architecture review before any routing model
+run. Insight generation and delivery remain deliberately deferred.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -122,7 +123,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | Open a fresh architecture-review tracker with `$project`; no active tracker currently exists. |
+| What should be done next, exactly? | [`projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |

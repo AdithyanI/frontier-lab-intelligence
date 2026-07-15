@@ -91,7 +91,8 @@ bounded decoding. A page that exposes only a client-rendered loading/error shell
 is a terminal extraction failure rather than misleading clean text. Successful
 raw and text payloads are written atomically under their SHA-256 paths.
 
-The Artifact UI loads normalized text only when a retrieved row is expanded,
+The Artifact UI loads normalized text only when the default-collapsed Preview
+control inside a retrieved row is explicitly expanded,
 shows the extractor and character count beside a bounded preview, and links to
 `/api/artifacts/{artifact_id}/text` for the complete plain-text response. The
 endpoint resolves the content-addressed snapshot server-side and never exposes

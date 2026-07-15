@@ -178,7 +178,7 @@ function ArtifactRow({
   }
 
   return (
-    <details className={rowClassName} onToggle={loadExtractedText}>
+    <details className={rowClassName}>
       <summary>
         <span
           className="artifact-rank mono"
@@ -251,30 +251,32 @@ function ArtifactRow({
           </div>
         </dl>
         {hasReadableText && (
-          <section className="artifact-extracted" aria-label="Extracted artifact content">
-            <header>
+          <details className="artifact-extracted" onToggle={loadExtractedText}>
+            <summary>
               <div>
-                <h3>Extracted content</h3>
+                <strong>Extracted content</strong>
                 <p className="mono">
                   {extractedContentLabel(item)} · {textCharCount?.toLocaleString('en-US')} characters
                 </p>
               </div>
+            </summary>
+            <div className="artifact-extracted-body">
               <a href={textUrl} target="_blank" rel="noreferrer">
                 Open full text ↗
               </a>
-            </header>
-            {textState === 'loading' && (
-              <p className="artifact-extracted-state mono">Loading extracted content…</p>
-            )}
-            {textState === 'error' && (
-              <p className="artifact-extracted-state mono">
-                Couldn’t load the extracted content. Open the full text to retry.
-              </p>
-            )}
-            {textState === 'ready' && extractedText != null && (
-              <pre>{extractedText}</pre>
-            )}
-          </section>
+              {textState === 'loading' && (
+                <p className="artifact-extracted-state mono">Loading extracted content…</p>
+              )}
+              {textState === 'error' && (
+                <p className="artifact-extracted-state mono">
+                  Couldn’t load the extracted content. Open the full text to retry.
+                </p>
+              )}
+              {textState === 'ready' && extractedText != null && (
+                <pre>{extractedText}</pre>
+              )}
+            </div>
+          </details>
         )}
       </div>
     </details>
