@@ -323,12 +323,21 @@ selected usefulness/actionability/specificity threshold, and false-negative
 reject counts. Duplicate and padding judgments remain exclusively in the
 separate day-set gate.
 
-A failed selected-item audit never rewrites the source run or audit. The only
-supported correction is an adjacent immutable publication-finalization sidecar
-whose hashes bind the complete source selection/review chain and exact audit
-result; every read revalidates those bindings before projecting the disqualified
-base selection to an effective empty set. `fli.audience_insight_production_reconciliation`
-then provides the production closeout boundary. Its strict explicit manifest
+A source run and its audit are never rewritten. An adjacent immutable
+publication-finalization sidecar may only make the release boundary stricter:
+it either removes exact audit-failed selected IDs, or records an exact senior
+editorial disqualification after the independent audit has passed. The latter
+binds a review ID, reviewer, enumerated reason, and rationale to exact active
+candidate IDs. Neither mode can promote a reject, substitute content, or
+reorder survivors. Every read revalidates the source selection and audit
+bindings; canonical reconciliation additionally binds the sidecar bytes. A
+senior editorial veto changes the released projection but retains that
+mechanically valid item in duplicate-suppression history, so later editors do
+not rediscover the same weak framing and already-frozen downstream runs do not
+need to be rewritten. An audit disqualification remains absent from both the
+released projection and later history.
+`fli.audience_insight_production_reconciliation` then provides the production
+closeout boundary. Its strict explicit manifest
 names every required audience/day, exact source database, adjacent audit,
 expected base selection count, optional finalization, and—when available—the
 exact X Article artifact cohort. It discovers no runs by recency or directory

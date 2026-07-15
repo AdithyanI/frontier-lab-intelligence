@@ -2489,6 +2489,53 @@ td.num {
 }
 
 .insight-audience-switch button.is-active small { color: rgba(255, 255, 255, 0.72); }
+
+.insight-view-switch {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+}
+
+.insight-view-switch button {
+  display: flex;
+  min-height: 50px;
+  flex: 0 0 290px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding: 9px 18px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink-soft);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.insight-view-switch button.is-active {
+  background: var(--surface);
+  box-shadow: inset 0 -2px 0 var(--blue-mid);
+  color: var(--ink);
+}
+
+.insight-view-switch button:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+}
+
+.insight-view-switch span { font-size: 12.5px; font-weight: 600; }
+.insight-view-switch small { color: var(--muted); font-size: 10.5px; }
+
+.insight-view-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 9.5px;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
 .insight-calendar { margin-top: 16px; }
 
 .insight-list {

@@ -29,6 +29,7 @@ from fli import artifact_urls, artifacts
 
 
 FETCH_POLICY = "bounded-public-v1"
+EXPLICIT_SELECTION_POLICY = "explicit-artifact-ids-v1"
 JINA_READER_POLICY = "jina-reader-v1"
 JINA_READER_SELECTION = "native-public-failure-v1"
 JINA_READER_URL = "https://r.jina.ai/"
@@ -352,6 +353,33 @@ def _html_metadata(body: bytes, final_url: str) -> tuple[str | None, str | None]
     return (titles[0] if titles else None), declared
 
 
+def _sec_archives_text(body: bytes, final_url: str) -> str | None:
+    split = urlsplit(final_url)
+    host = (split.hostname or "").lower()
+    if not (host == "sec.gov" or host.endswith(".sec.gov")):
+        return None
+    if not split.path.lower().startswith("/archives/edgar/data/"):
+        return None
+    try:
+        tree = lxml_html.fromstring(body, base_url=final_url)
+    except (ValueError, TypeError):
+        return None
+    for node in tree.xpath("//script|//style|//noscript"):
+        node.drop_tree()
+    blocks = []
+    for node in tree.xpath("//p|//h1|//h2|//h3|//h4|//li"):
+        text = " ".join(node.text_content().replace("\xa0", " ").split())
+        if text:
+            blocks.append(text)
+    if not blocks:
+        for node in tree.xpath("//td"):
+            text = " ".join(node.text_content().replace("\xa0", " ").split())
+            if text:
+                blocks.append(text)
+    clean = _normalize_text("\n\n".join(blocks))
+    return clean if len(clean.strip()) >= MIN_HTML_TEXT_CHARS else None
+
+
 def extract_content(
     body: bytes,
     *,
@@ -427,6 +455,17 @@ def extract_content(
                 "video_transcript_unavailable", "Video pages require a later transcript stage",
             )
         clean = _normalize_text(document.text) if document and document.text else ""
+        if len(clean.strip()) < MIN_HTML_TEXT_CHARS:
+            sec_text = _sec_archives_text(body, final_url)
+            if sec_text is not None:
+                return Extraction(
+                    True,
+                    "html-sec-archives-lxml-v1",
+                    version("lxml"),
+                    title,
+                    sec_text,
+                    declared,
+                )
         if len(clean.strip()) < MIN_HTML_TEXT_CHARS:
             return Extraction(
                 False, "html-trafilatura-v1", trafilatura.__version__, title, None, declared,
@@ -589,6 +628,157 @@ def select_cohort(conn: Any, *, limit: int) -> list[dict[str, Any]]:
     for rank, item in enumerate(selected, 1):
         item["selection_rank"] = rank
     return selected
+
+
+def select_explicit_artifacts(
+    conn: Any, *, artifact_ids: Iterable[str]
+) -> list[dict[str, Any]]:
+    """Resolve an exact deterministic catalog cohort without widening fetch scope."""
+    requested = sorted({str(value or "").strip() for value in artifact_ids})
+    if not requested or "" in requested:
+        raise ValueError("at least one non-empty artifact_id is required")
+    selected: list[dict[str, Any]] = []
+    missing: list[str] = []
+    unbound: list[str] = []
+    for artifact_id in requested:
+        artifact = conn.execute(
+            "SELECT * FROM artifact WHERE artifact_id = ?", (artifact_id,)
+        ).fetchone()
+        if artifact is None:
+            missing.append(artifact_id)
+            continue
+        source = conn.execute(
+            """SELECT envelope_day, event_id, source_rank,
+                      day_candidate_count, expanded_url AS selected_url
+               FROM artifact_import_candidate
+               WHERE artifact_id = ? AND decision = 'accepted'
+               ORDER BY source_rank, envelope_day, event_id
+               LIMIT 1""",
+            (artifact_id,),
+        ).fetchone()
+        if source is None:
+            source = conn.execute(
+                """SELECT envelope_day, event_id, source_rank,
+                          day_candidate_count, ? AS selected_url
+                   FROM artifact_event_supplement
+                   WHERE artifact_id = ?
+                   ORDER BY source_rank, envelope_day, event_id
+                   LIMIT 1""",
+                (str(artifact["canonical_url"]), artifact_id),
+            ).fetchone()
+        if source is None:
+            unbound.append(artifact_id)
+            continue
+        item = dict(artifact)
+        item.update(dict(source))
+        item["normalized_rank"] = (int(source["source_rank"]) - 1) / max(
+            int(source["day_candidate_count"]) - 1, 1
+        )
+        item["stratum"] = _stratum(item)
+        selected.append(item)
+    if missing:
+        raise ValueError("unknown artifact_id: " + ", ".join(missing))
+    if unbound:
+        raise ValueError(
+            "artifact has no accepted source association: " + ", ".join(unbound)
+        )
+    for rank, item in enumerate(selected, start=1):
+        item["selection_rank"] = rank
+    return selected
+
+
+def _create_explicit_fetch_run(
+    conn: Any, selection: list[dict[str, Any]]
+) -> tuple[str, bool]:
+    payload = [
+        [item["artifact_id"], item["selected_url"], item["source_event_id"]]
+        if "source_event_id" in item
+        else [item["artifact_id"], item["selected_url"], item["event_id"]]
+        for item in selection
+    ]
+    fingerprint = hashlib.sha256(_canonical_json(payload).encode()).hexdigest()
+    fetch_run_id = hashlib.sha256(
+        _canonical_json(
+            [FETCH_POLICY, EXPLICIT_SELECTION_POLICY, fingerprint]
+        ).encode()
+    ).hexdigest()
+    existing = conn.execute(
+        "SELECT status FROM artifact_fetch_run WHERE fetch_run_id = ?",
+        (fetch_run_id,),
+    ).fetchone()
+    if existing is not None:
+        if str(existing["status"]) != "complete":
+            return fetch_run_id, False
+        pending = conn.execute(
+            """SELECT 1
+               FROM artifact_fetch_run_item item
+               WHERE item.fetch_run_id = ?
+                 AND NOT EXISTS (
+                     SELECT 1 FROM artifact_fetch fetch
+                     WHERE fetch.artifact_id = item.artifact_id
+                       AND fetch.fetch_policy = ?
+                       AND fetch.status IN ('success', 'failed_terminal')
+                 )
+                 AND COALESCE((
+                     SELECT MAX(fetch.attempt_number)
+                     FROM artifact_fetch fetch
+                     WHERE fetch.artifact_id = item.artifact_id
+                       AND fetch.fetch_policy = ?
+                 ), 0) < ?
+               LIMIT 1""",
+            (fetch_run_id, FETCH_POLICY, FETCH_POLICY, MAX_ATTEMPTS),
+        ).fetchone()
+        if pending is None:
+            return fetch_run_id, True
+        with conn:
+            conn.execute(
+                """UPDATE artifact_fetch_run
+                   SET status = 'in_progress', completed_at = NULL
+                   WHERE fetch_run_id = ?""",
+                (fetch_run_id,),
+            )
+        return fetch_run_id, False
+    now = _now()
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact_fetch_run
+               (fetch_run_id, schema_version, fetch_policy, selection_policy,
+                input_fingerprint, expected_count, success_count,
+                failed_retryable_count, failed_terminal_count, started_at,
+                status)
+               VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, 'in_progress')""",
+            (
+                fetch_run_id,
+                artifacts.SCHEMA_VERSION,
+                FETCH_POLICY,
+                EXPLICIT_SELECTION_POLICY,
+                fingerprint,
+                len(selection),
+                now,
+            ),
+        )
+        conn.executemany(
+            """INSERT INTO artifact_fetch_run_item
+               (fetch_run_id, artifact_id, selection_rank, stratum,
+                selected_url, source_day, source_rank, normalized_rank,
+                source_event_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [
+                (
+                    fetch_run_id,
+                    item["artifact_id"],
+                    item["selection_rank"],
+                    item["stratum"],
+                    item["selected_url"],
+                    item["envelope_day"],
+                    item["source_rank"],
+                    item["normalized_rank"],
+                    item["event_id"],
+                )
+                for item in selection
+            ],
+        )
+    return fetch_run_id, False
 
 
 def _create_fetch_run(conn: Any, selection: list[dict[str, Any]]) -> tuple[str, bool]:
@@ -1320,12 +1510,17 @@ def fetch_cohort(
     *,
     db_path: Path | str = artifacts.DEFAULT_DB,
     limit: int = 30,
+    artifact_ids: Iterable[str] | None = None,
     resolver: Resolver = _default_resolver,
     transport: httpx.BaseTransport | None = None,
 ) -> dict[str, Any]:
     conn = artifacts.connect(db_path)
-    selection = select_cohort(conn, limit=limit)
-    fetch_run_id, already_complete = _create_fetch_run(conn, selection)
+    if artifact_ids is None:
+        selection = select_cohort(conn, limit=limit)
+        fetch_run_id, already_complete = _create_fetch_run(conn, selection)
+    else:
+        selection = select_explicit_artifacts(conn, artifact_ids=artifact_ids)
+        fetch_run_id, already_complete = _create_explicit_fetch_run(conn, selection)
     if already_complete:
         row = conn.execute(
             "SELECT * FROM artifact_fetch_run WHERE fetch_run_id = ?", (fetch_run_id,)

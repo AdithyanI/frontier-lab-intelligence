@@ -1223,6 +1223,13 @@ def _inspect_run(
                 )
             audit_report = finalization_report["audit"]
             effective_ids = list(finalization_report["effective_selected_ids"])
+        history_ids = (
+            base_ids
+            if finalization_report is not None
+            and finalization_report["reason_code"]
+            == publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
+            else effective_ids
+        )
 
         audit_meta = audit.execute(
             "SELECT selected_count, reject_sample_count FROM audit_run WHERE singleton = 1"
@@ -1290,7 +1297,11 @@ def _inspect_run(
             "telemetry": source_telemetry,
             "audit": {
                 "status": (
-                    "failed_selected_finalized"
+                    "passed_selected_editorial_finalized"
+                    if finalization_report is not None
+                    and finalization_report["reason_code"]
+                    == publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
+                    else "failed_selected_finalized"
                     if finalization_report is not None
                     else "passed"
                 ),
@@ -1328,6 +1339,7 @@ def _inspect_run(
             ),
             "_event_ids": event_ids,
             "_effective_selected_ids": effective_ids,
+            "_history_selected_ids": history_ids,
         }
     finally:
         audit.close()
@@ -1372,7 +1384,7 @@ def _validate_chronological_history(runs: list[dict[str, Any]]) -> None:
                 prior_history.extend(
                     audience_insight_runs.selected_history_row(
                         source,
-                        candidate_ids=row["_effective_selected_ids"],
+                        candidate_ids=row["_history_selected_ids"],
                     )
                 )
             finally:
@@ -1681,6 +1693,7 @@ def evaluate_manifest(path: Path | str) -> dict[str, Any]:
     for row in runs:
         del row["_event_ids"]
         del row["_effective_selected_ids"]
+        del row["_history_selected_ids"]
     totals = _run_totals(runs)
     by_audience = {
         audience: _run_totals(

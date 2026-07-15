@@ -55,6 +55,19 @@ candidate. Every such result requires an exact, human- or agent-reviewed
 or materially diversify the set. The file binds source contract, audit cohort,
 and audit-result hashes, so it cannot clear changed evidence or outputs.
 
+## Stricter release decisions
+
+Neither a failed audit nor a senior editorial decision mutates the source run
+or audit. An adjacent `publication-finalization-v1/finalization.json` may only
+remove exact active selected IDs and preserve survivor order. Audit-failed
+items use the mechanically derived audit-disqualification sidecar. A selected
+item that passes the independent audit but still misses the senior product bar
+uses `audience-insight-editorial-review-v1`: an explicit review ID, reviewer,
+enumerated reason, and rationale. This second path requires the audit to pass;
+it cannot be used to repair or override an audit failure. Revalidation binds
+the exact source selection, passing audit, decision, and effective IDs, while
+the canonical reconciliation report binds the final sidecar bytes.
+
 ## Unattended commands
 
 ```bash
@@ -79,6 +92,11 @@ fli audience-insight-audit validate \
   --source-run-db "$RUN_DIR/insights.db" \
   --audit-db "$RUN_DIR/publication-audit-v1/audit.db" \
   --expected-selected-count SELECTED_COUNT
+
+fli audience-insight-audit finalize-editorial \
+  --source-run-db "$RUN_DIR/insights.db" \
+  --audit-db "$RUN_DIR/publication-audit-v1/audit.db" \
+  --editorial-review editorial-review.json
 ```
 
 `freeze` never calls a model. The audit must be frozen separately for each

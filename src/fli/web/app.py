@@ -478,6 +478,14 @@ def insight_dates(
     return JSONResponse(insight_store.insight_dates_payload(audience=audience))
 
 
+@app.get("/api/insights/extracted/dates")
+def extracted_insight_dates(
+    audience: Literal["investment", "ai_engineering"] = "investment",
+) -> JSONResponse:
+    """Existing first-stage audience extractions, grouped by Feed date."""
+    return JSONResponse(insight_store.extraction_dates_payload(audience=audience))
+
+
 @app.get("/api/insights")
 def insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
@@ -486,6 +494,20 @@ def insights(
     """Editor-selected insights with mechanically bound source quotations."""
     return JSONResponse(
         insight_store.insights_payload(
+            audience=audience,
+            day=insight_date.isoformat() if insight_date else None,
+        )
+    )
+
+
+@app.get("/api/insights/extracted")
+def extracted_insights(
+    insight_date: calendar_date | None = Query(None, alias="date"),
+    audience: Literal["investment", "ai_engineering"] = "investment",
+) -> JSONResponse:
+    """Citation-bound first-stage insights ordered by original Feed rank."""
+    return JSONResponse(
+        insight_store.extraction_insights_payload(
             audience=audience,
             day=insight_date.isoformat() if insight_date else None,
         )

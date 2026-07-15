@@ -12,7 +12,12 @@ const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'ut
 
 test('Insights keeps Investment and AI engineering as independent URL-backed views', () => {
   assert.match(apiSource, /export type InsightAudience = 'investment' \| 'ai_engineering'/)
-  assert.match(insightSource, /const DEFAULT_AUDIENCE: InsightAudience = 'investment'/)
+  assert.match(insightSource, /const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'/)
+  assert.match(
+    insightSource,
+    /const AUDIENCE_ORDER: InsightAudience\[\] = \['ai_engineering', 'investment'\]/,
+  )
+  assert.match(insightSource, /label: 'Investment thesis'/)
   assert.match(insightSource, /searchParams\.get\('audience'\)/)
   assert.match(insightSource, /searchParams\.get\('date'\)/)
   assert.match(insightSource, /nextParams\.set\('audience', nextAudience\)/)
@@ -23,14 +28,12 @@ test('Insights keeps Investment and AI engineering as independent URL-backed vie
 })
 
 test('Insights fetches and guards audience-specific date and item responses', () => {
-  assert.match(
-    insightSource,
-    /`\/api\/insights\/dates\?audience=\$\{audience\}`/,
-  )
-  assert.match(
-    insightSource,
-    /`\/api\/insights\?audience=\$\{audience\}&date=\$\{selectedDate\}`/,
-  )
+  assert.match(insightSource, /'\/api\/insights\/extracted\/dates'/)
+  assert.match(insightSource, /'\/api\/insights\/dates'/)
+  assert.match(insightSource, /'\/api\/insights\/extracted'/)
+  assert.match(insightSource, /'\/api\/insights'/)
+  assert.match(insightSource, /type InsightView = 'extracted' \| 'reviewed'/)
+  assert.match(insightSource, /nextParams\.set\('view', nextInsightView\)/)
   assert.match(insightSource, /activeDatesViewRef\.current !== viewKey/)
   assert.match(insightSource, /activeDataViewRef\.current !== viewKey/)
   assert.match(insightSource, /dataView\?\.viewKey === selectedViewKey/)
@@ -79,10 +82,9 @@ test('Insights gives each analysis region and source link an insight-specific na
 test('Insights has honest audience-aware loading, error, and thin-day states', () => {
   assert.match(insightSource, /Insight dates are unavailable/)
   assert.match(insightSource, /This brief did not load/)
-  assert.match(insightSource, /No investment insight cleared today’s bar/)
-  assert.match(insightSource, /No engineering insight cleared today’s bar/)
-  assert.match(insightSource, /rather than fill the brief with weak signal/)
-  assert.match(insightSource, /no unverified claim is shown/)
+  assert.match(insightSource, /No useful investment insight was extracted today/)
+  assert.match(insightSource, /No useful engineering insight was extracted today/)
+  assert.match(insightSource, /No citation-bound insight is available for this day/)
   assert.match(insightSource, /aria-busy="true"/)
 })
 
@@ -91,8 +93,6 @@ test('Insights retries failed date and brief requests without reloading the page
   assert.match(insightSource, /const \[dataRetryKey, setDataRetryKey\] = useState\(0\)/)
   assert.match(insightSource, /setDatesRetryKey\(\(value\) => value \+ 1\)/)
   assert.match(insightSource, /setDataRetryKey\(\(value\) => value \+ 1\)/)
-  assert.match(insightSource, /onRetry=\{retryDates\}/)
-  assert.match(insightSource, /onRetry=\{retryData\}/)
   assert.match(insightSource, />\s*Try again\s*<\/button>/)
   assert.doesNotMatch(insightSource, /window\.location\.reload/)
   assert.match(appStyles, /\.insight-state-action \{[\s\S]*?min-height: 36px;/)

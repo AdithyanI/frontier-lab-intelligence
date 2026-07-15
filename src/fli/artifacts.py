@@ -20,6 +20,7 @@ from fli import artifact_urls, signal_events, signal_feed, sources
 
 SCHEMA_VERSION = "artifact-store-v1"
 RESULT_SCHEMA_VERSION = "1.0"
+REVIEWED_SUPPLEMENT_CONTRACT = "artifact-reviewed-supplement-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = REPO_ROOT / "data" / "derived" / "artifacts" / "artifacts.db"
 DEFAULT_TRIAGE_ROOT = (
@@ -178,6 +179,36 @@ CREATE INDEX IF NOT EXISTS idx_artifact_candidate_source
     ON artifact_import_candidate(
         source_provider, source_external_id, source_snapshot_sha256
     );
+
+CREATE TABLE IF NOT EXISTS artifact_event_supplement (
+    supplement_id TEXT PRIMARY KEY,
+    contract TEXT NOT NULL CHECK (
+        contract = '{REVIEWED_SUPPLEMENT_CONTRACT}'
+    ),
+    manifest_sha256 TEXT NOT NULL,
+    artifact_id TEXT NOT NULL REFERENCES artifact(artifact_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    event_id TEXT NOT NULL,
+    envelope_day TEXT NOT NULL,
+    source_rank INTEGER NOT NULL,
+    day_candidate_count INTEGER NOT NULL,
+    source_triage_run_id TEXT NOT NULL,
+    source_input_sha256 TEXT NOT NULL,
+    source_snapshot_content_sha256 TEXT NOT NULL,
+    evidence_role TEXT NOT NULL CHECK (
+        evidence_role = 'official_primary_source'
+    ),
+    source_published_at TEXT NOT NULL,
+    rationale TEXT NOT NULL,
+    reviewed_by TEXT NOT NULL,
+    reviewed_at TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE (contract, source_triage_run_id, event_id, artifact_id)
+);
+CREATE INDEX IF NOT EXISTS idx_artifact_supplement_event
+    ON artifact_event_supplement(event_id, artifact_id);
+CREATE INDEX IF NOT EXISTS idx_artifact_supplement_artifact
+    ON artifact_event_supplement(artifact_id, envelope_day, source_rank);
 
 CREATE TABLE IF NOT EXISTS artifact_fetch_run (
     fetch_run_id TEXT PRIMARY KEY,
@@ -987,6 +1018,281 @@ def import_kept_envelopes(
     return result
 
 
+def _require_manifest_keys(
+    value: dict[str, Any], *, required: set[str], label: str
+) -> None:
+    missing = sorted(required - set(value))
+    extra = sorted(set(value) - required)
+    if missing or extra:
+        details = []
+        if missing:
+            details.append("missing " + ", ".join(missing))
+        if extra:
+            details.append("unknown " + ", ".join(extra))
+        raise ValueError(f"{label} fields are invalid: {'; '.join(details)}")
+
+
+def _require_review_timestamp(value: Any) -> str:
+    rendered = str(value or "").strip()
+    try:
+        parsed = datetime.fromisoformat(rendered.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("reviewed_at must be an ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None:
+        raise ValueError("reviewed_at must include a timezone")
+    return parsed.isoformat(timespec="seconds")
+
+
+def _require_source_date(value: Any) -> str:
+    rendered = str(value or "").strip()
+    try:
+        if "T" in rendered:
+            parsed = datetime.fromisoformat(rendered.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                raise ValueError
+        else:
+            datetime.strptime(rendered, "%Y-%m-%d")
+    except ValueError as exc:
+        raise ValueError(
+            "source_published_at must be an ISO date or timezone-aware timestamp"
+        ) from exc
+    return rendered
+
+
+def import_reviewed_supplements(
+    *,
+    manifest_path: Path | str,
+    triage_db: Path | str,
+    db_path: Path | str = DEFAULT_DB,
+) -> dict[str, Any]:
+    """Import explicitly reviewed event evidence without rewriting X provenance."""
+    manifest_file = Path(manifest_path)
+    try:
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"reviewed supplement manifest is invalid JSON: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise ValueError("reviewed supplement manifest must be a JSON object")
+    _require_manifest_keys(
+        manifest,
+        required={"schema_version", "reviewed_by", "reviewed_at", "items"},
+        label="manifest",
+    )
+    if manifest["schema_version"] != REVIEWED_SUPPLEMENT_CONTRACT:
+        raise ValueError(
+            "reviewed supplement manifest schema_version must be "
+            + REVIEWED_SUPPLEMENT_CONTRACT
+        )
+    reviewed_by = str(manifest["reviewed_by"] or "").strip()
+    if not reviewed_by:
+        raise ValueError("reviewed_by must be non-empty")
+    reviewed_at = _require_review_timestamp(manifest["reviewed_at"])
+    raw_items = manifest["items"]
+    if not isinstance(raw_items, list) or not raw_items:
+        raise ValueError("reviewed supplement manifest items must be a non-empty list")
+    manifest_sha256 = _sha256(_canonical_json(manifest))
+
+    triage_path = Path(triage_db)
+    triage = _open_readonly(triage_path)
+    try:
+        meta = triage.execute(
+            "SELECT run_id, day, expected_count FROM run_meta WHERE singleton = 1"
+        ).fetchone()
+        if meta is None:
+            raise ValueError("triage database has no run metadata")
+        source_triage_run_id = str(meta["run_id"])
+        envelope_day = str(meta["day"])
+        day_candidate_count = int(meta["expected_count"])
+        prepared: list[dict[str, Any]] = []
+        for ordinal, raw_item in enumerate(raw_items, start=1):
+            if not isinstance(raw_item, dict):
+                raise ValueError(f"items[{ordinal}] must be a JSON object")
+            _require_manifest_keys(
+                raw_item,
+                required={
+                    "event_id",
+                    "artifact_url",
+                    "evidence_role",
+                    "source_published_at",
+                    "rationale",
+                },
+                label=f"items[{ordinal}]",
+            )
+            event_id = str(raw_item["event_id"] or "").strip()
+            rationale = str(raw_item["rationale"] or "").strip()
+            if not event_id or not rationale:
+                raise ValueError(
+                    f"items[{ordinal}] event_id and rationale must be non-empty"
+                )
+            if raw_item["evidence_role"] != "official_primary_source":
+                raise ValueError(
+                    f"items[{ordinal}] evidence_role must be official_primary_source"
+                )
+            source_row = triage.execute(
+                """SELECT event_id, current_rank, input_sha256,
+                          snapshot_content_sha256, status, decision
+                   FROM triage_item WHERE event_id = ?""",
+                (event_id,),
+            ).fetchone()
+            if source_row is None:
+                raise ValueError(
+                    f"items[{ordinal}] event_id is not in the frozen triage run"
+                )
+            if str(source_row["status"]) != "complete" or str(
+                source_row["decision"]
+            ) != "keep":
+                raise ValueError(
+                    f"items[{ordinal}] event must be a completed kept envelope"
+                )
+            artifact_url = str(raw_item["artifact_url"] or "").strip()
+            decision = artifact_urls.classify_candidate(artifact_url, artifact_url)
+            if decision.decision != "accepted":
+                raise ValueError(
+                    f"items[{ordinal}] artifact URL is not fetchable: "
+                    f"{decision.reason_code}"
+                )
+            assert decision.canonical_url and decision.artifact_kind
+            artifact_id = artifact_urls.artifact_id(decision.canonical_url)
+            source_published_at = _require_source_date(
+                raw_item["source_published_at"]
+            )
+            frozen = {
+                "contract": REVIEWED_SUPPLEMENT_CONTRACT,
+                "manifest_sha256": manifest_sha256,
+                "artifact_id": artifact_id,
+                "canonical_url": decision.canonical_url,
+                "artifact_kind": decision.artifact_kind,
+                "observed_url": artifact_url,
+                "event_id": event_id,
+                "envelope_day": envelope_day,
+                "source_rank": int(source_row["current_rank"]),
+                "day_candidate_count": day_candidate_count,
+                "source_triage_run_id": source_triage_run_id,
+                "source_input_sha256": str(source_row["input_sha256"]),
+                "source_snapshot_content_sha256": str(
+                    source_row["snapshot_content_sha256"] or ""
+                ),
+                "evidence_role": "official_primary_source",
+                "source_published_at": source_published_at,
+                "rationale": rationale,
+                "reviewed_by": reviewed_by,
+                "reviewed_at": reviewed_at,
+            }
+            frozen["supplement_id"] = _sha256(_canonical_json(frozen))
+            prepared.append(frozen)
+    finally:
+        triage.close()
+
+    identities = [(item["event_id"], item["artifact_id"]) for item in prepared]
+    if len(set(identities)) != len(identities):
+        raise ValueError("reviewed supplement manifest contains duplicate event artifacts")
+
+    conn = connect(db_path)
+    imported = 0
+    reused = 0
+    try:
+        with conn:
+            for item in prepared:
+                conflict = conn.execute(
+                    """SELECT supplement_id FROM artifact_event_supplement
+                       WHERE contract = ? AND source_triage_run_id = ?
+                         AND event_id = ? AND artifact_id = ?""",
+                    (
+                        REVIEWED_SUPPLEMENT_CONTRACT,
+                        item["source_triage_run_id"],
+                        item["event_id"],
+                        item["artifact_id"],
+                    ),
+                ).fetchone()
+                if conflict is not None:
+                    if str(conflict["supplement_id"]) != item["supplement_id"]:
+                        raise ValueError(
+                            "reviewed supplement conflicts with an existing frozen "
+                            f"association for event {item['event_id']}"
+                        )
+                    reused += 1
+                    continue
+                host = str(urlsplit(item["canonical_url"]).hostname or "")
+                conn.execute(
+                    """INSERT INTO artifact
+                       (artifact_id, canonical_url, canonicalization_contract,
+                        host, artifact_kind, first_seen_at, last_seen_at,
+                        created_at, updated_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       ON CONFLICT(artifact_id) DO UPDATE SET
+                           last_seen_at = MAX(last_seen_at, excluded.last_seen_at),
+                           updated_at = MAX(updated_at, excluded.updated_at)""",
+                    (
+                        item["artifact_id"],
+                        item["canonical_url"],
+                        artifact_urls.CANONICALIZATION_CONTRACT,
+                        host,
+                        item["artifact_kind"],
+                        item["reviewed_at"],
+                        item["reviewed_at"],
+                        item["reviewed_at"],
+                        item["reviewed_at"],
+                    ),
+                )
+                _upsert_alias(
+                    conn,
+                    alias_url=item["canonical_url"],
+                    target_artifact_id=item["artifact_id"],
+                    alias_kind="canonical",
+                    seen_at=item["reviewed_at"],
+                )
+                if item["observed_url"] != item["canonical_url"]:
+                    _upsert_alias(
+                        conn,
+                        alias_url=item["observed_url"],
+                        target_artifact_id=item["artifact_id"],
+                        alias_kind="observed",
+                        seen_at=item["reviewed_at"],
+                    )
+                conn.execute(
+                    """INSERT INTO artifact_event_supplement
+                       (supplement_id, contract, manifest_sha256, artifact_id,
+                        event_id, envelope_day, source_rank,
+                        day_candidate_count, source_triage_run_id,
+                        source_input_sha256, source_snapshot_content_sha256,
+                        evidence_role, source_published_at, rationale,
+                        reviewed_by, reviewed_at, created_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        item["supplement_id"],
+                        item["contract"],
+                        item["manifest_sha256"],
+                        item["artifact_id"],
+                        item["event_id"],
+                        item["envelope_day"],
+                        item["source_rank"],
+                        item["day_candidate_count"],
+                        item["source_triage_run_id"],
+                        item["source_input_sha256"],
+                        item["source_snapshot_content_sha256"],
+                        item["evidence_role"],
+                        item["source_published_at"],
+                        item["rationale"],
+                        item["reviewed_by"],
+                        item["reviewed_at"],
+                        item["reviewed_at"],
+                    ),
+                )
+                imported += 1
+        return {
+            "contract": REVIEWED_SUPPLEMENT_CONTRACT,
+            "manifest_sha256": manifest_sha256,
+            "source_triage_run_id": source_triage_run_id,
+            "expected_count": len(prepared),
+            "imported_count": imported,
+            "reused_count": reused,
+            "artifact_ids": sorted(item["artifact_id"] for item in prepared),
+            "supplement_ids": sorted(item["supplement_id"] for item in prepared),
+        }
+    finally:
+        conn.close()
+
+
 def converge_artifact(
     conn: sqlite3.Connection,
     *,
@@ -1261,6 +1567,14 @@ def main(argv: list[str] | None = None) -> int:
     import_parser.add_argument("--events-db", type=Path, default=signal_events.DEFAULT_EVENTS_DB)
     import_parser.add_argument("--triage-root", type=Path, default=DEFAULT_TRIAGE_ROOT)
     _add_output_arguments(import_parser)
+    supplement_parser = sub.add_parser(
+        "import-reviewed-supplements",
+        help="Import frozen human-reviewed primary evidence for exact events.",
+    )
+    supplement_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    supplement_parser.add_argument("--manifest", type=Path, required=True)
+    supplement_parser.add_argument("--triage-db", type=Path, required=True)
+    _add_output_arguments(supplement_parser)
     summary_parser = sub.add_parser("summary", help="Summarize the artifact catalog.")
     summary_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     _add_output_arguments(summary_parser)
@@ -1270,7 +1584,15 @@ def main(argv: list[str] | None = None) -> int:
     _add_output_arguments(inspect_parser)
     fetch_parser = sub.add_parser("fetch", help="Fetch a bounded artifact cohort.")
     fetch_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
-    fetch_parser.add_argument("--limit", type=int, default=30)
+    fetch_parser.add_argument("--limit", type=int, default=None)
+    fetch_parser.add_argument(
+        "--artifact-id",
+        action="append",
+        help=(
+            "Fetch exactly this catalog artifact ID; repeat for a frozen cohort "
+            "(cannot be combined with --limit)."
+        ),
+    )
     _add_output_arguments(fetch_parser)
     reader_parser = sub.add_parser(
         "reader-fallback",
@@ -1318,10 +1640,22 @@ def main(argv: list[str] | None = None) -> int:
                 events_db=args.events_db,
                 triage_root=args.triage_root,
             )
+        elif args.action == "import-reviewed-supplements":
+            data = import_reviewed_supplements(
+                db_path=args.db,
+                manifest_path=args.manifest,
+                triage_db=args.triage_db,
+            )
         elif args.action == "fetch":
             from fli import artifact_fetch
 
-            data = artifact_fetch.fetch_cohort(db_path=args.db, limit=args.limit)
+            if args.limit is not None and args.artifact_id is not None:
+                raise ValueError("--limit cannot be combined with --artifact-id")
+            data = artifact_fetch.fetch_cohort(
+                db_path=args.db,
+                limit=args.limit if args.limit is not None else 30,
+                artifact_ids=args.artifact_id,
+            )
         elif args.action == "reader-fallback":
             from fli import artifact_fetch
 

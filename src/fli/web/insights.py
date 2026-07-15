@@ -208,6 +208,205 @@ def _available_runs(
     return sorted(latest_by_day.values(), key=lambda value: value["day"])
 
 
+def _extraction_run_summary(path: Path) -> dict[str, Any] | None:
+    """Return the first-stage audience extraction summary for one production run.
+
+    This intentionally stops before item review, editing, and publication audit.
+    It powers the explicit Feed-ranked comparison view; it is not a publication
+    allowlist and must not be reused by the reviewed briefing endpoint.
+    """
+    if not path.is_file():
+        return None
+    conn: sqlite3.Connection | None = None
+    try:
+        conn = sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        run = conn.execute(
+            """SELECT run_id, audience, day, updated_at
+               FROM run_meta WHERE singleton = 1"""
+        ).fetchone()
+        if run is None or "-production-" not in str(run["run_id"]):
+            return None
+        counts = conn.execute(
+            """SELECT COUNT(*) AS candidate_count,
+                      SUM(status = 'complete') AS complete_count,
+                      SUM(status = 'complete' AND outcome = 'insight'
+                          AND citation_source_url IS NOT NULL
+                          AND citation_source_sha256 IS NOT NULL
+                          AND supporting_quote IS NOT NULL) AS extracted_count
+               FROM candidate_item"""
+        ).fetchone()
+        if counts is None or int(counts["complete_count"] or 0) == 0:
+            return None
+        return {
+            "path": path,
+            "run_id": str(run["run_id"]),
+            "audience": str(run["audience"]),
+            "day": str(run["day"]),
+            "updated_at": str(run["updated_at"]),
+            "candidate_count": int(counts["candidate_count"] or 0),
+            "complete_count": int(counts["complete_count"] or 0),
+            "extracted_count": int(counts["extracted_count"] or 0),
+        }
+    except sqlite3.Error:
+        return None
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+def _available_extraction_runs(
+    *,
+    audience: str,
+    run_root: Path | str | None = None,
+) -> list[dict[str, Any]]:
+    """Choose the most complete production extraction for each audience-day."""
+    audience = audience_insights.require_audience(audience)
+    root = Path(run_root or DEFAULT_INSIGHTS_ROOT)
+    paths = set(root.glob("**/insights.db")) if root.is_dir() else set()
+    best_by_day: dict[str, dict[str, Any]] = {}
+    for path in paths:
+        summary = _extraction_run_summary(path)
+        if summary is None or summary["audience"] != audience:
+            continue
+        current = best_by_day.get(summary["day"])
+        candidate_key = (
+            summary["complete_count"],
+            summary["updated_at"],
+            summary["run_id"],
+        )
+        current_key = (
+            current["complete_count"],
+            current["updated_at"],
+            current["run_id"],
+        ) if current is not None else None
+        if current_key is None or candidate_key > current_key:
+            best_by_day[summary["day"]] = summary
+    return sorted(best_by_day.values(), key=lambda value: value["day"])
+
+
+def extraction_dates_payload(
+    *,
+    audience: str = DEFAULT_AUDIENCE,
+    run_root: Path | str | None = None,
+) -> dict[str, Any]:
+    """Return existing first-stage extraction dates for one audience."""
+    audience = audience_insights.require_audience(audience)
+    runs = _available_extraction_runs(audience=audience, run_root=run_root)
+    if not runs:
+        return {
+            "available": False,
+            "reason": f"No {audience.replace('_', ' ')} extractions exist yet.",
+            "audience": audience,
+            "latest_date": None,
+            "dates": [],
+        }
+    return {
+        "available": True,
+        "reason": None,
+        "audience": audience,
+        "latest_date": runs[-1]["day"],
+        "dates": [
+            {"day": run["day"], "item_count": run["extracted_count"]}
+            for run in runs
+        ],
+    }
+
+
+def extraction_insights_payload(
+    *,
+    audience: str = DEFAULT_AUDIENCE,
+    day: str | None = None,
+    db_path: Path | str | None = None,
+    run_root: Path | str | None = None,
+) -> dict[str, Any]:
+    """Return citation-bound first-stage insights ordered by original Feed rank."""
+    audience = audience_insights.require_audience(audience)
+    if db_path is not None:
+        path = Path(db_path)
+        summary = _extraction_run_summary(path)
+    else:
+        runs = _available_extraction_runs(audience=audience, run_root=run_root)
+        selected = (
+            next((run for run in runs if run["day"] == day), None)
+            if day is not None
+            else (runs[-1] if runs else None)
+        )
+        if selected is None:
+            return _missing(
+                f"No {audience.replace('_', ' ')} extraction exists for {day}.",
+                audience=audience,
+            )
+        path = Path(selected["path"])
+        summary = selected
+    if summary is None or summary["audience"] != audience:
+        return _missing(
+            "The requested first-stage extraction is unavailable.", audience=audience
+        )
+
+    conn = sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute(
+            """SELECT candidate_id, event_id, day, feed_rank, claim,
+                      claim_posture, why_it_matters, audience_fields_json,
+                      supporting_quote, citation_block_index,
+                      citation_source_type, citation_source_id,
+                      citation_source_url, citation_source_author,
+                      citation_source_title, citation_source_sha256,
+                      citation_section_ordinal, citation_char_start,
+                      citation_char_end
+               FROM candidate_item
+               WHERE status = 'complete' AND outcome = 'insight'
+                 AND citation_source_url IS NOT NULL
+                 AND citation_source_sha256 IS NOT NULL
+                 AND supporting_quote IS NOT NULL
+               ORDER BY feed_rank, event_id"""
+        ).fetchall()
+        items = [
+            {
+                "candidate_id": str(row["candidate_id"]),
+                "event_id": str(row["event_id"]),
+                "day": str(row["day"]),
+                "feed_rank": int(row["feed_rank"]),
+                "claim": str(row["claim"]),
+                "claim_posture": str(row["claim_posture"]),
+                "why_it_matters": str(row["why_it_matters"]),
+                "audience_fields": json.loads(str(row["audience_fields_json"])),
+                "citation": {
+                    "quote": str(row["supporting_quote"]),
+                    "url": str(row["citation_source_url"]),
+                    "source_type": str(row["citation_source_type"]),
+                    "source_id": str(row["citation_source_id"]),
+                    "author": row["citation_source_author"],
+                    "title": row["citation_source_title"],
+                    "source_sha256": str(row["citation_source_sha256"]),
+                    "block_index": int(row["citation_block_index"]),
+                    "section_ordinal": row["citation_section_ordinal"],
+                    "char_start": int(row["citation_char_start"]),
+                    "char_end": int(row["citation_char_end"]),
+                },
+            }
+            for row in rows
+        ]
+        return {
+            "available": bool(items),
+            "reason": None if items else "No useful citation-bound items were extracted.",
+            "audience": audience,
+            "run": {
+                "run_id": summary["run_id"],
+                "day": summary["day"],
+                "audience": audience,
+                "candidate_count": summary["candidate_count"],
+                "complete_count": summary["complete_count"],
+                "extracted_count": len(items),
+            },
+            "items": items,
+        }
+    finally:
+        conn.close()
+
+
 def insight_dates_payload(
     *,
     audience: str = DEFAULT_AUDIENCE,

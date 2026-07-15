@@ -558,6 +558,48 @@ def test_insights_read_model_is_honest_when_missing(tmp_path):
     assert payload["items"] == []
 
 
+def test_feed_ranked_extraction_view_reads_existing_candidate_rows(tmp_path):
+    db = tmp_path / "2026-07-11" / "investment" / "run" / "insights.db"
+    _fixture(
+        db,
+        run_id="audience-insights-v2-production-investment-2026-07-11-test",
+    )
+
+    dates = insight_store.extraction_dates_payload(
+        audience="investment", run_root=tmp_path
+    )
+    payload = insight_store.extraction_insights_payload(
+        audience="investment", day="2026-07-11", run_root=tmp_path
+    )
+
+    assert dates["dates"] == [{"day": "2026-07-11", "item_count": 1}]
+    assert payload["available"] is True
+    assert payload["run"]["complete_count"] == 1
+    assert [item["feed_rank"] for item in payload["items"]] == [4]
+    assert "editorial_rank" not in payload["items"][0]
+    assert payload["items"][0]["citation"]["quote"] == "Exact quote"
+
+
+def test_feed_ranked_extraction_api_uses_existing_run_databases(tmp_path, monkeypatch):
+    db = tmp_path / "2026-07-11" / "ai_engineering" / "run" / "insights.db"
+    _fixture(
+        db,
+        audience="ai_engineering",
+        run_id="audience-insights-v2-production-ai-engineering-2026-07-11-test",
+    )
+    monkeypatch.setattr(insight_store, "DEFAULT_INSIGHTS_ROOT", tmp_path)
+
+    dates = client.get(
+        "/api/insights/extracted/dates?audience=ai_engineering"
+    ).json()
+    payload = client.get(
+        "/api/insights/extracted?audience=ai_engineering&date=2026-07-11"
+    ).json()
+
+    assert dates["latest_date"] == "2026-07-11"
+    assert payload["items"][0]["audience_fields"]["action_type"] == "benchmark"
+
+
 def test_zero_item_day_uses_application_owned_quality_bar_copy(tmp_path):
     db = tmp_path / "run" / "investment" / "insights.db"
     _fixture(db, audit=False)

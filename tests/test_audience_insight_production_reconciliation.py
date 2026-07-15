@@ -640,6 +640,98 @@ def test_report_is_deterministic_and_counts_every_stage(tmp_path):
     assert first["checks"]["x_article_cohort_requirement_satisfied"]
 
 
+def test_reconciliation_accepts_exact_editorial_disqualification(tmp_path):
+    manifest, payload = _manifest(tmp_path, days=(DAY, "2026-07-12"))
+    for audience in ("investment", "ai_engineering"):
+        first_entry = next(
+            row
+            for row in payload["runs"]
+            if row["audience"] == audience and row["day"] == DAY
+        )
+        next_entry = next(
+            row
+            for row in payload["runs"]
+            if row["audience"] == audience and row["day"] == "2026-07-12"
+        )
+        first_source = Path(first_entry["source_run_db"])
+        first_conn = reconciliation._open_readonly(first_source)
+        first_ids = [
+            str(row[0])
+            for row in first_conn.execute(
+                "SELECT candidate_id FROM publication_selection "
+                "ORDER BY publication_rank"
+            ).fetchall()
+        ]
+        history = audience_insight_runs.selected_history_row(
+            first_conn, candidate_ids=first_ids
+        )
+        first_conn.close()
+        history_json = reconciliation._canonical_json(history)
+        next_conn = sqlite3.connect(next_entry["source_run_db"])
+        next_conn.execute(
+            "UPDATE editor_run SET prior_selected_json = ?, history_sha256 = ? "
+            "WHERE singleton = 1",
+            (history_json, reconciliation._sha256(history_json)),
+        )
+        next_conn.commit()
+        next_conn.close()
+    entry = payload["runs"][0]
+    source = Path(entry["source_run_db"])
+    audit = Path(entry["audit_db"])
+    conn = sqlite3.connect(source)
+    candidate_id = str(
+        conn.execute(
+            "SELECT candidate_id FROM publication_selection "
+            "ORDER BY publication_rank LIMIT 1"
+        ).fetchone()[0]
+    )
+    conn.close()
+    publication_audit.create_editorial_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+        editorial_review={
+            "schema_version": publication_audit.EDITORIAL_REVIEW_SCHEMA_VERSION,
+            "review_id": "senior-product-review-2026-07-15",
+            "reviewer": "product-owner",
+            "removals": [
+                {
+                    "candidate_id": candidate_id,
+                    "reason_code": "insufficient_decision_value",
+                    "rationale": (
+                        "The exact item passes factual audit but does not materially "
+                        "sharpen an audience decision."
+                    ),
+                }
+            ],
+        },
+    )
+    entry["finalization_path"] = str(
+        publication_audit.default_finalization_path(source)
+    )
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+    report = reconciliation.evaluate_manifest(manifest)
+
+    assert report["passed"] is True
+    assert report["totals"]["all"]["counts"]["base_publication"] == 4
+    assert report["totals"]["all"]["counts"]["effective_publication"] == 3
+    finalized = next(
+        row for row in report["runs"] if row["source_run_db"] == str(source)
+    )
+    assert finalized["audit"]["passed"] is True
+    assert finalized["audit"]["status"] == "passed_selected_editorial_finalized"
+    assert finalized["finalization"]["reason_code"] == (
+        publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
+    )
+    assert finalized["finalization"]["removed_candidate_ids"] == [candidate_id]
+    next_investment = next(
+        row
+        for row in report["runs"]
+        if row["audience"] == "investment" and row["day"] == "2026-07-12"
+    )
+    assert next_investment["history"]["prior_item_count"] == 1
+
+
 def test_write_report_atomically_replaces_existing_bytes(tmp_path, monkeypatch):
     output = tmp_path / "report.json"
     output.write_text("stale report\n")

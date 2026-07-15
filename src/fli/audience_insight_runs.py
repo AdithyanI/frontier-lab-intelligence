@@ -512,11 +512,36 @@ def _artifact_sources(
     event_id: str,
     max_total_chars: int = 600_000,
 ) -> list[audience_insights.EvidenceSource]:
+    artifact_ids = {
+        str(row["artifact_id"])
+        for row in artifact_conn.execute(
+            """SELECT DISTINCT artifact_id
+               FROM artifact_import_candidate
+               WHERE event_id = ? AND decision = 'accepted'
+                 AND artifact_id IS NOT NULL""",
+            (event_id,),
+        ).fetchall()
+    }
+    has_supplements = artifact_conn.execute(
+        """SELECT 1 FROM sqlite_master
+           WHERE type = 'table' AND name = 'artifact_event_supplement'"""
+    ).fetchone()
+    if has_supplements is not None:
+        artifact_ids.update(
+            str(row["artifact_id"])
+            for row in artifact_conn.execute(
+                """SELECT DISTINCT artifact_id
+                   FROM artifact_event_supplement WHERE event_id = ?""",
+                (event_id,),
+            ).fetchall()
+        )
+    if not artifact_ids:
+        return []
+    placeholders = ",".join("?" for _ in artifact_ids)
     rows = artifact_conn.execute(
-        """SELECT DISTINCT a.artifact_id, a.canonical_url, a.title,
+        f"""SELECT DISTINCT a.artifact_id, a.canonical_url, a.title,
                           latest.text_snapshot_ref, latest.text_sha256
-           FROM artifact_import_candidate AS candidate
-           JOIN artifact AS a ON a.artifact_id = candidate.artifact_id
+           FROM artifact AS a
            JOIN artifact_fetch AS latest ON latest.fetch_id = (
                SELECT fetch.fetch_id
                FROM artifact_fetch AS fetch
@@ -526,10 +551,9 @@ def _artifact_sources(
                ORDER BY fetch.completed_at DESC, fetch.fetch_id DESC
                LIMIT 1
            )
-           WHERE candidate.event_id = ?
-             AND candidate.decision = 'accepted'
+           WHERE a.artifact_id IN ({placeholders})
            ORDER BY a.artifact_id""",
-        (event_id,),
+        tuple(sorted(artifact_ids)),
     ).fetchall()
     sources: list[audience_insights.EvidenceSource] = []
     included = 0

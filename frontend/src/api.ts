@@ -459,6 +459,28 @@ export interface InsightItem {
   citation: InsightCitation
 }
 
+export type ExtractedInsightItem = Omit<
+  InsightItem,
+  'editorial_rank' | 'decision_value'
+>
+
+export interface ExtractedInsightRun {
+  run_id: string
+  day: string
+  audience: InsightAudience
+  candidate_count: number
+  complete_count: number
+  extracted_count: number
+}
+
+export interface ExtractedInsightsResponse {
+  available: boolean
+  reason?: string | null
+  audience: InsightAudience
+  run: ExtractedInsightRun | null
+  items: ExtractedInsightItem[]
+}
+
 export interface InsightRun {
   run_id: string
   day: string

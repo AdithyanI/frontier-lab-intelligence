@@ -4,6 +4,8 @@ import {
   getCachedJSON,
   type EngineeringActionType,
   type EngineeringInsightFields,
+  type ExtractedInsightItem,
+  type ExtractedInsightsResponse,
   type InsightAudience,
   type InsightDates,
   type InsightItem,
@@ -18,7 +20,12 @@ import {
 } from '../dateWindow'
 import { decodeTextEntities } from '../textEntities'
 
-const DEFAULT_AUDIENCE: InsightAudience = 'investment'
+const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'
+const AUDIENCE_ORDER: InsightAudience[] = ['ai_engineering', 'investment']
+type InsightView = 'extracted' | 'reviewed'
+const DEFAULT_VIEW: InsightView = 'extracted'
+type DisplayItem = InsightItem | ExtractedInsightItem
+type InsightPayload = InsightsResponse | ExtractedInsightsResponse
 
 const insightDay = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -41,15 +48,15 @@ const AUDIENCE_COPY: Record<
   }
 > = {
   investment: {
-    label: 'Investment',
+    label: 'Investment thesis',
     noun: 'investment',
     switchDescription: 'Theses, exposures, and watchpoints',
     title: 'Investment intelligence',
     subtitle:
-      'Position-relevant frontier AI changes, selected for theses, diligence, exposures, and competitive risk.',
+      'Position-relevant frontier AI changes for theses, diligence, exposures, and competitive risk.',
     dateLabel: 'Investment insight date',
     itemLabel: 'investment insights',
-    emptyTitle: 'No investment insight cleared today’s bar',
+    emptyTitle: 'No useful investment insight was extracted today',
   },
   ai_engineering: {
     label: 'AI engineering',
@@ -57,10 +64,10 @@ const AUDIENCE_COPY: Record<
     switchDescription: 'Experiments, implementation, and reliability',
     title: 'AI engineering brief',
     subtitle:
-      'Techniques, models, and tooling changes selected for experiments, implementation choices, and reliability work.',
+      'Techniques, models, and tooling changes for experiments, implementation choices, and reliability work.',
     dateLabel: 'AI engineering insight date',
     itemLabel: 'AI engineering insights',
-    emptyTitle: 'No engineering insight cleared today’s bar',
+    emptyTitle: 'No useful engineering insight was extracted today',
   },
 }
 
@@ -97,20 +104,20 @@ function parseAudience(value: string | null): InsightAudience {
     : DEFAULT_AUDIENCE
 }
 
+function parseView(value: string | null): InsightView {
+  return value === 'reviewed' ? 'reviewed' : DEFAULT_VIEW
+}
+
 function sourceTypeLabel(sourceType: string) {
   if (sourceType === 'x_post') return 'X post'
   if (sourceType === 'artifact') return 'Primary artifact'
   return sourceType.replaceAll('_', ' ')
 }
 
-function sourceLabel(item: InsightItem) {
+function sourceLabel(item: DisplayItem) {
   const { author, title, source_type: sourceType } = item.citation
   if (author && title) return `${author} · ${title}`
   return author || title || sourceTypeLabel(sourceType)
-}
-
-function decisionValueLabel(value: string) {
-  return DECISION_VALUE_LABELS[value] || value.replaceAll('_', ' ')
 }
 
 function InsightState({
@@ -153,7 +160,7 @@ function AudienceAnalysis({
   accessibleName,
 }: {
   audience: InsightAudience
-  item: InsightItem
+  item: DisplayItem
   accessibleName: string
 }) {
   if (audience === 'investment') {
@@ -205,20 +212,82 @@ function AudienceAnalysis({
   )
 }
 
-function InsightRow({
-  audience,
-  item,
-}: {
+function Citation({ item, accessibleName }: { item: DisplayItem; accessibleName: string }) {
+  return (
+    <blockquote className="insight-citation" cite={item.citation.url}>
+      <div className="insight-citation-head">
+        <span className="mono">Exact source passage</span>
+        <a
+          href={item.citation.url}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Open exact source for ${accessibleName} in a new tab`}
+        >
+          Open source ↗
+        </a>
+      </div>
+      <p>“{decodeTextEntities(item.citation.quote)}”</p>
+    </blockquote>
+  )
+}
+
+function ItemHeader({ item, accessibleName, titleId }: {
+  item: DisplayItem
+  accessibleName: string
+  titleId: string
+}) {
+  return (
+    <header className="insight-head">
+      <h2 id={titleId}>{item.claim}</h2>
+      <div className="insight-provenance mono">
+        <a
+          href={item.citation.url}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Open ${sourceLabel(item)} for ${accessibleName} in a new tab`}
+        >
+          {sourceLabel(item)}
+        </a>
+        <span>{sourceTypeLabel(item.citation.source_type)}</span>
+        <span>{CLAIM_POSTURE_LABELS[item.claim_posture]}</span>
+        <time dateTime={item.day}>
+          {insightDay.format(new Date(`${item.day}T00:00:00Z`))}
+        </time>
+      </div>
+    </header>
+  )
+}
+
+function ExtractedInsightRow({ audience, item }: {
+  audience: InsightAudience
+  item: ExtractedInsightItem
+}) {
+  const accessibleName = `Feed rank ${item.feed_rank}: ${item.claim}`
+  const titleId = `${audience}-extracted-${item.feed_rank}-title`
+  return (
+    <article className="insight-row" aria-labelledby={titleId}>
+      <div className="insight-rank mono" aria-label={`Feed rank ${item.feed_rank}`}>
+        <strong>#{item.feed_rank}</strong>
+        <span>Feed rank</span>
+      </div>
+      <div className="insight-body">
+        <ItemHeader item={item} accessibleName={accessibleName} titleId={titleId} />
+        <AudienceAnalysis audience={audience} item={item} accessibleName={accessibleName} />
+        <Citation item={item} accessibleName={accessibleName} />
+      </div>
+    </article>
+  )
+}
+
+function InsightRow({ audience, item }: {
   audience: InsightAudience
   item: InsightItem
 }) {
-  const engineeringFields =
-    audience === 'ai_engineering'
-      ? (item.audience_fields as EngineeringInsightFields)
-      : null
+  const fields = audience === 'ai_engineering'
+    ? (item.audience_fields as EngineeringInsightFields)
+    : null
   const accessibleName = `editorial rank ${item.editorial_rank}: ${item.claim}`
   const titleId = `${audience}-insight-${item.editorial_rank}-title`
-
   return (
     <article className="insight-row" aria-labelledby={titleId}>
       <div
@@ -230,56 +299,19 @@ function InsightRow({
         <span className="insight-feed-rank">Feed #{item.feed_rank}</span>
       </div>
       <div className="insight-body">
-        <header className="insight-head">
-          <h2 id={titleId}>{item.claim}</h2>
-          <div className="insight-provenance mono">
-            <a
-              href={item.citation.url}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`Open ${sourceLabel(item)} for ${accessibleName} in a new tab`}
-            >
-              {sourceLabel(item)}
-            </a>
-            <span>{sourceTypeLabel(item.citation.source_type)}</span>
-            <span>{CLAIM_POSTURE_LABELS[item.claim_posture]}</span>
-            <time dateTime={item.day}>
-              {insightDay.format(new Date(`${item.day}T00:00:00Z`))}
-            </time>
-          </div>
-        </header>
-
+        <ItemHeader item={item} accessibleName={accessibleName} titleId={titleId} />
         <div className="insight-decision-line">
           <span className="mono">Decision value</span>
-          <strong>{decisionValueLabel(item.decision_value)}</strong>
-          {engineeringFields && (
+          <strong>{DECISION_VALUE_LABELS[item.decision_value] || item.decision_value}</strong>
+          {fields && (
             <>
               <span className="mono">Action</span>
-              <strong>{ACTION_TYPE_LABELS[engineeringFields.action_type]}</strong>
+              <strong>{ACTION_TYPE_LABELS[fields.action_type]}</strong>
             </>
           )}
         </div>
-
-        <AudienceAnalysis
-          audience={audience}
-          item={item}
-          accessibleName={accessibleName}
-        />
-
-        <blockquote className="insight-citation" cite={item.citation.url}>
-          <div className="insight-citation-head">
-            <span className="mono">Exact source passage</span>
-            <a
-              href={item.citation.url}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`Open exact source for ${accessibleName} in a new tab`}
-            >
-              Open source ↗
-            </a>
-          </div>
-          <p>“{decodeTextEntities(item.citation.quote)}”</p>
-        </blockquote>
+        <AudienceAnalysis audience={audience} item={item} accessibleName={accessibleName} />
+        <Citation item={item} accessibleName={accessibleName} />
       </div>
     </article>
   )
@@ -288,13 +320,11 @@ function InsightRow({
 export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
   const audience = parseAudience(searchParams.get('audience'))
+  const insightView = parseView(searchParams.get('view'))
   const selectedDate = searchParams.get('date') ?? ''
   const [dates, setDates] = useState<InsightDates | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
-  const [dataView, setDataView] = useState<{
-    viewKey: string
-    payload: InsightsResponse
-  } | null>(null)
+  const [dataView, setDataView] = useState<{ viewKey: string; payload: InsightPayload } | null>(null)
   const [datesError, setDatesError] = useState<string | null>(null)
   const [dataError, setDataError] = useState<string | null>(null)
   const [datesRetryKey, setDatesRetryKey] = useState(0)
@@ -305,15 +335,11 @@ export default function Insights() {
   searchParamsRef.current = searchParams
 
   const currentDates = dates?.audience === audience ? dates : null
-  const selectedViewKey = `${audience}:${selectedDate}`
-  const currentData =
-    dataView?.viewKey === selectedViewKey && dataView.payload.audience === audience
-      ? dataView.payload
-      : null
-  const availableDates = useMemo(
-    () => currentDates?.dates ?? [],
-    [currentDates],
-  )
+  const selectedViewKey = `${insightView}:${audience}:${selectedDate}`
+  const currentData = dataView?.viewKey === selectedViewKey && dataView.payload.audience === audience
+    ? dataView.payload
+    : null
+  const availableDates = useMemo(() => currentDates?.dates ?? [], [currentDates])
   const dateWindow = useMemo(
     () => getDateWindow(dateWindowEnd, availableDates.length),
     [dateWindowEnd, availableDates.length],
@@ -322,19 +348,21 @@ export default function Insights() {
     () => availableDates.slice(dateWindow.start, dateWindow.end),
     [availableDates, dateWindow],
   )
-  const canShowOlderDates = dateWindow.start > 0
-  const canShowNewerDates = dateWindow.end < availableDates.length
   const copy = AUDIENCE_COPY[audience]
 
   useEffect(() => {
-    if (searchParams.get('audience') === audience) return
+    if (
+      searchParams.get('audience') === audience &&
+      searchParams.get('view') === insightView
+    ) return
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('audience', audience)
+    nextParams.set('view', insightView)
     setSearchParams(nextParams, { replace: true })
-  }, [audience, searchParams, setSearchParams])
+  }, [audience, insightView, searchParams, setSearchParams])
 
   useEffect(() => {
-    const viewKey = `dates:${audience}`
+    const viewKey = `dates:${insightView}:${audience}`
     let live = true
     activeDatesViewRef.current = viewKey
     activeDataViewRef.current = ''
@@ -342,34 +370,32 @@ export default function Insights() {
     setDataView(null)
     setDatesError(null)
     setDataError(null)
+    const endpoint = insightView === 'extracted'
+      ? '/api/insights/extracted/dates'
+      : '/api/insights/dates'
 
-    getCachedJSON<InsightDates>(`/api/insights/dates?audience=${audience}`)
+    getCachedJSON<InsightDates>(`${endpoint}?audience=${audience}`)
       .then((payload) => {
         if (!live || activeDatesViewRef.current !== viewKey) return
         setDates(payload)
         setDateWindowEnd(payload.dates.length)
-
         const linkedDate = searchParamsRef.current.get('date') ?? ''
         const nextDate = payload.dates.some((value) => value.day === linkedDate)
           ? linkedDate
           : payload.latest_date ?? ''
         const nextParams = new URLSearchParams(searchParamsRef.current)
         nextParams.set('audience', audience)
+        nextParams.set('view', insightView)
         if (nextDate) nextParams.set('date', nextDate)
         else nextParams.delete('date')
         setSearchParams(nextParams, { replace: true })
       })
       .catch(() => {
         if (!live || activeDatesViewRef.current !== viewKey) return
-        setDatesError(
-          `Couldn’t load ${copy.noun} insight dates. Try the request again.`,
-        )
+        setDatesError(`Couldn’t load ${copy.noun} insight dates. Try the request again.`)
       })
-
-    return () => {
-      live = false
-    }
-  }, [audience, copy.noun, datesRetryKey, setSearchParams])
+    return () => { live = false }
+  }, [audience, copy.noun, datesRetryKey, insightView, setSearchParams])
 
   useEffect(() => {
     if (
@@ -381,42 +407,39 @@ export default function Insights() {
       setDataView(null)
       return
     }
-
-    const viewKey = `${audience}:${selectedDate}`
+    const viewKey = `${insightView}:${audience}:${selectedDate}`
     let live = true
     activeDataViewRef.current = viewKey
     setDataView(null)
     setDataError(null)
-    getCachedJSON<InsightsResponse>(
-      `/api/insights?audience=${audience}&date=${selectedDate}`,
-    )
+    const endpoint = insightView === 'extracted' ? '/api/insights/extracted' : '/api/insights'
+    getCachedJSON<InsightPayload>(`${endpoint}?audience=${audience}&date=${selectedDate}`)
       .then((payload) => {
         if (!live || activeDataViewRef.current !== viewKey) return
         setDataView({ viewKey, payload })
       })
       .catch(() => {
         if (!live || activeDataViewRef.current !== viewKey) return
-        setDataError(
-          `Couldn’t load the ${copy.noun} brief for this date. Try the request again.`,
-        )
+        setDataError(`Couldn’t load the ${copy.noun} brief for this date. Try the request again.`)
       })
-    return () => {
-      live = false
-    }
-  }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate])
+    return () => { live = false }
+  }, [audience, copy.noun, currentDates, dataRetryKey, insightView, selectedDate])
 
-  const setView = (nextAudience: InsightAudience, nextDate: string) => {
+  const setView = (
+    nextAudience: InsightAudience,
+    nextDate: string,
+    nextInsightView: InsightView = insightView,
+  ) => {
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('audience', nextAudience)
+    nextParams.set('view', nextInsightView)
     if (nextDate) nextParams.set('date', nextDate)
     else nextParams.delete('date')
     setSearchParams(nextParams, { replace: true })
   }
 
   const moveDateWindow = (direction: DateWindowDirection) => {
-    const selectedIndex = availableDates.findIndex(
-      (value) => value.day === selectedDate,
-    )
+    const selectedIndex = availableDates.findIndex((value) => value.day === selectedDate)
     const nextWindow = shiftDateWindow(
       dateWindow.end,
       availableDates.length,
@@ -429,31 +452,26 @@ export default function Insights() {
     if (nextDate) setView(audience, nextDate.day)
   }
 
-  const retryDates = () => {
-    setDatesError(null)
-    setDatesRetryKey((value) => value + 1)
-  }
-
-  const retryData = () => {
-    setDataError(null)
-    setDataRetryKey((value) => value + 1)
-  }
-
   const items = currentData?.items ?? []
   const run = currentData?.run
   const datesLoading = currentDates === null && datesError === null
-  const dataLoading =
-    currentDates?.available === true &&
+  const dataLoading = currentDates?.available === true &&
     currentDates.dates.some((value) => value.day === selectedDate) &&
-    currentData === null &&
-    dataError === null
+    currentData === null && dataError === null
 
   return (
     <div className="page insight-page">
       <header className="page-head insight-page-head">
         <h1 className="page-title">{copy.title}</h1>
         <p className="page-sub">{copy.subtitle}</p>
-        {run && (
+        {run && insightView === 'extracted' && 'complete_count' in run && (
+          <p className="page-method-line mono">
+            <span>{run.extracted_count.toLocaleString('en-US')} useful</span>
+            <span>{run.complete_count.toLocaleString('en-US')} classified</span>
+            <span>{run.candidate_count.toLocaleString('en-US')} Feed envelopes</span>
+          </p>
+        )}
+        {run && insightView === 'reviewed' && 'selected_count' in run && (
           <p className="page-method-line mono">
             <span>{run.selected_count.toLocaleString('en-US')} selected</span>
             <span>{run.extracted_count.toLocaleString('en-US')} citation-bound</span>
@@ -462,12 +480,8 @@ export default function Insights() {
         )}
       </header>
 
-      <div
-        className="insight-audience-switch"
-        role="group"
-        aria-label="Insight audience"
-      >
-        {(Object.keys(AUDIENCE_COPY) as InsightAudience[]).map((value) => (
+      <div className="insight-audience-switch" role="group" aria-label="Insight audience">
+        {AUDIENCE_ORDER.map((value) => (
           <button
             type="button"
             className={value === audience ? 'is-active' : ''}
@@ -481,17 +495,40 @@ export default function Insights() {
         ))}
       </div>
 
-      {!datesError && (!currentDates || currentDates.available) && (
-        <section
-          className="feed-calendar insight-calendar"
-          aria-label={`Available ${copy.itemLabel} dates`}
+      <div className="insight-view-switch" role="group" aria-label="Insight processing view">
+        <button
+          type="button"
+          className={insightView === 'extracted' ? 'is-active' : ''}
+          aria-pressed={insightView === 'extracted'}
+          onClick={() => setView(audience, selectedDate, 'extracted')}
         >
+          <span>Feed-ranked</span>
+          <small>Useful extractions before editorial review</small>
+        </button>
+        <button
+          type="button"
+          className={insightView === 'reviewed' ? 'is-active' : ''}
+          aria-pressed={insightView === 'reviewed'}
+          onClick={() => setView(audience, selectedDate, 'reviewed')}
+        >
+          <span>Reviewed brief</span>
+          <small>Selected and independently audited</small>
+        </button>
+      </div>
+      <p className="insight-view-note mono">
+        {insightView === 'extracted'
+          ? 'Existing first-stage classifications · ordered by original Feed rank'
+          : 'Editorial selection · independent audit · publication reconciliation'}
+      </p>
+
+      {!datesError && (!currentDates || currentDates.available) && (
+        <section className="feed-calendar insight-calendar" aria-label={`Available ${copy.itemLabel} dates`}>
           <DateNavigator
             dates={visibleDates}
             selectedDate={selectedDate}
             onSelectDate={(day) => setView(audience, day)}
-            canShowOlderDates={canShowOlderDates}
-            canShowNewerDates={canShowNewerDates}
+            canShowOlderDates={dateWindow.start > 0}
+            canShowNewerDates={dateWindow.end < availableDates.length}
             onShowOlderDates={() => moveDateWindow('older')}
             onShowNewerDates={() => moveDateWindow('newer')}
             ariaLabel={copy.dateLabel}
@@ -506,7 +543,7 @@ export default function Insights() {
           title="Insight dates are unavailable"
           detail={datesError}
           kind="error"
-          onRetry={retryDates}
+          onRetry={() => { setDatesError(null); setDatesRetryKey((value) => value + 1) }}
           retryLabel={`Retry loading ${copy.itemLabel} dates`}
         />
       )}
@@ -515,50 +552,39 @@ export default function Insights() {
           title="This brief did not load"
           detail={dataError}
           kind="error"
-          onRetry={retryData}
+          onRetry={() => { setDataError(null); setDataRetryKey((value) => value + 1) }}
           retryLabel={`Retry loading the ${copy.noun} brief for this date`}
         />
       )}
       {currentDates && !currentDates.available && !datesError && (
         <InsightState
-          title={`No ${copy.itemLabel} are published yet`}
-          detail={
-            currentDates.reason ||
-            'This audience will appear here after its first daily editor run completes.'
-          }
+          title={`No ${copy.itemLabel} are available yet`}
+          detail={currentDates.reason || 'No classified audience insight days exist yet.'}
         />
       )}
       {currentData && !currentData.available && !dataError && (
-        <InsightState
-          title={copy.emptyTitle}
-          detail={
-            currentData.reason ||
-            'The editor can publish a thin day rather than fill the brief with weak signal.'
-          }
-        />
+        <InsightState title={copy.emptyTitle} detail={currentData.reason || 'No useful item cleared this view.'} />
       )}
 
-      {currentData?.available && items.length > 0 && (
+      {currentData?.available && items.length > 0 && insightView === 'extracted' && (
         <section className="insight-list" aria-label={`${copy.label} insights`}>
-          {items.map((item) => (
+          {(items as ExtractedInsightItem[]).map((item) => (
+            <ExtractedInsightRow audience={audience} item={item} key={item.candidate_id} />
+          ))}
+        </section>
+      )}
+      {currentData?.available && items.length > 0 && insightView === 'reviewed' && (
+        <section className="insight-list" aria-label={`${copy.label} insights`}>
+          {(items as InsightItem[]).map((item) => (
             <InsightRow audience={audience} item={item} key={item.candidate_id} />
           ))}
         </section>
       )}
-
       {currentData?.available && items.length === 0 && (
-        <InsightState
-          title={copy.emptyTitle}
-          detail="The publication set was empty after citation reconciliation; no unverified claim is shown."
-        />
+        <InsightState title={copy.emptyTitle} detail="No citation-bound insight is available for this day." />
       )}
-
       {dataLoading && (
-        <div
-          className="insight-loading"
-          aria-label={`Loading ${copy.itemLabel}`}
-          aria-busy="true"
-        >
+        <div className="insight-loading" aria-label={`Loading ${copy.itemLabel}`} aria-busy="true">
           <div className="skeleton" />
           <div className="skeleton" />
           <div className="skeleton" />

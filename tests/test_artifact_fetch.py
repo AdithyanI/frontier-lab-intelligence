@@ -124,6 +124,33 @@ def test_extract_content_rejects_client_rendered_error_shell():
     assert result.text is None
 
 
+def test_extract_content_uses_scoped_sec_archives_fallback():
+    body = b"""<DOCUMENT><TYPE>EX-99.1<SEQUENCE>2<FILENAME>filing.htm
+    <DESCRIPTION>EXHIBIT 99.1<TEXT><HTML><HEAD><TITLE></TITLE></HEAD><BODY>
+    <P STYLE="font: 10pt Times New Roman">TeraWulf entered into a 20-year lease
+    with Anthropic.</P><P STYLE="font: 10pt Times New Roman">The campus will
+    accommodate approximately 401 MW and the lease is expected to generate
+    approximately $19 billion over the initial term.</P></BODY></HTML></TEXT>
+    </DOCUMENT>"""
+
+    result = artifact_fetch.extract_content(
+        body,
+        content_type="text/html",
+        charset="utf-8",
+        final_url=(
+            "https://www.sec.gov/Archives/edgar/data/1083301/"
+            "000110465926080583/tm2619468d1_ex99-1.htm"
+        ),
+        artifact_kind="other",
+    )
+
+    assert result.success is True
+    assert result.extractor_contract == "html-sec-archives-lxml-v1"
+    assert "20-year lease" in result.text
+    assert "with Anthropic" in result.text
+    assert "approximately $19 billion" in result.text
+
+
 def test_fetch_cohort_snapshots_text_and_reuses_success(tmp_path, monkeypatch):
     db = tmp_path / "artifacts.db"
     artifact_id = _seed_artifact(db)
@@ -238,6 +265,78 @@ def test_fetch_cohort_does_not_retry_terminal_failure(tmp_path):
         (artifact_id,),
     ).fetchone()[0]
     assert attempts == 1
+    conn.close()
+
+
+def test_fetch_cohort_exact_artifact_id_does_not_widen_scope(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    _seed_artifact(db)
+    exact_url = "https://example.com/exact"
+    exact_id = artifact_urls.artifact_id(exact_url)
+    now = "2026-07-15T08:00:00+00:00"
+    conn = artifacts.connect(db)
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact
+               (artifact_id, canonical_url, canonicalization_contract, host,
+                artifact_kind, first_seen_at, last_seen_at, created_at, updated_at)
+               VALUES (?, ?, ?, 'example.com', 'other', ?, ?, ?, ?)""",
+            (
+                exact_id,
+                exact_url,
+                artifact_urls.CANONICALIZATION_CONTRACT,
+                now,
+                now,
+                now,
+                now,
+            ),
+        )
+        conn.execute(
+            """INSERT INTO artifact_event_supplement
+               (supplement_id, contract, manifest_sha256, artifact_id,
+                event_id, envelope_day, source_rank, day_candidate_count,
+                source_triage_run_id, source_input_sha256,
+                source_snapshot_content_sha256, evidence_role,
+                source_published_at, rationale, reviewed_by, reviewed_at,
+                created_at)
+               VALUES ('supplement', ?, 'manifest-sha', ?, 'event-exact',
+                       '2026-07-06', 50, 863, 'triage-run', 'input-sha',
+                       'snapshot-sha', 'official_primary_source', '2026-07-06',
+                       'Official source.', 'human-review', ?, ?)""",
+            (artifacts.REVIEWED_SUPPLEMENT_CONTRACT, exact_id, now, now),
+        )
+    conn.close()
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    fetched_paths: list[str] = []
+    body = b"""<html><body><article><h1>Exact source</h1><p>This exact artifact
+    contains enough substantive public evidence for deterministic extraction
+    without fetching any unrelated catalog row.</p></article></body></html>"""
+
+    def handler(request: httpx.Request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        fetched_paths.append(request.url.path)
+        return httpx.Response(200, headers={"Content-Type": "text/html"}, content=body)
+
+    result = artifact_fetch.fetch_cohort(
+        db_path=db,
+        artifact_ids=[exact_id],
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(handler),
+    )
+
+    assert result["success"] == 1
+    assert fetched_paths == ["/exact"]
+    conn = artifacts.connect(db)
+    run = conn.execute(
+        "SELECT selection_policy, expected_count FROM artifact_fetch_run"
+    ).fetchone()
+    assert run["selection_policy"] == artifact_fetch.EXPLICIT_SELECTION_POLICY
+    assert run["expected_count"] == 1
+    assert conn.execute(
+        "SELECT artifact_id FROM artifact_fetch_run_item"
+    ).fetchone()[0] == exact_id
     conn.close()
 
 
