@@ -151,10 +151,9 @@ function LiveSystemMap() {
 
       <g>
         <rect x="280" y="248" width="520" height="72" fill={INK} />
-        <text x="302" y="272" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
-        <text x="302" y="298" fontFamily={UI} fontSize="18" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
-        <text x="778" y="288" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill="#fff" opacity="0.7">FROZEN EVIDENCE · EXACT PASSAGES</text>
-        <text x="778" y="304" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill="#fff" opacity="0.7">SHARED PROVENANCE · OPTIONAL ARTIFACTS</text>
+        <text x="302" y="270" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
+        <text x="302" y="293" fontFamily={UI} fontSize="18" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
+        <text x="302" y="310" fontFamily={MONO} fontSize="8.5" fill="#fff" opacity="0.68">FROZEN EVIDENCE · EXACT PASSAGES · SHARED PROVENANCE · OPTIONAL ARTIFACTS</text>
       </g>
 
       <path d="M540 320 V342 H162 V358" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#flow-arrow)" />
