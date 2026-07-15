@@ -21,8 +21,8 @@ from typing import Any, Iterable
 from fli import x_content
 
 
-SCHEMA_VERSION = "signal-feed-v8"
-SELECTION_CONTRACT = "complete-calendar-days-v7-discovery-cutoff"
+SCHEMA_VERSION = "signal-feed-v9"
+SELECTION_CONTRACT = "complete-calendar-days-v8-primary-author-threads"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SOURCE_DB = REPO_ROOT / "data" / "raw" / "x" / "x-content.db"
 DEFAULT_FEED_DB = REPO_ROOT / "data" / "derived" / "signal-feed" / "feed.db"
@@ -398,6 +398,7 @@ def _selected_rows(
     # Provider timestamps are not stored in ISO order, so parse the bounded
     # local corpus once. The raw table is indexed for author workflows, while
     # this derived refresh intentionally optimizes the product read path.
+    candidates: list[tuple[sqlite3.Row, dict[str, Any]]] = []
     for row in source.execute(
         """SELECT post.provider, post.post_id, post.author_handle,
                   post.post_type, observed.raw_sha256, observed.raw_json
@@ -426,6 +427,41 @@ def _selected_rows(
             continue
         published = _parse_datetime(tweet.get("createdAt") or tweet.get("created_at"))
         if published is not None and start <= published.date() <= end:
+            candidates.append((row, tweet))
+
+    # Reply-inclusive account timelines are necessary to capture first-party
+    # continuations such as "details below" threads and tracked-account replies
+    # to other captured roots. They also contain replies in conversations that
+    # are otherwise absent from our evidence corpus. Keep a reply only when its
+    # conversation root is present in this materialization window; the envelope
+    # later distinguishes same-author continuation from tracked-author reaction.
+    roots: dict[str, dict[str, Any]] = {}
+    for _row, tweet in candidates:
+        if bool(
+            tweet.get("isReply")
+            or tweet.get("is_reply")
+            or tweet.get("inReplyToId")
+            or tweet.get("in_reply_to_post_id")
+        ):
+            continue
+        post_id = str(tweet.get("id") or tweet.get("tweetId") or "").strip()
+        if post_id:
+            roots[post_id] = tweet
+
+    for row, tweet in candidates:
+        is_reply = bool(
+            tweet.get("isReply")
+            or tweet.get("is_reply")
+            or tweet.get("inReplyToId")
+            or tweet.get("in_reply_to_post_id")
+        )
+        if not is_reply:
+            yield row
+            continue
+        conversation_id = str(
+            tweet.get("conversationId") or tweet.get("conversation_id") or ""
+        ).strip()
+        if conversation_id in roots:
             yield row
 
 

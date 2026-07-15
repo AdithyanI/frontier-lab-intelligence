@@ -11,13 +11,14 @@ provider without changing Registry identity.
   `x_post` convenience row, an append-only `x_post_observation` history, and
   exact model-evidence bundles. Historical rebuilds select observations, never
   the mutable latest row.
-- `data/derived/signal-feed/feed.db`: rebuildable `signal-feed-v8` runs. Each
+- `data/derived/signal-feed/feed.db`: rebuildable `signal-feed-v9` runs. Each
   content-addressed run stores its selected direct observations, recursively
   discovered embedded quote/retweet posts, immutable per-snapshot `raw_json`,
   complete declared relation closure, and opaque provider target anchors whose
-  payload was not captured.
-- `data/derived/signal-events/events.db`: rebuildable `signal-events-v3` runs
-  under `exact-structural-v5-provider-edges`. It stores exact multi-post
+  payload was not captured. Reply-inclusive timelines contribute only replies
+  whose conversation root is captured in the same run.
+- `data/derived/signal-events/events.db`: rebuildable `signal-events-v4` runs
+  under `exact-structural-v6-primary-author-threads`. It stores exact multi-post
   components, member/link/anchor facts, per-day membership, and the one-row
   `signal_publication` pointer that names the validated live run. Singleton
   envelopes are added by the read model without duplicating post storage.
@@ -68,7 +69,12 @@ provider access:
 ```
 
 Provider payloads and post observations land in `x-content.db`; the collection
-manifest does not duplicate them.
+manifest does not duplicate them. The collection contract requests authored
+replies. Feed materialization retains replies to captured roots—same-author
+posts become continuations and other tracked authors remain reactions—while
+excluding reply activity whose root is absent. When a same-author continuation
+survives but its immediate parent is missing, the Event projection records an
+explicit conversation-root bridge rather than rewriting provider metadata.
 
 ## Rebuild and Publish
 

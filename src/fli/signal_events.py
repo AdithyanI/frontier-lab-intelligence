@@ -21,8 +21,8 @@ from typing import Any
 from fli import signal_feed
 
 
-SCHEMA_VERSION = "signal-events-v3"
-CLUSTERING_CONTRACT = "exact-structural-v5-provider-edges"
+SCHEMA_VERSION = "signal-events-v4"
+CLUSTERING_CONTRACT = "exact-structural-v6-primary-author-threads"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_EVENTS_DB = REPO_ROOT / "data" / "derived" / "signal-events" / "events.db"
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS event_link (
     source_post_id TEXT NOT NULL,
     target_post_id TEXT NOT NULL,
     link_type TEXT NOT NULL CHECK (
-        link_type IN ('quote', 'retweet', 'reply_parent')
+        link_type IN ('quote', 'retweet', 'reply_parent', 'primary_thread')
     ),
     anchor_value TEXT NOT NULL,
     discovered_at TEXT NOT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS event_anchor (
     run_id TEXT NOT NULL,
     event_id TEXT NOT NULL,
     anchor_type TEXT NOT NULL CHECK (
-        anchor_type IN ('same_target', 'reply_parent')
+        anchor_type IN ('same_target', 'reply_parent', 'conversation_root')
     ),
     anchor_value TEXT NOT NULL,
     PRIMARY KEY (run_id, event_id, anchor_type, anchor_value),
@@ -215,7 +215,7 @@ def _canonical_identity(
     stable identity without treating every branch in the conversation as one
     event.
     """
-    structural_types = {"quote", "retweet", "reply_parent"}
+    structural_types = {"quote", "retweet", "reply_parent", "primary_thread"}
     outbound: dict[tuple[str, str], set[tuple[str, str]]] = defaultdict(set)
     inbound: dict[tuple[str, str], int] = defaultdict(int)
     for link in member_links:
@@ -465,6 +465,34 @@ def materialize(
                 "reply_parent",
                 "reply_parent",
                 parent_id,
+                row["first_discovered_at"],
+                row["first_discovered_day"],
+                row["disclosure_post_id"],
+            )
+        # A later first-party continuation can survive even when its immediate
+        # parent was deleted or omitted by the provider. Keep the exact parent
+        # metadata, but bridge that orphaned continuation to the captured root
+        # so one authored thread does not split into separate envelopes.
+        conversation_id = str(row["conversation_id"] or "")
+        root = posts.get((row["provider"], conversation_id))
+        parent_present = (row["provider"], parent_id) in posts
+        if root is None or parent_present:
+            continue
+        same_author = (
+            bool(row["author_x_id"] and root["author_x_id"])
+            and row["author_x_id"] == root["author_x_id"]
+        ) or (
+            not (row["author_x_id"] and root["author_x_id"])
+            and row["author_handle"] == root["author_handle"]
+        )
+        if same_author and conversation_id != row["post_id"]:
+            add_link(
+                row["provider"],
+                row["post_id"],
+                conversation_id,
+                "primary_thread",
+                "conversation_root",
+                conversation_id,
                 row["first_discovered_at"],
                 row["first_discovered_day"],
                 row["disclosure_post_id"],

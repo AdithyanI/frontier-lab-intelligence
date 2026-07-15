@@ -224,11 +224,12 @@ class TwitterApiIoClient:
         *,
         username: str,
         cursor: str | None = None,
+        include_replies: bool = False,
     ) -> dict[str, Any]:
-        """Fetch one recent-timeline page without replies."""
+        """Fetch one recent-timeline page, optionally including authored replies."""
         query: dict[str, str] = {
             "userName": username,
-            "includeReplies": "false",
+            "includeReplies": "true" if include_replies else "false",
         }
         if cursor:
             query["cursor"] = cursor

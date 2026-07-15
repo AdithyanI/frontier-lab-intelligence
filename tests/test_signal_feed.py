@@ -96,6 +96,86 @@ def test_materialize_deduplicates_retweet_target_and_preserves_quote(tmp_path):
     conn.close()
 
 
+def test_materialize_keeps_replies_only_for_captured_conversation_roots(tmp_path):
+    raw = tmp_path / "x-content.db"
+    derived = tmp_path / "feed.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    root = _tweet(
+        "root", "alice", "2026-07-11T08:00:00Z", "Technical report. Details below"
+    )
+    root["conversationId"] = "root"
+    continuation = _tweet(
+        "continuation",
+        "alice",
+        "2026-07-11T08:01:00Z",
+        "Link: https://arxiv.org/abs/2607.00001",
+    )
+    continuation.update(
+        {
+            "conversationId": "root",
+            "inReplyToId": "root",
+            "isReply": True,
+        }
+    )
+    unrelated_reply = _tweet(
+        "unrelated",
+        "alice",
+        "2026-07-11T09:00:00Z",
+        "A reply in somebody else's conversation",
+    )
+    unrelated_reply.update(
+        {
+            "conversationId": "outside-root",
+            "inReplyToId": "outside-root",
+            "isReply": True,
+        }
+    )
+    foreign_reply = _tweet(
+        "foreign", "bob", "2026-07-11T10:00:00Z", "A reaction to Alice"
+    )
+    foreign_reply.update(
+        {
+            "conversationId": "root",
+            "inReplyToId": "root",
+            "isReply": True,
+        }
+    )
+    with client.db:
+        client._store_posts(
+            url=(
+                "https://api.twitterapi.io/twitter/user/last_tweets"
+                "?userName=alice&includeReplies=true"
+            ),
+            payload={"data": {"tweets": [root, continuation, unrelated_reply]}},
+            observed_at="2026-07-12T00:00:00+00:00",
+        )
+        client._store_posts(
+            url=(
+                "https://api.twitterapi.io/twitter/user/last_tweets"
+                "?userName=bob&includeReplies=true"
+            ),
+            payload={"data": {"tweets": [foreign_reply]}},
+            observed_at="2026-07-12T00:00:00+00:00",
+        )
+    client.close()
+
+    result = signal_feed.materialize(
+        source_db=raw, feed_db=derived, through=date(2026, 7, 11), days=1
+    )
+
+    assert result["source_post_count"] == 3
+    conn = signal_feed.connect(derived)
+    rows = conn.execute(
+        "SELECT post_id, post_type FROM feed_post ORDER BY post_id"
+    ).fetchall()
+    assert [tuple(row) for row in rows] == [
+        ("continuation", "reply"),
+        ("foreign", "reply"),
+        ("root", "original"),
+    ]
+    conn.close()
+
+
 def test_materialize_recursively_preserves_nested_quote_chain(tmp_path):
     raw = tmp_path / "x-content.db"
     derived = tmp_path / "feed.db"

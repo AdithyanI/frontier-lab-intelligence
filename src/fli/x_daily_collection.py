@@ -15,6 +15,7 @@ import sqlite3
 import sys
 import time as monotonic_time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -26,7 +27,7 @@ from fli import channels, sources, store, x_content
 
 
 DEFAULT_MANIFEST_PATH = Path("data/derived/x-daily-collection.db")
-COLLECTION_CONTRACT = "registry-x-date-complete-v1"
+COLLECTION_CONTRACT = "registry-x-date-complete-v2-authored-replies"
 CLI_SCHEMA_VERSION = "1.0"
 
 SCHEMA = """
@@ -208,7 +209,7 @@ def _pagination(payload: dict[str, Any]) -> tuple[bool, str | None]:
 def _timeline_url(handle: str, cursor: str | None = None) -> str:
     query: dict[str, str] = {
         "userName": handle,
-        "includeReplies": "false",
+        "includeReplies": "true",
     }
     if cursor:
         query["cursor"] = cursor
@@ -713,7 +714,11 @@ def _fetch_missing_chain(
         client.refresh = True
     try:
         for _ordinal in range(1, max_pages + 1):
-            payload = client.fetch_recent_tweets_page(username=handle, cursor=cursor)
+            payload = client.fetch_recent_tweets_page(
+                username=handle,
+                cursor=cursor,
+                include_replies=True,
+            )
             if not _has_tweets_array(payload):
                 raise sources.SourceCliError(
                     code="E_PROVIDER_SCHEMA",
@@ -753,8 +758,11 @@ def execute_collection(
     end_day: str | date,
     run_id: str | None = None,
     max_pages: int = 100,
+    workers: int = 1,
 ) -> dict[str, Any]:
     """Fetch only insufficient accounts and resume safely account by account."""
+    if workers < 1 or workers > 64:
+        raise ValueError("workers must be between 1 and 64")
     client_db = getattr(client, "db", None)
     if client_db is not None:
         db_file = client_db.execute("PRAGMA database_list").fetchone()[2]
@@ -785,9 +793,8 @@ def execute_collection(
                ORDER BY handle""",
             (run_id,),
         ).fetchall()
-        for account in pending:
-            handle = account["handle"]
-            before = client.stats()
+        def collect_account(handle: str) -> dict[str, Any]:
+            before = client.stats() if workers == 1 else None
             error_code = None
             error_message = None
             status = "failed"
@@ -830,19 +837,60 @@ def execute_collection(
                 error_code = type(exc).__name__
                 error_message = str(exc)
                 coverage = Coverage(False, "provider request failed", (), False, False, False, None, None)
-            after = client.stats()
+            after = client.stats() if workers == 1 else None
+            return {
+                "handle": handle,
+                "coverage": coverage,
+                "status": status,
+                "provider_requests": (
+                    max(
+                        0,
+                        int(after["provider_requests"])
+                        - int(before["provider_requests"]),
+                    )
+                    if before is not None and after is not None
+                    else len(coverage.pages)
+                ),
+                "cache_hits": (
+                    max(0, int(after["cache_hits"]) - int(before["cache_hits"]))
+                    if before is not None and after is not None
+                    else 0
+                ),
+                "error_code": error_code,
+                "error_message": error_message,
+            }
+
+        def persist(result: dict[str, Any]) -> None:
             with conn:
                 _write_coverage(
                     conn,
                     run_id=run_id,
-                    handle=handle,
-                    coverage=coverage,
-                    status=status,
-                    provider_requests=max(0, after["provider_requests"] - before["provider_requests"]),
-                    cache_hits=max(0, after["cache_hits"] - before["cache_hits"]),
-                    error_code=error_code,
-                    error_message=error_message,
+                    handle=str(result["handle"]),
+                    coverage=result["coverage"],
+                    status=str(result["status"]),
+                    provider_requests=int(result["provider_requests"]),
+                    cache_hits=int(result["cache_hits"]),
+                    error_code=result["error_code"],
+                    error_message=result["error_message"],
                 )
+
+        handles = [str(account["handle"]) for account in pending]
+        if workers == 1:
+            for handle in handles:
+                persist(collect_account(handle))
+        else:
+            original_refresh = client.refresh
+            client.refresh = True
+            try:
+                with ThreadPoolExecutor(max_workers=workers) as executor:
+                    futures = {
+                        executor.submit(collect_account, handle): handle
+                        for handle in handles
+                    }
+                    for future in as_completed(futures):
+                        persist(future.result())
+            finally:
+                client.refresh = original_refresh
         failures = conn.execute(
             """SELECT COUNT(*) FROM collection_account
                WHERE run_id = ? AND status IN ('pending', 'failed')""",
@@ -957,6 +1005,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     execute_parser.add_argument("--timeout-seconds", type=float, default=30.0)
     execute_parser.add_argument("--page-sleep-seconds", type=float, default=0.0)
+    execute_parser.add_argument("--workers", type=int, default=1)
     status_parser = subparsers.add_parser(
         "status", help="Inspect one durable collection run without provider access."
     )
@@ -1001,6 +1050,7 @@ def main(argv: list[str] | None = None) -> int:
                 end_day=args.end_day,
                 run_id=args.run_id,
                 max_pages=args.max_pages,
+                workers=args.workers,
             )
         else:
             data = collection_status(

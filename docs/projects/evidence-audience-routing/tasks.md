@@ -28,6 +28,8 @@ positive routes without reviving the old stack.
 - Define the exact immutable Evidence-envelope blocks presented to the router,
   preserving the author, relationship, source URL, and provenance of each
   root, continuation, reply, quote-post, and accepted artifact block.
+- Enrich selected root posts with same-author replies from the same X
+  conversation before event, artifact, and routing projections are frozen.
 - Use one combined routing call with two independently reasoned audience
   judgments: AI Engineering relevant/not relevant and Investment relevant/not
   relevant, each with a concise evidence-grounded explanation. The current
@@ -58,8 +60,8 @@ positive routes without reviving the old stack.
 - Daily editorial ranking, independent publication audit, reconciliation,
   briefing/export, alerts, or delivery.
 - Bulk nine-day generation before the one-envelope and one-day reviews pass.
-- Expanding the Registry, following graph, collection cohort, or artifact
-  acquisition policy.
+- Expanding the Registry, following graph, or collection cohort; broad reply
+  ingestion and reaction-owned artifact acquisition remain out of scope.
 - External submission, publication, or contact without Adi's explicit
   current-session approval.
 
@@ -231,6 +233,11 @@ Application invariants:
   visible characters and at least 90% are exact `█` or Unicode-replacement
   placeholders. Routing contains no artifact-quality heuristic and consumes
   only successful text snapshots.
+- A reply-capable envelope cannot be built from a reply-free source timeline.
+  Daily collection now includes authored replies; Feed admission requires the
+  conversation root to be captured. Same-author replies become first-party
+  continuations, other tracked authors remain reactions, and unrelated reply
+  activity remains excluded.
 
 ## Open Questions / Blockers
 
@@ -245,15 +252,18 @@ Application invariants:
   inconsistent Engineering boundary for temporary access/rate-limit changes.
   Adi must decide whether to adopt the narrow clarification proposed in
   `resources/top10-contextual-audit-v1.md` before a targeted rerun.
+- Artifact catalog import still depends on the deleted legacy keep/drop triage
+  runs. The corrected Gemma envelope now exposes its arXiv reply, but attaching
+  or fetching that document under the new routing-first workflow requires a
+  triage-independent primary-artifact import boundary.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Contextually audit 26 stratified packets against the exact stored evidence and approved audience standards. | parent | `resources/top10-contextual-audit-v1.md` |
-| done | Move the placeholder-only guard into shared artifact extraction, correct the one known live fetch, and remove routing-local cleanup. | parent | `resources/top10-contextual-audit-v1.md` |
-| done | Expose artifact content readiness and exact source time inside the existing Primary artifacts expansion. | parent | — |
-| in_progress | Decide whether to add the two narrow boundary clarifications and rerun only the five disputed/borderline packets. | parent | `resources/top10-contextual-audit-v1.md` |
+| complete | Collect authored replies and admit only replies whose conversation root is captured. | parent | — |
+| complete | Rebuild and publish Feed/events; prove Gemma and Muse include their first-party continuations. | parent | — |
+| in_progress | Replace legacy-triage-gated artifact import, then rerun routing against corrected envelope hashes. | parent | `resources/top10-contextual-audit-v1.md` |
 
 ## Backlog / Remaining Work
 
@@ -263,6 +273,12 @@ Application invariants:
   content states inside expanded provenance without adding another list column.
 - [ ] Add broader packet-integrity or schema-consistency validation only when a
   concrete failure justifies a deterministic rule.
+- [x] Fetch authored replies for captured root conversations without adding
+  unrelated reply noise to the daily Feed.
+- [x] Rebuild the affected Feed/Event projections and verify Gemma and Muse
+  continuations against corrected envelopes.
+- [ ] Decouple primary-artifact catalog import from the deleted legacy triage
+  store, associate the Gemma arXiv report, and rerun only invalidated routes.
 - [x] Audit a stratified sample of both, single-audience, and `neither`
   outcomes from the authorized top-10 cohort.
 - [ ] After the current boundary decision, audit a bounded sample of difficult

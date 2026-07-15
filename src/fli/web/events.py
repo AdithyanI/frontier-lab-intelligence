@@ -134,7 +134,12 @@ def _relationship_rows(
 ) -> list[dict[str, Any]]:
     """Return exact related evidence in parent-before-child display order."""
     root = next(member for member in members if member["post_id"] == root_post_id)
-    link_priority = {"reply_parent": 0, "quote": 1, "retweet": 2}
+    link_priority = {
+        "reply_parent": 0,
+        "primary_thread": 0,
+        "quote": 1,
+        "retweet": 2,
+    }
     source_links: dict[str, list[sqlite3.Row]] = {}
     for link in links:
         source_links.setdefault(link["source_post_id"], []).append(link)
@@ -148,10 +153,15 @@ def _relationship_rows(
         link = source_links.get(member["post_id"], [None])[0]
         link_type = link["link_type"] if link is not None else None
         target_post_id = link["target_post_id"] if link is not None else None
-        if member["post_type"] == "reply" or link_type == "reply_parent":
+        if member["post_type"] == "reply" or link_type in {
+            "reply_parent",
+            "primary_thread",
+        }:
             relationship = "reply"
             parent_post_id = member.get("in_reply_to_post_id") or (
-                target_post_id if link_type == "reply_parent" else None
+                target_post_id
+                if link_type in {"reply_parent", "primary_thread"}
+                else None
             )
         elif member["post_type"] == "quote" or link_type == "quote":
             relationship = "quote"
@@ -422,7 +432,7 @@ def _component_root(
     posts: dict[tuple[str, str], sqlite3.Row],
     canonical_root_key: tuple[str, str],
 ) -> tuple[str, str]:
-    structural = {"quote", "retweet", "reply_parent"}
+    structural = {"quote", "retweet", "reply_parent", "primary_thread"}
     identity_provider, _, identity_value = _component_identity(
         component_keys=component_keys,
         links=links,
@@ -468,7 +478,7 @@ def _component_identity(
     visible cutoff structure prevents a later bridge from rewriting an older
     day's event IDs and snapshot hashes.
     """
-    structural = {"quote", "retweet", "reply_parent"}
+    structural = {"quote", "retweet", "reply_parent", "primary_thread"}
     nodes = set(component_keys)
     outbound: set[tuple[str, str]] = set()
     for link in links:
@@ -552,7 +562,11 @@ def _project_component(
         {
             "same_target"
             if link["link_type"] in ("quote", "retweet")
-            else "reply_parent"
+            else (
+                "conversation_root"
+                if link["link_type"] == "primary_thread"
+                else "reply_parent"
+            )
             for link in current_links
         }
     )
@@ -561,6 +575,7 @@ def _project_component(
         for anchor, label in (
             ("same_target", "Exact same quoted or reposted post"),
             ("reply_parent", "Exact same reply parent"),
+            ("conversation_root", "Same author and conversation root"),
         )
         if anchor in anchor_types
     ]

@@ -66,6 +66,17 @@ def _cache(client, handle, payload, cursor=None):
     )
 
 
+def test_daily_timeline_contract_includes_authored_replies():
+    url = x_daily_collection._timeline_url("Example_User", "next page")
+    query = parse.parse_qs(parse.urlparse(url).query)
+
+    assert query == {
+        "userName": ["Example_User"],
+        "includeReplies": ["true"],
+        "cursor": ["next page"],
+    }
+
+
 def test_freeze_is_stable_and_excludes_rejected_but_not_zero_following(tmp_path):
     registry_path = tmp_path / "registry.db"
     manifest_path = tmp_path / "manifest.db"
