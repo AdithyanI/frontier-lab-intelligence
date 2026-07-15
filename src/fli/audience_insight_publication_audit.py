@@ -2238,6 +2238,17 @@ def main(argv: list[str] | None = None) -> int:
     finalize.add_argument("--audit-db", type=Path, required=True)
     finalize.add_argument("--source-run-db", type=Path, required=True)
     finalize.add_argument("--finalization-path", type=Path)
+    finalize_editorial = sub.add_parser(
+        "finalize-editorial",
+        help=(
+            "Write an immutable stricter editorial release decision after a "
+            "passing independent audit."
+        ),
+    )
+    finalize_editorial.add_argument("--audit-db", type=Path, required=True)
+    finalize_editorial.add_argument("--source-run-db", type=Path, required=True)
+    finalize_editorial.add_argument("--editorial-review", type=Path, required=True)
+    finalize_editorial.add_argument("--finalization-path", type=Path)
     validate_finalization = sub.add_parser(
         "validate-finalization",
         help="Fail closed unless a finalization exactly matches source and audit evidence.",
@@ -2277,6 +2288,14 @@ def main(argv: list[str] | None = None) -> int:
             data = create_publication_finalization(
                 source_run_db=args.source_run_db,
                 audit_db=args.audit_db,
+                finalization_path=args.finalization_path,
+            )
+        elif args.action == "finalize-editorial":
+            editorial_review = json.loads(args.editorial_review.read_text())
+            data = create_editorial_publication_finalization(
+                source_run_db=args.source_run_db,
+                audit_db=args.audit_db,
+                editorial_review=editorial_review,
                 finalization_path=args.finalization_path,
             )
         elif args.action == "validate-finalization":

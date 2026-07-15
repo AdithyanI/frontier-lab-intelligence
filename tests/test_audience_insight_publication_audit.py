@@ -976,6 +976,101 @@ def test_passing_audit_is_a_finalization_noop(tmp_path):
     assert not publication_audit.default_finalization_path(source).exists()
 
 
+def test_editorial_finalization_strictly_removes_item_after_passing_audit(tmp_path):
+    source = _finalizable_source_run(tmp_path / "run" / "insights.db")
+    audit = _complete_finalization_audit(
+        source,
+        source.parent / "publication-audit-v1" / "audit.db",
+        selected_passes=True,
+    )
+    review = {
+        "schema_version": publication_audit.EDITORIAL_REVIEW_SCHEMA_VERSION,
+        "review_id": "senior-product-review-2026-07-15",
+        "reviewer": "product-owner",
+        "removals": [
+            {
+                "candidate_id": "selected",
+                "reason_code": "promotional_or_testimonial_evidence",
+                "rationale": (
+                    "The item relies on a partner testimonial and overstates it "
+                    "as independent market validation."
+                ),
+            }
+        ],
+    }
+
+    result = publication_audit.create_editorial_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+        editorial_review=review,
+    )
+
+    assert result["reason_code"] == "senior_editorial_disqualification"
+    assert result["effective_selected_ids"] == []
+    validation = publication_audit.validate_readonly_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+    )
+    assert validation["audit"]["passed"] is True
+    assert validation["base_selected_ids"] == ["selected"]
+    assert validation["removed_candidate_ids"] == ["selected"]
+    assert validation["effective_selected_ids"] == []
+    assert validation["editorial_review"] == review
+    projection = publication_audit.validated_publication_projection(
+        source_run_db=source,
+        audit_db=audit,
+    )
+    assert projection["mode"] == "editorial_disqualified_zero"
+    assert projection["selected_count"] == 0
+
+
+def test_editorial_finalization_fails_closed_on_substitution_or_tampering(tmp_path):
+    source = _finalizable_source_run(tmp_path / "run" / "insights.db")
+    audit = _complete_finalization_audit(
+        source,
+        source.parent / "publication-audit-v1" / "audit.db",
+        selected_passes=True,
+    )
+    review = {
+        "schema_version": publication_audit.EDITORIAL_REVIEW_SCHEMA_VERSION,
+        "review_id": "senior-product-review-2026-07-15",
+        "reviewer": "product-owner",
+        "removals": [
+            {
+                "candidate_id": "not-selected",
+                "reason_code": "insufficient_decision_value",
+                "rationale": "This candidate does not materially sharpen a decision.",
+            }
+        ],
+    }
+    with pytest.raises(ValueError, match="only an active selected candidate"):
+        publication_audit.create_editorial_publication_finalization(
+            source_run_db=source,
+            audit_db=audit,
+            editorial_review=review,
+        )
+
+    review["removals"][0] = {
+        "candidate_id": "selected",
+        "reason_code": "insufficient_decision_value",
+        "rationale": "This candidate does not materially sharpen a decision.",
+    }
+    publication_audit.create_editorial_publication_finalization(
+        source_run_db=source,
+        audit_db=audit,
+        editorial_review=review,
+    )
+    path = publication_audit.default_finalization_path(source)
+    payload = json.loads(path.read_text())
+    payload["editorial_review"]["removals"][0]["rationale"] = "Changed later."
+    path.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="editorial_review_sha256"):
+        publication_audit.validate_readonly_publication_finalization(
+            source_run_db=source,
+            audit_db=audit,
+        )
+
+
 def test_finalization_blocks_unresolved_false_negative_and_stale_source(tmp_path):
     source = _finalizable_source_run(tmp_path / "unresolved" / "insights.db")
     audit = _complete_finalization_audit(
