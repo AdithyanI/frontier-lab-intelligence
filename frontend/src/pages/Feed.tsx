@@ -26,13 +26,13 @@ import DateNavigator from '../components/DateNavigator'
 import CopyEnvelopeId from '../components/CopyEnvelopeId'
 import { useAuditDate } from '../auditDateStore'
 import { readAuditDate, setAuditDateParam } from '../auditDate'
+import {
+  initialFeedRoutingFilter,
+  type FeedRoutingFilter,
+} from '../feedState'
 
 type Sort = 'attention' | 'recent' | 'engagement'
-type RoutingFilter =
-  | 'all'
-  | 'relevant'
-  | 'not_relevant'
-  | 'not_evaluated'
+type RoutingFilter = FeedRoutingFilter
 
 const PAGE_SIZE = 20
 const shortDate = new Intl.DateTimeFormat('en-US', {
@@ -675,7 +675,9 @@ export default function Feed() {
   const [dates, setDates] = useState<FeedDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [sort, setSort] = useState<Sort>('attention')
-  const [routingFilter, setRoutingFilter] = useState<RoutingFilter>('relevant')
+  const [routingFilter, setRoutingFilter] = useState<RoutingFilter>(() =>
+    initialFeedRoutingFilter(initialSearchParams.current),
+  )
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [data, setData] = useState<EventResponse | null>(null)
@@ -1022,6 +1024,8 @@ export default function Feed() {
           <div className="registry-empty">
             {selectedDate && !selectedDateIsAvailable
               ? `No complete Feed view is available for ${selectedDateLabel}. This audit date remains preserved across views.`
+              : targetEventId
+                ? `This exact Feed envelope is not available for ${selectedDateLabel}. Check the date or envelope ID.`
               : 'No evidence matches this search. Try another day or clear the search.'}
           </div>
         )}

@@ -49,6 +49,11 @@ def test_refresh_evidence_runs_cached_pipeline_in_dependency_order(monkeypatch):
         lambda **kwargs: (calls.append(("catalog", kwargs)), {"artifact_count": 3})[1],
     )
     monkeypatch.setattr(
+        evidence_refresh.artifact_arxiv,
+        "fetch_arxiv_metadata",
+        lambda **kwargs: (calls.append(("arxiv", kwargs)), {"success": 1})[1],
+    )
+    monkeypatch.setattr(
         evidence_refresh.artifact_fetch,
         "fetch_cohort",
         lambda **kwargs: (calls.append(("content", kwargs)), {"success": 2})[1],
@@ -81,13 +86,14 @@ def test_refresh_evidence_runs_cached_pipeline_in_dependency_order(monkeypatch):
         "publish",
         "catalog",
         "content",
+        "arxiv",
         "x_articles",
         "fallback",
     ]
     assert calls[1][1]["start_day"].isoformat() == "2026-07-05"
     assert calls[1][1]["workers"] == 48
     assert calls[6][1]["limit"] == 60
-    assert calls[7][1]["limit"] == 10
+    assert calls[8][1]["limit"] == 10
     assert result["range"] == {
         "start_day": "2026-07-05",
         "end_day": "2026-07-13",
@@ -129,3 +135,66 @@ def test_refresh_evidence_can_rebuild_without_collection_or_content(monkeypatch)
     assert result["content_fetch"] is None
     assert result["x_article_fetch"] is None
     assert result["reader_fallback"] is None
+
+
+def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):
+    calls: list[tuple[str, object]] = []
+    monkeypatch.setattr(
+        evidence_refresh.signal_feed,
+        "materialize",
+        lambda **kwargs: {"run_id": "feed-1"},
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_events,
+        "materialize",
+        lambda **kwargs: {"run_id": "event-1"},
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_events,
+        "publish",
+        lambda **kwargs: {"run_id": "event-1"},
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifacts,
+        "import_feed_envelopes",
+        lambda **kwargs: {"artifact_count": 3},
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_fetch,
+        "fetch_all_supported",
+        lambda **kwargs: (calls.append(("content", kwargs)), {"success": 2})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_arxiv,
+        "fetch_arxiv_metadata",
+        lambda **kwargs: (calls.append(("arxiv", kwargs)), {"success": 1})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_x_articles,
+        "fetch_x_articles",
+        lambda **kwargs: (calls.append(("x_articles", kwargs)), {"success": 1})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_fetch,
+        "recover_with_jina_reader",
+        lambda **kwargs: {"success": 0},
+    )
+
+    evidence_refresh.refresh_evidence(
+        through="2026-07-13",
+        collect=False,
+        workers=24,
+    )
+
+    assert calls == [
+        ("content", {"db_path": evidence_refresh.artifacts.DEFAULT_DB, "workers": 24}),
+        ("arxiv", {"db_path": evidence_refresh.artifacts.DEFAULT_DB}),
+        (
+            "x_articles",
+            {
+                "db_path": evidence_refresh.artifacts.DEFAULT_DB,
+                "limit": None,
+                "key_file": evidence_refresh.sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+            },
+        ),
+    ]

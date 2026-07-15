@@ -10,12 +10,12 @@ import sys
 import time
 import uuid
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import urlsplit
 
-from fli import artifact_urls, signal_events, signal_feed, sources
+from fli import artifact_urls, evidence_lineage, signal_events, signal_feed, sources
 
 
 SCHEMA_VERSION = "artifact-store-v1"
@@ -431,9 +431,26 @@ def _iter_feed_candidates(
     events_db: Path,
     event_run_id: str,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Collect links owned by each envelope root and its same-author replies."""
+    """Collect URLs from each visible root and its same-author replies."""
+    if (
+        feed_db.resolve() != Path(signal_feed.DEFAULT_FEED_DB).resolve()
+        or events_db.resolve() != Path(signal_events.DEFAULT_EVENTS_DB).resolve()
+    ):
+        raise ValueError(
+            "Primary artifact import currently requires the published canonical "
+            "Feed and Event stores."
+        )
+
+    from fli.web import events as event_store
+
     feed = _open_readonly(feed_db)
-    events = _open_readonly(events_db)
+    feed_run = feed.execute(
+        "SELECT date_from, date_to FROM feed_run WHERE run_id = ?",
+        (feed_run_id,),
+    ).fetchone()
+    if feed_run is None:
+        feed.close()
+        raise ValueError(f"Unknown Feed run: {feed_run_id}")
     posts = {
         str(row["post_id"]): row
         for row in feed.execute(
@@ -443,141 +460,112 @@ def _iter_feed_candidates(
             (feed_run_id,),
         ).fetchall()
     }
-    members: dict[str, list[str]] = defaultdict(list)
-    for row in events.execute(
-        """SELECT event_id, post_id
-           FROM event_member
-           WHERE run_id = ? AND provider = 'twitterapi_io'
-           ORDER BY event_id, post_id""",
-        (event_run_id,),
-    ).fetchall():
-        members[str(row["event_id"])].append(str(row["post_id"]))
-    clusters = events.execute(
-        """SELECT event_id, representative_post_id
-           FROM event_cluster
-           WHERE run_id = ?
-           ORDER BY event_id""",
-        (event_run_id,),
-    ).fetchall()
 
+    start = datetime.fromisoformat(str(feed_run["date_from"])).date()
+    end = datetime.fromisoformat(str(feed_run["date_to"])).date()
+    current = start
     candidates: list[dict[str, Any]] = []
-    for cluster in clusters:
-        event_id = str(cluster["event_id"])
-        primary_posts: list[sqlite3.Row] = []
-        for post_id in members.get(event_id, []):
-            post = posts.get(post_id)
-            if post is None:
-                continue
-            if str(post["post_type"]) == "original":
-                primary_posts.append(post)
-                continue
-            if str(post["post_type"]) != "reply":
-                continue
-            conversation_root = posts.get(str(post["conversation_id"] or ""))
-            if conversation_root is None:
-                continue
-            author = str(post["author_x_id"] or post["author_handle"]).lower()
-            root_author = str(
-                conversation_root["author_x_id"]
-                or conversation_root["author_handle"]
-            ).lower()
-            if author == root_author:
-                primary_posts.append(post)
-
-        for post in primary_posts:
-            post_id = str(post["post_id"])
-            disclosure_id = str(post["disclosure_post_id"] or post_id)
-            disclosure = posts.get(disclosure_id) or post
-            for evidence in artifact_urls.url_evidence(
-                json.loads(str(post["raw_json"]))
-            ):
-                if evidence.owner_external_id != post_id:
-                    continue
-                preliminary = artifact_urls.classify_candidate(
-                    evidence.observed_url,
-                    evidence.expanded_url,
-                )
-                candidates.append(
-                    {
-                        "envelope_day": str(post["first_discovered_day"]),
-                        "event_id": event_id,
-                        "source_rank": 0,
-                        "day_candidate_count": 0,
-                        "source_kind": "x_post",
-                        "source_provider": str(post["provider"]),
-                        "source_external_id": post_id,
-                        "source_snapshot_sha256": str(post["raw_sha256"]),
-                        "source_url": str(post["url"]),
-                        "disclosure_external_id": str(disclosure["post_id"]),
-                        "disclosure_snapshot_sha256": str(disclosure["raw_sha256"]),
-                        "disclosure_url": str(disclosure["url"]),
-                        "disclosure_published_at": str(disclosure["published_at"]),
-                        "source_published_at": str(post["published_at"]),
-                        "observed_url": evidence.observed_url,
-                        "expanded_url": evidence.expanded_url,
-                        "candidate_source": evidence.source,
-                        "title_hint": "",
-                        "relation": (
-                            "self_publishes"
-                            if preliminary.reason_code == "x_longform_article"
-                            else "links_to"
-                        ),
-                        "forced_failure": None,
-                    }
-                )
-
-    candidates.sort(
-        key=lambda item: (
-            item["envelope_day"],
-            item["event_id"],
-            item["source_published_at"],
-            item["source_external_id"],
-            item["expanded_url"],
+    day_counts: dict[str, int] = {}
+    seen_sources: set[tuple[str, str, str]] = set()
+    while current <= end:
+        day = current.isoformat()
+        payload = event_store.events_payload(
+            day=day,
+            lane="all",
+            sort="attention",
+            query="",
+            routing_filter="all",
+            limit=2**31 - 1,
+            offset=0,
         )
-    )
-    day_events: dict[str, list[str]] = defaultdict(list)
-    for candidate in candidates:
-        day = str(candidate["envelope_day"])
-        event_id = str(candidate["event_id"])
-        if event_id not in day_events[day]:
-            day_events[day].append(event_id)
-    day_ranks: dict[str, dict[str, int]] = {}
-    if (
-        feed_db.resolve() == Path(signal_feed.DEFAULT_FEED_DB).resolve()
-        and events_db.resolve() == Path(signal_events.DEFAULT_EVENTS_DB).resolve()
-    ):
-        from fli.web import events as event_store
+        day_counts[day] = int(payload.get("daily_rank_total") or 0)
+        for item in payload.get("items") or []:
+            event_id = str(item["event_id"])
+            source_rank = int(item["daily_rank"])
+            primary_ids = evidence_lineage.verified_primary_post_ids(
+                feed,
+                feed_run_id=feed_run_id,
+                envelope={"root": item["root"]},
+            )
+            root_id = str(item["root"]["post_id"])
+            root_post = posts.get(root_id)
+            if root_post is not None and str(root_post["post_type"]) == "reply":
+                conversation_root = posts.get(
+                    str(root_post["conversation_id"] or "")
+                )
+                root_author = str(
+                    root_post["author_x_id"] or root_post["author_handle"]
+                ).lower()
+                conversation_author = (
+                    str(
+                        conversation_root["author_x_id"]
+                        or conversation_root["author_handle"]
+                    ).lower()
+                    if conversation_root is not None
+                    else ""
+                )
+                if not conversation_author or conversation_author != root_author:
+                    primary_ids = set()
+            for post_id in primary_ids:
+                post = posts.get(post_id)
+                if post is None or str(post["first_discovered_day"]) != day:
+                    continue
+                source_key = (day, event_id, post_id)
+                if source_key in seen_sources:
+                    continue
+                seen_sources.add(source_key)
+                disclosure_id = str(post["disclosure_post_id"] or post_id)
+                disclosure = posts.get(disclosure_id) or post
+                for evidence in artifact_urls.url_evidence(
+                    json.loads(str(post["raw_json"]))
+                ):
+                    if evidence.owner_external_id != post_id:
+                        continue
+                    preliminary = artifact_urls.classify_candidate(
+                        evidence.observed_url,
+                        evidence.expanded_url,
+                    )
+                    candidates.append(
+                        {
+                            "envelope_day": day,
+                            "event_id": event_id,
+                            "source_rank": source_rank,
+                            "day_candidate_count": day_counts[day],
+                            "source_kind": "x_post",
+                            "source_provider": str(post["provider"]),
+                            "source_external_id": post_id,
+                            "source_snapshot_sha256": str(post["raw_sha256"]),
+                            "source_url": str(post["url"]),
+                            "disclosure_external_id": str(disclosure["post_id"]),
+                            "disclosure_snapshot_sha256": str(
+                                disclosure["raw_sha256"]
+                            ),
+                            "disclosure_url": str(disclosure["url"]),
+                            "disclosure_published_at": str(
+                                disclosure["published_at"]
+                            ),
+                            "source_published_at": str(post["published_at"]),
+                            "observed_url": evidence.observed_url,
+                            "expanded_url": evidence.expanded_url,
+                            "candidate_source": evidence.source,
+                            "title_hint": "",
+                            "relation": (
+                                "self_publishes"
+                                if preliminary.reason_code == "x_longform_article"
+                                else "links_to"
+                            ),
+                            "forced_failure": None,
+                        }
+                    )
+        current += timedelta(days=1)
 
-        day_ranks = {
-            day: event_store.current_daily_rank_by_event_id(day=day)
-            for day in day_events
-        }
-    for day, event_ids in day_events.items():
-        fallback = {
-            event_id: rank for rank, event_id in enumerate(event_ids, start=1)
-        }
-        if not day_ranks.get(day):
-            day_ranks[day] = fallback
-        else:
-            next_rank = max(day_ranks[day].values(), default=0) + 1
-            for event_id in event_ids:
-                if event_id not in day_ranks[day]:
-                    day_ranks[day][event_id] = next_rank
-                    next_rank += 1
-    for candidate in candidates:
-        day = str(candidate["envelope_day"])
-        candidate["source_rank"] = day_ranks[day][str(candidate["event_id"])]
-        candidate["day_candidate_count"] = len(day_ranks[day])
-
+    candidates.sort(key=lambda item: _canonical_json(_candidate_identity(item)))
     manifest = {
         "feed_run_id": feed_run_id,
         "event_run_id": event_run_id,
         "selection_policy": PRIMARY_AUTHOR_SELECTION_POLICY,
-        "candidate_days": {
-            day: len(event_ids) for day, event_ids in sorted(day_events.items())
-        },
+        "candidate_days": day_counts,
     }
-    events.close()
     feed.close()
     return candidates, manifest
 

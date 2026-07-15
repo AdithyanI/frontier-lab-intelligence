@@ -29,6 +29,8 @@ def _fetch_method(fetch_policy: str | None) -> str | None:
         return "Jina Reader"
     if fetch_policy == "bounded-public-v1":
         return "Direct fetch"
+    if fetch_policy == "arxiv-metadata-v1":
+        return "arXiv metadata"
     return fetch_policy
 
 

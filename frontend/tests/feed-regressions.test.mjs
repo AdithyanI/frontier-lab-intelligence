@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { getDateWindow, shiftDateWindow } from '../src/dateWindow.ts'
+import { initialFeedRoutingFilter } from '../src/feedState.ts'
 
 const feedSource = await readFile(new URL('../src/pages/Feed.tsx', import.meta.url), 'utf8')
 const dateNavigatorSource = await readFile(
@@ -52,6 +53,16 @@ test('Feed exposes one mutually exclusive routing Status control', () => {
   assert.doesNotMatch(feedSource, /label="AUDIT"|label="AUDIENCE"/)
   assert.doesNotMatch(feedSource, /value: 'engineering'|value: 'investment'|value: 'both'/)
   assert.doesNotMatch(feedSource, /triageFilter|triage_counts|auditFilter|audienceFilter/)
+})
+
+test('Feed exact-envelope links reveal the target outside the default Relevant filter', () => {
+  assert.equal(initialFeedRoutingFilter(new URLSearchParams()), 'relevant')
+  assert.equal(
+    initialFeedRoutingFilter(new URLSearchParams('event=exact-envelope-id')),
+    'all',
+  )
+  assert.match(feedSource, /initialFeedRoutingFilter\(initialSearchParams\.current\)/)
+  assert.match(feedSource, /This exact Feed envelope is not available/)
 })
 
 test('Feed search matches the compact ruled control language', () => {

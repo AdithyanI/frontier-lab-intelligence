@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from fli import (
+    artifact_arxiv,
     artifact_fetch,
     artifact_x_articles,
     artifacts,
@@ -30,8 +31,8 @@ def refresh_evidence(
     through: str | date,
     days: int = 9,
     workers: int = 32,
-    artifact_limit: int = 30,
-    x_article_limit: int = 20,
+    artifact_limit: int | None = None,
+    x_article_limit: int | None = None,
     reader_fallback: bool = True,
     collect: bool = True,
     registry_db: Path | str = store.DEFAULT_DB_PATH,
@@ -48,7 +49,9 @@ def refresh_evidence(
         raise ValueError("days must be between 1 and 90")
     if workers < 1 or workers > 64:
         raise ValueError("workers must be between 1 and 64")
-    if artifact_limit < 0 or x_article_limit < 0:
+    if (artifact_limit is not None and artifact_limit < 0) or (
+        x_article_limit is not None and x_article_limit < 0
+    ):
         raise ValueError("artifact limits cannot be negative")
     start = end - timedelta(days=days - 1)
 
@@ -109,20 +112,31 @@ def refresh_evidence(
     )
 
     content: dict[str, Any] | None = None
-    if artifact_limit:
-        content = artifact_fetch.fetch_cohort(
+    if artifact_limit is None:
+        content = artifact_fetch.fetch_all_supported(
             db_path=artifact_db,
-            limit=artifact_limit,
+            workers=workers,
         )
+    elif artifact_limit:
+        content = artifact_fetch.fetch_cohort(db_path=artifact_db, limit=artifact_limit)
+    arxiv: dict[str, Any] | None = None
+    if artifact_limit != 0:
+        arxiv = artifact_arxiv.fetch_arxiv_metadata(db_path=artifact_db)
     x_articles: dict[str, Any] | None = None
-    if x_article_limit:
+    if x_article_limit is None:
+        x_articles = artifact_x_articles.fetch_x_articles(
+            db_path=artifact_db,
+            limit=None,
+            key_file=key_file.expanduser(),
+        )
+    elif x_article_limit:
         x_articles = artifact_x_articles.fetch_x_articles(
             db_path=artifact_db,
             limit=x_article_limit,
             key_file=key_file.expanduser(),
         )
     fallback: dict[str, Any] | None = None
-    if reader_fallback and artifact_limit:
+    if reader_fallback and artifact_limit != 0:
         fallback = artifact_fetch.recover_with_jina_reader(db_path=artifact_db)
 
     return {
@@ -133,6 +147,7 @@ def refresh_evidence(
         "publication": publication,
         "artifacts": catalog,
         "content_fetch": content,
+        "arxiv_fetch": arxiv,
         "x_article_fetch": x_articles,
         "reader_fallback": fallback,
     }
@@ -149,8 +164,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--through", required=True, help="Latest complete UTC day.")
     parser.add_argument("--days", type=int, default=9)
     parser.add_argument("--workers", type=int, default=32)
-    parser.add_argument("--artifact-limit", type=int, default=30)
-    parser.add_argument("--x-article-limit", type=int, default=20)
+    parser.add_argument(
+        "--artifact-limit",
+        type=int,
+        default=None,
+        help="Bound direct extraction for a calibration run; default fetches all supported.",
+    )
+    parser.add_argument(
+        "--x-article-limit",
+        type=int,
+        default=None,
+        help="Bound X Article extraction; default fetches all catalogued X Articles.",
+    )
     parser.add_argument("--skip-collection", action="store_true")
     parser.add_argument("--no-reader-fallback", action="store_true")
     parser.add_argument("--key-file", type=Path, default=sources.DEFAULT_TWITTERAPI_IO_KEY_FILE)

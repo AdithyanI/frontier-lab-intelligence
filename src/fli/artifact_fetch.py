@@ -9,9 +9,12 @@ import os
 import re
 import shlex
 import socket
+import sqlite3
 import tempfile
 import time
 import unicodedata
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from importlib.metadata import version
@@ -1576,8 +1579,15 @@ def fetch_cohort(
     artifact_ids: Iterable[str] | None = None,
     resolver: Resolver = _default_resolver,
     transport: httpx.BaseTransport | None = None,
+    _initialize_db: bool = True,
 ) -> dict[str, Any]:
-    conn = artifacts.connect(db_path)
+    if _initialize_db:
+        conn = artifacts.connect(db_path)
+    else:
+        conn = sqlite3.connect(Path(db_path), timeout=60.0)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA busy_timeout = 60000")
     if artifact_ids is None:
         selection = select_cohort(conn, limit=limit)
         fetch_run_id, already_complete = _create_fetch_run(conn, selection)
@@ -1588,8 +1598,15 @@ def fetch_cohort(
         row = conn.execute(
             "SELECT * FROM artifact_fetch_run WHERE fetch_run_id = ?", (fetch_run_id,)
         ).fetchone()
-        result = dict(row)
-        result["reused"] = True
+        assert row is not None
+        result = {
+            "fetch_run_id": fetch_run_id,
+            "expected_count": int(row["expected_count"]),
+            "success": int(row["success_count"]),
+            "failed_retryable": int(row["failed_retryable_count"]),
+            "failed_terminal": int(row["failed_terminal_count"]),
+            "reused": True,
+        }
         conn.close()
         return result
     client = httpx.Client(
@@ -1673,6 +1690,88 @@ def fetch_cohort(
     result["reused"] = False
     conn.close()
     return result
+
+
+def fetch_all_supported(
+    *,
+    db_path: Path | str = artifacts.DEFAULT_DB,
+    workers: int = 16,
+    resolver: Resolver = _default_resolver,
+) -> dict[str, Any]:
+    """Fetch every directly supported catalog artifact, sharded by host.
+
+    Host sharding keeps each origin polite and sequential while allowing
+    independent origins to run concurrently. Existing successes and terminal
+    outcomes are reused by ``fetch_cohort``. Videos and arXiv are deferred;
+    X Articles are left to their dedicated adapter.
+    """
+    if workers < 1 or workers > 64:
+        raise ValueError("workers must be between 1 and 64")
+    # Initialize and validate the store once. Worker connections deliberately
+    # skip schema DDL, which otherwise serializes every host batch.
+    conn = artifacts.connect(db_path)
+    try:
+        rows = conn.execute(
+            """SELECT artifact_id, host
+               FROM artifact
+               WHERE artifact_kind != 'video'
+                 AND host != 'arxiv.org'
+                 AND canonical_url NOT LIKE 'http://x.com/i/article/%'
+                 AND canonical_url NOT LIKE 'https://x.com/i/article/%'
+               ORDER BY host, artifact_id"""
+        ).fetchall()
+    finally:
+        conn.close()
+
+    by_host: dict[str, list[str]] = defaultdict(list)
+    for row in rows:
+        by_host[str(row["host"])].append(str(row["artifact_id"]))
+    if not by_host:
+        return {
+            "selection_policy": "all-supported-by-host-v1",
+            "expected_count": 0,
+            "success": 0,
+            "failed_retryable": 0,
+            "failed_terminal": 0,
+            "host_batches": 0,
+            "reused_host_batches": 0,
+            "reused": True,
+            "batches": [],
+        }
+
+    batch_results: list[dict[str, Any]] = []
+    with ThreadPoolExecutor(max_workers=min(workers, len(by_host))) as executor:
+        futures = {
+            executor.submit(
+                fetch_cohort,
+                db_path=db_path,
+                artifact_ids=artifact_ids,
+                resolver=resolver,
+                _initialize_db=False,
+            ): host
+            for host, artifact_ids in by_host.items()
+        }
+        for future in as_completed(futures):
+            host = futures[future]
+            result = future.result()
+            batch_results.append({"host": host, **result})
+
+    batch_results.sort(key=lambda item: str(item["host"]))
+    return {
+        "selection_policy": "all-supported-by-host-v1",
+        "expected_count": sum(int(item["expected_count"]) for item in batch_results),
+        "success": sum(int(item["success"]) for item in batch_results),
+        "failed_retryable": sum(
+            int(item["failed_retryable"]) for item in batch_results
+        ),
+        "failed_terminal": sum(
+            int(item["failed_terminal"]) for item in batch_results
+        ),
+        "host_batches": len(batch_results),
+        "reused_host_batches": sum(bool(item["reused"]) for item in batch_results),
+        "reused": all(bool(item["reused"]) for item in batch_results),
+        "batches": batch_results,
+    }
 
 
 def inspect_fetches(conn: Any, *, fetch_run_id: str | None = None) -> list[dict[str, Any]]:

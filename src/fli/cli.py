@@ -118,8 +118,8 @@ def main(argv: list[str] | None = None) -> int:
     evidence_refresh_p.add_argument("--through", required=True)
     evidence_refresh_p.add_argument("--days", type=int, default=9)
     evidence_refresh_p.add_argument("--workers", type=int, default=32)
-    evidence_refresh_p.add_argument("--artifact-limit", type=int, default=30)
-    evidence_refresh_p.add_argument("--x-article-limit", type=int, default=20)
+    evidence_refresh_p.add_argument("--artifact-limit", type=int, default=None)
+    evidence_refresh_p.add_argument("--x-article-limit", type=int, default=None)
     evidence_refresh_p.add_argument("--skip-collection", action="store_true")
     evidence_refresh_p.add_argument("--no-reader-fallback", action="store_true")
     evidence_refresh_p.add_argument("--key-file")
@@ -266,11 +266,11 @@ def main(argv: list[str] | None = None) -> int:
             str(args.days),
             "--workers",
             str(args.workers),
-            "--artifact-limit",
-            str(args.artifact_limit),
-            "--x-article-limit",
-            str(args.x_article_limit),
         ]
+        if args.artifact_limit is not None:
+            refresh_args.extend(["--artifact-limit", str(args.artifact_limit)])
+        if args.x_article_limit is not None:
+            refresh_args.extend(["--x-article-limit", str(args.x_article_limit)])
         if args.skip_collection:
             refresh_args.append("--skip-collection")
         if args.no_reader_fallback:

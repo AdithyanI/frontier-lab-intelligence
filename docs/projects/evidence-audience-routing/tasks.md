@@ -468,3 +468,10 @@ Application invariants:
   Added `fli evidence-refresh` as the cache-aware operator path. A full replay
   reused all 2,561 account page chains and made zero provider requests; Feed,
   Events, and artifact import also reused their content-addressed runs.
+- 2026-07-15: [VALIDATED] Fixed exact Feed-envelope deep links that could hide
+  their target behind the normal `Relevant` browsing default. A URL carrying
+  `event` now opens in `All` while ordinary Feed visits still default to
+  `Relevant`; invalid exact links receive an envelope-specific empty state.
+  The focused frontend suite, production build, and rendered check against the
+  first prompt-design envelope all pass, with the linked Satya envelope visible
+  at its stable daily rank #2.
