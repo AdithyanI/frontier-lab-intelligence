@@ -22,7 +22,7 @@ from fli import signal_feed
 
 
 SCHEMA_VERSION = "signal-events-v6"
-CLUSTERING_CONTRACT = "exact-structural-v8-terminal-thread-root-identity"
+CLUSTERING_CONTRACT = "exact-structural-v10-root-owned-reactions"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_EVENTS_DB = REPO_ROOT / "data" / "derived" / "signal-events" / "events.db"
@@ -449,63 +449,135 @@ def materialize(
             "disclosure_post_id": disclosure_post_id,
         }
 
+    relations_by_source: dict[tuple[str, str], list[sqlite3.Row]] = defaultdict(list)
     for relation in relation_rows:
-        add_link(
-            relation["provider"],
-            relation["source_post_id"],
-            relation["target_post_id"],
-            relation["relation_type"],
-            "same_target",
-            relation["target_post_id"],
-            relation["discovered_at"],
-            relation["discovered_day"],
-            relation["disclosure_post_id"],
-        )
+        relations_by_source[
+            (str(relation["provider"]), str(relation["source_post_id"]))
+        ].append(relation)
 
-    for row in posts.values():
-        if row["post_type"] != "reply":
+    # Structural placement is a rooted-forest contract, not unrestricted graph
+    # connectivity. Quote/retweet wrappers point toward one source root. Replies
+    # are handled separately after those roots are known.
+    structural_parent: dict[tuple[str, str], tuple[str, str]] = {}
+    for key, row in sorted(posts.items()):
+        if row["in_reply_to_post_id"]:
+            continue
+        candidates = relations_by_source.get(key, [])
+        preferred_type = (
+            str(row["post_type"])
+            if row["post_type"] in {"quote", "retweet"}
+            else None
+        )
+        if preferred_type:
+            candidates = [
+                relation
+                for relation in candidates
+                if relation["relation_type"] == preferred_type
+            ]
+        distinct_targets = {
+            (str(relation["relation_type"]), str(relation["target_post_id"]))
+            for relation in candidates
+        }
+        if len(distinct_targets) > 1:
+            raise RuntimeError(
+                "A Feed post exposes multiple structural parents: "
+                f"{key[0]}:{key[1]} -> {sorted(distinct_targets)}"
+            )
+        if candidates:
+            relation = candidates[0]
+            target_key = (
+                str(relation["provider"]),
+                str(relation["target_post_id"]),
+            )
+            # A quoted reply is not promoted into a source envelope in this
+            # first product boundary. The wrapper remains a standalone Feed
+            # item and the complete relationship stays in the Feed ledger.
+            target = posts.get(target_key)
+            if target is not None and target["in_reply_to_post_id"]:
+                continue
+            add_link(
+                relation["provider"],
+                relation["source_post_id"],
+                relation["target_post_id"],
+                relation["relation_type"],
+                "same_target",
+                relation["target_post_id"],
+                relation["discovered_at"],
+                relation["discovered_day"],
+                relation["disclosure_post_id"],
+            )
+            structural_parent[key] = target_key
+
+    def terminal_source(key: tuple[str, str]) -> tuple[str, str]:
+        seen: set[tuple[str, str]] = set()
+        current = key
+        while current in structural_parent:
+            if current in seen:
+                raise RuntimeError(f"Event graph contains a structural cycle at {key}")
+            seen.add(current)
+            current = structural_parent[current]
+        return current
+
+    def same_author(left: sqlite3.Row, right: sqlite3.Row) -> bool:
+        if left["author_x_id"] and right["author_x_id"]:
+            return left["author_x_id"] == right["author_x_id"]
+        return left["author_handle"] == right["author_handle"]
+
+    # Only the source/root author's own replies extend an envelope. Replies by
+    # other accounts remain in the immutable Feed ledger but are deliberately
+    # absent from Event grouping and the product Feed. A source-author reply
+    # to an outside participant bridges directly back to the source root rather
+    # than importing that participant's branch.
+    for key, row in sorted(posts.items()):
+        if not row["in_reply_to_post_id"]:
+            continue
+        conversation_id = str(row["conversation_id"] or "")
+        conversation_key = (str(row["provider"]), conversation_id)
+        if not conversation_id or conversation_key not in posts:
+            continue
+        root_key = terminal_source(conversation_key)
+        root = posts.get(root_key)
+        if root is None or not same_author(row, root):
             continue
         parent_id = str(row["in_reply_to_post_id"] or "")
-        if parent_id:
-            add_link(
-                row["provider"],
-                row["post_id"],
-                parent_id,
-                "reply_parent",
-                "reply_parent",
-                parent_id,
-                row["first_discovered_at"],
-                row["first_discovered_day"],
-                row["disclosure_post_id"],
-            )
-        # A later first-party continuation can survive even when its immediate
-        # parent was deleted or omitted by the provider. Keep the exact parent
-        # metadata, but bridge that orphaned continuation to the captured root
-        # so one authored thread does not split into separate envelopes.
-        conversation_id = str(row["conversation_id"] or "")
-        root = posts.get((row["provider"], conversation_id))
-        parent_present = (row["provider"], parent_id) in posts
-        if root is None or parent_present:
-            continue
-        same_author = (
-            bool(row["author_x_id"] and root["author_x_id"])
-            and row["author_x_id"] == root["author_x_id"]
-        ) or (
-            not (row["author_x_id"] and root["author_x_id"])
-            and row["author_handle"] == root["author_handle"]
+        parent_key = (str(row["provider"]), parent_id)
+        parent = posts.get(parent_key)
+        if parent is not None and same_author(parent, root):
+            target_key = parent_key
+            link_type = "reply_parent"
+            anchor_type = "reply_parent"
+            anchor_value = parent_id
+        else:
+            target_key = root_key
+            link_type = "primary_thread"
+            anchor_type = "conversation_root"
+            anchor_value = root_key[1]
+        add_link(
+            str(row["provider"]),
+            str(row["post_id"]),
+            target_key[1],
+            link_type,
+            anchor_type,
+            anchor_value,
+            str(row["first_discovered_at"]),
+            str(row["first_discovered_day"]),
+            str(row["disclosure_post_id"]),
         )
-        if same_author and conversation_id != row["post_id"]:
-            add_link(
-                row["provider"],
-                row["post_id"],
-                conversation_id,
-                "primary_thread",
-                "conversation_root",
-                conversation_id,
-                row["first_discovered_at"],
-                row["first_discovered_day"],
-                row["disclosure_post_id"],
-            )
+        structural_parent[key] = target_key
+
+    outbound_targets: dict[tuple[str, str], set[tuple[str, str]]] = defaultdict(set)
+    for link in links.values():
+        source = (str(link["provider"]), str(link["source_post_id"]))
+        outbound_targets[source].add(
+            (str(link["provider"]), str(link["target_post_id"]))
+        )
+    bridged = {
+        source: targets
+        for source, targets in outbound_targets.items()
+        if len(targets) > 1
+    }
+    if bridged:
+        raise RuntimeError(f"Event graph violates one-parent invariant: {bridged}")
 
     groups: dict[tuple[str, str], set[tuple[str, str]]] = defaultdict(set)
     for node in union.parent:

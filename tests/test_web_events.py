@@ -564,14 +564,12 @@ def test_events_api_traverses_exact_parent_tree_before_later_branches(
         "14",
         "15",
         "12",
-        "16",
     ]
     (
         continuation_result,
         continuation_child_result,
         later_root_child_result,
         quote_result,
-        reply_to_quote_result,
     ) = item["evidence"]
     assert continuation_result["relationship"] == "reply"
     assert continuation_result["parent_post_id"] == "10"
@@ -585,10 +583,6 @@ def test_events_api_traverses_exact_parent_tree_before_later_branches(
     assert quote_result["relationship"] == "quote"
     assert quote_result["parent_post_id"] == "10"
     assert quote_result["depth"] == 1
-    assert reply_to_quote_result["relationship"] == "reply"
-    assert reply_to_quote_result["parent_post_id"] == "12"
-    assert reply_to_quote_result["depth"] == 2
-    assert reply_to_quote_result["same_author_as_root"] is False
 
 
 def test_events_follow_current_registry_rejections_without_rebuild(
@@ -808,7 +802,7 @@ def test_future_evidence_does_not_rewrite_an_earlier_event_revision(
     }
 
 
-def test_future_bridge_does_not_merge_or_reidentify_earlier_components(
+def test_future_reply_quote_does_not_merge_or_reidentify_source_components(
     tmp_path, monkeypatch
 ):
     raw = tmp_path / "x-content.db"
@@ -899,43 +893,46 @@ def test_future_bridge_does_not_merge_or_reidentify_earlier_components(
     assert after_items == before_items
 
     wednesday = client.get("/api/events?date=2026-07-15&limit=20").json()
-    merged = next(
-        item
-        for item in wednesday["items"]
-        if item["root"]["post_id"] in {"historical-left", "historical-right"}
-    )
-    expected_members = {
-        "historical-left",
-        "historical-left-quote",
-        "historical-right",
-        "historical-right-quote",
-        "future-bridge",
-    }
-    assert {
-        merged["root"]["post_id"],
-        *[member["post_id"] for member in merged["evidence"]],
-    } == expected_members
+    for item in wednesday["items"]:
+        member_ids = {
+            item["root"]["post_id"],
+            *[member["post_id"] for member in item["evidence"]],
+        }
+        assert "future-bridge" not in member_ids
+        assert not {"historical-left", "historical-right"} <= member_ids
 
     weekly = client.get(
         "/api/events?date=2026-07-15&projection=week&limit=20"
     ).json()
-    weekly_matches = [
-        item
+    expected_components = {
+        frozenset({"historical-left", "historical-left-quote"}),
+        frozenset({"historical-right", "historical-right-quote"}),
+    }
+    weekly_components = {
+        frozenset(
+            {
+                item["root"]["post_id"],
+                *[member["post_id"] for member in item["evidence"]],
+            }
+        ): item
         for item in weekly["items"]
-        if expected_members
-        & {
+        if item["root"]["post_id"] in {"historical-left", "historical-right"}
+    }
+    assert set(weekly_components) == expected_components
+    assert weekly_components[
+        frozenset({"historical-left", "historical-left-quote"})
+    ]["active_days"] == ["2026-07-13", "2026-07-15"]
+    assert weekly_components[
+        frozenset({"historical-right", "historical-right-quote"})
+    ]["active_days"] == ["2026-07-13"]
+    assert all(
+        "future-bridge"
+        not in {
             item["root"]["post_id"],
             *[member["post_id"] for member in item["evidence"]],
         }
-    ]
-    assert len(weekly_matches) == 1
-    weekly_event = weekly_matches[0]
-    assert {
-        weekly_event["root"]["post_id"],
-        *[member["post_id"] for member in weekly_event["evidence"]],
-    } == expected_members
-    assert weekly_event["active_days"] == ["2026-07-13", "2026-07-15"]
-    assert weekly_event["weekly_active_day_count"] == 2
+        for item in weekly["items"]
+    )
 
     projected_members = [
         (member.get("provider"), member["post_id"])
@@ -1061,7 +1058,7 @@ def test_relationship_disclosed_by_future_wrapper_does_not_rewrite_monday(
     assert merged["is_grouped"] is True
 
 
-def test_rejected_bridge_preserves_every_surviving_exact_component(
+def test_rejected_reply_quote_never_bridges_surviving_source_components(
     tmp_path, monkeypatch
 ):
     raw = tmp_path / "x-content.db"
@@ -1129,7 +1126,13 @@ def test_rejected_bridge_preserves_every_surviving_exact_component(
     )
 
     before = client.get("/api/events?date=2026-07-11&limit=20").json()
-    assert any(item["member_count"] == 5 for item in before["items"])
+    before_components = [
+        item
+        for item in before["items"]
+        if item["root"]["post_id"] in {"bridge-left-root", "bridge-right-root"}
+    ]
+    assert len(before_components) == 2
+    assert {item["member_count"] for item in before_components} == {2}
 
     conn = channels.connect(registry)
     conn.execute(

@@ -37,10 +37,18 @@ def test_exact_events_group_only_explicit_feed_relations(tmp_path):
     assert {
         row[0] for row in conn.execute("SELECT DISTINCT anchor_type FROM event_anchor")
     } == {"same_target"}
+    assert conn.execute(
+        """SELECT COUNT(*) FROM (
+               SELECT source_post_id
+               FROM event_link
+               GROUP BY run_id, provider, source_post_id
+               HAVING COUNT(DISTINCT target_post_id) > 1
+           )"""
+    ).fetchone()[0] == 0
     conn.close()
 
 
-def test_exact_events_connect_partial_reply_to_present_parent(tmp_path):
+def test_third_party_reply_and_quote_of_reply_stay_out_of_source_envelopes(tmp_path):
     raw = tmp_path / "x-content.db"
     feed_db = tmp_path / "feed.db"
     events_db = tmp_path / "events.db"
@@ -90,15 +98,11 @@ def test_exact_events_connect_partial_reply_to_present_parent(tmp_path):
     feed.close()
 
     result = signal_events.materialize(feed_db=feed_db, events_db=events_db)
-    assert result["cluster_count"] == 1
-    assert result["member_count"] == 3
+    assert result["cluster_count"] == 0
+    assert result["member_count"] == 0
+    assert result["link_count"] == 0
     conn = signal_events.connect(events_db)
-    assert {
-        row[0] for row in conn.execute("SELECT DISTINCT anchor_type FROM event_anchor")
-    } == {"reply_parent", "same_target"}
-    assert {
-        row[0] for row in conn.execute("SELECT post_id FROM event_member")
-    } == {"10", "11", "12"}
+    assert conn.execute("SELECT COUNT(*) FROM event_member").fetchone()[0] == 0
     conn.close()
 
 
@@ -485,6 +489,18 @@ def test_primary_thread_root_remains_identity_when_continuation_quotes_older_pos
         (result["run_id"],),
     ).fetchone()
     assert tuple(cluster) == ("900", "900")
+    assert {
+        row[0]
+        for row in conn.execute(
+            "SELECT post_id FROM event_member WHERE run_id = ?",
+            (result["run_id"],),
+        )
+    } == {"900", "901"}
+    assert conn.execute(
+        """SELECT COUNT(*) FROM event_link
+           WHERE run_id = ? AND source_post_id = '901'""",
+        (result["run_id"],),
+    ).fetchone()[0] == 1
     conn.close()
 
 
@@ -538,4 +554,107 @@ def test_reaction_thread_does_not_replace_the_post_its_root_quotes(tmp_path):
         (result["run_id"],),
     ).fetchone()
     assert tuple(cluster) == ("100", "100")
+    conn.close()
+
+
+def test_reply_that_quotes_another_root_cannot_bridge_source_envelopes(tmp_path):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    client = x_content.TwitterContentClient(api_key="test", db_path=raw)
+    first_root = _tweet(
+        "100", "firstlab", "2026-07-11T08:00:00Z", "First independent result"
+    )
+    reaction = _tweet(
+        "200",
+        "analyst",
+        "2026-07-11T09:00:00Z",
+        "Commentary on the first result",
+        relation="quote",
+        target=first_root,
+    )
+    reaction["conversationId"] = "200"
+    second_root = _tweet(
+        "300", "secondlab", "2026-07-11T10:00:00Z", "Second independent result"
+    )
+    bridging_reply = _tweet(
+        "201",
+        "analyst",
+        "2026-07-11T10:30:00Z",
+        "Replying in the first thread while citing the second",
+        relation="quote",
+        target=second_root,
+    )
+    bridging_reply.update(
+        {
+            "conversationId": "200",
+            "inReplyToId": "200",
+            "isReply": True,
+        }
+    )
+    with client.db:
+        for handle, tweet in (
+            ("firstlab", first_root),
+            ("analyst", reaction),
+            ("analyst", bridging_reply),
+            ("secondlab", second_root),
+        ):
+            client._store_posts(
+                url=(
+                    "https://api.twitterapi.io/twitter/user/last_tweets"
+                    f"?userName={handle}&includeReplies=true"
+                ),
+                payload={"data": {"tweets": [tweet]}},
+                observed_at="2026-07-12T00:00:00+00:00",
+            )
+    client.close()
+
+    feed = signal_feed.materialize(
+        source_db=raw, feed_db=feed_db, through=date(2026, 7, 11), days=1
+    )
+    feed_conn = signal_feed.connect(feed_db)
+    preserved_quote = feed_conn.execute(
+        """SELECT source_post_id, target_post_id, relation_type
+           FROM feed_relation
+           WHERE run_id = ? AND source_post_id = '201'""",
+        (feed["run_id"],),
+    ).fetchone()
+    assert tuple(preserved_quote) == ("201", "300", "quote")
+    feed_conn.close()
+    result = signal_events.materialize(
+        feed_db=feed_db, events_db=events_db, feed_run_id=feed["run_id"]
+    )
+
+    conn = signal_events.connect(events_db)
+    first_event = conn.execute(
+        """SELECT event_id FROM event_member
+           WHERE run_id = ? AND post_id = '100'""",
+        (result["run_id"],),
+    ).fetchone()[0]
+    members = {
+        row[0]
+        for row in conn.execute(
+            """SELECT post_id FROM event_member
+               WHERE run_id = ? AND event_id = ?""",
+            (result["run_id"], first_event),
+        )
+    }
+    assert members == {"100", "200"}
+    assert "201" not in members
+    assert "300" not in members
+    assert conn.execute(
+        """SELECT COUNT(*) FROM event_link
+           WHERE run_id = ? AND source_post_id = '201' AND link_type = 'quote'""",
+        (result["run_id"],),
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        """SELECT COUNT(*) FROM (
+               SELECT source_post_id
+               FROM event_link
+               WHERE run_id = ?
+               GROUP BY provider, source_post_id
+               HAVING COUNT(DISTINCT target_post_id) > 1
+           )""",
+        (result["run_id"],),
+    ).fetchone()[0] == 0
     conn.close()

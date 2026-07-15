@@ -253,6 +253,11 @@ Application invariants:
 - The broader artifact retrieval gaps remain upstream limitations. Do not add
   model-side web search or routing-local text-quality heuristics until the next
   Insight stage demonstrates a concrete need.
+- The 900-route cohort is invalidated as evaluation evidence. Reply ingestion
+  exposed a transitive Event-component bridge: a reply that also quotes an
+  older post can join otherwise distinct topic envelopes. Adi is correcting
+  that deterministic Event boundary; do not rerun routing until the corrected
+  Event publication is live.
 
 ## Current Batch
 
@@ -262,8 +267,9 @@ Application invariants:
 | complete | Rebuild and publish Feed/events; prove Gemma and Muse include their first-party continuations. | parent | — |
 | complete | Replace legacy-triage-gated artifact import with published Feed/Event discovery. | parent | `../../../references/evidence-refresh.md` |
 | complete | Bound only the model-facing packet at 20,000 tokens and preserve an explicit truncation notice. | parent | — |
-| complete | Replace all stale routes with GPT-5.4-mini/high top-100 runs for July 5–13. | parent | — |
-| in_progress | Review the 900 current routes with Adi, then freeze the boundary for the separate Insight stage. | parent | — |
+| invalidated | Replace all stale routes with GPT-5.4-mini/high top-100 runs for July 5–13. | parent | — |
+| complete | Add one resumable publication-bound command for the next nine-day top-100 routing refresh. | parent | `../../../references/evidence-refresh.md` |
+| blocked | Rerun and review the 900 routes after the Event bridge fix is published. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -493,3 +499,16 @@ Application invariants:
   The run produced 814 cache-hit requests, 1,463,296 cached tokens, and
   $5.506914 in proxy-reported cost. Twenty-eight repeated exact model inputs
   had zero label conflicts.
+- 2026-07-15: [INVALIDATED] The broad routing run revealed an upstream Event
+  bug rather than a routing-prompt failure. Anthropic's J-space thread and Ryan
+  Brewer's unrelated education post landed in one 389-member component through
+  a chain containing reply posts that also quote posts from another thread.
+  The reply-free pipeline had hidden this transitive bridge. The current 900
+  labels must not be used as evaluation evidence and will be replaced after
+  the Event fix.
+- 2026-07-15: [VALIDATED] Added `fli audience-routing refresh` as the resumable
+  multi-day operator path. It binds all days to one published Event/Feed pair,
+  uses deterministic source-qualified run IDs, executes days and items in
+  bounded parallelism, aggregates cache/cost telemetry, and removes old runs
+  only after the full replacement succeeds. Its dry-run freezes the exact
+  nine-day top-100 plan without any model call.

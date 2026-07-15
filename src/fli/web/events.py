@@ -730,6 +730,7 @@ def _events_day_cached(
     member_post_keys = sorted(
         {(str(row["provider"]), str(row["post_id"])) for row in member_rows}
     )
+    candidate_post_keys = sorted(candidates)
     feed = _open_readonly(DEFAULT_FEED_DB)
     if member_post_keys:
         feed.execute(
@@ -752,8 +753,35 @@ def _events_day_cached(
         ).fetchall()
     else:
         post_rows = []
+    if candidate_post_keys:
+        feed.execute(
+            "CREATE TEMP TABLE selected_feed_candidate "
+            "(provider TEXT NOT NULL, post_id TEXT NOT NULL, "
+            "PRIMARY KEY (provider, post_id)) WITHOUT ROWID"
+        )
+        feed.executemany(
+            "INSERT INTO selected_feed_candidate (provider, post_id) VALUES (?, ?)",
+            candidate_post_keys,
+        )
+        reply_candidate_rows = feed.execute(
+            """SELECT post.provider, post.post_id
+               FROM selected_feed_candidate selected
+               JOIN feed_post post
+                 ON post.provider = selected.provider
+                AND post.post_id = selected.post_id
+               WHERE post.run_id = ?
+                 AND post.in_reply_to_post_id IS NOT NULL
+                 AND post.in_reply_to_post_id != ''""",
+            (run["feed_run_id"],),
+        ).fetchall()
+    else:
+        reply_candidate_rows = []
     feed.close()
     posts = {(row["provider"], row["post_id"]): row for row in post_rows}
+    reply_candidate_keys = {
+        (str(row["provider"]), str(row["post_id"]))
+        for row in reply_candidate_rows
+    }
     by_handle, by_x_id = feed_store._registry_maps()
 
     members_by_event: dict[str, list[sqlite3.Row]] = {}
@@ -858,7 +886,10 @@ def _events_day_cached(
                 items.append(item)
 
     items.extend(
-        _singleton(item) for item in feed_items if _feed_key(item) not in consumed
+        _singleton(item)
+        for item in feed_items
+        if _feed_key(item) not in consumed
+        and _feed_key(item) not in reply_candidate_keys
     )
     for item in items:
         route = routing_items.get(item["event_id"])
@@ -901,14 +932,11 @@ def _events_week_cached(
     """
     end = date.fromisoformat(through)
     start = end - timedelta(days=6)
-    # A later exact relationship can merge two components that were separate
-    # earlier in the week. Event IDs intentionally remain cutoff-local, so an
-    # ID-keyed ``latest revision`` map would retain the superseded component
-    # and double-count its posts. Instead, carry a disjoint set of weekly
-    # states forward by their provider-qualified visible members. A new daily
-    # revision supersedes every earlier state it overlaps and inherits their
-    # activity/peak metadata.
-    weekly_states: list[dict[str, Any]] = []
+    # Root-owned Event IDs are stable across daily projections. A later day can
+    # surface only the root again (for example when a new excluded reply quotes
+    # it), so retain the richest visible revision instead of replacing prior
+    # evidence with a thinner daily snapshot.
+    weekly_states: dict[str, dict[str, Any]] = {}
     base: dict[str, Any] | None = None
     for offset in range(7):
         day = (start + timedelta(days=offset)).isoformat()
@@ -917,23 +945,9 @@ def _events_week_cached(
             continue
         base = payload
         for item in payload["items"]:
-            member_keys = {
-                (
-                    str(member.get("provider", "twitterapi_io")),
-                    str(member["post_id"]),
-                )
-                for member in [item["root"], *item["evidence"]]
-            }
-            overlapping = [
-                state
-                for state in weekly_states
-                if state["member_keys"] & member_keys
-            ]
-            inherited_days = {
-                active_day
-                for state in overlapping
-                for active_day in state["active_days"]
-            }
+            event_id = str(item["event_id"])
+            previous = weekly_states.get(event_id)
+            inherited_days = set(previous["active_days"]) if previous else set()
             peak_state = max(
                 [
                     {
@@ -941,13 +955,12 @@ def _events_week_cached(
                         "daily_score_basis": item["daily_score_basis"],
                     }
                 ]
-                + [
+                + ([
                     {
-                        "peak_attention_score": state["peak_attention_score"],
-                        "daily_score_basis": state["daily_score_basis"],
+                        "peak_attention_score": previous["peak_attention_score"],
+                        "daily_score_basis": previous["daily_score_basis"],
                     }
-                    for state in overlapping
-                ],
+                ] if previous else []),
                 key=lambda state: (
                     state["peak_attention_score"],
                     state["daily_score_basis"]["published_at"],
@@ -957,26 +970,22 @@ def _events_week_cached(
             peak_score = peak_state["peak_attention_score"]
             peak_interaction = max(
                 [item["peak_public_interactions"]]
-                + [state["peak_public_interactions"] for state in overlapping]
+                + ([previous["peak_public_interactions"]] if previous else [])
             )
-            if overlapping:
-                weekly_states = [
-                    state for state in weekly_states if state not in overlapping
-                ]
-            weekly_states.append(
-                {
-                    "item": item,
-                    "member_keys": member_keys,
-                    "active_days": {*inherited_days, day},
-                    "peak_attention_score": peak_score,
-                    "daily_score_basis": peak_state["daily_score_basis"],
-                    "peak_public_interactions": peak_interaction,
-                }
-            )
+            richest_item = item
+            if previous and previous["item"]["member_count"] > item["member_count"]:
+                richest_item = previous["item"]
+            weekly_states[event_id] = {
+                "item": richest_item,
+                "active_days": {*inherited_days, day},
+                "peak_attention_score": peak_score,
+                "daily_score_basis": peak_state["daily_score_basis"],
+                "peak_public_interactions": peak_interaction,
+            }
     if base is None:
         return {"available": False, "reason": "No complete Feed days in window."}
     items: list[dict[str, Any]] = []
-    for state in weekly_states:
+    for state in weekly_states.values():
         item = state["item"]
         event_id = item["event_id"]
         active_days = sorted(state["active_days"])

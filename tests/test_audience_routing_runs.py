@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from fli import artifacts, audience_routing_runs
 from fli.web import events as event_store
 
@@ -79,3 +81,125 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     assert frozen["feed_rank"] == 3
     packet = json.loads(frozen["packet_json"])
     assert [source["relation"] for source in packet["sources"]] == ["root", "quote"]
+
+
+def _refresh_summary(day: str) -> dict:
+    return {
+        "run": {"day": day},
+        "counts": {
+            "total": 1,
+            "complete": 1,
+            "failed": 0,
+            "ai_engineering_only": 0,
+            "investment_only": 0,
+            "both": 1,
+            "neither": 0,
+            "input_tokens": 2_000,
+            "cached_tokens": 1_024,
+            "cache_write_tokens": 0,
+            "output_tokens": 100,
+            "reported_cost_usd": 0.01,
+            "reported_cost_count": 1,
+            "cache_eligible_requests": 1,
+            "cache_hit_requests": 1,
+        },
+    }
+
+
+def test_refresh_dry_run_freezes_one_published_source_without_writes(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_published_event_source",
+        lambda: {"event_run_id": "event-run-abcdef", "feed_run_id": "feed-run-1"},
+    )
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_execute_refresh_day",
+        lambda *args, **kwargs: pytest.fail("dry-run must not execute routing"),
+    )
+
+    result = audience_routing_runs.refresh_all_days(
+        through="2026-07-07",
+        days=3,
+        top_ranked=100,
+        dry_run=True,
+        run_root=tmp_path / "routing",
+    )
+
+    assert result["dry_run"] is True
+    assert result["will_call_model"] is False
+    assert [item["day"] for item in result["plan"]] == [
+        "2026-07-05",
+        "2026-07-06",
+        "2026-07-07",
+    ]
+    assert all("event-run-ab" in item["run_id"] for item in result["plan"])
+    assert not (tmp_path / "routing").exists()
+
+
+def test_refresh_replaces_old_runs_only_after_every_day_completes(
+    tmp_path, monkeypatch
+):
+    run_root = tmp_path / "routing"
+    (run_root / "old-run").mkdir(parents=True)
+    source = {"event_run_id": "event-run-abcdef", "feed_run_id": "feed-run-1"}
+    monkeypatch.setattr(audience_routing_runs, "_published_event_source", lambda: source)
+
+    def execute(item, **kwargs):
+        (kwargs["run_root"] / item["run_id"]).mkdir(parents=True)
+        return _refresh_summary(item["day"])
+
+    monkeypatch.setattr(audience_routing_runs, "_execute_refresh_day", execute)
+
+    result = audience_routing_runs.refresh_all_days(
+        through="2026-07-06",
+        days=2,
+        top_ranked=1,
+        workers=2,
+        day_workers=2,
+        replace=True,
+        run_root=run_root,
+    )
+
+    assert result["counts"]["complete"] == 2
+    assert result["counts"]["both"] == 2
+    assert result["counts"]["cache_hit_requests"] == 2
+    assert result["counts"]["reported_cost_usd"] == pytest.approx(0.02)
+    assert result["pruned_runs"] == ["old-run"]
+    assert not (run_root / "old-run").exists()
+    assert {path.name for path in run_root.iterdir()} == {
+        item["run_id"] for item in result["plan"]
+    }
+
+
+def test_refresh_failure_retains_old_runs_for_retry(tmp_path, monkeypatch):
+    run_root = tmp_path / "routing"
+    (run_root / "old-run").mkdir(parents=True)
+    monkeypatch.setattr(
+        audience_routing_runs,
+        "_published_event_source",
+        lambda: {"event_run_id": "event-run-abcdef", "feed_run_id": "feed-run-1"},
+    )
+
+    def execute(item, **kwargs):
+        if item["day"] == "2026-07-06":
+            raise RuntimeError("model call failed")
+        (kwargs["run_root"] / item["run_id"]).mkdir(parents=True)
+        return _refresh_summary(item["day"])
+
+    monkeypatch.setattr(audience_routing_runs, "_execute_refresh_day", execute)
+
+    with pytest.raises(RuntimeError, match="2026-07-06.*model call failed"):
+        audience_routing_runs.refresh_all_days(
+            through="2026-07-06",
+            days=2,
+            top_ranked=1,
+            workers=1,
+            day_workers=2,
+            replace=True,
+            run_root=run_root,
+        )
+
+    assert (run_root / "old-run").is_dir()

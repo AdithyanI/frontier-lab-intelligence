@@ -6,10 +6,12 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
+import re
+import shutil
 import sqlite3
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +22,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RUN_ROOT = REPO_ROOT / "data" / "derived" / "audience-routing"
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
 DEFAULT_TOP_RANKED = 10
+DEFAULT_REFRESH_TOP_RANKED = 100
+DEFAULT_REFRESH_DAYS = 9
+DEFAULT_REFRESH_WORKERS = 24
+DEFAULT_REFRESH_DAY_WORKERS = 9
 
 RUN_SCHEMA = """
 CREATE TABLE IF NOT EXISTS run_meta (
@@ -110,6 +116,245 @@ def default_run_db(run_id: str) -> Path:
     ):
         raise ValueError("run_id may contain only letters, numbers, '-', '_', and '.'")
     return DEFAULT_RUN_ROOT / run_id / "routing.db"
+
+
+def _published_event_source() -> dict[str, str]:
+    from fli import signal_events
+
+    path = signal_events.DEFAULT_EVENTS_DB.resolve()
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    conn = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        row = conn.execute(
+            """SELECT run.run_id, run.feed_run_id
+               FROM signal_publication AS publication
+               JOIN event_run AS run
+                 ON run.run_id = publication.event_run_id
+               WHERE publication.singleton = 1"""
+        ).fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        raise ValueError("No Event run is currently published.")
+    return {"event_run_id": str(row["run_id"]), "feed_run_id": str(row["feed_run_id"])}
+
+
+def _refresh_days(through: str, days: int) -> list[str]:
+    if days < 1 or days > 90:
+        raise ValueError("days must be between 1 and 90")
+    end = date.fromisoformat(through)
+    start = end - timedelta(days=days - 1)
+    return [(start + timedelta(days=offset)).isoformat() for offset in range(days)]
+
+
+def _run_label(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+
+
+def _refresh_plan(
+    *,
+    through: str,
+    days: int,
+    top_ranked: int,
+    model: str,
+    effort: str,
+    source_event_run_id: str,
+) -> list[dict[str, Any]]:
+    if top_ranked < 1:
+        raise ValueError("top_ranked must be positive")
+    source_label = source_event_run_id[:12]
+    return [
+        {
+            "day": day,
+            "run_id": (
+                f"{audience_routing.PROMPT_VERSION}-{_run_label(model)}-{day}-"
+                f"top{top_ranked}-{_run_label(effort)}-{source_label}"
+            ),
+        }
+        for day in _refresh_days(through, days)
+    ]
+
+
+def _execute_refresh_day(
+    item: dict[str, Any],
+    *,
+    top_ranked: int,
+    artifact_db: Path,
+    model: str,
+    effort: str,
+    workers: int,
+    expected_event_run_id: str,
+    run_root: Path,
+) -> dict[str, Any]:
+    run_db = run_root / str(item["run_id"]) / "routing.db"
+    conn = connect_run(run_db)
+    try:
+        freeze_run(
+            conn,
+            run_id=str(item["run_id"]),
+            day=str(item["day"]),
+            top_ranked=top_ranked,
+            event_id=None,
+            artifact_db=artifact_db,
+            model=model,
+            effort=effort,
+        )
+        meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+        if meta is None or str(meta["source_event_run_id"]) != expected_event_run_id:
+            raise RuntimeError(
+                f"{item['day']} froze a different Event publication; rerun the refresh."
+            )
+        client = entity_kinds.create_litellm_client()
+        if hasattr(client, "with_options"):
+            client = client.with_options(max_retries=0, timeout=180.0)
+        result = run_pending(conn, client=client, workers=workers)
+        if int(result["counts"]["failed"] or 0):
+            raise RuntimeError(
+                f"{item['day']} has {result['counts']['failed']} failed routing items; "
+                "rerun the same refresh to retry them."
+            )
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        return result
+    finally:
+        conn.close()
+
+
+def refresh_all_days(
+    *,
+    through: str,
+    days: int = DEFAULT_REFRESH_DAYS,
+    top_ranked: int = DEFAULT_REFRESH_TOP_RANKED,
+    artifact_db: Path = DEFAULT_ARTIFACT_DB,
+    model: str = audience_routing.DEFAULT_MODEL,
+    effort: str = audience_routing.DEFAULT_REASONING_EFFORT,
+    workers: int = DEFAULT_REFRESH_WORKERS,
+    day_workers: int = DEFAULT_REFRESH_DAY_WORKERS,
+    replace: bool = False,
+    dry_run: bool = False,
+    run_root: Path = DEFAULT_RUN_ROOT,
+) -> dict[str, Any]:
+    """Route one top-ranked cohort for every day against one publication.
+
+    Matching deterministic run IDs resume in place. Older live routing runs are
+    pruned only after every requested day completes and the Event publication
+    is proven unchanged.
+    """
+    if workers < 1 or workers > 64:
+        raise ValueError("workers must be between 1 and 64")
+    if day_workers < 1 or day_workers > 31:
+        raise ValueError("day_workers must be between 1 and 31")
+    source = _published_event_source()
+    plan = _refresh_plan(
+        through=through,
+        days=days,
+        top_ranked=top_ranked,
+        model=model,
+        effort=effort,
+        source_event_run_id=source["event_run_id"],
+    )
+    base = {
+        "source_event_run_id": source["event_run_id"],
+        "source_feed_run_id": source["feed_run_id"],
+        "through": through,
+        "days": days,
+        "top_ranked": top_ranked,
+        "model": model,
+        "reasoning_effort": effort,
+        "workers_per_day": workers,
+        "day_workers": min(day_workers, len(plan)),
+        "replace": replace,
+        "plan": [
+            {
+                **item,
+                "run_db": str(run_root / str(item["run_id"]) / "routing.db"),
+            }
+            for item in plan
+        ],
+    }
+    if dry_run:
+        return {**base, "dry_run": True, "will_call_model": False}
+
+    run_root.mkdir(parents=True, exist_ok=True)
+    results: dict[str, dict[str, Any]] = {}
+    errors: list[str] = []
+    with ThreadPoolExecutor(max_workers=min(day_workers, len(plan))) as executor:
+        futures = {
+            executor.submit(
+                _execute_refresh_day,
+                item,
+                top_ranked=top_ranked,
+                artifact_db=artifact_db,
+                model=model,
+                effort=effort,
+                workers=workers,
+                expected_event_run_id=source["event_run_id"],
+                run_root=run_root,
+            ): item
+            for item in plan
+        }
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                results[str(item["day"])] = future.result()
+            except Exception as exc:
+                errors.append(f"{item['day']}: {type(exc).__name__}: {exc}")
+    if errors:
+        raise RuntimeError("Audience refresh did not complete: " + " | ".join(errors))
+
+    current_source = _published_event_source()
+    if current_source != source:
+        raise RuntimeError(
+            "The published Event run changed during audience routing; completed "
+            "runs were retained, but old runs were not removed. Rerun the refresh."
+        )
+
+    keep = {str(item["run_id"]) for item in plan}
+    pruned: list[str] = []
+    if replace:
+        for path in sorted(run_root.iterdir()):
+            if path.is_dir() and path.name not in keep:
+                shutil.rmtree(path)
+                pruned.append(path.name)
+
+    count_fields = (
+        "total",
+        "complete",
+        "failed",
+        "ai_engineering_only",
+        "investment_only",
+        "both",
+        "neither",
+        "input_tokens",
+        "cached_tokens",
+        "cache_write_tokens",
+        "output_tokens",
+        "reported_cost_count",
+        "cache_eligible_requests",
+        "cache_hit_requests",
+    )
+    counts = {
+        field: sum(int(result["counts"].get(field) or 0) for result in results.values())
+        for field in count_fields
+    }
+    counts["reported_cost_usd"] = round(
+        sum(float(result["counts"].get("reported_cost_usd") or 0) for result in results.values()),
+        6,
+    )
+    counts["cache_read_ratio"] = (
+        round(counts["cached_tokens"] / counts["input_tokens"], 6)
+        if counts["input_tokens"]
+        else 0.0
+    )
+    return {
+        **base,
+        "dry_run": False,
+        "will_call_model": True,
+        "counts": counts,
+        "runs": [results[day] for day in sorted(results)],
+        "pruned_runs": pruned,
+    }
 
 
 def connect_run(path: Path | str) -> sqlite3.Connection:
@@ -622,6 +867,34 @@ def main(argv: list[str] | None = None) -> int:
     item_parser = sub.add_parser("inspect-item", help="Inspect one exact result.")
     item_parser.add_argument("--run-db", type=Path, required=True)
     item_parser.add_argument("--event-id", required=True)
+    refresh_parser = sub.add_parser(
+        "refresh",
+        help="Route the top-ranked cohort for every day against one publication.",
+    )
+    refresh_parser.add_argument("--through", required=True)
+    refresh_parser.add_argument("--days", type=int, default=DEFAULT_REFRESH_DAYS)
+    refresh_parser.add_argument(
+        "--top-ranked", type=int, default=DEFAULT_REFRESH_TOP_RANKED
+    )
+    refresh_parser.add_argument(
+        "--artifact-db", type=Path, default=DEFAULT_ARTIFACT_DB
+    )
+    refresh_parser.add_argument("--model", default=audience_routing.DEFAULT_MODEL)
+    refresh_parser.add_argument(
+        "--reasoning-effort", default=audience_routing.DEFAULT_REASONING_EFFORT
+    )
+    refresh_parser.add_argument(
+        "--workers", type=int, default=DEFAULT_REFRESH_WORKERS
+    )
+    refresh_parser.add_argument(
+        "--day-workers", type=int, default=DEFAULT_REFRESH_DAY_WORKERS
+    )
+    refresh_parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Remove older routing runs only after the full refresh succeeds.",
+    )
+    refresh_parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
     started = time.monotonic()
     try:
@@ -638,7 +911,7 @@ def main(argv: list[str] | None = None) -> int:
                 "workers": args.workers,
                 "prompt_version": audience_routing.PROMPT_VERSION,
                 "prompt_caching": "single_stable_prefix_key",
-                "execution": "sequential",
+                "execution": "bounded_parallel" if args.workers > 1 else "sequential",
                 "will_call_model": False,
             }
             print(_canonical_json(_result("audience-routing.run", data)))
@@ -662,6 +935,20 @@ def main(argv: list[str] | None = None) -> int:
             data = run_pending(conn, client=client, workers=args.workers)
             conn.close()
             command = "audience-routing.run"
+        elif args.action == "refresh":
+            data = refresh_all_days(
+                through=args.through,
+                days=args.days,
+                top_ranked=args.top_ranked,
+                artifact_db=args.artifact_db,
+                model=args.model,
+                effort=args.reasoning_effort,
+                workers=args.workers,
+                day_workers=args.day_workers,
+                replace=args.replace,
+                dry_run=args.dry_run,
+            )
+            command = "audience-routing.refresh"
         elif args.action == "summary":
             conn = connect_run(args.run_db)
             data = summary(conn)
@@ -672,7 +959,7 @@ def main(argv: list[str] | None = None) -> int:
             data = inspect_item(conn, args.event_id)
             conn.close()
             command = "audience-routing.inspect-item"
-    except (FileNotFoundError, ValueError) as exc:
+    except (FileNotFoundError, RuntimeError, ValueError) as exc:
         print(
             _canonical_json(
                 {

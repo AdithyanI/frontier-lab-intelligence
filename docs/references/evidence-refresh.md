@@ -57,6 +57,28 @@ The pipeline does not rerun audience routing automatically. Rebuilt envelope
 hashes make stale routing results disappear from the Feed; a later explicit
 routing run evaluates only the intended cohort against the corrected evidence.
 
+## Refresh audience routing
+
+After the corrected Event run and artifact catalog are published, refresh the
+top 100 envelopes for the same nine-day window with one command:
+
+```bash
+fli audience-routing refresh --through 2026-07-13 --replace
+```
+
+The defaults are GPT-5.4-mini/high, nine days, 100 envelopes per day, 24 item
+workers per day, and nine days in parallel. The command binds every daily run
+to the same published Event/Feed pair, uses deterministic run IDs so an
+interrupted invocation resumes in place, and checks that publication did not
+change while it ran. `--replace` removes older routing directories only after
+all requested days complete successfully. Use `--dry-run` to print the exact
+run plan without calling the model.
+
+LiteLLM/OpenAI prompt caching still applies to the stable instruction prefix;
+the run databases provide the stronger exact-response reuse when the source
+publication and frozen cohort are unchanged. A changed envelope correctly
+produces a new request rather than reusing a stale judgment.
+
 ## Output
 
 The command emits one JSON object containing each stage result, including
