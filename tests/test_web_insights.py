@@ -57,8 +57,57 @@ def _evaluation(candidate, result):
     }
 
 
-def _insight_db(tmp_path):
+def _routing_db(tmp_path, *, current=True):
+    path = tmp_path / "routing.db"
+    conn = sqlite3.connect(path)
+    conn.executescript(
+        """
+        CREATE TABLE run_meta (
+            singleton INTEGER PRIMARY KEY,
+            prompt_version TEXT NOT NULL,
+            prompt_sha256 TEXT NOT NULL,
+            schema_version TEXT NOT NULL
+        );
+        CREATE TABLE routing_item (
+            event_id TEXT PRIMARY KEY,
+            packet_json TEXT NOT NULL,
+            status TEXT NOT NULL
+        );
+        """
+    )
+    conn.execute(
+        "INSERT INTO run_meta VALUES (1, ?, ?, ?)",
+        (
+            audience_routing.PROMPT_VERSION if current else "audience-routing-v8",
+            audience_routing.prompt_sha256() if current else "superseded",
+            audience_routing.SCHEMA_VERSION,
+        ),
+    )
+    conn.execute(
+        "INSERT INTO routing_item VALUES (?, ?, 'complete')",
+        (
+            "event-insight-1",
+            json.dumps(
+                {
+                    "sources": [
+                        {
+                            "source_type": "x_post",
+                            "relation": "root",
+                            "url": "https://x.com/alice/status/post-1",
+                        }
+                    ]
+                }
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+    return path
+
+
+def _insight_db(tmp_path, *, current_routing=True):
     path = tmp_path / "insights.db"
+    routing_db = _routing_db(tmp_path, current=current_routing)
     conn = insight_runs.connect(path)
     packet = _packet()
     candidates = {
@@ -74,7 +123,7 @@ def _insight_db(tmp_path):
         day=packet.day,
         feed_rank=45,
         source_routing_run_id="routing-run",
-        source_routing_db="routing.db",
+        source_routing_db=str(routing_db),
         model="gpt-5.6-terra",
         reasoning_effort="high",
         items=(
@@ -163,7 +212,7 @@ def test_status_views_expose_kept_and_suppressed_rationales(tmp_path):
 
     assert kept["items"][0]["decision"] == "surface"
     assert kept["items"][0]["title"] == "Test harness changes against held-out failures"
-    assert kept["items"][0]["root_source_url"] is None
+    assert kept["items"][0]["root_source_url"] == "https://x.com/alice/status/post-1"
     assert kept["items"][0]["artifacts"] == []
     assert kept["items"][0]["decision_reason"].startswith("The method is concrete")
     assert suppressed["items"][0]["decision"] == "suppress"
@@ -179,12 +228,8 @@ def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
     routing_db = tmp_path / "routing.db"
     routing = sqlite3.connect(routing_db)
     routing.execute(
-        "CREATE TABLE routing_item (event_id TEXT PRIMARY KEY, packet_json TEXT NOT NULL)"
-    )
-    routing.execute(
-        "INSERT INTO routing_item VALUES (?, ?)",
+        "UPDATE routing_item SET packet_json = ? WHERE event_id = ?",
         (
-            "event-insight-1",
             json.dumps(
                 {
                     "sources": [
@@ -202,6 +247,7 @@ def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
                     ]
                 }
             ),
+            "event-insight-1",
         ),
     )
     routing.commit()
@@ -213,7 +259,7 @@ def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
     )
     conn.commit()
     conn.close()
-    insight_store._routing_packets.cache_clear()
+    insight_store._routing_source.cache_clear()
 
     kept = insight_store.insights_payload(
         audience="ai_engineering", day="2026-07-13", status="kept", db_path=db
@@ -226,6 +272,23 @@ def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
             "url": "https://example.com/recovery-evaluation",
         }
     ]
+
+
+def test_superseded_routing_contract_cannot_publish_current_insights(tmp_path):
+    db = _insight_db(tmp_path, current_routing=False)
+    insight_store._routing_source.cache_clear()
+
+    dates = insight_store.insight_dates_payload(
+        audience="ai_engineering", db_path=db
+    )
+    items = insight_store.insights_payload(
+        audience="ai_engineering", day="2026-07-13", status="all", db_path=db
+    )
+
+    assert dates["available"] is False
+    assert dates["dates"] == []
+    assert items["available"] is False
+    assert items["items"] == []
 
 
 def test_current_ui_routes_read_the_durable_store(tmp_path, monkeypatch):

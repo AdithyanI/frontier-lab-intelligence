@@ -45,15 +45,15 @@ multi-stage Audience Insights v2 implementation and generated outputs were
 explicitly discarded on 2026-07-15; its learnings remain archived in docs.
 The successor now starts directly from ranked Feed evidence: one versioned
 GPT-5.4-mini/high call makes independent AI Engineering and Investment relevance
-judgments over a complete attributed evidence packet. The former model-based
+judgments over a first-party-authored evidence packet. The former model-based
 keep/drop gate, its generated databases, and its live API/UI/CLI surfaces were
 removed on 2026-07-15. The Feed derives `kept` only when either audience is
 relevant; it is not a third judgment. A successor Insight foundation defines
-two audience prompts and one small surface-or-suppress schema. Its first frozen
-envelope comparison produced four valid suppressions across mini and Terra;
-the production path now freezes first-party-only requests into one resumable
-SQLite store. A second Terra run produced one kept AI Engineering Insight and
-one suppressed Investment decision, both live in the Feed-ranked UI.
+two audience prompts and one small surface-or-suppress schema. Historical Terra
+calibrations remain inspectable, but they were produced from a superseded v8
+route and are no longer eligible for publication. The production path freezes
+first-party-only requests into one resumable SQLite store; a fresh v9-qualified
+Insight run is the remaining model step.
 
 ## Where the System Stands
 
@@ -62,12 +62,12 @@ one suppressed Investment decision, both live in the Feed-ranked UI.
 | Registry | Implemented, inspectable, and manually extensible | One entity can own multiple channels; structural kind and Registry admission are separate; rejected records remain reversible and reason-bearing. The Registry UI/API can now intake one X profile through the combined evidence screen or a reason-bearing direct admission, with exact-handle idempotency and durable attempt/model telemetry. The current checkpoint contains 2,630 auditable identities: 2,431 active people, 160 active channel-backed organizations, and 39 reason-bearing rejections. The lean World's Fair 2026/2024 cohort contributes 423 people; unresolved company labels stay person facts rather than fake organizations. Conference inclusion is provenance, not rank or vote weight, and inactivity alone is not a rejection gate because dormant experts can still contribute useful outgoing-follow evidence. |
 | Trusted-following graph | Evaluated candidate generator | The current immutable incremental snapshot contains 2,832,858 outgoing-follow edges from 2,558 complete source accounts resolving to 2,521 voting entities. Entity-union overlap is the accepted inspectable support feature across 2,524 active X-addressable Registry targets, including 38 zero-support targets; personalized PageRank remains a diagnostic, not truth. |
 | X evidence store | Implemented source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
-| Exact event projection | Implemented and regression-tested | Provider-declared evidence is projected as root-owned structural forests, not unrestricted connected components: quote/retweet reactions attach to one source, only the source author's replies extend its thread, and every member has at most one structural parent. Third-party replies remain in the Feed ledger but cannot render, import their own branch, or bridge independent roots. Daily snapshots are cutoff-correct and weekly views retain the richest stable-root revision. The current July 5–13 Feed contains 39,491 normalized posts; its published Event run contains 7,515 grouped envelopes, 28,625 members, and 21,368 links. |
-| Feed + daily score | Implemented audit surface | Daily collection includes authored replies; the ledger preserves replies whose conversation root is captured, while the product projection admits only first-party continuations and treats trusted quotes/retweets as reactions. The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
+| Exact event projection | Implemented and regression-tested | Provider-declared evidence is stored as root-owned structural forests, not unrestricted connected components: quote/retweet reactions attach to one source, only the source author's replies extend its thread, and every member has at most one structural parent. Third-party replies remain in the ledger but cannot import their own branch or bridge independent roots. The product publishes each Event exactly once on its earliest canonical source day; later activity appends to that Event without creating another dated candidate or changing its rank. The clean July 5–13 Feed contains 39,491 normalized posts; its one-run Event store contains 7,515 grouped envelopes, 28,625 members, and 21,368 links. |
+| Feed + daily score | Implemented audit surface | Daily collection includes authored replies and tracked reactions. The Feed is date-filterable, shows one frozen canonical-day rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Later reactions remain available in one flat activity disclosure but do not republish or rerank the source Event. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The reply-inclusive catalog converges to 2,735 artifacts with zero lineage violations; 2,507 have usable text, including all 221 arXiv metadata/abstract records and all 167 cached X Articles. Videos remain deferred and 65 non-video pages are unavailable or retryable. One shared extraction validator rejects placeholder-dominated bodies before they become successful snapshots. |
-| Feed audience routing | Current nine-day top-100 audit complete | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact packet/input/model/cost provenance. The complete packet remains immutable; only the model-facing view is capped at 20,000 tokens with an explicit truncation marker. The corrected July 5–13 run completed all 900 envelopes against the root-owned Event publication: 344 both, 112 Engineering-only, 141 Investment-only, and 303 neither. Thirty-eight repeated exact inputs have zero label conflicts. The publication-bound refresh freezes packets sequentially, then runs only pending model requests in bounded parallelism and prunes obsolete runs only after complete success. |
-| Audience Insight generation | Durable first production run complete | Separate Investment and AI Engineering prompts share one strict decision/reason/summary/implication/next-step schema. The full routed packet stays immutable, while model input keeps only the root, same-author continuations, and linked primary artifacts. `fli insights` freezes exact requests before execution, resumes completed audiences without another call, and records result/cache/cost telemetry in `data/derived/insights/insights.db`. The first production Terra run kept AI Engineering and suppressed Investment for envelope `1dc9cd72…`; both requests had zero cache reads. |
-| Insights UI | Live Feed-ranked decision audit | The Investment and AI Engineering views share the Feed-style date rail, inherit the source envelope rank, and expose `Kept`, `Suppressed`, and `All` status views. Each row explains why it was kept or suppressed and links to the exact Feed envelope; the retired quote/citation layout and old Insight databases are not read. |
+| Feed audience routing | Current v9 nine-day top-100 audit complete | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons. Its semantic packet contains the root, same-author replies/thread/quote commentary, and accepted first-party artifacts; independently authored reactions and pure reposts remain outside model input. The clean July 5–13 replacement completed all 900 envelopes: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither. All 900 requests were cache-eligible, 805 reported cache reads (1,442,560 cached tokens), zero failed, and proxy-reported cost was $4.1366515. Only nine v9 run directories remain. |
+| Audience Insight generation | Implementation complete; clean run pending | Separate Investment and AI Engineering prompts share one strict decision/reason/summary/implication/next-step schema. Model input uses the same first-party semantic boundary as routing. `fli insights` freezes exact requests before execution, rejects non-current routing sources, resumes completed audiences without another call, and records result/cache/cost telemetry. The current v9 routes yield 492 unique positive Events and 751 audience requests. Adi stopped the full Terra execution to run it himself; no partial candidate was retained and the old production database remains historical only. |
+| Insights UI | Ready; awaiting current Insight database | The Investment and AI Engineering views share the Feed-style date rail, inherit the frozen canonical Feed rank, and expose `Kept`, `Suppressed`, and `All` status views. The API publishes only rows backed by a completed current routing item whose prompt version, prompt hash, and schema match v9; old v8 Terra results fail closed instead of being re-anchored or relabeled. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -76,9 +76,8 @@ current databases or APIs before using them as present-tense product claims.
 ## The Most Important Unproven Claim
 
 The repository has proved that one prompt/schema, versioned run store, and
-exact-match Feed projection can route a varied 90-record cohort, and the five
-disputed/borderline packets now behave coherently under the approved v7
-boundary. The next unproven claim is that positive audience routes can be
+canonical Feed projection can route a complete nine-day top-100 cohort under a
+first-party-only semantic boundary. The next unproven claim is that positive audience routes can be
 converted into a small set of excellent, source-bound Insights without
 reviving the premature multi-stage stack or weakening attribution. Previous
 multi-stage Insight results remain historical learning, not the active
@@ -89,10 +88,9 @@ contract.
 The routing boundary is frozen. The active Evidence Audience Routing tracker
 owns final closeout and archive. At system level, the remaining proof is:
 
-1. Evaluate one user-selected positive envelope with each applicable successor
-   prompt and inspect both the surfaced content and any suppression reason.
-2. Add the smallest run store only after that output contract is accepted, then
-   produce and inspect 3–5 excellent Insights in Feed-rank order.
+1. Complete the approved 492-Event / 751-request clean Terra Insight refresh
+   into a fresh database and publish it only after full reconciliation.
+2. Inspect and select 3–5 excellent Insights in Feed-rank order.
 3. Assemble the rubric-mapped submission package and limitations.
 4. Perform the final delivery review before requesting explicit approval for
    any external submission.
@@ -117,12 +115,10 @@ case-study thesis.
 
 The active tracker is
 [`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
-The repaired-Event nine-day top-100 routing refresh and its bounded contextual
-review are complete. The successor Insight path now has one durable production
-run: a substantive harness-engineering envelope produced a kept AI Engineering
-Insight and an auditable Investment suppression. The active tracker owns the
-next small calibration set and routing closeout. Full-catalog generation and
-delivery remain deliberately deferred.
+The canonical Event rebuild and v9 nine-day top-100 routing replacement are
+complete. The old v8 routing directories are gone, and historical Insight rows
+cannot publish under the current source contract. The active tracker owns the
+fresh Terra Insight run, UI proof, and closeout; Adi is executing that paid run.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

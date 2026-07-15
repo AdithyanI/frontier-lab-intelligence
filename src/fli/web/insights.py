@@ -8,8 +8,7 @@ from pathlib import Path
 import sqlite3
 from typing import Any, Literal
 
-from fli import insight_generation, insight_runs
-from fli.web import events as event_store
+from fli import audience_routing, insight_generation, insight_runs
 
 
 DEFAULT_AUDIENCE = insight_generation.InsightAudience.INVESTMENT.value
@@ -44,17 +43,30 @@ def _open(path: Path) -> sqlite3.Connection | None:
 
 
 @lru_cache(maxsize=32)
-def _routing_packets(source_db: str) -> dict[str, dict[str, Any]]:
+def _routing_source(source_db: str) -> dict[str, Any]:
     path = Path(source_db)
     if not path.is_absolute():
         path = insight_runs.REPO_ROOT / path
     conn = _open(path)
     if conn is None:
-        return {}
+        return {"current": False, "packets": {}}
     try:
-        rows = conn.execute("SELECT event_id, packet_json FROM routing_item").fetchall()
+        meta = conn.execute(
+            """SELECT prompt_version, prompt_sha256, schema_version
+               FROM run_meta WHERE singleton = 1"""
+        ).fetchone()
+        if meta is None or (
+            str(meta["prompt_version"]) != audience_routing.PROMPT_VERSION
+            or str(meta["prompt_sha256"]) != audience_routing.prompt_sha256()
+            or str(meta["schema_version"]) != audience_routing.SCHEMA_VERSION
+        ):
+            return {"current": False, "packets": {}}
+        rows = conn.execute(
+            """SELECT event_id, packet_json FROM routing_item
+               WHERE status = 'complete'"""
+        ).fetchall()
     except sqlite3.DatabaseError:
-        return {}
+        return {"current": False, "packets": {}}
     finally:
         conn.close()
     packets: dict[str, dict[str, Any]] = {}
@@ -65,13 +77,12 @@ def _routing_packets(source_db: str) -> dict[str, dict[str, Any]]:
             continue
         if isinstance(packet, dict):
             packets[str(row["event_id"])] = packet
-    return packets
+    return {"current": True, "packets": packets}
 
 
 def _source_payload(row: dict[str, Any]) -> dict[str, Any]:
-    packet = _routing_packets(str(row["source_routing_db"])).get(
-        str(row["event_id"]), {}
-    )
+    source = _routing_source(str(row["source_routing_db"]))
+    packet = source["packets"].get(str(row["event_id"]), {})
     sources = packet.get("sources", [])
     if not isinstance(sources, list):
         sources = []
@@ -119,12 +130,9 @@ def _current_rows(
     projected: list[dict[str, Any]] = []
     for row in rows:
         item = dict(row)
-        location = event_store.canonical_event_location(str(row["event_id"]))
-        if location is not None:
-            item.update(location)
-            item["candidate_id"] = insight_generation.candidate_id(
-                str(row["audience"]), str(row["event_id"])
-            )
+        source = _routing_source(str(row["source_routing_db"]))
+        if not source["current"] or str(row["event_id"]) not in source["packets"]:
+            continue
         projected.append(item)
     projected.sort(key=lambda item: (int(item["feed_rank"]), str(item["event_id"])))
     return projected

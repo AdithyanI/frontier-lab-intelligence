@@ -206,37 +206,35 @@ membership. `signal_publication` is the single explicit pointer to the validated
 Event run and matching Feed run; readers never infer "live" from whichever run
 was created most recently.
 
-`fli.web.events` turns that published structure into cutoff-correct daily
-projections. A selected day includes only evidence both published and first
-disclosed through that UTC cutoff; its visible links obey the same boundary.
-A continuing event keeps its stable identity and cumulative prior
-context, while `day_member_count`, `prior_context_count`, `is_new_on_day`, and
-`previous_activity_day` distinguish that day's delta from history. The date
-strip reports envelope counts produced by this projection, not raw evidence-post
-counts. Registry curation remains dynamic: rejected renderable posts are
-removed, the surviving graph is re-componentized, rejected wrappers cannot
-bridge otherwise separate components, and opaque provider anchors continue to
-connect legitimate survivors. Unconsumed posts remain one-member envelopes.
+`fli.web.events` publishes each Event once on the earliest day of its canonical
+source component. That day owns the Event identity and frozen attention rank.
+Evidence disclosed later is assigned back to the already-canonical Event and
+appears in its lifetime activity view; it never creates another dated Feed
+candidate, reranks history, or asks routing/Insight generation to reconsider
+the same source. Future disclosures also cannot merge or reidentify canonical
+components. The date strip therefore counts canonical Event publications, not
+raw evidence posts or daily Event revisions. Registry curation remains dynamic:
+rejected renderable posts are removed, the surviving graph is re-componentized,
+rejected wrappers cannot bridge otherwise separate components, and opaque
+provider anchors continue to connect legitimate survivors. Unconsumed posts
+remain one-member envelopes.
 
-The weekly projection rolls the same daily revisions through a seven-day
-window by stable root-owned Event ID. It keeps the richest visible envelope
-revision while accumulating active days and peak daily score/engagement. A
-later excluded reply may make an existing root active again, but it cannot
-replace the earlier envelope with a thinner singleton or merge another root.
+The weekly projection deduplicates those canonical publications across the
+seven-day window while retaining each Event's lifetime `activity_days` and
+peak attention/interaction facts. Later activity can make the original Event
+visibly active without introducing a second rank or a continuation row.
 
 The React `/evidence/feed` surface is one evidence browser rather than separate post,
 group, or lane modes. It offers complete-day navigation, search, the three
 transparent sort orders, score inputs, raw engagement, and direct X
-provenance. Each envelope renders the root once, then exact replies in
-parent-first order, unique quote commentary, and a compact retweeter trace.
-Captured parents always precede their descendants and sibling branches are
-chronological. A reply whose exact parent is absent stays as a visibly
-unparented branch rather than being attached by conversation or timing
-inference. Audience routing, semantic grouping, summaries, and cited insights
-remain later stages after this deterministic layer is audited.
+provenance. Each envelope renders the root once and exposes one flat expandable
+activity ledger for same-author updates, independent quote/reply commentary,
+and compact amplification facts. The UI no longer presents current/prior
+sections or a continuation state. Audience routing and Insight generation
+remain later semantic stages after this deterministic layer is audited.
 
 `fli.audience_routing` is the sole live model judgment over ranked Feed
-evidence. One GPT-5.4-mini/high call receives the readable attributed packet and
+evidence. One GPT-5.4-mini/high call receives the readable first-party packet and
 returns two independently reasoned booleans: AI Engineering relevance and
 Investment relevance. Feed rank, score, engagement, prominence, and the
 derived audit state are not model inputs. `fli.audience_routing_runs`
@@ -246,13 +244,17 @@ SQLite database. The run records its source event/feed run IDs and selection
 policy directly; it does not depend on a source classification run or read the
 superseded Audience Insights tables. Stable instructions precede the variable
 packet. The current low-rate runner uses one prompt-level cache key with
-bounded parallel workers; it does not store per-item keys, shard traffic, pad
-the prompt, or request extended retention. Full packet JSON remains immutable,
-while the derived model view is capped at 20,000 `o200k_base` tokens. Primary
-evidence precedes reactions, and an explicit `TRUNCATED_EVIDENCE` marker
-replaces only an omitted lower-priority tail. The current nine-day top-100 run
-completed 900/900 packets; 16 required this bound. It read 1,463,296 cached
-tokens across 3,634,944 input tokens. The current prompt asks for roughly
+bounded parallel workers; it does not store per-item keys, shard traffic, or
+pad the prompt. The v9 packet and rendered input contain only the root,
+same-author replies/thread/quote commentary, and accepted first-party
+artifacts. Independently authored replies/quotes/reactions and pure reposts
+stay in the Feed activity ledger but do not enter the model. The model view is
+capped at 20,000 `o200k_base` tokens with an explicit truncation marker. The
+current clean nine-day top-100 run completed 900/900 packets with zero
+failures: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither.
+All 900 requests were cache-eligible; 805 reported cache reads totaling
+1,442,560 cached of 2,760,202 input tokens. Proxy-reported cost was $4.1366515.
+The current prompt asks for roughly
 40–50 words per reason as soft guidance, never a schema limit. The frozen v7
 boundary treats a specific attributed Investment thesis as potentially useful
 without independent verification when its uncertainty is preserved. Temporary
@@ -339,8 +341,9 @@ is an operator inspection surface, not a second Feed or an insight product.
 one immutable `RoutingPacket`, one positive audience, and its application-owned
 Feed rank. Event ID, day, candidate ID, and rank remain outside model input.
 The complete routed packet remains immutable, but the model view retains only
-the root, same-author continuations, and linked primary artifacts; independent
-quote-posts and replies stay available upstream for routing and human audit.
+the root, same-author replies/thread/quote commentary, and linked primary
+artifacts; independently authored reactions and pure reposts stay available
+only in the upstream Feed activity ledger and human audit.
 That first-party view is wrapped as the final variable block after one stable
 audience prompt. Investment and AI Engineering have separate versioned prompts and cache keys but share one
 strict output schema: `decision`, freeform nullable `suppression_reason`, and
@@ -378,8 +381,11 @@ review, editor, audit, recall, and production-reconciliation modules and CLI
 commands have been deleted. Their historical decisions remain in archived
 project documentation, but live code has no compatibility read or old-schema
 fallback. `fli.web.insights` reads only the successor store for both the
-canonical and existing `/api/insights/extracted*` UI routes. It deduplicates
-later reruns by event/day/audience, orders solely by frozen Feed rank, includes
+canonical and existing `/api/insights/extracted*` UI routes. A row is current
+only when its source routing database proves the exact current prompt version,
+prompt hash, schema version, and completed Event packet. The UI never reanchors
+or relabels a legacy result. It deduplicates later reruns by event/audience,
+orders solely by the already-frozen canonical Feed rank, includes
 all evaluated days even when zero items were kept, and exposes `kept`,
 `suppressed`, and `all` decision views. The UI uses implication as the surfaced
 decision rationale (`Why kept`) and the freeform suppression reason as `Why
@@ -1153,20 +1159,20 @@ final score.
 | `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, complete supported artifact extraction, SQLite optimization, and visible-day view warmup |
 | `fli.signal_feed` | content-addressed `signal-feed-v10` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v6` root-owned structural forests with one-parent enforcement, same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
-| `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
-| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with full immutable evidence, a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, sequential packet freezing followed by bounded parallel model execution, resumable cache/cost telemetry, and one publication-bound multi-day refresh command |
+| `fli.web.events` | Registry-aware one-time canonical Event publication with frozen day/rank, lifetime activity append, and deduplicated weekly projection; later disclosures never create another candidate |
+| `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over root + same-author updates + accepted first-party artifacts, with a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, sequential packet freezing followed by bounded parallel model execution, resumable cache/cost telemetry, and one publication-bound multi-day refresh command |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.artifact_arxiv` | official batch-feed title, author, category, date, and abstract extraction for catalogued arXiv papers; PDFs remain optional future work |
 | `fli.insight_generation` | successor generation boundary with separate Investment and AI Engineering prompts/cache keys, one strict surface-or-suppress schema, first-party-only routed Evidence view, deterministic execution/validation, and application-owned Event/day/Feed-rank publication metadata |
 | `fli.insight_runs` / `fli.insight_cli` | immutable SQLite Insight runs plus a JSON-first single-item and publication-qualified batch client; exact requests freeze before execution, each Event/audience resumes independently, ten-item calibrations expand without duplicate calls, and cache/cost telemetry distinguishes new model work from reused local results |
 | `fli.following_snapshots` | immutable, resumable raw-page/account/edge storage for one frozen outgoing-follow cohort, with checksum-bound parent reuse for unchanged stable-ID sources |
 | `fli.following_rankings` | deterministic account discovery ordering plus entity-union Network support (source and target both one entity/one vote, self excluded), with experimental personalized PageRank retained for comparison |
-| `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed/Event readers share the newest completed analysis selection, and Insights projects kept/suppressed successor decisions without legacy reads; source in `frontend/` |
+| `fli.web` | JSON API + built SPA host; Network keeps Registry entity support and Ranking discovery distinct, Feed shows canonical Events with flat lifetime activity, and Insights publishes only current source-qualified kept/suppressed decisions without legacy reads; source in `frontend/` |
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Audience Insight generation | durable first-party-only Terra path with exact frozen requests, resumable per-audience execution, one kept Engineering result, one Investment suppression, and measured zero-cache telemetry |
-| Insights UI | live Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links |
+| Audience Insight generation | durable first-party-only Terra path with exact frozen requests and resumable per-audience execution; current v9 cohort is 492 Events / 751 requests and awaits Adi's clean run |
+| Insights UI | current-source-qualified Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links; honestly empty until the fresh Insight database is published |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order
