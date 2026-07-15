@@ -8,6 +8,109 @@ const SAND = '#f4f1ea'
 const MONO = "'IBM Plex Mono', monospace"
 const UI = "'Inter', system-ui, sans-serif"
 
+function SystemOverview() {
+  const stages = [
+    {
+      x: 30,
+      width: 170,
+      label: 'SOURCES',
+      title: 'Public evidence',
+      detail: 'X + linked documents',
+      meta: 'TWITTERAPI.IO',
+      tone: 'plain',
+    },
+    {
+      x: 236,
+      width: 190,
+      label: 'BACKEND',
+      title: 'Python pipeline',
+      detail: 'collect · group · rank',
+      meta: 'PYTHON 3.13 · CLI STAGES',
+      tone: 'dark',
+    },
+    {
+      x: 462,
+      width: 190,
+      label: 'DATA',
+      title: 'SQLite stores',
+      detail: 'Registry · raw · derived',
+      meta: 'AUDITABLE + REBUILDABLE',
+      tone: 'surface',
+    },
+    {
+      x: 688,
+      width: 160,
+      label: 'API',
+      title: 'FastAPI',
+      detail: 'typed JSON',
+      meta: 'PYDANTIC · UVICORN',
+      tone: 'plain',
+    },
+    {
+      x: 884,
+      width: 166,
+      label: 'FRONTEND',
+      title: 'React SPA',
+      detail: 'browse · inspect · audit',
+      meta: 'TYPESCRIPT · VITE',
+      tone: 'plain',
+    },
+  ]
+
+  return (
+    <svg
+      viewBox="0 0 1080 354"
+      role="img"
+      aria-label="Current high-level architecture. Public X evidence and linked documents enter a Python pipeline, which preserves canonical, raw, and derived data in SQLite. The pipeline calls models through LiteLLM and stores structured judgments. FastAPI exposes typed JSON to the React and TypeScript interface."
+    >
+      <defs>
+        <marker id="overview-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+        </marker>
+      </defs>
+
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">CURRENT STACK · ONE LOCAL-FIRST APPLICATION</text>
+
+      {stages.map((stage) => {
+        const dark = stage.tone === 'dark'
+        const fill = dark ? INK : stage.tone === 'surface' ? SURFACE : '#fff'
+        return (
+          <g key={stage.label}>
+            <rect
+              x={stage.x}
+              y="68"
+              width={stage.width}
+              height="112"
+              fill={fill}
+              stroke={dark ? INK : BLUE_MID}
+              strokeWidth="1.2"
+            />
+            <text x={stage.x + 16} y="93" fontFamily={MONO} fontSize="9.5" fill={dark ? BLUE : BLUE_INK} letterSpacing="0.08em">{stage.label}</text>
+            <text x={stage.x + 16} y="121" fontFamily={UI} fontSize="16" fontWeight="600" fill={dark ? '#fff' : INK}>{stage.title}</text>
+            <text x={stage.x + 16} y="145" fontFamily={UI} fontSize="11.5" fill={dark ? '#fff' : MUTED} opacity={dark ? 0.78 : 1}>{stage.detail}</text>
+            <text x={stage.x + 16} y="165" fontFamily={MONO} fontSize="7.8" fill={dark ? BLUE : MUTED} letterSpacing="0.04em">{stage.meta}</text>
+          </g>
+        )
+      })}
+
+      <line x1="200" y1="124" x2="230" y2="124" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+      <line x1="426" y1="124" x2="456" y2="124" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+      <line x1="652" y1="124" x2="682" y2="124" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+      <line x1="848" y1="124" x2="878" y2="124" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+
+      <path d="M331 180 V216" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
+      <rect x="236" y="224" width="416" height="76" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="254" y="249" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
+      <text x="254" y="275" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>OpenAI SDK → LiteLLM → models</text>
+      <text x="254" y="291" fontFamily={MONO} fontSize="8" fill={MUTED} letterSpacing="0.04em">STRUCTURED JUDGMENTS · CACHE · USAGE · COST</text>
+      <path d="M557 224 V188" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
+
+      <line x1="30" y1="328" x2="1050" y2="328" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="30" y="348" fontFamily={UI} fontSize="11.5" fill={MUTED}>Deterministic evidence processing comes first. Model judgments return to the same inspectable data layer.</text>
+    </svg>
+  )
+}
+
 function Arrow({ x1, x2, y = 128 }: { x1: number; x2: number; y?: number }) {
   return (
     <line
@@ -561,13 +664,22 @@ export default function Architecture() {
       <p className="page-sub">A visual map of what is live, where judgment enters, and what each number means.</p>
 
       <nav className="arch-chapters" aria-label="Architecture chapters">
+        <a href="#overview">Overview</a>
         <a href="#data-model">Data model</a>
         <a href="#account-intake">Account intake</a>
         <a href="#system-today">Pipeline</a>
         <a href="#ranking-methods">Numbers</a>
       </nav>
 
-      <section className="arch-section arch-section--lead" id="data-model">
+      <section className="arch-section arch-section--lead" id="overview">
+        <div className="arch-section-head">
+          <h2 className="arch-h">System at a glance</h2>
+          <p className="arch-p">The complete stack in one view—from public evidence to the operator interface.</p>
+        </div>
+        <div className="arch-canvas"><SystemOverview /></div>
+      </section>
+
+      <section className="arch-section" id="data-model">
         <div className="arch-section-head">
           <h2 className="arch-h">The data model</h2>
           <p className="arch-p">X is observed in two ways: dated output arrives daily; follow relationships change more slowly.</p>

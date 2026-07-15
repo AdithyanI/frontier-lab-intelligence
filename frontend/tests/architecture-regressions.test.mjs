@@ -4,6 +4,18 @@ import test from 'node:test'
 
 const architecture = readFileSync(new URL('../src/pages/Architecture.tsx', import.meta.url), 'utf8')
 
+test('Architecture opens with the current end-to-end stack', () => {
+  assert.match(architecture, /function SystemOverview/)
+  assert.match(architecture, /CURRENT STACK · ONE LOCAL-FIRST APPLICATION/)
+  assert.match(architecture, /Public evidence/)
+  assert.match(architecture, /Python pipeline/)
+  assert.match(architecture, /SQLite stores/)
+  assert.match(architecture, /OpenAI SDK → LiteLLM → models/)
+  assert.match(architecture, /FastAPI/)
+  assert.match(architecture, /React SPA/)
+  assert.match(architecture, /System at a glance/)
+})
+
 test('Architecture maps one evidence core into two independently audited audience views', () => {
   assert.match(architecture, /function EvidenceInputMap/)
   assert.match(architecture, /function InsightGenerationMap/)
