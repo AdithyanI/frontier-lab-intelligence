@@ -1061,6 +1061,25 @@ def test_reconciliation_binds_composed_audit_and_editorial_finalizations(tmp_pat
         "effective_selected_ids": [editorial_id],
     }
 
+    production_manifest, _stored = _write_canonical_web_pair(tmp_path, manifest)
+    assert {
+        row["source_run_id"]
+        for row in reconciliation.evaluate_manifest(production_manifest)["runs"]
+    } == {row["source_run_id"] for row in report["runs"]}
+    assert insight_store._reconciled_run_entries(tmp_path)
+
+    stale_manifest = json.loads(production_manifest.read_text())
+    stale_entry = next(
+        row
+        for row in stale_manifest["runs"]
+        if row["source_run_db"] == str(source)
+    )
+    stale_entry["finalization_path"] = str(prerequisite)
+    production_manifest.write_text(
+        json.dumps(stale_manifest, indent=2, sort_keys=True) + "\n"
+    )
+    assert insight_store._reconciled_run_entries(tmp_path) == []
+
     prerequisite.write_text(prerequisite.read_text() + " ")
     with pytest.raises(
         reconciliation.ProductionReconciliationError,
