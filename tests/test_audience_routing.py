@@ -334,18 +334,18 @@ def test_output_rejects_non_exact_or_invalid_judgments(mutate, error):
         audience_routing._validate_output(json.dumps(payload))
 
 
-def test_output_normalizes_reasons_and_first_cohort_uses_one_cache_lane():
+def test_output_normalizes_reasons_and_cache_keys_use_stable_catalog_lanes():
     payload = routing_payload()
     payload["investment"]["reason"] = "  Cost   changes\nunit economics.  "
 
     result = audience_routing._validate_output(json.dumps(payload))
     keys = {
         audience_routing.prompt_cache_key(f"event-{index}")
-        for index in range(50)
+        for index in range(512)
     }
 
     assert result["investment"]["reason"] == "Cost changes unit economics."
-    assert len(keys) == audience_routing.PROMPT_CACHE_SHARDS == 1
+    assert len(keys) == audience_routing.PROMPT_CACHE_SHARDS == 32
     assert audience_routing.prompt_cache_key("event-1") == (
         audience_routing.prompt_cache_key("event-1")
     )

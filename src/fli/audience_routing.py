@@ -25,7 +25,7 @@ PROMPT_VERSION = "audience-routing-v3"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "medium"
-PROMPT_CACHE_SHARDS = 1
+PROMPT_CACHE_SHARDS = 32
 PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v3.txt"
 
 AUDIENCES = ("ai_engineering", "investment")

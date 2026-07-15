@@ -29,7 +29,8 @@ positive routes without reviving the old stack.
   root, continuation, reply, quote-post, and accepted artifact block.
 - Use one combined routing call with two independently reasoned audience
   judgments: AI Engineering relevant/not relevant and Investment relevant/not
-  relevant, each with one short evidence-grounded reason.
+  relevant, each with a concise evidence-grounded explanation that is usually
+  three to four sentences.
 - Keep existing Feed triage as the only keep/drop decision. The audience
   router does not write a second keep/drop field.
 - Write the routing prompt with Adi, keeping the two audience standards
@@ -92,11 +93,11 @@ positive routes without reviving the old stack.
 {
   "ai_engineering": {
     "relevant": true,
-    "reason": "Short evidence-grounded explanation."
+    "reason": "Concise evidence-grounded explanation, usually three to four sentences."
   },
   "investment": {
     "relevant": false,
-    "reason": "Short evidence-grounded explanation."
+    "reason": "Concise evidence-grounded explanation, usually three to four sentences."
   }
 }
 ```
@@ -110,6 +111,9 @@ Application invariants:
   it does not rewrite or contradict Feed triage.
 - IDs, hashes, prompt versions, model/run telemetry, and timestamps are
   application-owned fields, never model-authored fields.
+- The reason schema requires a non-empty string but imposes no maximum length.
+  The three-to-four-sentence guidance is a prompt preference, not a truncation
+  rule; the model should not add filler to reach it.
 - Mechanically invalid evidence packets fail before routing; they are not
   classified as `drop`.
 
@@ -189,21 +193,34 @@ Application invariants:
   routing judgment.
 - Insight generation remains a separate follow-up stage and may use a higher
   reasoning effort only after routing is qualitatively understood.
-- The v2 review renderer uses a human-readable YAML-style hierarchy rather
-  than XML/CDATA. It decodes HTML entities, represents link-only primary posts
-  by their artifact relationship, omits pure retweets and transport-only
-  links, excludes reactions shorter than 40 characters, and removes reactions
-  whose text is at least 80% duplicated by supplied primary evidence.
+- The v2 review renderer introduced a human-readable YAML-style hierarchy
+  rather than XML/CDATA. It decoded HTML entities, represented link-only
+  primary posts by their artifact relationship, omitted pure retweets and
+  transport-only links, excluded reactions shorter than 40 characters, and
+  removed reactions whose text was at least 80% duplicated by supplied primary
+  evidence.
+- The rank-1 review disproved the v2 length rule: it removed the specific claim
+  “Grok 4.5 is Opus class for browser use.” Runtime v3 therefore has no minimum
+  or maximum reaction length. It keeps short reactions and omits only pure
+  retweets, transport-only links, and reactions whose text is at least 80%
+  duplicated by supplied primary evidence.
+- Runtime v3 asks for roughly three to four sentences per audience reason with
+  no schema maximum. Its stable instructions are 8,188 characters and 1,180
+  whitespace-delimited words, comfortably beyond the 1,024-token cache
+  threshold without padding.
+- Catalog execution uses the same 32 stable prompt-cache lanes and sequential
+  per-lane scheduling as the previously proven Feed triage runner. This keeps
+  each key below provider routing pressure during concurrent bulk execution.
 
 ## Open Questions / Blockers
 
-- Prompt caching is not observable on the current Azure/LiteLLM configuration:
-  two consecutive eligible v2 calls used the same prompt hash and cache key,
-  but both reported zero cached and zero cache-write tokens. Investigate the
-  shared adapter before claiming caching works.
-- The reaction minimum-length filter is unsafe. It removed the specific claim
-  “Grok 4.5 is Opus class for browser use” solely because it was under 40
-  characters. Remove the length-only rule before routing a third envelope.
+- Azure prompt-prefix caching is currently intermittent or regressed on the
+  Luna Responses deployment. A 2026-07-15 v3 cold call and different-input
+  same-prefix call reported zero reads, and the previously successful
+  1,670-word Feed-triage prefix also returned zero reads for two fresh inputs.
+  LiteLLM's exact-response Redis cache does work, but it cannot reuse a prefix
+  across different catalog items. Keep telemetry visible and do not claim
+  prefix-cache savings until Azure again returns nonzero `cached_tokens`.
 - Which reply and quote-post blocks belong in the model packet, and when does a
   deterministic size bound become necessary? Inspect real packet sizes before
   choosing a top-N rule.
@@ -219,7 +236,8 @@ Application invariants:
 | done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
 | done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
 | done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
-| in_progress | Review the rank-1 result, failed cache-read test, and unsafe short-reaction filter with Adi before a third envelope. | parent | `resources/rank1-routing-v2-result.md`; `resources/satya-routing-v2-result.md` |
+| done | Remove the unsafe short-reaction cutoff and expand each audience reason to roughly three to four sentences without a schema maximum. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
+| in_progress | Review v3 qualitative output and the isolated Azure prefix-cache regression with Adi before routing a third distinct envelope. | parent | `resources/audience-routing-v3-cache-diagnostic.md`; `resources/rank1-routing-v2-result.md` |
 
 ## Backlog / Remaining Work
 
@@ -303,3 +321,12 @@ Application invariants:
   despite reusing the exact v2 prompt hash and cache key. The run also exposed
   that a length-only reaction filter can discard a specific material claim;
   exact evidence is in `resources/rank1-routing-v2-result.md`.
+- 2026-07-15: [VALIDATED] Promoted runtime v3 after Adi rejected any reaction
+  length limit. The renderer now retains short substantive reactions, including
+  the previously lost Grok claim, while the prompt requests roughly three to
+  four sentences per audience reason and the schema retains no maximum length.
+  A controlled cache diagnostic proved that LiteLLM's exact-response cache
+  works at zero incremental proxy spend, but Azure returned zero prefix reads
+  for both the v3 different-input test and two fresh inputs through the
+  previously successful Feed-triage prefix. The adapter fields and cache key
+  were forwarded unchanged to one deployment, isolating the miss upstream.

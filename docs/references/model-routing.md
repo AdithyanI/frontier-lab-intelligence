@@ -1,6 +1,6 @@
 # Model Routing and Prompt Caching
 
-Last verified: 2026-07-14
+Last verified: 2026-07-15
 
 ## Current Policy
 
@@ -55,6 +55,23 @@ The 2026-07-14 migration checks established:
   103,936 cached tokens from 168,022 input tokens (61.86%);
 - the five-item Luna extraction oracle recorded zero cache reads, so eligibility
   is never treated as proof of a hit.
+
+A 2026-07-15 control found that the same Azure Responses deployment had
+regressed or become intermittent again. A cache-eligible audience-routing
+prefix returned zero reads for different evidence, and two fresh variable
+inputs through the previously successful 1,670-word Feed-triage prefix also
+returned zero reads. LiteLLM's request transform forwarded the key, `24h`
+retention, instructions, and structured schema unchanged to one deployment.
+Treat this as an upstream operational limitation, not a reason to pad prompts
+or change classification quality. The exact diagnostic is recorded in
+`docs/projects/evidence-audience-routing/resources/audience-routing-v3-cache-diagnostic.md`.
+
+The proxy also has a separate Redis full-response cache. An exact complete
+request repeat can therefore return instantly at zero proxy spend while still
+showing `cached_tokens=0`; that is not reusable-prefix caching and does not help
+different catalog items. On such a full-response hit, LiteLLM 1.92.0 replays
+the original `x-litellm-response-cost` header even though its persisted spend
+record is zero, so use the persisted proxy record when reconciling that case.
 
 Keep stable 1,024+ token content first, use deterministic sharded
 `prompt_cache_key` lanes, limit each lane to one in-flight request, and record

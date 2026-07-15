@@ -1173,6 +1173,7 @@ final score.
 | `fli.signal_events` | `signal-events-v3` exact structural components with provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
 | `fli.insight_triage_runs` | resumable snapshot/input-hash-bound envelope triage with exact reuse and cached-token/cost telemetry |
+| `fli.audience_routing` / `fli.audience_routing_runs` | downstream audience assignment for Feed-kept envelopes: one Luna-medium call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with versioned prompt/schema hashes and resumable cache/cost provenance |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |
 | `fli.cited_insights` / `fli.cited_insight_runs` | historical minimal `insight-v1.1` proof: frozen five-record run, resumability, usage/cost telemetry, and application-owned exact citation binding |
 | `fli.audience_insights` / `fli.audience_insight_runs` | independent Investment and AI Engineering extraction/schema/cache contracts, exact citation binding, resumable attempt ledgers, all-five-pass item filtering, ID-only daily editing, day-set review, and audited-history inputs |
@@ -1194,8 +1195,9 @@ final score.
 
 The active project is
 [`docs/projects/evidence-audience-routing/tasks.md`](../projects/evidence-audience-routing/tasks.md).
-It begins with an architecture review of one complete Feed envelope. A
-candidate minimal output has two structured judgments—keep/drop and audience
-assignment—but the exact schema, evidence blocks, consistency rules, and prompt
-are intentionally unfrozen until Adi reviews the first envelope. The archived
-v2 review/publication stack is not the active build order.
+Existing Feed triage owns keep/drop. The downstream runtime v3 boundary accepts
+one complete attributed envelope and returns exactly two independent judgments:
+AI Engineering relevance plus reason, and Investment relevance plus reason.
+The current work is a small sequential qualitative review before Feed UI or any
+new Insight generation. The archived v2 review/publication stack is not the
+active build order.

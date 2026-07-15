@@ -41,10 +41,11 @@ Registry
 The stored-X and canonical-artifact evidence paths are implemented. The earlier
 multi-stage Audience Insights v2 implementation remains in code and has been
 archived, while all generated outputs were explicitly discarded on 2026-07-15.
-No successor contract is frozen yet. The next architecture review will start
-from a minimal structured Feed decision—candidate fields are explicit keep/drop
-and audience assignment—before any Insight writing, publication auditing,
-reconciliation, briefing, or export resumes.
+The successor now starts downstream of the existing Feed keep/drop decision:
+one versioned Luna-medium call makes independent AI Engineering and Investment
+relevance judgments over a complete attributed evidence packet. Insight
+writing, publication auditing, reconciliation, briefing, and export remain
+deferred until this narrower routing boundary is qualitatively proven.
 
 ## Where the System Stands
 
@@ -57,7 +58,7 @@ reconciliation, briefing, or export resumes.
 | Feed + daily score | Implemented audit surface | The Feed is date-filterable, shows one stable daily score rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Registry changes affect derived views without rewriting raw evidence. |
 | Legacy keep/drop triage | Implemented comparison baseline | The existing Luna decision/reason runs remain inspectable, but the active product is testing a cleaner audience-first contract. During calibration, the legacy result is preserved for comparison and is not silently overwritten. |
 | Canonical artifact library | Bounded implementation + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The catalog contains 1,566 canonical artifacts and a read-only inspection page; the bounded cohort now has 22 clean-text snapshots (19 native plus three Jina Reader recoveries). |
-| Feed audience routing | Active architecture review | The active project is deciding a minimal keep/drop plus audience-assignment contract on one exact envelope. Exact fields, consistency rules, evidence input, and prompt remain unfrozen until Adi reviews them. |
+| Feed audience routing | Implemented model boundary; small-cohort review active | Existing Feed triage remains the only keep/drop gate. Runtime v3 returns independent AI Engineering and Investment booleans plus evidence-grounded reasons, preserves the attributed primary/artifact/reaction hierarchy, and stores exact input/model/cost provenance. Two distinct envelopes route to both audiences; a third is paused while Adi reviews quality. Azure Responses prefix caching is currently intermittent despite a cache-eligible stable prompt and the proven shared adapter. |
 | Audience insight engine | Historical implementation preserved; not active | The previous split-audience extraction, review, editor, citation, and audit implementation remains in code and its learnings remain archived. Generated run data was deleted; no Insight result is live. |
 | Independent audit + recall | Implemented, fail-closed | An adjacent Luna-high publication audit rechecks every selection and a bounded reject sample without seeing rank or prior judgments. Exact false-negative adjudications and immutable finalization sidecars are hash-bound. The 73-packet/146-evaluation rank-blind recall cohort triggered bounded AI widening on exact days rather than a global rank-window expansion. |
 | Production publication boundary | Code preserved; no production data | The reconciliation and audit implementation remains available as prior work, but there are no source runs, adjacent audits, or canonical publication pair after the explicit data reset. It is not part of the live product until the simpler extraction contract proves useful. |
