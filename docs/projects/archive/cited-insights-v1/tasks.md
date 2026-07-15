@@ -4,9 +4,9 @@
 > delivery, alert, final-report, and submission milestones were not completed;
 > they were explicitly descoped when the product contract changed from one
 > blended record to two audience-specific editorial products. The successor is
-> `docs/projects/audience-insights-v2/tasks.md`. Durable v1 resources remain at
-> `docs/projects/cited-insights/resources/` so tracked manifests and historical
-> provenance do not move.
+> `docs/projects/audience-insights-v2/tasks.md`. Durable v1 resources now live
+> beside this archived tracker under `resources/`; tracked manifest references
+> were migrated with them on 2026-07-15.
 
 ## Goal
 

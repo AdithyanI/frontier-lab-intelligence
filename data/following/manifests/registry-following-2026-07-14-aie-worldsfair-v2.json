@@ -92,7 +92,7 @@
   },
   "commands": {
     "validate": "PYTHONPATH=src .venv/bin/python -m fli.cli following-snapshot validate --snapshot-db data/raw/following/registry-following-2026-07-14-aie-worldsfair-v2/snapshot.db --no-input",
-    "ranking": "PYTHONPATH=src .venv/bin/python -m fli.cli following-ranking overlap --snapshot-db data/raw/following/registry-following-2026-07-14-aie-worldsfair-v2/snapshot.db --registry-db data/fli.db --export-csv docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100.csv --export-unknown-csv docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100-unknown.csv --no-input"
+    "ranking": "PYTHONPATH=src .venv/bin/python -m fli.cli following-ranking overlap --snapshot-db data/raw/following/registry-following-2026-07-14-aie-worldsfair-v2/snapshot.db --registry-db data/fli.db --export-csv docs/projects/archive/cited-insights-v1/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100.csv --export-unknown-csv docs/projects/archive/cited-insights-v1/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100-unknown.csv --no-input"
   },
   "outputs": {
     "ranking": {
@@ -113,8 +113,8 @@
       "zero_support_registry_entities": 38,
       "final_dense_support_rank": 663,
       "review_artifacts": [
-        "docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100.csv",
-        "docs/projects/cited-insights/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100-unknown.csv"
+        "docs/projects/archive/cited-insights-v1/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100.csv",
+        "docs/projects/archive/cited-insights-v1/resources/network-source-architecture-audit/aie-worldsfair-overlap-top-100-unknown.csv"
       ],
       "scope_note": "Registry support is entity-union overlap only. Personalized PageRank was not rebuilt because it remains diagnostic and is not product-facing."
     }
