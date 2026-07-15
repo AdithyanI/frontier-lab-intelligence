@@ -20,11 +20,11 @@ from typing import Any
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v7"
+PROMPT_VERSION = "audience-routing-v8"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "high"
-PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v7.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v8.txt"
 PROMPT_CACHE_KEY = f"fli:audience-routing:{PROMPT_VERSION}"
 
 AUDIENCES = ("ai_engineering", "investment")
@@ -47,7 +47,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v7",
+    "name": "audience_routing_v8",
     "strict": True,
     "schema": {
         "type": "object",

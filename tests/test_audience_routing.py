@@ -120,16 +120,16 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v7_prompt_uses_soft_reason_word_guidance_without_truncation():
+def test_v8_prompt_uses_soft_reason_word_guidance_without_truncation():
     prompt = audience_routing.instructions()
 
-    assert audience_routing.PROMPT_VERSION == "audience-routing-v7"
+    assert audience_routing.PROMPT_VERSION == "audience-routing-v8"
     assert "Aim for roughly 40 to 50 words" in prompt
     assert "guidance, not a hard limit" in prompt
     assert "never truncate, reject, or add filler" in prompt
 
 
-def test_v7_prompt_defines_the_two_approved_audience_boundaries():
+def test_v8_prompt_defines_the_approved_audience_boundaries():
     prompt = audience_routing.instructions()
 
     assert "temporary access extensions or resets" in prompt
@@ -144,6 +144,9 @@ def test_v7_prompt_defines_the_two_approved_audience_boundaries():
     assert "do not reject an otherwise specific labor" in prompt
     assert "This rule applies only to AI Engineering" in prompt
     assert "reason must clearly preserve its epistemic status" in prompt
+    assert "Relevance is existential across the packet" in prompt
+    assert "must not erase a qualifying source" in prompt
+    assert "explicitly corrects, retracts, or disproves it" in prompt
 
 
 def test_render_input_uses_readable_hierarchy_before_separate_reactions():
@@ -307,7 +310,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v7",
+        "prompt:audience-routing-v8",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
