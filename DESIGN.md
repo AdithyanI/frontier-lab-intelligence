@@ -116,12 +116,13 @@ Rules:
   counts, load-more; rejected rows expose their reason in the table, while
   active rows show identity + truthful kind and open a detail card.
   All, People, and Organizations default to one stable Registry-wide **X
-  reach** order. Each cell leads with the entity's ordinal among all active
-  Registry entities and keeps the compact combined follower total as quieter
-  scale evidence (`#24 · 3.3M`). Search, kind filters, and pagination only hide
-  rows; they never recompute this rank. The separate sortable **Network
-  support** column leads with `N / voter denominator` and keeps a quieter
-  tie-aware ordinal among active X-addressable Registry entities. Support is
+  reach** order. Each metric cell shows only the entity's stable ordinal among
+  active Registry entities (`#24`) so the table remains scannable. Hovering a
+  metric reveals its compact underlying count in place; opening the entity
+  profile shows the exact count and rank together. Search, kind filters, and
+  pagination only hide rows; they never recompute this rank. The separate
+  sortable **Network support** column follows the same rank-first disclosure.
+  Support is
   the union of distinct active Registry entities following any represented X
   account owned by the target entity; self-support is excluded. The global
   account tiebreak position appears only in Ranking as candidate discovery.

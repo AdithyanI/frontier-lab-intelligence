@@ -9,6 +9,7 @@ import pytest
 from fli import (
     artifact_x_articles,
     artifacts,
+    audience_insight_evaluations,
     audience_insight_production_reconciliation as reconciliation,
     audience_insight_publication_audit as publication_audit,
     audience_insight_runs,
@@ -69,6 +70,7 @@ def _passing_audit_result(audit_item_id: str, meta) -> dict:
 
 def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, Path]:
     source = root / day / audience / "production-r1" / "insights.db"
+    run_id = f"production-{audience}-{day}-r1"
     event_id = f"event-{audience}-{day}"
     candidate_id = audience_insight_runs._candidate_id(day, audience, event_id)
     quote = f"Researcher reported a bounded result for {audience} on {day}."
@@ -106,6 +108,48 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
     ).hexdigest()
     conn = audience_insight_runs.connect_run(source)
     contracts = reconciliation.current_expected_contracts()[audience]
+    extraction_tags = json.dumps(
+        list(
+            audience_insights.request_tags(
+                audience=audience,
+                job="insight-extraction",
+                run=run_id,
+                day=day,
+                version=contracts["extraction"]["prompt_version"],
+            )
+        )
+    )
+    editor_tags = json.dumps(
+        list(
+            audience_insights.request_tags(
+                audience=audience,
+                job="daily-editor",
+                run=run_id,
+                day=day,
+                version=contracts["editor"]["prompt_version"],
+            )
+        )
+    )
+    review_tags = json.dumps(
+        list(
+            audience_insight_evaluations.request_tags(
+                audience=audience,
+                run=run_id,
+                day=day,
+                prompt_version=contracts["item_review"]["prompt_version"],
+            )
+        )
+    )
+    day_tags = json.dumps(
+        list(
+            audience_insight_evaluations.request_tags(
+                audience=audience,
+                run=run_id,
+                day=day,
+                prompt_version=contracts["day_review"]["prompt_version"],
+            )
+        )
+    )
     with conn:
         conn.execute(
             """INSERT INTO run_meta
@@ -128,7 +172,7 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
                        'day-schema', 'triage.db', 'artifacts.db', 50, ?,
                        ?, 1, ?, ?)""",
             (
-                f"production-{audience}-{day}-r1",
+                run_id,
                 audience,
                 day,
                 f"{audience}-insight-v2",
@@ -217,8 +261,12 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
             (candidate_id, NOW),
         )
         conn.execute(
+            "UPDATE candidate_item SET request_tags_json = ?",
+            (extraction_tags,),
+        )
+        conn.execute(
             "UPDATE candidate_attempt SET request_tags_json = ?",
-            (json.dumps(["app:frontier-lab-intelligence", "job:extraction"]),),
+            (extraction_tags,),
         )
         conn.execute(
             """INSERT INTO item_review
@@ -235,7 +283,7 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
                        'gpt-5.6-luna', 1200, 800, 0, 70, 0.003, ?, '{}', ?, ?)""",
             (
                 candidate_id,
-                json.dumps(["app:frontier-lab-intelligence", "job:item-review"]),
+                review_tags,
                 NOW,
                 NOW,
             ),
@@ -254,7 +302,7 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
                        'editor input', 'editor-cache', 1, NULL, 'resp-editor',
                        'gpt-5.6-luna', 1400, 900, 0, 80, 0.005, ?, '{}', ?, ?)""",
             (
-                json.dumps(["app:frontier-lab-intelligence", "job:editor"]),
+                editor_tags,
                 NOW,
                 NOW,
             ),
@@ -293,7 +341,7 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
                        ?, '{}', ?, ?)""",
             (
                 review_input,
-                json.dumps(["app:frontier-lab-intelligence", "job:day-review"]),
+                day_tags,
                 NOW,
                 NOW,
             ),

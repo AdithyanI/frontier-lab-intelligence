@@ -633,8 +633,36 @@ def _reject_zero_attempt_telemetry(
         )
 
 
+def _require_exact_request_tags(
+    rows: Iterable[Mapping[str, Any]],
+    expected: Iterable[str],
+    *,
+    stage: str,
+    source_path: Path,
+) -> None:
+    expected_json = _canonical_json(list(expected))
+    for row in rows:
+        # The generic telemetry validator owns the clearer null-field error.
+        if row["request_tags_json"] is None:
+            continue
+        try:
+            actual_json = _canonical_json(json.loads(str(row["request_tags_json"])))
+        except (TypeError, json.JSONDecodeError) as exc:
+            raise ProductionReconciliationError(
+                f"{stage} request tags are invalid: {source_path}"
+            ) from exc
+        if actual_json != expected_json:
+            raise ProductionReconciliationError(
+                f"{stage} request tags do not match the frozen contract: "
+                f"{source_path}"
+            )
+
+
 def _source_telemetry(
-    conn: sqlite3.Connection, *, source_path: Path
+    conn: sqlite3.Connection,
+    meta: Mapping[str, Any],
+    *,
+    source_path: Path,
 ) -> dict[str, dict[str, Any]]:
     extraction_rows = conn.execute(
         """SELECT candidate_id,
@@ -658,6 +686,18 @@ def _source_telemetry(
         stage="extraction",
         source_path=source_path,
     )
+    _require_exact_request_tags(
+        extraction_rows,
+        audience_insights.request_tags(
+            audience=str(meta["audience"]),
+            job="insight-extraction",
+            run=str(meta["run_id"]),
+            day=str(meta["day"]),
+            version=str(meta["prompt_version"]),
+        ),
+        stage="extraction",
+        source_path=source_path,
+    )
     extraction_attempts = sum(extraction_expected.values())
     _reject_zero_attempt_telemetry(
         conn, table="item_review", stage="review", source_path=source_path
@@ -669,6 +709,17 @@ def _source_telemetry(
                   request_tags_json
            FROM item_review WHERE attempts > 0"""
     ).fetchall()
+    _require_exact_request_tags(
+        review_rows,
+        audience_insight_evaluations.request_tags(
+            audience=str(meta["audience"]),
+            run=str(meta["run_id"]),
+            day=str(meta["day"]),
+            prompt_version=str(meta["item_review_prompt_version"]),
+        ),
+        stage="review",
+        source_path=source_path,
+    )
     review_attempts = int(
         conn.execute("SELECT COALESCE(SUM(attempts), 0) FROM item_review").fetchone()[0]
     )
@@ -682,6 +733,18 @@ def _source_telemetry(
                   request_tags_json
            FROM editor_run WHERE attempts > 0"""
     ).fetchall()
+    _require_exact_request_tags(
+        editor_rows,
+        audience_insights.request_tags(
+            audience=str(meta["audience"]),
+            job="daily-editor",
+            run=str(meta["run_id"]),
+            day=str(meta["day"]),
+            version=str(meta["editor_prompt_version"]),
+        ),
+        stage="editor",
+        source_path=source_path,
+    )
     editor_attempts = int(
         conn.execute("SELECT COALESCE(SUM(attempts), 0) FROM editor_run").fetchone()[0]
     )
@@ -707,6 +770,17 @@ def _source_telemetry(
                   request_tags_json
            FROM reconciled_day_set_review WHERE attempts > 0"""
     ).fetchall()
+    _require_exact_request_tags(
+        day_rows,
+        audience_insight_evaluations.request_tags(
+            audience=str(meta["audience"]),
+            run=str(meta["run_id"]),
+            day=str(meta["day"]),
+            prompt_version=str(meta["day_review_prompt_version"]),
+        ),
+        stage="day",
+        source_path=source_path,
+    )
     day_attempts = int(
         conn.execute(
             """SELECT
@@ -1114,7 +1188,11 @@ def _inspect_run(
             raise ProductionReconciliationError(
                 f"audit selected count drift: {audit_path}"
             )
-        source_telemetry = _source_telemetry(source, source_path=source_path)
+        source_telemetry = _source_telemetry(
+            source,
+            meta,
+            source_path=source_path,
+        )
         source_telemetry["audit"] = _audit_telemetry(
             audit, source_path=audit_path
         )

@@ -23,6 +23,25 @@ const compactFmt = new Intl.NumberFormat('en-US', {
 })
 const fmtCompact = (n: number | null | undefined) =>
   n == null ? '—' : compactFmt.format(n)
+
+function RegistryMetric({
+  rank,
+  detail,
+  accessibleLabel,
+}: {
+  rank: string
+  detail: string
+  accessibleLabel: string
+}) {
+  return (
+    <span className="ent-metric">
+      <span className="ent-metric-accessible">{accessibleLabel}</span>
+      <span className="ent-metric-rank" aria-hidden="true">{rank}</span>
+      <span className="ent-metric-detail" aria-hidden="true">{detail}</span>
+    </span>
+  )
+}
+
 const snapshotDate = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
@@ -350,54 +369,28 @@ export default function Registry() {
                     </td>
                   )}
                   {showNetworkRankColumn && (
-                    <td
-                      className="ent-network-rank"
-                      title={
-                        entity.network_rank == null
-                          ? 'No entity-level support is available in the current network snapshot.'
-                          : `${fmt(entity.network_follow_count)} of ${fmt(entity.network_source_total)} complete active Registry entities follow at least one of its ${fmt(entity.network_channel_count)} verified Registry X accounts · tied #${fmt(entity.network_rank)} among ${fmt(entity.network_rank_total)} active Registry entities with stable X identity. Self-support is excluded.`
-                      }
-                    >
+                    <td className="ent-network-rank">
                       {entity.network_rank == null
                         ? '—'
                         : (
-                          <span className="ent-network-value">
-                            <span className="ent-network-rank-value">
-                              {fmt(entity.network_follow_count)}/{fmt(entity.network_source_total)}
-                            </span>
-                            <span className="ent-network-separator" aria-hidden="true">
-                              ·
-                            </span>
-                            <span className="ent-network-magnitude">
-                              #{fmt(entity.network_rank)}
-                            </span>
-                          </span>
+                          <RegistryMetric
+                            rank={`#${fmt(entity.network_rank)}`}
+                            detail={`${fmt(entity.network_follow_count)} followers`}
+                            accessibleLabel={`Network support rank ${fmt(entity.network_rank)} of ${fmt(entity.network_rank_total)}. ${fmt(entity.network_follow_count)} of ${fmt(entity.network_source_total)} screened Registry entities follow this entity.`}
+                          />
                         )}
                     </td>
                   )}
                   {showFollowerColumn && (
-                    <td
-                      className="ent-reach"
-                      title={
-                        entity.reach_rank == null
-                          ? 'No observed X follower total is available for this entity.'
-                          : `#${fmt(entity.reach_rank)} of ${fmt(data.reach_rank_total)} active Registry entities · ${fmt(entity.followers_count)} combined X followers.`
-                      }
-                    >
+                    <td className="ent-reach">
                       {entity.reach_rank == null ? (
                         '—'
                       ) : (
-                        <span className="ent-reach-value">
-                          <span className="ent-reach-rank">
-                            #{fmt(entity.reach_rank)}
-                          </span>
-                          <span className="ent-reach-separator" aria-hidden="true">
-                            ·
-                          </span>
-                          <span className="ent-reach-magnitude">
-                            {fmtCompact(entity.followers_count)}
-                          </span>
-                        </span>
+                        <RegistryMetric
+                          rank={`#${fmt(entity.reach_rank)}`}
+                          detail={`${fmtCompact(entity.followers_count)} followers`}
+                          accessibleLabel={`X reach rank ${fmt(entity.reach_rank)} of ${fmt(data.reach_rank_total)}. ${fmt(entity.followers_count)} combined X followers.`}
+                        />
                       )}
                     </td>
                   )}
@@ -429,7 +422,44 @@ export default function Registry() {
         </button>
       )}
 
-      <EntityCard entity={selected} onClose={() => setSelected(null)} />
+      <EntityCard
+        entity={selected}
+        context={selected && showFollowerColumn ? (
+          <dl className="registry-card-metrics" aria-label="Registry positions">
+            <div>
+              <dt>Network support</dt>
+              <dd>
+                <strong>
+                  {selected.network_follow_count == null
+                    ? '—'
+                    : fmt(selected.network_follow_count)}
+                </strong>
+                <span>
+                  {selected.network_rank == null
+                    ? 'No current rank'
+                    : `Rank #${fmt(selected.network_rank)} · ${fmt(selected.network_source_total)} screened entities`}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt>X reach</dt>
+              <dd>
+                <strong>
+                  {selected.followers_count == null
+                    ? '—'
+                    : fmt(selected.followers_count)}
+                </strong>
+                <span>
+                  {selected.reach_rank == null
+                    ? 'No current rank'
+                    : `Rank #${fmt(selected.reach_rank)} · combined followers`}
+                </span>
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+        onClose={() => setSelected(null)}
+      />
     </section>
   )
 }
