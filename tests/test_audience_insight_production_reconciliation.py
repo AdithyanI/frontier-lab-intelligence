@@ -1,5 +1,6 @@
 import hashlib
 import json
+import shutil
 import sqlite3
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from fli import (
     audience_insight_runs,
     cli,
 )
+from fli.web import insights as insight_store
 
 
 DAY = "2026-07-11"
@@ -361,6 +363,47 @@ def _manifest(
     path = tmp_path / "manifest.json"
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return path, payload
+
+
+def _write_canonical_web_pair(
+    root: Path, source_manifest: Path
+) -> tuple[Path, dict]:
+    publication_dir = root / insight_store.PRODUCTION_RECONCILIATION_DIR
+    publication_dir.mkdir(parents=True, exist_ok=True)
+    manifest = publication_dir / insight_store.PRODUCTION_RECONCILIATION_MANIFEST
+    manifest.write_text(source_manifest.read_text())
+    report = reconciliation.evaluate_manifest(manifest)
+    reconciliation.write_report(
+        report,
+        publication_dir / insight_store.PRODUCTION_RECONCILIATION_REPORT,
+    )
+    return manifest, report
+
+
+def _refreeze_passing_audit(source: Path, audit_db: Path) -> None:
+    audit = publication_audit.connect(audit_db)
+    source_conn = sqlite3.connect(source)
+    audience, day = source_conn.execute(
+        "SELECT audience, day FROM run_meta WHERE singleton = 1"
+    ).fetchone()
+    source_conn.close()
+    publication_audit.freeze_audit(
+        audit,
+        audit_id=f"publication-audit-{audience}-{day}",
+        source_run_db=source,
+        reject_sample_limit=0,
+    )
+    meta = audit.execute("SELECT * FROM audit_run WHERE singleton = 1").fetchone()
+    for row in audit.execute(
+        "SELECT * FROM audit_item ORDER BY audit_item_id"
+    ).fetchall():
+        publication_audit._store_success(
+            audit,
+            row,
+            meta,
+            _passing_audit_result(str(row["audit_item_id"]), meta),
+        )
+    audit.close()
 
 
 def _seed_terminal_x_article(path: Path) -> str:
@@ -790,3 +833,86 @@ def test_explicit_x_article_cohort_reports_terminal_state(tmp_path):
     assert cohort["items"][0]["status"] == "success"
     assert cohort["items"][0]["raw_sha256"]
     assert cohort["items"][0]["text_sha256"]
+
+
+def test_default_web_rejects_same_identity_source_and_audit_replacement(
+    tmp_path, monkeypatch
+):
+    source_manifest, payload = _manifest(tmp_path)
+    canonical_manifest, stored_report = _write_canonical_web_pair(
+        tmp_path, source_manifest
+    )
+    monkeypatch.setattr(insight_store, "DEFAULT_INSIGHTS_ROOT", tmp_path)
+    assert insight_store.insight_dates_payload(audience="investment")[
+        "available"
+    ]
+
+    entry = next(
+        row for row in payload["runs"] if row["audience"] == "investment"
+    )
+    source = Path(entry["source_run_db"])
+    audit_db = Path(entry["audit_db"])
+    shutil.rmtree(source.parent)
+    replacement_source, replacement_audit = _complete_run(
+        tmp_path / "runs", audience="investment", day=DAY
+    )
+    assert replacement_source == source
+    assert replacement_audit == audit_db
+
+    shutil.rmtree(replacement_audit.parent)
+    conn = sqlite3.connect(replacement_source)
+    conn.execute(
+        "UPDATE candidate_item SET claim = ?",
+        ("A different same-identity experimental claim.",),
+    )
+    conn.commit()
+    conn.close()
+    _refreeze_passing_audit(replacement_source, replacement_audit)
+
+    replacement_report = reconciliation.evaluate_manifest(canonical_manifest)
+    assert replacement_report["passed"] is True
+    assert replacement_report != stored_report
+    assert insight_store.insight_dates_payload(audience="investment") == {
+        "available": False,
+        "reason": "No completed investment insight days exist yet.",
+        "audience": "investment",
+        "latest_date": None,
+        "dates": [],
+    }
+
+
+def test_default_web_rejects_bound_x_article_snapshot_drift(
+    tmp_path, monkeypatch
+):
+    artifact_db = tmp_path / "artifacts.db"
+    artifact_id = _seed_terminal_x_article(artifact_db)
+    source_manifest, _payload = _manifest(
+        tmp_path,
+        x_article_cohort={
+            "artifact_db": str(artifact_db),
+            "artifact_ids": [artifact_id],
+        },
+    )
+    _write_canonical_web_pair(tmp_path, source_manifest)
+    monkeypatch.setattr(insight_store, "DEFAULT_INSIGHTS_ROOT", tmp_path)
+    assert insight_store.insight_dates_payload(audience="investment")[
+        "available"
+    ]
+
+    conn = sqlite3.connect(artifact_db)
+    text_snapshot = Path(
+        conn.execute(
+            "SELECT text_snapshot_ref FROM artifact_fetch WHERE artifact_id = ?",
+            (artifact_id,),
+        ).fetchone()[0]
+    )
+    conn.close()
+    text_snapshot.write_text("Tampered X Article body.\n")
+
+    assert insight_store.insight_dates_payload(audience="investment") == {
+        "available": False,
+        "reason": "No completed investment insight days exist yet.",
+        "audience": "investment",
+        "latest_date": None,
+        "dates": [],
+    }

@@ -74,8 +74,10 @@ does not improve rubric coverage, demo proof, or interview discussion. See
 - To see UI changes: `npm --prefix frontend run build` (writes into
   `src/fli/web/dist`, which the always-on server hosts), then reload
   `127.0.0.1:8797`.
-- Use `$agent-browser` for UI inspection and screenshots. Use the in-app
-  Browser only when Adi explicitly asks to control that side-by-side surface.
+- In Codex Desktop, prefer the in-app Browser for collaborative visual
+  inspection when it is available. Use `$agent-browser` for repeatable or
+  automation-heavy UI checks and as the fallback when the in-app Browser is
+  unavailable.
   Put disposable captures in `tmp/`; presentation assets explicitly requested
   for reuse belong under `docs/references/`.
 - **Desktop-first for now:** design and polish the desktop view; do not spend
