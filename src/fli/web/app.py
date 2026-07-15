@@ -15,6 +15,7 @@ Endpoints:
 - /api/events                    Registry-aware exact structural event groups
 - /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
+- /api/artifacts/{id}/text       normalized readable artifact snapshot
 - /api/insights/dates            materialized citation-verified insight dates
 - /api/insights                  citation-verified insight proof
 """

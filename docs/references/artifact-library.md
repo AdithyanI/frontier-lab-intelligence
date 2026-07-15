@@ -91,6 +91,13 @@ bounded decoding. A page that exposes only a client-rendered loading/error shell
 is a terminal extraction failure rather than misleading clean text. Successful
 raw and text payloads are written atomically under their SHA-256 paths.
 
+The Artifact UI loads normalized text only when a retrieved row is expanded,
+shows the extractor and character count beside a bounded preview, and links to
+`/api/artifacts/{artifact_id}/text` for the complete plain-text response. The
+endpoint resolves the content-addressed snapshot server-side and never exposes
+local filesystem paths. Jina Reader snapshots preserve Markdown syntax; HTML,
+PDF, and X Article adapters expose their normalized text representation.
+
 `jina-reader-v1` is a narrow second attempt for ordinary public HTML pages
 that already failed `bounded-public-v1`. It calls Jina Reader through its JSON
 API, preserves the complete provider response as the raw snapshot, stores the
