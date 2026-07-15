@@ -236,10 +236,13 @@ Application invariants:
 - Which reply and quote-post blocks belong in the model packet, and when does a
   deterministic size bound become necessary? Inspect real packet sizes before
   choosing a top-N rule.
-- The first eight top-kept envelopes are enough to review the mechanics and
-  positive audience splits, but not the `neither` threshold. After Adi's UI
-  audit, choose a bounded hard-negative sample rather than expanding the full
-  catalog automatically.
+- The contextual audit found two likely Investment false negatives and an
+  inconsistent Engineering boundary for temporary access/rate-limit changes.
+  Adi must decide whether to adopt the narrow clarification proposed in
+  `resources/top10-contextual-audit-v1.md` before a targeted rerun.
+- One Claude Code article was extracted as redacted block characters. Add
+  deterministic artifact-content validation so an incomplete packet does not
+  silently look like a substantive `neither` result.
 
 ## Current Batch
 
@@ -248,13 +251,16 @@ Application invariants:
 | done | Simplify production audience routing to GPT-5.4 mini with one stable prompt key, sequential execution, and no sharding, retention override, or padding. | parent | `resources/audience-routing-v3-cache-diagnostic.md` |
 | done | Freeze and route the top 10 ranked Evidence envelopes for every available Feed day at high reasoning. | parent | `resources/top10-every-day-v4-mini.md` |
 | done | Verify per-day completeness, cache reads, cost, audience distribution, and existing Feed projection. | parent | `resources/top10-every-day-v4-mini.md` |
-| in_progress | Hand the multi-day cohort to Adi for qualitative audit before Insight generation or full-catalog expansion. | parent | `resources/top10-every-day-v4-mini.md` |
+| done | Contextually audit 26 stratified packets against the exact stored evidence and approved audience standards. | parent | `resources/top10-contextual-audit-v1.md` |
+| in_progress | Decide whether to add the two narrow boundary clarifications and rerun only the five disputed/borderline packets. | parent | `resources/top10-contextual-audit-v1.md` |
 
 ## Backlog / Remaining Work
 
 - [ ] Add deterministic packet-integrity and schema-consistency validation.
-- [ ] Audit a bounded sample of difficult low-ranked Evidence to calibrate
-  `neither`; there is no upstream model gate to sample from.
+- [x] Audit a stratified sample of both, single-audience, and `neither`
+  outcomes from the authorized top-10 cohort.
+- [ ] After the current boundary decision, audit a bounded sample of difficult
+  low-ranked Evidence before any full-catalog expansion.
 - [x] Expand the audit cohort to the authorized top 10 for every complete day.
 - [x] Add the read-only API projection and compact positive Feed audience marks
   and reasons without reading archived Insight data.
@@ -398,3 +404,14 @@ Application invariants:
   305,600 input tokens. Eighty-nine cost headers total $0.462966; one July 13
   call omitted the header. All databases have integrity `ok`, no sharding
   column, and the Feed API selects the exact 10-record run on every day.
+- 2026-07-15: [REVIEWED] Contextually audited 26 packets across all four
+  outcomes against their exact stored sources. Twenty-one were clear
+  agreements, three exposed an underdefined access/rate-limit boundary, and
+  two were likely Investment false negatives caused by imposing a stronger
+  verification requirement than the prompt. Fifteen repeated events had zero
+  label conflicts, reasons stayed near the requested length, and no reviewed
+  reason clearly invented or misattributed packet evidence. Also identified a
+  redacted Claude Code artifact as an upstream input-integrity failure. The
+  proposed narrow clarification and exact cases are recorded in
+  `resources/top10-contextual-audit-v1.md`; Adi's boundary decision remains the
+  project closeout blocker.
