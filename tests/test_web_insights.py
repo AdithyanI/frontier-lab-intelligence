@@ -690,6 +690,11 @@ def _write_reconciliation_report(root, paths, *, passed=True):
                 "audience": str(row["audience"]),
                 "day": str(row["day"]),
                 "source_run_db": str(path.resolve()),
+                "release_status": (
+                    insight_store.audience_insight_production_reconciliation
+                    .RELEASE_STATUS_PUBLISHABLE
+                ),
+                "counts": {"effective_publication": 1},
             }
         )
     report = {

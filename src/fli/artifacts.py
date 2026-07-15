@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import urlsplit
 
-from fli import artifact_urls, signal_events, signal_feed, sources
+from fli import artifact_urls, evidence_lineage, signal_events, signal_feed, sources
 
 
 SCHEMA_VERSION = "artifact-store-v1"
@@ -521,7 +521,14 @@ def _iter_frozen_candidates(
         )
         for row in rows:
             envelope = json.loads(row["envelope_json"])
+            primary_post_ids = evidence_lineage.verified_primary_post_ids(
+                feed,
+                feed_run_id=feed_run_id,
+                envelope=envelope,
+            )
             for post_id, targets in _candidate_targets(envelope).items():
+                if post_id not in primary_post_ids:
+                    continue
                 post = feed.execute(
                     """SELECT * FROM feed_post
                        WHERE run_id = ? AND provider = 'twitterapi_io'
@@ -789,7 +796,7 @@ def import_kept_envelopes(
             feed_run["run_id"],
             event_run["run_id"],
             _canonical_json(manifest),
-            "latest-complete-per-day-kept-envelopes-v1",
+            "kept-envelope-primary-author-thread-artifacts-v1",
             fingerprint,
             len(candidates),
             stable_time,

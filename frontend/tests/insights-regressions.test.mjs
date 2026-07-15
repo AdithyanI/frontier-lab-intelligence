@@ -27,25 +27,23 @@ test('Insights keeps Investment and AI engineering as independent URL-backed vie
   assert.match(insightSource, /aria-label="Insight audience"/)
 })
 
-test('Insights fetches and guards audience-specific date and item responses', () => {
-  assert.match(insightSource, /'\/api\/insights\/extracted\/dates'/)
-  assert.match(insightSource, /'\/api\/insights\/dates'/)
-  assert.match(insightSource, /'\/api\/insights\/extracted'/)
-  assert.match(insightSource, /'\/api\/insights'/)
-  assert.match(insightSource, /type InsightView = 'extracted' \| 'reviewed'/)
-  assert.match(insightSource, /nextParams\.set\('view', nextInsightView\)/)
+test('Insights exposes one Feed-ranked path and guards audience-specific responses', () => {
+  assert.match(insightSource, /`\/api\/insights\/extracted\/dates\?audience=\$\{audience\}`/)
+  assert.match(insightSource, /`\/api\/insights\/extracted\?audience=\$\{audience\}&date=\$\{selectedDate\}`/)
+  assert.doesNotMatch(insightSource, /Reviewed brief/)
+  assert.doesNotMatch(insightSource, /Insight processing view/)
+  assert.match(insightSource, /nextParams\.delete\('view'\)/)
   assert.match(insightSource, /activeDatesViewRef\.current !== viewKey/)
   assert.match(insightSource, /activeDataViewRef\.current !== viewKey/)
   assert.match(insightSource, /dataView\?\.viewKey === selectedViewKey/)
   assert.match(insightSource, /loading=\{datesLoading\}/)
 })
 
-test('Insights makes editorial rank primary and Feed rank secondary provenance', () => {
-  assert.match(insightSource, /<strong>#\{item\.editorial_rank\}<\/strong>/)
-  assert.match(insightSource, /<span>Editorial rank<\/span>/)
-  assert.match(insightSource, /className="insight-feed-rank insight-feed-rank--link"/)
+test('Insights makes the current Feed rank the only displayed rank', () => {
+  assert.match(insightSource, /<strong>\{item\.feed_rank === null \? '—' : `#\$\{item\.feed_rank\}`\}<\/strong>/)
+  assert.match(insightSource, /<span>Feed rank ↗<\/span>/)
+  assert.doesNotMatch(insightSource, /Editorial rank/)
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)
-  assert.match(appStyles, /\.insight-feed-rank \{[\s\S]*?color: var\(--muted\);/)
 })
 
 test('Insights links every Feed rank to its exact dated Feed envelope', () => {
@@ -63,8 +61,6 @@ test('Insights exposes audience decisions and exact citation evidence in plain l
   assert.match(insightSource, /what_to_watch/)
   assert.match(insightSource, /engineering_action/)
   assert.match(insightSource, /validation_boundary/)
-  assert.match(insightSource, /ACTION_TYPE_LABELS/)
-  assert.match(insightSource, /DECISION_VALUE_LABELS/)
   assert.match(insightSource, /Exact source passage/)
   assert.match(insightSource, /decodeTextEntities\(item\.citation\.quote\)/)
   assert.match(insightSource, /Open envelope ↗/)
@@ -86,7 +82,7 @@ test('Insights safely decodes source entities for display without interpreting m
 test('Insights gives each analysis region and source link an insight-specific name', () => {
   assert.match(
     insightSource,
-    /const accessibleName = `editorial rank \$\{item\.editorial_rank\}: \$\{decodeTextEntities\(item\.claim\)\}`/,
+    /const accessibleName = `\$\{feedRankLabel\}: \$\{decodeTextEntities\(item\.claim\)\}`/,
   )
   assert.match(insightSource, /aria-label=\{`Investment analysis for \$\{accessibleName\}`\}/)
   assert.match(insightSource, /aria-label=\{`AI engineering analysis for \$\{accessibleName\}`\}/)

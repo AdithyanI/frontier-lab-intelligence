@@ -259,6 +259,14 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 ## Decisions
 
+- 2026-07-15: Insight derivation uses a strict primary-author evidence boundary.
+  A packet may contain the root post, a structurally connected same-X-account
+  reply continuation, and artifacts linked by those posts. Other authors'
+  quotes, replies, links, and artifacts remain inspectable reactions in
+  Evidence but cannot support or anchor the root envelope's Insight. Enforce
+  this both during artifact admission and packet assembly, then regenerate
+  affected derived data.
+
 - 2026-07-14: Archive v1 and start a clean v2 tracker because the audience
   contract materially changed and the 725-line tracker obscured the live work.
 - 2026-07-14: One shared evidence/citation core, two independent editorial
@@ -339,12 +347,12 @@ finish with an honest quality assessment, limitations, and the next best test.
   Investment analysis too willing to promote a partner testimonial into
   demand/adoption validation. Do not retain it for nonzero yield. Recover a
   genuinely primary commercial disclosure or preserve the honest sparse set.
-- 2026-07-15: Keep the existing reviewed publication pipeline intact, but make
-  the simpler baseline inspectable first. Insights now defaults to a
-  “Feed-ranked” comparison that reads existing citation-bound `candidate_item`
-  extractions directly from production run databases, ordered by original Feed
-  rank across Jul 5–13. “Reviewed brief” remains a separate view for direct
-  comparison once the canonical publication pair is materialized.
+- 2026-07-15: Pause the reviewed-publication product layer and rebuild Insights
+  with Adi one step at a time. The visible product has one Feed-ranked view over
+  existing citation-bound `candidate_item` extractions; the reviewed/audit data
+  remains preserved in the pipeline but is not exposed as a second UI mode.
+  Do not resume canonical publication finalization until the minimal extraction
+  schema and prompt have been reviewed together.
 - 2026-07-15: Corrected production chronology must pass every exact earlier
   canonical run DB through repeated `--prior-run-db` arguments in ascending day
   order. The runner validates the whole chain plus adjacent audits/finalizations
@@ -361,7 +369,8 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Freeze the corrected chronological production suffix, including exact adjacent audits/finalizations and the Investment product-quality recovery decision. | parent | `data/derived/audience-insights-v2/` |
+| in_progress | Remove reaction evidence from artifact admission and Insight packets; rebuild associations and prove the Satya/Eve envelope resolves only to Satya's primary evidence. | parent | `data/derived/artifacts/artifacts.db` |
+| pending | Regenerate the simple Feed-ranked Insights from the cleaned evidence boundary and inspect affected days with Adi before resuming editorial closeout. | parent | `data/derived/audience-insights-v2/` |
 | done | Prepare conceptual status, architecture, evaluation, tracker, and project learnings for exact final-count insertion; do not archive before the canonical report and browser proof. | documenter | `resources/quality-evaluation.md` |
 | pending | Materialize the canonical 18-cell manifest/report, build the live SPA, perform rendered two-audience QA with `agent-browser`, reconcile exact spend/cache evidence, run check-fast, and archive. | parent | `resources/quality-evaluation.md` |
 
@@ -399,6 +408,12 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 ## Progress Log
 
+- 2026-07-15: [PRODUCT RESET] Removed the public Feed-ranked / Reviewed brief
+  split and returned Insights to one Feed-ranked extraction view. Old `view`
+  parameters normalize away; reviewed/audit data remains preserved but is not
+  a product mode. Frontend tests, build, and rendered browser proof pass. The
+  next schema change is intentionally paused until Adi reviews the minimal
+  canonical result contract.
 - 2026-07-14: [PLANNING] Archived the superseded blended v1 tracker, opened the
   audience-specific v2 project, confirmed nine complete days and 664 kept
   top-100 candidates, and identified the documented provider X Article endpoint.

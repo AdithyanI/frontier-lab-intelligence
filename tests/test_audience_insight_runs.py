@@ -49,7 +49,8 @@ def _source_databases(tmp_path):
     artifact = sqlite3.connect(artifact_db)
     artifact.executescript(
         """CREATE TABLE artifact_import_candidate (
-               event_id TEXT, decision TEXT, artifact_id TEXT
+               event_id TEXT, decision TEXT, artifact_id TEXT,
+               source_external_id TEXT
            );
            CREATE TABLE artifact (
                artifact_id TEXT, canonical_url TEXT, title TEXT
@@ -63,6 +64,90 @@ def _source_databases(tmp_path):
     artifact.commit()
     artifact.close()
     return triage_db, artifact_db
+
+
+def test_frozen_packet_excludes_other_author_reactions_and_artifacts(tmp_path):
+    triage_db, artifact_db = _source_databases(tmp_path)
+    triage = sqlite3.connect(triage_db)
+    envelope = json.loads(
+        triage.execute(
+            "SELECT envelope_json FROM triage_item WHERE event_id = 'event-1'"
+        ).fetchone()[0]
+    )
+    envelope["related_posts"] = [
+        {
+            "post_id": "post-1-reply",
+            "author": "@author",
+            "text": "The root author adds implementation details.",
+            "relation": "reply",
+            "same_author_as_root": True,
+        },
+        {
+            "post_id": "post-reaction",
+            "author": "@someone_else",
+            "text": "A different person promotes an unrelated tool.",
+            "relation": "quote",
+            "same_author_as_root": False,
+        },
+    ]
+    triage.execute(
+        "UPDATE triage_item SET envelope_json = ? WHERE event_id = 'event-1'",
+        (json.dumps(envelope),),
+    )
+    triage.commit()
+    triage.close()
+
+    artifact = sqlite3.connect(artifact_db)
+    for artifact_id, post_id, text in (
+        ("artifact-root", "post-1", "Root artifact evidence."),
+        ("artifact-reply", "post-1-reply", "Same-author reply artifact."),
+        ("artifact-reaction", "post-reaction", "Unrelated reaction artifact."),
+    ):
+        snapshot = tmp_path / f"{artifact_id}.txt"
+        snapshot.write_text(text)
+        artifact.execute(
+            "INSERT INTO artifact_import_candidate VALUES (?, 'accepted', ?, ?)",
+            ("event-1", artifact_id, post_id),
+        )
+        artifact.execute(
+            "INSERT INTO artifact VALUES (?, ?, ?)",
+            (artifact_id, f"https://example.com/{artifact_id}", artifact_id),
+        )
+        artifact.execute(
+            "INSERT INTO artifact_fetch VALUES (?, ?, 'success', ?, ?, ?)",
+            (
+                f"fetch-{artifact_id}",
+                artifact_id,
+                str(snapshot),
+                hashlib.sha256(text.encode()).hexdigest(),
+                "2026-07-11T12:00:00+00:00",
+            ),
+        )
+    artifact.commit()
+    artifact.close()
+
+    conn = audience_insight_runs.connect_run(tmp_path / "strict" / "insights.db")
+    audience_insight_runs.freeze_run(
+        conn,
+        run_id="strict-primary-author-only",
+        audience="ai_engineering",
+        day="2026-07-11",
+        triage_db=triage_db,
+        artifact_db=artifact_db,
+    )
+
+    packet = json.loads(
+        conn.execute("SELECT packet_json FROM candidate_item").fetchone()[0]
+    )
+    source_ids = [source["source_id"] for source in packet["sources"]]
+    assert source_ids == [
+        "post-1",
+        "post-1-reply",
+        "artifact-reply",
+        "artifact-root",
+    ]
+    assert "post-reaction" not in source_ids
+    assert "artifact-reaction" not in source_ids
 
 
 def _extraction_result(packet):

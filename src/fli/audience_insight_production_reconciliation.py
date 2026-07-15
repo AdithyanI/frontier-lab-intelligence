@@ -31,6 +31,31 @@ MANIFEST_SCHEMA_VERSION = "audience-insight-production-reconciliation-manifest-v
 REPORT_SCHEMA_VERSION = "audience-insight-production-reconciliation-report-v2"
 RECONCILIATION_VERSION = "audience-insight-production-reconciliation-v2"
 RECONCILIATION_MODES = ("partial", "final")
+RELEASE_STATUS_PUBLISHABLE = "publishable"
+RELEASE_STATUS_INTERNAL_GATE_QUARANTINE = "internal_gate_quarantine"
+RELEASE_STATUSES = (
+    RELEASE_STATUS_PUBLISHABLE,
+    RELEASE_STATUS_INTERNAL_GATE_QUARANTINE,
+)
+QUARANTINE_FAILURE_REASONS = ("no_padding",)
+QUALITY_GATE_CHECKS = frozenset(
+    {
+        "selected_ids_valid",
+        "selected_ids_unique",
+        "selected_count_within_editor_bound",
+        "schema_checks_passed",
+        "citation_checks_passed",
+        "editor_output_valid",
+        "reviewer_coverage",
+        "day_set_review_valid",
+        "claim_fidelity_and_epistemics",
+        "quality_threshold",
+        "thin_day_honest_and_all_quality",
+        "no_duplicate_stories",
+        "no_padding",
+        "no_unhandled_items",
+    }
+)
 FINAL_DAYS = tuple(f"2026-07-{day:02d}" for day in range(5, 14))
 CONTRACT_STAGES = ("extraction", "editor", "item_review", "day_review")
 CONTRACT_FIELDS = {
@@ -370,6 +395,7 @@ def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
                 "audit_db",
                 "expected_selected_count",
                 "finalization_path",
+                "release_status",
             },
             label=f"runs[{index}]",
         )
@@ -414,6 +440,12 @@ def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
             raise ProductionReconciliationError(
                 f"runs[{index}].expected_selected_count must be non-negative"
             )
+        release_status = raw["release_status"]
+        if release_status not in RELEASE_STATUSES:
+            raise ProductionReconciliationError(
+                f"runs[{index}].release_status must be one of "
+                f"{list(RELEASE_STATUSES)}"
+            )
         raw_finalization = raw["finalization_path"]
         if raw_finalization is None:
             finalization_path = None
@@ -436,6 +468,13 @@ def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
                     f"duplicate finalization sidecar: {finalization_path}"
                 )
             seen_finalization_paths.add(finalization_path)
+        if (
+            release_status == RELEASE_STATUS_INTERNAL_GATE_QUARANTINE
+            and finalization_path is not None
+        ):
+            raise ProductionReconciliationError(
+                f"runs[{index}] internal-gate quarantine cannot name a finalization"
+            )
         normalized_runs.append(
             {
                 "audience": audience,
@@ -443,6 +482,7 @@ def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
                 "source_run_db": str(source_path),
                 "audit_db": str(audit_path),
                 "expected_selected_count": selected_count,
+                "release_status": release_status,
                 "finalization_path": (
                     str(finalization_path) if finalization_path is not None else None
                 ),
@@ -1143,6 +1183,131 @@ def _validate_frozen_cohort(
     }
 
 
+def _row_sha256(row: Mapping[str, Any]) -> str:
+    return _sha256(_canonical_json(dict(row)))
+
+
+def _review_selected_ids(row: Mapping[str, Any], *, label: str) -> list[str]:
+    try:
+        payload = json.loads(str(row["input_text"]))
+        selected = payload["selected"]
+        ids = [str(item["candidate_id"]) for item in selected]
+    except (KeyError, TypeError, json.JSONDecodeError) as exc:
+        raise ProductionReconciliationError(
+            f"{label} does not bind an exact selected set"
+        ) from exc
+    if len(ids) != len(set(ids)) or any(not value for value in ids):
+        raise ProductionReconciliationError(
+            f"{label} selected IDs are invalid"
+        )
+    return ids
+
+
+def _same_exact_ids(actual: list[str], expected: list[str]) -> bool:
+    return len(actual) == len(expected) and set(actual) == set(expected)
+
+
+def _validate_internal_gate_quarantine(
+    source: sqlite3.Connection,
+    *,
+    source_path: Path,
+    gate: Mapping[str, Any],
+    gate_result: Mapping[str, Any],
+    day_review: Mapping[str, Any],
+    reconciliation: Mapping[str, Any] | None,
+    reconciled_review: Mapping[str, Any] | None,
+    base_ids: list[str],
+) -> None:
+    """Prove one exact no-padding terminal state without publishing it."""
+    checks = gate_result.get("checks")
+    expected_failures = list(QUARANTINE_FAILURE_REASONS)
+    if (
+        int(gate["passed"]) != 0
+        or gate_result.get("passed") is not False
+        or gate_result.get("failure_reasons") != expected_failures
+        or not isinstance(checks, dict)
+        or set(checks) != QUALITY_GATE_CHECKS
+        or checks.get("no_padding") is not False
+        or any(
+            value is not True
+            for key, value in checks.items()
+            if key != "no_padding"
+        )
+        or gate_result.get("thin_day") is not True
+    ):
+        raise ProductionReconciliationError(
+            f"internal-gate quarantine is not an exact no-padding-only failure: "
+            f"{source_path}"
+        )
+    if reconciliation is None or reconciled_review is None:
+        raise ProductionReconciliationError(
+            f"internal-gate quarantine requires completed padding reconciliation: "
+            f"{source_path}"
+        )
+    daily_rows = source.execute(
+        "SELECT * FROM daily_selection ORDER BY editorial_rank"
+    ).fetchall()
+    publication_rows = source.execute(
+        "SELECT * FROM publication_selection ORDER BY publication_rank"
+    ).fetchall()
+    daily_ids = [str(row["candidate_id"]) for row in daily_rows]
+    if (
+        not base_ids
+        or len(daily_ids) != len(base_ids) + 1
+        or [int(row["editorial_rank"]) for row in daily_rows]
+        != list(range(1, len(daily_rows) + 1))
+        or [int(row["publication_rank"]) for row in publication_rows]
+        != list(range(1, len(publication_rows) + 1))
+        or [int(row["original_editorial_rank"]) for row in publication_rows]
+        != list(range(1, len(publication_rows) + 1))
+        or not _same_exact_ids(
+            _review_selected_ids(day_review, label="original day review"),
+            daily_ids,
+        )
+        or str(day_review["status"]) != "complete"
+        or int(day_review["padding_detected"] or 0) != 1
+    ):
+        raise ProductionReconciliationError(
+            f"internal-gate quarantine original padding state drift: {source_path}"
+        )
+    try:
+        original_ids = json.loads(str(reconciliation["original_selected_ids_json"]))
+        active_ids = json.loads(str(reconciliation["active_selected_ids_json"]))
+    except json.JSONDecodeError as exc:
+        raise ProductionReconciliationError(
+            f"internal-gate quarantine reconciliation IDs are invalid: {source_path}"
+        ) from exc
+    if (
+        str(reconciliation["status"]) != "complete"
+        or str(reconciliation["reason_code"]) != "padding_tail_trim"
+        or original_ids != daily_ids
+        or active_ids != base_ids
+        or str(reconciliation["removed_candidate_id"]) != daily_ids[-1]
+        or int(reconciliation["removed_editorial_rank"]) != len(daily_ids)
+        or str(reconciliation["source_review_input_sha256"])
+        != str(day_review["input_sha256"])
+        or str(reconciliation["source_review_response_id"])
+        != str(day_review["response_id"])
+        or str(reconciled_review["status"]) != "complete"
+        or str(reconciled_review["reconciliation_reason"])
+        != "padding_tail_trim"
+        or str(reconciled_review["source_review_input_sha256"])
+        != str(day_review["input_sha256"])
+        or not _same_exact_ids(
+            _review_selected_ids(
+                reconciled_review, label="reconciled day review"
+            ),
+            base_ids,
+        )
+        or int(reconciled_review["padding_detected"] or 0) != 1
+        or int(reconciled_review["thin_day_honest"] or 0) != 1
+    ):
+        raise ProductionReconciliationError(
+            f"internal-gate quarantine reconciled padding state drift: "
+            f"{source_path}"
+        )
+
+
 def _inspect_run(
     entry: Mapping[str, Any],
     *,
@@ -1151,6 +1316,7 @@ def _inspect_run(
     source_path = Path(str(entry["source_run_db"]))
     audit_path = Path(str(entry["audit_db"]))
     expected_selected = int(entry["expected_selected_count"])
+    release_status = str(entry["release_status"])
     finalization_path = (
         Path(str(entry["finalization_path"]))
         if entry["finalization_path"] is not None
@@ -1189,10 +1355,6 @@ def _inspect_run(
             raise ProductionReconciliationError(
                 f"editor/day review is incomplete: {source_path}"
             )
-        if int(gate["passed"]) != 1:
-            raise ProductionReconciliationError(
-                f"internal quality gate did not pass: {source_path}"
-            )
         counts = dict(
             source.execute(
                 """SELECT COUNT(*) AS candidates,
@@ -1230,14 +1392,9 @@ def _inspect_run(
         gate_result = json.loads(str(gate["result_json"]))
         gate_checks = gate_result.get("checks")
         if (
-            gate_result.get("passed") is not True
-            or gate_result.get("audience") != entry["audience"]
+            gate_result.get("audience") != entry["audience"]
             or gate_result.get("day") != entry["day"]
             or int(gate_result.get("selected_count", -1)) != expected_selected
-            or not isinstance(gate_checks, dict)
-            or not gate_checks
-            or any(value is not True for value in gate_checks.values())
-            or gate_result.get("failure_reasons") != []
         ):
             raise ProductionReconciliationError(
                 f"internal quality gate result is incomplete or inconsistent: "
@@ -1287,13 +1444,75 @@ def _inspect_run(
                     f"quality gate padding reconciliation drift: {source_path}"
                 )
 
+        if release_status == RELEASE_STATUS_PUBLISHABLE:
+            if (
+                int(gate["passed"]) != 1
+                or gate_result.get("passed") is not True
+                or not isinstance(gate_checks, dict)
+                or not gate_checks
+                or any(value is not True for value in gate_checks.values())
+                or gate_result.get("failure_reasons") != []
+            ):
+                raise ProductionReconciliationError(
+                    "internal quality gate result is incomplete or inconsistent: "
+                    f"{source_path}"
+                )
+        elif release_status == RELEASE_STATUS_INTERNAL_GATE_QUARANTINE:
+            _validate_internal_gate_quarantine(
+                source,
+                source_path=source_path,
+                gate=gate,
+                gate_result=gate_result,
+                day_review=day_review,
+                reconciliation=reconciliation_row,
+                reconciled_review=reconciled_review,
+                base_ids=base_ids,
+            )
+        else:  # load_manifest owns the user-facing enum error.
+            raise AssertionError(f"unsupported release status: {release_status}")
+
         default_editorial_finalization = (
             publication_audit.default_editorial_finalization_path(source_path)
         )
         terminal_finalization = publication_audit.terminal_finalization_path(
             source_path
         )
-        if finalization_path is None:
+        if release_status == RELEASE_STATUS_INTERNAL_GATE_QUARANTINE:
+            if finalization_path is not None or terminal_finalization.exists():
+                raise ProductionReconciliationError(
+                    f"internal-gate quarantine cannot have a finalization: "
+                    f"{source_path}"
+                )
+            try:
+                audit_report = (
+                    publication_audit.validate_readonly_completed_publication_audit(
+                        source_run_db=source_path,
+                        audit_db=audit_path,
+                        expected_selected_count=expected_selected,
+                    )
+                )
+            except (
+                FileNotFoundError,
+                IndexError,
+                KeyError,
+                OSError,
+                TypeError,
+                ValueError,
+                sqlite3.Error,
+            ) as exc:
+                raise ProductionReconciliationError(
+                    f"quarantine characterization audit validation failed: "
+                    f"{source_path}: {exc}"
+                ) from exc
+            projection = {
+                "base_selected_ids": base_ids,
+                "post_audit_selected_ids": [],
+                "effective_selected_ids": [],
+                "history_selected_ids": [],
+                "audit": audit_report,
+                "finalization": None,
+            }
+        elif finalization_path is None:
             if terminal_finalization.exists():
                 raise ProductionReconciliationError(
                     f"manifest omitted existing finalization: {terminal_finalization}"
@@ -1387,7 +1606,9 @@ def _inspect_run(
             else None
         )
         audit_status = "passed"
-        if prerequisite_report is not None:
+        if release_status == RELEASE_STATUS_INTERNAL_GATE_QUARANTINE:
+            audit_status = "completed_characterization_quarantined"
+        elif prerequisite_report is not None:
             audit_status = "failed_selected_audit_and_editorial_finalized"
         elif finalization_report is not None:
             audit_status = (
@@ -1399,6 +1620,13 @@ def _inspect_run(
         return {
             "audience": str(meta["audience"]),
             "day": str(meta["day"]),
+            "release_status": release_status,
+            "release": {
+                "status": release_status,
+                "internal_quality_gate_passed": bool(gate_result["passed"]),
+                "failure_reasons": list(gate_result["failure_reasons"]),
+                "quality_gate_sha256": _row_sha256(gate),
+            },
             "source_run_id": str(meta["run_id"]),
             "source_run_db": str(source_path),
             "source_run_db_sha256": _file_sha256(source_path),

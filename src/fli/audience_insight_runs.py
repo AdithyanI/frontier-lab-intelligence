@@ -28,6 +28,7 @@ from fli import (
     audience_insight_evaluations,
     audience_insight_publication_audit,
     audience_insights,
+    evidence_lineage,
     entity_kinds,
 )
 
@@ -517,22 +518,30 @@ def _artifact_sources(
     artifact_conn: sqlite3.Connection,
     *,
     event_id: str,
+    primary_post_ids: set[str],
+    include_reviewed_supplements: bool = False,
     max_total_chars: int = 600_000,
 ) -> list[audience_insights.EvidenceSource]:
+    placeholders = ",".join("?" for _ in primary_post_ids)
     artifact_ids = {
         str(row["artifact_id"])
         for row in artifact_conn.execute(
-            """SELECT DISTINCT artifact_id
+            f"""SELECT DISTINCT artifact_id
                FROM artifact_import_candidate
                WHERE event_id = ? AND decision = 'accepted'
-                 AND artifact_id IS NOT NULL""",
-            (event_id,),
+                 AND artifact_id IS NOT NULL
+                 AND source_external_id IN ({placeholders})""",
+            (event_id, *sorted(primary_post_ids)),
         ).fetchall()
     }
-    has_supplements = artifact_conn.execute(
-        """SELECT 1 FROM sqlite_master
-           WHERE type = 'table' AND name = 'artifact_event_supplement'"""
-    ).fetchone()
+    has_supplements = (
+        artifact_conn.execute(
+            """SELECT 1 FROM sqlite_master
+               WHERE type = 'table' AND name = 'artifact_event_supplement'"""
+        ).fetchone()
+        if include_reviewed_supplements
+        else None
+    )
     if has_supplements is not None:
         artifact_ids.update(
             str(row["artifact_id"])
@@ -604,12 +613,21 @@ def _packet_from_row(
     envelope = json.loads(row["envelope_json"])
     root = dict(envelope["root"])
     sources = [_x_source(root, relation="root")]
+    primary_post_ids = evidence_lineage.frozen_primary_post_ids(envelope)
     for related in envelope.get("related_posts") or []:
         item = dict(related)
+        if str(item.get("post_id") or "") not in primary_post_ids:
+            continue
         sources.append(
-            _x_source(item, relation=str(item.get("relation") or "related"))
+            _x_source(item, relation="same_author_continuation")
         )
-    sources.extend(_artifact_sources(artifact_conn, event_id=str(row["event_id"])))
+    sources.extend(
+        _artifact_sources(
+            artifact_conn,
+            event_id=str(row["event_id"]),
+            primary_post_ids=primary_post_ids,
+        )
+    )
     return audience_insights.EvidencePacket(
         event_id=str(row["event_id"]),
         day=str(envelope["day"]),

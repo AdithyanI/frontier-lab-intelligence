@@ -412,6 +412,33 @@ def test_prompt_and_cache_namespace_are_independent():
     assert publication_audit.DEFAULT_MODEL == "gpt-5.6-luna"
 
 
+def test_completed_audit_validation_is_characterization_not_permission(tmp_path):
+    source = _finalizable_source_run(tmp_path / "run" / "insights.db")
+    audit = _complete_finalization_audit(
+        source,
+        source.parent / "publication-audit-v1" / "audit.db",
+        selected_passes=False,
+    )
+
+    with pytest.raises(ValueError, match="summary did not pass"):
+        publication_audit.validate_readonly_publication_audit(
+            source_run_db=source,
+            audit_db=audit,
+            expected_selected_count=1,
+        )
+
+    characterization = (
+        publication_audit.validate_readonly_completed_publication_audit(
+            source_run_db=source,
+            audit_db=audit,
+            expected_selected_count=1,
+        )
+    )
+    assert characterization["passed"] is False
+    assert characterization["selected_metrics"]["total"] == 1
+    assert characterization["selected_metrics"]["full_quality_passes"] == 0
+
+
 def test_validate_output_requires_exact_schema_and_consistent_failures():
     item_id = "audit-123"
     passing = _passing_result(item_id)

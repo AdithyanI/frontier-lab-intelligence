@@ -195,19 +195,20 @@ Rules:
   revealed the artifact, never by retrieval time; this is an inspection aid,
   not an independent artifact relevance model. Do not add summaries, cards,
   or additional filters until a cited-insight consumer proves the need.
-- **Audience Insights:** one stable surface with an explicit Investment / AI
-  Engineering switch in URL state. Each day is a flat editorial list, not a
-  card grid. The left rail leads with the audience editor's ordinal and keeps
-  inherited Feed rank quiet and secondary; neither is a quality score.
+- **Audience Insights:** one stable Feed-ranked surface with an explicit
+  Investment / AI Engineering switch in URL state. Each day is a flat
+  editorial list, not a card grid. The left rail shows the envelope's current
+  daily Feed rank and links directly to that exact envelope; it is inherited
+  ordering, not a second insight score. Reviewed publication data may remain
+  available to the pipeline, but it is not exposed as a second product view
+  while the extraction contract is rebuilt step by step.
   Every row puts the exact claim first, then a mono provenance line with linked
   source, source type, claim posture, and source day. A compact decision-value
   band precedes audience-specific analysis: Investment shows why it matters,
   implication, and what to watch; AI Engineering shows why it matters,
   recommended action, validation boundary, and action type. The exact source
   passage is always visible with a direct source link. Honest zero/thin days
-  use plain editorial empty states and must never be padded. Missing or stale
-  production reconciliation renders unavailable/error state, not a fallback
-  to the newest run directory.
+  use plain editorial empty states and must never be padded.
 - **Score breakdown:** inputs and weights are visible only on demand from the
   Feed rank. Trust through inspectability without making the decimal the primary
   reading cue (PRODUCT.md #3).

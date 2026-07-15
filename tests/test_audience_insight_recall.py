@@ -47,14 +47,17 @@ def _triage_db(path: Path, day: str, rows: list[tuple]) -> Path:
     return path
 
 
-def _artifact_db(path: Path, article_edges: list[tuple[str, str, str]]) -> Path:
+def _artifact_db(
+    path: Path, article_edges: list[tuple[str, str, str, str]]
+) -> Path:
     conn = sqlite3.connect(path)
     conn.executescript(
         """CREATE TABLE artifact_import_candidate (
                envelope_day TEXT,
                event_id TEXT,
                decision TEXT,
-               artifact_id TEXT
+               artifact_id TEXT,
+               source_external_id TEXT
            );
            CREATE TABLE artifact (
                artifact_id TEXT PRIMARY KEY,
@@ -71,14 +74,14 @@ def _artifact_db(path: Path, article_edges: list[tuple[str, str, str]]) -> Path:
                completed_at TEXT
            );"""
     )
-    for day, event_id, artifact_id in article_edges:
+    for day, event_id, artifact_id, source_external_id in article_edges:
         conn.execute(
             "INSERT INTO artifact VALUES (?, ?, 'x.com', ?)",
             (artifact_id, f"http://x.com/i/article/{artifact_id}", artifact_id),
         )
         conn.execute(
-            "INSERT INTO artifact_import_candidate VALUES (?, ?, 'accepted', ?)",
-            (day, event_id, artifact_id),
+            "INSERT INTO artifact_import_candidate VALUES (?, ?, 'accepted', ?, ?)",
+            (day, event_id, artifact_id, source_external_id),
         )
     conn.commit()
     conn.close()
@@ -254,7 +257,8 @@ def test_freeze_is_deterministic_rank_blind_and_adds_article_census(tmp_path):
     rows.append(_event(day, article_event, 54, "keep"))
     triage_db = _triage_db(tmp_path / "triage.db", day, rows)
     artifact_db = _artifact_db(
-        tmp_path / "artifacts.db", [(day, article_event, "article-1")]
+        tmp_path / "artifacts.db",
+        [(day, article_event, "article-1", f"post-{day}-54-{article_event}")],
     )
     conn = audience_insight_recall.connect(tmp_path / "recall.db")
 

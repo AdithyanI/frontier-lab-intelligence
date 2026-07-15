@@ -185,8 +185,18 @@ def test_reviewed_supplement_text_strengthens_only_its_exact_event(tmp_path):
             (artifact_id, ARTIFACT_URL, now, now, str(snapshot)),
         )
 
-    sources = audience_insight_runs._artifact_sources(conn, event_id=EVENT_ID)
-    unrelated = audience_insight_runs._artifact_sources(conn, event_id="other-event")
+    sources = audience_insight_runs._artifact_sources(
+        conn,
+        event_id=EVENT_ID,
+        primary_post_ids={"root-post"},
+        include_reviewed_supplements=True,
+    )
+    unrelated = audience_insight_runs._artifact_sources(
+        conn,
+        event_id="other-event",
+        primary_post_ids={"root-post"},
+        include_reviewed_supplements=True,
+    )
     conn.close()
 
     assert len(sources) == 1

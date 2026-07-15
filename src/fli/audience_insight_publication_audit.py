@@ -1468,6 +1468,28 @@ def validate_readonly_publication_audit(
     )
 
 
+def validate_readonly_completed_publication_audit(
+    *,
+    source_run_db: Path | str,
+    audit_db: Path | str,
+    expected_selected_count: int,
+) -> dict[str, Any]:
+    """Validate an exact completed audit without granting publication.
+
+    This characterization-only projection exists for source runs that the
+    internal quality gate has already quarantined.  A successful return proves
+    that every frozen audit item and attempt still matches the source; it does
+    *not* mean the audit passed and must never be used as a publication
+    allowlist.
+    """
+    return _validate_readonly_publication_audit(
+        source_run_db=source_run_db,
+        audit_db=audit_db,
+        expected_selected_count=expected_selected_count,
+        require_passed=False,
+    )
+
+
 def default_finalization_path(source_run_db: Path | str) -> Path:
     """Return the immutable publication-finalization sidecar for one run."""
     return Path(source_run_db).resolve().parent / FINALIZATION_DIR / FINALIZATION_FILENAME

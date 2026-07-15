@@ -412,6 +412,7 @@ def _manifest(
                     "audit_db": str(audit),
                     "expected_selected_count": 1,
                     "finalization_path": None,
+                    "release_status": reconciliation.RELEASE_STATUS_PUBLISHABLE,
                 }
             )
     payload = {
@@ -429,6 +430,202 @@ def _manifest(
     path = tmp_path / "manifest.json"
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return path, payload
+
+
+def _make_internal_gate_quarantine(source: Path) -> str:
+    """Turn a passing one-item fixture into an exact 2 -> 1 failed trim."""
+    conn = audience_insight_runs.connect_run(source)
+    meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+    first = conn.execute("SELECT * FROM candidate_item").fetchone()
+    first_id = str(first["candidate_id"])
+    packet = json.loads(str(first["packet_json"]))
+    packet["event_id"] = f"{packet['event_id']}-padding"
+    packet["feed_rank"] = int(packet["feed_rank"]) + 1
+    packet["sources"][0]["source_id"] = f"{packet['sources'][0]['source_id']}-padding"
+    packet["sources"][0]["url"] = f"{packet['sources'][0]['url']}-padding"
+    packet["sources"][0]["text"] = "A lower-ranked item was reported."
+    packet_object = audience_insight_runs._packet_from_payload(packet)
+    canonical_packet = audience_insight_runs._packet_payload(packet_object)
+    packet_json = json.dumps(
+        canonical_packet, sort_keys=True, separators=(",", ":")
+    )
+    candidate_id = audience_insight_runs._candidate_id(
+        str(meta["day"]), str(meta["audience"]), str(packet["event_id"])
+    )
+    input_text = audience_insights.render_model_input(
+        packet_object,
+        version=audience_insight_runs.declared_input_render_version(conn),
+    )
+
+    def clone_row(table: str, where: str, updates: dict) -> None:
+        row = conn.execute(f"SELECT * FROM {table} WHERE {where}").fetchone()
+        values = dict(row)
+        values.update(updates)
+        columns = tuple(values)
+        conn.execute(
+            f"INSERT INTO {table} ({', '.join(columns)}) "
+            f"VALUES ({', '.join('?' for _ in columns)})",
+            tuple(values[column] for column in columns),
+        )
+
+    clone_row(
+        "candidate_item",
+        f"candidate_id = '{first_id}'",
+        {
+            "candidate_id": candidate_id,
+            "event_id": str(packet["event_id"]),
+            "feed_rank": int(packet["feed_rank"]),
+            "packet_json": packet_json,
+            "input_text": input_text,
+            "input_sha256": hashlib.sha256(input_text.encode()).hexdigest(),
+            "prompt_cache_key": audience_insights.prompt_cache_key(
+                str(meta["audience"]), str(packet["event_id"])
+            ),
+            "claim": "A lower-ranked item was reported.",
+            "supporting_quote": "A lower-ranked item was reported.",
+            "citation_source_id": str(packet["sources"][0]["source_id"]),
+            "citation_source_url": str(packet["sources"][0]["url"]),
+            "citation_char_end": len("A lower-ranked item was reported."),
+        },
+    )
+    clone_row(
+        "candidate_attempt",
+        f"candidate_id = '{first_id}'",
+        {"candidate_id": candidate_id},
+    )
+    clone_row(
+        "item_review",
+        f"candidate_id = '{first_id}'",
+        {"candidate_id": candidate_id},
+    )
+    packet_rows = conn.execute(
+        "SELECT event_id, packet_json FROM candidate_item ORDER BY feed_rank, event_id"
+    ).fetchall()
+    packet_payloads = [json.loads(str(row["packet_json"])) for row in packet_rows]
+    event_ids = [str(row["event_id"]) for row in packet_rows]
+    initial_input = json.dumps(
+        {
+            "selected": [
+                {"candidate_id": first_id},
+                {"candidate_id": candidate_id},
+            ]
+        },
+        sort_keys=True,
+    )
+    reconciled_input = json.dumps(
+        {"selected": [{"candidate_id": first_id}]}, sort_keys=True
+    )
+    checks = {key: True for key in reconciliation.QUALITY_GATE_CHECKS}
+    checks["no_padding"] = False
+    gate_reconciliation = {
+        "reason_code": "padding_tail_trim",
+        "removed_candidate_id": candidate_id,
+        "removed_editorial_rank": 2,
+        "original_selected_count": 2,
+        "active_selected_count": 1,
+    }
+    reconciled_tags = json.dumps(
+        list(
+            audience_insight_evaluations.request_tags(
+                audience=str(meta["audience"]),
+                run=f"{meta['run_id']}:padding-tail-trim",
+                day=str(meta["day"]),
+                prompt_version=str(meta["day_review_prompt_version"]),
+            )
+        )
+    )
+    with conn:
+        conn.execute(
+            """UPDATE run_meta
+               SET event_ids_json = ?, cohort_sha256 = ?, expected_count = 2
+               WHERE singleton = 1""",
+            (
+                json.dumps(event_ids, separators=(",", ":")),
+                hashlib.sha256(
+                    json.dumps(
+                        packet_payloads,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ).encode()
+                ).hexdigest(),
+            ),
+        )
+        conn.execute(
+            "UPDATE editor_run SET selected_count = 2 WHERE singleton = 1"
+        )
+        conn.execute(
+            """INSERT INTO daily_selection
+               (editorial_rank, candidate_id, decision_value, audit_reason)
+               VALUES (2, ?, 'experiment_or_benchmark',
+                       'The reviewer later identifies this tail as padding.')""",
+            (candidate_id,),
+        )
+        conn.execute(
+            """UPDATE day_set_review
+               SET input_text = ?, input_sha256 = 'initial-padding-sha',
+                   padding_detected = 1, thin_day_honest = 0,
+                   set_rationale = 'The final item is padding.'
+               WHERE singleton = 1""",
+            (initial_input,),
+        )
+        conn.execute(
+            """INSERT INTO selection_reconciliation
+               (singleton, status, reason_code, source_review_input_sha256,
+                source_review_response_id, original_selected_ids_json,
+                active_selected_ids_json, removed_candidate_id,
+                removed_editorial_rank, created_at, completed_at, updated_at)
+               VALUES (1, 'complete', 'padding_tail_trim',
+                       'initial-padding-sha', 'resp-day', ?, ?, ?, 2, ?, ?, ?)""",
+            (
+                json.dumps([first_id, candidate_id], separators=(",", ":")),
+                json.dumps([first_id], separators=(",", ":")),
+                candidate_id,
+                NOW,
+                NOW,
+                NOW,
+            ),
+        )
+        conn.execute(
+            """INSERT INTO reconciled_day_set_review
+               (singleton, status, attempts, reconciliation_reason,
+                source_review_input_sha256, input_text, input_sha256,
+                prompt_cache_key, duplicate_pairs_json, padding_detected,
+                thin_day_honest, set_rationale, response_id, response_model,
+                input_tokens, cached_tokens, cache_write_tokens, output_tokens,
+                reported_cost_usd, request_tags_json, raw_output_text,
+                completed_at, updated_at)
+               VALUES (1, 'complete', 1, 'padding_tail_trim',
+                       'initial-padding-sha', ?, 'reconciled-padding-sha',
+                       'reconciled-cache', '[]', 1, 1,
+                       'The survivor is strong, but the active set still contains padding.',
+                       'resp-reconciled', 'gpt-5.6-luna', 1300, 850, 0, 75,
+                       0.004, ?, '{}', ?, ?)""",
+            (reconciled_input, reconciled_tags, NOW, NOW),
+        )
+        conn.execute(
+            """UPDATE quality_gate SET passed = 0, result_json = ?
+               WHERE singleton = 1""",
+            (
+                json.dumps(
+                    {
+                        "audience": str(meta["audience"]),
+                        "day": str(meta["day"]),
+                        "checks": checks,
+                        "failure_reasons": ["no_padding"],
+                        "passed": False,
+                        "quality_pass_count": 1,
+                        "reconciliation": gate_reconciliation,
+                        "required_quality_pass_count": 1,
+                        "selected_count": 1,
+                        "thin_day": True,
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+            ),
+        )
+    conn.close()
+    return candidate_id
 
 
 def _write_canonical_web_pair(
@@ -906,6 +1103,127 @@ def test_report_is_deterministic_and_counts_every_stage(tmp_path):
     assert {row["audit"]["status"] for row in first["runs"]} == {"passed"}
     assert first["x_article_cohort"]["status"] == "not_bound"
     assert first["checks"]["x_article_cohort_requirement_satisfied"]
+
+
+def test_internal_gate_quarantine_preserves_cell_but_publishes_zero(
+    tmp_path, monkeypatch
+):
+    manifest, payload = _manifest(tmp_path)
+    entry = next(
+        row for row in payload["runs"] if row["audience"] == "ai_engineering"
+    )
+    source = Path(entry["source_run_db"])
+    quarantined_tail = _make_internal_gate_quarantine(source)
+    entry["release_status"] = (
+        reconciliation.RELEASE_STATUS_INTERNAL_GATE_QUARANTINE
+    )
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+    report = reconciliation.evaluate_manifest(manifest)
+    row = next(
+        item for item in report["runs"] if item["audience"] == "ai_engineering"
+    )
+
+    assert report["passed"] is True
+    assert row["release_status"] == "internal_gate_quarantine"
+    assert row["release"] == {
+        "status": "internal_gate_quarantine",
+        "internal_quality_gate_passed": False,
+        "failure_reasons": ["no_padding"],
+        "quality_gate_sha256": row["release"]["quality_gate_sha256"],
+    }
+    assert len(row["release"]["quality_gate_sha256"]) == 64
+    assert row["counts"]["base_publication"] == 1
+    assert row["counts"]["effective_publication"] == 0
+    assert row["selection"]["post_audit_ids"] == []
+    assert row["selection"]["effective_ids"] == []
+    assert row["selection"]["history_ids"] == []
+    assert quarantined_tail not in row["selection"]["base_ids"]
+    assert row["audit"]["status"] == "completed_characterization_quarantined"
+    assert row["audit"]["passed"] is True
+    assert row["finalization"]["status"] == "not_present"
+    assert report["totals"]["all"]["counts"]["base_publication"] == 2
+    assert report["totals"]["all"]["counts"]["effective_publication"] == 1
+
+    _write_canonical_web_pair(tmp_path, manifest)
+    monkeypatch.setattr(insight_store, "DEFAULT_INSIGHTS_ROOT", tmp_path)
+    dates = insight_store.insight_dates_payload(audience="ai_engineering")
+    reviewed = insight_store.insights_payload(
+        audience="ai_engineering", day=DAY
+    )
+    assert dates["dates"] == [{"day": DAY, "item_count": 0}]
+    assert reviewed["available"] is False
+    assert reviewed["items"] == []
+    assert "quarantined" in reviewed["reason"]
+
+
+@pytest.mark.parametrize(
+    ("case", "message"),
+    (
+        ("publishable", "internal quality gate result is incomplete"),
+        ("unknown_status", "release_status must be one of"),
+        ("extra_failure", "no-padding-only failure"),
+        ("second_review_passes", "reconciled padding state drift"),
+        ("finalization", "quarantine cannot name a finalization"),
+        ("incomplete_audit", "attempt count does not match"),
+    ),
+)
+def test_internal_gate_quarantine_is_narrow_and_fail_closed(
+    tmp_path, case, message
+):
+    manifest, payload = _manifest(tmp_path)
+    entry = next(
+        row for row in payload["runs"] if row["audience"] == "ai_engineering"
+    )
+    source = Path(entry["source_run_db"])
+    _make_internal_gate_quarantine(source)
+    entry["release_status"] = (
+        reconciliation.RELEASE_STATUS_INTERNAL_GATE_QUARANTINE
+    )
+
+    if case == "publishable":
+        entry["release_status"] = reconciliation.RELEASE_STATUS_PUBLISHABLE
+    elif case == "unknown_status":
+        entry["release_status"] = "manual_override"
+    elif case == "extra_failure":
+        conn = sqlite3.connect(source)
+        gate = json.loads(
+            conn.execute("SELECT result_json FROM quality_gate").fetchone()[0]
+        )
+        gate["checks"]["no_duplicate_stories"] = False
+        gate["failure_reasons"].append("no_duplicate_stories")
+        conn.execute(
+            "UPDATE quality_gate SET result_json = ?", (json.dumps(gate),)
+        )
+        conn.commit()
+        conn.close()
+    elif case == "second_review_passes":
+        conn = sqlite3.connect(source)
+        conn.execute(
+            "UPDATE reconciled_day_set_review SET padding_detected = 0"
+        )
+        conn.commit()
+        conn.close()
+    elif case == "finalization":
+        entry["finalization_path"] = str(
+            source.parent
+            / reconciliation.ADJACENT_FINALIZATION
+        )
+    elif case == "incomplete_audit":
+        audit = sqlite3.connect(entry["audit_db"])
+        audit.execute(
+            "DELETE FROM audit_attempt WHERE rowid IN "
+            "(SELECT rowid FROM audit_attempt LIMIT 1)"
+        )
+        audit.commit()
+        audit.close()
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+    with pytest.raises(
+        (reconciliation.ProductionReconciliationError, ValueError),
+        match=message,
+    ):
+        reconciliation.evaluate_manifest(manifest)
 
 
 def test_reconciliation_accepts_exact_editorial_disqualification(tmp_path):

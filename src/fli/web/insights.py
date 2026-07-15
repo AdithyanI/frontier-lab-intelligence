@@ -112,7 +112,7 @@ def _run_summary(path: Path) -> dict[str, Any] | None:
             conn.close()
 
 
-def _reconciled_run_entries(root: Path) -> list[dict[str, str]]:
+def _reconciled_run_entries(root: Path) -> list[dict[str, Any]]:
     """Return only runs proven by the exact manifest/report pair.
 
     Production never guesses by recency.  The stored report must equal a fresh
@@ -145,7 +145,7 @@ def _reconciled_run_entries(root: Path) -> list[dict[str, str]]:
         runs = report.get("runs")
         if not isinstance(runs, list) or not runs:
             return []
-        normalized: list[dict[str, str]] = []
+        normalized: list[dict[str, Any]] = []
         resolved_root = root.resolve()
         for row in runs:
             path = Path(str(row["source_run_db"])).resolve()
@@ -157,6 +157,10 @@ def _reconciled_run_entries(root: Path) -> list[dict[str, str]]:
                     "day": str(row["day"]),
                     "run_id": str(row["source_run_id"]),
                     "path": str(path),
+                    "release_status": str(row["release_status"]),
+                    "selected_count": int(
+                        row["counts"]["effective_publication"]
+                    ),
                 }
             )
         return sorted(normalized, key=lambda row: (row["day"], row["audience"]))
@@ -183,6 +187,25 @@ def _available_runs(
         reconciled_entries = _reconciled_run_entries(root)
         summaries: list[dict[str, Any]] = []
         for entry in reconciled_entries:
+            if (
+                entry["release_status"]
+                == audience_insight_production_reconciliation.RELEASE_STATUS_INTERNAL_GATE_QUARANTINE
+            ):
+                if entry["selected_count"] != 0:
+                    return []
+                if entry["audience"] == audience:
+                    summaries.append(
+                        {
+                            "path": Path(entry["path"]),
+                            "run_id": entry["run_id"],
+                            "audience": entry["audience"],
+                            "day": entry["day"],
+                            "updated_at": "",
+                            "selected_count": 0,
+                            "release_status": entry["release_status"],
+                        }
+                    )
+                continue
             summary = _run_summary(Path(entry["path"]))
             if (
                 summary is None
@@ -479,6 +502,15 @@ def insights_payload(
                 audience=audience,
             )
         path = Path(selected_run["path"])
+        if (
+            selected_run.get("release_status")
+            == audience_insight_production_reconciliation.RELEASE_STATUS_INTERNAL_GATE_QUARANTINE
+        ):
+            return _missing(
+                "No candidate cleared this audience's publication quality bar "
+                "for this day; the internal quality gate quarantined the set.",
+                audience=audience,
+            )
     if not path.is_file():
         return _missing("The requested audience insight run does not exist.", audience=audience)
 
