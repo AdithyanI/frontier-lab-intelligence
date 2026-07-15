@@ -1,3 +1,4 @@
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
@@ -108,6 +109,133 @@ def _add_source_event(triage_db: Path, *, event_id: str, rank: int) -> None:
     )
     conn.commit()
     conn.close()
+
+
+@pytest.mark.parametrize(
+    ("audience", "expected_effort"),
+    [
+        (audience_insights.INVESTMENT, "high"),
+        (audience_insights.AI_ENGINEERING, "medium"),
+    ],
+)
+def test_dry_run_uses_audience_specific_extraction_effort_by_default(
+    tmp_path, capsys, audience, expected_effort
+):
+    triage_db, artifact_db = _source_databases(tmp_path)
+    run_db = tmp_path / audience / "insights.db"
+
+    assert audience_insight_runs.main(
+        [
+            "run",
+            "--run-id",
+            f"dry-run-{audience}",
+            "--run-db",
+            str(run_db),
+            "--audience",
+            audience,
+            "--day",
+            "2026-07-11",
+            "--triage-db",
+            str(triage_db),
+            "--artifact-db",
+            str(artifact_db),
+            "--dry-run",
+        ]
+    ) == 0
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["data"]["will_call_model"] is False
+    assert payload["data"]["run"]["reasoning_effort"] == expected_effort
+
+
+def test_new_run_persists_provider_safe_input_render_version(tmp_path):
+    triage_db, artifact_db = _source_databases(tmp_path)
+    conn = audience_insight_runs.connect_run(tmp_path / "versioned" / "insights.db")
+
+    audience_insight_runs.freeze_run(
+        conn,
+        run_id="versioned",
+        audience="investment",
+        day="2026-07-11",
+        triage_db=triage_db,
+        artifact_db=artifact_db,
+    )
+
+    assert audience_insight_runs.declared_input_render_version(conn) == (
+        audience_insights.INPUT_RENDER_PROVIDER_SAFE_V2
+    )
+    assert audience_insight_runs.summary(conn)["run"]["input_render_version"] == (
+        audience_insights.INPUT_RENDER_PROVIDER_SAFE_V2
+    )
+
+
+def test_pre_column_run_is_explicitly_classified_as_verbatim_v1():
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        """CREATE TABLE run_meta (
+               singleton INTEGER PRIMARY KEY,
+               run_id TEXT NOT NULL
+           )"""
+    )
+    conn.execute("INSERT INTO run_meta VALUES (1, 'legacy')")
+
+    assert audience_insight_runs.declared_input_render_version(conn) == (
+        audience_insights.INPUT_RENDER_VERBATIM_V1
+    )
+
+
+def test_resume_sends_exact_frozen_input_bytes_and_rejects_hash_drift(
+    tmp_path, monkeypatch
+):
+    triage_db, artifact_db = _source_databases(tmp_path)
+    conn = audience_insight_runs.connect_run(tmp_path / "resume" / "insights.db")
+    audience_insight_runs.freeze_run(
+        conn,
+        run_id="resume-exact-input",
+        audience="investment",
+        day="2026-07-11",
+        triage_db=triage_db,
+        artifact_db=artifact_db,
+    )
+    exact_input = "exact frozen bytes\nincluding [EXPLETIVE] and whitespace  "
+    exact_sha256 = hashlib.sha256(exact_input.encode()).hexdigest()
+    conn.execute(
+        "UPDATE candidate_item SET input_text = ?, input_sha256 = ?",
+        (exact_input, exact_sha256),
+    )
+    conn.commit()
+    observed_inputs = []
+
+    def fake_extract(_client, packet, **kwargs):
+        observed_inputs.append(kwargs["frozen_input_text"])
+        return _extraction_result(packet)
+
+    monkeypatch.setattr(audience_insights, "evaluate_one", fake_extract)
+    audience_insight_runs.run_pending(conn, client=FakeClient(), workers=1)
+    assert observed_inputs == [exact_input]
+
+    drift_conn = audience_insight_runs.connect_run(
+        tmp_path / "resume-drift" / "insights.db"
+    )
+    audience_insight_runs.freeze_run(
+        drift_conn,
+        run_id="resume-hash-drift",
+        audience="investment",
+        day="2026-07-11",
+        triage_db=triage_db,
+        artifact_db=artifact_db,
+    )
+    drift_conn.execute("UPDATE candidate_item SET input_text = input_text || ' drift'")
+    drift_conn.commit()
+
+    with pytest.raises(ValueError, match="frozen candidate input hash drift"):
+        audience_insight_runs.run_pending(
+            drift_conn,
+            client=FakeClient(),
+            workers=1,
+        )
+    assert observed_inputs == [exact_input]
 
 
 def test_full_run_is_resumable_editor_owned_and_quality_gated(tmp_path, monkeypatch):

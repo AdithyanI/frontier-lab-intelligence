@@ -55,6 +55,9 @@ CREATE TABLE IF NOT EXISTS run_meta (
     reasoning_effort TEXT NOT NULL,
     prompt_version TEXT NOT NULL,
     prompt_sha256 TEXT NOT NULL,
+    input_render_version TEXT NOT NULL CHECK (
+        input_render_version IN ('verbatim-v1', 'provider-safe-v2')
+    ),
     schema_version TEXT NOT NULL,
     editor_model TEXT NOT NULL,
     editor_reasoning_effort TEXT NOT NULL,
@@ -406,6 +409,23 @@ def connect_run(path: Path | str) -> sqlite3.Connection:
     return conn
 
 
+def declared_input_render_version(conn: sqlite3.Connection) -> str:
+    """Return the declared model-input renderer, classifying pre-column runs."""
+    columns = {
+        str(row[1]) for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
+    }
+    if "input_render_version" not in columns:
+        return audience_insights.INPUT_RENDER_VERBATIM_V1
+    row = conn.execute(
+        "SELECT input_render_version FROM run_meta WHERE singleton = 1"
+    ).fetchone()
+    if row is None:
+        return audience_insights.DEFAULT_INPUT_RENDER_VERSION
+    return audience_insights.require_input_render_version(
+        str(row["input_render_version"])
+    )
+
+
 def _open_readonly(path: Path) -> sqlite3.Connection:
     if not path.is_file():
         raise FileNotFoundError(path)
@@ -583,13 +603,19 @@ def freeze_run(
     triage_db: Path | None = None,
     artifact_db: Path = DEFAULT_ARTIFACT_DB,
     model: str = audience_insights.DEFAULT_MODEL,
-    effort: str = audience_insights.DEFAULT_EXTRACTION_EFFORT,
+    effort: str | None = None,
     editor_model: str = audience_insights.DEFAULT_MODEL,
     editor_effort: str = audience_insights.DEFAULT_EDITOR_EFFORT,
     review_model: str = audience_insight_evaluations.DEFAULT_MODEL,
     review_effort: str = audience_insight_evaluations.DEFAULT_REASONING_EFFORT,
+    input_render_version: str | None = None,
 ) -> int:
     audience = audience_insights.require_audience(audience)
+    effort = (
+        audience_insights.default_extraction_effort(audience)
+        if effort is None
+        else effort
+    )
     if rank_limit < 1:
         raise ValueError("rank_limit must be positive")
     triage_path = triage_db or canonical_triage_db(day)
@@ -633,6 +659,26 @@ def freeze_run(
     cohort_sha256 = _sha256(_canonical_json(cohort))
     contract = audience_insights.contract(audience)
     existing = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+    requested_render_version = (
+        audience_insights.require_input_render_version(input_render_version)
+        if input_render_version is not None
+        else None
+    )
+    if existing is None:
+        resolved_render_version = (
+            requested_render_version
+            or audience_insights.DEFAULT_INPUT_RENDER_VERSION
+        )
+    else:
+        resolved_render_version = declared_input_render_version(conn)
+        if (
+            requested_render_version is not None
+            and requested_render_version != resolved_render_version
+        ):
+            raise ValueError(
+                "run database does not match the frozen request: "
+                "input_render_version"
+            )
     expected = {
         "run_id": run_id,
         "audience": audience,
@@ -682,11 +728,22 @@ def freeze_run(
         return int(existing["expected_count"])
 
     now = _now()
+    rendered_packets = [
+        (
+            packet,
+            audience_insights.render_model_input(
+                packet,
+                version=resolved_render_version,
+            ),
+        )
+        for packet in packets
+    ]
     with conn:
         conn.execute(
             """INSERT INTO run_meta
                (singleton, run_id, audience, day, model, reasoning_effort,
-                prompt_version, prompt_sha256, schema_version,
+                prompt_version, prompt_sha256, input_render_version,
+                schema_version,
                 editor_model, editor_reasoning_effort, editor_prompt_version,
                 editor_prompt_sha256, editor_schema_version,
                 review_model, review_reasoning_effort,
@@ -697,7 +754,7 @@ def freeze_run(
                 event_ids_json, cohort_sha256, expected_count,
                 created_at, updated_at)
                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 run_id,
                 audience,
@@ -706,6 +763,7 @@ def freeze_run(
                 effort,
                 contract.prompt_version,
                 audience_insights.prompt_sha256(audience),
+                resolved_render_version,
                 contract.schema_version,
                 editor_model,
                 editor_effort,
@@ -742,12 +800,12 @@ def freeze_run(
                     packet.day,
                     packet.feed_rank,
                     _canonical_json(_packet_payload(packet)),
-                    audience_insights.render_input(packet),
-                    packet.input_sha256,
+                    input_text,
+                    _sha256(input_text),
                     audience_insights.prompt_cache_key(audience, packet.event_id),
                     now,
                 )
-                for packet in packets
+                for packet, input_text in rendered_packets
             ],
         )
     return len(packets)
@@ -975,6 +1033,12 @@ def run_pending(
     ).fetchall()
     if not rows:
         return summary(conn)
+    for row in rows:
+        input_text = str(row["input_text"])
+        if _sha256(input_text) != str(row["input_sha256"]):
+            raise ValueError(
+                f"frozen candidate input hash drift: {row['candidate_id']}"
+            )
 
     def evaluate(
         row: sqlite3.Row,
@@ -988,6 +1052,7 @@ def run_pending(
                 run=str(meta["run_id"]),
                 model=str(meta["model"]),
                 effort=str(meta["reasoning_effort"]),
+                frozen_input_text=str(row["input_text"]),
             )
             return row, result, None
         except Exception as exc:
@@ -2098,6 +2163,11 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
     meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
     if meta is None:
         raise ValueError("run database has not been prepared")
+    run = dict(meta)
+    run.setdefault(
+        "input_render_version",
+        declared_input_render_version(conn),
+    )
     counts = dict(
         conn.execute(
             """SELECT COUNT(*) AS total,
@@ -2220,7 +2290,7 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
         else 0.0
     )
     return {
-        "run": dict(meta),
+        "run": run,
         "counts": counts,
         "editor": dict(editor) if editor is not None else None,
         "item_reviews": item_review_counts,
@@ -2337,7 +2407,19 @@ def main(argv: list[str] | None = None) -> int:
     run_parser.add_argument("--artifact-db", type=Path, default=DEFAULT_ARTIFACT_DB)
     run_parser.add_argument("--model", default=audience_insights.DEFAULT_MODEL)
     run_parser.add_argument(
-        "--reasoning-effort", default=audience_insights.DEFAULT_EXTRACTION_EFFORT
+        "--input-render-version",
+        choices=audience_insights.INPUT_RENDER_VERSIONS,
+        help=(
+            "Persist the model-input rendering contract for a new run. "
+            "Existing pre-column runs remain verbatim-v1."
+        ),
+    )
+    run_parser.add_argument(
+        "--reasoning-effort",
+        help=(
+            "Override the audience default (Investment: high; "
+            "AI Engineering: medium)."
+        ),
     )
     run_parser.add_argument("--editor-model", default=audience_insights.DEFAULT_MODEL)
     run_parser.add_argument(
@@ -2391,6 +2473,7 @@ def main(argv: list[str] | None = None) -> int:
                 editor_effort=args.editor_reasoning_effort,
                 review_model=args.review_model,
                 review_effort=args.review_reasoning_effort,
+                input_render_version=args.input_render_version,
             )
             if args.dry_run:
                 data = summary(conn)

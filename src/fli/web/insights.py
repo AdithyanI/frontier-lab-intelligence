@@ -126,12 +126,15 @@ def _reconciled_run_entries(root: Path) -> list[dict[str, str]]:
     if not report_path.is_file() or not manifest_path.is_file():
         return []
     try:
-        stored_report = json.loads(report_path.read_text())
+        stored_report_text = report_path.read_text()
         report = audience_insight_production_reconciliation.evaluate_manifest(
             manifest_path
         )
         if (
-            stored_report != report
+            stored_report_text
+            != audience_insight_production_reconciliation.canonical_report_text(
+                report
+            )
             or not isinstance(report, dict)
             or report.get("schema_version") != PRODUCTION_RECONCILIATION_SCHEMA
             or report.get("mode") not in {"partial", "final"}

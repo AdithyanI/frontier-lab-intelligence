@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,6 +25,13 @@ AI_ENGINEERING = "ai_engineering"
 AUDIENCES = frozenset({INVESTMENT, AI_ENGINEERING})
 
 DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
+AUDIENCE_EXTRACTION_REASONING_EFFORTS = {
+    INVESTMENT: "high",
+    AI_ENGINEERING: "medium",
+}
+# The generic alias remains the conservative direct-call default for callers
+# that do not own an audience boundary. Audience runs resolve through
+# ``default_extraction_effort`` instead.
 DEFAULT_EXTRACTION_REASONING_EFFORT = "medium"
 DEFAULT_EDITOR_REASONING_EFFORT = "high"
 # Stable public names used by the run-store boundary.
@@ -31,6 +39,21 @@ DEFAULT_EXTRACTION_EFFORT = DEFAULT_EXTRACTION_REASONING_EFFORT
 DEFAULT_EDITOR_EFFORT = DEFAULT_EDITOR_REASONING_EFFORT
 EXTRACTION_PROMPT_CACHE_SHARDS = 32
 EDITOR_PROMPT_CACHE_SHARDS = 1
+
+INPUT_RENDER_VERBATIM_V1 = "verbatim-v1"
+INPUT_RENDER_PROVIDER_SAFE_V2 = "provider-safe-v2"
+INPUT_RENDER_VERSIONS = (
+    INPUT_RENDER_VERBATIM_V1,
+    INPUT_RENDER_PROVIDER_SAFE_V2,
+)
+DEFAULT_INPUT_RENDER_VERSION = INPUT_RENDER_PROVIDER_SAFE_V2
+
+# Nova can return a completed, empty, zero-token response for otherwise valid
+# evidence packets containing this expletive. Keep the source packet exact and
+# normalize only the provider-safe model transcription. Citation binding still
+# runs against the original packet, so a quote spanning the marker fails closed.
+_MODEL_INPUT_EXPLETIVE = re.compile(r"\bfucking\b", flags=re.IGNORECASE)
+_MODEL_INPUT_EXPLETIVE_MARKER = "[EXPLETIVE]"
 
 EXTRACTION_PROMPT_VERSIONS = {
     INVESTMENT: "investment-insight-v2.2",
@@ -416,6 +439,17 @@ def require_audience(audience: str) -> str:
     return _require_audience(audience)
 
 
+def default_extraction_effort(audience: str) -> str:
+    """Return the frozen production extraction effort for one audience."""
+    return AUDIENCE_EXTRACTION_REASONING_EFFORTS[_require_audience(audience)]
+
+
+def require_input_render_version(version: str) -> str:
+    if version not in INPUT_RENDER_VERSIONS:
+        raise ValueError(f"invalid input render version: {version!r}")
+    return version
+
+
 def _cache_audience_segment(audience: str) -> str:
     return "investment" if audience == INVESTMENT else "engineering"
 
@@ -503,7 +537,13 @@ def request_tags(
 
 
 def render_input(packet: EvidencePacket) -> str:
-    """Render numbered evidence without runner IDs, URLs, rank, or popularity."""
+    """Render legacy verbatim input without runner IDs, URLs, rank, or popularity."""
+    return render_model_input(packet, version=INPUT_RENDER_VERBATIM_V1)
+
+
+def render_model_input(packet: EvidencePacket, *, version: str) -> str:
+    """Render one explicitly versioned, deterministic model-input transcription."""
+    version = require_input_render_version(version)
     if not packet.sources:
         raise ValueError("evidence packet must contain at least one source")
     blocks = [
@@ -511,6 +551,12 @@ def render_input(packet: EvidencePacket) -> str:
         "Each numbered block has independent authorship. Return the one-based block index for the exact quote.",
     ]
     for block_index, source in enumerate(packet.sources, start=1):
+        source_text = source.normalized_text()
+        if version == INPUT_RENDER_PROVIDER_SAFE_V2:
+            source_text = _MODEL_INPUT_EXPLETIVE.sub(
+                _MODEL_INPUT_EXPLETIVE_MARKER,
+                source_text,
+            )
         details = []
         if source.author:
             details.append(f"author={source.author}")
@@ -526,7 +572,7 @@ def render_input(packet: EvidencePacket) -> str:
                 f'<EVIDENCE_BLOCK index="{block_index}" type="{source.source_type.upper()}">',
                 f"[{' | '.join(details)}]" if details else "",
                 "<VERBATIM_TEXT>",
-                source.normalized_text(),
+                source_text,
                 "</VERBATIM_TEXT>",
                 "</EVIDENCE_BLOCK>",
             )
@@ -993,9 +1039,17 @@ def evaluate_one(
     run: str,
     model: str = DEFAULT_MODEL,
     effort: str = DEFAULT_EXTRACTION_REASONING_EFFORT,
+    frozen_input_text: str | None = None,
 ) -> dict[str, Any]:
     """Extract and application-bind one audience-specific frozen packet."""
     audience = _require_audience(audience)
+    input_text = (
+        render_model_input(packet, version=DEFAULT_INPUT_RENDER_VERSION)
+        if frozen_input_text is None
+        else frozen_input_text
+    )
+    if not isinstance(input_text, str) or not input_text.strip():
+        raise ValueError("frozen_input_text must be a non-empty string")
     version = prompt_version(audience)
     tags = request_tags(
         audience=audience,
@@ -1007,7 +1061,7 @@ def evaluate_one(
     request = {
         "model": model,
         "instructions": instructions(audience),
-        "input": render_input(packet),
+        "input": input_text,
         "prompt_cache_key": prompt_cache_key(audience, packet.event_id),
         **llm_responses.litellm_prompt_cache_kwargs(model),
         "reasoning": {"effort": effort},
@@ -1025,7 +1079,7 @@ def evaluate_one(
         "day": packet.day,
         "feed_rank": packet.feed_rank,
         "evidence_sha256": packet.evidence_sha256,
-        "input_sha256": packet.input_sha256,
+        "input_sha256": _sha256(input_text),
         "model": model,
         "reasoning_effort": effort,
         "prompt_version": version,

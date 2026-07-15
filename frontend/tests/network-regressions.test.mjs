@@ -21,7 +21,7 @@ const rankingSource = await readFile(
 )
 const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
 
-test('Network owns Ranking, Registry, and Add Profile as explicit subviews', () => {
+test('Network owns Registry, Ranking, and Add Profile as explicit subviews', () => {
   assert.match(appSource, /<NavLink to="\/network">Network<\/NavLink>/)
   assert.match(appSource, /<Route path="\/network" element=\{<Network \/>\}>/)
   assert.match(appSource, /<Route path="ranking" element=\{<Ranking \/>\} \/>/)
@@ -29,14 +29,13 @@ test('Network owns Ranking, Registry, and Add Profile as explicit subviews', () 
   assert.match(appSource, /<Route path="add-profile" element=\{<AddProfile \/>\} \/>/)
   assert.doesNotMatch(appSource, /<NavLink to="\/ranking">Ranking<\/NavLink>/)
   assert.match(networkSource, /The Registry defines the screened source set/)
-  assert.match(networkSource, /<NavLink to="\/network\/ranking">Ranking<\/NavLink>/)
-  assert.match(networkSource, /<NavLink to="\/network\/registry">Registry<\/NavLink>/)
-  assert.match(networkSource, /<NavLink to="\/network\/add-profile">Add Profile<\/NavLink>/)
+  assert.match(networkSource, /<NavLink to="\/network\/registry">Registry<\/NavLink>[\s\S]*?<NavLink to="\/network\/ranking">Ranking<\/NavLink>[\s\S]*?<NavLink to="\/network\/add-profile">Add Profile<\/NavLink>/)
   assert.match(addProfileSource, /id="add-profile-title">Add Profile<\/h2>/)
 })
 
-test('Network defaults to Ranking while preserving Registry terminology and reach', () => {
-  assert.match(appSource, /<Navigate to="\/network\/ranking" replace \/>/)
+test('Network defaults to Registry while preserving Ranking and reach', () => {
+  assert.match(appSource, /<Navigate to="\/network\/registry" replace \/>/)
+  assert.match(appSource, /<Route index element=\{<Navigate to="registry" replace \/>\} \/>/)
   assert.match(rankingSource, /<h2 className="network-view-title" id="ranking-title">/)
   assert.match(registrySource, /<h2 className="network-view-title" id="registry-title">Registry<\/h2>/)
   assert.match(registrySource, /X reach/)

@@ -90,7 +90,8 @@ def _source_run(path: Path) -> Path:
     conn.execute(
         """INSERT INTO run_meta
            (singleton, run_id, audience, day, model, reasoning_effort,
-            prompt_version, prompt_sha256, schema_version, editor_model,
+            prompt_version, prompt_sha256, input_render_version,
+            schema_version, editor_model,
             editor_reasoning_effort, editor_prompt_version,
             editor_prompt_sha256, editor_schema_version, review_model,
             review_reasoning_effort, item_review_prompt_version,
@@ -100,7 +101,8 @@ def _source_run(path: Path) -> Path:
             rank_limit, event_ids_json, cohort_sha256, expected_count,
             created_at, updated_at)
            VALUES (1, 'source-run', 'investment', '2026-07-11', 'luna', 'medium',
-                   'investment-insight-v2.1', 'extract-sha', 'extract-schema',
+                   'investment-insight-v2.1', 'extract-sha', 'provider-safe-v2',
+                   'extract-schema',
                    'luna', 'high', 'investment-daily-editor-v2.1', 'editor-sha',
                    'editor-schema', 'luna', 'high', 'filter-v2', 'filter-sha',
                    'filter-schema', 'day-v2', 'day-sha', 'day-schema',

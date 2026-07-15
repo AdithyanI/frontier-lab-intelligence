@@ -12,8 +12,10 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import re
 import sqlite3
+import tempfile
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -37,18 +39,17 @@ CONTRACT_FIELDS = {
     "prompt_sha256",
     "schema_version",
 }
-# These efforts are the frozen production routing decision, not a provider
-# default inferred at reconciliation time. Investment extraction intentionally
-# used high reasoning while AI Engineering extraction used medium reasoning.
+# These downstream efforts are frozen production routing decisions, not
+# provider defaults inferred at reconciliation time. Extraction effort is
+# audience-owned by audience_insights.default_extraction_effort so the runner
+# and reconciler cannot drift.
 FINAL_REASONING_EFFORTS = {
     "investment": {
-        "extraction": "high",
         "editor": "high",
         "item_review": "high",
         "day_review": "high",
     },
     "ai_engineering": {
-        "extraction": "medium",
         "editor": "high",
         "item_review": "high",
         "day_review": "high",
@@ -76,7 +77,9 @@ def current_expected_contracts() -> dict[str, dict[str, dict[str, str]]]:
         contracts[audience] = {
             "extraction": {
                 "model": audience_insights.DEFAULT_MODEL,
-                "reasoning_effort": efforts["extraction"],
+                "reasoning_effort": (
+                    audience_insights.default_extraction_effort(audience)
+                ),
                 "prompt_version": audience_insights.prompt_version(audience),
                 "prompt_sha256": audience_insights.prompt_sha256(audience),
                 "schema_version": audience_insights.schema_version(audience),
@@ -846,6 +849,92 @@ def _validate_run_contract(
     return observed
 
 
+def _validate_frozen_cohort(
+    conn: sqlite3.Connection,
+    meta: Mapping[str, Any],
+    *,
+    source_path: Path,
+) -> dict[str, Any]:
+    """Rebuild the immutable candidate cohort from its runner-owned fields."""
+    audience = str(meta["audience"])
+    day = str(meta["day"])
+    render_version = audience_insight_runs.declared_input_render_version(conn)
+    rows = conn.execute(
+        """SELECT candidate_id, event_id, day, feed_rank, packet_json,
+                  input_text, input_sha256, prompt_cache_key
+           FROM candidate_item
+           ORDER BY feed_rank, event_id"""
+    ).fetchall()
+    event_ids: list[str] = []
+    packet_payloads: list[dict[str, Any]] = []
+    for row in rows:
+        candidate_id = str(row["candidate_id"])
+        event_id = str(row["event_id"])
+        expected_candidate_id = audience_insight_runs._candidate_id(
+            day, audience, event_id
+        )
+        if candidate_id != expected_candidate_id:
+            raise ProductionReconciliationError(
+                f"frozen candidate ID drift for {event_id}: {source_path}"
+            )
+        try:
+            raw_packet = json.loads(str(row["packet_json"]))
+            packet = audience_insight_runs._packet_from_payload(raw_packet)
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise ProductionReconciliationError(
+                f"frozen packet is invalid for {candidate_id}: {source_path}"
+            ) from exc
+        canonical_packet = audience_insight_runs._packet_payload(packet)
+        if str(row["packet_json"]) != _canonical_json(canonical_packet):
+            raise ProductionReconciliationError(
+                f"frozen packet is not canonical for {candidate_id}: {source_path}"
+            )
+        if (
+            packet.event_id != event_id
+            or packet.day != day
+            or str(row["day"]) != day
+            or packet.feed_rank != int(row["feed_rank"])
+        ):
+            raise ProductionReconciliationError(
+                f"frozen packet identity drift for {candidate_id}: {source_path}"
+            )
+        expected_input = audience_insights.render_model_input(
+            packet,
+            version=render_version,
+        )
+        if (
+            str(row["input_text"]) != expected_input
+            or str(row["input_sha256"]) != _sha256(expected_input)
+        ):
+            raise ProductionReconciliationError(
+                f"frozen model input drift for {candidate_id}: {source_path}"
+            )
+        expected_cache_key = audience_insights.prompt_cache_key(audience, event_id)
+        if str(row["prompt_cache_key"]) != expected_cache_key:
+            raise ProductionReconciliationError(
+                f"extraction cache key drift for {candidate_id}: {source_path}"
+            )
+        event_ids.append(event_id)
+        packet_payloads.append(canonical_packet)
+
+    expected_event_ids_json = _canonical_json(event_ids)
+    expected_cohort_sha256 = _sha256(_canonical_json(packet_payloads))
+    if (
+        str(meta["event_ids_json"]) != expected_event_ids_json
+        or str(meta["cohort_sha256"]) != expected_cohort_sha256
+        or int(meta["expected_count"]) != len(rows)
+    ):
+        raise ProductionReconciliationError(
+            f"frozen cohort binding drift: {source_path}"
+        )
+    return {
+        "input_render_version": render_version,
+        "event_ids_sha256": _sha256(expected_event_ids_json),
+        "cohort_sha256": expected_cohort_sha256,
+        "candidate_count": len(rows),
+    }
+
+
 def _inspect_run(
     entry: Mapping[str, Any],
     *,
@@ -882,6 +971,11 @@ def _inspect_run(
             )
         observed_contract = _validate_run_contract(
             meta, expected_contract, source_path=source_path
+        )
+        frozen_cohort = _validate_frozen_cohort(
+            source,
+            meta,
+            source_path=source_path,
         )
         if str(editor["status"]) != "complete" or str(day_review["status"]) != "complete":
             raise ProductionReconciliationError(
@@ -1047,9 +1141,12 @@ def _inspect_run(
             "day": str(meta["day"]),
             "source_run_id": str(meta["run_id"]),
             "source_run_db": str(source_path),
+            "source_run_db_sha256": _file_sha256(source_path),
             "audit_db": str(audit_path),
+            "audit_db_sha256": _file_sha256(audit_path),
             "rank_limit": int(meta["rank_limit"]),
             "contracts": observed_contract,
+            "frozen_cohort": frozen_cohort,
             "counts": {
                 "expected_candidates": int(meta["expected_count"]),
                 **counts,
@@ -1275,6 +1372,15 @@ def _inspect_x_article_cohort(
                 f"from declared run events; missing={sorted(derived_ids - configured_ids)}, "
                 f"extra={sorted(configured_ids - derived_ids)}"
             )
+        try:
+            provider_provenance = artifact_x_articles.validate_x_article_provenance(
+                db_path=path,
+                artifact_ids=sorted(configured_ids),
+            )
+        except (FileNotFoundError, sqlite3.Error, TypeError, ValueError) as exc:
+            raise ProductionReconciliationError(
+                f"X Article provider provenance is invalid: {exc}"
+            ) from exc
         items = []
         for artifact_id in config["artifact_ids"]:
             artifact = conn.execute(
@@ -1405,6 +1511,9 @@ def _inspect_x_article_cohort(
                 "artifact_ids_sha256": _sha256(
                     _canonical_json(sorted(derived_ids))
                 ),
+                "provider_provenance_sha256": provider_provenance[
+                    "binding_sha256"
+                ],
             },
             "artifact_count": len(items),
             "terminal_count": terminal,
@@ -1477,7 +1586,28 @@ def evaluate_manifest(path: Path | str) -> dict[str, Any]:
 def write_report(report: Mapping[str, Any], path: Path | str) -> None:
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(_canonical_json(report) + "\n")
+    handle = tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=output.parent,
+        prefix=f".{output.name}.",
+        suffix=".tmp",
+        delete=False,
+    )
+    temporary = Path(handle.name)
+    try:
+        with handle:
+            handle.write(canonical_report_text(report))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, output)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def canonical_report_text(report: Mapping[str, Any]) -> str:
+    """Return the one byte-stable JSON representation accepted for publication."""
+    return _canonical_json(report) + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -12,6 +12,7 @@ from fli import (
     audience_insight_production_reconciliation as reconciliation,
     audience_insight_publication_audit as publication_audit,
     audience_insight_runs,
+    audience_insights,
     cli,
 )
 from fli.web import insights as insight_store
@@ -68,38 +69,49 @@ def _passing_audit_result(audit_item_id: str, meta) -> dict:
 
 def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, Path]:
     source = root / day / audience / "production-r1" / "insights.db"
-    candidate_id = f"candidate-{audience}-{day}"
     event_id = f"event-{audience}-{day}"
+    candidate_id = audience_insight_runs._candidate_id(day, audience, event_id)
     quote = f"Researcher reported a bounded result for {audience} on {day}."
-    packet = json.dumps(
-        {
-            "event_id": event_id,
-            "day": day,
-            "feed_rank": 4,
-            "sources": [
-                {
-                    "source_type": "x_post",
-                    "source_id": f"post-{audience}",
-                    "url": f"https://x.com/researcher/status/{audience}",
-                    "text": quote,
-                    "author": "@researcher",
-                    "title": None,
-                    "relation": "root",
-                    "source_sha256": "source-sha",
-                    "section_ordinal": None,
-                    "source_char_start": None,
-                    "source_char_end": None,
-                }
-            ],
-        }
+    packet_payload = {
+        "event_id": event_id,
+        "day": day,
+        "feed_rank": 4,
+        "sources": [
+            {
+                "source_type": "x_post",
+                "source_id": f"post-{audience}",
+                "url": f"https://x.com/researcher/status/{audience}",
+                "text": quote,
+                "author": "@researcher",
+                "title": None,
+                "relation": "root",
+                "source_sha256": "source-sha",
+                "section_ordinal": None,
+                "source_char_start": None,
+                "source_char_end": None,
+            }
+        ],
+    }
+    packet = json.dumps(packet_payload, sort_keys=True, separators=(",", ":"))
+    packet_object = audience_insight_runs._packet_from_payload(packet_payload)
+    extraction_input = audience_insights.render_model_input(
+        packet_object,
+        version=audience_insights.INPUT_RENDER_PROVIDER_SAFE_V2,
     )
+    extraction_input_sha = hashlib.sha256(extraction_input.encode()).hexdigest()
+    extraction_cache_key = audience_insights.prompt_cache_key(audience, event_id)
+    event_ids_json = json.dumps([event_id], separators=(",", ":"))
+    cohort_sha256 = hashlib.sha256(
+        json.dumps([packet_payload], sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
     conn = audience_insight_runs.connect_run(source)
     contracts = reconciliation.current_expected_contracts()[audience]
     with conn:
         conn.execute(
             """INSERT INTO run_meta
                (singleton, run_id, audience, day, model, reasoning_effort,
-                prompt_version, prompt_sha256, schema_version, editor_model,
+                prompt_version, prompt_sha256, input_render_version,
+                schema_version, editor_model,
                 editor_reasoning_effort, editor_prompt_version,
                 editor_prompt_sha256, editor_schema_version, review_model,
                 review_reasoning_effort, item_review_prompt_version,
@@ -109,18 +121,20 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
                 rank_limit, event_ids_json, cohort_sha256, expected_count,
                 created_at, updated_at)
                VALUES (1, ?, ?, ?, 'gpt-5.6-luna', 'medium', ?, 'extract-sha',
+                       'provider-safe-v2',
                        'extract-schema', 'gpt-5.6-luna', 'high', ?, 'editor-sha',
                        'editor-schema', 'gpt-5.6-luna', 'high', 'review-v2',
                        'review-sha', 'review-schema', 'day-v2', 'day-sha',
                        'day-schema', 'triage.db', 'artifacts.db', 50, ?,
-                       'cohort-sha', 1, ?, ?)""",
+                       ?, 1, ?, ?)""",
             (
                 f"production-{audience}-{day}-r1",
                 audience,
                 day,
                 f"{audience}-insight-v2",
                 f"{audience}-daily-editor-v2",
-                json.dumps([event_id]),
+                event_ids_json,
+                cohort_sha256,
                 NOW,
                 NOW,
             ),
@@ -168,8 +182,8 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
                 response_id, response_model, input_tokens, cached_tokens,
                 cache_write_tokens, output_tokens, reported_cost_usd,
                 request_tags_json, raw_output_text, completed_at, updated_at)
-               VALUES (?, ?, ?, 4, ?, 'extract input', 'extract-input-sha',
-                       'extract-cache', 'complete', 1, 'insight', ?,
+               VALUES (?, ?, ?, 4, ?, ?, ?,
+                       ?, 'complete', 1, 'insight', ?,
                        'third_party_observation', 'The result supports a bounded action.',
                        ?, ?, 1, 'x_post', ?, ?, '@researcher', 'source-sha', 0,
                        ?, 'resp-extract', 'gpt-5.6-luna', 1500, 1000, 0, 90,
@@ -179,6 +193,9 @@ def _complete_run(root: Path, *, audience: str, day: str = DAY) -> tuple[Path, P
                 event_id,
                 day,
                 packet,
+                extraction_input,
+                extraction_input_sha,
+                extraction_cache_key,
                 quote,
                 json.dumps(_audience_fields(audience)),
                 quote,
@@ -411,10 +428,20 @@ def _seed_terminal_x_article(path: Path) -> str:
     artifact_id = hashlib.sha256(url.encode()).hexdigest()
     raw_snapshot = path.parent / "article-raw.json"
     text_snapshot = path.parent / "article-text.txt"
-    raw_snapshot.write_bytes(b'{"article":{"contents":[]}}')
+    contents = [{"type": "unstyled", "text": "Bounded X Article body."}]
+    raw_payload = {
+        "article": {"title": "Bounded article", "contents": contents},
+        "status": "success",
+        "message": "ok",
+    }
+    raw_snapshot.write_text(
+        json.dumps(raw_payload, sort_keys=True, separators=(",", ":"))
+    )
     text_snapshot.write_text("Bounded X Article body.\n")
     raw_sha256 = hashlib.sha256(raw_snapshot.read_bytes()).hexdigest()
     text_sha256 = hashlib.sha256(text_snapshot.read_bytes()).hexdigest()
+    contents_json = json.dumps(contents, sort_keys=True, separators=(",", ":"))
+    contents_sha256 = hashlib.sha256(contents_json.encode()).hexdigest()
     conn = artifacts.connect(path)
     with conn:
         conn.execute(
@@ -445,9 +472,9 @@ def _seed_terminal_x_article(path: Path) -> str:
                 expanded_url, candidate_source, title_hint, relation, decision,
                 reason_code, artifact_id, created_at)
                VALUES ('import-candidate', 'import', ?, ?, 4, 1, 'x_post',
-                       'twitterapi_io', 'post-investment', 'source-sha',
+                       'twitterapi_io', '456', 'source-sha',
                        'https://x.com/researcher/status/investment',
-                       'post-investment', 'source-sha',
+                       '456', 'source-sha',
                        'https://x.com/researcher/status/investment', ?, ?, ?,
                        'x_article', 'Article', 'self_publishes', 'accepted',
                        'x_longform_article', ?, ?)""",
@@ -475,11 +502,14 @@ def _seed_terminal_x_article(path: Path) -> str:
             """INSERT INTO artifact_fetch
                (fetch_id, fetch_run_id, artifact_id, fetch_policy,
                 requested_url, request_key, status, attempt_number, started_at,
-                completed_at, final_url, content_type, raw_sha256,
-                raw_snapshot_ref, text_sha256, text_snapshot_ref,
-                text_char_count, text_truncated, declared_canonical_url)
+                completed_at, final_url, http_status, content_type,
+                content_length, raw_sha256, raw_snapshot_ref,
+                extractor_contract, extractor_version, extracted_title,
+                text_sha256, text_snapshot_ref, text_char_count,
+                text_truncated, declared_canonical_url, retryable)
                VALUES ('x-fetch', 'x-run', ?, ?, ?, 'request-key', 'success', 1,
-                       ?, ?, ?, 'text/plain', ?, ?, ?, ?, 24, 0, ?)""",
+                       ?, ?, ?, 200, 'application/json', ?, ?, ?, ?, ?, ?, ?, ?,
+                       24, 0, ?, 0)""",
             (
                 artifact_id,
                 artifact_x_articles.FETCH_POLICY,
@@ -487,8 +517,12 @@ def _seed_terminal_x_article(path: Path) -> str:
                 NOW,
                 NOW,
                 url,
+                len(raw_snapshot.read_bytes()),
                 raw_sha256,
                 str(raw_snapshot),
+                artifact_x_articles.EXTRACTOR_CONTRACT,
+                artifact_x_articles.EXTRACTOR_VERSION,
+                "Bounded article",
                 text_sha256,
                 str(text_snapshot),
                 url,
@@ -496,12 +530,22 @@ def _seed_terminal_x_article(path: Path) -> str:
         )
         conn.execute(
             """INSERT INTO artifact_x_article_fetch
-               (fetch_id, artifact_id, provider, endpoint, request_post_id,
+                (fetch_id, artifact_id, provider, endpoint, request_post_id,
                 canonical_article_id, canonical_article_url, request_made,
-                estimated_provider_credits, provider_status, created_at)
-               VALUES ('x-fetch', ?, 'twitterapi_io', '/twitter/article', '456',
-                       '123', ?, 1, 100, 'success', ?)""",
-            (artifact_id, url, NOW),
+                estimated_provider_credits, provider_status, provider_message,
+                response_fetched_at, content_block_count, content_blocks_json,
+                content_blocks_sha256, created_at)
+               VALUES ('x-fetch', ?, 'twitterapi_io', ?, '456',
+                       '123', ?, 1, 100, 'success', 'ok', ?, 1, ?, ?, ?)""",
+            (
+                artifact_id,
+                artifact_x_articles.ENDPOINT,
+                url,
+                NOW,
+                contents_json,
+                contents_sha256,
+                NOW,
+            ),
         )
     conn.close()
     return artifact_id
@@ -517,6 +561,12 @@ def test_report_is_deterministic_and_counts_every_stage(tmp_path):
     assert first["passed"] is True
     assert first["mode"] == "partial"
     assert first["expected_contracts"] == reconciliation.current_expected_contracts()
+    assert first["expected_contracts"]["investment"]["extraction"][
+        "reasoning_effort"
+    ] == "high"
+    assert first["expected_contracts"]["ai_engineering"]["extraction"][
+        "reasoning_effort"
+    ] == "medium"
     assert first["totals"]["all"]["run_count"] == 2
     assert first["totals"]["all"]["counts"] == {
         "expected_candidates": 2,
@@ -540,6 +590,30 @@ def test_report_is_deterministic_and_counts_every_stage(tmp_path):
     assert {row["audit"]["status"] for row in first["runs"]} == {"passed"}
     assert first["x_article_cohort"]["status"] == "not_bound"
     assert first["checks"]["x_article_cohort_requirement_satisfied"]
+
+
+def test_write_report_atomically_replaces_existing_bytes(tmp_path, monkeypatch):
+    output = tmp_path / "report.json"
+    output.write_text("stale report\n")
+    report = {"passed": True, "runs": []}
+    replacements = []
+    real_replace = reconciliation.os.replace
+
+    def observed_replace(source, destination):
+        source_path = Path(source)
+        destination_path = Path(destination)
+        assert source_path.parent == output.parent
+        assert source_path.read_text() == reconciliation.canonical_report_text(report)
+        assert destination_path.read_text() == "stale report\n"
+        replacements.append((source_path, destination_path))
+        real_replace(source, destination)
+
+    monkeypatch.setattr(reconciliation.os, "replace", observed_replace)
+    reconciliation.write_report(report, output)
+
+    assert output.read_text() == reconciliation.canonical_report_text(report)
+    assert len(replacements) == 1
+    assert list(tmp_path.glob(".report.json.*.tmp")) == []
 
 
 def test_cli_writes_report_and_exact_manifest_rejects_missing_or_duplicate_runs(

@@ -310,6 +310,81 @@ def test_rendered_evidence_exposes_block_selector_but_not_provenance_or_rank():
     assert "engagement" not in rendered.lower()
 
 
+def test_model_input_render_versions_are_deterministic_and_preserve_packet():
+    packet = audience_insights.EvidencePacket(
+        event_id="event-expletive",
+        day="2026-07-10",
+        feed_rank=23,
+        sources=(
+            audience_insights.EvidenceSource(
+                source_type="x_post",
+                source_id="post-expletive",
+                url="https://x.com/source/status/post-expletive",
+                text="thank fucking god",
+                author="@source",
+                relation="reply",
+            ),
+        ),
+    )
+
+    legacy = audience_insights.render_input(packet)
+    first = audience_insights.render_model_input(
+        packet,
+        version=audience_insights.INPUT_RENDER_PROVIDER_SAFE_V2,
+    )
+    second = audience_insights.render_model_input(
+        packet,
+        version=audience_insights.INPUT_RENDER_PROVIDER_SAFE_V2,
+    )
+
+    assert "thank fucking god" in legacy
+    assert "thank [EXPLETIVE] god" in first
+    assert "fucking" not in first.lower()
+    assert packet.sources[0].text == "thank fucking god"
+    assert first == second
+    assert packet.input_sha256 == audience_insights._sha256(legacy)
+    assert packet.input_sha256 != audience_insights._sha256(first)
+
+
+def test_citation_across_model_input_normalization_still_fails_closed():
+    packet = audience_insights.EvidencePacket(
+        event_id="event-expletive",
+        day="2026-07-10",
+        feed_rank=23,
+        sources=(
+            audience_insights.EvidenceSource(
+                source_type="x_post",
+                source_id="post-expletive",
+                url="https://x.com/source/status/post-expletive",
+                text="thank fucking god",
+                author="@source",
+                relation="reply",
+            ),
+        ),
+    )
+    payload = investment_payload()
+    payload["supporting_quote"] = "thank [EXPLETIVE] god"
+    payload["citation_block_index"] = 1
+    client = FakeClient(payload)
+
+    with pytest.raises(audience_insights.CitationVerificationError):
+        audience_insights.evaluate_one(
+            client,
+            packet,
+            audience=audience_insights.INVESTMENT,
+            run="provider-safe-input-test",
+            frozen_input_text=audience_insights.render_model_input(
+                packet,
+                version=audience_insights.INPUT_RENDER_PROVIDER_SAFE_V2,
+            ),
+        )
+
+    assert "thank [EXPLETIVE] god" in client.responses.with_raw_response.calls[0][
+        "input"
+    ]
+    assert packet.sources[0].text == "thank fucking god"
+
+
 @pytest.mark.parametrize(
     ("audience", "payload"),
     [

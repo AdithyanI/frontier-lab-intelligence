@@ -388,6 +388,198 @@ def test_x_article_artifact_id_filter_rejects_non_article_catalog_id(tmp_path):
         )
 
 
+def _fetch_provenance_fixture(db: Path, tmp_path: Path, monkeypatch) -> str:
+    artifact_id = _seed_x_article(db)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+
+    def handler(_request: httpx.Request):
+        return httpx.Response(
+            200,
+            json={
+                "article": {
+                    "title": "Bound title",
+                    "preview_text": "metadata only",
+                    "contents": [
+                        {"type": "unstyled", "text": "Exact body."},
+                        {"type": "image", "url": "https://example.com/a.png"},
+                    ],
+                },
+                "status": "success",
+                "message": "ok",
+            },
+        )
+
+    result = artifact_x_articles.fetch_x_articles(
+        db_path=db,
+        artifact_ids=[artifact_id],
+        api_key="test-key",
+        transport=httpx.MockTransport(handler),
+    )
+    assert result["success"] == 1
+    return artifact_id
+
+
+def test_x_article_provenance_is_exact_read_only_and_deterministic(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    artifact_id = _fetch_provenance_fixture(db, tmp_path, monkeypatch)
+
+    first = artifact_x_articles.validate_x_article_provenance(
+        db_path=db, artifact_ids=[artifact_id]
+    )
+    second = artifact_x_articles.validate_x_article_provenance(
+        db_path=db, artifact_ids=(artifact_id.upper(),)
+    )
+
+    assert first == second
+    assert first["schema_version"] == (
+        artifact_x_articles.PROVENANCE_SCHEMA_VERSION
+    )
+    assert first["artifact_db"] == str(db.resolve())
+    assert first["artifact_count"] == 1
+    assert len(first["binding_sha256"]) == 64
+    item = first["items"][0]
+    assert item["artifact_id"] == artifact_id
+    assert item["canonical_article_id"] == "111"
+    assert item["canonical_article_url"] == "https://x.com/i/article/111"
+    assert item["request_post_id"] == "222"
+    assert item["mapping_error"] is None
+    assert len(item["attempts"]) == 1
+    attempt = item["attempts"][0]
+    assert attempt["status"] == "success"
+    assert attempt["provider"] == "twitterapi_io"
+    assert attempt["endpoint"] == artifact_x_articles.ENDPOINT
+    assert attempt["request_post_id"] == "222"
+    assert attempt["canonical_article_id"] == "111"
+    assert attempt["canonical_article_url"] == "https://x.com/i/article/111"
+    assert attempt["request_made"] == 1
+    assert attempt["estimated_provider_credits"] == 100
+    assert attempt["provider_status"] == "success"
+    assert attempt["provider_message"] == "ok"
+    assert attempt["content_block_count"] == 2
+    assert len(attempt["content_blocks_sha256"]) == 64
+    assert Path(attempt["raw_snapshot_ref"]).is_file()
+    assert Path(attempt["text_snapshot_ref"]).is_file()
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("provider", "unbound-provider"),
+        ("endpoint", "https://example.com/not-the-endpoint"),
+        ("request_post_id", "999"),
+        ("canonical_article_id", "999"),
+        ("canonical_article_url", "https://x.com/i/article/999"),
+        ("request_made", 0),
+        ("estimated_provider_credits", 999),
+    ],
+)
+def test_x_article_provenance_rejects_provider_mapping_drift(
+    tmp_path, monkeypatch, field, value
+):
+    db = tmp_path / "artifacts.db"
+    artifact_id = _fetch_provenance_fixture(db, tmp_path, monkeypatch)
+    conn = artifacts.connect(db)
+    conn.execute("PRAGMA ignore_check_constraints = ON")
+    with conn:
+        conn.execute(
+            f"UPDATE artifact_x_article_fetch SET {field} = ?",  # noqa: S608
+            (value,),
+        )
+    conn.close()
+
+    with pytest.raises(ValueError, match=f"binding drift: {field}"):
+        artifact_x_articles.validate_x_article_provenance(
+            db_path=db, artifact_ids=[artifact_id]
+        )
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("provider_status", "failed"),
+        ("provider_message", "not the stored response"),
+        ("content_block_count", 99),
+        ("content_blocks_sha256", "0" * 64),
+    ],
+)
+def test_x_article_provenance_rejects_response_projection_drift(
+    tmp_path, monkeypatch, field, value
+):
+    db = tmp_path / "artifacts.db"
+    artifact_id = _fetch_provenance_fixture(db, tmp_path, monkeypatch)
+    conn = artifacts.connect(db)
+    with conn:
+        conn.execute(
+            f"UPDATE artifact_x_article_fetch SET {field} = ?",  # noqa: S608
+            (value,),
+        )
+    conn.close()
+
+    with pytest.raises(ValueError, match=f"binding drift: {field}"):
+        artifact_x_articles.validate_x_article_provenance(
+            db_path=db, artifact_ids=[artifact_id]
+        )
+
+
+def test_x_article_provenance_rejects_snapshot_drift(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    artifact_id = _fetch_provenance_fixture(db, tmp_path, monkeypatch)
+    conn = artifacts.connect(db)
+    snapshot = Path(
+        conn.execute(
+            "SELECT text_snapshot_ref FROM artifact_fetch"
+        ).fetchone()["text_snapshot_ref"]
+    )
+    conn.close()
+    snapshot.write_text("tampered body\n")
+
+    with pytest.raises(ValueError, match="text snapshot hash drift"):
+        artifact_x_articles.validate_x_article_provenance(
+            db_path=db, artifact_ids=[artifact_id]
+        )
+
+
+def test_x_article_provenance_binds_terminal_mapping_error(tmp_path):
+    db = tmp_path / "artifacts.db"
+    artifact_id = _seed_x_article(db, post_ids=("222", "333"))
+    result = artifact_x_articles.fetch_x_articles(
+        db_path=db,
+        artifact_ids=[artifact_id],
+        api_key="unused",
+        transport=httpx.MockTransport(
+            lambda _request: pytest.fail("mapping failure must not call provider")
+        ),
+    )
+    assert result["failed_terminal"] == 1
+
+    provenance = artifact_x_articles.validate_x_article_provenance(
+        db_path=db, artifact_ids=[artifact_id]
+    )
+    item = provenance["items"][0]
+    assert item["mapping_error"] == "x_article_post_id_ambiguous"
+    assert item["request_post_id"] is None
+    assert item["attempts"][0]["status"] == "failed_terminal"
+    assert item["attempts"][0]["error_code"] == (
+        "x_article_post_id_ambiguous"
+    )
+    assert item["attempts"][0]["request_made"] == 0
+    assert item["attempts"][0]["estimated_provider_credits"] == 0
+
+    conn = artifacts.connect(db)
+    with conn:
+        conn.execute(
+            "UPDATE artifact_fetch SET error_code = 'x_article_post_id_missing'"
+        )
+    conn.close()
+    with pytest.raises(ValueError, match="binding drift: error_code"):
+        artifact_x_articles.validate_x_article_provenance(
+            db_path=db, artifact_ids=[artifact_id]
+        )
+
+
 def test_x_article_cli_passes_repeatable_exact_filter_and_keeps_default_limit(
     tmp_path, monkeypatch, capsys
 ):

@@ -11,9 +11,10 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import sqlite3
 import unicodedata
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable, Mapping
 from urllib.parse import urlsplit
 
 import httpx
@@ -29,6 +30,7 @@ EXTRACTOR_VERSION = "1"
 PROVIDER_CREDITS_PER_REQUEST = 100
 ARTICLE_PATH = re.compile(r"^/i/article/(?P<article_id>\d+)/?$", re.IGNORECASE)
 ARTIFACT_ID = re.compile(r"^[0-9a-f]{64}$")
+PROVENANCE_SCHEMA_VERSION = "x-article-provider-provenance-v1"
 
 
 def _canonical_json(value: Any) -> str:
@@ -200,6 +202,385 @@ def _selection_rows(
     for rank, item in enumerate(selection, 1):
         item["selection_rank"] = rank
     return selection
+
+
+def _provenance_snapshot(
+    reference: Any,
+    digest: Any,
+    *,
+    label: str,
+) -> tuple[str | None, str | None, bytes | None]:
+    """Read and hash one immutable snapshot without mutating catalog state."""
+    if reference is None and digest is None:
+        return None, None, None
+    if not isinstance(reference, str) or not reference.strip():
+        raise ValueError(f"{label} snapshot reference is missing")
+    if not isinstance(digest, str) or ARTIFACT_ID.fullmatch(digest) is None:
+        raise ValueError(f"{label} snapshot SHA-256 is invalid")
+    path = Path(reference)
+    if not path.is_absolute():
+        path = artifacts.REPO_ROOT / path
+    path = path.resolve()
+    if not path.is_file():
+        raise ValueError(f"{label} snapshot does not exist: {path}")
+    body = path.read_bytes()
+    if _sha256_bytes(body) != digest:
+        raise ValueError(f"{label} snapshot hash drift")
+    return reference, digest, body
+
+
+def _require_binding(
+    row: Mapping[str, Any],
+    expected: Mapping[str, Any],
+    *,
+    label: str,
+) -> None:
+    drift = [field for field, value in expected.items() if row[field] != value]
+    if drift:
+        raise ValueError(f"{label} binding drift: {', '.join(drift)}")
+
+
+def _validate_response_projection(
+    row: Mapping[str, Any],
+    *,
+    label: str,
+    raw: bytes | None,
+    text: bytes | None,
+) -> None:
+    """Bind response-derived columns to the exact raw and text snapshots."""
+    status = str(row["status"])
+    if status == "in_progress":
+        if row["completed_at"] is not None:
+            raise ValueError(f"{label} in-progress attempt is marked complete")
+        if any(
+            row[field] is not None
+            for field in (
+                "error_code",
+                "error_message",
+                "retryable",
+                "provider_status",
+                "provider_message",
+                "response_fetched_at",
+                "content_block_count",
+                "content_blocks_json",
+                "content_blocks_sha256",
+            )
+        ):
+            raise ValueError(f"{label} in-progress attempt has terminal metadata")
+        return
+
+    if row["completed_at"] is None:
+        raise ValueError(f"{label} terminal attempt lacks completed_at")
+    expected_retryable = int(status == "failed_retryable")
+    if row["retryable"] != expected_retryable:
+        raise ValueError(f"{label} retryable flag does not match status")
+    if status == "success":
+        if row["error_code"] is not None or row["error_message"] is not None:
+            raise ValueError(f"{label} successful attempt has error metadata")
+    elif not row["error_code"] or not row["error_message"]:
+        raise ValueError(f"{label} failed attempt lacks explicit error metadata")
+
+    if raw is None:
+        if text is not None:
+            raise ValueError(f"{label} has text without a raw response")
+        if any(
+            row[field] is not None
+            for field in (
+                "provider_status",
+                "provider_message",
+                "response_fetched_at",
+                "content_block_count",
+                "content_blocks_json",
+                "content_blocks_sha256",
+            )
+        ):
+            raise ValueError(f"{label} has provider response data without a snapshot")
+        return
+
+    if row["http_status"] is None:
+        raise ValueError(f"{label} raw response lacks an HTTP status")
+    if row["response_fetched_at"] is None:
+        raise ValueError(f"{label} raw response lacks provider fetch time")
+    response = httpx.Response(int(row["http_status"]), content=raw)
+    (
+        expected_status,
+        provider_status,
+        provider_message,
+        title,
+        contents,
+        normalized_text,
+        error_code,
+        error_message,
+    ) = _response_outcome(response)
+    expected_blocks_json = _canonical_json(contents) if contents is not None else None
+    expected_blocks_sha256 = (
+        _sha256_bytes(expected_blocks_json.encode())
+        if expected_blocks_json is not None
+        else None
+    )
+    expected_block_count = len(contents) if contents is not None else None
+    _require_binding(
+        row,
+        {
+            "status": expected_status,
+            "provider_status": provider_status,
+            "provider_message": provider_message,
+            "extracted_title": title,
+            "content_block_count": expected_block_count,
+            "content_blocks_json": expected_blocks_json,
+            "content_blocks_sha256": expected_blocks_sha256,
+            "error_code": error_code,
+            "error_message": error_message,
+        },
+        label=label,
+    )
+    if normalized_text is None:
+        if text is not None:
+            raise ValueError(f"{label} has text for a response without a body")
+    else:
+        if text is None or text.decode("utf-8") != normalized_text:
+            raise ValueError(f"{label} text snapshot does not match provider blocks")
+
+
+def validate_x_article_provenance(
+    *,
+    db_path: Path | str = artifacts.DEFAULT_DB,
+    artifact_ids: Iterable[str],
+) -> dict[str, Any]:
+    """Return an exact read-only provider binding for catalogued X Articles.
+
+    The returned projection is deterministic and JSON-safe.  It binds the
+    current catalog mapping to every stored fetch/provider attempt and proves
+    that response-derived status, errors, content blocks, and snapshots still
+    match the raw provider response.  The function never creates or resumes a
+    fetch and is therefore safe for production reconciliation.
+    """
+    selected_ids = _validated_artifact_ids(tuple(artifact_ids))
+    if not selected_ids:
+        raise ValueError("artifact_ids must contain at least one X Article")
+    path = Path(db_path).resolve()
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    conn = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        selection = _selection_rows(
+            conn,
+            limit=None,
+            artifact_ids=selected_ids,
+        )
+        items: list[dict[str, Any]] = []
+        for selected in sorted(selection, key=lambda item: item["artifact_id"]):
+            artifact_id = str(selected["artifact_id"])
+            attempts = conn.execute(
+                """SELECT fetch.fetch_id, fetch.fetch_run_id,
+                          fetch.artifact_id AS fetch_artifact_id,
+                          fetch.fetch_policy, fetch.requested_url,
+                          fetch.status, fetch.attempt_number, fetch.started_at,
+                          fetch.completed_at, fetch.final_url, fetch.http_status,
+                          fetch.content_length, fetch.raw_sha256,
+                          fetch.raw_snapshot_ref, fetch.extractor_contract,
+                          fetch.extractor_version, fetch.extracted_title,
+                          fetch.text_sha256, fetch.text_snapshot_ref,
+                          fetch.text_char_count, fetch.text_truncated,
+                          fetch.declared_canonical_url, fetch.error_code,
+                          fetch.error_message, fetch.retryable,
+                          provider.fetch_id AS provider_fetch_id,
+                          provider.artifact_id AS provider_artifact_id,
+                          provider.provider, provider.endpoint,
+                          provider.request_post_id,
+                          provider.canonical_article_id,
+                          provider.canonical_article_url,
+                          provider.request_made,
+                          provider.estimated_provider_credits,
+                          provider.provider_status, provider.provider_message,
+                          provider.response_fetched_at,
+                          provider.content_block_count,
+                          provider.content_blocks_json,
+                          provider.content_blocks_sha256,
+                          provider.created_at AS provider_created_at
+                   FROM artifact_fetch AS fetch
+                   LEFT JOIN artifact_x_article_fetch AS provider
+                     ON provider.fetch_id = fetch.fetch_id
+                   WHERE fetch.artifact_id = ? AND fetch.fetch_policy = ?
+                   ORDER BY fetch.attempt_number, fetch.fetch_id""",
+                (artifact_id, FETCH_POLICY),
+            ).fetchall()
+            orphan_count = int(
+                conn.execute(
+                    """SELECT COUNT(*)
+                       FROM artifact_x_article_fetch AS provider
+                       LEFT JOIN artifact_fetch AS fetch
+                         ON fetch.fetch_id = provider.fetch_id
+                       WHERE provider.artifact_id = ?
+                         AND (fetch.fetch_id IS NULL OR fetch.fetch_policy != ?)""",
+                    (artifact_id, FETCH_POLICY),
+                ).fetchone()[0]
+            )
+            if orphan_count:
+                raise ValueError(
+                    f"X Article {artifact_id} has provider rows outside {FETCH_POLICY}"
+                )
+            numbers = [int(row["attempt_number"]) for row in attempts]
+            if numbers != list(range(1, len(attempts) + 1)):
+                raise ValueError(
+                    f"X Article {artifact_id} attempt numbers are not contiguous"
+                )
+
+            attempt_projection: list[dict[str, Any]] = []
+            expected_request_made = int(selected["mapping_error"] is None)
+            expected_credits = (
+                PROVIDER_CREDITS_PER_REQUEST if expected_request_made else 0
+            )
+            for row_value in attempts:
+                row = dict(row_value)
+                label = f"X Article {artifact_id} attempt {row['attempt_number']}"
+                if row["provider_fetch_id"] is None:
+                    raise ValueError(f"{label} lacks provider provenance")
+                _require_binding(
+                    row,
+                    {
+                        "fetch_artifact_id": artifact_id,
+                        "fetch_policy": FETCH_POLICY,
+                        "requested_url": selected["canonical_url"],
+                        "provider_fetch_id": row["fetch_id"],
+                        "provider_artifact_id": artifact_id,
+                        "provider": "twitterapi_io",
+                        "endpoint": ENDPOINT,
+                        "request_post_id": selected["request_post_id"],
+                        "canonical_article_id": selected["canonical_article_id"],
+                        "canonical_article_url": selected["canonical_article_url"],
+                        "request_made": expected_request_made,
+                        "estimated_provider_credits": expected_credits,
+                    },
+                    label=label,
+                )
+                raw_ref, raw_sha, raw = _provenance_snapshot(
+                    row["raw_snapshot_ref"],
+                    row["raw_sha256"],
+                    label=f"{label} raw",
+                )
+                text_ref, text_sha, text = _provenance_snapshot(
+                    row["text_snapshot_ref"],
+                    row["text_sha256"],
+                    label=f"{label} text",
+                )
+                if raw is not None and row["content_length"] != len(raw):
+                    raise ValueError(f"{label} raw content length drift")
+                if text is not None and row["text_char_count"] != len(
+                    text.decode("utf-8")
+                ):
+                    raise ValueError(f"{label} text character count drift")
+                if raw is not None:
+                    _require_binding(
+                        row,
+                        {
+                            "final_url": selected["canonical_article_url"],
+                            "declared_canonical_url": selected[
+                                "canonical_article_url"
+                            ],
+                            "extractor_contract": EXTRACTOR_CONTRACT,
+                            "extractor_version": EXTRACTOR_VERSION,
+                            "text_truncated": 0,
+                            "request_made": 1,
+                        },
+                        label=label,
+                    )
+                if row["status"] == "success":
+                    if raw is None or text is None:
+                        raise ValueError(f"{label} success lacks raw or text snapshot")
+                if not expected_request_made:
+                    _require_binding(
+                        row,
+                        {
+                            "status": "failed_terminal",
+                            "error_code": selected["mapping_error"],
+                            "retryable": 0,
+                        },
+                        label=label,
+                    )
+                    if raw is not None or text is not None:
+                        raise ValueError(
+                            f"{label} mapping failure has response evidence"
+                        )
+                _validate_response_projection(
+                    row,
+                    label=label,
+                    raw=raw,
+                    text=text,
+                )
+                attempt_projection.append(
+                    {
+                        "fetch_id": str(row["fetch_id"]),
+                        "fetch_run_id": str(row["fetch_run_id"]),
+                        "attempt_number": int(row["attempt_number"]),
+                        "status": str(row["status"]),
+                        "started_at": str(row["started_at"]),
+                        "completed_at": row["completed_at"],
+                        "requested_url": str(row["requested_url"]),
+                        "final_url": row["final_url"],
+                        "http_status": row["http_status"],
+                        "raw_sha256": raw_sha,
+                        "raw_snapshot_ref": raw_ref,
+                        "content_length": row["content_length"],
+                        "extractor_contract": row["extractor_contract"],
+                        "extractor_version": row["extractor_version"],
+                        "extracted_title": row["extracted_title"],
+                        "text_sha256": text_sha,
+                        "text_snapshot_ref": text_ref,
+                        "text_char_count": row["text_char_count"],
+                        "text_truncated": row["text_truncated"],
+                        "declared_canonical_url": row[
+                            "declared_canonical_url"
+                        ],
+                        "error_code": row["error_code"],
+                        "error_message": row["error_message"],
+                        "retryable": row["retryable"],
+                        "provider": str(row["provider"]),
+                        "endpoint": str(row["endpoint"]),
+                        "request_post_id": row["request_post_id"],
+                        "canonical_article_id": str(row["canonical_article_id"]),
+                        "canonical_article_url": str(row["canonical_article_url"]),
+                        "request_made": int(row["request_made"]),
+                        "estimated_provider_credits": int(
+                            row["estimated_provider_credits"]
+                        ),
+                        "provider_status": row["provider_status"],
+                        "provider_message": row["provider_message"],
+                        "response_fetched_at": row["response_fetched_at"],
+                        "content_block_count": row["content_block_count"],
+                        "content_blocks_sha256": row["content_blocks_sha256"],
+                        "provider_created_at": str(row["provider_created_at"]),
+                    }
+                )
+            items.append(
+                {
+                    "artifact_id": artifact_id,
+                    "selection_rank": int(selected["selection_rank"]),
+                    "canonical_url": str(selected["canonical_url"]),
+                    "canonical_article_id": str(selected["canonical_article_id"]),
+                    "canonical_article_url": str(
+                        selected["canonical_article_url"]
+                    ),
+                    "request_post_id": selected["request_post_id"],
+                    "mapping_error": selected["mapping_error"],
+                    "source_day": str(selected["source_day"]),
+                    "source_rank": int(selected["source_rank"]),
+                    "normalized_rank": float(selected["normalized_rank"]),
+                    "source_event_id": str(selected["source_event_id"]),
+                    "attempts": attempt_projection,
+                }
+            )
+        digest = _sha256_bytes(_canonical_json(items).encode())
+        return {
+            "schema_version": PROVENANCE_SCHEMA_VERSION,
+            "artifact_db": str(path),
+            "artifact_count": len(items),
+            "binding_sha256": digest,
+            "items": items,
+        }
+    finally:
+        conn.close()
 
 
 def _create_run(

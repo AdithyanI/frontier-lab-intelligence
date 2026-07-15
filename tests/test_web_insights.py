@@ -1,6 +1,7 @@
 import json
 import sqlite3
 
+import pytest
 from fastapi.testclient import TestClient
 
 from fli import audience_insight_publication_audit, audience_insight_runs
@@ -209,7 +210,8 @@ def _fixture(
         conn.execute(
             """INSERT INTO run_meta
                (singleton, run_id, audience, day, model, reasoning_effort,
-                prompt_version, prompt_sha256, schema_version,
+                prompt_version, prompt_sha256, input_render_version,
+                schema_version,
                 editor_model, editor_reasoning_effort, editor_prompt_version,
                 editor_prompt_sha256, editor_schema_version,
                 review_model, review_reasoning_effort,
@@ -220,7 +222,8 @@ def _fixture(
                 event_ids_json, cohort_sha256, expected_count,
                 created_at, updated_at)
                VALUES (1, ?, ?, '2026-07-11', 'gpt-test', 'medium', ?,
-                       'prompt-sha', 'schema-v2', 'gpt-test', 'high', ?,
+                       'prompt-sha', 'provider-safe-v2', 'schema-v2',
+                       'gpt-test', 'high', ?,
                        'editor-prompt-sha', 'editor-schema-v2', 'gpt-test', 'high',
                        'item-review-v2', 'item-review-sha', 'item-review-schema',
                        'day-review-v2', 'day-review-sha', 'day-review-schema',
@@ -655,7 +658,11 @@ def _write_reconciliation_report(root, paths, *, passed=True):
         / insight_store.PRODUCTION_RECONCILIATION_REPORT
     )
     target.parent.mkdir(parents=True)
-    target.write_text(json.dumps(report))
+    target.write_text(
+        insight_store.audience_insight_production_reconciliation.canonical_report_text(
+            report
+        )
+    )
     manifest = target.parent / insight_store.PRODUCTION_RECONCILIATION_MANIFEST
     manifest.write_text("{}")
     return target, report
@@ -756,6 +763,34 @@ def test_reconciliation_report_binding_drift_fails_closed(tmp_path, monkeypatch)
         "effective_ids_sha256": "0" * 64,
     }
     target.write_text(json.dumps(stored_report))
+    monkeypatch.setattr(insight_store, "DEFAULT_INSIGHTS_ROOT", tmp_path)
+    monkeypatch.setattr(
+        insight_store.audience_insight_production_reconciliation,
+        "evaluate_manifest",
+        lambda _path: evaluated_report,
+    )
+
+    assert insight_store.insight_dates_payload(audience="investment")["dates"] == []
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda text: text.replace('"passed":true', '"passed":1'),
+        lambda text: "  " + text,
+    ],
+)
+def test_reconciliation_report_requires_exact_canonical_bytes(
+    tmp_path, monkeypatch, mutate
+):
+    investment = tmp_path / "approved" / "investment" / "insights.db"
+    engineering = tmp_path / "approved" / "engineering" / "insights.db"
+    _fixture(investment, audience="investment", run_id="investment")
+    _fixture(engineering, audience="ai_engineering", run_id="engineering")
+    target, evaluated_report = _write_reconciliation_report(
+        tmp_path, [investment, engineering]
+    )
+    target.write_text(mutate(target.read_text()))
     monkeypatch.setattr(insight_store, "DEFAULT_INSIGHTS_ROOT", tmp_path)
     monkeypatch.setattr(
         insight_store.audience_insight_production_reconciliation,

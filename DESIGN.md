@@ -86,11 +86,11 @@ Rules:
   beneath. No sidebar — pages own their full width. Show only working routes;
   unavailable future destinations do not occupy the navigation.
 - Registry and Ranking share one top-level **Network** destination because they
-  are two views of the same source system. Ranking is the default subview;
-  Registry remains an explicit term because it is the assignment's screened
-  identity register. A third **Add Profile** subview owns manual admission as
-  an operator action. Use one ruled secondary navigation for all three, not
-  another row of top-level pills.
+  are two views of the same source system. Registry is the first and default
+  subview because it is the assignment's screened identity register; Ranking
+  follows as its network-discovery view. A third **Add Profile** subview owns
+  manual admission as an operator action. Use one ruled secondary navigation
+  for all three, not another row of top-level pills.
 - Home is an editorial split: statement + hero numerals on the left, live
   pipeline rail on the right, divided by an ink rule.
 - Density first: tables and lists over cards. Cards only where an item is
