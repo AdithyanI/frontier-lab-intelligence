@@ -221,7 +221,11 @@ Application invariants:
   and the same v3 different-input control returned zero reads on GPT-5.5.
   LiteLLM's exact-response Redis cache does work, but it cannot reuse a prefix
   across different catalog items. Keep telemetry visible and do not claim
-  prefix-cache savings until Azure again returns nonzero `cached_tokens`.
+  prefix-cache savings until Azure again returns nonzero `cached_tokens`. The
+  July 12 LiteLLM 1.92.0 upgrade is not an adequate causal explanation because
+  the successful July 14 cache run already used that image; source and live
+  transform inspection also show the Responses cache fields are still
+  forwarded. Do not roll back on this evidence alone.
 - Which reply and quote-post blocks belong in the model packet, and when does a
   deterministic size bound become necessary? Inspect real packet sizes before
   choosing a top-N rule.

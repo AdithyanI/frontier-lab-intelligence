@@ -67,10 +67,35 @@ GPT-5.5 also failed to reuse the different-input prefix. This broadens the
 diagnosis from a Luna-specific regression to the Azure Responses caching path
 or its current interaction through the shared proxy.
 
+## LiteLLM version audit
+
+The shared proxy is running LiteLLM 1.92.0. The automatic stable-version
+workflow committed that image on July 12, and Azure changed the live container
+to the 1.92.0 image at 19:57 UTC that day. The successful July 14 Feed-triage
+run therefore already used 1.92.0; the version upgrade cannot by itself explain
+why the same route stopped returning cache reads on July 15.
+
+The 1.91.2-to-1.92.0 source diff does not change Azure Responses handling for
+`prompt_cache_key` or `prompt_cache_retention`. Both fields remain declared
+Responses parameters and are passed through the Azure Responses transform. The
+only 1.92 release item labelled as a caching fix repairs replay of LiteLLM's own
+Redis full-response cache for a streamed Responses-to-Chat bridge; it does not
+alter provider-side prompt-prefix caching. A newly reported LiteLLM issue about
+silently dropped `prompt_cache_key` values applies to the Chat Completions
+client path, not this Responses path, and the live transform inspection already
+proves that this request retained both fields.
+
+The sibling LiteLLM repository does have a daily workflow that automatically
+selects the newest stable release, commits the Docker image bump, and triggers
+Azure deployment. No rollback or workflow change was made during this audit.
+The current newest stable release remains 1.92.0; 1.93 and 1.94 are prerelease
+channels.
+
 ## Conclusion
 
 The miss is not caused by the 1,024-token threshold, v3 prompt length, cache-key
-instability, parallel calls within one lane, or a dropped adapter field. Both
+instability, parallel calls within one lane, a dropped adapter field, or the
+1.92.0 image upgrade alone. Both
 GPT-5.5 and GPT-5.6 failed the different-input test, so the Azure Responses
 prompt-prefix cache or its current proxy interaction is not functioning
 reliably. Microsoft documented a GPT-5.6 Responses-specific failure in July and
@@ -87,3 +112,6 @@ References:
 - [OpenAI prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching)
 - [Azure prompt caching](https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/prompt-caching)
 - [Azure GPT-5.6 Responses cache incident](https://learn.microsoft.com/en-in/answers/questions/5942997/gpt-5-6-implicit-prompt-caching-and-explicit-promp)
+- [LiteLLM 1.92.0 release](https://github.com/BerriAI/litellm/releases/tag/v1.92.0)
+- [LiteLLM 1.92 Redis replay fix](https://github.com/BerriAI/litellm/pull/28158)
+- [LiteLLM Chat Completions parameter issue](https://github.com/BerriAI/litellm/issues/33184)
