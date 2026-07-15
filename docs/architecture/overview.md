@@ -141,11 +141,11 @@ or Parquet without changing bundle identity.
 
 The product-facing Feed is a separate, rebuildable read model over that raw
 evidence. `fli.signal_feed` materializes complete UTC calendar days under the
-`signal-feed-v9` contract into `data/derived/signal-feed/feed.db`. Daily account
+`signal-feed-v10` contract into `data/derived/signal-feed/feed.db`. Daily account
 collection includes authored replies. The Feed admits a reply only when its
 conversation root is also captured in the materialization window, preserving
-both first-party continuations and tracked-account reactions without turning
-unrelated reply activity into Feed items. Starting from the selected top-level
+the raw evidence needed for first-party continuations and tracked-account
+reactions without importing replies to unknown threads. Starting from the selected top-level
 observations, it recursively follows every embedded
 quote/retweet payload it can render, preserves the exact immutable `raw_json`
 and hash of every direct or embedded post in the Feed snapshot, and records the
@@ -184,9 +184,13 @@ components that produced its peak daily score so the disclosure never explains
 the wrong root post.
 
 `fli.signal_events` is a separate content-addressed projection over one frozen
-Feed run. The `signal-events-v4` /
-`exact-structural-v6-primary-author-threads` contract joins provider-declared
-quote/retweet targets and reply parents. A shared conversation ID is not a
+Feed run. The `signal-events-v6` /
+`exact-structural-v10-root-owned-reactions` contract is a rooted forest rather
+than an unrestricted connected graph. Each post has at most one structural
+parent. Quote/retweet wrappers attach to one source, and only the source
+author's replies extend that envelope. Third-party replies remain preserved in
+the Feed ledger but do not render or group; a reaction can never import its own
+reply thread or bridge two independent roots. A shared conversation ID is not a
 general grouping edge. It bridges only a same-author reply to its captured
 conversation root when the provider omitted or deleted the immediate parent,
 preventing one first-party thread from splitting into separate envelopes.
@@ -214,11 +218,10 @@ bridge otherwise separate components, and opaque provider anchors continue to
 connect legitimate survivors. Unconsumed posts remain one-member envelopes.
 
 The weekly projection rolls the same daily revisions through a seven-day
-window. When a later exact relationship merges components that were separate
-earlier in the week, it supersedes every overlapping earlier state by
-provider-qualified visible membership. This retains one cumulative envelope,
-its active-day list, and peak daily score/engagement without double-counting
-the same post or retaining a superseded event revision.
+window by stable root-owned Event ID. It keeps the richest visible envelope
+revision while accumulating active days and peak daily score/engagement. A
+later excluded reply may make an existing root active again, but it cannot
+replace the earlier envelope with a thinner singleton or merge another root.
 
 The React `/evidence/feed` surface is one evidence browser rather than separate post,
 group, or lane modes. It offers complete-day navigation, search, the three
@@ -480,7 +483,7 @@ flowchart LR
     UI[Web UI<br/>FastAPI + React SPA]
     OBS[(Immutable X observations<br/>provider payload history)]
     FEED[Feed v8<br/>posts · disclosure-dated relation closure · opaque anchors]
-    EVENTS[Events v3<br/>stable exact envelopes · cutoff projections]
+    EVENTS[Events v6<br/>root-owned envelopes · cutoff projections]
     PUB[Published read model<br/>explicit validated run pointer]
     READ[Registry-aware projections<br/>daily delta · weekly dedupe · audience routing]
     ART[(Artifact catalog<br/>canonical URLs · aliases · source provenance)]
@@ -563,8 +566,8 @@ data/following/cohorts/*.json       # frozen broad collection membership
 data/raw/following/*/snapshot.db    # ignored local raw pages + fresh edges
 data/raw/x/x-content.db             # ignored raw X responses + normalized posts/bundles
 data/derived/following/*/analysis.db # ignored recomputable rankings + identity map
-data/derived/signal-feed/feed.db     # ignored signal-feed-v9 snapshots + primary-thread/reaction closure
-data/derived/signal-events/events.db # ignored signal-events-v4 projection + live pointer
+data/derived/signal-feed/feed.db     # ignored signal-feed-v10 snapshots + primary-thread/reaction closure
+data/derived/signal-events/events.db # ignored signal-events-v6 projection + live pointer
 data/derived/x-daily-collection.db   # ignored frozen-cohort collection manifests
 docs/references/digg-ranking-baseline.md
 ```
@@ -1197,8 +1200,8 @@ final score.
 | `fli.x_content` | immutable raw provider responses and `x_post_observation` history, plus mutable latest-post convenience rows and exact post bundles |
 | `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
 | `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, and complete supported artifact extraction |
-| `fli.signal_feed` | content-addressed `signal-feed-v9` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
-| `fli.signal_events` | `signal-events-v4` exact structural components with same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
+| `fli.signal_feed` | content-addressed `signal-feed-v10` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
+| `fli.signal_events` | `signal-events-v6` root-owned structural forests with one-parent enforcement, same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware cutoff-correct daily/delta and deduplicated weekly envelope projections; date counts are envelope counts cached as one structural-version summary and warmed when the always-on web process starts |
 | `fli.audience_routing` / `fli.audience_routing_runs` | direct audience assignment for ranked Feed evidence: one GPT-5.4-mini/high call returns independent AI Engineering and Investment relevance judgments over a readable attributed packet, with full immutable evidence, a marked 20,000-token model-view ceiling, direct event/feed provenance, versioned prompt/schema hashes, a single stable prompt key, bounded parallel execution, resumable cache/cost telemetry, and one publication-bound multi-day refresh command |
 | `fli.artifacts` | shared canonical artifact identity, aliases, provenance, disclosures, immutable fetch attempts, and content-addressed clean text |

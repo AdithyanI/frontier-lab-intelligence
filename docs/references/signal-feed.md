@@ -11,15 +11,15 @@ provider without changing Registry identity.
   `x_post` convenience row, an append-only `x_post_observation` history, and
   exact model-evidence bundles. Historical rebuilds select observations, never
   the mutable latest row.
-- `data/derived/signal-feed/feed.db`: rebuildable `signal-feed-v9` runs. Each
+- `data/derived/signal-feed/feed.db`: rebuildable `signal-feed-v10` runs. Each
   content-addressed run stores its selected direct observations, recursively
   discovered embedded quote/retweet posts, immutable per-snapshot `raw_json`,
   complete declared relation closure, and opaque provider target anchors whose
   payload was not captured. Reply-inclusive timelines contribute only replies
   whose conversation root is captured in the same run.
-- `data/derived/signal-events/events.db`: rebuildable `signal-events-v4` runs
-  under `exact-structural-v6-primary-author-threads`. It stores exact multi-post
-  components, member/link/anchor facts, per-day membership, and the one-row
+- `data/derived/signal-events/events.db`: rebuildable `signal-events-v6` runs
+  under `exact-structural-v10-root-owned-reactions`. It stores rooted
+  multi-post envelopes, member/link/anchor facts, per-day membership, and the one-row
   `signal_publication` pointer that names the validated live run. Singleton
   envelopes are added by the read model without duplicating post storage.
 - `data/fli.db`: current Registry identity and rejection state. It is read at
@@ -70,11 +70,13 @@ provider access:
 
 Provider payloads and post observations land in `x-content.db`; the collection
 manifest does not duplicate them. The collection contract requests authored
-replies. Feed materialization retains replies to captured roots—same-author
-posts become continuations and other tracked authors remain reactions—while
-excluding reply activity whose root is absent. When a same-author continuation
-survives but its immediate parent is missing, the Event projection records an
-explicit conversation-root bridge rather than rewriting provider metadata.
+replies. Feed materialization preserves replies whose conversation root is
+captured and excludes reply activity whose root is absent. Event materialization
+admits only the source author's replies as envelope continuations; third-party
+replies remain inspectable in the Feed ledger but do not group or render as
+product envelopes. When a same-author continuation survives but its immediate
+parent is missing, the Event projection records an explicit conversation-root
+bridge rather than rewriting provider metadata.
 
 ## Rebuild and Publish
 
@@ -90,7 +92,10 @@ An unchanged range therefore reuses the same Feed run ID even after a later
 provider refresh updates `x_post` engagement metrics. The default end date is
 the previous UTC calendar day; pin `--through` for a reproducible demo.
 
-The Event refresh materializes exact structural components for that Feed run.
+The Event refresh materializes root-owned envelopes for that Feed run. Every
+member has at most one structural parent. Quote posts and retweets may point to
+one source root, while only that source author's replies may extend its thread;
+reaction replies cannot import their own branches or bridge two roots.
 `--publish` updates `signal_publication` only after verifying that the referenced
 Feed run exists in the selected Feed database. API readers follow this explicit
 pointer; they do not pick the newest row by timestamp. Build into candidate
@@ -104,11 +109,12 @@ Neither rebuild command makes a provider or LLM call.
 - `GET /api/events/dates` lists complete materialized dates and the number of
   projected envelopes on each date. The number is not a raw post count.
 - `GET /api/events?date=YYYY-MM-DD` returns one unified Registry-aware page of
-  evidence envelopes at that UTC cutoff. An unrelated post is a singleton;
-  provider-declared quote, retweet, and reply-parent links form a component.
-  Conversation IDs alone never merge posts. Shared opaque target IDs can
-  connect wrappers even when the target
-  payload itself is absent.
+  evidence envelopes at that UTC cutoff. An unrelated non-reply post is a
+  singleton. Provider-declared quote and retweet wrappers attach to one source,
+  and same-author reply-parent links extend only that source's thread.
+  Third-party replies remain in the lower-level ledger and are not projected as
+  singleton cards. Conversation IDs alone never merge posts. Shared opaque
+  target IDs can connect wrappers when the target payload itself is absent.
 - `GET /api/events?date=YYYY-MM-DD&projection=week` returns a deduplicated
   seven-day rollup ending on that date.
 - `sort=attention|recent|engagement` changes ordering.
@@ -136,11 +142,12 @@ an explicit unparented branch; the reader never guesses a parent from timing or
 text. No URL, embedding, model, or semantic similarity is used to form these
 components.
 
-The weekly projection carries daily revisions forward by provider-qualified
-visible membership. If a later exact edge merges two earlier components, the
-later revision supersedes every overlapping weekly state, so the same post is
-not counted twice. `active_days`, `weekly_active_day_count`, and peak daily
-attention/interaction values remain available for inspection.
+The weekly projection groups daily revisions by stable root-owned Event ID and
+retains the richest visible revision. A later day may surface only an existing
+root again when an excluded reply quotes it; that day still counts as network
+attention but cannot replace the earlier envelope with a thinner singleton.
+`active_days`, `weekly_active_day_count`, and peak daily attention/interaction
+values remain available for inspection.
 
 Registry rejection changes are dynamic. On the next request, a rejected author
 is absent and a rejected amplifier no longer votes. Raw/derived evidence is not

@@ -5,8 +5,9 @@ workspace. It runs the dependent stages in order and reuses valid work at each
 boundary.
 
 ```text
-X timelines → Feed posts/relations → Event envelopes → Primary artifact links
-            → supported artifact text → publish
+X timelines → Feed posts/relations → publish Event envelopes
+            → primary artifact links → supported artifact text
+            → optimize SQLite indexes → warm every visible Feed day
 ```
 
 ## Normal run
@@ -52,6 +53,12 @@ HTML cohort.
   sequential per origin but parallel across origins. arXiv abstracts, X
   Articles, and the public-HTML fallback keep separate fetch policies and
   caches. Videos remain explicitly deferred.
+- **Read performance:** every successful refresh runs `PRAGMA optimize` on the
+  Feed, Event, and artifact stores, then requests the date index and compact
+  first page for every visible Feed and artifact day. This primes the server's
+  state-aware projections after the database-version cache key changes. Index
+  definitions are part of the schemas; they are not recreated on each browser
+  visit. Use `--no-view-warmup` only for isolated diagnostics.
 
 The pipeline does not rerun audience routing automatically. Rebuilt envelope
 hashes make stale routing results disappear from the Feed; a later explicit
@@ -83,6 +90,8 @@ produces a new request rather than reusing a stale judgment.
 
 The command emits one JSON object containing each stage result, including
 whether a deterministic run was reused, collection provider-request counts,
-published Feed/Event IDs, artifact counts, and content-fetch outcomes. Any
-incomplete collection stops the dependent stages instead of publishing a
-partial workspace.
+published Feed/Event IDs, artifact counts, content-fetch outcomes, index
+maintenance, and per-view warmup timings. Any incomplete collection stops the
+dependent stages instead of publishing a partial workspace. A refresh is not
+operationally complete until both `index_maintenance` and `view_cache` report
+ready/optimized outcomes.

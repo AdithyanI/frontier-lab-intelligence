@@ -253,11 +253,10 @@ Application invariants:
 - The broader artifact retrieval gaps remain upstream limitations. Do not add
   model-side web search or routing-local text-quality heuristics until the next
   Insight stage demonstrates a concrete need.
-- The 900-route cohort is invalidated as evaluation evidence. Reply ingestion
-  exposed a transitive Event-component bridge: a reply that also quotes an
-  older post can join otherwise distinct topic envelopes. Adi is correcting
-  that deterministic Event boundary; do not rerun routing until the corrected
-  Event publication is live.
+- The 900-route cohort is invalidated as evaluation evidence. The deterministic
+  Event boundary is now repaired and published as a root-owned, one-parent
+  forest; do not reuse the pre-repair labels. The next routing refresh must bind
+  to Event run `cc76958510ddf90c14863d1c5b8de1d40881a6bf12396671dfd264a6e2df210d`.
 
 ## Current Batch
 
@@ -269,7 +268,8 @@ Application invariants:
 | complete | Bound only the model-facing packet at 20,000 tokens and preserve an explicit truncation notice. | parent | — |
 | invalidated | Replace all stale routes with GPT-5.4-mini/high top-100 runs for July 5–13. | parent | — |
 | complete | Add one resumable publication-bound command for the next nine-day top-100 routing refresh. | parent | `../../../references/evidence-refresh.md` |
-| blocked | Rerun and review the 900 routes after the Event bridge fix is published. | parent | — |
+| complete | Replace unrestricted Event components with root-owned one-parent envelopes; rebuild July 5–13 and prove the Anthropic root is restored. | parent | `../../../references/signal-feed.md` |
+| pending | Rerun and review the 900 routes against the repaired Event publication. | parent | — |
 
 ## Backlog / Remaining Work
 
@@ -512,3 +512,15 @@ Application invariants:
   bounded parallelism, aggregates cache/cost telemetry, and removes old runs
   only after the full replacement succeeds. Its dry-run freezes the exact
   nine-day top-100 plan without any model call.
+- 2026-07-15: [VALIDATED] Replaced unrestricted transitive Event connectivity
+  with `exact-structural-v10-root-owned-reactions`: every member has at most one
+  structural parent, quote/retweet reactions attach to one source, only the
+  source author's replies extend its envelope, and third-party replies remain
+  preserved in the Feed ledger without rendering or grouping. Regression tests
+  cover reply-plus-quote bridges, quoted replies, missing-parent first-party
+  continuations, cutoff stability, weekly thin-revision replacement, Registry
+  rejection, one-parent enforcement, and unique Event membership. The full
+  July 5–13 publication has 7,515 grouped envelopes and zero multi-parent or
+  multi-event members. Anthropic post `2074185348142280912` is restored as the
+  July 7 rank-1 root with 108 cutoff-correct related posts; Ryan Brewer's post
+  remains a separate 14-member Event. All 490 Python and 40 frontend tests pass.
