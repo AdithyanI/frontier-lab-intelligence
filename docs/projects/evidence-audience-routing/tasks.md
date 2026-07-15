@@ -207,7 +207,7 @@ Application invariants:
 | done | Implement the independent packet/schema/prompt and minimal resumable Luna-medium run record without old Insight-table dependencies. | parent | `resources/satya-routing-v1.md` |
 | done | Map the narrowest reuse points across triage runs, artifact packet assembly, API projection, and Feed types without editing shared files. | explorer | — |
 | done | Implement the isolated audience-routing model boundary, prompt, and unit tests; do not touch runner, CLI, tracker, or shared integration files. | worker | `resources/satya-routing-v1.md` |
-| in_progress | Review the exact Satya input, two-audience output, and prompt length with Adi before any additional call or Feed UI work. | parent | `resources/satya-routing-v1.md` |
+| in_progress | Review the exact Satya input and context-first v2 prompt draft with Adi before any additional call, renderer integration, or Feed UI work. | parent | `resources/satya-routing-v1.md`; `../../../src/fli/prompts/audience_routing_v2_draft.txt` |
 
 ## Backlog / Remaining Work
 
@@ -253,3 +253,8 @@ Application invariants:
   for $0.005958. The exact input, schema, raw output, hashes, and telemetry are
   frozen in `resources/satya-routing-v1.md`; no additional call or UI work will
   proceed before Adi's qualitative review.
+- 2026-07-15: [IN-PROGRESS] Drafted a context-first v2 routing prompt for Adi's
+  review after the v1 prompt was rejected as pipeline-centric and overbuilt.
+  The draft explains the product, current X evidence collection, packet
+  assembly, artifacts and reactions, then defines the two audience decisions
+  and approved schema. It is intentionally not wired or executed yet.
