@@ -350,17 +350,8 @@ finish with an honest quality assessment, limitations, and the next best test.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Freeze the v2 product contract with Adi and convert answers into decisions and acceptance rubrics. | parent | `tasks.md` |
-| done | Audit the nine-day candidate/evidence cohort, especially X Articles and long-context outliers. | explorer | `resources/evidence-cohort-audit.md` |
-| done | Freeze independent Investment and AI Engineering schema/prompt/evaluation contracts. | architect | `resources/audience-contracts.md` |
-| done | Implement, test, and run the provider-backed X Article adapter over the exact 22-Article top-100 cohort. One canary plus 21 remaining requests all succeeded; 2,200 credits observed. | implementer | `src/fli/artifact_x_articles.py` |
-| done | Implement and test independent audience model boundaries, resumable run store, exact citation binding, ID-only daily editor, per-attempt telemetry, terminal citation rejection, and passed-run-only history. | parent + implementer | `src/fli/audience_insights.py` / `src/fli/audience_insight_runs.py` |
-| done | Implement independent Luna-high item/day evaluation and deterministic expansion gate. | implementer | `src/fli/audience_insight_evaluations.py` |
-| done | Build the separate Investment and AI Engineering Insights UI over editor-selected, quality-gated rows only. | implementer | `frontend/src/pages/Insights.tsx` |
-| done | Preserve all failed calibration evidence; finish final-contract Jul 9 and Jul 11 for both audiences, then run untouched Jul 13 through editor, reviewer, publication audit, and the versioned standard/audited-sparse combined gate. | parent | `resources/quality-evaluation.md` |
-| done | Complete the frozen 73-packet/146-evaluation rank-blind recall comparison. Two AI items entered exact widened days, one Investment item did not, and two schema-terminal cells remain bounded unknowns. | parent | `resources/quality-evaluation.md` |
 | in_progress | Freeze the corrected chronological production suffix, including exact adjacent audits/finalizations and the Investment product-quality recovery decision. | parent | `data/derived/audience-insights-v2/` |
-| delegated | Prepare conceptual status, architecture, evaluation, tracker, and project learnings for exact final-count insertion; do not archive before the canonical report and browser proof. | documenter | `resources/quality-evaluation.md` |
+| done | Prepare conceptual status, architecture, evaluation, tracker, and project learnings for exact final-count insertion; do not archive before the canonical report and browser proof. | documenter | `resources/quality-evaluation.md` |
 | pending | Materialize the canonical 18-cell manifest/report, build the live SPA, perform rendered two-audience QA with `agent-browser`, reconcile exact spend/cache evidence, run check-fast, and archive. | parent | `resources/quality-evaluation.md` |
 
 ## Backlog / Remaining Work

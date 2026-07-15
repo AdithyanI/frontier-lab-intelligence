@@ -41,6 +41,19 @@ ADJUDICATION_SCHEMA_VERSION = "audience-insight-publication-audit-adjudications-
 ADJUDICATION_FILENAME = "adjudications.json"
 FINALIZATION_SCHEMA_VERSION = "audience-insight-publication-finalization-v1"
 FINALIZATION_REASON_CODE = "publication_audit_disqualification"
+EDITORIAL_FINALIZATION_SCHEMA_VERSION = (
+    "audience-insight-editorial-finalization-v1"
+)
+EDITORIAL_FINALIZATION_REASON_CODE = "senior_editorial_disqualification"
+EDITORIAL_REVIEW_SCHEMA_VERSION = "audience-insight-editorial-review-v1"
+EDITORIAL_REMOVAL_REASON_CODES = (
+    "analytical_overstatement",
+    "insufficient_decision_value",
+    "promotional_or_testimonial_evidence",
+    "duplicate_or_redundant",
+    "audience_mismatch",
+    "other",
+)
 FINALIZATION_DIR = "publication-finalization-v1"
 FINALIZATION_FILENAME = "finalization.json"
 PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_insight_publication_auditor_v1.txt"
