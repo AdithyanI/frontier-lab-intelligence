@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from fli import artifact_urls, artifacts
+from fli import artifact_urls, artifacts, audience_insight_runs
 
 
 EVENT_ID = "event-reviewed"
@@ -144,3 +144,54 @@ def test_reviewed_supplement_cli_returns_machine_contract(tmp_path, capsys):
     assert payload["status"] == "ok"
     assert payload["error"] is None
     assert payload["data"]["imported_count"] == 1
+
+
+def test_reviewed_supplement_text_strengthens_only_its_exact_event(tmp_path):
+    triage_db = tmp_path / "triage.db"
+    artifact_db = tmp_path / "artifacts.db"
+    manifest = tmp_path / "supplements.json"
+    snapshot = tmp_path / "official.txt"
+    snapshot.write_text(
+        "TeraWulf entered a 20-year Anthropic lease for approximately 401 MW.\n",
+        encoding="utf-8",
+    )
+    _triage_db(triage_db)
+    _manifest(manifest)
+    result = artifacts.import_reviewed_supplements(
+        manifest_path=manifest, triage_db=triage_db, db_path=artifact_db
+    )
+    artifact_id = result["artifact_ids"][0]
+    now = "2026-07-15T08:01:00+00:00"
+    conn = artifacts.connect(artifact_db)
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact_fetch_run
+               (fetch_run_id, schema_version, fetch_policy, selection_policy,
+                input_fingerprint, expected_count, success_count,
+                failed_retryable_count, failed_terminal_count, started_at,
+                completed_at, status)
+               VALUES ('fetch', ?, 'test', 'exact', 'fingerprint', 1, 1, 0, 0,
+                       ?, ?, 'complete')""",
+            (artifacts.SCHEMA_VERSION, now, now),
+        )
+        conn.execute(
+            """INSERT INTO artifact_fetch
+               (fetch_id, fetch_run_id, artifact_id, fetch_policy,
+                requested_url, request_key, status, attempt_number, started_at,
+                completed_at, text_sha256, text_snapshot_ref, text_char_count,
+                text_truncated, retryable)
+               VALUES ('fetch-item', 'fetch', ?, 'test', ?, 'request', 'success',
+                       1, ?, ?, 'text-sha', ?, 72, 0, 0)""",
+            (artifact_id, ARTIFACT_URL, now, now, str(snapshot)),
+        )
+
+    sources = audience_insight_runs._artifact_sources(conn, event_id=EVENT_ID)
+    unrelated = audience_insight_runs._artifact_sources(conn, event_id="other-event")
+    conn.close()
+
+    assert len(sources) == 1
+    assert sources[0].source_type == "artifact"
+    assert sources[0].source_id == artifact_id
+    assert sources[0].url == ARTIFACT_URL
+    assert "20-year Anthropic lease" in sources[0].text
+    assert unrelated == []

@@ -43,9 +43,18 @@ test('Insights fetches and guards audience-specific date and item responses', ()
 test('Insights makes editorial rank primary and Feed rank secondary provenance', () => {
   assert.match(insightSource, /<strong>#\{item\.editorial_rank\}<\/strong>/)
   assert.match(insightSource, /<span>Editorial rank<\/span>/)
-  assert.match(insightSource, /className="insight-feed-rank">Feed #\{item\.feed_rank\}/)
+  assert.match(insightSource, /className="insight-feed-rank insight-feed-rank--link"/)
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)
   assert.match(appStyles, /\.insight-feed-rank \{[\s\S]*?color: var\(--muted\);/)
+})
+
+test('Insights links every Feed rank to its exact dated Feed envelope', () => {
+  assert.match(insightSource, /to=\{`\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`\}/)
+  assert.match(insightSource, /Open exact Feed envelope/)
+  assert.match(insightSource, /Feed rank ↗/)
+  assert.match(insightSource, /const envelopeUrl = `\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
+  assert.match(insightSource, /Open the exact Feed envelope for/)
+  assert.match(appStyles, /\.insight-feed-link:focus-visible/)
 })
 
 test('Insights exposes audience decisions and exact citation evidence in plain language', () => {
@@ -57,7 +66,7 @@ test('Insights exposes audience decisions and exact citation evidence in plain l
   assert.match(insightSource, /DECISION_VALUE_LABELS/)
   assert.match(insightSource, /Exact source passage/)
   assert.match(insightSource, /decodeTextEntities\(item\.citation\.quote\)/)
-  assert.match(insightSource, /Open source ↗/)
+  assert.match(insightSource, /Open envelope ↗/)
   assert.doesNotMatch(insightSource, /dangerouslySetInnerHTML/)
   assert.doesNotMatch(insightSource, /investment_implication.*engineering_implication/s)
 })
@@ -76,7 +85,7 @@ test('Insights gives each analysis region and source link an insight-specific na
   assert.match(insightSource, /const accessibleName = `editorial rank \$\{item\.editorial_rank\}: \$\{item\.claim\}`/)
   assert.match(insightSource, /aria-label=\{`Investment analysis for \$\{accessibleName\}`\}/)
   assert.match(insightSource, /aria-label=\{`AI engineering analysis for \$\{accessibleName\}`\}/)
-  assert.match(insightSource, /aria-label=\{`Open exact source for \$\{accessibleName\} in a new tab`\}/)
+  assert.match(insightSource, /aria-label=\{`Open the exact Feed envelope for \$\{accessibleName\}`\}/)
 })
 
 test('Insights has honest audience-aware loading, error, and thin-day states', () => {

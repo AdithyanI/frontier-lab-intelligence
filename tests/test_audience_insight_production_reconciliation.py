@@ -12,6 +12,7 @@ from fli import (
     audience_insight_evaluations,
     audience_insight_production_reconciliation as reconciliation,
     audience_insight_publication_audit as publication_audit,
+    audience_insight_recall,
     audience_insight_runs,
     audience_insights,
     cli,
@@ -471,11 +472,18 @@ def _refreeze_passing_audit(source: Path, audit_db: Path) -> None:
     audit.close()
 
 
-def _seed_terminal_x_article(path: Path) -> str:
-    url = "https://x.com/i/article/123"
+def _seed_terminal_x_article(
+    path: Path,
+    *,
+    event_id: str | None = None,
+    article_number: str = "123",
+    request_post_id: str = "456",
+) -> str:
+    event_id = event_id or f"event-investment-{DAY}"
+    url = f"https://x.com/i/article/{article_number}"
     artifact_id = hashlib.sha256(url.encode()).hexdigest()
-    raw_snapshot = path.parent / "article-raw.json"
-    text_snapshot = path.parent / "article-text.txt"
+    raw_snapshot = path.parent / f"article-{article_number}-raw.json"
+    text_snapshot = path.parent / f"article-{article_number}-text.txt"
     contents = [{"type": "unstyled", "text": "Bounded X Article body."}]
     raw_payload = {
         "article": {"title": "Bounded article", "contents": contents},
@@ -493,7 +501,7 @@ def _seed_terminal_x_article(path: Path) -> str:
     conn = artifacts.connect(path)
     with conn:
         conn.execute(
-            """INSERT INTO artifact_import_run
+            """INSERT OR IGNORE INTO artifact_import_run
                (import_run_id, schema_version, canonicalization_contract,
                 source_feed_run_id, source_event_run_id, triage_runs_json,
                 selection_policy, input_fingerprint, expected_candidate_count,
@@ -519,16 +527,19 @@ def _seed_terminal_x_article(path: Path) -> str:
                 disclosure_url, disclosure_published_at, observed_url,
                 expanded_url, candidate_source, title_hint, relation, decision,
                 reason_code, artifact_id, created_at)
-               VALUES ('import-candidate', 'import', ?, ?, 4, 1, 'x_post',
-                       'twitterapi_io', '456', 'source-sha',
+               VALUES (?, 'import', ?, ?, 4, 1, 'x_post',
+                       'twitterapi_io', ?, 'source-sha',
                        'https://x.com/researcher/status/investment',
-                       '456', 'source-sha',
+                       ?, 'source-sha',
                        'https://x.com/researcher/status/investment', ?, ?, ?,
                        'x_article', 'Article', 'self_publishes', 'accepted',
                        'x_longform_article', ?, ?)""",
             (
+                f"import-candidate-{article_number}",
                 DAY,
-                f"event-investment-{DAY}",
+                event_id,
+                request_post_id,
+                request_post_id,
                 NOW,
                 url,
                 url,
@@ -537,7 +548,7 @@ def _seed_terminal_x_article(path: Path) -> str:
             ),
         )
         conn.execute(
-            """INSERT INTO artifact_fetch_run
+            """INSERT OR IGNORE INTO artifact_fetch_run
                (fetch_run_id, schema_version, fetch_policy, selection_policy,
                 input_fingerprint, expected_count, success_count,
                 failed_retryable_count, failed_terminal_count, started_at,
@@ -555,13 +566,15 @@ def _seed_terminal_x_article(path: Path) -> str:
                 extractor_contract, extractor_version, extracted_title,
                 text_sha256, text_snapshot_ref, text_char_count,
                 text_truncated, declared_canonical_url, retryable)
-               VALUES ('x-fetch', 'x-run', ?, ?, ?, 'request-key', 'success', 1,
+               VALUES (?, 'x-run', ?, ?, ?, ?, 'success', 1,
                        ?, ?, ?, 200, 'application/json', ?, ?, ?, ?, ?, ?, ?, ?,
                        24, 0, ?, 0)""",
             (
+                f"x-fetch-{article_number}",
                 artifact_id,
                 artifact_x_articles.FETCH_POLICY,
                 url,
+                f"request-key-{article_number}",
                 NOW,
                 NOW,
                 url,
@@ -583,11 +596,14 @@ def _seed_terminal_x_article(path: Path) -> str:
                 estimated_provider_credits, provider_status, provider_message,
                 response_fetched_at, content_block_count, content_blocks_json,
                 content_blocks_sha256, created_at)
-               VALUES ('x-fetch', ?, 'twitterapi_io', ?, '456',
-                       '123', ?, 1, 100, 'success', 'ok', ?, 1, ?, ?, ?)""",
+               VALUES (?, ?, 'twitterapi_io', ?, ?,
+                       ?, ?, 1, 100, 'success', 'ok', ?, 1, ?, ?, ?)""",
             (
+                f"x-fetch-{article_number}",
                 artifact_id,
                 artifact_x_articles.ENDPOINT,
+                request_post_id,
+                article_number,
                 url,
                 NOW,
                 contents_json,
@@ -887,6 +903,111 @@ def test_request_tags_must_match_the_exact_stage_contract(tmp_path):
         reconciliation.evaluate_manifest(manifest)
 
 
+def _seed_reconciled_day_telemetry(
+    source: Path, *, run_suffix: str = ":padding-tail-trim"
+) -> None:
+    conn = sqlite3.connect(source)
+    conn.row_factory = sqlite3.Row
+    meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+    tags = json.dumps(
+        list(
+            audience_insight_evaluations.request_tags(
+                audience=str(meta["audience"]),
+                run=f"{meta['run_id']}{run_suffix}",
+                day=str(meta["day"]),
+                prompt_version=str(meta["day_review_prompt_version"]),
+            )
+        )
+    )
+    with conn:
+        conn.execute(
+            """INSERT INTO reconciled_day_set_review
+               (singleton, status, attempts, reconciliation_reason,
+                source_review_input_sha256, input_text, input_sha256,
+                prompt_cache_key, duplicate_pairs_json, padding_detected,
+                thin_day_honest, set_rationale, response_id, response_model,
+                input_tokens, cached_tokens, cache_write_tokens, output_tokens,
+                reported_cost_usd, request_tags_json, raw_output_text,
+                completed_at, updated_at)
+               VALUES (1, 'complete', 1, 'padding_tail_trim', 'source-sha',
+                       'reconciled input', 'reconciled-input-sha',
+                       'padding-tail-trim-cache', '[]', 0, 1,
+                       'The trimmed set is coherent.', 'resp-reconciled-day',
+                       'gpt-5.6-luna', 1200, 700, 0, 70, 0.004, ?, '{}', ?, ?)""",
+            (tags, NOW, NOW),
+        )
+    conn.close()
+
+
+def test_reconciled_day_accepts_only_runner_owned_padding_tail_tags(tmp_path):
+    source, _audit = _complete_run(
+        tmp_path / "valid", audience="investment"
+    )
+    _seed_reconciled_day_telemetry(source)
+    conn = reconciliation._open_readonly(source)
+    meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+
+    telemetry = reconciliation._source_telemetry(
+        conn, meta, source_path=source
+    )
+
+    assert telemetry["day"]["attempts"] == 2
+    assert telemetry["day"]["recorded_attempts"] == 2
+    conn.close()
+
+    for name, suffix in (
+        ("base-run", ""),
+        ("arbitrary-suffix", ":padding-tail-trim-extra"),
+    ):
+        invalid_source, _audit = _complete_run(
+            tmp_path / name, audience="investment"
+        )
+        _seed_reconciled_day_telemetry(invalid_source, run_suffix=suffix)
+        invalid = reconciliation._open_readonly(invalid_source)
+        invalid_meta = invalid.execute(
+            "SELECT * FROM run_meta WHERE singleton = 1"
+        ).fetchone()
+        with pytest.raises(
+            reconciliation.ProductionReconciliationError,
+            match="reconciled day request tags do not match the frozen contract",
+        ):
+            reconciliation._source_telemetry(
+                invalid, invalid_meta, source_path=invalid_source
+            )
+        invalid.close()
+
+
+def test_initial_day_rejects_padding_tail_run_tags(tmp_path):
+    source, _audit = _complete_run(tmp_path, audience="investment")
+    conn = sqlite3.connect(source)
+    conn.row_factory = sqlite3.Row
+    meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+    tags = audience_insight_evaluations.request_tags(
+        audience=str(meta["audience"]),
+        run=f"{meta['run_id']}:padding-tail-trim",
+        day=str(meta["day"]),
+        prompt_version=str(meta["day_review_prompt_version"]),
+    )
+    conn.execute(
+        "UPDATE day_set_review SET request_tags_json = ?",
+        (json.dumps(list(tags)),),
+    )
+    conn.commit()
+    conn.close()
+    readonly = reconciliation._open_readonly(source)
+    readonly_meta = readonly.execute(
+        "SELECT * FROM run_meta WHERE singleton = 1"
+    ).fetchone()
+    with pytest.raises(
+        reconciliation.ProductionReconciliationError,
+        match="day request tags do not match the frozen contract",
+    ):
+        reconciliation._source_telemetry(
+            readonly, readonly_meta, source_path=source
+        )
+    readonly.close()
+
+
 def _duplicate_extraction_attempt(
     source: Path, *, attempt_number: int, expected_attempts: int
 ) -> None:
@@ -970,9 +1091,14 @@ def test_telemetry_rejects_null_required_fields(tmp_path, field):
     conn.commit()
     conn.close()
 
+    expected = (
+        "missing proxy-reported cost"
+        if field == "reported_cost_usd"
+        else rf"telemetry has null required fields.*{field}"
+    )
     with pytest.raises(
         reconciliation.ProductionReconciliationError,
-        match=rf"telemetry has null required fields.*{field}",
+        match=expected,
     ):
         reconciliation.evaluate_manifest(manifest)
 
@@ -1044,7 +1170,7 @@ def test_history_gate_and_telemetry_integrity_are_fail_closed(tmp_path):
     conn.close()
     with pytest.raises(
         reconciliation.ProductionReconciliationError,
-        match="telemetry has null required fields.*reported_cost_usd",
+        match="missing proxy-reported cost",
     ):
         reconciliation.evaluate_manifest(telemetry_manifest)
 
@@ -1078,6 +1204,7 @@ def test_explicit_x_article_cohort_reports_terminal_state(tmp_path):
         x_article_cohort={
             "artifact_db": str(artifact_db),
             "artifact_ids": [artifact_id],
+            "frozen_recall_origin": None,
         },
     )
 
@@ -1108,6 +1235,7 @@ def test_x_article_provider_mapping_drift_fails_closed(tmp_path):
         x_article_cohort={
             "artifact_db": str(artifact_db),
             "artifact_ids": [artifact_id],
+            "frozen_recall_origin": None,
         },
     )
     conn = sqlite3.connect(artifact_db)
@@ -1180,6 +1308,7 @@ def test_default_web_rejects_bound_x_article_snapshot_drift(
         x_article_cohort={
             "artifact_db": str(artifact_db),
             "artifact_ids": [artifact_id],
+            "frozen_recall_origin": None,
         },
     )
     _write_canonical_web_pair(tmp_path, source_manifest)

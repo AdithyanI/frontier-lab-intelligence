@@ -238,6 +238,14 @@
     "artifact_db": "../../../../data/derived/artifacts/artifacts.db",
     "artifact_ids": [
       "0000000000000000000000000000000000000000000000000000000000000000"
-    ]
+    ],
+    "frozen_recall_origin": {
+      "binding_sha256": "461e1a49eed789ddeee7b96b9ef5e15b7283fdc3f81d90c42cd7c3ab46ff5c19",
+      "recall_db": "../../../../data/derived/audience-insights-v2/recall/audience-insights-v2-recall-current-contract-2026-07-15/recall.db",
+      "sample_ids": [
+        "recall-sample-36761b56f2d1cdfa010f",
+        "recall-sample-f7f18972967ada8f854e"
+      ]
+    }
   }
 }

@@ -139,6 +139,8 @@ def test_dry_run_uses_audience_specific_extraction_effort_by_default(
             str(triage_db),
             "--artifact-db",
             str(artifact_db),
+            "--history-mode",
+            "none",
             "--dry-run",
         ]
     ) == 0
@@ -146,6 +148,12 @@ def test_dry_run_uses_audience_specific_extraction_effort_by_default(
     payload = json.loads(capsys.readouterr().out)
     assert payload["data"]["will_call_model"] is False
     assert payload["data"]["run"]["reasoning_effort"] == expected_effort
+    assert payload["data"]["history_input"] == {
+        "mode": "none",
+        "sources": [],
+        "prior_item_count": 0,
+        "history_sha256": audience_insight_runs._sha256("[]"),
+    }
 
 
 def test_new_run_persists_provider_safe_input_render_version(tmp_path):
@@ -1047,8 +1055,9 @@ def _history_run(
     computed_at: str,
     passed: bool,
     claim: str,
-) -> None:
-    path = root / day / "investment" / run_id / "insights.db"
+    audience: str = "investment",
+) -> Path:
+    path = root / day / audience / run_id / "insights.db"
     path.parent.mkdir(parents=True)
     conn = sqlite3.connect(path)
     conn.executescript(
@@ -1086,8 +1095,8 @@ def _history_run(
     )
     candidate_id = f"candidate-{run_id}"
     conn.execute(
-        "INSERT INTO run_meta VALUES (1, 'investment', ?, ?, ?)",
-        (day, run_id, computed_at),
+        "INSERT INTO run_meta VALUES (1, ?, ?, ?, ?)",
+        (audience, day, run_id, computed_at),
     )
     conn.execute("INSERT INTO editor_run VALUES (1, 'complete')")
     conn.execute(
@@ -1102,6 +1111,7 @@ def _history_run(
     conn.execute("INSERT INTO publication_selection VALUES (1, ?)", (candidate_id,))
     conn.commit()
     conn.close()
+    return path
 
 
 def test_prior_history_uses_latest_audited_passed_run_once_per_day(
@@ -1242,6 +1252,44 @@ def test_prior_history_consumes_effective_finalized_zero_projection(
 
     assert len(calls) == 1
     assert history == []
+
+
+def test_prior_history_retains_senior_editorial_veto_for_duplicate_suppression(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "runs"
+    _history_run(
+        root,
+        day="2026-07-08",
+        run_id="editorial-veto",
+        computed_at="2026-07-08T10:00:00+00:00",
+        passed=True,
+        claim="Mechanically valid framing vetoed from release.",
+    )
+    candidate_id = "candidate-editorial-veto"
+    audit_module = audience_insight_runs.audience_insight_publication_audit
+    finalization_reason = audit_module.EDITORIAL_FINALIZATION_REASON_CODE
+
+    monkeypatch.setattr(
+        audience_insight_runs.audience_insight_publication_audit,
+        "validated_publication_projection",
+        lambda **_kwargs: {
+            "mode": "editorial_disqualified_zero",
+            "base_selected_ids": [candidate_id],
+            "effective_selected_ids": [],
+            "finalization": {"reason_code": finalization_reason},
+        },
+    )
+
+    history = audience_insight_runs._prior_history(
+        root=root,
+        audience="investment",
+        day="2026-07-09",
+    )
+
+    assert [item["claim"] for item in history] == [
+        "Mechanically valid framing vetoed from release."
+    ]
 
 
 def test_long_text_sectioning_is_verbatim_and_lossless():

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
   type EngineeringActionType,
@@ -213,18 +213,17 @@ function AudienceAnalysis({
 }
 
 function Citation({ item, accessibleName }: { item: DisplayItem; accessibleName: string }) {
+  const envelopeUrl = `/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
   return (
-    <blockquote className="insight-citation" cite={item.citation.url}>
+    <blockquote className="insight-citation" cite={envelopeUrl}>
       <div className="insight-citation-head">
         <span className="mono">Exact source passage</span>
-        <a
-          href={item.citation.url}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Open exact source for ${accessibleName} in a new tab`}
+        <Link
+          to={envelopeUrl}
+          aria-label={`Open the exact Feed envelope for ${accessibleName}`}
         >
-          Open source ↗
-        </a>
+          Open envelope ↗
+        </Link>
       </div>
       <p>“{decodeTextEntities(item.citation.quote)}”</p>
     </blockquote>
@@ -266,9 +265,16 @@ function ExtractedInsightRow({ audience, item }: {
   const titleId = `${audience}-extracted-${item.feed_rank}-title`
   return (
     <article className="insight-row" aria-labelledby={titleId}>
-      <div className="insight-rank mono" aria-label={`Feed rank ${item.feed_rank}`}>
-        <strong>#{item.feed_rank}</strong>
-        <span>Feed rank</span>
+      <div className="insight-rank mono">
+        <Link
+          className="insight-feed-link"
+          to={`/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
+          aria-label={`Open Feed rank ${item.feed_rank} in its exact Feed envelope`}
+          title="Open exact Feed envelope"
+        >
+          <strong>#{item.feed_rank}</strong>
+          <span>Feed rank ↗</span>
+        </Link>
       </div>
       <div className="insight-body">
         <ItemHeader item={item} accessibleName={accessibleName} titleId={titleId} />
@@ -296,7 +302,14 @@ function InsightRow({ audience, item }: {
       >
         <strong>#{item.editorial_rank}</strong>
         <span>Editorial rank</span>
-        <span className="insight-feed-rank">Feed #{item.feed_rank}</span>
+        <Link
+          className="insight-feed-rank insight-feed-rank--link"
+          to={`/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`}
+          aria-label={`Open Feed rank ${item.feed_rank} in its exact Feed envelope`}
+          title="Open exact Feed envelope"
+        >
+          Feed #{item.feed_rank} ↗
+        </Link>
       </div>
       <div className="insight-body">
         <ItemHeader item={item} accessibleName={accessibleName} titleId={titleId} />

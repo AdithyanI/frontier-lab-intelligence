@@ -15,6 +15,10 @@ immutable X evidence
     -> independently traceable source observations
     -> bounded fetch attempts
     -> content-addressed raw body and clean text
+
+frozen kept event + human-reviewed official source
+    -> explicit event supplement ledger
+    -> the same canonical artifact / fetch / snapshot boundary
 ```
 
 An ordinary X status permalink remains source evidence. A paper, article,
@@ -41,6 +45,7 @@ evidence.
 | `artifact_observation` | Stable source record that points to an artifact. |
 | `artifact_disclosure` | The direct wrapper through which an embedded source became visible. |
 | `artifact_import_candidate` | Accepted and excluded URL decisions, including reason codes. |
+| `artifact_event_supplement` | Human-reviewed official primary sources attached to one exact frozen kept event, with triage hashes and review provenance. |
 | `artifact_fetch_run` / `_item` | One frozen, ordered validation cohort. |
 | `artifact_fetch` | Append-only attempts, redirects, metadata, hashes, snapshots, and explicit errors. |
 
@@ -94,6 +99,41 @@ The operator CLI is not a public arbitrary-URL fetch service. DNS is rechecked
 before each request, but the remaining DNS-rebinding race is accepted only for
 this local, trusted, one-worker command.
 
+## Reviewed primary-source supplements
+
+The normal catalog remains mechanically derived from outbound links. When a
+kept event reports a material fact through a secondary X source but does not
+link the underlying official document, a reviewer may attach that document
+through a strict `artifact-reviewed-supplement-v1` manifest. This is a separate
+ledger, not a synthetic X URL candidate: it records the exact triage run,
+event, input/snapshot hashes, rank, official-source role, publication date,
+rationale, reviewer, review timestamp, and manifest hash.
+
+Import is idempotent. Replaying the same manifest reuses the association;
+changing the assertion for the same artifact and frozen event fails instead of
+silently rewriting provenance. The imported artifact still needs a successful
+bounded fetch before it can strengthen an Audience Insights packet. Exact-ID
+fetch selection prevents a one-source recovery from widening into a crawl.
+
+Manifest shape:
+
+```json
+{
+  "schema_version": "artifact-reviewed-supplement-v1",
+  "reviewed_by": "human-review",
+  "reviewed_at": "2026-07-15T08:00:00+00:00",
+  "items": [
+    {
+      "event_id": "<stable-event-sha256>",
+      "artifact_url": "https://www.sec.gov/Archives/edgar/data/...",
+      "evidence_role": "official_primary_source",
+      "source_published_at": "2026-07-06",
+      "rationale": "The official filing directly substantiates the reported event."
+    }
+  ]
+}
+```
+
 ## Operator commands
 
 Commands are non-interactive and emit a stable JSON envelope by default. Use
@@ -101,9 +141,14 @@ Commands are non-interactive and emit a stable JSON envelope by default. Use
 
 ```bash
 fli artifacts import-kept --no-input
+fli artifacts import-reviewed-supplements \
+  --manifest path/to/supplements.json \
+  --triage-db path/to/triage.db \
+  --no-input
 fli artifacts summary --no-input
 fli artifacts inspect --limit 20 --no-input
 fli artifacts fetch --limit 30 --no-input
+fli artifacts fetch --artifact-id <artifact-sha256> --no-input
 fli artifacts reader-fallback --no-input
 fli artifacts inspect-fetches --no-input
 ```

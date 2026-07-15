@@ -1,0 +1,12 @@
+{
+  "removals": [
+    {
+      "candidate_id": "candidate-8e322ab4eccc3bf10eaf",
+      "rationale": "The immutable item upgrades a Box executive testimonial embedded in Meta's own launch post into public validation and an enterprise adoption or competitive signal without a documented deployment, integration, customer outcome, contract, or adoption metric.",
+      "reason_code": "analytical_overstatement"
+    }
+  ],
+  "review_id": "senior-product-review-investment-2026-07-09-r1-2026-07-15",
+  "reviewer": "codex-root-agent",
+  "schema_version": "audience-insight-editorial-review-v1"
+}

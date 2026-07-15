@@ -22,6 +22,7 @@ from typing import Any, Iterable, Mapping
 from fli import artifact_x_articles
 from fli import audience_insight_evaluations
 from fli import audience_insight_publication_audit as publication_audit
+from fli import audience_insight_recall
 from fli import audience_insight_runs
 from fli import audience_insights
 
@@ -62,6 +63,7 @@ ADJACENT_FINALIZATION = (
 )
 _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _ARTIFACT_ID = re.compile(r"^[0-9a-f]{64}$")
+_RECALL_SAMPLE_ID = re.compile(r"^recall-sample-[0-9a-f]{20}$")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -179,6 +181,11 @@ SOURCE_BINDING_TABLES = (
     "quality_gate",
 )
 AUDIT_BINDING_TABLES = ("audit_run", "audit_item", "audit_attempt")
+RECALL_ORIGIN_BINDING_TABLES = (
+    "recall_run",
+    "recall_sample",
+    "recall_replacement",
+)
 
 
 def _open_readonly(path: Path) -> sqlite3.Connection:
@@ -452,7 +459,7 @@ def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
             )
         _require_exact_keys(
             raw_x,
-            {"artifact_db", "artifact_ids"},
+            {"artifact_db", "artifact_ids", "frozen_recall_origin"},
             label="x_article_cohort",
         )
         artifact_db = _resolve_path(
@@ -477,9 +484,62 @@ def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
             raise ProductionReconciliationError(
                 "x_article_cohort.artifact_ids contains duplicates"
             )
+        raw_recall = raw_x["frozen_recall_origin"]
+        if raw_recall is None:
+            normalized_recall = None
+        else:
+            if not isinstance(raw_recall, dict):
+                raise ProductionReconciliationError(
+                    "x_article_cohort.frozen_recall_origin must be null or an object"
+                )
+            _require_exact_keys(
+                raw_recall,
+                {"recall_db", "binding_sha256", "sample_ids"},
+                label="x_article_cohort.frozen_recall_origin",
+            )
+            recall_db = _resolve_path(
+                raw_recall["recall_db"],
+                manifest_path=manifest_path,
+                label="x_article_cohort.frozen_recall_origin.recall_db",
+            )
+            binding_sha256 = raw_recall["binding_sha256"]
+            if (
+                not isinstance(binding_sha256, str)
+                or _ARTIFACT_ID.fullmatch(binding_sha256) is None
+            ):
+                raise ProductionReconciliationError(
+                    "x_article_cohort.frozen_recall_origin.binding_sha256 "
+                    "must be a lowercase SHA-256"
+                )
+            sample_ids = raw_recall["sample_ids"]
+            if not isinstance(sample_ids, list) or not sample_ids:
+                raise ProductionReconciliationError(
+                    "x_article_cohort.frozen_recall_origin.sample_ids must be "
+                    "a non-empty array"
+                )
+            if any(
+                not isinstance(value, str)
+                or _RECALL_SAMPLE_ID.fullmatch(value) is None
+                for value in sample_ids
+            ):
+                raise ProductionReconciliationError(
+                    "x_article_cohort.frozen_recall_origin.sample_ids must use "
+                    "canonical recall-sample IDs"
+                )
+            if len(sample_ids) != len(set(sample_ids)):
+                raise ProductionReconciliationError(
+                    "x_article_cohort.frozen_recall_origin.sample_ids contains "
+                    "duplicates"
+                )
+            normalized_recall = {
+                "recall_db": str(recall_db),
+                "binding_sha256": binding_sha256,
+                "sample_ids": sorted(sample_ids),
+            }
         normalized_x = {
             "artifact_db": str(artifact_db),
             "artifact_ids": sorted(artifact_ids),
+            "frozen_recall_origin": normalized_recall,
         }
     if mode == "final" and normalized_x is None:
         raise ProductionReconciliationError(
@@ -506,7 +566,6 @@ _TELEMETRY_REQUIRED_FIELDS = (
     "input_tokens",
     "cached_tokens",
     "output_tokens",
-    "reported_cost_usd",
     "request_tags_json",
 )
 _TELEMETRY_TOKEN_FIELDS = (
@@ -524,6 +583,15 @@ def _validate_telemetry_record(
         raise ProductionReconciliationError(
             f"{stage} telemetry has null required fields {null_fields} for "
             f"{identity}: {source_path}"
+        )
+    # The proxy-reported response cost is the operational source of truth. A
+    # literal numeric zero is a valid provider report; NULL means the cost is
+    # unknown and must never be silently backfilled or coerced to zero.
+    if row["reported_cost_usd"] is None:
+        raise ProductionReconciliationError(
+            f"{stage} telemetry is missing proxy-reported cost for {identity}; "
+            "unknown cost cannot be coerced to zero and the run must be "
+            f"superseded: {source_path}"
         )
     for field in ("response_id", "response_model"):
         if not isinstance(row[field], str) or not str(row[field]).strip():
@@ -663,7 +731,11 @@ def _validate_attempt_sequences(
 def _reject_zero_attempt_telemetry(
     conn: sqlite3.Connection, *, table: str, stage: str, source_path: Path
 ) -> None:
-    telemetry_fields = (*_TELEMETRY_REQUIRED_FIELDS, "cache_write_tokens")
+    telemetry_fields = (
+        *_TELEMETRY_REQUIRED_FIELDS,
+        "reported_cost_usd",
+        "cache_write_tokens",
+    )
     predicates = " OR ".join(f"{field} IS NOT NULL" for field in telemetry_fields)
     count = int(
         conn.execute(
@@ -800,21 +872,22 @@ def _source_telemetry(
         stage="day_reconciliation",
         source_path=source_path,
     )
-    day_rows = conn.execute(
+    initial_day_rows = conn.execute(
         """SELECT 'day-initial' AS telemetry_identity, response_id,
                   response_model, input_tokens, cached_tokens,
                   cache_write_tokens, output_tokens, reported_cost_usd,
                   request_tags_json
-           FROM day_set_review WHERE attempts > 0
-           UNION ALL
-           SELECT 'day-reconciled' AS telemetry_identity, response_id,
+           FROM day_set_review WHERE attempts > 0"""
+    ).fetchall()
+    reconciled_day_rows = conn.execute(
+        """SELECT 'day-reconciled' AS telemetry_identity, response_id,
                   response_model, input_tokens, cached_tokens,
                   cache_write_tokens, output_tokens, reported_cost_usd,
                   request_tags_json
            FROM reconciled_day_set_review WHERE attempts > 0"""
     ).fetchall()
     _require_exact_request_tags(
-        day_rows,
+        initial_day_rows,
         audience_insight_evaluations.request_tags(
             audience=str(meta["audience"]),
             run=str(meta["run_id"]),
@@ -824,6 +897,18 @@ def _source_telemetry(
         stage="day",
         source_path=source_path,
     )
+    _require_exact_request_tags(
+        reconciled_day_rows,
+        audience_insight_evaluations.request_tags(
+            audience=str(meta["audience"]),
+            run=f"{meta['run_id']}:padding-tail-trim",
+            day=str(meta["day"]),
+            prompt_version=str(meta["day_review_prompt_version"]),
+        ),
+        stage="reconciled day",
+        source_path=source_path,
+    )
+    day_rows = [*initial_day_rows, *reconciled_day_rows]
     day_attempts = int(
         conn.execute(
             """SELECT
@@ -1470,6 +1555,195 @@ def _snapshot_path(raw: Any, *, label: str) -> Path:
     return path
 
 
+def frozen_recall_origin_binding_sha256(path: Path | str) -> str:
+    """Hash the complete frozen recall-origin ledger visible to SQLite."""
+    source_path = Path(path).resolve()
+    conn = _open_readonly(source_path)
+    try:
+        return _database_binding_sha256(conn, RECALL_ORIGIN_BINDING_TABLES)
+    finally:
+        conn.close()
+
+
+def _resolved_recorded_path(raw: Any, *, label: str) -> Path:
+    if not isinstance(raw, str) or not raw.strip():
+        raise ProductionReconciliationError(f"{label} is missing")
+    path = Path(raw)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    return path.resolve()
+
+
+def _inspect_frozen_recall_origin(
+    config: Mapping[str, Any] | None,
+    *,
+    artifact_conn: sqlite3.Connection,
+    artifact_db: Path,
+    source_event_ids: set[str],
+) -> tuple[set[str], dict[str, Any] | None]:
+    """Validate exact lower-rank X Articles against one frozen recall ledger."""
+    if config is None:
+        return set(), None
+    recall_path = Path(str(config["recall_db"]))
+    conn = _open_readonly(recall_path)
+    try:
+        binding_sha256 = _database_binding_sha256(
+            conn, RECALL_ORIGIN_BINDING_TABLES
+        )
+        if binding_sha256 != str(config["binding_sha256"]):
+            raise ProductionReconciliationError(
+                "frozen recall origin binding does not match the manifest: "
+                f"{recall_path}"
+            )
+        meta = conn.execute(
+            "SELECT * FROM recall_run WHERE singleton = 1"
+        ).fetchone()
+        if meta is None:
+            raise ProductionReconciliationError(
+                f"frozen recall origin is missing recall_run: {recall_path}"
+            )
+        if str(meta["protocol_version"]) != audience_insight_recall.PROTOCOL_VERSION:
+            raise ProductionReconciliationError(
+                f"frozen recall origin uses an unsupported protocol: {recall_path}"
+            )
+        sample_count = int(
+            conn.execute("SELECT COUNT(*) FROM recall_sample").fetchone()[0]
+        )
+        if sample_count != int(meta["expected_sample_count"]):
+            raise ProductionReconciliationError(
+                f"frozen recall origin sample count drift: {recall_path}"
+            )
+        recorded_artifact_db = _resolved_recorded_path(
+            meta["source_artifact_db"],
+            label="frozen recall origin source_artifact_db",
+        )
+        if recorded_artifact_db != artifact_db.resolve():
+            raise ProductionReconciliationError(
+                "frozen recall origin was built from a different artifact DB: "
+                f"{recall_path}"
+            )
+
+        sample_ids = list(config["sample_ids"])
+        placeholders = ",".join("?" for _ in sample_ids)
+        rows = conn.execute(
+            f"""SELECT sample_id, day, event_id, band, sample_kind,
+                       triage_decision, feed_rank, selection_sha256,
+                       article_artifact_ids_json, packet_json
+                FROM recall_sample
+                WHERE sample_id IN ({placeholders})
+                ORDER BY sample_id""",
+            tuple(sample_ids),
+        ).fetchall()
+        observed_ids = {str(row["sample_id"]) for row in rows}
+        if observed_ids != set(sample_ids):
+            raise ProductionReconciliationError(
+                "frozen recall origin sample IDs do not match the manifest; "
+                f"missing={sorted(set(sample_ids) - observed_ids)}, "
+                f"extra={sorted(observed_ids - set(sample_ids))}: {recall_path}"
+            )
+
+        artifact_ids: set[str] = set()
+        items: list[dict[str, Any]] = []
+        for row in rows:
+            sample_id = str(row["sample_id"])
+            day = str(row["day"])
+            event_id = str(row["event_id"])
+            band = str(row["band"])
+            if (
+                str(row["sample_kind"]) != "x_article_census"
+                or str(row["triage_decision"]) != "keep"
+                or band != audience_insight_recall.X_ARTICLE_51_100
+            ):
+                raise ProductionReconciliationError(
+                    "frozen recall origin is not an accepted X Article census "
+                    f"sample: {sample_id}"
+                )
+            if event_id in source_event_ids:
+                raise ProductionReconciliationError(
+                    "frozen recall origin overlaps a declared production-run "
+                    f"event: {sample_id}"
+                )
+            if sample_id != audience_insight_recall._sample_id(day, event_id):
+                raise ProductionReconciliationError(
+                    f"frozen recall sample identity drift: {sample_id}"
+                )
+            expected_selection_sha256 = audience_insight_recall.selection_sha256(
+                day=day,
+                band=band,
+                event_id=event_id,
+            )
+            if str(row["selection_sha256"]) != expected_selection_sha256:
+                raise ProductionReconciliationError(
+                    f"frozen recall sample selection drift: {sample_id}"
+                )
+            try:
+                article_ids = json.loads(str(row["article_artifact_ids_json"]))
+                packet = json.loads(str(row["packet_json"]))
+            except json.JSONDecodeError as exc:
+                raise ProductionReconciliationError(
+                    f"frozen recall sample JSON is invalid: {sample_id}"
+                ) from exc
+            if (
+                not isinstance(article_ids, list)
+                or not article_ids
+                or any(
+                    not isinstance(value, str)
+                    or _ARTIFACT_ID.fullmatch(value) is None
+                    for value in article_ids
+                )
+                or len(article_ids) != len(set(article_ids))
+                or str(row["article_artifact_ids_json"])
+                != _canonical_json(article_ids)
+            ):
+                raise ProductionReconciliationError(
+                    f"frozen recall article IDs are invalid: {sample_id}"
+                )
+            if (
+                not isinstance(packet, dict)
+                or packet.get("event_id") != event_id
+                or packet.get("day") != day
+            ):
+                raise ProductionReconciliationError(
+                    f"frozen recall packet identity drift: {sample_id}"
+                )
+            for artifact_id in article_ids:
+                linked = artifact_conn.execute(
+                    """SELECT COUNT(*)
+                       FROM artifact_import_candidate
+                       WHERE event_id = ? AND artifact_id = ?
+                         AND decision = 'accepted'""",
+                    (event_id, artifact_id),
+                ).fetchone()[0]
+                if int(linked) < 1:
+                    raise ProductionReconciliationError(
+                        "frozen recall article is not linked to its exact event: "
+                        f"{sample_id}/{artifact_id}"
+                    )
+            artifact_ids.update(article_ids)
+            items.append(
+                {
+                    "sample_id": sample_id,
+                    "day": day,
+                    "event_id": event_id,
+                    "feed_rank": int(row["feed_rank"]),
+                    "selection_sha256": expected_selection_sha256,
+                    "artifact_ids": article_ids,
+                }
+            )
+        return artifact_ids, {
+            "recall_db": str(recall_path),
+            "run_id": str(meta["run_id"]),
+            "protocol_version": str(meta["protocol_version"]),
+            "sample_set_sha256": str(meta["sample_set_sha256"]),
+            "binding_sha256": binding_sha256,
+            "sample_count": len(items),
+            "artifact_count": len(artifact_ids),
+            "items": items,
+        }
+    finally:
+        conn.close()
+
+
 def _inspect_x_article_cohort(
     config: Mapping[str, Any] | None, *, source_event_ids: set[str]
 ) -> dict[str, Any]:
@@ -1506,12 +1780,25 @@ def _inspect_x_article_cohort(
                 tuple(sorted(source_event_ids)),
             ).fetchall()
         }
-        configured_ids = set(config["artifact_ids"])
-        if configured_ids != derived_ids:
+        recall_ids, recall_origin = _inspect_frozen_recall_origin(
+            config["frozen_recall_origin"],
+            artifact_conn=conn,
+            artifact_db=path,
+            source_event_ids=source_event_ids,
+        )
+        overlap = derived_ids & recall_ids
+        if overlap:
             raise ProductionReconciliationError(
-                "manifest X Article cohort does not match the exact union derived "
-                f"from declared run events; missing={sorted(derived_ids - configured_ids)}, "
-                f"extra={sorted(configured_ids - derived_ids)}"
+                "frozen recall X Articles overlap the production-run-derived "
+                f"origin: {sorted(overlap)}"
+            )
+        required_ids = derived_ids | recall_ids
+        configured_ids = set(config["artifact_ids"])
+        if configured_ids != required_ids:
+            raise ProductionReconciliationError(
+                "manifest X Article cohort does not match the exact origin union; "
+                f"missing={sorted(required_ids - configured_ids)}, "
+                f"extra={sorted(configured_ids - required_ids)}"
             )
         try:
             provider_provenance = artifact_x_articles.validate_x_article_provenance(
@@ -1626,6 +1913,11 @@ def _inspect_x_article_cohort(
             items.append(
                 {
                     "artifact_id": artifact_id,
+                    "origin": (
+                        "production_run_event"
+                        if artifact_id in derived_ids
+                        else "frozen_recall_x_article_census"
+                    ),
                     "canonical_url": canonical_url,
                     "status": effective_status,
                     "attempt_count": len(attempts),
@@ -1649,12 +1941,14 @@ def _inspect_x_article_cohort(
             "binding": {
                 "source_event_count": len(source_event_ids),
                 "derived_artifact_count": len(derived_ids),
+                "frozen_recall_artifact_count": len(recall_ids),
                 "artifact_ids_sha256": _sha256(
-                    _canonical_json(sorted(derived_ids))
+                    _canonical_json(sorted(required_ids))
                 ),
                 "provider_provenance_sha256": provider_provenance[
                     "binding_sha256"
                 ],
+                "frozen_recall_origin": recall_origin,
             },
             "artifact_count": len(items),
             "terminal_count": terminal,

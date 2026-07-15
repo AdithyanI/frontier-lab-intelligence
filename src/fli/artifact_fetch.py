@@ -691,9 +691,7 @@ def _create_explicit_fetch_run(
     conn: Any, selection: list[dict[str, Any]]
 ) -> tuple[str, bool]:
     payload = [
-        [item["artifact_id"], item["selected_url"], item["source_event_id"]]
-        if "source_event_id" in item
-        else [item["artifact_id"], item["selected_url"], item["event_id"]]
+        [item["artifact_id"], item["selected_url"], item["event_id"]]
         for item in selection
     ]
     fingerprint = hashlib.sha256(_canonical_json(payload).encode()).hexdigest()

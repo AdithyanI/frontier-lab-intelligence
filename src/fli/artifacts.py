@@ -1421,6 +1421,9 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
         "observations": int(conn.execute("SELECT COUNT(*) FROM artifact_observation").fetchone()[0]),
         "disclosures": int(conn.execute("SELECT COUNT(*) FROM artifact_disclosure").fetchone()[0]),
         "candidates": int(conn.execute("SELECT COUNT(*) FROM artifact_import_candidate").fetchone()[0]),
+        "reviewed_supplements": int(
+            conn.execute("SELECT COUNT(*) FROM artifact_event_supplement").fetchone()[0]
+        ),
         "fetch_runs": int(conn.execute("SELECT COUNT(*) FROM artifact_fetch_run").fetchone()[0]),
         "fetch_attempts": int(
             conn.execute("SELECT COUNT(*) FROM artifact_fetch").fetchone()[0]

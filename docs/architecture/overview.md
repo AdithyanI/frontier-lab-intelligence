@@ -32,7 +32,11 @@ exact quote/retweet/reply envelopes are cutoff-correct, and current Registry
 curation is overlaid at read time. Triage and canonical artifact storage are
 derived, replayable stages. Extraction consumes accepted first-party X
 evidence directly and may join canonical artifact text as optional
-strengthening; it never mutates upstream evidence.
+strengthening; it never mutates upstream evidence. Rare primary-source
+recovery is explicit rather than synthetic: `artifact_event_supplement` binds
+one human-reviewed official document to one exact frozen kept event and its
+triage hashes, while the ordinary artifact candidate ledger remains derived
+only from observed source links.
 Exact human name/kind corrections are separately versioned in
 `data/registry/entity-overrides.json` and recorded in
 `entity_override_audit`; they never rewrite model-classification provenance.

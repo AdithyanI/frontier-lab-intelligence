@@ -557,6 +557,57 @@ def test_artifact_cli_has_stable_json_success_and_error_contract(tmp_path, capsy
     assert failure["error"]["hint"]
 
 
+def test_artifact_cli_passes_repeatable_exact_native_fetch_filter(
+    tmp_path, monkeypatch, capsys
+):
+    calls: list[dict] = []
+
+    def fake_fetch_cohort(**kwargs):
+        calls.append(kwargs)
+        return {"fetch_run_id": "exact", "expected_count": 2}
+
+    monkeypatch.setattr(artifact_fetch, "fetch_cohort", fake_fetch_cohort)
+    first_id = "a" * 64
+    second_id = "b" * 64
+    assert artifacts.main(
+        [
+            "fetch",
+            "--db",
+            str(tmp_path / "artifacts.db"),
+            "--artifact-id",
+            second_id,
+            "--artifact-id",
+            first_id,
+            "--json",
+            "--no-input",
+        ]
+    ) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["status"] == "ok"
+    assert calls == [
+        {
+            "db_path": tmp_path / "artifacts.db",
+            "limit": 30,
+            "artifact_ids": [second_id, first_id],
+        }
+    ]
+
+    assert artifacts.main(
+        [
+            "fetch",
+            "--limit",
+            "1",
+            "--artifact-id",
+            first_id,
+            "--json",
+        ]
+    ) == 2
+    failure = json.loads(capsys.readouterr().out)
+    assert failure["error"]["code"] == "E_VALIDATION"
+    assert "cannot be combined" in failure["error"]["message"]
+
+
 def test_summary_separates_fetch_attempts_from_artifact_outcomes(tmp_path):
     db = tmp_path / "artifacts.db"
     artifact_id = _seed_artifact(db)

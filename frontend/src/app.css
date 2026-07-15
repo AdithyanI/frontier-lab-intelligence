@@ -2571,6 +2571,31 @@ td.num {
   line-height: 1;
 }
 
+.insight-feed-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.insight-feed-link:hover strong,
+.insight-feed-link:focus-visible strong {
+  color: var(--blue-ink);
+}
+
+.insight-feed-link:hover span,
+.insight-feed-link:focus-visible span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.insight-feed-link:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 5px;
+}
+
 .insight-feed-rank {
   margin-top: 7px;
   padding-top: 8px;
@@ -2578,6 +2603,17 @@ td.num {
   color: var(--muted);
   letter-spacing: 0.015em;
   text-transform: none;
+}
+
+.insight-feed-rank--link {
+  text-decoration: none;
+}
+
+.insight-feed-rank--link:hover,
+.insight-feed-rank--link:focus-visible {
+  color: var(--blue-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .insight-body {

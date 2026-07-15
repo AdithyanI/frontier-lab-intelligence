@@ -17,8 +17,9 @@ import sqlite3
 import sys
 import time
 from collections import deque
+from collections.abc import Mapping
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -43,6 +44,8 @@ DEFAULT_REVIEW_WORKERS = 5
 DEFAULT_PROGRESS_EVERY = 10
 MAX_EXTRACTION_ATTEMPTS = 2
 CANONICAL_TRIAGE_PREFIX = "triage-v2.2-canonical-v8"
+ADJACENT_PUBLICATION_AUDIT = Path("publication-audit-v1") / "audit.db"
+HISTORY_MODES = ("auto", "explicit", "none")
 
 
 SCHEMA = """
@@ -1429,6 +1432,25 @@ def selected_history_row(
     ]
 
 
+def _history_projection_ids(projection: Mapping[str, Any]) -> list[str]:
+    """Project one audited run into duplicate-suppression history.
+
+    Independent-audit disqualifications disappear from both publication and
+    history. A senior editorial veto disappears only from publication: the
+    mechanically valid framing remains in history so a later editor cannot
+    rediscover it as a fresh story.
+    """
+    history_ids = [str(value) for value in projection["effective_selected_ids"]]
+    finalization = projection.get("finalization")
+    if (
+        isinstance(finalization, Mapping)
+        and finalization.get("reason_code")
+        == audience_insight_publication_audit.EDITORIAL_FINALIZATION_REASON_CODE
+    ):
+        history_ids = [str(value) for value in projection["base_selected_ids"]]
+    return history_ids
+
+
 def _quality_item_payload(
     row: sqlite3.Row,
 ) -> tuple[
@@ -2386,11 +2408,12 @@ def _prior_history(
             )
             current = passed_by_day.get(run_day)
             if current is None or recency_key > current[0]:
+                history_ids = _history_projection_ids(projection)
                 passed_by_day[run_day] = (
                     recency_key,
                     selected_history_row(
                         conn,
-                        candidate_ids=projection["effective_selected_ids"],
+                        candidate_ids=history_ids,
                     ),
                 )
         except sqlite3.Error:
@@ -2403,6 +2426,171 @@ def _prior_history(
         for run_day in sorted(passed_by_day)
         for item in passed_by_day[run_day][1]
     ]
+
+
+def _explicit_prior_history(
+    *,
+    prior_run_dbs: Iterable[Path],
+    audience: str,
+    day: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Resolve an exact ordered history chain before any model request.
+
+    Every source must be an earlier, internally passed run for the requested
+    audience. Its exact adjacent publication audit and optional adjacent
+    finalization are revalidated; no directory discovery or recency choice is
+    involved.
+    """
+    audience_insights.require_audience(audience)
+    try:
+        target_day = date.fromisoformat(day)
+    except ValueError as exc:
+        raise ValueError(f"invalid run day: {day}") from exc
+    paths = [Path(value).resolve() for value in prior_run_dbs]
+    if not paths:
+        raise ValueError("explicit history requires at least one --prior-run-db")
+    if len(paths) != len(set(paths)):
+        raise ValueError("explicit history contains a duplicate prior run database")
+
+    history: list[dict[str, Any]] = []
+    sources: list[dict[str, Any]] = []
+    seen_days: set[str] = set()
+    previous_day: date | None = None
+    for path in paths:
+        conn = _open_readonly(path)
+        try:
+            run = conn.execute(
+                "SELECT audience, day, run_id FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+            editor = conn.execute(
+                "SELECT status FROM editor_run WHERE singleton = 1"
+            ).fetchone()
+            gate = conn.execute(
+                "SELECT passed FROM quality_gate WHERE singleton = 1"
+            ).fetchone()
+            if run is None:
+                raise ValueError(f"prior run is missing run_meta: {path}")
+            run_audience = str(run["audience"])
+            run_day_text = str(run["day"])
+            if run_audience != audience:
+                raise ValueError(
+                    "prior run audience does not match target audience: "
+                    f"{path} ({run_audience} != {audience})"
+                )
+            try:
+                run_day = date.fromisoformat(run_day_text)
+            except ValueError as exc:
+                raise ValueError(
+                    f"prior run has an invalid day: {path} ({run_day_text})"
+                ) from exc
+            if run_day >= target_day:
+                raise ValueError(
+                    "prior run day must be earlier than target day: "
+                    f"{path} ({run_day_text} >= {day})"
+                )
+            if run_day_text in seen_days:
+                raise ValueError(
+                    f"explicit history contains duplicate day {run_day_text}"
+                )
+            if previous_day is not None and run_day <= previous_day:
+                raise ValueError(
+                    "--prior-run-db values must be in strictly increasing day order"
+                )
+            if editor is None or str(editor["status"]) != "complete":
+                raise ValueError(f"prior run editor is not complete: {path}")
+            if gate is None or int(gate["passed"] or 0) != 1:
+                raise ValueError(f"prior run quality gate did not pass: {path}")
+
+            audit_db = path.parent / ADJACENT_PUBLICATION_AUDIT
+            finalization_path = (
+                audience_insight_publication_audit.default_finalization_path(path)
+            )
+            try:
+                projection = (
+                    audience_insight_publication_audit.validated_publication_projection(
+                        source_run_db=path,
+                        audit_db=audit_db,
+                    )
+                )
+            except (
+                FileNotFoundError,
+                IndexError,
+                KeyError,
+                OSError,
+                TypeError,
+                ValueError,
+                sqlite3.Error,
+            ) as exc:
+                raise ValueError(
+                    "prior run has a missing or stale adjacent audit/finalization: "
+                    f"{path}: {exc}"
+                ) from exc
+            history_ids = _history_projection_ids(projection)
+            selected = selected_history_row(conn, candidate_ids=history_ids)
+            if [str(item["selected_item_id"]) for item in selected] != history_ids:
+                raise ValueError(
+                    f"prior run history projection order is stale: {path}"
+                )
+            history.extend(selected)
+            sources.append(
+                {
+                    "run_db": _display_path(path),
+                    "run_id": str(run["run_id"]),
+                    "day": run_day_text,
+                    "audit_db": _display_path(audit_db),
+                    "finalization": (
+                        _display_path(finalization_path)
+                        if finalization_path.is_file()
+                        else None
+                    ),
+                    "projection_mode": str(projection["mode"]),
+                    "history_item_count": len(selected),
+                }
+            )
+            seen_days.add(run_day_text)
+            previous_day = run_day
+        finally:
+            conn.close()
+    return history, {
+        "mode": "explicit",
+        "sources": sources,
+        "prior_item_count": len(history),
+        "history_sha256": _sha256(_canonical_json(history)),
+    }
+
+
+def _resolve_history_input(
+    *,
+    mode: str,
+    prior_run_dbs: Iterable[Path],
+    audience: str,
+    day: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    paths = list(prior_run_dbs)
+    if mode == "explicit":
+        return _explicit_prior_history(
+            prior_run_dbs=paths,
+            audience=audience,
+            day=day,
+        )
+    if paths:
+        raise ValueError("--prior-run-db may be used only with explicit history")
+    if mode == "none":
+        history: list[dict[str, Any]] = []
+    elif mode == "auto":
+        history = _prior_history(
+            root=DEFAULT_RUN_ROOT,
+            audience=audience,
+            day=day,
+        )
+    else:
+        raise ValueError(f"unsupported history mode: {mode}")
+    return history, {
+        "mode": mode,
+        "sources": [],
+        "prior_item_count": len(history),
+        "history_sha256": _sha256(_canonical_json(history)),
+    }
 
 
 def _result(command: str, data: Any) -> dict[str, Any]:
@@ -2464,6 +2652,25 @@ def main(argv: list[str] | None = None) -> int:
     run_parser.add_argument("--skip-editor", action="store_true")
     run_parser.add_argument("--skip-quality", action="store_true")
     run_parser.add_argument("--dry-run", action="store_true")
+    run_parser.add_argument(
+        "--history-mode",
+        choices=HISTORY_MODES,
+        help=(
+            "Required unless --prior-run-db infers explicit mode. Use explicit "
+            "for production, none only at a history origin, and auto only for "
+            "non-production discovery."
+        ),
+    )
+    run_parser.add_argument(
+        "--prior-run-db",
+        type=Path,
+        action="append",
+        default=[],
+        help=(
+            "Exact earlier audience run DB, repeated in strictly increasing day "
+            "order. Its adjacent audit/finalization is revalidated before model calls."
+        ),
+    )
 
     summary_parser = sub.add_parser("summary", help="Inspect one immutable run.")
     summary_parser.add_argument("--run-db", type=Path, required=True)
@@ -2477,6 +2684,20 @@ def main(argv: list[str] | None = None) -> int:
             data = summary(conn)
             conn.close()
         else:
+            history_mode = args.history_mode
+            if args.prior_run_db and history_mode is None:
+                history_mode = "explicit"
+            if history_mode is None:
+                raise ValueError(
+                    "run requires --history-mode or at least one --prior-run-db; "
+                    "production chronology must not use implicit directory recency"
+                )
+            history, history_input = _resolve_history_input(
+                mode=history_mode,
+                prior_run_dbs=args.prior_run_db,
+                audience=args.audience,
+                day=args.day,
+            )
             run_db = args.run_db or default_run_db(
                 day=args.day,
                 audience=args.audience,
@@ -2499,6 +2720,19 @@ def main(argv: list[str] | None = None) -> int:
                 review_effort=args.review_reasoning_effort,
                 input_render_version=args.input_render_version,
             )
+            existing_editor = conn.execute(
+                "SELECT history_sha256, prior_selected_json "
+                "FROM editor_run WHERE singleton = 1"
+            ).fetchone()
+            if existing_editor is not None and (
+                str(existing_editor["history_sha256"])
+                != str(history_input["history_sha256"])
+                or str(existing_editor["prior_selected_json"])
+                != _canonical_json(history)
+            ):
+                raise ValueError(
+                    "resolved history does not match the existing frozen editor input"
+                )
             if args.dry_run:
                 data = summary(conn)
                 data["will_call_model"] = False
@@ -2528,11 +2762,6 @@ def main(argv: list[str] | None = None) -> int:
                         client=client,
                         workers=args.review_workers,
                     )
-                    history = _prior_history(
-                        root=DEFAULT_RUN_ROOT,
-                        audience=args.audience,
-                        day=args.day,
-                    )
                     prepare_editor(conn, prior_selected=history)
                     run_editor(conn, client=client)
                     if not args.skip_quality:
@@ -2542,6 +2771,7 @@ def main(argv: list[str] | None = None) -> int:
                             workers=args.review_workers,
                         )
                 data = summary(conn)
+            data["history_input"] = history_input
             data["run_db"] = _display_path(run_db)
             conn.close()
     except (FileNotFoundError, RuntimeError, sqlite3.Error, ValueError) as exc:
