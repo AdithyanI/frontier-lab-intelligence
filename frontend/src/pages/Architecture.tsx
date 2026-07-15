@@ -46,10 +46,10 @@ function RosterGlyph({ x, y, dark }: { x: number; y: number; dark?: boolean }) {
 }
 
 function DaysGlyph({ x, y }: { x: number; y: number }) {
-  const dots = Array.from({ length: 7 }, (_, i) => x + 6 + i * 26)
+  const dots = Array.from({ length: 7 }, (_, i) => x + 6 + i * 22)
   return (
     <g>
-      <line x1={x} y1={y} x2={x + 168} y2={y} stroke={MUTED} strokeWidth="1" opacity="0.45" />
+      <line x1={x} y1={y} x2={x + 144} y2={y} stroke={MUTED} strokeWidth="1" opacity="0.45" />
       {dots.map((cx) => (
         <circle key={cx} cx={cx} cy={y} r={3.5} fill={BLUE} />
       ))}
@@ -72,24 +72,6 @@ function EnvelopeGlyph({ x, y }: { x: number; y: number }) {
   )
 }
 
-function RankedGlyph({ x, y }: { x: number; y: number }) {
-  const rows = [
-    { w: 98 },
-    { w: 72 },
-    { w: 50 },
-  ]
-  return (
-    <g>
-      {rows.map((row, i) => (
-        <g key={i}>
-          <rect x={x} y={y + i * 15 - 4.5} width={22} height={9} fill={BLUE} />
-          <rect x={x + 30} y={y + i * 15 - 1.5} width={row.w} height={3} fill="#fff" opacity={0.5} />
-        </g>
-      ))}
-    </g>
-  )
-}
-
 function TriageGlyph({ x, y }: { x: number; y: number }) {
   return (
     <g>
@@ -104,36 +86,42 @@ function TriageGlyph({ x, y }: { x: number; y: number }) {
   )
 }
 
+function AcceptedEvidenceGlyph({ x, y }: { x: number; y: number }) {
+  return (
+    <g>
+      <rect x={x} y={y - 18} width={38} height={42} fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
+      <rect x={x + 50} y={y - 12} width={38} height={36} fill="#fff" stroke={MUTED} strokeWidth="1" />
+      <line x1={x + 8} y1={y - 6} x2={x + 30} y2={y - 6} stroke={BLUE_MID} strokeWidth="2" />
+      <line x1={x + 8} y1={y + 2} x2={x + 26} y2={y + 2} stroke={MUTED} strokeWidth="1" />
+      <line x1={x + 58} y1={y} x2={x + 80} y2={y} stroke={MUTED} strokeWidth="1" />
+      <line x1={x + 58} y1={y + 8} x2={x + 76} y2={y + 8} stroke={MUTED} strokeWidth="1" />
+      <text x={x + 44} y={y + 38} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED}>+ ARTIFACT</text>
+    </g>
+  )
+}
+
 function LiveSystemMap() {
   const stages = [
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
-    { x: 234, kicker: 'SOURCE', title: 'X evidence', glyph: 'days' },
+    { x: 234, kicker: 'SOURCE', title: 'X posts + threads', glyph: 'days' },
     { x: 440, kicker: 'STRUCTURE', title: 'Exact envelopes', glyph: 'envelope' },
-    { x: 646, kicker: 'SURFACE', title: 'Feed', glyph: 'ranked', dark: true },
-    { x: 852, kicker: 'ROUTE', title: 'Keep / drop', glyph: 'triage' },
-  ]
-  const nextLayer = [
-    { x: 28, label: 'Primary artifacts', live: true },
-    { x: 370, label: '4 verified insights', live: true },
-    { x: 712, label: 'Investor + engineer delivery', live: false },
+    { x: 646, kicker: 'ROUTE', title: 'Feed + keep / drop', glyph: 'triage', dark: true },
+    { x: 852, kicker: 'EVIDENCE', title: 'Accepted evidence', glyph: 'accepted' },
   ]
 
   return (
     <svg
-      viewBox="0 0 1080 392"
+      viewBox="0 0 1080 492"
       role="img"
-      aria-label="The live system: the screened Registry determines whose public X evidence is stored, exact relationships organize that evidence, the Feed makes it inspectable, triage routes each candidate, artifacts can strengthen accepted evidence, and cited extraction publishes only claims whose exact quote binds to a frozen source. Delivery is planned next."
+      aria-label="Current evidence-to-insight architecture. A screened Registry supplies dated X posts and threads. Exact envelopes enter the Feed for keep or drop routing. Accepted evidence, optionally enriched with artifacts, enters one shared citation-bound insight engine. The flow then splits: Investment and AI Engineering each use their own prompt and editorial judgment, independent publication audit, and separate daily view."
     >
       <defs>
         <marker id="flow-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
         </marker>
-        <marker id="flow-arrow-muted" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={MUTED} />
-        </marker>
       </defs>
 
-      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">LIVE TODAY · EVIDENCE FIRST, THEN ONE ROUTING DECISION</text>
+      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">SHARED EVIDENCE · INSPECTABLE BEFORE JUDGMENT</text>
       {stages.map((stage) => (
         <g key={stage.title}>
           <rect
@@ -146,12 +134,12 @@ function LiveSystemMap() {
             strokeWidth="1.2"
           />
           <text x={stage.x + 18} y="92" fontFamily={MONO} fontSize="10" fill={stage.dark ? BLUE : BLUE_INK} letterSpacing="0.08em">{stage.kicker}</text>
-          <text x={stage.x + 18} y="122" fontFamily={UI} fontSize="18" fontWeight="600" fill={stage.dark ? '#fff' : INK}>{stage.title}</text>
+          <text x={stage.x + 18} y="122" fontFamily={UI} fontSize={stage.title.length > 16 ? 15.5 : 18} fontWeight="600" fill={stage.dark ? '#fff' : INK}>{stage.title}</text>
           {stage.glyph === 'roster' && <RosterGlyph x={stage.x + 18} y={144} dark />}
           {stage.glyph === 'days' && <DaysGlyph x={stage.x + 18} y={158} />}
           {stage.glyph === 'envelope' && <EnvelopeGlyph x={stage.x + 18} y={158} />}
-          {stage.glyph === 'ranked' && <RankedGlyph x={stage.x + 18} y={144} />}
           {stage.glyph === 'triage' && <TriageGlyph x={stage.x + 18} y={158} />}
+          {stage.glyph === 'accepted' && <AcceptedEvidenceGlyph x={stage.x + 18} y={152} />}
         </g>
       ))}
       <Arrow x1={206} x2={228} />
@@ -159,30 +147,49 @@ function LiveSystemMap() {
       <Arrow x1={618} x2={640} />
       <Arrow x1={824} x2={846} />
 
-      <line x1="28" y1="238" x2="1052" y2="238" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.45" />
-      <text x="28" y="266" fontFamily={MONO} fontSize="11" fill={MUTED} letterSpacing="0.08em">ACCEPTED EVIDENCE · OPTIONAL ARTIFACT · EXACT CITATION</text>
+      <path d="M941 190 V218 H540 V242" fill="none" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#flow-arrow)" />
+
       <g>
-        {nextLayer.map((box, index) => (
-          <g key={box.label} opacity={box.live ? 1 : 0.62}>
-            <rect
-              x={box.x}
-              y="282"
-              width="280"
-              height="56"
-              fill={box.live ? SAND : '#fff'}
-              stroke={box.live ? BLUE_MID : MUTED}
-              strokeWidth="1.2"
-              strokeDasharray={box.live ? undefined : '5 5'}
-            />
-            <text x={box.x + 140} y="315" textAnchor="middle" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>{box.label}</text>
-            {index < nextLayer.length - 1 && (() => {
-              const liveLink = box.live && nextLayer[index + 1].live
-              return <line x1={box.x + 280} y1="310" x2={nextLayer[index + 1].x - 8} y2="310" stroke={liveLink ? BLUE_MID : MUTED} strokeWidth="1.2" strokeDasharray={liveLink ? undefined : '5 5'} markerEnd={liveLink ? 'url(#flow-arrow)' : 'url(#flow-arrow-muted)'} />
-            })()}
-          </g>
-        ))}
+        <rect x="280" y="248" width="520" height="72" fill={INK} />
+        <text x="302" y="272" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
+        <text x="302" y="298" fontFamily={UI} fontSize="18" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
+        <text x="778" y="288" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill="#fff" opacity="0.7">FROZEN EVIDENCE · EXACT PASSAGES</text>
+        <text x="778" y="304" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill="#fff" opacity="0.7">SHARED PROVENANCE · OPTIONAL ARTIFACTS</text>
       </g>
-      <text x="28" y="372" fontFamily={UI} fontSize="12.5" fill={MUTED}>The first proof published 4 of 5 candidates. One model-written quote was rejected because it did not exactly match frozen evidence.</text>
+
+      <path d="M540 320 V342 H162 V358" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#flow-arrow)" />
+      <path d="M540 342 H686 V358" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#flow-arrow)" />
+
+      <g>
+        <text x="28" y="352" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">INVESTMENT</text>
+        <rect x="28" y="364" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="42" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
+        <text x="42" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
+        <line x1="176" y1="399" x2="188" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
+        <rect x="194" y="364" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="208" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
+        <text x="208" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
+        <line x1="322" y1="399" x2="334" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
+        <rect x="340" y="364" width="160" height="70" fill={INK} />
+        <text x="354" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
+        <text x="354" y="411" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
+
+        <text x="552" y="352" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">AI ENGINEERING</text>
+        <rect x="552" y="364" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="566" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
+        <text x="566" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
+        <line x1="700" y1="399" x2="712" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
+        <rect x="718" y="364" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
+        <text x="732" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
+        <text x="732" y="411" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
+        <line x1="846" y1="399" x2="858" y2="399" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#flow-arrow)" />
+        <rect x="864" y="364" width="188" height="70" fill={INK} />
+        <text x="878" y="391" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
+        <text x="878" y="411" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
+      </g>
+
+      <line x1="28" y1="462" x2="1052" y2="462" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
+      <text x="28" y="483" fontFamily={UI} fontSize="12" fill={MUTED}>Evidence and citation rules stay shared. Audience prompts, judgment, audits, and published views do not.</text>
     </svg>
   )
 }
@@ -557,7 +564,7 @@ export default function Architecture() {
       <section className="arch-section" id="system-today">
         <div className="arch-section-head">
           <h2 className="arch-h">The evidence-to-insight path</h2>
-          <p className="arch-p">Evidence stays inspectable before judgment. Accepted envelopes may gain artifact context; only claims with an exact source-bound quote reach Insights.</p>
+          <p className="arch-p">One evidence core preserves exact provenance. Investment and AI Engineering then use separate prompts, editorial judgment, publication audits, and daily views.</p>
         </div>
         <div className="arch-canvas"><LiveSystemMap /></div>
       </section>

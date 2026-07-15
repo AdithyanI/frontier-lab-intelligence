@@ -335,3 +335,25 @@ abstain. The first live canonical run promoted `@jack` from `unsure` to
 actions consulted 43 URLs and resolved the exact account. The Registry reason
 is normalized to plain text; complete source URLs remain in the web-evidence
 row rather than leaking into the model-output field.
+
+## Manual X Profile Intake
+
+The Registry page exposes one inline `Add profile` action rather than a third
+Network tab. Its API is `POST /api/registry/intake` with an X profile plus one
+of two explicit modes:
+
+- `screen` fetches and stores the profile, rejects protected or sub-1,000
+  accounts mechanically, otherwise fetches up to 20 authored posts and runs
+  `registry-evaluation-v3`. `keep` becomes active; `remove` and `review` remain
+  reversible, reason-bearing rejections.
+- `direct` requires an operator reason and bypasses the follower/relevance
+  decision. It still runs the canonical kind lifecycle and never admits a
+  protected profile whose public evidence cannot be collected.
+
+Exact-handle lookup happens before client construction. An already-active
+profile therefore returns its existing entity with zero provider and model
+calls, preventing duplicates and spend. `entity_registry_intake_audit` records
+the requested mode, human reason, outcome, evaluator reasons, model contract,
+usage, reported cost, failure, and timestamps. The current case-study demo has
+no feature-level password; the route is intended to sit behind the same
+whole-site access boundary as the rest of the product when that is enabled.

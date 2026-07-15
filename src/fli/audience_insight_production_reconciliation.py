@@ -1,0 +1,1533 @@
+"""Deterministic read-only production reconciliation for Audience Insights v2.
+
+The manifest is the scope boundary: every audience/day, source run, adjacent
+audit, expected base selection count, and optional finalization sidecar is
+named explicitly.  No directory discovery or recency heuristic participates
+in the report.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import re
+import sqlite3
+from pathlib import Path
+from typing import Any, Iterable, Mapping
+
+from fli import artifact_x_articles
+from fli import audience_insight_evaluations
+from fli import audience_insight_publication_audit as publication_audit
+from fli import audience_insight_runs
+from fli import audience_insights
+
+
+MANIFEST_SCHEMA_VERSION = "audience-insight-production-reconciliation-manifest-v2"
+REPORT_SCHEMA_VERSION = "audience-insight-production-reconciliation-report-v2"
+RECONCILIATION_VERSION = "audience-insight-production-reconciliation-v2"
+RECONCILIATION_MODES = ("partial", "final")
+FINAL_DAYS = tuple(f"2026-07-{day:02d}" for day in range(5, 14))
+CONTRACT_STAGES = ("extraction", "editor", "item_review", "day_review")
+CONTRACT_FIELDS = {
+    "model",
+    "reasoning_effort",
+    "prompt_version",
+    "prompt_sha256",
+    "schema_version",
+}
+# These efforts are the frozen production routing decision, not a provider
+# default inferred at reconciliation time. Investment extraction intentionally
+# used high reasoning while AI Engineering extraction used medium reasoning.
+FINAL_REASONING_EFFORTS = {
+    "investment": {
+        "extraction": "high",
+        "editor": "high",
+        "item_review": "high",
+        "day_review": "high",
+    },
+    "ai_engineering": {
+        "extraction": "medium",
+        "editor": "high",
+        "item_review": "high",
+        "day_review": "high",
+    },
+}
+ADJACENT_AUDIT = Path("publication-audit-v1") / "audit.db"
+ADJACENT_FINALIZATION = (
+    Path(publication_audit.FINALIZATION_DIR)
+    / publication_audit.FINALIZATION_FILENAME
+)
+_DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_ARTIFACT_ID = re.compile(r"^[0-9a-f]{64}$")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+class ProductionReconciliationError(ValueError):
+    """The manifest or a frozen production input violates the contract."""
+
+
+def current_expected_contracts() -> dict[str, dict[str, dict[str, str]]]:
+    """Return the exact current production contracts bound by a manifest."""
+    contracts: dict[str, dict[str, dict[str, str]]] = {}
+    for audience in sorted(audience_insights.AUDIENCES):
+        efforts = FINAL_REASONING_EFFORTS[audience]
+        contracts[audience] = {
+            "extraction": {
+                "model": audience_insights.DEFAULT_MODEL,
+                "reasoning_effort": efforts["extraction"],
+                "prompt_version": audience_insights.prompt_version(audience),
+                "prompt_sha256": audience_insights.prompt_sha256(audience),
+                "schema_version": audience_insights.schema_version(audience),
+            },
+            "editor": {
+                "model": audience_insights.DEFAULT_MODEL,
+                "reasoning_effort": efforts["editor"],
+                "prompt_version": audience_insights.editor_prompt_version(audience),
+                "prompt_sha256": audience_insights.editor_prompt_sha256(audience),
+                "schema_version": audience_insights.editor_schema_version(audience),
+            },
+            "item_review": {
+                "model": audience_insight_evaluations.DEFAULT_MODEL,
+                "reasoning_effort": efforts["item_review"],
+                "prompt_version": audience_insight_evaluations.item_prompt_version(
+                    audience
+                ),
+                "prompt_sha256": audience_insight_evaluations.item_prompt_sha256(
+                    audience
+                ),
+                "schema_version": audience_insight_evaluations.ITEM_SCHEMA_VERSION,
+            },
+            "day_review": {
+                "model": audience_insight_evaluations.DEFAULT_MODEL,
+                "reasoning_effort": efforts["day_review"],
+                "prompt_version": audience_insight_evaluations.DAY_SET_PROMPT_VERSION,
+                "prompt_sha256": (
+                    audience_insight_evaluations.day_set_prompt_sha256()
+                ),
+                "schema_version": (
+                    audience_insight_evaluations.DAY_SET_SCHEMA_VERSION
+                ),
+            },
+        }
+    return contracts
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _sha256(value: str) -> str:
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _open_readonly(path: Path) -> sqlite3.Connection:
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    conn = sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def _require_exact_keys(
+    value: Mapping[str, Any], expected: set[str], *, label: str
+) -> None:
+    if set(value) != expected:
+        raise ProductionReconciliationError(
+            f"{label} keys do not match the schema; "
+            f"missing={sorted(expected - set(value))}, "
+            f"extra={sorted(set(value) - expected)}"
+        )
+
+
+def _resolve_path(raw: Any, *, manifest_path: Path, label: str) -> Path:
+    if not isinstance(raw, str) or not raw.strip():
+        raise ProductionReconciliationError(f"{label} must be a non-empty path")
+    path = Path(raw)
+    if not path.is_absolute():
+        path = manifest_path.parent / path
+    return path.resolve()
+
+
+def load_manifest(path: Path | str) -> tuple[dict[str, Any], str]:
+    """Strictly load and normalize one explicit reconciliation manifest."""
+    manifest_path = Path(path).resolve()
+    payload = json.loads(manifest_path.read_text())
+    if not isinstance(payload, dict):
+        raise ProductionReconciliationError("manifest must be a JSON object")
+    _require_exact_keys(
+        payload,
+        {
+            "schema_version",
+            "reconciliation_id",
+            "mode",
+            "expected_contracts",
+            "expected_audience_days",
+            "runs",
+            "x_article_cohort",
+        },
+        label="manifest",
+    )
+    if payload["schema_version"] != MANIFEST_SCHEMA_VERSION:
+        raise ProductionReconciliationError(
+            f"unsupported manifest schema_version: {payload['schema_version']!r}"
+        )
+    reconciliation_id = payload["reconciliation_id"]
+    if not isinstance(reconciliation_id, str) or not reconciliation_id.strip():
+        raise ProductionReconciliationError(
+            "reconciliation_id must be a non-empty string"
+        )
+    mode = payload["mode"]
+    if mode not in RECONCILIATION_MODES:
+        raise ProductionReconciliationError(
+            f"mode must be one of {list(RECONCILIATION_MODES)}"
+        )
+
+    raw_contracts = payload["expected_contracts"]
+    if not isinstance(raw_contracts, dict):
+        raise ProductionReconciliationError("expected_contracts must be an object")
+    _require_exact_keys(
+        raw_contracts,
+        set(audience_insights.AUDIENCES),
+        label="expected_contracts",
+    )
+    current_contracts = current_expected_contracts()
+    normalized_contracts: dict[str, dict[str, dict[str, str]]] = {}
+    for audience in sorted(audience_insights.AUDIENCES):
+        raw_audience = raw_contracts[audience]
+        if not isinstance(raw_audience, dict):
+            raise ProductionReconciliationError(
+                f"expected_contracts.{audience} must be an object"
+            )
+        _require_exact_keys(
+            raw_audience,
+            set(CONTRACT_STAGES),
+            label=f"expected_contracts.{audience}",
+        )
+        normalized_stages: dict[str, dict[str, str]] = {}
+        for stage in CONTRACT_STAGES:
+            raw_stage = raw_audience[stage]
+            if not isinstance(raw_stage, dict):
+                raise ProductionReconciliationError(
+                    f"expected_contracts.{audience}.{stage} must be an object"
+                )
+            _require_exact_keys(
+                raw_stage,
+                CONTRACT_FIELDS,
+                label=f"expected_contracts.{audience}.{stage}",
+            )
+            if any(
+                not isinstance(raw_stage[field], str)
+                or not raw_stage[field].strip()
+                for field in CONTRACT_FIELDS
+            ):
+                raise ProductionReconciliationError(
+                    f"expected_contracts.{audience}.{stage} values must be "
+                    "non-empty strings"
+                )
+            normalized_stage = {
+                field: raw_stage[field].strip() for field in sorted(CONTRACT_FIELDS)
+            }
+            expected_current = current_contracts[audience][stage]
+            if normalized_stage != expected_current:
+                raise ProductionReconciliationError(
+                    f"expected_contracts.{audience}.{stage} does not match the "
+                    f"current production contract; expected={expected_current}, "
+                    f"actual={normalized_stage}"
+                )
+            normalized_stages[stage] = normalized_stage
+        normalized_contracts[audience] = normalized_stages
+
+    expected = payload["expected_audience_days"]
+    if not isinstance(expected, dict):
+        raise ProductionReconciliationError(
+            "expected_audience_days must be an object"
+        )
+    _require_exact_keys(
+        expected,
+        set(audience_insights.AUDIENCES),
+        label="expected_audience_days",
+    )
+    expected_pairs: set[tuple[str, str]] = set()
+    normalized_expected: dict[str, list[str]] = {}
+    for audience in audience_insights.AUDIENCES:
+        raw_days = expected[audience]
+        if not isinstance(raw_days, list) or not raw_days:
+            raise ProductionReconciliationError(
+                f"expected_audience_days.{audience} must be a non-empty array"
+            )
+        if any(
+            not isinstance(day, str) or _DAY.fullmatch(day) is None
+            for day in raw_days
+        ):
+            raise ProductionReconciliationError(
+                f"expected_audience_days.{audience} must use YYYY-MM-DD"
+            )
+        if len(raw_days) != len(set(raw_days)):
+            raise ProductionReconciliationError(
+                f"expected_audience_days.{audience} contains duplicates"
+            )
+        days = sorted(raw_days)
+        normalized_expected[audience] = days
+        expected_pairs.update((audience, day) for day in days)
+    if mode == "final":
+        final_days = list(FINAL_DAYS)
+        for audience in audience_insights.AUDIENCES:
+            if normalized_expected[audience] != final_days:
+                raise ProductionReconciliationError(
+                    "final mode requires exactly 2026-07-05 through "
+                    f"2026-07-13 for {audience}"
+                )
+
+    raw_runs = payload["runs"]
+    if not isinstance(raw_runs, list) or not raw_runs:
+        raise ProductionReconciliationError("runs must be a non-empty array")
+    normalized_runs: list[dict[str, Any]] = []
+    seen_pairs: set[tuple[str, str]] = set()
+    seen_source_paths: set[Path] = set()
+    seen_audit_paths: set[Path] = set()
+    seen_finalization_paths: set[Path] = set()
+    for index, raw in enumerate(raw_runs):
+        if not isinstance(raw, dict):
+            raise ProductionReconciliationError(f"runs[{index}] must be an object")
+        _require_exact_keys(
+            raw,
+            {
+                "audience",
+                "day",
+                "source_run_db",
+                "audit_db",
+                "expected_selected_count",
+                "finalization_path",
+            },
+            label=f"runs[{index}]",
+        )
+        audience = raw["audience"]
+        if audience not in audience_insights.AUDIENCES:
+            raise ProductionReconciliationError(
+                f"runs[{index}].audience is unsupported"
+            )
+        day = raw["day"]
+        if not isinstance(day, str) or _DAY.fullmatch(day) is None:
+            raise ProductionReconciliationError(
+                f"runs[{index}].day must use YYYY-MM-DD"
+            )
+        pair = (audience, day)
+        if pair in seen_pairs:
+            raise ProductionReconciliationError(
+                f"duplicate audience/day run: {audience}/{day}"
+            )
+        seen_pairs.add(pair)
+        source_path = _resolve_path(
+            raw["source_run_db"],
+            manifest_path=manifest_path,
+            label=f"runs[{index}].source_run_db",
+        )
+        audit_path = _resolve_path(
+            raw["audit_db"],
+            manifest_path=manifest_path,
+            label=f"runs[{index}].audit_db",
+        )
+        if audit_path != (source_path.parent / ADJACENT_AUDIT).resolve():
+            raise ProductionReconciliationError(
+                f"runs[{index}].audit_db is not adjacent to source_run_db"
+            )
+        if source_path in seen_source_paths:
+            raise ProductionReconciliationError(f"duplicate source run: {source_path}")
+        if audit_path in seen_audit_paths:
+            raise ProductionReconciliationError(f"duplicate audit DB: {audit_path}")
+        seen_source_paths.add(source_path)
+        seen_audit_paths.add(audit_path)
+        selected_count = raw["expected_selected_count"]
+        if type(selected_count) is not int or selected_count < 0:
+            raise ProductionReconciliationError(
+                f"runs[{index}].expected_selected_count must be non-negative"
+            )
+        raw_finalization = raw["finalization_path"]
+        if raw_finalization is None:
+            finalization_path = None
+        else:
+            finalization_path = _resolve_path(
+                raw_finalization,
+                manifest_path=manifest_path,
+                label=f"runs[{index}].finalization_path",
+            )
+            if finalization_path != (
+                source_path.parent / ADJACENT_FINALIZATION
+            ).resolve():
+                raise ProductionReconciliationError(
+                    f"runs[{index}].finalization_path is not adjacent to source_run_db"
+                )
+            if finalization_path in seen_finalization_paths:
+                raise ProductionReconciliationError(
+                    f"duplicate finalization sidecar: {finalization_path}"
+                )
+            seen_finalization_paths.add(finalization_path)
+        normalized_runs.append(
+            {
+                "audience": audience,
+                "day": day,
+                "source_run_db": str(source_path),
+                "audit_db": str(audit_path),
+                "expected_selected_count": selected_count,
+                "finalization_path": (
+                    str(finalization_path) if finalization_path is not None else None
+                ),
+            }
+        )
+    if seen_pairs != expected_pairs:
+        raise ProductionReconciliationError(
+            "runs do not match expected_audience_days exactly; "
+            f"missing={sorted(expected_pairs - seen_pairs)}, "
+            f"extra={sorted(seen_pairs - expected_pairs)}"
+        )
+
+    raw_x = payload["x_article_cohort"]
+    if raw_x is None:
+        normalized_x = None
+    else:
+        if not isinstance(raw_x, dict):
+            raise ProductionReconciliationError(
+                "x_article_cohort must be null or an object"
+            )
+        _require_exact_keys(
+            raw_x,
+            {"artifact_db", "artifact_ids"},
+            label="x_article_cohort",
+        )
+        artifact_db = _resolve_path(
+            raw_x["artifact_db"],
+            manifest_path=manifest_path,
+            label="x_article_cohort.artifact_db",
+        )
+        artifact_ids = raw_x["artifact_ids"]
+        if not isinstance(artifact_ids, list) or not artifact_ids:
+            raise ProductionReconciliationError(
+                "x_article_cohort.artifact_ids must be a non-empty array"
+            )
+        if any(
+            not isinstance(value, str)
+            or _ARTIFACT_ID.fullmatch(value) is None
+            for value in artifact_ids
+        ):
+            raise ProductionReconciliationError(
+                "x_article_cohort.artifact_ids must be lowercase SHA-256 IDs"
+            )
+        if len(artifact_ids) != len(set(artifact_ids)):
+            raise ProductionReconciliationError(
+                "x_article_cohort.artifact_ids contains duplicates"
+            )
+        normalized_x = {
+            "artifact_db": str(artifact_db),
+            "artifact_ids": sorted(artifact_ids),
+        }
+    if mode == "final" and normalized_x is None:
+        raise ProductionReconciliationError(
+            "final mode requires a non-null exact X Article cohort"
+        )
+
+    normalized = {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
+        "reconciliation_id": reconciliation_id.strip(),
+        "mode": mode,
+        "expected_contracts": normalized_contracts,
+        "expected_audience_days": normalized_expected,
+        "runs": sorted(
+            normalized_runs, key=lambda row: (row["day"], row["audience"])
+        ),
+        "x_article_cohort": normalized_x,
+    }
+    return normalized, _sha256(_canonical_json(normalized))
+
+
+_TELEMETRY_REQUIRED_FIELDS = (
+    "response_id",
+    "response_model",
+    "input_tokens",
+    "cached_tokens",
+    "output_tokens",
+    "reported_cost_usd",
+    "request_tags_json",
+)
+_TELEMETRY_TOKEN_FIELDS = (
+    "input_tokens",
+    "cached_tokens",
+    "output_tokens",
+)
+
+
+def _validate_telemetry_record(
+    row: Mapping[str, Any], *, stage: str, identity: str, source_path: Path
+) -> None:
+    null_fields = [field for field in _TELEMETRY_REQUIRED_FIELDS if row[field] is None]
+    if null_fields:
+        raise ProductionReconciliationError(
+            f"{stage} telemetry has null required fields {null_fields} for "
+            f"{identity}: {source_path}"
+        )
+    for field in ("response_id", "response_model"):
+        if not isinstance(row[field], str) or not str(row[field]).strip():
+            raise ProductionReconciliationError(
+                f"{stage} telemetry has an empty {field} for {identity}: "
+                f"{source_path}"
+            )
+    for field in _TELEMETRY_TOKEN_FIELDS:
+        value = row[field]
+        if type(value) is not int or value < 0:
+            raise ProductionReconciliationError(
+                f"{stage} telemetry has invalid {field} for {identity}: "
+                f"{source_path}"
+            )
+    cache_write_tokens = row["cache_write_tokens"]
+    if cache_write_tokens is not None and (
+        type(cache_write_tokens) is not int or cache_write_tokens < 0
+    ):
+        raise ProductionReconciliationError(
+            f"{stage} telemetry has invalid cache_write_tokens for {identity}: "
+            f"{source_path}"
+        )
+    cost = row["reported_cost_usd"]
+    if (
+        type(cost) not in (int, float)
+        or not math.isfinite(float(cost))
+        or float(cost) < 0.0
+    ):
+        raise ProductionReconciliationError(
+            f"{stage} telemetry has invalid reported_cost_usd for {identity}: "
+            f"{source_path}"
+        )
+    try:
+        tags = json.loads(str(row["request_tags_json"]))
+    except json.JSONDecodeError as exc:
+        raise ProductionReconciliationError(
+            f"{stage} telemetry has invalid request_tags_json for {identity}: "
+            f"{source_path}"
+        ) from exc
+    if (
+        not isinstance(tags, list)
+        or not tags
+        or any(not isinstance(tag, str) or not tag.strip() for tag in tags)
+    ):
+        raise ProductionReconciliationError(
+            f"{stage} telemetry request_tags_json must be a non-empty string "
+            f"array for {identity}: {source_path}"
+        )
+
+
+def _telemetry_report(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    expected_attempts: int,
+    stage: str,
+    source_path: Path,
+) -> dict[str, Any]:
+    records = list(rows)
+    for index, row in enumerate(records):
+        identity = str(row["telemetry_identity"])
+        _validate_telemetry_record(
+            row,
+            stage=stage,
+            identity=identity or f"row-{index + 1}",
+            source_path=source_path,
+        )
+    input_tokens = sum(int(row["input_tokens"]) for row in records)
+    cached_tokens = sum(int(row["cached_tokens"]) for row in records)
+    cache_write_tokens = sum(
+        int(row["cache_write_tokens"])
+        for row in records
+        if row["cache_write_tokens"] is not None
+    )
+    cache_write_reported = sum(
+        row["cache_write_tokens"] is not None for row in records
+    )
+    output_tokens = sum(int(row["output_tokens"]) for row in records)
+    cost = sum(float(row["reported_cost_usd"]) for row in records)
+    eligible = sum(int(row["input_tokens"]) >= 1024 for row in records)
+    hits = sum(int(row["cached_tokens"]) > 0 for row in records)
+    recorded = len(records)
+    expected = int(expected_attempts)
+    return {
+        "attempts": expected,
+        "recorded_attempts": recorded,
+        "telemetry_missing_attempts": max(expected - recorded, 0),
+        "telemetry_surplus_attempts": max(recorded - expected, 0),
+        "input_tokens": input_tokens,
+        "cached_tokens": cached_tokens,
+        "cache_write_tokens": cache_write_tokens,
+        "cache_write_tokens_reported_records": cache_write_reported,
+        "cache_write_tokens_unreported_records": recorded - cache_write_reported,
+        "output_tokens": output_tokens,
+        "cache_eligible_requests": eligible,
+        "cache_hit_requests": hits,
+        "cache_hit_request_ratio": round(hits / eligible, 6) if eligible else 0.0,
+        "cache_read_ratio": (
+            round(cached_tokens / input_tokens, 6) if input_tokens else 0.0
+        ),
+        "proxy_reported_cost_usd": round(cost, 9),
+        "proxy_cost_records": recorded,
+    }
+
+
+def _validate_attempt_sequences(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    entity_field: str,
+    expected_attempts: Mapping[str, int],
+    stage: str,
+    source_path: Path,
+) -> None:
+    observed: dict[str, list[int]] = {}
+    for row in rows:
+        entity = str(row[entity_field])
+        observed.setdefault(entity, []).append(int(row["attempt_number"]))
+    expected_entities = {
+        entity for entity, attempts in expected_attempts.items() if attempts > 0
+    }
+    if set(observed) != expected_entities:
+        raise ProductionReconciliationError(
+            f"{stage} telemetry entities do not match expected attempts; "
+            f"missing={sorted(expected_entities - set(observed))}, "
+            f"extra={sorted(set(observed) - expected_entities)}: {source_path}"
+        )
+    for entity in sorted(expected_entities):
+        actual_numbers = sorted(observed[entity])
+        expected_numbers = list(range(1, expected_attempts[entity] + 1))
+        if actual_numbers != expected_numbers:
+            raise ProductionReconciliationError(
+                f"{stage} telemetry attempt numbers are not contiguous for "
+                f"{entity}; expected={expected_numbers}, actual={actual_numbers}: "
+                f"{source_path}"
+            )
+
+
+def _reject_zero_attempt_telemetry(
+    conn: sqlite3.Connection, *, table: str, stage: str, source_path: Path
+) -> None:
+    telemetry_fields = (*_TELEMETRY_REQUIRED_FIELDS, "cache_write_tokens")
+    predicates = " OR ".join(f"{field} IS NOT NULL" for field in telemetry_fields)
+    count = int(
+        conn.execute(
+            f"SELECT COUNT(*) FROM {table} WHERE attempts = 0 AND ({predicates})"
+        ).fetchone()[0]
+    )
+    if count:
+        raise ProductionReconciliationError(
+            f"{stage} has telemetry on {count} zero-attempt rows: {source_path}"
+        )
+
+
+def _source_telemetry(
+    conn: sqlite3.Connection, *, source_path: Path
+) -> dict[str, dict[str, Any]]:
+    extraction_rows = conn.execute(
+        """SELECT candidate_id,
+                  candidate_id || ':' || attempt_number AS telemetry_identity,
+                  attempt_number, response_id, response_model, input_tokens,
+                  cached_tokens, cache_write_tokens, output_tokens,
+                  reported_cost_usd, request_tags_json
+           FROM candidate_attempt
+           ORDER BY candidate_id, attempt_number"""
+    ).fetchall()
+    extraction_expected = {
+        str(row["candidate_id"]): int(row["attempts"])
+        for row in conn.execute(
+            "SELECT candidate_id, attempts FROM candidate_item"
+        ).fetchall()
+    }
+    _validate_attempt_sequences(
+        extraction_rows,
+        entity_field="candidate_id",
+        expected_attempts=extraction_expected,
+        stage="extraction",
+        source_path=source_path,
+    )
+    extraction_attempts = sum(extraction_expected.values())
+    _reject_zero_attempt_telemetry(
+        conn, table="item_review", stage="review", source_path=source_path
+    )
+    review_rows = conn.execute(
+        """SELECT candidate_id AS telemetry_identity, response_id,
+                  response_model, input_tokens, cached_tokens,
+                  cache_write_tokens, output_tokens, reported_cost_usd,
+                  request_tags_json
+           FROM item_review WHERE attempts > 0"""
+    ).fetchall()
+    review_attempts = int(
+        conn.execute("SELECT COALESCE(SUM(attempts), 0) FROM item_review").fetchone()[0]
+    )
+    _reject_zero_attempt_telemetry(
+        conn, table="editor_run", stage="editor", source_path=source_path
+    )
+    editor_rows = conn.execute(
+        """SELECT 'editor' AS telemetry_identity, response_id,
+                  response_model, input_tokens, cached_tokens,
+                  cache_write_tokens, output_tokens, reported_cost_usd,
+                  request_tags_json
+           FROM editor_run WHERE attempts > 0"""
+    ).fetchall()
+    editor_attempts = int(
+        conn.execute("SELECT COALESCE(SUM(attempts), 0) FROM editor_run").fetchone()[0]
+    )
+    _reject_zero_attempt_telemetry(
+        conn, table="day_set_review", stage="day", source_path=source_path
+    )
+    _reject_zero_attempt_telemetry(
+        conn,
+        table="reconciled_day_set_review",
+        stage="day_reconciliation",
+        source_path=source_path,
+    )
+    day_rows = conn.execute(
+        """SELECT 'day-initial' AS telemetry_identity, response_id,
+                  response_model, input_tokens, cached_tokens,
+                  cache_write_tokens, output_tokens, reported_cost_usd,
+                  request_tags_json
+           FROM day_set_review WHERE attempts > 0
+           UNION ALL
+           SELECT 'day-reconciled' AS telemetry_identity, response_id,
+                  response_model, input_tokens, cached_tokens,
+                  cache_write_tokens, output_tokens, reported_cost_usd,
+                  request_tags_json
+           FROM reconciled_day_set_review WHERE attempts > 0"""
+    ).fetchall()
+    day_attempts = int(
+        conn.execute(
+            """SELECT
+                   COALESCE((SELECT SUM(attempts) FROM day_set_review), 0) +
+                   COALESCE((SELECT SUM(attempts)
+                             FROM reconciled_day_set_review), 0)"""
+        ).fetchone()[0]
+    )
+    return {
+        "extraction": _telemetry_report(
+            extraction_rows,
+            expected_attempts=extraction_attempts,
+            stage="extraction",
+            source_path=source_path,
+        ),
+        "review": _telemetry_report(
+            review_rows,
+            expected_attempts=review_attempts,
+            stage="review",
+            source_path=source_path,
+        ),
+        "editor": _telemetry_report(
+            editor_rows,
+            expected_attempts=editor_attempts,
+            stage="editor",
+            source_path=source_path,
+        ),
+        "day": _telemetry_report(
+            day_rows,
+            expected_attempts=day_attempts,
+            stage="day",
+            source_path=source_path,
+        ),
+    }
+
+
+def _audit_telemetry(
+    conn: sqlite3.Connection, *, source_path: Path
+) -> dict[str, Any]:
+    rows = conn.execute(
+        """SELECT audit_item_id,
+                  audit_item_id || ':' || attempt_number AS telemetry_identity,
+                  attempt_number, response_id, response_model, input_tokens,
+                  cached_tokens, cache_write_tokens, output_tokens,
+                  reported_cost_usd, request_tags_json
+           FROM audit_attempt ORDER BY audit_item_id, attempt_number"""
+    ).fetchall()
+    expected_by_item = {
+        str(row["audit_item_id"]): int(row["attempts"])
+        for row in conn.execute(
+            "SELECT audit_item_id, attempts FROM audit_item"
+        ).fetchall()
+    }
+    _validate_attempt_sequences(
+        rows,
+        entity_field="audit_item_id",
+        expected_attempts=expected_by_item,
+        stage="audit",
+        source_path=source_path,
+    )
+    return _telemetry_report(
+        rows,
+        expected_attempts=sum(expected_by_item.values()),
+        stage="audit",
+        source_path=source_path,
+    )
+
+
+def _validate_telemetry(
+    telemetry: Mapping[str, Mapping[str, Any]], *, source_path: Path
+) -> None:
+    for stage, report in telemetry.items():
+        missing = int(report["telemetry_missing_attempts"])
+        surplus = int(report["telemetry_surplus_attempts"])
+        recorded = int(report["recorded_attempts"])
+        cost_records = int(report["proxy_cost_records"])
+        if missing or surplus:
+            raise ProductionReconciliationError(
+                f"{stage} telemetry attempt count is not exact; missing={missing}, "
+                f"surplus={surplus}: {source_path}"
+            )
+        if cost_records != recorded:
+            raise ProductionReconciliationError(
+                f"{stage} telemetry is missing provider-reported cost for "
+                f"{recorded - cost_records} attempts: {source_path}"
+            )
+
+
+_RUN_CONTRACT_COLUMNS = {
+    "extraction": {
+        "model": "model",
+        "reasoning_effort": "reasoning_effort",
+        "prompt_version": "prompt_version",
+        "prompt_sha256": "prompt_sha256",
+        "schema_version": "schema_version",
+    },
+    "editor": {
+        "model": "editor_model",
+        "reasoning_effort": "editor_reasoning_effort",
+        "prompt_version": "editor_prompt_version",
+        "prompt_sha256": "editor_prompt_sha256",
+        "schema_version": "editor_schema_version",
+    },
+    "item_review": {
+        "model": "review_model",
+        "reasoning_effort": "review_reasoning_effort",
+        "prompt_version": "item_review_prompt_version",
+        "prompt_sha256": "item_review_prompt_sha256",
+        "schema_version": "item_review_schema_version",
+    },
+    "day_review": {
+        "model": "review_model",
+        "reasoning_effort": "review_reasoning_effort",
+        "prompt_version": "day_review_prompt_version",
+        "prompt_sha256": "day_review_prompt_sha256",
+        "schema_version": "day_review_schema_version",
+    },
+}
+
+
+def _validate_run_contract(
+    meta: Mapping[str, Any],
+    expected_contract: Mapping[str, Mapping[str, str]],
+    *,
+    source_path: Path,
+) -> dict[str, dict[str, str]]:
+    observed: dict[str, dict[str, str]] = {}
+    for stage in CONTRACT_STAGES:
+        stage_observed = {
+            field: str(meta[column])
+            for field, column in _RUN_CONTRACT_COLUMNS[stage].items()
+        }
+        if stage_observed != dict(expected_contract[stage]):
+            raise ProductionReconciliationError(
+                f"{stage} contract does not match manifest; "
+                f"expected={dict(expected_contract[stage])}, "
+                f"actual={stage_observed}: {source_path}"
+            )
+        observed[stage] = stage_observed
+    return observed
+
+
+def _inspect_run(
+    entry: Mapping[str, Any],
+    *,
+    expected_contract: Mapping[str, Mapping[str, str]],
+) -> dict[str, Any]:
+    source_path = Path(str(entry["source_run_db"]))
+    audit_path = Path(str(entry["audit_db"]))
+    expected_selected = int(entry["expected_selected_count"])
+    finalization_path = (
+        Path(str(entry["finalization_path"]))
+        if entry["finalization_path"] is not None
+        else None
+    )
+    source = _open_readonly(source_path)
+    audit = _open_readonly(audit_path)
+    try:
+        meta = source.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+        editor = source.execute(
+            "SELECT * FROM editor_run WHERE singleton = 1"
+        ).fetchone()
+        gate = source.execute(
+            "SELECT * FROM quality_gate WHERE singleton = 1"
+        ).fetchone()
+        day_review = source.execute(
+            "SELECT * FROM day_set_review WHERE singleton = 1"
+        ).fetchone()
+        if meta is None or editor is None or gate is None or day_review is None:
+            raise ProductionReconciliationError(
+                f"source run is incomplete: {source_path}"
+            )
+        if str(meta["audience"]) != entry["audience"] or str(meta["day"]) != entry["day"]:
+            raise ProductionReconciliationError(
+                f"manifest audience/day does not match source: {source_path}"
+            )
+        observed_contract = _validate_run_contract(
+            meta, expected_contract, source_path=source_path
+        )
+        if str(editor["status"]) != "complete" or str(day_review["status"]) != "complete":
+            raise ProductionReconciliationError(
+                f"editor/day review is incomplete: {source_path}"
+            )
+        if int(gate["passed"]) != 1:
+            raise ProductionReconciliationError(
+                f"internal quality gate did not pass: {source_path}"
+            )
+        counts = dict(
+            source.execute(
+                """SELECT COUNT(*) AS candidates,
+                          SUM(status = 'pending') AS pending,
+                          SUM(status = 'complete') AS complete,
+                          SUM(status = 'rejected') AS rejected,
+                          SUM(status = 'failed') AS failed,
+                          SUM(status = 'complete' AND outcome = 'insight') AS insights
+                   FROM candidate_item"""
+            ).fetchone()
+        )
+        counts = {key: int(value or 0) for key, value in counts.items()}
+        if counts["candidates"] != int(meta["expected_count"]):
+            raise ProductionReconciliationError(
+                f"candidate count drift in source run: {source_path}"
+            )
+        if counts["pending"]:
+            raise ProductionReconciliationError(
+                f"source run still has pending candidates: {source_path}"
+            )
+        if counts["failed"]:
+            raise ProductionReconciliationError(
+                f"source run still has retryable failed candidates: {source_path}"
+            )
+        base_ids = [
+            str(row[0])
+            for row in source.execute(
+                "SELECT candidate_id FROM publication_selection ORDER BY publication_rank"
+            ).fetchall()
+        ]
+        if len(base_ids) != expected_selected:
+            raise ProductionReconciliationError(
+                f"base publication count does not match manifest: {source_path}"
+            )
+        gate_result = json.loads(str(gate["result_json"]))
+        gate_checks = gate_result.get("checks")
+        if (
+            gate_result.get("passed") is not True
+            or gate_result.get("audience") != entry["audience"]
+            or gate_result.get("day") != entry["day"]
+            or int(gate_result.get("selected_count", -1)) != expected_selected
+            or not isinstance(gate_checks, dict)
+            or not gate_checks
+            or any(value is not True for value in gate_checks.values())
+            or gate_result.get("failure_reasons") != []
+        ):
+            raise ProductionReconciliationError(
+                f"internal quality gate result is incomplete or inconsistent: "
+                f"{source_path}"
+            )
+        reconciliation_row = source.execute(
+            "SELECT * FROM selection_reconciliation WHERE singleton = 1"
+        ).fetchone()
+        reconciled_review = source.execute(
+            "SELECT * FROM reconciled_day_set_review WHERE singleton = 1"
+        ).fetchone()
+        gate_reconciliation = gate_result.get("reconciliation")
+        if gate_reconciliation is None:
+            if reconciliation_row is not None or reconciled_review is not None:
+                raise ProductionReconciliationError(
+                    f"quality gate omitted an existing padding reconciliation: "
+                    f"{source_path}"
+                )
+        else:
+            if (
+                not isinstance(gate_reconciliation, dict)
+                or reconciliation_row is None
+                or str(reconciliation_row["status"]) != "complete"
+                or reconciled_review is None
+                or str(reconciled_review["status"]) != "complete"
+            ):
+                raise ProductionReconciliationError(
+                    f"padding reconciliation is incomplete: {source_path}"
+                )
+            expected_reconciliation = {
+                "reason_code": str(reconciliation_row["reason_code"]),
+                "removed_candidate_id": str(
+                    reconciliation_row["removed_candidate_id"]
+                ),
+                "removed_editorial_rank": int(
+                    reconciliation_row["removed_editorial_rank"]
+                ),
+                "original_selected_count": len(
+                    json.loads(str(reconciliation_row["original_selected_ids_json"]))
+                ),
+                "active_selected_count": len(
+                    json.loads(str(reconciliation_row["active_selected_ids_json"]))
+                ),
+            }
+            if gate_reconciliation != expected_reconciliation:
+                raise ProductionReconciliationError(
+                    f"quality gate padding reconciliation drift: {source_path}"
+                )
+
+        default_finalization = publication_audit.default_finalization_path(source_path)
+        if finalization_path is None:
+            if default_finalization.exists():
+                raise ProductionReconciliationError(
+                    f"manifest omitted existing finalization: {default_finalization}"
+                )
+            audit_report = publication_audit.validate_readonly_publication_audit(
+                source_run_db=source_path,
+                audit_db=audit_path,
+                expected_selected_count=expected_selected,
+            )
+            effective_ids = base_ids
+            finalization_report = None
+        else:
+            finalization_report = (
+                publication_audit.validate_readonly_publication_finalization(
+                    source_run_db=source_path,
+                    audit_db=audit_path,
+                    finalization_path=finalization_path,
+                )
+            )
+            if finalization_report["base_selected_ids"] != base_ids:
+                raise ProductionReconciliationError(
+                    f"finalization base selection drift: {source_path}"
+                )
+            audit_report = finalization_report["audit"]
+            effective_ids = list(finalization_report["effective_selected_ids"])
+
+        audit_meta = audit.execute(
+            "SELECT selected_count, reject_sample_count FROM audit_run WHERE singleton = 1"
+        ).fetchone()
+        if audit_meta is None or int(audit_meta["selected_count"]) != expected_selected:
+            raise ProductionReconciliationError(
+                f"audit selected count drift: {audit_path}"
+            )
+        source_telemetry = _source_telemetry(source, source_path=source_path)
+        source_telemetry["audit"] = _audit_telemetry(
+            audit, source_path=audit_path
+        )
+        _validate_telemetry(source_telemetry, source_path=source_path)
+        editor_selected = int(
+            source.execute("SELECT COUNT(*) FROM daily_selection").fetchone()[0]
+        )
+        try:
+            event_ids = json.loads(str(meta["event_ids_json"]))
+        except json.JSONDecodeError as exc:
+            raise ProductionReconciliationError(
+                f"source event_ids_json is invalid: {source_path}"
+            ) from exc
+        if (
+            not isinstance(event_ids, list)
+            or any(not isinstance(event_id, str) or not event_id for event_id in event_ids)
+            or len(event_ids) != len(set(event_ids))
+        ):
+            raise ProductionReconciliationError(
+                f"source event_ids_json is not an exact unique ID list: {source_path}"
+            )
+        return {
+            "audience": str(meta["audience"]),
+            "day": str(meta["day"]),
+            "source_run_id": str(meta["run_id"]),
+            "source_run_db": str(source_path),
+            "audit_db": str(audit_path),
+            "rank_limit": int(meta["rank_limit"]),
+            "contracts": observed_contract,
+            "counts": {
+                "expected_candidates": int(meta["expected_count"]),
+                **counts,
+                "editor_selected": editor_selected,
+                "base_publication": len(base_ids),
+                "effective_publication": len(effective_ids),
+            },
+            "selection": {
+                "base_ids_sha256": _sha256(_canonical_json(base_ids)),
+                "effective_ids_sha256": _sha256(_canonical_json(effective_ids)),
+            },
+            "telemetry": source_telemetry,
+            "audit": {
+                "status": (
+                    "failed_selected_finalized"
+                    if finalization_report is not None
+                    else "passed"
+                ),
+                "passed": bool(audit_report["passed"]),
+                "audit_id": str(audit_report["audit_id"]),
+                "selected_count": int(audit_meta["selected_count"]),
+                "reject_sample_count": int(audit_meta["reject_sample_count"]),
+                "cohort_sha256": str(audit_report["audit_cohort_sha256"]),
+                "result_sha256": str(audit_report["audit_result_sha256"]),
+                "source_contract_sha256": str(
+                    audit_report["source_contract_sha256"]
+                ),
+                "false_negative_adjudication": audit_report[
+                    "false_negative_adjudication"
+                ],
+            },
+            "finalization": (
+                {
+                    "status": "validated",
+                    "path": str(finalization_path),
+                    "reason_code": str(finalization_report["reason_code"]),
+                    "sha256": str(finalization_report["finalization_sha256"]),
+                    "removed_candidate_ids": list(
+                        finalization_report["removed_candidate_ids"]
+                    ),
+                }
+                if finalization_report is not None
+                else {
+                    "status": "not_present",
+                    "path": None,
+                    "reason_code": None,
+                    "sha256": None,
+                    "removed_candidate_ids": [],
+                }
+            ),
+            "_event_ids": event_ids,
+            "_effective_selected_ids": effective_ids,
+        }
+    finally:
+        audit.close()
+        source.close()
+
+
+def _validate_chronological_history(runs: list[dict[str, Any]]) -> None:
+    """Prove each editor consumed earlier effective publication projections."""
+    for audience in audience_insights.AUDIENCES:
+        prior_history: list[dict[str, Any]] = []
+        audience_runs = sorted(
+            (row for row in runs if row["audience"] == audience),
+            key=lambda row: (row["day"], row["source_run_id"]),
+        )
+        for row in audience_runs:
+            source_path = Path(str(row["source_run_db"]))
+            source = _open_readonly(source_path)
+            try:
+                editor = source.execute(
+                    "SELECT prior_selected_json, history_sha256 "
+                    "FROM editor_run WHERE singleton = 1"
+                ).fetchone()
+                if editor is None:
+                    raise ProductionReconciliationError(
+                        f"source editor is missing: {source_path}"
+                    )
+                expected_json = _canonical_json(prior_history)
+                expected_sha256 = _sha256(expected_json)
+                if (
+                    str(editor["prior_selected_json"]) != expected_json
+                    or str(editor["history_sha256"]) != expected_sha256
+                ):
+                    raise ProductionReconciliationError(
+                        "editor history does not match earlier manifest runs' "
+                        f"effective selections: {source_path}"
+                    )
+                row["history"] = {
+                    "status": "validated",
+                    "prior_item_count": len(prior_history),
+                    "prior_history_sha256": expected_sha256,
+                }
+                prior_history.extend(
+                    audience_insight_runs.selected_history_row(
+                        source,
+                        candidate_ids=row["_effective_selected_ids"],
+                    )
+                )
+            finally:
+                source.close()
+
+
+_TELEMETRY_SUM_FIELDS = (
+    "attempts",
+    "recorded_attempts",
+    "telemetry_missing_attempts",
+    "telemetry_surplus_attempts",
+    "input_tokens",
+    "cached_tokens",
+    "cache_write_tokens",
+    "cache_write_tokens_reported_records",
+    "cache_write_tokens_unreported_records",
+    "output_tokens",
+    "cache_eligible_requests",
+    "cache_hit_requests",
+    "proxy_cost_records",
+)
+
+
+def _sum_telemetry(reports: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+    rows = list(reports)
+    result = {
+        field: sum(int(row[field]) for row in rows)
+        for field in _TELEMETRY_SUM_FIELDS
+    }
+    input_tokens = result["input_tokens"]
+    eligible = result["cache_eligible_requests"]
+    result["cache_hit_request_ratio"] = (
+        round(result["cache_hit_requests"] / eligible, 6) if eligible else 0.0
+    )
+    result["cache_read_ratio"] = (
+        round(result["cached_tokens"] / input_tokens, 6) if input_tokens else 0.0
+    )
+    result["proxy_reported_cost_usd"] = round(
+        sum(float(row["proxy_reported_cost_usd"]) for row in rows), 9
+    )
+    return result
+
+
+def _run_totals(runs: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+    rows = list(runs)
+    count_fields = (
+        "expected_candidates",
+        "candidates",
+        "pending",
+        "complete",
+        "rejected",
+        "failed",
+        "insights",
+        "editor_selected",
+        "base_publication",
+        "effective_publication",
+    )
+    stages = ("extraction", "review", "editor", "day", "audit")
+    telemetry = {
+        stage: _sum_telemetry(row["telemetry"][stage] for row in rows)
+        for stage in stages
+    }
+    return {
+        "run_count": len(rows),
+        "counts": {
+            field: sum(int(row["counts"][field]) for row in rows)
+            for field in count_fields
+        },
+        "telemetry": telemetry,
+        "telemetry_all_stages": _sum_telemetry(telemetry.values()),
+    }
+
+
+def _snapshot_path(raw: Any, *, label: str) -> Path:
+    if not isinstance(raw, str) or not raw.strip():
+        raise ProductionReconciliationError(f"{label} is missing")
+    path = Path(raw)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    path = path.resolve()
+    if not path.is_file():
+        raise ProductionReconciliationError(f"{label} does not exist: {path}")
+    return path
+
+
+def _inspect_x_article_cohort(
+    config: Mapping[str, Any] | None, *, source_event_ids: set[str]
+) -> dict[str, Any]:
+    if config is None:
+        return {
+            "status": "not_bound",
+            "reason": (
+                "manifest did not provide an explicit artifact_db and exact "
+                "artifact_ids; no heuristic X Article cohort was inferred"
+            ),
+            "artifact_db": None,
+            "binding": None,
+            "artifact_count": 0,
+            "terminal_count": 0,
+            "terminal_complete": None,
+            "status_counts": {},
+            "provider_request_count": 0,
+            "estimated_provider_credits": 0,
+            "items": [],
+        }
+    path = Path(str(config["artifact_db"]))
+    conn = _open_readonly(path)
+    try:
+        placeholders = ",".join("?" for _ in source_event_ids)
+        derived_ids = {
+            str(row[0])
+            for row in conn.execute(
+                f"""SELECT DISTINCT artifact.artifact_id
+                    FROM artifact_import_candidate AS candidate
+                    JOIN artifact USING (artifact_id)
+                    WHERE candidate.event_id IN ({placeholders})
+                      AND candidate.decision = 'accepted'
+                      AND lower(artifact.canonical_url) LIKE '%/i/article/%'""",
+                tuple(sorted(source_event_ids)),
+            ).fetchall()
+        }
+        configured_ids = set(config["artifact_ids"])
+        if configured_ids != derived_ids:
+            raise ProductionReconciliationError(
+                "manifest X Article cohort does not match the exact union derived "
+                f"from declared run events; missing={sorted(derived_ids - configured_ids)}, "
+                f"extra={sorted(configured_ids - derived_ids)}"
+            )
+        items = []
+        for artifact_id in config["artifact_ids"]:
+            artifact = conn.execute(
+                "SELECT artifact_id, canonical_url FROM artifact WHERE artifact_id = ?",
+                (artifact_id,),
+            ).fetchone()
+            if artifact is None:
+                raise ProductionReconciliationError(
+                    f"manifest X Article is not catalogued: {artifact_id}"
+                )
+            canonical_url = str(artifact["canonical_url"])
+            if "/i/article/" not in canonical_url.lower():
+                raise ProductionReconciliationError(
+                    f"manifest artifact is not an X Article: {artifact_id}"
+                )
+            attempts = conn.execute(
+                """SELECT fetch_id, status, attempt_number, raw_sha256,
+                          raw_snapshot_ref, text_sha256, text_snapshot_ref,
+                          error_code, error_message
+                   FROM artifact_fetch
+                   WHERE artifact_id = ? AND fetch_policy = ?
+                   ORDER BY attempt_number, fetch_id""",
+                (artifact_id, artifact_x_articles.FETCH_POLICY),
+            ).fetchall()
+            statuses = [str(row["status"]) for row in attempts]
+            if "success" in statuses:
+                effective_status = "success"
+                effective_fetch = [
+                    row for row in attempts if str(row["status"]) == "success"
+                ][-1]
+            elif "failed_terminal" in statuses:
+                effective_status = "failed_terminal"
+                effective_fetch = [
+                    row
+                    for row in attempts
+                    if str(row["status"]) == "failed_terminal"
+                ][-1]
+            elif statuses:
+                effective_status = statuses[-1]
+                effective_fetch = attempts[-1]
+            else:
+                effective_status = "missing"
+                effective_fetch = None
+            provider_row = (
+                conn.execute(
+                    "SELECT * FROM artifact_x_article_fetch WHERE fetch_id = ?",
+                    (effective_fetch["fetch_id"],),
+                ).fetchone()
+                if effective_fetch is not None
+                else None
+            )
+            raw_sha256 = None
+            text_sha256 = None
+            terminal_error_code = None
+            if effective_status == "success":
+                if provider_row is None or int(provider_row["request_made"]) != 1:
+                    raise ProductionReconciliationError(
+                        f"successful X Article lacks provider request proof: {artifact_id}"
+                    )
+                raw_sha256 = str(effective_fetch["raw_sha256"] or "")
+                text_sha256 = str(effective_fetch["text_sha256"] or "")
+                if (
+                    _ARTIFACT_ID.fullmatch(raw_sha256) is None
+                    or _ARTIFACT_ID.fullmatch(text_sha256) is None
+                ):
+                    raise ProductionReconciliationError(
+                        f"successful X Article lacks raw/text hashes: {artifact_id}"
+                    )
+                raw_snapshot = _snapshot_path(
+                    effective_fetch["raw_snapshot_ref"],
+                    label=f"X Article {artifact_id} raw snapshot",
+                )
+                text_snapshot = _snapshot_path(
+                    effective_fetch["text_snapshot_ref"],
+                    label=f"X Article {artifact_id} text snapshot",
+                )
+                if (
+                    _file_sha256(raw_snapshot) != raw_sha256
+                    or _file_sha256(text_snapshot) != text_sha256
+                ):
+                    raise ProductionReconciliationError(
+                        f"X Article snapshot hash drift: {artifact_id}"
+                    )
+            elif effective_status == "failed_terminal":
+                if provider_row is None:
+                    raise ProductionReconciliationError(
+                        f"terminal X Article lacks provider attempt proof: {artifact_id}"
+                    )
+                terminal_error_code = str(effective_fetch["error_code"] or "")
+                error_message = str(effective_fetch["error_message"] or "")
+                if not terminal_error_code or not error_message:
+                    raise ProductionReconciliationError(
+                        f"terminal X Article lacks explicit error metadata: {artifact_id}"
+                    )
+            provider = conn.execute(
+                """SELECT COUNT(*) AS requests,
+                          COALESCE(SUM(estimated_provider_credits), 0) AS credits
+                   FROM artifact_x_article_fetch
+                   WHERE artifact_id = ? AND request_made = 1""",
+                (artifact_id,),
+            ).fetchone()
+            items.append(
+                {
+                    "artifact_id": artifact_id,
+                    "canonical_url": canonical_url,
+                    "status": effective_status,
+                    "attempt_count": len(attempts),
+                    "provider_request_count": int(provider["requests"] or 0),
+                    "estimated_provider_credits": int(provider["credits"] or 0),
+                    "raw_sha256": raw_sha256,
+                    "text_sha256": text_sha256,
+                    "terminal_error_code": terminal_error_code,
+                }
+            )
+        status_counts: dict[str, int] = {}
+        for item in items:
+            status_counts[item["status"]] = status_counts.get(item["status"], 0) + 1
+        terminal = sum(
+            item["status"] in {"success", "failed_terminal"} for item in items
+        )
+        return {
+            "status": "validated",
+            "reason": None,
+            "artifact_db": str(path),
+            "binding": {
+                "source_event_count": len(source_event_ids),
+                "derived_artifact_count": len(derived_ids),
+                "artifact_ids_sha256": _sha256(
+                    _canonical_json(sorted(derived_ids))
+                ),
+            },
+            "artifact_count": len(items),
+            "terminal_count": terminal,
+            "terminal_complete": terminal == len(items),
+            "status_counts": dict(sorted(status_counts.items())),
+            "provider_request_count": sum(
+                item["provider_request_count"] for item in items
+            ),
+            "estimated_provider_credits": sum(
+                item["estimated_provider_credits"] for item in items
+            ),
+            "items": items,
+        }
+    finally:
+        conn.close()
+
+
+def evaluate_manifest(path: Path | str) -> dict[str, Any]:
+    """Validate every frozen input and return a deterministic report."""
+    manifest, manifest_sha256 = load_manifest(path)
+    runs = [
+        _inspect_run(
+            entry,
+            expected_contract=manifest["expected_contracts"][entry["audience"]],
+        )
+        for entry in manifest["runs"]
+    ]
+    runs.sort(key=lambda row: (row["day"], row["audience"], row["source_run_id"]))
+    _validate_chronological_history(runs)
+    source_event_ids = {
+        event_id for row in runs for event_id in row["_event_ids"]
+    }
+    x_articles = _inspect_x_article_cohort(
+        manifest["x_article_cohort"], source_event_ids=source_event_ids
+    )
+    for row in runs:
+        del row["_event_ids"]
+        del row["_effective_selected_ids"]
+    totals = _run_totals(runs)
+    by_audience = {
+        audience: _run_totals(
+            row for row in runs if row["audience"] == audience
+        )
+        for audience in audience_insights.AUDIENCES
+    }
+    x_article_requirement_satisfied = bool(x_articles["terminal_complete"])
+    if manifest["mode"] == "partial" and x_articles["status"] == "not_bound":
+        x_article_requirement_satisfied = True
+    checks = {
+        "all_manifest_runs_validated": True,
+        "mode_scope_validated": True,
+        "x_article_cohort_requirement_satisfied": x_article_requirement_satisfied,
+    }
+    return {
+        "schema_version": REPORT_SCHEMA_VERSION,
+        "reconciliation_version": RECONCILIATION_VERSION,
+        "reconciliation_id": manifest["reconciliation_id"],
+        "mode": manifest["mode"],
+        "manifest_sha256": manifest_sha256,
+        "expected_contracts": manifest["expected_contracts"],
+        "expected_audience_days": manifest["expected_audience_days"],
+        "runs": runs,
+        "totals": {"all": totals, "by_audience": by_audience},
+        "x_article_cohort": x_articles,
+        "checks": checks,
+        "passed": all(checks.values()),
+    }
+
+
+def write_report(report: Mapping[str, Any], path: Path | str) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(_canonical_json(report) + "\n")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="fli audience-insight-production-reconciliation"
+    )
+    parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args(argv)
+    command = "audience-insight-production-reconciliation.evaluate"
+    try:
+        report = evaluate_manifest(args.manifest)
+        write_report(report, args.output)
+    except (
+        FileNotFoundError,
+        json.JSONDecodeError,
+        ProductionReconciliationError,
+        sqlite3.Error,
+        TypeError,
+        ValueError,
+    ) as exc:
+        print(
+            _canonical_json(
+                {
+                    "schema_version": "1.0",
+                    "command": command,
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": "E_INVALID_INPUT", "message": str(exc)},
+                }
+            )
+        )
+        return 2
+    print(
+        _canonical_json(
+            {
+                "schema_version": "1.0",
+                "command": command,
+                "status": "ok",
+                "data": {
+                    "output": str(args.output.resolve()),
+                    "passed": report["passed"],
+                    "run_count": len(report["runs"]),
+                },
+                "error": None,
+            }
+        )
+    )
+    return 0 if report["passed"] else 4
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

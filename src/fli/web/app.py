@@ -23,12 +23,14 @@ from contextlib import asynccontextmanager
 from datetime import date as calendar_date
 from pathlib import Path
 from threading import Thread
+from typing import Literal
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from fli import channels, registry as entity_registry
+from fli import channels, entity_kinds, registry as entity_registry, registry_intake, sources
 from fli.web import artifact_library as artifact_store
 from fli.web import events as event_store, feed as feed_store, rankings as rankings_store
 from fli.web import insights as insight_store
@@ -50,6 +52,12 @@ async def _lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Frontier Lab Intelligence", lifespan=_lifespan)
+
+
+class RegistryIntakeRequest(BaseModel):
+    profile: str = Field(min_length=1, max_length=500)
+    mode: Literal["screen", "direct"]
+    reason: str | None = Field(default=None, max_length=500)
 
 
 def _model_conn():
@@ -319,6 +327,45 @@ def registry_entity(entity_id: int) -> JSONResponse:
         conn.close()
 
 
+@app.post("/api/registry/intake")
+def registry_profile_intake(request: RegistryIntakeRequest) -> JSONResponse:
+    """Screen or directly admit one X profile from the operator UI."""
+    conn = _model_conn()
+    try:
+        try:
+            result = registry_intake.run_intake(
+                conn,
+                profile=request.profile,
+                mode=request.mode,
+                reason=request.reason,
+                llm_client=entity_kinds.create_litellm_client,
+                post_client=sources.create_twitterapi_io_client,
+            )
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+        except sources.SourceCliError as error:
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "code": error.code,
+                    "message": error.message,
+                    "hint": error.hint,
+                    "retryable": error.retryable,
+                },
+            ) from error
+        entity = None
+        if result["entity_id"] is not None:
+            entities = entity_registry.read_entities(
+                conn, limit=1, entity_id=int(result["entity_id"])
+            )
+            if entities:
+                _add_registry_ranks(conn, entities)
+                entity = entities[0]
+        return JSONResponse({**result, "entity": entity})
+    finally:
+        conn.close()
+
+
 @app.get("/api/rankings")
 def rankings(
     limit: int = Query(160, ge=1, le=2000),
@@ -424,19 +471,23 @@ def artifact_dates() -> JSONResponse:
 
 
 @app.get("/api/insights/dates")
-def insight_dates() -> JSONResponse:
-    """Materialized cited-insight days and verified insight counts."""
-    return JSONResponse(insight_store.insight_dates_payload())
+def insight_dates(
+    audience: Literal["investment", "ai_engineering"] = "investment",
+) -> JSONResponse:
+    """Complete daily selected-set counts for one insight audience."""
+    return JSONResponse(insight_store.insight_dates_payload(audience=audience))
 
 
 @app.get("/api/insights")
 def insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
+    audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
-    """Publishable insights whose citation spans were verified in application code."""
+    """Editor-selected insights with mechanically bound source quotations."""
     return JSONResponse(
         insight_store.insights_payload(
-            day=insight_date.isoformat() if insight_date else None
+            audience=audience,
+            day=insight_date.isoformat() if insight_date else None,
         )
     )
 

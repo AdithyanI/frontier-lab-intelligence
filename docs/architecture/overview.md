@@ -60,6 +60,21 @@ evidence is insufficient; a response with no search is valid. The model output
 does not mutate canonical state. Search actions and sources remain operational
 metadata outside the four-field decision schema.
 
+Manual candidate intake is the application-owned mutation path over that
+boundary. `POST /api/registry/intake` and the inline Registry control accept an
+X profile in `screen` or `direct` mode. `screen` materializes current profile
+evidence, applies the follower/protected-account gates, runs the combined v3
+evaluator over up to 20 authored posts, and maps `keep` to active state while
+mapping `remove | review` to a reason-bearing rejection. `direct` bypasses the
+relevance and follower decisions but still fetches the source, runs the
+canonical structural-kind lifecycle, requires a human reason, and preserves
+the protected-account collection gate. Existing active handles return before
+provider or model client construction. Every accepted, rejected, existing, or
+failed attempt is recorded in `entity_registry_intake_audit`, including model
+telemetry when a call occurs. The demo does not add feature-specific
+authentication; the write route will inherit the planned whole-site access
+boundary.
+
 `fli.identity_contexts` supplies the missing-bio stage. It runs required hosted
 web research against the exact X identity, stores current role, organization,
 durable contributions, relevance summary, consulted sources, usage, and cost
@@ -283,6 +298,43 @@ substring is retained as a failed calibration row and never reaches the
 read-only `/api/insights` projection. The first proof published four verified
 insights from five candidates; its one rejected citation, usage, prompt-cache
 reads, proxy cost, and raw output remain auditable in the run database.
+
+Audience Insights v2 replaces the compromise audience framing with two
+independent products over the same frozen evidence and application-owned
+citation binder. `fli.audience_insight_runs` gives Investment and AI
+Engineering separate extraction prompts, schemas, run databases, cache
+namespaces, pre-editor item filters, daily editors, and day-set gates. The
+editor can select only runner-owned IDs that passed every item-review
+dimension; it cannot rewrite a claim or citation. Feed rank chooses a bounded
+candidate cohort but is absent from extraction, review, and editorial inputs.
+
+`fli.audience_insight_publication_audit` is a second, isolated calibration
+boundary so the pre-editor filter is not reused as proof of its own quality. A
+separate SQLite audit freezes every published selection and a deterministic
+small sample of the highest-Feed-ranked filter rejects. Its Luna-high prompt,
+strict schema, cache namespace, request tags, attempts, and telemetry are
+independent. The auditor sees sanitized evidence and item content under an
+opaque ID, never rank, selection state, prior judgments/rationale, or editor
+metadata. It reports zero-tolerance citation/attribution failures, the 80%
+selected usefulness/actionability/specificity threshold, and false-negative
+reject counts. Duplicate and padding judgments remain exclusively in the
+separate day-set gate.
+
+A failed selected-item audit never rewrites the source run or audit. The only
+supported correction is an adjacent immutable publication-finalization sidecar
+whose hashes bind the complete source selection/review chain and exact audit
+result; every read revalidates those bindings before projecting the disqualified
+base selection to an effective empty set. `fli.audience_insight_production_reconciliation`
+then provides the production closeout boundary. Its strict explicit manifest
+names every required audience/day, exact source database, adjacent audit,
+expected base selection count, optional finalization, and—when available—the
+exact X Article artifact cohort. It discovers no runs by recency or directory
+scan, opens all SQLite inputs read-only, fails closed on missing or duplicate
+cells, immutable-contract drift, unresolved false negatives, incomplete stage
+state, or nonterminal bound Articles, and emits deterministic per-run and
+aggregate count, token, cache, cost, audit-hash, and finalization-hash evidence.
+An Article cohort not explicitly bound is reported as unbound rather than
+silently inferred.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL

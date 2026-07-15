@@ -1428,12 +1428,21 @@ def inspect_fetches(conn: Any, *, fetch_run_id: str | None = None) -> list[dict[
                    fetch.http_status, fetch.final_url,
                    fetch.content_type, fetch.text_char_count,
                    fetch.error_code, fetch.error_message,
-                   fetch.raw_snapshot_ref, fetch.text_snapshot_ref
+                   fetch.raw_snapshot_ref, fetch.text_snapshot_ref,
+                   x_article.request_post_id,
+                   x_article.canonical_article_id,
+                   x_article.canonical_article_url,
+                   x_article.provider_status,
+                   x_article.estimated_provider_credits,
+                   x_article.content_block_count,
+                   x_article.content_blocks_sha256
             FROM artifact_fetch fetch
             JOIN artifact_fetch_run_item item
               ON item.fetch_run_id = fetch.fetch_run_id
              AND item.artifact_id = fetch.artifact_id
             JOIN artifact ON artifact.artifact_id = fetch.artifact_id
+            LEFT JOIN artifact_x_article_fetch x_article
+              ON x_article.fetch_id = fetch.fetch_id
             {where}
             ORDER BY fetch.started_at DESC, item.selection_rank,
                      fetch.attempt_number DESC""",

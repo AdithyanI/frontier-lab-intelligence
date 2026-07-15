@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import test from 'node:test'
+
+const architecture = readFileSync(new URL('../src/pages/Architecture.tsx', import.meta.url), 'utf8')
+
+test('Architecture maps one evidence core into two independently audited audience views', () => {
+  assert.match(architecture, /Citation-bound insight engine/)
+  assert.match(architecture, />INVESTMENT</)
+  assert.match(architecture, />AI ENGINEERING</)
+  assert.equal((architecture.match(/INDEPENDENT AUDIT/g) ?? []).length, 2)
+  assert.equal((architecture.match(/SEPARATE VIEW/g) ?? []).length, 2)
+  assert.match(architecture, /Audience prompts, judgment, audits, and published views do not/)
+})
+
+test('Architecture does not publish stale proof counts or describe audience delivery as future', () => {
+  assert.doesNotMatch(architecture, /4 verified insights/)
+  assert.doesNotMatch(architecture, /Investor \+ engineer delivery/)
+  assert.doesNotMatch(architecture, /Delivery is planned next/)
+})

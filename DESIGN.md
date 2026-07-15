@@ -131,6 +131,14 @@ Rules:
   an em dash and sort last. Rejected remains a reason-bearing review view.
   Internal source seeds such as the curated `labs` table do not create public
   kinds, badges, or filters.
+- **Registry profile intake:** one `Add profile` action belongs in the Registry
+  heading, not in the Network subview tabs. It expands a full-width inline
+  operator panel with a single X URL field and two plain admission paths:
+  `Screen normally` and `Add directly`. Direct admission reveals one required
+  reason field. Keep the collection limitation visible, make long-running
+  evaluation state explicit, and return the existing/active/rejected reason in
+  place. Do not introduce a feature-specific password control; whole-site
+  access owns authentication when enabled.
 - **Entity detail card:** native `<dialog>` opened on row click — type pill,
   name, observed bio, and a flat platform matrix that groups every channel by
   X, website, GitHub, or blog. Multiple X accounts are equal links on

@@ -1,0 +1,243 @@
+{
+  "expected_audience_days": {
+    "ai_engineering": [
+      "2026-07-05",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-08",
+      "2026-07-09",
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13"
+    ],
+    "investment": [
+      "2026-07-05",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-08",
+      "2026-07-09",
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13"
+    ]
+  },
+  "expected_contracts": {
+    "ai_engineering": {
+      "day_review": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "799af1fbcae028e588ab8c35f9aecd007590870ae41a040a3f470ca06c00016f",
+        "prompt_version": "audience-insight-day-set-review-v2.4",
+        "reasoning_effort": "high",
+        "schema_version": "audience-insight-day-set-review-output-v2"
+      },
+      "editor": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "af68795dc0862eeb672b1feb8efd7052217d84e5572bef5841a76360a4c34ef7",
+        "prompt_version": "ai-engineering-daily-editor-v2.4",
+        "reasoning_effort": "high",
+        "schema_version": "audience-daily-editor-output-v2"
+      },
+      "extraction": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "8f70df97ace2b14c70cbf839eab14aea3797f1bc53a3c1bd35ceabcecfb47be5",
+        "prompt_version": "ai-engineering-insight-v2.2",
+        "reasoning_effort": "medium",
+        "schema_version": "ai-engineering-insight-output-v2"
+      },
+      "item_review": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "d9757959321cbf362aa9cdddff77dc4738f1310ca247ee37459871dc85251594",
+        "prompt_version": "audience-insight-item-review-v2.4",
+        "reasoning_effort": "high",
+        "schema_version": "audience-insight-item-review-output-v2"
+      }
+    },
+    "investment": {
+      "day_review": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "799af1fbcae028e588ab8c35f9aecd007590870ae41a040a3f470ca06c00016f",
+        "prompt_version": "audience-insight-day-set-review-v2.4",
+        "reasoning_effort": "high",
+        "schema_version": "audience-insight-day-set-review-output-v2"
+      },
+      "editor": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "906307b22abb127166ef9448a5e12d821b0fa43817f80ab752b7f1b92bf71d24",
+        "prompt_version": "investment-daily-editor-v2.1",
+        "reasoning_effort": "high",
+        "schema_version": "audience-daily-editor-output-v2"
+      },
+      "extraction": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "ccb8c8d464562787ba1a0af749db81c7d30acc4b13095eca407694d0c04d2e1e",
+        "prompt_version": "investment-insight-v2.2",
+        "reasoning_effort": "high",
+        "schema_version": "investment-insight-output-v2"
+      },
+      "item_review": {
+        "model": "gpt-5.6-luna",
+        "prompt_sha256": "b5b1f45e86109aae8681d60c8facba1b9b95c2fc0605e7dff80d7b46efc79264",
+        "prompt_version": "audience-insight-item-review-v2.3",
+        "reasoning_effort": "high",
+        "schema_version": "audience-insight-item-review-output-v2"
+      }
+    }
+  },
+  "mode": "final",
+  "reconciliation_id": "audience-insights-v2-final-2026-07-05-through-2026-07-13",
+  "runs": [
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-05/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-05",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-05/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-05/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-05",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-05/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-06/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-06",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-06/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-06/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-06",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-06/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-07/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-07",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-07/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-07/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-07",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-07/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-08/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-08",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-08/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-08/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-08",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-08/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-09/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-09",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-09/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-09/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-09",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-09/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-10/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-10",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-10/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-10/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-10",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-10/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-11/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-11",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-11/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-11/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-11",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-11/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-12/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-12",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-12/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-12/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-12",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-12/investment/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-13/ai_engineering/RUN/publication-audit-v1/audit.db",
+      "audience": "ai_engineering",
+      "day": "2026-07-13",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-13/ai_engineering/RUN/insights.db"
+    },
+    {
+      "audit_db": "../../../../data/derived/audience-insights-v2/2026-07-13/investment/RUN/publication-audit-v1/audit.db",
+      "audience": "investment",
+      "day": "2026-07-13",
+      "expected_selected_count": 0,
+      "finalization_path": null,
+      "source_run_db": "../../../../data/derived/audience-insights-v2/2026-07-13/investment/RUN/insights.db"
+    }
+  ],
+  "schema_version": "audience-insight-production-reconciliation-manifest-v2",
+  "x_article_cohort": {
+    "artifact_db": "../../../../data/derived/artifacts/artifacts.db",
+    "artifact_ids": [
+      "0000000000000000000000000000000000000000000000000000000000000000"
+    ]
+  }
+}

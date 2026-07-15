@@ -262,6 +262,33 @@ CREATE INDEX IF NOT EXISTS idx_artifact_fetch_run
 CREATE UNIQUE INDEX IF NOT EXISTS idx_artifact_fetch_success
     ON artifact_fetch(artifact_id, fetch_policy, requested_url)
     WHERE status = 'success';
+
+CREATE TABLE IF NOT EXISTS artifact_x_article_fetch (
+    fetch_id TEXT PRIMARY KEY REFERENCES artifact_fetch(fetch_id)
+        ON DELETE CASCADE,
+    artifact_id TEXT NOT NULL REFERENCES artifact(artifact_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    provider TEXT NOT NULL CHECK (provider = 'twitterapi_io'),
+    endpoint TEXT NOT NULL,
+    request_post_id TEXT,
+    canonical_article_id TEXT NOT NULL,
+    canonical_article_url TEXT NOT NULL,
+    request_made INTEGER NOT NULL CHECK (request_made IN (0, 1)),
+    estimated_provider_credits INTEGER NOT NULL CHECK (
+        estimated_provider_credits >= 0
+    ),
+    provider_status TEXT,
+    provider_message TEXT,
+    response_fetched_at TEXT,
+    content_block_count INTEGER CHECK (content_block_count >= 0),
+    content_blocks_json TEXT,
+    content_blocks_sha256 TEXT,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_artifact_x_article_artifact
+    ON artifact_x_article_fetch(artifact_id, fetch_id);
+CREATE INDEX IF NOT EXISTS idx_artifact_x_article_post
+    ON artifact_x_article_fetch(request_post_id, fetch_id);
 """
 
 
@@ -1055,6 +1082,10 @@ def converge_artifact(
                 (item["fetch_run_id"], source_artifact_id),
             )
     conn.execute(
+        "UPDATE artifact_x_article_fetch SET artifact_id = ? WHERE artifact_id = ?",
+        (target_id, source_artifact_id),
+    )
+    conn.execute(
         "UPDATE artifact_fetch SET artifact_id = ? WHERE artifact_id = ?",
         (target_id, source_artifact_id),
     )
@@ -1087,6 +1118,18 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
         "fetch_runs": int(conn.execute("SELECT COUNT(*) FROM artifact_fetch_run").fetchone()[0]),
         "fetch_attempts": int(
             conn.execute("SELECT COUNT(*) FROM artifact_fetch").fetchone()[0]
+        ),
+        "x_article_provider_requests": int(
+            conn.execute(
+                """SELECT COUNT(*) FROM artifact_x_article_fetch
+                   WHERE request_made = 1"""
+            ).fetchone()[0]
+        ),
+        "x_article_estimated_provider_credits": int(
+            conn.execute(
+                """SELECT COALESCE(SUM(estimated_provider_credits), 0)
+                   FROM artifact_x_article_fetch"""
+            ).fetchone()[0]
         ),
     }
     decisions = {
@@ -1235,6 +1278,26 @@ def main(argv: list[str] | None = None) -> int:
     )
     reader_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     _add_output_arguments(reader_parser)
+    x_article_parser = sub.add_parser(
+        "fetch-x-articles",
+        help="Fetch X Article bodies through the dedicated provider adapter.",
+    )
+    x_article_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    x_article_parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Fetch the first N catalogued X Articles (default: 20).",
+    )
+    x_article_parser.add_argument(
+        "--artifact-id",
+        action="append",
+        help=(
+            "Fetch exactly this catalog artifact ID; repeat for a frozen cohort "
+            "(cannot be combined with --limit)."
+        ),
+    )
+    _add_output_arguments(x_article_parser)
     fetch_inspect_parser = sub.add_parser(
         "inspect-fetches", help="Inspect artifact fetch outcomes."
     )
@@ -1245,7 +1308,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         args = parser.parse_args(argv)
         command = f"artifacts.{args.action}"
-        if getattr(args, "limit", 1) <= 0:
+        parsed_limit = getattr(args, "limit", None)
+        if parsed_limit is not None and parsed_limit <= 0:
             raise ValueError("limit must be greater than zero")
         if args.action == "import-kept":
             data = import_kept_envelopes(
@@ -1262,6 +1326,18 @@ def main(argv: list[str] | None = None) -> int:
             from fli import artifact_fetch
 
             data = artifact_fetch.recover_with_jina_reader(db_path=args.db)
+        elif args.action == "fetch-x-articles":
+            from fli import artifact_x_articles
+
+            data = artifact_x_articles.fetch_x_articles(
+                db_path=args.db,
+                limit=(
+                    args.limit
+                    if args.limit is not None
+                    else (None if args.artifact_id is not None else 20)
+                ),
+                artifact_ids=args.artifact_id,
+            )
         elif args.action == "inspect-fetches":
             from fli import artifact_fetch
 

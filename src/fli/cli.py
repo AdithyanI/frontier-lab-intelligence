@@ -70,6 +70,40 @@ def main(argv: list[str] | None = None) -> int:
         "cited-insights", help="Extract application-verified cited insights."
     )
     cited_insights_p.add_argument("insight_args", nargs=argparse.REMAINDER)
+    audience_insights_p = sub.add_parser(
+        "audience-insights",
+        help="Build independent Investment or AI Engineering daily insights.",
+    )
+    audience_insights_p.add_argument(
+        "audience_insight_args", nargs=argparse.REMAINDER
+    )
+    audience_insight_audit_p = sub.add_parser(
+        "audience-insight-audit",
+        help="Independently audit published audience insights and sampled rejects.",
+    )
+    audience_insight_audit_p.add_argument(
+        "audience_insight_audit_args", nargs=argparse.REMAINDER
+    )
+    audience_insight_combined_gate_p = sub.add_parser(
+        "audience-insight-combined-gate",
+        help="Evaluate frozen multi-day audience runs and publication audits.",
+    )
+    audience_insight_combined_gate_p.add_argument(
+        "--manifest", required=True, help="Frozen audience evaluation manifest."
+    )
+    audience_insight_combined_gate_p.add_argument(
+        "--output", required=True, help="Deterministic gate report path."
+    )
+    audience_insight_reconciliation_p = sub.add_parser(
+        "audience-insight-production-reconciliation",
+        help="Reconcile exact frozen production audience runs read-only.",
+    )
+    audience_insight_reconciliation_p.add_argument(
+        "--manifest", required=True, help="Explicit production run manifest."
+    )
+    audience_insight_reconciliation_p.add_argument(
+        "--output", required=True, help="Deterministic reconciliation report path."
+    )
     x_daily_collection_p = sub.add_parser(
         "x-daily-collection",
         help="Plan or resume date-complete Registry X collection.",
@@ -177,6 +211,32 @@ def main(argv: list[str] | None = None) -> int:
         from fli import cited_insight_runs
 
         return cited_insight_runs.main(args.insight_args)
+
+    if args.command == "audience-insights":
+        from fli import audience_insight_runs
+
+        return audience_insight_runs.main(args.audience_insight_args)
+
+    if args.command == "audience-insight-audit":
+        from fli import audience_insight_publication_audit
+
+        return audience_insight_publication_audit.main(
+            args.audience_insight_audit_args
+        )
+
+    if args.command == "audience-insight-combined-gate":
+        from fli import audience_insight_combined_gate
+
+        return audience_insight_combined_gate.main(
+            ["--manifest", args.manifest, "--output", args.output]
+        )
+
+    if args.command == "audience-insight-production-reconciliation":
+        from fli import audience_insight_production_reconciliation
+
+        return audience_insight_production_reconciliation.main(
+            ["--manifest", args.manifest, "--output", args.output]
+        )
 
     if args.command == "x-daily-collection":
         from fli import x_daily_collection

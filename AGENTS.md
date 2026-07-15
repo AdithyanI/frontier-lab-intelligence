@@ -74,9 +74,10 @@ does not improve rubric coverage, demo proof, or interview discussion. See
 - To see UI changes: `npm --prefix frontend run build` (writes into
   `src/fli/web/dist`, which the always-on server hosts), then reload
   `127.0.0.1:8797`.
-- Use the in-app Browser skill for UI inspection and screenshots, not ad-hoc
-  Puppeteer scripts. Put disposable captures in `tmp/`; presentation assets
-  explicitly requested for reuse belong under `docs/references/`.
+- Use `$agent-browser` for UI inspection and screenshots. Use the in-app
+  Browser only when Adi explicitly asks to control that side-by-side surface.
+  Put disposable captures in `tmp/`; presentation assets explicitly requested
+  for reuse belong under `docs/references/`.
 - **Desktop-first for now:** design and polish the desktop view; do not spend
   effort on mobile/responsive polish unless Adi asks. (Decision 2026-07-09.)
 

@@ -34,6 +34,34 @@ CREATE TABLE IF NOT EXISTS entity_registry_rejections (
     rejected_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS entity_registry_intake_audit (
+    id INTEGER PRIMARY KEY,
+    entity_id INTEGER REFERENCES entities (id) ON DELETE SET NULL,
+    handle TEXT NOT NULL,
+    profile_url TEXT NOT NULL,
+    mode TEXT NOT NULL CHECK (mode IN ('screen', 'direct')),
+    override_reason TEXT,
+    status TEXT NOT NULL CHECK (status IN ('running', 'completed', 'failed')),
+    outcome TEXT,
+    registry_decision TEXT,
+    registry_decision_reason TEXT,
+    kind TEXT,
+    kind_reason TEXT,
+    model TEXT,
+    reasoning_effort TEXT,
+    prompt_version TEXT,
+    response_id TEXT,
+    input_tokens INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
+    reported_cost_usd REAL,
+    error_code TEXT,
+    error_message TEXT,
+    requested_at TEXT NOT NULL,
+    completed_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_entity_registry_intake_entity
+ON entity_registry_intake_audit (entity_id, requested_at DESC, id DESC);
+
 CREATE TABLE IF NOT EXISTS entity_merge_audit (
     id INTEGER PRIMARY KEY,
     canonical_entity_id INTEGER NOT NULL REFERENCES entities (id),
@@ -111,6 +139,7 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     if conn.in_transaction:
         required = {
             "entity_registry_rejections",
+            "entity_registry_intake_audit",
             "entity_merge_audit",
             "entity_override_audit",
         }
@@ -1541,6 +1570,12 @@ def read_entities(
                WHERE type = 'table' AND name = 'entity_override_audit'"""
         ).fetchone()
     )
+    has_intake_audit = bool(
+        conn.execute(
+            """SELECT 1 FROM sqlite_master
+               WHERE type = 'table' AND name = 'entity_registry_intake_audit'"""
+        ).fetchone()
+    )
     override_reason_sql = (
         """(SELECT o.reason FROM entity_override_audit o
              WHERE o.entity_id = e.id
@@ -1551,14 +1586,28 @@ def read_entities(
         if has_overrides
         else "NULL"
     )
-    kind_reason_sql = (
-        f"""COALESCE({override_reason_sql},
-             (SELECT k.reason FROM entity_kind_classifications k
+    intake_reason_sql = (
+        """(SELECT intake.kind_reason FROM entity_registry_intake_audit intake
+             WHERE intake.entity_id = e.id
+               AND intake.status = 'completed'
+               AND intake.kind = e.kind
+               AND intake.kind_reason IS NOT NULL
+             ORDER BY intake.requested_at DESC, intake.id DESC
+             LIMIT 1)"""
+        if has_intake_audit
+        else "NULL"
+    )
+    classification_reason_sql = (
+        """(SELECT k.reason FROM entity_kind_classifications k
              WHERE k.entity_id = e.id AND k.classification = e.kind
              ORDER BY k.classified_at DESC, k.run_id DESC
-             LIMIT 1))"""
+             LIMIT 1)"""
         if has_classifications
-        else override_reason_sql
+        else "NULL"
+    )
+    kind_reason_sql = (
+        f"COALESCE({override_reason_sql}, {intake_reason_sql}, "
+        f"{classification_reason_sql})"
     )
     if limit < 1:
         raise ValueError("limit must be at least 1")

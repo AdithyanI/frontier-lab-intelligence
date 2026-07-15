@@ -71,6 +71,20 @@ export interface Registry {
   direction: 'asc' | 'desc'
 }
 
+export interface RegistryIntakeResult {
+  audit_id: number
+  handle: string
+  mode: 'screen' | 'direct'
+  outcome: 'existing' | 'active' | 'rejected'
+  entity_id: number | null
+  registry_decision: 'existing' | 'keep' | 'remove' | 'review' | 'manual_keep'
+  decision_reason: string
+  kind: EntityKind | null
+  kind_reason: string | null
+  followers_count: number | null
+  entity: Entity | null
+}
+
 export interface RankingNode {
   rank: number
   cohort_follow_count: number
@@ -397,25 +411,64 @@ export interface InsightCitation {
   source_id: string
   author: string | null
   title: string | null
+  source_sha256: string
+  block_index: number
+  section_ordinal: number | null
+  char_start: number
+  char_end: number
+}
+
+export type InsightAudience = 'investment' | 'ai_engineering'
+
+export type InsightClaimPosture =
+  | 'directly_documented'
+  | 'first_party_report'
+  | 'third_party_observation'
+  | 'opinion_or_forecast'
+
+export interface InvestmentInsightFields {
+  investment_implication: string
+  what_to_watch: string
+}
+
+export type EngineeringActionType =
+  | 'investigate'
+  | 'reproduce'
+  | 'benchmark'
+  | 'prototype'
+  | 'regression_test'
+  | 'monitor'
+
+export interface EngineeringInsightFields {
+  action_type: EngineeringActionType
+  engineering_action: string
+  validation_boundary: string
 }
 
 export interface InsightItem {
+  candidate_id: string
   event_id: string
   day: string
-  current_rank: number
+  editorial_rank: number
+  feed_rank: number
+  decision_value: string
   claim: string
+  claim_posture: InsightClaimPosture
   why_it_matters: string
-  investment_implication: string
-  engineering_implication: string
+  audience_fields: InvestmentInsightFields | EngineeringInsightFields
   citation: InsightCitation
 }
 
 export interface InsightRun {
   run_id: string
   day: string
+  audience: InsightAudience
   prompt_version: string
+  editor_prompt_version: string
   model: string
-  verified_count: number
+  candidate_count: number
+  extracted_count: number
+  selected_count: number
   failed_count: number
   reported_cost_usd: number
   cache_hit_requests: number
@@ -425,6 +478,7 @@ export interface InsightRun {
 export interface InsightsResponse {
   available: boolean
   reason?: string | null
+  audience: InsightAudience
   run: InsightRun | null
   items: InsightItem[]
 }
@@ -432,6 +486,7 @@ export interface InsightsResponse {
 export interface InsightDates {
   available: boolean
   reason?: string | null
+  audience: InsightAudience
   latest_date: string | null
   dates: FeedDate[]
 }
@@ -440,6 +495,30 @@ export async function getJSON<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, init)
   if (!r.ok) throw new Error(`${url} → ${r.status}`)
   return r.json() as Promise<T>
+}
+
+export async function postJSON<T>(
+  url: string,
+  body: unknown,
+): Promise<T> {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as {
+      detail?: string | { message?: string; hint?: string }
+    } | null
+    const detail = payload?.detail
+    const message = typeof detail === 'string'
+      ? detail
+      : [detail?.message, detail?.hint].filter(Boolean).join(' ')
+    throw new Error(message || `Request failed with status ${response.status}.`)
+  }
+  return response.json() as Promise<T>
 }
 
 const jsonCache = new Map<string, unknown>()
