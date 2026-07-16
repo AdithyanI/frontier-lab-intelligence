@@ -150,3 +150,68 @@ instead of converting every frontier claim into a result. No repeatable error
 justifies another prompt hill climb yet. The next useful action is human ranking
 of the ten surfaced Insights, with particular scrutiny of the softer formal-
 proof Investment implication. The remaining catalog stays paused.
+
+## Investment next-step correction
+
+Adi's review of the computer-use Insight exposed one real persona leak in
+Investment v6. Its proposed next step—obtain run logs and execute a controlled
+multi-hour UI benchmark—was a strong AI Engineering action, but not the most
+useful instruction to a BIT portfolio manager or equity analyst.
+
+The correction stayed deliberately narrow. Investment v9 now states that BIT
+is an active technology public-equity investor and requires consequential
+private-lab evidence to be translated into a public-company competitive map,
+business-model exposure, semiconductor or energy value-chain effects, and an
+observable thesis implication. An Investment next step must name a thesis
+assumption, company or business-model exposure, value-chain consequence, or
+investment-relevant observable. It must not assign an engineering experiment
+unless that experiment directly resolves a named investment question. The
+prompt still does not claim knowledge of BIT's live holdings, position sizes,
+valuations, or private internal theses.
+
+Two early-signal rules from the assignment were made explicit after bounded
+controls found that an evidence threshold designed for product launches could
+incorrectly suppress them:
+
+- a specific, attributed strategic thesis may surface before realized adoption
+  when it challenges a concrete procurement, competitive-map, business-model,
+  or value-chain assumption and defines observable validation; and
+- a specific capability observation or reported result may surface before
+  independent replication when its anecdotal or provider-reported status is
+  preserved and it challenges a named capability, cost, reliability, moat, or
+  workflow assumption.
+
+Four fixed controls passed under v9: Sutton's Oak Lab formation, Nadella's
+enterprise-control thesis, Thinking Machines' custom-model strategy, and the
+reported five-hour computer-use run. The computer-use Investment next step now
+tracks independent/provider evidence on long-horizon desktop completion,
+intervention rates, and costly-error rates for multi-application enterprise
+workflows. The Engineering result remains intentionally different: it asks the
+AI team to build and run the repeated workflow evaluation.
+
+### Full bounded replay
+
+Investment v9 was then replayed over all fifteen previously evaluated
+Investment candidates, while the ten AI Engineering v5 decisions remained
+unchanged. Fourteen of fifteen Investment decisions matched v6. The one change
+was a second Thinking Machines strategy envelope that moved from suppressed to
+surfaced because it contains a specific customization thesis. That decision is
+defensible in isolation but redundant beside the stronger financing/product
+envelope; it is an editorial cross-Event deduplication finding, not a reason to
+weaken the per-Event Investment standard or build a reconciliation subsystem
+during this calibration.
+
+The current prompt-qualified store therefore contains twenty-five decisions:
+eleven surfaced and fourteen suppressed. Investment v9 accounts for seven
+surfaced and eight suppressed decisions; AI Engineering v5 accounts for four
+surfaced and six suppressed decisions. Together they used 81,612 input tokens
+and 11,410 output tokens, read 12,544 cached Investment-prefix tokens, and
+recorded $0.346956 in proxy-reported cost.
+
+Qualitatively, the original ten surfaced Insights still form the useful review
+set. The additional Thinking Machines note should be treated as redundant in
+final selection. The strongest Investment improvements are the corrected
+computer-use diligence action, Nadella's procurement/control watchpoint, and
+Sutton's talent-formation signal. No further prompt change is justified before
+human ranking; the next useful step remains selecting the strongest three to
+five Insights for the submission.

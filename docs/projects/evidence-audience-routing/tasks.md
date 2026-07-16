@@ -308,7 +308,8 @@ Application invariants:
 | complete | Calibrate Investment v6 and AI Engineering v5 against BIT's public reader context and the assignment's explicit researcher-formation case; run only a bounded six-Event review set and stop at five surfaced Insights. | parent | `../../references/insight-persona-calibration.md` |
 | complete | Adi reviewed the first five Insights and approved one bounded expansion without a prompt change. | parent | `../../references/insight-persona-calibration.md` |
 | complete | Add exactly five more surfaced Insights from the next top-ranked July 11 and July 10 routes, audit all fifteen new decisions, and stop before catalog scale. | parent | `../../references/insight-persona-calibration.md` |
-| pending | Adi reviews and ranks the ten current surfaced Insights; do not run the remaining catalog before that review. | parent | `../../references/insight-persona-calibration.md` |
+| complete | Correct the Investment persona leak in the computer-use next step, calibrate Investment v9 on four early-signal controls, and replay all fifteen bounded Investment candidates. | parent | `../../references/insight-persona-calibration.md` |
+| pending | Adi reviews and ranks the original ten useful surfaced Insights; treat the additional Thinking Machines strategy note as a cross-Event duplicate and do not run the remaining catalog before that review. | parent | `../../references/insight-persona-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -670,3 +671,15 @@ Application invariants:
   the current total to ten surfaced, fifteen suppressed, and $0.334543. The
   remaining catalog stays paused pending human ranking; detailed evidence is in
   `../../references/insight-persona-calibration.md`.
+- 2026-07-16: [VALIDATED] Corrected the Investment next-step persona after Adi
+  identified an Engineering-style benchmark assignment in the computer-use
+  note. Investment v9 requires a thesis, exposure, value-chain consequence, or
+  investment-relevant observable and explicitly preserves the assignment's
+  researcher move, strategic thesis, and attributed capability-observation
+  early signals. Four controls passed, then all fifteen bounded Investment
+  candidates were replayed: fourteen decisions matched v6 and a second
+  Thinking Machines strategy envelope surfaced as a defensible but redundant
+  note. The current v9/v5 store contains twenty-five decisions, eleven surfaced
+  and fourteen suppressed, with 12,544 cached tokens and $0.346956 total
+  proxy-reported cost. The original ten useful Insights remain the human-
+  ranking set; no catalog-scale run was started.

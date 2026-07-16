@@ -353,14 +353,20 @@ three content fields and no suppression reason; a suppressed result requires
 one concrete reason and no audience content beyond its neutral title. No quote, confidence score,
 model-authored identifier, or ranking field exists in the schema.
 
-The stable Investment v6 and Engineering v5 prompts are naturally cache eligible
-under `o200k_base`, with both exceeding the 1,024-token boundary. Investment v6 explicitly preserves the case
-assignment's researcher-movement signal: a specific first-party departure or
-company formation around a concrete direction can clear the final gate as an
-early competitive-map watchpoint before funding or product evidence exists.
+The stable Investment v9 and Engineering v5 prompts are naturally cache eligible
+under `o200k_base`, at 2,148 and 1,714 instruction tokens respectively.
+Investment v9 explicitly preserves the case assignment's early-signal cases:
+a specific first-party departure or company formation around a concrete
+direction, an attributed strategic thesis, or a concrete attributed capability
+observation can clear the final gate before funding, adoption, product, or
+independent-replication evidence exists when its status and investment
+transmission path remain explicit.
 Their distinct editorial voices reflect the real consumers: a technically
 fluent bottom-up public-equity investor looking for thesis-changing observables,
 and a senior production AI engineer looking for reproducible build decisions.
+Investment next steps must name a thesis, exposure, value-chain consequence, or
+investment-relevant observable; they cannot assign an Engineering experiment
+unless it resolves a named investment question.
 `build_request` constructs the shared LiteLLM Responses
 payload with stable metadata/tags and provider cache kwargs; `evaluate` executes
 and validates one request without owning persistence. `publish` binds surfaced
@@ -1181,8 +1187,8 @@ final score.
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Audience Insight generation | durable first-party-only Terra path with exact frozen requests and resumable per-audience execution; current v9 cohort is 492 Events / 751 requests, the active v4 prompt prefixes are 1,425 Investment and 1,459 Engineering tokens, and the clean run has begun with six current decisions over three Events |
-| Insights UI | current-v4-and-v9-qualified Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links; the partial clean run is inspectable while the remaining cohort runs; no duplicate API or old-schema read remains |
+| Audience Insight generation | durable first-party-only Terra path with exact frozen requests and resumable per-audience execution; current v9 routing cohort is 492 Events / 751 possible requests, while the bounded final-editor cohort uses Investment v9 and AI Engineering v5. The two prompts share an output schema but enforce distinct PM/analyst and production-engineering next actions. Twenty-five bounded decisions are current; the remaining catalog is intentionally paused. |
+| Insights UI | current-v9/v5-qualified Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links; the bounded calibration is inspectable while the remaining catalog stays paused; no duplicate API or old-schema read remains |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order
