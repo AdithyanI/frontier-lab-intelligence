@@ -65,9 +65,9 @@ PROMPT_CONTRACTS = {
     ),
     InsightAudience.AI_ENGINEERING: PromptContract(
         audience=InsightAudience.AI_ENGINEERING,
-        version="ai-engineering-insight-v5",
-        path=_PROMPT_ROOT / "ai_engineering_insight_v5.txt",
-        cache_key="fli:insights:ai-engineering:v5",
+        version="ai-engineering-insight-v6",
+        path=_PROMPT_ROOT / "ai_engineering_insight_v6.txt",
+        cache_key="fli:insights:ai-engineering:v6",
     ),
 }
 

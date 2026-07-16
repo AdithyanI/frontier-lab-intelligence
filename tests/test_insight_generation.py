@@ -57,7 +57,7 @@ def test_contracts_are_separate_and_share_one_schema():
     engineering = insight_generation.contract("ai_engineering")
 
     assert investment.version == "investment-insight-v9"
-    assert engineering.version == "ai-engineering-insight-v5"
+    assert engineering.version == "ai-engineering-insight-v6"
     assert investment.cache_key != engineering.cache_key
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
@@ -70,6 +70,12 @@ def test_contracts_are_separate_and_share_one_schema():
     assert "specific attributed capability observation" in investment.instructions()
     assert "precise internal engineering review" in engineering.instructions()
     assert "AI Engineering decision standard" in engineering.instructions()
+    assert "specific attributed capability observation" in engineering.instructions()
+    assert "an unspecified comparison" in engineering.instructions()
+    assert "generic aspirations" in engineering.instructions()
+    assert "smallest practical investigation" in engineering.instructions()
+    assert "Reproduce a source project only when" in engineering.instructions()
+    assert "is not the team's assigned action" in engineering.instructions()
     assert audience_routing.input_token_count(investment.instructions()) >= 1_024
     assert audience_routing.input_token_count(engineering.instructions()) >= 1_024
     assert insight_generation.OUTPUT_FORMAT["strict"] is True
