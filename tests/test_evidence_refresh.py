@@ -349,6 +349,40 @@ def test_top_level_cli_forwards_refresh_arguments_without_contract_duplication(
     ]
 
 
+def test_cli_interruption_is_retryable_and_structured(monkeypatch, capsys):
+    monkeypatch.setattr(
+        evidence_refresh,
+        "refresh_evidence",
+        lambda **_: (_ for _ in ()).throw(KeyboardInterrupt()),
+    )
+
+    code = evidence_refresh.main(
+        ["--through", "2026-07-15", "--progress", "off", "--no-input"]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert code == 5
+    assert payload["error"]["code"] == "E_INTERRUPTED"
+    assert payload["error"]["retryable"] is True
+
+
+def test_cli_timeout_is_retryable_and_structured(monkeypatch, capsys):
+    monkeypatch.setattr(
+        evidence_refresh,
+        "refresh_evidence",
+        lambda **_: (_ for _ in ()).throw(httpx.ReadTimeout("timed out")),
+    )
+
+    code = evidence_refresh.main(
+        ["--through", "2026-07-15", "--progress", "off", "--no-input"]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert code == 5
+    assert payload["error"]["code"] == "E_TIMEOUT"
+    assert payload["error"]["retryable"] is True
+
+
 def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):
     calls: list[tuple[str, object]] = []
     monkeypatch.setattr(

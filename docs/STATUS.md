@@ -112,7 +112,10 @@ current-session approval.
 
 - Broad RSS, blog, GitHub, arXiv, or second-source ingestion.
 - Semantic/topic event clustering beyond exact provider relations.
-- A learned ranking model or renewed daily-score weight tuning.
+- A learned ranking model or renewed daily-score weight tuning. A verified
+  redesign concept and deferred tracker exist at
+  [`projects/attention-score-v2/`](projects/attention-score-v2/); it must not
+  activate before submission delivery.
 - Large discovered-account admission or recursive graph crawling.
 - Mobile/responsive polish.
 - Real external alerts, publishing, uploading, or submission without Adi's
