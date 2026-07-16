@@ -52,6 +52,15 @@ reasoning, and start zero-shot before adding examples:
    mechanism, evidence boundaries, architecture or evaluation consequences,
    and a reproducible next step. Neither prompt claims knowledge of BIT's
    holdings, valuation work, or exact internal stack.
+4. AI Engineering v6 preserved the strict final gate while correcting two
+   bounded editorial failures. A specialized source artifact may support a
+   transferable engineering pattern without making reproduction of that
+   specialized project the team's assignment; the next step now applies the
+   pattern to a representative BIT workflow. A concrete attributed capability
+   observation or architectural thesis may also clear the gate before a formal
+   benchmark when it challenges a named build assumption and supports a
+   bounded team-relevant investigation. Generic inspiration and unspecified
+   comparisons remain suppressions.
 
 No few-shot examples were added. The zero-shot instructions produced the
 desired separation, so examples would currently add length and anchoring risk
@@ -201,7 +210,7 @@ envelope; it is an editorial cross-Event deduplication finding, not a reason to
 weaken the per-Event Investment standard or build a reconciliation subsystem
 during this calibration.
 
-The current prompt-qualified store therefore contains twenty-five decisions:
+At that v9/v5 checkpoint, the prompt-qualified store contained twenty-five decisions:
 eleven surfaced and fourteen suppressed. Investment v9 accounts for seven
 surfaced and eight suppressed decisions; AI Engineering v5 accounts for four
 surfaced and six suppressed decisions. Together they used 81,612 input tokens
@@ -215,3 +224,67 @@ computer-use diligence action, Nadella's procurement/control watchpoint, and
 Sutton's talent-formation signal. No further prompt change is justified before
 human ranking; the next useful step remains selecting the strongest three to
 five Insights for the submission.
+
+## Engineering v6 and balanced 50-decision expansion
+
+Adi's review of the Lean-checkable proof Insight found that its summary and
+implication were useful but its proposed action was audience-remote: rebuilding
+and auditing the Lean repository would assign the AI team a specialized formal-
+methods project rather than test the transferable verifier-gate pattern in its
+own work. Engineering v6 now chooses the smallest investigation that resolves
+the named team decision and reproduces a source project only when the team
+could plausibly adopt or compare it directly. The corrected Lean action applies
+an immutable verifier gate to a representative financial extraction and
+reconciliation workflow.
+
+A six-control replay then separated concrete early signals from inspirational
+noise:
+
+- the Lean verifier workflow, a reported five-hour computer-use run, a
+  first-hand multi-model browser-use evaluation, an intent-aware evidence-
+  capture pattern, and Nadella's protected-learning-assets thesis surfaced;
+- Thinking Machines' broad customization/interaction manifesto remained
+  suppressed because it supplied no mechanism, measured behavior, or bounded
+  build decision; and
+- the browser-use evaluation was retained only after inspecting the complete
+  packet. It contained relative performance, token, price, and speed
+  observations across several models, not merely the isolated phrase “Grok is
+  Opus-class for browser use.” The surfaced note labels the evidence anecdotal
+  and asks for a controlled internal comparison.
+
+After the control set passed, the exact current Investment v9 and Engineering
+v6 contracts evaluated 50 new positive audience routes. The cohort was balanced
+across the five highest-ranked positively routed Events per day and excluded
+the 25 current decisions already present. It produced 30 surfaced and 20
+suppressed decisions:
+
+| Audience | Decisions | Surfaced | Suppressed | Cached input tokens | Cost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| AI Engineering | 26 | 14 | 12 | 28,672 | $0.507623 |
+| Investment | 24 | 16 | 8 | 41,216 | $0.438862 |
+| **Total** | **50** | **30** | **20** | **69,888** | **$0.946485** |
+
+The qualitative result is precision-positive at the per-Event gate. Strong
+notes include adversarially durable alignment training, Jacobian-lens agent
+monitoring, SWE-Bench Pro task-validity failures, continuous-voice controller
+architecture, programmatic tool calling, horizontal work agents, and
+Transformers-native vLLM serving. Suppressions correctly rejected missing
+papers, unsupported benchmark claims, generic sovereignty and recursive-
+improvement theses, a departure without a consequential next move, product
+privacy controls without implementation evidence, and technically credible but
+team-remote modular robotics.
+
+The expansion also exposed a separate product problem: 30 surfaced decisions
+represent roughly 23 unique developments. Exact but independent Feed Events can
+describe the same launch, producing duplicate audience notes for Meta Muse,
+GPT-5.6, the Meta Model API, and Grok 4.5. Each result is defensible in isolation,
+so weakening either audience prompt would remove useful signals. The next
+quality boundary is cross-Event consolidation or final selection, not another
+prompt hill climb. The run stops at 50 new decisions rather than scaling to the
+remaining catalog.
+
+The current prompt-qualified store contains 75 decisions: 43 surfaced and 32
+suppressed. It has read 89,600 cached input tokens and records $1.305057 in
+proxy-reported cumulative cost. These are audit decisions, not 43 recommended
+submission items; semantic duplicates and weaker notes still require final
+selection before the 3–5 item case-study proof.

@@ -272,14 +272,26 @@ Application invariants:
   conversation root to be captured. Same-author replies become first-party
   continuations, other tracked authors remain reactions, and unrelated reply
   activity remains excluded.
+- Engineering v6 keeps the final gate selective but no longer assigns a
+  specialized source-domain reproduction when the useful lesson is a
+  transferable pattern for BIT's own workflows. Concrete attributed capability
+  observations and architecture theses can surface before formal reproduction
+  only when they challenge a named build assumption and support a bounded
+  team-relevant investigation.
+- The balanced 50-decision expansion is the current scale stop. Its 30 surfaced
+  decisions represent roughly 23 unique developments because independent Feed
+  Events can describe the same launch. Per-Event prompt weakening would discard
+  valid signals; cross-Event consolidation or final selection is the next
+  boundary before another 50–100 requests.
 
 ## Open Questions / Blockers
 
 - GPT-5.4 mini prompt caching is proven on the current v9 route. The clean
   900-row run produced 805 cache-hit requests and read 1,442,560 of 2,760,202
-  input tokens. The Terra Insight prompts are eligible and were warmed once,
-  but their cold warm-up calls do not prove a read; keep model-specific evidence
-  visible rather than generalizing one deployment's result to another.
+  input tokens. Terra caching is now also observed rather than inferred: the
+  current 75-decision Insight store reports 89,600 cached input tokens, including
+  69,888 during the latest 50-call expansion. Keep model- and prefix-specific
+  evidence visible rather than generalizing one deployment's result to another.
 - The broader artifact retrieval gaps remain upstream limitations. Do not add
   model-side web search or routing-local text-quality heuristics until the next
   Insight stage demonstrates a concrete need.
@@ -309,7 +321,9 @@ Application invariants:
 | complete | Adi reviewed the first five Insights and approved one bounded expansion without a prompt change. | parent | `../../references/insight-persona-calibration.md` |
 | complete | Add exactly five more surfaced Insights from the next top-ranked July 11 and July 10 routes, audit all fifteen new decisions, and stop before catalog scale. | parent | `../../references/insight-persona-calibration.md` |
 | complete | Correct the Investment persona leak in the computer-use next step, calibrate Investment v9 on four early-signal controls, and replay all fifteen bounded Investment candidates. | parent | `../../references/insight-persona-calibration.md` |
-| pending | Adi reviews and ranks the original ten useful surfaced Insights; treat the additional Thinking Machines strategy note as a cross-Event duplicate and do not run the remaining catalog before that review. | parent | `../../references/insight-persona-calibration.md` |
+| complete | Correct the Engineering audience-distance leak, calibrate Engineering v6 on six high-signal/noise controls, replay the original ten Engineering candidates, and remove superseded prompt rows. | parent | `../../references/insight-persona-calibration.md` |
+| complete | Expand Investment v9 / Engineering v6 by exactly 50 new balanced audience decisions, audit every surfaced/suppressed result, and stop before 100. | parent | `../../references/insight-persona-calibration.md` |
+| pending | Consolidate or manually select across the obvious Meta Muse, GPT-5.6, Meta Model API, and Grok cross-Event duplicate clusters; then rank the strongest 3–5 unique Insights for the submission. | parent | `../../references/insight-persona-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -338,8 +352,9 @@ Application invariants:
 - [x] Update architecture, status, model-routing/prompt references, and build log.
 - [x] Run focused tests, `bash scripts/check-fast.sh`, API proof, and desktop QA.
 - [ ] Review and finalize `learnings.md`, then archive this project.
-- [ ] After Adi's bounded Insight review, either freeze the current v6/v5
-  contracts or record one repeatable editorial failure before any broader run.
+- [x] After Adi's bounded Insight review, freeze Investment v9 and Engineering
+  v6 only after the repeatable Investment-next-step and Engineering-audience-
+  distance failures were corrected and controlled.
 
 ## Validation / Test Plan
 
@@ -683,3 +698,18 @@ Application invariants:
   and fourteen suppressed, with 12,544 cached tokens and $0.346956 total
   proxy-reported cost. The original ten useful Insights remain the human-
   ranking set; no catalog-scale run was started.
+- 2026-07-16: [VALIDATED] Promoted AI Engineering v6 after a six-control replay.
+  It preserved the Lean verifier pattern while replacing the audience-remote
+  Lean-repository audit with a representative financial extraction verifier
+  test; it retained concrete computer-use, browser-evaluation, evidence-capture,
+  and enterprise-control signals while suppressing the broad Thinking Machines
+  manifesto. The original ten Engineering candidates were replayed and all
+  superseded v5/wrong-hash rows were removed.
+- 2026-07-16: [VALIDATED] Ran exactly 50 new balanced Investment v9 / Engineering
+  v6 decisions across the top five positive Events per day after excluding 25
+  current decisions. Thirty surfaced and twenty suppressed; the calls read
+  69,888 cached input tokens and cost $0.946485. Qualitative review found strong
+  per-Event notes but seven obvious duplicate audience notes across Meta Muse,
+  GPT-5.6, Meta Model API, and Grok launch Events. The current store therefore
+  stops at 75 decisions (43 surfaced, 32 suppressed, 89,600 cached tokens,
+  $1.305057 cumulative cost) pending consolidation and final 3–5 selection.

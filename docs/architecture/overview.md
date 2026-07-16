@@ -353,8 +353,8 @@ three content fields and no suppression reason; a suppressed result requires
 one concrete reason and no audience content beyond its neutral title. No quote, confidence score,
 model-authored identifier, or ranking field exists in the schema.
 
-The stable Investment v9 and Engineering v5 prompts are naturally cache eligible
-under `o200k_base`, at 2,148 and 1,714 instruction tokens respectively.
+The stable Investment v9 and Engineering v6 prompts are naturally cache eligible
+under `o200k_base`, at 2,148 and 1,937 instruction tokens respectively.
 Investment v9 explicitly preserves the case assignment's early-signal cases:
 a specific first-party departure or company formation around a concrete
 direction, an attributed strategic thesis, or a concrete attributed capability
@@ -367,6 +367,13 @@ and a senior production AI engineer looking for reproducible build decisions.
 Investment next steps must name a thesis, exposure, value-chain consequence, or
 investment-relevant observable; they cannot assign an Engineering experiment
 unless it resolves a named investment question.
+Engineering v6 permits a concrete attributed capability observation or
+architectural thesis before formal reproduction only when it challenges a
+named build assumption and supports a bounded team-relevant investigation.
+Its next step applies transferable patterns to a representative team workflow;
+it reproduces a specialized source project only when the team could plausibly
+adopt or compare that project directly. Generic inspiration and unspecified
+comparisons still stop at the final gate.
 `build_request` constructs the shared LiteLLM Responses
 payload with stable metadata/tags and provider cache kwargs; `evaluate` executes
 and validates one request without owning persistence. `publish` binds surfaced
@@ -406,6 +413,11 @@ all evaluated days even when zero items were kept, and exposes `kept`,
 `suppressed`, and `all` decision views. The UI uses implication as the surfaced
 decision rationale (`Why kept`) and the freeform suppression reason as `Why
 suppressed`; no model quote or second ranking is introduced.
+This identity rule does not consolidate semantically overlapping independent
+Events. The 50-decision expansion proved that multiple root authors can describe
+the same launch and yield individually valid but duplicate Insights; that is a
+future consolidation or final-selection boundary, not a prompt or rerun-
+deduplication concern.
 
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
@@ -1187,8 +1199,8 @@ final score.
 | `fli.registry` | channel ownership invariant, provisional unknown materialization, and canonical Registry read model |
 | `fli.relevance` | read-only, web-grounded Registry relevance audit using the versioned `registry-relevance-v1` prompt; emits cited review artifacts and cannot mutate canonical data |
 | `fli.llm_responses` | shared normalization of OpenAI-compatible Responses text, hosted-search actions, and cited sources across native and translated providers |
-| Audience Insight generation | durable first-party-only Terra path with exact frozen requests and resumable per-audience execution; current v9 routing cohort is 492 Events / 751 possible requests, while the bounded final-editor cohort uses Investment v9 and AI Engineering v5. The two prompts share an output schema but enforce distinct PM/analyst and production-engineering next actions. Twenty-five bounded decisions are current; the remaining catalog is intentionally paused. |
-| Insights UI | current-v9/v5-qualified Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links; the bounded calibration is inspectable while the remaining catalog stays paused; no duplicate API or old-schema read remains |
+| Audience Insight generation | durable first-party-only Terra path with exact frozen requests and resumable per-audience execution; current v9 routing cohort is 492 Events / 751 possible requests, while the final-editor audit uses Investment v9 and AI Engineering v6. The two prompts share an output schema but enforce distinct PM/analyst and production-engineering next actions. Seventy-five decisions are current: 43 surfaced and 32 suppressed; the remaining catalog is paused at the observed cross-Event consolidation boundary. |
+| Insights UI | current-v9/v6-qualified Feed-ranked audience surface with shared day pills, kept/suppressed/all audit status, decision reasons, and exact-envelope links; all nine evaluated days are inspectable, reruns are deduplicated by Event/audience, and independent semantically overlapping Events remain visible for explicit audit; no duplicate API or old-schema read remains |
 | Local alert outbox | required package proof; no external sending without approval |
 
 ## Current Build Order
