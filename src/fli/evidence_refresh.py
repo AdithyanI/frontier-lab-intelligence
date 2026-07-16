@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import argparse
 import json
 import sqlite3
+import sys
 import time
-from datetime import date, datetime, timedelta
+import uuid
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import httpx
 
@@ -27,6 +28,11 @@ from fli import (
 
 
 DEFAULT_VIEW_BASE_URL = "http://127.0.0.1:8797"
+CLI_SCHEMA_VERSION = "1.0"
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def _day(value: str | date) -> date:
@@ -221,6 +227,7 @@ def refresh_evidence(
     days: int = 9,
     collection_days: int | None = None,
     workers: int = 32,
+    timeout_seconds: float = 30.0,
     artifact_limit: int | None = None,
     x_article_limit: int | None = None,
     reader_fallback: bool = True,
@@ -234,6 +241,7 @@ def refresh_evidence(
     key_file: Path = sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
     view_warmup: bool = True,
     view_base_url: str = DEFAULT_VIEW_BASE_URL,
+    progress: Callable[[str, str], None] | None = None,
 ) -> dict[str, Any]:
     """Refresh every deterministic Evidence stage, reusing valid cached work."""
     end = _day(through)
@@ -243,6 +251,8 @@ def refresh_evidence(
         raise ValueError("collection_days must be between 1 and days")
     if workers < 1 or workers > 64:
         raise ValueError("workers must be between 1 and 64")
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be greater than zero")
     if (artifact_limit is not None and artifact_limit < 0) or (
         x_article_limit is not None and x_article_limit < 0
     ):
@@ -253,10 +263,12 @@ def refresh_evidence(
     collection: dict[str, Any]
     collection_coverage: dict[str, Any]
     if collect:
+        if progress:
+            progress("collection", "running")
         client = x_content.create_client(
             db_path=raw_db,
             key_file=key_file.expanduser(),
-            timeout=30.0,
+            timeout=timeout_seconds,
             page_sleep_seconds=0.0,
         )
         try:
@@ -274,9 +286,12 @@ def refresh_evidence(
         if int(collection.get("failures", 0)) or int(
             collection.get("unfinished_accounts", 0)
         ):
-            raise RuntimeError(
-                "X collection is incomplete; resume the same refresh after fixing "
-                "the reported account failures."
+            raise sources.SourceCliError(
+                code="E_COLLECTION_INCOMPLETE",
+                message="X collection is incomplete.",
+                hint="Resume the same command after fixing the reported account failures.",
+                exit_code=4,
+                retryable=True,
             )
         if collection_start > start:
             collection_coverage = _completed_collection_coverage(
@@ -287,10 +302,15 @@ def refresh_evidence(
                 cohort_sha256=str(collection["cohort_sha256"]),
             )
             if collection_coverage["status"] != "complete":
-                raise RuntimeError(
-                    "Incremental X collection completed, but prior completed runs do "
-                    "not cover the retained publication window; increase "
-                    "--collection-days before rebuilding downstream views."
+                raise sources.SourceCliError(
+                    code="E_COLLECTION_COVERAGE_GAP",
+                    message=(
+                        "Completed collection runs do not cover the retained "
+                        "publication window."
+                    ),
+                    hint="Increase --collection-days and resume the same command.",
+                    exit_code=2,
+                    retryable=False,
                 )
         else:
             collection_coverage = {
@@ -299,6 +319,8 @@ def refresh_evidence(
                 "end_day": end.isoformat(),
                 "run_ids": [str(collection.get("run_id") or "")],
             }
+        if progress:
+            progress("collection", "complete")
     else:
         collection = {
             "status": "skipped",
@@ -312,6 +334,8 @@ def refresh_evidence(
             "run_ids": [],
         }
 
+    if progress:
+        progress("feed", "running")
     feed = signal_feed.materialize(
         source_db=raw_db,
         feed_db=feed_db,
@@ -328,6 +352,9 @@ def refresh_evidence(
         feed_db=feed_db,
         event_run_id=str(events["run_id"]),
     )
+    if progress:
+        progress("feed", "complete")
+        progress("artifacts", "running")
     catalog = artifacts.import_feed_envelopes(
         db_path=artifact_db,
         feed_db=feed_db,
@@ -364,6 +391,9 @@ def refresh_evidence(
             db_path=artifact_db,
             workers=min(workers, 16),
         )
+    if progress:
+        progress("artifacts", "complete")
+        progress("maintenance", "running")
     index_maintenance = _optimize_stores(
         {"feed": feed_db, "events": events_db, "artifacts": artifact_db}
     )
@@ -372,6 +402,8 @@ def refresh_evidence(
         if view_warmup
         else {"status": "skipped", "base_url": view_base_url}
     )
+    if progress:
+        progress("maintenance", "complete")
 
     return {
         "range": {"start_day": start.isoformat(), "end_day": end.isoformat()},
@@ -394,8 +426,64 @@ def refresh_evidence(
     }
 
 
+def _result(
+    *,
+    status: str,
+    data: dict[str, Any] | None,
+    error: dict[str, Any] | None,
+    started: float,
+    request_id: str,
+) -> dict[str, Any]:
+    return {
+        "schema_version": CLI_SCHEMA_VERSION,
+        "command": "evidence-refresh",
+        "status": status,
+        "data": data,
+        "error": error,
+        "meta": {
+            "request_id": request_id,
+            "duration_ms": round((time.monotonic() - started) * 1000, 3),
+            "timestamp_utc": _now(),
+        },
+    }
+
+
+def _print_result(payload: dict[str, Any], *, plain: bool) -> None:
+    if not plain:
+        print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+        return
+    if payload["status"] == "error":
+        error = payload["error"] or {}
+        print(
+            " ".join(
+                (
+                    "status=error",
+                    f"code={error.get('code', 'E_INTERNAL')}",
+                    f"retryable={str(bool(error.get('retryable'))).lower()}",
+                    f"message={json.dumps(error.get('message', ''))}",
+                )
+            )
+        )
+        return
+    data = payload["data"] or {}
+    collection = data.get("collection") or {}
+    publication = data.get("publication") or {}
+    print(
+        " ".join(
+            (
+                "status=ok",
+                f"collection_run_id={collection.get('run_id', '')}",
+                f"provider_requests={collection.get('provider_requests', 0)}",
+                f"event_run_id={publication.get('event_run_id', publication.get('run_id', ''))}",
+            )
+        )
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
+    started = time.monotonic()
+    request_id = str(uuid.uuid4())
+    parser = sources.JsonArgumentParser(
         prog="fli evidence-refresh",
         description=(
             "Refresh raw X evidence, Feed envelopes, primary links, and supported "
@@ -414,6 +502,7 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument("--workers", type=int, default=32)
+    parser.add_argument("--timeout-seconds", type=float, default=30.0)
     parser.add_argument(
         "--artifact-limit",
         type=int,
@@ -431,14 +520,25 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--no-view-warmup", action="store_true")
     parser.add_argument("--view-base-url", default=DEFAULT_VIEW_BASE_URL)
     parser.add_argument("--key-file", type=Path, default=sources.DEFAULT_TWITTERAPI_IO_KEY_FILE)
-    parser.add_argument("--json", action="store_true")
-    args = parser.parse_args(argv)
+    parser.add_argument("--progress", choices=("off", "plain"), default="plain")
+    parser.add_argument("--no-input", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--json", action="store_true")
+    mode.add_argument("--plain", action="store_true")
+    args = None
     try:
+        args = parser.parse_args(argv)
+        progress = None
+        if args.progress == "plain":
+            progress = lambda stage, status: print(
+                f"stage={stage} status={status}", file=sys.stderr, flush=True
+            )
         result = refresh_evidence(
             through=args.through,
             days=args.days,
             collection_days=args.collection_days,
             workers=args.workers,
+            timeout_seconds=args.timeout_seconds,
             artifact_limit=args.artifact_limit,
             x_article_limit=args.x_article_limit,
             reader_fallback=not args.no_reader_fallback,
@@ -446,17 +546,91 @@ def main(argv: list[str] | None = None) -> int:
             key_file=args.key_file,
             view_warmup=not args.no_view_warmup,
             view_base_url=args.view_base_url,
+            progress=progress,
         )
+    except KeyboardInterrupt:
+        payload = _result(
+            status="error",
+            data=None,
+            error={
+                "code": "E_INTERRUPTED",
+                "message": "Evidence refresh was interrupted.",
+                "retryable": True,
+                "hint": "Resume the same command; completed account work is retained.",
+            },
+            started=started,
+            request_id=request_id,
+        )
+        _print_result(payload, plain=bool(args and args.plain))
+        return 5
+    except sources.SourceCliError as exc:
+        payload = _result(
+            status="error",
+            data=None,
+            error={
+                "code": exc.code,
+                "message": exc.message,
+                "retryable": exc.retryable,
+                "hint": exc.hint,
+            },
+            started=started,
+            request_id=request_id,
+        )
+        _print_result(payload, plain=bool(args and args.plain))
+        return exc.exit_code
+    except (ValueError, FileNotFoundError) as exc:
+        payload = _result(
+            status="error",
+            data=None,
+            error={
+                "code": "E_VALIDATION",
+                "message": str(exc),
+                "retryable": False,
+                "hint": "Check the requested dates, windows, paths, and numeric limits.",
+            },
+            started=started,
+            request_id=request_id,
+        )
+        _print_result(payload, plain=bool(args and args.plain))
+        return 2
+    except httpx.TimeoutException as exc:
+        payload = _result(
+            status="error",
+            data=None,
+            error={
+                "code": "E_TIMEOUT",
+                "message": str(exc) or "A remote dependency timed out.",
+                "retryable": True,
+                "hint": "Resume the same command or increase --timeout-seconds.",
+            },
+            started=started,
+            request_id=request_id,
+        )
+        _print_result(payload, plain=bool(args and args.plain))
+        return 5
     except Exception as exc:
-        payload = {
-            "status": "error",
-            "command": "evidence-refresh",
-            "error": {"code": type(exc).__name__, "message": str(exc)},
-        }
-        print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+        payload = _result(
+            status="error",
+            data=None,
+            error={
+                "code": "E_INTERNAL",
+                "message": str(exc) or type(exc).__name__,
+                "retryable": False,
+                "hint": "Inspect the command inputs and repository checks before retrying.",
+            },
+            started=started,
+            request_id=request_id,
+        )
+        _print_result(payload, plain=bool(args and args.plain))
         return 1
-    payload = {"status": "ok", "command": "evidence-refresh", "data": result}
-    print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+    payload = _result(
+        status="ok",
+        data=result,
+        error=None,
+        started=started,
+        request_id=request_id,
+    )
+    _print_result(payload, plain=args.plain)
     return 0
 
 

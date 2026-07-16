@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from pathlib import Path
 
@@ -250,6 +251,71 @@ def test_refresh_evidence_rejects_collection_window_larger_than_publication():
         assert str(exc) == "collection_days must be between 1 and days"
     else:
         raise AssertionError("expected invalid collection_days to fail")
+
+
+def test_cli_returns_stable_json_contract(monkeypatch, capsys):
+    received = {}
+
+    def fake_refresh(**kwargs):
+        received.update(kwargs)
+        return {
+            "collection": {"run_id": "collection-1", "provider_requests": 3},
+            "publication": {"event_run_id": "event-1"},
+        }
+
+    monkeypatch.setattr(evidence_refresh, "refresh_evidence", fake_refresh)
+
+    code = evidence_refresh.main(
+        [
+            "--through",
+            "2026-07-15",
+            "--days",
+            "11",
+            "--collection-days",
+            "3",
+            "--progress",
+            "off",
+            "--no-input",
+        ]
+    )
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert code == 0
+    assert captured.err == ""
+    assert payload["schema_version"] == "1.0"
+    assert payload["command"] == "evidence-refresh"
+    assert payload["status"] == "ok"
+    assert payload["error"] is None
+    assert set(payload["meta"]) == {"request_id", "duration_ms", "timestamp_utc"}
+    assert received["days"] == 11
+    assert received["collection_days"] == 3
+
+
+def test_cli_validation_error_is_structured(capsys):
+    code = evidence_refresh.main(
+        [
+            "--through",
+            "2026-07-15",
+            "--days",
+            "3",
+            "--collection-days",
+            "4",
+            "--progress",
+            "off",
+            "--no-input",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert code == 2
+    assert payload["status"] == "error"
+    assert payload["error"] == {
+        "code": "E_VALIDATION",
+        "message": "collection_days must be between 1 and days",
+        "retryable": False,
+        "hint": "Check the requested dates, windows, paths, and numeric limits.",
+    }
 
 
 def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):

@@ -1,11 +1,17 @@
 """CLI entrypoint. Pipeline stages become subcommands as they land."""
 
 import argparse
+import sys
 
 from fli import __version__
 
 
 def main(argv: list[str] | None = None) -> int:
+    raw_args = list(argv) if argv is not None else sys.argv[1:]
+    if raw_args and raw_args[0] == "evidence-refresh":
+        from fli import evidence_refresh
+
+        return evidence_refresh.main(raw_args[1:])
     parser = argparse.ArgumentParser(
         prog="fli",
         description="Frontier Lab Intelligence pipeline.",
@@ -80,26 +86,14 @@ def main(argv: list[str] | None = None) -> int:
     evidence_refresh_p = sub.add_parser(
         "evidence-refresh",
         help="Refresh Evidence, envelopes, and primary artifacts end to end.",
+        add_help=False,
     )
-    evidence_refresh_p.add_argument("--through", required=True)
-    evidence_refresh_p.add_argument("--days", type=int, default=9)
-    evidence_refresh_p.add_argument("--collection-days", type=int, default=None)
-    evidence_refresh_p.add_argument("--workers", type=int, default=32)
-    evidence_refresh_p.add_argument("--artifact-limit", type=int, default=None)
-    evidence_refresh_p.add_argument("--x-article-limit", type=int, default=None)
-    evidence_refresh_p.add_argument("--skip-collection", action="store_true")
-    evidence_refresh_p.add_argument("--no-reader-fallback", action="store_true")
-    evidence_refresh_p.add_argument("--no-view-warmup", action="store_true")
-    evidence_refresh_p.add_argument(
-        "--view-base-url", default="http://127.0.0.1:8797"
-    )
-    evidence_refresh_p.add_argument("--key-file")
-    evidence_refresh_p.add_argument("--json", action="store_true")
+    evidence_refresh_p.add_argument("refresh_args", nargs=argparse.REMAINDER)
     artifacts_p = sub.add_parser(
         "artifacts", help="Catalog and fetch canonical external artifacts."
     )
     artifacts_p.add_argument("artifact_args", nargs=argparse.REMAINDER)
-    args = parser.parse_args(argv)
+    args = parser.parse_args(raw_args)
 
     if args.command == "web":
         import uvicorn
@@ -204,32 +198,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "evidence-refresh":
         from fli import evidence_refresh
 
-        refresh_args = [
-            "--through",
-            args.through,
-            "--days",
-            str(args.days),
-            "--workers",
-            str(args.workers),
-        ]
-        if args.collection_days is not None:
-            refresh_args.extend(["--collection-days", str(args.collection_days)])
-        if args.artifact_limit is not None:
-            refresh_args.extend(["--artifact-limit", str(args.artifact_limit)])
-        if args.x_article_limit is not None:
-            refresh_args.extend(["--x-article-limit", str(args.x_article_limit)])
-        if args.skip_collection:
-            refresh_args.append("--skip-collection")
-        if args.no_reader_fallback:
-            refresh_args.append("--no-reader-fallback")
-        if args.no_view_warmup:
-            refresh_args.append("--no-view-warmup")
-        refresh_args.extend(["--view-base-url", args.view_base_url])
-        if args.key_file:
-            refresh_args.extend(["--key-file", args.key_file])
-        if args.json:
-            refresh_args.append("--json")
-        return evidence_refresh.main(refresh_args)
+        return evidence_refresh.main(args.refresh_args)
 
     if args.command == "artifacts":
         from fli import artifacts

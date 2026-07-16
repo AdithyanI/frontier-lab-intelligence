@@ -18,8 +18,13 @@ fli evidence-refresh \
   --days 11 \
   --collection-days 3 \
   --workers 32 \
-  --json
+  --no-input --json
 ```
+
+In plain language, that command downloads only July 13–15, then rebuilds the
+July 5–15 app pages from the complete local cache. The local rebuild makes no X
+provider request. `--days` controls what remains visible; `--collection-days`
+controls what is fetched now.
 
 `--through` is the latest complete UTC day. `--days` defines the inclusive
 published Feed/Event window. `--collection-days` can collect only the newest
@@ -39,6 +44,22 @@ Use `--skip-collection` only when raw X coverage is already known to be
 complete and the operator deliberately wants to rebuild downstream views.
 `--no-reader-fallback` disables the Jina retry adapter for the selected native
 HTML cohort.
+
+## Client contract
+
+The command is machine-first and non-interactive. JSON is the default result;
+`--json` makes that intent explicit and `--plain` provides a compact operator
+summary. Success and failure both return one versioned object with `command`,
+`status`, `data`, `error`, and execution `meta`. Validation, dependency,
+interruption, and incomplete-collection failures use stable error codes and
+non-zero exit codes. `--timeout-seconds` bounds provider requests, while the
+same deterministic command safely resumes account-level work after an
+interruption. Sparse stage progress goes to stderr and can be disabled with
+`--progress off`, so stdout remains parseable.
+
+The key is read only from `--key-file` (default:
+`~/.secrets/twitterapi-io/api-key`); the client does not accept the secret
+value through a flag or environment variable.
 
 ## Cache and invalidation contract
 

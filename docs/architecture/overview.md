@@ -575,7 +575,7 @@ fli x-daily-collection execute --start-day YYYY-MM-DD --end-day YYYY-MM-DD --no-
 fli x-daily-collection status --run-id <id> --no-input --json
 fli signal-feed refresh --days 7 [--through YYYY-MM-DD]
 fli signal-events refresh --publish
-fli evidence-refresh --through YYYY-MM-DD --days 9 --workers 32 --json
+fli evidence-refresh --through YYYY-MM-DD --days 11 --collection-days 3 --workers 32 --no-input --json
 ```
 
 The first provider implementation is TwitterAPI.io. It reads its API key from
@@ -1184,7 +1184,7 @@ final score.
 | `fli.conference_sources` | manifest-driven official conference snapshots, exact-X identity reconciliation, lean current role/bio/affiliation import, resumable raw profile hydration, unavailable-account rejection, and following-snapshot profile seeding |
 | `fli.x_content` | immutable raw provider responses and `x_post_observation` history, plus mutable latest-post convenience rows and exact post bundles |
 | `fli.x_daily_collection` | frozen-cohort, date-complete, cache-aware and resumable Registry X timeline collection with JSON-first plan/execute/status commands |
-| `fli.evidence_refresh` | one resumable cache-aware operator path for parallel X collection, deterministic Feed/Event publication, primary-link catalog refresh, complete supported artifact extraction, SQLite optimization, and visible-day view warmup |
+| `fli.evidence_refresh` | one JSON-first, resumable operator client that separates the newest paid collection slice from the retained Feed/Event window, proves contiguous completed collection coverage, then performs deterministic publication, primary-link catalog refresh, supported artifact extraction, SQLite optimization, and visible-day view warmup |
 | `fli.signal_feed` | content-addressed `signal-feed-v10` snapshots with captured-root reply admission, recursive embedded relation closure, first-disclosure provenance, opaque provider anchors, and immutable per-post raw JSON |
 | `fli.signal_events` | `signal-events-v6` root-owned structural forests with one-parent enforcement, same-author missing-parent thread repair, provider-qualified identity, disclosure-dated links, and an explicit `signal_publication` pointer |
 | `fli.web.events` | Registry-aware one-time canonical Event publication with frozen day/rank, lifetime activity append, and deduplicated weekly projection; later disclosures never create another candidate |
