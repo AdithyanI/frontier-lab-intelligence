@@ -303,7 +303,7 @@ Application invariants:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Extend the published Evidence window through July 15, then audit old-day rank/hash stability and downstream route visibility without model calls. | parent | `../../../references/evidence-refresh.md` |
+| completed | Extend the published Evidence window through July 15, audit old-day rank/hash and route visibility, then route only the new July 14–15 top-100 cohorts. | parent | `../../../references/evidence-refresh.md` |
 | pending | Consolidate or manually select across the obvious Meta Muse, GPT-5.6, Meta Model API, and Grok cross-Event duplicate clusters; then rank the strongest 3–5 unique Insights for the submission. | parent | `../../references/insight-persona-calibration.md` |
 | pending | Finalize project learnings and archive this tracker after the submission set is frozen. | parent | `learnings.md` |
 
@@ -695,3 +695,12 @@ Application invariants:
   GPT-5.6, Meta Model API, and Grok launch Events. The current store therefore
   stops at 75 decisions (43 surfaced, 32 suppressed, 89,600 cached tokens,
   $1.305057 cumulative cost) pending consolidation and final 3–5 selection.
+- 2026-07-16: [VALIDATED] Extended the published Evidence window through July
+  15, then routed only the July 14–15 top-100 cohorts against Event run
+  `1d180c03c128`. All 200 requests completed with zero failures: 61 both, 21
+  Engineering-only, 32 Investment-only, and 86 neither. Every request was
+  cache-eligible; 168 read 301,056 cached tokens, and proxy-reported cost was
+  $1.052918. The API exposes all 100 routes on each new day. The preceding
+  Evidence rebuild changed 185 old envelope hashes and 3,017 old ranks across
+  all 10,033 prior placements; no July 5–13 model call was made, and old routes
+  remain fail-closed wherever their frozen envelope hash no longer matches.
