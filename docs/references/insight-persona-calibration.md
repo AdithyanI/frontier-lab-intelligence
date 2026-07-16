@@ -57,7 +57,7 @@ No few-shot examples were added. The zero-shot instructions produced the
 desired separation, so examples would currently add length and anchoring risk
 without evidence of a remaining systematic failure.
 
-## Bounded evaluation
+## First bounded evaluation
 
 The fixed review set contains six routed Events across 2026-07-12 and
 2026-07-13. Terra/high produced ten audience decisions: five surfaced and five
@@ -98,8 +98,55 @@ commercial claims out. The output is somewhat detailed, but the detail carries
 source qualification, a real decision boundary, or an executable next step
 rather than generic prose.
 
-Do not rewrite or expand the prompts again before human review. The next useful
-step is for Adi to inspect these five surfaced Insights in the UI and select
-the strongest 3–5 submission examples. Do not run the remaining 751-request
-catalog until that review either approves the contract or identifies a
-repeatable failure.
+Adi reviewed this first five-Insight checkpoint on 2026-07-16 and approved a
+second bounded expansion of exactly five additional surfaced Insights. No
+prompt change was made between cohorts.
+
+## Second bounded evaluation
+
+The expansion consumed the five highest-ranked positive routes from July 11
+and then the five highest-ranked positive routes from July 10. It stopped as
+soon as exactly five additional audience decisions surfaced. Ten Events
+produced fifteen decisions: five surfaced and ten suppressed. The expansion
+used 47,581 input tokens and 6,763 output tokens, read 3,584 cached prefix
+tokens, and recorded $0.212334 in proxy-reported cost.
+
+### Additional surfaced Insights
+
+| Audience | Feed item | Title | Qualitative judgment |
+| --- | --- | --- | --- |
+| Engineering | Jul 11 #9 | Test long-horizon computer use beyond short UI tasks | Strong. Treats a reported five-hour game run as an anecdotal capability signal, not a reliability result, and converts it into a repeated state/recovery/intervention evaluation on a representative workflow. |
+| Investment | Jul 11 #9 | Reported five-hour game win raises computer-use agent bar | Defensible and distinct. Challenges a specific thesis assumption about UI-agent horizons while explicitly rejecting enterprise reliability inference from one game outcome. |
+| Investment | Jul 10 #1 | Thinking Machines raises $2B around custom-model strategy | Strongest new Investment result. Preserves the disclosed financing, named participants, open-source/custom-model direction, and unknown commercial traction, then defines product-release comparisons that could turn investor participation into an operating signal. |
+| Engineering | Jul 10 #4 | Lean artifact makes agent proof auditable | Strongest new Engineering result. Identifies the verifier-backed artifact as the development, preserves the provider-reported evidence boundary, and gives exact pinned build, source-audit, and specification-alignment checks. |
+| Investment | Jul 10 #4 | Claimed Lean-checked proof raises the bar for agentic reasoning | Useful but the softest surfaced result. The public-equity transmission is indirect; however, it remains conditional, identifies formal verification as the differentiator, flags the prompt/runtime inconsistency, and requires reproduction before treating the claim as a capability milestone. |
+
+### Additional rejected controls
+
+- Unsupported Altman employment commentary and Buterin governance preferences
+  were rejected because neither supplied a concrete development or defensible
+  company-level diligence path.
+- A Grok comparison was rejected for both audiences because the benchmark,
+  methods, settings, and results were absent.
+- Thinking Machines' separate manifesto was rejected for both audiences after
+  the stronger financing/product announcement cleared Investment; the essay
+  added direction but no released artifact, measured result, customer, or
+  commercialization evidence.
+- A vague laboratory data-capture anecdote was rejected for Engineering, while
+  a small AI-news launch and free deployment URL were rejected for Investment.
+
+## Cumulative assessment
+
+The current contracts have now evaluated sixteen Events and twenty-five
+audience decisions: ten surfaced and fifteen suppressed. They used 76,797 input
+tokens and 11,385 output tokens, read 12,544 cached tokens, and recorded
+$0.334543 in proxy-reported cost. Engineering has ten decisions with four
+surfaced; Investment has fifteen decisions with six surfaced.
+
+The second cohort reinforces the first conclusion: the prompts distinguish an
+interesting topic from an actionable audience Insight, produce materially
+different last-mile interpretations of the same packet, and preserve caveats
+instead of converting every frontier claim into a result. No repeatable error
+justifies another prompt hill climb yet. The next useful action is human ranking
+of the ten surfaced Insights, with particular scrutiny of the softer formal-
+proof Investment implication. The remaining catalog stays paused.

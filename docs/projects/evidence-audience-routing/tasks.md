@@ -306,7 +306,9 @@ Application invariants:
 | complete | Reduce routing and Insight packets to first-party-authored source material plus accepted first-party artifacts and enforce one candidate per Event/audience. | parent | — |
 | complete | Rebuild clean one-run Feed/Event stores and replace all routing data with nine v9 top-100 runs; prove cache telemetry and remove v8 directories. | parent | `../../../references/model-routing.md` |
 | complete | Calibrate Investment v6 and AI Engineering v5 against BIT's public reader context and the assignment's explicit researcher-formation case; run only a bounded six-Event review set and stop at five surfaced Insights. | parent | `../../references/insight-persona-calibration.md` |
-| pending | Adi reviews the five current Insights and decides whether the prompt contract is accepted; do not run the remaining 751-request catalog before that review. | parent | `../../references/insight-persona-calibration.md` |
+| complete | Adi reviewed the first five Insights and approved one bounded expansion without a prompt change. | parent | `../../references/insight-persona-calibration.md` |
+| complete | Add exactly five more surfaced Insights from the next top-ranked July 11 and July 10 routes, audit all fifteen new decisions, and stop before catalog scale. | parent | `../../references/insight-persona-calibration.md` |
+| pending | Adi reviews and ranks the ten current surfaced Insights; do not run the remaining catalog before that review. | parent | `../../references/insight-persona-calibration.md` |
 
 ## Backlog / Remaining Work
 
@@ -655,4 +657,16 @@ Application invariants:
   Investment, while Satya and METR produced appropriately distinct outputs for
   both audiences. The remaining 751-request catalog is paused pending Adi's
   qualitative review; evidence is in
+  `../../references/insight-persona-calibration.md`.
+- 2026-07-16: [VALIDATED] Adi approved the first five-Insight checkpoint and
+  requested exactly five more plus qualitative analysis. The next five July 11
+  routes produced two surfaced and five suppressed audience decisions; the
+  next five July 10 routes produced three surfaced and five suppressed, so the
+  run stopped at exactly five additions. The new Insights cover long-horizon
+  computer use for both audiences, Thinking Machines' $2B custom-model strategy
+  for Investment, and a Lean-checkable multi-agent proof artifact for both
+  audiences. Ten weak or insufficient candidates were suppressed. No repeated
+  failure justified a prompt change. The expansion cost $0.212334 and brought
+  the current total to ten surfaced, fifteen suppressed, and $0.334543. The
+  remaining catalog stays paused pending human ranking; detailed evidence is in
   `../../references/insight-persona-calibration.md`.
