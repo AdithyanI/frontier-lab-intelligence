@@ -17,6 +17,7 @@ def _packet() -> audience_routing.RoutingPacket:
                 text="We released a new evaluation method.",
                 author="@alice",
                 relation="root",
+                posted="2026-07-15",
             ),
             audience_routing.EvidenceSource(
                 source_type="artifact",
@@ -39,25 +40,28 @@ def _packet() -> audience_routing.RoutingPacket:
     )
 
 
-def _payload(**overrides):
+def _payload(audience="ai_engineering", **overrides):
+    action_field = (
+        "watchpoint" if audience == "investment" else "experiment"
+    )
     payload = {
         "decision": "surface",
         "suppression_reason": None,
         "title": "Test recovery where agents actually fail",
         "summary": "Alice reports a new agent-recovery evaluation method.",
-        "implication": "It could expose reliability failures hidden by success-only benchmarks.",
-        "next_step": "Run the method against one current tool-using workflow.",
+        "why_it_matters": "It could expose reliability failures hidden by success-only benchmarks.",
+        action_field: "Run the method against one current tool-using workflow.",
     }
     payload.update(overrides)
     return payload
 
 
-def test_contracts_are_separate_and_share_one_schema():
+def test_contracts_are_separate_and_use_audience_specific_schemas():
     investment = insight_generation.contract("investment")
     engineering = insight_generation.contract("ai_engineering")
 
-    assert investment.version == "investment-insight-v9"
-    assert engineering.version == "ai-engineering-insight-v6"
+    assert investment.version == "investment-insight-v10"
+    assert engineering.version == "ai-engineering-insight-v7"
     assert investment.cache_key != engineering.cache_key
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
@@ -65,7 +69,7 @@ def test_contracts_are_separate_and_share_one_schema():
     assert "do not require disclosed funding" in investment.instructions()
     assert "sharp internal research note" in investment.instructions()
     assert "private frontier labs" in investment.instructions()
-    assert "Do not assign an engineering experiment" in investment.instructions()
+    assert "Never describe your own editorial process" in investment.instructions()
     assert "specific attributed strategic thesis" in investment.instructions()
     assert "specific attributed capability observation" in investment.instructions()
     assert "precise internal engineering review" in engineering.instructions()
@@ -78,14 +82,24 @@ def test_contracts_are_separate_and_share_one_schema():
     assert "is not the team's assigned action" in engineering.instructions()
     assert audience_routing.input_token_count(investment.instructions()) >= 1_024
     assert audience_routing.input_token_count(engineering.instructions()) >= 1_024
-    assert insight_generation.OUTPUT_FORMAT["strict"] is True
-    assert set(insight_generation.OUTPUT_FORMAT["schema"]["properties"]) == {
+    investment_schema = insight_generation.output_format("investment")
+    engineering_schema = insight_generation.output_format("ai_engineering")
+    assert investment_schema["strict"] is True
+    assert set(investment_schema["schema"]["properties"]) == {
         "decision",
         "suppression_reason",
         "title",
         "summary",
-        "implication",
-        "next_step",
+        "why_it_matters",
+        "watchpoint",
+    }
+    assert set(engineering_schema["schema"]["properties"]) == {
+        "decision",
+        "suppression_reason",
+        "title",
+        "summary",
+        "why_it_matters",
+        "experiment",
     }
 
 
@@ -99,6 +113,8 @@ def test_candidate_input_reuses_attributed_envelope_without_rank_or_router_reaso
     assert rendered.startswith("<candidate_evidence>\nevidence_packet:")
     assert rendered.endswith("\n</candidate_evidence>")
     assert 'author: "@alice"' in rendered
+    assert 'evaluation_day: "2026-07-15"' in rendered
+    assert 'posted: "2026-07-15"' in rendered
     assert "kind: authored_artifact" in rendered
     assert "This looks exciting" not in rendered
     assert "independent_reactions" not in rendered
@@ -108,6 +124,28 @@ def test_candidate_input_reuses_attributed_envelope_without_rank_or_router_reaso
     assert candidate.candidate_id == insight_generation.InsightCandidate.create(
         audience="ai_engineering", packet=_packet(), feed_rank=19
     ).candidate_id
+
+
+def test_insight_dates_do_not_change_the_frozen_routing_contract():
+    packet = _packet()
+    without_date = audience_routing.RoutingPacket(
+        event_id=packet.event_id,
+        day=packet.day,
+        sources=tuple(
+            audience_routing.EvidenceSource(
+                **{
+                    key: value
+                    for key, value in source.__dict__.items()
+                    if key != "posted"
+                }
+            )
+            for source in packet.sources
+        ),
+    )
+
+    assert packet.evidence_sha256 == without_date.evidence_sha256
+    assert "evaluation_day" not in audience_routing.render_input(packet)
+    assert "posted:" not in audience_routing.render_input(packet)
 
 
 def test_build_request_is_pure_and_keeps_variable_evidence_last():
@@ -126,23 +164,31 @@ def test_build_request_is_pure_and_keeps_variable_evidence_last():
         "investment"
     ).instructions()
     assert request["input"] == insight_generation.render_input(candidate)
-    assert request["prompt_cache_key"] == "fli:insights:investment:v9"
-    assert request["text"]["format"] == insight_generation.OUTPUT_FORMAT
+    assert request["prompt_cache_key"] == "fli:insights:investment:v10"
+    assert request["text"]["format"] == insight_generation.output_format(
+        "investment"
+    )
     assert request["store"] is False
     assert "audience:investment" in request["extra_body"]["metadata"]["tags"]
 
 
 def test_surface_output_requires_all_content_and_no_reason():
-    result = insight_generation.validate_output(json.dumps(_payload()))
+    result = insight_generation.validate_output(
+        json.dumps(_payload()), audience="ai_engineering"
+    )
 
     assert result.decision is insight_generation.InsightDecision.SURFACE
     assert result.suppression_reason is None
-    assert result.as_dict()["next_step"].startswith("Run the method")
+    assert result.as_dict()["experiment"].startswith("Run the method")
 
     with pytest.raises(ValueError, match="null suppression_reason"):
-        insight_generation.validate_output(_payload(suppression_reason="Weak."))
+        insight_generation.validate_output(
+            _payload(suppression_reason="Weak."), audience="ai_engineering"
+        )
     with pytest.raises(ValueError, match="requires summary"):
-        insight_generation.validate_output(_payload(summary=None))
+        insight_generation.validate_output(
+            _payload(summary=None), audience="ai_engineering"
+        )
 
 
 def test_suppress_output_keeps_freeform_reason_and_null_content():
@@ -155,9 +201,10 @@ def test_suppress_output_keeps_freeform_reason_and_null_content():
             ),
             "title": "A method announcement without testable evidence",
             "summary": None,
-            "implication": None,
-            "next_step": None,
-        }
+            "why_it_matters": None,
+            "experiment": None,
+        },
+        audience="ai_engineering",
     )
 
     assert result.decision is insight_generation.InsightDecision.SUPPRESS
@@ -169,24 +216,30 @@ def test_suppress_output_keeps_freeform_reason_and_null_content():
             {
                 **result.as_dict(),
                 "suppression_reason": "   ",
-            }
+            },
+            audience="ai_engineering",
         )
     with pytest.raises(ValueError, match="null summary"):
         insight_generation.validate_output(
             {
                 **result.as_dict(),
                 "summary": "A partial summary should not leak through.",
-            }
+            },
+            audience="ai_engineering",
         )
     with pytest.raises(ValueError, match="title is required"):
-        insight_generation.validate_output({**result.as_dict(), "title": None})
+        insight_generation.validate_output(
+            {**result.as_dict(), "title": None}, audience="ai_engineering"
+        )
 
 
 def test_publish_binds_model_content_to_application_owned_feed_metadata():
     candidate = insight_generation.InsightCandidate.create(
         audience="investment", packet=_packet(), feed_rank=3
     )
-    result = insight_generation.validate_output(_payload())
+    result = insight_generation.validate_output(
+        _payload("investment"), audience="investment"
+    )
 
     published = insight_generation.publish(candidate, result)
 
@@ -196,10 +249,11 @@ def test_publish_binds_model_content_to_application_owned_feed_metadata():
         "day": "2026-07-15",
         "audience": "investment",
         "feed_rank": 3,
-        "title": _payload()["title"],
-        "summary": _payload()["summary"],
-        "implication": _payload()["implication"],
-        "next_step": _payload()["next_step"],
+        "title": _payload("investment")["title"],
+        "summary": _payload("investment")["summary"],
+        "why_it_matters": _payload("investment")["why_it_matters"],
+        "action": _payload("investment")["watchpoint"],
+        "action_label": "Watchpoint",
     }
     suppressed = insight_generation.validate_output(
         {
@@ -207,9 +261,10 @@ def test_publish_binds_model_content_to_application_owned_feed_metadata():
             "suppression_reason": "The evidence is too thin to act on.",
             "title": "A thinly evidenced technical claim",
             "summary": None,
-            "implication": None,
-            "next_step": None,
-        }
+            "why_it_matters": None,
+            "watchpoint": None,
+        },
+        audience="investment",
     )
     with pytest.raises(ValueError, match="cannot be published"):
         insight_generation.publish(candidate, suppressed)
@@ -217,7 +272,9 @@ def test_publish_binds_model_content_to_application_owned_feed_metadata():
 
 def test_validation_rejects_unknown_fields_and_audiences():
     with pytest.raises(ValueError, match="exact Insight schema"):
-        insight_generation.validate_output({**_payload(), "confidence": 0.9})
+        insight_generation.validate_output(
+            {**_payload(), "confidence": 0.9}, audience="ai_engineering"
+        )
     with pytest.raises(ValueError, match="unsupported Insight audience"):
         insight_generation.InsightCandidate.create(
             audience="general", packet=_packet(), feed_rank=1

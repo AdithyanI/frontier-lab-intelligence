@@ -91,6 +91,10 @@ class EvidenceSource:
     section_ordinal: int | None = None
     source_char_start: int | None = None
     source_char_end: int | None = None
+    # Insight-only temporal context. Deliberately excluded from the routing
+    # evidence hash and serialized routing packet so existing v9 runs remain
+    # immutable and replayable.
+    posted: str | None = None
 
     def normalized_text(self) -> str:
         return unicodedata.normalize("NFC", self.text)
@@ -188,7 +192,9 @@ def _is_transport_only(text: str) -> bool:
     return not text or _URL_ONLY_RE.fullmatch(text) is not None
 
 
-def _render_full_input(packet: RoutingPacket) -> str:
+def _render_full_input(
+    packet: RoutingPacket, *, include_dates: bool = False
+) -> str:
     """Render first-party semantic evidence without internal provenance."""
     roots = [source for source in packet.sources if source.relation == "root"]
     if len(roots) != 1:
@@ -203,7 +209,10 @@ def _render_full_input(packet: RoutingPacket) -> str:
     artifacts = [
         source for source in packet.sources if source.source_type == "artifact"
     ]
-    lines = ["evidence_packet:", "  primary_source:"]
+    lines = ["evidence_packet:"]
+    if include_dates:
+        lines.append(f"  evaluation_day: {_yaml_value(packet.day)}")
+    lines.append("  primary_source:")
     if root.author:
         lines.append(f"    author: {_yaml_value(root.author)}")
     lines.append("    post:")
@@ -214,6 +223,8 @@ def _render_full_input(packet: RoutingPacket) -> str:
         )
     else:
         lines.append("      kind: x_post")
+        if include_dates and root.posted:
+            lines.append(f"      posted: {_yaml_value(root.posted)}")
         lines.extend(_literal_field("text", root_text, indent="      "))
 
     if continuations:
@@ -222,6 +233,8 @@ def _render_full_input(packet: RoutingPacket) -> str:
             text = _display_text(source)
             kind = "artifact_link" if _is_transport_only(text) else "x_post"
             lines.append(f"      - kind: {kind}")
+            if include_dates and source.posted:
+                lines.append(f"        posted: {_yaml_value(source.posted)}")
             if not _is_transport_only(text):
                 lines.extend(_literal_field("text", text, indent="        "))
 
@@ -265,13 +278,17 @@ def _truncate_input(text: str) -> str:
     return encoding.decode(prefix_tokens).rstrip() + TRUNCATION_MARKER
 
 
-def render_input(packet: RoutingPacket) -> str:
+def render_input(
+    packet: RoutingPacket, *, include_dates: bool = False
+) -> str:
     """Render a readable model view capped at ``MAX_INPUT_TOKENS`` tokens.
 
     ``RoutingPacket`` and its evidence hash continue to bind the complete
     evidence. Only this derived model-facing view is truncated.
     """
-    return _truncate_input(_render_full_input(packet))
+    return _truncate_input(
+        _render_full_input(packet, include_dates=include_dates)
+    )
 
 
 def _validate_output(output_text: str) -> dict[str, Any]:

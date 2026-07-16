@@ -63,12 +63,14 @@ test('Insights inherits Feed rank and links every decision to its exact envelope
 
 test('Insights shows an explicit rationale for both decisions without reviving quotes', () => {
   assert.match(insightSource, /item\.decision_reason/)
-  assert.match(insightSource, /'Why kept' : 'Why suppressed'/)
+  assert.match(insightSource, /'Why it matters' : 'Why suppressed'/)
   assert.match(insightSource, /const title = item\.title/)
   assert.doesNotMatch(insightSource, /Suppressed at the final editorial gate/)
   assert.match(insightSource, /<h3 className="mono">Summary<\/h3>/)
   assert.match(insightSource, /decodeTextEntities\(item\.summary\)/)
-  assert.match(insightSource, /item\.next_step/)
+  assert.match(insightSource, /item\.action_label/)
+  assert.match(insightSource, /decodeTextEntities\(item\.action\)/)
+  assert.doesNotMatch(insightSource, /item\.next_step/)
   assert.doesNotMatch(insightSource, /Exact source passage/)
   assert.doesNotMatch(insightSource, /citation\.quote/)
   assert.doesNotMatch(insightSource, /dangerouslySetInnerHTML/)

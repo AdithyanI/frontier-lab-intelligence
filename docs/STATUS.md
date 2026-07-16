@@ -52,12 +52,11 @@ relevant; it is not a third judgment. A successor Insight foundation defines
 two audience prompts and one small surface-or-suppress schema. Historical Terra
 calibrations remain documented, but their generated rows were deleted because
 they used superseded source and output contracts. The production path freezes
-first-party-only requests into one resumable SQLite store. Investment v9 and
-AI Engineering v6 are calibrated on the original bounded review set, a
-balanced 50-decision expansion, and the fresh July 14–15 top-30 cohort. Further
-generation is paused because the expansion exposed cross-Event semantic
-duplicates and one stale-source packaging false positive that prompt tuning
-cannot resolve.
+first-party-only requests into one resumable SQLite store. Investment v10 and
+AI Engineering v7 now use per-audience watchpoint/experiment schemas and stored
+post dates. The July 5–15 current-contract cohort is fully evaluated. The
+remaining editorial boundary is consolidation and final selection across
+semantically overlapping Events, not broader generation or looser prompts.
 
 ## Where the System Stands
 
@@ -69,9 +68,9 @@ cannot resolve.
 | Exact event projection | Implemented and regression-tested | Provider-declared evidence is stored as root-owned structural forests, not unrestricted connected components: quote/retweet reactions attach to one source, only the source author's replies extend its thread, and every member has at most one structural parent. Third-party replies remain in the ledger but cannot import their own branch or bridge independent roots. The product publishes each Event exactly once on its earliest canonical source day; later activity appends to that Event without creating another dated candidate. The clean July 5–15 Feed contains 51,323 normalized posts; its one-run Event store contains 9,646 grouped envelopes, 37,227 members, and 27,913 links. |
 | Feed + daily score | Implemented audit surface | Daily collection includes authored replies and tracked reactions. The Feed is date-filterable, shows one frozen canonical-day rank across Audit/search filters, and explains its transparent tracked-amplification, author-support, and public-engagement inputs on demand. Later reactions remain available in one flat activity disclosure but do not republish or rerank the source Event. Registry changes affect derived views without rewriting raw evidence. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The reply-inclusive catalog converges to 2,735 artifacts with zero lineage violations; 2,507 have usable text, including all 221 arXiv metadata/abstract records and all 167 cached X Articles. Videos remain deferred and 65 non-video pages are unavailable or retryable. One shared extraction validator rejects placeholder-dominated bodies before they become successful snapshots. |
-| Feed audience routing | Current v9 top-100 coverage through July 15 | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons. Its semantic packet contains the root, same-author replies/thread/quote commentary, and accepted first-party artifacts; independently authored reactions and pure reposts remain outside model input. The July 14–15 extension completed 200/200 envelopes with zero failures: 61 both, 21 Engineering-only, 32 Investment-only, and 86 neither. All 200 requests were cache-eligible, 168 reported cache reads (301,056 cached tokens), and proxy-reported cost was $1.052918. The earlier July 5–13 runs remain stored without another model call; routes are exposed only where their frozen envelope hash still matches the rebuilt publication. |
-| Audience Insight generation | Implementation complete; 173-decision persona audit ready for consolidation | Investment v9 and AI Engineering v6 share one strict decision/title/reason/summary/implication/next-step schema but address distinct readers: a technically fluent bottom-up public-tech investor and a senior product-minded production AI engineer. Investment next steps require a thesis, exposure, value-chain consequence, or investment-relevant observable rather than an Engineering experiment. Engineering next steps apply transferable source patterns to a representative team workflow instead of assigning audience-remote reproduction work. Model input uses the same first-party semantic boundary as routing. `fli insights` freezes exact requests before execution, rejects non-current source or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The prompt-qualified store contains 173 decisions: 100 surfaced, 73 suppressed, 242,176 cached input tokens, and $3.622624 proxy-reported cost. The fresh July 14–15 top-30 cohort produced 57 surfaced and 41 suppressed decisions. Review found strong per-Event audience fit, repeated Inkling and Google/DoD developments across independent Events, and one stale 2022 ChatGPT launch false positive caused by missing temporal context in the first-party packet. The next boundary is temporal provenance plus consolidation/final selection, not looser prompts or immediate catalog scale. |
-| Insights UI | Ready for the v9/v6 audit and final selection | The Investment and AI Engineering views share the Feed-style date rail, inherit the frozen canonical Feed rank, and expose `Kept`, `Suppressed`, and `All` status views. `/api/insights/dates` and `/api/insights` are the only live endpoints. Publication requires the exact current audience prompt/hash/schema and a completed current v9 routing item; no old row is re-anchored, relabeled, or read through a compatibility route. The current checkpoint exposes 100 kept and 73 suppressed decisions across all eleven evaluated days. Repeated runs of one Event/audience are deduplicated, but semantically overlapping independent Events remain visible for audit until the consolidation boundary is chosen. |
+| Feed audience routing | Current v9 top-100 coverage through July 15 | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons. Its semantic packet contains the root, same-author replies/thread/quote commentary, and accepted first-party artifacts; independently authored reactions and pure reposts remain outside model input. The refreshed July 5–15 cohort completed 1,100/1,100 envelopes with zero failures: 330 both, 123 Engineering-only, 164 Investment-only, and 483 neither. It reported 967 cache-hit requests, 1,732,864 cached tokens, and $5.372287 proxy-reported cost. Routes are exposed only where their frozen envelope hash still matches the rebuilt publication. |
+| Audience Insight generation | Complete v10/v7 evaluation of every routed-positive audience | Investment v10 and AI Engineering v7 address distinct readers through one shared decision core and per-audience action schemas: `Summary` → `Why it matters` → one trigger-shaped Investment `Watchpoint` or one bounded Engineering `Experiment`. Insight-only rendering adds the evaluation day and stored post dates without changing routing hashes, and suppresses resurfaced historical material that has no current development. `fli insights` freezes exact requests before execution, rejects non-current source or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The current production batch contains 947 unique Event/audience decisions: 404 surfaced and 543 suppressed. It reported 847 cache-hit requests, 1,755,904 cached tokens, and $15.512238 proxy-reported cost. The stale 2022 ChatGPT candidate is now suppressed with its date; all 189 surfaced Investment notes use trigger→assumption watchpoints, and no surfaced rationale contains editorial gate-talk. Cross-Event semantic duplicates remain an explicit downstream editorial boundary. |
+| Insights UI | Current v10/v7 reader and audit surface | The Investment and AI Engineering views share the Feed-style date rail, inherit the frozen canonical Feed rank, and expose `Kept`, `Suppressed`, and `All` status views. Surfaced cards use a flat four-part reader hierarchy: title, summary, why it matters, and the audience-specific watchpoint or experiment; suppressed cards retain a neutral title and reason. `/api/insights/dates` and `/api/insights` are the only live endpoints. Publication requires the exact current audience prompt/hash/schema and a completed current v9 routing item; routing-source cache tokens notice database replacement and WAL changes, so a successful refresh becomes visible without stale process state. The checkpoint exposes 404 kept and 543 suppressed decisions across all eleven evaluated days. Repeated runs of one Event/audience are deduplicated, but semantically overlapping independent Events remain visible for audit until the consolidation boundary is chosen. |
 | Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -82,21 +81,20 @@ current databases or APIs before using them as present-tense product claims.
 The repository has proved that one prompt/schema, versioned run store, and
 canonical Feed projection can route a top-100 cohort under a first-party-only
 semantic boundary and turn selected positive routes into distinct audience
-notes. Bounded Terra calibrations plus 148 expansion decisions have proved that
-the current audience gates can retain actionable early signals while rejecting
-weak packets. The next unproven claim is downstream of the prompts: whether
-source time can prevent a resurfaced historical post from reading as a current
-development, whether semantically overlapping independent Events should be
-consolidated before the reader view, and which 3–5 unique developments form the
-strongest submission proof. Immediate catalog scale would amplify known
-duplication and stale-source risk rather than add stronger evidence. Previous
-multi-stage Insight results remain historical learning, not the active
-contract.
+notes. The 947-decision current-contract run proves that the audience gates can
+retain actionable early signals while rejecting weak packets, and that stored
+source time prevents a resurfaced historical post from reading as a current
+development. The next unproven claim is downstream of generation: whether
+semantically overlapping independent Events should be consolidated before the
+reader view, and which 3–5 unique developments form the strongest submission
+proof. Previous multi-stage Insight results remain historical learning, not the
+active contract.
 
 ## Submission Finish Line
 
-The routing boundary is frozen. The active Evidence Audience Routing tracker
-owns final closeout and archive. At system level, the remaining proof is:
+The routing and per-Event Insight boundaries are frozen; the completed Insight
+Format v10 tracker is archived as milestone evidence. At system level, the
+remaining proof is:
 
 1. Consolidate or manually select across the obvious cross-Event duplicate
    clusters without weakening the per-Event audience prompts.

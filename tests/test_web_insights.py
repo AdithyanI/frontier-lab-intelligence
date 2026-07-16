@@ -151,8 +151,8 @@ def _insight_db(tmp_path, *, current_routing=True):
                 "suppression_reason": None,
                 "title": "Test harness changes against held-out failures",
                 "summary": "A bounded harness-improvement loop improved held-out tasks.",
-                "implication": "The method is concrete and testable on an internal workflow.",
-                "next_step": "Run it on one frozen held-in and held-out split.",
+                "why_it_matters": "The method is concrete and testable on an internal workflow.",
+                "experiment": "Run it on one frozen held-in and held-out split.",
             },
         ),
     )
@@ -166,8 +166,8 @@ def _insight_db(tmp_path, *, current_routing=True):
                 "suppression_reason": "No company adoption or public-equity transmission path is evidenced.",
                 "title": "A technical method without investment transmission",
                 "summary": None,
-                "implication": None,
-                "next_step": None,
+                "why_it_matters": None,
+                "watchpoint": None,
             },
         ),
     )
@@ -216,6 +216,9 @@ def test_status_views_expose_kept_and_suppressed_rationales(tmp_path):
     assert kept["items"][0]["root_source_url"] == "https://x.com/alice/status/post-1"
     assert kept["items"][0]["artifacts"] == []
     assert kept["items"][0]["decision_reason"].startswith("The method is concrete")
+    assert kept["items"][0]["why_it_matters"].startswith("The method is concrete")
+    assert kept["items"][0]["action"] == "Run it on one frozen held-in and held-out split."
+    assert kept["items"][0]["action_label"] == "Experiment"
     assert suppressed["items"][0]["decision"] == "suppress"
     assert suppressed["items"][0]["decision_reason"].startswith("No company adoption")
     assert suppressed["run"]["counts"] == {"all": 1, "kept": 0, "suppressed": 1}
@@ -226,6 +229,11 @@ def test_status_views_expose_kept_and_suppressed_rationales(tmp_path):
 
 def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
     db = _insight_db(tmp_path)
+    before = insight_store.insights_payload(
+        audience="ai_engineering", day="2026-07-13", status="kept", db_path=db
+    )
+    assert before["items"][0]["artifacts"] == []
+
     routing_db = tmp_path / "routing.db"
     routing = sqlite3.connect(routing_db)
     routing.execute(
@@ -260,7 +268,6 @@ def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
     )
     conn.commit()
     conn.close()
-    insight_store._routing_source.cache_clear()
 
     kept = insight_store.insights_payload(
         audience="ai_engineering", day="2026-07-13", status="kept", db_path=db
@@ -277,7 +284,6 @@ def test_items_link_the_frozen_root_source_and_primary_artifacts(tmp_path):
 
 def test_superseded_routing_contract_cannot_publish_current_insights(tmp_path):
     db = _insight_db(tmp_path, current_routing=False)
-    insight_store._routing_source.cache_clear()
 
     dates = insight_store.insight_dates_payload(
         audience="ai_engineering", db_path=db

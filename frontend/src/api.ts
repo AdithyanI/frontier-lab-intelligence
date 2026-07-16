@@ -442,8 +442,9 @@ export interface InsightItem {
   decision_reason: string
   title: string
   summary: string | null
-  implication: string | null
-  next_step: string | null
+  why_it_matters: string | null
+  action: string | null
+  action_label: 'Watchpoint' | 'Experiment'
   model: string
   reasoning_effort: string
   prompt_version: string

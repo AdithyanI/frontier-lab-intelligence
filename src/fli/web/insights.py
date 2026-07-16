@@ -42,11 +42,27 @@ def _open(path: Path) -> sqlite3.Connection | None:
     return conn
 
 
-@lru_cache(maxsize=32)
-def _routing_source(source_db: str) -> dict[str, Any]:
-    path = Path(source_db)
-    if not path.is_absolute():
-        path = insight_runs.REPO_ROOT / path
+def _db_version(path: Path) -> tuple[str, int, int, int, int]:
+    """Return a cache token that notices replacement and WAL writes."""
+    try:
+        stat = path.stat()
+        main_mtime, main_size = stat.st_mtime_ns, stat.st_size
+    except FileNotFoundError:
+        main_mtime, main_size = 0, 0
+    wal = Path(f"{path}-wal")
+    try:
+        wal_stat = wal.stat()
+        wal_mtime, wal_size = wal_stat.st_mtime_ns, wal_stat.st_size
+    except FileNotFoundError:
+        wal_mtime, wal_size = 0, 0
+    return str(path.resolve()), main_mtime, main_size, wal_mtime, wal_size
+
+
+@lru_cache(maxsize=64)
+def _routing_source_cached(
+    version: tuple[str, int, int, int, int],
+) -> dict[str, Any]:
+    path = Path(version[0])
     conn = _open(path)
     if conn is None:
         return {"current": False, "packets": {}}
@@ -78,6 +94,13 @@ def _routing_source(source_db: str) -> dict[str, Any]:
         if isinstance(packet, dict):
             packets[str(row["event_id"])] = packet
     return {"current": True, "run_id": str(meta["run_id"]), "packets": packets}
+
+
+def _routing_source(source_db: str) -> dict[str, Any]:
+    path = Path(source_db)
+    if not path.is_absolute():
+        path = insight_runs.REPO_ROOT / path
+    return _routing_source_cached(_db_version(path))
 
 
 def _source_payload(row: dict[str, Any]) -> dict[str, Any]:
@@ -194,7 +217,8 @@ def insight_dates_payload(
 
 def _item_payload(row: dict[str, Any]) -> dict[str, Any]:
     decision = str(row["decision"])
-    implication = row["implication"]
+    why_it_matters = row["why_it_matters"]
+    audience = insight_generation.require_audience(str(row["audience"]))
     return {
         "candidate_id": str(row["candidate_id"]),
         "event_id": str(row["event_id"]),
@@ -205,12 +229,15 @@ def _item_payload(row: dict[str, Any]) -> dict[str, Any]:
         "decision_reason": (
             str(row["suppression_reason"])
             if decision == "suppress"
-            else str(implication)
+            else str(why_it_matters)
         ),
         "title": str(row["title"]),
         "summary": str(row["summary"]) if row["summary"] is not None else None,
-        "implication": str(implication) if implication is not None else None,
-        "next_step": str(row["next_step"]) if row["next_step"] is not None else None,
+        "why_it_matters": (
+            str(why_it_matters) if why_it_matters is not None else None
+        ),
+        "action": str(row["action"]) if row["action"] is not None else None,
+        "action_label": insight_generation.ACTION_LABELS[audience],
         "model": str(row["model"]),
         "reasoning_effort": str(row["reasoning_effort"]),
         "prompt_version": str(row["prompt_version"]),

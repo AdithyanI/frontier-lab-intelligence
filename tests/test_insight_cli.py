@@ -170,13 +170,17 @@ class _RawAPI:
 
     def create(self, **kwargs):
         self.calls.append(kwargs)
+        properties = kwargs["text"]["format"]["schema"]["properties"]
+        action_field = (
+            "watchpoint" if "watchpoint" in properties else "experiment"
+        )
         output = {
             "decision": "surface",
             "suppression_reason": None,
             "title": "Make agent recovery measurable",
             "summary": "Alice reports a measured harness-recovery improvement.",
-            "implication": "The harness design may improve agent reliability.",
-            "next_step": "Reproduce the evaluation on one internal workflow.",
+            "why_it_matters": "The harness design may improve agent reliability.",
+            action_field: "Reproduce the evaluation on one internal workflow.",
         }
         response = SimpleNamespace(
             id=f"response-{len(self.calls)}",
@@ -217,7 +221,10 @@ def test_contract_command_exposes_exact_schema(capsys):
 
     assert payload["status"] == "ok"
     assert payload["schema_version"] == "1.0"
-    assert payload["data"]["output_format"] == insight_cli.insight_generation.OUTPUT_FORMAT
+    assert payload["data"]["output_formats"] == {
+        audience.value: insight_cli.insight_generation.output_format(audience)
+        for audience in insight_cli.insight_generation.InsightAudience
+    }
     assert payload["data"]["model_view"].endswith("artifacts_only")
 
 
@@ -252,7 +259,9 @@ def test_dry_run_resolves_latest_route_and_dumps_first_party_requests(
     assert payload["data"]["will_call_model"] is False
     assert "Harness evaluation" in request["input"]
     assert "Huge if true" not in request["input"]
-    assert request["text"]["format"] == insight_cli.insight_generation.OUTPUT_FORMAT
+    assert request["text"]["format"] == insight_cli.insight_generation.output_format(
+        "investment"
+    )
     assert request["prompt_cache_retention"] == "24h"
 
 

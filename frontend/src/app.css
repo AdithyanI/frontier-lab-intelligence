@@ -2781,14 +2781,12 @@ td.num {
 .insight-decision-reason {
   max-width: 920px;
   margin-top: 24px;
-  padding: 16px 18px 18px;
-  border-left: 3px solid var(--positive);
-  background: var(--blue-wash);
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
 }
 
 .insight-decision-reason--suppressed {
-  border-left-color: var(--muted);
-  background: var(--surface);
+  color: var(--muted);
 }
 
 .insight-decision-reason h3 {

@@ -259,16 +259,16 @@ function InsightRow({ item }: { item: InsightItem }) {
 
         <section
           className={`insight-decision-reason insight-decision-reason--${isKept ? 'kept' : 'suppressed'}`}
-          aria-label={`${isKept ? 'Why kept' : 'Why suppressed'}: ${accessibleName}`}
+          aria-label={`${isKept ? 'Why it matters' : 'Why suppressed'}: ${accessibleName}`}
         >
-          <h3 className="mono">{isKept ? 'Why kept' : 'Why suppressed'}</h3>
+          <h3 className="mono">{isKept ? 'Why it matters' : 'Why suppressed'}</h3>
           <p>{decodeTextEntities(item.decision_reason)}</p>
         </section>
 
-        {isKept && item.next_step && (
-          <section className="insight-analysis" aria-label={`Next step for ${accessibleName}`}>
-            <h3 className="mono">Next step</h3>
-            <p>{decodeTextEntities(item.next_step)}</p>
+        {isKept && item.action && (
+          <section className="insight-analysis" aria-label={`${item.action_label} for ${accessibleName}`}>
+            <h3 className="mono">{item.action_label}</h3>
+            <p>{decodeTextEntities(item.action)}</p>
           </section>
         )}
       </div>

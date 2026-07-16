@@ -345,17 +345,24 @@ the root, same-author replies/thread/quote commentary, and linked primary
 artifacts; independently authored reactions and pure reposts stay available
 only in the upstream Feed activity ledger and human audit.
 That first-party view is wrapped as the final variable block after one stable
-audience prompt. Investment and AI Engineering have separate versioned prompts and cache keys but share one
-strict output schema: `decision`, freeform nullable `suppression_reason`, a
-required `title`, and nullable `summary`, `implication`, and `next_step`. Every
+audience prompt. Investment and AI Engineering have separate versioned prompts,
+cache keys, and strict action schemas. Both return `decision`, freeform nullable
+`suppression_reason`, required `title`, nullable `summary`, and nullable
+`why_it_matters`; Investment adds a nullable `watchpoint`, while Engineering
+adds a nullable `experiment`. The SQLite store normalizes those last fields to
+one audience-keyed `action` column and the API returns its reader label. Every
 decision gets a short reader-oriented title. A surfaced result requires all
-three content fields and no suppression reason; a suppressed result requires
-one concrete reason and no audience content beyond its neutral title. No quote, confidence score,
-model-authored identifier, or ranking field exists in the schema.
+three audience content fields and no suppression reason; a suppressed result
+requires one concrete reason and no audience content beyond its neutral title.
+No quote, confidence score, model-authored identifier, or ranking field exists
+in the schema.
 
-The stable Investment v9 and Engineering v6 prompts are naturally cache eligible
-under `o200k_base`, at 2,148 and 1,937 instruction tokens respectively.
-Investment v9 explicitly preserves the case assignment's early-signal cases:
+The stable Investment v10 and Engineering v7 prompts are naturally cache
+eligible. Insight-only rendering adds `evaluation_day` and the stored Feed
+publication date for each included post so historical evidence cannot present
+itself as a current development. Dates do not alter the immutable routing packet
+hash or the routing model input. Investment v10 explicitly preserves the case
+assignment's early-signal cases:
 a specific first-party departure or company formation around a concrete
 direction, an attributed strategic thesis, or a concrete attributed capability
 observation can clear the final gate before funding, adoption, product, or
@@ -364,16 +371,18 @@ transmission path remain explicit.
 Their distinct editorial voices reflect the real consumers: a technically
 fluent bottom-up public-equity investor looking for thesis-changing observables,
 and a senior production AI engineer looking for reproducible build decisions.
-Investment next steps must name a thesis, exposure, value-chain consequence, or
-investment-relevant observable; they cannot assign an Engineering experiment
-unless it resolves a named investment question.
-Engineering v6 permits a concrete attributed capability observation or
+Investment `why_it_matters` names the thesis, exposure, competitive map, or
+value-chain consequence that could change, and its one-sentence watchpoint
+binds one observable trigger to the assumption it would revisit. It cannot
+assign an Engineering experiment unless that experiment is itself the named
+investment observable. Engineering v7 permits a concrete attributed capability observation or
 architectural thesis before formal reproduction only when it challenges a
 named build assumption and supports a bounded team-relevant investigation.
-Its next step applies transferable patterns to a representative team workflow;
+Its experiment applies transferable patterns to a representative team workflow;
 it reproduces a specialized source project only when the team could plausibly
-adopt or compare that project directly. Generic inspiration and unspecified
-comparisons still stop at the final gate.
+adopt or compare that project directly, and is bounded by workload, baseline,
+metric, and failure condition. Generic inspiration and unspecified comparisons
+still stop at the final gate.
 `build_request` constructs the shared LiteLLM Responses
 payload with stable metadata/tags and provider cache kwargs; `evaluate` executes
 and validates one request without owning persistence. `publish` binds surfaced
@@ -410,9 +419,11 @@ routing prompt version/hash/schema, run identity, and completed Event packet.
 The UI never reanchors or relabels an old result. It deduplicates later reruns by event/audience,
 orders solely by the already-frozen canonical Feed rank, includes
 all evaluated days even when zero items were kept, and exposes `kept`,
-`suppressed`, and `all` decision views. The UI uses implication as the surfaced
-decision rationale (`Why kept`) and the freeform suppression reason as `Why
-suppressed`; no model quote or second ranking is introduced.
+`suppressed`, and `all` decision views. Surfaced cards progress from `Summary`
+to `Why it matters` to the audience-specific `Watchpoint` or `Experiment`;
+suppressed cards show only `Why suppressed`. The reader sections use flat
+hairline separation rather than gate-colored callouts. No model quote or second
+ranking is introduced.
 This identity rule does not consolidate semantically overlapping independent
 Events. The 50-decision expansion proved that multiple root authors can describe
 the same launch and yield individually valid but duplicate Insights; that is a

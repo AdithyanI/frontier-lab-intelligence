@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import replace
 from datetime import date, datetime, timedelta, timezone
 import hashlib
 import json
@@ -23,6 +24,7 @@ from fli import (
     entity_kinds,
     insight_generation,
     insight_runs,
+    signal_feed,
 )
 
 
@@ -125,7 +127,10 @@ def contract_payload(audience: str = AUDIENCE_ALL) -> dict[str, Any]:
     )
     return {
         "schema_version": insight_generation.SCHEMA_VERSION,
-        "output_format": insight_generation.OUTPUT_FORMAT,
+        "output_formats": {
+            value.value: insight_generation.output_format(value)
+            for value in selected
+        },
         "model_view": "first_party_authored_posts_and_artifacts_only",
         "prompts": [
             {
@@ -147,6 +152,55 @@ def _open_readonly(path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(f"file:{path.resolve()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _enrich_post_dates(
+    packet: audience_routing.RoutingPacket,
+    *,
+    feed_run_id: str,
+    feed_db: Path = signal_feed.DEFAULT_FEED_DB,
+) -> audience_routing.RoutingPacket:
+    """Add Insight-only post dates without mutating the frozen route packet."""
+    source_ids = sorted(
+        {
+            source.source_id
+            for source in packet.sources
+            if source.source_type == "x_post" and not source.posted
+        }
+    )
+    if not source_ids or not feed_db.is_file():
+        return packet
+    placeholders = ",".join("?" for _ in source_ids)
+    try:
+        conn = _open_readonly(feed_db)
+        try:
+            rows = conn.execute(
+                f"""SELECT post_id, published_at FROM feed_post
+                    WHERE run_id = ? AND post_id IN ({placeholders})""",
+                (feed_run_id, *source_ids),
+            ).fetchall()
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return packet
+    posted_by_id = {
+        str(row["post_id"]): str(row["published_at"])[:10]
+        for row in rows
+        if row["published_at"]
+    }
+    if not posted_by_id:
+        return packet
+    return audience_routing.RoutingPacket(
+        event_id=packet.event_id,
+        day=packet.day,
+        sources=tuple(
+            replace(
+                source,
+                posted=source.posted or posted_by_id.get(source.source_id),
+            )
+            for source in packet.sources
+        ),
+    )
 
 
 def resolve_envelope(
@@ -249,7 +303,10 @@ def run_spike(
         source_routing_run_id=source_routing_run_id,
     )
     row = resolved["row"]
-    packet = resolved["packet"]
+    packet = _enrich_post_dates(
+        resolved["packet"],
+        feed_run_id=str(resolved["meta"]["source_feed_run_id"]),
+    )
     audiences = _selected_audiences(row, audience)
     dump_dir.mkdir(parents=True, exist_ok=True)
     request_paths: dict[str, str] = {}

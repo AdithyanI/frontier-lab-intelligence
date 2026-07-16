@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS insight_item (
     suppression_reason TEXT,
     title TEXT,
     summary TEXT,
-    implication TEXT,
-    next_step TEXT,
+    why_it_matters TEXT,
+    action TEXT,
     raw_output_text TEXT,
     published_json TEXT,
     evaluation_json TEXT,
@@ -126,7 +126,9 @@ def _request_contract(
     instructions = request.get("instructions")
     if not isinstance(instructions, str) or not instructions:
         raise ValueError(f"{audience} request has no instructions")
-    if request.get("text", {}).get("format") != insight_generation.OUTPUT_FORMAT:
+    if request.get("text", {}).get("format") != insight_generation.output_format(
+        audience
+    ):
         raise ValueError(f"{audience} request does not match the current output schema")
     if instructions != prompt.instructions():
         raise ValueError(f"{audience} request does not match the current prompt")
@@ -311,7 +313,9 @@ def complete_item(
         raise ValueError(f"{run_id}/{audience} input changed after freeze")
     if str(row["prompt_sha256"]) != str(evaluation["prompt_sha256"]):
         raise ValueError(f"{run_id}/{audience} prompt changed after freeze")
-    result = insight_generation.validate_output(evaluation["result"])
+    result = insight_generation.validate_output(
+        evaluation["result"], audience=audience
+    )
     canonical_evaluation = _canonical_json(evaluation)
     if row["status"] == "complete":
         if str(row["evaluation_json"]) != canonical_evaluation:
@@ -321,8 +325,8 @@ def complete_item(
     conn.execute(
         """UPDATE insight_item
            SET status = 'complete', attempts = attempts + 1,
-               decision = ?, suppression_reason = ?, title = ?, summary = ?, implication = ?,
-               next_step = ?, raw_output_text = ?, published_json = ?,
+               decision = ?, suppression_reason = ?, title = ?, summary = ?,
+               why_it_matters = ?, action = ?, raw_output_text = ?, published_json = ?,
                evaluation_json = ?, response_id = ?, response_model = ?,
                input_tokens = ?, cached_tokens = ?, cache_write_tokens = ?,
                output_tokens = ?, reported_cost_usd = ?, request_tags_json = ?,
@@ -333,8 +337,8 @@ def complete_item(
             result.suppression_reason,
             result.title,
             result.summary,
-            result.implication,
-            result.next_step,
+            result.why_it_matters,
+            result.action,
             evaluation.get("raw_output_text"),
             _canonical_json(evaluation.get("published")),
             canonical_evaluation,
@@ -395,7 +399,7 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
         raise ValueError(f"Insight run {run_id!r} does not exist")
     items = conn.execute(
         """SELECT audience, candidate_id, status, decision, suppression_reason,
-                  title, summary, implication, next_step, attempts, prompt_version,
+                  title, summary, why_it_matters, action, attempts, prompt_version,
                   input_sha256, response_id, response_model, input_tokens,
                   cached_tokens, cache_write_tokens, output_tokens,
                   reported_cost_usd, error_type, error_message, completed_at

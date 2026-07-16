@@ -18,16 +18,15 @@ from typing import Any
 from fli import audience_routing, llm_responses
 
 
-SCHEMA_VERSION = "audience-insight-output-v3"
+SCHEMA_VERSION = "audience-insight-output-v4"
 MAX_OUTPUT_TOKENS = 4_096
 _PROMPT_ROOT = Path(__file__).with_name("prompts")
-_OUTPUT_FIELDS = (
+_BASE_OUTPUT_FIELDS = (
     "decision",
     "suppression_reason",
     "title",
     "summary",
-    "implication",
-    "next_step",
+    "why_it_matters",
 )
 
 
@@ -59,39 +58,64 @@ class PromptContract:
 PROMPT_CONTRACTS = {
     InsightAudience.INVESTMENT: PromptContract(
         audience=InsightAudience.INVESTMENT,
-        version="investment-insight-v9",
-        path=_PROMPT_ROOT / "investment_insight_v9.txt",
-        cache_key="fli:insights:investment:v9",
+        version="investment-insight-v10",
+        path=_PROMPT_ROOT / "investment_insight_v10.txt",
+        cache_key="fli:insights:investment:v10",
     ),
     InsightAudience.AI_ENGINEERING: PromptContract(
         audience=InsightAudience.AI_ENGINEERING,
-        version="ai-engineering-insight-v6",
-        path=_PROMPT_ROOT / "ai_engineering_insight_v6.txt",
-        cache_key="fli:insights:ai-engineering:v6",
+        version="ai-engineering-insight-v7",
+        path=_PROMPT_ROOT / "ai_engineering_insight_v7.txt",
+        cache_key="fli:insights:ai-engineering:v7",
     ),
 }
 
 
-OUTPUT_FORMAT: dict[str, Any] = {
-    "type": "json_schema",
-    "name": "audience_insight_v3",
-    "strict": True,
-    "schema": {
-        "type": "object",
-        "properties": {
-            "decision": {
-                "type": "string",
-                "enum": [decision.value for decision in InsightDecision],
+ACTION_FIELDS = {
+    InsightAudience.INVESTMENT: "watchpoint",
+    InsightAudience.AI_ENGINEERING: "experiment",
+}
+ACTION_LABELS = {
+    InsightAudience.INVESTMENT: "Watchpoint",
+    InsightAudience.AI_ENGINEERING: "Experiment",
+}
+
+
+def output_format(
+    audience: str | InsightAudience,
+) -> dict[str, Any]:
+    """Return the strict audience-specific v4 response schema."""
+    try:
+        selected = InsightAudience(audience)
+    except ValueError as error:
+        raise ValueError(f"unsupported Insight audience: {audience!r}") from error
+    action_field = ACTION_FIELDS[selected]
+    fields = (*_BASE_OUTPUT_FIELDS, action_field)
+    return {
+        "type": "json_schema",
+        "name": f"audience_insight_v4_{selected.value}",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "decision": {
+                    "type": "string",
+                    "enum": [decision.value for decision in InsightDecision],
+                },
+                "suppression_reason": {"type": ["string", "null"]},
+                "title": {"type": "string"},
+                "summary": {"type": ["string", "null"]},
+                "why_it_matters": {"type": ["string", "null"]},
+                action_field: {"type": ["string", "null"]},
             },
-            "suppression_reason": {"type": ["string", "null"]},
-            "title": {"type": "string"},
-            "summary": {"type": ["string", "null"]},
-            "implication": {"type": ["string", "null"]},
-            "next_step": {"type": ["string", "null"]},
+            "required": list(fields),
+            "additionalProperties": False,
         },
-        "required": list(_OUTPUT_FIELDS),
-        "additionalProperties": False,
-    },
+    }
+
+
+OUTPUT_FORMATS = {
+    audience: output_format(audience) for audience in InsightAudience
 }
 
 
@@ -134,22 +158,24 @@ class InsightCandidate:
 
 @dataclass(frozen=True)
 class InsightResult:
+    audience: InsightAudience
     decision: InsightDecision
     suppression_reason: str | None
     title: str
     summary: str | None
-    implication: str | None
-    next_step: str | None
+    why_it_matters: str | None
+    action: str | None
 
     def as_dict(self) -> dict[str, str | None]:
-        return {
+        payload = {
             "decision": self.decision.value,
             "suppression_reason": self.suppression_reason,
             "title": self.title,
             "summary": self.summary,
-            "implication": self.implication,
-            "next_step": self.next_step,
+            "why_it_matters": self.why_it_matters,
+            ACTION_FIELDS[self.audience]: self.action,
         }
+        return payload
 
 
 @dataclass(frozen=True)
@@ -167,8 +193,8 @@ class PublishedInsight:
     feed_rank: int
     title: str
     summary: str
-    implication: str
-    next_step: str
+    why_it_matters: str
+    action: str
 
     def as_dict(self) -> dict[str, str | int]:
         return {
@@ -179,8 +205,9 @@ class PublishedInsight:
             "feed_rank": self.feed_rank,
             "title": self.title,
             "summary": self.summary,
-            "implication": self.implication,
-            "next_step": self.next_step,
+            "why_it_matters": self.why_it_matters,
+            "action": self.action,
+            "action_label": ACTION_LABELS[self.audience],
         }
 
 
@@ -219,7 +246,7 @@ def render_input(candidate: InsightCandidate) -> str:
             or source.relation in {"root", "same_author_continuation"}
         ),
     )
-    packet = audience_routing.render_input(model_packet)
+    packet = audience_routing.render_input(model_packet, include_dates=True)
     return f"<candidate_evidence>\n{packet}\n</candidate_evidence>"
 
 
@@ -256,7 +283,7 @@ def build_request(
         **llm_responses.litellm_prompt_cache_kwargs(model),
         "reasoning": {"effort": effort},
         "max_output_tokens": MAX_OUTPUT_TOKENS,
-        "text": {"format": OUTPUT_FORMAT},
+        "text": {"format": output_format(candidate.audience)},
         "store": False,
         "extra_body": {"metadata": {"tags": list(tags)}},
         "extra_headers": {"x-litellm-tags": ",".join(tags)},
@@ -272,10 +299,15 @@ def _clean_optional(value: Any, *, field: str) -> str | None:
     return cleaned or None
 
 
-def validate_output(output: str | dict[str, Any]) -> InsightResult:
+def validate_output(
+    output: str | dict[str, Any], *, audience: str | InsightAudience
+) -> InsightResult:
     """Validate schema shape plus the surface/suppress cross-field contract."""
+    selected = require_audience(audience)
+    action_field = ACTION_FIELDS[selected]
+    output_fields = (*_BASE_OUTPUT_FIELDS, action_field)
     payload = json.loads(output) if isinstance(output, str) else output
-    if not isinstance(payload, dict) or set(payload) != set(_OUTPUT_FIELDS):
+    if not isinstance(payload, dict) or set(payload) != set(output_fields):
         raise ValueError("response does not match the exact Insight schema")
     try:
         decision = InsightDecision(payload["decision"])
@@ -284,24 +316,40 @@ def validate_output(output: str | dict[str, Any]) -> InsightResult:
 
     values = {
         field: _clean_optional(payload[field], field=field)
-        for field in _OUTPUT_FIELDS
+        for field in output_fields
         if field != "decision"
     }
     if values["title"] is None:
         raise ValueError("title is required for every Insight decision")
-    content = (values["summary"], values["implication"], values["next_step"])
+    content = (
+        values["summary"],
+        values["why_it_matters"],
+        values[action_field],
+    )
     if decision is InsightDecision.SURFACE:
         if values["suppression_reason"] is not None:
             raise ValueError("surface requires a null suppression_reason")
         if any(value is None for value in content):
-            raise ValueError("surface requires summary, implication, and next_step")
+            raise ValueError(
+                f"surface requires summary, why_it_matters, and {action_field}"
+            )
     else:
         if values["suppression_reason"] is None:
             raise ValueError("suppress requires a concrete suppression_reason")
         if any(value is not None for value in content):
-            raise ValueError("suppress requires null summary, implication, and next_step")
+            raise ValueError(
+                f"suppress requires null summary, why_it_matters, and {action_field}"
+            )
 
-    return InsightResult(decision=decision, **values)
+    return InsightResult(
+        audience=selected,
+        decision=decision,
+        suppression_reason=values["suppression_reason"],
+        title=values["title"],
+        summary=values["summary"],
+        why_it_matters=values["why_it_matters"],
+        action=values[action_field],
+    )
 
 
 def publish(candidate: InsightCandidate, result: InsightResult) -> PublishedInsight:
@@ -310,8 +358,10 @@ def publish(candidate: InsightCandidate, result: InsightResult) -> PublishedInsi
         raise ValueError("suppressed results cannot be published")
     assert result.summary is not None
     assert result.title is not None
-    assert result.implication is not None
-    assert result.next_step is not None
+    if result.audience is not candidate.audience:
+        raise ValueError("result audience does not match the Insight candidate")
+    assert result.why_it_matters is not None
+    assert result.action is not None
     return PublishedInsight(
         candidate_id=candidate.candidate_id,
         event_id=candidate.packet.event_id,
@@ -320,8 +370,8 @@ def publish(candidate: InsightCandidate, result: InsightResult) -> PublishedInsi
         feed_rank=candidate.feed_rank,
         title=result.title,
         summary=result.summary,
-        implication=result.implication,
-        next_step=result.next_step,
+        why_it_matters=result.why_it_matters,
+        action=result.action,
     )
 
 
@@ -369,7 +419,7 @@ def evaluate(
             f"{response_data.get('incomplete_details')!r}"
         )
     raw_output_text = llm_responses.output_text(response_data)
-    result = validate_output(raw_output_text)
+    result = validate_output(raw_output_text, audience=candidate.audience)
     usage = getattr(response, "usage", None) or response_data.get("usage")
     prompt = contract(candidate.audience)
     return {
