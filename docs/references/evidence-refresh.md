@@ -14,14 +14,20 @@ X timelines → Feed posts/relations → publish Event envelopes
 
 ```bash
 fli evidence-refresh \
-  --through 2026-07-13 \
-  --days 9 \
+  --through 2026-07-15 \
+  --days 11 \
+  --collection-days 3 \
   --workers 32 \
   --json
 ```
 
 `--through` is the latest complete UTC day. `--days` defines the inclusive
-window. Collection uses up to `--workers` account requests concurrently. By
+published Feed/Event window. `--collection-days` can collect only the newest
+overlapping slice when completed collection runs already cover the earlier
+retained dates. The command proves that those completed run ranges compose
+without a gap before rebuilding downstream views. This avoids repaging old
+timelines merely to keep old Feed days visible. Collection uses up to
+`--workers` account requests concurrently. By
 default, every supported current artifact is extracted: ordinary hosts are
 sharded by origin, arXiv metadata/abstracts use the official batch feed, X
 Articles use their provider adapter, and eligible ordinary-page failures use
@@ -39,7 +45,9 @@ HTML cohort.
 - **Collection:** the frozen Registry/date/contract run ID is deterministic.
   Cached page chains are inspected first, and only incomplete accounts call the
   provider. Account fetches are resumable and parallel; protected accounts are
-  recorded rather than retried forever.
+  recorded rather than retried forever. Incremental collection may compose
+  adjacent completed runs for the same frozen Registry cohort and collection
+  contract; the retained publication is blocked if those ranges leave a gap.
 - **Feed:** the run ID hashes the date window, schema contract, and immutable raw
   post snapshots. An unchanged input reuses the existing run.
 - **Events:** the run ID hashes the Feed run and exact structural links. The

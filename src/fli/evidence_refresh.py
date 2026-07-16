@@ -33,6 +33,60 @@ def _day(value: str | date) -> date:
     return value if isinstance(value, date) else datetime.strptime(value, "%Y-%m-%d").date()
 
 
+def _completed_collection_coverage(
+    *,
+    manifest_path: Path | str,
+    start_day: date,
+    end_day: date,
+    contract: str,
+    cohort_sha256: str,
+) -> dict[str, Any]:
+    """Prove an inclusive range from contiguous completed collection runs."""
+    conn = sqlite3.connect(manifest_path)
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute(
+            """SELECT run_id, horizon_start_day, horizon_end_day
+               FROM collection_run
+               WHERE status = 'complete'
+                 AND collection_contract = ?
+                 AND cohort_sha256 = ?
+                 AND horizon_end_day >= ?
+                 AND horizon_start_day <= ?
+               ORDER BY horizon_start_day, horizon_end_day DESC""",
+            (contract, cohort_sha256, start_day.isoformat(), end_day.isoformat()),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    cursor = start_day
+    selected: list[str] = []
+    while cursor <= end_day:
+        candidates = [
+            row
+            for row in rows
+            if _day(row["horizon_start_day"]) <= cursor
+            and _day(row["horizon_end_day"]) >= cursor
+        ]
+        if not candidates:
+            return {
+                "status": "incomplete",
+                "start_day": start_day.isoformat(),
+                "end_day": end_day.isoformat(),
+                "first_uncovered_day": cursor.isoformat(),
+                "run_ids": selected,
+            }
+        winner = max(candidates, key=lambda row: row["horizon_end_day"])
+        selected.append(str(winner["run_id"]))
+        cursor = _day(winner["horizon_end_day"]) + timedelta(days=1)
+    return {
+        "status": "complete",
+        "start_day": start_day.isoformat(),
+        "end_day": end_day.isoformat(),
+        "run_ids": selected,
+    }
+
+
 def _optimize_stores(stores: dict[str, Path | str]) -> dict[str, Any]:
     """Refresh SQLite planner statistics after the materialized writes."""
     results: dict[str, Any] = {}
@@ -165,6 +219,7 @@ def refresh_evidence(
     *,
     through: str | date,
     days: int = 9,
+    collection_days: int | None = None,
     workers: int = 32,
     artifact_limit: int | None = None,
     x_article_limit: int | None = None,
@@ -184,6 +239,8 @@ def refresh_evidence(
     end = _day(through)
     if days < 1 or days > 90:
         raise ValueError("days must be between 1 and 90")
+    if collection_days is not None and not 1 <= collection_days <= days:
+        raise ValueError("collection_days must be between 1 and days")
     if workers < 1 or workers > 64:
         raise ValueError("workers must be between 1 and 64")
     if (artifact_limit is not None and artifact_limit < 0) or (
@@ -191,8 +248,10 @@ def refresh_evidence(
     ):
         raise ValueError("artifact limits cannot be negative")
     start = end - timedelta(days=days - 1)
+    collection_start = end - timedelta(days=(collection_days or days) - 1)
 
     collection: dict[str, Any]
+    collection_coverage: dict[str, Any]
     if collect:
         client = x_content.create_client(
             db_path=raw_db,
@@ -206,7 +265,7 @@ def refresh_evidence(
                 registry_path=registry_db,
                 raw_path=raw_db,
                 manifest_path=collection_db,
-                start_day=start,
+                start_day=collection_start,
                 end_day=end,
                 workers=workers,
             )
@@ -219,11 +278,38 @@ def refresh_evidence(
                 "X collection is incomplete; resume the same refresh after fixing "
                 "the reported account failures."
             )
+        if collection_start > start:
+            collection_coverage = _completed_collection_coverage(
+                manifest_path=collection_db,
+                start_day=start,
+                end_day=end,
+                contract=str(collection["contract"]),
+                cohort_sha256=str(collection["cohort_sha256"]),
+            )
+            if collection_coverage["status"] != "complete":
+                raise RuntimeError(
+                    "Incremental X collection completed, but prior completed runs do "
+                    "not cover the retained publication window; increase "
+                    "--collection-days before rebuilding downstream views."
+                )
+        else:
+            collection_coverage = {
+                "status": "complete",
+                "start_day": start.isoformat(),
+                "end_day": end.isoformat(),
+                "run_ids": [str(collection.get("run_id") or "")],
+            }
     else:
         collection = {
             "status": "skipped",
+            "start_day": collection_start.isoformat(),
+            "end_day": end.isoformat(),
+        }
+        collection_coverage = {
+            "status": "skipped",
             "start_day": start.isoformat(),
             "end_day": end.isoformat(),
+            "run_ids": [],
         }
 
     feed = signal_feed.materialize(
@@ -289,7 +375,12 @@ def refresh_evidence(
 
     return {
         "range": {"start_day": start.isoformat(), "end_day": end.isoformat()},
+        "collection_range": {
+            "start_day": collection_start.isoformat(),
+            "end_day": end.isoformat(),
+        },
         "collection": collection,
+        "collection_coverage": collection_coverage,
         "feed": feed,
         "events": events,
         "publication": publication,
@@ -313,6 +404,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--through", required=True, help="Latest complete UTC day.")
     parser.add_argument("--days", type=int, default=9)
+    parser.add_argument(
+        "--collection-days",
+        type=int,
+        default=None,
+        help=(
+            "Collect only the latest N days while retaining --days in the "
+            "published Feed; completed collection runs must cover the earlier range."
+        ),
+    )
     parser.add_argument("--workers", type=int, default=32)
     parser.add_argument(
         "--artifact-limit",
@@ -337,6 +437,7 @@ def main(argv: list[str] | None = None) -> int:
         result = refresh_evidence(
             through=args.through,
             days=args.days,
+            collection_days=args.collection_days,
             workers=args.workers,
             artifact_limit=args.artifact_limit,
             x_article_limit=args.x_article_limit,

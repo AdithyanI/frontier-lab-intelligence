@@ -83,6 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     evidence_refresh_p.add_argument("--through", required=True)
     evidence_refresh_p.add_argument("--days", type=int, default=9)
+    evidence_refresh_p.add_argument("--collection-days", type=int, default=None)
     evidence_refresh_p.add_argument("--workers", type=int, default=32)
     evidence_refresh_p.add_argument("--artifact-limit", type=int, default=None)
     evidence_refresh_p.add_argument("--x-article-limit", type=int, default=None)
@@ -211,6 +212,8 @@ def main(argv: list[str] | None = None) -> int:
             "--workers",
             str(args.workers),
         ]
+        if args.collection_days is not None:
+            refresh_args.extend(["--collection-days", str(args.collection_days)])
         if args.artifact_limit is not None:
             refresh_args.extend(["--artifact-limit", str(args.artifact_limit)])
         if args.x_article_limit is not None:

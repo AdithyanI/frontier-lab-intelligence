@@ -160,6 +160,98 @@ def test_refresh_evidence_can_rebuild_without_collection_or_content(monkeypatch)
     assert result["reader_fallback"] is None
 
 
+def test_refresh_evidence_proves_incremental_collection_covers_publication(
+    monkeypatch, tmp_path
+):
+    calls: list[tuple[str, object]] = []
+    client = _Client()
+    manifest = tmp_path / "collection.db"
+    conn = sqlite3.connect(manifest)
+    conn.execute(
+        """CREATE TABLE collection_run (
+               run_id TEXT PRIMARY KEY,
+               collection_contract TEXT NOT NULL,
+               horizon_start_day TEXT NOT NULL,
+               horizon_end_day TEXT NOT NULL,
+               cohort_sha256 TEXT NOT NULL,
+               status TEXT NOT NULL
+           )"""
+    )
+    conn.executemany(
+        "INSERT INTO collection_run VALUES (?, ?, ?, ?, ?, 'complete')",
+        [
+            ("old", "contract", "2026-07-05", "2026-07-13", "cohort"),
+            ("new", "contract", "2026-07-13", "2026-07-15", "cohort"),
+        ],
+    )
+    conn.commit()
+    conn.close()
+
+    monkeypatch.setattr(evidence_refresh.x_content, "create_client", lambda **_: client)
+    monkeypatch.setattr(
+        evidence_refresh.x_daily_collection,
+        "execute_collection",
+        lambda **kwargs: (
+            calls.append(("collection", kwargs)),
+            {
+                "run_id": "new",
+                "status": "complete",
+                "contract": "contract",
+                "cohort_sha256": "cohort",
+                "failures": 0,
+                "unfinished_accounts": 0,
+            },
+        )[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_feed,
+        "materialize",
+        lambda **kwargs: (calls.append(("feed", kwargs)), {"run_id": "feed-1"})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_events, "materialize", lambda **_: {"run_id": "event-1"}
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_events, "publish", lambda **_: {"run_id": "event-1"}
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifacts,
+        "import_feed_envelopes",
+        lambda **_: {"artifact_count": 0},
+    )
+    monkeypatch.setattr(evidence_refresh, "_optimize_stores", lambda _: {})
+
+    result = evidence_refresh.refresh_evidence(
+        through="2026-07-15",
+        days=11,
+        collection_days=3,
+        collection_db=manifest,
+        artifact_limit=0,
+        x_article_limit=0,
+        reader_fallback=False,
+        view_warmup=False,
+    )
+
+    assert calls[0][1]["start_day"].isoformat() == "2026-07-13"
+    assert calls[1][1]["days"] == 11
+    assert result["collection_range"] == {
+        "start_day": "2026-07-13",
+        "end_day": "2026-07-15",
+    }
+    assert result["collection_coverage"]["run_ids"] == ["old", "new"]
+
+
+def test_refresh_evidence_rejects_collection_window_larger_than_publication():
+    try:
+        evidence_refresh.refresh_evidence(
+            through="2026-07-15", days=3, collection_days=4
+        )
+    except ValueError as exc:
+        assert str(exc) == "collection_days must be between 1 and days"
+    else:
+        raise AssertionError("expected invalid collection_days to fail")
+
+
 def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):
     calls: list[tuple[str, object]] = []
     monkeypatch.setattr(
