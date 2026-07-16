@@ -876,22 +876,38 @@ def execute_collection(
                 )
 
         handles = [str(account["handle"]) for account in pending]
-        if workers == 1:
-            for handle in handles:
-                persist(collect_account(handle))
-        else:
-            original_refresh = client.refresh
-            client.refresh = True
-            try:
-                with ThreadPoolExecutor(max_workers=workers) as executor:
+        try:
+            if workers == 1:
+                for handle in handles:
+                    persist(collect_account(handle))
+            else:
+                original_refresh = client.refresh
+                client.refresh = True
+                executor = ThreadPoolExecutor(max_workers=workers)
+                try:
                     futures = {
                         executor.submit(collect_account, handle): handle
                         for handle in handles
                     }
                     for future in as_completed(futures):
                         persist(future.result())
-            finally:
-                client.refresh = original_refresh
+                except BaseException:
+                    for future in futures:
+                        future.cancel()
+                    executor.shutdown(wait=True, cancel_futures=True)
+                    raise
+                else:
+                    executor.shutdown(wait=True)
+                finally:
+                    client.refresh = original_refresh
+        except BaseException:
+            with conn:
+                conn.execute(
+                    """UPDATE collection_run SET status = 'partial', updated_at = ?
+                       WHERE run_id = ?""",
+                    (_now(), run_id),
+                )
+            raise
         failures = conn.execute(
             """SELECT COUNT(*) FROM collection_account
                WHERE run_id = ? AND status IN ('pending', 'failed')""",

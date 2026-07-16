@@ -2,6 +2,8 @@ import json
 from datetime import datetime, timezone
 from urllib import parse
 
+import pytest
+
 from fli import channels, registry, sources, x_content, x_daily_collection
 from fli.cli import main as root_main
 
@@ -444,6 +446,36 @@ def test_live_unparseable_tweet_timestamp_fails_closed(tmp_path):
     conn = x_daily_collection.connect_manifest(manifest_path)
     account = conn.execute("SELECT * FROM collection_account").fetchone()
     assert account["error_code"] == "E_PROVIDER_SCHEMA"
+
+
+def test_interrupted_collection_is_marked_partial(tmp_path, monkeypatch):
+    registry_path = tmp_path / "registry.db"
+    raw_path = tmp_path / "raw.db"
+    manifest_path = tmp_path / "manifest.db"
+    _registry(registry_path, {"handle": "alpha"})
+    client = x_content.TwitterContentClient(
+        api_key="test", db_path=raw_path, refresh=True
+    )
+    monkeypatch.setattr(
+        x_daily_collection,
+        "_fetch_missing_chain",
+        lambda **_: (_ for _ in ()).throw(KeyboardInterrupt()),
+    )
+
+    with pytest.raises(KeyboardInterrupt):
+        x_daily_collection.execute_collection(
+            client=client,
+            registry_path=registry_path,
+            raw_path=raw_path,
+            manifest_path=manifest_path,
+            start_day="2026-07-11",
+            end_day="2026-07-12",
+        )
+
+    conn = x_daily_collection.connect_manifest(manifest_path)
+    run = conn.execute("SELECT status FROM collection_run").fetchone()
+    conn.close()
+    assert run["status"] == "partial"
 
 
 def test_start_midnight_does_not_prove_complete_start_day(tmp_path):
