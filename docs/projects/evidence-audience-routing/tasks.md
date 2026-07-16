@@ -278,11 +278,12 @@ Application invariants:
   observations and architecture theses can surface before formal reproduction
   only when they challenge a named build assumption and support a bounded
   team-relevant investigation.
-- The balanced 50-decision expansion is the current scale stop. Its 30 surfaced
-  decisions represent roughly 23 unique developments because independent Feed
-  Events can describe the same launch. Per-Event prompt weakening would discard
-  valid signals; cross-Event consolidation or final selection is the next
-  boundary before another 50–100 requests.
+- The fresh July 14–15 top-30 expansion is the current scale stop. Across 98
+  decisions, 57 surfaced and 41 suppressed. Independent Feed Events can still
+  describe the same launch, and one historical source resurfaced without enough
+  temporal context in the model packet. Per-Event prompt weakening would
+  discard valid signals; temporal provenance plus cross-Event consolidation or
+  final selection is the next boundary before another broad request batch.
 
 ## Open Questions / Blockers
 
@@ -297,14 +298,16 @@ Application invariants:
   Insight stage demonstrates a concrete need.
 - All v8 routing cohorts are invalid historical evidence and their directories
   have been removed. Consumers must select only current source-qualified v9
-  run IDs against Event run `cc76958510ddf90c14863d1c5b8de1d40881a6bf12396671dfd264a6e2df210d`.
+  run IDs against Event run `1d180c03c12837f1550e61262a4d833c5d48e6370c2c16ae7bed05ba5e74c5f2`.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
 | completed | Extend the published Evidence window through July 15, audit old-day rank/hash and route visibility, then route only the new July 14–15 top-100 cohorts. | parent | `../../../references/evidence-refresh.md` |
-| pending | Consolidate or manually select across the obvious Meta Muse, GPT-5.6, Meta Model API, and Grok cross-Event duplicate clusters; then rank the strongest 3–5 unique Insights for the submission. | parent | `../../references/insight-persona-calibration.md` |
+| completed | Expand Investment v9 and Engineering v6 through the fresh July 14–15 top-30 Events, audit false flags, and freeze the next quality boundary without changing either prompt. | parent | `../../references/insight-persona-calibration.md` |
+| pending | Add a narrow temporal-provenance boundary so a historical primary source resurfaced by current reactions cannot read as a new development after those reactions are removed from Insight input. | parent | `../../references/insight-persona-calibration.md` |
+| pending | Consolidate or manually select across the obvious Meta Muse, GPT-5.6, Meta Model API, Grok, Inkling, and Google/DoD cross-Event duplicate clusters; then rank the strongest 3–5 unique Insights for the submission. | parent | `../../references/insight-persona-calibration.md` |
 | pending | Finalize project learnings and archive this tracker after the submission set is frozen. | parent | `learnings.md` |
 
 ## Backlog / Remaining Work
@@ -315,6 +318,9 @@ Application invariants:
   content states inside expanded provenance without adding another list column.
 - [ ] Add broader packet-integrity or schema-consistency validation only when a
   concrete failure justifies a deterministic rule.
+- [ ] Preserve enough primary-source time context at the Insight boundary to
+  reject stale-source false positives without exposing independent reaction
+  prose or weakening current early-signal gates.
 - [x] Fetch authored replies for captured root conversations without adding
   unrelated reply noise to the daily Feed.
 - [x] Rebuild the affected Feed/Event projections and verify Gemma and Muse
@@ -704,3 +710,15 @@ Application invariants:
   Evidence rebuild changed 185 old envelope hashes and 3,017 old ranks across
   all 10,033 prior placements; no July 5–13 model call was made, and old routes
   remain fail-closed wherever their frozen envelope hash no longer matches.
+- 2026-07-16: [VALIDATED] Expanded the frozen Investment v9 and Engineering v6
+  contracts through the top 30 routed Events on each fresh day. All 98 audience
+  decisions completed: 57 surfaced and 41 suppressed, with 152,576 cached input
+  tokens and $2.317567 proxy-reported cost. Qualitative review found no repeated
+  persona-gate error, but it did find repeated Inkling and Google/DoD
+  developments across independent Events and one stale 2022 ChatGPT launch
+  treated as current because the first-party Insight packet omitted source
+  timestamps and the current reactions that resurfaced it. The prompt-qualified
+  store now contains 173 decisions (100 surfaced, 73 suppressed), 242,176
+  cached tokens, and $3.622624 cumulative cost. Further broad generation pauses
+  at this checkpoint for temporal provenance, consolidation, and final
+  selection rather than another prompt hill climb.

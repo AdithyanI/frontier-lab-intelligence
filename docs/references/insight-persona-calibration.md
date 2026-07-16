@@ -288,3 +288,48 @@ suppressed. It has read 89,600 cached input tokens and records $1.305057 in
 proxy-reported cumulative cost. These are audit decisions, not 43 recommended
 submission items; semantic duplicates and weaker notes still require final
 selection before the 3–5 item case-study proof.
+
+## Fresh July 14–15 top-30 expansion
+
+After the Evidence and audience-routing window extended through July 15, the
+frozen Investment v9 and Engineering v6 contracts evaluated the top 30 routed
+Events on each new day. The run made 98 audience decisions over 60 Events and
+completed without a pending or failed row:
+
+| Audience | Decisions | Surfaced | Suppressed | Cached input tokens | Cost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| AI Engineering | 44 | 25 | 19 | 50,176 | $1.093977 |
+| Investment | 54 | 32 | 22 | 102,400 | $1.223590 |
+| **Total** | **98** | **57** | **41** | **152,576** | **$2.317567** |
+
+The decisions reinforce the audience split. WANDR's research-agent coverage
+benchmark, frozen-probe reward signals, agent-trajectory safety evaluation,
+claim-level factuality checks, SHARP deployment caveats, per-viewer MCP access,
+and kernel-specific FP4 serving behavior produced concrete Engineering notes.
+Classified-AI procurement, K–12 distribution, coding-agent bundling, insurance
+constraints on agent deployment, open-model inference share, regional Gemini
+distribution, and reported frontier-model task-cost changes produced distinct
+Investment notes. Thin hiring posts, unsupported launch rumors, event
+announcements without artifacts, broad custom-RL theses, anecdotes without
+evaluation detail, and product milestones without a public-equity transmission
+path were suppressed.
+
+The review found no repeated persona or final-gate error that justifies another
+prompt revision. It did find two downstream quality boundaries:
+
+- Inkling appears through four independent Feed Events and the reported
+  Google/DoD agreement through two. Each per-Event result is defensible, but the
+  reader should receive one consolidated development rather than every valid
+  angle as a separate note.
+- One old 2022 ChatGPT launch Event resurfaced through current network activity.
+  The first-party-only Insight packet omitted both source timestamps and the
+  current reactions that caused the resurfacing, so the model treated the old
+  launch as current. This is a temporal-provenance false positive in candidate
+  packaging, not evidence that Investment v9 should become stricter in general.
+
+The prompt-qualified store now contains 173 decisions: 100 surfaced and 73
+suppressed. It has read 242,176 cached input tokens and records $3.622624 in
+proxy-reported cumulative cost. Further broad generation is paused at this
+checkpoint. The next quality work is to expose enough temporal provenance to
+prevent stale-source Insights and to consolidate semantically overlapping
+Events before final human selection.
