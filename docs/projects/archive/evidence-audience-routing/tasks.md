@@ -147,8 +147,11 @@ Application invariants:
   no dependency on or link to the superseded keep/drop run.
 - [x] Focused tests, `bash scripts/check-fast.sh`, live API proof, and rendered
   desktop QA pass; architecture/status docs reflect the final boundary.
-- [ ] Project learnings are finalized and the tracker is archived before the
-  next Insight-generation project begins.
+- [x] Project learnings are finalized and the tracker is archived before the
+  next Insight-generation project begins. Closed 2026-07-16: the routing
+  boundary is frozen; the remaining Insight-side work (temporal provenance,
+  cross-Event consolidation, final 3–5 selection) transferred to
+  [`../insight-format-v10/tasks.md`](../insight-format-v10/tasks.md).
 
 ## Milestones
 
@@ -168,16 +171,20 @@ Application invariants:
   controls, or reasons; current routing records carry only Evidence/run
   provenance. Validate: repository search, direct-run tests, API proof, and
   rendered desktop QA.
-- [ ] Milestone 4 — Freeze the routing boundary and close out. Acceptance:
+- [x] Milestone 4 — Freeze the routing boundary and close out. Acceptance:
   architecture, status, model/prompt references, evaluation evidence, and
   limitations are current; Insight generation is a separate explicit next
   project. Validate: `bash scripts/check-fast.sh` and archive this tracker.
-- [ ] Milestone 4b — Publish each semantic envelope once. Acceptance: every
+  Closed 2026-07-16: the boundary is frozen and the successor project is
+  `insight-format-v10`.
+- [x] Milestone 4b — Publish each semantic envelope once. Acceptance: every
   Event has one canonical Feed day and rank; later activity appends to that
   Event without another routing or Insight candidate; routing and Insight
   packets contain only the original source and accepted first-party artifacts.
   Validate: focused projection/packet tests, rebuilt live data, API proof, and
-  rendered Feed/Insight QA.
+  rendered Feed/Insight QA. Closed 2026-07-16 per the 2026-07-16 progress
+  entries: one-run Event store, fail-closed hash matching, and first-party-only
+  packets are live.
 
 ## Execution Rules
 
@@ -306,9 +313,9 @@ Application invariants:
 | --- | --- | --- | --- |
 | completed | Extend the published Evidence window through July 15, audit old-day rank/hash and route visibility, then route only the new July 14–15 top-100 cohorts. | parent | `../../../references/evidence-refresh.md` |
 | completed | Expand Investment v9 and Engineering v6 through the fresh July 14–15 top-30 Events, audit false flags, and freeze the next quality boundary without changing either prompt. | parent | `../../references/insight-persona-calibration.md` |
-| pending | Add a narrow temporal-provenance boundary so a historical primary source resurfaced by current reactions cannot read as a new development after those reactions are removed from Insight input. | parent | `../../references/insight-persona-calibration.md` |
-| pending | Consolidate or manually select across the obvious Meta Muse, GPT-5.6, Meta Model API, Grok, Inkling, and Google/DoD cross-Event duplicate clusters; then rank the strongest 3–5 unique Insights for the submission. | parent | `../../references/insight-persona-calibration.md` |
-| pending | Finalize project learnings and archive this tracker after the submission set is frozen. | parent | `learnings.md` |
+| transferred | Temporal-provenance boundary for stale resurfaced sources — moved to `insight-format-v10` (packet `posted:` dates + prompt temporal standard). | parent | `../insight-format-v10/tasks.md` |
+| transferred | Cross-Event duplicate consolidation and final 3–5 Insight selection — moved to `insight-format-v10`. | parent | `../insight-format-v10/tasks.md` |
+| completed | Finalize project learnings and archive this tracker; successor execution is owned by `insight-format-v10`. | parent | `learnings.md` |
 
 ## Backlog / Remaining Work
 
@@ -316,11 +323,13 @@ Application invariants:
   adding a subjective garbage-text heuristic.
 - [x] Explain ready, pending, unsupported, retryable, and unavailable artifact
   content states inside expanded provenance without adding another list column.
-- [ ] Add broader packet-integrity or schema-consistency validation only when a
-  concrete failure justifies a deterministic rule.
-- [ ] Preserve enough primary-source time context at the Insight boundary to
+- [x] Add broader packet-integrity or schema-consistency validation only when a
+  concrete failure justifies a deterministic rule. Closed without action: no
+  concrete failure appeared before the routing boundary froze.
+- [x] Preserve enough primary-source time context at the Insight boundary to
   reject stale-source false positives without exposing independent reaction
-  prose or weakening current early-signal gates.
+  prose or weakening current early-signal gates. Transferred to
+  `../insight-format-v10/tasks.md` (packet dates + temporal standard).
 - [x] Fetch authored replies for captured root conversations without adding
   unrelated reply noise to the daily Feed.
 - [x] Rebuild the affected Feed/Event projections and verify Gemma and Muse
@@ -339,7 +348,7 @@ Application invariants:
   and reasons without reading archived Insight data.
 - [x] Update architecture, status, model-routing/prompt references, and build log.
 - [x] Run focused tests, `bash scripts/check-fast.sh`, API proof, and desktop QA.
-- [ ] Review and finalize `learnings.md`, then archive this project.
+- [x] Review and finalize `learnings.md`, then archive this project.
 - [x] After Adi's bounded Insight review, freeze Investment v9 and Engineering
   v6 only after the repeatable Investment-next-step and Engineering-audience-
   distance failures were corrected and controlled.
@@ -722,3 +731,10 @@ Application invariants:
   cached tokens, and $3.622624 cumulative cost. Further broad generation pauses
   at this checkpoint for temporal provenance, consolidation, and final
   selection rather than another prompt hill climb.
+- 2026-07-16: [DECISION] Closed and archived this tracker. The routing
+  boundary is frozen and proven; the remaining Insight-side work — temporal
+  provenance (packet `posted:` dates plus a prompt temporal standard),
+  cross-Event duplicate consolidation, final 3–5 selection, and the reviewed
+  v10/v7 output-format upgrade (`why_it_matters` plus audience-specific
+  `watchpoint`/`experiment`, named public-company mapping for Investment) —
+  is owned by `docs/projects/insight-format-v10/tasks.md`.

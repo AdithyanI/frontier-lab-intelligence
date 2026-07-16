@@ -129,13 +129,17 @@ case-study thesis.
 ## Current Direction
 
 The active tracker is
-[`docs/projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md).
+[`docs/projects/insight-format-v10/tasks.md`](projects/insight-format-v10/tasks.md).
 The canonical Event rebuild and v9 nine-day top-100 routing replacement are
-complete. The old v8 routing directories, superseded Insight prompt rows,
-duplicate Insight API routes, and Event re-anchoring helper are gone. The
-current Investment v9 / Engineering v6 store contains the 75-decision audit;
-the active tracker owns cross-Event consolidation, final 3–5 selection, and
-closeout.
+complete, and the Evidence Audience Routing project is closed and archived.
+The old v8 routing directories, superseded Insight prompt rows, duplicate
+Insight API routes, and Event re-anchoring helper are gone. The current
+Investment v9 / Engineering v6 store contains the 173-decision audit. The
+active tracker owns the reviewed v10/v7 Insight format upgrade (renamed
+`why_it_matters` plus audience-specific `watchpoint`/`experiment` fields,
+named public-company mapping for Investment, packet `posted:` dates with a
+temporal standard), cross-Event consolidation, final 3–5 selection, and the
+regeneration run.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -148,7 +152,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | [`projects/evidence-audience-routing/tasks.md`](projects/evidence-audience-routing/tasks.md) |
+| What should be done next, exactly? | [`projects/insight-format-v10/tasks.md`](projects/insight-format-v10/tasks.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |
