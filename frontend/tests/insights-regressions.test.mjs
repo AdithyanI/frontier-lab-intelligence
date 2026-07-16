@@ -22,6 +22,13 @@ test('Insights keeps audience, date, and decision status in the URL', () => {
   assert.match(insightSource, /aria-label="Insight audience"/)
 })
 
+test('Insights presents Investment thesis before AI engineering', () => {
+  assert.match(
+    insightSource,
+    /const AUDIENCE_ORDER: InsightAudience\[\] = \['investment', 'ai_engineering'\]/,
+  )
+})
+
 test('Insights uses the durable successor API and guards status-specific responses', () => {
   assert.match(insightSource, /`\/api\/insights\/dates\?audience=\$\{audience\}`/)
   assert.match(

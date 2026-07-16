@@ -21,7 +21,7 @@ import { useAuditDate } from '../auditDateStore'
 
 const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'
 const DEFAULT_STATUS: InsightStatus = 'kept'
-const AUDIENCE_ORDER: InsightAudience[] = ['ai_engineering', 'investment']
+const AUDIENCE_ORDER: InsightAudience[] = ['investment', 'ai_engineering']
 const STATUS_ORDER: InsightStatus[] = ['kept', 'suppressed', 'all']
 
 const insightDay = new Intl.DateTimeFormat('en-US', {
