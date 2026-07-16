@@ -303,27 +303,9 @@ Application invariants:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| complete | Collect authored replies and admit only replies whose conversation root is captured. | parent | — |
-| complete | Rebuild and publish Feed/events; prove Gemma and Muse include their first-party continuations. | parent | — |
-| complete | Replace legacy-triage-gated artifact import with published Feed/Event discovery. | parent | `../../../references/evidence-refresh.md` |
-| complete | Bound only the model-facing packet at 20,000 tokens and preserve an explicit truncation notice. | parent | — |
-| invalidated | Replace all stale routes with GPT-5.4-mini/high top-100 runs for July 5–13. | parent | — |
-| complete | Add one resumable publication-bound command for the next nine-day top-100 routing refresh. | parent | `../../../references/evidence-refresh.md` |
-| complete | Replace unrestricted Event components with root-owned one-parent envelopes; rebuild July 5–13 and prove the Anthropic root is restored. | parent | `../../../references/signal-feed.md` |
-| complete | Replace the obsolete Insight backend with the two-prompt, shared-schema, non-executing successor foundation; preserve the empty UI transport and Feed-rank metadata. | parent | — |
-| complete | Run both successor prompts against envelope `9412a377…` on its latest corrected July 12 revision; inspect raw structured output, cache, and cost before designing storage. | parent | `resources/first-successor-insight-spike.md` |
-| complete | Move the successor Insight path into durable SQLite-backed generation; import the first-party-only Terra result, expose kept/suppressed decisions through the API, and add Feed-style date/status audit controls to the existing UI. | parent | `resources/first-live-insight-run.md` |
-| invalidated | Rerun and review the 900 v8 routes against the repaired Event publication; superseded when the semantic input boundary changed. | parent | `resources/top100-contextual-audit-v2.md` |
-| complete | Replace daily continuation publication with one canonical Event day/rank while retaining later activity on the Event. | parent | — |
-| complete | Reduce routing and Insight packets to first-party-authored source material plus accepted first-party artifacts and enforce one candidate per Event/audience. | parent | — |
-| complete | Rebuild clean one-run Feed/Event stores and replace all routing data with nine v9 top-100 runs; prove cache telemetry and remove v8 directories. | parent | `../../../references/model-routing.md` |
-| complete | Calibrate Investment v6 and AI Engineering v5 against BIT's public reader context and the assignment's explicit researcher-formation case; run only a bounded six-Event review set and stop at five surfaced Insights. | parent | `../../references/insight-persona-calibration.md` |
-| complete | Adi reviewed the first five Insights and approved one bounded expansion without a prompt change. | parent | `../../references/insight-persona-calibration.md` |
-| complete | Add exactly five more surfaced Insights from the next top-ranked July 11 and July 10 routes, audit all fifteen new decisions, and stop before catalog scale. | parent | `../../references/insight-persona-calibration.md` |
-| complete | Correct the Investment persona leak in the computer-use next step, calibrate Investment v9 on four early-signal controls, and replay all fifteen bounded Investment candidates. | parent | `../../references/insight-persona-calibration.md` |
-| complete | Correct the Engineering audience-distance leak, calibrate Engineering v6 on six high-signal/noise controls, replay the original ten Engineering candidates, and remove superseded prompt rows. | parent | `../../references/insight-persona-calibration.md` |
-| complete | Expand Investment v9 / Engineering v6 by exactly 50 new balanced audience decisions, audit every surfaced/suppressed result, and stop before 100. | parent | `../../references/insight-persona-calibration.md` |
+| in_progress | Extend the published Evidence window through July 15, then audit old-day rank/hash stability and downstream route visibility without model calls. | parent | `../../../references/evidence-refresh.md` |
 | pending | Consolidate or manually select across the obvious Meta Muse, GPT-5.6, Meta Model API, and Grok cross-Event duplicate clusters; then rank the strongest 3–5 unique Insights for the submission. | parent | `../../references/insight-persona-calibration.md` |
+| pending | Finalize project learnings and archive this tracker after the submission set is frozen. | parent | `learnings.md` |
 
 ## Backlog / Remaining Work
 
