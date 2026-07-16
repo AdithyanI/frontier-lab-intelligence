@@ -4,7 +4,7 @@ from pathlib import Path
 
 import httpx
 
-from fli import evidence_refresh
+from fli import cli, evidence_refresh
 
 
 class _Client:
@@ -316,6 +316,37 @@ def test_cli_validation_error_is_structured(capsys):
         "retryable": False,
         "hint": "Check the requested dates, windows, paths, and numeric limits.",
     }
+
+
+def test_top_level_cli_forwards_refresh_arguments_without_contract_duplication(
+    monkeypatch,
+):
+    forwarded = []
+    monkeypatch.setattr(
+        evidence_refresh,
+        "main",
+        lambda args: (forwarded.extend(args), 0)[1],
+    )
+
+    code = cli.main(
+        [
+            "evidence-refresh",
+            "--through",
+            "2026-07-15",
+            "--collection-days",
+            "3",
+            "--no-input",
+        ]
+    )
+
+    assert code == 0
+    assert forwarded == [
+        "--through",
+        "2026-07-15",
+        "--collection-days",
+        "3",
+        "--no-input",
+    ]
 
 
 def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import sqlite3
 import sys
@@ -489,6 +490,12 @@ def main(argv: list[str] | None = None) -> int:
             "Refresh raw X evidence, Feed envelopes, primary links, and supported "
             "artifact text with cache reuse at every stage."
         ),
+        epilog=(
+            "Example:\n"
+            "  fli evidence-refresh --through 2026-07-15 --days 11 "
+            "--collection-days 3 --workers 32 --no-input --json"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--through", required=True, help="Latest complete UTC day.")
     parser.add_argument("--days", type=int, default=9)
