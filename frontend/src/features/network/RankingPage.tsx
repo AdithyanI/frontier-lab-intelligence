@@ -14,8 +14,8 @@ import {
   type RankingFollowers,
   type RankingNode,
   type Rankings,
-} from '../api'
-import EntityCard from '../components/EntityCard'
+} from '../../shared/api'
+import EntityCard from './EntityCard'
 
 const INK = '#151515'
 const MUTED = '#6b6b68'

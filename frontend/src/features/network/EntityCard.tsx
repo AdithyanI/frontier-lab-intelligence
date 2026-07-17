@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, type ReactNode } from 'react'
 import { siGithub, siRss, siX } from 'simple-icons'
-import type { Entity, EntityChannel, EntityKind } from '../api'
+import type { Entity, EntityChannel, EntityKind } from '../../shared/api'
 
 const BRAND_ICON: Record<string, string> = {
   github: siGithub.path,

@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { useAuditDatePath } from '../auditDateStore'
+import { useAuditDatePath } from '../../shared/date/auditDateStore'
 
 export default function Evidence() {
   const feedPath = useAuditDatePath('/evidence/feed')

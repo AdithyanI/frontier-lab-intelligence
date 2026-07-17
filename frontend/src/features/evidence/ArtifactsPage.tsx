@@ -13,17 +13,17 @@ import {
   type ArtifactFetchState,
   type ArtifactItem,
   type ArtifactLibrary,
-} from '../api'
-import DateNavigator from '../components/DateNavigator'
-import CopyEnvelopeId from '../components/CopyEnvelopeId'
+} from '../../shared/api'
+import DateNavigator from '../../shared/components/DateNavigator'
+import CopyEnvelopeId from '../../shared/components/CopyEnvelopeId'
 import {
   getDateWindowEndForSelection,
   getDateWindow,
   shiftDateWindow,
   type DateWindowDirection,
-} from '../dateWindow'
-import { useAuditDate } from '../auditDateStore'
-import { readAuditDate, setAuditDateParam } from '../auditDate'
+} from '../../shared/date/dateWindow'
+import { useAuditDate } from '../../shared/date/auditDateStore'
+import { readAuditDate, setAuditDateParam } from '../../shared/date/auditDate'
 
 const PAGE_SIZE = 60
 

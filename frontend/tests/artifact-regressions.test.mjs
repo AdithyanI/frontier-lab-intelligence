@@ -3,15 +3,15 @@ import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 
 const artifactSource = await readFile(
-  new URL('../src/pages/Artifacts.tsx', import.meta.url),
+  new URL('../src/features/evidence/ArtifactsPage.tsx', import.meta.url),
   'utf8',
 )
-const feedSource = await readFile(new URL('../src/pages/Feed.tsx', import.meta.url), 'utf8')
+const feedSource = await readFile(new URL('../src/features/evidence/FeedPage.tsx', import.meta.url), 'utf8')
 const evidenceSource = await readFile(
-  new URL('../src/pages/Evidence.tsx', import.meta.url),
+  new URL('../src/features/evidence/EvidenceLayout.tsx', import.meta.url),
   'utf8',
 )
-const appSource = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8')
+const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url), 'utf8')
 
 test('Feed and Primary artifacts are separate views of one Evidence workspace', () => {
   assert.match(appSource, /useAuditDatePath\('\/evidence\/feed'\)/)

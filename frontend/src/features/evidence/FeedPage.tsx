@@ -15,21 +15,21 @@ import {
   type FeedDates,
   type FeedItem,
   type SignalEvent,
-} from '../api'
+} from '../../shared/api'
 import {
   getDateWindowEndForSelection,
   getDateWindow,
   shiftDateWindow,
   type DateWindowDirection,
-} from '../dateWindow'
-import DateNavigator from '../components/DateNavigator'
-import CopyEnvelopeId from '../components/CopyEnvelopeId'
-import { useAuditDate } from '../auditDateStore'
-import { readAuditDate, setAuditDateParam } from '../auditDate'
+} from '../../shared/date/dateWindow'
+import DateNavigator from '../../shared/components/DateNavigator'
+import CopyEnvelopeId from '../../shared/components/CopyEnvelopeId'
+import { useAuditDate } from '../../shared/date/auditDateStore'
+import { readAuditDate, setAuditDateParam } from '../../shared/date/auditDate'
 import {
   initialFeedRoutingFilter,
   type FeedRoutingFilter,
-} from '../feedState'
+} from './feedState'
 
 type Sort = 'attention' | 'recent' | 'engagement'
 type RoutingFilter = FeedRoutingFilter

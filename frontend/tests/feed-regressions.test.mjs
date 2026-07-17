@@ -1,19 +1,20 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { getDateWindow, shiftDateWindow } from '../src/dateWindow.ts'
-import { initialFeedRoutingFilter } from '../src/feedState.ts'
+import { getDateWindow, shiftDateWindow } from '../src/shared/date/dateWindow.ts'
+import { initialFeedRoutingFilter } from '../src/features/evidence/feedState.ts'
+import { readStyles } from './source-files.mjs'
 
-const feedSource = await readFile(new URL('../src/pages/Feed.tsx', import.meta.url), 'utf8')
+const feedSource = await readFile(new URL('../src/features/evidence/FeedPage.tsx', import.meta.url), 'utf8')
 const dateNavigatorSource = await readFile(
-  new URL('../src/components/DateNavigator.tsx', import.meta.url),
+  new URL('../src/shared/components/DateNavigator.tsx', import.meta.url),
   'utf8',
 )
 const copyEnvelopeSource = await readFile(
-  new URL('../src/components/CopyEnvelopeId.tsx', import.meta.url),
+  new URL('../src/shared/components/CopyEnvelopeId.tsx', import.meta.url),
   'utf8',
 )
-const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
+const appStyles = readStyles()
 
 test('Feed uses semantic classes for optional menu and routing content', () => {
   assert.match(feedSource, /className="feed-menu-option-count mono"/)

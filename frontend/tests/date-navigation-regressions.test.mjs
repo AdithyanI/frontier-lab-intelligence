@@ -5,21 +5,21 @@ import {
   readAuditDate,
   setAuditDateParam,
   withAuditDate,
-} from '../src/auditDate.ts'
-import { getDateWindowEndForSelection } from '../src/dateWindow.ts'
+} from '../src/shared/date/auditDate.ts'
+import { getDateWindowEndForSelection } from '../src/shared/date/dateWindow.ts'
 
-const appSource = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8')
+const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url), 'utf8')
 const evidenceSource = await readFile(
-  new URL('../src/pages/Evidence.tsx', import.meta.url),
+  new URL('../src/features/evidence/EvidenceLayout.tsx', import.meta.url),
   'utf8',
 )
-const feedSource = await readFile(new URL('../src/pages/Feed.tsx', import.meta.url), 'utf8')
+const feedSource = await readFile(new URL('../src/features/evidence/FeedPage.tsx', import.meta.url), 'utf8')
 const artifactSource = await readFile(
-  new URL('../src/pages/Artifacts.tsx', import.meta.url),
+  new URL('../src/features/evidence/ArtifactsPage.tsx', import.meta.url),
   'utf8',
 )
 const insightSource = await readFile(
-  new URL('../src/pages/Insights.tsx', import.meta.url),
+  new URL('../src/features/insights/InsightsPage.tsx', import.meta.url),
   'utf8',
 )
 

@@ -7,19 +7,19 @@ import {
   type InsightItem,
   type InsightStatus,
   type InsightsResponse,
-} from '../api'
-import CopyEnvelopeId from '../components/CopyEnvelopeId'
-import DateNavigator from '../components/DateNavigator'
+} from '../../shared/api'
+import CopyEnvelopeId from '../../shared/components/CopyEnvelopeId'
+import DateNavigator from '../../shared/components/DateNavigator'
 import {
   getDateWindowEndForSelection,
   getDateWindow,
   shiftDateWindow,
   type DateWindowDirection,
-} from '../dateWindow'
-import { decodeTextEntities } from '../textEntities'
-import { useAuditDate } from '../auditDateStore'
+} from '../../shared/date/dateWindow'
+import { decodeTextEntities } from '../../shared/textEntities'
+import { useAuditDate } from '../../shared/date/auditDateStore'
 
-const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'
+const DEFAULT_AUDIENCE: InsightAudience = 'investment'
 const DEFAULT_STATUS: InsightStatus = 'kept'
 const AUDIENCE_ORDER: InsightAudience[] = ['investment', 'ai_engineering']
 const STATUS_ORDER: InsightStatus[] = ['kept', 'suppressed', 'all']

@@ -222,7 +222,9 @@ Rules:
   summaries, cards, or additional filters until a cited-insight consumer proves
   the need.
 - **Audience Insights:** one stable Feed-ranked surface with an explicit
-  Investment / AI Engineering switch in URL state. Each day is a flat
+  Investment / AI Engineering switch in URL state. Investment is the default
+  audience on a fresh visit, matching the switch order and fund-facing product
+  context. Each day is a flat
   editorial list, not a card grid. The left rail shows the envelope's current
   canonical-day Feed rank and links directly to that exact envelope; it is inherited
   ordering, not a second insight score. Reuse the Feed's seven-day navigator;

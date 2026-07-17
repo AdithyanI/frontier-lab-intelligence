@@ -1,25 +1,26 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
+import { readStyles } from './source-files.mjs'
 
-const appSource = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8')
+const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url), 'utf8')
 const networkSource = await readFile(
-  new URL('../src/pages/Network.tsx', import.meta.url),
+  new URL('../src/features/network/NetworkLayout.tsx', import.meta.url),
   'utf8',
 )
 const registrySource = await readFile(
-  new URL('../src/pages/Registry.tsx', import.meta.url),
+  new URL('../src/features/network/RegistryPage.tsx', import.meta.url),
   'utf8',
 )
 const addProfileSource = await readFile(
-  new URL('../src/pages/AddProfile.tsx', import.meta.url),
+  new URL('../src/features/network/AddProfilePage.tsx', import.meta.url),
   'utf8',
 )
 const rankingSource = await readFile(
-  new URL('../src/pages/Ranking.tsx', import.meta.url),
+  new URL('../src/features/network/RankingPage.tsx', import.meta.url),
   'utf8',
 )
-const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
+const appStyles = readStyles()
 
 test('Network owns Registry, Ranking, and Add Profile as explicit subviews', () => {
   assert.match(appSource, /<NavLink to="\/network">Network<\/NavLink>/)

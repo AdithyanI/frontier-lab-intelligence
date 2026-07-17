@@ -1,19 +1,20 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
-import { decodeTextEntities } from '../src/textEntities.ts'
+import { decodeTextEntities } from '../src/shared/textEntities.ts'
+import { readStyles } from './source-files.mjs'
 
 const insightSource = await readFile(
-  new URL('../src/pages/Insights.tsx', import.meta.url),
+  new URL('../src/features/insights/InsightsPage.tsx', import.meta.url),
   'utf8',
 )
-const apiSource = await readFile(new URL('../src/api.ts', import.meta.url), 'utf8')
-const appStyles = await readFile(new URL('../src/app.css', import.meta.url), 'utf8')
+const apiSource = await readFile(new URL('../src/shared/api.ts', import.meta.url), 'utf8')
+const appStyles = readStyles()
 
-test('Insights keeps audience, date, and decision status in the URL', () => {
+test('Insights defaults to Investment and keeps audience, date, and decision status in the URL', () => {
   assert.match(apiSource, /export type InsightAudience = 'investment' \| 'ai_engineering'/)
   assert.match(apiSource, /export type InsightStatus = 'kept' \| 'suppressed' \| 'all'/)
-  assert.match(insightSource, /const DEFAULT_AUDIENCE: InsightAudience = 'ai_engineering'/)
+  assert.match(insightSource, /const DEFAULT_AUDIENCE: InsightAudience = 'investment'/)
   assert.match(insightSource, /const DEFAULT_STATUS: InsightStatus = 'kept'/)
   assert.match(insightSource, /searchParams\.get\('audience'\)/)
   assert.match(insightSource, /searchParams\.get\('date'\)/)

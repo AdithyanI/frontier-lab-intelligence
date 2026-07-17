@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { readSource, readStyles } from './source-files.mjs'
 
-const architecture = readFileSync(new URL('../src/pages/Architecture.tsx', import.meta.url), 'utf8')
-const appStyles = readFileSync(new URL('../src/app.css', import.meta.url), 'utf8')
+const architecture = readSource('features/architecture/ArchitecturePage.tsx')
+const appStyles = readStyles()
 
 test('Architecture chapters share the ruled secondary navigation primitive', () => {
   assert.match(architecture, /className="ruled-nav arch-chapters"/)

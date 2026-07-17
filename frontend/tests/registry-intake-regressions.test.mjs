@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { readStyles } from './source-files.mjs'
 
 const addProfile = readFileSync(
-  new URL('../src/pages/AddProfile.tsx', import.meta.url),
+  new URL('../src/features/network/AddProfilePage.tsx', import.meta.url),
   'utf8',
 )
-const api = readFileSync(new URL('../src/api.ts', import.meta.url), 'utf8')
-const css = readFileSync(new URL('../src/app.css', import.meta.url), 'utf8')
+const api = readFileSync(new URL('../src/shared/api.ts', import.meta.url), 'utf8')
+const css = readStyles()
 
 test('Add Profile exposes both audited X profile admission paths', () => {
   assert.match(addProfile, /Add Profile/)

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   postJSON,
   type RegistryIntakeResult,
-} from '../api'
+} from '../../shared/api'
 
 const registryResultURL = (result: RegistryIntakeResult) => {
   const params = new URLSearchParams({ q: result.handle })
