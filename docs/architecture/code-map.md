@@ -1,9 +1,8 @@
 # Code and Data Map
 
 This is the cold-start map for implementation work. Read it after
-[`docs/STATUS.md`](../STATUS.md); use the longer
-[`overview.md`](overview.md) only for the architecture section relevant to the
-task.
+[`docs/STATUS.md`](../STATUS.md), then use [`overview.md`](overview.md) for the
+system boundaries relevant to the task.
 
 ## Pipeline
 
@@ -44,6 +43,25 @@ the Event read model moves out of `web`, not through new aliases.
 The root package contains only cross-domain runtime plumbing (`cli`,
 `llm_responses`, and the compact product `store`). Domain behavior belongs in
 the packages above; do not add compatibility modules at former flat paths.
+
+## Frontend Ownership
+
+The React source mirrors product domains rather than collecting unrelated
+routes in a generic `pages/` directory:
+
+| Area | Owner | What belongs there |
+| --- | --- | --- |
+| App composition | `frontend/src/app/` | Route composition and the shared audit-date provider only. |
+| Architecture | `frontend/src/features/architecture/` | The system explanation route and its local presentation logic. |
+| Evidence | `frontend/src/features/evidence/` | Feed, Artifact index, their workspace layout, and Evidence-only view state. |
+| Insights | `frontend/src/features/insights/` | Audience Insight inspection and decision-state UI. |
+| Network | `frontend/src/features/network/` | Registry, Ranking, Add Profile, their workspace layout, and the shared entity detail surface. |
+| Shared UI | `frontend/src/shared/` | Cross-feature API contracts, date state, text normalization, and genuinely reused components. |
+| Styles | `frontend/src/styles/` | Domain styles in cascade order; `app.css` is imports only and remains the single entrypoint. |
+
+`frontend/src/main.tsx` is the only TypeScript entrypoint at the source root.
+Prefer feature-local code until two product domains genuinely share a contract;
+do not recreate generic `pages/` or `components/` buckets.
 
 ## Store Ownership
 

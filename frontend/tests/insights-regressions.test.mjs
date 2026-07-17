@@ -8,7 +8,7 @@ const insightSource = await readFile(
   new URL('../src/features/insights/InsightsPage.tsx', import.meta.url),
   'utf8',
 )
-const apiSource = await readFile(new URL('../src/shared/api.ts', import.meta.url), 'utf8')
+const apiSource = await readFile(new URL('../src/shared/api/insights.ts', import.meta.url), 'utf8')
 const appStyles = readStyles()
 
 test('Insights defaults to Investment and keeps audience, date, and decision status in the URL', () => {

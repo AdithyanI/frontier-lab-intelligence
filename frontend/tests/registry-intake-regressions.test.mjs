@@ -7,7 +7,7 @@ const addProfile = readFileSync(
   new URL('../src/features/network/AddProfilePage.tsx', import.meta.url),
   'utf8',
 )
-const api = readFileSync(new URL('../src/shared/api.ts', import.meta.url), 'utf8')
+const api = readFileSync(new URL('../src/shared/api/client.ts', import.meta.url), 'utf8')
 const css = readStyles()
 
 test('Add Profile exposes both audited X profile admission paths', () => {

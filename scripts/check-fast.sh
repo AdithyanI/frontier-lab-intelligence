@@ -32,6 +32,22 @@ if [ -n "$unexpected_root_modules" ]; then
 fi
 test ! -e data/signal-events.db
 
+# React ownership mirrors product domains. Keep route implementation inside
+# features, cross-feature primitives inside shared, and composition inside app.
+for area in app shared styles features/architecture features/evidence \
+  features/insights features/network; do
+  test -d "frontend/src/$area"
+done
+test ! -d frontend/src/pages
+test ! -d frontend/src/components
+unexpected_frontend_root=$(find frontend/src -maxdepth 1 -type f \
+  \( -name '*.ts' -o -name '*.tsx' \) ! -name 'main.tsx' -print)
+if [ -n "$unexpected_frontend_root" ]; then
+  echo "React modules must be owned by app, features, or shared:"
+  echo "$unexpected_frontend_root"
+  exit 1
+fi
+
 # Active prompt paths are semantic and stable. Contract versions and hashes
 # belong in run metadata rather than mutable filenames.
 for prompt in \

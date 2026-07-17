@@ -5,7 +5,8 @@ import {
   type RegistryGroup,
   type Registry as RegistryData,
 } from '../../shared/api'
-import EntityCard, { typeClass, typeLabel, xHandleLabel } from './EntityCard'
+import EntityCard from './EntityCard'
+import { typeClass, typeLabel, xHandleLabel } from './entityPresentation'
 
 type KindFilter = 'all' | RegistryGroup
 type SortField = 'reach' | 'network'
