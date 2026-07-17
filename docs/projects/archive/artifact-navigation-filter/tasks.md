@@ -28,12 +28,12 @@ The artifact catalog accepted `https://www.amazon.science/search` as a durable a
 - [x] Generic `/search` navigation URLs are excluded with a stable reason code and regression coverage.
 - [x] The Amazon Science search page is absent from envelope #92's routing packet after rebuild.
 - [x] The affected route no longer cites unrelated Amazon Ads evidence.
-- [ ] Fast checks pass and the completed tracker is archived.
+- [x] Fast checks pass and the completed tracker is archived.
 
 ## Milestones
 - [x] Milestone 1 — Navigation URLs are excluded during artifact import. Acceptance: structural test covers generic search endpoints without excluding specific documents. Validate: 29 targeted artifact tests pass.
 - [x] Milestone 2 — July 14 derived evidence is clean. Acceptance: #92 packet excludes the search artifact and its route is refreshed or invalidated. Validate: local API and both SQLite stores.
-- [ ] Milestone 3 — Repository handoff is clean. Acceptance: relevant architecture/status guidance is accurate and fast checks pass. Validate: `bash scripts/check-fast.sh`.
+- [x] Milestone 3 — Repository handoff is clean. Acceptance: relevant architecture/status guidance is accurate and fast checks pass. Validate: `bash scripts/check-fast.sh`.
 
 ## Execution Rules
 - Keep work scoped to the current milestone unless the tracker explicitly expands scope.
@@ -55,12 +55,12 @@ The artifact catalog accepted `https://www.amazon.science/search` as a durable a
 | --- | --- | --- | --- |
 | done | Locate artifact URL admission and derived-data refresh boundaries; implement the smallest structural exclusion. | parent | — |
 | done | Rebuild and inspect July 14 #92 packet/route. | parent | — |
-| in_progress | Run repository checks, record the completed reroute, and archive. | parent | — |
+| done | Run repository checks, record the completed reroute, and archive. | parent | — |
 
 ## Backlog / Remaining Work
-- [ ] Run targeted tests and full fast checks.
+- [x] Run targeted tests and full fast checks.
 - [x] Review architecture/status docs for any durable contract update.
-- [ ] Close and archive this tracker.
+- [x] Close and archive this tracker.
 
 ## Validation / Test Plan
 - Targeted artifact URL/import tests.
@@ -72,3 +72,4 @@ The artifact catalog accepted `https://www.amazon.science/search` as a durable a
 - 2026-07-17: [DONE] Bumped the candidate contract to `artifact-url-v2`, excluded exact `/search` paths, and added final-redirect eligibility validation. Targeted URL/fetch tests pass 29/29.
 - 2026-07-17: [DONE] Removed the derived Amazon search artifact, re-imported the immutable Feed/Event evidence, and persisted the author URL as `failed_terminal` with `final_url_search_navigation` and no snapshots.
 - 2026-07-17: [DONE] Rebuilt the July 14 top-100 routing cohort for $0.508 proxy-reported cost. The live API exposes #92 with zero artifacts and both audiences correctly mark the unspecified career/project teaser irrelevant.
+- 2026-07-17: [DONE] `scripts/check-fast.sh` passes 362 backend tests, 47 frontend tests, lint, and the production build; tracker closed for archive.

@@ -124,7 +124,14 @@ case-study thesis.
 
 ## Current Direction
 
-No project tracker is active. Repository housekeeping is complete and archived
+No project tracker is active. The bounded artifact-navigation cleanup is
+complete and archived under
+[`docs/projects/archive/artifact-navigation-filter/`](projects/archive/artifact-navigation-filter/).
+Exact generic `/search` destinations are now rejected before they can become
+artifact snapshots; the affected published routing day was refreshed. This did
+not change the submission critical path below.
+
+Repository housekeeping is complete and archived
 under [`docs/projects/archive/repo-housekeeping/`](projects/archive/repo-housekeeping/):
 all runtime domains have direct package ownership, the code/data map is the
 cold-start implementation index, local-data lifecycle is explicit, and fast
