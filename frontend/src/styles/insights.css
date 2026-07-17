@@ -367,6 +367,11 @@
   border-top: 0;
 }
 
+.editorial-watch {
+  padding-top: 0;
+  border-top: 0;
+}
+
 .editorial-decision .editorial-entities {
   margin-top: 16px;
 }

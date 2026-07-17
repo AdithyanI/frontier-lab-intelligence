@@ -123,6 +123,7 @@ test('Insights renders canonical daily editorial judgments as a ranked, cited br
   assert.match(insightSource, /citation\.excerpt/)
   assert.match(appStyles, /\.editorial-insight-row/)
   assert.match(appStyles, /\.editorial-decision \{[^}]*border-top: 0;/)
+  assert.match(appStyles, /\.editorial-watch \{[^}]*border-top: 0;/)
   assert.match(appStyles, /\.editorial-source-links \{[^}]*display: grid;/)
   assert.doesNotMatch(appStyles, /\.editorial-citation-links \{[^}]*border-top:/)
   assert.doesNotMatch(appStyles, /\.editorial-insight-row\s*\{[\s\S]*?border-radius:/)
