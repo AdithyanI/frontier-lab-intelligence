@@ -15,8 +15,8 @@ const holdingNotes: Record<string, ReactNode> = {
       The size change is itself important evidence: Amazon was 1.78% in the complete
       31 December 2025 portfolio and 10.4% in the June 2026 top-ten disclosure. Public
       documents do not reveal the cost basis or the exact internal reason for every
-      increment, so the defensible claim is that exposure increased sharply—not that we
-      know BIT’s private target or expected return.
+      increment. We can say that exposure increased sharply. We cannot know BIT’s private
+      target or expected return.
     </>
   ),
   IREN: (
@@ -72,7 +72,7 @@ const sourceLedger = [
   {
     date: 'Current',
     label: 'Flagship fund page',
-    use: 'Public strategy language and selected Thesis–Edge–Signal–Key Move examples.',
+    use: 'Public strategy language and selected thesis, edge, signal and key move examples.',
     href: sources.fund,
   },
   {
@@ -119,44 +119,40 @@ export default function BitLensPage() {
       <header className="bit-lens-head">
         <h1 className="page-title">BIT Lens</h1>
         <p className="page-sub">
-          A detailed public-research briefing on BIT Global Technology Leaders,
-          BIT’s investment process, and the standard Frontier Lab Intelligence
-          should meet when writing for the fund.
+          How BIT Capital appears to invest, what its flagship fund owns, and what
+          Frontier Lab Intelligence should produce for it.
         </p>
       </header>
 
       <article className="lens-reading">
-        <p className="lens-reading-meta mono">
-          Public evidence reviewed 17 Jul 2026 · holdings are always dated · this is
-          research context, not a live portfolio or trade recommendation
-        </p>
-
         <section className="lens-reading-intro" aria-labelledby="lens-purpose-title">
-          <h2 id="lens-purpose-title">What this page is for</h2>
+          <h2 id="lens-purpose-title">The short version</h2>
           <p>
-            This page condenses the public research on BIT Capital into one place. Its
-            purpose is to make the rest of Frontier Lab Intelligence easier to judge. When
-            the product produces an investment insight, we should be able to compare that
-            insight against the way BIT appears to form a company thesis, search for an
-            information edge, translate evidence into operating drivers, update forecasts,
-            challenge conviction, and make a human portfolio decision.
+            <strong>My read:</strong> BIT does not need another AI news feed. It needs evidence
+            tied to a company thesis, an operating driver, and a clear next question for an
+            analyst. That is the standard Frontier Lab Intelligence should meet.
           </p>
           <p>
-            The central conclusion is that BIT does not appear to want a generic AI-news
-            digest. Its public material describes a thesis-first, company-specific process.
-            The useful output is therefore not merely “this development matters for AI.” It
-            is: what changed; which dated holding, portfolio bottleneck, or candidate it may
-            affect; which operating variable and financial-model line could move; why the
-            implication may differ from consensus; what evidence would confirm or falsify
-            it; and what an analyst should investigate next.
+            This page brings the public research on BIT into one place. It covers the
+            flagship fund, its dated holdings, BIT’s research process, Aion, and the way the
+            team appears to turn evidence into an investment decision. We can use it to judge
+            every investment insight that FLI produces.
           </p>
           <p>
-            This is necessarily an outside-in reconstruction. Mandatory fund documents can
-            establish dated holdings and legal facts. BIT’s own pages, interviews, podcasts,
-            and job descriptions can establish its public language and working methods.
-            They cannot establish private forecasts, current cost bases, valuation targets,
-            live trades, or the actual output of internal models. Those boundaries are kept
-            explicit throughout.
+            A useful FLI insight must answer 6 questions. What changed? Which dated holding,
+            bottleneck, or candidate could it affect? Which operating variable could move?
+            Why might the market be wrong? What evidence would confirm or disprove the idea?
+            And what should the analyst investigate next?
+          </p>
+          <p>
+            This is my reconstruction from public evidence. Fund documents establish dated
+            holdings and legal facts. BIT’s pages, interviews, podcasts, and job descriptions
+            show how the team talks about its work. They do not reveal private forecasts,
+            cost bases, valuation targets, live trades, or the output of internal models.
+          </p>
+          <p className="lens-review-note">
+            Last reviewed: 17 July 2026. Every holding is tied to a date. This is research
+            context, not a live portfolio.
           </p>
         </section>
 
