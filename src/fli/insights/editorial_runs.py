@@ -27,8 +27,8 @@ DEFAULT_ROUTING_ROOT = routing_runs.DEFAULT_RUN_ROOT
 DEFAULT_INSIGHTS_DB = insight_runs.DEFAULT_DB
 DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v1"
-STORE_SCHEMA_VERSION = "daily-intelligence-store-v2"
-READ_SCHEMA_VERSION = "daily-intelligence-read-v3"
+STORE_SCHEMA_VERSION = "daily-intelligence-store-v3"
+READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
 
 CONTEXT_PATHS = {
     "investment": (
@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS editorial_insight (
     local_id TEXT NOT NULL,
     audience TEXT NOT NULL CHECK (audience IN ('investment', 'ai_engineering')),
     display_rank INTEGER NOT NULL CHECK (display_rank >= 1),
+    rank_rationale TEXT NOT NULL,
     title TEXT NOT NULL,
     what_changed TEXT NOT NULL,
     interpretation TEXT NOT NULL,
@@ -292,6 +293,21 @@ def _migrate_editorial_insight_v2(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE editorial_insight_v2 RENAME TO editorial_insight")
 
 
+def _migrate_editorial_insight_v3(conn: sqlite3.Connection) -> None:
+    """Add explicit editorial reasoning for each audience priority position."""
+    columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(editorial_insight)").fetchall()
+    }
+    if not columns or "rank_rationale" in columns:
+        return
+    conn.execute(
+        """ALTER TABLE editorial_insight
+           ADD COLUMN rank_rationale TEXT NOT NULL DEFAULT
+           'This historical run predates item-specific rank explanations. Its position reflects the editorial priority rubric across the complete daily brief.'"""
+    )
+
+
 def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path, timeout=60.0)
@@ -300,6 +316,7 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.execute("PRAGMA foreign_keys = OFF")
     _migrate_editorial_insight_v2(conn)
+    _migrate_editorial_insight_v3(conn)
     conn.executescript(SCHEMA)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
@@ -1007,14 +1024,16 @@ def import_result(
                 conn.execute(
                     """INSERT INTO editorial_insight (
                            run_id, insight_id, local_id, audience, display_rank,
-                           title, what_changed, interpretation, next_step, analysis_json)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                           rank_rationale, title, what_changed, interpretation,
+                           next_step, analysis_json)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     (
                         run_id,
                         insight_id,
                         insight["local_id"],
                         insight["audience"],
                         insight["rank"],
+                        insight["rank_rationale"],
                         insight["title"],
                         insight["what_changed"],
                         insight["interpretation"],
@@ -1097,7 +1116,7 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
     if run is None:
         raise ValueError(f"editorial run {run_id!r} does not exist")
     insights = conn.execute(
-        """SELECT insight_id, local_id, audience, display_rank, title,
+        """SELECT insight_id, local_id, audience, display_rank, rank_rationale, title,
                   what_changed, interpretation, next_step, analysis_json
            FROM editorial_insight WHERE run_id = ?
            ORDER BY audience, display_rank""",

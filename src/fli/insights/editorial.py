@@ -13,7 +13,7 @@ import re
 from typing import Any
 
 
-DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v3"
+DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v4"
 AUDIENCES = ("investment", "ai_engineering")
 EVENT_ROLES = ("primary", "supporting", "context", "counterevidence")
 CITATION_KINDS = ("event", "artifact", "web", "context")
@@ -48,7 +48,7 @@ def output_contract() -> dict[str, Any]:
             "workspace_run_id": "<from manifest>",
             "workspace_manifest_sha256": "<from manifest>",
             "agent": {
-                "skill_version": "fli-daily-intelligence-v2",
+                "skill_version": "fli-daily-intelligence-v3",
                 "model": "codex",
                 "notes": None,
             },
@@ -57,6 +57,10 @@ def output_contract() -> dict[str, Any]:
                     "local_id": "investment-example",
                     "audience": "investment",
                     "rank": 1,
+                    "rank_rationale": (
+                        "Why this Insight has this audience decision priority "
+                        "relative to the rest of the daily brief."
+                    ),
                     "title": "Judgment-led headline",
                     "what_changed": "Evidence-grounded factual synthesis.",
                     "interpretation": (
@@ -131,7 +135,7 @@ def draft_template(manifest: dict[str, Any]) -> dict[str, Any]:
         "workspace_run_id": str(manifest["run_id"]),
         "workspace_manifest_sha256": str(manifest["manifest_sha256"]),
         "agent": {
-            "skill_version": "fli-daily-intelligence-v2",
+            "skill_version": "fli-daily-intelligence-v3",
             "model": "codex",
             "notes": None,
         },
@@ -383,6 +387,7 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
                 "local_id",
                 "audience",
                 "rank",
+                "rank_rationale",
                 "title",
                 "what_changed",
                 "interpretation",
@@ -446,6 +451,9 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
                 "local_id": local_id,
                 "audience": audience,
                 "rank": rank,
+                "rank_rationale": _text(
+                    insight["rank_rationale"], f"{path}.rank_rationale"
+                ),
                 "title": _text(insight["title"], f"{path}.title"),
                 "what_changed": _text(insight["what_changed"], f"{path}.what_changed"),
                 "interpretation": _text(insight["interpretation"], f"{path}.interpretation"),

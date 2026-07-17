@@ -132,7 +132,7 @@ def _draft(workspace: Path):
         "workspace_run_id": manifest["run_id"],
         "workspace_manifest_sha256": manifest["manifest_sha256"],
         "agent": {
-            "skill_version": "fli-daily-intelligence-v2",
+            "skill_version": "fli-daily-intelligence-v3",
             "model": "codex-test",
             "notes": None,
         },
@@ -141,6 +141,10 @@ def _draft(workspace: Path):
                 "local_id": "investment-inkling",
                 "audience": "investment",
                 "rank": 1,
+                "rank_rationale": (
+                    "Ranked first because it affects two named companies and has "
+                    "a concrete enterprise-economics diligence path."
+                ),
                 "title": "Open models shorten the enterprise distribution path",
                 "what_changed": "Inkling launched with weights and enterprise distribution support.",
                 "interpretation": (
@@ -184,6 +188,10 @@ def _draft(workspace: Path):
                 "local_id": "engineering-inkling",
                 "audience": "ai_engineering",
                 "rank": 1,
+                "rank_rationale": (
+                    "Ranked first because it creates a bounded, immediately runnable "
+                    "engineering test."
+                ),
                 "title": "Test open-model serving before adopting the launch claim",
                 "what_changed": "Inkling shipped downloadable weights and implementation artifacts.",
                 "interpretation": "A bounded serving test can establish whether it transfers locally.",
@@ -319,6 +327,7 @@ def test_import_is_atomic_normalized_and_idempotent(tmp_path, monkeypatch):
     }
     assert "impact_chain_json" not in columns
     assert "evidence_limitations_json" not in columns
+    assert "rank_rationale" in columns
     assert conn.execute("SELECT COUNT(*) FROM editorial_candidate").fetchone()[0] == 3
     assert conn.execute("SELECT COUNT(*) FROM editorial_event_disposition").fetchone()[0] == 4
     assert conn.execute("SELECT COUNT(*) FROM editorial_run").fetchone()[0] == 1
@@ -380,12 +389,15 @@ def test_store_migration_collapses_legacy_investment_analysis(tmp_path):
         for row in migrated.execute("PRAGMA table_info(editorial_insight)").fetchall()
     }
     row = migrated.execute(
-        "SELECT analysis_json FROM editorial_insight WHERE insight_id = 'legacy-insight'"
+        """SELECT analysis_json, rank_rationale FROM editorial_insight
+           WHERE insight_id = 'legacy-insight'"""
     ).fetchone()
     migrated.close()
 
     assert "impact_chain_json" not in columns
     assert "evidence_limitations_json" not in columns
+    assert "rank_rationale" in columns
+    assert row["rank_rationale"].startswith("This historical run predates")
     assert json.loads(row["analysis_json"]) == {
         "affected_entities": [],
         "key_uncertainty": (
@@ -428,19 +440,20 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
         audience="investment", day=DAY, db_path=db
     )
 
-    assert payload["schema_version"] == "daily-intelligence-read-v3"
+    assert payload["schema_version"] == "daily-intelligence-read-v4"
     assert payload["content_kind"] == "daily_editorial"
     assert payload["available"] is True
     assert payload["reason"] is None
     assert payload["run"]["run_id"] == second["run_id"]
     assert payload["run"]["agent"] == {
-        "skill_version": "fli-daily-intelligence-v2",
+        "skill_version": "fli-daily-intelligence-v3",
         "model": "codex-test",
         "notes": "Second editorial pass.",
     }
     assert payload["run"]["counts"]["insights"] == 1
     assert [item["audience"] for item in payload["items"]] == ["investment"]
     assert payload["items"][0]["rank"] == 1
+    assert payload["items"][0]["rank_rationale"].startswith("Ranked first")
     assert payload["items"][0]["day"] == DAY
     assert payload["items"][0]["title"] == "Revised distribution judgment"
     assert payload["items"][0]["events"][0]["event_id"] == "event-a"

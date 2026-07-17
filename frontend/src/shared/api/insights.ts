@@ -118,6 +118,7 @@ export interface EditorialInsightItem {
   local_id: string
   audience: InsightAudience
   rank: number
+  rank_rationale: string
   day: string
   title: string
   what_changed: string

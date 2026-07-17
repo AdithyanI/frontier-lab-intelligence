@@ -31,7 +31,8 @@ unit; the Insight is the reader-facing judgment.
 
 Every Insight has:
 
-- a contiguous audience-local `rank` starting at one;
+- a contiguous audience-local `rank` starting at one and a concise
+  `rank_rationale` explaining that relative priority;
 - a judgment-led `title`;
 - attributable `what_changed` facts;
 - one audience-specific `interpretation` that carries the complete causal
@@ -74,7 +75,8 @@ Keep every decision-useful Insight supported by the day, while preferring
 precision over padding. Rank is an ordinal editorial priority based on decision
 consequence, evidence strength, time sensitivity, actionability, and novelty.
 It is not Feed rank, an embedding score, popularity, or a learned numerical
-score. Selecting the strongest three to five for a submission is a separate
+score. The stored rationale makes the qualitative choice inspectable without
+inventing a synthetic formula. Selecting the strongest three to five for a submission is a separate
 downstream decision, not a storage limit.
 
 Group Events only when they support one coherent audience conclusion, causal
@@ -128,7 +130,8 @@ run wins even when it selected zero Insights for an audience.
 The canonical Investment reader shows the conclusion-led title, facts, one
 investment interpretation, company read-through, confirmation/challenge
 signals, and two source columns: exact original Feed Events and supporting
-artifacts/context. Evidence roles and citation provenance remain stored even
+artifacts/context. Brief rank opens an inline explanation of the item-specific
+rationale and shared qualitative rubric. Evidence roles and citation provenance remain stored even
 though the reader does not expose the authoring scaffolding.
 
 No run schedules itself or performs publication, submission, alert delivery,

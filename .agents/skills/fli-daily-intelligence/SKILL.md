@@ -97,6 +97,8 @@ shared theme as an automatic merge.
   a separate later step, not a persistence limit.
 - Rank only the selected Insights. Rank is the audience's daily decision
   priority, not Feed rank, popularity, confidence, or embedding similarity.
+  Give each selected Insight one concise `rank_rationale` that explains its
+  position relative to the rest of that audience's complete daily brief.
 - The title states a judgment. `what_changed` states the attributable facts.
 - Connect every Insight to one or more exact Events and at least one citation.
 - Assign each routed Event once per relevant audience: to one Insight or to

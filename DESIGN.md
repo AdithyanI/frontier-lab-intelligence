@@ -232,7 +232,10 @@ Rules:
   Investment remains the default. For a date with a complete imported daily
   editorial run, `Kept` shows every selected Insight in agent-assigned priority
   order. The left rail is `Brief rank`, not Feed rank; each supporting Event
-  retains its exact Feed rank and envelope link inside provenance. The flat
+  retains its exact Feed rank and envelope link inside provenance. Brief rank
+  is a quiet disclosure control: opening it shows the item-specific editorial
+  rationale and the shared qualitative ranking rubric without adding permanent
+  metadata to the reading surface. The flat
   ruled row leads with title, `What changed`, and `Interpretation`. Investment
   then separates `Portfolio impact` from the optional `Outside the disclosed
   portfolio` mapping, gives every company a textual impact direction and one

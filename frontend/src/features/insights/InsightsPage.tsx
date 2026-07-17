@@ -454,19 +454,46 @@ function EngineeringExperimentDetails({
 
 function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
   const titleId = `${item.insight_id}-title`
+  const rankExplanationId = `${item.insight_id}-rank-explanation`
+  const [rankExplanationOpen, setRankExplanationOpen] = useState(false)
   const investmentAnalysis = isInvestmentAnalysis(item.analysis) ? item.analysis : null
   const engineeringAnalysis = isEngineeringAnalysis(item.analysis) ? item.analysis : null
 
   return (
     <article className="insight-row editorial-insight-row" aria-labelledby={titleId}>
       <div className="insight-rank editorial-rank mono">
-        <strong>#{item.rank}</strong>
-        <span>Brief rank</span>
+        <button
+          type="button"
+          aria-controls={rankExplanationId}
+          aria-expanded={rankExplanationOpen}
+          aria-label={`${rankExplanationOpen ? 'Hide' : 'Explain'} brief rank ${item.rank}`}
+          onClick={() => setRankExplanationOpen((open) => !open)}
+        >
+          <strong>#{item.rank}</strong>
+          <span>
+            Brief rank
+            <i aria-hidden="true">i</i>
+          </span>
+        </button>
       </div>
       <div className="insight-body editorial-insight-body">
         <header className="insight-head">
           <h2 id={titleId}>{decodeTextEntities(item.title)}</h2>
         </header>
+
+        {rankExplanationOpen && (
+          <div className="editorial-rank-explanation" id={rankExplanationId} role="region">
+            <p>
+              <strong>Why #{item.rank}:</strong>{' '}
+              {decodeTextEntities(item.rank_rationale)}
+            </p>
+            <p className="mono">
+              Ranked across this audience’s full daily brief by decision consequence,
+              evidence strength, time sensitivity, actionability, and novelty. It is not
+              Feed rank, confidence, popularity, or similarity.
+            </p>
+          </div>
+        )}
 
         <div className="editorial-opening">
           <section>

@@ -16,6 +16,8 @@ An Insight is a compact decision memo built directly from one or more Events.
 It contains:
 
 - `title`: the judgment, not merely the release name;
+- `rank_rationale`: one concise explanation of why the Insight has this
+  decision priority relative to the rest of the audience's daily brief;
 - `what_changed`: concise factual synthesis with exact attribution;
 - `interpretation`: one audience-specific argument connecting the evidence to
   the operating, financial, thesis, or engineering consequence;
@@ -75,6 +77,10 @@ Do not calculate a synthetic score. Feed rank may help locate evidence but does
 not determine editorial rank. Similarity is never a ranking input. If two items
 are close, prefer the one with the clearer causal chain and falsifiable next
 step.
+
+Write a `rank_rationale` for every selected Insight. It should name the decisive
+relative factors—such as portfolio breadth, consequence, evidence quality,
+urgency, or actionability—without pretending that rank is a calculated score.
 
 ## Investment analysis
 
