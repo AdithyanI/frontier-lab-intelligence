@@ -97,6 +97,114 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     ]
 
 
+def test_artifact_sources_deduplicate_one_artifact_across_source_posts(
+    tmp_path, monkeypatch
+):
+    artifact_db = tmp_path / "artifacts.db"
+    text_ref = "text/artifact.txt"
+    snapshot = tmp_path / text_ref
+    snapshot.parent.mkdir(parents=True)
+    snapshot.write_text(
+        "A substantive primary artifact that should appear exactly once.",
+        encoding="utf-8",
+    )
+    conn = artifacts.connect(artifact_db)
+    now = "2026-07-15T00:00:00+00:00"
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact_import_run
+               (import_run_id, schema_version, canonicalization_contract,
+                source_feed_run_id, source_event_run_id, triage_runs_json,
+                selection_policy, input_fingerprint, expected_candidate_count,
+                accepted_count, excluded_count, failed_count, created_at,
+                completed_at)
+               VALUES ('import', ?, 'test', 'feed', 'events', '[]', ?,
+                       'fingerprint', 2, 2, 0, 0, ?, ?)""",
+            (
+                artifacts.SCHEMA_VERSION,
+                artifacts.PRIMARY_AUTHOR_SELECTION_POLICY,
+                now,
+                now,
+            ),
+        )
+        conn.execute(
+            """INSERT INTO artifact
+               (artifact_id, canonical_url, canonicalization_contract, host,
+                artifact_kind, title, first_seen_at, last_seen_at, created_at,
+                updated_at)
+               VALUES ('artifact-1', 'https://example.com/research', 'test',
+                       'example.com', 'article', 'Research result', ?, ?, ?, ?)""",
+            (now, now, now, now),
+        )
+        for candidate_id, source_id, relation in (
+            ("candidate-linked", "post-linked", "links_to"),
+            ("candidate-self", "post-self", "self_publishes"),
+        ):
+            conn.execute(
+                """INSERT INTO artifact_import_candidate
+                   (candidate_id, import_run_id, envelope_day, event_id,
+                    source_rank, day_candidate_count, source_kind,
+                    source_provider, source_external_id,
+                    source_snapshot_sha256, source_url,
+                    disclosure_external_id, disclosure_snapshot_sha256,
+                    disclosure_url, disclosure_published_at, observed_url,
+                    expanded_url, candidate_source, relation, decision,
+                    reason_code, artifact_id, created_at)
+                   VALUES (?, 'import', '2026-07-15', 'event-1', 1, 100,
+                           'x_post', 'twitterapi_io', ?, ?, ?, ?, ?, ?, ?,
+                           'https://example.com/research',
+                           'https://example.com/research', 'entity', ?,
+                           'accepted', 'external_http_url', 'artifact-1', ?)""",
+                (
+                    candidate_id,
+                    source_id,
+                    f"snapshot-{source_id}",
+                    f"https://x.com/alice/status/{source_id}",
+                    source_id,
+                    f"snapshot-{source_id}",
+                    f"https://x.com/alice/status/{source_id}",
+                    now,
+                    relation,
+                    now,
+                ),
+            )
+        conn.execute(
+            """INSERT INTO artifact_fetch_run
+               (fetch_run_id, schema_version, fetch_policy, selection_policy,
+                input_fingerprint, expected_count, success_count,
+                failed_retryable_count, failed_terminal_count, started_at,
+                completed_at, status)
+               VALUES ('fetch-run', ?, 'test', 'test', 'fetch-fingerprint',
+                       1, 1, 0, 0, ?, ?, 'complete')""",
+            (artifacts.SCHEMA_VERSION, now, now),
+        )
+        conn.execute(
+            """INSERT INTO artifact_fetch
+               (fetch_id, fetch_run_id, artifact_id, fetch_policy,
+                requested_url, request_key, status, attempt_number, started_at,
+                completed_at, text_sha256, text_snapshot_ref, text_char_count,
+                text_truncated, retryable)
+               VALUES ('fetch', 'fetch-run', 'artifact-1', 'test',
+                       'https://example.com/research', 'request', 'success', 1,
+                       ?, ?, 'text-sha', ?, 63, 0, 0)""",
+            (now, now, text_ref),
+        )
+    monkeypatch.setattr(routing_runs, "REPO_ROOT", tmp_path)
+
+    sources = routing_runs._artifact_sources(
+        conn,
+        event_id="event-1",
+        post_authors={"post-self": "@alice", "post-linked": "@alice"},
+        primary_author="@alice",
+    )
+    conn.close()
+
+    assert len(sources) == 1
+    assert sources[0].source_id == "artifact-1"
+    assert sources[0].relation == "self_published_artifact"
+    assert sources[0].author == "@alice"
+
+
 def _refresh_summary(day: str) -> dict:
     return {
         "run": {"day": day},

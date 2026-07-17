@@ -531,11 +531,21 @@ def _artifact_sources(
            WHERE candidate.event_id = ?
              AND candidate.decision = 'accepted'
              AND import_run.selection_policy = ?
-           ORDER BY candidate.artifact_id""",
+           ORDER BY candidate.artifact_id,
+                    CASE candidate.relation
+                        WHEN 'self_publishes' THEN 0 ELSE 1
+                    END,
+                    candidate.source_external_id,
+                    candidate.source_snapshot_sha256""",
         (event_id, artifacts.PRIMARY_AUTHOR_SELECTION_POLICY),
     ).fetchall()
     sources: list[routing_model.EvidenceSource] = []
+    seen_artifact_ids: set[str] = set()
     for row in rows:
+        artifact_id = str(row["artifact_id"])
+        if artifact_id in seen_artifact_ids:
+            continue
+        seen_artifact_ids.add(artifact_id)
         snapshot = REPO_ROOT / str(row["text_snapshot_ref"])
         if not snapshot.is_file():
             raise FileNotFoundError(snapshot)
@@ -549,7 +559,7 @@ def _artifact_sources(
         sources.append(
             routing_model.EvidenceSource(
                 source_type="artifact",
-                source_id=str(row["artifact_id"]),
+                source_id=artifact_id,
                 url=str(row["canonical_url"]),
                 title=str(row["title"] or "") or None,
                 text=text,
