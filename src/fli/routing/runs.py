@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS routing_item (
     request_tags_json TEXT,
     error_type TEXT,
     error_message TEXT,
+    reused_from_run_id TEXT,
+    reused_from_event_id TEXT,
     completed_at TEXT,
     updated_at TEXT NOT NULL
 );
@@ -804,6 +806,162 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
     return {"run": dict(meta), "counts": counts}
 
 
+def reuse_exact_results(
+    target: sqlite3.Connection,
+    source: sqlite3.Connection,
+) -> int:
+    """Copy judgments only when the complete rendered model input is identical."""
+    source_meta = source.execute(
+        "SELECT * FROM run_meta WHERE singleton = 1"
+    ).fetchone()
+    target_meta = target.execute(
+        "SELECT * FROM run_meta WHERE singleton = 1"
+    ).fetchone()
+    if source_meta is None or target_meta is None:
+        raise ValueError("source and target run databases must both be frozen")
+    for key in (
+        "day",
+        "model",
+        "reasoning_effort",
+        "prompt_version",
+        "prompt_sha256",
+        "schema_version",
+        "source_event_run_id",
+        "source_feed_run_id",
+        "selection_kind",
+        "selection_limit",
+        "requested_event_id",
+        "expected_count",
+    ):
+        if source_meta[key] != target_meta[key]:
+            raise ValueError(f"source and target run metadata differ: {key}")
+
+    source_rows = {
+        (str(row["event_id"]), str(row["input_sha256"])): row
+        for row in source.execute(
+            "SELECT * FROM routing_item WHERE status = 'complete'"
+        ).fetchall()
+    }
+    reusable = []
+    for row in target.execute(
+        "SELECT event_id, input_sha256 FROM routing_item WHERE status != 'complete'"
+    ).fetchall():
+        source_row = source_rows.get(
+            (str(row["event_id"]), str(row["input_sha256"]))
+        )
+        if source_row is not None:
+            reusable.append(source_row)
+    if not reusable:
+        return 0
+
+    now = _now()
+    with target:
+        target.executemany(
+            """UPDATE routing_item
+               SET status = 'complete', attempts = 0,
+                   ai_engineering_relevant = ?, ai_engineering_reason = ?,
+                   investment_relevant = ?, investment_reason = ?,
+                   raw_output_text = ?, response_id = ?, response_model = ?,
+                   input_tokens = ?, cached_tokens = ?, cache_write_tokens = ?,
+                   output_tokens = ?, reported_cost_usd = ?,
+                   request_tags_json = ?, error_type = NULL,
+                   error_message = NULL, reused_from_run_id = ?,
+                   reused_from_event_id = ?, completed_at = ?, updated_at = ?
+               WHERE event_id = ? AND input_sha256 = ?
+                 AND status != 'complete'""",
+            [
+                (
+                    row["ai_engineering_relevant"],
+                    row["ai_engineering_reason"],
+                    row["investment_relevant"],
+                    row["investment_reason"],
+                    row["raw_output_text"],
+                    row["response_id"],
+                    row["response_model"],
+                    row["input_tokens"],
+                    row["cached_tokens"],
+                    row["cache_write_tokens"],
+                    row["output_tokens"],
+                    row["reported_cost_usd"],
+                    row["request_tags_json"],
+                    str(source_meta["run_id"]),
+                    str(row["event_id"]),
+                    row["completed_at"],
+                    now,
+                    row["event_id"],
+                    row["input_sha256"],
+                )
+                for row in reusable
+            ],
+        )
+        target.execute(
+            "UPDATE run_meta SET updated_at = ? WHERE singleton = 1",
+            (now,),
+        )
+    return len(reusable)
+
+
+def refresh_run_packets(
+    *,
+    source_run_db: Path,
+    target_run_db: Path,
+    run_id: str,
+    artifact_db: Path,
+    client: Any,
+    workers: int = 1,
+) -> dict[str, Any]:
+    """Freeze a successor run and evaluate only packets whose input changed."""
+    if source_run_db.resolve() == target_run_db.resolve():
+        raise ValueError("target run database must differ from source run database")
+    source = _open_readonly(source_run_db)
+    try:
+        source_meta = source.execute(
+            "SELECT * FROM run_meta WHERE singleton = 1"
+        ).fetchone()
+        if source_meta is None:
+            raise ValueError("source run database has not been prepared")
+        if str(source_meta["selection_kind"]) != "top_ranked":
+            raise ValueError("selective refresh requires a top_ranked source run")
+        complete_count = int(
+            source.execute(
+                "SELECT COUNT(*) FROM routing_item WHERE status = 'complete'"
+            ).fetchone()[0]
+        )
+        if complete_count != int(source_meta["expected_count"]):
+            raise ValueError("source run must be complete before selective refresh")
+
+        target = connect_run(target_run_db)
+        try:
+            freeze_run(
+                target,
+                run_id=run_id,
+                day=str(source_meta["day"]),
+                top_ranked=int(source_meta["selection_limit"]),
+                event_id=None,
+                artifact_db=artifact_db,
+                model=str(source_meta["model"]),
+                effort=str(source_meta["reasoning_effort"]),
+            )
+            reused_count = reuse_exact_results(target, source)
+            model_requests = int(
+                target.execute(
+                    "SELECT COUNT(*) FROM routing_item WHERE status != 'complete'"
+                ).fetchone()[0]
+            )
+            result = run_pending(target, client=client, workers=workers)
+            target.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        finally:
+            target.close()
+    finally:
+        source.close()
+    return {
+        **result,
+        "source_run_id": str(source_meta["run_id"]),
+        "reused_exact_count": reused_count,
+        "model_requests": model_requests,
+    }
+
+
 def run_pending(
     conn: sqlite3.Connection,
     *,
@@ -973,6 +1131,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Remove older routing runs only after the full refresh succeeds.",
     )
     refresh_parser.add_argument("--dry-run", action="store_true")
+    refresh_run_parser = sub.add_parser(
+        "refresh-run",
+        help="Freeze a successor run and reroute only changed exact inputs.",
+    )
+    refresh_run_parser.add_argument("--source-run-db", type=Path, required=True)
+    refresh_run_parser.add_argument("--run-id", required=True)
+    refresh_run_parser.add_argument("--run-db", type=Path)
+    refresh_run_parser.add_argument(
+        "--artifact-db", type=Path, default=DEFAULT_ARTIFACT_DB
+    )
+    refresh_run_parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args(argv)
     started = time.monotonic()
     try:
@@ -1027,6 +1196,19 @@ def main(argv: list[str] | None = None) -> int:
                 dry_run=args.dry_run,
             )
             command = "audience-routing.refresh"
+        elif args.action == "refresh-run":
+            client = entity_kinds.create_litellm_client()
+            if hasattr(client, "with_options"):
+                client = client.with_options(max_retries=0, timeout=180.0)
+            data = refresh_run_packets(
+                source_run_db=args.source_run_db,
+                target_run_db=args.run_db or default_run_db(args.run_id),
+                run_id=args.run_id,
+                artifact_db=args.artifact_db,
+                client=client,
+                workers=args.workers,
+            )
+            command = "audience-routing.refresh-run"
         elif args.action == "summary":
             conn = connect_run(args.run_db)
             data = summary(conn)

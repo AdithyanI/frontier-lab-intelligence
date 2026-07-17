@@ -97,6 +97,87 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     ]
 
 
+def test_selective_refresh_reuses_only_exact_complete_inputs(tmp_path):
+    source = routing_runs.connect_run(tmp_path / "source.db")
+    target = routing_runs.connect_run(tmp_path / "target.db")
+    now = "2026-07-17T00:00:00+00:00"
+
+    def seed_meta(conn, run_id, cohort_sha):
+        conn.execute(
+            """INSERT INTO run_meta
+               (singleton, run_id, day, model, reasoning_effort,
+                prompt_version, prompt_sha256, schema_version,
+                source_event_run_id, source_feed_run_id, source_artifact_db,
+                selection_kind, selection_limit, requested_event_id,
+                cohort_sha256, expected_count, created_at, updated_at)
+               VALUES (1, ?, '2026-07-15', 'model', 'high', 'prompt',
+                       'prompt-sha', 'schema', 'events', 'feed', 'artifacts.db',
+                       'top_ranked', 2, NULL, ?, 2, ?, ?)""",
+            (run_id, cohort_sha, now, now),
+        )
+
+    def seed_item(conn, event_id, input_sha, *, complete=False):
+        conn.execute(
+            """INSERT INTO routing_item
+               (event_id, feed_rank, root_url, snapshot_content_sha256,
+                packet_json, evidence_sha256, input_text, input_sha256,
+                status, attempts, ai_engineering_relevant,
+                ai_engineering_reason, investment_relevant,
+                investment_reason, raw_output_text, response_id,
+                response_model, input_tokens, cached_tokens,
+                cache_write_tokens, output_tokens, reported_cost_usd,
+                request_tags_json, completed_at, updated_at)
+               VALUES (?, ?, 'https://x.com/a/status/1', 'snapshot', '{}',
+                       'evidence', 'input', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                       ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                event_id,
+                1 if event_id == "same" else 2,
+                input_sha,
+                "complete" if complete else "pending",
+                1 if complete else 0,
+                1 if complete else None,
+                "engineering" if complete else None,
+                0 if complete else None,
+                "investment" if complete else None,
+                "raw" if complete else None,
+                "response" if complete else None,
+                "model" if complete else None,
+                100 if complete else None,
+                20 if complete else None,
+                0 if complete else None,
+                10 if complete else None,
+                0.01 if complete else None,
+                '{"run":"source"}' if complete else None,
+                now if complete else None,
+                now,
+            ),
+        )
+
+    seed_meta(source, "source", "old-cohort")
+    seed_meta(target, "target", "new-cohort")
+    seed_item(source, "same", "same-input", complete=True)
+    seed_item(source, "changed", "old-input", complete=True)
+    seed_item(target, "same", "same-input")
+    seed_item(target, "changed", "new-input")
+
+    assert routing_runs.reuse_exact_results(target, source) == 1
+    same = target.execute(
+        "SELECT * FROM routing_item WHERE event_id = 'same'"
+    ).fetchone()
+    changed = target.execute(
+        "SELECT * FROM routing_item WHERE event_id = 'changed'"
+    ).fetchone()
+    source.close()
+    target.close()
+
+    assert same["status"] == "complete"
+    assert same["reused_from_run_id"] == "source"
+    assert same["response_id"] == "response"
+    assert changed["status"] == "pending"
+    assert changed["reused_from_run_id"] is None
+
+
 def test_artifact_sources_deduplicate_one_artifact_across_source_posts(
     tmp_path, monkeypatch
 ):

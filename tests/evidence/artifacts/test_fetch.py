@@ -238,6 +238,48 @@ def test_placeholder_validation_keeps_short_or_mixed_text(text):
             "This page isn't yet available in your region. Please check back "
             "later for availability.",
         ),
+        (
+            "Bloomberg - Are you a robot?",
+            "https://www.bloomberg.com/news/articles/example",
+            "We've detected unusual activity from your computer network. "
+            "Click the box below to let us know you're not a robot.",
+        ),
+        (
+            "Blocked",
+            "https://www.reddit.com/r/MachineLearning/comments/example",
+            "You've been blocked by network security. If you think you've "
+            "been blocked by mistake, file a ticket below.",
+        ),
+        (
+            "Research notes",
+            "https://example.notion.site/research",
+            "JavaScript must be enabled in order to use Notion. Please enable "
+            "JavaScript to continue.",
+        ),
+        (
+            "Maps",
+            "https://consent.google.com/m?continue=https://maps.google.com",
+            "Bevor Sie zu Google Maps weitergehen. Wir verwenden Cookies und "
+            "Daten, um Google-Dienste bereitzustellen.",
+        ),
+        (
+            "Welcome back - OpenAI",
+            "https://chatgpt.com/yubikey",
+            "Welcome back. Email address. Continue. Or continue with Google, "
+            "Microsoft Account, Apple, or phone.",
+        ),
+        (
+            "Sign in required",
+            "https://example.chatgpt.site/",
+            "You're almost in. This site uses ChatGPT to securely sign you in. "
+            "Continue with ChatGPT.",
+        ),
+        (
+            "ChatGPT",
+            "https://chatgpt.com/",
+            "Get responses tailored to you. Log in to get answers based on "
+            "saved chats and preferences.",
+        ),
     ],
 )
 def test_content_validation_rejects_non_content_shells(title, url, text):
@@ -271,6 +313,19 @@ def test_content_validation_keeps_legitimate_short_mixed_content():
         text,
         title="EdgeBench: reproducible inference measurements",
         final_url="https://example.com/edgebench",
+    ) is None
+
+
+def test_content_validation_keeps_substantive_javascript_discussion():
+    text = (
+        "JavaScript must be enabled for the interactive demo, but the paper "
+        "reports a 17% latency reduction across six evaluated models. " * 12
+    )
+
+    assert artifact_fetch.extracted_text_issue(
+        text,
+        title="Measured serving latency results",
+        final_url="https://example.com/research/serving-latency",
     ) is None
 
 

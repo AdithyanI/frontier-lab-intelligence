@@ -41,7 +41,7 @@ JINA_READER_EXTRACTOR = "jina-reader-markdown-v1"
 JINA_API_KEY_ENV = "JINA_API_KEY"
 DEFAULT_REPO_ENV = artifacts.REPO_ROOT / ".env"
 EXTRACTOR_CONTRACT = "artifact-text-v2"
-CONTENT_VALIDATION_CONTRACT = "artifact-content-v2"
+CONTENT_VALIDATION_CONTRACT = "artifact-content-v3"
 USER_AGENT = "frontier-lab-intelligence/0.1 artifact-fetch (+local research project)"
 RAW_ROOT = artifacts.REPO_ROOT / "data" / "raw" / "artifacts" / "body" / "sha256"
 TEXT_ROOT = (
@@ -174,9 +174,21 @@ def extracted_text_issue(
     elif "checking your browser - recaptcha" in normalized_title:
         shell_kind = "captcha verification"
     elif (
+        "are you a robot" in normalized_title
+        or "you've been blocked by network security" in normalized_text
+        or (
+            "detected unusual activity from your computer network"
+            in normalized_text
+            and "not a robot" in normalized_text
+        )
+    ):
+        shell_kind = "bot or network security"
+    elif (
         "javascript is disabled" in normalized_text
         or "enable javascript in your browser" in normalized_text
-    ) and len(text) < 500:
+        or "javascript must be enabled" in normalized_text
+        or "need to enable javascript" in normalized_text
+    ) and len(text) < 1_000:
         shell_kind = "client-rendered JavaScript"
     elif "there was an error while loading. please reload this page" in normalized_text:
         shell_kind = "client loading error"
@@ -195,14 +207,29 @@ def extracted_text_issue(
         or "isn't yet available in your region" in normalized_text
     ):
         shell_kind = "region-unavailable"
+    elif host in {"consent.google.com", "consent.youtube.com"}:
+        shell_kind = "consent"
     elif (
-        normalized_title in {"sign in", "google forms: sign-in"}
+        normalized_title in {
+            "sign in",
+            "sign in required",
+            "google forms: sign-in",
+        }
         and len(text) < 2_500
         and (
             "continue with" in normalized_text
             or "email or phone" in normalized_text
             or "sign in to" in normalized_text
+            or "securely sign you in" in normalized_text
         )
+    ) or (
+        normalized_title.startswith("welcome back")
+        and len(text) < 2_500
+        and ("continue with" in normalized_text or "log in" in normalized_text)
+    ) or (
+        host == "chatgpt.com"
+        and len(text) < 1_000
+        and "log in to get answers" in normalized_text
     ) or (path.startswith(("/login", "/signin", "/sign-in")) and len(text) < 2_500):
         shell_kind = "authentication"
     elif "access denied" in normalized_title or normalized_text.startswith(
