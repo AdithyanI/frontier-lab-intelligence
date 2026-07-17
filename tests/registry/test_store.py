@@ -7,6 +7,7 @@ import pytest
 from fli.registry import channels, graph
 from fli.registry import seeds as labs
 from fli.registry import store as registry
+from fli.registry import view as registry_view
 
 
 def test_materializes_one_unknown_entity_per_unlinked_channel(tmp_path):
@@ -116,7 +117,7 @@ def test_registry_read_model_excludes_rank_and_source_fields(tmp_path):
     )
     registry.materialize_unlinked_channels(conn)
 
-    row = registry.read_entities(conn)[0]
+    row = registry_view.read_entities(conn)[0]
     assert set(row) == {
         "id",
         "slug",
@@ -170,7 +171,7 @@ def test_registry_sums_followers_across_an_organizations_x_channels(tmp_path):
         )
     conn.commit()
 
-    entity = registry.read_entities(conn)[0]
+    entity = registry_view.read_entities(conn)[0]
 
     assert entity["followers_count"] == 175
 
@@ -201,13 +202,13 @@ def test_registry_rejection_is_reasoned_and_separate_from_kind(tmp_path):
     )
     conn.commit()
 
-    row = registry.read_entities(conn)[0]
+    row = registry_view.read_entities(conn)[0]
     assert row["kind"] == "unsure"
     assert row["registry_state"] == "rejected"
     assert row["rejection_reason_code"] == "protected_x_account"
     assert row["rejection_reason"] == "The X account has protected posts."
     assert row["rejection_source"] == "twitterapi_io"
-    assert registry.kind_counts(conn) == {
+    assert registry_view.kind_counts(conn) == {
         "person": 0,
         "organization": 0,
         "unsure": 0,
@@ -365,7 +366,7 @@ def test_organization_groups_are_explicit_and_idempotent(tmp_path):
         "claudedevs",
     ]
     assert conn.execute("SELECT COUNT(*) FROM entity_merge_audit").fetchone()[0] == 2
-    assert registry.read_entities(conn)[0]["bio"] == "Bio for anthropicai"
+    assert registry_view.read_entities(conn)[0]["bio"] == "Bio for anthropicai"
 
 
 def test_organization_group_dry_run_preserves_logical_snapshot(tmp_path):
@@ -891,7 +892,11 @@ def test_entity_override_updates_identity_records_reason_and_replays(tmp_path):
         "SELECT COUNT(*) FROM entity_override_audit WHERE entity_id = ?",
         (entity_id,),
     ).fetchone()[0] == 1
-    read = next(item for item in registry.read_entities(conn) if item["id"] == entity_id)
+    read = next(
+        item
+        for item in registry_view.read_entities(conn)
+        if item["id"] == entity_id
+    )
     assert read["kind_reason"] == "The X account represents one individual."
 
 

@@ -4,6 +4,7 @@ import sqlite3
 
 import pytest
 
+from fli.evidence.artifacts import cli as artifact_cli
 from fli.evidence.artifacts import store as artifacts
 from fli.evidence.artifacts import urls as artifact_urls
 
@@ -125,7 +126,7 @@ def test_reviewed_supplement_cli_returns_machine_contract(tmp_path, capsys):
     _triage_db(triage_db)
     _manifest(manifest)
 
-    exit_code = artifacts.main(
+    exit_code = artifact_cli.main(
         [
             "import-reviewed-supplements",
             "--db",

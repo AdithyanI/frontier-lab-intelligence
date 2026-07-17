@@ -5,6 +5,7 @@ import httpx
 import pytest
 
 from fli.evidence.artifacts import fetch as artifact_fetch
+from fli.evidence.artifacts import cli as artifact_cli
 from fli.evidence.artifacts import store as artifacts
 from fli.evidence.artifacts import urls as artifact_urls
 
@@ -754,15 +755,17 @@ def test_jina_api_key_prefers_environment_then_repo_env(tmp_path, monkeypatch):
 def test_artifact_cli_has_stable_json_success_and_error_contract(tmp_path, capsys):
     db = tmp_path / "artifacts.db"
 
-    assert artifacts.main(["summary", "--db", str(db), "--json", "--no-input"]) == 0
+    assert artifact_cli.main(
+        ["summary", "--db", str(db), "--json", "--no-input"]
+    ) == 0
     success = json.loads(capsys.readouterr().out)
-    assert success["schema_version"] == artifacts.RESULT_SCHEMA_VERSION
+    assert success["schema_version"] == artifact_cli.RESULT_SCHEMA_VERSION
     assert success["command"] == "artifacts.summary"
     assert success["status"] == "ok"
     assert success["error"] is None
     assert set(success["meta"]) == {"request_id", "duration_ms", "timestamp_utc"}
 
-    assert artifacts.main(["inspect", "--db", str(db), "--limit", "0"]) == 2
+    assert artifact_cli.main(["inspect", "--db", str(db), "--limit", "0"]) == 2
     failure = json.loads(capsys.readouterr().out)
     assert failure["command"] == "artifacts.inspect"
     assert failure["status"] == "error"
@@ -784,7 +787,7 @@ def test_artifact_cli_passes_repeatable_exact_native_fetch_filter(
     monkeypatch.setattr(artifact_fetch, "fetch_cohort", fake_fetch_cohort)
     first_id = "a" * 64
     second_id = "b" * 64
-    assert artifacts.main(
+    assert artifact_cli.main(
         [
             "fetch",
             "--db",
@@ -808,7 +811,7 @@ def test_artifact_cli_passes_repeatable_exact_native_fetch_filter(
         }
     ]
 
-    assert artifacts.main(
+    assert artifact_cli.main(
         [
             "fetch",
             "--limit",

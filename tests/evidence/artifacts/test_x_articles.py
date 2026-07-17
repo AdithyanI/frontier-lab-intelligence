@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from fli.evidence.artifacts import fetch as artifact_fetch
+from fli.evidence.artifacts import cli as artifact_cli
 from fli.evidence.artifacts import store as artifacts
 from fli.evidence.artifacts import urls as artifact_urls
 from fli.evidence.artifacts import x_articles as artifact_x_articles
@@ -647,7 +648,7 @@ def test_x_article_cli_passes_repeatable_exact_filter_and_keeps_default_limit(
     )
     first_id = "a" * 64
     second_id = "b" * 64
-    assert artifacts.main(
+    assert artifact_cli.main(
         [
             "fetch-x-articles",
             "--db",
@@ -660,7 +661,7 @@ def test_x_article_cli_passes_repeatable_exact_filter_and_keeps_default_limit(
         ]
     ) == 0
     capsys.readouterr()
-    assert artifacts.main(
+    assert artifact_cli.main(
         [
             "fetch-x-articles",
             "--db",

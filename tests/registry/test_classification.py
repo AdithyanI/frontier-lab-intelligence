@@ -6,6 +6,7 @@ import pytest
 from fli.registry import channels
 from fli.registry import classification as entity_kinds
 from fli.registry import store as registry
+from fli.registry import view as registry_view
 
 
 class FakeResponses:
@@ -702,7 +703,7 @@ def test_post_enrichment_rejects_protected_account_before_model_call(tmp_path):
     assert client.responses.calls == []
     assert post_client.profile_calls == ["private_person"]
     assert post_client.calls == []
-    row = registry.read_entities(conn)[0]
+    row = registry_view.read_entities(conn)[0]
     assert row["kind"] == "unsure"
     assert row["registry_state"] == "rejected"
     assert row["rejection_reason_code"] == "protected_x_account"
@@ -778,7 +779,7 @@ def test_single_handle_lifecycle_rejects_protected_before_model(tmp_path):
     assert result["stage"] == "protected_account"
     assert result["persisted"] is True
     assert client.responses.calls == []
-    row = registry.read_entities(conn)[0]
+    row = registry_view.read_entities(conn)[0]
     assert row["registry_state"] == "rejected"
     assert row["rejection_reason_code"] == "protected_x_account"
 

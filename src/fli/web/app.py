@@ -38,6 +38,7 @@ from fli.registry import channels
 from fli.registry import classification as entity_kinds
 from fli.registry import intake as registry_intake
 from fli.registry import store as entity_registry
+from fli.registry import view as entity_registry_view
 from fli.web import artifact_library as artifact_store
 from fli.web import events as event_store, feed as feed_store
 
@@ -265,12 +266,12 @@ def registry(
     """One server-filtered page of the entity universe."""
     conn = _model_conn()
     try:
-        counts = entity_registry.kind_counts(conn)
-        filtered_total = entity_registry.count_entities(
+        counts = entity_registry_view.kind_counts(conn)
+        filtered_total = entity_registry_view.count_entities(
             conn, group=group, query=q
         )
         if sort == "network" and filtered_total:
-            entities = entity_registry.read_entities(
+            entities = entity_registry_view.read_entities(
                 conn,
                 limit=filtered_total,
                 offset=0,
@@ -280,7 +281,7 @@ def registry(
             )
         else:
             follower_direction = "desc" if direction == "asc" else "asc"
-            entities = entity_registry.read_entities(
+            entities = entity_registry_view.read_entities(
                 conn,
                 limit=limit,
                 offset=offset,
@@ -322,7 +323,7 @@ def registry_entity(entity_id: int) -> JSONResponse:
     """One resolved entity with channels, for the shared identity card."""
     conn = _model_conn()
     try:
-        entities = entity_registry.read_entities(
+        entities = entity_registry_view.read_entities(
             conn, limit=1, entity_id=entity_id
         )
         if not entities:
@@ -361,7 +362,7 @@ def registry_profile_intake(request: RegistryIntakeRequest) -> JSONResponse:
             ) from error
         entity = None
         if result["entity_id"] is not None:
-            entities = entity_registry.read_entities(
+            entities = entity_registry_view.read_entities(
                 conn, limit=1, entity_id=int(result["entity_id"])
             )
             if entities:

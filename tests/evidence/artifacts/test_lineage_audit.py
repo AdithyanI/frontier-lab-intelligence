@@ -1,6 +1,7 @@
 import json
 import sqlite3
 
+from fli.evidence.artifacts import cli as artifact_cli
 from fli.evidence.artifacts import store as artifacts
 from fli.evidence.artifacts import urls as artifact_urls
 
@@ -219,7 +220,7 @@ def test_primary_author_lineage_cli_fails_with_structured_foreign_author_report(
     feed.commit()
     feed.close()
 
-    exit_code = artifacts.main(
+    exit_code = artifact_cli.main(
         [
             "audit-lineage",
             "--db",

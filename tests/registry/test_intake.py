@@ -6,6 +6,7 @@ import pytest
 from fli.ingestion import sources
 from fli.registry import channels, intake as registry_intake
 from fli.registry import store as registry
+from fli.registry import view as registry_view
 
 
 class FakeResponses:
@@ -149,7 +150,9 @@ def test_screen_mode_persists_combined_keep_decision_and_kind_reason(tmp_path):
 
     assert result["outcome"] == "active"
     assert result["registry_decision"] == "keep"
-    entity = registry.read_entities(conn, limit=1, entity_id=result["entity_id"])[0]
+    entity = registry_view.read_entities(
+        conn, limit=1, entity_id=result["entity_id"]
+    )[0]
     assert entity["kind"] == "person"
     assert entity["kind_reason"] == "The profile describes one individual researcher."
     assert entity["registry_state"] == "active"
@@ -181,7 +184,9 @@ def test_screen_mode_records_below_floor_profile_as_rejected_without_llm(tmp_pat
     assert result["registry_decision"] == "remove"
     assert "1,000-follower" in result["decision_reason"]
     assert llm.responses.calls == []
-    entity = registry.read_entities(conn, limit=1, entity_id=result["entity_id"])[0]
+    entity = registry_view.read_entities(
+        conn, limit=1, entity_id=result["entity_id"]
+    )[0]
     assert entity["registry_state"] == "rejected"
     assert entity["rejection_reason_code"] == "below_follower_floor"
 

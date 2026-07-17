@@ -211,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
         return evidence_refresh.main(args.refresh_args)
 
     if args.command == "artifacts":
-        from fli.evidence.artifacts import store as artifacts
+        from fli.evidence.artifacts import cli as artifacts
 
         return artifacts.main(args.artifact_args)
 
