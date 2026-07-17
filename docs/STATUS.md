@@ -112,10 +112,9 @@ current-session approval.
 
 - Broad RSS, blog, GitHub, arXiv, or second-source ingestion.
 - Semantic/topic event clustering beyond exact provider relations.
-- A learned ranking model or renewed daily-score weight tuning. A verified
-  redesign concept and deferred tracker exist at
-  [`projects/attention-score-v2/`](projects/attention-score-v2/); it must not
-  activate before submission delivery.
+- A learned ranking model. The evidence-backed Attention Score v2 redesign is
+  now active as a fixed-formula calibration project; it remains separate from
+  a learned ranker.
 - Large discovered-account admission or recursive graph crawling.
 - Mobile/responsive polish.
 - Real external alerts, publishing, uploading, or submission without Adi's
@@ -127,14 +126,11 @@ case-study thesis.
 ## Current Direction
 
 The active tracker is
-[`docs/projects/submission-sprint/tasks.md`](projects/submission-sprint/tasks.md).
-The Event rebuild, v9 top-100 routing coverage, and full v10/v7 Insight
-regeneration are complete and frozen unless final-proof validation exposes a
-concrete defect. The remaining three-day critical path is to consolidate
-cross-Event semantic duplicates, select and source-check the strongest 3–5
-unique developments, deliver them as an in-app briefing/PDF/local alert
-preview, complete compact evaluation and tokenomics evidence, and assemble the
-reviewer-facing submission package.
+[`docs/projects/attention-score-v2/tasks.md`](projects/attention-score-v2/tasks.md).
+The next boundary is a reproducible offline comparison of attention-v1.1 and
+the proposed fixed-curve v2 formula, followed by a below-cutoff probe and blind
+ordering audit. Production activation is evidence-gated; the existing v9
+routing and v10/v7 Insight rows remain frozen and are not silently re-ranked.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -147,7 +143,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | [`projects/submission-sprint/tasks.md`](projects/submission-sprint/tasks.md) |
+| What should be done next, exactly? | [`projects/attention-score-v2/tasks.md`](projects/attention-score-v2/tasks.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |

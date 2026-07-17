@@ -1,10 +1,5 @@
 # Attention Score v2
 
-> **Deferred tracker.** The repo allows one active tracker at a time
-> (`scripts/check-fast.sh`), and the submission critical path owns it. To
-> activate this project after the current active tracker is archived, rename
-> this file to `tasks.md` and update the STATUS active-tracker pointer.
-
 ## Goal
 
 Replace the percentile encoding of the daily attention score's amplification
@@ -45,8 +40,8 @@ re-litigated without new data.
 
 ### Out of Scope
 
-- Any production formula change before the 2026-07-20 submission is delivered
-  (hard constraint — see Execution Rules).
+- Replacing the production formula before the offline comparison, below-cutoff
+  probe, and human ordering audit establish that v2 is an improvement.
 - Prominence-weighted votes (PageRank/support-weighted amplifiers) — rejected
   in the concept doc as fame bias; do not reopen without new evidence.
 - Increasing the author-support weight — measured flat above a low floor.
@@ -58,7 +53,7 @@ re-litigated without new data.
 
 ## Context / Constraints
 
-- Date started: 2026-07-16 (concept only; implementation deliberately deferred).
+- Date started: 2026-07-16; activated for implementation on 2026-07-17.
 - Current formula: `attention-v1.1` in `src/fli/web/feed.py` (`SCORE_FORMULA`,
   `_percentiles`, `_apply_attention_scores`); same components consumed by
   `src/fli/web/events.py`. Documented in `docs/references/signal-feed.md`.
@@ -71,10 +66,9 @@ re-litigated without new data.
 - Labels are model judgments (GPT-5.4-mini v9), not human truth, and are
   censored at the current top-100 — hence the human audit and below-cutoff
   probe milestones.
-- STATUS lists "a learned ranking model or renewed daily-score weight tuning"
-  as deliberately deferred; this project is the successor to that deferral and
-  must not start implementation while the submission critical path
-  (`docs/projects/evidence-audience-routing/tasks.md`) is active.
+- Adi explicitly activated this project on 2026-07-17. Implement and validate
+  the candidate immediately; production activation remains evidence-gated,
+  not date-gated.
 - All numbers in the concept doc are 2026-07-16 checkpoint evidence; re-verify
   against live stores before building on them.
 
@@ -119,11 +113,10 @@ re-litigated without new data.
 
 ## Execution Rules
 
-- **Hard gate: no production formula change before the 2026-07-20 submission
-  is delivered and Adi confirms the freeze is lifted.** M1–M2 and M4 are
-  offline/read-only and may proceed earlier if they do not touch production
-  code paths; M3 spends (trivially) on routing calls and needs the usual
-  spend norms; M5–M6 wait for the gate.
+- Implement M1–M4 now. Do not make v2 the production default until the
+  evaluation and blind audit meet the M6 ship criteria. Existing v9 routing
+  and Insight rows remain frozen historical artifacts and are never silently
+  re-anchored to a new rank.
 - Keep work scoped to the current milestone unless the tracker explicitly
   expands scope.
 - Read `resources/concept-and-evidence.md` before proposing design changes;
@@ -157,8 +150,8 @@ re-litigated without new data.
 
 ## Open Questions / Blockers
 
-- Blocked (M5–M6 and any production change): submission freeze until
-  2026-07-20 delivery and explicit go-ahead from Adi.
+- Production activation depends on the measured v1.1-versus-v2 comparison and
+  blind audit; this is an evaluation dependency, not a user blocker.
 - Should firsthand (Registry-authored) and network-discovered lanes be ranked
   separately instead of blended? Deliberately out of scope here; if M2/M3
   results make the blend look unsalvageable, raise it as a new project rather
@@ -203,6 +196,8 @@ re-litigated without new data.
   900-label join, single-component P@20 head-to-head, amplification–support
   anti-correlation). Findings, proposed formula, and evaluation plan written
   to [resources/concept-and-evidence.md](resources/concept-and-evidence.md).
-- 2026-07-16: [IN-PROGRESS] Tracker created. Implementation intentionally not
-  started: submission freeze active; next agent starts at M1 (offline
-  harness), which is safe to begin before the freeze lifts.
+- 2026-07-16: [IN-PROGRESS] Tracker created with M1 as the first implementation
+  batch.
+- 2026-07-17: [IN-PROGRESS] Adi activated Attention Score v2. The submission
+  sprint drafts were removed; implementation begins with the reproducible
+  offline harness and candidate calibration before any production switch.

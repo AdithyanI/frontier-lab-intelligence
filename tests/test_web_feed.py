@@ -4,6 +4,7 @@ from datetime import date
 from fastapi.testclient import TestClient
 
 from fli import channels, signal_feed, x_content
+from fli.scoring import attention
 from fli.web import feed as feed_store
 from fli.web.app import app
 from test_signal_feed import _raw_fixture, _tweet
@@ -143,7 +144,7 @@ def test_attention_uses_flat_amplifier_votes_and_separate_originator_support():
     stronger_originator = item(amplifier_support=1, originator_support=50)
     items = [low_support_amplifier, high_support_amplifier, stronger_originator]
 
-    feed_store._apply_attention_scores(items)
+    attention.apply_attention_scores(items)
 
     assert low_support_amplifier["attention_score"] == high_support_amplifier["attention_score"]
     assert stronger_originator["attention_score"] > low_support_amplifier["attention_score"]
