@@ -89,11 +89,11 @@ Rules:
   groups the live Status surface with the explanatory Architecture surface;
   neither competes with the reader workflows as a fifth top-level destination.
 - Registry and Ranking share one top-level **Network** destination because they
-  are two views of the same source system. Registry is the first and default
-  subview because it is the assignment's screened identity register; Ranking
-  follows as its network-discovery view. A third **Add Profile** subview owns
-  manual admission as an operator action. Use one ruled secondary navigation
-  for all three, not another row of top-level pills.
+  are two views of the same source system. Ranking is the first and default
+  subview because it is the clearest demonstration of network discovery;
+  Registry follows as the screened identity audit view. A third **Add Profile**
+  subview owns manual admission as an operator action. Use one ruled secondary
+  navigation for all three, not another row of top-level pills.
 - Feed and Primary artifacts share one top-level **Evidence** destination
   because they are two inspection views over the same evidence layer. Feed is
   the first and default subview: it owns daily rank, score disclosure, and

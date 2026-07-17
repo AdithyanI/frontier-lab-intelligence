@@ -6,13 +6,13 @@ export default function Network() {
       <header className="network-head">
         <h1 className="page-title">Network</h1>
         <p className="page-sub">
-          The Registry defines the screened source set. Ranking shows which
-          accounts that set follows. Add Profile admits a source through normal
+          Ranking shows which accounts the screened source set follows. The
+          Registry defines that set. Add Profile admits a source through normal
           screening or a direct audited override.
         </p>
         <nav className="ruled-nav network-tabs" aria-label="Network views">
-          <NavLink to="/network/registry">Registry</NavLink>
           <NavLink to="/network/ranking">Ranking</NavLink>
+          <NavLink to="/network/registry">Registry</NavLink>
           <NavLink to="/network/add-profile">Add Profile</NavLink>
         </nav>
       </header>

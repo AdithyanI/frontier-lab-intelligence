@@ -32,9 +32,9 @@ export default function App() {
       </header>
       <main className="content">
         <Routes>
-          <Route path="/" element={<Navigate to="/network/registry" replace />} />
+          <Route path="/" element={<Navigate to="/network/ranking" replace />} />
           <Route path="/network" element={<Network />}>
-            <Route index element={<Navigate to="registry" replace />} />
+            <Route index element={<Navigate to="ranking" replace />} />
             <Route path="registry" element={<Registry />} />
             <Route path="ranking" element={<Ranking />} />
             <Route path="add-profile" element={<AddProfile />} />
@@ -50,7 +50,7 @@ export default function App() {
             <Route path="status" element={<Status />} />
             <Route path="architecture" element={<Architecture />} />
           </Route>
-          <Route path="*" element={<Navigate to="/network/registry" replace />} />
+          <Route path="*" element={<Navigate to="/network/ranking" replace />} />
         </Routes>
       </main>
     </div>
