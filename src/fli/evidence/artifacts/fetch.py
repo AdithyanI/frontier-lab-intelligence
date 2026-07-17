@@ -40,7 +40,8 @@ JINA_READER_URL = "https://r.jina.ai/"
 JINA_READER_EXTRACTOR = "jina-reader-markdown-v1"
 JINA_API_KEY_ENV = "JINA_API_KEY"
 DEFAULT_REPO_ENV = artifacts.REPO_ROOT / ".env"
-EXTRACTOR_CONTRACT = "artifact-text-v1"
+EXTRACTOR_CONTRACT = "artifact-text-v2"
+CONTENT_VALIDATION_CONTRACT = "artifact-content-v2"
 USER_AGENT = "frontier-lab-intelligence/0.1 artifact-fetch (+local research project)"
 RAW_ROOT = artifacts.REPO_ROOT / "data" / "raw" / "artifacts" / "body" / "sha256"
 TEXT_ROOT = (
@@ -58,8 +59,12 @@ PLACEHOLDER_MIN_VISIBLE_CHARS = 100
 PLACEHOLDER_CHAR_RATIO = 0.90
 PLACEHOLDER_CHARS = frozenset({"\u2588", "\ufffd"})
 PLACEHOLDER_ERROR_CODE = "extraction_placeholder_content"
+NON_CONTENT_ERROR_CODE = "extraction_non_content_shell"
+GARBLED_TEXT_ERROR_CODE = "extraction_garbled_text"
 JINA_ELIGIBLE_KINDS = frozenset({"announcement", "article", "other"})
 JINA_DEFERRED_HOST_SUFFIXES = (
+    "docs.google.com",
+    "forms.gle",
     "linkedin.com",
     "paperform.co",
     "twitter.com",
@@ -124,26 +129,128 @@ class Extraction:
     error_message: str | None = None
 
 
-def extracted_text_issue(text: str) -> tuple[str, str] | None:
-    """Return one narrow extraction error for placeholder-dominated bodies."""
+def _signal_text(value: str | None) -> str:
+    return " ".join(unicodedata.normalize("NFKC", str(value or "")).casefold().split())
+
+
+def extracted_text_issue(
+    text: str,
+    *,
+    title: str | None = None,
+    final_url: str | None = None,
+) -> tuple[str, str] | None:
+    """Return a deterministic reason when extracted text is not artifact content."""
     visible_chars = [char for char in text if not char.isspace()]
-    if len(visible_chars) < PLACEHOLDER_MIN_VISIBLE_CHARS:
-        return None
-    placeholder_count = sum(char in PLACEHOLDER_CHARS for char in visible_chars)
-    if placeholder_count / len(visible_chars) < PLACEHOLDER_CHAR_RATIO:
-        return None
-    return (
-        PLACEHOLDER_ERROR_CODE,
-        "Extracted text is dominated by placeholder characters rather than "
-        "readable artifact content",
+    if len(visible_chars) >= PLACEHOLDER_MIN_VISIBLE_CHARS:
+        placeholder_count = sum(char in PLACEHOLDER_CHARS for char in visible_chars)
+        if placeholder_count / len(visible_chars) >= PLACEHOLDER_CHAR_RATIO:
+            return (
+                PLACEHOLDER_ERROR_CODE,
+                "Extracted text is dominated by placeholder characters rather than "
+                "readable artifact content",
+            )
+
+    normalized_title = _signal_text(title)
+    normalized_text = _signal_text(text)
+    split = urlsplit(str(final_url or ""))
+    host = (split.hostname or "").lower()
+    path = split.path.lower()
+
+    shell_kind: str | None = None
+    if (
+        "just a moment" in normalized_title
+        or "performing security verification" in normalized_text
+        or "security service to protect against malicious bots" in normalized_text
+    ):
+        shell_kind = "security verification"
+    elif (
+        "checking your browser" in normalized_title
+        or "verifying your browser" in normalized_title
+        or "complete the check below to continue" in normalized_text
+        or "vercel security checkpoint" in normalized_title
+        or "vercel security checkpoint" in normalized_text
+    ):
+        shell_kind = "browser verification"
+    elif "checking your browser - recaptcha" in normalized_title:
+        shell_kind = "captcha verification"
+    elif (
+        "javascript is disabled" in normalized_text
+        or "enable javascript in your browser" in normalized_text
+    ) and len(text) < 500:
+        shell_kind = "client-rendered JavaScript"
+    elif "there was an error while loading. please reload this page" in normalized_text:
+        shell_kind = "client loading error"
+    elif (
+        "page not found" in normalized_title
+        or re.match(r"^404(?:\s|$)", normalized_title)
+        or normalized_text.startswith("404 ")
+    ):
+        shell_kind = "not-found"
+    elif normalized_title.startswith("redirecting") and normalized_text.startswith(
+        "redirecting"
+    ):
+        shell_kind = "redirect"
+    elif (
+        "not available in your region" in normalized_title
+        or "isn't yet available in your region" in normalized_text
+    ):
+        shell_kind = "region-unavailable"
+    elif (
+        normalized_title in {"sign in", "google forms: sign-in"}
+        and len(text) < 2_500
+        and (
+            "continue with" in normalized_text
+            or "email or phone" in normalized_text
+            or "sign in to" in normalized_text
+        )
+    ) or (path.startswith(("/login", "/signin", "/sign-in")) and len(text) < 2_500):
+        shell_kind = "authentication"
+    elif "access denied" in normalized_title or normalized_text.startswith(
+        "access denied"
+    ):
+        shell_kind = "access-denied"
+    elif "/error/" in path and len(text) < 1_000:
+        shell_kind = "error"
+    elif host in {"youtube.com", "www.youtube.com", "youtu.be"} and len(text) < 1_000:
+        shell_kind = "video site chrome"
+    if shell_kind is not None:
+        return (
+            NON_CONTENT_ERROR_CODE,
+            f"Extracted text is a {shell_kind} shell rather than artifact content",
+        )
+
+    control_count = sum(
+        unicodedata.category(char).startswith("C") and char not in "\n\r\t"
+        for char in text
     )
+    ascii_printable_count = sum(
+        ord(char) < 128 and (char.isprintable() or char in "\n\r\t")
+        for char in text
+    )
+    if (
+        control_count >= 10
+        and control_count / max(len(text), 1) >= 0.001
+        and ascii_printable_count / max(len(text), 1) < 0.5
+    ):
+        return (
+            GARBLED_TEXT_ERROR_CODE,
+            "Extracted text contains control-heavy malformed encoding rather than "
+            "readable artifact content",
+        )
+    return None
 
 
-def validate_extraction(extraction: Extraction) -> Extraction:
-    """Fail a successful extraction only for a mechanical placeholder body."""
+def validate_extraction(
+    extraction: Extraction, *, final_url: str | None = None
+) -> Extraction:
+    """Fail a successful extraction when its text is not usable artifact content."""
     if not extraction.success or extraction.text is None:
         return extraction
-    issue = extracted_text_issue(extraction.text)
+    issue = extracted_text_issue(
+        extraction.text,
+        title=extraction.title,
+        final_url=final_url or extraction.declared_canonical_url,
+    )
     if issue is None:
         return extraction
     error_code, error_message = issue
@@ -1128,7 +1235,7 @@ def _finish_retrieved(
     retrieved: Retrieved,
     extraction: Extraction,
 ) -> str:
-    extraction = validate_extraction(extraction)
+    extraction = validate_extraction(extraction, final_url=retrieved.final_url)
     now = _now()
     raw_sha = _sha256_bytes(retrieved.body)
     raw_ref = _write_snapshot(RAW_ROOT, raw_sha, ".bin", retrieved.body)
