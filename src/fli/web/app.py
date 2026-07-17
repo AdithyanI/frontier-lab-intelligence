@@ -31,10 +31,15 @@ from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
-from fli import channels, entity_kinds, registry as entity_registry, registry_intake, sources
+from fli.ingestion import sources
+from fli.insights import view as insight_store
+from fli.network import view as rankings_store
+from fli.registry import channels
+from fli.registry import classification as entity_kinds
+from fli.registry import intake as registry_intake
+from fli.registry import store as entity_registry
 from fli.web import artifact_library as artifact_store
-from fli.web import events as event_store, feed as feed_store, rankings as rankings_store
-from fli.web import insights as insight_store
+from fli.web import events as event_store, feed as feed_store
 
 DIST_DIR = Path(__file__).parent / "dist"
 

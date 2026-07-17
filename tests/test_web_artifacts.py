@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from fli import artifacts
+from fli.evidence.artifacts import store as artifacts
 from fli.web import artifact_library as artifact_store
 from fli.web.app import app
 

@@ -44,7 +44,7 @@
   },
   "lineage": {
     "parent_snapshot_id": "registry-following-2026-07-14-aie-worldsfair-v1",
-    "parent_database_path": "data/raw/following/registry-following-2026-07-14-aie-worldsfair-v1/snapshot.db",
+    "parent_database_path": "data/archive/raw/following/registry-following-2026-07-14-aie-worldsfair-v1/snapshot.db",
     "parent_database_sha256": "ae4cc6322ad89b18a5c2afbf21a08c6854a65f8e686ea67ef7999da21599015e",
     "copied_at": "2026-07-14T18:22:56+00:00",
     "copied_sources": 2564,

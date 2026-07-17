@@ -9,7 +9,7 @@ from fli import __version__
 def main(argv: list[str] | None = None) -> int:
     raw_args = list(argv) if argv is not None else sys.argv[1:]
     if raw_args and raw_args[0] == "evidence-refresh":
-        from fli import evidence_refresh
+        from fli.evidence import refresh as evidence_refresh
 
         return evidence_refresh.main(raw_args[1:])
     parser = argparse.ArgumentParser(
@@ -106,7 +106,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "fetch":
-        from fli import fetch, store
+        from fli import store
+        from fli.ingestion import public_sources as fetch
 
         conn = store.connect(args.db) if args.db else store.connect()
         fetch.fetch_all(conn)
@@ -115,7 +116,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "labs":
-        from fli import labs
+        from fli.registry import seeds as labs
 
         return labs.main(
             [
@@ -125,7 +126,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.command == "channels":
-        from fli import channels
+        from fli.registry import channels
 
         return channels.main(
             [
@@ -135,62 +136,62 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.command == "registry":
-        from fli import registry
+        from fli.registry import store as registry
 
         return registry.main(args.registry_args)
 
     if args.command == "sources":
-        from fli import sources
+        from fli.ingestion import sources
 
         return sources.main(args.source_args)
 
     if args.command == "conference-sources":
-        from fli import conference_sources
+        from fli.ingestion import conference as conference_sources
 
         return conference_sources.main(args.conference_source_args)
 
     if args.command == "following-snapshot":
-        from fli import following_snapshots
+        from fli.network import snapshots as following_snapshots
 
         return following_snapshots.main(args.snapshot_args)
 
     if args.command == "following-ranking":
-        from fli import following_rankings
+        from fli.network import rankings as following_rankings
 
         return following_rankings.main(args.ranking_args)
 
     if args.command == "entity-kinds":
-        from fli import entity_kinds
+        from fli.registry import classification as entity_kinds
 
         return entity_kinds.main(args.entity_kind_args)
 
     if args.command == "relevance-audit":
-        from fli import relevance
+        from fli.registry import relevance
 
         return relevance.main(args.relevance_args)
 
     if args.command == "registry-evaluation":
-        from fli import registry_evaluation_runs
+        from fli.registry import evaluation_runs as registry_evaluation_runs
 
         return registry_evaluation_runs.main(args.evaluation_args)
 
     if args.command == "signal-feed":
-        from fli import signal_feed
+        from fli.evidence import feed as signal_feed
 
         return signal_feed.main(args.feed_args)
 
     if args.command == "signal-events":
-        from fli import signal_events
+        from fli.evidence import events as signal_events
 
         return signal_events.main(args.event_args)
 
     if args.command == "audience-routing":
-        from fli import audience_routing_runs
+        from fli.routing import runs as audience_routing_runs
 
         return audience_routing_runs.main(args.audience_routing_args)
 
     if args.command == "insights":
-        from fli import insight_cli
+        from fli.insights import cli as insight_cli
 
         return insight_cli.main(args.insights_args)
 
@@ -200,17 +201,17 @@ def main(argv: list[str] | None = None) -> int:
         return evaluation.main(args.attention_score_args)
 
     if args.command == "x-daily-collection":
-        from fli import x_daily_collection
+        from fli.ingestion.x import collection as x_daily_collection
 
         return x_daily_collection.main(args.collection_args)
 
     if args.command == "evidence-refresh":
-        from fli import evidence_refresh
+        from fli.evidence import refresh as evidence_refresh
 
         return evidence_refresh.main(args.refresh_args)
 
     if args.command == "artifacts":
-        from fli import artifacts
+        from fli.evidence.artifacts import store as artifacts
 
         return artifacts.main(args.artifact_args)
 

@@ -1,7 +1,25 @@
 # Data
 
+Use [`docs/references/data-lifecycle.md`](../docs/references/data-lifecycle.md)
+before moving or deleting local data. The short rule is:
+
+- tracked files directly under `data/`, `registry/`, `following/`, and `digg/`
+  are compact product state or manifests;
+- `raw/` is immutable provider evidence and paid-request cache;
+- `derived/` is the current product's rebuildable projections and frozen model
+  runs;
+- `archive/` is ignored historical local state that no runtime reader may scan;
+- `private/` and `tmp/` are never product inputs.
+
+Current default store paths are listed in
+[`docs/architecture/code-map.md`](../docs/architecture/code-map.md). Do not
+introduce a second database at the `data/` root when an owning domain already
+has a canonical path.
+
 - `raw/` — raw ingested source data (git-ignored; do not commit).
 - `private/` — any private/confidential inputs (git-ignored; do not commit).
+- `archive/` — ignored historical outputs removed from runtime discovery but
+  retained for provenance or comparison.
 - `raw/following/<snapshot-id>/snapshot.db` — ignored local SQLite database for
   a complete outgoing-follow crawl, including raw provider pages, resumable
   source state, normalized accounts, and directed edges.

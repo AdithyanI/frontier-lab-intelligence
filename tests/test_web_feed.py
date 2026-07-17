@@ -3,11 +3,13 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
-from fli import channels, signal_feed, x_content
+from fli.evidence import feed as signal_feed
+from fli.ingestion.x import content as x_content
+from fli.registry import channels
 from fli.scoring import attention
 from fli.web import feed as feed_store
 from fli.web.app import app
-from test_signal_feed import _raw_fixture, _tweet
+from tests.evidence.test_feed import _raw_fixture, _tweet
 
 
 client = TestClient(app)

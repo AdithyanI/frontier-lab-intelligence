@@ -2,19 +2,17 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
-from fli import (
-    audience_routing,
-    audience_routing_runs,
-    channels,
-    signal_events,
-    signal_feed,
-    x_content,
-)
-from fli.web import audience_routing as audience_routing_store
+from fli.evidence import events as signal_events
+from fli.evidence import feed as signal_feed
+from fli.ingestion.x import content as x_content
+from fli.registry import channels
+from fli.routing import model as routing_model
+from fli.routing import runs as routing_runs
+from fli.routing import view as audience_routing_store
 from fli.web import events as event_store, feed as feed_store
 from fli.web.app import app
-from test_signal_feed import _raw_fixture, _tweet
-from test_web_feed import _registry_fixture
+from tests.evidence.test_feed import _raw_fixture, _tweet
+from tests.test_web_feed import _registry_fixture
 
 
 client = TestClient(app)
@@ -131,7 +129,7 @@ def _event_fixture(tmp_path, monkeypatch, *, include_singleton=False):
 
 def _write_audience_routing_run(root, *, items):
     path = root / "audience-run-1" / "routing.db"
-    conn = audience_routing_runs.connect_run(path)
+    conn = routing_runs.connect_run(path)
     now = "2026-07-13T10:05:00+00:00"
     conn.execute(
         """INSERT INTO run_meta
@@ -146,9 +144,9 @@ def _write_audience_routing_run(root, *, items):
                    'feed-run-1', 'artifacts.db', 'review_cohort', ?, NULL,
                    'cohort-hash', ?, ?, ?)""",
         (
-            audience_routing.PROMPT_VERSION,
-            audience_routing.prompt_sha256(),
-            audience_routing.SCHEMA_VERSION,
+            routing_model.PROMPT_VERSION,
+            routing_model.prompt_sha256(),
+            routing_model.SCHEMA_VERSION,
             len(items),
             len(items),
             now,

@@ -1,6 +1,6 @@
 # System Status
 
-Last verified: 2026-07-16
+Last verified: 2026-07-17
 
 This is the conceptual handoff for Frontier Lab Intelligence. Read it before
 planning across projects or changing the system direction. It explains what
@@ -112,9 +112,8 @@ current-session approval.
 
 - Broad RSS, blog, GitHub, arXiv, or second-source ingestion.
 - Semantic/topic event clustering beyond exact provider relations.
-- A learned ranking model. The evidence-backed Attention Score v2 redesign is
-  now active as a fixed-formula calibration project; it remains separate from
-  a learned ranker.
+- A learned ranking model. Attention Score v2 research is archived as deferred;
+  production remains on the existing transparent day-relative formula.
 - Large discovered-account admission or recursive graph crawling.
 - Mobile/responsive polish.
 - Real external alerts, publishing, uploading, or submission without Adi's
@@ -125,12 +124,16 @@ case-study thesis.
 
 ## Current Direction
 
-The active tracker is
-[`docs/projects/attention-score-v2/tasks.md`](projects/attention-score-v2/tasks.md).
-The next boundary is a reproducible offline comparison of attention-v1.1 and
-the proposed fixed-curve v2 formula, followed by a below-cutoff probe and blind
-ordering audit. Production activation is evidence-gated; the existing v9
-routing and v10/v7 Insight rows remain frozen and are not silently re-ranked.
+No project tracker is active. Repository housekeeping is complete and archived
+under [`docs/projects/archive/repo-housekeeping/`](projects/archive/repo-housekeeping/):
+all runtime domains have direct package ownership, the code/data map is the
+cold-start implementation index, local-data lifecycle is explicit, and fast
+checks prevent the former flat source layout from returning. Attention Score
+v2 remains paused and archived without changing the production score.
+
+The product critical path is now selecting and consolidating the strongest
+3–5 submission insights. Start a focused tracker before implementing that next
+multi-session batch.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -143,7 +146,8 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | [`projects/attention-score-v2/tasks.md`](projects/attention-score-v2/tasks.md) |
+| What should be done next, exactly? | Current Direction above; create the next focused tracker before implementation. |
+| Which code/store/command/test owns a stage? | [`architecture/code-map.md`](architecture/code-map.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |

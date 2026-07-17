@@ -12,7 +12,7 @@ import time
 from typing import Any, Iterable
 from uuid import uuid4
 
-from fli import audience_routing_runs
+from fli.routing import runs as routing_runs
 from fli.scoring.attention import (
     ATTENTION_V1_1,
     ATTENTION_V2_CANDIDATE,
@@ -80,7 +80,7 @@ def _routing_sources(root: Path) -> list[tuple[str, Path]]:
 
 def load_labeled_days(
     *,
-    routing_root: Path = audience_routing_runs.DEFAULT_RUN_ROOT,
+    routing_root: Path = routing_runs.DEFAULT_RUN_ROOT,
     from_day: str | None = None,
     through: str | None = None,
 ) -> dict[str, list[LabeledEvent]]:
@@ -312,7 +312,7 @@ def candidate_grid() -> list[AttentionFormula]:
 
 def evaluation_payload(
     *,
-    routing_root: Path = audience_routing_runs.DEFAULT_RUN_ROOT,
+    routing_root: Path = routing_runs.DEFAULT_RUN_ROOT,
     from_day: str | None = None,
     through: str | None = None,
     top_movers: int = DEFAULT_TOP_MOVERS,
@@ -387,7 +387,7 @@ def _parser() -> argparse.ArgumentParser:
         "evaluate", help="Replay attention-v1.1 and the v2 candidate grid."
     )
     evaluate.add_argument(
-        "--routing-root", type=Path, default=audience_routing_runs.DEFAULT_RUN_ROOT
+        "--routing-root", type=Path, default=routing_runs.DEFAULT_RUN_ROOT
     )
     evaluate.add_argument("--from-day")
     evaluate.add_argument("--through")

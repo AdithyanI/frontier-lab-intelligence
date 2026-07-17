@@ -9,9 +9,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from fli import following_rankings, signal_feed
+from fli.evidence import feed as signal_feed
+from fli.network import rankings as following_rankings
 from fli.scoring import attention
-from fli.web import rankings as rankings_store
+from fli.network import view as rankings_store
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]

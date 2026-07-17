@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from fli.web import rankings as rankings_store
+from fli.network import view as rankings_store
 from fli.web.app import app
 
 client = TestClient(app)

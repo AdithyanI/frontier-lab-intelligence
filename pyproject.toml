@@ -28,7 +28,9 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"fli" = ["prompts/*.txt"]
+"fli.insights" = ["prompts/*.txt"]
+"fli.registry" = ["prompts/*.txt"]
+"fli.routing" = ["prompts/*.txt"]
 "fli.web" = ["dist/**/*"]
 
 [tool.pytest.ini_options]

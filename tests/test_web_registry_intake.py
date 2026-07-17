@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from fli import channels
+from fli.registry import channels
 from fli.web import app as web_app
 
 

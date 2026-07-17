@@ -9,9 +9,11 @@ Capital AI Engineer case study.
 1. `docs/references/case-prompt.md` - external requirements.
 2. `docs/STATUS.md` - conceptual handoff: what is proven, active, missing, and
    deliberately deferred.
-3. Active `docs/projects/<project>/tasks.md` - execution state; use `$project`.
-4. Relevant section of `docs/architecture/overview.md` - system map.
-5. `PRODUCT.md` / `DESIGN.md` when changing product or UI behavior.
+3. Relevant active tracker(s) named by `docs/STATUS.md` - execution state; use
+   `$project`.
+4. `docs/architecture/code-map.md` - code, store, command, and test ownership.
+5. Relevant section of `docs/architecture/overview.md` - system boundaries.
+6. `PRODUCT.md` / `DESIGN.md` when changing product or UI behavior.
 
 If docs conflict with chat, note it in the active tracker and follow the
 preserved prompt until Adi decides.

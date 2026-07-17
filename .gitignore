@@ -8,6 +8,7 @@ __pycache__/
 *.pyc
 data/raw/
 data/derived/
+data/archive/
 data/private/
 .DS_Store
 *.egg-info/

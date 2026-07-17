@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from fli import artifacts
+from fli.evidence.artifacts import store as artifacts
 
 
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB

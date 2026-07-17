@@ -25,7 +25,7 @@ This keeps the current Registry checkpoint cheap to clone and review while the
 local snapshot database can grow to millions of edges.
 
 The implemented `following-snapshot-v1` evidence boundary lives in
-`fli.following_snapshots`. It is storage-only: initializing or inspecting a
+`fli.network.snapshots`. It is storage-only: initializing or inspecting a
 snapshot makes no provider request. The first frozen cohort is
 `data/following/cohorts/registry-active-2026-07-11.json` (2,231 stable X IDs).
 

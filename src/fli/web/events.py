@@ -11,8 +11,9 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-from fli import signal_events, signal_feed
-from fli.web import audience_routing as audience_routing_store
+from fli.evidence import events as signal_events
+from fli.evidence import feed as signal_feed
+from fli.routing import view as audience_routing_store
 from fli.web import feed as feed_store
 
 

@@ -11,7 +11,25 @@ test -d docs/references/build-log/archive
 test ! -e docs/references/build-log.jsonl
 test ! -e scripts/render-build-log.py
 test -f docs/architecture/overview.md
+test -f docs/architecture/code-map.md
+test -f docs/references/data-lifecycle.md
 test -f docs/STATUS.md
+
+# Domain code is package-owned. Keep the root package restricted to shared
+# composition/runtime plumbing so new work cannot recreate the former flat
+# module pile.
+for domain in ingestion registry network evidence routing scoring insights web; do
+  test -d "src/fli/$domain"
+done
+unexpected_root_modules=$(find src/fli -maxdepth 1 -type f -name '*.py' \
+  ! -name '__init__.py' ! -name 'cli.py' ! -name 'llm_responses.py' \
+  ! -name 'store.py' -print)
+if [ -n "$unexpected_root_modules" ]; then
+  echo "Domain modules must live in a package, not directly under src/fli:"
+  echo "$unexpected_root_modules"
+  exit 1
+fi
+test ! -e data/signal-events.db
 
 # Keep the cold-start route unambiguous without limiting independent work to
 # one active project. STATUS is the conceptual handoff and must name every
