@@ -92,6 +92,7 @@ All repeated LLM work uses the shared LiteLLM path and the exact contracts in
 ## Where Exact Details Live
 
 - System boundaries: [`overview.md`](overview.md)
+- Detailed implemented contracts: [`implementation-contracts.md`](../references/implementation-contracts.md)
 - Current proof and critical path: [`docs/STATUS.md`](../STATUS.md)
 - Feed/Event contract: [`signal-feed.md`](../references/signal-feed.md)
 - End-to-end Evidence refresh: [`evidence-refresh.md`](../references/evidence-refresh.md)

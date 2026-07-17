@@ -13,6 +13,7 @@ test ! -e scripts/render-build-log.py
 test -f docs/architecture/overview.md
 test -f docs/architecture/code-map.md
 test -f docs/references/data-lifecycle.md
+test -f docs/references/implementation-contracts.md
 test -f docs/STATUS.md
 
 # Domain code is package-owned. Keep the root package restricted to shared
@@ -30,6 +31,25 @@ if [ -n "$unexpected_root_modules" ]; then
   exit 1
 fi
 test ! -e data/signal-events.db
+
+# Active prompt paths are semantic and stable. Contract versions and hashes
+# belong in run metadata rather than mutable filenames.
+for prompt in \
+  src/fli/registry/prompts/identity_context.txt \
+  src/fli/registry/prompts/evaluation.txt \
+  src/fli/registry/prompts/relevance.txt \
+  src/fli/routing/prompts/audience_routing.txt \
+  src/fli/insights/prompts/ai_engineering.txt \
+  src/fli/insights/prompts/investment.txt; do
+  test -f "$prompt"
+done
+versioned_active_prompts=$(find src/fli -path '*/prompts/*' -type f \
+  -name '*_v[0-9]*.txt' -print)
+if [ -n "$versioned_active_prompts" ]; then
+  echo "Active prompt filenames must be semantic; keep versions in run metadata:"
+  echo "$versioned_active_prompts"
+  exit 1
+fi
 
 # Keep the cold-start route unambiguous without limiting independent work to
 # one active project. STATUS is the conceptual handoff and must name every

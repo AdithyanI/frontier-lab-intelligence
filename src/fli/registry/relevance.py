@@ -21,7 +21,7 @@ DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_REASONING_EFFORT = "high"
 DEFAULT_WORKERS = 8
 PROMPT_CACHE_SHARDS = 64
-PROMPT_PATH = Path(__file__).with_name("prompts") / "registry_relevance_v1.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "relevance.txt"
 
 DECISIONS = frozenset({"keep", "remove", "review"})
 RELEVANCE_BASES = frozenset(

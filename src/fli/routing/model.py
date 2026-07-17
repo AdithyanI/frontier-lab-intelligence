@@ -34,7 +34,7 @@ TRUNCATION_MARKER = (
     "routing input limit. Remaining lower-priority evidence was omitted "
     "from this model call."
 )
-PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing_v9.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "audience_routing.txt"
 PROMPT_CACHE_KEY = f"fli:audience-routing:{PROMPT_VERSION}"
 
 AUDIENCES = ("ai_engineering", "investment")

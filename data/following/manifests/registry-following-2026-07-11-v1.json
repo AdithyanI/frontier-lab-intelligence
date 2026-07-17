@@ -49,6 +49,8 @@
     "database_path": "data/raw/following/registry-following-2026-07-11-v1/snapshot.db",
     "database_sha256": "3892fffeb5c1e8838fb5aed266e04ee8c1e3db12541ccea537e6f2d61b97225a",
     "database_bytes": 2152931328,
+    "expanded_database_retained_locally": false,
+    "local_retention_note": "The expanded database and obsolete derived analysis were removed locally on 2026-07-17. The verified compressed recovery object below remains available locally and from durable object storage.",
     "local_recovery_archive": {
       "path": "data/raw/following/registry-following-2026-07-11-v1/snapshot.db.zst",
       "compression": "zstd-6",

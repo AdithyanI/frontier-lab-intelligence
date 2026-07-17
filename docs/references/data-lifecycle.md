@@ -35,13 +35,17 @@ manifests/lineage, and run `PRAGMA quick_check` on the replacement store. Move a
 historical output to `data/archive/` when its evidence remains useful but no
 runtime reader should discover it.
 
-## Known Retained History
+## Historical Retention
 
-The July 14 World's Fair v1 raw snapshot and analysis are superseded by the
-corrected self-contained v2 stores. They live under `data/archive/`; the
-tracked v2 manifest retains the archived parent path and its checksum as
-lineage. Runtime discovery sees only v2.
+The corrected July 14 World's Fair v2 snapshot is self-contained and is the
+only expanded following database used by the product. Its fully copied v1
+parent and both superseded analyses were removed locally on 2026-07-17; the v2
+manifest retains their historical checksums and copy counts as provenance.
 
-The archived Insight v9/v6 database lives under
-`data/archive/derived/insights/`; current readers use only
-`data/derived/insights/insights.db`.
+The July 11 expanded snapshot was also removed after its evidence had been
+copied forward. Its verified `snapshot.db.zst` recovery cache remains local and
+has a checksum-verified durable object recorded in the tracked manifest. This
+preserves paid evidence without keeping another 2+ GB expanded database.
+
+The obsolete Insight v9/v6 database and zero-byte orphan databases were
+deleted. Current readers use only `data/derived/insights/insights.db`.

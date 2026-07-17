@@ -11,7 +11,7 @@ records where they live and how an agent can inspect or resume them safely.
 | Canonical Registry | `data/fli.db` | Tracked entities, channels, structural kind, and reason-bearing Registry rejections. |
 | Reusable X evidence | `data/raw/x/x-content.db` | Ignored immutable provider responses, normalized posts, and exact post bundles. |
 | Evaluation runs | `data/derived/registry-evaluation/*.db` | Ignored cohort, hashes, model results, identity context, sources, usage, cache counters, and spend. |
-| Prompt contracts | `src/fli/registry/prompts/identity_context_v1.txt`, `src/fli/registry/prompts/registry_evaluation_v3.txt` | Versioned stable prompt prefixes. Keep old prompt versions when historical runs reference their hashes. |
+| Prompt contracts | `src/fli/registry/prompts/identity_context.txt`, `src/fli/registry/prompts/evaluation.txt` | Stable active prompt paths. Contract-version constants and prompt hashes identify immutable historical runs. |
 | Request contracts | `src/fli/registry/identity_contexts.py`, `src/fli/registry/evaluation.py` | Structured schemas, rendering, validation, LiteLLM tags, search, and cache keys. |
 | Resumable orchestration | `src/fli/registry/evaluation_runs.py` | Cohort freezing, local evidence reuse, missing-bio research, evaluation, persistence, and status. |
 
