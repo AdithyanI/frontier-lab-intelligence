@@ -1,5 +1,6 @@
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import Architecture from '../features/architecture/ArchitecturePage'
+import BitLensPage from '../features/bit-lens/BitLensPage'
 import Artifacts from '../features/evidence/ArtifactsPage'
 import Evidence from '../features/evidence/EvidenceLayout'
 import Feed from '../features/evidence/FeedPage'
@@ -27,6 +28,7 @@ export default function App() {
           <NavLink to="/network">Network</NavLink>
           <NavLink to={evidencePath}>Evidence</NavLink>
           <NavLink to={insightsPath}>Insights</NavLink>
+          <NavLink to="/bit-lens">BIT Lens</NavLink>
           <NavLink to="/system">System</NavLink>
         </nav>
       </header>
@@ -45,6 +47,7 @@ export default function App() {
             <Route path="artifacts" element={<Artifacts />} />
           </Route>
           <Route path="/insights" element={<Insights />} />
+          <Route path="/bit-lens" element={<BitLensPage />} />
           <Route path="/system" element={<System />}>
             <Route index element={<Navigate to="architecture" replace />} />
             <Route path="status" element={<Status />} />

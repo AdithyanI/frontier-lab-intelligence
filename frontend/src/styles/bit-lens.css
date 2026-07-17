@@ -1,0 +1,225 @@
+/* ---- BIT Lens: one text-first public research briefing ---- */
+
+.bit-lens-page { max-width: 1160px; }
+
+.bit-lens-head { max-width: 76ch; }
+
+.lens-reading {
+  width: 100%;
+  margin-top: 48px;
+  padding-bottom: 72px;
+}
+
+.lens-reading-meta {
+  max-width: 92ch;
+  margin: 0 0 32px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+}
+
+.lens-reading h2,
+.lens-reading h3 {
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.lens-reading h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.lens-reading h3 {
+  max-width: 52ch;
+  margin-top: 32px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.lens-reading p,
+.lens-reading li,
+.lens-reading dd {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.lens-reading p,
+.lens-reading-section > ul,
+.lens-reading-section > ol,
+.lens-reading-intro > p,
+.lens-reading-intro > ul { max-width: 72ch; }
+
+.lens-reading p { margin: 16px 0 0; }
+
+.lens-reading a {
+  color: var(--blue-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.lens-reading a:hover { color: var(--ink); }
+
+.lens-reading-intro {
+  padding: 32px 0;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.lens-reading-intro h2 { font-size: 1.75rem; }
+
+.lens-contents {
+  max-width: 72ch;
+  padding: 32px 0 0;
+}
+
+.lens-contents h2 { font-size: 1.125rem; }
+
+.lens-contents ol {
+  margin: 16px 0 0;
+  padding-left: 24px;
+}
+
+.lens-contents li + li { margin-top: 8px; }
+
+.lens-reading-section {
+  margin-top: 72px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-strong);
+  scroll-margin-top: 24px;
+}
+
+.lens-reading-section > h2 + p { margin-top: 24px; }
+
+.lens-facts {
+  margin: 32px 0 0;
+  border-top: 1px solid var(--border-strong);
+}
+
+.lens-facts > div {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.lens-facts dt {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+}
+
+.lens-facts dd { margin: 0; }
+
+.lens-table-wrap {
+  width: 100%;
+  margin-top: 24px;
+  overflow-x: auto;
+}
+
+.lens-data-table {
+  min-width: 760px;
+  border-top: 1px solid var(--border-strong);
+  font-size: 0.875rem;
+}
+
+.lens-data-table th { padding: 12px; }
+
+.lens-data-table td {
+  padding: 12px;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.lens-data-table tbody tr:hover { background: transparent; }
+
+.lens-data-table td.num {
+  color: var(--ink);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.lens-secondary {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.lens-source-note {
+  max-width: 92ch !important;
+  color: var(--muted) !important;
+  font-family: var(--font-mono);
+  font-size: 0.75rem !important;
+  line-height: 1.6 !important;
+}
+
+.lens-audited-table {
+  width: min(100%, 640px);
+  min-width: 480px;
+}
+
+.lens-audited-table td:last-child,
+.lens-audited-table th:last-child { text-align: right; }
+
+.lens-holding-reading {
+  max-width: 72ch;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.lens-holding-reading h3 { margin-top: 0; }
+
+.lens-holding-reading h3 .mono {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.lens-holding-meta {
+  color: var(--muted) !important;
+  font-size: 0.875rem !important;
+}
+
+.lens-process-list,
+.lens-standard-list {
+  margin: 32px 0 0;
+  padding-left: 24px;
+}
+
+.lens-process-list > li,
+.lens-standard-list > li { padding-left: 8px; }
+
+.lens-process-list > li + li { margin-top: 32px; }
+
+.lens-process-list h3 { margin-top: 0; }
+
+.lens-process-list p { margin-top: 12px; }
+
+.lens-standard-list > li + li,
+.lens-caution-list > li + li { margin-top: 12px; }
+
+.lens-caution-list {
+  margin: 24px 0 0;
+  padding-left: 24px;
+}
+
+.lens-source-ledger td:first-child {
+  width: 152px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.lens-source-ledger td:nth-child(2) { width: 240px; }
+
+@media (max-width: 900px) {
+  .lens-facts > div { grid-template-columns: 1fr; gap: 4px; }
+}

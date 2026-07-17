@@ -84,10 +84,14 @@ Rules:
 
 - App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
   beneath. No sidebar — pages own their full width. Show only working routes;
-  unavailable future destinations do not occupy the navigation. The four
-  top-level workspaces are Network, Evidence, Insights, and System. System
+  unavailable future destinations do not occupy the navigation. The five
+  top-level workspaces are Network, Evidence, Insights, BIT Lens, and System.
+  BIT Lens holds the public client context used to translate frontier evidence
+  into fund-specific research questions. It is one detailed reading page, not
+  another dashboard or a set of subviews, and remains separate from generated
+  daily Insights. System
   groups the live Status surface with the explanatory Architecture surface;
-  neither competes with the reader workflows as a fifth top-level destination.
+  neither becomes another top-level destination.
 - Registry and Ranking share one top-level **Network** destination because they
   are two views of the same source system. Ranking is the first and default
   subview because it is the clearest demonstration of network discovery;
@@ -245,6 +249,20 @@ Rules:
   match the current contracts; never re-anchor old output at read time. Do not revive the retired quote
   block, claim-posture fields, cards, or a second editorial rank. Honest
   zero/thin views use plain editorial empty states and must never be padded.
+- **BIT Lens:** one text-first public-research briefing, without internal tabs,
+  diagrams, dashboards, or collapsed holding detail. It preserves the full
+  outside-in research in a linear reading order: flagship mandate and terms;
+  dated portfolio disclosures and the latest complete audited holdings; the
+  current top ten with explicit BIT-thesis, BIT-commentary, and analyst-inference
+  grades; BIT's public Thesis → Edge → Signal → Key Move grammar; Volume × Price
+  × Mix × Margin company analysis; alternative data, Aion, human investment
+  judgment, and Devil's Advocate review; the resulting Investment-insight
+  standard; contradictions, unknowns, and a source ledger. Use ordinary prose,
+  descriptive headings, lists, and flat tables only where rows make exact dates
+  or weights easier to compare. Keep body copy at 16px with a 72ch maximum and
+  all claims dated or qualified. Never imply access to the complete current
+  portfolio, internal forecasts, cost bases, position targets, or automated
+  trade decisions.
 - **Score breakdown:** inputs and weights are visible only on demand from the
   Feed rank. Trust through inspectability without making the decimal the primary
   reading cue (PRODUCT.md #3).

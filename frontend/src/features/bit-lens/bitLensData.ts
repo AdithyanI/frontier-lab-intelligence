@@ -27,15 +27,42 @@ export const sources = {
   semiannualReport:
     'https://fondswelt.hansainvest.com/uploads/documents/halbjahresbericht/HJB_1806_BIT_Global_Technology_Leaders_2025-06-30.pdf',
   downloads: 'https://fondswelt.hansainvest.com/de/fonds/details/780/downloads',
+  prospectus:
+    'https://fondswelt.hansainvest.com/uploads/documents/verkaufsprospekt/VKP_BIT_Global_Technology_Leaders_15_06_2026.pdf',
+  kid:
+    'https://fondswelt.hansainvest.com/uploads/documents/priips/PRIIPS_DE000A2N8127_1072995_DE_DE_2026-04-16_69bbe9ea22c51.pdf',
+  sustainability:
+    'https://fondswelt.hansainvest.com/uploads/documents/nachhaltigkeitsoffenlegungen/BIT_Global_Technology_Leaders_16_03_2026.pdf',
+  futureNotice:
+    'https://fondswelt.hansainvest.com/uploads/documents/bekanntmachung/DauDa_BIT_Global_Technology_Leaders_03_08_2026.pdf',
   fund: 'https://bitcap.com/en/fonds/bit-global-technology-leaders',
   approach: 'https://bitcap.com/en/investmentansatz',
   faq: 'https://bitcap.com/en/haeufig-gestellte-fragen-zum-investieren',
   homepage: 'https://bitcap.com/en',
   q1Report: 'https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026',
+  omrInterview:
+    'https://bitcap.com/en/news/omr-podcast-mit-philipp-westermeyer-1000-prozent-rendite-borsen-update-vom-bit-capital-grunder-von-ki-hype-bis-software-aktien--und-bitcoin-krise',
+  team: 'https://bitcap.com/en/team',
+  rename:
+    'https://bitcap.com/en/news/bit-capital-gibt-umbenennung-der-bit-global-internet-leaders-fonds-bekannt',
+  duolingo:
+    'https://bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast',
+  stockPicking2025:
+    'https://bitcap.com/ki-krypto-gezieltes-stockpicking-so-will-jan-beckers-2025-den-markt-schlagen/',
+  contrarian:
+    'https://bitcap.com/en/news/fondsmanager-jan-beckers-uber-investments-gegen-den-trend-kaufen-wenn-keiner-die-aktie-haben-will-podcast',
+  fazProfile:
+    'https://bitcap.com/news/faz-wie-jan-beckers-und-bit-capital-nicht-nur-den-nasdaq-schlagen',
+  selection2026:
+    'https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast',
   aiEngineer: 'https://bitcap.jobs.personio.com/job/2685548?language=en',
   semiconductorAnalyst: 'https://bitcap.jobs.personio.com/job/2701020?language=de',
   hardwareAnalyst: 'https://bitcap.jobs.personio.com/job/2591396?language=en',
   seniorAnalyst: 'https://bitcap.jobs.personio.com/job/2591464',
+  directorEngineering: 'https://bitcap.jobs.personio.com/job/2649902',
+  dataPlatforms: 'https://bitcap.jobs.personio.com/job/1833794?language=en',
+  technicalChiefOfStaff: 'https://bitcap.jobs.personio.com/job/2337969',
+  satyaInterview: 'https://bitcap.com/en/careers-en-interview-satya-mishra/',
   oldenkottInterview:
     'https://www.buzzsprout.com/1159130/episodes/16731481-79-bit-global-leaders-renditekick-furs-depot-mit-marcel-oldenkott',
   iren:
@@ -213,10 +240,39 @@ export const snapshots = [
   { date: '30 Jun', positions: 28, cash: 5.4, top: 'Amazon 10.4%', note: 'Re-concentrated' },
 ]
 
-export const themeWeights = [
-  { label: 'AI infrastructure', value: 36.9, tone: 'blue' },
-  { label: 'AI platform', value: 10.4, tone: 'ink' },
-  { label: 'HealthTech', value: 8.4, tone: 'mid' },
-  { label: 'Fintech', value: 5.0, tone: 'sand' },
-]
-
+export const auditedHoldings = [
+  ['IREN', 8.93],
+  ['AUTO1', 8.4],
+  ['Hinge Health', 6.74],
+  ['TSMC', 5.66],
+  ['Micron', 5.07],
+  ['Reddit', 4.93],
+  ['Alphabet', 4.48],
+  ['Datadog', 4.34],
+  ['Lemonade', 3.95],
+  ['Robinhood', 3.77],
+  ['Oscar Health', 3.7],
+  ['Meta', 3.49],
+  ['Rubrik', 3.37],
+  ['Kaspi', 3.32],
+  ['Nvidia', 3.26],
+  ['Microsoft', 2.89],
+  ['HUT 8', 2.22],
+  ['Duolingo', 2.02],
+  ['Amazon', 1.78],
+  ['Netskope', 1.76],
+  ['Luckin Coffee', 1.72],
+  ['Palo Alto Networks', 1.66],
+  ['InPost', 1.42],
+  ['Grindr', 1.07],
+  ['Coherent', 1.07],
+  ['AMD', 1.04],
+  ['Intel', 1.02],
+  ['Axon', 0.97],
+  ['Broadcom', 0.82],
+  ['Pure Storage', 0.78],
+  ['Lumentum', 0.57],
+  ['Xometry', 0.55],
+  ['Omada Health', 0.55],
+  ['GCL-Poly', 0.11],
+] as const

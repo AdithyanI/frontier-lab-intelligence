@@ -7,7 +7,7 @@ const layout = readSource('features/system/SystemLayout.tsx')
 const status = readSource('features/system/StatusPage.tsx')
 const styles = readStyles()
 
-test('System groups Status and Architecture without adding a fifth top-level destination', () => {
+test('System groups Status and Architecture without promoting either subview', () => {
   assert.match(app, /<NavLink to="\/system">System<\/NavLink>/)
   assert.match(app, /<Route path="\/system" element=\{<System \/>\}>/)
   assert.match(app, /<Route index element=\{<Navigate to="architecture" replace \/>\} \/>/)

@@ -11,6 +11,7 @@ const styleOrder = [
   'feed',
   'artifacts',
   'insights',
+  'bit-lens',
 ]
 
 export const readSource = (path) =>
