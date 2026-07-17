@@ -7,10 +7,11 @@ planning across projects or changing the system direction. It explains what
 the product is, what is already real, what remains unproven, and which durable
 document answers each deeper question.
 
-This file is not the execution tracker and not a chronological log. The active
-project tracker owns detailed work state; the build log owns historical
-submission evidence. Query that history with `scripts/build-log.py recent` or
-`search` only when needed; do not load the complete artifact during handoff.
+This file is not an execution tracker and not a chronological log. Routine work
+does not require a project tracker. When Adi explicitly invokes `$project`, that
+tracker owns detailed work state; the build log owns historical submission
+evidence. Query that history with `scripts/build-log.py recent` or `search` only
+when needed; do not load the complete artifact during handoff.
 
 ## North Star
 
@@ -160,23 +161,23 @@ handoff.
 | What happened chronologically, including spend and tools? | `scripts/build-log.py recent` / `search`; complete reviewer artifact at [`references/build-log.md`](references/build-log.md) |
 | How should an external reviewer inspect the repository? | [`references/reviewer-guide.md`](references/reviewer-guide.md) |
 
-If this brief conflicts with an active tracker, the tracker wins for execution
-state. If either conflicts with implemented behavior, stop, record the mismatch
-in the tracker, and reconcile the documentation before building on it.
+If this brief conflicts with an explicitly invoked active tracker, the tracker
+wins for execution state. If either conflicts with implemented behavior, stop
+and reconcile the relevant durable documentation before building on it.
 
 ## Cold-Agent Handoff
 
 A new architect or implementation agent should:
 
 1. Read this file and the case prompt.
-2. If an active tracker exists, read its Goal, Decisions, Current Batch,
-   blockers, and Done When; otherwise use Current Direction above.
-3. Read only the architecture section and project resources relevant to the
-   current batch.
+2. If Adi explicitly invoked `$project`, read its Goal, Decisions, Current
+   Batch, blockers, and Done When; otherwise use Current Direction above.
+3. Read only the architecture and reference docs relevant to the current work.
 4. Inspect code and data at the named boundary before proposing a new
    abstraction.
-5. Update the tracker while executing; update this brief only when the
-   conceptual system status or critical path changes.
+5. Update an explicitly invoked tracker while executing; otherwise work
+   directly. Update this brief only when conceptual status or the critical path
+   changes.
 
 Update this file when an active project changes, a major layer moves between
 planned/proven, the critical unproven claim changes, or a foundational status

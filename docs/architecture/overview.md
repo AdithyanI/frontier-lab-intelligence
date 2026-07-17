@@ -105,7 +105,8 @@ at the root of `fli`.
 Start at the owning package and its mirrored tests. Update this overview only
 when the system shape or dependency direction changes. Update the relevant
 reference when an exact contract, schema, cache rule, command, or store changes.
-Use a project tracker only for work that needs a durable multi-session plan.
+Routine work is tracker-free. Use a project tracker only when Adi explicitly
+invokes `$project` for work that needs a durable multi-session plan.
 
 Validation is one command:
 

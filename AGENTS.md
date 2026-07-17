@@ -9,14 +9,15 @@ Capital AI Engineer case study.
 1. `docs/references/case-prompt.md` - external requirements.
 2. `docs/STATUS.md` - conceptual handoff: what is proven, active, missing, and
    deliberately deferred.
-3. Relevant active tracker(s) named by `docs/STATUS.md` - execution state; use
-   `$project`.
+3. If Adi explicitly invoked `$project`, read the named active tracker for
+   execution state. Otherwise skip project tracking.
 4. `docs/architecture/code-map.md` - code, store, command, and test ownership.
 5. Relevant section of `docs/architecture/overview.md` - system boundaries.
 6. `PRODUCT.md` / `DESIGN.md` when changing product or UI behavior.
 
-If docs conflict with chat, note it in the active tracker and follow the
-preserved prompt until Adi decides.
+If docs conflict with chat, follow the preserved prompt until Adi decides and
+record the resolution in the relevant durable doc. Use a tracker only when the
+work was explicitly started with `$project`.
 
 ## Submission North Star
 
@@ -46,14 +47,14 @@ does not improve rubric coverage, demo proof, or interview discussion. See
   change model choice, or block in-scope work because of cost unless Adi sets
   an explicit cap for that work.
 - The build log is historical submission evidence, not current state or a
-  cold-start document. Default to no entry; the active tracker is the normal
-  work record. Use `scripts/build-log.py add` only when a tracker milestone
-  closes, a decision changes product or architecture direction, a completed
-  external run records material spend, or a learning changes future operating
-  policy. Batch related work into one entry; routine UI polish, refactors,
-  tests, reviews, and agent turns are not separate entries. When uncertain, do
-  not log. Use bounded `recent` or `search` only when history is relevant;
-  `scripts/check-fast.sh` validates and renders the reviewer artifact.
+  cold-start document. Default to no entry, and do not create a tracker for
+  routine work. Use `scripts/build-log.py add` only when an explicitly tracked
+  milestone closes, a decision changes product or architecture direction, a
+  completed external run records material spend, or a learning changes future
+  operating policy. Batch related work into one entry; routine UI polish,
+  refactors, tests, reviews, and agent turns are not separate entries. When
+  uncertain, do not log. Use bounded `recent` or `search` only when history is
+  relevant; `scripts/check-fast.sh` validates and renders the reviewer artifact.
 - Route every LLM call through the shared LiteLLM endpoint with stable
   `metadata.tags` for app, pipeline, job, scope, prompt, and run. Capture the
   proxy-reported response cost as the operational source of truth. Use a dated
@@ -70,8 +71,8 @@ does not improve rubric coverage, demo proof, or interview discussion. See
 - Update `docs/STATUS.md` only when the conceptual system status, active
   critical path, or planned/proven boundary changes; do not turn it into a
   second progress log.
-- Run `scripts/check-fast.sh` before handoff, or record why validation was
-  skipped in the active tracker.
+- Run `scripts/check-fast.sh` before handoff, or report why validation was
+  skipped. If the work is explicitly tracker-backed, record the reason there.
 
 ## UI Preview & Visual Checks
 
@@ -93,5 +94,6 @@ does not improve rubric coverage, demo proof, or interview discussion. See
 ## Skill Routing
 
 - AGENTS/docs/harness review: `$agent-native-repo-playbook`.
-- Tracker planning, refresh, or closeout: `$project`.
+- Project tracking is opt-in: use `$project` only when Adi explicitly invokes
+  it. Routine implementation, review, and validation remain tracker-free.
 - UI review or frontend polish: `$impeccable`.
