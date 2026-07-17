@@ -120,6 +120,13 @@ the run databases provide the stronger exact-response reuse when the source
 publication and frozen cohort are unchanged. A changed envelope correctly
 produces a new request rather than reusing a stale judgment.
 
+For an artifact-only correction to an already complete day, use
+`fli audience-routing refresh-run` with the prior run database and a fresh run
+ID/database. It freezes a new immutable full cohort, reuses a completed judgment
+only when Event ID and the exact rendered `input_sha256` match, records the
+source run on reused rows, and calls the model only for changed packets. This is
+the bounded repair path; it does not invoke Insight generation.
+
 ## Refresh audience Insights
 
 After every requested routing database is complete and current, inspect the
