@@ -1341,6 +1341,133 @@ def _complete_run(
     return {"fetch_run_id": fetch_run_id, "expected_count": len(items), **states}
 
 
+def _snapshot_path(snapshot_ref: str) -> Path:
+    path = Path(snapshot_ref)
+    return path if path.is_absolute() else artifacts.REPO_ROOT / path
+
+
+def revalidate_successful_fetches(
+    *, db_path: Path | str = artifacts.DEFAULT_DB
+) -> dict[str, Any]:
+    """Quarantine stored successes that fail the current content contract.
+
+    Fetch bodies remain immutable and addressable through ``raw_snapshot_ref``.
+    Only the derived normalized text projection and success state are revoked.
+    Replaying this operation is idempotent.
+    """
+    conn = artifacts.connect(db_path)
+    rows = conn.execute(
+        """SELECT fetch.fetch_id, fetch.fetch_run_id, fetch.artifact_id,
+                  fetch.fetch_policy, fetch.requested_url, fetch.final_url,
+                  fetch.extracted_title, fetch.text_snapshot_ref
+           FROM artifact_fetch AS fetch
+           WHERE fetch.status = 'success'
+             AND fetch.text_snapshot_ref IS NOT NULL
+           ORDER BY fetch.completed_at, fetch.fetch_id"""
+    ).fetchall()
+    quarantined: list[dict[str, str]] = []
+    for row in rows:
+        snapshot = _snapshot_path(str(row["text_snapshot_ref"]))
+        if not snapshot.is_file():
+            issue = (
+                "extraction_snapshot_missing",
+                f"Normalized text snapshot is missing: {row['text_snapshot_ref']}",
+            )
+        else:
+            issue = extracted_text_issue(
+                snapshot.read_text(encoding="utf-8", errors="replace"),
+                title=str(row["extracted_title"] or "") or None,
+                final_url=str(row["final_url"] or row["requested_url"]),
+            )
+        if issue is None:
+            continue
+        error_code, error_message = issue
+        quarantined.append(
+            {
+                "fetch_id": str(row["fetch_id"]),
+                "fetch_run_id": str(row["fetch_run_id"]),
+                "artifact_id": str(row["artifact_id"]),
+                "fetch_policy": str(row["fetch_policy"]),
+                "error_code": error_code,
+                "error_message": error_message,
+            }
+        )
+
+    if quarantined:
+        now = _now()
+        with conn:
+            conn.executemany(
+                """UPDATE artifact_fetch
+                   SET status = 'failed_terminal',
+                       text_sha256 = NULL, text_snapshot_ref = NULL,
+                       text_char_count = NULL, text_truncated = NULL,
+                       error_code = ?, error_message = ?, retryable = 0
+                   WHERE fetch_id = ? AND status = 'success'""",
+                [
+                    (item["error_code"], item["error_message"], item["fetch_id"])
+                    for item in quarantined
+                ],
+            )
+            affected_artifacts = sorted(
+                {item["artifact_id"] for item in quarantined}
+            )
+            invalid_fetch_ids = {item["fetch_id"] for item in quarantined}
+            for artifact_id in affected_artifacts:
+                artifact = conn.execute(
+                    "SELECT title_fetch_id FROM artifact WHERE artifact_id = ?",
+                    (artifact_id,),
+                ).fetchone()
+                if artifact is None or str(artifact["title_fetch_id"] or "") not in invalid_fetch_ids:
+                    continue
+                replacement = conn.execute(
+                    """SELECT fetch_id, extracted_title
+                       FROM artifact_fetch
+                       WHERE artifact_id = ? AND status = 'success'
+                         AND extracted_title IS NOT NULL
+                         AND trim(extracted_title) != ''
+                       ORDER BY completed_at DESC, fetch_id DESC
+                       LIMIT 1""",
+                    (artifact_id,),
+                ).fetchone()
+                conn.execute(
+                    """UPDATE artifact
+                       SET title = ?, title_fetch_id = ?, updated_at = ?
+                       WHERE artifact_id = ?""",
+                    (
+                        str(replacement["extracted_title"]) if replacement else None,
+                        str(replacement["fetch_id"]) if replacement else None,
+                        now,
+                        artifact_id,
+                    ),
+                )
+        affected_runs = sorted(
+            {(item["fetch_run_id"], item["fetch_policy"]) for item in quarantined}
+        )
+        for fetch_run_id, fetch_policy in affected_runs:
+            _complete_run(conn, fetch_run_id, fetch_policy=fetch_policy)
+        conn.execute("PRAGMA optimize")
+    else:
+        affected_artifacts = []
+        affected_runs = []
+
+    by_error_code: dict[str, int] = defaultdict(int)
+    by_fetch_policy: dict[str, int] = defaultdict(int)
+    for item in quarantined:
+        by_error_code[item["error_code"]] += 1
+        by_fetch_policy[item["fetch_policy"]] += 1
+    result = {
+        "validation_contract": CONTENT_VALIDATION_CONTRACT,
+        "scanned_success_count": len(rows),
+        "quarantined_count": len(quarantined),
+        "artifact_count": len(affected_artifacts),
+        "affected_run_count": len(affected_runs),
+        "by_error_code": dict(sorted(by_error_code.items())),
+        "by_fetch_policy": dict(sorted(by_fetch_policy.items())),
+    }
+    conn.close()
+    return result
+
+
 def _repo_env_value(name: str, path: Path = DEFAULT_REPO_ENV) -> str | None:
     """Read one explicitly named value from the ignored repo-local env file."""
     if not path.exists():
