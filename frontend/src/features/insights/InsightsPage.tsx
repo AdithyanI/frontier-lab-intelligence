@@ -114,7 +114,7 @@ function isEditorialResponse(payload: InsightsResponse): payload is EditorialIns
 function isInvestmentAnalysis(
   analysis: EditorialAnalysis,
 ): analysis is InvestmentEditorialAnalysis {
-  return 'thesis_effect' in analysis
+  return 'key_uncertainty' in analysis
 }
 
 function isEngineeringAnalysis(
@@ -324,15 +324,17 @@ function InvestmentDecision({
           {outsideEntities.length > 0 && entityList(outsideEntities, 'Outside the disclosed portfolio')}
         </section>
       )}
-      <section className="editorial-section editorial-watch" aria-label="What to watch">
-        <h3>What to watch</h3>
-        <div className="editorial-decision-grid">
-          {analysis.watchpoints.length > 0 && (
-            <div>
-              <h4 className="mono">Signals</h4>
-              <EditorialList items={analysis.watchpoints.slice(0, 2)} />
-            </div>
-          )}
+      <section className="editorial-section editorial-watch" aria-label="What would confirm or challenge this">
+        <h3>What would confirm or challenge this</h3>
+        <div className="editorial-validation-grid">
+          <div>
+            <h4 className="mono">Key uncertainty</h4>
+            <p>{decodeTextEntities(analysis.key_uncertainty)}</p>
+          </div>
+          <div>
+            <h4 className="mono">Signals</h4>
+            <EditorialList items={analysis.watchpoints} />
+          </div>
           <div>
             <h4 className="mono">Next diligence step</h4>
             <p>{decodeTextEntities(nextStep)}</p>
@@ -371,146 +373,82 @@ function EngineeringDecision({
   )
 }
 
-function EditorialCitationLinks({ item }: { item: EditorialInsightItem }) {
+function EditorialSources({ item }: { item: EditorialInsightItem }) {
+  const researchSources = item.citations.filter((citation) => citation.kind !== 'event')
   const titleId = `${item.insight_id}-sources`
+
   return (
-    <section className="editorial-citation-links" aria-labelledby={titleId}>
-      <h3 className="mono" id={titleId}>Sources</h3>
-      <ul className="editorial-source-links">
-        {item.citations.map((citation) => (
-          <li key={citation.citation_id}>
-            <a href={citation.url} target="_blank" rel="noreferrer">
-              {decodeTextEntities(citation.title)} ↗
-            </a>
-          </li>
-        ))}
-      </ul>
+    <section className="editorial-sources" aria-labelledby={titleId}>
+      <h3 id={titleId}>Sources</h3>
+      <div className="editorial-source-columns">
+        <section aria-label="Original feed sources">
+          <h4 className="mono">Original feed</h4>
+          <ul className="editorial-source-list">
+            {item.events.map((event) => {
+              const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(event.event_id)}`
+              return (
+                <li key={event.event_id}>
+                  <div className="editorial-source-actions">
+                    <Link to={envelopeUrl}>Feed #{event.feed_rank} ↗</Link>
+                    <a href={event.root_url} target="_blank" rel="noreferrer">Original post ↗</a>
+                  </div>
+                  <p>{decodeTextEntities(event.reason)}</p>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+        <section aria-label="Artifacts and research context">
+          <h4 className="mono">Artifacts &amp; context</h4>
+          <ul className="editorial-source-list">
+            {researchSources.map((citation) => (
+              <li key={citation.citation_id}>
+                <a className="editorial-source-title" href={citation.url} target="_blank" rel="noreferrer">
+                  {decodeTextEntities(citation.title)} ↗
+                </a>
+                <p>{decodeTextEntities(citation.supports)}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </section>
   )
 }
 
-function EditorialEvidence({ item }: { item: EditorialInsightItem }) {
-  return (
-    <div className="editorial-evidence">
-      <div className="editorial-source-group">
-        <h4 className="mono">Linked Events</h4>
-        <ul className="editorial-event-list">
-          {item.events.map((event) => {
-            const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(event.event_id)}`
-            return (
-              <li key={event.event_id}>
-                <div className="editorial-source-line">
-                  <span className="editorial-source-kind mono">{titleCase(event.role)}</span>
-                  <Link to={envelopeUrl}>Feed #{event.feed_rank} ↗</Link>
-                  <CopyEnvelopeId envelopeId={event.event_id} />
-                  <a href={event.root_url} target="_blank" rel="noreferrer">Source ↗</a>
-                </div>
-                <p>{decodeTextEntities(event.reason)}</p>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-      <div className="editorial-source-group">
-        <h4 className="mono">Citations</h4>
-        <ol className="editorial-citation-list">
-          {item.citations.map((citation) => (
-            <li key={citation.citation_id}>
-              <div className="editorial-source-line">
-                <span className="editorial-source-kind mono">{titleCase(citation.kind)}</span>
-                {citation.published_at && <time className="mono" dateTime={citation.published_at}>{citation.published_at}</time>}
-                {citation.retrieved_at && <span className="mono">Retrieved {citation.retrieved_at.slice(0, 10)}</span>}
-              </div>
-              <a className="editorial-citation-title" href={citation.url} target="_blank" rel="noreferrer">
-                {decodeTextEntities(citation.title)} ↗
-              </a>
-              <p>{decodeTextEntities(citation.supports)}</p>
-              {citation.excerpt && <blockquote>{decodeTextEntities(citation.excerpt)}</blockquote>}
-            </li>
-          ))}
-        </ol>
-      </div>
-    </div>
-  )
-}
-
-function EditorialFullAnalysis({
-  item,
-  investmentAnalysis,
-  engineeringAnalysis,
+function EngineeringExperimentDetails({
+  analysis,
 }: {
-  item: EditorialInsightItem
-  investmentAnalysis: InvestmentEditorialAnalysis | null
-  engineeringAnalysis: EngineeringEditorialAnalysis | null
+  analysis: EngineeringEditorialAnalysis
 }) {
   return (
-    <div className="editorial-full-body">
-      <section className="editorial-section editorial-impact" aria-labelledby={`${item.insight_id}-impact`}>
-        <h3 id={`${item.insight_id}-impact`}>Impact chain</h3>
-        <ol>
-          {item.impact_chain.map((step, index) => (
-            <li key={`${index}-${step}`}><span className="mono">{index + 1}</span>{decodeTextEntities(step)}</li>
-          ))}
-        </ol>
-      </section>
-
-      {investmentAnalysis && (
-        <section className="editorial-section" aria-label="Full investment analysis">
-          <h3>Thesis mechanics</h3>
-          <dl className="editorial-analysis-grid">
-            <EditorialField label="Operating driver">
-              {decodeTextEntities(investmentAnalysis.operating_driver)}
-            </EditorialField>
-            <EditorialField label="Financial driver">
-              {decodeTextEntities(investmentAnalysis.financial_driver)}
-            </EditorialField>
-            <EditorialField label="Potential edge">
-              {decodeTextEntities(investmentAnalysis.edge)}
-            </EditorialField>
-            <EditorialField label="Counter-case">
-              {decodeTextEntities(investmentAnalysis.counter_case)}
-            </EditorialField>
-          </dl>
-          <div className="editorial-list-section">
-            <h4 className="mono">All watchpoints</h4>
-            <EditorialList items={investmentAnalysis.watchpoints} />
-          </div>
-        </section>
-      )}
-
-      {engineeringAnalysis && (
+    <details className="editorial-full-analysis">
+      <summary>Experiment details</summary>
+      <div className="editorial-full-body">
         <section className="editorial-section" aria-label="Full engineering analysis">
-          <h3>Experiment detail</h3>
           <dl className="editorial-analysis-grid">
             <EditorialField label="Technical implication">
-              {decodeTextEntities(engineeringAnalysis.technical_implication)}
+              {decodeTextEntities(analysis.technical_implication)}
             </EditorialField>
             <EditorialField label="Hypothesis">
-              {decodeTextEntities(engineeringAnalysis.experiment.hypothesis)}
+              {decodeTextEntities(analysis.experiment.hypothesis)}
             </EditorialField>
             <EditorialField label="Success metric">
-              {decodeTextEntities(engineeringAnalysis.experiment.success_metric)}
+              {decodeTextEntities(analysis.experiment.success_metric)}
             </EditorialField>
             <EditorialField label="Stop condition">
-              {decodeTextEntities(engineeringAnalysis.experiment.stop_condition)}
+              {decodeTextEntities(analysis.experiment.stop_condition)}
             </EditorialField>
           </dl>
-          {engineeringAnalysis.constraints.length > 0 && (
+          {analysis.constraints.length > 0 && (
             <div className="editorial-list-section">
               <h4 className="mono">Constraints</h4>
-              <EditorialList items={engineeringAnalysis.constraints} />
+              <EditorialList items={analysis.constraints} />
             </div>
           )}
         </section>
-      )}
-
-      <section className="editorial-section" aria-label="Evidence limitations">
-        <h3>Evidence limitations</h3>
-        <EditorialList items={item.evidence_limitations} />
-      </section>
-
-      <EditorialEvidence item={item} />
-    </div>
+      </div>
+    </details>
   )
 }
 
@@ -536,7 +474,9 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
             <p>{decodeTextEntities(item.what_changed)}</p>
           </section>
           <section>
-            <h3 className="mono">Interpretation</h3>
+            <h3 className="mono">
+              {investmentAnalysis ? 'Investment interpretation' : 'Engineering interpretation'}
+            </h3>
             <p>{decodeTextEntities(item.interpretation)}</p>
           </section>
         </div>
@@ -548,16 +488,8 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
           <EngineeringDecision analysis={engineeringAnalysis} nextStep={item.next_step} />
         )}
 
-        <EditorialCitationLinks item={item} />
-
-        <details className="editorial-full-analysis">
-          <summary>Evidence and full analysis</summary>
-          <EditorialFullAnalysis
-            item={item}
-            investmentAnalysis={investmentAnalysis}
-            engineeringAnalysis={engineeringAnalysis}
-          />
-        </details>
+        <EditorialSources item={item} />
+        {engineeringAnalysis && <EngineeringExperimentDetails analysis={engineeringAnalysis} />}
       </div>
     </article>
   )

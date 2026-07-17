@@ -13,13 +13,12 @@ import re
 from typing import Any
 
 
-DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v2"
+DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v3"
 AUDIENCES = ("investment", "ai_engineering")
 EVENT_ROLES = ("primary", "supporting", "context", "counterevidence")
 CITATION_KINDS = ("event", "artifact", "web", "context")
 ENTITY_SCOPES = ("portfolio", "outside_portfolio")
 IMPACT_DIRECTIONS = ("positive", "negative", "mixed", "uncertain")
-THESIS_EFFECTS = ("strengthens", "weakens", "opportunity", "risk", "mixed", "uncertain")
 ENGINEERING_ACTIONS = ("test", "adopt", "watch", "ignore")
 
 _LOCAL_ID = re.compile(r"^[a-z0-9][a-z0-9-]{1,63}$")
@@ -35,7 +34,6 @@ def output_contract() -> dict[str, Any]:
         "citation_kinds": list(CITATION_KINDS),
         "entity_scopes": list(ENTITY_SCOPES),
         "impact_directions": list(IMPACT_DIRECTIONS),
-        "thesis_effects": list(THESIS_EFFECTS),
         "engineering_actions": list(ENGINEERING_ACTIONS),
         "analysis_shapes": {
             "investment": investment_analysis_template(),
@@ -50,7 +48,7 @@ def output_contract() -> dict[str, Any]:
             "workspace_run_id": "<from manifest>",
             "workspace_manifest_sha256": "<from manifest>",
             "agent": {
-                "skill_version": "fli-daily-intelligence-v1",
+                "skill_version": "fli-daily-intelligence-v2",
                 "model": "codex",
                 "notes": None,
             },
@@ -61,13 +59,10 @@ def output_contract() -> dict[str, Any]:
                     "rank": 1,
                     "title": "Judgment-led headline",
                     "what_changed": "Evidence-grounded factual synthesis.",
-                    "interpretation": "The audience-specific conclusion.",
-                    "impact_chain": [
-                        "Observed change",
-                        "Operating consequence",
-                        "Decision consequence",
-                    ],
-                    "evidence_limitations": ["Material uncertainty or counter-case."],
+                    "interpretation": (
+                        "One audience-specific argument connecting the evidence to "
+                        "an operating, financial, or engineering decision."
+                    ),
                     "next_step": "One concrete diligence or engineering action.",
                     "analysis": investment_analysis_template(),
                     "event_links": [
@@ -95,11 +90,7 @@ def output_contract() -> dict[str, Any]:
 def investment_analysis_template() -> dict[str, Any]:
     return {
         "affected_entities": [],
-        "thesis_effect": "uncertain",
-        "operating_driver": "How the change reaches company operations or competition.",
-        "financial_driver": "Revenue, margin, capex, market-share, or valuation bridge; say unknown when unsupported.",
-        "edge": "What may be underappreciated or differently interpreted.",
-        "counter_case": "The strongest reason the interpretation may be wrong.",
+        "key_uncertainty": "The strongest reason the interpretation may be wrong or fail to matter.",
         "watchpoints": ["A measurable confirmation or falsification signal."],
     }
 
@@ -140,7 +131,7 @@ def draft_template(manifest: dict[str, Any]) -> dict[str, Any]:
         "workspace_run_id": str(manifest["run_id"]),
         "workspace_manifest_sha256": str(manifest["manifest_sha256"]),
         "agent": {
-            "skill_version": "fli-daily-intelligence-v1",
+            "skill_version": "fli-daily-intelligence-v2",
             "model": "codex",
             "notes": None,
         },
@@ -237,11 +228,7 @@ def _validate_investment_analysis(value: Any, path: str) -> dict[str, Any]:
         path,
         {
             "affected_entities",
-            "thesis_effect",
-            "operating_driver",
-            "financial_driver",
-            "edge",
-            "counter_case",
+            "key_uncertainty",
             "watchpoints",
         },
     )
@@ -261,12 +248,8 @@ def _validate_investment_analysis(value: Any, path: str) -> dict[str, Any]:
         )
     return {
         "affected_entities": entities,
-        "thesis_effect": _enum(analysis["thesis_effect"], f"{path}.thesis_effect", THESIS_EFFECTS),
-        "operating_driver": _text(analysis["operating_driver"], f"{path}.operating_driver"),
-        "financial_driver": _text(analysis["financial_driver"], f"{path}.financial_driver"),
-        "edge": _text(analysis["edge"], f"{path}.edge"),
-        "counter_case": _text(analysis["counter_case"], f"{path}.counter_case"),
-        "watchpoints": _texts(analysis["watchpoints"], f"{path}.watchpoints", minimum=1, maximum=5),
+        "key_uncertainty": _text(analysis["key_uncertainty"], f"{path}.key_uncertainty"),
+        "watchpoints": _texts(analysis["watchpoints"], f"{path}.watchpoints", minimum=1, maximum=3),
     }
 
 
@@ -403,8 +386,6 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
                 "title",
                 "what_changed",
                 "interpretation",
-                "impact_chain",
-                "evidence_limitations",
                 "next_step",
                 "analysis",
                 "event_links",
@@ -468,10 +449,6 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
                 "title": _text(insight["title"], f"{path}.title"),
                 "what_changed": _text(insight["what_changed"], f"{path}.what_changed"),
                 "interpretation": _text(insight["interpretation"], f"{path}.interpretation"),
-                "impact_chain": _texts(insight["impact_chain"], f"{path}.impact_chain", minimum=2, maximum=5),
-                "evidence_limitations": _texts(
-                    insight["evidence_limitations"], f"{path}.evidence_limitations", minimum=1, maximum=6
-                ),
                 "next_step": _text(insight["next_step"], f"{path}.next_step"),
                 "analysis": analysis,
                 "event_links": event_links,

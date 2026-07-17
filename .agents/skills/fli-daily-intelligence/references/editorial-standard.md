@@ -17,10 +17,8 @@ It contains:
 
 - `title`: the judgment, not merely the release name;
 - `what_changed`: concise factual synthesis with exact attribution;
-- `interpretation`: the audience-specific conclusion;
-- `impact_chain`: two to five causal steps from evidence to decision;
-- `evidence_limitations`: important missing information, counterevidence, or
-  transfer limits;
+- `interpretation`: one audience-specific argument connecting the evidence to
+  the operating, financial, thesis, or engineering consequence;
 - `next_step`: one concrete diligence or engineering action;
 - audience-specific `analysis`;
 - `event_links`; and
@@ -95,14 +93,11 @@ mapping, not a known BIT view, holding, or recommendation. Consider the
 portfolio first and omit the outside section when no direct public-company
 connection is defensible.
 
-Then provide:
-
-- `thesis_effect`;
-- `operating_driver`;
-- `financial_driver`;
-- `edge`;
-- `counter_case`; and
-- measurable `watchpoints`.
+Then provide one `key_uncertainty` and one to three measurable `watchpoints`.
+Do not create separate operating-driver, financial-driver, edge, impact-chain,
+or counter-case fields. Their useful substance belongs in one coherent
+`interpretation`, while the uncertainty and watchpoints explain how the reader
+could challenge it.
 
 The desired chain is:
 
@@ -111,7 +106,7 @@ public evidence
 → operating or competitive driver
 → company or portfolio exposure
 → revenue / margin / capex / share / valuation consequence
-→ thesis effect and falsifiable watchpoint
+→ thesis consequence and falsifiable watchpoint
 ```
 
 If a step is not supported, say so. Do not fill a structural field with

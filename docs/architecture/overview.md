@@ -76,6 +76,9 @@ at the root of `fli`.
 9. Deterministic validation binds the draft to its frozen workspace and imports
    Insights, Event roles, dispositions, and citations in one transaction.
    Optional embedding retrieval may find paraphrases but never decides a merge.
+   Investment Insights persist one causal interpretation, company read-through,
+   key uncertainty, watchpoints, and a diligence step; intermediate reasoning
+   scaffolds are not separate reader fields.
 10. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners.
 

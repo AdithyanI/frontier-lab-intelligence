@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import sqlite3
 from types import SimpleNamespace
 
 import numpy as np
@@ -131,7 +132,7 @@ def _draft(workspace: Path):
         "workspace_run_id": manifest["run_id"],
         "workspace_manifest_sha256": manifest["manifest_sha256"],
         "agent": {
-            "skill_version": "fli-daily-intelligence-v1",
+            "skill_version": "fli-daily-intelligence-v2",
             "model": "codex-test",
             "notes": None,
         },
@@ -142,13 +143,10 @@ def _draft(workspace: Path):
                 "rank": 1,
                 "title": "Open models shorten the enterprise distribution path",
                 "what_changed": "Inkling launched with weights and enterprise distribution support.",
-                "interpretation": "Distribution evidence matters more than launch attention alone.",
-                "impact_chain": [
-                    "Open weights become available",
-                    "Enterprise gateways reduce adoption friction",
-                    "Closed API differentiation faces a new test",
-                ],
-                "evidence_limitations": ["No customer adoption or unit economics are disclosed."],
+                "interpretation": (
+                    "Distribution evidence matters more than launch attention alone because "
+                    "enterprise gateways can reduce adoption friction before model economics are proven."
+                ),
                 "next_step": "Measure adoption and serving economics across one enterprise workload.",
                 "analysis": {
                     **editorial.investment_analysis_template(),
@@ -166,7 +164,7 @@ def _draft(workspace: Path):
                             "mechanism": "A named deployment provides a specific diligence target outside the book.",
                         },
                     ],
-                    "financial_driver": "Inference cost and platform gross margin remain unknown.",
+                    "key_uncertainty": "No customer adoption or unit economics are disclosed.",
                 },
                 "event_links": [
                     {
@@ -189,8 +187,6 @@ def _draft(workspace: Path):
                 "title": "Test open-model serving before adopting the launch claim",
                 "what_changed": "Inkling shipped downloadable weights and implementation artifacts.",
                 "interpretation": "A bounded serving test can establish whether it transfers locally.",
-                "impact_chain": ["Weights become available", "Local serving becomes testable"],
-                "evidence_limitations": ["The packet does not establish local latency or quality."],
                 "next_step": "Run one frozen multimodal workload on the supported stack.",
                 "analysis": editorial.engineering_analysis_template(),
                 "event_links": [
@@ -251,6 +247,9 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
     }
     assert [item["feed_rank"] for item in manifest["events"]] == [1, 4, 9]
     assert (workspace / "draft.template.json").is_file()
+    assert json.loads((workspace / "draft.template.json").read_text())["schema_version"] == (
+        editorial.DRAFT_SCHEMA_VERSION
+    )
     assert editorial_runs.search_workspace(workspace, query="Inkling")["match_count"] == 2
 
     reused = editorial_runs.prepare_workspace(
@@ -260,6 +259,9 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
         workspace_root=tmp_path / "workspaces",
     )
     assert reused["reused"] is True
+    assert json.loads((workspace / "draft.template.json").read_text())["schema_version"] == (
+        editorial.DRAFT_SCHEMA_VERSION
+    )
 
 
 def test_validate_requires_exact_candidate_coverage(tmp_path, monkeypatch):
@@ -312,10 +314,85 @@ def test_import_is_atomic_normalized_and_idempotent(tmp_path, monkeypatch):
     assert len(first["run"]["insights"]) == 2
     assert first["run"]["insights"][0]["events"][0]["feed_rank"] == 1
     conn = editorial_runs.connect(db)
+    columns = {
+        row["name"] for row in conn.execute("PRAGMA table_info(editorial_insight)").fetchall()
+    }
+    assert "impact_chain_json" not in columns
+    assert "evidence_limitations_json" not in columns
     assert conn.execute("SELECT COUNT(*) FROM editorial_candidate").fetchone()[0] == 3
     assert conn.execute("SELECT COUNT(*) FROM editorial_event_disposition").fetchone()[0] == 4
     assert conn.execute("SELECT COUNT(*) FROM editorial_run").fetchone()[0] == 1
     conn.close()
+
+
+def test_store_migration_collapses_legacy_investment_analysis(tmp_path):
+    db = tmp_path / "legacy-editorial.db"
+    conn = sqlite3.connect(db)
+    conn.execute(
+        """CREATE TABLE editorial_insight (
+               run_id TEXT NOT NULL,
+               insight_id TEXT NOT NULL,
+               local_id TEXT NOT NULL,
+               audience TEXT NOT NULL,
+               display_rank INTEGER NOT NULL,
+               title TEXT NOT NULL,
+               what_changed TEXT NOT NULL,
+               interpretation TEXT NOT NULL,
+               impact_chain_json TEXT NOT NULL,
+               evidence_limitations_json TEXT NOT NULL,
+               next_step TEXT NOT NULL,
+               analysis_json TEXT NOT NULL
+           )"""
+    )
+    conn.execute(
+        """INSERT INTO editorial_insight VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (
+            "legacy-run",
+            "legacy-insight",
+            "legacy-local",
+            "investment",
+            1,
+            "Legacy title",
+            "Legacy facts",
+            "Legacy interpretation",
+            json.dumps(["Evidence", "Consequence"]),
+            json.dumps(["Provider evidence is not independent."]),
+            "Legacy next step",
+            json.dumps(
+                {
+                    "affected_entities": [],
+                    "thesis_effect": "mixed",
+                    "operating_driver": "Legacy operating driver.",
+                    "financial_driver": "Legacy financial driver.",
+                    "edge": "Legacy edge.",
+                    "counter_case": "Legacy counter-case.",
+                    "watchpoints": ["One", "Two", "Three", "Four"],
+                }
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    migrated = editorial_runs.connect(db)
+    columns = {
+        row["name"]
+        for row in migrated.execute("PRAGMA table_info(editorial_insight)").fetchall()
+    }
+    row = migrated.execute(
+        "SELECT analysis_json FROM editorial_insight WHERE insight_id = 'legacy-insight'"
+    ).fetchone()
+    migrated.close()
+
+    assert "impact_chain_json" not in columns
+    assert "evidence_limitations_json" not in columns
+    assert json.loads(row["analysis_json"]) == {
+        "affected_entities": [],
+        "key_uncertainty": (
+            "Legacy counter-case. Provider evidence is not independent."
+        ),
+        "watchpoints": ["One", "Two", "Three"],
+    }
 
 
 def test_editorial_read_selects_latest_complete_run_and_filters_audience(
@@ -351,13 +428,13 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
         audience="investment", day=DAY, db_path=db
     )
 
-    assert payload["schema_version"] == "daily-intelligence-read-v2"
+    assert payload["schema_version"] == "daily-intelligence-read-v3"
     assert payload["content_kind"] == "daily_editorial"
     assert payload["available"] is True
     assert payload["reason"] is None
     assert payload["run"]["run_id"] == second["run_id"]
     assert payload["run"]["agent"] == {
-        "skill_version": "fli-daily-intelligence-v1",
+        "skill_version": "fli-daily-intelligence-v2",
         "model": "codex-test",
         "notes": "Second editorial pass.",
     }
@@ -369,6 +446,9 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
     assert payload["items"][0]["events"][0]["event_id"] == "event-a"
     assert payload["items"][0]["citations"][0]["local_id"] == "source-a"
     assert "analysis" in payload["items"][0]
+    assert payload["items"][0]["analysis"]["key_uncertainty"].startswith("No customer")
+    assert "impact_chain" not in payload["items"][0]
+    assert "evidence_limitations" not in payload["items"][0]
     assert payload["portfolio_reference"] == {
         "basis": "complete audited year-end portfolio",
         "as_of": "2025-12-31",

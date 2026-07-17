@@ -27,8 +27,8 @@ DEFAULT_ROUTING_ROOT = routing_runs.DEFAULT_RUN_ROOT
 DEFAULT_INSIGHTS_DB = insight_runs.DEFAULT_DB
 DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v1"
-STORE_SCHEMA_VERSION = "daily-intelligence-store-v1"
-READ_SCHEMA_VERSION = "daily-intelligence-read-v2"
+STORE_SCHEMA_VERSION = "daily-intelligence-store-v2"
+READ_SCHEMA_VERSION = "daily-intelligence-read-v3"
 
 CONTEXT_PATHS = {
     "investment": (
@@ -95,8 +95,6 @@ CREATE TABLE IF NOT EXISTS editorial_insight (
     title TEXT NOT NULL,
     what_changed TEXT NOT NULL,
     interpretation TEXT NOT NULL,
-    impact_chain_json TEXT NOT NULL,
-    evidence_limitations_json TEXT NOT NULL,
     next_step TEXT NOT NULL,
     analysis_json TEXT NOT NULL,
     PRIMARY KEY (run_id, insight_id),
@@ -222,14 +220,88 @@ def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _migrate_editorial_insight_v2(conn: sqlite3.Connection) -> None:
+    """Collapse the first editorial memo shape into the smaller durable contract."""
+    columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(editorial_insight)").fetchall()
+    }
+    if not {"impact_chain_json", "evidence_limitations_json"} <= columns:
+        return
+
+    rows = conn.execute(
+        """SELECT run_id, insight_id, local_id, audience, display_rank,
+                  title, what_changed, interpretation, evidence_limitations_json,
+                  next_step, analysis_json
+           FROM editorial_insight"""
+    ).fetchall()
+    with conn:
+        conn.execute(
+            """CREATE TABLE editorial_insight_v2 (
+                   run_id TEXT NOT NULL REFERENCES editorial_run(run_id) ON DELETE CASCADE,
+                   insight_id TEXT NOT NULL,
+                   local_id TEXT NOT NULL,
+                   audience TEXT NOT NULL CHECK (audience IN ('investment', 'ai_engineering')),
+                   display_rank INTEGER NOT NULL CHECK (display_rank >= 1),
+                   title TEXT NOT NULL,
+                   what_changed TEXT NOT NULL,
+                   interpretation TEXT NOT NULL,
+                   next_step TEXT NOT NULL,
+                   analysis_json TEXT NOT NULL,
+                   PRIMARY KEY (run_id, insight_id),
+                   UNIQUE (run_id, local_id),
+                   UNIQUE (run_id, audience, display_rank)
+               )"""
+        )
+        for row in rows:
+            analysis = json.loads(str(row["analysis_json"]))
+            if row["audience"] == "investment" and "key_uncertainty" not in analysis:
+                limitations = json.loads(str(row["evidence_limitations_json"]))
+                counter_case = str(analysis.get("counter_case") or "").strip()
+                limitation = str(limitations[0]).strip() if limitations else ""
+                uncertainty_parts = [counter_case]
+                if limitation and limitation.casefold() not in counter_case.casefold():
+                    uncertainty_parts.append(limitation)
+                analysis = {
+                    "affected_entities": analysis.get("affected_entities", []),
+                    "key_uncertainty": " ".join(
+                        part for part in uncertainty_parts if part
+                    )
+                    or "The available evidence does not yet establish the financial effect.",
+                    "watchpoints": analysis.get("watchpoints", [])[:3],
+                }
+            conn.execute(
+                """INSERT INTO editorial_insight_v2 (
+                       run_id, insight_id, local_id, audience, display_rank,
+                       title, what_changed, interpretation, next_step, analysis_json)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    row["run_id"],
+                    row["insight_id"],
+                    row["local_id"],
+                    row["audience"],
+                    row["display_rank"],
+                    row["title"],
+                    row["what_changed"],
+                    row["interpretation"],
+                    row["next_step"],
+                    _canonical_json(analysis),
+                ),
+            )
+        conn.execute("DROP TABLE editorial_insight")
+        conn.execute("ALTER TABLE editorial_insight_v2 RENAME TO editorial_insight")
+
+
 def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path, timeout=60.0)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     conn.execute("PRAGMA busy_timeout = 60000")
+    conn.execute("PRAGMA foreign_keys = OFF")
+    _migrate_editorial_insight_v2(conn)
     conn.executescript(SCHEMA)
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
@@ -572,6 +644,10 @@ def prepare_workspace(
         existing = load_manifest(workspace)
         if existing != manifest:
             raise ValueError(f"workspace {run_id} already exists with different frozen content")
+        template_path = workspace / "draft.template.json"
+        template = editorial.draft_template(manifest)
+        if not template_path.is_file() or _read_json(template_path) != template:
+            _write_json(template_path, template)
         return {**result, "reused": True}
     workspace.mkdir(parents=True, exist_ok=True)
     for event, payload in zip(event_index, event_payloads, strict=True):
@@ -931,9 +1007,8 @@ def import_result(
                 conn.execute(
                     """INSERT INTO editorial_insight (
                            run_id, insight_id, local_id, audience, display_rank,
-                           title, what_changed, interpretation, impact_chain_json,
-                           evidence_limitations_json, next_step, analysis_json)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                           title, what_changed, interpretation, next_step, analysis_json)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     (
                         run_id,
                         insight_id,
@@ -943,8 +1018,6 @@ def import_result(
                         insight["title"],
                         insight["what_changed"],
                         insight["interpretation"],
-                        _canonical_json(insight["impact_chain"]),
-                        _canonical_json(insight["evidence_limitations"]),
                         insight["next_step"],
                         _canonical_json(insight["analysis"]),
                     ),
@@ -1025,8 +1098,7 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
         raise ValueError(f"editorial run {run_id!r} does not exist")
     insights = conn.execute(
         """SELECT insight_id, local_id, audience, display_rank, title,
-                  what_changed, interpretation, impact_chain_json,
-                  evidence_limitations_json, next_step, analysis_json
+                  what_changed, interpretation, next_step, analysis_json
            FROM editorial_insight WHERE run_id = ?
            ORDER BY audience, display_rank""",
         (run_id,),
@@ -1034,8 +1106,7 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
     items = []
     for row in insights:
         item = dict(row)
-        for field in ("impact_chain_json", "evidence_limitations_json", "analysis_json"):
-            item[field.removesuffix("_json")] = json.loads(str(item.pop(field)))
+        item["analysis"] = json.loads(str(item.pop("analysis_json")))
         item["events"] = [
             dict(value)
             for value in conn.execute(

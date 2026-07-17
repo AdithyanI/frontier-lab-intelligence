@@ -113,8 +113,11 @@ shared theme as an automatic merge.
   `outside_portfolio`. Consider the portfolio first. Include an outside company
   only when a direct public-equity transmission path is defensible; omit that
   section rather than padding it.
-- For Investment, make the operating-to-financial-to-thesis chain explicit or
-  state that the link is unknown.
+- For Investment, write one coherent `interpretation` that makes the
+  operating-to-financial-to-thesis chain explicit or states that the link is
+  unknown. Keep the strongest challenge in `key_uncertainty` and use one to
+  three measurable `watchpoints`; do not split the same argument across
+  parallel mechanics fields.
 - For Engineering, propose a bounded experiment with both a success metric and
   a stop condition.
 - Existing per-Event Insights are working annotations, not editorial truth.

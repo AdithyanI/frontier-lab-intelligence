@@ -34,9 +34,8 @@ Every Insight has:
 - a contiguous audience-local `rank` starting at one;
 - a judgment-led `title`;
 - attributable `what_changed` facts;
-- an audience-specific `interpretation`;
-- a two-to-five-step `impact_chain`;
-- material `evidence_limitations`;
+- one audience-specific `interpretation` that carries the complete causal
+  argument rather than exposing intermediate reasoning fields;
 - one concrete `next_step`;
 - audience-specific `analysis`;
 - exact Event links with `primary`, `supporting`, `context`, or
@@ -45,9 +44,10 @@ Every Insight has:
   research.
 
 Investment analysis records company mappings as `portfolio` or
-`outside_portfolio`, a directional impact and mechanism for each, thesis effect,
-operating and financial drivers, edge, counter-case, and measurable
-watchpoints. The skill-owned BIT packet holds the complete audited portfolio,
+`outside_portfolio`, a directional impact and mechanism for each, one key
+uncertainty, and one to three measurable watchpoints. The interpretation itself
+connects evidence through the operating and financial drivers to the thesis
+consequence. The skill-owned BIT packet holds the complete audited portfolio,
 public thesis, research process, source cautions, and the date/source disclosure
 shown once in the reader rather than repeated per company. AI Engineering analysis records
 the system surface, technical implication, action, bounded experiment, success
@@ -114,7 +114,7 @@ ignored SQLite store is `data/derived/daily-intelligence/editorial.db`.
 
 An import succeeds only after the draft matches the exact workspace manifest,
 passes the audience schema, and accounts for the entire routed-positive cohort.
-The normalized run, candidates, Insights, dispositions, Event roles, and
+The normalized run, candidates, Insights, dispositions, Event provenance, and
 citations are written in one transaction. Reimporting the identical result is a
 no-op; a conflicting result cannot overwrite the existing run identity.
 
@@ -124,6 +124,12 @@ normalized backend projection; it never loads `draft.json` or SQLite directly.
 Candidate-level Insight decisions remain an audit fallback for dates without an
 imported run and for explicit suppressed/all inspection. A complete imported
 run wins even when it selected zero Insights for an audience.
+
+The canonical Investment reader shows the conclusion-led title, facts, one
+investment interpretation, company read-through, confirmation/challenge
+signals, and two source columns: exact original Feed Events and supporting
+artifacts/context. Evidence roles and citation provenance remain stored even
+though the reader does not expose the authoring scaffolding.
 
 No run schedules itself or performs publication, submission, alert delivery,
 or another external action. Those remain separately authorized operations.

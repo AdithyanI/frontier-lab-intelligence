@@ -55,7 +55,6 @@ export type EditorialEventRole = 'primary' | 'supporting' | 'context' | 'counter
 export type EditorialCitationKind = 'event' | 'artifact' | 'web' | 'context'
 export type InvestmentEntityScope = 'portfolio' | 'outside_portfolio'
 export type InvestmentImpactDirection = 'positive' | 'negative' | 'mixed' | 'uncertain'
-export type ThesisEffect = 'strengthens' | 'weakens' | 'opportunity' | 'risk' | 'mixed' | 'uncertain'
 export type EngineeringAction = 'test' | 'adopt' | 'watch' | 'ignore'
 
 export interface EditorialEventLink {
@@ -87,11 +86,7 @@ export interface InvestmentEditorialAnalysis {
     impact: InvestmentImpactDirection
     mechanism: string
   }>
-  thesis_effect: ThesisEffect
-  operating_driver: string
-  financial_driver: string
-  edge: string
-  counter_case: string
+  key_uncertainty: string
   watchpoints: string[]
 }
 
@@ -127,8 +122,6 @@ export interface EditorialInsightItem {
   title: string
   what_changed: string
   interpretation: string
-  impact_chain: string[]
-  evidence_limitations: string[]
   next_step: string
   analysis: EditorialAnalysis
   events: EditorialEventLink[]
