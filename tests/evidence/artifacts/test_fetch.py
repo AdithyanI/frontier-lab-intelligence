@@ -201,6 +201,79 @@ def test_placeholder_validation_keeps_short_or_mixed_text(text):
     assert artifact_fetch.extracted_text_issue(text) is None
 
 
+@pytest.mark.parametrize(
+    ("title", "url", "text"),
+    [
+        (
+            "Just a moment...",
+            "https://example.com/paper",
+            "Performing security verification. This website uses a security "
+            "service to protect against malicious bots. Please wait.",
+        ),
+        (
+            "Google Forms: Sign-in",
+            "https://docs.google.com/forms/d/e/example/viewform",
+            "Sign in to continue with Google Forms. Use your email or phone to "
+            "continue with this protected form.",
+        ),
+        (
+            "Vercel Security Checkpoint",
+            "https://example.vercel.app/report",
+            "Vercel Security Checkpoint. Complete the check below to continue "
+            "to the requested deployment.",
+        ),
+        (
+            "Repository",
+            "https://github.com/example/repository",
+            "There was an error while loading. Please reload this page. " * 3,
+        ),
+        (
+            "Video",
+            "https://www.youtube.com/watch?v=example",
+            "About Press Copyright Contact us Creators Advertise Developers " * 3,
+        ),
+        (
+            "Not available in your region",
+            "https://example.com/announcement",
+            "This page isn't yet available in your region. Please check back "
+            "later for availability.",
+        ),
+    ],
+)
+def test_content_validation_rejects_non_content_shells(title, url, text):
+    issue = artifact_fetch.extracted_text_issue(
+        text,
+        title=title,
+        final_url=url,
+    )
+
+    assert issue is not None
+    assert issue[0] == artifact_fetch.NON_CONTENT_ERROR_CODE
+
+
+def test_content_validation_rejects_control_heavy_garbled_text():
+    text = ("\x00\x01\x02\x03\x04\x05" + "\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a") * 100
+
+    issue = artifact_fetch.extracted_text_issue(text)
+
+    assert issue is not None
+    assert issue[0] == artifact_fetch.GARBLED_TEXT_ERROR_CODE
+
+
+def test_content_validation_keeps_legitimate_short_mixed_content():
+    text = (
+        "We released EdgeBench today. It evaluates inference latency across "
+        "three accelerators, includes the benchmark code, and reports the exact "
+        "measurement protocol."
+    )
+
+    assert artifact_fetch.extracted_text_issue(
+        text,
+        title="EdgeBench: reproducible inference measurements",
+        final_url="https://example.com/edgebench",
+    ) is None
+
+
 def test_extract_content_rejects_empty_html_without_raising():
     result = artifact_fetch.extract_content(
         b"",
@@ -715,6 +788,50 @@ def test_jina_reader_rejects_thin_provider_output(tmp_path):
     conn.close()
 
 
+def test_jina_reader_rejects_provider_shell_after_retrieval(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    _seed_artifact(db)
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    _native_terminal_failure(db)
+
+    def reader_handler(_request: httpx.Request):
+        return httpx.Response(
+            200,
+            json={
+                "code": 200,
+                "status": 20000,
+                "data": {
+                    "title": "Just a moment...",
+                    "url": "https://example.com/article",
+                    "content": (
+                        "# Just a moment...\n\nPerforming security verification. "
+                        "This website uses a security service to protect against "
+                        "malicious bots. Please wait while the check completes."
+                    ),
+                },
+            },
+        )
+
+    result = artifact_fetch.recover_with_jina_reader(
+        db_path=db,
+        api_key="",
+        transport=httpx.MockTransport(reader_handler),
+    )
+
+    assert result["success"] == 0
+    assert result["failed_terminal"] == 1
+    conn = artifacts.connect(db)
+    fetch = conn.execute(
+        "SELECT * FROM artifact_fetch WHERE fetch_policy = ?",
+        (artifact_fetch.JINA_READER_POLICY,),
+    ).fetchone()
+    assert fetch["error_code"] == artifact_fetch.NON_CONTENT_ERROR_CODE
+    assert fetch["raw_snapshot_ref"] is not None
+    assert fetch["text_snapshot_ref"] is None
+    conn.close()
+
+
 def test_jina_reader_resumes_retryable_provider_failure(tmp_path, monkeypatch):
     db = tmp_path / "artifacts.db"
     _seed_artifact(db)
@@ -799,6 +916,96 @@ def test_artifact_cli_has_stable_json_success_and_error_contract(tmp_path, capsy
     assert failure["error"]["code"] == "E_VALIDATION"
     assert failure["error"]["retryable"] is False
     assert failure["error"]["hint"]
+
+
+def test_revalidate_content_quarantines_stored_shell_idempotently(
+    tmp_path, monkeypatch, capsys
+):
+    db = tmp_path / "artifacts.db"
+    artifact_id = _seed_artifact(db)
+    snapshot = tmp_path / "text" / "shell.txt"
+    snapshot.parent.mkdir()
+    snapshot.write_text(
+        "Performing security verification. This website uses a security service "
+        "to protect against malicious bots. Please wait while the check completes.",
+        encoding="utf-8",
+    )
+    now = "2026-07-14T00:00:00+00:00"
+    conn = artifacts.connect(db)
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact_fetch_run
+               (fetch_run_id, schema_version, fetch_policy, selection_policy,
+                input_fingerprint, expected_count, success_count,
+                failed_retryable_count, failed_terminal_count, started_at,
+                completed_at, status)
+               VALUES ('fetch-run', ?, ?, 'test-selection', 'fingerprint',
+                       1, 1, 0, 0, ?, ?, 'complete')""",
+            (artifacts.SCHEMA_VERSION, artifact_fetch.FETCH_POLICY, now, now),
+        )
+        conn.execute(
+            """INSERT INTO artifact_fetch_run_item
+               (fetch_run_id, artifact_id, selection_rank, stratum,
+                selected_url, source_day, source_rank, normalized_rank,
+                source_event_id)
+               VALUES ('fetch-run', ?, 1, 'article',
+                       'https://example.com/article', '2026-07-14', 1, 0.01,
+                       'event')""",
+            (artifact_id,),
+        )
+        conn.execute(
+            """INSERT INTO artifact_fetch
+               (fetch_id, fetch_run_id, artifact_id, fetch_policy,
+                requested_url, request_key, status, attempt_number, started_at,
+                completed_at, final_url, extractor_contract, extractor_version,
+                extracted_title, text_sha256, text_snapshot_ref,
+                text_char_count, text_truncated, retryable)
+               VALUES ('fetch', 'fetch-run', ?, ?, 'https://example.com/article',
+                       'request', 'success', 1, ?, ?,
+                       'https://example.com/article', 'test', '1',
+                       'Just a moment...', 'sha', ?, 145, 0, 0)""",
+            (artifact_id, artifact_fetch.FETCH_POLICY, now, now, str(snapshot)),
+        )
+        conn.execute(
+            """UPDATE artifact SET title = 'Just a moment...',
+                                      title_fetch_id = 'fetch'
+               WHERE artifact_id = ?""",
+            (artifact_id,),
+        )
+    conn.close()
+
+    assert artifact_cli.main(
+        ["revalidate-content", "--db", str(db), "--json", "--no-input"]
+    ) == 0
+    first = json.loads(capsys.readouterr().out)["data"]
+    assert first["quarantined_count"] == 1
+    assert first["by_error_code"] == {
+        artifact_fetch.NON_CONTENT_ERROR_CODE: 1
+    }
+    assert artifact_cli.main(
+        ["revalidate-content", "--db", str(db), "--json", "--no-input"]
+    ) == 0
+    second = json.loads(capsys.readouterr().out)["data"]
+    assert second["quarantined_count"] == 0
+
+    conn = artifacts.connect(db)
+    fetch = conn.execute("SELECT * FROM artifact_fetch WHERE fetch_id = 'fetch'").fetchone()
+    run = conn.execute(
+        "SELECT * FROM artifact_fetch_run WHERE fetch_run_id = 'fetch-run'"
+    ).fetchone()
+    artifact = conn.execute(
+        "SELECT title, title_fetch_id FROM artifact WHERE artifact_id = ?",
+        (artifact_id,),
+    ).fetchone()
+    conn.close()
+    assert fetch["status"] == "failed_terminal"
+    assert fetch["text_snapshot_ref"] is None
+    assert fetch["text_sha256"] is None
+    assert fetch["error_code"] == artifact_fetch.NON_CONTENT_ERROR_CODE
+    assert run["success_count"] == 0
+    assert run["failed_terminal_count"] == 1
+    assert artifact["title"] is None
+    assert artifact["title_fetch_id"] is None
 
 
 def test_artifact_cli_passes_repeatable_exact_native_fetch_filter(

@@ -151,6 +151,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     reader_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     _add_output_arguments(reader_parser)
+    revalidate_parser = sub.add_parser(
+        "revalidate-content",
+        help="Quarantine stored successes that fail the current content contract.",
+    )
+    revalidate_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    _add_output_arguments(revalidate_parser)
     x_article_parser = sub.add_parser(
         "fetch-x-articles",
         help="Fetch X Article bodies through the dedicated provider adapter.",
@@ -210,6 +216,10 @@ def main(argv: list[str] | None = None) -> int:
             from fli.evidence.artifacts import fetch as artifact_fetch
 
             data = artifact_fetch.recover_with_jina_reader(db_path=args.db)
+        elif args.action == "revalidate-content":
+            from fli.evidence.artifacts import fetch as artifact_fetch
+
+            data = artifact_fetch.revalidate_successful_fetches(db_path=args.db)
         elif args.action == "fetch-x-articles":
             from fli.evidence.artifacts import x_articles as artifact_x_articles
 
