@@ -308,6 +308,54 @@ def _migrate_editorial_insight_v3(conn: sqlite3.Connection) -> None:
     )
 
 
+def _migrate_engineering_analysis_v3(conn: sqlite3.Connection) -> None:
+    """Collapse the original experiment scaffold into one measurable decision rule."""
+    columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(editorial_insight)").fetchall()
+    }
+    if "analysis_json" not in columns:
+        return
+    rows = conn.execute(
+        """SELECT run_id, insight_id, analysis_json
+           FROM editorial_insight
+           WHERE audience = 'ai_engineering'"""
+    ).fetchall()
+    updates: list[tuple[str, str, str]] = []
+    for row in rows:
+        analysis = json.loads(str(row["analysis_json"]))
+        if set(analysis) == {"decision_rule"}:
+            continue
+        experiment = analysis.get("experiment")
+        experiment = experiment if isinstance(experiment, dict) else {}
+        success = str(experiment.get("success_metric") or "").strip().rstrip(".")
+        stop = str(experiment.get("stop_condition") or "").strip().rstrip(".")
+        if success and stop:
+            decision_rule = (
+                f"Proceed if the success criterion is met: {success}. "
+                f"Stop or revise if: {stop}."
+            )
+        else:
+            decision_rule = (
+                "Proceed only when a bounded test demonstrates a measurable benefit; "
+                "stop when it fails the stated quality, safety, cost, or reliability limit."
+            )
+        updates.append(
+            (
+                _canonical_json({"decision_rule": decision_rule}),
+                str(row["run_id"]),
+                str(row["insight_id"]),
+            )
+        )
+    if updates:
+        with conn:
+            conn.executemany(
+                """UPDATE editorial_insight SET analysis_json = ?
+                   WHERE run_id = ? AND insight_id = ?""",
+                updates,
+            )
+
+
 def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path, timeout=60.0)
@@ -317,6 +365,7 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = OFF")
     _migrate_editorial_insight_v2(conn)
     _migrate_editorial_insight_v3(conn)
+    _migrate_engineering_analysis_v3(conn)
     conn.executescript(SCHEMA)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
@@ -1239,6 +1288,10 @@ def editorial_insights_payload(
             item = dict(stored)
             item["rank"] = int(item.pop("display_rank"))
             item["day"] = str(payload["day"])
+            item["events"] = [
+                {key: value for key, value in event.items() if key != "root_url"}
+                for event in item["events"]
+            ]
             items.append(item)
 
         disposition_counts = {

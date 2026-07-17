@@ -380,6 +380,36 @@ def test_store_migration_collapses_legacy_investment_analysis(tmp_path):
             ),
         ),
     )
+    conn.execute(
+        """INSERT INTO editorial_insight VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (
+            "legacy-run",
+            "legacy-engineering-insight",
+            "legacy-engineering-local",
+            "ai_engineering",
+            1,
+            "Legacy engineering title",
+            "Legacy engineering facts",
+            "Legacy engineering interpretation",
+            json.dumps(["Evidence", "Consequence"]),
+            json.dumps(["Provider evidence is not independent."]),
+            "Run one bounded test.",
+            json.dumps(
+                {
+                    "system_surface": "Agent evaluation",
+                    "technical_implication": "Add adaptive attacks.",
+                    "recommended_action": "test",
+                    "experiment": {
+                        "hypothesis": "Adaptive attacks find more failures.",
+                        "smallest_test": "Run one frozen suite.",
+                        "success_metric": "Find three new failures",
+                        "stop_condition": "Stop if no new failures are found",
+                    },
+                    "constraints": ["Use synthetic credentials."],
+                }
+            ),
+        ),
+    )
     conn.commit()
     conn.close()
 
@@ -391,6 +421,10 @@ def test_store_migration_collapses_legacy_investment_analysis(tmp_path):
     row = migrated.execute(
         """SELECT analysis_json, rank_rationale FROM editorial_insight
            WHERE insight_id = 'legacy-insight'"""
+    ).fetchone()
+    engineering_row = migrated.execute(
+        """SELECT analysis_json FROM editorial_insight
+           WHERE insight_id = 'legacy-engineering-insight'"""
     ).fetchone()
     migrated.close()
 
@@ -404,6 +438,12 @@ def test_store_migration_collapses_legacy_investment_analysis(tmp_path):
             "Legacy counter-case. Provider evidence is not independent."
         ),
         "watchpoints": ["One", "Two", "Three"],
+    }
+    assert json.loads(engineering_row["analysis_json"]) == {
+        "decision_rule": (
+            "Proceed if the success criterion is met: Find three new failures. "
+            "Stop or revise if: Stop if no new failures are found."
+        )
     }
 
 
@@ -457,6 +497,7 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
     assert payload["items"][0]["day"] == DAY
     assert payload["items"][0]["title"] == "Revised distribution judgment"
     assert payload["items"][0]["events"][0]["event_id"] == "event-a"
+    assert "root_url" not in payload["items"][0]["events"][0]
     assert payload["items"][0]["citations"][0]["local_id"] == "source-a"
     assert "analysis" in payload["items"][0]
     assert payload["items"][0]["analysis"]["key_uncertainty"].startswith("No customer")
@@ -618,7 +659,7 @@ def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, cap
     contract = success["data"]["draft"]
     assert contract["max_insights_per_audience"] is None
     assert set(contract["analysis_shapes"]) == {"investment", "ai_engineering"}
-    assert contract["analysis_shapes"]["ai_engineering"]["recommended_action"] == "test"
+    assert set(contract["analysis_shapes"]["ai_engineering"]) == {"decision_rule"}
 
     assert editorial_cli.main(
         [

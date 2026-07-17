@@ -120,8 +120,10 @@ shared theme as an automatic merge.
   unknown. Keep the strongest challenge in `key_uncertainty` and use one to
   three measurable `watchpoints`; do not split the same argument across
   parallel mechanics fields.
-- For Engineering, propose a bounded experiment with both a success metric and
-  a stop condition.
+- For Engineering, put the concrete bounded action in `next_step` and combine
+  its measurable proceed and stop conditions into one concise `decision_rule`.
+  Keep affected surfaces, implications, hypotheses, and material constraints
+  in the interpretation rather than duplicating them as parallel fields.
 - Existing per-Event Insights are working annotations, not editorial truth.
   Re-evaluate them against the complete day.
 

@@ -50,9 +50,10 @@ uncertainty, and one to three measurable watchpoints. The interpretation itself
 connects evidence through the operating and financial drivers to the thesis
 consequence. The skill-owned BIT packet holds the complete audited portfolio,
 public thesis, research process, source cautions, and the date/source disclosure
-shown once in the reader rather than repeated per company. AI Engineering analysis records
-the system surface, technical implication, action, bounded experiment, success
-metric, stop condition, and constraints.
+shown once in the reader rather than repeated per company. AI Engineering uses
+the common interpretation plus one bounded `next_step`; its only additional
+field is a concise `decision_rule` combining the measurable proceed and stop
+conditions.
 
 The authoritative machine shape and enums are returned by:
 

@@ -40,15 +40,14 @@ ignore a technique or product. It should answer:
 - A useful experiment is reproducible and small enough to run. “Evaluate it” is
   not an experiment.
 
-## Experiment standard
+## Decision standard
 
-Every surfaced Engineering Insight contains:
+Every surfaced Engineering Insight uses the common `interpretation` to explain
+the technical implication and material transfer limits, then contains:
 
-- `hypothesis`: the exact technical belief being tested;
-- `smallest_test`: one bounded workload, frozen dataset, or controlled slice;
-- `success_metric`: a measurable quality, latency, cost, reliability, or
-  operator-effort result that justifies proceeding; and
-- `stop_condition`: the evidence that rejects, pauses, or constrains adoption.
+- `next_step`: one bounded workload, frozen dataset, or controlled action; and
+- `decision_rule`: the measurable result that justifies proceeding together
+  with the result that rejects, pauses, or constrains the idea.
 
 Examples of useful metrics include held-out task success, failure-recovery rate,
 precision/recall, citation correctness, p50/p95 latency, tokens or dollars per
@@ -68,6 +67,6 @@ validation, persistence, and provenance.
 ## Final quality test
 
 Reject or rewrite an Engineering Insight when it merely repeats a release,
-cannot identify the affected system surface, omits transfer constraints, or
-proposes an unbounded experiment without success and stop conditions.
-
+cannot explain the affected system in its interpretation, omits material
+transfer constraints, or proposes an unbounded next step without a measurable
+proceed-and-stop decision rule.

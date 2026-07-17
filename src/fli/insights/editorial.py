@@ -19,7 +19,6 @@ EVENT_ROLES = ("primary", "supporting", "context", "counterevidence")
 CITATION_KINDS = ("event", "artifact", "web", "context")
 ENTITY_SCOPES = ("portfolio", "outside_portfolio")
 IMPACT_DIRECTIONS = ("positive", "negative", "mixed", "uncertain")
-ENGINEERING_ACTIONS = ("test", "adopt", "watch", "ignore")
 
 _LOCAL_ID = re.compile(r"^[a-z0-9][a-z0-9-]{1,63}$")
 
@@ -34,7 +33,6 @@ def output_contract() -> dict[str, Any]:
         "citation_kinds": list(CITATION_KINDS),
         "entity_scopes": list(ENTITY_SCOPES),
         "impact_directions": list(IMPACT_DIRECTIONS),
-        "engineering_actions": list(ENGINEERING_ACTIONS),
         "analysis_shapes": {
             "investment": investment_analysis_template(),
             "ai_engineering": engineering_analysis_template(),
@@ -101,16 +99,10 @@ def investment_analysis_template() -> dict[str, Any]:
 
 def engineering_analysis_template() -> dict[str, Any]:
     return {
-        "system_surface": "The affected model, data, evaluation, agent, inference, safety, or tooling surface.",
-        "technical_implication": "What may change in an implementation decision.",
-        "recommended_action": "test",
-        "experiment": {
-            "hypothesis": "What may be true.",
-            "smallest_test": "A bounded reproducible test.",
-            "success_metric": "Evidence that justifies proceeding.",
-            "stop_condition": "Evidence that rejects or pauses the idea.",
-        },
-        "constraints": ["A cost, reliability, security, integration, or evaluation limit."],
+        "decision_rule": (
+            "The measurable result that would justify proceeding, together with "
+            "the result that would reject or pause the idea."
+        ),
     }
 
 
@@ -258,28 +250,9 @@ def _validate_investment_analysis(value: Any, path: str) -> dict[str, Any]:
 
 
 def _validate_engineering_analysis(value: Any, path: str) -> dict[str, Any]:
-    analysis = _object(
-        value,
-        path,
-        {"system_surface", "technical_implication", "recommended_action", "experiment", "constraints"},
-    )
-    experiment_path = f"{path}.experiment"
-    experiment = _object(
-        analysis["experiment"],
-        experiment_path,
-        {"hypothesis", "smallest_test", "success_metric", "stop_condition"},
-    )
+    analysis = _object(value, path, {"decision_rule"})
     return {
-        "system_surface": _text(analysis["system_surface"], f"{path}.system_surface"),
-        "technical_implication": _text(analysis["technical_implication"], f"{path}.technical_implication"),
-        "recommended_action": _enum(
-            analysis["recommended_action"], f"{path}.recommended_action", ENGINEERING_ACTIONS
-        ),
-        "experiment": {
-            key: _text(experiment[key], f"{experiment_path}.{key}")
-            for key in ("hypothesis", "smallest_test", "success_metric", "stop_condition")
-        },
-        "constraints": _texts(analysis["constraints"], f"{path}.constraints", maximum=6),
+        "decision_rule": _text(analysis["decision_rule"], f"{path}.decision_rule"),
     }
 
 

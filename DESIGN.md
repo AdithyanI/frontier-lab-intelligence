@@ -241,10 +241,12 @@ Rules:
   portfolio` mapping, gives every company a textual impact direction and one
   causal mechanism, and ends with two watchpoints plus the next diligence step.
   A single page note identifies the audited working portfolio source; dates and
-  caveats are not repeated beside every company. Engineering keeps its decision
-  and smallest-test view. Sources remain visible in the normal reading flow;
-  the complete causal chain, limitations, counter-case, and Event provenance
-  stay in one native details disclosure rather than becoming nested cards. The date count is the number of final
+  caveats are not repeated beside every company. Engineering uses one flat
+  `What to do next` section containing the bounded next step and its measurable
+  decision rule; it does not expose separate action, system-surface, hypothesis,
+  experiment-detail, or constraints labels. Sources remain visible in the
+  normal reading flow. Event provenance links only to the exact Feed envelope,
+  which already owns the onward original-post link. The date count is the number of final
   imported Insights when that run exists. Candidate-level decisions remain an
   audit fallback for unimported days and for explicit `Suppressed` / `All`
   views; they are not the final daily product. Honest zero/thin imported runs

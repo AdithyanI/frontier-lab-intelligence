@@ -71,7 +71,9 @@ at the root of `fli`.
 8. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis and audited 2025 portfolio packet for Investment, may use
    per-Event notes as annotations, researches missing transmission paths, and
-   writes the ranked cited Insights that clear the audience bar. Every
+   writes the ranked cited Insights that clear the audience bar. Each selected
+   Insight stores the qualitative rationale for its audience-local priority;
+   the rank is not a synthetic score. Every
    candidate is linked once to an Insight or explicitly not selected.
 9. Deterministic validation binds the draft to its frozen workspace and imports
    Insights, Event roles, dispositions, and citations in one transaction.

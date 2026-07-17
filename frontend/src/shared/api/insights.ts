@@ -55,14 +55,12 @@ export type EditorialEventRole = 'primary' | 'supporting' | 'context' | 'counter
 export type EditorialCitationKind = 'event' | 'artifact' | 'web' | 'context'
 export type InvestmentEntityScope = 'portfolio' | 'outside_portfolio'
 export type InvestmentImpactDirection = 'positive' | 'negative' | 'mixed' | 'uncertain'
-export type EngineeringAction = 'test' | 'adopt' | 'watch' | 'ignore'
 
 export interface EditorialEventLink {
   event_id: string
   feed_rank: number
   role: EditorialEventRole
   reason: string
-  root_url: string
 }
 
 export interface EditorialCitation {
@@ -99,16 +97,7 @@ export interface EditorialPortfolioReference {
 }
 
 export interface EngineeringEditorialAnalysis {
-  system_surface: string
-  technical_implication: string
-  recommended_action: EngineeringAction
-  experiment: {
-    hypothesis: string
-    smallest_test: string
-    success_metric: string
-    stop_condition: string
-  }
-  constraints: string[]
+  decision_rule: string
 }
 
 export type EditorialAnalysis = InvestmentEditorialAnalysis | EngineeringEditorialAnalysis

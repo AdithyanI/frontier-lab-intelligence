@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
@@ -100,13 +100,6 @@ function displayInsightDay(day: string) {
   return Number.isNaN(parsed.getTime()) ? day : insightDay.format(parsed)
 }
 
-function titleCase(value: string) {
-  return value
-    .split('_')
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(' ')
-}
-
 function isEditorialResponse(payload: InsightsResponse): payload is EditorialInsightsResponse {
   return payload.content_kind === 'daily_editorial'
 }
@@ -120,7 +113,7 @@ function isInvestmentAnalysis(
 function isEngineeringAnalysis(
   analysis: EditorialAnalysis,
 ): analysis is EngineeringEditorialAnalysis {
-  return 'recommended_action' in analysis
+  return 'decision_rule' in analysis
 }
 
 function InsightState({
@@ -249,15 +242,6 @@ function InsightRow({ item }: { item: InsightItem }) {
   )
 }
 
-function EditorialField({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div>
-      <dt className="mono">{label}</dt>
-      <dd>{children}</dd>
-    </div>
-  )
-}
-
 function EditorialList({ items }: { items: string[] }) {
   return (
     <ul className="editorial-text-list">
@@ -353,20 +337,16 @@ function EngineeringDecision({
   nextStep: string
 }) {
   return (
-    <section className="editorial-section editorial-decision" aria-label="Engineering decision">
-      <h3>Engineering decision</h3>
-      <div className="editorial-analysis-state mono">
-        <span>{titleCase(analysis.recommended_action)}</span>
-        <span>{decodeTextEntities(analysis.system_surface)}</span>
-      </div>
+    <section className="editorial-section editorial-decision" aria-label="What to do next">
+      <h3>What to do next</h3>
       <div className="editorial-decision-grid">
         <div>
           <h4 className="mono">Next step</h4>
           <p>{decodeTextEntities(nextStep)}</p>
         </div>
         <div>
-          <h4 className="mono">Smallest test</h4>
-          <p>{decodeTextEntities(analysis.experiment.smallest_test)}</p>
+          <h4 className="mono">Decision rule</h4>
+          <p>{decodeTextEntities(analysis.decision_rule)}</p>
         </div>
       </div>
     </section>
@@ -388,10 +368,9 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
               const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(event.event_id)}`
               return (
                 <li key={event.event_id}>
-                  <div className="editorial-source-actions">
-                    <Link to={envelopeUrl}>Feed #{event.feed_rank} ↗</Link>
-                    <a href={event.root_url} target="_blank" rel="noreferrer">Original post ↗</a>
-                  </div>
+                  <Link className="editorial-source-title" to={envelopeUrl}>
+                    Feed #{event.feed_rank} ↗
+                  </Link>
                   <p>{decodeTextEntities(event.reason)}</p>
                 </li>
               )
@@ -413,42 +392,6 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
         </section>
       </div>
     </section>
-  )
-}
-
-function EngineeringExperimentDetails({
-  analysis,
-}: {
-  analysis: EngineeringEditorialAnalysis
-}) {
-  return (
-    <details className="editorial-full-analysis">
-      <summary>Experiment details</summary>
-      <div className="editorial-full-body">
-        <section className="editorial-section" aria-label="Full engineering analysis">
-          <dl className="editorial-analysis-grid">
-            <EditorialField label="Technical implication">
-              {decodeTextEntities(analysis.technical_implication)}
-            </EditorialField>
-            <EditorialField label="Hypothesis">
-              {decodeTextEntities(analysis.experiment.hypothesis)}
-            </EditorialField>
-            <EditorialField label="Success metric">
-              {decodeTextEntities(analysis.experiment.success_metric)}
-            </EditorialField>
-            <EditorialField label="Stop condition">
-              {decodeTextEntities(analysis.experiment.stop_condition)}
-            </EditorialField>
-          </dl>
-          {analysis.constraints.length > 0 && (
-            <div className="editorial-list-section">
-              <h4 className="mono">Constraints</h4>
-              <EditorialList items={analysis.constraints} />
-            </div>
-          )}
-        </section>
-      </div>
-    </details>
   )
 }
 
@@ -481,19 +424,23 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
           <h2 id={titleId}>{decodeTextEntities(item.title)}</h2>
         </header>
 
-        {rankExplanationOpen && (
-          <div className="editorial-rank-explanation" id={rankExplanationId} role="region">
-            <p>
-              <strong>Why #{item.rank}:</strong>{' '}
-              {decodeTextEntities(item.rank_rationale)}
-            </p>
-            <p className="mono">
-              Ranked across this audience’s full daily brief by decision consequence,
-              evidence strength, time sensitivity, actionability, and novelty. It is not
-              Feed rank, confidence, popularity, or similarity.
-            </p>
-          </div>
-        )}
+        <div
+          className="editorial-rank-explanation"
+          id={rankExplanationId}
+          role="region"
+          aria-label={`Why brief rank ${item.rank}`}
+          hidden={!rankExplanationOpen}
+        >
+          <p>
+            <strong>Why #{item.rank}:</strong>{' '}
+            {decodeTextEntities(item.rank_rationale)}
+          </p>
+          <p className="mono">
+            Ranked across this audience’s full daily brief by decision consequence,
+            evidence strength, time sensitivity, actionability, and novelty. It is not
+            Feed rank, confidence, popularity, or similarity.
+          </p>
+        </div>
 
         <div className="editorial-opening">
           <section>
@@ -516,7 +463,6 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
         )}
 
         <EditorialSources item={item} />
-        {engineeringAnalysis && <EngineeringExperimentDetails analysis={engineeringAnalysis} />}
       </div>
     </article>
   )

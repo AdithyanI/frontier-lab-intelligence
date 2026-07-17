@@ -120,17 +120,18 @@ speculation merely to make the memo look complete.
 
 ## AI Engineering analysis
 
-Identify the affected `system_surface` and the `technical_implication`. Choose
-`test`, `adopt`, `watch`, or `ignore`. The experiment must contain:
+Use the common fields rather than a second experiment memo. `interpretation`
+explains the affected system, practical implication, transfer limits, and why
+the evidence matters. `next_step` states one bounded, reproducible action.
+The only Engineering-specific field is `decision_rule`: one concise statement
+of the measurable result that justifies proceeding and the result that rejects,
+pauses, or constrains the idea.
 
-- one falsifiable hypothesis;
-- the smallest reproducible test;
-- a success metric that justifies proceeding; and
-- a stop condition that rejects or constrains the idea.
-
-Record workload, hardware, quantization, context, benchmark, or security limits
-when they affect transferability. A provider microbenchmark is not evidence of
-end-to-end production improvement.
+The author should still reason about hypothesis, workload, hardware,
+quantization, context, benchmark conditions, security limits, and operator
+cost when they affect transferability. Include their useful substance in the
+three reader fields above instead of preserving each as a separate label. A
+provider microbenchmark is not evidence of end-to-end production improvement.
 
 ## Citation and coverage rules
 
