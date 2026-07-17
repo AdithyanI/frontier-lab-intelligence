@@ -4,6 +4,8 @@
 
 - Reader-facing shape
 - Evidence roles
+- Grouping boundary
+- Editorial rank
 - Investment analysis
 - AI Engineering analysis
 - Citation and coverage rules
@@ -40,6 +42,41 @@ Several posts repeating one announcement can support one Insight. Several
 distinct but related developments can also support one broader Insight when the
 causal synthesis is defensible. Explain the role in each link rather than
 asserting that similarity proves sameness.
+
+## Grouping boundary
+
+Group Events into one Insight only when they support one audience judgment,
+one intelligible causal chain, and one decision or next action. Repeated posts
+about the same primary artifact normally consolidate. Distinct developments may
+support one broader conclusion, but `what_changed` must preserve their separate
+attribution and the Event roles must explain the relationship.
+
+Keep them separate when combining them would require two unrelated judgments,
+two materially different causal chains, or two different audience decisions.
+An exact shared artifact is strong evidence of a relationship, not proof that
+every surrounding claim is identical. Lexical matches and embedding neighbors
+are discovery aids only. No URL rule, threshold, or connected component makes
+the grouping decision.
+
+Each routed Event may support at most one selected Insight per audience. This
+forces the author to choose the clearest editorial home instead of duplicating
+evidence across the daily brief.
+
+## Editorial rank
+
+Rank selected Insights contiguously from one by the order in which this audience
+should act on or investigate them. Use a qualitative, lexicographic judgment:
+
+1. decision consequence for a BIT thesis, exposure, or engineering system;
+2. strength and directness of the evidence;
+3. time sensitivity or risk of waiting;
+4. specificity and usefulness of the next action; and
+5. novelty relative to the rest of the day's brief.
+
+Do not calculate a synthetic score. Feed rank may help locate evidence but does
+not determine editorial rank. Similarity is never a ranking input. If two items
+are close, prefer the one with the clearer causal chain and falsifiable next
+step.
 
 ## Investment analysis
 

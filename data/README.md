@@ -31,6 +31,10 @@ has a canonical path.
   TwitterAPI.io responses, normalized queryable X posts, and ordered post
   bundles used by model evaluations. Raw-response freshness controls provider
   reuse; bundle IDs preserve the exact evidence supplied to a model.
+- `derived/daily-intelligence/` — ignored frozen agent workspaces, optional
+  packet-keyed Event embedding cache, and the canonical `editorial.db` holding
+  validated daily Insights. Only `fli daily-intelligence` writes this boundary;
+  the frontend reads its normalized API projection rather than draft files.
 - `following/manifests/` — small tracked manifests that bind each local
   snapshot checksum to its cohort, provider, completeness, spend, ranking, and
   evaluation outputs.

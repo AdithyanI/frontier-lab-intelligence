@@ -28,6 +28,7 @@ DEFAULT_INSIGHTS_DB = insight_runs.DEFAULT_DB
 DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v1"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v1"
+READ_SCHEMA_VERSION = "daily-intelligence-read-v1"
 
 CONTEXT_PATHS = {
     "investment": REPO_ROOT / "docs" / "references" / "bit-capital-editorial-context.md",
@@ -83,7 +84,7 @@ CREATE TABLE IF NOT EXISTS editorial_insight (
     insight_id TEXT NOT NULL,
     local_id TEXT NOT NULL,
     audience TEXT NOT NULL CHECK (audience IN ('investment', 'ai_engineering')),
-    display_rank INTEGER NOT NULL CHECK (display_rank BETWEEN 1 AND 5),
+    display_rank INTEGER NOT NULL CHECK (display_rank >= 1),
     title TEXT NOT NULL,
     what_changed TEXT NOT NULL,
     interpretation TEXT NOT NULL,
@@ -510,9 +511,9 @@ def prepare_workspace(
         "events": event_index,
         "exact_artifact_groups": exact_artifact_groups,
         "retrieval": {
-            "text_search": "fli daily-intelligence search --workspace <path> --query <text>",
-            "vector_index": "fli daily-intelligence index --workspace <path>",
-            "similar": "fli daily-intelligence similar --workspace <path> --event-id <id>",
+            "text_search": ".venv/bin/fli daily-intelligence search --workspace <path> --query <text>",
+            "vector_index": ".venv/bin/fli daily-intelligence index --workspace <path>",
+            "similar": ".venv/bin/fli daily-intelligence similar --workspace <path> --event-id <id>",
         },
     }
     manifest["manifest_sha256"] = _manifest_digest(manifest)
@@ -972,7 +973,18 @@ def import_result(
 
 
 def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
-    run = conn.execute("SELECT * FROM editorial_run WHERE run_id = ?", (run_id,)).fetchone()
+    run = conn.execute(
+        """SELECT run_id, schema_version, draft_schema_version, day,
+                  workspace_run_id, workspace_manifest_sha256,
+                  source_routing_run_id, source_routing_db,
+                  source_cohort_sha256, source_event_run_id,
+                  source_feed_run_id, skill_version, executor_model,
+                  executor_notes, result_sha256, candidate_count,
+                  candidate_pair_count, insight_count, citation_count,
+                  status, created_at
+           FROM editorial_run WHERE run_id = ?""",
+        (run_id,),
+    ).fetchone()
     if run is None:
         raise ValueError(f"editorial run {run_id!r} does not exist")
     insights = conn.execute(
@@ -1004,7 +1016,8 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
         item["citations"] = [
             dict(value)
             for value in conn.execute(
-                """SELECT citation.kind, citation.url, citation.title,
+                """SELECT citation.citation_id, citation.local_id,
+                          citation.kind, citation.url, citation.title,
                           citation.event_id, citation.artifact_id,
                           citation.published_at, citation.retrieved_at,
                           citation.supports, citation.excerpt
@@ -1028,6 +1041,211 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
         "insights": items,
         "dispositions": [dict(row) for row in dispositions],
     }
+
+
+def editorial_insights_payload(
+    *,
+    audience: str = "investment",
+    day: str | None = None,
+    db_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Return one audience from the latest complete imported run for a day.
+
+    A complete run supersedes older runs for the same day even when it selects
+    no Insights for the requested audience. The function never creates the
+    editorial database while serving a read.
+    """
+    if audience not in editorial.AUDIENCES:
+        raise ValueError(f"audience must be one of {list(editorial.AUDIENCES)}")
+    path = DEFAULT_DB if db_path is None else _resolve_path(db_path)
+
+    def unavailable(reason: str) -> dict[str, Any]:
+        return {
+            "schema_version": READ_SCHEMA_VERSION,
+            "content_kind": "daily_editorial",
+            "available": False,
+            "reason": reason,
+            "status": "kept",
+            "requested_date": day,
+            "date": day,
+            "audience": audience,
+            "run": None,
+            "items": [],
+        }
+
+    if not path.is_file():
+        return unavailable("No complete daily editorial run has been imported.")
+
+    conn = _open_readonly(path)
+    try:
+        table = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'editorial_run'"
+        ).fetchone()
+        if table is None:
+            return unavailable("No complete daily editorial run has been imported.")
+        if day is None:
+            selected = conn.execute(
+                """SELECT run_id FROM editorial_run
+                   WHERE status = 'complete'
+                   ORDER BY day DESC, created_at DESC, rowid DESC
+                   LIMIT 1"""
+            ).fetchone()
+        else:
+            selected = conn.execute(
+                """SELECT run_id FROM editorial_run
+                   WHERE status = 'complete' AND day = ?
+                   ORDER BY created_at DESC, rowid DESC
+                   LIMIT 1""",
+                (day,),
+            ).fetchone()
+        if selected is None:
+            scope = f" for {day}" if day is not None else ""
+            return unavailable(f"No complete daily editorial run is available{scope}.")
+
+        payload = run_payload(conn, str(selected["run_id"]))
+        items = []
+        for stored in payload["insights"]:
+            if stored["audience"] != audience:
+                continue
+            item = dict(stored)
+            item["rank"] = int(item.pop("display_rank"))
+            item["day"] = str(payload["day"])
+            items.append(item)
+
+        disposition_counts = {
+            str(row["status"]): int(row["count"])
+            for row in payload["dispositions"]
+            if row["audience"] == audience
+        }
+        run = {
+            "run_id": payload["run_id"],
+            "date": payload["day"],
+            "status": payload["status"],
+            "created_at": payload["created_at"],
+            "schema_version": payload["schema_version"],
+            "draft_schema_version": payload["draft_schema_version"],
+            "workspace": {
+                "run_id": payload["workspace_run_id"],
+                "manifest_sha256": payload["workspace_manifest_sha256"],
+            },
+            "source": {
+                "routing_run_id": payload["source_routing_run_id"],
+                "cohort_sha256": payload["source_cohort_sha256"],
+                "event_run_id": payload["source_event_run_id"],
+                "feed_run_id": payload["source_feed_run_id"],
+            },
+            "agent": {
+                "skill_version": payload["skill_version"],
+                "model": payload["executor_model"],
+                "notes": payload["executor_notes"],
+            },
+            "result_sha256": payload["result_sha256"],
+            "counts": {
+                "candidate_events": int(payload["candidate_count"]),
+                "candidate_pairs": int(payload["candidate_pair_count"]),
+                "insights_all_audiences": int(payload["insight_count"]),
+                "citations_all_audiences": int(payload["citation_count"]),
+                "insights": len(items),
+                "included_candidates": disposition_counts.get("included", 0),
+                "not_selected_candidates": disposition_counts.get("not_selected", 0),
+            },
+        }
+        reason = None
+        if not items:
+            label = "Investment" if audience == "investment" else "AI Engineering"
+            reason = f"The complete daily editorial run selected no {label} Insights."
+        return {
+            "schema_version": READ_SCHEMA_VERSION,
+            "content_kind": "daily_editorial",
+            "available": True,
+            "reason": reason,
+            "status": "kept",
+            "requested_date": day,
+            "date": str(payload["day"]),
+            "audience": audience,
+            "run": run,
+            "items": items,
+        }
+    finally:
+        conn.close()
+
+
+def editorial_insight_dates_payload(
+    *,
+    audience: str = "investment",
+    db_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Return canonical Insight counts from the latest complete run per day."""
+    if audience not in editorial.AUDIENCES:
+        raise ValueError(f"audience must be one of {list(editorial.AUDIENCES)}")
+    path = DEFAULT_DB if db_path is None else _resolve_path(db_path)
+    empty = {
+        "schema_version": READ_SCHEMA_VERSION,
+        "available": False,
+        "reason": "No complete daily editorial run has been imported.",
+        "audience": audience,
+        "latest_date": None,
+        "dates": [],
+    }
+    if not path.is_file():
+        return empty
+    conn = _open_readonly(path)
+    try:
+        table = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'editorial_run'"
+        ).fetchone()
+        if table is None:
+            return empty
+        rows = conn.execute(
+            """SELECT rowid AS import_ordinal, run_id, day, created_at,
+                      candidate_count, candidate_pair_count
+               FROM editorial_run
+               WHERE status = 'complete'
+               ORDER BY day, created_at DESC, rowid DESC"""
+        ).fetchall()
+        latest_by_day: dict[str, sqlite3.Row] = {}
+        for row in rows:
+            latest_by_day.setdefault(str(row["day"]), row)
+        dates = []
+        for selected_day, row in sorted(latest_by_day.items()):
+            insight_count = int(
+                conn.execute(
+                    """SELECT COUNT(*) FROM editorial_insight
+                       WHERE run_id = ? AND audience = ?""",
+                    (row["run_id"], audience),
+                ).fetchone()[0]
+            )
+            dispositions = {
+                str(value["status"]): int(value["count"])
+                for value in conn.execute(
+                    """SELECT status, COUNT(*) AS count
+                       FROM editorial_event_disposition
+                       WHERE run_id = ? AND audience = ?
+                       GROUP BY status""",
+                    (row["run_id"], audience),
+                ).fetchall()
+            }
+            dates.append(
+                {
+                    "day": selected_day,
+                    "item_count": insight_count,
+                    "candidate_count": sum(dispositions.values()),
+                    "included_candidate_count": dispositions.get("included", 0),
+                    "not_selected_candidate_count": dispositions.get("not_selected", 0),
+                    "run_id": str(row["run_id"]),
+                    "created_at": str(row["created_at"]),
+                }
+            )
+        return {
+            "schema_version": READ_SCHEMA_VERSION,
+            "available": bool(dates),
+            "reason": None if dates else empty["reason"],
+            "audience": audience,
+            "latest_date": dates[-1]["day"] if dates else None,
+            "dates": dates,
+        }
+    finally:
+        conn.close()
 
 
 def summary_payload(conn: sqlite3.Connection) -> dict[str, Any]:

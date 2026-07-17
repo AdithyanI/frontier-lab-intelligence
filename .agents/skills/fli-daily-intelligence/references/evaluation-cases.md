@@ -16,9 +16,12 @@ Expected behavior:
   Engineering candidate pairs;
 - searches across the complete cohort rather than reviewing only the current
   kept cards;
-- produces no more than five ranked Insights per audience;
+- keeps every decision-useful Insight and ranks each audience contiguously;
 - accounts for every candidate pair; and
-- validates and imports without manually editing SQLite.
+- validates and imports without manually editing SQLite;
+- inspects the imported run; and
+- makes the complete run available to the normal Insights read path without
+  copying the draft into frontend code.
 
 ## 2. Inkling retrieval and grouping
 
@@ -32,6 +35,8 @@ Expected behavior:
 - text search finds the eleven union-positive Inkling candidates, including the
   previously surfaced ranks 1, 4, 10, 23, 45, 55, 64, and 76;
 - vector retrieval is used as a candidate aid when useful;
+- a complete one-day review may skip vector retrieval when lexical and artifact
+  retrieval already establish the candidate set;
 - the official release/model-card evidence is treated as primary;
 - kernel performance, third-party evaluation, and Databricks distribution are
   not falsely described as the identical occurrence;

@@ -36,12 +36,16 @@ def output_contract() -> dict[str, Any]:
     return {
         "schema_version": DRAFT_SCHEMA_VERSION,
         "audiences": list(AUDIENCES),
-        "max_insights_per_audience": 5,
+        "max_insights_per_audience": None,
         "event_roles": list(EVENT_ROLES),
         "citation_kinds": list(CITATION_KINDS),
         "portfolio_relationships": list(PORTFOLIO_RELATIONSHIPS),
         "thesis_effects": list(THESIS_EFFECTS),
         "engineering_actions": list(ENGINEERING_ACTIONS),
+        "analysis_shapes": {
+            "investment": investment_analysis_template(),
+            "ai_engineering": engineering_analysis_template(),
+        },
         "coverage_rule": (
             "Every positively routed Event/audience pair must appear exactly once "
             "in an insight event_links list or in not_selected."
@@ -425,8 +429,8 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
         insight_ids.add(local_id)
         audience = _enum(insight["audience"], f"{path}.audience", AUDIENCES)
         rank = insight["rank"]
-        if isinstance(rank, bool) or not isinstance(rank, int) or not 1 <= rank <= 5:
-            raise ValueError(f"{path}.rank must be an integer from 1 to 5")
+        if isinstance(rank, bool) or not isinstance(rank, int) or rank < 1:
+            raise ValueError(f"{path}.rank must be a positive integer")
         if rank in ranks[audience]:
             raise ValueError(f"duplicate {audience} rank {rank}")
         ranks[audience].add(rank)

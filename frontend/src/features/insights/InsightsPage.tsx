@@ -1,12 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
+  type EditorialAnalysis,
+  type EditorialInsightItem,
+  type EditorialInsightRun,
+  type EditorialInsightsResponse,
+  type EngineeringEditorialAnalysis,
   type InsightAudience,
   type InsightDates,
   type InsightItem,
   type InsightStatus,
   type InsightsResponse,
+  type InvestmentEditorialAnalysis,
 } from '../../shared/api'
 import CopyEnvelopeId from '../../shared/components/CopyEnvelopeId'
 import DateNavigator from '../../shared/components/DateNavigator'
@@ -86,6 +92,29 @@ function parseStatus(value: string | null): InsightStatus {
 function displayInsightDay(day: string) {
   const parsed = new Date(`${day}T12:00:00Z`)
   return Number.isNaN(parsed.getTime()) ? day : insightDay.format(parsed)
+}
+
+function titleCase(value: string) {
+  return value
+    .split('_')
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(' ')
+}
+
+function isEditorialResponse(payload: InsightsResponse): payload is EditorialInsightsResponse {
+  return payload.content_kind === 'daily_editorial'
+}
+
+function isInvestmentAnalysis(
+  analysis: EditorialAnalysis,
+): analysis is InvestmentEditorialAnalysis {
+  return 'portfolio_relationship' in analysis
+}
+
+function isEngineeringAnalysis(
+  analysis: EditorialAnalysis,
+): analysis is EngineeringEditorialAnalysis {
+  return 'recommended_action' in analysis
 }
 
 function InsightState({
@@ -276,6 +305,299 @@ function InsightRow({ item }: { item: InsightItem }) {
   )
 }
 
+function EditorialField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <dt className="mono">{label}</dt>
+      <dd>{children}</dd>
+    </div>
+  )
+}
+
+function EditorialList({ items }: { items: string[] }) {
+  return (
+    <ul className="editorial-text-list">
+      {items.map((item, index) => (
+        <li key={`${index}-${item}`}>{decodeTextEntities(item)}</li>
+      ))}
+    </ul>
+  )
+}
+
+function InvestmentDecision({
+  analysis,
+  nextStep,
+}: {
+  analysis: InvestmentEditorialAnalysis
+  nextStep: string
+}) {
+  return (
+    <section className="editorial-section editorial-decision" aria-label="Investment decision">
+      <h3>Investment decision</h3>
+      <div className="editorial-analysis-state mono">
+        <span>{titleCase(analysis.portfolio_relationship)}</span>
+        <span>{titleCase(analysis.thesis_effect)}</span>
+      </div>
+      {analysis.affected_entities.length > 0 && (
+        <div className="editorial-entities">
+          <h4 className="mono">Affected entities</h4>
+          <ul>
+            {analysis.affected_entities.map((entity) => (
+              <li key={`${entity.name}-${entity.as_of ?? 'undated'}`}>
+                <strong>{decodeTextEntities(entity.name)}</strong>
+                <span>{decodeTextEntities(entity.relationship)}</span>
+                {entity.as_of && <time className="mono" dateTime={entity.as_of}>As of {entity.as_of}</time>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div className="editorial-decision-grid">
+        <div>
+          <h4 className="mono">Next step</h4>
+          <p>{decodeTextEntities(nextStep)}</p>
+        </div>
+        {analysis.watchpoints.length > 0 && (
+          <div>
+            <h4 className="mono">Immediate watchpoints</h4>
+            <EditorialList items={analysis.watchpoints.slice(0, 2)} />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function EngineeringDecision({
+  analysis,
+  nextStep,
+}: {
+  analysis: EngineeringEditorialAnalysis
+  nextStep: string
+}) {
+  return (
+    <section className="editorial-section editorial-decision" aria-label="Engineering decision">
+      <h3>Engineering decision</h3>
+      <div className="editorial-analysis-state mono">
+        <span>{titleCase(analysis.recommended_action)}</span>
+        <span>{decodeTextEntities(analysis.system_surface)}</span>
+      </div>
+      <div className="editorial-decision-grid">
+        <div>
+          <h4 className="mono">Next step</h4>
+          <p>{decodeTextEntities(nextStep)}</p>
+        </div>
+        <div>
+          <h4 className="mono">Smallest test</h4>
+          <p>{decodeTextEntities(analysis.experiment.smallest_test)}</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function EditorialCitationLinks({ item }: { item: EditorialInsightItem }) {
+  return (
+    <div className="editorial-citation-links" aria-label="Citations">
+      <span className="mono">Sources</span>
+      {item.citations.map((citation, index) => (
+        <a href={citation.url} target="_blank" rel="noreferrer" key={citation.citation_id}>
+          {index + 1}. {decodeTextEntities(citation.title)} ↗
+        </a>
+      ))}
+    </div>
+  )
+}
+
+function EditorialEvidence({ item }: { item: EditorialInsightItem }) {
+  return (
+    <div className="editorial-evidence">
+      <div className="editorial-source-group">
+        <h4 className="mono">Linked Events</h4>
+        <ul className="editorial-event-list">
+          {item.events.map((event) => {
+            const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(event.event_id)}`
+            return (
+              <li key={event.event_id}>
+                <div className="editorial-source-line">
+                  <span className="editorial-source-kind mono">{titleCase(event.role)}</span>
+                  <Link to={envelopeUrl}>Feed #{event.feed_rank} ↗</Link>
+                  <CopyEnvelopeId envelopeId={event.event_id} />
+                  <a href={event.root_url} target="_blank" rel="noreferrer">Source ↗</a>
+                </div>
+                <p>{decodeTextEntities(event.reason)}</p>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+      <div className="editorial-source-group">
+        <h4 className="mono">Citations</h4>
+        <ol className="editorial-citation-list">
+          {item.citations.map((citation) => (
+            <li key={citation.citation_id}>
+              <div className="editorial-source-line">
+                <span className="editorial-source-kind mono">{titleCase(citation.kind)}</span>
+                {citation.published_at && <time className="mono" dateTime={citation.published_at}>{citation.published_at}</time>}
+                {citation.retrieved_at && <span className="mono">Retrieved {citation.retrieved_at.slice(0, 10)}</span>}
+              </div>
+              <a className="editorial-citation-title" href={citation.url} target="_blank" rel="noreferrer">
+                {decodeTextEntities(citation.title)} ↗
+              </a>
+              <p>{decodeTextEntities(citation.supports)}</p>
+              {citation.excerpt && <blockquote>{decodeTextEntities(citation.excerpt)}</blockquote>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  )
+}
+
+function EditorialFullAnalysis({
+  item,
+  investmentAnalysis,
+  engineeringAnalysis,
+}: {
+  item: EditorialInsightItem
+  investmentAnalysis: InvestmentEditorialAnalysis | null
+  engineeringAnalysis: EngineeringEditorialAnalysis | null
+}) {
+  return (
+    <div className="editorial-full-body">
+      <section className="editorial-section editorial-impact" aria-labelledby={`${item.insight_id}-impact`}>
+        <h3 id={`${item.insight_id}-impact`}>Impact chain</h3>
+        <ol>
+          {item.impact_chain.map((step, index) => (
+            <li key={`${index}-${step}`}><span className="mono">{index + 1}</span>{decodeTextEntities(step)}</li>
+          ))}
+        </ol>
+      </section>
+
+      {investmentAnalysis && (
+        <section className="editorial-section" aria-label="Full investment analysis">
+          <h3>Thesis mechanics</h3>
+          <dl className="editorial-analysis-grid">
+            <EditorialField label="Operating driver">
+              {decodeTextEntities(investmentAnalysis.operating_driver)}
+            </EditorialField>
+            <EditorialField label="Financial driver">
+              {decodeTextEntities(investmentAnalysis.financial_driver)}
+            </EditorialField>
+            <EditorialField label="Potential edge">
+              {decodeTextEntities(investmentAnalysis.edge)}
+            </EditorialField>
+            <EditorialField label="Counter-case">
+              {decodeTextEntities(investmentAnalysis.counter_case)}
+            </EditorialField>
+          </dl>
+          <div className="editorial-list-section">
+            <h4 className="mono">All watchpoints</h4>
+            <EditorialList items={investmentAnalysis.watchpoints} />
+          </div>
+        </section>
+      )}
+
+      {engineeringAnalysis && (
+        <section className="editorial-section" aria-label="Full engineering analysis">
+          <h3>Experiment detail</h3>
+          <dl className="editorial-analysis-grid">
+            <EditorialField label="Technical implication">
+              {decodeTextEntities(engineeringAnalysis.technical_implication)}
+            </EditorialField>
+            <EditorialField label="Hypothesis">
+              {decodeTextEntities(engineeringAnalysis.experiment.hypothesis)}
+            </EditorialField>
+            <EditorialField label="Success metric">
+              {decodeTextEntities(engineeringAnalysis.experiment.success_metric)}
+            </EditorialField>
+            <EditorialField label="Stop condition">
+              {decodeTextEntities(engineeringAnalysis.experiment.stop_condition)}
+            </EditorialField>
+          </dl>
+          {engineeringAnalysis.constraints.length > 0 && (
+            <div className="editorial-list-section">
+              <h4 className="mono">Constraints</h4>
+              <EditorialList items={engineeringAnalysis.constraints} />
+            </div>
+          )}
+        </section>
+      )}
+
+      <section className="editorial-section" aria-label="Evidence limitations">
+        <h3>Evidence limitations</h3>
+        <EditorialList items={item.evidence_limitations} />
+      </section>
+
+      <EditorialEvidence item={item} />
+    </div>
+  )
+}
+
+function EditorialInsightRow({
+  item,
+  run,
+}: {
+  item: EditorialInsightItem
+  run: EditorialInsightRun
+}) {
+  const titleId = `${item.insight_id}-title`
+  const investmentAnalysis = isInvestmentAnalysis(item.analysis) ? item.analysis : null
+  const engineeringAnalysis = isEngineeringAnalysis(item.analysis) ? item.analysis : null
+
+  return (
+    <article className="insight-row editorial-insight-row" aria-labelledby={titleId}>
+      <div className="insight-rank editorial-rank mono">
+        <strong>#{item.rank}</strong>
+        <span>Brief rank</span>
+        <span className="editorial-rank-sources">{item.events.length} {item.events.length === 1 ? 'Event' : 'Events'}</span>
+      </div>
+      <div className="insight-body editorial-insight-body">
+        <header className="insight-head">
+          <div className="insight-decision-mark insight-decision-mark--kept mono">Selected</div>
+          <h2 id={titleId}>{decodeTextEntities(item.title)}</h2>
+          <div className="insight-provenance mono">
+            <time dateTime={item.day}>{displayInsightDay(item.day)}</time>
+            <span>{run.agent.model}</span>
+            <span>{run.agent.skill_version}</span>
+            <span>{item.events.length} linked {item.events.length === 1 ? 'Event' : 'Events'}</span>
+            <span>{item.citations.length} {item.citations.length === 1 ? 'citation' : 'citations'}</span>
+          </div>
+        </header>
+
+        <div className="editorial-opening">
+          <section>
+            <h3 className="mono">What changed</h3>
+            <p>{decodeTextEntities(item.what_changed)}</p>
+          </section>
+          <section>
+            <h3 className="mono">Interpretation</h3>
+            <p>{decodeTextEntities(item.interpretation)}</p>
+          </section>
+        </div>
+
+        {investmentAnalysis && (
+          <InvestmentDecision analysis={investmentAnalysis} nextStep={item.next_step} />
+        )}
+        {engineeringAnalysis && (
+          <EngineeringDecision analysis={engineeringAnalysis} nextStep={item.next_step} />
+        )}
+
+        <EditorialCitationLinks item={item} />
+
+        <details className="editorial-full-analysis">
+          <summary>Evidence and full analysis</summary>
+          <EditorialFullAnalysis
+            item={item}
+            investmentAnalysis={investmentAnalysis}
+            engineeringAnalysis={engineeringAnalysis}
+          />
+        </details>
+      </div>
+    </article>
+  )
+}
+
 export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { rememberDate } = useAuditDate()
@@ -303,6 +625,8 @@ export default function Insights() {
       dataView.payload.audience === audience && dataView.payload.status === status
     ? dataView.payload
     : null
+  const editorialData = currentData && isEditorialResponse(currentData) ? currentData : null
+  const candidateData = currentData && !isEditorialResponse(currentData) ? currentData : null
   const availableDates = useMemo(() => currentDates?.dates ?? [], [currentDates])
   const dateWindow = useMemo(
     () => getDateWindow(dateWindowEnd, availableDates.length),
@@ -418,8 +742,16 @@ export default function Insights() {
     if (nextDate) setView(audience, nextDate.day)
   }
 
-  const items = currentData?.items ?? []
-  const run = currentData?.run
+  const editorialRun = editorialData?.run ?? null
+  const candidateRun = candidateData?.run ?? null
+  const selectedDateCounts = availableDates.find((value) => value.day === selectedDate)
+  const statusCounts = editorialRun
+    ? {
+        kept: editorialRun.counts.insights,
+        suppressed: selectedDateCounts?.suppressed_count ?? 0,
+        all: editorialRun.counts.insights + (selectedDateCounts?.suppressed_count ?? 0),
+      }
+    : candidateRun?.counts
   const datesLoading = currentDates === null && datesError === null
   const dataLoading = currentDates?.available === true &&
     currentDates.dates.some((value) => value.day === selectedDate) &&
@@ -433,12 +765,20 @@ export default function Insights() {
       <header className="page-head insight-page-head">
         <h1 className="page-title">{copy.title}</h1>
         <p className="page-sub">{copy.subtitle}</p>
-        {run && (
+        {editorialRun && (
           <p className="page-method-line mono">
-            <span>{run.surfaced_count.toLocaleString('en-US')} kept</span>
-            <span>{run.suppressed_count.toLocaleString('en-US')} suppressed</span>
-            <span>{run.complete_count.toLocaleString('en-US')} classified</span>
-            <span>{run.model}</span>
+            <span>{editorialRun.counts.insights.toLocaleString('en-US')} selected</span>
+            <span>{editorialRun.counts.candidate_events.toLocaleString('en-US')} routed Events reviewed</span>
+            <span>{editorialRun.agent.model}</span>
+            <span>{editorialRun.agent.skill_version}</span>
+          </p>
+        )}
+        {candidateRun && (
+          <p className="page-method-line mono">
+            <span>{candidateRun.surfaced_count.toLocaleString('en-US')} kept</span>
+            <span>{candidateRun.suppressed_count.toLocaleString('en-US')} suppressed</span>
+            <span>{candidateRun.complete_count.toLocaleString('en-US')} classified</span>
+            <span>{candidateRun.model}</span>
           </p>
         )}
       </header>
@@ -477,11 +817,15 @@ export default function Insights() {
 
       {currentDates?.available && (
         <div className="insight-tools">
-          <p className="mono">Day pills count kept Insights. Audit every decision here.</p>
+          <p className="mono">
+            {editorialRun
+              ? 'Day pills count final Insights. Suppressed and All retain the candidate audit.'
+              : 'Day pills count kept Insights. Audit every decision here.'}
+          </p>
           <div className="feed-controls">
             <InsightStatusMenu
               value={status}
-              counts={run?.counts}
+              counts={statusCounts}
               onChange={(nextStatus) => setView(audience, selectedDate, nextStatus)}
             />
           </div>
@@ -522,12 +866,19 @@ export default function Insights() {
         <InsightState title={copy.emptyTitle} detail={currentData.reason || 'No editorial decision is available.'} />
       )}
 
-      {currentData?.available && items.length > 0 && (
+      {editorialData?.available && editorialRun && editorialData.items.length > 0 && (
         <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
-          {items.map((item) => <InsightRow item={item} key={item.candidate_id} />)}
+          {editorialData.items.map((item) => (
+            <EditorialInsightRow item={item} run={editorialRun} key={item.insight_id} />
+          ))}
         </section>
       )}
-      {currentData?.available && items.length === 0 && (
+      {candidateData?.available && candidateData.items.length > 0 && (
+        <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
+          {candidateData.items.map((item) => <InsightRow item={item} key={item.candidate_id} />)}
+        </section>
+      )}
+      {currentData?.available && currentData.items.length === 0 && (
         <InsightState
           title={status === 'kept' ? copy.emptyTitle : `No ${STATUS_COPY[status].label.toLowerCase()} decisions today`}
           detail={currentData.reason || 'No completed decision matches this status.'}

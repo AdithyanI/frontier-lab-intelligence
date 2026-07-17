@@ -96,4 +96,7 @@ does not improve rubric coverage, demo proof, or interview discussion. See
 - AGENTS/docs/harness review: `$agent-native-repo-playbook`.
 - Project tracking is opt-in: use `$project` only when Adi explicitly invokes
   it. Routine implementation, review, and validation remain tracker-free.
+- Daily brief generation, review, or reruns: `$fli-daily-intelligence`. Its
+  validated client and schema are the only write path for agent-authored daily
+  Insights.
 - UI review or frontend polish: `$impeccable`.

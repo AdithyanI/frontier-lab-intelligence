@@ -10,7 +10,7 @@ reason to delete it.
 | --- | --- | --- |
 | Tracked product inputs/state | `data/fli.db`, `data/registry/`, `data/following/`, `data/digg/` | Versioned, reviewable, and retained in Git. |
 | Immutable raw evidence | `data/raw/x/`, `data/raw/artifacts/`, `data/raw/following/`, `data/raw/conference-sources/` | Ignored locally; preserve successful provider responses and content-addressed bodies to avoid paid or irreproducible refetches. |
-| Current derived state | `data/derived/signal-feed/`, `signal-events/`, `artifacts/`, `audience-routing/`, `insights/`, current `following/` analysis | Ignored but required by the local product and audit surfaces. Rebuild only through the owning client. |
+| Current derived state | `data/derived/signal-feed/`, `signal-events/`, `artifacts/`, `audience-routing/`, `insights/`, `daily-intelligence/`, current `following/` analysis | Ignored but required by the local product and audit surfaces. Rebuild only through the owning client. |
 | Historical local archive | `data/archive/` | Ignored, non-runtime outputs retained for provenance or comparison. No production reader may scan this tree. |
 | Disposable scratch | `tmp/`, Python/test caches, SQLite zero-byte orphans | Remove freely when no process owns the file. Scratch must never become a runtime dependency. |
 
@@ -28,6 +28,7 @@ Preserve these exact stores during the submission sprint:
 - `data/derived/artifacts/`
 - all eleven current v9 top-100 directories under `data/derived/audience-routing/`
 - `data/derived/insights/insights.db`
+- `data/derived/daily-intelligence/editorial.db` and its current validated workspaces
 - `data/derived/x-daily-collection.db`
 
 Before a destructive cleanup, trace every default path in code, inspect tracked

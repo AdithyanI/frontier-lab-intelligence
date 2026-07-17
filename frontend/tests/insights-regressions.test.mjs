@@ -40,6 +40,9 @@ test('Insights uses the durable successor API and guards status-specific respons
   assert.match(insightSource, /activeDatesViewRef\.current !== viewKey/)
   assert.match(insightSource, /activeDataViewRef\.current !== viewKey/)
   assert.match(insightSource, /loading=\{datesLoading\}/)
+  assert.match(apiSource, /content_kind: 'candidate_decisions'/)
+  assert.match(apiSource, /content_kind: 'daily_editorial'/)
+  assert.match(insightSource, /payload\.content_kind === 'daily_editorial'/)
 })
 
 test('Insights reuses the Feed week strip and gives it kept counts', () => {
@@ -53,7 +56,7 @@ test('Insights exposes kept, suppressed, and all decisions in a Feed-style statu
   assert.match(insightSource, /const STATUS_ORDER: InsightStatus\[\] = \['kept', 'suppressed', 'all'\]/)
   assert.match(insightSource, /<span className="feed-menu-label mono">STATUS<\/span>/)
   assert.match(insightSource, /role="menuitemradio"/)
-  assert.match(insightSource, /counts=\{run\?\.counts\}/)
+  assert.match(insightSource, /counts=\{statusCounts\}/)
   assert.match(appStyles, /\.insight-tools \.feed-menu > summary \{ min-width: 190px; \}/)
 })
 
@@ -69,7 +72,7 @@ test('Insights inherits Feed rank and links every decision to its exact envelope
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)
 })
 
-test('Insights shows an explicit rationale for both decisions without reviving quotes', () => {
+test('Insights shows an explicit rationale for legacy decisions without interpreting source markup', () => {
   assert.match(insightSource, /item\.decision_reason/)
   assert.match(insightSource, /'Why it matters' : 'Why suppressed'/)
   assert.match(insightSource, /const title = item\.title/)
@@ -78,11 +81,35 @@ test('Insights shows an explicit rationale for both decisions without reviving q
   assert.match(insightSource, /decodeTextEntities\(item\.summary\)/)
   assert.match(insightSource, /item\.action_label/)
   assert.match(insightSource, /decodeTextEntities\(item\.action\)/)
-  assert.doesNotMatch(insightSource, /item\.next_step/)
+  assert.match(insightSource, /item\.next_step/)
   assert.doesNotMatch(insightSource, /Exact source passage/)
   assert.doesNotMatch(insightSource, /citation\.quote/)
   assert.doesNotMatch(insightSource, /dangerouslySetInnerHTML/)
   assert.match(appStyles, /\.insight-decision-reason--suppressed/)
+})
+
+test('Insights renders canonical daily editorial judgments as a ranked, cited brief', () => {
+  assert.match(apiSource, /export interface EditorialInsightItem/)
+  assert.match(apiSource, /what_changed: string/)
+  assert.match(apiSource, /interpretation: string/)
+  assert.match(apiSource, /impact_chain: string\[\]/)
+  assert.match(apiSource, /evidence_limitations: string\[\]/)
+  assert.match(apiSource, /events: EditorialEventLink\[\]/)
+  assert.match(apiSource, /citations: EditorialCitation\[\]/)
+  assert.match(insightSource, /<span>Brief rank<\/span>/)
+  assert.match(insightSource, /What changed/)
+  assert.match(insightSource, /Interpretation/)
+  assert.match(insightSource, /Impact chain/)
+  assert.match(insightSource, /Investment decision/)
+  assert.match(insightSource, /Engineering decision/)
+  assert.match(insightSource, /Evidence limitations/)
+  assert.match(insightSource, /Evidence and full analysis/)
+  assert.match(insightSource, /Feed #\{event\.feed_rank\} ↗/)
+  assert.match(insightSource, /citation\.supports/)
+  assert.match(insightSource, /citation\.excerpt/)
+  assert.match(appStyles, /\.editorial-insight-row/)
+  assert.doesNotMatch(appStyles, /\.editorial-insight-row\s*\{[\s\S]*?border-radius:/)
+  assert.doesNotMatch(appStyles, /\.editorial-insight-row\s*\{[\s\S]*?box-shadow:/)
 })
 
 test('Insights safely decodes model prose without interpreting markup', () => {

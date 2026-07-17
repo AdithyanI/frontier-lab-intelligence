@@ -1,6 +1,6 @@
 ---
 name: fli-daily-intelligence
-description: Produces and optionally persists one evidence-grounded Frontier Lab Intelligence daily brief by researching across positively routed Events, retrieving related packets, grouping supporting evidence, applying BIT Capital Investment or AI Engineering context, and validating complete cited outputs. Use when asked to generate, test, review, or improve a daily intelligence run for a specific date.
+description: Produces and persists one evidence-grounded Frontier Lab Intelligence daily brief by researching across positively routed Events, retrieving related packets, grouping supporting evidence, applying BIT Capital Investment or AI Engineering context, and validating complete cited outputs. Use when asked to generate, test, review, or improve a daily intelligence run for a specific date.
 ---
 
 # FLI Daily Intelligence
@@ -31,7 +31,8 @@ your own judgment for research, retrieval, grouping, and synthesis.
    - inspect `exact_artifact_groups` in the manifest;
    - use `search` for entities, products, concepts, and repeated claims;
    - use `inspect-event` before relying on a candidate;
-   - lazily run `index`, then `similar`, when wording or sources may differ;
+   - use `index`, then `similar`, only when lexical and artifact retrieval may
+     miss materially different wording; a normal one-day run does not require it;
    - perform broader web research when packets do not establish the relevant
      company, technical, competitive, or portfolio transmission path.
 5. Write `draft.json` beside the template. Use
@@ -45,13 +46,19 @@ your own judgment for research, retrieval, grouping, and synthesis.
      --workspace <workspace> --draft <workspace>/draft.json --json --no-input
    ```
 
-7. If the task asks to persist the result, import it atomically and inspect it:
+7. For a requested daily brief, import the validated result atomically and
+   inspect the durable run:
 
    ```bash
    .venv/bin/fli daily-intelligence import-result \
      --workspace <workspace> --draft <workspace>/draft.json --json --no-input
    .venv/bin/fli daily-intelligence inspect-run --run-id <returned-run-id> --json --no-input
    ```
+
+   Review-only and client-evaluation tasks may stop after validation or use
+   `import-result --dry-run`. Never edit the SQLite store directly. Once a
+   complete run is imported, the Insights backend and UI select it
+   automatically for that date and audience.
 
 Do not schedule, publish, submit, or take another external action unless the
 user explicitly requests that action in the current session.
@@ -80,8 +87,11 @@ shared theme as an automatic merge.
 
 ## Editorial invariants
 
-- Target three to five excellent Insights per audience, but publish fewer when
-  the evidence is weak.
+- Keep every decision-useful Insight supported by the day, while preferring
+  precision over padding. Selecting the best three to five for a submission is
+  a separate later step, not a persistence limit.
+- Rank only the selected Insights. Rank is the audience's daily decision
+  priority, not Feed rank, popularity, confidence, or embedding similarity.
 - The title states a judgment. `what_changed` states the attributable facts.
 - Connect every Insight to one or more exact Events and at least one citation.
 - Assign each routed Event once per relevant audience: to one Insight or to

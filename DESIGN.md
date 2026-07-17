@@ -228,27 +228,20 @@ Rules:
   catalogued-only rows do not imply that content was retrieved. Do not add
   summaries, cards, or additional filters until a cited-insight consumer proves
   the need.
-- **Audience Insights:** one stable Feed-ranked surface with an explicit
-  Investment / AI Engineering switch in URL state. Investment is the default
-  audience on a fresh visit, matching the switch order and fund-facing product
-  context. Each day is a flat
-  editorial list, not a card grid. The left rail shows the envelope's current
-  canonical-day Feed rank and links directly to that exact envelope; it is inherited
-  ordering, not a second insight score. Reuse the Feed's seven-day navigator;
-  its number is the kept count, but retain evaluated zero-kept days so rejected
-  decisions remain inspectable. A Feed-style Status disclosure switches among
-  `Kept`, `Suppressed`, and `All`, with counts and URL-backed state.
-  Both decisions lead with a short evidence-specific title so the list remains
-  scannable. A kept row then shows its concise summary, a quiet `Why kept`
-  rationale, and one concrete next step. A suppressed row follows the same
-  hierarchy but contains only the model's freeform `Why suppressed` reason; the
-  title names what was evaluated without implying it cleared the gate. Both
-  states retain model/prompt provenance, envelope copy action, and the exact
-  Feed link. Publish a row only when both its Insight prompt/hash/schema and its
-  source routing prompt/hash/schema, run identity, and completed Event packet
-  match the current contracts; never re-anchor old output at read time. Do not revive the retired quote
-  block, claim-posture fields, cards, or a second editorial rank. Honest
-  zero/thin views use plain editorial empty states and must never be padded.
+- **Audience Insights:** one URL-backed Investment / AI Engineering reader.
+  Investment remains the default. For a date with a complete imported daily
+  editorial run, `Kept` shows every selected Insight in agent-assigned priority
+  order. The left rail is `Brief rank`, not Feed rank; each supporting Event
+  retains its exact Feed rank and envelope link inside provenance. The flat
+  ruled row leads with title, `What changed`, and `Interpretation`, then exposes
+  the causal chain, complete audience analysis, limitations, next step, linked
+  Event roles, and visible citations. Do not hide source support in tooltips or
+  collapse the reasoning into cards. The date count is the number of final
+  imported Insights when that run exists. Candidate-level decisions remain an
+  audit fallback for unimported days and for explicit `Suppressed` / `All`
+  views; they are not the final daily product. Honest zero/thin imported runs
+  remain available and are never padded. The backend, not the SPA, selects the
+  newest complete run and returns a discriminated read contract.
 - **BIT Lens:** one text-first public-research briefing, without internal tabs,
   diagrams, dashboards, or collapsed holding detail. It preserves the full
   outside-in research in a linear reading order: flagship mandate and terms;

@@ -32,6 +32,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from fli.ingestion import sources
+from fli.insights import editorial_runs as editorial_store
 from fli.insights import view as insight_store
 from fli.network import view as rankings_store
 from fli.registry import channels
@@ -503,7 +504,33 @@ def insight_dates(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
     """Available successor Insight dates for one audience."""
-    return JSONResponse(insight_store.insight_dates_payload(audience=audience))
+    payload = insight_store.insight_dates_payload(audience=audience)
+    editorial = editorial_store.editorial_insight_dates_payload(audience=audience)
+    if not editorial["available"]:
+        return JSONResponse(payload)
+    dates = {str(item["day"]): dict(item) for item in payload["dates"]}
+    for item in editorial["dates"]:
+        day = str(item["day"])
+        current = dates.get(
+            day,
+            {
+                "day": day,
+                "suppressed_count": 0,
+                "evaluated_count": int(item["candidate_count"]),
+            },
+        )
+        current["item_count"] = int(item["item_count"])
+        dates[day] = current
+    ordered = [dates[day] for day in sorted(dates)]
+    return JSONResponse(
+        {
+            **payload,
+            "available": True,
+            "reason": None,
+            "latest_date": ordered[-1]["day"],
+            "dates": ordered,
+        }
+    )
 
 
 @app.get("/api/insights")
@@ -513,13 +540,21 @@ def insights(
     status: Literal["kept", "suppressed", "all"] = "kept",
 ) -> JSONResponse:
     """Successor audience Insights ordered by application-owned Feed rank."""
-    return JSONResponse(
-        insight_store.insights_payload(
+    day = insight_date.isoformat() if insight_date else None
+    if status == "kept":
+        editorial = editorial_store.editorial_insights_payload(
             audience=audience,
-            day=insight_date.isoformat() if insight_date else None,
-            status=status,
+            day=day,
         )
+        if editorial["available"]:
+            return JSONResponse(editorial)
+    payload = insight_store.insights_payload(
+        audience=audience,
+        day=day,
+        status=status,
     )
+    payload["content_kind"] = "candidate_decisions"
+    return JSONResponse(payload)
 
 
 if DIST_DIR.exists():

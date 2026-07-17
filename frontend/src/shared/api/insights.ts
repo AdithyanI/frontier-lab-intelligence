@@ -41,14 +41,145 @@ export interface InsightRun {
   counts: Record<InsightStatus, number>
 }
 
-export interface InsightsResponse {
+export interface CandidateDecisionInsightsResponse {
   available: boolean
   reason?: string | null
   audience: InsightAudience
   status: InsightStatus
+  content_kind: 'candidate_decisions'
   run: InsightRun | null
   items: InsightItem[]
 }
+
+export type EditorialEventRole = 'primary' | 'supporting' | 'context' | 'counterevidence'
+export type EditorialCitationKind = 'event' | 'artifact' | 'web' | 'context'
+export type PortfolioRelationship =
+  | 'current_disclosed_holding'
+  | 'historical_holding'
+  | 'portfolio_thesis'
+  | 'candidate_or_watchlist'
+  | 'sector_readthrough'
+  | 'none'
+export type ThesisEffect = 'strengthens' | 'weakens' | 'opportunity' | 'risk' | 'mixed' | 'uncertain'
+export type EngineeringAction = 'test' | 'adopt' | 'watch' | 'ignore'
+
+export interface EditorialEventLink {
+  event_id: string
+  feed_rank: number
+  role: EditorialEventRole
+  reason: string
+  root_url: string
+}
+
+export interface EditorialCitation {
+  citation_id: string
+  local_id: string
+  kind: EditorialCitationKind
+  url: string
+  title: string
+  event_id: string | null
+  artifact_id: string | null
+  published_at: string | null
+  retrieved_at: string | null
+  supports: string
+  excerpt: string | null
+}
+
+export interface InvestmentEditorialAnalysis {
+  portfolio_relationship: PortfolioRelationship
+  affected_entities: Array<{
+    name: string
+    relationship: string
+    as_of: string | null
+  }>
+  thesis_effect: ThesisEffect
+  operating_driver: string
+  financial_driver: string
+  edge: string
+  counter_case: string
+  watchpoints: string[]
+}
+
+export interface EngineeringEditorialAnalysis {
+  system_surface: string
+  technical_implication: string
+  recommended_action: EngineeringAction
+  experiment: {
+    hypothesis: string
+    smallest_test: string
+    success_metric: string
+    stop_condition: string
+  }
+  constraints: string[]
+}
+
+export type EditorialAnalysis = InvestmentEditorialAnalysis | EngineeringEditorialAnalysis
+
+export interface EditorialInsightItem {
+  insight_id: string
+  local_id: string
+  audience: InsightAudience
+  rank: number
+  day: string
+  title: string
+  what_changed: string
+  interpretation: string
+  impact_chain: string[]
+  evidence_limitations: string[]
+  next_step: string
+  analysis: EditorialAnalysis
+  events: EditorialEventLink[]
+  citations: EditorialCitation[]
+}
+
+export interface EditorialInsightRun {
+  run_id: string
+  date: string
+  status: 'complete'
+  created_at: string
+  schema_version: string
+  draft_schema_version: string
+  workspace: {
+    run_id: string
+    manifest_sha256: string
+  }
+  source: {
+    routing_run_id: string
+    cohort_sha256: string
+    event_run_id: string
+    feed_run_id: string
+  }
+  agent: {
+    skill_version: string
+    model: string
+    notes: string | null
+  }
+  result_sha256: string
+  counts: {
+    candidate_events: number
+    candidate_pairs: number
+    insights_all_audiences: number
+    citations_all_audiences: number
+    insights: number
+    included_candidates: number
+    not_selected_candidates: number
+  }
+}
+
+export interface EditorialInsightsResponse {
+  schema_version: string
+  available: boolean
+  reason?: string | null
+  requested_date: string | null
+  date: string | null
+  audience: InsightAudience
+  status: 'kept'
+  content_kind: 'daily_editorial'
+  run: EditorialInsightRun | null
+  items: EditorialInsightItem[]
+}
+
+export type InsightsResponse = CandidateDecisionInsightsResponse | EditorialInsightsResponse
 
 export interface InsightDate extends FeedDate {
   suppressed_count: number

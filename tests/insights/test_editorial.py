@@ -3,15 +3,19 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+from fastapi.testclient import TestClient
 
 from fli.insights import editorial
 from fli.insights import editorial_cli
 from fli.insights import editorial_runs
+from fli.insights import runs as insight_runs
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
+from fli.web.app import app
 
 
 DAY = "2026-07-15"
+CLIENT = TestClient(app)
 
 
 def _packet(event_id: str, text: str, *, artifact: bool = False):
@@ -286,6 +290,99 @@ def test_import_is_atomic_normalized_and_idempotent(tmp_path, monkeypatch):
     conn.close()
 
 
+def test_editorial_read_selects_latest_complete_run_and_filters_audience(
+    tmp_path, monkeypatch
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    db = tmp_path / "editorial.db"
+
+    first_draft = workspace / "first.json"
+    first_draft.write_text(json.dumps(_draft(workspace)), encoding="utf-8")
+    first = editorial_runs.import_result(workspace, first_draft, db_path=db)
+
+    revised = _draft(workspace)
+    revised["agent"]["notes"] = "Second editorial pass."
+    revised["insights"][0]["title"] = "Revised distribution judgment"
+    second_draft = workspace / "second.json"
+    second_draft.write_text(json.dumps(revised), encoding="utf-8")
+    second = editorial_runs.import_result(workspace, second_draft, db_path=db)
+
+    conn = editorial_runs.connect(db)
+    with conn:
+        conn.execute(
+            "UPDATE editorial_run SET created_at = ? WHERE run_id = ?",
+            ("2026-07-17T12:00:00+00:00", first["run_id"]),
+        )
+        conn.execute(
+            "UPDATE editorial_run SET created_at = ? WHERE run_id = ?",
+            ("2026-07-17T13:00:00+00:00", second["run_id"]),
+        )
+    conn.close()
+
+    payload = editorial_runs.editorial_insights_payload(
+        audience="investment", day=DAY, db_path=db
+    )
+
+    assert payload["schema_version"] == "daily-intelligence-read-v1"
+    assert payload["content_kind"] == "daily_editorial"
+    assert payload["available"] is True
+    assert payload["reason"] is None
+    assert payload["run"]["run_id"] == second["run_id"]
+    assert payload["run"]["agent"] == {
+        "skill_version": "fli-daily-intelligence-v1",
+        "model": "codex-test",
+        "notes": "Second editorial pass.",
+    }
+    assert payload["run"]["counts"]["insights"] == 1
+    assert [item["audience"] for item in payload["items"]] == ["investment"]
+    assert payload["items"][0]["rank"] == 1
+    assert payload["items"][0]["day"] == DAY
+    assert payload["items"][0]["title"] == "Revised distribution judgment"
+    assert payload["items"][0]["events"][0]["event_id"] == "event-a"
+    assert payload["items"][0]["citations"][0]["local_id"] == "source-a"
+    assert "analysis" in payload["items"][0]
+
+    missing = editorial_runs.editorial_insights_payload(
+        audience="investment", day="2026-07-14", db_path=db
+    )
+    assert missing["available"] is False
+    assert missing["run"] is None
+    assert missing["items"] == []
+
+
+def test_web_prefers_editorial_for_kept_and_preserves_candidate_fallback(
+    tmp_path, monkeypatch
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    draft_path = workspace / "draft.json"
+    draft_path.write_text(json.dumps(_draft(workspace)), encoding="utf-8")
+    db = tmp_path / "editorial.db"
+    editorial_runs.import_result(workspace, draft_path, db_path=db)
+    monkeypatch.setattr(editorial_runs, "DEFAULT_DB", db)
+    monkeypatch.setattr(insight_runs, "DEFAULT_DB", tmp_path / "missing-insights.db")
+
+    kept = CLIENT.get(
+        f"/api/insights?audience=investment&date={DAY}&status=kept"
+    ).json()
+    suppressed = CLIENT.get(
+        f"/api/insights?audience=investment&date={DAY}&status=suppressed"
+    ).json()
+    dates = CLIENT.get("/api/insights/dates?audience=investment").json()
+    assert kept["content_kind"] == "daily_editorial"
+    assert kept["status"] == "kept"
+    assert kept["items"][0]["title"].startswith("Open models")
+    assert suppressed["content_kind"] == "candidate_decisions"
+    assert suppressed["available"] is False
+    assert dates["dates"] == [
+        {
+            "day": DAY,
+            "suppressed_count": 0,
+            "evaluated_count": 2,
+            "item_count": 1,
+        }
+    ]
+
+
 class _RawResponse:
     def __init__(self, response):
         self._response = response
@@ -363,6 +460,10 @@ def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, cap
     assert success["schema_version"] == "1.0"
     assert success["status"] == "ok"
     assert success["error"] is None
+    contract = success["data"]["draft"]
+    assert contract["max_insights_per_audience"] is None
+    assert set(contract["analysis_shapes"]) == {"investment", "ai_engineering"}
+    assert contract["analysis_shapes"]["ai_engineering"]["recommended_action"] == "test"
 
     assert editorial_cli.main(
         [

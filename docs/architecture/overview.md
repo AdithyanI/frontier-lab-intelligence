@@ -25,7 +25,7 @@ flowchart TD
     E --> Q["Audience routing<br/>Engineering and Investment"]
     A --> Q
     S --> Q
-    Q --> I["Insights<br/>kept or suppressed per audience"]
+    Q --> I["Daily editorial agent<br/>ranked, cited Insights per audience"]
     I --> W["Web and CLI<br/>inspection and operation"]
     E --> W
     A --> W
@@ -47,7 +47,7 @@ or reinterpret its upstream evidence.
 | Artifacts | `fli.evidence.artifacts` | Canonical source links, lineage, retrieval, and extracted text. |
 | Attention | `fli.scoring` | Versioned, inspectable ordering formulas and offline evaluation. |
 | Audience routing | `fli.routing` | Independent Engineering and Investment relevance decisions with durable runs. |
-| Insights | `fli.insights` | Audience-specific synthesis, final editorial decision, storage, and read model. |
+| Insights | `fli.insights` | Per-Event working annotations plus agent-authored daily synthesis, strict validation, atomic storage, and the canonical read model. |
 | Product adapters | `fli.web`, `fli.cli` | HTTP/UI composition and non-interactive commands; no domain truth belongs here. |
 
 Cross-domain provider behavior belongs in `fli.llm_responses`; compact tracked
@@ -68,9 +68,14 @@ at the root of `fli`.
    or a quality judgment.
 7. Audience routing independently decides whether the packet matters to AI
    Engineering and Investment.
-8. Insight generation converts a relevant packet into audience-shaped output
-   and may still suppress it at the final editorial gate.
-9. The web and CLI expose the frozen evidence, decisions, provenance, and
+8. A daily editorial agent reviews the complete routed-positive cohort, may use
+   per-Event notes as annotations, researches missing transmission paths, and
+   writes the ranked cited Insights that clear the audience bar. Every
+   candidate is linked once to an Insight or explicitly not selected.
+9. Deterministic validation binds the draft to its frozen workspace and imports
+   Insights, Event roles, dispositions, and citations in one transaction.
+   Optional embedding retrieval may find paraphrases but never decides a merge.
+10. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners.
 
 ## Important Boundaries
@@ -88,6 +93,9 @@ at the root of `fli`.
   Feed but cannot silently become primary artifact or Insight evidence.
 - **Independent audiences:** Engineering and Investment are separate judgments
   over one shared evidence core, not two ingestion systems.
+- **Agent freedom behind a narrow write boundary:** the agent may search,
+  compare, group, and research freely, but only a versioned Insight schema and
+  complete candidate disposition may enter product state.
 - **Versioned model contracts:** active prompts use stable semantic filenames;
   immutable runs store prompt version, schema version, and prompt/input hashes.
 - **Shared model adapter:** every LLM call goes through the LiteLLM Responses
@@ -129,3 +137,4 @@ builds the production SPA.
 - [Artifact library contract](../references/artifact-library.md)
 - [Model routing and cache policy](../references/model-routing.md)
 - [Insight refresh/client](../references/insight-refresh.md)
+- [Daily agent/editorial contract](../references/daily-intelligence.md)

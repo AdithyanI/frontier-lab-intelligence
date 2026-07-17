@@ -15,7 +15,7 @@ flowchart TD
     E --> S["Attention score"]
     A --> U["Audience routing"]
     S --> U
-    U --> I["Audience Insights"]
+    U --> I["Daily editorial agent<br/>ranked audience Insights"]
     I --> W["Web and CLI adapters"]
 ```
 
@@ -36,7 +36,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
 | Attention | `fli.scoring` | Versioned score formulas and offline comparison. Production remains `attention-v1.1`. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
-| Insights | `fli.insights` | Generation contract, durable runs, machine client, read model, and active prompts. |
+| Insights | `fli.insights` | Per-Event generation plus the `editorial`, `editorial_runs`, and `editorial_cli` daily-agent boundary: strict drafts, frozen workspaces, retrieval helpers, atomic runs, and the canonical read model. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.artifact_library` | HTTP composition and remaining projections only. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
 
@@ -76,6 +76,7 @@ do not recreate generic `pages/` or `components/` buckets.
 | `data/derived/artifacts/artifacts.db` | Artifact catalog/fetch commands | Routing and artifact UI | Durable local catalog; raw bodies and clean text are content-addressed beside it. |
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, score evaluation | Frozen per-day current-contract runs; preserve all current v9 days. |
 | `data/derived/insights/insights.db` | `fli insights` | Insight read model/UI | Current audience Insight run store. |
+| `data/derived/daily-intelligence/editorial.db` | `fli daily-intelligence import-result` | Daily Insight read model/UI | Complete agent-authored daily runs; frozen workspaces and the optional packet-keyed embedding cache live beside it. |
 
 See [`data/README.md`](../../data/README.md) for directory lifecycle and
 [`docs/references/data-lifecycle.md`](../references/data-lifecycle.md) before
@@ -88,6 +89,7 @@ removing or archiving local data.
   `fli artifacts`
 - Route Evidence: `fli audience-routing`
 - Generate or inspect Insights: `fli insights`
+- Author, validate, persist, or inspect one daily brief: `fli daily-intelligence`
 - Evaluate attention formulas offline: `fli attention-score`
 - Run the product: `fli web` or the always-on service at
   `http://127.0.0.1:8797`
@@ -116,4 +118,5 @@ All repeated LLM work uses the shared LiteLLM path and the exact contracts in
 - End-to-end Evidence refresh: [`evidence-refresh.md`](../references/evidence-refresh.md)
 - Artifact contract: [`artifact-library.md`](../references/artifact-library.md)
 - Insight refresh/client: [`insight-refresh.md`](../references/insight-refresh.md)
+- Daily agent/editorial contract: [`daily-intelligence.md`](../references/daily-intelligence.md)
 - Model routing/cache contract: [`model-routing.md`](../references/model-routing.md)
