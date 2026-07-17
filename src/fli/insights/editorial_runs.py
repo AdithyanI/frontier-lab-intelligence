@@ -28,10 +28,17 @@ DEFAULT_INSIGHTS_DB = insight_runs.DEFAULT_DB
 DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v1"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v1"
-READ_SCHEMA_VERSION = "daily-intelligence-read-v1"
+READ_SCHEMA_VERSION = "daily-intelligence-read-v2"
 
 CONTEXT_PATHS = {
-    "investment": REPO_ROOT / "docs" / "references" / "bit-capital-editorial-context.md",
+    "investment": (
+        REPO_ROOT
+        / ".agents"
+        / "skills"
+        / "fli-daily-intelligence"
+        / "references"
+        / "bit-investment-context.json"
+    ),
     "ai_engineering": REPO_ROOT / "docs" / "references" / "ai-engineering-editorial-context.md",
 }
 
@@ -380,6 +387,35 @@ def _context_files() -> dict[str, dict[str, str]]:
         text = path.read_text(encoding="utf-8")
         result[audience] = {"path": _display_path(path), "sha256": _sha256(text)}
     return result
+
+
+def investment_context() -> dict[str, Any]:
+    """Load the skill-owned, structured BIT Investment reference packet."""
+    path = CONTEXT_PATHS["investment"]
+    value = _read_json(path)
+    if not isinstance(value, dict):
+        raise ValueError("Investment context packet must be an object")
+    if value.get("schema_version") != "bit-investment-context-v1":
+        raise ValueError("Investment context packet uses an unsupported schema version")
+    return value
+
+
+def portfolio_reference_payload() -> dict[str, Any]:
+    """Return the compact reader disclosure derived from the canonical packet."""
+    context = investment_context()
+    portfolio = context.get("portfolio")
+    if not isinstance(portfolio, dict):
+        raise ValueError("Investment context packet is missing portfolio")
+    source = portfolio.get("source")
+    if not isinstance(source, dict):
+        raise ValueError("Investment context packet is missing portfolio.source")
+    return {
+        "basis": str(portfolio["basis"]),
+        "as_of": str(portfolio["as_of"]),
+        "source_label": str(source["label"]),
+        "source_url": str(source["url"]),
+        "reader_note": str(context["reader_note"]),
+    }
 
 
 def prepare_workspace(
@@ -1069,6 +1105,9 @@ def editorial_insights_payload(
             "requested_date": day,
             "date": day,
             "audience": audience,
+            "portfolio_reference": (
+                portfolio_reference_payload() if audience == "investment" else None
+            ),
             "run": None,
             "items": [],
         }
@@ -1163,6 +1202,9 @@ def editorial_insights_payload(
             "requested_date": day,
             "date": str(payload["day"]),
             "audience": audience,
+            "portfolio_reference": (
+                portfolio_reference_payload() if audience == "investment" else None
+            ),
             "run": run,
             "items": items,
         }

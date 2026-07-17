@@ -152,6 +152,20 @@ def _draft(workspace: Path):
                 "next_step": "Measure adoption and serving economics across one enterprise workload.",
                 "analysis": {
                     **editorial.investment_analysis_template(),
+                    "affected_entities": [
+                        {
+                            "name": "Microsoft",
+                            "scope": "portfolio",
+                            "impact": "mixed",
+                            "mechanism": "Open models can pressure model economics while increasing cloud demand.",
+                        },
+                        {
+                            "name": "Toyota",
+                            "scope": "outside_portfolio",
+                            "impact": "uncertain",
+                            "mechanism": "A named deployment provides a specific diligence target outside the book.",
+                        },
+                    ],
                     "financial_driver": "Inference cost and platform gross margin remain unknown.",
                 },
                 "event_links": [
@@ -259,6 +273,20 @@ def test_validate_requires_exact_candidate_coverage(tmp_path, monkeypatch):
     assert report["included_candidate_pairs"] == 3
     assert report["not_selected_candidate_pairs"] == 1
     assert normalized["insights"][0]["local_id"] == "investment-inkling"
+    assert normalized["insights"][0]["analysis"]["affected_entities"] == [
+        {
+            "name": "Microsoft",
+            "scope": "portfolio",
+            "impact": "mixed",
+            "mechanism": "Open models can pressure model economics while increasing cloud demand.",
+        },
+        {
+            "name": "Toyota",
+            "scope": "outside_portfolio",
+            "impact": "uncertain",
+            "mechanism": "A named deployment provides a specific diligence target outside the book.",
+        },
+    ]
 
     draft["not_selected"] = []
     try:
@@ -323,7 +351,7 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
         audience="investment", day=DAY, db_path=db
     )
 
-    assert payload["schema_version"] == "daily-intelligence-read-v1"
+    assert payload["schema_version"] == "daily-intelligence-read-v2"
     assert payload["content_kind"] == "daily_editorial"
     assert payload["available"] is True
     assert payload["reason"] is None
@@ -341,6 +369,16 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
     assert payload["items"][0]["events"][0]["event_id"] == "event-a"
     assert payload["items"][0]["citations"][0]["local_id"] == "source-a"
     assert "analysis" in payload["items"][0]
+    assert payload["portfolio_reference"] == {
+        "basis": "complete audited year-end portfolio",
+        "as_of": "2025-12-31",
+        "source_label": "BIT Global Technology Leaders audited annual report",
+        "source_url": "https://fondswelt.hansainvest.com/uploads/documents/jahresbericht/JB_1806_BIT_Global_Technology_Leaders_2025-12-31.pdf",
+        "reader_note": (
+            "Portfolio mappings use the complete audited public portfolio. "
+            "They are research context, not a claim about a live portfolio or a trade recommendation."
+        ),
+    }
 
     missing = editorial_runs.editorial_insights_payload(
         audience="investment", day="2026-07-14", db_path=db
@@ -448,6 +486,30 @@ def test_embedding_index_is_packet_keyed_reused_and_queryable(tmp_path, monkeypa
     assert len(client.embeddings.calls) == 1
     assert similar["items"][0]["event_id"] == "event-b"
     assert np.isclose(similar["items"][0]["cosine_similarity"], 1.0)
+
+
+def test_investment_context_is_complete_structured_skill_packet(capsys):
+    context = editorial_runs.investment_context()
+    portfolio = context["portfolio"]
+
+    assert context["schema_version"] == "bit-investment-context-v1"
+    assert len(portfolio["holdings"]) == 34
+    assert round(sum(item["weight_pct"] for item in portfolio["holdings"]), 2) == 97.43
+    assert {item["name"] for item in portfolio["holdings"]} >= {
+        "Alphabet",
+        "Microsoft",
+        "NVIDIA",
+    }
+    assert context["research_process"]["challenge_process"]["principle"]
+    assert context["outside_portfolio_policy"]["label"] == "Outside the disclosed portfolio"
+
+    assert editorial_cli.main(
+        ["context", "--audience", "investment", "--json", "--no-input"]
+    ) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["data"]["format"] == "json"
+    assert payload["data"]["context"]["schema_version"] == "bit-investment-context-v1"
+    assert payload["data"]["path"].endswith("references/bit-investment-context.json")
 
 
 def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, capsys):

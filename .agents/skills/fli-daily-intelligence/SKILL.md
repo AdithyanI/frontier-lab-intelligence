@@ -18,6 +18,11 @@ your own judgment for research, retrieval, grouping, and synthesis.
    .venv/bin/fli daily-intelligence context --audience ai_engineering --json --no-input
    ```
 
+   The Investment context is the structured
+   [BIT investment packet](references/bit-investment-context.json). It is the
+   authoritative skill reference for the fund's public thesis, complete audited
+   portfolio baseline, and the boundary for companies outside that portfolio.
+
 3. Freeze or reuse the day's union-positive workspace:
 
    ```bash
@@ -100,8 +105,14 @@ shared theme as an automatic merge.
   attribution and important contradictory evidence.
 - Use web research actively when it can resolve an unknown. A web citation must
   retain its URL, retrieval time, supporting excerpt, and the claim it supports.
-- Never invent a BIT holding, current weight, private forecast, cost basis,
-  trade, target, or consensus view.
+- Never invent a BIT holding, private forecast, cost basis, trade, target, or
+  consensus view. For this version, treat the packet's audited portfolio as the
+  working portfolio context and keep its date and source in the packet rather
+  than repeating them in every reader-facing company row.
+- For Investment, classify every named company as `portfolio` or
+  `outside_portfolio`. Consider the portfolio first. Include an outside company
+  only when a direct public-equity transmission path is defensible; omit that
+  section rather than padding it.
 - For Investment, make the operating-to-financial-to-thesis chain explicit or
   state that the link is unknown.
 - For Engineering, propose a bounded experiment with both a success metric and

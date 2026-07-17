@@ -68,7 +68,8 @@ at the root of `fli`.
    or a quality judgment.
 7. Audience routing independently decides whether the packet matters to AI
    Engineering and Investment.
-8. A daily editorial agent reviews the complete routed-positive cohort, may use
+8. A daily editorial agent reviews the complete routed-positive cohort, reads
+   the skill-owned BIT thesis and audited 2025 portfolio packet for Investment, may use
    per-Event notes as annotations, researches missing transmission paths, and
    writes the ranked cited Insights that clear the audience bar. Every
    candidate is linked once to an Insight or explicitly not selected.

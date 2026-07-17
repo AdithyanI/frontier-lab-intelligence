@@ -1,0 +1,251 @@
+{
+  "schema_version": "bit-investment-context-v1",
+  "fund": {
+    "name": "BIT Global Technology Leaders",
+    "manager": "BIT Capital GmbH",
+    "vehicle": "UCITS equity fund",
+    "role": "BIT Capital flagship global technology-equity strategy"
+  },
+  "public_thesis": {
+    "objective": "Find structural technology winners whose growth, competitive position, or operating leverage is not fully reflected in market expectations.",
+    "universe": "Global technology and AI-infrastructure companies, including established platforms and less-indexed companies with superior growth dynamics.",
+    "selection": "Benchmark-independent bottom-up stock selection, validated through fundamental company research and proprietary alternative-data signals.",
+    "edge": "Decompose a company thesis into observable operating drivers and use data to update those drivers before ordinary financial reporting.",
+    "weighting": "Concentrate capital in the highest-conviction positions rather than mirror index weights, while retaining portfolio and liquidity controls.",
+    "challenge": "Test material positions against a strong counter-case and allow the human portfolio manager to retain, resize, hedge, or exit.",
+    "human_boundary": "Research agents may retrieve, connect, prioritize, and draft; they do not make the final portfolio decision.",
+    "sources": [
+      {
+        "label": "BIT Global Technology Leaders fund page",
+        "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders"
+      },
+      {
+        "label": "BIT Capital investment approach",
+        "url": "https://bitcap.com/en/investmentansatz"
+      }
+    ]
+  },
+  "research_process": {
+    "thesis_formation": [
+      "Begin with a company-specific, bottom-up thesis rather than a broad technology theme alone.",
+      "Decompose the business into observable drivers such as volume, price, mix, margin, capacity, utilization, retention, or market share.",
+      "Identify the structural change and the market expectation that the thesis challenges.",
+      "Translate operating evidence into forecasts, valuation, and position consequences rather than stopping at a qualitative narrative."
+    ],
+    "information_edge": {
+      "principle": "Use proprietary and alternative-data signals to update thesis drivers before ordinary financial reporting.",
+      "public_scale_claim": "BIT says its process uses more than 30,000 data points processed daily.",
+      "examples": [
+        "App usage and product engagement can test adoption, retention, or demand before quarterly results.",
+        "Pricing, supply, yields, capacity, and lead times can test semiconductor and infrastructure bottlenecks.",
+        "Customer, web, transaction, hiring, product, and expert evidence can challenge company forecasts when the signal is causally connected."
+      ],
+      "constraint": "A signal is useful only when its relationship to an operating driver and the company thesis is explicit; correlation or attention alone is not an edge."
+    },
+    "forecast_and_valuation": [
+      "Update the relevant operating driver first.",
+      "State the revenue, margin, capex, market-share, cash-flow, or valuation bridge.",
+      "Separate an observable change from the analyst inference and from the private forecast that remains unknown.",
+      "Do not convert a technical development directly into a trade recommendation."
+    ],
+    "portfolio_construction": [
+      "Use conviction-based weighting rather than benchmark weights.",
+      "Allow evidence to change position size, risk controls, hedges, or exit decisions.",
+      "Preserve liquidity, concentration, factor, macro, and portfolio-level constraints even though idea selection is bottom-up.",
+      "A disclosed weight is evidence of portfolio state at one reporting date, not evidence of cost basis, target weight, expected return, or current ownership."
+    ],
+    "challenge_process": {
+      "principle": "BIT publicly describes a Devil's Advocate process for positions above 5% of NAV.",
+      "questions": [
+        "What is the strongest causal reason the thesis may be wrong?",
+        "Which evidence would distinguish temporary noise from a broken operating assumption?",
+        "What observable signal should trigger retention, resizing, hedging, or exit?"
+      ]
+    },
+    "working_frame": [
+      "Thesis: the company-specific belief and expectation gap.",
+      "Edge: why BIT could know earlier or interpret the evidence differently.",
+      "Signal: the observable evidence that updates an operating driver.",
+      "Key move: the human portfolio action the evidence may justify after valuation and risk review."
+    ]
+  },
+  "public_examples": [
+    {
+      "company": "Duolingo",
+      "lesson": "BIT describes using app and internal usage data to test the thesis and reduce exposure when observed behavior weakened the expected trajectory.",
+      "source": "https://bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast"
+    },
+    {
+      "company": "Micron",
+      "lesson": "BIT frames memory as a physical AI bottleneck and follows supply, yields, pricing, and capacity rather than treating AI demand as a generic semiconductor tailwind.",
+      "source": "https://bitcap.com/en/fonds/bit-global-technology-leaders"
+    },
+    {
+      "company": "IREN",
+      "lesson": "The public thesis treats secured power, interconnection, and data-center capacity as scarce infrastructure whose value depends on contracted deployment and execution.",
+      "source": "https://bitcap.com/en/fonds/bit-global-technology-leaders"
+    },
+    {
+      "company": "Carvana",
+      "lesson": "BIT's contrarian example emphasizes operating evidence and normalized company economics, not buying merely because price or sentiment fell.",
+      "source": "https://bitcap.com/en/news/fondsmanager-jan-beckers-uber-investments-gegen-den-trend-kaufen-wenn-keiner-die-aktie-haben-will-podcast"
+    }
+  ],
+  "aion_and_human_boundary": {
+    "public_description": "BIT recruiting material describes Aion and related data platforms as production infrastructure for retrieval, extraction, research signals, evaluations, observability, and human review.",
+    "agent_role": [
+      "Retrieve and preserve evidence.",
+      "Connect developments across sources and companies.",
+      "Prioritize research questions and draft decision-ready notes.",
+      "Expose uncertainty, counterevidence, and the next falsifiable test."
+    ],
+    "human_role": [
+      "Own the company thesis and private forecasts.",
+      "Judge valuation, portfolio fit, risk, and position size.",
+      "Make the final investment decision."
+    ],
+    "sources": [
+      "https://bitcap.jobs.personio.com/job/2685548?language=en",
+      "https://bitcap.jobs.personio.com/job/1833794?language=en",
+      "https://bitcap.jobs.personio.com/job/2701020?language=de"
+    ]
+  },
+  "investment_translation_standard": {
+    "reader_order": [
+      "What changed",
+      "Interpretation",
+      "Portfolio impact",
+      "Outside the disclosed portfolio when defensible",
+      "What to watch",
+      "Sources"
+    ],
+    "causal_chain": [
+      "Public evidence",
+      "Operating or competitive driver",
+      "Company or portfolio exposure",
+      "Revenue, margin, capex, market-share, cash-flow, or valuation consequence",
+      "Thesis effect and falsifiable watchpoint"
+    ],
+    "quality_rules": [
+      "The title states the investment judgment rather than repeating the release name.",
+      "Name a public company only when the operating or competitive connection is specific.",
+      "State when the financial bridge is unknown instead of filling it with speculation.",
+      "Include the strongest counter-case and one or two measurable watchpoints.",
+      "Never claim a live BIT view, forecast, holding, trade, cost basis, or target unless the packet establishes it."
+    ]
+  },
+  "portfolio": {
+    "as_of": "2025-12-31",
+    "basis": "complete audited year-end portfolio",
+    "source": {
+      "label": "BIT Global Technology Leaders audited annual report",
+      "url": "https://fondswelt.hansainvest.com/uploads/documents/jahresbericht/JB_1806_BIT_Global_Technology_Leaders_2025-12-31.pdf",
+      "portfolio_statement_page": 8
+    },
+    "fund_assets_eur": 1088484031.17,
+    "equity_weight_pct": 97.43,
+    "cash_weight_pct": 2.86,
+    "derivative_weight_pct": 0.18,
+    "liabilities_weight_pct": -0.49,
+    "holdings": [
+      { "name": "IREN", "weight_pct": 8.93 },
+      { "name": "AUTO1", "weight_pct": 8.40 },
+      { "name": "Hinge Health", "weight_pct": 6.74 },
+      { "name": "TSMC", "weight_pct": 5.66 },
+      { "name": "Micron", "weight_pct": 5.07 },
+      { "name": "Reddit", "weight_pct": 4.93 },
+      { "name": "Alphabet", "weight_pct": 4.48 },
+      { "name": "Datadog", "weight_pct": 4.34 },
+      { "name": "Lemonade", "weight_pct": 3.95 },
+      { "name": "Robinhood", "weight_pct": 3.77 },
+      { "name": "Oscar Health", "weight_pct": 3.70 },
+      { "name": "Meta", "weight_pct": 3.49 },
+      { "name": "Rubrik", "weight_pct": 3.37 },
+      { "name": "Kaspi", "weight_pct": 3.32 },
+      { "name": "NVIDIA", "weight_pct": 3.26 },
+      { "name": "Microsoft", "weight_pct": 2.89 },
+      { "name": "HUT 8", "weight_pct": 2.22 },
+      { "name": "Duolingo", "weight_pct": 2.02 },
+      { "name": "Amazon", "weight_pct": 1.78 },
+      { "name": "Netskope", "weight_pct": 1.76 },
+      { "name": "Luckin Coffee", "weight_pct": 1.72 },
+      { "name": "Palo Alto Networks", "weight_pct": 1.66 },
+      { "name": "InPost", "weight_pct": 1.42 },
+      { "name": "Grindr", "weight_pct": 1.07 },
+      { "name": "Coherent", "weight_pct": 1.07 },
+      { "name": "AMD", "weight_pct": 1.04 },
+      { "name": "Intel", "weight_pct": 1.02 },
+      { "name": "Axon", "weight_pct": 0.97 },
+      { "name": "Broadcom", "weight_pct": 0.82 },
+      { "name": "Pure Storage", "weight_pct": 0.78 },
+      { "name": "Lumentum", "weight_pct": 0.57 },
+      { "name": "Xometry", "weight_pct": 0.55 },
+      { "name": "Omada Health", "weight_pct": 0.55 },
+      { "name": "GCL-Poly", "weight_pct": 0.11 }
+    ],
+    "other_exposures": [
+      {
+        "name": "Microsoft call option",
+        "underlying": "Microsoft",
+        "weight_pct": 0.18,
+        "expiry": "2027-01-15",
+        "strike_usd": 650.0
+      }
+    ]
+  },
+  "outside_portfolio_policy": {
+    "label": "Outside the disclosed portfolio",
+    "purpose": "Capture a specific public-company landing spot that may benefit, lose, or deserve diligence even though it is absent from the audited portfolio.",
+    "rules": [
+      "Consider disclosed portfolio companies first.",
+      "Include an outside company only when the evidence supports a direct operating or competitive transmission path.",
+      "Treat the mapping as analyst inference, not a known BIT view, holding, or recommendation.",
+      "Omit the section when no credible outside company exists."
+    ]
+  },
+  "known_source_cautions": [
+    "Monthly factsheets expose only the top holdings and cannot prove that an omitted company was sold.",
+    "The audited year-end statement is the complete working portfolio baseline for this version; it is not a live portfolio.",
+    "BIT commentary and an IREN company announcement use conflicting descriptions of a large transaction; the primary company source governs the transaction facts.",
+    "Public BIT pages give inconsistent dates for the Micron entry; do not silently reconcile them.",
+    "Manager commentary, company announcements, and vendor benchmarks are attributed evidence, not independent validation."
+  ],
+  "source_ledger": [
+    {
+      "label": "Flagship fund page",
+      "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders",
+      "use": "Strategy, portfolio presentation, public company theses, and fund documents."
+    },
+    {
+      "label": "Investment approach",
+      "url": "https://bitcap.com/en/investmentansatz",
+      "use": "Bottom-up selection, data, weighting, and challenge process."
+    },
+    {
+      "label": "BIT FAQ",
+      "url": "https://bitcap.com/en/haeufig-gestellte-fragen-zum-investieren",
+      "use": "Research and portfolio-process context."
+    },
+    {
+      "label": "Q1 2026 equity report",
+      "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026",
+      "use": "Public market and AI-infrastructure worldview."
+    },
+    {
+      "label": "2026 selection commentary",
+      "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+      "use": "Selection discipline and market context."
+    },
+    {
+      "label": "AI Engineer role",
+      "url": "https://bitcap.jobs.personio.com/job/2685548?language=en",
+      "use": "Aion, production-agent, evaluation, and human-review context."
+    },
+    {
+      "label": "Semiconductor Analyst role",
+      "url": "https://bitcap.jobs.personio.com/job/2701020?language=de",
+      "use": "First-principles company decomposition and semiconductor research expectations."
+    }
+  ],
+  "reader_note": "Portfolio mappings use the complete audited public portfolio. They are research context, not a claim about a live portfolio or a trade recommendation."
+}

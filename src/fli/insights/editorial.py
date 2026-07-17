@@ -13,18 +13,12 @@ import re
 from typing import Any
 
 
-DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v1"
+DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v2"
 AUDIENCES = ("investment", "ai_engineering")
 EVENT_ROLES = ("primary", "supporting", "context", "counterevidence")
 CITATION_KINDS = ("event", "artifact", "web", "context")
-PORTFOLIO_RELATIONSHIPS = (
-    "current_disclosed_holding",
-    "historical_holding",
-    "portfolio_thesis",
-    "candidate_or_watchlist",
-    "sector_readthrough",
-    "none",
-)
+ENTITY_SCOPES = ("portfolio", "outside_portfolio")
+IMPACT_DIRECTIONS = ("positive", "negative", "mixed", "uncertain")
 THESIS_EFFECTS = ("strengthens", "weakens", "opportunity", "risk", "mixed", "uncertain")
 ENGINEERING_ACTIONS = ("test", "adopt", "watch", "ignore")
 
@@ -39,7 +33,8 @@ def output_contract() -> dict[str, Any]:
         "max_insights_per_audience": None,
         "event_roles": list(EVENT_ROLES),
         "citation_kinds": list(CITATION_KINDS),
-        "portfolio_relationships": list(PORTFOLIO_RELATIONSHIPS),
+        "entity_scopes": list(ENTITY_SCOPES),
+        "impact_directions": list(IMPACT_DIRECTIONS),
         "thesis_effects": list(THESIS_EFFECTS),
         "engineering_actions": list(ENGINEERING_ACTIONS),
         "analysis_shapes": {
@@ -99,7 +94,6 @@ def output_contract() -> dict[str, Any]:
 
 def investment_analysis_template() -> dict[str, Any]:
     return {
-        "portfolio_relationship": "none",
         "affected_entities": [],
         "thesis_effect": "uncertain",
         "operating_driver": "How the change reaches company operations or competition.",
@@ -242,7 +236,6 @@ def _validate_investment_analysis(value: Any, path: str) -> dict[str, Any]:
         value,
         path,
         {
-            "portfolio_relationship",
             "affected_entities",
             "thesis_effect",
             "operating_driver",
@@ -255,23 +248,18 @@ def _validate_investment_analysis(value: Any, path: str) -> dict[str, Any]:
     entities = []
     for index, raw in enumerate(_list(analysis["affected_entities"], f"{path}.affected_entities")):
         entity_path = f"{path}.affected_entities[{index}]"
-        entity = _object(raw, entity_path, {"name", "relationship", "as_of"})
+        entity = _object(raw, entity_path, {"name", "scope", "impact", "mechanism"})
         entities.append(
             {
                 "name": _text(entity["name"], f"{entity_path}.name"),
-                "relationship": _text(entity["relationship"], f"{entity_path}.relationship"),
-                "as_of": _optional_date(entity["as_of"], f"{entity_path}.as_of"),
+                "scope": _enum(entity["scope"], f"{entity_path}.scope", ENTITY_SCOPES),
+                "impact": _enum(
+                    entity["impact"], f"{entity_path}.impact", IMPACT_DIRECTIONS
+                ),
+                "mechanism": _text(entity["mechanism"], f"{entity_path}.mechanism"),
             }
         )
-    relationship = _enum(
-        analysis["portfolio_relationship"],
-        f"{path}.portfolio_relationship",
-        PORTFOLIO_RELATIONSHIPS,
-    )
-    if relationship == "none" and entities:
-        raise ValueError(f"{path}.affected_entities must be empty when portfolio_relationship is none")
     return {
-        "portfolio_relationship": relationship,
         "affected_entities": entities,
         "thesis_effect": _enum(analysis["thesis_effect"], f"{path}.thesis_effect", THESIS_EFFECTS),
         "operating_driver": _text(analysis["operating_driver"], f"{path}.operating_driver"),

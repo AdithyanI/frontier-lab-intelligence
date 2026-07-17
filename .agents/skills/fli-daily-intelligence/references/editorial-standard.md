@@ -80,18 +80,22 @@ step.
 
 ## Investment analysis
 
-Use the BIT context returned by `context --audience investment`. Select the
-most honest `portfolio_relationship`:
+Use the structured BIT context returned by `context --audience investment`.
+It contains the public fund thesis and the complete audited portfolio baseline.
+For each affected company record:
 
-- `current_disclosed_holding`
-- `historical_holding`
-- `portfolio_thesis`
-- `candidate_or_watchlist`
-- `sector_readthrough`
-- `none`
+- `scope`: `portfolio` or `outside_portfolio`;
+- `impact`: `positive`, `negative`, `mixed`, or `uncertain`; and
+- `mechanism`: the company-specific operating or competitive transmission path.
 
-When naming an affected entity, record its relationship and the date of the
-public holding evidence when applicable. Then provide:
+Do not repeat portfolio dates or disclosure caveats in every entity. They live
+once in the context packet and the reader's portfolio note. `portfolio` means
+the company appears in that working baseline. `outside_portfolio` is an analyst
+mapping, not a known BIT view, holding, or recommendation. Consider the
+portfolio first and omit the outside section when no direct public-company
+connection is defensible.
+
+Then provide:
 
 - `thesis_effect`;
 - `operating_driver`;

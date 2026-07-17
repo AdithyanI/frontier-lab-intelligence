@@ -53,13 +53,8 @@ export interface CandidateDecisionInsightsResponse {
 
 export type EditorialEventRole = 'primary' | 'supporting' | 'context' | 'counterevidence'
 export type EditorialCitationKind = 'event' | 'artifact' | 'web' | 'context'
-export type PortfolioRelationship =
-  | 'current_disclosed_holding'
-  | 'historical_holding'
-  | 'portfolio_thesis'
-  | 'candidate_or_watchlist'
-  | 'sector_readthrough'
-  | 'none'
+export type InvestmentEntityScope = 'portfolio' | 'outside_portfolio'
+export type InvestmentImpactDirection = 'positive' | 'negative' | 'mixed' | 'uncertain'
 export type ThesisEffect = 'strengthens' | 'weakens' | 'opportunity' | 'risk' | 'mixed' | 'uncertain'
 export type EngineeringAction = 'test' | 'adopt' | 'watch' | 'ignore'
 
@@ -86,11 +81,11 @@ export interface EditorialCitation {
 }
 
 export interface InvestmentEditorialAnalysis {
-  portfolio_relationship: PortfolioRelationship
   affected_entities: Array<{
     name: string
-    relationship: string
-    as_of: string | null
+    scope: InvestmentEntityScope
+    impact: InvestmentImpactDirection
+    mechanism: string
   }>
   thesis_effect: ThesisEffect
   operating_driver: string
@@ -98,6 +93,14 @@ export interface InvestmentEditorialAnalysis {
   edge: string
   counter_case: string
   watchpoints: string[]
+}
+
+export interface EditorialPortfolioReference {
+  basis: string
+  as_of: string
+  source_label: string
+  source_url: string
+  reader_note: string
 }
 
 export interface EngineeringEditorialAnalysis {
@@ -173,6 +176,7 @@ export interface EditorialInsightsResponse {
   requested_date: string | null
   date: string | null
   audience: InsightAudience
+  portfolio_reference: EditorialPortfolioReference | null
   status: 'kept'
   content_kind: 'daily_editorial'
   run: EditorialInsightRun | null

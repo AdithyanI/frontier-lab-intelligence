@@ -44,9 +44,12 @@ Every Insight has:
 - ordered citations to frozen Events, artifacts, public context, or bounded web
   research.
 
-Investment analysis records the honest portfolio relationship, dated affected
-entities where applicable, thesis effect, operating and financial drivers,
-edge, counter-case, and measurable watchpoints. AI Engineering analysis records
+Investment analysis records company mappings as `portfolio` or
+`outside_portfolio`, a directional impact and mechanism for each, thesis effect,
+operating and financial drivers, edge, counter-case, and measurable
+watchpoints. The skill-owned BIT packet holds the complete audited portfolio,
+public thesis, research process, source cautions, and the date/source disclosure
+shown once in the reader rather than repeated per company. AI Engineering analysis records
 the system surface, technical implication, action, bounded experiment, success
 metric, stop condition, and constraints.
 
@@ -55,6 +58,10 @@ The authoritative machine shape and enums are returned by:
 ```bash
 .venv/bin/fli daily-intelligence contract --json --no-input
 ```
+
+The Investment context command returns the structured
+`bit-investment-context-v1` packet; the Engineering context remains markdown in
+the same stable response envelope.
 
 ## Coverage and Selection
 

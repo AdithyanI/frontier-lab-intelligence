@@ -1,8 +1,11 @@
 # BIT Capital Editorial Context
 
-This is the machine-readable working context for the daily Investment
-Intelligence agent. It condenses the public BIT Lens research into the facts and
-decision standard needed during synthesis. The human-readable long-form source
+This is the long-form research companion for the daily Investment Intelligence
+agent. The active machine-readable packet lives in the repo-local skill at
+`.agents/skills/fli-daily-intelligence/references/bit-investment-context.json`.
+That packet intentionally uses the complete audited 2025 portfolio as its
+working holdings baseline and preserves BIT's thesis, research process, source
+cautions, and outside-portfolio policy. The human-readable long-form source
 remains the product's `/bit-lens` page, implemented in
 `frontend/src/features/bit-lens/BitLensPage.tsx` with its structured holdings
 and source ledger in `bitLensData.ts`.
@@ -14,16 +17,16 @@ company-specific, alternative-data-informed, and human-decided. It does not
 need a generic frontier-AI digest. A useful Insight explains:
 
 1. what changed;
-2. which dated holding, historical exposure, portfolio thesis, candidate, or
-   sector read-through it may affect;
+2. which company in the working portfolio it may affect and whether a specific
+   company outside that portfolio deserves diligence;
 3. the operating and financial transmission mechanism;
 4. what may be underappreciated or differently interpreted;
 5. the strongest counter-case and missing evidence;
 6. a measurable confirmation or falsification watchpoint; and
 7. the next useful diligence action.
 
-Never force a portfolio connection. `portfolio_relationship: none` is more
-useful than an invented holding or an unsupported earnings bridge.
+Never force a company connection. An empty company mapping is more useful than
+an invented holding or an unsupported earnings bridge.
 
 ## Flagship fund boundary
 
@@ -161,17 +164,16 @@ References:
 
 ## Required editorial distinctions
 
-Use one of these relationships and explain it:
+Each affected company uses one of two scopes:
 
-- `current_disclosed_holding`: confirmed by a current dated public disclosure.
-- `historical_holding`: confirmed only in an older complete report.
-- `portfolio_thesis`: relevant to a publicly expressed bottleneck or investment
-  framework without proving a position.
-- `candidate_or_watchlist`: a plausible diligence candidate, clearly labeled as
-  analyst inference rather than a known BIT view.
-- `sector_readthrough`: indirect competitive or operating evidence for a sector
-  or portfolio exposure.
-- `none`: no defensible portfolio or thesis connection.
+- `portfolio`: present in the skill packet's complete audited working baseline;
+- `outside_portfolio`: a specific public-company landing spot supported by the
+  evidence and clearly presented as analyst mapping rather than a known BIT
+  view, holding, or recommendation.
+
+Each mapping also records a `positive`, `negative`, `mixed`, or `uncertain`
+impact and one company-specific mechanism. Consider the portfolio first. Omit
+the outside section when no defensible company exists.
 
 An Insight should normally carry this causal chain:
 
@@ -207,4 +209,3 @@ Reject or rewrite an Investment Insight when it is merely “important for AI,�
 names a holding without a dated source, lacks an operating-to-financial bridge,
 omits the strongest counter-case, or ends with a vague instruction to “monitor
 developments.” The watchpoint and next step should name observable evidence.
-

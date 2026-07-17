@@ -108,7 +108,7 @@ function isEditorialResponse(payload: InsightsResponse): payload is EditorialIns
 function isInvestmentAnalysis(
   analysis: EditorialAnalysis,
 ): analysis is InvestmentEditorialAnalysis {
-  return 'portfolio_relationship' in analysis
+  return 'thesis_effect' in analysis
 }
 
 function isEngineeringAnalysis(
@@ -331,40 +331,63 @@ function InvestmentDecision({
   analysis: InvestmentEditorialAnalysis
   nextStep: string
 }) {
+  const portfolioEntities = analysis.affected_entities.filter(
+    (entity) => entity.scope === 'portfolio',
+  )
+  const outsideEntities = analysis.affected_entities.filter(
+    (entity) => entity.scope === 'outside_portfolio',
+  )
+
+  const entityList = (
+    entities: InvestmentEditorialAnalysis['affected_entities'],
+    label: string,
+  ) => (
+    <div className="editorial-entities">
+      <h4 className="mono">{label}</h4>
+      <ul>
+        {entities.map((entity) => (
+          <li key={`${entity.scope}-${entity.name}`}>
+            <div className="editorial-entity-heading">
+              <strong>{decodeTextEntities(entity.name)}</strong>
+              <span className={`editorial-entity-impact editorial-entity-impact--${entity.impact} mono`}>
+                {titleCase(entity.impact)}
+              </span>
+            </div>
+            <p>{decodeTextEntities(entity.mechanism)}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+
   return (
-    <section className="editorial-section editorial-decision" aria-label="Investment decision">
-      <h3>Investment decision</h3>
-      <div className="editorial-analysis-state mono">
-        <span>{titleCase(analysis.portfolio_relationship)}</span>
-        <span>{titleCase(analysis.thesis_effect)}</span>
-      </div>
+    <>
       {analysis.affected_entities.length > 0 && (
-        <div className="editorial-entities">
-          <h4 className="mono">Affected entities</h4>
-          <ul>
-            {analysis.affected_entities.map((entity) => (
-              <li key={`${entity.name}-${entity.as_of ?? 'undated'}`}>
-                <strong>{decodeTextEntities(entity.name)}</strong>
-                <span>{decodeTextEntities(entity.relationship)}</span>
-                {entity.as_of && <time className="mono" dateTime={entity.as_of}>As of {entity.as_of}</time>}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div className="editorial-decision-grid">
-        <div>
-          <h4 className="mono">Next step</h4>
-          <p>{decodeTextEntities(nextStep)}</p>
-        </div>
-        {analysis.watchpoints.length > 0 && (
-          <div>
-            <h4 className="mono">Immediate watchpoints</h4>
-            <EditorialList items={analysis.watchpoints.slice(0, 2)} />
+        <section className="editorial-section editorial-decision" aria-label="Company read-through">
+          <div className="editorial-section-heading">
+            <h3>Company read-through</h3>
+            <span className="editorial-thesis-effect mono">Overall: {titleCase(analysis.thesis_effect)}</span>
           </div>
-        )}
-      </div>
-    </section>
+          {portfolioEntities.length > 0 && entityList(portfolioEntities, 'Portfolio impact')}
+          {outsideEntities.length > 0 && entityList(outsideEntities, 'Outside the disclosed portfolio')}
+        </section>
+      )}
+      <section className="editorial-section editorial-watch" aria-label="What to watch">
+        <h3>What to watch</h3>
+        <div className="editorial-decision-grid">
+          {analysis.watchpoints.length > 0 && (
+            <div>
+              <h4 className="mono">Signals</h4>
+              <EditorialList items={analysis.watchpoints.slice(0, 2)} />
+            </div>
+          )}
+          <div>
+            <h4 className="mono">Next diligence step</h4>
+            <p>{decodeTextEntities(nextStep)}</p>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
 
@@ -867,11 +890,23 @@ export default function Insights() {
       )}
 
       {editorialData?.available && editorialRun && editorialData.items.length > 0 && (
-        <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
-          {editorialData.items.map((item) => (
-            <EditorialInsightRow item={item} run={editorialRun} key={item.insight_id} />
-          ))}
-        </section>
+        <>
+          {audience === 'investment' && editorialData.portfolio_reference && (
+            <p className="editorial-portfolio-note">
+              Portfolio impact uses BIT Global Technology Leaders’ complete audited 2025
+              disclosure. “Outside the disclosed portfolio” is analyst mapping, not a known
+              BIT holding or recommendation.{' '}
+              <a href={editorialData.portfolio_reference.source_url} target="_blank" rel="noreferrer">
+                Portfolio source ↗
+              </a>
+            </p>
+          )}
+          <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
+            {editorialData.items.map((item) => (
+              <EditorialInsightRow item={item} run={editorialRun} key={item.insight_id} />
+            ))}
+          </section>
+        </>
       )}
       {candidateData?.available && candidateData.items.length > 0 && (
         <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>

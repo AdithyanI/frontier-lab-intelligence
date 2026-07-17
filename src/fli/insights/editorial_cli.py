@@ -172,11 +172,20 @@ def _context_payload(audience: str) -> dict[str, Any]:
     if not path.is_file():
         raise FileNotFoundError(path)
     text = path.read_text(encoding="utf-8")
+    context: Any
+    format_name: str
+    if path.suffix == ".json":
+        context = json.loads(text)
+        format_name = "json"
+    else:
+        context = text
+        format_name = "markdown"
     return {
         "audience": audience,
         "path": editorial_runs._display_path(path),
         "sha256": hashlib.sha256(text.encode()).hexdigest(),
-        "text": text,
+        "format": format_name,
+        "context": context,
     }
 
 

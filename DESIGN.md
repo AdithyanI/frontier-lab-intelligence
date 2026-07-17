@@ -233,10 +233,15 @@ Rules:
   editorial run, `Kept` shows every selected Insight in agent-assigned priority
   order. The left rail is `Brief rank`, not Feed rank; each supporting Event
   retains its exact Feed rank and envelope link inside provenance. The flat
-  ruled row leads with title, `What changed`, and `Interpretation`, then exposes
-  the causal chain, complete audience analysis, limitations, next step, linked
-  Event roles, and visible citations. Do not hide source support in tooltips or
-  collapse the reasoning into cards. The date count is the number of final
+  ruled row leads with title, `What changed`, and `Interpretation`. Investment
+  then separates `Portfolio impact` from the optional `Outside the disclosed
+  portfolio` mapping, gives every company a textual impact direction and one
+  causal mechanism, and ends with two watchpoints plus the next diligence step.
+  A single page note identifies the audited working portfolio source; dates and
+  caveats are not repeated beside every company. Engineering keeps its decision
+  and smallest-test view. Sources remain visible in the normal reading flow;
+  the complete causal chain, limitations, counter-case, and Event provenance
+  stay in one native details disclosure rather than becoming nested cards. The date count is the number of final
   imported Insights when that run exists. Candidate-level decisions remain an
   audit fallback for unimported days and for explicit `Suppressed` / `All`
   views; they are not the final daily product. Honest zero/thin imported runs

@@ -41,7 +41,10 @@ Expected behavior:
 - kernel performance, third-party evaluation, and Databricks distribution are
   not falsely described as the identical occurrence;
 - they may still support one defensible broader Insight; and
-- the Investment result does not invent a direct BIT holding connection.
+- the Investment result maps affected companies against the structured audited
+  portfolio packet and does not invent a holding connection;
+- any company outside the packet is labeled `outside_portfolio` and is included
+  only when its operating or competitive transmission path is specific.
 
 ## 3. Similar topic that must not be merged
 
