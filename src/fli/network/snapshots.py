@@ -14,18 +14,17 @@ import fcntl
 import hashlib
 import json
 import sqlite3
-import subprocess
 import sys
 import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from fli.ingestion import sources
+from fli.network import provenance
 
 
 RESULT_SCHEMA_VERSION = "1.0"
@@ -168,35 +167,8 @@ class JsonArgumentParser(argparse.ArgumentParser):
         )
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-
-def _canonical_json(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-
-
 def _sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
-
-
-def _sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def _git_head() -> str:
-    completed = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=REPO_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return completed.stdout.strip()
 
 
 def _normalize_handle(value: Any) -> str | None:
@@ -265,7 +237,7 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _cohort_hash(sources: list[dict[str, Any]]) -> str:
-    return _sha256_bytes(_canonical_json(sources).encode())
+    return _sha256_bytes(provenance.canonical_json(sources).encode())
 
 
 def _active_x_sources(product_db: Path) -> list[dict[str, Any]]:
@@ -341,13 +313,13 @@ def freeze_cohort(
     manifest = {
         "schema_version": COHORT_SCHEMA_VERSION,
         "cohort_id": cohort_id,
-        "created_at": created_at or _now(),
+        "created_at": created_at or provenance.utc_now(),
         "source": {
             "database": str(product_db.relative_to(REPO_ROOT))
             if product_db.is_relative_to(REPO_ROOT)
             else str(product_db),
-            "checkpoint_commit": checkpoint_commit or _git_head(),
-            "database_sha256": _sha256_file(product_db),
+            "checkpoint_commit": checkpoint_commit or provenance.git_head(REPO_ROOT),
+            "database_sha256": provenance.file_sha256(product_db),
         },
         "selection": {
             "platform": "x",
@@ -445,7 +417,7 @@ def initialize_snapshot(
         )
 
     conn = connect_snapshot(snapshot_db)
-    observed_at = created_at or _now()
+    observed_at = created_at or provenance.utc_now()
     source_meta = cohort["source"]
     try:
         conn.executescript(SCHEMA)
@@ -573,8 +545,8 @@ def reuse_parent_snapshot(
             exit_code=4,
         )
 
-    parent_sha256 = _sha256_file(parent_snapshot_db)
-    copied_at = copied_at or _now()
+    parent_sha256 = provenance.file_sha256(parent_snapshot_db)
+    copied_at = copied_at or provenance.utc_now()
     conn.execute("ATTACH DATABASE ? AS parent", (str(parent_snapshot_db),))
     try:
         conn.execute("BEGIN IMMEDIATE")
@@ -739,8 +711,8 @@ def record_profile(
     retrieved_at: str | None = None,
 ) -> dict[str, Any]:
     """Cache one source profile before following pages are requested."""
-    retrieved_at = retrieved_at or _now()
-    raw_json = _canonical_json(profile)
+    retrieved_at = retrieved_at or provenance.utc_now()
+    raw_json = provenance.canonical_json(profile)
     profile_sha256 = _sha256_bytes(raw_json.encode())
     observed_x_id = str(profile.get("id") or profile.get("id_str") or "").strip()
     if observed_x_id and observed_x_id != source_x_id:
@@ -845,7 +817,7 @@ def record_attempt_error(
     observed_at: str | None = None,
 ) -> None:
     """Persist a retryable failure without discarding the resume cursor."""
-    observed_at = observed_at or _now()
+    observed_at = observed_at or provenance.utc_now()
     _ensure_mutable(conn)
     updated = conn.execute(
         """UPDATE source_fetch
@@ -871,7 +843,7 @@ def complete_zero_following_source(
     observed_at: str | None = None,
 ) -> None:
     """Complete a source whose cached provider profile advertises zero follows."""
-    observed_at = observed_at or _now()
+    observed_at = observed_at or provenance.utc_now()
     _ensure_mutable(conn)
     profile = conn.execute(
         """SELECT advertised_following_count FROM raw_profile
@@ -1293,9 +1265,9 @@ def record_page(
     advertised_following_count: int | None = None,
 ) -> dict[str, Any]:
     """Atomically cache one provider page and derive its accounts/edges."""
-    retrieved_at = retrieved_at or _now()
+    retrieved_at = retrieved_at or provenance.utc_now()
     cursor_key = request_cursor or ""
-    raw_json = _canonical_json(payload)
+    raw_json = provenance.canonical_json(payload)
     response_sha256 = _sha256_bytes(raw_json.encode())
     followers = payload.get("followings")
     if not isinstance(followers, list):
@@ -1493,7 +1465,7 @@ def mark_source(
     """Record an explicit non-success terminal state for one source."""
     if status not in TERMINAL_SOURCE_STATUSES - {"complete"}:
         raise ValueError(f"unsupported terminal source status: {status}")
-    observed_at = observed_at or _now()
+    observed_at = observed_at or provenance.utc_now()
     _ensure_mutable(conn)
     source = conn.execute(
         "SELECT * FROM source_fetch WHERE source_x_id = ?", (source_x_id,)
@@ -2038,7 +2010,7 @@ def finalize_snapshot(
         """UPDATE snapshot_run
            SET status = 'complete', completed_at = ?,
                reported_cost_usd = ?, estimated_cost_usd = ?""",
-        (completed_at or _now(), reported_cost_usd, estimated_cost_usd),
+        (completed_at or provenance.utc_now(), reported_cost_usd, estimated_cost_usd),
     )
     conn.commit()
     return snapshot_summary(conn)
@@ -2171,7 +2143,7 @@ def _result(
         "meta": {
             "request_id": request_id,
             "duration_ms": int((time.monotonic() - started) * 1000),
-            "timestamp_utc": _now(),
+            "timestamp_utc": provenance.utc_now(),
         },
     }
 

@@ -21,12 +21,12 @@ import tempfile
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
+from fli.network import provenance
 from fli.network import snapshots as following_snapshots
 
 
@@ -211,35 +211,8 @@ class JsonArgumentParser(argparse.ArgumentParser):
         )
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-
-def _sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
-
-
-def _canonical_json(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-
-
-def _git_head() -> str:
-    completed = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=REPO_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return completed.stdout.strip()
 
 
 def _readonly_uri(path: Path) -> str:
@@ -572,7 +545,7 @@ def _context_id(
     snapshot: dict[str, Any], snapshot_sha256: str, registry_sha256: str
 ) -> str:
     return _sha256_text(
-        _canonical_json(
+        provenance.canonical_json(
             {
                 "schema_version": ANALYSIS_SCHEMA_VERSION,
                 "snapshot_id": snapshot["snapshot_id"],
@@ -586,7 +559,7 @@ def _context_id(
 
 def _run_id(context_id: str, algorithm: str, parameters_json: str) -> str:
     return _sha256_text(
-        _canonical_json(
+        provenance.canonical_json(
             {
                 "context_id": context_id,
                 "algorithm": algorithm,
@@ -626,7 +599,7 @@ def _insert_context_and_nodes(
             snapshot["checkpoint_db_sha256"],
             registry_checkpoint_commit,
             registry_sha256,
-            _now(),
+            provenance.utc_now(),
         ),
     )
     conn.execute(
@@ -680,7 +653,7 @@ def _insert_overlap(
             parameters_json,
             source_accounts,
             source_entities,
-            _now(),
+            provenance.utc_now(),
         ),
     )
     eligible_edges = conn.execute(
@@ -1101,7 +1074,7 @@ def run_overlap(
     _require_file(snapshot_db, label="Snapshot database")
     _require_file(registry_db, label="Registry database")
     snapshot = _snapshot_metadata(snapshot_db)
-    snapshot_sha256 = _sha256_file(snapshot_db)
+    snapshot_sha256 = provenance.file_sha256(snapshot_db)
     tracked_manifest = _verify_tracked_snapshot_manifest(snapshot, snapshot_sha256)
     analysis_db = analysis_db or _default_analysis_path(snapshot["snapshot_id"])
     export_paths = [path for path in (export_csv, export_unknown_csv) if path]
@@ -1111,7 +1084,7 @@ def run_overlap(
         analysis_db=analysis_db,
         export_paths=export_paths,
     )
-    parameters_json = _canonical_json(
+    parameters_json = provenance.canonical_json(
         {
             "eligible_source_status": "complete",
             "eligible_registry_state": "active",
@@ -1134,8 +1107,8 @@ def run_overlap(
     registry_snapshot = _snapshot_registry_database(registry_db)
     try:
         _validate_registry_schema(registry_snapshot)
-        registry_sha256 = _sha256_file(registry_snapshot)
-        registry_checkpoint_commit = _git_head()
+        registry_sha256 = provenance.file_sha256(registry_snapshot)
+        registry_checkpoint_commit = provenance.git_head(REPO_ROOT)
         context_id = _context_id(snapshot, snapshot_sha256, registry_sha256)
         run_id = _run_id(context_id, OVERLAP_ALGORITHM, parameters_json)
         analysis_db.parent.mkdir(parents=True, exist_ok=True)
@@ -1387,7 +1360,7 @@ def load_personalization(path: Path) -> tuple[dict[str, Any], str]:
         "selection_rule": manifest["selection_rule"],
         "sources": canonical_sources,
     }
-    return manifest, _sha256_text(_canonical_json(canonical))
+    return manifest, _sha256_text(provenance.canonical_json(canonical))
 
 
 def _preflight_personalization(
@@ -1601,7 +1574,7 @@ def _insert_pagerank(
             overlap_run["eligible_edge_count"],
             overlap_run["eligible_vote_count"],
             overlap_run["ranked_node_count"],
-            _now(),
+            provenance.utc_now(),
         ),
     )
     conn.execute(
@@ -1792,7 +1765,7 @@ def run_pagerank(
     analysis_db = Path(overlap["analysis_db"])
     registry_snapshot = _snapshot_registry_database(registry_db)
     try:
-        registry_sha256 = _sha256_file(registry_snapshot)
+        registry_sha256 = provenance.file_sha256(registry_snapshot)
         if registry_sha256 != overlap["registry"]["database_sha256"]:
             raise RankingCliError(
                 code="E_REGISTRY_CHANGED",
@@ -1819,7 +1792,7 @@ def run_pagerank(
                 snapshot_id=overlap["snapshot"]["snapshot_id"],
                 manifest=manifest,
             )
-            parameters_json = _canonical_json(
+            parameters_json = provenance.canonical_json(
                 {
                     "damping": damping,
                     "tolerance_l1": tolerance,
@@ -2001,7 +1974,7 @@ def _result(
         "meta": {
             "request_id": request_id,
             "duration_ms": int((time.monotonic() - started) * 1000),
-            "timestamp_utc": _now(),
+            "timestamp_utc": provenance.utc_now(),
         },
     }
 
