@@ -10,14 +10,6 @@
   padding-bottom: 72px;
 }
 
-.lens-reading-meta {
-  max-width: 92ch;
-  margin: 0 0 32px;
-  color: var(--muted);
-  font-size: 0.75rem;
-  letter-spacing: 0.025em;
-}
-
 .lens-reading h2,
 .lens-reading h3 {
   line-height: 1.25;

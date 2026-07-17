@@ -126,10 +126,6 @@ export default function BitLensPage() {
       </header>
 
       <article className="lens-reading">
-        <p className="lens-reading-meta mono">
-          Research reviewed 17 Jul 2026 · dated public holdings · not a live portfolio
-        </p>
-
         <section className="lens-reading-intro" aria-labelledby="lens-purpose-title">
           <h2 id="lens-purpose-title">What this page is for</h2>
           <p>
