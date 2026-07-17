@@ -277,8 +277,10 @@ remain quiet row-level detail rather than another filter.
 Counts are computed before filtering and pagination. No
 third relevance judgment or Insight prose is generated.
 
-`fli.evidence.artifacts.store`, `fli.evidence.artifacts.urls`, and `fli.evidence.artifacts.lineage` implement a
-parallel deterministic enrichment boundary for selected Feed envelopes. They
+`fli.evidence.artifacts.store`, `fli.evidence.artifacts.urls`, and
+`fli.evidence.artifacts.lineage` implement a parallel deterministic enrichment
+boundary for selected Feed envelopes; `fli.evidence.artifacts.cli` is the thin
+machine command adapter over those stores and the retrieval workflows. They
 admit outbound URLs only from the root X post or replies by the same stable X
 account in the same conversation. Other authors' replies, quotes, retweets, and
 nested links remain visible reactions but cannot create artifact associations
@@ -731,11 +733,11 @@ rejections remain separate from structural kind in
 `raw_items` is an unconnected bootstrap table. Row counts as of this writing
 are in parentheses.
 
-The Registry read model exposes nullable `followers_count` as the sum of the
-latest stored X-account follower counts owned by each entity, plus a stable
-`reach_rank` across all active Registry entities. All, People, and Organizations
-show this as **X reach**: the ordinal is primary and the compact combined total
-remains secondary scale evidence (`#24 · 3.3M`). The default API order is
+The `fli.registry.view` read model exposes nullable `followers_count` as the
+sum of the latest stored X-account follower counts owned by each entity, plus
+a stable `reach_rank` across all active Registry entities. All, People, and
+Organizations show this as **X reach**: the ordinal is primary and the compact
+combined total remains secondary scale evidence (`#24 · 3.3M`). The default API order is
 `sort=reach&direction=asc`; reversing it shows the deepest observed ranks first.
 Search, kind filters, and pagination do not redefine the comparison universe.
 Missing observations remain null and sort last. This is a public-reach proxy,

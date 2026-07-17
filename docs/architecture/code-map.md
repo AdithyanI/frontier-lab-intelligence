@@ -30,10 +30,10 @@ the Event read model moves out of `web`, not through new aliases.
 | --- | --- | --- |
 | Shared runtime | `fli.llm_responses`, `fli.store` | Provider response normalization and the compact product DB boundary. |
 | Ingestion | `fli.ingestion` | Public-source adapters, conference imports, raw X evidence, and date-complete collection. |
-| Registry | `fli.registry` | Entity/channel truth, admission, provenance, classification, evaluation, and curated seeds. |
+| Registry | `fli.registry.store`, `fli.registry.view`, and the other `fli.registry` workflows | Entity/channel mutation and curation stay in `store`; the API-facing read projection stays in `view`; admission, classification, evaluation, and seeds own their workflows. |
 | Trusted network | `fli.network` | Immutable outgoing-follow snapshots, derived support/ranking analysis, and its read model. |
 | Evidence | `fli.evidence` | Deterministic Feed materialization, exact structural Events, and the end-to-end refresh client. |
-| Artifacts | `fli.evidence.artifacts` | Canonical external-source identity, provenance, retrieval, and extracted text. |
+| Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
 | Attention | `fli.scoring` | Versioned score formulas and offline comparison. Production remains `attention-v1.1`. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
 | Insights | `fli.insights` | Generation contract, durable runs, machine client, read model, and active prompts. |
