@@ -76,6 +76,13 @@ def main(argv: list[str] | None = None) -> int:
         "insights", help="Run and inspect durable audience Insight generation."
     )
     insights_p.add_argument("insights_args", nargs=argparse.REMAINDER)
+    daily_intelligence_p = sub.add_parser(
+        "daily-intelligence",
+        help="Prepare and persist agent-authored daily audience intelligence.",
+    )
+    daily_intelligence_p.add_argument(
+        "daily_intelligence_args", nargs=argparse.REMAINDER
+    )
     attention_score_p = sub.add_parser(
         "attention-score", help="Evaluate versioned Feed attention scores."
     )
@@ -194,6 +201,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli.insights import cli as insight_cli
 
         return insight_cli.main(args.insights_args)
+
+    if args.command == "daily-intelligence":
+        from fli.insights import editorial_cli
+
+        return editorial_cli.main(args.daily_intelligence_args)
 
     if args.command == "attention-score":
         from fli.scoring import evaluation

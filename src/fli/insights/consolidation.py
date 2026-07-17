@@ -26,6 +26,7 @@ from fli.registry import classification as entity_kinds
 INPUT_CONTRACT = "routing-packet-long-v1"
 DEFAULT_MODEL = "text-embedding-3-large"
 DEFAULT_THRESHOLD = 0.66
+EMBEDDING_BATCH_SIZE = 16
 
 AUXILIARY_SCHEMA = """
 CREATE TABLE IF NOT EXISTS event_embedding (
@@ -231,42 +232,58 @@ def _embed(
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     if not rows:
         return {}, {"input_tokens": 0, "reported_cost_usd": 0.0}
-    request = {
-        "model": model,
-        "input": [str(row["input_text"]) for row in rows],
-        "extra_body": {"metadata": {"tags": list(tags)}},
-        "extra_headers": {"x-litellm-tags": ",".join(tags)},
-    }
-    raw_api = getattr(client.embeddings, "with_raw_response", None)
-    if raw_api is None:
-        response = client.embeddings.create(**request)
-        reported_cost = None
-    else:
-        raw_response = raw_api.create(**request)
-        response = raw_response.parse()
-        reported_cost = llm_responses.reported_cost(raw_response.headers)
-    ordered = sorted(response.data, key=lambda item: int(item.index))
-    indices = [int(item.index) for item in ordered]
-    if indices != list(range(len(rows))):
-        raise RuntimeError(
-            "embedding response did not provide complete indexed coverage: "
-            f"expected {list(range(len(rows)))}, found {indices}"
+    vectors: dict[str, np.ndarray] = {}
+    input_tokens = 0
+    reported_costs: list[float] = []
+    request_count = 0
+    for start in range(0, len(rows), EMBEDDING_BATCH_SIZE):
+        batch = rows[start : start + EMBEDDING_BATCH_SIZE]
+        request = {
+            "model": model,
+            "input": [str(row["input_text"]) for row in batch],
+            "extra_body": {"metadata": {"tags": list(tags)}},
+            "extra_headers": {"x-litellm-tags": ",".join(tags)},
+        }
+        raw_api = getattr(client.embeddings, "with_raw_response", None)
+        if raw_api is None:
+            response = client.embeddings.create(**request)
+            reported_cost = None
+        else:
+            raw_response = raw_api.create(**request)
+            response = raw_response.parse()
+            reported_cost = llm_responses.reported_cost(raw_response.headers)
+        request_count += 1
+        ordered = sorted(response.data, key=lambda item: int(item.index))
+        indices = [int(item.index) for item in ordered]
+        if indices != list(range(len(batch))):
+            raise RuntimeError(
+                "embedding response did not provide complete indexed coverage "
+                f"for batch {request_count}: expected {list(range(len(batch)))}, "
+                f"found {indices}"
+            )
+        matrix = np.asarray([item.embedding for item in ordered], dtype=np.float32)
+        norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+        if np.any(norms == 0):
+            raise RuntimeError("embedding response contained a zero-length vector")
+        matrix /= norms
+        vectors.update(
+            {
+                str(row["event_id"]): matrix[index]
+                for index, row in enumerate(batch)
+            }
         )
-    matrix = np.asarray([item.embedding for item in ordered], dtype=np.float32)
-    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-    if np.any(norms == 0):
-        raise RuntimeError("embedding response contained a zero-length vector")
-    matrix /= norms
-    usage = getattr(response, "usage", None)
-    input_tokens = int(getattr(usage, "total_tokens", 0) or 0)
+        usage = getattr(response, "usage", None)
+        input_tokens += int(getattr(usage, "total_tokens", 0) or 0)
+        if reported_cost is not None:
+            reported_costs.append(float(reported_cost))
     return (
-        {
-            str(row["event_id"]): matrix[index]
-            for index, row in enumerate(rows)
-        },
+        vectors,
         {
             "input_tokens": input_tokens,
-            "reported_cost_usd": reported_cost,
+            "reported_cost_usd": (
+                round(sum(reported_costs), 10) if reported_costs else None
+            ),
+            "request_count": request_count,
         },
     )
 

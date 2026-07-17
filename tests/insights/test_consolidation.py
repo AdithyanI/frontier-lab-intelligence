@@ -31,6 +31,23 @@ class FailingEmbeddings:
         raise AssertionError(f"cached embeddings should be reused: {kwargs}")
 
 
+class ProviderChunkSafeEmbeddings:
+    """Model the proxy contract whose response indices reset every 16 inputs."""
+
+    def __init__(self):
+        self.calls = []
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        return SimpleNamespace(
+            data=[
+                SimpleNamespace(index=index, embedding=[float(index + 1), 1.0])
+                for index in range(len(kwargs["input"]))
+            ],
+            usage=SimpleNamespace(total_tokens=len(kwargs["input"])),
+        )
+
+
 def _routing_db(path: Path) -> Path:
     conn = sqlite3.connect(path)
     conn.executescript(routing_runs.RUN_SCHEMA)
@@ -184,3 +201,23 @@ def test_index_is_stored_by_event_and_reused_without_another_embedding_call(tmp_
     assert second["embedded_event_count"] == 0
     assert second["reused_embedding_count"] == 3
     assert second["groups"] == first["groups"]
+
+
+def test_embedding_client_chunks_before_proxy_indices_reset():
+    embeddings = ProviderChunkSafeEmbeddings()
+    rows = [
+        {"event_id": f"event-{index}", "input_text": f"input {index}"}
+        for index in range(33)
+    ]
+
+    vectors, usage = consolidation._embed(
+        SimpleNamespace(embeddings=embeddings),
+        rows,
+        model="text-embedding-3-large",
+        tags=("app:test",),
+    )
+
+    assert [len(call["input"]) for call in embeddings.calls] == [16, 16, 1]
+    assert len(vectors) == 33
+    assert usage["request_count"] == 3
+    assert usage["input_tokens"] == 33
