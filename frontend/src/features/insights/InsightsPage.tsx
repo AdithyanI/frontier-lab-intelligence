@@ -356,15 +356,20 @@ function EngineeringDecision({
 }
 
 function EditorialCitationLinks({ item }: { item: EditorialInsightItem }) {
+  const titleId = `${item.insight_id}-sources`
   return (
-    <div className="editorial-citation-links" aria-label="Citations">
-      <span className="mono">Sources</span>
-      {item.citations.map((citation, index) => (
-        <a href={citation.url} target="_blank" rel="noreferrer" key={citation.citation_id}>
-          {index + 1}. {decodeTextEntities(citation.title)} ↗
-        </a>
-      ))}
-    </div>
+    <section className="editorial-citation-links" aria-labelledby={titleId}>
+      <h3 className="mono" id={titleId}>Sources</h3>
+      <ul className="editorial-source-links">
+        {item.citations.map((citation) => (
+          <li key={citation.citation_id}>
+            <a href={citation.url} target="_blank" rel="noreferrer">
+              {decodeTextEntities(citation.title)} ↗
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -505,11 +510,8 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
         <span>Brief rank</span>
       </div>
       <div className="insight-body editorial-insight-body">
-        <header className="insight-head editorial-insight-head">
+        <header className="insight-head">
           <h2 id={titleId}>{decodeTextEntities(item.title)}</h2>
-          <time className="editorial-insight-date mono" dateTime={item.day}>
-            {displayInsightDay(item.day)}
-          </time>
         </header>
 
         <div className="editorial-opening">
