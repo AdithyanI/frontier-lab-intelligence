@@ -46,7 +46,7 @@ export default function App() {
           </Route>
           <Route path="/insights" element={<Insights />} />
           <Route path="/system" element={<System />}>
-            <Route index element={<Navigate to="status" replace />} />
+            <Route index element={<Navigate to="architecture" replace />} />
             <Route path="status" element={<Status />} />
             <Route path="architecture" element={<Architecture />} />
           </Route>
