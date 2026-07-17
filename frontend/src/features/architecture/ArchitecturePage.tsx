@@ -651,8 +651,8 @@ function RankingMethods() {
 
 export default function Architecture() {
   return (
-    <div className="page arch-page">
-      <h1 className="page-title">Architecture</h1>
+    <section className="system-view arch-page" aria-labelledby="architecture-title">
+      <h2 className="system-view-title" id="architecture-title">Architecture</h2>
       <p className="page-sub">A visual map of what is live, where judgment enters, and what each number means.</p>
 
       <nav className="ruled-nav arch-chapters" aria-label="Architecture chapters">
@@ -704,6 +704,6 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas"><SystemOverview /></div>
       </section>
-    </div>
+    </section>
   )
 }

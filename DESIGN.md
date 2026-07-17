@@ -84,7 +84,10 @@ Rules:
 
 - App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
   beneath. No sidebar — pages own their full width. Show only working routes;
-  unavailable future destinations do not occupy the navigation.
+  unavailable future destinations do not occupy the navigation. The four
+  top-level workspaces are Network, Evidence, Insights, and System. System
+  groups the live Status surface with the explanatory Architecture surface;
+  neither competes with the reader workflows as a fifth top-level destination.
 - Registry and Ranking share one top-level **Network** destination because they
   are two views of the same source system. Registry is the first and default
   subview because it is the assignment's screened identity register; Ranking
@@ -245,6 +248,11 @@ Rules:
 - **Score breakdown:** inputs and weights are visible only on demand from the
   Feed rank. Trust through inspectability without making the decimal the primary
   reading cue (PRODUCT.md #3).
+- **System status:** a read-only, API-derived checkpoint view. Lead with data
+  currency, observation time, and the operator-run refresh model, then use one
+  ruled table for Registry, collection, Feed/Events, artifacts, routing, and
+  Insights. Separate "data through" from "last update" and never claim host,
+  database, or scheduler health that the current product APIs do not prove.
 
 ## Motion
 

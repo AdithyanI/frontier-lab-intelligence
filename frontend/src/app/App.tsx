@@ -8,6 +8,8 @@ import AddProfile from '../features/network/AddProfilePage'
 import Network from '../features/network/NetworkLayout'
 import Ranking from '../features/network/RankingPage'
 import Registry from '../features/network/RegistryPage'
+import Status from '../features/system/StatusPage'
+import System from '../features/system/SystemLayout'
 import { useAuditDatePath } from '../shared/date/auditDateStore'
 
 export default function App() {
@@ -25,7 +27,7 @@ export default function App() {
           <NavLink to="/network">Network</NavLink>
           <NavLink to={evidencePath}>Evidence</NavLink>
           <NavLink to={insightsPath}>Insights</NavLink>
-          <NavLink to="/architecture">Architecture</NavLink>
+          <NavLink to="/system">System</NavLink>
         </nav>
       </header>
       <main className="content">
@@ -43,7 +45,11 @@ export default function App() {
             <Route path="artifacts" element={<Artifacts />} />
           </Route>
           <Route path="/insights" element={<Insights />} />
-          <Route path="/architecture" element={<Architecture />} />
+          <Route path="/system" element={<System />}>
+            <Route index element={<Navigate to="status" replace />} />
+            <Route path="status" element={<Status />} />
+            <Route path="architecture" element={<Architecture />} />
+          </Route>
           <Route path="*" element={<Navigate to="/network/registry" replace />} />
         </Routes>
       </main>

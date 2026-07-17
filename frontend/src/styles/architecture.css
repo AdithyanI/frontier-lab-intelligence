@@ -1,6 +1,6 @@
 /* ---- architecture page: one visual learning narrative ---- */
 
-.arch-page { max-width: 1280px; padding-bottom: 88px; }
+.arch-page { padding-bottom: 32px; }
 
 .arch-section {
   margin-top: 64px;
@@ -141,4 +141,3 @@
   .method-row { grid-template-columns: 190px minmax(0, 1fr); }
   .method-limit { grid-column: 2; border-top: 1px solid var(--border); }
 }
-

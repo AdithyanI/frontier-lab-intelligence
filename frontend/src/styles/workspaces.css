@@ -37,9 +37,11 @@
 /* ---- Network and Evidence workspaces ---- */
 
 .network-page,
-.evidence-page { max-width: 1360px; }
+.evidence-page,
+.system-page { max-width: 1360px; }
 
 .network-tabs a.active,
+.system-tabs a.active,
 .evidence-tabs a.active {
   background: var(--ink);
   color: #fff;
@@ -48,6 +50,14 @@
 .network-view { margin-top: 36px; }
 
 .evidence-view { margin-top: 36px; }
+
+.system-view { margin-top: 36px; }
+
+.system-view-title {
+  letter-spacing: -0.015em;
+  font-size: 22px;
+  font-weight: 600;
+}
 
 .network-view-title {
   letter-spacing: -0.015em;
@@ -264,4 +274,3 @@
   .topbar { flex-wrap: wrap; height: auto; padding: 14px 20px; row-gap: 10px; }
   .topbar nav { width: 100%; margin-left: 0; overflow-x: auto; }
 }
-

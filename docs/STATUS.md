@@ -132,8 +132,7 @@ checks prevent the former flat source layout from returning. Attention Score
 v2 remains paused and archived without changing the production score.
 
 The product critical path is now selecting and consolidating the strongest
-3–5 submission insights. Start a focused tracker before implementing that next
-multi-session batch.
+3–5 submission insights.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -146,7 +145,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | Current Direction above; create the next focused tracker before implementation. |
+| What should be done next, exactly? | Current Direction above. |
 | Which code/store/command/test owns a stage? | [`architecture/code-map.md`](architecture/code-map.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
