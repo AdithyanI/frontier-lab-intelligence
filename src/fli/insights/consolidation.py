@@ -25,7 +25,7 @@ from fli.registry import classification as entity_kinds
 
 INPUT_CONTRACT = "routing-packet-long-v1"
 DEFAULT_MODEL = "text-embedding-3-large"
-DEFAULT_THRESHOLD = 0.64
+DEFAULT_THRESHOLD = 0.66
 
 AUXILIARY_SCHEMA = """
 CREATE TABLE IF NOT EXISTS event_embedding (

@@ -125,12 +125,12 @@ case-study thesis.
 
 ## Current Direction
 
-No project tracker is active. The bounded artifact-navigation cleanup is
-complete and archived under
-[`docs/projects/archive/artifact-navigation-filter/`](projects/archive/artifact-navigation-filter/).
-Exact generic `/search` destinations are now rejected before they can become
-artifact snapshots; the affected published routing day was refreshed. This did
-not change the submission critical path below.
+The complete artifact-content refresh is active under
+[`docs/projects/artifact-content-refresh/tasks.md`](projects/artifact-content-refresh/tasks.md).
+It makes usable extracted content—not HTTP or Reader success—the packet
+eligibility boundary, quarantines current non-content snapshots, and rebuilds
+the July 5–15 routing publication. This evidence-integrity correction temporarily
+precedes the submission selection critical path below.
 
 Repository housekeeping is complete and archived
 under [`docs/projects/archive/repo-housekeeping/`](projects/archive/repo-housekeeping/):
