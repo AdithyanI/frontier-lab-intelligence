@@ -4,7 +4,6 @@ import {
   getCachedJSON,
   type EditorialAnalysis,
   type EditorialInsightItem,
-  type EditorialInsightRun,
   type EditorialInsightsResponse,
   type EngineeringEditorialAnalysis,
   type InsightAudience,
@@ -28,7 +27,6 @@ import { useAuditDate } from '../../shared/date/auditDateStore'
 const DEFAULT_AUDIENCE: InsightAudience = 'investment'
 const DEFAULT_STATUS: InsightStatus = 'kept'
 const AUDIENCE_ORDER: InsightAudience[] = ['investment', 'ai_engineering']
-const STATUS_ORDER: InsightStatus[] = ['kept', 'suppressed', 'all']
 
 const insightDay = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -148,68 +146,6 @@ function InsightState({
         </button>
       )}
     </section>
-  )
-}
-
-function InsightStatusMenu({
-  value,
-  counts,
-  onChange,
-}: {
-  value: InsightStatus
-  counts?: Record<InsightStatus, number>
-  onChange: (value: InsightStatus) => void
-}) {
-  const detailsRef = useRef<HTMLDetailsElement>(null)
-  const selected = STATUS_COPY[value]
-
-  useEffect(() => {
-    const closeOnOutsideClick = (event: MouseEvent) => {
-      if (!detailsRef.current?.contains(event.target as Node)) {
-        detailsRef.current?.removeAttribute('open')
-      }
-    }
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') detailsRef.current?.removeAttribute('open')
-    }
-    window.addEventListener('pointerdown', closeOnOutsideClick)
-    window.addEventListener('keydown', closeOnEscape)
-    return () => {
-      window.removeEventListener('pointerdown', closeOnOutsideClick)
-      window.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [])
-
-  return (
-    <details className="feed-menu" ref={detailsRef}>
-      <summary aria-label={`STATUS: ${selected.description}`}>
-        <span className="feed-menu-label mono">STATUS</span>
-        <span className="feed-menu-value">{selected.label}</span>
-        {counts && <span className="feed-menu-count mono">{counts[value]}</span>}
-        <span className="feed-menu-caret" aria-hidden="true" />
-      </summary>
-      <div className="feed-menu-panel" role="menu" aria-label="Insight status">
-        {STATUS_ORDER.map((status) => (
-          <button
-            type="button"
-            className={status === value ? 'is-active' : ''}
-            role="menuitemradio"
-            aria-checked={status === value}
-            title={STATUS_COPY[status].description}
-            onClick={() => {
-              onChange(status)
-              detailsRef.current?.removeAttribute('open')
-            }}
-            key={status}
-          >
-            <span>{STATUS_COPY[status].label}</span>
-            {counts && (
-              <span className="feed-menu-option-count mono">{counts[status]}</span>
-            )}
-          </button>
-        ))}
-      </div>
-    </details>
   )
 }
 
@@ -557,13 +493,7 @@ function EditorialFullAnalysis({
   )
 }
 
-function EditorialInsightRow({
-  item,
-  run,
-}: {
-  item: EditorialInsightItem
-  run: EditorialInsightRun
-}) {
+function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
   const titleId = `${item.insight_id}-title`
   const investmentAnalysis = isInvestmentAnalysis(item.analysis) ? item.analysis : null
   const engineeringAnalysis = isEngineeringAnalysis(item.analysis) ? item.analysis : null
@@ -573,19 +503,13 @@ function EditorialInsightRow({
       <div className="insight-rank editorial-rank mono">
         <strong>#{item.rank}</strong>
         <span>Brief rank</span>
-        <span className="editorial-rank-sources">{item.events.length} {item.events.length === 1 ? 'Event' : 'Events'}</span>
       </div>
       <div className="insight-body editorial-insight-body">
-        <header className="insight-head">
-          <div className="insight-decision-mark insight-decision-mark--kept mono">Selected</div>
+        <header className="insight-head editorial-insight-head">
           <h2 id={titleId}>{decodeTextEntities(item.title)}</h2>
-          <div className="insight-provenance mono">
-            <time dateTime={item.day}>{displayInsightDay(item.day)}</time>
-            <span>{run.agent.model}</span>
-            <span>{run.agent.skill_version}</span>
-            <span>{item.events.length} linked {item.events.length === 1 ? 'Event' : 'Events'}</span>
-            <span>{item.citations.length} {item.citations.length === 1 ? 'citation' : 'citations'}</span>
-          </div>
+          <time className="editorial-insight-date mono" dateTime={item.day}>
+            {displayInsightDay(item.day)}
+          </time>
         </header>
 
         <div className="editorial-opening">
@@ -765,16 +689,6 @@ export default function Insights() {
     if (nextDate) setView(audience, nextDate.day)
   }
 
-  const editorialRun = editorialData?.run ?? null
-  const candidateRun = candidateData?.run ?? null
-  const selectedDateCounts = availableDates.find((value) => value.day === selectedDate)
-  const statusCounts = editorialRun
-    ? {
-        kept: editorialRun.counts.insights,
-        suppressed: selectedDateCounts?.suppressed_count ?? 0,
-        all: editorialRun.counts.insights + (selectedDateCounts?.suppressed_count ?? 0),
-      }
-    : candidateRun?.counts
   const datesLoading = currentDates === null && datesError === null
   const dataLoading = currentDates?.available === true &&
     currentDates.dates.some((value) => value.day === selectedDate) &&
@@ -788,22 +702,6 @@ export default function Insights() {
       <header className="page-head insight-page-head">
         <h1 className="page-title">{copy.title}</h1>
         <p className="page-sub">{copy.subtitle}</p>
-        {editorialRun && (
-          <p className="page-method-line mono">
-            <span>{editorialRun.counts.insights.toLocaleString('en-US')} selected</span>
-            <span>{editorialRun.counts.candidate_events.toLocaleString('en-US')} routed Events reviewed</span>
-            <span>{editorialRun.agent.model}</span>
-            <span>{editorialRun.agent.skill_version}</span>
-          </p>
-        )}
-        {candidateRun && (
-          <p className="page-method-line mono">
-            <span>{candidateRun.surfaced_count.toLocaleString('en-US')} kept</span>
-            <span>{candidateRun.suppressed_count.toLocaleString('en-US')} suppressed</span>
-            <span>{candidateRun.complete_count.toLocaleString('en-US')} classified</span>
-            <span>{candidateRun.model}</span>
-          </p>
-        )}
       </header>
 
       <div className="insight-audience-switch" role="group" aria-label="Insight audience">
@@ -836,23 +734,6 @@ export default function Insights() {
             loading={datesLoading}
           />
         </section>
-      )}
-
-      {currentDates?.available && (
-        <div className="insight-tools">
-          <p className="mono">
-            {editorialRun
-              ? 'Day pills count final Insights. Suppressed and All retain the candidate audit.'
-              : 'Day pills count kept Insights. Audit every decision here.'}
-          </p>
-          <div className="feed-controls">
-            <InsightStatusMenu
-              value={status}
-              counts={statusCounts}
-              onChange={(nextStatus) => setView(audience, selectedDate, nextStatus)}
-            />
-          </div>
-        </div>
       )}
 
       {datesError && (
@@ -889,7 +770,7 @@ export default function Insights() {
         <InsightState title={copy.emptyTitle} detail={currentData.reason || 'No editorial decision is available.'} />
       )}
 
-      {editorialData?.available && editorialRun && editorialData.items.length > 0 && (
+      {editorialData?.available && editorialData.items.length > 0 && (
         <>
           {audience === 'investment' && editorialData.portfolio_reference && (
             <p className="editorial-portfolio-note">
@@ -903,7 +784,7 @@ export default function Insights() {
           )}
           <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
             {editorialData.items.map((item) => (
-              <EditorialInsightRow item={item} run={editorialRun} key={item.insight_id} />
+              <EditorialInsightRow item={item} key={item.insight_id} />
             ))}
           </section>
         </>

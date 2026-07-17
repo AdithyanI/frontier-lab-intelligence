@@ -45,19 +45,19 @@ test('Insights uses the durable successor API and guards status-specific respons
   assert.match(insightSource, /payload\.content_kind === 'daily_editorial'/)
 })
 
-test('Insights reuses the Feed week strip and gives it kept counts', () => {
+test('Insights reuses the Feed week strip without explanatory reader clutter', () => {
   assert.match(insightSource, /<DateNavigator/)
-  assert.match(insightSource, /Day pills count kept Insights/)
   assert.match(insightSource, /itemLabel=\{copy\.itemLabel\}/)
+  assert.doesNotMatch(insightSource, /Day pills count/)
+  assert.doesNotMatch(insightSource, /className="insight-tools"/)
   assert.match(appStyles, /\.insight-calendar \.feed-day:only-child \{ grid-column: 7; \}/)
 })
 
-test('Insights exposes kept, suppressed, and all decisions in a Feed-style status menu', () => {
-  assert.match(insightSource, /const STATUS_ORDER: InsightStatus\[\] = \['kept', 'suppressed', 'all'\]/)
-  assert.match(insightSource, /<span className="feed-menu-label mono">STATUS<\/span>/)
-  assert.match(insightSource, /role="menuitemradio"/)
-  assert.match(insightSource, /counts=\{statusCounts\}/)
-  assert.match(appStyles, /\.insight-tools \.feed-menu > summary \{ min-width: 190px; \}/)
+test('Insights keeps status in the audit URL without exposing a reader control strip', () => {
+  assert.match(insightSource, /const status = parseStatus\(searchParams\.get\('status'\)\)/)
+  assert.match(insightSource, /nextParams\.set\('status', nextStatus\)/)
+  assert.doesNotMatch(insightSource, /InsightStatusMenu/)
+  assert.doesNotMatch(insightSource, /role="menuitemradio"/)
 })
 
 test('Insights inherits Feed rank and links every decision to its exact envelope', () => {
@@ -98,6 +98,10 @@ test('Insights renders canonical daily editorial judgments as a ranked, cited br
   assert.match(apiSource, /portfolio_reference: EditorialPortfolioReference \| null/)
   assert.match(apiSource, /impact_chain: string\[\]/)
   assert.match(apiSource, /evidence_limitations: string\[\]/)
+  assert.match(insightSource, /className="editorial-insight-date mono"/)
+  assert.doesNotMatch(insightSource, />Selected<\/div>/)
+  assert.doesNotMatch(insightSource, /run\.agent\.model/)
+  assert.doesNotMatch(insightSource, /run\.agent\.skill_version/)
   assert.match(apiSource, /events: EditorialEventLink\[\]/)
   assert.match(apiSource, /citations: EditorialCitation\[\]/)
   assert.match(insightSource, /<span>Brief rank<\/span>/)
