@@ -127,17 +127,14 @@ case-study thesis.
 ## Current Direction
 
 The active tracker is
-[`docs/projects/insight-format-v10/tasks.md`](projects/insight-format-v10/tasks.md).
-The canonical Event rebuild and v9 nine-day top-100 routing replacement are
-complete, and the Evidence Audience Routing project is closed and archived.
-The old v8 routing directories, superseded Insight prompt rows, duplicate
-Insight API routes, and Event re-anchoring helper are gone. The current
-Investment v9 / Engineering v6 store contains the 173-decision audit. The
-active tracker owns the reviewed v10/v7 Insight format upgrade (renamed
-`why_it_matters` plus audience-specific `watchpoint`/`experiment` fields,
-named public-company mapping for Investment, packet `posted:` dates with a
-temporal standard), cross-Event consolidation, final 3–5 selection, and the
-regeneration run.
+[`docs/projects/submission-sprint/tasks.md`](projects/submission-sprint/tasks.md).
+The Event rebuild, v9 top-100 routing coverage, and full v10/v7 Insight
+regeneration are complete and frozen unless final-proof validation exposes a
+concrete defect. The remaining three-day critical path is to consolidate
+cross-Event semantic duplicates, select and source-check the strongest 3–5
+unique developments, deliver them as an in-app briefing/PDF/local alert
+preview, complete compact evaluation and tokenomics evidence, and assemble the
+reviewer-facing submission package.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -150,7 +147,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | [`projects/insight-format-v10/tasks.md`](projects/insight-format-v10/tasks.md) |
+| What should be done next, exactly? | [`projects/submission-sprint/tasks.md`](projects/submission-sprint/tasks.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |
