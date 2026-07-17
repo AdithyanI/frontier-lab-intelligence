@@ -109,6 +109,32 @@ def test_safe_get_revalidates_redirect_target():
         client.close()
 
 
+def test_safe_get_rejects_navigation_redirect_target():
+    def handler(request: httpx.Request):
+        if request.url.path == "/author/researcher":
+            return httpx.Response(301, headers={"Location": "/search"})
+        return httpx.Response(
+            200,
+            headers={"Content-Type": "text/html"},
+            content=b"<html><body>Changing search results</body></html>",
+        )
+
+    client = httpx.Client(
+        transport=httpx.MockTransport(handler), trust_env=False
+    )
+    try:
+        with pytest.raises(artifact_fetch.FetchFailure) as failure:
+            artifact_fetch._safe_get(
+                client,
+                "https://example.com/author/researcher",
+                resolver=_global_resolver,
+            )
+        assert failure.value.code == "final_url_search_navigation"
+        assert failure.value.retryable is False
+    finally:
+        client.close()
+
+
 def test_extract_content_rejects_client_rendered_error_shell():
     body = b"""<html><head><title>Join us</title></head><body><main>
     <p>Oh dear. We were unable to load the form.</p>

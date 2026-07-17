@@ -24,6 +24,7 @@ def test_candidate_rules_exclude_navigation_and_accept_artifacts():
         "https://www.youtube.com/@lab": "external_profile",
         "https://discord.gg/example": "invite_url",
         "https://www.google.com/search?q=ai": "search_navigation",
+        "https://www.amazon.science/search": "search_navigation",
     }
     for url, reason in cases.items():
         result = artifact_urls.classify_candidate(url)
@@ -35,6 +36,11 @@ def test_candidate_rules_exclude_navigation_and_accept_artifacts():
     )
     assert accepted.decision == "accepted"
     assert accepted.canonical_url == "https://arxiv.org/abs/2603.18073"
+
+    specific_document = artifact_urls.classify_candidate(
+        "https://example.com/research/searching-for-truth"
+    )
+    assert specific_document.decision == "accepted"
 
 
 def test_url_evidence_binds_nested_link_to_actual_owner():

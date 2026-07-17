@@ -289,6 +289,16 @@ def _safe_get(
                         f"HTTP {response.status_code}",
                         retryable=False,
                     )
+                final_decision = artifact_urls.classify_candidate(
+                    str(response.request.url)
+                )
+                if final_decision.decision != "accepted":
+                    raise FetchFailure(
+                        f"final_url_{final_decision.reason_code}",
+                        "Final URL is not artifact-eligible: "
+                        f"{final_decision.reason_code}",
+                        retryable=False,
+                    )
                 content_type_header = response.headers.get("content-type")
                 content_type = _media_type(content_type_header)
                 limit = max_bytes or _body_limit(str(response.request.url), content_type)

@@ -94,6 +94,9 @@ at the root of `fli`.
   boundary with stable metadata, measured cache telemetry, and captured cost.
 - **No compatibility maze:** migrations use direct imports and canonical data
   paths. Old module aliases and dual reads are not retained by default.
+- **Artifact targets remain document-shaped:** exact generic `/search`
+  navigation endpoints are excluded both when first observed and when reached
+  through redirects, so changing listing content cannot enter semantic packets.
 - **External action remains explicit:** publishing, alerts, uploads, and case
   submission require current-session human approval.
 

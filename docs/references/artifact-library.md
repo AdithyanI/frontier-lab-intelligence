@@ -52,7 +52,8 @@ evidence.
 
 ## URL rules
 
-Canonicalization is conservative and versioned as `artifact-url-v1`:
+Canonicalization and candidate admission are conservative and versioned as
+`artifact-url-v2`:
 
 - remove fragments and known tracking parameters;
 - normalize host/scheme/ports and narrow known site forms such as arXiv;
@@ -63,6 +64,9 @@ Canonicalization is conservative and versioned as `artifact-url-v1`:
 - ignore ordinary X status/profile/media self-links;
 - admit X long-form Article URLs explicitly;
 - do not guess the target of a card-only `t.co` URL.
+- exclude exact generic `/search` navigation endpoints both at candidate
+  admission and after redirects, before content snapshot or identity
+  convergence.
 
 The stored artifact kind is a deterministic, fetch-oriented URL-shape hint,
 not a semantic content classification. The product exposes five stable types:

@@ -294,10 +294,12 @@ ownership, observation support, disclosure presence, and artifact provenance.
 The fast repo check runs it whenever the local derived catalog exists.
 Ordinary
 X status/profile/media URLs remain source evidence; X long-form Articles are
-the explicit artifact exception. Conservative `artifact-url-v1`
+the explicit artifact exception. Conservative `artifact-url-v2`
 canonicalization removes only known tracking noise, retains every observed and
 expanded form as an alias, and never merges different URLs solely by content
-hash. Stable source-kind/provider/external-ID/snapshot observations preserve
+hash. Exact generic `/search` navigation endpoints are excluded at candidate
+admission and when reached as a redirect target, before snapshotting or
+artifact-identity convergence. Stable source-kind/provider/external-ID/snapshot observations preserve
 provenance independently of mutable event projections.
 
 `fli.evidence.artifacts.fetch` supports both frozen validation cohorts and a complete

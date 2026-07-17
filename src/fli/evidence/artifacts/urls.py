@@ -11,7 +11,7 @@ from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 
-CANONICALIZATION_CONTRACT = "artifact-url-v1"
+CANONICALIZATION_CONTRACT = "artifact-url-v2"
 _TRACKING_KEYS = frozenset(
     {
         "dclid",
@@ -159,13 +159,13 @@ def classify_candidate(observed_url: str, expanded_url: str | None = None) -> Ca
     if host in {"pic.twitter.com", "pbs.twimg.com", "video.twimg.com"}:
         return CandidateDecision("excluded", "x_media")
     lowered_path = path.lower()
+    if lowered_path.rstrip("/") == "/search":
+        return CandidateDecision("excluded", "search_navigation")
     if host in {"discord.gg", "www.discord.gg"} or (
         host in {"discord.com", "www.discord.com"}
         and lowered_path.startswith("/invite/")
     ):
         return CandidateDecision("excluded", "invite_url")
-    if host in {"google.com", "www.google.com"} and lowered_path == "/search":
-        return CandidateDecision("excluded", "search_navigation")
     if host in {"github.com", "www.github.com"}:
         segments = [segment for segment in path.split("/") if segment]
         if len(segments) < 2:
