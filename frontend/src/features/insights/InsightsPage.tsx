@@ -12,6 +12,7 @@ import {
   type InsightStatus,
   type InsightsResponse,
   type InvestmentEditorialAnalysis,
+  type InvestmentImpactDirection,
 } from '../../shared/api'
 import CopyEnvelopeId from '../../shared/components/CopyEnvelopeId'
 import DateNavigator from '../../shared/components/DateNavigator'
@@ -74,6 +75,13 @@ const STATUS_COPY: Record<InsightStatus, { label: string; description: string }>
   suppressed: { label: 'Suppressed', description: 'Rejected at the final editorial gate' },
   all: { label: 'All', description: 'Every completed editorial decision' },
 }
+
+const INVESTMENT_IMPACT_COPY = {
+  positive: { icon: '↗', label: 'Positive' },
+  negative: { icon: '↘', label: 'Negative' },
+  mixed: { icon: '↔', label: 'Mixed' },
+  uncertain: { icon: '?', label: 'Uncertain' },
+} satisfies Record<InvestmentImpactDirection, { icon: string; label: string }>
 
 function parseAudience(value: string | null): InsightAudience {
   return value === 'ai_engineering' || value === 'investment'
@@ -276,35 +284,43 @@ function InvestmentDecision({
 
   const entityList = (
     entities: InvestmentEditorialAnalysis['affected_entities'],
-    label: string,
+    label: string | null,
   ) => (
-    <div className="editorial-entities">
-      <h4 className="mono">{label}</h4>
+    <div className={`editorial-entities${label ? '' : ' editorial-entities--unlabelled'}`}>
+      {label && <h4 className="mono">{label}</h4>}
       <ul>
-        {entities.map((entity) => (
-          <li key={`${entity.scope}-${entity.name}`}>
-            <div className="editorial-entity-heading">
-              <strong>{decodeTextEntities(entity.name)}</strong>
-              <span className={`editorial-entity-impact editorial-entity-impact--${entity.impact} mono`}>
-                {titleCase(entity.impact)}
+        {entities.map((entity) => {
+          const impact = INVESTMENT_IMPACT_COPY[entity.impact]
+          return (
+            <li key={`${entity.scope}-${entity.name}`}>
+              <strong className="editorial-entity-name">
+                {decodeTextEntities(entity.name)}
+              </strong>
+              <span className={`editorial-entity-impact editorial-entity-impact--${entity.impact}`}>
+                <span className="editorial-entity-impact-icon" aria-hidden="true">
+                  {impact.icon}
+                </span>
+                <span>{impact.label}</span>
               </span>
-            </div>
-            <p>{decodeTextEntities(entity.mechanism)}</p>
-          </li>
-        ))}
+              <p>{decodeTextEntities(entity.mechanism)}</p>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )
+
+  const hasBothEntityScopes = portfolioEntities.length > 0 && outsideEntities.length > 0
 
   return (
     <>
       {analysis.affected_entities.length > 0 && (
         <section className="editorial-section editorial-decision" aria-label="Company read-through">
-          <div className="editorial-section-heading">
-            <h3>Company read-through</h3>
-            <span className="editorial-thesis-effect mono">Overall: {titleCase(analysis.thesis_effect)}</span>
-          </div>
-          {portfolioEntities.length > 0 && entityList(portfolioEntities, 'Portfolio impact')}
+          <h3>Company read-through</h3>
+          {portfolioEntities.length > 0 && entityList(
+            portfolioEntities,
+            hasBothEntityScopes ? 'Portfolio companies' : null,
+          )}
           {outsideEntities.length > 0 && entityList(outsideEntities, 'Outside the disclosed portfolio')}
         </section>
       )}

@@ -341,26 +341,6 @@
   letter-spacing: -0.012em;
 }
 
-.editorial-section-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.editorial-section-heading h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.012em;
-}
-
-.editorial-thesis-effect {
-  color: var(--muted);
-  font-size: 9.5px;
-  letter-spacing: 0.035em;
-}
-
 .editorial-decision {
   margin-top: 24px;
   padding-top: 0;
@@ -552,6 +532,10 @@
   margin-top: 22px;
 }
 
+.editorial-entities--unlabelled {
+  margin-top: 14px;
+}
+
 .editorial-entities + .editorial-entities {
   margin-top: 28px;
 }
@@ -565,8 +549,9 @@
 
 .editorial-entities li {
   display: grid;
-  grid-template-columns: minmax(150px, 0.28fr) minmax(0, 1fr);
+  grid-template-columns: minmax(138px, 0.24fr) minmax(104px, 0.16fr) minmax(0, 1fr);
   gap: 24px;
+  align-items: start;
   padding: 13px 0 14px;
   border-bottom: 1px solid var(--border);
   color: var(--ink-soft);
@@ -574,23 +559,26 @@
   line-height: 1.5;
 }
 
-.editorial-entity-heading {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  align-items: baseline;
-  gap: 6px 10px;
-}
-
-.editorial-entity-heading strong {
+.editorial-entity-name {
   color: var(--ink);
   font-weight: 600;
 }
 
 .editorial-entity-impact {
-  font-size: 9.5px;
-  letter-spacing: 0.025em;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.editorial-entity-impact-icon {
+  width: 16px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1;
+  text-align: center;
 }
 
 .editorial-entity-impact--positive { color: var(--positive); }
@@ -888,5 +876,9 @@
     border-left: 0;
   }
   .editorial-opening section + section { border-top: 1px solid var(--border); }
-  .editorial-entities li { grid-template-columns: 1fr; gap: 4px; }
+  .editorial-entities li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 18px;
+  }
+  .editorial-entities li p { grid-column: 1 / -1; }
 }
