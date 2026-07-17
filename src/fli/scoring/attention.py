@@ -25,6 +25,13 @@ class AttentionFormula:
     support_knee: int | None = None
 
     def __post_init__(self) -> None:
+        weights = (
+            self.network_attention_weight,
+            self.originator_support_weight,
+            self.public_engagement_weight,
+        )
+        if any(not math.isfinite(weight) or weight < 0 for weight in weights):
+            raise ValueError("attention weights must be finite and non-negative")
         total = (
             self.network_attention_weight
             + self.originator_support_weight
@@ -44,7 +51,9 @@ class AttentionFormula:
         return self.amplifier_cap is not None
 
     def payload(self) -> dict[str, Any]:
-        return asdict(self)
+        return {
+            key: value for key, value in asdict(self).items() if value is not None
+        }
 
 
 ATTENTION_V1_1 = AttentionFormula(
@@ -91,7 +100,14 @@ def score_components(
     The stored public-engagement percentile is valid for both versions because
     v2 deliberately leaves that day-relative transform unchanged.
     """
-    engagement = float(components["public_engagement_percentile"])
+    engagement = float(
+        components.get(
+            "public_engagement_factor",
+            components["public_engagement_percentile"],
+        )
+    )
+    if not math.isfinite(engagement) or not 0 <= engagement <= 1:
+        raise ValueError("public engagement factor must be between 0 and 1")
     if formula.uses_fixed_curves:
         assert formula.amplifier_cap is not None
         assert formula.support_knee is not None
@@ -102,8 +118,23 @@ def score_components(
             int(components["originator_network_support"]), formula.support_knee
         )
     else:
-        network = float(components["network_attention_percentile"])
-        support = float(components["originator_support_percentile"])
+        network = float(
+            components.get(
+                "network_attention_factor",
+                components["network_attention_percentile"],
+            )
+        )
+        support = float(
+            components.get(
+                "originator_support_factor",
+                components["originator_support_percentile"],
+            )
+        )
+        if any(
+            not math.isfinite(value) or not 0 <= value <= 1
+            for value in (network, support)
+        ):
+            raise ValueError("attention factors must be between 0 and 1")
     score = 100 * (
         formula.network_attention_weight * network
         + formula.originator_support_weight * support
