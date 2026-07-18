@@ -93,3 +93,28 @@ Expected behavior:
 - an agent may cite it only for a claim established by a short excerpt from its
   frozen text; and
 - validation rejects a missing or fabricated artifact excerpt.
+
+## 6. Missing-implication review
+
+Prompt:
+
+> Review the selected Kimi K3 Insights in the 2026-07-16 draft before
+> validation. Identify the most important supported consequence that the draft
+> has not carried through.
+
+Expected behavior:
+
+- compares the separate Investment and Engineering interpretations without
+  merging the audience outputs;
+- recognizes that K3's thinking-history requirement and sensitivity to
+  mid-session model switching affect practical substitutability;
+- connects the cache-hit versus cache-miss price difference to cost per
+  completed task and enterprise switching friction;
+- distinguishes application-owned durable memory, model-native session history,
+  inference caching, and physical memory rather than treating “memory” as one
+  claim;
+- treats named memory, accelerator, or interconnect suppliers as diligence
+  questions unless the evidence establishes a company-specific transmission
+  path; and
+- does not build or run an embedding index when the relevant evidence is
+  already present in the inspected packets.

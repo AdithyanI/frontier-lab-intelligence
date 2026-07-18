@@ -57,14 +57,26 @@ your own judgment for research, retrieval, grouping, and synthesis.
    [references/editorial-standard.md](references/editorial-standard.md) for the
    reasoning and field contract. Multiple Events may support one Insight; do
    not create a separate development object.
-6. Validate repeatedly until the complete cohort passes:
+6. Before validation, run one distinct missing-implication review over every
+   selected Insight. Ask: **What important consequence does this evidence
+   support that the draft has not carried through?** Follow the evidence one
+   additional causal step and revise only when the consequence is material and
+   supported. When the same development appears for both audiences, compare the
+   two interpretations so a relevant technical constraint can inform the
+   Investment consequence, or a business constraint can inform the Engineering
+   decision, without merging the audience outputs. If the missing bridge can be
+   resolved with bounded web research, resolve it; otherwise preserve it as an
+   uncertainty or watchpoint rather than speculation. This is a reasoning
+   review, not a reason to build or run an embedding index when the evidence is
+   already present.
+7. Validate repeatedly until the complete cohort passes:
 
    ```bash
    .venv/bin/fli daily-intelligence validate \
      --workspace <workspace> --draft <workspace>/draft.json --json --no-input
    ```
 
-7. For a requested daily brief, import the validated result atomically and
+8. For a requested daily brief, import the validated result atomically and
    inspect the durable run:
 
    ```bash
