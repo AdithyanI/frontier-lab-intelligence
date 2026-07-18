@@ -121,6 +121,23 @@ The normal run is:
 .venv/bin/fli daily-intelligence inspect-run --run-id <run-id> --json --no-input
 ```
 
+The date-keyed orchestration entry point composes the existing Evidence,
+routing, and workspace owners without replacing them:
+
+```bash
+.venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --json --no-input
+.venv/bin/fli daily-intelligence inspect-day-run --day YYYY-MM-DD --json --no-input
+.venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --launch-codex --json --no-input
+```
+
+The default stops at a validated workspace. `--launch-codex` starts one named,
+non-ephemeral task through a short-lived Codex App Server client and records the
+exact Evidence, routing, workspace, task, and editorial-run identities in the
+same editorial store. Retries reuse completed deterministic stages. If a
+complete editorial run already exists for the workspace, that durable import
+closes orchestration before any App Server connection is opened; a task that
+the user later reuses for review is never resumed as pipeline work.
+
 The agent may use `search` and `inspect-event` while researching. `index` and
 `similar` are optional for paraphrase discovery or larger cross-day work. The
 embedding cache is a sidecar keyed by Event ID, rendered packet contract and
@@ -134,10 +151,11 @@ ignored SQLite store is `data/derived/daily-intelligence/editorial.db`.
 
 An import succeeds only after the draft matches the exact workspace manifest,
 passes the audience schema, and accounts for the entire routed-positive cohort.
-For workspace v3, that cohort means the routed-positive candidates remaining
+Workspace v3 is the only executable workspace contract. Its cohort means the routed-positive candidates remaining
 after the seven-day X-source projection, with Event snapshots identified by
-`semantic_snapshot_sha256`. Frozen v2 workspaces keep their original manifests
-and hashes as provenance. Retained X sources carry their
+`semantic_snapshot_sha256`. Earlier workspace packets may remain as historical
+files, but no command reads, upgrades, or resumes them; new work must prepare a
+fresh v3 workspace. Retained X sources carry their
 application-owned publication times; Event citations inherit that date and a
 conflicting agent-supplied date fails validation.
 Artifacts retain inspectable disclosure lineage. An artifact citation must

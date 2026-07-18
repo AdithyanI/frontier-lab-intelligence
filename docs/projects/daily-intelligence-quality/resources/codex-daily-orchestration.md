@@ -23,6 +23,12 @@ routing, editorial validation, or editorial persistence.
   explicitly crosses into agent execution.
 - Repeating the same date reuses completed compatible stages rather than
   creating duplicate work or a second Codex task.
+- Workspace v3 is the only launchable workspace contract. Obsolete packets are
+  never upgraded or rebound to a task; preparation creates a fresh current
+  packet before launch.
+- A complete imported editorial run for the exact workspace is terminal. The
+  ledger closes from that row before opening App Server, even if the original
+  task has since been reused for unrelated human review.
 - Failures return stable codes, retryability, and the last durable stage.
 - Progress goes to stderr; the final structured result goes to stdout.
 

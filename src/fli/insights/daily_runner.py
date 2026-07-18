@@ -745,6 +745,23 @@ def run_day(
         current_stage = "codex"
         workspace = stages["prepare"]
         workspace_path = REPO_ROOT / str(workspace["workspace"])
+        editorial_run_id = _latest_editorial_run(
+            workspace_run_id=str(workspace["run_id"])
+        )
+        if editorial_run_id:
+            existing_codex = stages.get("codex") or {}
+            stages["codex"] = {
+                **existing_codex,
+                "status": "complete",
+                "completion_source": "editorial_run",
+            }
+            record["editorial_run_id"] = editorial_run_id
+            record = _save_record(
+                conn, record, status="complete", stage="codex", error=None
+            )
+            if progress:
+                progress("codex", "complete")
+            return {**record, "reused": reused}
         name = f"FLI Daily Brief — {day}"
         objective = (
             f"Produce, validate, import, and inspect the complete Frontier Lab "

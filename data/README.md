@@ -33,8 +33,10 @@ has a canonical path.
   reuse; bundle IDs preserve the exact evidence supplied to a model.
 - `derived/daily-intelligence/` — ignored frozen agent workspaces, optional
   packet-keyed Event embedding cache, and the canonical `editorial.db` holding
-  validated daily Insights. Only `fli daily-intelligence` writes this boundary;
-  the frontend reads its normalized API projection rather than draft files.
+  validated daily Insights plus the date-keyed orchestration ledger. Only
+  `fli daily-intelligence` writes this boundary; the frontend reads its
+  normalized API projection rather than draft files. Workspace v3 is the only
+  supported authoring input; historical packets are not upgraded in place.
 - `following/manifests/` — small tracked manifests that bind each local
   snapshot checksum to its cohort, provider, completeness, spend, ranking, and
   evaluation outputs.

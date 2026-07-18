@@ -31,13 +31,6 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--editorial-db", type=Path, default=editorial_runs.DEFAULT_DB
     )
-    parser.add_argument(
-        "--workspace",
-        action="append",
-        type=Path,
-        default=[],
-        help="Upgrade this unimported v2 editorial workspace in place; repeatable.",
-    )
     return parser
 
 
@@ -76,9 +69,6 @@ def main() -> int:
                 args.editorial_db
             ),
         },
-        "workspaces": [
-            editorial_runs.migrate_workspace(path) for path in args.workspace
-        ],
     }
     print(json.dumps(result, sort_keys=True))
     return 0

@@ -78,12 +78,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - The normalized Feed already holds authoritative X `published_at`,
   `first_discovered_at`, and `first_discovered_day` values. All 2,187 X-source
   references in the canonical workspaces resolve against their bound Feed run.
-- Daily workspace v1 freezes routing packets without those dates. Daily
-  citation validation currently checks URL membership and date syntax, not
-  equality to the stored source date.
-- Existing workspaces and imported results remain immutable. Corrected output
-  uses workspace v2 and requires a new editorial run only for dates selected
-  after calibration.
+- Workspace v3 is the only executable authoring contract. It carries
+  application-owned source dates and Event-native `semantic_snapshot_sha256`
+  keys. Historical packets remain files only; no runtime command upgrades,
+  opens, or resumes them.
 - `first_discovered_at` is transport discovery, not an artifact publication
   time and not a generic `observed_at` fact.
 
@@ -109,11 +107,11 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [ ] The provisional weak-item and omission queues are adjudicated, the final
       3–5 submission candidates are named, and remaining findings are either
       fixed or explicitly deferred.
-- [ ] One machine-readable command can prepare a requested date through the
+- [x] One machine-readable command can prepare a requested date through the
       deterministic handoff, resume without duplicating completed stages, and
       optionally launch a persisted, named Codex App Server task with an active
       daily-intelligence goal.
-- [ ] A one-day canary proves that the deterministic outputs are inspectable
+- [x] A one-day canary proves that the deterministic outputs are inspectable
       before task launch and that the resulting task is visible under the
       repository in Codex Desktop with its thread id recorded durably.
 - [ ] Relevant tests and `scripts/check-fast.sh` pass; conceptual docs match the
@@ -134,13 +132,15 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [x] Milestone 3 — Calibrate on demonstrated cases before a broad rerun.
       Acceptance: Jul 10 Thinking Machines, Jul 13 CaMeLs, Jul 14 teachers, and
       Jul 15 current-source control behave as specified under the seven-day
-      rule. Validate: fresh v2 workspaces and deterministic canary inspection.
-- [ ] Milestone 4 — Ship and canary the minimal daily orchestrator. Acceptance:
+      rule. Validate: fresh current workspaces and deterministic canary inspection.
+- [x] Milestone 4 — Ship and canary the minimal daily orchestrator. Acceptance:
       one command prepares a date through existing deterministic stages,
       checkpoints exact identifiers, and launches one persisted App Server
       thread with repository cwd, explicit name, active goal, and initial turn.
-      Validate: contract tests, stop-after-prepare run, live one-day task, and
-      durable task/run inspection.
+      Validate: contract tests, stop-after-prepare run, live July 16 task, and
+      durable task/run inspection. The canary froze 59 Events / 95 audience
+      pairs and imported 15 Insights; retries close from the durable import
+      without reopening a task later reused for review.
 - [ ] Milestone 5 — Adjudicate the editorial queues and decide the minimum rerun
       set. Acceptance: every provisional weak item and strongest omission has a
       recorded keep/rewrite/suppress/defer judgment; no all-days rerun occurs
@@ -155,7 +155,8 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - Milestones 2–3 are complete. Continue with editorial adjudication rather than
   expanding the chronology harness.
 - Preserve existing routing runs and raw Events. New routing freezes apply the
-  source window; workspace v2 applies it defensively to already-frozen runs.
+  source window; fresh workspace v3 packets apply it defensively to
+  already-frozen current routing runs.
 - Treat the brief day, X publication time, discovery time, artifact publication
   time, and retrieval time as different facts.
 - For X evidence, age beyond seven days is a deterministic exclusion. Artifact
@@ -201,6 +202,12 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - 2026-07-18: Prove the deterministic stages separately before spending a Codex
   turn. The first command contract must support a stop-after-prepare boundary
   and stable JSON inspection.
+- 2026-07-18: Workspace v3 is the sole executable packet contract. Remove the
+  in-place v2 upgrader and prepare fresh current packets instead of maintaining
+  a dual-read or compatibility path.
+- 2026-07-18: The imported editorial run, not a task's later mutable goal state,
+  is terminal orchestration proof. Reconciliation checks the exact workspace's
+  complete run before any App Server resume.
 
 ## Open Questions / Blockers
 
@@ -215,9 +222,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Freeze the orchestration contract and map existing stage/CLI boundaries. | parent | [contract](resources/codex-daily-orchestration.md) |
-| todo | Implement the date-keyed command, resumable ledger, and App Server client with contract tests. | parent | [contract](resources/codex-daily-orchestration.md) |
-| todo | Run a stop-after-prepare canary, then one live visible Codex task for a single new day. | parent | [contract](resources/codex-daily-orchestration.md) |
+| done | Freeze the orchestration contract and map existing stage/CLI boundaries. | parent | [contract](resources/codex-daily-orchestration.md) |
+| done | Implement the date-keyed command, resumable ledger, and App Server client with contract tests. | parent | [contract](resources/codex-daily-orchestration.md) |
+| done | Run a stop-after-prepare canary, then one live visible Codex task for July 16. | parent | [contract](resources/codex-daily-orchestration.md) |
+| in_progress | Adjudicate the editorial quality queues and select the minimum rerun set. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 
 ## Backlog / Remaining Work
 
@@ -249,7 +257,7 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - Jul 10: `https://x.com/miramurati/status/1945166365834535247`
   is pruned; the Jul 10 quote/reply become the current packet.
 - Jul 13: `https://x.com/sebkrier/status/2060811780721418707`
-  is absent from the v2 workspace because it is older than seven days.
+  is absent from a fresh current workspace because it is older than seven days.
 - Jul 14: the old-only OpenAI teacher packet `1991218197530378431` is excluded;
   current Jul 14 evidence remains eligible.
 - Jul 15: GPT-Red, Anthropic agentic-misalignment, and Perplexity SPACE remain a
@@ -273,7 +281,7 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   envelopes, Adi chose a seven-day inclusive first-party X window rather than
   warning-only chronology. Raw Events remain intact.
 - 2026-07-18: [DONE] Implemented the source-level rule in routing freezes and
-  workspace v2, deterministic Event citation dates, and skill/architecture
+  current workspaces, deterministic Event citation dates, and skill/architecture
   guidance. Targeted tests passed; all eleven July 5–15 workspaces prepared.
   Jul 14 excluded four old-only Events and 53 stale X sources; Jul 10 retained
   Mira Murati's current quote/reply while removing the 2025 root.

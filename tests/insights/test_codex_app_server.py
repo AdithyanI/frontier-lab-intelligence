@@ -320,6 +320,55 @@ def test_resuming_active_goal_does_not_start_or_set_another_turn(
     assert transport.closed
 
 
+def test_terminal_goal_refreshes_stale_turn_activity_from_persisted_thread(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/resume",
+                result=_thread_result(
+                    repo_root,
+                    thread_id="thread-existing",
+                    turns=[{"id": "turn-interrupted", "status": "inProgress"}],
+                    status="active",
+                ),
+            ),
+            _SendStep("thread/name/set", result={}),
+            _SendStep(
+                "thread/goal/get",
+                result={"goal": {"status": "complete"}},
+            ),
+            _SendStep(
+                "thread/read",
+                result=_thread_result(
+                    repo_root,
+                    thread_id="thread-existing",
+                    turns=[
+                        {"id": "turn-interrupted", "status": "interrupted"},
+                        {"id": "turn-continuation", "status": "completed"},
+                    ],
+                    status="idle",
+                ),
+            ),
+        ]
+    )
+
+    result = _run_task(tmp_path, transport, thread_id="thread-existing")
+
+    assert result["thread_id"] == "thread-existing"
+    assert result["turn_id"] == "turn-continuation"
+    assert result["turn_status"] == "completed"
+    assert result["goal_status"] == "complete"
+    assert result["turns_started"] == 2
+    assert [message["method"] for message in transport.sent].count("thread/read") == 1
+    transport.assert_exhausted()
+    assert transport.closed
+
+
 def test_cwd_mismatch_fails_closed_and_closes_transport(tmp_path: Path) -> None:
     wrong_root = tmp_path / "wrong-repo"
     wrong_root.mkdir()

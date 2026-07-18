@@ -308,6 +308,35 @@ class CodexAppServerClient:
         status = thread.get("status") if isinstance(thread.get("status"), dict) else {}
         state.turn_in_progress = status.get("type") == "active"
 
+    async def _refresh_thread_state(
+        self,
+        transport: AppServerTransport,
+        state: _TaskState,
+        *,
+        deadline: float,
+        progress: ProgressCallback | None,
+    ) -> None:
+        """Replace notification-derived activity with persisted thread state."""
+        result = await self._request(
+            transport,
+            "thread/read",
+            {"threadId": state.thread_id, "includeTurns": True},
+            state,
+            deadline=deadline,
+            progress=progress,
+        )
+        thread = result.get("thread") if isinstance(result.get("thread"), dict) else {}
+        returned_thread_id = str(thread.get("id") or "")
+        if not returned_thread_id or returned_thread_id != state.thread_id:
+            raise CodexTaskError(
+                code="E_CODEX_PROTOCOL",
+                message="App Server did not return the expected persisted task state.",
+                hint="Inspect the persisted task in Codex Desktop before retrying.",
+                retryable=False,
+                exit_code=4,
+            )
+        self._hydrate_thread_state(state, thread)
+
     async def _request(
         self,
         transport: AppServerTransport,
@@ -631,6 +660,18 @@ class CodexAppServerClient:
                 state.goal_status not in TERMINAL_GOAL_STATUSES
                 or state.turn_in_progress
             ):
+                if (
+                    state.goal_status in TERMINAL_GOAL_STATUSES
+                    and state.turn_in_progress
+                ):
+                    await self._refresh_thread_state(
+                        transport,
+                        state,
+                        deadline=deadline,
+                        progress=progress,
+                    )
+                    if not state.turn_in_progress:
+                        break
                 wait_seconds = min(
                     self._remaining(deadline), self.goal_poll_seconds
                 )
@@ -654,6 +695,13 @@ class CodexAppServerClient:
                         current_goal.get("status") or state.goal_status or "active"
                     )
                     if state.goal_status in TERMINAL_GOAL_STATUSES:
+                        if state.turn_in_progress:
+                            await self._refresh_thread_state(
+                                transport,
+                                state,
+                                deadline=deadline,
+                                progress=progress,
+                            )
                         if not state.turn_in_progress:
                             break
                         continue

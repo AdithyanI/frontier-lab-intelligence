@@ -407,7 +407,7 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
 
     def latest_editorial_run(*, workspace_run_id: str, **_: Any) -> str:
         editorial_lookups.append(workspace_run_id)
-        return "editorial-run-1"
+        return "editorial-run-1" if pipeline.codex_calls else None
 
     monkeypatch.setattr(daily_runner, "_latest_editorial_run", latest_editorial_run)
 
@@ -437,7 +437,7 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
     assert codex_call["thread_id"] is None
     assert codex_call["progress"] is None
     assert callable(codex_call["checkpoint"])
-    assert editorial_lookups == [WORKSPACE_RUN_ID]
+    assert editorial_lookups == [WORKSPACE_RUN_ID, WORKSPACE_RUN_ID]
     assert launched["status"] == "complete"
     assert launched["stage"] == "codex"
     assert launched["codex_thread_id"] == "thread-1"
@@ -447,6 +447,58 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
         "status": "complete",
         "thread_id": "thread-1",
         "goal_status": "complete",
+    }
+
+
+def test_imported_run_closes_checkpoint_without_resuming_reused_task(
+    tmp_path, monkeypatch
+) -> None:
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+    imported_run_id: str | None = None
+
+    def latest_editorial_run(*, workspace_run_id: str, **_: Any) -> str | None:
+        assert workspace_run_id == WORKSPACE_RUN_ID
+        return imported_run_id
+
+    monkeypatch.setattr(daily_runner, "_latest_editorial_run", latest_editorial_run)
+
+    def interrupted_task(**kwargs: Any) -> None:
+        kwargs["checkpoint"](
+            {
+                "status": "running",
+                "thread_id": "thread-reused-by-user",
+                "goal_status": "active",
+                "turn_id": "turn-original",
+            }
+        )
+        raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        _run(
+            db_path=db_path,
+            pipeline=pipeline,
+            launch_codex=True,
+            codex_runner=interrupted_task,
+        )
+
+    imported_run_id = "editorial-run-imported"
+    resumed = _run(
+        db_path=db_path,
+        pipeline=pipeline,
+        launch_codex=True,
+        codex_runner=lambda **_: pytest.fail("must not resume a reused task"),
+    )
+
+    assert resumed["status"] == "complete"
+    assert resumed["editorial_run_id"] == imported_run_id
+    assert resumed["codex_thread_id"] == "thread-reused-by-user"
+    assert resumed["stages"]["codex"] == {
+        "status": "complete",
+        "thread_id": "thread-reused-by-user",
+        "goal_status": "active",
+        "turn_id": "turn-original",
+        "completion_source": "editorial_run",
     }
 
 

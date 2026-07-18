@@ -28,7 +28,6 @@ DEFAULT_DB = DEFAULT_ROOT / "editorial.db"
 DEFAULT_ROUTING_ROOT = routing_runs.DEFAULT_RUN_ROOT
 DEFAULT_INSIGHTS_DB = insight_runs.DEFAULT_DB
 DEFAULT_MODEL = consolidation.DEFAULT_MODEL
-LEGACY_WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v2"
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v3"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v4"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
@@ -222,28 +221,6 @@ def _write_json(path: Path, value: Any) -> None:
 
 def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _migrate_workspace_value(value: Any) -> Any:
-    if isinstance(value, list):
-        return [_migrate_workspace_value(item) for item in value]
-    if not isinstance(value, dict):
-        return value
-    if (
-        "snapshot_content_sha256" in value
-        and "semantic_snapshot_sha256" in value
-    ):
-        raise ValueError(
-            "workspace value contains both legacy and Event-native snapshot keys"
-        )
-    return {
-        (
-            "semantic_snapshot_sha256"
-            if key == "snapshot_content_sha256"
-            else key
-        ): _migrate_workspace_value(item)
-        for key, item in value.items()
-    }
 
 
 def _migrate_editorial_insight_v2(conn: sqlite3.Connection) -> None:
@@ -442,62 +419,6 @@ def _manifest_digest(manifest: dict[str, Any]) -> str:
     value = dict(manifest)
     value.pop("manifest_sha256", None)
     return _sha256(_canonical_json(value))
-
-
-def _refresh_workspace_template(workspace: Path, manifest: dict[str, Any]) -> bool:
-    """Keep the authoring template bound to the exact migrated manifest."""
-    path = workspace / "draft.template.json"
-    expected = editorial.draft_template(manifest)
-    if path.is_file() and _read_json(path) == expected:
-        return False
-    _write_json(path, expected)
-    return True
-
-
-def migrate_workspace(workspace: Path | str) -> dict[str, Any]:
-    """Upgrade one unimported v2 workspace without changing its stable path."""
-    workspace = Path(workspace)
-    manifest_path = workspace / "manifest.json"
-    manifest = _read_json(manifest_path)
-    if not isinstance(manifest, dict):
-        raise ValueError("workspace manifest must be an object")
-    schema_version = manifest.get("schema_version")
-    if schema_version == WORKSPACE_SCHEMA_VERSION:
-        manifest = load_manifest(workspace)
-        return {
-            "workspace": str(workspace),
-            "run_id": str(manifest.get("run_id") or ""),
-            "manifest_sha256": str(manifest.get("manifest_sha256") or ""),
-            "migrated": False,
-            "template_updated": _refresh_workspace_template(workspace, manifest),
-        }
-    if schema_version != LEGACY_WORKSPACE_SCHEMA_VERSION:
-        raise ValueError(f"unsupported workspace schema: {schema_version!r}")
-    if manifest.get("manifest_sha256") != _manifest_digest(manifest):
-        raise ValueError("workspace manifest hash does not match its content")
-
-    event_payloads = [
-        (path, _migrate_workspace_value(_read_json(path)))
-        for path in sorted((workspace / "events").glob("*.json"))
-    ]
-    migrated_manifest = _migrate_workspace_value(manifest)
-    assert isinstance(migrated_manifest, dict)
-    migrated_manifest["schema_version"] = WORKSPACE_SCHEMA_VERSION
-    migrated_manifest["manifest_sha256"] = _manifest_digest(migrated_manifest)
-
-    for path, payload in event_payloads:
-        _write_json(path, payload)
-    _write_json(manifest_path, migrated_manifest)
-    load_manifest(workspace)
-    template_updated = _refresh_workspace_template(workspace, migrated_manifest)
-    return {
-        "workspace": str(workspace),
-        "run_id": str(migrated_manifest["run_id"]),
-        "manifest_sha256": str(migrated_manifest["manifest_sha256"]),
-        "migrated": True,
-        "template_updated": template_updated,
-        "event_count": len(event_payloads),
-    }
 
 
 def load_manifest(workspace: Path) -> dict[str, Any]:

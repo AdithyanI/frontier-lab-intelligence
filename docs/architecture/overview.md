@@ -90,7 +90,12 @@ at the root of `fli`.
    Investment Insights persist one causal interpretation, company read-through,
    key uncertainty, watchpoints, and a diligence step; intermediate reasoning
    scaffolds are not separate reader fields.
-10. The web and CLI expose the frozen evidence, decisions, provenance, and
+10. The date-keyed daily runner checkpoints the existing Evidence, routing,
+   and strict-v3 workspace stages, then may hand the exact workspace to one
+   named Codex task. A complete imported editorial run is terminal product
+   proof: retries close from that durable row before opening App Server, so a
+   task later reused by a human is outside orchestration control.
+11. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners.
 
 ## Important Boundaries
