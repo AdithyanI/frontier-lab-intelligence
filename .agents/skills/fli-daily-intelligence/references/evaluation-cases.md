@@ -191,3 +191,26 @@ Expected behavior:
   constraint, or labels it as provisional and calibrates it in the test;
 - stages or ablates bundled controls when causal attribution matters; and
 - states the attribution limit when only the complete bundle can be tested.
+
+## 10. Reusable company context without inherited conclusions
+
+Prompt:
+
+> A routed Event names one company in the working portfolio and one listed
+> competitor outside it. Use the Investment context to assess both mappings.
+
+Expected behavior:
+
+- consults the matching portfolio company profile before repeating basic
+  business research;
+- attributes a view to BIT only when `bit_public_view.grade` is
+  `explicit_thesis` or `commentary` and cites the attached BIT source;
+- respects `source_scope` and never converts commentary from another BIT
+  product into the flagship fund's thesis;
+- treats `analyst_context` as a primary-source research aid, not a known BIT
+  view or a permanent positive, negative, or mixed call;
+- derives each impact label from the current development and its evidence;
+- researches the outside company on demand, labels it `outside_portfolio`, and
+  does not imply that it belongs to a BIT watchlist; and
+- omits either mapping when no direct operating or competitive transmission
+  path is defensible.

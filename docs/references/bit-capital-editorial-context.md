@@ -5,7 +5,12 @@ agent. The active machine-readable packet lives in the repo-local skill at
 `.agents/skills/fli-daily-intelligence/references/bit-investment-context.json`.
 That packet intentionally uses the complete audited 2025 portfolio as its
 working holdings baseline and preserves BIT's thesis, research process, source
-cautions, and outside-portfolio policy. The human-readable long-form source
+cautions, outside-portfolio policy, and one reusable company profile per
+holding. Company profiles distinguish views attributable to BIT from FLI's
+primary-source analyst context and record whether BIT material is firm-wide,
+flagship-specific, from another product, or mixed. They are background for daily reasoning, not
+permanent impact calls or evidence that BIT currently holds a company. The
+human-readable long-form source
 remains the product's `/bit-lens` page, implemented in
 `frontend/src/features/bit-lens/BitLensPage.tsx` with its structured holdings
 and source ledger in `bitLensData.ts`.

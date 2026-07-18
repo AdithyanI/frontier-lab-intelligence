@@ -79,8 +79,30 @@ The authoritative machine shape and enums are returned by:
 ```
 
 The Investment context command returns the structured
-`bit-investment-context-v1` packet; the Engineering context remains markdown in
+`bit-investment-context-v2` packet; the Engineering context remains markdown in
 the same stable response envelope.
+
+Version 2 includes one reusable profile for every company in the working
+portfolio baseline. Profiles keep attributable BIT views separate from FLI
+analyst context and provide stable company identity, operating drivers,
+two-sided frontier-AI exposure channels, and watchpoints. They reduce repeated
+background research without deciding the impact of a daily development. BIT
+views also carry a source scope so firm-wide or other-product commentary cannot
+be mistaken for this flagship strategy's thesis.
+
+Daily agents load the compact Investment projection first, then retrieve only
+the matching company profiles by exact canonical name, ticker, or alias:
+
+```bash
+.venv/bin/fli daily-intelligence context \
+  --audience investment --compact --json --no-input
+.venv/bin/fli daily-intelligence company-context \
+  --company MSFT --json --no-input
+```
+
+The full context command remains available for audit. Both projections carry
+the same canonical packet path and SHA-256; the lookup returns the matched
+profile, its working portfolio row, match type, and profile review date.
 
 ## Coverage and Selection
 

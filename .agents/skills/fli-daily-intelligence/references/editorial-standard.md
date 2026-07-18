@@ -148,7 +148,25 @@ urgency, or actionability—without pretending that rank is a calculated score.
 ## Investment analysis
 
 Use the structured BIT context returned by `context --audience investment`.
-It contains the public fund thesis and the complete audited portfolio baseline.
+It contains the public fund thesis, the complete audited portfolio baseline,
+and one reusable profile for every company in that baseline. A profile provides
+identity aliases, stable business drivers, two-sided frontier-AI exposure
+channels, and watchpoints so the agent does not reconstruct basic company
+context during every run.
+
+The profile has a strict attribution boundary. `bit_public_view` contains only
+views supported by a cited BIT source and records whether the evidence is an
+explicit thesis, broader commentary, or absent. `analyst_context` is FLI's
+primary-source research aid. It is never a known BIT thesis, holding decision,
+or directional conclusion. Use both as a starting lens, then determine the
+effect of the current development from current evidence.
+
+`source_scope` distinguishes firm-wide research, flagship commentary, another
+BIT product, mixed sources, or no BIT view. Commentary from another product can
+inform how the manager reasons, but it must not be presented as the flagship
+fund's own thesis. `company_profiles_reviewed_at` is an internal freshness
+marker; verify time-sensitive identity or listing facts when needed.
+
 For each affected company record:
 
 - `scope`: `portfolio` or `outside_portfolio`;

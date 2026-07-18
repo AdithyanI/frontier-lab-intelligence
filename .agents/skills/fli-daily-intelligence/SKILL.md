@@ -14,14 +14,18 @@ your own judgment for research, retrieval, grouping, and synthesis.
 2. Read both audience contexts before inspecting candidates:
 
    ```bash
-   .venv/bin/fli daily-intelligence context --audience investment --json --no-input
+   .venv/bin/fli daily-intelligence context --audience investment --compact --json --no-input
    .venv/bin/fli daily-intelligence context --audience ai_engineering --json --no-input
    ```
 
    The Investment context is the structured
    [BIT investment packet](references/bit-investment-context.json). It is the
    authoritative skill reference for the fund's public thesis, complete audited
-   portfolio baseline, and the boundary for companies outside that portfolio.
+   portfolio baseline, reusable company profiles, and the boundary for companies
+   outside that portfolio. Each company profile separates BIT's attributable
+   public view from FLI analyst context; never present the latter as BIT's thesis.
+   `source_scope` distinguishes firm-wide research, this flagship strategy,
+   another BIT product, or mixed commentary.
 
 3. Freeze or reuse the day's union-positive workspace:
 
@@ -46,6 +50,14 @@ your own judgment for research, retrieval, grouping, and synthesis.
    per-Event annotations; judge it from the retained evidence.
 4. Investigate across the whole cohort. Start with deterministic retrieval,
    then broaden only where it improves the judgment:
+   - for an Investment candidate, fetch every matching profile before web
+     research and use its identity, operating drivers, AI exposure channels,
+     and watchpoints as a starting lens rather than a daily conclusion:
+
+     ```bash
+     .venv/bin/fli daily-intelligence company-context \
+       --company "NAME, TICKER, OR ALIAS" --json --no-input
+     ```
    - inspect `exact_artifact_groups` in the manifest;
    - use `search` for entities, products, concepts, and repeated claims;
    - use `inspect-event` before relying on a candidate;
@@ -116,6 +128,9 @@ user explicitly requests that action in the current session.
 ## Retrieval commands
 
 ```bash
+.venv/bin/fli daily-intelligence company-context \
+  --company "Microsoft" --json --no-input
+
 .venv/bin/fli daily-intelligence search \
   --workspace <workspace> --query "Inkling" --limit 20 --json --no-input
 
@@ -171,6 +186,12 @@ shared theme as an automatic merge.
   consensus view. For this version, treat the packet's audited portfolio as the
   working portfolio context and keep its date and source in the packet rather
   than repeating them in every reader-facing company row.
+- Treat a company profile as reusable background, not evidence that today's
+  development has an effect. Attribute a view to BIT only when
+  `bit_public_view.grade` is `explicit_thesis` or `commentary` and cite its BIT
+  source. Respect `source_scope`: commentary from another BIT product is not the
+  flagship fund's thesis. When the grade is `none`, use the analyst context only
+  to guide diligence and derive direction from development-specific evidence.
 - For Investment, classify every named company as `portfolio` or
   `outside_portfolio`. Consider the portfolio first. Include an outside company
   only when a direct public-equity transmission path is defensible; omit that

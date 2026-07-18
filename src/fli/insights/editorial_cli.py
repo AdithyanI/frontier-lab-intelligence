@@ -105,7 +105,19 @@ def _parser() -> argparse.ArgumentParser:
 
     context = sub.add_parser("context", help="Read the audience context the agent must apply.")
     context.add_argument("--audience", choices=editorial.AUDIENCES, required=True)
+    context.add_argument(
+        "--compact",
+        action="store_true",
+        help="For Investment, return fund context plus a company index, not all profiles.",
+    )
     _add_output_flags(context)
+
+    company_context = sub.add_parser(
+        "company-context",
+        help="Read one Investment company profile by exact name, ticker, or alias.",
+    )
+    company_context.add_argument("--company", required=True)
+    _add_output_flags(company_context)
 
     prepare = sub.add_parser("prepare", help="Freeze one union-positive daily Evidence workspace.")
     prepare.add_argument("--day", required=True)
@@ -170,7 +182,7 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _context_payload(audience: str) -> dict[str, Any]:
+def _context_payload(audience: str, *, compact: bool = False) -> dict[str, Any]:
     path = editorial_runs.CONTEXT_PATHS[audience]
     if not path.is_file():
         raise FileNotFoundError(path)
@@ -183,11 +195,28 @@ def _context_payload(audience: str) -> dict[str, Any]:
     else:
         context = text
         format_name = "markdown"
+    projection = "full"
+    if compact:
+        if audience != "investment":
+            raise ValueError("--compact is available only for the Investment context")
+        profiles = context.pop("company_profiles")
+        context["company_profile_index"] = [
+            {
+                "name": profile["name"],
+                "ticker": profile["ticker"],
+                "aliases": profile["aliases"],
+                "bit_public_view_grade": profile["bit_public_view"]["grade"],
+                "bit_public_view_source_scope": profile["bit_public_view"]["source_scope"],
+            }
+            for profile in profiles
+        ]
+        projection = "compact"
     return {
         "audience": audience,
         "path": editorial_runs._display_path(path),
         "sha256": hashlib.sha256(text.encode()).hexdigest(),
         "format": format_name,
+        "projection": projection,
         "context": context,
     }
 
@@ -243,10 +272,21 @@ def main(
                 "cli_schema_version": CLI_SCHEMA_VERSION,
                 "workspace_schema_version": editorial_runs.WORKSPACE_SCHEMA_VERSION,
                 "store_schema_version": editorial_runs.STORE_SCHEMA_VERSION,
+                "investment_context_schema_version": (
+                    editorial_runs.INVESTMENT_CONTEXT_SCHEMA_VERSION
+                ),
                 "draft": editorial.output_contract(),
             }
         elif args.action == "context":
-            data = _context_payload(args.audience)
+            data = _context_payload(args.audience, compact=args.compact)
+        elif args.action == "company-context":
+            path = editorial_runs.CONTEXT_PATHS["investment"]
+            text = path.read_text(encoding="utf-8")
+            data = {
+                "path": editorial_runs._display_path(path),
+                "sha256": hashlib.sha256(text.encode()).hexdigest(),
+                **editorial_runs.company_context(args.company),
+            }
         elif args.action == "prepare":
             data = editorial_runs.prepare_workspace(
                 day=args.day,
@@ -359,6 +399,20 @@ def main(
             message=str(error),
             retryable=False,
             hint="Prepare the workspace or provide an existing local path.",
+            request_id=request_id,
+            started=started,
+        )
+    except editorial_runs.CompanyProfileNotFound as error:
+        exit_code = 2
+        payload = _error(
+            command,
+            code="E_COMPANY_NOT_FOUND",
+            message=str(error),
+            retryable=False,
+            hint=(
+                "Inspect `fli daily-intelligence context --audience investment "
+                "--compact` for canonical names, tickers, and aliases."
+            ),
             request_id=request_id,
             started=started,
         )

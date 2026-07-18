@@ -31,6 +31,9 @@ DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v3"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v4"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
+INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v2"
+BIT_PUBLIC_VIEW_GRADES = {"explicit_thesis", "commentary", "none"}
+BIT_PUBLIC_VIEW_SOURCE_SCOPES = {"firm", "flagship", "other_product", "mixed", "none"}
 
 CONTEXT_PATHS = {
     "investment": (
@@ -43,6 +46,10 @@ CONTEXT_PATHS = {
     ),
     "ai_engineering": REPO_ROOT / "docs" / "references" / "ai-engineering-editorial-context.md",
 }
+
+
+class CompanyProfileNotFound(ValueError):
+    """The exact company name, ticker, or alias is absent from the packet."""
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS editorial_run (
@@ -664,9 +671,209 @@ def investment_context() -> dict[str, Any]:
     value = _read_json(path)
     if not isinstance(value, dict):
         raise ValueError("Investment context packet must be an object")
-    if value.get("schema_version") != "bit-investment-context-v1":
+    if value.get("schema_version") != INVESTMENT_CONTEXT_SCHEMA_VERSION:
         raise ValueError("Investment context packet uses an unsupported schema version")
+    _validate_company_profiles(value)
     return value
+
+
+def company_context(query: str) -> dict[str, Any]:
+    """Return one exact reusable company lens by canonical name, ticker, or alias."""
+    normalized = " ".join(query.split()).casefold()
+    if not normalized:
+        raise ValueError("company query must not be empty")
+    context = investment_context()
+    matches: list[tuple[dict[str, Any], str]] = []
+    for profile in context["company_profiles"]:
+        candidates = {
+            "name": [profile["name"]],
+            "ticker": [profile["ticker"]],
+            "alias": profile["aliases"],
+        }
+        for match_type, values in candidates.items():
+            if any(" ".join(value.split()).casefold() == normalized for value in values):
+                matches.append((profile, match_type))
+                break
+    if not matches:
+        raise CompanyProfileNotFound(f"no company profile matches {query!r}")
+    if len(matches) != 1:
+        raise ValueError(f"company query {query!r} is ambiguous")
+    profile, match_type = matches[0]
+    holding = next(
+        item for item in context["portfolio"]["holdings"] if item["name"] == profile["name"]
+    )
+    return {
+        "context_schema_version": context["schema_version"],
+        "company_profiles_reviewed_at": context["company_profiles_reviewed_at"],
+        "query": query,
+        "matched_by": match_type,
+        "portfolio_holding": holding,
+        "profile": profile,
+    }
+
+
+def _validate_company_profiles(context: dict[str, Any]) -> None:
+    """Require one source-graded reusable lens for every working holding."""
+    portfolio = context.get("portfolio")
+    if not isinstance(portfolio, dict) or not isinstance(portfolio.get("holdings"), list):
+        raise ValueError("Investment context packet is missing portfolio holdings")
+    profiles = context.get("company_profiles")
+    if not isinstance(profiles, list):
+        raise ValueError("Investment context packet is missing company_profiles")
+    reviewed_at = context.get("company_profiles_reviewed_at")
+    if not isinstance(reviewed_at, str):
+        raise ValueError("Investment context packet is missing company_profiles_reviewed_at")
+    try:
+        datetime.strptime(reviewed_at, "%Y-%m-%d")
+    except ValueError as exc:
+        raise ValueError("company_profiles_reviewed_at must be an ISO date") from exc
+
+    holding_names = [
+        item.get("name") for item in portfolio["holdings"] if isinstance(item, dict)
+    ]
+    profile_names = [item.get("name") for item in profiles if isinstance(item, dict)]
+    if len(holding_names) != len(portfolio["holdings"]) or any(
+        not isinstance(name, str) or not name for name in holding_names
+    ):
+        raise ValueError("Investment context portfolio contains an invalid holding name")
+    if profile_names != holding_names:
+        raise ValueError("Investment company_profiles must match portfolio holding order exactly")
+
+    tickers: set[str] = set()
+    lookup_owners: dict[str, str] = {}
+    for index, profile in enumerate(profiles):
+        path = f"company_profiles[{index}]"
+        if not isinstance(profile, dict):
+            raise ValueError(f"{path} must be an object")
+        required = {
+            "name",
+            "ticker",
+            "aliases",
+            "listing_status",
+            "bit_public_view",
+            "analyst_context",
+            "identity_sources",
+        }
+        if set(profile) != required:
+            raise ValueError(f"{path} must contain exactly {sorted(required)}")
+        ticker = profile["ticker"]
+        if not isinstance(ticker, str) or not ticker.strip():
+            raise ValueError(f"{path}.ticker must be a non-empty string")
+        if ticker in tickers:
+            raise ValueError(f"{path}.ticker duplicates {ticker}")
+        tickers.add(ticker)
+        if profile["listing_status"] != "public":
+            raise ValueError(f"{path}.listing_status must be public")
+        _validate_string_list(profile["aliases"], f"{path}.aliases", allow_empty=True)
+        for lookup_value in (profile["name"], profile["ticker"], *profile["aliases"]):
+            lookup_key = " ".join(lookup_value.split()).casefold()
+            prior_owner = lookup_owners.get(lookup_key)
+            if prior_owner is not None and prior_owner != profile["name"]:
+                raise ValueError(
+                    f"{path} lookup value {lookup_value!r} duplicates {prior_owner}"
+                )
+            lookup_owners[lookup_key] = profile["name"]
+
+        bit_view = profile["bit_public_view"]
+        if not isinstance(bit_view, dict) or set(bit_view) != {
+            "grade",
+            "source_scope",
+            "thesis",
+            "edge",
+            "signals",
+            "countercase",
+            "sources",
+        }:
+            raise ValueError(f"{path}.bit_public_view has an invalid shape")
+        if bit_view["grade"] not in BIT_PUBLIC_VIEW_GRADES:
+            raise ValueError(f"{path}.bit_public_view.grade is invalid")
+        if bit_view["source_scope"] not in BIT_PUBLIC_VIEW_SOURCE_SCOPES:
+            raise ValueError(f"{path}.bit_public_view.source_scope is invalid")
+        for key in ("thesis", "edge", "countercase"):
+            value = bit_view[key]
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                raise ValueError(f"{path}.bit_public_view.{key} must be null or text")
+        _validate_string_list(
+            bit_view["signals"],
+            f"{path}.bit_public_view.signals",
+            allow_empty=True,
+        )
+        _validate_source_refs(
+            bit_view["sources"],
+            f"{path}.bit_public_view.sources",
+            allow_empty=True,
+        )
+        if bit_view["grade"] == "none" and any(
+            bit_view[key] not in (None, [], "")
+            for key in ("thesis", "edge", "signals", "countercase", "sources")
+        ):
+            raise ValueError(f"{path}.bit_public_view must be empty when grade is none")
+        if (bit_view["grade"] == "none") != (bit_view["source_scope"] == "none"):
+            raise ValueError(f"{path}.bit_public_view none grade and scope must match")
+        if bit_view["grade"] != "none" and not bit_view["sources"]:
+            raise ValueError(f"{path}.bit_public_view requires a BIT source")
+
+        analyst = profile["analyst_context"]
+        if not isinstance(analyst, dict) or set(analyst) != {
+            "business_summary",
+            "operating_drivers",
+            "frontier_ai_channels",
+            "cautions",
+        }:
+            raise ValueError(f"{path}.analyst_context has an invalid shape")
+        if not isinstance(analyst["business_summary"], str) or not analyst[
+            "business_summary"
+        ].strip():
+            raise ValueError(f"{path}.analyst_context.business_summary is required")
+        _validate_string_list(
+            analyst["operating_drivers"],
+            f"{path}.analyst_context.operating_drivers",
+        )
+        _validate_string_list(
+            analyst["cautions"],
+            f"{path}.analyst_context.cautions",
+            allow_empty=True,
+        )
+        channels = analyst["frontier_ai_channels"]
+        if not isinstance(channels, list) or not channels:
+            raise ValueError(f"{path}.analyst_context.frontier_ai_channels is required")
+        for channel_index, channel in enumerate(channels):
+            channel_path = f"{path}.analyst_context.frontier_ai_channels[{channel_index}]"
+            if not isinstance(channel, dict) or set(channel) != {
+                "channel",
+                "potential_upside",
+                "potential_downside",
+                "watchpoints",
+            }:
+                raise ValueError(f"{channel_path} has an invalid shape")
+            for key in ("channel", "potential_upside", "potential_downside"):
+                if not isinstance(channel[key], str) or not channel[key].strip():
+                    raise ValueError(f"{channel_path}.{key} is required")
+            _validate_string_list(
+                channel["watchpoints"],
+                f"{channel_path}.watchpoints",
+            )
+        _validate_source_refs(profile["identity_sources"], f"{path}.identity_sources")
+
+
+def _validate_string_list(value: Any, path: str, *, allow_empty: bool = False) -> None:
+    if not isinstance(value, list) or (not allow_empty and not value):
+        raise ValueError(f"{path} must be a non-empty list")
+    if any(not isinstance(item, str) or not item.strip() for item in value):
+        raise ValueError(f"{path} must contain only non-empty strings")
+
+
+def _validate_source_refs(value: Any, path: str, *, allow_empty: bool = False) -> None:
+    if not isinstance(value, list) or (not allow_empty and not value):
+        raise ValueError(f"{path} must be a non-empty list")
+    for index, source in enumerate(value):
+        if not isinstance(source, dict) or set(source) != {"label", "url"}:
+            raise ValueError(f"{path}[{index}] must contain label and url")
+        if any(
+            not isinstance(source[key], str) or not source[key].strip()
+            for key in ("label", "url")
+        ):
+            raise ValueError(f"{path}[{index}] must contain non-empty strings")
 
 
 def portfolio_reference_payload() -> dict[str, Any]:

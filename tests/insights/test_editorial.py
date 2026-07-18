@@ -893,7 +893,7 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     context = editorial_runs.investment_context()
     portfolio = context["portfolio"]
 
-    assert context["schema_version"] == "bit-investment-context-v1"
+    assert context["schema_version"] == "bit-investment-context-v2"
     assert len(portfolio["holdings"]) == 34
     assert round(sum(item["weight_pct"] for item in portfolio["holdings"]), 2) == 97.43
     assert {item["name"] for item in portfolio["holdings"]} >= {
@@ -903,14 +903,91 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     }
     assert context["research_process"]["challenge_process"]["principle"]
     assert context["outside_portfolio_policy"]["label"] == "Outside the disclosed portfolio"
+    profiles = context["company_profiles"]
+    assert context["company_profiles_reviewed_at"] == "2026-07-18"
+    assert len(profiles) == 34
+    assert [profile["name"] for profile in profiles] == [
+        holding["name"] for holding in portfolio["holdings"]
+    ]
+    assert len({profile["ticker"] for profile in profiles}) == 34
+    assert {profile["bit_public_view"]["grade"] for profile in profiles} <= {
+        "explicit_thesis",
+        "commentary",
+        "none",
+    }
+    assert {profile["bit_public_view"]["source_scope"] for profile in profiles} <= {
+        "firm",
+        "flagship",
+        "other_product",
+        "mixed",
+        "none",
+    }
+    assert all(profile["analyst_context"]["frontier_ai_channels"] for profile in profiles)
+    by_name = {profile["name"]: profile for profile in profiles}
+    assert by_name["IREN"]["bit_public_view"]["grade"] == "explicit_thesis"
+    assert by_name["Amazon"]["bit_public_view"] == {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": None,
+        "edge": None,
+        "signals": [],
+        "countercase": None,
+        "sources": [],
+    }
+    assert by_name["Kaspi"]["bit_public_view"]["source_scope"] == "other_product"
+    assert by_name["Grindr"]["bit_public_view"]["source_scope"] == "flagship"
+    assert "Finisar" not in by_name["Coherent"]["aliases"]
 
     assert editorial_cli.main(
         ["context", "--audience", "investment", "--json", "--no-input"]
     ) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["data"]["format"] == "json"
-    assert payload["data"]["context"]["schema_version"] == "bit-investment-context-v1"
+    assert payload["data"]["projection"] == "full"
+    assert payload["data"]["context"]["schema_version"] == "bit-investment-context-v2"
     assert payload["data"]["path"].endswith("references/bit-investment-context.json")
+
+    assert editorial_cli.main(
+        [
+            "context",
+            "--audience",
+            "investment",
+            "--compact",
+            "--json",
+            "--no-input",
+        ]
+    ) == 0
+    compact = json.loads(capsys.readouterr().out)
+    assert compact["data"]["projection"] == "compact"
+    assert "company_profiles" not in compact["data"]["context"]
+    assert len(compact["data"]["context"]["company_profile_index"]) == 34
+
+
+def test_company_context_lookup_is_exact_and_machine_readable(capsys):
+    assert editorial_cli.main(
+        ["company-context", "--company", "MSFT", "--json", "--no-input"]
+    ) == 0
+    ticker_match = json.loads(capsys.readouterr().out)
+    assert ticker_match["command"] == "daily-intelligence.company-context"
+    assert ticker_match["data"]["matched_by"] == "ticker"
+    assert ticker_match["data"]["profile"]["name"] == "Microsoft"
+    assert ticker_match["data"]["portfolio_holding"]["name"] == "Microsoft"
+
+    assert editorial_cli.main(
+        ["company-context", "--company", "Google", "--json", "--no-input"]
+    ) == 0
+    alias_match = json.loads(capsys.readouterr().out)
+    assert alias_match["data"]["matched_by"] == "alias"
+    assert alias_match["data"]["profile"]["name"] == "Alphabet"
+
+    assert editorial_cli.main(
+        ["company-context", "--company", "not-a-company", "--json", "--no-input"]
+    ) == 2
+    missing = json.loads(capsys.readouterr().out)
+    assert missing["status"] == "error"
+    assert missing["error"]["code"] == "E_COMPANY_NOT_FOUND"
+    assert missing["error"]["retryable"] is False
+    assert "--compact" in missing["error"]["hint"]
 
 
 def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, capsys):
@@ -923,6 +1000,10 @@ def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, cap
     assert success["schema_version"] == "1.0"
     assert success["status"] == "ok"
     assert success["error"] is None
+    assert (
+        success["data"]["investment_context_schema_version"]
+        == "bit-investment-context-v2"
+    )
     contract = success["data"]["draft"]
     assert contract["max_insights_per_audience"] is None
     assert set(contract["analysis_shapes"]) == {"investment", "ai_engineering"}

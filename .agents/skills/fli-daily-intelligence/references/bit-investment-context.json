@@ -1,5 +1,6 @@
 {
-  "schema_version": "bit-investment-context-v1",
+  "schema_version": "bit-investment-context-v2",
+  "company_profiles_reviewed_at": "2026-07-18",
   "fund": {
     "name": "BIT Global Technology Leaders",
     "manager": "BIT Capital GmbH",
@@ -193,6 +194,2180 @@
       }
     ]
   },
+  "company_profiles": [
+    {
+      "name": "IREN",
+      "ticker": "IREN",
+      "aliases": [
+        "IREN Limited",
+        "Iris Energy"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "explicit_thesis",
+        "source_scope": "firm",
+        "thesis": "Secured large-scale power and data-center capacity can become scarce, valuable AI infrastructure even when the owner began as a Bitcoin miner.",
+        "edge": "BIT combined years of Bitcoin-miner coverage with AI-value-chain work and says it recognized IREN's position at the power and data-center bottlenecks before the market treated it as an AI company.",
+        "signals": [
+          "Texas grid-interconnection pipeline",
+          "Repeated site visits and CEO discussions",
+          "AI Cloud GPU deployment and conversion of power capacity into data-center use"
+        ],
+        "countercase": null,
+        "sources": [
+          {
+            "label": "BIT Capital — Ahead of the Curve: IREN thesis",
+            "url": "https://bitcap.com/en"
+          },
+          {
+            "label": "BIT Capital — Beckers Bets: Duolingo data and IREN drivers",
+            "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "IREN builds, owns, and operates power-dense data centers in North America for AI cloud, colocation and build-to-suit services, while retaining Bitcoin-mining operations.",
+        "operating_drivers": [
+          "Secured, energized, and construction-stage power capacity",
+          "AI data-center delivery, contracted capacity, and GPU utilization",
+          "Power economics, capital availability, construction cost, and customer concentration"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Power-constrained AI data centers",
+            "potential_upside": "Owned sites and grid access can be monetized through AI cloud, colocation, or build-to-suit contracts when customers need deployable high-density capacity.",
+            "potential_downside": "Secured megawatts do not create economics until interconnection, construction, cooling, financing, and customer commitments convert them into operating capacity.",
+            "watchpoints": [
+              "Energized MW and construction milestones",
+              "Contracted capacity and customer concentration",
+              "GPU fleet utilization and AI-cloud revenue"
+            ]
+          },
+          {
+            "channel": "Bitcoin mining as an alternate use of power",
+            "potential_upside": "Mining can monetize available power before or alongside AI deployments and provides operating experience with power-dense compute.",
+            "potential_downside": "Mining economics are volatile and mining equipment can compete with AI projects for capital without transferring directly into enterprise data-center capability.",
+            "watchpoints": [
+              "Hashrate and fleet efficiency",
+              "Power cost and curtailment economics",
+              "Capital allocation between mining and AI infrastructure"
+            ]
+          }
+        ],
+        "cautions": [
+          "Do not treat secured or planned power as commissioned AI capacity.",
+          "The company is transitioning from its Iris Energy identity and a mining-led model, so historical comparisons need consistent business definitions.",
+          "BIT and IREN materials have described at least one large AI transaction differently; company filings should govern transaction facts."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "IREN — company and data-center overview",
+          "url": "https://iren.com/"
+        },
+        {
+          "label": "IREN — investor hub",
+          "url": "https://www.iren.com/investors"
+        }
+      ]
+    },
+    {
+      "name": "AUTO1",
+      "ticker": "AG1",
+      "aliases": [
+        "AUTO1 Group",
+        "AUTO1 Group SE"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "mixed",
+        "thesis": "BIT publicly described market conditions for AUTO1 as \"perfect\" and separately identified it as the largest position in BIT Defensive Growth, whose selected securities were described as having above-average return potential.",
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": [
+          {
+            "label": "BIT Capital: WELT podcast landing page mentioning AUTO1 conditions",
+            "url": "https://bitcap.com/en/news/welt-podcast-alles-auf-aktien-die-bullenmarkt-these-des-jan-beckers-und-seine-etf-idee"
+          },
+          {
+            "label": "BIT Capital: first-year review of BIT Defensive Growth",
+            "url": "https://bitcap.com/en/news/presseinformation-bit-capital-zieht-jahresbilanz-zum-bit-defensive-growth"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "AUTO1 Group operates a European digital used-car platform spanning consumer sourcing, dealer remarketing and wholesale through AUTO1.com, retail through Autohero, and consumer and merchant financing.",
+        "operating_drivers": [
+          "Units bought and sold across merchant and retail channels",
+          "Gross profit per unit and inventory turnover",
+          "Used-car price dispersion, financing performance, and logistics efficiency"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Vehicle pricing, appraisal, and cross-market inventory matching",
+            "potential_upside": "Stronger multimodal models could extract condition data, improve live valuations, route vehicles to the best market, and reduce manual appraisal cost.",
+            "potential_downside": "Correlated model errors could overpay for inventory or underprice vehicles at scale, while opaque valuations could weaken seller and dealer trust.",
+            "watchpoints": [
+              "Gross profit per unit and inventory days",
+              "Realized prices versus initial appraisals",
+              "Markdowns, returns, and appraisal overrides"
+            ]
+          }
+        ],
+        "cautions": [
+          "The accessible BIT commentary does not disclose the operating conditions behind its positive wording.",
+          "Inventory ownership, refurbishment, logistics, and financing make this more capital- and execution-intensive than a pure marketplace."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "AUTO1 Group corporate overview",
+          "url": "https://www.auto1-group.com/"
+        },
+        {
+          "label": "AUTO1 Group share and listing information",
+          "url": "https://ir.auto1-group.com/shares"
+        },
+        {
+          "label": "AUTO1 Group securities prospectus: technology and pricing algorithms",
+          "url": "https://ir.auto1-group.com/websites/auto1/English/9990/pdf-download.html?filename=AUTO1+Group+SE+-+Securities+Prospectus.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Hinge Health",
+      "ticker": "HNGE",
+      "aliases": [
+        "Hinge Health, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Hinge Health provides technology-enabled care for musculoskeletal conditions through software, AI, wearable technology, and clinician oversight, primarily for employers, health plans, and benefits partners.",
+        "operating_drivers": [
+          "Clients, contracted lives, and eligible-population expansion",
+          "Member enrollment, engagement, and completion",
+          "Clinical outcomes, client ROI, retention, and care-delivery efficiency"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Automated motion tracking and personalized care delivery",
+            "potential_upside": "More capable models could improve movement assessment, personalize exercises and nudges, and help clinicians support more members without removing human oversight.",
+            "potential_downside": "Unsafe or uneven recommendations, missed clinical escalation, or weaker performance across bodies and conditions could harm outcomes and trust.",
+            "watchpoints": [
+              "Clinical outcomes and engagement by cohort",
+              "Clinician escalations and safety events",
+              "Client retention and independently credible ROI evidence"
+            ]
+          }
+        ],
+        "cautions": [
+          "Healthcare AI claims require validation across patient groups, conditions, and real-world workflows.",
+          "Company-reported outcomes and ROI should be read with study design, comparator, and follow-up period."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Hinge Health investor-relations corporate overview",
+          "url": "https://ir.hingehealth.com/overview/default.aspx"
+        },
+        {
+          "label": "Hinge Health why-invest overview",
+          "url": "https://ir.hingehealth.com/why-invest/default.aspx"
+        }
+      ]
+    },
+    {
+      "name": "TSMC",
+      "ticker": "TSM",
+      "aliases": [
+        "Taiwan Semiconductor Manufacturing Company",
+        "Taiwan Semiconductor Manufacturing Company Limited",
+        "Taiwan Semiconductor",
+        "2330.TW"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "TSMC is a pure-play semiconductor foundry that manufactures customer designs using leading-edge and specialty process technologies and provides advanced packaging and chip-stacking services.",
+        "operating_drivers": [
+          "Leading-edge node demand, utilization, yield, and pricing",
+          "High-performance-computing mix and advanced-packaging capacity",
+          "Capital intensity, global fab execution, and customer concentration"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Leading-edge AI accelerator fabrication and packaging",
+            "potential_upside": "More accelerator designs and larger systems can raise demand for advanced logic nodes, chip stacking, and advanced packaging.",
+            "potential_downside": "Demand concentration, customer redesigns, packaging bottlenecks, or underused capacity can weaken the translation from AI spending to foundry economics.",
+            "watchpoints": [
+              "Advanced-node share and utilization",
+              "HPC revenue mix",
+              "Advanced-packaging capacity and cycle times"
+            ]
+          },
+          {
+            "channel": "AI moving into PCs, phones, vehicles, and edge devices",
+            "potential_upside": "On-device AI can add silicon content and pull newer, more energy-efficient process technologies into broad end markets.",
+            "potential_downside": "Consumer unit cycles, cost constraints, and model-efficiency gains can limit incremental wafer demand.",
+            "watchpoints": [
+              "Customer tape-outs on newer nodes",
+              "Smartphone and PC utilization",
+              "Specialty-technology demand"
+            ]
+          }
+        ],
+        "cautions": [
+          "A large share of leading-edge capacity remains in Taiwan, creating geopolitical and continuity risk.",
+          "Overseas fabs diversify the footprint but can carry ramp, cost, and yield penalties.",
+          "Export controls and customer concentration can change product and geography mix."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "TSMC — 2025 Annual Report",
+          "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html"
+        }
+      ]
+    },
+    {
+      "name": "Micron",
+      "ticker": "MU",
+      "aliases": [
+        "Micron Technology",
+        "Micron Technology, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "explicit_thesis",
+        "source_scope": "firm",
+        "thesis": "AI requires unusually large amounts of memory, while HBM production displaces conventional-memory capacity and can tighten pricing across the memory complex.",
+        "edge": "BIT says it formed an early view that the AI memory cycle would exceed mobile and cloud demand cycles and follows operating data before reported results.",
+        "signals": [
+          "DRAM spot prices",
+          "HBM production yields",
+          "Supply-chain and proprietary business-momentum data"
+        ],
+        "countercase": null,
+        "sources": [
+          {
+            "label": "BIT Capital — Ahead of the Curve: Micron thesis",
+            "url": "https://bitcap.com/en"
+          },
+          {
+            "label": "BIT Capital — Beckers Bets: the memory supercycle",
+            "url": "https://bitcap.com/news/85-fondsmanager-beckers-wie-der-memory-supercycle-weitergeht"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Micron develops and manufactures memory and storage products, principally DRAM, NAND, high-bandwidth memory, and solid-state drives for data centers, clients, mobile, automotive, and embedded markets.",
+        "operating_drivers": [
+          "DRAM and NAND industry supply, inventory, and pricing",
+          "HBM qualification, yields, capacity allocation, and product mix",
+          "Data-center demand, technology transitions, and capital spending"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "HBM and server DRAM for AI accelerators",
+            "potential_upside": "Larger models, longer contexts, and higher accelerator counts increase bandwidth and capacity requirements per AI system.",
+            "potential_downside": "Competitor capacity, better yields, accelerator redesigns, or slower cluster deployment can loosen supply and restore memory cyclicality.",
+            "watchpoints": [
+              "HBM customer qualifications and shipments",
+              "HBM yields and capacity allocation",
+              "DRAM pricing and inventories"
+            ]
+          },
+          {
+            "channel": "AI data storage and inference memory hierarchy",
+            "potential_upside": "Retrieval, checkpointing, KV-cache, and data-lake workloads can increase demand for data-center SSDs, NAND, and lower-power DRAM.",
+            "potential_downside": "Storage optimization, slower enterprise deployment, or NAND oversupply can dilute AI-linked demand.",
+            "watchpoints": [
+              "Data-center SSD revenue and qualifications",
+              "NAND pricing and industry supply",
+              "High-capacity and low-power DRAM mix"
+            ]
+          }
+        ],
+        "cautions": [
+          "Memory remains capital-intensive and cyclical even when AI changes the product mix.",
+          "HBM commitments can displace conventional DRAM capacity, but the magnitude depends on yields and supplier investment.",
+          "BIT's public pages give inconsistent Micron entry dates; do not infer a cost basis from them."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Micron — 2025 Form 10-K",
+          "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027"
+        },
+        {
+          "label": "Micron — investor relations and annual materials",
+          "url": "https://investors.micron.com/"
+        }
+      ]
+    },
+    {
+      "name": "Reddit",
+      "ticker": "RDDT",
+      "aliases": [
+        "Reddit, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "explicit_thesis",
+        "source_scope": "firm",
+        "thesis": "Reddit's difficult-to-replicate archive of authentic human opinions is valuable both for advertising and as training material for large language models; BIT believes the market initially misclassified Reddit as only a social-media ad platform.",
+        "edge": "BIT identified data licensing as a distinct revenue stream before it entered consensus models and expected deeper Google integration to create a reinforcing search-acquisition loop.",
+        "signals": [
+          "Data-licensing agreements with leading AI model providers",
+          "Registered-user growth",
+          "Advertising revenue supported by user growth"
+        ],
+        "countercase": null,
+        "sources": [
+          {
+            "label": "BIT Capital — Reddit investment thesis, edge, and signals",
+            "url": "https://bitcap.com/en"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Reddit is a community-of-communities platform where users submit, vote on, and discuss content. It monetizes primarily through advertising, with other revenue including commercial data and API arrangements.",
+        "operating_drivers": [
+          "Daily and weekly active uniques, logged-in participation, and the health of topic communities",
+          "Ad load, advertiser breadth, targeting and measurement quality, and average revenue per unique",
+          "International discovery and commercial data access while maintaining user, moderator, and rightsholder trust"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Licensing public conversation for model training and grounding",
+            "potential_upside": "Reddit can charge frontier-model and search providers for structured access to a large, current corpus of human discussion and product experience.",
+            "potential_downside": "Model providers may resist pricing, use substitutes or unlicensed collection, while users and rightsholders may challenge how their content is used.",
+            "watchpoints": [
+              "New and renewed licensing agreements",
+              "Other revenue and customer concentration",
+              "API enforcement, litigation, and user-policy changes"
+            ]
+          },
+          {
+            "channel": "AI-assisted translation, search, and content discovery",
+            "potential_upside": "Translation and semantic discovery can expose the existing corpus to more geographies, improve onboarding, and convert more visits into recurring use.",
+            "potential_downside": "Low-quality translation or answer layers can strip community context, reduce direct engagement, or make Reddit more dependent on external search distribution.",
+            "watchpoints": [
+              "International DAUq and logged-in-user growth",
+              "Direct versus search-referred traffic",
+              "Retention and contribution in translated communities"
+            ]
+          }
+        ],
+        "cautions": [
+          "The product depends on volunteer moderators and community norms that Reddit does not fully control.",
+          "Advertising remains the dominant revenue source despite the strategic value of data licensing.",
+          "Search-platform changes can materially affect visitor acquisition.",
+          "Licensing public content creates privacy, copyright, consent, and community-trust tensions."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Reddit Investor Relations — company overview",
+          "url": "https://investor.redditinc.com/overview/default.aspx"
+        },
+        {
+          "label": "Reddit Investor Relations — Q4 and full-year 2025 results",
+          "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx"
+        }
+      ]
+    },
+    {
+      "name": "Alphabet",
+      "ticker": "GOOGL",
+      "aliases": [
+        "Alphabet Inc.",
+        "Google",
+        "Google LLC"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "firm",
+        "thesis": "BIT Capital argues that Alphabet and the other hyperscalers can fund their exceptional AI investment from current earnings, while the scale of that spending creates entry barriers and can reinforce an oligopolistic market structure.",
+        "edge": null,
+        "signals": [
+          "AI capital expenditure relative to operating cash flow and revenue",
+          "Revenue growth needed to keep funding the investment cycle internally",
+          "Evidence that AI spending is producing revenue, productivity, or strategic distribution advantages"
+        ],
+        "countercase": "BIT describes a high-expectations equilibrium: the investment cycle is risky, and failure to meet growth and return expectations carries disproportionate downside.",
+        "sources": [
+          {
+            "label": "BIT Capital / F.A.Z. — AI bubble discussion",
+            "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Alphabet is the listed parent of Google. Google Services includes Search, YouTube, Android, Maps, Play, subscriptions, and devices; Google Cloud sells infrastructure, AI platforms, cybersecurity, data tools, and collaboration software; Other Bets includes businesses such as Waymo.",
+        "operating_drivers": [
+          "Search and YouTube engagement, ad relevance, and advertiser return on spend",
+          "Google Cloud consumption, backlog conversion, and enterprise adoption across infrastructure and software",
+          "AI compute availability, capital intensity, and the efficiency of proprietary TPUs and serving infrastructure"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "AI-native Search, recommendations, and advertising",
+            "potential_upside": "Gemini can broaden the set of queries Google serves, deepen sessions, improve ad matching, and preserve high-intent commercial discovery across Search and YouTube.",
+            "potential_downside": "Answer-heavy interfaces can alter click and ad behavior, raise inference cost per query, or create openings for competing assistants and discovery products.",
+            "watchpoints": [
+              "AI Mode usage and follow-up-query behavior",
+              "Search and YouTube advertising growth and advertiser ROI",
+              "Inference cost and monetization of AI-assisted sessions"
+            ]
+          },
+          {
+            "channel": "Vertically integrated frontier-model and cloud stack",
+            "potential_upside": "Google can monetize AI across TPUs and GPUs, Gemini models, Vertex AI, enterprise agents, Workspace, and security while using the same research internally.",
+            "potential_downside": "Supply constraints, rapid model commoditization, price competition, or underutilized capacity could weaken returns on a very large infrastructure program.",
+            "watchpoints": [
+              "Cloud backlog and consumption by AI customers",
+              "Adoption of Gemini, Vertex AI, and enterprise agents",
+              "Capital expenditure, power availability, and accelerator utilization"
+            ]
+          }
+        ],
+        "cautions": [
+          "Advertising remains the main economic engine despite broader product breadth.",
+          "The AI build-out requires unusually high capital expenditure and dependable power and hardware supply.",
+          "Antitrust, privacy, copyright, content, and default-distribution rules can change product economics or access.",
+          "Model quality and consumer distribution are moving quickly, so current leadership is not self-sustaining."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Alphabet Investor Relations — segments and financial statement glossary",
+          "url": "https://abc.xyz/investor/faqs-and-general-information/default.aspx"
+        },
+        {
+          "label": "Alphabet Investor Relations — 2025 Q4 earnings call",
+          "url": "https://abc.xyz/investor/events/event-details/2026/2025-Q4-Earnings-Call-2026-Dr_C033hS6/default.aspx"
+        }
+      ]
+    },
+    {
+      "name": "Datadog",
+      "ticker": "DDOG",
+      "aliases": [
+        "Datadog, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Datadog provides a cloud observability and security platform that brings together infrastructure monitoring, application performance, logs, traces, digital experience, software delivery, incident response, and cloud security in one data model and workflow.",
+        "operating_drivers": [
+          "Cloud workload growth and customer consumption of telemetry",
+          "Expansion from an initial product into additional observability, security, and developer modules",
+          "Growth and retention of large customers with complex, multi-cloud environments"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Observability for models and AI agents",
+            "potential_upside": "Production AI introduces traces, evaluations, latency, token cost, safety, and tool-call telemetry that can expand Datadog's role from infrastructure monitoring into the AI development loop.",
+            "potential_downside": "Open-source tooling, model vendors, and hyperscalers can bundle AI observability, while rapidly changing frameworks can fragment instrumentation.",
+            "watchpoints": [
+              "Adoption and paid usage of LLM and Agent Observability",
+              "Integration coverage across leading models and agent frameworks",
+              "Customer evidence of quality, latency, and cost improvements"
+            ]
+          },
+          {
+            "channel": "Bits AI agents for development, operations, and security",
+            "potential_upside": "Datadog can turn its cross-stack telemetry into autonomous investigations, code fixes, security triage, and remediation rather than stopping at alerts and dashboards.",
+            "potential_downside": "Incorrect or over-privileged actions could create production or security incidents, and buyers may be reluctant to delegate remediation without verifiable controls.",
+            "watchpoints": [
+              "Conversion from preview or trial to paid agent usage",
+              "Resolution quality, human review rates, and measurable time-to-recovery gains",
+              "Access controls, auditability, and incident history"
+            ]
+          }
+        ],
+        "cautions": [
+          "Consumption-based usage can slow when customers optimize cloud and telemetry bills.",
+          "Datadog competes with hyperscalers, security platforms, point products, and open-source stacks.",
+          "Processing and retaining high-volume telemetry creates material infrastructure-cost and pricing tradeoffs.",
+          "Agentic remediation increases the importance of permissions, audit trails, reliability, and liability boundaries."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Datadog — 2025 annual report",
+          "url": "https://investors.datadoghq.com/static-files/0a0cecbd-9dfe-43c8-9174-1bcffad62c20"
+        },
+        {
+          "label": "Datadog — Bits AI Agents",
+          "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/"
+        }
+      ]
+    },
+    {
+      "name": "Lemonade",
+      "ticker": "LMND",
+      "aliases": [
+        "Lemonade, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Lemonade is an AI-powered, full-stack insurer offering renters, homeowners, car, pet, and life products across the United States and Europe.",
+        "operating_drivers": [
+          "In-force premium, customer growth, and premium per customer",
+          "Gross loss ratio and loss-adjustment expense",
+          "Cross-sell, retention, acquisition efficiency, and approved expansion"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Underwriting, pricing, claims, and customer-service automation",
+            "potential_upside": "Better models could segment risk more precisely, automate low-complexity claims and service, reduce expense per policy, and improve response speed.",
+            "potential_downside": "Model drift, biased segmentation, adversarial fraud, or incorrect claim handling could worsen loss ratios, create unfair outcomes, and attract regulatory scrutiny.",
+            "watchpoints": [
+              "Loss ratio by product and underwriting cohort",
+              "Automation rate, claim cycle time, and loss-adjustment expense",
+              "Complaints, reversals, fraud losses, and regulatory actions"
+            ]
+          }
+        ],
+        "cautions": [
+          "Growth and automation should be evaluated alongside underwriting profitability rather than in isolation.",
+          "Insurance outcomes emerge with a lag, so early model or cohort performance may not represent mature loss experience."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Lemonade investor-relations overview",
+          "url": "https://www.lemonade.com/investor"
+        },
+        {
+          "label": "Lemonade investor FAQ and listing information",
+          "url": "https://www.lemonade.com/investor/faq"
+        },
+        {
+          "label": "Lemonade Q1 2026 shareholder letter",
+          "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Robinhood",
+      "ticker": "HOOD",
+      "aliases": [
+        "Robinhood Markets",
+        "Robinhood Markets, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "explicit_thesis",
+        "source_scope": "firm",
+        "thesis": "Robinhood brought a new generation into capital markets and is evolving from a trading app into a full-stack wealth-management platform for younger households.",
+        "edge": "BIT framed low balance-sheet leverage versus established brokers, plus proprietary forecasts of quarterly operating metrics, as an underappreciated combination.",
+        "signals": [
+          "Total platform assets",
+          "Paying subscribers",
+          "Product launches and adoption"
+        ],
+        "countercase": null,
+        "sources": [
+          {
+            "label": "BIT Capital Ahead of the Curve: Robinhood thesis, edge, and signals",
+            "url": "https://bitcap.com/en"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Robinhood is a financial-services platform offering retail brokerage, crypto, advisory, digital banking, and private-markets access to a new generation of investors.",
+        "operating_drivers": [
+          "Funded customers, total platform assets, and net deposits",
+          "Gold subscriptions and adoption of additional financial products",
+          "Trading activity, net interest revenue, product expansion, and regulatory execution"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Cortex and personalized financial guidance inside the distribution surface",
+            "potential_upside": "A reliable assistant could make market context, portfolio explanations, and product discovery more accessible while increasing the value of Robinhood Gold.",
+            "potential_downside": "Hallucinated, unsuitable, or engagement-optimized guidance could harm customers, blur the line between education and advice, and increase compliance exposure.",
+            "watchpoints": [
+              "Cortex adoption and Gold retention",
+              "Customer complaints, corrections, and human escalations",
+              "Regulatory disclosures and suitability controls"
+            ]
+          }
+        ],
+        "cautions": [
+          "Revenue remains exposed to market activity, crypto cycles, interest rates, and regulation even as the product set broadens.",
+          "Platform-asset growth should be separated into net deposits, market appreciation, and acquired assets."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Robinhood investor-relations overview",
+          "url": "https://investors.robinhood.com/"
+        },
+        {
+          "label": "Robinhood Q1 2026 results and Cortex disclosure",
+          "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results"
+        }
+      ]
+    },
+    {
+      "name": "Oscar Health",
+      "ticker": "OSCR",
+      "aliases": [
+        "Oscar",
+        "Oscar Health, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Oscar Health is a technology-enabled health insurer built on a full-stack platform, offering Individual and Family plans, ICHRA solutions, +Oscar technology services, and the Lucie Health Marketplace.",
+        "operating_drivers": [
+          "Membership, premiums, and geographic or product expansion",
+          "Medical loss ratio, risk adjustment, and medical-cost trend",
+          "Administrative efficiency, member engagement, +Oscar adoption, and ICHRA distribution"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Oswell member support, care navigation, and plan-benefit interpretation",
+            "potential_upside": "A grounded personal health agent could resolve routine questions, connect fragmented records and benefit documents, guide members to appropriate care, and reduce service friction.",
+            "potential_downside": "Incorrect medication, symptom, benefit, or network guidance could create clinical and financial harm; sensitive-record access also raises privacy and security stakes.",
+            "watchpoints": [
+              "Usage, resolution, and clinician-escalation rates",
+              "Member complaints, safety incidents, and privacy events",
+              "Care utilization, retention, and administrative cost per member"
+            ]
+          }
+        ],
+        "cautions": [
+          "Insurance economics remain dominated by pricing adequacy, risk adjustment, and medical-cost control, not technology adoption alone.",
+          "Health-agent capability claims need evidence of grounding, escalation, and performance across member populations."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Oscar Health investor-relations overview",
+          "url": "https://ir.hioscar.com/overview"
+        },
+        {
+          "label": "Oscar Health announcement of Oswell and 2026 products",
+          "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx"
+        }
+      ]
+    },
+    {
+      "name": "Meta",
+      "ticker": "META",
+      "aliases": [
+        "Meta Platforms",
+        "Meta Platforms, Inc.",
+        "Facebook"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "firm",
+        "thesis": "BIT Capital identifies Meta's generative-AI ad optimization as one of the clearest commercial AI levers, helping rebuild advertising revenue after Apple's App Tracking Transparency shock.",
+        "edge": null,
+        "signals": [
+          "Incremental advertising revenue associated with AI optimization",
+          "Advertiser conversion performance and return on ad spend",
+          "Revenue recovery relative to the post-ATT baseline"
+        ],
+        "countercase": "The cited memo frames GenAI payback as an open timing question even where early returns are visible.",
+        "sources": [
+          {
+            "label": "BIT Capital AI ROI Research Memo — Is it all worth it?",
+            "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert-2"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Meta operates Facebook, Instagram, Messenger, WhatsApp, Threads, and related services in Family of Apps, whose revenue is predominantly advertising. Reality Labs develops virtual- and augmented-reality hardware, software, and content, including AI glasses.",
+        "operating_drivers": [
+          "Daily active people, time spent, content supply, and recommendation quality across the app family",
+          "Ad impressions, pricing, conversion performance, and advertiser adoption of automated campaign tools",
+          "AI infrastructure capacity and the return earned on model training and inference spend"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Recommendation, ranking, and generative advertising systems",
+            "potential_upside": "Better recommendations can increase engagement while AI campaign setup, creative generation, attribution, and ranking improve advertiser outcomes and monetization.",
+            "potential_downside": "Synthetic content can reduce feed quality or trust, and high compute intensity can absorb part of the economic gain from better targeting.",
+            "watchpoints": [
+              "Time spent and recommendation-driven engagement",
+              "Advertiser ROI and adoption of Advantage+ and generative creative tools",
+              "Revenue contribution versus inference and infrastructure cost"
+            ]
+          },
+          {
+            "channel": "Meta AI and model distribution across consumer apps",
+            "potential_upside": "Distribution through WhatsApp, Instagram, Facebook, Messenger, and a standalone app gives Meta a large surface for assistants, creation, discovery, and future business messaging services.",
+            "potential_downside": "Assistant usage may be costly before durable monetization appears, while privacy, safety, and model-quality failures could impair trust across the core apps.",
+            "watchpoints": [
+              "Meta AI active use and repeat engagement",
+              "Model capability and cost per interaction",
+              "Commercial integrations in messaging, discovery, and creation"
+            ]
+          }
+        ],
+        "cautions": [
+          "Advertising concentration ties results to engagement, advertiser demand, and measurement access.",
+          "Privacy, content-safety, competition, and youth-protection regulation can constrain data use or distribution.",
+          "Frontier-model and data-center investment is capital intensive and its payback timing is uncertain.",
+          "Reality Labs expands the opportunity set but has historically required large operating investment."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Meta Investor Relations — Q4 and full-year 2025 results",
+          "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/"
+        },
+        {
+          "label": "Meta — Introducing the Meta AI app",
+          "url": "https://about.fb.com/news/2025/04/introducing-meta-ai-app-new-way-access-ai-assistant/"
+        }
+      ]
+    },
+    {
+      "name": "Rubrik",
+      "ticker": "RBRK",
+      "aliases": [
+        "Rubrik, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Rubrik sells a subscription cyber-resilience platform spanning immutable data protection, threat detection, sensitive-data posture, identity resilience, and orchestrated recovery across enterprise, cloud, and SaaS environments. It is extending that control plane into AI data and agent operations.",
+        "operating_drivers": [
+          "Subscription annual recurring revenue and growth in large customers",
+          "Expansion across data protection, cyber recovery, identity, SaaS, and posture-management modules",
+          "Ransomware, regulatory, and business-continuity urgency among CIOs and CISOs"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Governed access to enterprise data for AI applications",
+            "potential_upside": "Rubrik can use its indexed data and metadata, access controls, and recovery layer to help enterprises expose trusted data to retrieval and agent workflows without creating a separate governance silo.",
+            "potential_downside": "A permissions, leakage, or data-quality failure in an AI workflow would undermine the trust required for Rubrik to become that control layer.",
+            "watchpoints": [
+              "Production adoption of AI data and embedding services",
+              "Protected data sources and policy coverage",
+              "Security, privacy, and recovery outcomes"
+            ]
+          },
+          {
+            "channel": "Monitoring, governing, and rewinding AI agents",
+            "potential_upside": "Rubrik Agent Cloud extends cyber recovery into agent discovery, real-time guardrails, audit trails, and reversal of destructive actions across multi-agent deployments.",
+            "potential_downside": "Agent governance is an early category with unsettled standards, dependency on platform APIs, and competition from security, identity, observability, and model vendors.",
+            "watchpoints": [
+              "Number and breadth of production agent integrations",
+              "Attach to existing Rubrik Security Cloud customers",
+              "Frequency and quality of governed or reversed actions"
+            ]
+          }
+        ],
+        "cautions": [
+          "Cyber resilience is trust-sensitive: product vulnerabilities or failed recoveries can have outsized reputational effects.",
+          "The market includes established backup vendors, large security platforms, cloud-native services, and focused startups.",
+          "New AI and identity categories broaden the opportunity but also increase product and go-to-market complexity.",
+          "Subscription growth should be assessed alongside operating leverage, stock-based compensation, and cash generation."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Rubrik — company and Rubrik Security Cloud overview",
+          "url": "https://www.rubrik.com/company"
+        },
+        {
+          "label": "Rubrik — Rubrik Agent Cloud",
+          "url": "https://www.rubrik.com/products/rubrik-agent-cloud"
+        }
+      ]
+    },
+    {
+      "name": "Kaspi",
+      "ticker": "KSPI",
+      "aliases": [
+        "Kaspi.kz",
+        "Joint Stock Company Kaspi.kz"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "other_product",
+        "thesis": "BIT's published commentary focused on Kaspi continuing to compound profits in Kazakhstan while expanding internationally.",
+        "edge": "BIT said a 2024 short-seller report lacked merit, citing subsequent statements and facts from the company and Kazakhstan's central bank.",
+        "signals": [
+          "Profit compounding in Kazakhstan",
+          "International expansion"
+        ],
+        "countercase": "Failure to sustain domestic profit compounding or execute international expansion would break the condition BIT identified.",
+        "sources": [
+          {
+            "label": "BIT Global Technology Opportunities September 2024 factsheet",
+            "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Kaspi.kz operates consumer and merchant Super Apps that connect payments, marketplace, and fintech services in Kazakhstan, and it controls the Hepsiburada e-commerce platform in Türkiye.",
+        "operating_drivers": [
+          "Active consumers, merchants, transaction frequency, and cross-platform engagement",
+          "Payments TPV, marketplace GMV, fintech TFV, and monetization",
+          "Credit quality, funding costs, and Hepsiburada execution in Türkiye"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Super-app personalization, merchant tools, real-time credit decisions, and fraud control",
+            "potential_upside": "Better models could improve product discovery, merchant conversion, service automation, and risk decisions across an unusually dense transaction dataset.",
+            "potential_downside": "Model errors or bias could amplify credit losses, fraud, poor recommendations, or exclusion across several tightly linked services at once.",
+            "watchpoints": [
+              "Order and transaction frequency with take rates",
+              "Cost of risk, fraud losses, and manual-review rates",
+              "Cross-platform adoption and service complaints"
+            ]
+          }
+        ],
+        "cautions": [
+          "Separate Kazakhstan's mature ecosystem economics from Türkiye integration and investment.",
+          "Currency, regulation, funding costs, credit quality, and geopolitical exposure can overwhelm product-level gains."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Kaspi.kz 2025 annual-report filing announcement and company overview",
+          "url": "https://ir.kaspi.kz/media/PR_20-F_2025.pdf"
+        },
+        {
+          "label": "Kaspi.kz mission and ecosystem overview",
+          "url": "https://ir.kaspi.kz/about/mission/"
+        },
+        {
+          "label": "Kaspi.kz fintech platform overview",
+          "url": "https://ir.kaspi.kz/platforms/e-finance/"
+        }
+      ]
+    },
+    {
+      "name": "NVIDIA",
+      "ticker": "NVDA",
+      "aliases": [
+        "NVIDIA Corporation",
+        "Nvidia"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "firm",
+        "thesis": "NVIDIA remains a central AI-compute bottleneck, with capacity constraints indicating demand beyond available supply.",
+        "edge": "BIT views the competitive gap as difficult to close and direct-challenger hunting as a crowded source of alpha.",
+        "signals": [
+          "Whether NVIDIA remains capacity constrained",
+          "Continued rollout of new AI use cases",
+          "Emergence of a genuine competitive alternative"
+        ],
+        "countercase": "BIT identifies real competition as the principal challenge and also notes that exceptional growth raises the expectations bar.",
+        "sources": [
+          {
+            "label": "BIT Capital — Beckers Bets: NVIDIA capacity and competition",
+            "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "NVIDIA provides an accelerated-computing platform spanning GPUs and CPUs, networking, systems, and software for data centers, gaming, professional visualization, automotive, and edge workloads.",
+        "operating_drivers": [
+          "Data-center compute and networking platform demand",
+          "Product-transition execution, supply, and system availability",
+          "CUDA adoption, customer concentration, and export controls"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Training and scaling frontier models",
+            "potential_upside": "Larger training runs and multimodal or reasoning workloads can require more accelerators, networking, and integrated systems.",
+            "potential_downside": "Custom silicon, competing accelerators, algorithmic efficiency, or constrained power can reduce NVIDIA content per training run.",
+            "watchpoints": [
+              "Data Center compute and networking revenue",
+              "Blackwell and Rubin deployment cadence",
+              "Cloud and model-builder concentration"
+            ]
+          },
+          {
+            "channel": "Inference and agentic AI factories",
+            "potential_upside": "Persistent inference, long context, and agent workflows can broaden demand beyond episodic model training into recurring production compute.",
+            "potential_downside": "Inference can be more price-sensitive and easier to optimize onto alternative accelerators or customer-designed silicon.",
+            "watchpoints": [
+              "Inference-oriented platform deployments",
+              "Token-cost and performance improvements",
+              "Adoption of alternative accelerators"
+            ]
+          }
+        ],
+        "cautions": [
+          "A small number of direct and indirect customers account for substantial demand.",
+          "Advanced manufacturing and packaging depend on external suppliers.",
+          "Rapid product transitions can create allocation, inventory, and execution risk.",
+          "Export restrictions can remove addressable demand or require lower-specification products."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "NVIDIA — 2026 Annual Report and proxies",
+          "url": "https://investor.nvidia.com/financial-info/annual-reports-and-proxies/default.aspx"
+        },
+        {
+          "label": "NVIDIA — fiscal 2026 results",
+          "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Fourth-Quarter-and-Fiscal-2026/"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft",
+      "ticker": "MSFT",
+      "aliases": [
+        "Microsoft Corporation"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "firm",
+        "thesis": "Microsoft's diversification, stable business model, and cross-product synergies leave it with few obvious operating weaknesses.",
+        "edge": "Its enterprise, productivity, developer, and cloud businesses reinforce one another rather than relying on a single AI product.",
+        "signals": [
+          "Business-model stability",
+          "Cross-business synergies",
+          "Breadth of diversification"
+        ],
+        "countercase": "BIT says those strengths were already reflected in a premium valuation and described Microsoft as stable but no longer cheap.",
+        "sources": [
+          {
+            "label": "BIT Capital — Beckers Bets: Microsoft diversification and valuation",
+            "url": "https://bitcap.com/news/elon-musk-hat-sich-mit-seinen-unternehmen-verzettelt-jan-beckers-im-beckers-bets-podcast"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Microsoft combines productivity and business applications, Azure cloud and AI services, developer tools, Windows, search, gaming, LinkedIn, and enterprise support in a recurring-license and consumption-led platform.",
+        "operating_drivers": [
+          "Azure and other cloud-service consumption",
+          "Microsoft 365 seats, pricing, retention, and Copilot adoption",
+          "AI capacity, capital spending, cloud margin, and enterprise renewals"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Azure AI infrastructure and model platform",
+            "potential_upside": "Training, inference, and agent workloads can increase Azure consumption and deepen enterprise use of its data, security, and developer services.",
+            "potential_downside": "Capacity build-out and inference costs can pressure margins if consumption, utilization, or pricing does not keep pace.",
+            "watchpoints": [
+              "Azure growth and disclosed AI contribution",
+              "AI capacity constraints and capital spending",
+              "Microsoft Cloud gross margin"
+            ]
+          },
+          {
+            "channel": "Copilots and agents across the installed base",
+            "potential_upside": "Microsoft can distribute AI through Microsoft 365, GitHub, Dynamics, security, and Windows to existing enterprise and developer customers.",
+            "potential_downside": "Weak willingness to pay, product overlap, model errors, or high serving costs can limit incremental economics.",
+            "watchpoints": [
+              "Paid Copilot and agent adoption",
+              "Per-user and consumption monetization",
+              "Retention, security, and reliability disclosures"
+            ]
+          }
+        ],
+        "cautions": [
+          "AI infrastructure scaling has already weighed on Microsoft Cloud gross margin.",
+          "The AI stack depends on external chip supply and important model partnerships as well as Microsoft's own technology.",
+          "Security, data-governance, competition, and antitrust issues can affect enterprise adoption."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Microsoft — 2025 Annual Report",
+          "url": "https://www.microsoft.com/investor/reports/ar25/index.html"
+        },
+        {
+          "label": "Microsoft — annual reports",
+          "url": "https://www.microsoft.com/en-us/investor/annual-reports"
+        }
+      ]
+    },
+    {
+      "name": "HUT 8",
+      "ticker": "HUT",
+      "aliases": [
+        "Hut 8",
+        "Hut 8 Corp.",
+        "Hut 8 Corporation"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "firm",
+        "thesis": "BIT Capital views Hut 8 as well positioned because AI data-center capacity and secured power are structurally scarce, with large technology buyers reserving resources years ahead.",
+        "edge": "BIT cites close dialogue with data-center management teams as a source of strong demand signals that are not always visible in traditional media.",
+        "signals": [
+          "Lease rates for data-center capacity",
+          "Available capacity by delivery year",
+          "Power and grid resources secured ahead of demand"
+        ],
+        "countercase": null,
+        "sources": [
+          {
+            "label": "BIT Capital podcast transcript — 2026 will be the year of selection",
+            "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Hut 8 is a power-first energy infrastructure platform spanning powered land and electrical systems, purpose-built digital infrastructure, and compute businesses. It develops and leases AI and high-performance-computing data centers while retaining exposure to Bitcoin mining through American Bitcoin and related infrastructure services.",
+        "operating_drivers": [
+          "Secured power, interconnection rights, powered-land pipeline, and speed to energization",
+          "AI data-center lease terms, customer credit, financing structure, and contracted capacity",
+          "Construction cost, schedule, equipment availability, and return on project capital"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Hyperscale AI data-center development and leasing",
+            "potential_upside": "Long-duration AI leases can convert scarce power and development capability into contracted infrastructure cash flows with customers that need large clusters quickly.",
+            "potential_downside": "Projects require substantial capital and flawless delivery; delays, cost overruns, tenant credit changes, or technology redesign can impair returns.",
+            "watchpoints": [
+              "Contracted IT megawatts, lease duration, and counterparty concentration",
+              "Financing terms and equity contribution",
+              "Construction milestones, cost per megawatt, and energization dates"
+            ]
+          },
+          {
+            "channel": "Power scarcity and interconnection as the bottleneck for AI compute",
+            "potential_upside": "A power-first portfolio can create option value before the final compute use case is chosen and can support data-center, cloud, or ASIC tenants.",
+            "potential_downside": "Grid rules, permitting, transmission constraints, local opposition, or slower compute demand can strand powered land or delay monetization.",
+            "watchpoints": [
+              "Capacity under management and interconnection progress",
+              "Utility and regulatory approvals",
+              "Market lease rates and forward capacity availability"
+            ]
+          }
+        ],
+        "cautions": [
+          "Large AI campuses create construction, financing, tenant-concentration, and refinancing risk.",
+          "Power availability is valuable only if interconnections, permits, facilities, and customer contracts arrive on workable terms.",
+          "Bitcoin prices, network difficulty, halving cycles, and miner efficiency still affect part of the exposure.",
+          "The platform has multiple business models whose economics and capital intensity should be assessed separately."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Hut 8 — energy infrastructure platform overview",
+          "url": "https://www.hut8.com/"
+        },
+        {
+          "label": "Hut 8 — digital infrastructure segment",
+          "url": "https://www.hut8.com/digital-infrastructure"
+        }
+      ]
+    },
+    {
+      "name": "Duolingo",
+      "ticker": "DUOL",
+      "aliases": [
+        "Duolingo, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "mixed",
+        "thesis": "BIT linked the growth case to Duolingo Max's generative-AI video call and deeper intermediate-English content, while treating valuation and operating momentum as continuously updated inputs.",
+        "edge": "App-usage data and proprietary company models were central to BIT's read on quarterly momentum.",
+        "signals": [
+          "App usage",
+          "Model-implied operating momentum",
+          "Duolingo Max adoption",
+          "Intermediate-English content depth",
+          "Valuation"
+        ],
+        "countercase": "BIT's own example shows that fading usage momentum or expectations no longer being exceeded can outweigh otherwise solid results.",
+        "sources": [
+          {
+            "label": "BIT Capital podcast transcript on Duolingo data signals",
+            "url": "https://bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast"
+          },
+          {
+            "label": "BIT Global Technology Opportunities September 2024 factsheet",
+            "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Duolingo operates a freemium mobile learning platform led by language courses, with paid Super and Max subscriptions, advertising, the Duolingo English Test, and expansion into subjects such as math, music, and chess.",
+        "operating_drivers": [
+          "Daily and monthly active users, retention, and organic acquisition",
+          "Paid-subscriber conversion, penetration, and Super-to-Max mix",
+          "Learning efficacy, content velocity, and expansion into new learners and subjects"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "AI tutoring, conversational practice, and course-content generation",
+            "potential_upside": "More capable models can make practice adaptive and conversational, expand content much faster, improve learning depth, and strengthen the premium Max tier.",
+            "potential_downside": "Low-quality or culturally weak lessons, hallucinated feedback, higher inference costs, or generic model tutors could erode efficacy and differentiation.",
+            "watchpoints": [
+              "Learning-efficacy and content-quality measures",
+              "Max conversion, retention, and feature engagement",
+              "Content output relative to review burden and model cost"
+            ]
+          }
+        ],
+        "cautions": [
+          "Engagement and subscription growth do not by themselves prove improved learning outcomes.",
+          "AI raises both product capability and the risk that general-purpose assistants become substitute learning interfaces."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Duolingo investor-relations overview",
+          "url": "https://investors.duolingo.com/"
+        },
+        {
+          "label": "Duolingo company strategy and AI product overview",
+          "url": "https://investors.duolingo.com/company-strategy-overview-0"
+        },
+        {
+          "label": "Duolingo investor FAQ and listing information",
+          "url": "https://investors.duolingo.com/resources"
+        }
+      ]
+    },
+    {
+      "name": "Amazon",
+      "ticker": "AMZN",
+      "aliases": [
+        "Amazon.com",
+        "Amazon.com, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Amazon operates first- and third-party commerce, fulfillment and logistics, subscriptions, advertising, and Amazon Web Services, which provides global compute, storage, database, analytics, and AI services.",
+        "operating_drivers": [
+          "Store demand, selection, delivery speed, and fulfillment efficiency",
+          "Third-party seller services, advertising, and AWS consumption",
+          "Cloud and logistics capital spending, regulation, and labor costs"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "AWS compute, models, and custom AI silicon",
+            "potential_upside": "AI training and inference can increase AWS consumption across accelerators, Trainium, Bedrock, SageMaker, storage, databases, and networking.",
+            "potential_downside": "Heavy infrastructure spending, cloud competition, model commoditization, or weak custom-chip adoption can reduce returns on added capacity.",
+            "watchpoints": [
+              "AWS growth and remaining contract commitments",
+              "AI-related capital spending and free cash flow",
+              "Bedrock and Trainium customer adoption"
+            ]
+          },
+          {
+            "channel": "AI in retail, advertising, and logistics",
+            "potential_upside": "Recommendations, shopping agents, advertising tools, robotics, and forecasting can improve conversion, monetization, and fulfillment productivity.",
+            "potential_downside": "Poor recommendations, agent errors, added serving cost, or regulatory constraints can erode trust and economics.",
+            "watchpoints": [
+              "Advertising and third-party seller-services growth",
+              "Fulfillment cost and delivery speed",
+              "Adoption of customer-facing AI shopping tools"
+            ]
+          }
+        ],
+        "cautions": [
+          "Amazon's AI opportunity is embedded in a much broader retail, logistics, advertising, and cloud business.",
+          "Capital expenditure is a use of cash before it is evidence of demand or return.",
+          "Antitrust, labor, privacy, and content rules can affect several businesses at once."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Amazon — annual reports, proxies, and shareholder letters",
+          "url": "https://ir.aboutamazon.com/annual-reports-proxies-and-shareholder-letters/default.aspx"
+        },
+        {
+          "label": "Amazon — 2025 full-year results",
+          "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-Fourth-Quarter-Results/"
+        }
+      ]
+    },
+    {
+      "name": "Netskope",
+      "ticker": "NTSK",
+      "aliases": [
+        "Netskope, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Netskope converges security, networking, and analytics in the Netskope One platform. Its Zero Trust Engine and company-operated NewEdge network secure and accelerate access to cloud, SaaS, web, private applications, and AI as a Security Service Edge and Secure Access Service Edge provider.",
+        "operating_drivers": [
+          "Recurring revenue, customer retention, and expansion across the Netskope One platform",
+          "Large-enterprise wins and adoption across SSE, SASE, data protection, and zero-trust access",
+          "NewEdge coverage, latency, reliability, and the cost to add capacity"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Security controls for AI applications, models, agents, and MCP traffic",
+            "potential_upside": "AI Guardrails, Agentic Broker, AI Gateway, and red teaming can make Netskope a policy enforcement point for public and private AI use across users and autonomous agents.",
+            "potential_downside": "Protocols and attack methods are evolving quickly, while model, cloud, browser, and identity vendors can embed competing controls at adjacent layers.",
+            "watchpoints": [
+              "AI-security module adoption and platform attach",
+              "Coverage across models, private deployments, agents, and MCP",
+              "Detection quality and material customer incidents"
+            ]
+          },
+          {
+            "channel": "Agentic security and network operations",
+            "potential_upside": "AgentSkope can automate investigation, policy work, troubleshooting, and remediation for security and networking teams with constrained human capacity.",
+            "potential_downside": "False conclusions or autonomous changes can disrupt access or miss threats, requiring strong human approval, rollback, and audit controls.",
+            "watchpoints": [
+              "Production workflows delegated to agents",
+              "Triage accuracy and time saved",
+              "Approval, audit, and rollback behavior"
+            ]
+          }
+        ],
+        "cautions": [
+          "Netskope operates in a competitive market spanning networking, firewalls, cloud security, identity, and point data-protection tools.",
+          "Enterprise security procurement can involve long sales, deployment, and consolidation cycles.",
+          "Operating a global private network adds capital, capacity-planning, and availability obligations.",
+          "A security or availability failure can directly damage customer trust and expansion."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Netskope Investor Relations — company overview",
+          "url": "https://investors.netskope.com/"
+        },
+        {
+          "label": "Netskope — Netskope One AI Security",
+          "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-unveils-netskope-one-ai-security-delivering-high"
+        }
+      ]
+    },
+    {
+      "name": "Luckin Coffee",
+      "ticker": "LKNCY",
+      "aliases": [
+        "Luckin Coffee Inc.",
+        "luckin coffee"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Luckin Coffee operates a technology-driven coffee retail network centered on mobile ordering, cashierless transactions, a large store footprint, and data-led customer, store, and supply-chain operations.",
+        "operating_drivers": [
+          "Store count, same-store sales, and order frequency",
+          "Product innovation, pricing, promotions, and customer retention",
+          "Store-level margin, supply-chain efficiency, and geographic expansion"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Demand forecasting, personalized offers, menu development, and store operations",
+            "potential_upside": "Richer models could improve local assortment, staffing, replenishment, and individualized marketing across a high-frequency mobile dataset.",
+            "potential_downside": "Promotion optimization could train customers to wait for discounts, while bad forecasts or automated decisions could increase waste, stockouts, or inconsistent quality.",
+            "watchpoints": [
+              "Same-store sales, repeat purchase, and promotion intensity",
+              "Store-level margin, waste, and stockouts",
+              "New-product repeat rates rather than launch spikes"
+            ]
+          }
+        ],
+        "cautions": [
+          "The ADSs trade over the counter, so liquidity, governance, and disclosure should be evaluated separately from exchange-listed peers.",
+          "Rapid network expansion can obscure mature-store economics and franchise or partnership quality."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Luckin Coffee investor-relations company overview",
+          "url": "https://investor.luckincoffee.com/"
+        },
+        {
+          "label": "Luckin Coffee investor FAQ and OTC ticker",
+          "url": "https://investor.luckincoffee.com/investor-faqs"
+        }
+      ]
+    },
+    {
+      "name": "Palo Alto Networks",
+      "ticker": "PANW",
+      "aliases": [
+        "Palo Alto Networks, Inc.",
+        "PANW"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Palo Alto Networks provides cybersecurity platforms across network security, cloud security, security operations, AI security, and identity. Its platformization strategy seeks to consolidate point products onto integrated data, policy, and workflow layers.",
+        "operating_drivers": [
+          "Next-generation security annual recurring revenue and platformized-customer expansion",
+          "Customer consolidation across network, cloud, security operations, identity, and AI security",
+          "Threat intensity and enterprise demand to modernize fragmented security stacks"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Security platform for AI applications and autonomous agents",
+            "potential_upside": "Prisma AIRS and an AI gateway can inspect models, prompts, data, tools, and agent-to-agent traffic as enterprise AI moves into production.",
+            "potential_downside": "Native controls from model and cloud providers, fast-changing attack surfaces, or security gaps in acquired products could limit differentiation.",
+            "watchpoints": [
+              "AI-security adoption and contribution to next-generation security ARR",
+              "Integration of Portkey and other AI-security capabilities",
+              "Coverage and efficacy across models, agents, and deployment environments"
+            ]
+          },
+          {
+            "channel": "AI-driven security operations",
+            "potential_upside": "XSIAM can use a shared telemetry layer to automate detection, investigation, and response, replacing manual work and disconnected SIEM tools.",
+            "potential_downside": "Autonomous response can amplify false positives or incorrect containment, and incumbent SIEM and cloud platforms are improving their own AI workflows.",
+            "watchpoints": [
+              "XSIAM platformizations and displacement wins",
+              "Measured detection and response outcomes",
+              "Customer willingness to automate containment and remediation"
+            ]
+          }
+        ],
+        "cautions": [
+          "Platformization depends on customers preferring an integrated vendor without perceiving unacceptable product compromise or lock-in.",
+          "Large acquisitions increase integration, execution, debt, and management-attention risk.",
+          "Competitive pricing and free transition periods can defer revenue or pressure near-term economics.",
+          "Product defects or breaches are especially damaging for a vendor entrusted with core security control planes."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Palo Alto Networks — fiscal Q3 2026 results and platform scope",
+          "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial"
+        },
+        {
+          "label": "Palo Alto Networks — Idira identity security platform",
+          "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity"
+        }
+      ]
+    },
+    {
+      "name": "InPost",
+      "ticker": "INPST",
+      "aliases": [
+        "InPost S.A.",
+        "InPost Group"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "InPost is a European e-commerce logistics platform built around automated parcel machines, out-of-home delivery, digital consumer tools, and an expanding cross-border last-mile network.",
+        "operating_drivers": [
+          "Parcel volumes, automated-parcel-machine density, and utilization",
+          "Merchant and marketplace contracts",
+          "Delivery economics, network capital efficiency, and international execution"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Locker placement, route optimization, capacity forecasting, and parcel support",
+            "potential_upside": "AI can improve demand forecasts, courier routes, locker capacity allocation, real-time tracking, and automated issue resolution across a physical network.",
+            "potential_downside": "Poor forecasts could strand capital or create congestion, while increasingly connected logistics systems expand cyber, privacy, and operational-resilience risk.",
+            "watchpoints": [
+              "Parcels per locker and utilization by market",
+              "Delivery cost, on-time performance, and failed-delivery rates",
+              "Capex efficiency, outages, and support-resolution quality"
+            ]
+          }
+        ],
+        "cautions": [
+        "A July 2026 recommended all-cash offer made the listing status time-sensitive; verify the current status before treating INPST as a tradable public equity.",
+          "Network density can create advantages, but expansion requires capital before utilization and local merchant demand are proven."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "InPost investor overview",
+          "url": "https://inpost.eu/investors"
+        },
+        {
+          "label": "InPost products, innovation, AI, and data science overview",
+          "url": "https://inpost.eu/what-we-do/our-products-innovations"
+        },
+        {
+          "label": "InPost official consortium-offer page",
+          "url": "https://inpost.eu/investors/consortiums-offer"
+        }
+      ]
+    },
+    {
+      "name": "Grindr",
+      "ticker": "GRND",
+      "aliases": [
+        "Grindr Inc.",
+        "Grindr LLC"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "flagship",
+        "thesis": "BIT described Grindr as the largest social network for the LGBTQ+ community, with high engagement but insufficient monetization, and highlighted a roadmap spanning AI features, travel experiences, and serious relationships.",
+        "edge": "The gap between a large, highly engaged user base and monetization was BIT's stated opportunity.",
+        "signals": [
+          "Monthly active users",
+          "Time spent",
+          "Paying-user conversion and monetization",
+          "Delivery of the product roadmap"
+        ],
+        "countercase": "Monetization or new features could weaken trust and engagement, leaving the stated user-base opportunity unrealized.",
+        "sources": [
+          {
+            "label": "BIT Global Internet Leaders June 2024 factsheet",
+            "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-06%20-%20Juni/2024-06%20BIT%20Global%20Internet%20Leaders%2030%20R-I.pdf?_hsmi=314792919"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Grindr operates a global social and connection app for gay, bisexual, transgender, and queer adults, monetized through subscriptions and other paid features while expanding toward a broader 'Global Gayborhood' platform.",
+        "operating_drivers": [
+          "Monthly active users, daily engagement, and community trust",
+          "Paying users, conversion, pricing, and revenue per payer",
+          "Product expansion, safety, privacy, moderation, and international availability"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "AI-native discovery, conversation support, travel utility, and safety tooling",
+            "potential_upside": "Models could make discovery more relevant, reduce conversational friction, surface trusted local information, and improve detection of scams or abusive behavior.",
+            "potential_downside": "Sensitive inference, discriminatory ranking, impersonation, surveillance, or data leakage could impose exceptional harm on users, especially in hostile jurisdictions.",
+            "watchpoints": [
+              "Adoption and retention for AI-native features",
+              "Reports, blocks, appeals, and safety incidents",
+              "Privacy controls, model-data boundaries, and regulator response"
+            ]
+          }
+        ],
+        "cautions": [
+          "The product handles unusually sensitive identity, location, and relationship data.",
+          "Monetization gains must be tested against free-user utility, safety, and long-term community trust."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Grindr investor-relations corporate overview",
+          "url": "https://investors.grindr.com/overview/"
+        },
+        {
+          "label": "Grindr official company and AI-platform overview",
+          "url": "https://www.grindr.com/about"
+        },
+        {
+          "label": "Grindr Q1 2026 results and AI-native disclosure",
+          "url": "https://investors.grindr.com/financials/quarterly-results/default.aspx"
+        }
+      ]
+    },
+    {
+      "name": "Coherent",
+      "ticker": "COHR",
+      "aliases": [
+        "Coherent Corp.",
+        "II-VI Incorporated"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Coherent supplies photonic materials, components, modules, subsystems, and lasers for data-center and telecom communications, industrial applications, electronics, and instrumentation.",
+        "operating_drivers": [
+          "Data-center transceiver speed transitions and shipment volume",
+          "Photonics and module capacity, yields, product mix, and pricing",
+          "Telecom and industrial cycles, customer concentration, and capital spending"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "High-speed optical interconnects inside AI data centers",
+            "potential_upside": "Higher accelerator counts and flatter networks increase link count, bandwidth, and demand for 800G, 1.6T, 3.2T, and related laser components.",
+            "potential_downside": "Customer concentration, pricing pressure, integration choices, or architectural shifts can change supplier content even when aggregate bandwidth grows.",
+            "watchpoints": [
+              "800G, 1.6T, and 3.2T product mix",
+              "Datacenter and Communications revenue",
+              "Capacity additions and manufacturing yields"
+            ]
+          },
+          {
+            "channel": "Co-packaged optics and optical switching",
+            "potential_upside": "Power and bandwidth constraints can pull optics closer to compute and create demand for Coherent's materials-to-systems photonics portfolio.",
+            "potential_downside": "Standards, packaging responsibility, and winning architectures remain unsettled, and integration can shift value away from pluggable modules.",
+            "watchpoints": [
+              "CPO and optical-switch customer qualifications",
+              "Laser and silicon-photonics design wins",
+              "Power efficiency per bit"
+            ]
+          }
+        ],
+        "cautions": [
+          "Company lineage spans II-VI, legacy Coherent, and Finisar; comparisons need consistent segment definitions.",
+          "Vendor capacity and roadmap claims are not independent proof of customer demand.",
+          "Optical transitions require timely yields and capital while older telecom and industrial markets remain cyclical."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Coherent — 2025 Annual Report and annual filings",
+          "url": "https://www.coherent.com/company/investor-relations/annual-filings"
+        },
+        {
+          "label": "Coherent — Q3 fiscal 2026 investor presentation",
+          "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/investor-presentations/2026/may-6/investor-presentation-20260506.pdf"
+        }
+      ]
+    },
+    {
+      "name": "AMD",
+      "ticker": "AMD",
+      "aliases": [
+        "Advanced Micro Devices",
+        "Advanced Micro Devices, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "AMD supplies high-performance and adaptive computing products across data-center CPUs and AI accelerators, client and gaming processors, networking, FPGAs, and embedded systems.",
+        "operating_drivers": [
+          "EPYC server-CPU adoption and data-center share",
+          "Instinct deployments, roadmap cadence, and ROCm ecosystem maturity",
+          "Client and embedded cycles plus external-foundry capacity"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Alternative AI accelerators and rack-scale systems",
+            "potential_upside": "Hyperscalers and model builders can use Instinct GPUs, EPYC CPUs, Pensando networking, and rack-scale systems to diversify supply and lower total compute cost.",
+            "potential_downside": "NVIDIA's software and systems ecosystem, customer-designed silicon, or roadmap delays can limit deployments and utilization.",
+            "watchpoints": [
+              "Instinct deployment and data-center revenue",
+              "ROCm performance and framework support",
+              "Rack-scale customer qualifications"
+            ]
+          },
+          {
+            "channel": "Host CPUs and client AI",
+            "potential_upside": "Agentic data-center workloads can require more CPU orchestration, while local inference can add demand for Ryzen processors with neural engines.",
+            "potential_downside": "Workloads can consolidate on custom Arm silicon or show limited willingness to pay for on-device AI features.",
+            "watchpoints": [
+              "EPYC adoption in AI clusters",
+              "Ryzen AI enterprise design wins",
+              "Client and server average selling price mix"
+            ]
+          }
+        ],
+        "cautions": [
+          "AMD relies on third-party foundries and packaging capacity.",
+          "Data-center accelerator growth is exposed to a small set of large customers and demanding roadmap cadence.",
+          "The company competes across CPUs, GPUs, networking, embedded, and gaming against different entrenched ecosystems."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "AMD — 2025 Form 10-K",
+          "url": "https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000021/amd-20251227.htm"
+        }
+      ]
+    },
+    {
+      "name": "Intel",
+      "ticker": "INTC",
+      "aliases": [
+        "Intel Corporation"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Intel designs x86 compute platforms for clients and data centers and is building Intel Foundry to manufacture and package chips for internal and external customers.",
+        "operating_drivers": [
+          "Client and server CPU demand, product competitiveness, and market share",
+          "Process-node yield, external foundry commitments, and factory utilization",
+          "Capital intensity, cost reduction, and AI-platform adoption"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "CPUs and platforms around AI accelerators",
+            "potential_upside": "AI clusters and agents still require host CPUs, memory orchestration, networking, and general-purpose compute, supporting Intel's installed x86 platform.",
+            "potential_downside": "AMD, Arm-based custom CPUs, and tighter accelerator integration can reduce Intel's share or content in AI servers.",
+            "watchpoints": [
+              "Data Center and AI segment revenue and margin",
+              "Server-product competitiveness and share",
+              "Hyperscaler CPU design wins"
+            ]
+          },
+          {
+            "channel": "Foundry and advanced packaging for AI chips",
+            "potential_upside": "Demand for geographically diversified leading-edge manufacturing and packaging can create external foundry opportunities.",
+            "potential_downside": "Without competitive yields, design tools, and anchor customers, foundry investment can remain underutilized and cash intensive.",
+            "watchpoints": [
+              "18A and 14A yield and product milestones",
+              "External customer tape-outs and commitments",
+              "Foundry operating loss and factory utilization"
+            ]
+          }
+        ],
+        "cautions": [
+          "The foundry strategy requires sustained capital before external demand and cost competitiveness are proven.",
+          "Intel must execute simultaneous product, process, cost, and organizational changes.",
+          "Government support and geographic diversification do not substitute for yield, performance, and customer adoption."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Intel — 2025 Form 10-K",
+          "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm"
+        }
+      ]
+    },
+    {
+      "name": "Axon",
+      "ticker": "AXON",
+      "aliases": [
+        "Axon Enterprise",
+        "Axon Enterprise, Inc.",
+        "TASER International"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Axon provides a connected public-safety ecosystem spanning TASER energy weapons, body and vehicle cameras, digital evidence and records software, real-time operations, drones and counter-drone tools, training, and AI-enabled workflows. Revenue spans connected devices and higher-margin software and services.",
+        "operating_drivers": [
+          "Agency adoption, device refresh cycles, user growth, and premium software attach",
+          "Contracted bookings, subscription retention, public-safety budgets, and procurement cycles",
+          "Product reliability, responsible-innovation controls, evidence admissibility, and hardware supply"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "AI-assisted report writing, transcription, translation, and evidence review",
+            "potential_upside": "Draft One and related tools can reduce administrative work, deepen software attachment to body-camera deployments, and make a growing evidence corpus more usable.",
+            "potential_downside": "Hallucinations, omissions, biased outputs, weak disclosure, or evidentiary challenges can create legal harm and slow agency adoption.",
+            "watchpoints": [
+              "AI Era Plan and standalone AI product adoption",
+              "Documented time savings and report-quality studies",
+              "Human-review compliance, corrections, and legal challenges"
+            ]
+          },
+          {
+            "channel": "Real-time multimodal intelligence",
+            "potential_upside": "Fusus and Axon Vision can combine live video, sensors, locations, alerts, and AI-assisted search into a shared operational picture for faster response.",
+            "potential_downside": "False alerts, surveillance concerns, facial or vehicle misidentification, and fragmented local rules can constrain permissible use.",
+            "watchpoints": [
+              "Fusus, camera, and real-time-operations deployments",
+              "Alert accuracy and verified operational outcomes",
+              "Privacy policy, retention, audit, and community-consent controls"
+            ]
+          }
+        ],
+        "cautions": [
+          "Public procurement is budget-sensitive, political, and often slow despite long contract duration.",
+          "AI and surveillance products face unusually high ethical, civil-liberties, bias, transparency, and evidentiary scrutiny.",
+          "Connected-device growth brings hardware supply, tariff, warranty, and gross-margin exposure.",
+          "A broadening product portfolio and acquisitions increase integration and execution demands."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Axon Investor Relations — Q4 and full-year 2025 results",
+          "url": "https://investor.axon.com/2026-02-24-Axon-reports-Q4-2025-revenue-of-797-million%2C-up-39-year-over-year"
+        },
+        {
+          "label": "Axon — AI product and responsible-use overview",
+          "url": "https://www.axon.com/ai"
+        }
+      ]
+    },
+    {
+      "name": "Broadcom",
+      "ticker": "AVGO",
+      "aliases": [
+        "Broadcom Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Broadcom designs semiconductors for custom compute, networking, connectivity, broadband, wireless, storage, and industrial markets and supplies infrastructure software led by VMware Cloud Foundation.",
+        "operating_drivers": [
+          "Custom AI accelerator programs and customer concentration",
+          "Ethernet, optics, and connectivity demand",
+          "VMware adoption, integration, debt, and cash generation"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Custom AI accelerators",
+            "potential_upside": "Large model builders can use Broadcom's XPU platform and co-design capability to deploy workload-specific accelerators across multiple generations.",
+            "potential_downside": "Programs are concentrated, customer-controlled, and exposed to design changes, insourcing, deployment delays, and foundry constraints.",
+            "watchpoints": [
+              "AI semiconductor revenue by accelerator and networking",
+              "Named multi-generation customer programs",
+              "Design-to-deployment timing"
+            ]
+          },
+          {
+            "channel": "Ethernet, optics, and data movement",
+            "potential_upside": "Larger AI clusters require more scale-up, scale-out, and scale-across bandwidth, expanding demand for switches, NICs, DSPs, SerDes, and optical components.",
+            "potential_downside": "Alternative fabrics, co-packaged architectures, customer concentration, or slower cluster builds can shift content and pricing.",
+            "watchpoints": [
+              "Tomahawk, Jericho, NIC, and optical product ramps",
+              "Ethernet adoption in AI clusters",
+              "Bandwidth generation and product mix"
+            ]
+          }
+        ],
+        "cautions": [
+          "AI semiconductor exposure is concentrated in a limited number of hyperscale customers.",
+          "Management's AI revenue labels combine custom accelerators and networking and should not be treated as one homogeneous market.",
+          "VMware integration and debt add execution considerations outside semiconductors."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Broadcom — 2025 Annual Report",
+          "url": "https://investors.broadcom.com/financial-information/annual-reports"
+        },
+        {
+          "label": "Broadcom — AI infrastructure portfolio at OFC 2026",
+          "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-showcases-industry-leading-solutions-scaling-ai"
+        }
+      ]
+    },
+    {
+      "name": "Pure Storage",
+      "ticker": "PSTG",
+      "aliases": [
+        "Pure Storage, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Pure Storage provides all-flash data-storage systems and a unified storage-as-a-service platform across on-premises, hosted, and cloud environments, including FlashArray, FlashBlade, Evergreen, and Portworx.",
+        "operating_drivers": [
+          "Enterprise and hyperscaler adoption of all-flash storage",
+          "Product revenue, subscription ARR, and large-customer timing",
+          "Flash economics, NAND supply, component cost, and gross margin"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Storage for training, retrieval, checkpoints, and AI data pipelines",
+            "potential_upside": "High-throughput unstructured data and repeated checkpoint or retrieval workloads can favor scalable flash systems that keep accelerators fed.",
+            "potential_downside": "AI budgets can remain compute-heavy, while custom object stores, local storage, or workload optimization can limit external storage content.",
+            "watchpoints": [
+              "FlashBlade AI customer deployments",
+              "NVIDIA-certified system adoption",
+              "Large AI-related orders and repeat expansion"
+            ]
+          },
+          {
+            "channel": "Hyperscale replacement of disk with flash",
+            "potential_upside": "Density, power, and operational simplicity can make flash more relevant where data-center power and floor space are constrained.",
+            "potential_downside": "Qualification cycles are long, pricing is demanding, and a few hyperscaler programs can create concentration and lumpy revenue.",
+            "watchpoints": [
+              "Hyperscaler design wins and revenue recognition",
+              "Flash-versus-disk cost and energy metrics",
+              "Customer concentration and order timing"
+            ]
+          }
+        ],
+        "cautions": [
+          "Company performance claims and certifications demonstrate capability, not independent workload economics.",
+          "Hyperscaler opportunities can be material but concentrated and slow to qualify.",
+          "Subscription ARR and product revenue describe different commercial motions and should not be blended."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Pure Storage — fiscal 2025 full-year results and company description",
+          "url": "https://investor.purestorage.com/files/doc_financials/2025/q4/PSTG-Q4FY25-Earnings-Release-FINAL.pdf"
+        },
+        {
+          "label": "Pure Storage — investor relations",
+          "url": "https://investor.purestorage.com/"
+        }
+      ]
+    },
+    {
+      "name": "Lumentum",
+      "ticker": "LITE",
+      "aliases": [
+        "Lumentum Holdings",
+        "Lumentum Holdings Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Lumentum supplies optical and photonic lasers, modules, and subsystems for AI and cloud data-center connectivity, telecom networks, industrial manufacturing, and sensing.",
+        "operating_drivers": [
+          "Cloud and AI data-center photonics demand",
+          "High-speed product ramps, manufacturing capacity, and yields",
+          "Telecom cycles, customer concentration, mix, and Cloud Light integration"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Optical connectivity for scale-out AI clusters",
+            "potential_upside": "More accelerators and higher bandwidth per accelerator increase demand for high-speed optical transceivers and their laser components.",
+            "potential_downside": "Hyperscaler concentration, pricing pressure, inventory corrections, or different network architectures can weaken supplier economics.",
+            "watchpoints": [
+              "Cloud and AI data-center revenue",
+              "800G and 1.6T ramp and customer qualifications",
+              "Capacity and yield execution"
+            ]
+          },
+          {
+            "channel": "Photonics for next-generation network architectures",
+            "potential_upside": "Co-packaged and near-packaged optics can increase demand for efficient lasers and photonic components as electrical links hit power and reach limits.",
+            "potential_downside": "Integration choices can shift value among laser, component, and module suppliers, while standards and volume timing remain uncertain.",
+            "watchpoints": [
+              "CPO and laser design wins",
+              "Power efficiency per bit",
+              "Customer architecture and sourcing choices"
+            ]
+          }
+        ],
+        "cautions": [
+          "Cloud-photonics demand can be concentrated among a small number of customers.",
+          "Fast speed transitions expose the company to yield, inventory, and product-mix risk.",
+          "Telecom and industrial exposure can offset or obscure AI data-center performance."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Lumentum — investor FAQ and company description",
+          "url": "https://investor.lumentum.com/resources/investor-faqs/default.aspx"
+        },
+        {
+          "label": "Lumentum — 2025 Form 10-K",
+          "url": "https://investor.lumentum.com/sec-filings/sec-filings-details/default.aspx?FilingId=18710345"
+        }
+      ]
+    },
+    {
+      "name": "Xometry",
+      "ticker": "XMTR",
+      "aliases": [
+        "Xometry, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Xometry operates an AI-native, two-sided marketplace for custom manufacturing. Its instant-quoting and sourcing models connect buyers with a global supplier network, while Thomasnet and cloud tools support supplier discovery and shop operations.",
+        "operating_drivers": [
+          "Active buyers, repeat ordering, enterprise wallet share, and international penetration",
+          "Supplier density, capability coverage, quality, lead-time reliability, and available capacity",
+          "Pricing and lead-time model accuracy, marketplace gross margin, and fulfillment performance"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Closed-loop pricing, sourcing, and lead-time intelligence",
+            "potential_upside": "Each quoted and completed job can improve models that price complex parts, predict delivery, and match suppliers, strengthening liquidity and reliability on both sides of the marketplace.",
+            "potential_downside": "Bad quotes or lead-time predictions can create direct fulfillment losses and erode trust; suppliers and competitors can also improve their own digital estimation tools.",
+            "watchpoints": [
+              "Quote conversion and model-error trends",
+              "On-time delivery, quality, and marketplace gross margin",
+              "Buyer repeat rates and supplier participation"
+            ]
+          },
+          {
+            "channel": "Physical supply chain for AI and data-center infrastructure",
+            "potential_upside": "The supplier network can serve prototyping and production demand for precision-machined, molded, sheet-metal, and additive components used by data-center OEMs and infrastructure vendors.",
+            "potential_downside": "Infrastructure buyers require qualification, volume consistency, traceability, and tight delivery performance that a distributed supplier base may struggle to provide.",
+            "watchpoints": [
+              "Data-center and electronics customer activity",
+              "Supplier certification and process coverage",
+              "Order size, repeat rates, quality, and on-time delivery"
+            ]
+          }
+        ],
+        "cautions": [
+          "Xometry bears marketplace reputation and often transaction economics when supplier quality, cost, or delivery misses occur.",
+          "Custom manufacturing demand is exposed to industrial cycles, procurement budgets, and supply-chain volatility.",
+          "The model advantage depends on proprietary transaction data continuing to improve prediction quality.",
+          "Supplier compliance, export controls, quality systems, and customer concentration require disciplined execution."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Xometry — company overview",
+          "url": "https://www.xometry.com/about-us/"
+        },
+        {
+          "label": "Xometry — AI-native marketplace and lead-time models",
+          "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-deepens-ai-native-marketplace-advantage-new-enterprise/"
+        }
+      ]
+    },
+    {
+      "name": "Omada Health",
+      "ticker": "OMDA",
+      "aliases": [
+        "Omada",
+        "Omada Health, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Omada Health provides virtual care for cardiometabolic conditions, musculoskeletal care, GLP-1 support, and behavioral health by combining care teams, connected devices, software, and AI for employers and health-plan buyers.",
+        "operating_drivers": [
+          "Covered lives, customers, enrollment, and customer retention",
+          "Member engagement, persistence, and program completion",
+          "Clinical outcomes, buyer ROI, renewal, and care-team productivity"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "OmadaSpark, Meal Map, and AI-assisted personalized care between visits",
+            "potential_upside": "Agents can make food logging and nutrition feedback immediate, personalize education, and help care teams focus attention where human support has the most value.",
+            "potential_downside": "Incorrect nutrition or care guidance, weak escalation, automation bias, and sensitive-health-data exposure could impair outcomes and trust.",
+            "watchpoints": [
+              "Sustained feature engagement and member outcomes",
+              "Care-team workload, escalations, and safety events",
+              "Customer retention and credible ROI evidence"
+            ]
+          }
+        ],
+        "cautions": [
+          "AI feature use should be separated from durable clinical behavior change and buyer savings.",
+          "Outcomes and retention can vary by condition, buyer, enrollment pathway, and member cohort."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Omada Health investor-relations overview",
+          "url": "https://investors.omadahealth.com/"
+        },
+        {
+          "label": "Omada Health 2025 annual report hosted on investor relations",
+          "url": "https://investors.omadahealth.com/node/7851/html"
+        }
+      ]
+    },
+    {
+      "name": "GCL-Poly",
+      "ticker": "03800.HK",
+      "aliases": [
+        "GCL-Poly Energy Holdings Limited",
+        "GCL Technology",
+        "GCL Technology Holdings Limited",
+        "GCL TECH"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "GCL-Poly is the former name of GCL Technology Holdings, a Hong Kong-listed energy-materials manufacturer. Its core products include low-carbon FBR granular silicon and photovoltaic wafers, with development in perovskite solar modules and a broader move into silicon-, lithium-, and carbon-based materials.",
+        "operating_drivers": [
+          "Polysilicon selling prices, sales volume, inventory discipline, and industry capacity utilization",
+          "Granular-silicon cash cost, purity, carbon intensity, and adoption in high-efficiency cells",
+          "Commercial yield, efficiency, durability, and scale-up of perovskite modules"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "AI-assisted materials research and manufacturing optimization",
+            "potential_upside": "GCL says its AI R&D system is accelerating perovskite iteration; similar methods can improve experimentation, process control, yield, purity, and energy use across materials production.",
+            "potential_downside": "Digital optimization cannot overcome weak process physics or premature scale-up, and competitors can adopt comparable tools without erasing structural oversupply.",
+            "watchpoints": [
+              "Perovskite efficiency, stability, yield, and qualification",
+              "Granular-silicon quality and cash cost",
+              "Evidence that AI-assisted development shortens iteration cycles"
+            ]
+          },
+          {
+            "channel": "Electricity demand from AI infrastructure",
+            "potential_upside": "Sustained compute-driven electricity demand can support additional renewable generation and storage investment, creating an indirect demand channel for low-carbon photovoltaic materials.",
+            "potential_downside": "AI data centers require firm, timely power; grid congestion and solar intermittency may direct incremental spending toward other generation sources or slow project connection.",
+            "watchpoints": [
+              "Photovoltaic installations tied to data-center and industrial power demand",
+              "Renewable power-purchase agreements and storage pairing",
+              "Polysilicon demand, inventory, and pricing"
+            ]
+          }
+        ],
+        "cautions": [
+          "Upstream solar materials are cyclical and vulnerable to prolonged overcapacity and price compression.",
+          "The current business remains concentrated in China and exposed to trade, sourcing, and carbon-origin requirements.",
+          "Perovskite and adjacent-material businesses must prove bankable mass production rather than laboratory or pilot performance.",
+          "Diversification can reduce single-product risk but adds capital-allocation and execution complexity."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "GCL Technology — company profile and listing identity",
+          "url": "https://gcltech.com/en/about/about.html"
+        },
+        {
+          "label": "GCL Technology — R&D and innovation",
+          "url": "https://www.gcltech.com/en/goods/innovation.html"
+        }
+      ]
+    }
+  ],
   "outside_portfolio_policy": {
     "label": "Outside the disclosed portfolio",
     "purpose": "Capture a specific public-company landing spot that may benefit, lose, or deserve diligence even though it is absent from the audited portfolio.",

@@ -71,7 +71,9 @@ at the root of `fli`.
    sources no more than seven days old; a current same-author continuation may
    replace an older root, while old-only packets are excluded.
 8. A daily editorial agent reviews the complete routed-positive cohort, reads
-   the skill-owned BIT thesis and audited 2025 portfolio packet for Investment, may use
+   the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
+   profiles for Investment. It loads a compact profile index once and retrieves
+   only matching profiles by canonical name, ticker, or alias. It may use
    per-Event notes as annotations, researches missing transmission paths, and
    writes the ranked cited Insights that clear the audience bar. Each selected
    Insight stores the qualitative rationale for its audience-local priority;
