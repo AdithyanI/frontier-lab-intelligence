@@ -139,7 +139,7 @@ def _expected_effective_codex_setting(
     key: str, value: str | None
 ) -> str | None:
     if key == "service_tier" and value == STANDARD_SERVICE_TIER:
-        return None
+        return "default"
     return value
 
 
@@ -235,7 +235,7 @@ def _bound_codex_settings(
             **effective,
             "service_tier": (
                 STANDARD_SERVICE_TIER
-                if effective["service_tier"] is None
+                if effective["service_tier"] == "default"
                 else effective["service_tier"]
             ),
         }
@@ -709,7 +709,13 @@ def _complete_from_editorial_run(
         "status": "complete",
         "completion_source": "editorial_run",
     }
-    for key in ("thread_id", "thread_name", "requested_settings", "settings"):
+    for key in (
+        "thread_id",
+        "thread_name",
+        "requested_settings",
+        "settings",
+        "feedback",
+    ):
         if existing_codex.get(key):
             completed_codex[key] = existing_codex[key]
     stages["codex"] = completed_codex
@@ -1025,8 +1031,11 @@ def run_day(
         objective = (
             f"Produce, validate, import, and inspect the complete Frontier Lab "
             f"Intelligence daily brief for {day} from frozen workspace "
-            f"{workspace['workspace']}. Follow the fli-daily-intelligence skill, "
-            "review every candidate for both audiences, use web research when it "
+            f"{workspace['workspace']}. Before acting, read and follow "
+            ".agents/skills/fli-daily-intelligence/SKILL.md. Use "
+            f"{_display_path(db_path)} as the exact editorial database for indexing, "
+            "import, and inspection. Review every candidate for both audiences, "
+            "use web research when it "
             "materially resolves an unknown, and continue until the exact imported "
             "run is inspected. Do not modify product code or rerun Evidence/routing. "
             "Mark the goal blocked only after exhausting safe in-scope recovery."

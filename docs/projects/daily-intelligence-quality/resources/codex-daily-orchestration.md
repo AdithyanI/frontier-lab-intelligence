@@ -37,6 +37,11 @@ routing, editorial validation, or editorial persistence.
 - A resume sends no model-setting overrides. It compares the task's effective
   tuple with the frozen checkpoint and fails before naming, goal, or turn work
   if the task has changed.
+- App Server notifications are scoped to the persisted parent thread; Ultra
+  subagent turn notifications never replace parent activity. If a process is
+  interrupted while the owned goal remains active and the parent is idle, a
+  retry reactivates that same goal and lets Codex start its native continuation
+  in the same task.
 - Failures return stable codes, retryability, and the last durable stage.
 - Progress goes to stderr; the final structured result goes to stdout.
 
@@ -49,26 +54,29 @@ Use a short-lived stdio `codex app-server` child and the stable protocol:
    - `cwd=/Users/dobby/GitHub/frontier-lab-intelligence`;
    - `ephemeral=false`;
    - a stable service name;
-   - optional `model`, plus explicit `serviceTier: null` for Standard unless a
-     different tier was requested;
+   - optional `model`, plus explicit `serviceTier: "default"` for Standard
+     unless a different tier was requested;
 3. `thread/name/set` with `FLI Daily Brief — YYYY-MM-DD`;
-4. `turn/start` with the complete objective, prepared workspace, explicit
-   skill invocation, and optional `model`, `effort`, and `serviceTier`
-   overrides;
-5. after that turn is running, `thread/goal/set` with the same active objective
-   (the persisted equivalent of `/goal`);
-6. follow native goal continuation turns until the goal is terminal, then
-   inspect the exact durable editorial run.
+4. `thread/goal/get`, then `thread/goal/set` with one active objective that
+   names the exact workspace, required skill, database, completion criteria,
+   and execution instructions. Setting the goal starts its native first turn;
+5. follow native goal continuation turns until both the goal is terminal and
+   its final turn has emitted a terminal status. `goal: complete` alone is not
+   enough because it can arrive before `turn/completed`;
+6. inspect the exact durable editorial run;
+7. after a complete goal and completed final turn, clear the completed goal and
+   start one ordinary text-only follow-up in the same task that writes the
+   local post-run harness reflection. Do not attach another goal, reopen
+   editorial work, archive the task, or make reflection success a condition of
+   brief success.
 
 App Server exposes the exact thread `cwd`, not a project-assignment parameter.
 Codex Desktop separately derives and records its local project association from
 that exact path. The live canary therefore verifies the UI association instead
-of assuming it from the protocol alone. The initial turn is started immediately
-so the task is a normal visible conversation rather than an empty thread.
-
-The order matters: activating a goal on an idle thread can auto-start a native
-continuation. Starting the explicit first turn before activating the goal avoids
-racing two turns while still giving the task the full objective in context.
+of assuming it from the protocol alone. The goal owns its turns; the client
+must not manually start a competing first turn. Clearing a completed goal
+before its final turn settles interrupts that turn, so the two terminal signals
+form an explicit lifecycle boundary.
 
 ## Canary Order
 
@@ -93,10 +101,13 @@ racing two turns while still giving the task the full objective in context.
 Routine launches explicitly use Standard service even when the surrounding
 Codex configuration prefers Fast. The command defaults
 `--codex-service-tier` to `standard`, which is sent to App Server as
-`serviceTier: null`; `normal` and `default` are aliases. The optional value
+`serviceTier: "default"`; `normal` and `default` are operator aliases. The optional value
 `fast` remains an operator-facing alias for App Server's `priority` tier. The
 ledger stores both the requested setting and the effective canonical value
 returned by App Server.
+App Server 0.144.5 reports the same Standard tier as `"default"` on launch and
+`null` on resume; the client canonicalizes both responses to stored
+`"default"` before comparing the frozen tuple.
 
 ## Explicitly Deferred
 

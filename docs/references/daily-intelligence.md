@@ -145,14 +145,28 @@ Codex model and reasoning selection are explicit but optional:
 `--codex-model` and `--codex-reasoning-effort` inherit normal Codex
 user/project configuration when omitted. Service speed is deliberately
 different: `--codex-service-tier` defaults to `standard`, and the runner sends
-App Server the explicit `serviceTier: null` override that clears any inherited
-Fast tier. `normal` and `default` are accepted aliases for `standard`; `fast`
+App Server the explicit canonical `serviceTier: "default"` value that clears
+any inherited Fast tier. `normal` and `default` are accepted operator aliases
+for `standard`; `fast`
 remains an explicit opt-in and is normalized to App Server's `priority` tier.
 App Server reports the effective model, reasoning effort, and tier, and the
 runner freezes that tuple in the day checkpoint.
 Retries resume without sending overrides and first verify that the persisted
 task still has the frozen tuple; a task whose settings changed is left
 untouched rather than silently changed back.
+
+The active goal owns the main Codex turns. The runner waits for both the goal's
+terminal status and its final turn's terminal status; it never treats an early
+`goal: complete` notification as permission to interrupt the finishing turn.
+After a complete goal and completed final turn, the runner clears the completed
+goal and sends one ordinary text-only follow-up in the same visible task. That
+turn writes a short, candid harness reflection to
+`data/derived/daily-intelligence/agent-feedback/YYYY-MM-DD.md`. It may identify
+friction, missing tools or context, improvements, and unexpected wishes from
+the concrete run. This reflection is local, non-authoritative, and never an
+input to the brief. It cannot reopen the completed goal or modify the imported
+run, and a missing or failed reflection never invalidates a completed brief.
+The task remains a normal inspectable Codex conversation.
 
 The agent may use `search` and `inspect-event` while researching. `index` and
 `similar` are optional for paraphrase discovery or larger cross-day work. The

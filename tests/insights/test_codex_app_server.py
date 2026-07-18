@@ -12,6 +12,16 @@ from fli.insights.codex_app_server import _app_server_command
 
 
 OBJECTIVE = "Publish the cited daily brief."
+PROMPT = "Use the prepared routing run."
+
+
+def _goal_objective(tmp_path: Path) -> str:
+    return (
+        f"{OBJECTIVE}\n\n"
+        f"Required skill: {(tmp_path / 'SKILL.md').resolve()}. "
+        "Read it completely before acting.\n\n"
+        f"Execution instructions:\n{PROMPT}"
+    )
 
 
 @dataclass(frozen=True)
@@ -62,6 +72,8 @@ class _ScriptedTransport:
         assert timeout_seconds > 0
         assert self._incoming, "script has no message for receive()"
         message = self._incoming.popleft()
+        if message.get("__timeout__") is True:
+            raise TimeoutError
         label = str(message.get("method") or f"response:{message.get('id')}")
         self.transcript.append(f"receive:{label}")
         return message
@@ -121,6 +133,8 @@ def _run_task(
     model: str | None = None,
     reasoning_effort: str | None = None,
     service_tier: str | None = None,
+    post_completion_prompt: str | None = None,
+    post_completion_output_path: Path | None = None,
 ) -> dict[str, Any]:
     repo_root = tmp_path / "repo"
     repo_root.mkdir(exist_ok=True)
@@ -139,13 +153,15 @@ def _run_task(
         client.run_task(
             name="Daily intelligence 2026-07-18",
             objective=OBJECTIVE,
-            prompt="Use the prepared routing run.",
+            prompt=PROMPT,
             skill_path=skill_path,
             timeout_seconds=1.0,
             model=model,
             reasoning_effort=reasoning_effort,
             service_tier=service_tier,
             thread_id=thread_id,
+            post_completion_prompt=post_completion_prompt,
+            post_completion_output_path=post_completion_output_path,
             checkpoint=checkpoints.append if checkpoints is not None else None,
         )
     )
@@ -156,10 +172,30 @@ def test_new_task_uses_safe_rpc_order_and_checkpoints_ids_immediately(
 ) -> None:
     repo_root = tmp_path / "repo"
     checkpoints: list[dict[str, Any]] = []
+    turn_started = _notification(
+        "turn/started",
+        {"threadId": "thread-1", "turn": {"id": "turn-1", "status": "inProgress"}},
+    )
+    goal_completed = _notification(
+        "thread/goal/updated",
+        {"threadId": "thread-1", "goal": {"status": "complete"}},
+    )
     turn_completed = _notification(
         "turn/completed",
-        {"turn": {"id": "turn-1", "status": "completed"}},
+        {"threadId": "thread-1", "turn": {"id": "turn-1", "status": "completed"}},
     )
+
+    def assert_goal_set(message: dict[str, Any]) -> None:
+        assert message["params"] == {
+            "threadId": "thread-1",
+            "objective": _goal_objective(tmp_path),
+            "status": "active",
+        }
+        _checkpoint_guard(
+            checkpoints,
+            ["thread_starting", "thread_created"],
+        )(message)
+
     transport = _ScriptedTransport(
         [
             _SendStep("initialize", result={}),
@@ -176,19 +212,19 @@ def test_new_task_uses_safe_rpc_order_and_checkpoints_ids_immediately(
                     checkpoints, ["thread_starting", "thread_created"]
                 ),
             ),
-            _SendStep("thread/goal/get", result={"goal": None}),
-            _SendStep("turn/start", result={"turn": {"id": "turn-1"}}),
             _SendStep(
-                "thread/goal/set",
-                result={"goal": {"status": "active"}},
-                after_response=(turn_completed,),
+                "thread/goal/get",
+                result={"goal": None},
                 on_send=_checkpoint_guard(
                     checkpoints,
-                    ["thread_starting", "thread_created", "turn_started"],
+                    ["thread_starting", "thread_created"],
                 ),
             ),
             _SendStep(
-                "thread/goal/get", result={"goal": {"status": "complete"}}
+                "thread/goal/set",
+                result={"goal": {"status": "active"}},
+                after_response=(turn_started, goal_completed, turn_completed),
+                on_send=assert_goal_set,
             ),
         ]
     )
@@ -205,25 +241,15 @@ def test_new_task_uses_safe_rpc_order_and_checkpoints_ids_immediately(
         "thread/start",
         "thread/name/set",
         "thread/goal/get",
-        "turn/start",
         "thread/goal/set",
-        "thread/goal/get",
     ]
-    goal_get_sends = [
-        index
-        for index, item in enumerate(transport.transcript)
-        if item == "send:thread/goal/get"
-    ]
-    assert transport.transcript.index("receive:turn/completed") < goal_get_sends[-1]
     assert [item["status"] for item in checkpoints] == [
         "thread_starting",
         "thread_created",
-        "turn_started",
         "running",
         "finished",
     ]
     assert checkpoints[1]["thread_id"] == "thread-1"
-    assert checkpoints[2]["turn_id"] == "turn-1"
     assert result == {
         "thread_id": "thread-1",
         "thread_name": "Daily intelligence 2026-07-18",
@@ -239,12 +265,139 @@ def test_new_task_uses_safe_rpc_order_and_checkpoints_ids_immediately(
         "settings": {
             "model": "gpt-5.6-sol",
             "reasoning_effort": "xhigh",
-            "service_tier": None,
+            "service_tier": "default",
         },
         "instruction_sources": [str(repo_root / "AGENTS.md")],
     }
     transport.assert_exhausted()
     assert transport.closed
+
+
+def test_completed_turn_writes_feedback_in_a_follow_up_turn_on_same_thread(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    feedback_path = repo_root / "data/derived/daily-intelligence/agent-feedback/day.md"
+    main_completed = _notification(
+        "turn/completed",
+        {"threadId": "thread-1", "turn": {"id": "turn-main", "status": "completed"}},
+    )
+    feedback_completed = _notification(
+        "turn/completed",
+        {"turn": {"id": "turn-feedback", "status": "completed"}},
+    )
+
+    def write_feedback(message: dict[str, Any]) -> None:
+        assert message["params"]["threadId"] == "thread-1"
+        assert message["params"]["input"] == [
+            {"type": "text", "text": "Reflect on the run."}
+        ]
+        feedback_path.parent.mkdir(parents=True, exist_ok=True)
+        feedback_path.write_text("# Reflection\n\nNothing else.\n")
+
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep("thread/start", result=_thread_result(repo_root)),
+            _SendStep("thread/name/set", result={}),
+            _SendStep("thread/goal/get", result={"goal": None}),
+            _SendStep(
+                "thread/goal/set",
+                result={"goal": {"status": "active"}},
+                after_response=(
+                    _notification(
+                        "turn/started",
+                        {"threadId": "thread-1", "turn": {"id": "turn-main", "status": "inProgress"}},
+                    ),
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-1", "goal": {"status": "complete"}},
+                    ),
+                    main_completed,
+                ),
+            ),
+            _SendStep("thread/goal/clear", result={"cleared": True}),
+            _SendStep(
+                "turn/start",
+                result={"turn": {"id": "turn-feedback"}},
+                after_response=(feedback_completed,),
+                on_send=write_feedback,
+            ),
+        ]
+    )
+
+    result = _run_task(
+        tmp_path,
+        transport,
+        post_completion_prompt="Reflect on the run.",
+        post_completion_output_path=feedback_path,
+    )
+
+    assert result["turn_id"] == "turn-main"
+    assert result["goal_status"] == "complete"
+    assert result["feedback"]["status"] == "written"
+    assert result["feedback"]["turn_id"] == "turn-feedback"
+    assert result["feedback"]["path"] == str(feedback_path)
+    assert [item["method"] for item in transport.sent].count("thread/start") == 1
+    assert [item["method"] for item in transport.sent].count("turn/start") == 1
+    assert [item["method"] for item in transport.sent].count("thread/goal/clear") == 1
+    transport.assert_exhausted()
+
+
+def test_missing_feedback_file_does_not_invalidate_completed_turn(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    main_completed = _notification(
+        "turn/completed",
+        {"threadId": "thread-1", "turn": {"id": "turn-main", "status": "completed"}},
+    )
+    feedback_completed = _notification(
+        "turn/completed",
+        {"turn": {"id": "turn-feedback", "status": "completed"}},
+    )
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep("thread/start", result=_thread_result(repo_root)),
+            _SendStep("thread/name/set", result={}),
+            _SendStep("thread/goal/get", result={"goal": None}),
+            _SendStep(
+                "thread/goal/set",
+                result={"goal": {"status": "active"}},
+                after_response=(
+                    _notification(
+                        "turn/started",
+                        {"threadId": "thread-1", "turn": {"id": "turn-main", "status": "inProgress"}},
+                    ),
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-1", "goal": {"status": "complete"}},
+                    ),
+                    main_completed,
+                ),
+            ),
+            _SendStep("thread/goal/clear", result={"cleared": True}),
+            _SendStep(
+                "turn/start",
+                result={"turn": {"id": "turn-feedback"}},
+                after_response=(feedback_completed,),
+            ),
+        ]
+    )
+
+    result = _run_task(
+        tmp_path,
+        transport,
+        post_completion_prompt="Reflect on the run.",
+        post_completion_output_path=Path("data/feedback.md"),
+    )
+
+    assert result["goal_status"] == "complete"
+    assert result["feedback"]["status"] == "missing"
+    transport.assert_exhausted()
 
 
 def test_new_task_applies_explicit_model_effort_and_priority_tier(
@@ -263,12 +416,6 @@ def test_new_task_applies_explicit_model_effort_and_priority_tier(
         assert "effort" not in params
         assert params["config"] == {"model_reasoning_effort": "ultra"}
 
-    def assert_turn_start(message: dict[str, Any]) -> None:
-        params = message["params"]
-        assert params["model"] == "gpt-5.6-terra"
-        assert params["effort"] == "ultra"
-        assert params["serviceTier"] == "priority"
-
     transport = _ScriptedTransport(
         [
             _SendStep("initialize", result={}),
@@ -286,16 +433,20 @@ def test_new_task_applies_explicit_model_effort_and_priority_tier(
             _SendStep("thread/name/set", result={}),
             _SendStep("thread/goal/get", result={"goal": None}),
             _SendStep(
-                "turn/start",
-                result={"turn": {"id": "turn-1"}},
-                on_send=assert_turn_start,
-            ),
-            _SendStep(
                 "thread/goal/set",
                 result={"goal": {"status": "active"}},
-                after_response=(turn_completed,),
+                after_response=(
+                    _notification(
+                        "turn/started",
+                        {"threadId": "thread-1", "turn": {"id": "turn-1", "status": "inProgress"}},
+                    ),
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-1", "goal": {"status": "complete"}},
+                    ),
+                    turn_completed,
+                ),
             ),
-            _SendStep("thread/goal/get", result={"goal": {"status": "complete"}}),
         ]
     )
 
@@ -322,7 +473,7 @@ def test_new_task_applies_explicit_model_effort_and_priority_tier(
     transport.assert_exhausted()
 
 
-def test_new_task_explicit_standard_clears_inherited_service_tier(
+def test_new_task_explicit_standard_uses_app_server_default_service_tier(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "repo"
@@ -333,8 +484,7 @@ def test_new_task_explicit_standard_clears_inherited_service_tier(
 
     def assert_thread_start(message: dict[str, Any]) -> None:
         params = message["params"]
-        assert "serviceTier" in params
-        assert params["serviceTier"] is None
+        assert params["serviceTier"] == "default"
 
     transport = _ScriptedTransport(
         [
@@ -342,25 +492,33 @@ def test_new_task_explicit_standard_clears_inherited_service_tier(
             _SendStep("initialized", responds=False),
             _SendStep(
                 "thread/start",
-                result=_thread_result(repo_root, service_tier=None),
+                result=_thread_result(repo_root, service_tier="default"),
                 on_send=assert_thread_start,
             ),
             _SendStep("thread/name/set", result={}),
             _SendStep("thread/goal/get", result={"goal": None}),
-            _SendStep("turn/start", result={"turn": {"id": "turn-1"}}),
             _SendStep(
                 "thread/goal/set",
                 result={"goal": {"status": "active"}},
-                after_response=(turn_completed,),
+                after_response=(
+                    _notification(
+                        "turn/started",
+                        {"threadId": "thread-1", "turn": {"id": "turn-1", "status": "inProgress"}},
+                    ),
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-1", "goal": {"status": "complete"}},
+                    ),
+                    turn_completed,
+                ),
             ),
-            _SendStep("thread/goal/get", result={"goal": {"status": "complete"}}),
         ]
     )
 
     result = _run_task(tmp_path, transport, service_tier="standard")
 
     assert result["requested_settings"]["service_tier"] == "standard"
-    assert result["settings"]["service_tier"] is None
+    assert result["settings"]["service_tier"] == "default"
     transport.assert_exhausted()
 
 
@@ -539,27 +697,29 @@ def test_native_continuation_does_not_send_another_turn_start(
             _SendStep("thread/start", result=_thread_result(repo_root)),
             _SendStep("thread/name/set", result={}),
             _SendStep("thread/goal/get", result={"goal": None}),
-            _SendStep("turn/start", result={"turn": {"id": "turn-1"}}),
             _SendStep(
                 "thread/goal/set",
                 result={"goal": {"status": "active"}},
-                after_response=(first_turn_completed,),
-            ),
-            _SendStep(
-                "thread/goal/get",
-                result={"goal": {"status": "active"}},
-                before_response=(second_turn_started,),
-                after_response=(second_turn_completed,),
-            ),
-            _SendStep(
-                "thread/goal/get", result={"goal": {"status": "complete"}}
+                after_response=(
+                    _notification(
+                        "turn/started",
+                        {"threadId": "thread-1", "turn": {"id": "turn-1", "status": "inProgress"}},
+                    ),
+                    first_turn_completed,
+                    second_turn_started,
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-1", "goal": {"status": "complete"}},
+                    ),
+                    second_turn_completed,
+                ),
             ),
         ]
     )
 
     result = _run_task(tmp_path, transport)
 
-    assert [message["method"] for message in transport.sent].count("turn/start") == 1
+    assert [message["method"] for message in transport.sent].count("turn/start") == 0
     assert result["turn_id"] == "turn-2"
     assert result["turn_status"] == "completed"
     assert result["goal_status"] == "complete"
@@ -591,12 +751,19 @@ def test_resuming_active_goal_does_not_start_or_set_another_turn(
             ),
             _SendStep(
                 "thread/goal/get",
-                result={"goal": {"status": "active", "objective": OBJECTIVE}},
-                after_response=(turn_completed,),
-            ),
-            _SendStep(
-                "thread/goal/get",
-                result={"goal": {"status": "complete", "objective": OBJECTIVE}},
+                result={
+                    "goal": {
+                        "status": "active",
+                        "objective": _goal_objective(tmp_path),
+                    }
+                },
+                after_response=(
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-existing", "goal": {"status": "complete"}},
+                    ),
+                    turn_completed,
+                ),
             ),
         ]
     )
@@ -613,6 +780,130 @@ def test_resuming_active_goal_does_not_start_or_set_another_turn(
     assert result["turns_started"] == 1
     transport.assert_exhausted()
     assert transport.closed
+
+
+def test_resuming_idle_active_goal_reactivates_native_goal_without_manual_turn(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    turn_completed = _notification(
+        "turn/completed",
+        {
+            "threadId": "thread-existing",
+            "turn": {"id": "turn-resumed", "status": "completed"},
+        },
+    )
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/resume",
+                result=_thread_result(
+                    repo_root,
+                    thread_id="thread-existing",
+                    turns=[{"id": "turn-interrupted", "status": "interrupted"}],
+                    status="idle",
+                ),
+            ),
+            _SendStep(
+                "thread/goal/get",
+                result={
+                    "goal": {
+                        "status": "active",
+                        "objective": _goal_objective(tmp_path),
+                    }
+                },
+            ),
+            _SendStep(
+                "thread/goal/set",
+                result={
+                    "goal": {
+                        "status": "active",
+                        "objective": _goal_objective(tmp_path),
+                    }
+                },
+                after_response=(
+                    _notification(
+                        "turn/started",
+                        {
+                            "threadId": "thread-existing",
+                            "turn": {
+                                "id": "turn-resumed",
+                                "status": "inProgress",
+                            },
+                        },
+                    ),
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-existing", "goal": {"status": "complete"}},
+                    ),
+                    turn_completed,
+                ),
+            ),
+        ]
+    )
+
+    result = _run_task(tmp_path, transport, thread_id="thread-existing")
+
+    assert "turn/start" not in [item["method"] for item in transport.sent]
+    assert [item["method"] for item in transport.sent].count("thread/goal/clear") == 0
+    assert [item["method"] for item in transport.sent].count("thread/goal/set") == 1
+    assert result["turn_id"] == "turn-resumed"
+    assert result["goal_status"] == "complete"
+    transport.assert_exhausted()
+
+
+def test_subagent_turn_notifications_do_not_replace_parent_activity(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    subagent_started = _notification(
+        "turn/started",
+        {
+            "threadId": "thread-child",
+            "turn": {"id": "turn-child", "status": "inProgress"},
+        },
+    )
+    main_completed = _notification(
+        "turn/completed",
+        {
+            "threadId": "thread-1",
+            "turn": {"id": "turn-main", "status": "completed"},
+        },
+    )
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep("thread/start", result=_thread_result(repo_root)),
+            _SendStep("thread/name/set", result={}),
+            _SendStep("thread/goal/get", result={"goal": None}),
+            _SendStep(
+                "thread/goal/set",
+                result={"goal": {"status": "active"}},
+                after_response=(
+                    _notification(
+                        "turn/started",
+                        {"threadId": "thread-1", "turn": {"id": "turn-main", "status": "inProgress"}},
+                    ),
+                    subagent_started,
+                    _notification(
+                        "thread/goal/updated",
+                        {"threadId": "thread-1", "goal": {"status": "complete"}},
+                    ),
+                    main_completed,
+                ),
+            ),
+        ]
+    )
+
+    result = _run_task(tmp_path, transport)
+
+    assert result["turn_id"] == "turn-main"
+    assert result["turns_started"] == 1
+    assert result["goal_status"] == "complete"
+    transport.assert_exhausted()
 
 
 def test_terminal_goal_refreshes_stale_turn_activity_from_persisted_thread(
@@ -634,7 +925,22 @@ def test_terminal_goal_refreshes_stale_turn_activity_from_persisted_thread(
             ),
             _SendStep(
                 "thread/goal/get",
-                result={"goal": {"status": "complete", "objective": OBJECTIVE}},
+                result={
+                    "goal": {
+                        "status": "complete",
+                        "objective": _goal_objective(tmp_path),
+                    }
+                },
+                after_response=({"__timeout__": True},),
+            ),
+            _SendStep(
+                "thread/goal/get",
+                result={
+                    "goal": {
+                        "status": "complete",
+                        "objective": _goal_objective(tmp_path),
+                    }
+                },
             ),
             _SendStep(
                 "thread/read",
@@ -736,7 +1042,7 @@ def test_rpc_error_is_stable_and_closes_transport(tmp_path: Path) -> None:
     assert transport.closed
 
 
-def test_discard_archived_task_clears_goal_before_permanent_delete(
+def test_discard_task_clears_goal_before_permanent_delete(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "repo"
@@ -745,10 +1051,6 @@ def test_discard_archived_task_clears_goal_before_permanent_delete(
         [
             _SendStep("initialize", result={}),
             _SendStep("initialized", responds=False),
-            _SendStep(
-                "thread/unarchive",
-                result={"thread": {"id": "obsolete-thread"}},
-            ),
             _SendStep("thread/goal/get", result={"goal": {"status": "active"}}),
             _SendStep("thread/goal/clear", result={"cleared": True}),
             _SendStep("thread/delete", result={}),
@@ -774,7 +1076,6 @@ def test_discard_archived_task_clears_goal_before_permanent_delete(
     assert [message["method"] for message in transport.sent] == [
         "initialize",
         "initialized",
-        "thread/unarchive",
         "thread/goal/get",
         "thread/goal/clear",
         "thread/delete",

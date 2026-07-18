@@ -39,7 +39,10 @@ has a canonical path.
   supported authoring input; historical packets are not upgraded in place.
   A launched task's effective Codex model, reasoning effort, and service tier
   are frozen in its orchestration checkpoint so retries cannot silently change
-  or overwrite a reused task's settings.
+  or overwrite a reused task's settings. After a successful goal, the same
+  task may write a best-effort local harness reflection under
+  `derived/daily-intelligence/agent-feedback/`; it is not editorial input or
+  product data.
 - `following/manifests/` — small tracked manifests that bind each local
   snapshot checksum to its cohort, provider, completeness, spend, ranking, and
   evaluation outputs.

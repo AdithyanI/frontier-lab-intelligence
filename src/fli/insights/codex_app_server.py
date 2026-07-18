@@ -21,6 +21,7 @@ TERMINAL_GOAL_STATUSES = {
     "paused",
     "usageLimited",
 }
+TERMINAL_TURN_STATUSES = {"cancelled", "completed", "failed", "interrupted"}
 APP_SERVER_STREAM_LIMIT_BYTES = 16 * 1024 * 1024
 CODEX_SETTING_KEYS = ("model", "reasoning_effort", "service_tier")
 STANDARD_SERVICE_TIER = "standard"
@@ -70,9 +71,9 @@ def _request_settings(
 
 
 def _protocol_service_tier(value: str | None) -> str | None:
-    """Map the operator-facing Standard tier to App Server's explicit null."""
+    """Map the operator-facing Standard tier to App Server's canonical value."""
 
-    return None if value == STANDARD_SERVICE_TIER else value
+    return "default" if value == STANDARD_SERVICE_TIER else value
 
 
 def _expected_effective_settings(
@@ -89,16 +90,22 @@ def _effective_settings(opened: dict[str, Any]) -> dict[str, str | None]:
     response_values = {
         "model": opened.get("model"),
         "reasoning_effort": opened.get("reasoningEffort"),
-        "service_tier": opened.get("serviceTier"),
     }
-    return {
+    settings = {
         key: (
             str(response_values[key]).strip()
             if response_values[key] not in (None, "")
             else None
         )
-        for key in CODEX_SETTING_KEYS
+        for key in ("model", "reasoning_effort")
     }
+    raw_service_tier = opened.get("serviceTier")
+    settings["service_tier"] = (
+        "default"
+        if raw_service_tier in (None, "", "default")
+        else str(raw_service_tier).strip()
+    )
+    return settings
 
 
 class CodexTaskError(RuntimeError):
@@ -313,6 +320,14 @@ class CodexAppServerClient:
     ) -> None:
         method = str(message.get("method") or "")
         params = message.get("params") if isinstance(message.get("params"), dict) else {}
+        message_thread_id = str(params.get("threadId") or "")
+        if (
+            "id" not in message
+            and message_thread_id
+            and state.thread_id
+            and message_thread_id != state.thread_id
+        ):
+            return
         if "id" in message and method:
             if state.thread_id and state.turn_id and state.turn_in_progress:
                 await transport.send(
@@ -450,7 +465,6 @@ class CodexAppServerClient:
         state: _TaskState,
         *,
         prompt: str,
-        skill_path: Path,
         settings: dict[str, str | None],
         deadline: float,
         progress: ProgressCallback | None,
@@ -458,14 +472,7 @@ class CodexAppServerClient:
         turns_before_request = state.turns_started
         params: dict[str, Any] = {
             "threadId": state.thread_id,
-            "input": [
-                {
-                    "type": "skill",
-                    "name": "fli-daily-intelligence",
-                    "path": str(skill_path.resolve()),
-                },
-                {"type": "text", "text": prompt},
-            ],
+            "input": [{"type": "text", "text": prompt}],
         }
         if settings["model"] is not None:
             params["model"] = settings["model"]
@@ -494,12 +501,13 @@ class CodexAppServerClient:
         transport: AppServerTransport,
         state: _TaskState,
         *,
+        purpose: str,
         deadline: float,
         progress: ProgressCallback | None,
     ) -> None:
-        """Wait for one ordinary follow-up turn without reopening its goal."""
+        """Wait for one ordinary turn and verify its persisted terminal state."""
 
-        while state.turn_in_progress:
+        while state.turn_status not in TERMINAL_TURN_STATUSES:
             wait_seconds = min(self._remaining(deadline), self.goal_poll_seconds)
             try:
                 message = await transport.receive(wait_seconds)
@@ -517,11 +525,24 @@ class CodexAppServerClient:
                 state,
                 progress=progress,
             )
-        if state.turn_status == "failed":
+        if state.turn_status != "completed":
+            code = (
+                "E_CODEX_FEEDBACK_TURN_FAILED"
+                if purpose == "feedback"
+                else "E_CODEX_TURN_INCOMPLETE"
+            )
             raise CodexTaskError(
-                code="E_CODEX_FEEDBACK_TURN_FAILED",
-                message="The post-goal Codex feedback turn failed.",
-                hint="The completed daily brief remains valid; inspect the same task if feedback is still useful.",
+                code=code,
+                message=(
+                    "The Codex feedback turn did not complete successfully."
+                    if purpose == "feedback"
+                    else "The Codex daily-intelligence turn did not complete successfully."
+                ),
+                hint=(
+                    "The completed daily brief remains valid; inspect the same task if feedback is still useful."
+                    if purpose == "feedback"
+                    else "Resume the same daily run; its persisted task id is retained."
+                ),
                 retryable=True,
                 exit_code=4,
             )
@@ -542,7 +563,7 @@ class CodexAppServerClient:
         thread_id: str,
         timeout_seconds: float = 60.0,
     ) -> dict[str, Any]:
-        """Clear and permanently delete one known archived, idle task."""
+        """Clear and permanently delete one known idle task."""
         if not thread_id.strip():
             raise ValueError("thread_id must not be empty")
         if timeout_seconds <= 0:
@@ -567,14 +588,6 @@ class CodexAppServerClient:
                 progress=None,
             )
             await transport.send({"method": "initialized", "params": {}})
-            await self._request(
-                transport,
-                "thread/unarchive",
-                {"threadId": thread_id},
-                state,
-                deadline=deadline,
-                progress=None,
-            )
             goal_result = await self._request(
                 transport,
                 "thread/goal/get",
@@ -650,6 +663,11 @@ class CodexAppServerClient:
             self._feedback_output_path(post_completion_output_path)
             if post_completion_output_path is not None
             else None
+        )
+        goal_objective = (
+            f"{objective.strip()}\n\n"
+            f"Required skill: {skill_path.resolve()}. Read it completely before acting.\n\n"
+            f"Execution instructions:\n{prompt.strip()}"
         )
         requested_settings = _request_settings(
             model=model,
@@ -839,15 +857,15 @@ class CodexAppServerClient:
                     code="E_CODEX_GOAL_MISSING",
                     message="The persisted Codex task no longer has its daily goal.",
                     hint=(
-                        "Do not restart work in this task. Inspect the exact imported "
-                        "editorial run or start a new date with a fresh task."
+                        "Do not start unrelated work in this task. Inspect the durable "
+                        "daily-run checkpoint before deciding whether to replace it."
                     ),
                     retryable=False,
                     exit_code=4,
                 )
             if thread_id and goal is not None:
                 returned_objective = str(goal.get("objective") or "")
-                if returned_objective != objective:
+                if returned_objective != goal_objective:
                     raise CodexTaskError(
                         code="E_CODEX_GOAL_MISMATCH",
                         message="The persisted Codex task now owns a different goal.",
@@ -858,42 +876,48 @@ class CodexAppServerClient:
                         retryable=False,
                         exit_code=4,
                     )
-            if goal is None and not state.turn_in_progress:
-                await self._start_turn(
-                    transport,
-                    state,
-                    prompt=f"Goal:\n{objective}\n\nExecution context:\n{prompt}",
-                    skill_path=skill_path,
-                    settings=effective_settings,
-                    deadline=deadline,
-                    progress=progress,
-                )
-                if checkpoint:
-                    checkpoint(
-                        {
-                            "thread_id": state.thread_id,
-                            "thread_name": name,
-                            "turn_id": state.turn_id,
-                            "goal_status": None,
-                            "requested_settings": requested_settings,
-                            "settings": effective_settings,
-                            "status": "turn_started",
-                        }
-                    )
             if goal is None:
                 goal_result = await self._request(
                     transport,
                     "thread/goal/set",
                     {
                         "threadId": state.thread_id,
-                        "objective": objective,
+                        "objective": goal_objective,
                         "status": "active",
                     },
                     state,
                     deadline=deadline,
                     progress=progress,
                 )
-                goal = goal_result.get("goal") if isinstance(goal_result.get("goal"), dict) else {}
+                goal = (
+                    goal_result.get("goal")
+                    if isinstance(goal_result.get("goal"), dict)
+                    else {}
+                )
+            elif (
+                thread_id
+                and str(goal.get("status") or "") == "active"
+                and not state.turn_in_progress
+                and state.turn_status in TERMINAL_TURN_STATUSES
+            ):
+                goal_result = await self._request(
+                    transport,
+                    "thread/goal/set",
+                    {
+                        "threadId": state.thread_id,
+                        "objective": goal_objective,
+                        "status": "active",
+                    },
+                    state,
+                    deadline=deadline,
+                    progress=progress,
+                )
+                goal = (
+                    goal_result.get("goal")
+                    if isinstance(goal_result.get("goal"), dict)
+                    else goal
+                )
+                state.turn_status = None
             state.goal_status = str((goal or {}).get("status") or "active")
             if checkpoint:
                 checkpoint(
@@ -909,23 +933,9 @@ class CodexAppServerClient:
                 )
             while (
                 state.goal_status not in TERMINAL_GOAL_STATUSES
-                or state.turn_in_progress
+                or state.turn_status not in TERMINAL_TURN_STATUSES
             ):
-                if (
-                    state.goal_status in TERMINAL_GOAL_STATUSES
-                    and state.turn_in_progress
-                ):
-                    await self._refresh_thread_state(
-                        transport,
-                        state,
-                        deadline=deadline,
-                        progress=progress,
-                    )
-                    if not state.turn_in_progress:
-                        break
-                wait_seconds = min(
-                    self._remaining(deadline), self.goal_poll_seconds
-                )
+                wait_seconds = min(self._remaining(deadline), self.goal_poll_seconds)
                 try:
                     message = await transport.receive(wait_seconds)
                 except TimeoutError:
@@ -945,22 +955,21 @@ class CodexAppServerClient:
                     state.goal_status = str(
                         current_goal.get("status") or state.goal_status or "active"
                     )
-                    if state.goal_status in TERMINAL_GOAL_STATUSES:
-                        if state.turn_in_progress:
-                            await self._refresh_thread_state(
-                                transport,
-                                state,
-                                deadline=deadline,
-                                progress=progress,
-                            )
-                        if not state.turn_in_progress:
-                            break
-                        continue
-                    if not state.turn_in_progress:
+                    await self._refresh_thread_state(
+                        transport,
+                        state,
+                        deadline=deadline,
+                        progress=progress,
+                    )
+                    if (
+                        state.goal_status not in TERMINAL_GOAL_STATUSES
+                        and state.turn_status in TERMINAL_TURN_STATUSES
+                        and not state.turn_in_progress
+                    ):
                         raise CodexTaskError(
                             code="E_CODEX_STALLED",
                             message="The Codex goal remained active while its task was idle.",
-                            hint="Open the persisted task in Desktop; do not create a replacement task.",
+                            hint="Resume the same daily run; do not create a replacement task.",
                             retryable=True,
                             exit_code=5,
                         )
@@ -971,31 +980,15 @@ class CodexAppServerClient:
                     state,
                     progress=progress,
                 )
-                if message.get("method") == "turn/completed":
-                    goal_result = await self._request(
-                        transport,
-                        "thread/goal/get",
-                        {"threadId": state.thread_id},
-                        state,
-                        deadline=deadline,
-                        progress=progress,
-                    )
-                    current_goal = (
-                        goal_result.get("goal")
-                        if isinstance(goal_result.get("goal"), dict)
-                        else {}
-                    )
-                    state.goal_status = str(
-                        current_goal.get("status") or state.goal_status or "active"
-                    )
-                if state.turn_status == "failed" and state.goal_status not in TERMINAL_GOAL_STATUSES:
-                    raise CodexTaskError(
-                        code="E_CODEX_TURN_FAILED",
-                        message="The Codex daily task turn failed.",
-                        hint="Resume the same daily run; the persisted thread id is retained.",
-                        retryable=True,
-                        exit_code=4,
-                    )
+
+            if state.goal_status == "complete" and state.turn_status != "completed":
+                raise CodexTaskError(
+                    code="E_CODEX_TURN_INCOMPLETE",
+                    message="The Codex goal completed but its final turn did not.",
+                    hint="Inspect the persisted task before resuming the same daily run.",
+                    retryable=True,
+                    exit_code=4,
+                )
 
             result: dict[str, Any] = {
                 "thread_id": state.thread_id,
@@ -1010,16 +1003,32 @@ class CodexAppServerClient:
             }
             if (
                 state.goal_status == "complete"
+                and state.turn_status == "completed"
                 and post_completion_prompt is not None
                 and feedback_output_path is not None
             ):
                 feedback_output_path.parent.mkdir(parents=True, exist_ok=True)
                 try:
+                    clear_result = await self._request(
+                        transport,
+                        "thread/goal/clear",
+                        {"threadId": state.thread_id},
+                        state,
+                        deadline=deadline,
+                        progress=progress,
+                    )
+                    if clear_result.get("cleared") is not True:
+                        raise CodexTaskError(
+                            code="E_CODEX_GOAL_NOT_CLEARED",
+                            message="Codex did not clear the completed goal.",
+                            hint="The completed brief remains valid; inspect the same task.",
+                            retryable=True,
+                            exit_code=4,
+                        )
                     await self._start_turn(
                         transport,
                         state,
                         prompt=post_completion_prompt,
-                        skill_path=skill_path,
                         settings=effective_settings,
                         deadline=deadline,
                         progress=progress,
@@ -1028,6 +1037,7 @@ class CodexAppServerClient:
                     await self._wait_for_turn_completion(
                         transport,
                         state,
+                        purpose="feedback",
                         deadline=deadline,
                         progress=progress,
                     )
