@@ -101,6 +101,70 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     ]
 
 
+def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):
+    artifact_db = tmp_path / "artifacts.db"
+    artifact_conn = artifacts.connect(artifact_db)
+    item = {
+        "event_id": "event-current-update",
+        "root": {
+            "post_id": "old-root",
+            "author": {"handle": "alice"},
+            "text": "A year-old announcement.",
+            "published_at": "2025-07-15T12:00:00+00:00",
+        },
+        "evidence": [
+            {
+                "post_id": "current-update",
+                "author": {"handle": "alice"},
+                "text": "Here is what changed today.",
+                "relationship": "quote",
+                "same_author_as_root": True,
+                "published_at": "2026-07-10T12:00:00+00:00",
+            },
+            {
+                "post_id": "current-reaction",
+                "author": {"handle": "bob"},
+                "text": "A current reaction.",
+                "relationship": "quote",
+                "same_author_as_root": False,
+                "published_at": "2026-07-10T13:00:00+00:00",
+            },
+        ],
+    }
+
+    packet = routing_runs.packet_from_event(
+        item,
+        day="2026-07-10",
+        artifact_conn=artifact_conn,
+    )
+    artifact_conn.close()
+
+    assert packet is not None
+    assert [source.source_id for source in packet.sources] == ["current-update"]
+    assert packet.sources[0].relation == "root"
+
+
+def test_packet_excludes_an_event_with_only_an_old_first_party_source(tmp_path):
+    artifact_conn = artifacts.connect(tmp_path / "artifacts.db")
+    packet = routing_runs.packet_from_event(
+        {
+            "event_id": "event-old-only",
+            "root": {
+                "post_id": "old-root",
+                "author": {"handle": "alice"},
+                "text": "Old announcement.",
+                "published_at": "2025-11-19T12:00:00+00:00",
+            },
+            "evidence": [],
+        },
+        day="2026-07-14",
+        artifact_conn=artifact_conn,
+    )
+    artifact_conn.close()
+
+    assert packet is None
+
+
 def test_selective_refresh_reuses_only_exact_complete_inputs(tmp_path):
     source = routing_runs.connect_run(tmp_path / "source.db")
     target = routing_runs.connect_run(tmp_path / "target.db")

@@ -14,6 +14,7 @@ contract behind it.
 
 ```text
 current routed-positive Events for one UTC day
+  -> seven-day first-party X evidence projection
   -> immutable workspace and manifest
   -> agent research across packets, artifacts, context, and the web
   -> one strict draft containing both audiences
@@ -26,6 +27,15 @@ current routed-positive Events for one UTC day
 There is no first-class `Development` row. Several Events can support one
 Insight through explicit evidence roles. The Event remains the frozen evidence
 unit; the Insight is the reader-facing judgment.
+
+The daily workspace is a conservative semantic projection, not a raw-data
+store. It keeps first-party X sources published on the brief day or the seven
+preceding calendar days. When an older root has a current same-author quote or
+reply, the current source becomes the workspace root. When no eligible
+first-party X source remains, the routed candidate is omitted. Raw Feed and
+Event history remains intact for audit. Artifact chronology stays separate:
+neither retrieval time nor the linking X post proves an artifact publication
+date.
 
 ## Insight Schema
 
@@ -117,6 +127,10 @@ ignored SQLite store is `data/derived/daily-intelligence/editorial.db`.
 
 An import succeeds only after the draft matches the exact workspace manifest,
 passes the audience schema, and accounts for the entire routed-positive cohort.
+For workspace v2, that cohort means the routed-positive candidates remaining
+after the seven-day X-source projection. Retained X sources carry their
+application-owned publication times; Event citations inherit that date and a
+conflicting agent-supplied date fails validation.
 The normalized run, candidates, Insights, dispositions, Event provenance, and
 citations are written in one transaction. Reimporting the identical result is a
 no-op; a conflicting result cannot overwrite the existing run identity.

@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import numpy as np
 from fastapi.testclient import TestClient
+import pytest
 
 from fli.insights import editorial
 from fli.insights import editorial_cli
@@ -319,6 +320,30 @@ def test_validate_requires_exact_candidate_coverage(tmp_path, monkeypatch):
         assert "does not dispose every routed candidate" in str(error)
     else:
         raise AssertionError("missing coverage must fail validation")
+
+
+def test_event_citation_date_is_filled_from_source_truth_and_conflicts_fail(
+    tmp_path, monkeypatch
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    manifest = editorial_runs.load_manifest(workspace)
+    draft = _draft(workspace)
+    citation = draft["citations"][0]
+    citation.update(
+        {
+            "kind": "event",
+            "url": "https://x.com/example/status/event-a",
+            "artifact_id": None,
+            "published_at": None,
+        }
+    )
+
+    normalized, _report = editorial.validate_draft(draft, manifest)
+    assert normalized["citations"][0]["published_at"] == DAY
+
+    citation["published_at"] = "2026-07-14"
+    with pytest.raises(ValueError, match="must match frozen source date"):
+        editorial.validate_draft(draft, manifest)
 
 
 def test_import_is_atomic_normalized_and_idempotent(tmp_path, monkeypatch):

@@ -3,8 +3,8 @@
 ## Goal
 
 Make the July 5–15 daily briefs chronologically honest and submission-worthy,
-starting with deterministic source dates and then applying only the smallest
-editorial changes proven necessary by calibration.
+starting with a conservative seven-day X evidence window and deterministic
+source dates before applying further editorial changes.
 
 ## Why / Impact
 
@@ -14,11 +14,11 @@ evidence as if it happened on the brief day. That weakens freshness,
 traceability, signal-to-noise, and the credibility of the final 3–5 Insights—the
 parts of the BIT assignment that matter most.
 
-The immediate correction must not impose the opposite error. A periodic brief
-may contain a useful synthesis built from older evidence. The durable rule is:
+The overnight audit showed that broad old-root resurfacing creates more noise
+than useful synthesis in this daily product. Adi chose the conservative rule:
 
-> The run date says when the memo was selected; source dates say when the
-> evidence occurred.
+> Raw evidence remains auditable, but daily routing and editorial packets use
+> only first-party X sources published no more than seven days before the brief.
 
 ## Scope / Non-Goals
 
@@ -26,10 +26,10 @@ may contain a useful synthesis built from older evidence. The durable rule is:
 
 - Preserve the full July 5–15 editorial audit as a reproducible project
   baseline.
-- Make X-source chronology application-owned in daily workspaces and citation
-  validation using data already present in the Feed store.
-- Keep fresh-development and older-evidence synthesis Insights valid without a
-  blanket age rule.
+- Make X-source chronology application-owned in routing, daily workspaces, and
+  citation validation using data already present in the Feed store.
+- Exclude X sources older than seven days while retaining a current same-author
+  quote or reply as the primary source when one exists.
 - Calibrate the change against known failure cases and a known-good control
   before deciding which days need another editorial run.
 - Reassess the provisional weak-item and omission queues, then select the
@@ -37,8 +37,8 @@ may contain a useful synthesis built from older evidence. The durable rule is:
 
 ### Out of Scope
 
-- A mandatory current-day source for every Insight.
-- A blanket age cutoff or automatic stale suppression.
+- A same-day-only source rule; the allowed X window is seven days inclusive.
+- Deleting or rewriting raw Feed and Event evidence.
 - A required `development` entity or `development | synthesis` schema field in
   the first version.
 - Automatic merging from URLs, embeddings, thresholds, or connected
@@ -67,21 +67,23 @@ may contain a useful synthesis built from older evidence. The durable rule is:
   citation validation currently checks URL membership and date syntax, not
   equality to the stored source date.
 - Existing workspaces and imported results remain immutable. Corrected output
-  requires a new workspace contract and, only after calibration, targeted
-  reruns.
+  uses workspace v2 and requires a new editorial run only for dates selected
+  after calibration.
 - `first_discovered_at` is transport discovery, not an artifact publication
   time and not a generic `observed_at` fact.
 
 ## Done When
 
-- [ ] Every frozen X source in a new daily workspace carries deterministic
-      publication and discovery timing without changing the routing packet or
-      its evidence hashes.
+- [x] Every retained X source in a new daily workspace carries deterministic
+      publication timing without changing the source routing run or raw Event.
+- [x] X sources older than seven days are absent from new routing packets and
+      daily workspaces; an old-only candidate is excluded, while a current
+      same-author update is promoted to primary evidence.
 - [ ] Event citation dates are filled from frozen source truth; a conflicting
       agent-supplied date fails validation; an unavailable date remains null.
-- [ ] Search and inspection make source timing visible enough for the daily
+- [x] Search and inspection make source timing visible enough for the daily
       agent to reason about chronology.
-- [ ] Skill guidance explicitly permits dated synthesis while forbidding prose
+- [ ] Skill guidance states the seven-day evidence contract and forbids prose
       that silently turns the brief day into the source day.
 - [ ] Regression cases for Jul 10, Jul 13, Jul 14, and Jul 15 pass, including an
       entirely older-evidence synthesis that remains valid when honestly dated.
@@ -98,10 +100,11 @@ may contain a useful synthesis built from older evidence. The durable rule is:
       from reviewer judgment. Acceptance: totals, chronology, cases, quality
       queues, and harness suggestions are recorded with qualifications.
       Validate: direct SQLite checks plus source/skill inspection.
-- [ ] Milestone 2 — Ship deterministic X chronology in the daily workspace and
-      citation validator. Acceptance: actual dates are application-owned and
-      routing hashes remain unchanged. Validate: targeted editorial tests and
-      workspace inspection.
+- [ ] Milestone 2 — Ship the seven-day X source window plus deterministic
+      chronology in routing, the daily workspace, and citation validation.
+      Acceptance: raw evidence remains intact, old-only packets are excluded,
+      current same-author updates survive, and citations use source truth.
+      Validate: targeted routing/editorial tests and workspace inspection.
 - [ ] Milestone 3 — Calibrate on demonstrated cases before a broad rerun.
       Acceptance: Jul 10 Thinking Machines, Jul 13 CaMeLs, Jul 14 teachers, and
       Jul 15 current-source control behave as specified; old synthesis is still
@@ -120,11 +123,12 @@ may contain a useful synthesis built from older evidence. The durable rule is:
 
 - Keep work on Milestone 2 until chronology passes its tests; do not mix in the
   longer harness backlog.
-- Preserve the frozen routing packet and hashes. Add a daily-workspace timing
-  sidecar or equivalent derived projection rather than mutating routing truth.
+- Preserve existing routing runs and raw Events. New routing freezes apply the
+  source window; workspace v2 applies it defensively to already-frozen runs.
 - Treat the brief day, X publication time, discovery time, artifact publication
   time, and retrieval time as different facts.
-- Age may produce a warning or review cue, never an automatic error by itself.
+- For X evidence, age beyond seven days is a deterministic exclusion. Artifact
+  age remains separate because retrieval or link time is not publication time.
 - Reviewer quality labels in the audit are provisional queues, not ground truth.
 - Run repo-native validation after each milestone and fix failures before
   advancing.
@@ -145,6 +149,10 @@ may contain a useful synthesis built from older evidence. The durable rule is:
   artifact retrieval time do not establish the artifact's publication date.
 - 2026-07-18: Do not rerun all eleven days until the known chronology failures
   and one current-source control pass.
+- 2026-07-18: Adi selected a seven-day inclusive X-source window. Preserve raw
+  evidence, exclude old X sources from semantic packets, promote a current
+  same-author continuation when available, and exclude the Event when no
+  current first-party X source remains.
 
 ## Open Questions / Blockers
 
@@ -159,9 +167,10 @@ may contain a useful synthesis built from older evidence. The durable rule is:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Add a versioned daily-workspace timing projection from the bound Feed run without mutating routing packets or hashes. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
-| todo | Make Event citation dates deterministic and add mismatch/missing-date tests. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
-| todo | Update the daily skill's chronology rule and exercise the four calibration cases. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| done | Add workspace v2 publication-time projection and seven-day pruning without mutating raw Events or existing routing runs. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| done | Apply the same seven-day rule to newly frozen routing packets; promote current same-author updates and exclude old-only packets. | parent | [tests](../../../tests/routing/test_freshness.py) |
+| done | Make Event citation dates deterministic and add mismatch tests. | parent | [tests](../../../tests/insights/test_editorial.py) |
+| in_progress | Update skill/docs and complete Jul 10/14 plus broader regression validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 
 ## Backlog / Remaining Work
 
@@ -209,4 +218,3 @@ may contain a useful synthesis built from older evidence. The durable rule is:
 - 2026-07-18: [DONE] Chose deterministic chronology as the minimum first fix;
   explicitly rejected a mandatory current-day anchor, blanket stale filter,
   and premature Insight-type schema expansion.
-

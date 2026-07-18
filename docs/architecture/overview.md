@@ -67,14 +67,18 @@ at the root of `fli`.
 6. Attention provides a transparent daily ordering aid. It is not an Insight
    or a quality judgment.
 7. Audience routing independently decides whether the packet matters to AI
-   Engineering and Investment.
+   Engineering and Investment. New routing freezes admit only first-party X
+   sources no more than seven days old; a current same-author continuation may
+   replace an older root, while old-only packets are excluded.
 8. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis and audited 2025 portfolio packet for Investment, may use
    per-Event notes as annotations, researches missing transmission paths, and
    writes the ranked cited Insights that clear the audience bar. Each selected
    Insight stores the qualitative rationale for its audience-local priority;
    the rank is not a synthetic score. Every
-   candidate is linked once to an Insight or explicitly not selected.
+   candidate is linked once to an Insight or explicitly not selected. Its
+   workspace applies the same seven-day X-source projection defensively to
+   existing routing runs and attaches application-owned publication times.
 9. Deterministic validation binds the draft to its frozen workspace and imports
    Insights, Event roles, dispositions, and citations in one transaction.
    Optional embedding retrieval may find paraphrases but never decides a merge.
@@ -97,6 +101,10 @@ at the root of `fli`.
   rejected identities disappear without rewriting raw history.
 - **First-party model evidence:** independent reactions remain auditable in the
   Feed but cannot silently become primary artifact or Insight evidence.
+- **Fresh semantic evidence:** raw Events retain their history, while routing
+  and daily authoring use only first-party X posts from the brief day through
+  seven days earlier. Current same-author continuations may replace old roots;
+  third-party reactions may not rescue them.
 - **Independent audiences:** Engineering and Investment are separate judgments
   over one shared evidence core, not two ingestion systems.
 - **Agent freedom behind a narrow write boundary:** the agent may search,

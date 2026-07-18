@@ -60,3 +60,19 @@ Expected behavior:
 - a broader safety thesis may cite both only when its causal argument is
   explicit; and
 - cosine similarity alone never determines the result.
+
+## 4. Seven-day source window
+
+For July 14, the OpenAI ChatGPT for Teachers Event rooted in the 19 November
+2025 announcement must not enter the workspace merely because July reactions
+resurfaced it. For July 10, the Thinking Machines Event may remain, but the 15
+July 2025 financing root must be removed and Mira Murati's 10 July 2026 quote
+and reply must become the current first-party evidence.
+
+Expected behavior:
+
+- sources exactly seven days old remain eligible; older X sources do not;
+- independently authored reactions never rescue an old first-party packet;
+- a current same-author quote or reply can replace the old root;
+- an old-only Event is excluded before agent disposition; and
+- the Feed still retains the complete raw envelope for audit.

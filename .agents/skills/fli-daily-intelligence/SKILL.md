@@ -30,7 +30,11 @@ your own judgment for research, retrieval, grouping, and synthesis.
    ```
 
    Use the returned `workspace` path for every later command. Read its
-   `manifest.json` and `draft.template.json`.
+   `manifest.json` and `draft.template.json`. Workspace v2 retains only
+   first-party X sources published from the brief day through seven days
+   earlier. Raw Feed evidence is not deleted. If an old root has a current
+   same-author quote or reply, that current post becomes the packet root; if no
+   current first-party X source remains, the Event is absent from the workspace.
 4. Investigate across the whole cohort. Start with deterministic retrieval,
    then broaden only where it improves the judgment:
    - inspect `exact_artifact_groups` in the manifest;
@@ -105,6 +109,10 @@ shared theme as an automatic merge.
   `not_selected` with a concrete reason.
 - Prefer primary artifacts and first-party sources. Preserve provider
   attribution and important contradictory evidence.
+- Treat each retained X source's `posted` date as application-owned truth.
+  Never assign the brief day to an older source or cite a pruned URL. Event
+  citation dates are filled from the frozen workspace and conflicting dates
+  fail validation.
 - Use web research actively when it can resolve an unknown. A web citation must
   retain its URL, retrieval time, supporting excerpt, and the claim it supports.
 - Never invent a BIT holding, private forecast, cost basis, trade, target, or

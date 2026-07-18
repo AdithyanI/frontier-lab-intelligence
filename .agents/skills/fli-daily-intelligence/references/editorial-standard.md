@@ -136,6 +136,13 @@ provider microbenchmark is not evidence of end-to-end production improvement.
 ## Citation and coverage rules
 
 `event` and `artifact` citations must point to frozen URLs from the workspace.
+The workspace uses a seven-day inclusive window for first-party X evidence and
+stores the authoritative `posted` time on each retained X source. Raw Feed
+history remains available for audit, but it is not authoring evidence once
+pruned. If an Event's old root was replaced by a current same-author update,
+write and cite the update—not the historical announcement it referenced.
+Event citation dates are filled from frozen source truth; a conflicting date is
+invalid.
 Use `web` for newly researched sources and include `retrieved_at` and a concise
 supporting excerpt. Use `context` for the encoded BIT or Engineering context
 and retain the underlying public URL when making a factual portfolio claim.
