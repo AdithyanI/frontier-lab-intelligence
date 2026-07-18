@@ -28,8 +28,9 @@ DEFAULT_DB = DEFAULT_ROOT / "editorial.db"
 DEFAULT_ROUTING_ROOT = routing_runs.DEFAULT_RUN_ROOT
 DEFAULT_INSIGHTS_DB = insight_runs.DEFAULT_DB
 DEFAULT_MODEL = consolidation.DEFAULT_MODEL
-WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v2"
-STORE_SCHEMA_VERSION = "daily-intelligence-store-v3"
+LEGACY_WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v2"
+WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v3"
+STORE_SCHEMA_VERSION = "daily-intelligence-store-v4"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
 
 CONTEXT_PATHS = {
@@ -76,7 +77,7 @@ CREATE TABLE IF NOT EXISTS editorial_candidate (
     event_id TEXT NOT NULL,
     feed_rank INTEGER NOT NULL,
     root_url TEXT NOT NULL,
-    snapshot_content_sha256 TEXT NOT NULL,
+    semantic_snapshot_sha256 TEXT NOT NULL,
     evidence_sha256 TEXT NOT NULL,
     input_sha256 TEXT NOT NULL,
     packet_json TEXT NOT NULL,
@@ -223,6 +224,28 @@ def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _migrate_workspace_value(value: Any) -> Any:
+    if isinstance(value, list):
+        return [_migrate_workspace_value(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    if (
+        "snapshot_content_sha256" in value
+        and "semantic_snapshot_sha256" in value
+    ):
+        raise ValueError(
+            "workspace value contains both legacy and Event-native snapshot keys"
+        )
+    return {
+        (
+            "semantic_snapshot_sha256"
+            if key == "snapshot_content_sha256"
+            else key
+        ): _migrate_workspace_value(item)
+        for key, item in value.items()
+    }
+
+
 def _migrate_editorial_insight_v2(conn: sqlite3.Connection) -> None:
     """Collapse the first editorial memo shape into the smaller durable contract."""
     columns = {
@@ -358,6 +381,41 @@ def _migrate_engineering_analysis_v3(conn: sqlite3.Connection) -> None:
             )
 
 
+def migrate_editorial_store(path: Path | str = DEFAULT_DB) -> bool:
+    """Migrate the editorial candidate table to semantic Event hash naming."""
+    path = Path(path)
+    if not path.is_file():
+        return False
+    conn = sqlite3.connect(path, timeout=60.0)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA busy_timeout = 60000")
+    changed = False
+    try:
+        columns = {
+            str(row["name"])
+            for row in conn.execute("PRAGMA table_info(editorial_candidate)").fetchall()
+        }
+        if "snapshot_content_sha256" not in columns:
+            return False
+        if "semantic_snapshot_sha256" in columns:
+            raise RuntimeError(
+                "editorial_candidate contains both legacy and Event-native snapshot columns"
+            )
+        with conn:
+            conn.execute(
+                "ALTER TABLE editorial_candidate RENAME COLUMN "
+                "snapshot_content_sha256 TO semantic_snapshot_sha256"
+            )
+            conn.execute("PRAGMA user_version = 4")
+        changed = True
+        integrity = str(conn.execute("PRAGMA integrity_check").fetchone()[0])
+        if integrity != "ok":
+            raise RuntimeError(f"editorial storage integrity check failed: {integrity}")
+        return changed
+    finally:
+        conn.close()
+
+
 def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path, timeout=60.0)
@@ -369,6 +427,7 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     _migrate_editorial_insight_v3(conn)
     _migrate_engineering_analysis_v3(conn)
     conn.executescript(SCHEMA)
+    conn.execute("PRAGMA user_version = 4")
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
@@ -383,6 +442,62 @@ def _manifest_digest(manifest: dict[str, Any]) -> str:
     value = dict(manifest)
     value.pop("manifest_sha256", None)
     return _sha256(_canonical_json(value))
+
+
+def _refresh_workspace_template(workspace: Path, manifest: dict[str, Any]) -> bool:
+    """Keep the authoring template bound to the exact migrated manifest."""
+    path = workspace / "draft.template.json"
+    expected = editorial.draft_template(manifest)
+    if path.is_file() and _read_json(path) == expected:
+        return False
+    _write_json(path, expected)
+    return True
+
+
+def migrate_workspace(workspace: Path | str) -> dict[str, Any]:
+    """Upgrade one unimported v2 workspace without changing its stable path."""
+    workspace = Path(workspace)
+    manifest_path = workspace / "manifest.json"
+    manifest = _read_json(manifest_path)
+    if not isinstance(manifest, dict):
+        raise ValueError("workspace manifest must be an object")
+    schema_version = manifest.get("schema_version")
+    if schema_version == WORKSPACE_SCHEMA_VERSION:
+        manifest = load_manifest(workspace)
+        return {
+            "workspace": str(workspace),
+            "run_id": str(manifest.get("run_id") or ""),
+            "manifest_sha256": str(manifest.get("manifest_sha256") or ""),
+            "migrated": False,
+            "template_updated": _refresh_workspace_template(workspace, manifest),
+        }
+    if schema_version != LEGACY_WORKSPACE_SCHEMA_VERSION:
+        raise ValueError(f"unsupported workspace schema: {schema_version!r}")
+    if manifest.get("manifest_sha256") != _manifest_digest(manifest):
+        raise ValueError("workspace manifest hash does not match its content")
+
+    event_payloads = [
+        (path, _migrate_workspace_value(_read_json(path)))
+        for path in sorted((workspace / "events").glob("*.json"))
+    ]
+    migrated_manifest = _migrate_workspace_value(manifest)
+    assert isinstance(migrated_manifest, dict)
+    migrated_manifest["schema_version"] = WORKSPACE_SCHEMA_VERSION
+    migrated_manifest["manifest_sha256"] = _manifest_digest(migrated_manifest)
+
+    for path, payload in event_payloads:
+        _write_json(path, payload)
+    _write_json(manifest_path, migrated_manifest)
+    load_manifest(workspace)
+    template_updated = _refresh_workspace_template(workspace, migrated_manifest)
+    return {
+        "workspace": str(workspace),
+        "run_id": str(migrated_manifest["run_id"]),
+        "manifest_sha256": str(migrated_manifest["manifest_sha256"]),
+        "migrated": True,
+        "template_updated": template_updated,
+        "event_count": len(event_payloads),
+    }
 
 
 def load_manifest(workspace: Path) -> dict[str, Any]:
@@ -750,7 +865,7 @@ def prepare_workspace(
             "day": day,
             "feed_rank": int(row["feed_rank"]),
             "root_url": str(root.get("url") or row["root_url"]),
-            "snapshot_content_sha256": str(row["snapshot_content_sha256"]),
+            "semantic_snapshot_sha256": str(row["semantic_snapshot_sha256"]),
             "evidence_sha256": str(row["evidence_sha256"]),
             "input_sha256": str(row["input_sha256"]),
             "audiences": audiences,
@@ -778,7 +893,7 @@ def prepare_workspace(
                 "feed_rank": int(row["feed_rank"]),
                 "audiences": audiences,
                 "root_url": str(root.get("url") or row["root_url"]),
-                "snapshot_content_sha256": str(row["snapshot_content_sha256"]),
+                "semantic_snapshot_sha256": str(row["semantic_snapshot_sha256"]),
                 "evidence_sha256": str(row["evidence_sha256"]),
                 "input_sha256": str(row["input_sha256"]),
                 "root_author": str(root.get("author") or ""),
@@ -1229,7 +1344,7 @@ def import_result(
                 conn.execute(
                     """INSERT INTO editorial_candidate (
                            run_id, event_id, feed_rank, root_url,
-                           snapshot_content_sha256, evidence_sha256, input_sha256,
+                           semantic_snapshot_sha256, evidence_sha256, input_sha256,
                            packet_json, ai_engineering_relevant,
                            ai_engineering_reason, investment_relevant,
                            investment_reason)
@@ -1239,7 +1354,7 @@ def import_result(
                         event_id,
                         event["feed_rank"],
                         event["root_url"],
-                        event["snapshot_content_sha256"],
+                        event["semantic_snapshot_sha256"],
                         event["evidence_sha256"],
                         event["input_sha256"],
                         _canonical_json(payload["packet"]),

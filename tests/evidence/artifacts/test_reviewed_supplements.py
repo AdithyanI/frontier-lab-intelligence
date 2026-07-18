@@ -26,7 +26,7 @@ def _triage_db(path):
                event_id TEXT PRIMARY KEY,
                current_rank INTEGER NOT NULL,
                input_sha256 TEXT NOT NULL,
-               snapshot_content_sha256 TEXT,
+               semantic_snapshot_sha256 TEXT,
                status TEXT NOT NULL,
                decision TEXT NOT NULL
            );"""
@@ -93,7 +93,7 @@ def test_reviewed_supplement_import_is_frozen_and_replayable(tmp_path):
     assert row["day_candidate_count"] == 863
     assert row["source_triage_run_id"] == "triage-reviewed"
     assert row["source_input_sha256"] == "input-sha"
-    assert row["source_snapshot_content_sha256"] == "snapshot-sha"
+    assert row["source_semantic_snapshot_sha256"] == "snapshot-sha"
     assert row["evidence_role"] == "official_primary_source"
     assert row["reviewed_by"] == "human-review"
     assert conn.execute("SELECT COUNT(*) FROM artifact_import_candidate").fetchone()[0] == 0

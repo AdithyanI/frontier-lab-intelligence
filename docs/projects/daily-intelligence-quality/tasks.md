@@ -195,9 +195,9 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   than adding another model gate or database entity.
 - 2026-07-18: Use a short-lived stdio `codex app-server` client for orchestration
   v1. Create a non-ephemeral thread with the exact repo `cwd`, set its visible
-  name and persisted goal through App Server methods, start one turn, and wait
-  for completion. Do not use `codex exec`, a daemon, or an SDK abstraction for
-  the first canary.
+  name, start one explicit full-objective turn, attach the persisted active goal,
+  and follow native goal continuations to completion. Do not use `codex exec`, a
+  daemon, or an SDK abstraction for the first canary.
 - 2026-07-18: Prove the deterministic stages separately before spending a Codex
   turn. The first command contract must support a stop-after-prepare boundary
   and stable JSON inspection.

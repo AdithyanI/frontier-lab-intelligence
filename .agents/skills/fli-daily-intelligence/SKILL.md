@@ -30,7 +30,10 @@ your own judgment for research, retrieval, grouping, and synthesis.
    ```
 
    Use the returned `workspace` path for every later command. Read its
-   `manifest.json` and `draft.template.json`. Workspace v2 retains only
+   `manifest.json` and `draft.template.json`. Only the current workspace v3
+   contract is supported; never reuse or adapt an older packet after a schema
+   migration. Run `prepare` again from the same frozen routing lineage instead.
+   Workspace v3 retains only
    first-party X sources published from the brief day through seven days
    earlier. Raw Feed evidence is not deleted. If an old root has a current
    same-author quote or reply, that current post becomes the packet root; if no

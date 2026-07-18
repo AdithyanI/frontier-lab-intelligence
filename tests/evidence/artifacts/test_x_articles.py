@@ -63,7 +63,7 @@ def _seed_x_article(
         for ordinal, post_id in enumerate(post_ids, 1):
             conn.execute(
                 """INSERT INTO artifact_import_candidate
-                   (candidate_id, import_run_id, envelope_day, event_id,
+                   (candidate_id, import_run_id, event_day, event_id,
                     source_rank, day_candidate_count, source_kind,
                     source_provider, source_external_id,
                     source_snapshot_sha256, source_url,

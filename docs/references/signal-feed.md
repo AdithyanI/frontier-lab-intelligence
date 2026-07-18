@@ -158,9 +158,8 @@ metadata, not event identity and not a replacement ranking. The v9 semantic
 snapshot contains the root, same-author authored updates, and accepted
 first-party artifacts; independently authored reactions and pure reposts are
 excluded. The UI displays a route only when the completed row's `event_id` and
-public `semantic_snapshot_sha256` matches the canonical Event. The routing store
-retains the historical `snapshot_content_sha256` column name. Later third-party
-activity does not trigger rerouting. The runner reuses work only when Event ID,
+public and stored `semantic_snapshot_sha256` match the canonical Event. Later
+third-party activity does not trigger rerouting. The runner reuses work only when Event ID,
 snapshot hash, and exact rendered `input_sha256` match. The API derives
 kept/not-kept/not-evaluated and audience counts before pagination.
 

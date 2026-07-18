@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import sqlite3
 
 import httpx
 import pytest
@@ -8,6 +9,88 @@ from fli.evidence.artifacts import fetch as artifact_fetch
 from fli.evidence.artifacts import cli as artifact_cli
 from fli.evidence.artifacts import store as artifacts
 from fli.evidence.artifacts import urls as artifact_urls
+
+
+def test_connect_migrates_v1_store_to_event_native_v2(tmp_path):
+    db = tmp_path / "artifacts-v1.db"
+    legacy_schema = (
+        artifacts.SCHEMA.replace(artifacts.SCHEMA_VERSION, "artifact-store-v1")
+        .replace("first_event_day", "first_envelope_day")
+        .replace("last_event_day", "last_envelope_day")
+        .replace("event_day", "envelope_day")
+        .replace(
+            "source_semantic_snapshot_sha256",
+            "source_snapshot_content_sha256",
+        )
+    )
+    conn = sqlite3.connect(db)
+    conn.executescript(legacy_schema)
+    conn.execute(
+        """INSERT INTO artifact_import_run (
+               import_run_id, schema_version, canonicalization_contract,
+               source_feed_run_id, source_event_run_id, triage_runs_json,
+               selection_policy, input_fingerprint, expected_candidate_count,
+               accepted_count, excluded_count, failed_count, created_at,
+               completed_at)
+           VALUES ('legacy-import', 'artifact-store-v1', 'canonical-v1',
+                   'feed', 'events', '{}',
+                   'feed-envelope-primary-author-thread-artifacts-v1',
+                   'fingerprint', 1, 1, 0, 0, 'created', 'completed')"""
+    )
+    conn.execute(
+        """INSERT INTO artifact_import_candidate (
+               candidate_id, import_run_id, envelope_day, event_id,
+               source_rank, day_candidate_count, source_kind, source_provider,
+               source_external_id, source_snapshot_sha256, source_url,
+               disclosure_external_id, disclosure_snapshot_sha256,
+               disclosure_url, disclosure_published_at, observed_url,
+               expanded_url, candidate_source, title_hint, relation, decision,
+               reason_code, artifact_id, created_at)
+           VALUES ('legacy-candidate', 'legacy-import', '2026-07-15', 'event-1',
+                   1, 100, 'x_post', 'provider', 'post-1', 'source-sha',
+                   'https://x.com/a/status/1', 'post-1', 'disclosure-sha',
+                   'https://x.com/a/status/1', 'published', 'https://t.co/a',
+                   'https://example.com/a', 'entity', NULL, 'links_to',
+                   'accepted', 'external_http_url', NULL, 'created')"""
+    )
+    conn.execute(
+        """INSERT INTO artifact_fetch_run (
+               fetch_run_id, schema_version, fetch_policy, selection_policy,
+               input_fingerprint, expected_count, success_count,
+               failed_retryable_count, failed_terminal_count, started_at,
+               completed_at, status)
+           VALUES ('legacy-fetch', 'artifact-store-v1', 'fetch-v1', 'explicit',
+                   'fetch-fingerprint', 0, 0, 0, 0, 'started', 'completed',
+                   'complete')"""
+    )
+    conn.commit()
+    conn.close()
+
+    assert artifacts.migrate_store(db) is True
+    migrated = artifacts.connect(db)
+    candidate = migrated.execute(
+        "SELECT event_day, event_id FROM artifact_import_candidate"
+    ).fetchone()
+    versions = {
+        str(row[0])
+        for row in migrated.execute(
+            "SELECT schema_version FROM artifact_import_run "
+            "UNION SELECT schema_version FROM artifact_fetch_run"
+        ).fetchall()
+    }
+    supplement_columns = {
+        str(row["name"])
+        for row in migrated.execute(
+            "PRAGMA table_info(artifact_event_supplement)"
+        ).fetchall()
+    }
+    migrated.close()
+
+    assert dict(candidate) == {"event_day": "2026-07-15", "event_id": "event-1"}
+    assert versions == {artifacts.SCHEMA_VERSION}
+    assert "source_semantic_snapshot_sha256" in supplement_columns
+    assert "source_snapshot_content_sha256" not in supplement_columns
+    assert artifacts.migrate_store(db) is False
 
 
 def _global_resolver(_host: str, _port: int):
@@ -55,7 +138,7 @@ def _seed_artifact(
         )
         conn.execute(
             """INSERT INTO artifact_import_candidate
-               (candidate_id, import_run_id, envelope_day, event_id,
+               (candidate_id, import_run_id, event_day, event_id,
                 source_rank, day_candidate_count, source_kind, source_provider,
                 source_external_id, source_snapshot_sha256, source_url,
                 disclosure_external_id, disclosure_snapshot_sha256,
@@ -586,9 +669,9 @@ def test_fetch_cohort_exact_artifact_id_does_not_widen_scope(tmp_path, monkeypat
         conn.execute(
             """INSERT INTO artifact_event_supplement
                (supplement_id, contract, manifest_sha256, artifact_id,
-                event_id, envelope_day, source_rank, day_candidate_count,
+                event_id, event_day, source_rank, day_candidate_count,
                 source_triage_run_id, source_input_sha256,
-                source_snapshot_content_sha256, evidence_role,
+                source_semantic_snapshot_sha256, evidence_role,
                 source_published_at, rationale, reviewed_by, reviewed_at,
                 created_at)
                VALUES ('supplement', ?, 'manifest-sha', ?, 'event-exact',

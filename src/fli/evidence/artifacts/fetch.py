@@ -728,7 +728,7 @@ def _stratum(row: dict[str, Any]) -> str:
 def _selection_rows(conn: Any) -> list[dict[str, Any]]:
     rows = conn.execute(
         """WITH scored AS (
-               SELECT candidate.artifact_id, candidate.envelope_day,
+               SELECT candidate.artifact_id, candidate.event_day,
                       candidate.event_id, candidate.source_rank,
                       candidate.day_candidate_count, candidate.expanded_url,
                       CAST(candidate.source_rank - 1 AS REAL) /
@@ -745,7 +745,7 @@ def _selection_rows(conn: Any) -> list[dict[str, Any]]:
                FROM artifact_import_candidate candidate
                WHERE candidate.decision = 'accepted'
            )
-           SELECT artifact.*, scored.envelope_day, scored.event_id,
+           SELECT artifact.*, scored.event_day, scored.event_id,
                   scored.source_rank, scored.normalized_rank,
                   scored.expanded_url AS selected_url,
                   COUNT(DISTINCT observation.source_external_id) AS owner_count
@@ -832,21 +832,21 @@ def select_explicit_artifacts(
             missing.append(artifact_id)
             continue
         source = conn.execute(
-            """SELECT envelope_day, event_id, source_rank,
+            """SELECT event_day, event_id, source_rank,
                       day_candidate_count, expanded_url AS selected_url
                FROM artifact_import_candidate
                WHERE artifact_id = ? AND decision = 'accepted'
-               ORDER BY source_rank, envelope_day, event_id
+               ORDER BY source_rank, event_day, event_id
                LIMIT 1""",
             (artifact_id,),
         ).fetchone()
         if source is None:
             source = conn.execute(
-                """SELECT envelope_day, event_id, source_rank,
+                """SELECT event_day, event_id, source_rank,
                           day_candidate_count, ? AS selected_url
                    FROM artifact_event_supplement
                    WHERE artifact_id = ?
-                   ORDER BY source_rank, envelope_day, event_id
+                   ORDER BY source_rank, event_day, event_id
                    LIMIT 1""",
                 (str(artifact["canonical_url"]), artifact_id),
             ).fetchone()
@@ -939,7 +939,7 @@ def _create_explicit_fetch_run(
             item["selection_rank"],
             item["stratum"],
             item["selected_url"],
-            item["envelope_day"],
+            item["event_day"],
             item["source_rank"],
             item["normalized_rank"],
             item["event_id"],
@@ -1077,7 +1077,7 @@ def _create_fetch_run(conn: Any, selection: list[dict[str, Any]]) -> tuple[str, 
             item["selection_rank"],
             item["selected_url"],
             item["stratum"],
-            item["envelope_day"],
+            item["event_day"],
             item["event_id"],
         ]
         for item in selection
@@ -1124,7 +1124,7 @@ def _create_fetch_run(conn: Any, selection: list[dict[str, Any]]) -> tuple[str, 
                     item["selection_rank"],
                     item["stratum"],
                     item["selected_url"],
-                    item["envelope_day"],
+                    item["event_day"],
                     item["source_rank"],
                     item["normalized_rank"],
                     item["event_id"],

@@ -164,6 +164,9 @@ def _parser() -> argparse.ArgumentParser:
     summary = sub.add_parser("summary", help="Inspect aggregate durable editorial state.")
     summary.add_argument("--db", type=Path, default=editorial_runs.DEFAULT_DB)
     _add_output_flags(summary)
+    from fli.insights import daily_runner
+
+    daily_runner.add_cli_parsers(sub)
     return parser
 
 
@@ -222,13 +225,18 @@ def main(
     *,
     client_factory: Callable[[], Any] = entity_kinds.create_litellm_client,
 ) -> int:
+    raw_args = list(argv) if argv is not None else sys.argv[1:]
+    if raw_args and raw_args[0] in {"run-day", "inspect-day-run"}:
+        from fli.insights import daily_runner
+
+        return daily_runner.main(raw_args)
     started = time.monotonic()
     request_id = str(uuid4())
     args: argparse.Namespace | None = None
     command = "daily-intelligence"
     exit_code = 0
     try:
-        args = _parser().parse_args(argv)
+        args = _parser().parse_args(raw_args)
         command = f"daily-intelligence.{args.action}"
         if args.action == "contract":
             data = {

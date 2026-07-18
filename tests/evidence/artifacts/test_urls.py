@@ -93,11 +93,11 @@ def test_artifact_admission_rejects_a_link_owned_by_a_quoted_reaction():
     ) is None
 
 
-def test_artifact_admission_rejects_an_envelope_only_unbound_link():
+def test_artifact_admission_rejects_an_event_only_unbound_link():
     payload = {"id": "root", "entities": {"urls": []}}
 
     assert artifacts._matching_primary_evidence(
         json.dumps(payload),
-        "https://example.com/stale-envelope-preview",
+        "https://example.com/stale-event-preview",
         post_id="root",
     ) is None

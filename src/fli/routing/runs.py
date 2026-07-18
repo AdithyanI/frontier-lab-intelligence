@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS routing_item (
     event_id TEXT PRIMARY KEY,
     feed_rank INTEGER NOT NULL,
     root_url TEXT NOT NULL,
-    snapshot_content_sha256 TEXT NOT NULL,
+    semantic_snapshot_sha256 TEXT NOT NULL,
     packet_json TEXT NOT NULL,
     evidence_sha256 TEXT NOT NULL,
     input_text TEXT NOT NULL,
@@ -121,6 +121,41 @@ def default_run_db(run_id: str) -> Path:
     ):
         raise ValueError("run_id may contain only letters, numbers, '-', '_', and '.'")
     return DEFAULT_RUN_ROOT / run_id / "routing.db"
+
+
+def migrate_run_storage(path: Path | str) -> bool:
+    """Migrate one routing database to the Event-native storage schema."""
+    path = Path(path)
+    if not path.is_file():
+        return False
+    conn = sqlite3.connect(path, timeout=60.0)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA busy_timeout = 60000")
+    changed = False
+    try:
+        columns = {
+            str(row["name"])
+            for row in conn.execute("PRAGMA table_info(routing_item)").fetchall()
+        }
+        if "snapshot_content_sha256" not in columns:
+            return False
+        if "semantic_snapshot_sha256" in columns:
+            raise RuntimeError(
+                "routing_item contains both legacy and Event-native snapshot columns"
+            )
+        with conn:
+            conn.execute(
+                "ALTER TABLE routing_item RENAME COLUMN "
+                "snapshot_content_sha256 TO semantic_snapshot_sha256"
+            )
+            conn.execute("PRAGMA user_version = 2")
+        changed = True
+        integrity = str(conn.execute("PRAGMA integrity_check").fetchone()[0])
+        if integrity != "ok":
+            raise RuntimeError(f"routing storage integrity check failed: {integrity}")
+        return changed
+    finally:
+        conn.close()
 
 
 def _published_event_source() -> dict[str, str]:
@@ -437,6 +472,7 @@ def connect_run(path: Path | str) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(RUN_SCHEMA)
+    conn.execute("PRAGMA user_version = 2")
     conn.commit()
     return conn
 
@@ -726,7 +762,7 @@ def freeze_run(
         {
             "event_id": packet.event_id,
             "feed_rank": int(item["daily_rank"]),
-            "snapshot_content_sha256": str(item["semantic_snapshot_sha256"]),
+            "semantic_snapshot_sha256": str(item["semantic_snapshot_sha256"]),
             "evidence_sha256": packet.evidence_sha256,
             "input_sha256": _sha256(input_text),
         }
@@ -786,7 +822,7 @@ def freeze_run(
         )
         conn.executemany(
             """INSERT INTO routing_item
-               (event_id, feed_rank, root_url, snapshot_content_sha256,
+               (event_id, feed_rank, root_url, semantic_snapshot_sha256,
                 packet_json, evidence_sha256, input_text, input_sha256,
                 updated_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",

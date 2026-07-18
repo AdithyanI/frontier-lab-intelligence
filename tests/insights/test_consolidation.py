@@ -107,7 +107,7 @@ def _routing_db(path: Path) -> Path:
     for rank, packet in enumerate(packets, start=1):
         conn.execute(
             """INSERT INTO routing_item (
-                   event_id, feed_rank, root_url, snapshot_content_sha256,
+                   event_id, feed_rank, root_url, semantic_snapshot_sha256,
                    packet_json, evidence_sha256, input_text, input_sha256,
                    status, updated_at)
                VALUES (?, ?, ?, 'snapshot', ?, ?, 'input', 'input-sha',

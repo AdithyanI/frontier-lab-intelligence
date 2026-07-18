@@ -105,7 +105,7 @@ def _create_run(
             rank,
             "paper",
             item["selected_url"],
-            item["envelope_day"],
+            item["event_day"],
             item["source_rank"],
             item["normalized_rank"],
             item["event_id"],

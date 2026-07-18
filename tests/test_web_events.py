@@ -157,7 +157,7 @@ def _write_audience_routing_run(root, *, items):
     for rank, item in enumerate(items, start=1):
         conn.execute(
             """INSERT INTO routing_item
-               (event_id, feed_rank, root_url, snapshot_content_sha256,
+               (event_id, feed_rank, root_url, semantic_snapshot_sha256,
                 packet_json, evidence_sha256, input_text, input_sha256,
                 status, attempts,
                 ai_engineering_relevant, ai_engineering_reason,

@@ -267,7 +267,7 @@ those rules without changing the two-judgment output schema.
 newest fully completed schema-compatible run for the requested UTC day.
 `fli.web.events` attaches a route only when its stable `event_id` and current
 public `semantic_snapshot_sha256` and the persisted routing
-`snapshot_content_sha256` match the frozen semantic record; display rank is not an
+`semantic_snapshot_sha256` match the frozen semantic record; display rank is not an
 identity key. The Feed renders positive `ENG` and `INV` marks, or `Neither
 audience` when both judgments are false, with the two reasons in one disclosure.
 The UI presents the derived states as one mutually exclusive Status control:
@@ -323,16 +323,15 @@ with length bounds where needed, not a general quality or semantic heuristic.
 successes while preserving immutable raw bodies. Ordinary fetches, Jina
 recoveries, and X Articles use the same check. Repository and video support
 remain unchanged and deferred.
-The 2026-07-15 reply-inclusive primary-author rebuild indexes 3,087 source
-observations from 3,210 decisions, with zero
+The active 2026-07-18 reply-inclusive primary-author import indexes 4,627
+source observations from 5,032 decisions, with zero
 foreign-author or wrong-conversation lineage violations across the stored
 Feed. Artifact discovery reads the published Feed/Event pair directly and does
 not depend on keep/drop or audience-routing data. Later imports prune stale
 observations while retaining successful fetch snapshots for canonical
-artifacts that remain current. Redirect convergence leaves 2,735 canonical
-artifacts: 2,507 have usable text, including all 221 arXiv artifacts and all
-167 X Articles. Videos remain deferred; 65 non-video pages are unavailable or
-retryable. Broad crawling,
+artifacts that remain current. Redirect convergence leaves 3,999 canonical
+artifacts: 3,453 have usable text, 252 are catalogued but unfetched, 25 are
+retryable, and 269 are unavailable. Broad crawling,
 RSS/GitHub discovery adapters remain deferred. Cited daily editorial Insights
 are implemented downstream. The web
 layer now exposes the live catalog through read-only `/api/artifacts/dates`
@@ -451,6 +450,17 @@ prefetches complete Feed days and
 lazy-mounts closed evidence trees. Registry list reads stay uncached in the
 browser because their indexed queries are already fast and curation freshness
 matters more than another cache.
+
+Active derived storage uses Event-native names throughout:
+`event_day`, `first_event_day`, `last_event_day`, and
+`semantic_snapshot_sha256`. `artifact-store-v2`, new
+`daily-intelligence-workspace-v3` workspaces, and
+`daily-intelligence-store-v4` editorial rows own that contract.
+`scripts/migrate-event-storage.py` upgrades every published store in place and
+emits a JSON audit result; normal application reads accept only the migrated
+schema and do not carry dual-read fallbacks. Frozen run IDs,
+workspace files, and build-log records keep their original values and hashes as
+immutable provenance rather than being rewritten.
 
 ## Stack
 

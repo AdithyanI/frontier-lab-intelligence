@@ -19,7 +19,8 @@ routing, editorial validation, or editorial persistence.
 - One ISO `--day` is required.
 - JSON is the default machine contract; `--plain` is an inspection convenience.
 - `--no-input` is supported and normal operation never prompts.
-- A deterministic-only boundary stops after workspace preparation.
+- The default command stops after workspace preparation; `--launch-codex`
+  explicitly crosses into agent execution.
 - Repeating the same date reuses completed compatible stages rather than
   creating duplicate work or a second Codex task.
 - Failures return stable codes, retryability, and the last durable stage.
@@ -35,14 +36,22 @@ Use a short-lived stdio `codex app-server` child and the stable protocol:
    - `ephemeral=false`;
    - a stable service name;
 3. `thread/name/set` with `FLI Daily Brief — YYYY-MM-DD`;
-4. `thread/goal/set` with an active objective equivalent to `/goal`;
-5. `turn/start` with the prepared workspace and explicit skill invocation;
-6. stream until `turn/completed`, then inspect the durable editorial run.
+4. `turn/start` with the complete objective, prepared workspace, and explicit
+   skill invocation;
+5. after that turn is running, `thread/goal/set` with the same active objective
+   (the persisted equivalent of `/goal`);
+6. follow native goal continuation turns until the goal is terminal, then
+   inspect the exact durable editorial run.
 
-The Desktop project association is path-based: persisted thread state records
-the exact `cwd` and no separate project identifier. The initial turn is started
-immediately so the task is a normal visible conversation rather than an empty
-thread.
+App Server exposes the exact thread `cwd`, not a project-assignment parameter.
+Codex Desktop separately derives and records its local project association from
+that exact path. The live canary therefore verifies the UI association instead
+of assuming it from the protocol alone. The initial turn is started immediately
+so the task is a normal visible conversation rather than an empty thread.
+
+The order matters: activating a goal on an idle thread can auto-start a native
+continuation. Starting the explicit first turn before activating the goal avoids
+racing two turns while still giving the task the full objective in context.
 
 ## Canary Order
 
@@ -52,6 +61,14 @@ thread.
 4. Confirm the named task appears under `frontier-lab-intelligence` in Codex
    Desktop and that its thread id is stored with the orchestration record.
 5. Wait for completion and inspect the imported daily run and UI.
+
+```bash
+.venv/bin/fli daily-intelligence run-day \
+  --day 2026-07-16 --json --no-input
+
+.venv/bin/fli daily-intelligence run-day \
+  --day 2026-07-16 --launch-codex --json --no-input
+```
 
 ## Explicitly Deferred
 

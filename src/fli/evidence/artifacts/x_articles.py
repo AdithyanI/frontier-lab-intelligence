@@ -92,7 +92,7 @@ def _selection_rows(
 ) -> list[dict[str, Any]]:
     rows = conn.execute(
         """SELECT artifact.artifact_id, artifact.canonical_url,
-                  candidate.source_external_id, candidate.envelope_day,
+                  candidate.source_external_id, candidate.event_day,
                   candidate.event_id AS source_event_id, candidate.source_rank,
                   candidate.day_candidate_count, candidate.relation,
                   candidate.decision
@@ -135,7 +135,7 @@ def _selection_rows(
                 str(row["source_event_id"]),
             )
             if item["source_key"] is None or source_key < item["source_key"]:
-                item["source_day"] = str(row["envelope_day"])
+                item["source_day"] = str(row["event_day"])
                 item["source_rank"] = source_rank
                 item["normalized_rank"] = normalized_rank
                 item["source_event_id"] = str(row["source_event_id"])

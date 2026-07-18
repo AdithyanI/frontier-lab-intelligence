@@ -15,10 +15,12 @@ from typing import Any, Protocol
 TERMINAL_GOAL_STATUSES = {
     "blocked",
     "budgetLimited",
+    "cleared",
     "complete",
     "paused",
     "usageLimited",
 }
+APP_SERVER_STREAM_LIMIT_BYTES = 16 * 1024 * 1024
 
 
 class CodexTaskError(RuntimeError):
@@ -74,6 +76,7 @@ class StdioAppServerTransport:
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            limit=APP_SERVER_STREAM_LIMIT_BYTES,
         )
         return cls(process)
 
@@ -111,6 +114,14 @@ class StdioAppServerTransport:
             )
         except TimeoutError:
             raise
+        except ValueError as error:
+            raise CodexTaskError(
+                code="E_CODEX_MESSAGE_TOO_LARGE",
+                message="Codex App Server emitted a message above the stream limit.",
+                hint="Resume the persisted task after increasing the client stream limit.",
+                retryable=True,
+                exit_code=4,
+            ) from error
         if not line:
             return_code = await self.process.wait()
             detail = " | ".join(self.stderr_lines)
@@ -280,7 +291,7 @@ class CodexAppServerClient:
             if progress and state.goal_status:
                 progress("codex_goal", state.goal_status)
         elif method == "thread/goal/cleared":
-            state.goal_status = "complete"
+            state.goal_status = "cleared"
         elif method == "thread/status/changed":
             status = params.get("status") if isinstance(params.get("status"), dict) else {}
             if status.get("type") == "idle":
@@ -366,6 +377,89 @@ class CodexAppServerClient:
             state.turns_started = 1
         return result
 
+    async def discard_task(
+        self,
+        *,
+        thread_id: str,
+        timeout_seconds: float = 60.0,
+    ) -> dict[str, Any]:
+        """Clear and permanently delete one known archived, idle task."""
+        if not thread_id.strip():
+            raise ValueError("thread_id must not be empty")
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        deadline = time.monotonic() + timeout_seconds
+        state = _TaskState(thread_id=thread_id)
+        transport = await self._open_transport()
+        try:
+            await self._request(
+                transport,
+                "initialize",
+                {
+                    "clientInfo": {
+                        "name": "fli_daily_runner",
+                        "title": "FLI Daily Runner",
+                        "version": "1.0.0",
+                    },
+                    "capabilities": None,
+                },
+                state,
+                deadline=deadline,
+                progress=None,
+            )
+            await transport.send({"method": "initialized", "params": {}})
+            await self._request(
+                transport,
+                "thread/unarchive",
+                {"threadId": thread_id},
+                state,
+                deadline=deadline,
+                progress=None,
+            )
+            goal_result = await self._request(
+                transport,
+                "thread/goal/get",
+                {"threadId": thread_id},
+                state,
+                deadline=deadline,
+                progress=None,
+            )
+            goal = goal_result.get("goal")
+            goal_cleared = False
+            if isinstance(goal, dict):
+                clear_result = await self._request(
+                    transport,
+                    "thread/goal/clear",
+                    {"threadId": thread_id},
+                    state,
+                    deadline=deadline,
+                    progress=None,
+                )
+                if clear_result.get("cleared") is not True:
+                    raise CodexTaskError(
+                        code="E_CODEX_GOAL_NOT_CLEARED",
+                        message="Codex did not confirm that the obsolete goal was cleared.",
+                        hint="Inspect the task in Codex Desktop before deleting it.",
+                        retryable=False,
+                        exit_code=4,
+                    )
+                goal_cleared = True
+            await self._request(
+                transport,
+                "thread/delete",
+                {"threadId": thread_id},
+                state,
+                deadline=deadline,
+                progress=None,
+            )
+            return {
+                "thread_id": thread_id,
+                "goal_cleared": goal_cleared,
+                "deleted": True,
+            }
+        finally:
+            await transport.close()
+
     async def run_task(
         self,
         *,
@@ -414,6 +508,15 @@ class CodexAppServerClient:
                     progress=progress,
                 )
             else:
+                if checkpoint:
+                    checkpoint(
+                        {
+                            "thread_id": None,
+                            "turn_id": None,
+                            "goal_status": None,
+                            "status": "thread_starting",
+                        }
+                    )
                 opened = await self._request(
                     transport,
                     "thread/start",
@@ -437,6 +540,15 @@ class CodexAppServerClient:
                     retryable=False,
                     exit_code=4,
                 )
+            if checkpoint:
+                checkpoint(
+                    {
+                        "thread_id": state.thread_id,
+                        "turn_id": None,
+                        "goal_status": None,
+                        "status": "thread_resumed" if thread_id else "thread_created",
+                    }
+                )
             returned_cwd = Path(str(opened.get("cwd") or thread.get("cwd") or ""))
             if not returned_cwd.is_absolute() or returned_cwd.resolve() != self.repo_root:
                 raise CodexTaskError(
@@ -450,15 +562,6 @@ class CodexAppServerClient:
             raw_sources = opened.get("instructionSources")
             if isinstance(raw_sources, list):
                 instruction_sources = [str(item) for item in raw_sources]
-            if checkpoint:
-                checkpoint(
-                    {
-                        "thread_id": state.thread_id,
-                        "turn_id": state.turn_id,
-                        "goal_status": None,
-                        "status": "thread_resumed" if thread_id else "thread_created",
-                    }
-                )
             await self._request(
                 transport,
                 "thread/name/set",

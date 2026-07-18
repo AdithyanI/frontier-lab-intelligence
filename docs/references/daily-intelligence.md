@@ -134,8 +134,10 @@ ignored SQLite store is `data/derived/daily-intelligence/editorial.db`.
 
 An import succeeds only after the draft matches the exact workspace manifest,
 passes the audience schema, and accounts for the entire routed-positive cohort.
-For workspace v2, that cohort means the routed-positive candidates remaining
-after the seven-day X-source projection. Retained X sources carry their
+For workspace v3, that cohort means the routed-positive candidates remaining
+after the seven-day X-source projection, with Event snapshots identified by
+`semantic_snapshot_sha256`. Frozen v2 workspaces keep their original manifests
+and hashes as provenance. Retained X sources carry their
 application-owned publication times; Event citations inherit that date and a
 conflicting agent-supplied date fails validation.
 Artifacts retain inspectable disclosure lineage. An artifact citation must

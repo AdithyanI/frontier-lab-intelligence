@@ -24,7 +24,7 @@ def test_verified_primary_posts_require_stable_author_and_reply_chain():
             ("run", "twitterapi_io", "orphan", "author-1", "reply", "missing", "other"),
         ],
     )
-    envelope = {
+    event = {
         "root": {"post_id": "root"},
         "related_posts": [
             {
@@ -45,5 +45,5 @@ def test_verified_primary_posts_require_stable_author_and_reply_chain():
     assert evidence_lineage.verified_primary_post_ids(
         conn,
         feed_run_id="run",
-        event=envelope,
+        event=event,
     ) == {"root", "reply-1", "middle", "reply-2"}

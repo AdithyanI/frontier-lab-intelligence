@@ -65,7 +65,7 @@ def _artifact_fixture(path):
     )
     conn.execute(
         """INSERT INTO artifact_import_candidate
-           (candidate_id, import_run_id, envelope_day, event_id, source_rank,
+           (candidate_id, import_run_id, event_day, event_id, source_rank,
             day_candidate_count, source_kind, source_provider,
             source_external_id, source_snapshot_sha256, source_url,
             disclosure_external_id, disclosure_snapshot_sha256,
@@ -84,7 +84,7 @@ def _artifact_fixture(path):
     )
     conn.execute(
         """INSERT INTO artifact_import_candidate
-           (candidate_id, import_run_id, envelope_day, event_id, source_rank,
+           (candidate_id, import_run_id, event_day, event_id, source_rank,
             day_candidate_count, source_kind, source_provider,
             source_external_id, source_snapshot_sha256, source_url,
             disclosure_external_id, disclosure_snapshot_sha256,
@@ -106,7 +106,7 @@ def _artifact_fixture(path):
            (observation_id, artifact_id, source_kind, source_provider,
             source_external_id, source_snapshot_sha256, source_url,
             observed_url, expanded_url, relation, source_published_at,
-            first_envelope_day, best_source_rank, first_seen_at, last_seen_at)
+            first_event_day, best_source_rank, first_seen_at, last_seen_at)
            VALUES (?, ?, 'x_post', 'twitterapi_io', ?, 'sha', ?, ?, ?,
                    'links_to', ?, ?, ?, ?, ?)""",
         [

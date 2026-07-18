@@ -50,7 +50,7 @@ def test_exact_events_group_only_explicit_feed_relations(tmp_path):
     conn.close()
 
 
-def test_third_party_reply_and_quote_of_reply_stay_out_of_source_envelopes(tmp_path):
+def test_third_party_reply_and_quote_of_reply_stay_out_of_source_events(tmp_path):
     raw = tmp_path / "x-content.db"
     feed_db = tmp_path / "feed.db"
     events_db = tmp_path / "events.db"
@@ -559,7 +559,7 @@ def test_reaction_thread_does_not_replace_the_post_its_root_quotes(tmp_path):
     conn.close()
 
 
-def test_reply_that_quotes_another_root_cannot_bridge_source_envelopes(tmp_path):
+def test_reply_that_quotes_another_root_cannot_bridge_source_events(tmp_path):
     raw = tmp_path / "x-content.db"
     feed_db = tmp_path / "feed.db"
     events_db = tmp_path / "events.db"

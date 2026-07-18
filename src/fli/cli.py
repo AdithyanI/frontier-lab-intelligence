@@ -83,11 +83,6 @@ def main(argv: list[str] | None = None) -> int:
     daily_intelligence_p.add_argument(
         "daily_intelligence_args", nargs=argparse.REMAINDER
     )
-    daily_run_p = sub.add_parser(
-        "daily-run",
-        help="Prepare one date and launch its persisted Codex daily task.",
-    )
-    daily_run_p.add_argument("daily_run_args", nargs=argparse.REMAINDER)
     attention_score_p = sub.add_parser(
         "attention-score", help="Evaluate versioned Feed attention scores."
     )
@@ -211,11 +206,6 @@ def main(argv: list[str] | None = None) -> int:
         from fli.insights import editorial_cli
 
         return editorial_cli.main(args.daily_intelligence_args)
-
-    if args.command == "daily-run":
-        from fli.insights import daily_runner
-
-        return daily_runner.main(args.daily_run_args)
 
     if args.command == "attention-score":
         from fli.scoring import evaluation

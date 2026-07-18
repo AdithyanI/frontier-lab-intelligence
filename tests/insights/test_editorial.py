@@ -20,6 +20,119 @@ DAY = "2026-07-15"
 CLIENT = TestClient(app)
 
 
+def test_connect_migrates_editorial_candidate_snapshot_column(tmp_path):
+    db = tmp_path / "editorial-v3.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(
+        editorial_runs.SCHEMA.replace(
+            "semantic_snapshot_sha256", "snapshot_content_sha256"
+        )
+    )
+    conn.close()
+
+    assert editorial_runs.migrate_editorial_store(db) is True
+    migrated = editorial_runs.connect(db)
+    columns = {
+        str(row["name"])
+        for row in migrated.execute(
+            "PRAGMA table_info(editorial_candidate)"
+        ).fetchall()
+    }
+    user_version = int(migrated.execute("PRAGMA user_version").fetchone()[0])
+    migrated.close()
+
+    assert "semantic_snapshot_sha256" in columns
+    assert "snapshot_content_sha256" not in columns
+    assert user_version == 4
+    assert editorial_runs.migrate_editorial_store(db) is False
+
+
+def test_migrate_workspace_renames_snapshot_keys_and_rehashes_manifest(tmp_path):
+    workspace = tmp_path / "workspace"
+    event_path = workspace / "events" / "001-event.json"
+    event_payload = {
+        "event_id": "event-1",
+        "snapshot_content_sha256": "snapshot-sha",
+    }
+    manifest = {
+        "schema_version": editorial_runs.LEGACY_WORKSPACE_SCHEMA_VERSION,
+        "run_id": "workspace-v2",
+        "events": [
+            {
+                "event_id": "event-1",
+                "snapshot_content_sha256": "snapshot-sha",
+                "file": "events/001-event.json",
+            }
+        ],
+    }
+    manifest["manifest_sha256"] = editorial_runs._manifest_digest(manifest)
+    old_manifest_sha256 = manifest["manifest_sha256"]
+    editorial_runs._write_json(event_path, event_payload)
+    editorial_runs._write_json(workspace / "manifest.json", manifest)
+    editorial_runs._write_json(
+        workspace / "draft.template.json", editorial.draft_template(manifest)
+    )
+
+    result = editorial_runs.migrate_workspace(workspace)
+    loaded = editorial_runs.load_manifest(workspace)
+    migrated_event = editorial_runs._read_json(event_path)
+    migrated_template = editorial_runs._read_json(workspace / "draft.template.json")
+
+    assert result["migrated"] is True
+    assert result["template_updated"] is True
+    assert result["event_count"] == 1
+    assert loaded["schema_version"] == editorial_runs.WORKSPACE_SCHEMA_VERSION
+    assert loaded["events"][0]["semantic_snapshot_sha256"] == "snapshot-sha"
+    assert "snapshot_content_sha256" not in loaded["events"][0]
+    assert migrated_event["semantic_snapshot_sha256"] == "snapshot-sha"
+    assert migrated_template["workspace_manifest_sha256"] == loaded["manifest_sha256"]
+    assert migrated_template["workspace_manifest_sha256"] != old_manifest_sha256
+    repeated = editorial_runs.migrate_workspace(workspace)
+    assert repeated["migrated"] is False
+    assert repeated["template_updated"] is False
+
+
+def test_migrate_workspace_rejects_a_tampered_legacy_manifest(tmp_path):
+    workspace = tmp_path / "workspace"
+    manifest = {
+        "schema_version": editorial_runs.LEGACY_WORKSPACE_SCHEMA_VERSION,
+        "run_id": "workspace-v2",
+        "events": [],
+    }
+    manifest["manifest_sha256"] = editorial_runs._manifest_digest(manifest)
+    manifest["run_id"] = "tampered"
+    editorial_runs._write_json(workspace / "manifest.json", manifest)
+
+    with pytest.raises(ValueError, match="manifest hash"):
+        editorial_runs.migrate_workspace(workspace)
+
+
+def test_migrate_workspace_repairs_a_stale_current_template(tmp_path):
+    workspace = tmp_path / "workspace"
+    manifest = {
+        "schema_version": editorial_runs.WORKSPACE_SCHEMA_VERSION,
+        "run_id": "workspace-v3",
+        "events": [],
+    }
+    manifest["manifest_sha256"] = editorial_runs._manifest_digest(manifest)
+    editorial_runs._write_json(workspace / "manifest.json", manifest)
+    editorial_runs._write_json(
+        workspace / "draft.template.json",
+        {
+            **editorial.draft_template(manifest),
+            "workspace_manifest_sha256": "obsolete",
+        },
+    )
+
+    result = editorial_runs.migrate_workspace(workspace)
+
+    assert result["migrated"] is False
+    assert result["template_updated"] is True
+    assert editorial_runs._read_json(workspace / "draft.template.json") == (
+        editorial.draft_template(manifest)
+    )
+
+
 def _packet(event_id: str, text: str, *, artifact: bool = False):
     sources = [
         routing_model.EvidenceSource(
@@ -81,7 +194,7 @@ def _routing_fixture(root: Path) -> Path:
         packet = _packet(event_id, text, artifact=artifact)
         conn.execute(
             """INSERT INTO routing_item (
-                   event_id, feed_rank, root_url, snapshot_content_sha256,
+                   event_id, feed_rank, root_url, semantic_snapshot_sha256,
                    packet_json, evidence_sha256, input_text, input_sha256,
                    status, attempts, ai_engineering_relevant,
                    ai_engineering_reason, investment_relevant,
@@ -398,7 +511,7 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
     )
     conn.execute(
         """INSERT INTO routing_item (
-               event_id, feed_rank, root_url, snapshot_content_sha256,
+               event_id, feed_rank, root_url, semantic_snapshot_sha256,
                packet_json, evidence_sha256, input_text, input_sha256,
                status, attempts, ai_engineering_relevant,
                ai_engineering_reason, investment_relevant,

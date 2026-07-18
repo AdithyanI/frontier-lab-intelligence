@@ -104,7 +104,7 @@ def test_contracts_are_separate_and_use_audience_specific_schemas():
     }
 
 
-def test_candidate_input_reuses_attributed_envelope_without_rank_or_router_reason():
+def test_candidate_input_reuses_attributed_event_without_rank_or_router_reason():
     candidate = insight_generation.InsightCandidate.create(
         audience="ai_engineering", packet=_packet(), feed_rank=7
     )

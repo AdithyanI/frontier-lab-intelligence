@@ -1,10 +1,48 @@
 import json
+import sqlite3
 
 import pytest
 
 from fli.evidence.artifacts import store as artifacts
 from fli.routing import runs as routing_runs
 from fli.web import events as event_store
+
+
+def test_connect_run_migrates_legacy_snapshot_column(tmp_path):
+    db = tmp_path / "routing-v1.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(
+        routing_runs.RUN_SCHEMA.replace(
+            "semantic_snapshot_sha256", "snapshot_content_sha256"
+        )
+    )
+    conn.execute(
+        """INSERT INTO routing_item (
+               event_id, feed_rank, root_url, snapshot_content_sha256,
+               packet_json, evidence_sha256, input_text, input_sha256,
+               updated_at)
+           VALUES ('event-1', 1, 'https://x.com/a/status/1', 'snapshot-sha',
+                   '{}', 'evidence-sha', 'input', 'input-sha', 'updated')"""
+    )
+    conn.commit()
+    conn.close()
+
+    assert routing_runs.migrate_run_storage(db) is True
+    migrated = routing_runs.connect_run(db)
+    columns = {
+        str(row["name"])
+        for row in migrated.execute("PRAGMA table_info(routing_item)").fetchall()
+    }
+    row = migrated.execute(
+        "SELECT semantic_snapshot_sha256 FROM routing_item"
+    ).fetchone()
+    user_version = int(migrated.execute("PRAGMA user_version").fetchone()[0])
+    migrated.close()
+
+    assert row["semantic_snapshot_sha256"] == "snapshot-sha"
+    assert "snapshot_content_sha256" not in columns
+    assert user_version == 2
+    assert routing_runs.migrate_run_storage(db) is False
 
 
 def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
@@ -187,7 +225,7 @@ def test_selective_refresh_reuses_only_exact_complete_inputs(tmp_path):
     def seed_item(conn, event_id, input_sha, *, complete=False):
         conn.execute(
             """INSERT INTO routing_item
-               (event_id, feed_rank, root_url, snapshot_content_sha256,
+               (event_id, feed_rank, root_url, semantic_snapshot_sha256,
                 packet_json, evidence_sha256, input_text, input_sha256,
                 status, attempts, ai_engineering_relevant,
                 ai_engineering_reason, investment_relevant,
@@ -291,7 +329,7 @@ def test_artifact_sources_deduplicate_one_artifact_across_source_posts(
         ):
             conn.execute(
                 """INSERT INTO artifact_import_candidate
-                   (candidate_id, import_run_id, envelope_day, event_id,
+                   (candidate_id, import_run_id, event_day, event_id,
                     source_rank, day_candidate_count, source_kind,
                     source_provider, source_external_id,
                     source_snapshot_sha256, source_url,

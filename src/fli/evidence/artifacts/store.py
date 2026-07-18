@@ -15,9 +15,9 @@ from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
 from fli.evidence.artifacts import lineage as evidence_lineage
 from fli.evidence.artifacts import urls as artifact_urls
-SCHEMA_VERSION = "artifact-store-v1"
+SCHEMA_VERSION = "artifact-store-v2"
 REVIEWED_SUPPLEMENT_CONTRACT = "artifact-reviewed-supplement-v1"
-PRIMARY_AUTHOR_SELECTION_POLICY = "feed-envelope-primary-author-thread-artifacts-v1"
+PRIMARY_AUTHOR_SELECTION_POLICY = "feed-event-primary-author-thread-artifacts-v2"
 REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_DB = REPO_ROOT / "data" / "derived" / "artifacts" / "artifacts.db"
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS artifact_observation (
     expanded_url TEXT NOT NULL,
     relation TEXT NOT NULL CHECK (relation IN ('links_to', 'self_publishes')),
     source_published_at TEXT NOT NULL,
-    first_envelope_day TEXT NOT NULL,
+    first_event_day TEXT NOT NULL,
     best_source_rank INTEGER NOT NULL,
     first_seen_at TEXT NOT NULL,
     last_seen_at TEXT NOT NULL,
@@ -127,8 +127,8 @@ CREATE TABLE IF NOT EXISTS artifact_disclosure (
     disclosure_snapshot_sha256 TEXT NOT NULL,
     disclosure_url TEXT NOT NULL,
     disclosure_published_at TEXT NOT NULL,
-    first_envelope_day TEXT NOT NULL,
-    last_envelope_day TEXT NOT NULL,
+    first_event_day TEXT NOT NULL,
+    last_event_day TEXT NOT NULL,
     UNIQUE (
         observation_id, source_provider, disclosure_external_id,
         disclosure_snapshot_sha256
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS artifact_import_candidate (
     candidate_id TEXT PRIMARY KEY,
     import_run_id TEXT NOT NULL REFERENCES artifact_import_run(import_run_id)
         ON DELETE CASCADE,
-    envelope_day TEXT NOT NULL,
+    event_day TEXT NOT NULL,
     event_id TEXT NOT NULL,
     source_rank INTEGER NOT NULL,
     day_candidate_count INTEGER NOT NULL,
@@ -183,12 +183,12 @@ CREATE TABLE IF NOT EXISTS artifact_event_supplement (
     artifact_id TEXT NOT NULL REFERENCES artifact(artifact_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
     event_id TEXT NOT NULL,
-    envelope_day TEXT NOT NULL,
+    event_day TEXT NOT NULL,
     source_rank INTEGER NOT NULL,
     day_candidate_count INTEGER NOT NULL,
     source_triage_run_id TEXT NOT NULL,
     source_input_sha256 TEXT NOT NULL,
-    source_snapshot_content_sha256 TEXT NOT NULL,
+    source_semantic_snapshot_sha256 TEXT NOT NULL,
     evidence_role TEXT NOT NULL CHECK (
         evidence_role = 'official_primary_source'
     ),
@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS artifact_event_supplement (
 CREATE INDEX IF NOT EXISTS idx_artifact_supplement_event
     ON artifact_event_supplement(event_id, artifact_id);
 CREATE INDEX IF NOT EXISTS idx_artifact_supplement_artifact
-    ON artifact_event_supplement(artifact_id, envelope_day, source_rank);
+    ON artifact_event_supplement(artifact_id, event_day, source_rank);
 
 CREATE TABLE IF NOT EXISTS artifact_fetch_run (
     fetch_run_id TEXT PRIMARY KEY,
@@ -329,6 +329,191 @@ def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
 
+def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
+    return {
+        str(row["name"])
+        for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+    }
+
+
+def _rename_column(
+    conn: sqlite3.Connection, table: str, old_name: str, new_name: str
+) -> bool:
+    columns = _table_columns(conn, table)
+    if old_name not in columns:
+        return False
+    if new_name in columns:
+        raise RuntimeError(
+            f"{table} contains both {old_name} and {new_name}; migration is ambiguous"
+        )
+    conn.execute(f"ALTER TABLE {table} RENAME COLUMN {old_name} TO {new_name}")
+    return True
+
+
+def _rebuild_import_run_v2(conn: sqlite3.Connection) -> None:
+    if not _table_columns(conn, "artifact_import_run"):
+        return
+    conn.execute(
+        f"""CREATE TABLE artifact_import_run_v2 (
+                import_run_id TEXT PRIMARY KEY,
+                schema_version TEXT NOT NULL CHECK (schema_version = '{SCHEMA_VERSION}'),
+                canonicalization_contract TEXT NOT NULL,
+                source_feed_run_id TEXT NOT NULL,
+                source_event_run_id TEXT NOT NULL,
+                triage_runs_json TEXT NOT NULL,
+                selection_policy TEXT NOT NULL,
+                input_fingerprint TEXT NOT NULL,
+                expected_candidate_count INTEGER NOT NULL,
+                accepted_count INTEGER NOT NULL,
+                excluded_count INTEGER NOT NULL,
+                failed_count INTEGER NOT NULL,
+                created_at TEXT NOT NULL,
+                completed_at TEXT NOT NULL,
+                UNIQUE (canonicalization_contract, input_fingerprint)
+            )"""
+    )
+    conn.execute(
+        """INSERT INTO artifact_import_run_v2 (
+               import_run_id, schema_version, canonicalization_contract,
+               source_feed_run_id, source_event_run_id, triage_runs_json,
+               selection_policy, input_fingerprint, expected_candidate_count,
+               accepted_count, excluded_count, failed_count, created_at,
+               completed_at)
+           SELECT import_run_id, ?, canonicalization_contract,
+                  source_feed_run_id, source_event_run_id, triage_runs_json,
+                  selection_policy, input_fingerprint, expected_candidate_count,
+                  accepted_count, excluded_count, failed_count, created_at,
+                  completed_at
+           FROM artifact_import_run""",
+        (SCHEMA_VERSION,),
+    )
+    conn.execute("DROP TABLE artifact_import_run")
+    conn.execute("ALTER TABLE artifact_import_run_v2 RENAME TO artifact_import_run")
+
+
+def _rebuild_fetch_run_v2(conn: sqlite3.Connection) -> None:
+    if not _table_columns(conn, "artifact_fetch_run"):
+        return
+    conn.execute(
+        f"""CREATE TABLE artifact_fetch_run_v2 (
+                fetch_run_id TEXT PRIMARY KEY,
+                schema_version TEXT NOT NULL CHECK (schema_version = '{SCHEMA_VERSION}'),
+                fetch_policy TEXT NOT NULL,
+                selection_policy TEXT NOT NULL,
+                input_fingerprint TEXT NOT NULL,
+                expected_count INTEGER NOT NULL,
+                success_count INTEGER NOT NULL,
+                failed_retryable_count INTEGER NOT NULL,
+                failed_terminal_count INTEGER NOT NULL,
+                started_at TEXT NOT NULL,
+                completed_at TEXT,
+                status TEXT NOT NULL CHECK (status IN ('in_progress', 'complete')),
+                UNIQUE (fetch_policy, input_fingerprint)
+            )"""
+    )
+    conn.execute(
+        """INSERT INTO artifact_fetch_run_v2 (
+               fetch_run_id, schema_version, fetch_policy, selection_policy,
+               input_fingerprint, expected_count, success_count,
+               failed_retryable_count, failed_terminal_count, started_at,
+               completed_at, status)
+           SELECT fetch_run_id, ?, fetch_policy, selection_policy,
+                  input_fingerprint, expected_count, success_count,
+                  failed_retryable_count, failed_terminal_count, started_at,
+                  completed_at, status
+           FROM artifact_fetch_run""",
+        (SCHEMA_VERSION,),
+    )
+    conn.execute("DROP TABLE artifact_fetch_run")
+    conn.execute("ALTER TABLE artifact_fetch_run_v2 RENAME TO artifact_fetch_run")
+
+
+def migrate_store(path: Path | str = DEFAULT_DB) -> bool:
+    """Migrate a v1 artifact store to the Event-native v2 storage schema."""
+    path = Path(path)
+    if not path.is_file():
+        return False
+    conn = sqlite3.connect(path, timeout=60.0)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA busy_timeout = 60000")
+    conn.execute("PRAGMA foreign_keys = OFF")
+    renames = (
+        ("artifact_observation", "first_envelope_day", "first_event_day"),
+        ("artifact_disclosure", "first_envelope_day", "first_event_day"),
+        ("artifact_disclosure", "last_envelope_day", "last_event_day"),
+        ("artifact_import_candidate", "envelope_day", "event_day"),
+        ("artifact_event_supplement", "envelope_day", "event_day"),
+        (
+            "artifact_event_supplement",
+            "source_snapshot_content_sha256",
+            "source_semantic_snapshot_sha256",
+        ),
+    )
+    import_columns = _table_columns(conn, "artifact_import_run")
+    import_versions = (
+        {
+            str(row[0])
+            for row in conn.execute(
+                "SELECT DISTINCT schema_version FROM artifact_import_run"
+            ).fetchall()
+        }
+        if "schema_version" in import_columns
+        else set()
+    )
+    fetch_columns = _table_columns(conn, "artifact_fetch_run")
+    fetch_versions = (
+        {
+            str(row[0])
+            for row in conn.execute(
+                "SELECT DISTINCT schema_version FROM artifact_fetch_run"
+            ).fetchall()
+        }
+        if "schema_version" in fetch_columns
+        else set()
+    )
+    legacy_columns = any(
+        old_name in _table_columns(conn, table)
+        for table, old_name, _new_name in renames
+    )
+    if not (
+        legacy_columns
+        or import_versions - {SCHEMA_VERSION}
+        or fetch_versions - {SCHEMA_VERSION}
+    ):
+        conn.close()
+        return False
+
+    changed = False
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        for table, old_name, new_name in renames:
+            changed = _rename_column(conn, table, old_name, new_name) or changed
+
+        if import_versions - {SCHEMA_VERSION}:
+            _rebuild_import_run_v2(conn)
+            changed = True
+        if fetch_versions - {SCHEMA_VERSION}:
+            _rebuild_fetch_run_v2(conn)
+            changed = True
+        if changed:
+            conn.execute("PRAGMA user_version = 2")
+        conn.commit()
+        violations = conn.execute("PRAGMA foreign_key_check").fetchall()
+        if violations:
+            raise RuntimeError(
+                f"artifact-store-v2 migration created {len(violations)} foreign-key violations"
+            )
+        integrity = str(conn.execute("PRAGMA integrity_check").fetchone()[0])
+        if integrity != "ok":
+            raise RuntimeError(f"artifact-store-v2 integrity check failed: {integrity}")
+        return changed
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
 def connect(path: Path | str = DEFAULT_DB) -> sqlite3.Connection:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -362,6 +547,7 @@ def connect(path: Path | str = DEFAULT_DB) -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode = WAL")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(SCHEMA)
+    conn.execute("PRAGMA user_version = 2")
     return conn
 
 
@@ -528,7 +714,7 @@ def _iter_feed_candidates(
                     )
                     candidates.append(
                         {
-                            "envelope_day": day,
+                            "event_day": day,
                             "event_id": event_id,
                             "source_rank": source_rank,
                             "day_candidate_count": day_counts[day],
@@ -612,7 +798,7 @@ def _insert_candidate(
     candidate_id = _sha256(_canonical_json([import_run_id, *_candidate_identity(candidate)]))
     conn.execute(
         """INSERT OR IGNORE INTO artifact_import_candidate
-           (candidate_id, import_run_id, envelope_day, event_id, source_rank,
+           (candidate_id, import_run_id, event_day, event_id, source_rank,
             day_candidate_count,
             source_kind, source_provider, source_external_id,
             source_snapshot_sha256, source_url, disclosure_external_id,
@@ -624,7 +810,7 @@ def _insert_candidate(
         (
             candidate_id,
             import_run_id,
-            candidate["envelope_day"],
+            candidate["event_day"],
             candidate["event_id"],
             candidate["source_rank"],
             candidate["day_candidate_count"],
@@ -652,7 +838,7 @@ def _insert_candidate(
 
 def _candidate_identity(candidate: dict[str, Any]) -> list[Any]:
     return [
-        candidate["envelope_day"],
+        candidate["event_day"],
         candidate["event_id"],
         candidate["source_external_id"],
         candidate["source_snapshot_sha256"],
@@ -853,14 +1039,14 @@ def import_feed_events(
                             source_provider, source_external_id,
                             source_snapshot_sha256, source_url, observed_url,
                             expanded_url, relation, source_published_at,
-                            first_envelope_day, best_source_rank, first_seen_at,
+                            first_event_day, best_source_rank, first_seen_at,
                             last_seen_at)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                            ON CONFLICT(observation_id) DO UPDATE SET
                                artifact_id = excluded.artifact_id,
                                best_source_rank = excluded.best_source_rank,
-                               first_envelope_day = MIN(
-                                   first_envelope_day, excluded.first_envelope_day
+                               first_event_day = MIN(
+                                   first_event_day, excluded.first_event_day
                                ),
                                first_seen_at = MIN(first_seen_at, excluded.first_seen_at),
                                last_seen_at = MAX(last_seen_at, excluded.last_seen_at)""",
@@ -876,7 +1062,7 @@ def import_feed_events(
                             candidate["expanded_url"],
                             candidate["relation"],
                             candidate["source_published_at"],
-                            candidate["envelope_day"],
+                            candidate["event_day"],
                             candidate["source_rank"],
                             candidate["source_published_at"],
                             candidate["source_published_at"],
@@ -897,14 +1083,14 @@ def import_feed_events(
                        (disclosure_id, observation_id, source_provider,
                         disclosure_external_id, disclosure_snapshot_sha256,
                         disclosure_url, disclosure_published_at,
-                        first_envelope_day, last_envelope_day)
+                        first_event_day, last_event_day)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                        ON CONFLICT(disclosure_id) DO UPDATE SET
-                           first_envelope_day = MIN(
-                               first_envelope_day, excluded.first_envelope_day
+                           first_event_day = MIN(
+                               first_event_day, excluded.first_event_day
                            ),
-                           last_envelope_day = MAX(
-                               last_envelope_day, excluded.last_envelope_day
+                           last_event_day = MAX(
+                               last_event_day, excluded.last_event_day
                            )""",
                     (
                         disclosure_id,
@@ -914,8 +1100,8 @@ def import_feed_events(
                         candidate["disclosure_snapshot_sha256"],
                         candidate["disclosure_url"],
                         candidate["disclosure_published_at"],
-                        candidate["envelope_day"],
-                        candidate["envelope_day"],
+                        candidate["event_day"],
+                        candidate["event_day"],
                     ),
                 )
             _insert_candidate(
@@ -1074,7 +1260,7 @@ def import_reviewed_supplements(
         if meta is None:
             raise ValueError("triage database has no run metadata")
         source_triage_run_id = str(meta["run_id"])
-        envelope_day = str(meta["day"])
+        event_day = str(meta["day"])
         day_candidate_count = int(meta["expected_count"])
         prepared: list[dict[str, Any]] = []
         for ordinal, raw_item in enumerate(raw_items, start=1):
@@ -1103,7 +1289,7 @@ def import_reviewed_supplements(
                 )
             source_row = triage.execute(
                 """SELECT event_id, current_rank, input_sha256,
-                          snapshot_content_sha256, status, decision
+                          semantic_snapshot_sha256, status, decision
                    FROM triage_item WHERE event_id = ?""",
                 (event_id,),
             ).fetchone()
@@ -1137,13 +1323,13 @@ def import_reviewed_supplements(
                 "artifact_kind": decision.artifact_kind,
                 "observed_url": artifact_url,
                 "event_id": event_id,
-                "envelope_day": envelope_day,
+                "event_day": event_day,
                 "source_rank": int(source_row["current_rank"]),
                 "day_candidate_count": day_candidate_count,
                 "source_triage_run_id": source_triage_run_id,
                 "source_input_sha256": str(source_row["input_sha256"]),
-                "source_snapshot_content_sha256": str(
-                    source_row["snapshot_content_sha256"] or ""
+                "source_semantic_snapshot_sha256": str(
+                    source_row["semantic_snapshot_sha256"] or ""
                 ),
                 "evidence_role": "official_primary_source",
                 "source_published_at": source_published_at,
@@ -1225,9 +1411,9 @@ def import_reviewed_supplements(
                 conn.execute(
                     """INSERT INTO artifact_event_supplement
                        (supplement_id, contract, manifest_sha256, artifact_id,
-                        event_id, envelope_day, source_rank,
+                        event_id, event_day, source_rank,
                         day_candidate_count, source_triage_run_id,
-                        source_input_sha256, source_snapshot_content_sha256,
+                        source_input_sha256, source_semantic_snapshot_sha256,
                         evidence_role, source_published_at, rationale,
                         reviewed_by, reviewed_at, created_at)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
@@ -1237,12 +1423,12 @@ def import_reviewed_supplements(
                         item["manifest_sha256"],
                         item["artifact_id"],
                         item["event_id"],
-                        item["envelope_day"],
+                        item["event_day"],
                         item["source_rank"],
                         item["day_candidate_count"],
                         item["source_triage_run_id"],
                         item["source_input_sha256"],
-                        item["source_snapshot_content_sha256"],
+                        item["source_semantic_snapshot_sha256"],
                         item["evidence_role"],
                         item["source_published_at"],
                         item["rationale"],

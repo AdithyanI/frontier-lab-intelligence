@@ -77,7 +77,7 @@ def _routing_fixture(
         )
         conn.execute(
             """INSERT INTO routing_item
-               (event_id, feed_rank, root_url, snapshot_content_sha256,
+               (event_id, feed_rank, root_url, semantic_snapshot_sha256,
                 packet_json, evidence_sha256, input_text, input_sha256,
                 status, attempts, ai_engineering_relevant,
                 ai_engineering_reason, investment_relevant,
@@ -132,7 +132,7 @@ def _add_routed_event(
         )
         conn.execute(
             """INSERT INTO routing_item
-               (event_id, feed_rank, root_url, snapshot_content_sha256,
+               (event_id, feed_rank, root_url, semantic_snapshot_sha256,
                 packet_json, evidence_sha256, input_text, input_sha256,
                 status, attempts, ai_engineering_relevant,
                 ai_engineering_reason, investment_relevant,
@@ -347,7 +347,7 @@ def test_run_records_results_cache_and_cost(tmp_path, capsys):
     assert len(client.raw_api.calls) == 2
 
 
-def test_missing_envelope_uses_stable_validation_error(tmp_path, capsys):
+def test_missing_event_uses_stable_validation_error(tmp_path, capsys):
     exit_code = insight_cli.main(
         [
             "run",

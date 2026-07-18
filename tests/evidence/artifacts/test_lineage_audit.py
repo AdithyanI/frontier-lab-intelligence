@@ -12,7 +12,7 @@ def _fixture(tmp_path):
         triage.execute(
             """CREATE TABLE triage_item (
                    event_id TEXT PRIMARY KEY,
-                   envelope_json TEXT NOT NULL,
+                   event_json TEXT NOT NULL,
                    status TEXT NOT NULL,
                    decision TEXT NOT NULL
                )"""
@@ -142,7 +142,7 @@ def _fixture(tmp_path):
         )
         catalog.execute(
             """INSERT INTO artifact_import_candidate
-               (candidate_id, import_run_id, envelope_day, event_id, source_rank,
+               (candidate_id, import_run_id, event_day, event_id, source_rank,
                 day_candidate_count, source_kind, source_provider,
                 source_external_id, source_snapshot_sha256, source_url,
                 disclosure_external_id, disclosure_snapshot_sha256,
@@ -162,7 +162,7 @@ def _fixture(tmp_path):
                (observation_id, artifact_id, source_kind, source_provider,
                 source_external_id, source_snapshot_sha256, source_url,
                 observed_url, expanded_url, relation, source_published_at,
-                first_envelope_day, best_source_rank, first_seen_at, last_seen_at)
+                first_event_day, best_source_rank, first_seen_at, last_seen_at)
                VALUES ('observation', ?, 'x_post', 'twitterapi_io', 'reply',
                        'reply-sha', 'https://x.com/a/status/reply',
                        'https://t.co/source', ?, 'links_to', ?, '2026-07-15',
@@ -173,8 +173,8 @@ def _fixture(tmp_path):
             """INSERT INTO artifact_disclosure
                (disclosure_id, observation_id, source_provider,
                 disclosure_external_id, disclosure_snapshot_sha256,
-                disclosure_url, disclosure_published_at, first_envelope_day,
-                last_envelope_day)
+                disclosure_url, disclosure_published_at, first_event_day,
+                last_event_day)
                VALUES ('disclosure', 'observation', 'twitterapi_io', 'reply',
                        'reply-sha', 'https://x.com/a/status/reply', ?,
                        '2026-07-15', '2026-07-15')""",
