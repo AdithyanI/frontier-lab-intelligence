@@ -35,7 +35,10 @@ reply, the current source becomes the workspace root. When no eligible
 first-party X source remains, the routed candidate is omitted. Raw Feed and
 Event history remains intact for audit. Artifact chronology stays separate:
 neither retrieval time nor the linking X post proves an artifact publication
-date.
+date. When a packet is pruned, inherited routing prose and prior per-Event
+annotations are withheld because they may describe evidence that is no longer
+in the workspace; the positive audience route remains only as a recall cue for
+fresh editorial judgment.
 
 ## Insight Schema
 

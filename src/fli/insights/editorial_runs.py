@@ -674,11 +674,16 @@ def prepare_workspace(
             and source.get("url")
             and source.get("posted")
         }
-        prior_items = {
-            audience: prior[(event_id, audience)]
-            for audience in audiences
-            if (event_id, audience) in prior
-        }
+        packet_was_pruned = int(source_window["stale_x_source_count"]) > 0
+        prior_items = (
+            {}
+            if packet_was_pruned
+            else {
+                audience: prior[(event_id, audience)]
+                for audience in audiences
+                if (event_id, audience) in prior
+            }
+        )
         event_payload = {
             "event_id": event_id,
             "day": day,
@@ -691,7 +696,12 @@ def prepare_workspace(
             "routing": {
                 audience: {
                     "relevant": True,
-                    "reason": str(row[f"{audience}_reason"]),
+                    "reason": (
+                        "Positive route inherited from the original packet; "
+                        "re-evaluate against the retained seven-day evidence."
+                        if packet_was_pruned
+                        else str(row[f"{audience}_reason"])
+                    ),
                 }
                 for audience in audiences
             },

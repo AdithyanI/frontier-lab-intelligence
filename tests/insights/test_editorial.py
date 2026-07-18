@@ -287,6 +287,118 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
     )
 
 
+def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkeypatch):
+    routing_root = tmp_path / "routing"
+    path = routing_root / "current" / "routing.db"
+    conn = routing_runs.connect_run(path)
+    now = "2026-07-17T12:00:00+00:00"
+    conn.execute(
+        """INSERT INTO run_meta (
+               singleton, run_id, day, model, reasoning_effort,
+               prompt_version, prompt_sha256, schema_version,
+               source_event_run_id, source_feed_run_id, source_artifact_db,
+               selection_kind, selection_limit, requested_event_id,
+               cohort_sha256, expected_count, created_at, updated_at)
+           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?,
+                   'event-run', 'feed-run', 'artifacts.db', 'top_ranked', 1,
+                   NULL, 'cohort-sha', 1, ?, ?)""",
+        (
+            DAY,
+            routing_model.PROMPT_VERSION,
+            routing_model.prompt_sha256(),
+            routing_model.SCHEMA_VERSION,
+            now,
+            now,
+        ),
+    )
+    packet = routing_model.RoutingPacket(
+        event_id="event-pruned",
+        day=DAY,
+        sources=(
+            routing_model.EvidenceSource(
+                source_type="x_post",
+                source_id="old-root",
+                url="https://x.com/example/status/old-root",
+                text="Old financing claim.",
+                author="@example",
+                relation="root",
+            ),
+            routing_model.EvidenceSource(
+                source_type="x_post",
+                source_id="current-update",
+                url="https://x.com/example/status/current-update",
+                text="Current first-party update.",
+                author="@example",
+                relation="same_author_continuation",
+            ),
+        ),
+    )
+    conn.execute(
+        """INSERT INTO routing_item (
+               event_id, feed_rank, root_url, snapshot_content_sha256,
+               packet_json, evidence_sha256, input_text, input_sha256,
+               status, attempts, ai_engineering_relevant,
+               ai_engineering_reason, investment_relevant,
+               investment_reason, completed_at, updated_at)
+           VALUES ('event-pruned', 1, 'https://x.com/example/status/old-root',
+                   'snapshot', ?, ?, ?, ?, 'complete', 1, 0, 'Not relevant.',
+                   1, 'Old financing claim drives relevance.', ?, ?)""",
+        (
+            routing_runs._canonical_json(routing_runs._packet_payload(packet)),
+            packet.evidence_sha256,
+            routing_model.render_input(packet),
+            packet.input_sha256,
+            now,
+            now,
+        ),
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setattr(
+        routing_runs,
+        "_published_event_source",
+        lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
+    )
+    monkeypatch.setattr(
+        editorial_runs,
+        "_event_x_publication_times",
+        lambda **_kwargs: {
+            "event-pruned": {
+                "old-root": "2025-07-15T12:00:00+00:00",
+                "current-update": f"{DAY}T12:00:00+00:00",
+            }
+        },
+    )
+    monkeypatch.setattr(
+        editorial_runs,
+        "_prior_insights",
+        lambda *_args, **_kwargs: {
+            ("event-pruned", "investment"): {"summary": "Old financing claim."}
+        },
+    )
+
+    result = editorial_runs.prepare_workspace(
+        day=DAY,
+        routing_root=routing_root,
+        insights_db=tmp_path / "missing.db",
+        workspace_root=tmp_path / "workspaces",
+    )
+    workspace = Path(result["workspace"])
+    if not workspace.is_absolute():
+        workspace = editorial_runs.REPO_ROOT / workspace
+    manifest = editorial_runs.load_manifest(workspace)
+    payload = json.loads((workspace / manifest["events"][0]["file"]).read_text())
+
+    assert payload["root_url"].endswith("/current-update")
+    assert [source["source_id"] for source in payload["packet"]["sources"]] == [
+        "current-update"
+    ]
+    assert payload["routing"]["investment"]["reason"].startswith(
+        "Positive route inherited"
+    )
+    assert payload["prior_per_event_insights"] == {}
+
+
 def test_validate_requires_exact_candidate_coverage(tmp_path, monkeypatch):
     workspace = _workspace(tmp_path, monkeypatch)
     draft = _draft(workspace)

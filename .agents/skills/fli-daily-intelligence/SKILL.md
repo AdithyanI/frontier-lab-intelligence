@@ -35,6 +35,8 @@ your own judgment for research, retrieval, grouping, and synthesis.
    earlier. Raw Feed evidence is not deleted. If an old root has a current
    same-author quote or reply, that current post becomes the packet root; if no
    current first-party X source remains, the Event is absent from the workspace.
+   A pruned packet deliberately withholds inherited routing prose and prior
+   per-Event annotations; judge it from the retained evidence.
 4. Investigate across the whole cohort. Start with deterministic retrieval,
    then broaden only where it improves the judgment:
    - inspect `exact_artifact_groups` in the manifest;
