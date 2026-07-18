@@ -417,6 +417,7 @@ def _validate_prepared_workspace(
     evidence: dict[str, Any],
     routing: dict[str, Any],
     workspace_loader: Callable[[Path], dict[str, Any]],
+    template_loader: Callable[[Path], dict[str, Any]],
 ) -> None:
     """Verify that a resumed prepare checkpoint is still the supported packet."""
     raw_workspace = str(checkpoint.get("workspace") or "").strip()
@@ -450,6 +451,24 @@ def _validate_prepared_workspace(
             "prepare checkpoint no longer matches its frozen manifest: "
             + ", ".join(mismatches)
         )
+    expected_template_path = workspace_path / "draft.template.json"
+    raw_template_path = str(checkpoint.get("draft_template") or "").strip()
+    if raw_template_path:
+        template_path = Path(raw_template_path)
+        if not template_path.is_absolute():
+            template_path = REPO_ROOT / template_path
+        if template_path.resolve() != expected_template_path.resolve():
+            raise ValueError("prepare checkpoint points to a different draft template")
+    template = template_loader(expected_template_path)
+    if template != editorial.draft_template(manifest):
+        raise ValueError("draft template does not match the frozen manifest")
+
+
+def _load_json_object(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+    return value
 
 
 def _latest_editorial_run(
@@ -474,6 +493,7 @@ EvidenceRunner = Callable[..., dict[str, Any]]
 RoutingRunner = Callable[..., dict[str, Any]]
 WorkspacePreparer = Callable[..., dict[str, Any]]
 WorkspaceLoader = Callable[[Path], dict[str, Any]]
+WorkspaceTemplateLoader = Callable[[Path], dict[str, Any]]
 CodexRunner = Callable[..., dict[str, Any]]
 ProgressCallback = Callable[[str, str], None]
 
@@ -499,6 +519,7 @@ def run_day(
     routing_runner: RoutingRunner = routing_runs.refresh_all_days,
     workspace_preparer: WorkspacePreparer = editorial_runs.prepare_workspace,
     workspace_loader: WorkspaceLoader = editorial_runs.load_manifest,
+    workspace_template_loader: WorkspaceTemplateLoader = _load_json_object,
     codex_runner: CodexRunner | None = None,
 ) -> dict[str, Any]:
     datetime.strptime(day, "%Y-%m-%d")
@@ -634,6 +655,7 @@ def run_day(
                     evidence=stages["evidence"],
                     routing=stages["routing"],
                     workspace_loader=workspace_loader,
+                    template_loader=workspace_template_loader,
                 )
             except (FileNotFoundError, OSError, ValueError) as error:
                 started_codex = bool(

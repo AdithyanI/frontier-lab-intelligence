@@ -10,11 +10,37 @@ from fli.web import events as event_store
 
 def test_connect_run_migrates_legacy_snapshot_column(tmp_path):
     db = tmp_path / "routing-v1.db"
+    legacy_cohort_sha256 = routing_runs._sha256(
+        routing_runs._canonical_json(
+            [
+                {
+                    "event_id": "event-1",
+                    "feed_rank": 1,
+                    "snapshot_content_sha256": "snapshot-sha",
+                    "evidence_sha256": "evidence-sha",
+                    "input_sha256": "input-sha",
+                }
+            ]
+        )
+    )
     conn = sqlite3.connect(db)
     conn.executescript(
         routing_runs.RUN_SCHEMA.replace(
             "semantic_snapshot_sha256", "snapshot_content_sha256"
         )
+    )
+    conn.execute(
+        """INSERT INTO run_meta (
+               singleton, run_id, day, model, reasoning_effort,
+               prompt_version, prompt_sha256, schema_version,
+               source_event_run_id, source_feed_run_id, source_artifact_db,
+               selection_kind, selection_limit, requested_event_id,
+               cohort_sha256, expected_count, created_at, updated_at)
+           VALUES (1, 'run-1', '2026-07-15', 'model', 'high',
+                   'prompt', 'prompt-sha', 'schema', 'events', 'feed',
+                   'artifacts.db', 'top_ranked', 1, NULL,
+                   ?, 1, 'created', 'updated')""",
+        (legacy_cohort_sha256,),
     )
     conn.execute(
         """INSERT INTO routing_item (
@@ -36,12 +62,44 @@ def test_connect_run_migrates_legacy_snapshot_column(tmp_path):
     row = migrated.execute(
         "SELECT semantic_snapshot_sha256 FROM routing_item"
     ).fetchone()
+    cohort_sha256 = str(
+        migrated.execute(
+            "SELECT cohort_sha256 FROM run_meta WHERE singleton = 1"
+        ).fetchone()[0]
+    )
     user_version = int(migrated.execute("PRAGMA user_version").fetchone()[0])
-    migrated.close()
 
     assert row["semantic_snapshot_sha256"] == "snapshot-sha"
+    current_cohort_sha256 = routing_runs._sha256(
+        routing_runs._canonical_json(
+            [
+                {
+                    "event_id": "event-1",
+                    "feed_rank": 1,
+                    "semantic_snapshot_sha256": "snapshot-sha",
+                    "evidence_sha256": "evidence-sha",
+                    "input_sha256": "input-sha",
+                }
+            ]
+        )
+    )
+    assert cohort_sha256 == current_cohort_sha256
     assert "snapshot_content_sha256" not in columns
     assert user_version == 2
+
+    migrated.execute(
+        "UPDATE run_meta SET cohort_sha256 = ? WHERE singleton = 1",
+        (legacy_cohort_sha256,),
+    )
+    migrated.commit()
+    migrated.close()
+
+    assert routing_runs.migrate_run_storage(db) is True
+    repaired = routing_runs.connect_run(db)
+    assert repaired.execute(
+        "SELECT cohort_sha256 FROM run_meta WHERE singleton = 1"
+    ).fetchone()[0] == current_cohort_sha256
+    repaired.close()
     assert routing_runs.migrate_run_storage(db) is False
 
 

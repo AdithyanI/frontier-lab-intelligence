@@ -113,9 +113,11 @@ class _Pipeline:
         self.routing_calls: list[dict[str, Any]] = []
         self.workspace_calls: list[dict[str, Any]] = []
         self.workspace_loads: list[Path] = []
+        self.template_loads: list[Path] = []
         self.codex_calls: list[dict[str, Any]] = []
         self.workspace = workspace or _workspace_result()
         self.workspace_obsolete = False
+        self.template_obsolete = False
 
     def evidence(self, **kwargs: Any) -> dict[str, Any]:
         self.order.append("evidence")
@@ -147,6 +149,24 @@ class _Pipeline:
                 "feed_run_id": FEED_RUN_ID,
             },
         }
+
+    def load_template(self, path: Path) -> dict[str, Any]:
+        self.template_loads.append(path)
+        manifest = {
+            "schema_version": editorial_runs.WORKSPACE_SCHEMA_VERSION,
+            "day": DAY,
+            "run_id": WORKSPACE_RUN_ID,
+            "manifest_sha256": "manifest-sha-1",
+            "source": {
+                "routing_run_id": ROUTING_RUN_ID,
+                "event_run_id": EVENT_RUN_ID,
+                "feed_run_id": FEED_RUN_ID,
+            },
+        }
+        template = editorial.draft_template(manifest)
+        if self.template_obsolete:
+            template["workspace_manifest_sha256"] = "obsolete"
+        return template
 
     def codex(self, **kwargs: Any) -> dict[str, Any]:
         self.order.append("codex")
@@ -181,6 +201,7 @@ def _run(
         routing_runner=pipeline.routing,
         workspace_preparer=pipeline.prepare,
         workspace_loader=pipeline.load_workspace,
+        workspace_template_loader=pipeline.load_template,
         codex_runner=codex_runner,
     )
 
@@ -275,6 +296,10 @@ def test_resume_reuses_all_prepared_stages(tmp_path):
     assert pipeline.workspace_loads == [
         daily_runner.REPO_ROOT / f"tmp/daily-intelligence/{WORKSPACE_RUN_ID}"
     ]
+    assert pipeline.template_loads == [
+        daily_runner.REPO_ROOT
+        / f"tmp/daily-intelligence/{WORKSPACE_RUN_ID}/draft.template.json"
+    ]
 
 
 def test_resume_reprepares_an_obsolete_workspace_before_codex_starts(tmp_path):
@@ -289,6 +314,20 @@ def test_resume_reprepares_an_obsolete_workspace_before_codex_starts(tmp_path):
     assert resumed["status"] == "prepared"
     assert pipeline.order == ["evidence", "routing", "prepare", "prepare"]
     assert len(pipeline.workspace_loads) == 1
+    assert resumed["codex_thread_id"] is None
+
+
+def test_resume_reprepares_a_stale_draft_template_before_codex_starts(tmp_path):
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+    _run(db_path=db_path, pipeline=pipeline)
+    pipeline.template_obsolete = True
+
+    resumed = _run(db_path=db_path, pipeline=pipeline)
+
+    assert resumed["status"] == "prepared"
+    assert pipeline.order == ["evidence", "routing", "prepare", "prepare"]
+    assert len(pipeline.template_loads) == 1
     assert resumed["codex_thread_id"] is None
 
 

@@ -123,6 +123,27 @@ def default_run_db(run_id: str) -> Path:
     return DEFAULT_RUN_ROOT / run_id / "routing.db"
 
 
+def _stored_cohort_sha256(
+    conn: sqlite3.Connection, *, snapshot_key: str = "semantic_snapshot_sha256"
+) -> str:
+    rows = conn.execute(
+        """SELECT event_id, feed_rank, semantic_snapshot_sha256,
+                  evidence_sha256, input_sha256
+           FROM routing_item ORDER BY feed_rank, event_id"""
+    ).fetchall()
+    cohort = [
+        {
+            "event_id": str(row["event_id"]),
+            "feed_rank": int(row["feed_rank"]),
+            snapshot_key: str(row["semantic_snapshot_sha256"]),
+            "evidence_sha256": str(row["evidence_sha256"]),
+            "input_sha256": str(row["input_sha256"]),
+        }
+        for row in rows
+    ]
+    return _sha256(_canonical_json(cohort))
+
+
 def migrate_run_storage(path: Path | str) -> bool:
     """Migrate one routing database to the Event-native storage schema."""
     path = Path(path)
@@ -137,19 +158,40 @@ def migrate_run_storage(path: Path | str) -> bool:
             str(row["name"])
             for row in conn.execute("PRAGMA table_info(routing_item)").fetchall()
         }
-        if "snapshot_content_sha256" not in columns:
-            return False
         if "semantic_snapshot_sha256" in columns:
-            raise RuntimeError(
-                "routing_item contains both legacy and Event-native snapshot columns"
-            )
+            if "snapshot_content_sha256" in columns:
+                raise RuntimeError(
+                    "routing_item contains both legacy and Event-native snapshot columns"
+                )
+        elif "snapshot_content_sha256" not in columns:
+            return False
         with conn:
-            conn.execute(
-                "ALTER TABLE routing_item RENAME COLUMN "
-                "snapshot_content_sha256 TO semantic_snapshot_sha256"
-            )
+            if "snapshot_content_sha256" in columns:
+                conn.execute(
+                    "ALTER TABLE routing_item RENAME COLUMN "
+                    "snapshot_content_sha256 TO semantic_snapshot_sha256"
+                )
+                changed = True
+            meta = conn.execute(
+                "SELECT cohort_sha256 FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+            if meta is not None:
+                recorded = str(meta["cohort_sha256"])
+                legacy = _stored_cohort_sha256(
+                    conn, snapshot_key="snapshot_content_sha256"
+                )
+                current = _stored_cohort_sha256(conn)
+                if recorded == legacy and recorded != current:
+                    conn.execute(
+                        "UPDATE run_meta SET cohort_sha256 = ? WHERE singleton = 1",
+                        (current,),
+                    )
+                    changed = True
+                elif recorded != current:
+                    raise RuntimeError(
+                        "routing storage cohort hash does not match stored items"
+                    )
             conn.execute("PRAGMA user_version = 2")
-        changed = True
         integrity = str(conn.execute("PRAGMA integrity_check").fetchone()[0])
         if integrity != "ok":
             raise RuntimeError(f"routing storage integrity check failed: {integrity}")
