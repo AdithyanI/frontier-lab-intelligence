@@ -82,29 +82,48 @@ clearer language.
   establish the central factual claim.
 - `counterevidence`: evidence that qualifies or challenges the interpretation.
 
-Several posts repeating one announcement can support one Insight. Several
-distinct but related developments can also support one broader Insight when the
-causal synthesis is defensible. Explain the role in each link rather than
-asserting that similarity proves sameness.
+Several posts repeating one announcement can support one Insight. Context may
+explain an affected-company mapping or uncertainty, but it does not justify
+merging a separate development into the central claim. Explain the exact role
+of every link rather than asserting that similarity proves sameness.
 
 ## Grouping boundary
 
-Group Events into one Insight only when they support one audience judgment,
-one intelligible causal chain, and one decision or next action. Repeated posts
-about the same primary artifact normally consolidate. Distinct developments may
-support one broader conclusion, but `what_changed` must preserve their separate
-attribution and the Event roles must explain the relationship.
+Default distinct developments to separate Insights or `not_selected`. Group
+Events into one Insight only when they support one audience judgment, one
+intelligible causal chain, and one decision or next action. Repeated posts about
+the same primary artifact normally consolidate.
 
-Keep them separate when combining them would require two unrelated judgments,
-two materially different causal chains, or two different audience decisions.
-An exact shared artifact is strong evidence of a relationship, not proof that
+Before validation, state the Insight's core claim privately in one sentence and
+run a source-subtraction test over every attached Event and citation:
+
+- identify the exact clause it supports or challenges;
+- confirm that a comparison uses a genuinely comparable subject, workload,
+  method, and decision context;
+- confirm that it belongs to the same operating, financial, thesis, or
+  engineering mechanism; and
+- ask whether removing it would materially weaken the conclusion or its key
+  uncertainty.
+
+Remove, separate, or mark `not_selected` any evidence that fails this test. A
+source that merely shows the breadth of a trend is not necessary evidence for
+the central claim.
+
+Keep Events separate when combining them would require two judgments, two
+materially different causal chains, or two audience decisions. Sharing a broad
+topic, company, model class, policy direction, or phrase is insufficient. A
+result from a different benchmark or practitioner workflow is context for a
+separate question unless the Insight explicitly analyzes that difference. An
+exact shared artifact is strong evidence of a relationship, not proof that
 every surrounding claim is identical. Lexical matches and embedding neighbors
 are discovery aids only. No URL rule, threshold, or connected component makes
 the grouping decision.
 
 Each routed Event may support at most one selected Insight per audience. This
 forces the author to choose the clearest editorial home instead of duplicating
-evidence across the daily brief.
+evidence across the daily brief. Complete cohort accounting is satisfied by a
+specific `not_selected` disposition; it never requires attaching an adjacent
+Event to a published Insight.
 
 ## Editorial rank
 
@@ -161,6 +180,10 @@ public evidence
 
 If a step is not supported, say so. Do not fill a structural field with
 speculation merely to make the memo look complete.
+
+An internal research-method control without a defensible fund-thesis, company,
+or portfolio consequence normally belongs under AI Engineering or
+`not_selected`, not in the Investment brief.
 
 ## AI Engineering analysis
 

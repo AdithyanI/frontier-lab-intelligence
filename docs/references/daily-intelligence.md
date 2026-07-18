@@ -174,6 +174,14 @@ embedding cache is a sidecar keyed by Event ID, rendered packet contract and
 hash, model, and input hash. It never mutates the immutable Event packet and
 never becomes grouping truth.
 
+Editorial grouping defaults distinct developments to separate Insights or
+`not_selected`. Before validation, the agent states each selected Insight's
+single core claim and removes any Event or citation that does not support or
+challenge that same causal mechanism and audience decision. Comparable evidence
+must examine a genuinely comparable subject and workload. Complete cohort
+accounting is satisfied by explicit non-selection; it never requires widening
+an Insight around a shared topic.
+
 ## Storage and Read Rules
 
 Workspaces live under `data/derived/daily-intelligence/workspaces/`. The durable

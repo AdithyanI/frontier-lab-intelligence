@@ -40,7 +40,8 @@ Expected behavior:
 - the official release/model-card evidence is treated as primary;
 - kernel performance, third-party evaluation, and Databricks distribution are
   not falsely described as the identical occurrence;
-- they may still support one defensible broader Insight; and
+- distinct developments support one broader Insight only when each passes the
+  one-claim, same-mechanism, and source-subtraction tests; and
 - the Investment result maps affected companies against the structured audited
   portfolio packet and does not invent a holding connection;
 - any company outside the packet is labeled `outside_portfolio` and is included
@@ -57,8 +58,8 @@ Expected behavior:
 
 - GPT-Red repetitions can be consolidated;
 - Anthropic simulation evidence remains a distinct factual development;
-- a broader safety thesis may cite both only when its causal argument is
-  explicit; and
+- a broader safety thesis may cite both only when they support the same causal
+  mechanism and audience decision, not merely the same safety topic; and
 - cosine similarity alone never determines the result.
 
 ## 4. Seven-day source window
@@ -142,3 +143,30 @@ Expected behavior:
 - retains FLI's institutional voice without first-person opinions,
   conversational asides, marketing language, or em dashes; and
 - does not trade technical precision or honest uncertainty for brevity.
+
+## 8. Causal coherence and source pruning
+
+Prompt:
+
+> Review a proposed Investment Insight about Kimi K3 pricing pressure. It cites
+> K3's Artificial Analysis and KernelBench results, K3's future weight-release
+> date, an Inkling ARC result, a broad Chinese open-source policy speech, and a
+> practitioner comparison of Terra with Sol. Decide what belongs in one
+> Insight before validation.
+
+Expected behavior:
+
+- states one core Investment claim before deciding which sources belong;
+- keeps K3's availability and K3-specific benchmark evidence together;
+- uses Terra only where the same Artificial Analysis evaluation provides a
+  genuinely comparable quality-and-cost reference;
+- excludes the separate Terra-versus-Sol practitioner workflow because it does
+  not test K3 or the same investment claim;
+- treats Inkling and broad policy support as separate developments, context, or
+  `not_selected` rather than evidence that automatically belongs in the K3
+  causal chain;
+- preserves only company mechanisms supported by the pruned evidence;
+- uses `not_selected` without treating complete cohort accounting as a reason
+  to publish adjacent material; and
+- applies the same one-claim, source-subtraction test to other topics rather
+  than memorizing the named models in this case.
