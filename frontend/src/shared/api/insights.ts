@@ -169,8 +169,10 @@ export interface EditorialInsightsResponse {
 export type InsightsResponse = CandidateDecisionInsightsResponse | EditorialInsightsResponse
 
 export interface InsightDate extends FeedDate {
-  suppressed_count: number
-  evaluated_count: number
+  content_kind: 'daily_editorial' | 'candidate_decisions'
+  candidate_count: number
+  included_candidate_count: number
+  not_selected_candidate_count: number
 }
 
 export interface InsightDates {

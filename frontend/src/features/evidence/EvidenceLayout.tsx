@@ -10,12 +10,12 @@ export default function Evidence() {
       <header className="evidence-head">
         <h1 className="page-title">Evidence</h1>
         <p className="page-sub">
-          Inspect what the tracked network amplified and the primary sources
-          those posts revealed.
+          Inspect what the tracked network amplified and the source artifacts
+          those Events disclosed.
         </p>
         <nav className="ruled-nav evidence-tabs" aria-label="Evidence views">
           <NavLink to={feedPath}>Feed</NavLink>
-          <NavLink to={artifactsPath}>Primary artifacts</NavLink>
+          <NavLink to={artifactsPath}>Artifacts</NavLink>
         </nav>
       </header>
       <Outlet />

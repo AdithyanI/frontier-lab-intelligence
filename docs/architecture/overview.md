@@ -17,12 +17,12 @@ flowchart TD
     R["Registry<br/>entities and channels"] --> C["Collection<br/>immutable provider evidence"]
     R --> N["Trusted network<br/>frozen following snapshots"]
     C --> F["Feed<br/>complete daily evidence"]
-    F --> E["Events<br/>exact structural envelopes"]
+    F --> E["Events<br/>exact structural groups"]
     E --> A["Artifacts<br/>first-party source extraction"]
     N --> S["Attention<br/>transparent ordering"]
     R --> S
     E --> S
-    E --> Q["Audience routing<br/>Engineering and Investment"]
+    E --> Q["Audience routing<br/>AI Engineering and Investment"]
     A --> Q
     S --> Q
     Q --> I["Daily editorial agent<br/>ranked, cited Insights per audience"]
@@ -46,7 +46,7 @@ or reinterpret its upstream evidence.
 | Evidence | `fli.evidence` | Deterministic Feed snapshots, exact structural Events, and one refresh workflow. |
 | Artifacts | `fli.evidence.artifacts` | Canonical source links, lineage, retrieval, and extracted text. |
 | Attention | `fli.scoring` | Versioned, inspectable ordering formulas and offline evaluation. |
-| Audience routing | `fli.routing` | Independent Engineering and Investment relevance decisions with durable runs. |
+| Audience routing | `fli.routing` | Independent AI Engineering and Investment relevance decisions with durable runs. |
 | Insights | `fli.insights` | Per-Event working annotations plus agent-authored daily synthesis, strict validation, atomic storage, and the canonical read model. |
 | Product adapters | `fli.web`, `fli.cli` | HTTP/UI composition and non-interactive commands; no domain truth belongs here. |
 

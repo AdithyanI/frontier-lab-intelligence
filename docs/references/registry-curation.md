@@ -54,20 +54,21 @@ After the relevance and organization-identity cleanup, the corpus contains:
 
 | Kind | Entities |
 | --- | ---: |
-| person (active) | 2,104 |
-| organization | 93 (including 10 seeded labs) |
+| person (active) | 2,431 |
+| organization | 160 |
 | unsure (active) | 0 |
-| rejected | 23 |
+| rejected | 39 |
 | unknown | 0 |
-| **total** | **2,220** |
+| **total** | **2,630** |
 
-Those clusters own all 2,293 channels. Multiple official X, website, GitHub,
+These are the 2026-07-18 dated checkpoint totals; query `/api/registry` for the
+live read contract. Multiple official X, website, GitHub,
 and blog channels may resolve to one stable real-world organization. The
 eight affiliation-search arXiv
 queries were removed from the identity channel model; all 137 fetched arXiv
 documents remain in `raw_items` for later extraction work.
-The active graph has zero edges. Digg's 1,000-account ranking is an offline
-comparison artifact and is not active Registry provenance. A node's accepted
+The current immutable following snapshot and accepted entity-support view are
+documented in `docs/STATUS.md`. A node's accepted
 follower-floor and structural-kind decisions survive removal of its discovery
 edge.
 
@@ -338,8 +339,8 @@ row rather than leaking into the model-output field.
 
 ## Manual X Profile Intake
 
-The Registry page exposes one inline `Add profile` action rather than a third
-Network tab. Its API is `POST /api/registry/intake` with an X profile plus one
+The Network workspace exposes Add Profile as its third explicit subview. Its
+API is `POST /api/registry/intake` with an X profile plus one
 of two explicit modes:
 
 - `screen` fetches and stores the profile, rejects protected or sub-1,000

@@ -72,8 +72,8 @@ const AUDIENCE_COPY = {
 
 const STATUS_COPY: Record<InsightStatus, { label: string; description: string }> = {
   kept: { label: 'Kept', description: 'Published audience Insights' },
-  suppressed: { label: 'Suppressed', description: 'Rejected at the final editorial gate' },
-  all: { label: 'All', description: 'Every completed editorial decision' },
+  suppressed: { label: 'Suppressed', description: 'Suppressed during candidate evaluation' },
+  all: { label: 'All', description: 'Every completed candidate evaluation' },
 }
 
 const INVESTMENT_IMPACT_COPY = {
@@ -156,7 +156,7 @@ function InsightRow({ item }: { item: InsightItem }) {
   const title = item.title
   const accessibleName = `${feedRankLabel}: ${decodeTextEntities(title)}`
   const titleId = `${item.audience}-${item.candidate_id}-title`
-  const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(item.event_id)}`
+  const eventUrl = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(item.event_id)}`
 
   return (
     <article
@@ -166,9 +166,9 @@ function InsightRow({ item }: { item: InsightItem }) {
       <div className="insight-rank mono">
         <Link
           className="insight-feed-link"
-          to={envelopeUrl}
-          aria-label={`Open ${feedRankLabel.toLowerCase()} in its exact Feed envelope`}
-          title="Open exact Feed envelope"
+          to={eventUrl}
+          aria-label={`Open ${feedRankLabel.toLowerCase()} in its exact Feed Event`}
+          title="Open exact Feed Event"
         >
           <strong>#{item.feed_rank}</strong>
           <span>Feed rank ↗</span>
@@ -186,10 +186,10 @@ function InsightRow({ item }: { item: InsightItem }) {
             <span>{item.prompt_version}</span>
             <CopyEventId eventId={item.event_id} />
             <Link
-              to={envelopeUrl}
-              aria-label={`Open the exact Feed envelope for ${accessibleName}`}
+              to={eventUrl}
+              aria-label={`Open the exact Feed Event for ${accessibleName}`}
             >
-              Open envelope ↗
+              Open Event ↗
             </Link>
             {item.root_source_url && (
               <a
@@ -365,10 +365,10 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
           <h4 className="mono">Original feed</h4>
           <ul className="editorial-source-list">
             {item.events.map((event) => {
-              const envelopeUrl = `/evidence/feed?date=${item.day}&event=${encodeURIComponent(event.event_id)}`
+              const eventUrl = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(event.event_id)}`
               return (
                 <li key={event.event_id}>
-                  <Link className="editorial-source-title" to={envelopeUrl}>
+                  <Link className="editorial-source-title" to={eventUrl}>
                     Feed #{event.feed_rank} ↗
                   </Link>
                   <p>{decodeTextEntities(event.reason)}</p>
@@ -422,11 +422,13 @@ function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
       onClick={copyReference}
       aria-label={`Copy reference for ${decodeTextEntities(item.title)}`}
     >
-      {copyStatus === 'copied'
-        ? 'Copied'
-        : copyStatus === 'failed'
-          ? 'Copy failed'
-          : 'Copy reference'}
+      <span role="status" aria-live="polite">
+        {copyStatus === 'copied'
+          ? 'Copied'
+          : copyStatus === 'failed'
+            ? 'Copy failed'
+            : 'Copy reference'}
+      </span>
     </button>
   )
 }

@@ -560,7 +560,7 @@ def build_index(
     threshold: float = DEFAULT_THRESHOLD,
     client: Any | None = None,
 ) -> dict[str, Any]:
-    """Upsert per-envelope embeddings and candidate groups into a routing DB."""
+    """Upsert per-Event embeddings and candidate groups into a routing DB."""
     if not routing_db.is_file():
         raise FileNotFoundError(routing_db)
     if not 0 < threshold < 1:
@@ -678,7 +678,7 @@ def _parser() -> argparse.ArgumentParser:
 
 def _plain(payload: dict[str, Any]) -> str:
     lines = [
-        f"{payload['day']} · {payload['event_count']} envelopes · "
+        f"{payload['day']} · {payload['event_count']} Events · "
         f"{payload['group_count']} groups · {payload['candidate_edge_count']} candidate edges",
         f"{payload['embedded_event_count']} embedded · "
         f"{payload['reused_embedding_count']} reused · "

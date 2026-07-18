@@ -59,6 +59,18 @@ test('Network defaults to Ranking while preserving Registry and reach', () => {
   assert.doesNotMatch(registrySource, /Registry follows/)
 })
 
+test('Network filters and entity details expose honest control semantics', () => {
+  assert.match(rankingSource, /type="search"/)
+  assert.match(rankingSource, /aria-label="Search ranked accounts"/)
+  assert.match(rankingSource, /role="group" aria-label="Filter by kind"/)
+  assert.match(registrySource, /role="group" aria-label="Filter Registry"/)
+  assert.doesNotMatch(rankingSource, /role="tab"|role="tablist"/)
+  assert.doesNotMatch(registrySource, /role="tab"|role="tablist"/)
+  assert.match(registrySource, /className="ent-name-button"/)
+  assert.match(registrySource, /aria-label=\{`Open \$\{entity\.name\}`\}/)
+  assert.doesNotMatch(registrySource, /tabIndex=\{0\}/)
+})
+
 test('Network subviews use one ruled secondary navigation language', () => {
   assert.match(networkSource, /className="ruled-nav network-tabs"/)
   assert.match(appStyles, /\.ruled-nav \{[\s\S]*?width: 100%;[\s\S]*?border-top: 1px solid var\(--border-strong\);[\s\S]*?border-bottom: 1px solid var\(--border\);/)

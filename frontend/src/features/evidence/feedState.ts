@@ -7,5 +7,5 @@ export type FeedRoutingFilter =
 export function initialFeedRoutingFilter(
   searchParams: URLSearchParams,
 ): FeedRoutingFilter {
-  return searchParams.get('event')?.trim() ? 'all' : 'relevant'
+  return searchParams.get('event_id')?.trim() ? 'all' : 'relevant'
 }

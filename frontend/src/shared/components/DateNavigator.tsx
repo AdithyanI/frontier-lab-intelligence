@@ -37,7 +37,7 @@ export default function DateNavigator({
   onShowOlderDates,
   onShowNewerDates,
   ariaLabel,
-  itemLabel = 'posts',
+  itemLabel = 'items',
   loading = false,
 }: DateNavigatorProps) {
   const showLoadingDates = loading && dates.length === 0

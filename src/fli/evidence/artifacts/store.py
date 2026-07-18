@@ -1,4 +1,4 @@
-"""Canonical artifact catalog over primary-author links in Feed envelopes."""
+"""Canonical artifact catalog over first-party links in Feed Events."""
 
 from __future__ import annotations
 
@@ -481,7 +481,7 @@ def _iter_feed_candidates(
             primary_ids = evidence_lineage.verified_primary_post_ids(
                 feed,
                 feed_run_id=feed_run_id,
-                envelope={"root": item["root"]},
+                event={"root": item["root"]},
             )
             root_id = str(item["root"]["post_id"])
             root_post = posts.get(root_id)
@@ -506,9 +506,9 @@ def _iter_feed_candidates(
                 post = posts.get(post_id)
                 if post is None:
                     continue
-                # Process each primary source on the first day its envelope is
+                # Process each source artifact on the first day its Event is
                 # visible in this run. A quoted root and its stored thread may
-                # predate the window even though the envelope is first
+                # predate the window even though the Event is first
                 # discovered inside it; source publication day must not erase
                 # those first-party artifact links.
                 source_key = (event_id, post_id)
@@ -666,7 +666,7 @@ def _candidate_identity(candidate: dict[str, Any]) -> list[Any]:
     ]
 
 
-def import_feed_envelopes(
+def import_feed_events(
     *,
     db_path: Path | str = DEFAULT_DB,
     feed_db: Path | str = signal_feed.DEFAULT_FEED_DB,
@@ -1115,7 +1115,7 @@ def import_reviewed_supplements(
                 source_row["decision"]
             ) != "keep":
                 raise ValueError(
-                    f"items[{ordinal}] event must be a completed kept envelope"
+                    f"items[{ordinal}] event must be a completed kept Event"
                 )
             artifact_url = str(raw_item["artifact_url"] or "").strip()
             decision = artifact_urls.classify_candidate(artifact_url, artifact_url)
@@ -1678,4 +1678,3 @@ def inspect_artifacts(conn: sqlite3.Connection, *, limit: int = 20) -> list[dict
         (limit,),
     ).fetchall()
     return [dict(row) for row in rows]
-

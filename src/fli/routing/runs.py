@@ -1,4 +1,4 @@
-"""Freeze and route ranked Evidence envelopes directly by audience."""
+"""Freeze and route ranked Feed Events directly by audience."""
 
 from __future__ import annotations
 
@@ -683,15 +683,15 @@ def freeze_run(
     else:
         items = items[:top_ranked]
     if not items:
-        raise ValueError("Evidence projection has no matching envelopes")
+        raise ValueError("Evidence projection has no matching Events")
     missing_hashes = [
         str(item["event_id"])
         for item in items
-        if not item.get("snapshot_content_sha256")
+        if not item.get("semantic_snapshot_sha256")
     ]
     if missing_hashes:
         raise ValueError(
-            "Evidence envelopes are missing snapshot hashes: "
+            "Feed Events are missing snapshot hashes: "
             + ", ".join(missing_hashes)
         )
 
@@ -726,7 +726,7 @@ def freeze_run(
         {
             "event_id": packet.event_id,
             "feed_rank": int(item["daily_rank"]),
-            "snapshot_content_sha256": str(item["snapshot_content_sha256"]),
+            "snapshot_content_sha256": str(item["semantic_snapshot_sha256"]),
             "evidence_sha256": packet.evidence_sha256,
             "input_sha256": _sha256(input_text),
         }
@@ -799,7 +799,7 @@ def freeze_run(
                         for source in packet.sources
                         if source.relation == "root"
                     ),
-                    str(item["snapshot_content_sha256"]),
+                    str(item["semantic_snapshot_sha256"]),
                     _canonical_json(_packet_payload(packet)),
                     packet.evidence_sha256,
                     input_text,

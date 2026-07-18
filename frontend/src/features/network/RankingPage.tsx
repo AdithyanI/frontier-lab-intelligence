@@ -436,11 +436,13 @@ export default function Ranking() {
           <div className="rank-controls">
             <input
               className="search rank-search"
+              type="search"
               placeholder="Find anyone…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search ranked accounts"
             />
-            <div className="rank-filter" role="tablist" aria-label="Kind">
+            <div className="rank-filter" role="group" aria-label="Filter by kind">
               {(
                 [
                   ['all', 'All'],
@@ -451,8 +453,7 @@ export default function Ranking() {
               ).map(([value, label]) => (
                 <button
                   key={value}
-                  role="tab"
-                  aria-selected={filter === value}
+                  aria-pressed={filter === value}
                   className={filter === value ? 'on' : ''}
                   onClick={() => setFilter(value)}
                 >

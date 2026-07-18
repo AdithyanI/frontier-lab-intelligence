@@ -1,4 +1,4 @@
-"""Machine-first CLI for durable, repeated single-envelope Insight runs."""
+"""Machine-first CLI for durable, repeated single-Event Insight runs."""
 
 from __future__ import annotations
 
@@ -201,7 +201,7 @@ def _enrich_post_dates(
     )
 
 
-def resolve_envelope(
+def resolve_event(
     *,
     event_id: str,
     day: str | None,
@@ -236,7 +236,7 @@ def resolve_envelope(
         matches.append({"path": path, "meta": dict(meta), "row": dict(row)})
     if not matches:
         suffix = f" on {day}" if day else ""
-        raise ValueError(f"no completed current routing envelope found for {event_id}{suffix}")
+        raise ValueError(f"no completed current routed Event found for {event_id}{suffix}")
     selected = min(
         matches,
         key=lambda value: (
@@ -266,7 +266,7 @@ def _selected_audiences(
     )
     if not selected:
         raise ValueError(
-            f"envelope is not positively routed for requested audience {requested!r}"
+            f"Event is not positively routed for requested audience {requested!r}"
         )
     return selected
 
@@ -294,7 +294,7 @@ def run_spike(
     prepare_only: bool = False,
     client_factory: Callable[[], Any] = entity_kinds.create_litellm_client,
 ) -> dict[str, Any]:
-    resolved = resolve_envelope(
+    resolved = resolve_event(
         event_id=event_id,
         day=day,
         routing_root=routing_root,
@@ -921,7 +921,7 @@ def _parser() -> argparse.ArgumentParser:
     contract = sub.add_parser("contract", help="Inspect prompts and output schema.")
     contract.add_argument("--audience", choices=AUDIENCE_CHOICES, default=AUDIENCE_ALL)
     _add_output_flags(contract)
-    run = sub.add_parser("run", help="Evaluate one positively routed envelope.")
+    run = sub.add_parser("run", help="Evaluate one positively routed Event.")
     run.add_argument("--event-id", required=True)
     run.add_argument("--day")
     run.add_argument("--audience", choices=AUDIENCE_CHOICES, default=AUDIENCE_ALL)

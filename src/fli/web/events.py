@@ -1,4 +1,4 @@
-"""Registry-aware unified Feed envelopes over exact structural relationships."""
+"""Registry-aware Feed Events over exact structural relationships."""
 
 from __future__ import annotations
 
@@ -288,8 +288,7 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
         "event_id": singleton_id,
         "canonical_root_post_id": item["post_id"],
         "presentation_root_post_id": item["post_id"],
-        "snapshot_cutoff": f"{item['published_at'][:10]}T23:59:59.999999+00:00",
-        "snapshot_content_sha256": snapshot_hash,
+        "semantic_snapshot_sha256": snapshot_hash,
         "first_activity_day": item["published_at"][:10],
         "is_grouped": False,
         "root": item,
@@ -301,7 +300,7 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
         "activity_days": [item["published_at"][:10]],
         "link_count": 0,
         "author_count": 1,
-        "registry_account_count": 1 if item["author"]["entity_id"] is not None else 0,
+        "registry_entity_count": 1 if item["author"]["entity_id"] is not None else 0,
         "first_hand_count": int(item["observed_directly"]),
         "amplifiers": item["amplifiers"],
         "peak_attention_score": item["attention_score"],
@@ -313,7 +312,7 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def _daily_score_basis(item: dict[str, Any]) -> dict[str, Any]:
-    """Preserve the exact post and components behind an envelope's peak score."""
+    """Preserve the exact post and components behind an Event's peak score."""
     return {
         "post_id": item["post_id"],
         "author": dict(item["author"]),
@@ -610,8 +609,6 @@ def _project_component(
         key=lambda amplifier: (-amplifier["network_support"], amplifier["entity_name"]),
     )
     root["amplifiers"] = sorted_amplifiers
-    root["attention_score"] = max(item["attention_score"] for item in event_candidates)
-
     identity_provider, identity_type, identity_value = _component_identity(
         component_keys={
             (member["provider"], member["post_id"]) for member in visible_members
@@ -665,7 +662,7 @@ def _project_component(
         for link in current_links
         if (str(link["provider"]), str(link["source_post_id"])) in semantic_keys
     )
-    snapshot_content_sha256 = hashlib.sha256(
+    semantic_snapshot_sha256 = hashlib.sha256(
         json.dumps(
             [
                 projected_event_id,
@@ -696,10 +693,7 @@ def _project_component(
         "event_id": projected_event_id,
         "canonical_root_post_id": canonical_root_post_id,
         "presentation_root_post_id": root_post_id,
-        "snapshot_cutoff": max(
-            str(member["published_at"]) for member in visible_members
-        ),
-        "snapshot_content_sha256": snapshot_content_sha256,
+        "semantic_snapshot_sha256": semantic_snapshot_sha256,
         "first_activity_day": first_activity_day,
         "is_grouped": len(visible_members) > 1,
         "root": root,
@@ -711,7 +705,7 @@ def _project_component(
         "activity_days": direct_days,
         "link_count": len(current_links),
         "author_count": len({member["author"]["handle"] for member in visible_members}),
-        "registry_account_count": len(registry_entity_ids),
+        "registry_entity_count": len(registry_entity_ids),
         "first_hand_count": sum(1 for item in event_candidates if item["observed_directly"]),
         "amplifiers": sorted_amplifiers,
         "peak_attention_score": max(item["attention_score"] for item in event_candidates),
@@ -1023,12 +1017,20 @@ def _events_day_cached(
     )
     for item in items:
         route = routing_items.get(item["event_id"])
-        item["audience_routing"] = (
+        route_matches = bool(
             route
+            and route.get("semantic_snapshot_sha256")
+            == item["semantic_snapshot_sha256"]
+        )
+        item["audience_routing"] = route if route_matches else None
+        item["routing_state"] = (
+            "evaluated"
+            if route_matches
+            else "stale"
             if route
-            and route.get("snapshot_content_sha256")
-            == item["snapshot_content_sha256"]
-            else None
+            else "not_selected"
+            if routing_payload["available"]
+            else "unavailable"
         )
     return {
         "available": True,
@@ -1042,8 +1044,8 @@ def _events_day_cached(
         "score_formula": {
             **feed_result["score_formula"],
             "note": (
-                "Every Feed candidate is an envelope. Provider-declared exact "
-                "relationships combine evidence; all other posts remain singletons."
+                "Every Feed candidate is an Event. Provider-declared exact "
+                "relationships group evidence; all other posts remain singleton Events."
             ),
         },
         "items": items,
@@ -1128,21 +1130,21 @@ def _events_week_cached(
         active_days = sorted(state["active_days"])
         revision = {
             **item,
-            "snapshot_cutoff": f"{end.isoformat()}T23:59:59.999999+00:00",
-            "snapshot_content_sha256": hashlib.sha256(
+            "semantic_snapshot_sha256": hashlib.sha256(
                 json.dumps(
                     [
                         "week",
                         event_id,
                         start.isoformat(),
                         end.isoformat(),
-                        item["snapshot_content_sha256"],
+                        item["semantic_snapshot_sha256"],
                         active_days,
                     ],
                     separators=(",", ":"),
                 ).encode()
             ).hexdigest(),
             "audience_routing": None,
+            "routing_state": "unavailable",
             "active_days": active_days,
             "weekly_active_day_count": len(active_days),
             "peak_attention_score": state["peak_attention_score"],

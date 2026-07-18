@@ -230,12 +230,11 @@ export default function Registry() {
           onChange={(event) => setQuery(event.target.value)}
           aria-label="Search entities"
         />
-        <div className="seg" role="tablist" aria-label="Filter Registry">
+        <div className="seg" role="group" aria-label="Filter Registry">
           {filters.map((filter) => (
             <button
               key={filter.key}
-              role="tab"
-              aria-selected={kind === filter.key}
+              aria-pressed={kind === filter.key}
               className={kind === filter.key ? 'is-active' : undefined}
               onClick={() => setKind(filter.key)}
             >
@@ -342,16 +341,19 @@ export default function Registry() {
                   key={entity.id}
                   className="ent-row"
                   onClick={() => setSelected(entity)}
-                  tabIndex={0}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      setSelected(entity)
-                    }
-                  }}
                 >
                   <td>
-                    <span className="ent-name">{entity.name}</span>
+                    <button
+                      type="button"
+                      className="ent-name-button"
+                      aria-label={`Open ${entity.name}`}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setSelected(entity)
+                      }}
+                    >
+                      <span className="ent-name">{entity.name}</span>
+                    </button>
                     {xChannels.length > 0 && !showFollowerColumn && (
                       <span className="ent-handles">
                         {xChannels.map((channel) => (
@@ -376,7 +378,7 @@ export default function Registry() {
                         : (
                           <RegistryMetric
                             rank={`#${fmt(entity.network_rank)}`}
-                            detail={`${fmt(entity.network_follow_count)} followers`}
+                            detail={`${fmt(entity.network_follow_count)} Registry supporters`}
                             accessibleLabel={`Network support rank ${fmt(entity.network_rank)} of ${fmt(entity.network_rank_total)}. ${fmt(entity.network_follow_count)} of ${fmt(entity.network_source_total)} screened Registry entities follow this entity.`}
                           />
                         )}

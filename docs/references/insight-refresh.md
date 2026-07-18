@@ -7,7 +7,7 @@ Last verified: 2026-07-15
 `fli insights refresh` turns the current positive audience routes into durable
 Insight requests. It is deliberately downstream of Evidence and audience
 routing: it does not collect posts, rebuild Events, retrieve artifacts, or
-invent another envelope representation.
+invent another Event representation.
 
 The normal calibration loop is:
 

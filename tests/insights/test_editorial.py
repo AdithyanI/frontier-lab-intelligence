@@ -786,9 +786,11 @@ def test_web_prefers_editorial_for_kept_and_preserves_candidate_fallback(
     assert dates["dates"] == [
         {
             "day": DAY,
-            "suppressed_count": 0,
-            "evaluated_count": 2,
+            "content_kind": "daily_editorial",
             "item_count": 1,
+            "candidate_count": 2,
+            "included_candidate_count": 2,
+            "not_selected_candidate_count": 0,
         }
     ]
 

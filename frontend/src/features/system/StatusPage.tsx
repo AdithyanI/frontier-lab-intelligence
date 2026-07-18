@@ -74,13 +74,14 @@ function countDatesInPublishedWindow(payload: FeedDates | null): number {
 }
 
 function insightTotals(payload: InsightDates | null) {
-  return (payload?.dates ?? []).reduce(
+  return (payload?.dates ?? []).filter(
+    (value) => value.content_kind === 'daily_editorial',
+  ).reduce(
     (total, value) => ({
-      evaluated: total.evaluated + value.evaluated_count,
-      surfaced: total.surfaced + value.item_count,
-      suppressed: total.suppressed + value.suppressed_count,
+      dates: total.dates + 1,
+      insights: total.insights + value.item_count,
     }),
-    { evaluated: 0, surfaced: 0, suppressed: 0 },
+    { dates: 0, insights: 0 },
   )
 }
 
@@ -165,12 +166,11 @@ export default function Status() {
 
     const publishedDayCount = countDatesInPublishedWindow(data.eventDates)
     const routing = data.latestEvents?.audience_routing_run
-    const artifactCounts = data.artifacts?.counts
+    const artifactCounts = data.artifacts?.catalog_fetch_state_counts
     const investment = insightTotals(data.investmentInsights)
     const engineering = insightTotals(data.engineeringInsights)
-    const evaluated = investment.evaluated + engineering.evaluated
-    const surfaced = investment.surfaced + engineering.surfaced
-    const suppressed = investment.suppressed + engineering.suppressed
+    const editorialDates = investment.dates + engineering.dates
+    const publishedInsights = investment.insights + engineering.insights
     const insightsAvailable = Boolean(
       data.investmentInsights?.available && data.engineeringInsights?.available,
     )
@@ -210,12 +210,14 @@ export default function Status() {
           : (data.latestEvents?.reason ?? 'Published Event API did not respond'),
       },
       {
-        name: 'Primary artifacts',
-        description: 'Canonical source documents discovered from accepted evidence.',
+        name: 'Artifacts',
+        description: 'Canonical source documents disclosed by first-party Feed Events.',
         state: data.artifacts?.available
           ? ((artifactCounts?.retryable ?? 0) + (artifactCounts?.unavailable ?? 0) > 0 ? 'partial' : 'available')
           : 'unavailable',
-        stateLabel: data.artifacts?.available ? 'Available with gaps' : 'Unavailable',
+        stateLabel: data.artifacts?.available
+          ? ((artifactCounts?.retryable ?? 0) + (artifactCounts?.unavailable ?? 0) > 0 ? 'Available with gaps' : 'Available')
+          : 'Unavailable',
         dataThrough: formatDay(data.artifactDates?.latest_date),
         lastUpdate: null,
         coverage: data.artifacts?.available && artifactCounts
@@ -239,7 +241,7 @@ export default function Status() {
       },
       {
         name: 'Insights',
-        description: 'Current-contract audience decisions published to both reader views.',
+        description: 'Complete daily editorial briefs published to both audience views.',
         state: insightsAvailable ? 'available' : 'unavailable',
         stateLabel: insightsAvailable ? 'Published' : 'Unavailable',
         dataThrough: formatDay(
@@ -247,7 +249,7 @@ export default function Status() {
         ),
         lastUpdate: null,
         coverage: insightsAvailable
-          ? `${formatNumber(evaluated)} decisions · ${formatNumber(surfaced)} surfaced · ${formatNumber(suppressed)} suppressed`
+          ? `${formatNumber(publishedInsights)} published Insights · ${formatNumber(editorialDates)} audience-days`
           : 'One or both audience views did not respond',
       },
     ]

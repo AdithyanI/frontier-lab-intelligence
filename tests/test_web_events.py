@@ -1,3 +1,4 @@
+import copy
 from datetime import date
 
 from fastapi.testclient import TestClient
@@ -168,7 +169,7 @@ def _write_audience_routing_run(root, *, items):
             (
                 item["event_id"],
                 rank,
-                item["snapshot_content_sha256"],
+                item["semantic_snapshot_sha256"],
                 int(rank == 1),
                 "Concrete engineering relevance." if rank == 1 else "Not useful for engineering.",
                 int(rank == 1),
@@ -209,12 +210,60 @@ def test_events_api_returns_root_once_with_exact_relationships(tmp_path, monkeyp
     assert target_group["evidence"][0]["relationship"] == "retweet"
     assert target_group["evidence"][0]["target_post_id"] == "1"
     assert target_group["relationship_counts"] == {
-            "author_updates": 0,
+        "author_updates": 0,
         "replies": 0,
         "quotes": 0,
         "retweets": 1,
         "related": 0,
     }
+
+
+def test_event_peak_score_does_not_overwrite_root_score_components(
+    tmp_path, monkeypatch
+):
+    _event_fixture(tmp_path, monkeypatch)
+    original_feed_payload = feed_store.feed_payload
+    unmodified = original_feed_payload(
+        day="2026-07-11",
+        lane="all",
+        sort="attention",
+        query="",
+        limit=20,
+        offset=0,
+    )
+    root_candidate = next(
+        item for item in unmodified["items"] if item["post_id"] == "1"
+    )
+
+    def feed_payload_with_scoring_reaction(**kwargs):
+        payload = original_feed_payload(**kwargs)
+        reaction = copy.deepcopy(root_candidate)
+        reaction.update(
+            {
+                "post_id": "2",
+                "published_at": "2026-07-11T09:00:00+00:00",
+                "attention_score": root_candidate["attention_score"] + 20,
+                "author": {
+                    **reaction["author"],
+                    "handle": "bob",
+                    "name": "Bob",
+                    "entity_id": 2,
+                    "entity_name": "Bob",
+                },
+            }
+        )
+        payload["items"] = [*payload["items"], reaction]
+        return payload
+
+    monkeypatch.setattr(feed_store, "feed_payload", feed_payload_with_scoring_reaction)
+    event_store._events_day_cached.cache_clear()
+    payload = client.get("/api/events?date=2026-07-11&limit=20").json()
+    grouped = next(item for item in payload["items"] if item["root"]["post_id"] == "1")
+
+    assert grouped["daily_score_basis"]["post_id"] == "2"
+    assert grouped["peak_attention_score"] > grouped["root"]["attention_score"]
+    assert grouped["root"]["attention_score"] == root_candidate["attention_score"]
+    assert grouped["root"]["score_components"] == root_candidate["score_components"]
 
 
 def test_events_api_can_omit_heavy_evidence_from_list_rows(tmp_path, monkeypatch):
@@ -285,6 +334,7 @@ def test_events_api_projects_completed_audience_routing_directly(
 ):
     _event_fixture(tmp_path, monkeypatch)
     baseline = client.get("/api/events?date=2026-07-11&limit=20").json()
+    assert {item["routing_state"] for item in baseline["items"]} == {"unavailable"}
     _write_audience_routing_run(
         audience_routing_store.DEFAULT_ROUTING_ROOT,
         items=baseline["items"],
@@ -294,6 +344,7 @@ def test_events_api_projects_completed_audience_routing_directly(
     assert all_items["audience_routing_run"]["run_id"] == "audience-run-1"
     assert all("triage" not in item for item in all_items["items"])
     routed = all_items["items"][0]
+    assert {item["routing_state"] for item in all_items["items"]} == {"evaluated"}
     assert routed["audience_routing"]["ai_engineering"] == {
         "relevant": True,
         "reason": "Concrete engineering relevance.",
@@ -431,8 +482,9 @@ def test_events_api_publishes_once_and_appends_later_activity(tmp_path, monkeypa
     assert weekly_event["active_days"] == ["2026-07-10", "2026-07-11"]
     assert weekly_event["member_count"] == 2
     assert weekly_event["audience_routing"] is None
-    assert weekly_event["snapshot_content_sha256"] not in {
-        monday_event["snapshot_content_sha256"],
+    assert weekly_event["routing_state"] == "unavailable"
+    assert weekly_event["semantic_snapshot_sha256"] not in {
+        monday_event["semantic_snapshot_sha256"],
     }
 
 
@@ -780,7 +832,7 @@ def test_future_reaction_appends_without_republishing_or_rerouting(
     )
 
     assert after_event["event_id"] == before_event["event_id"]
-    assert after_event["snapshot_content_sha256"] == before_event["snapshot_content_sha256"]
+    assert after_event["semantic_snapshot_sha256"] == before_event["semantic_snapshot_sha256"]
     assert after_event["daily_rank"] == before_event["daily_rank"]
     assert [item["post_id"] for item in after_event["evidence"]] == [
         "future-monday-quote",
@@ -1014,9 +1066,9 @@ def test_relationship_disclosed_by_future_wrapper_does_not_rewrite_monday(
         "daily_rank",
     ):
         assert after_items["disclosed-a"][key] == before_items["disclosed-a"][key]
-    assert after_items["disclosed-a"]["snapshot_content_sha256"] != before_items[
+    assert after_items["disclosed-a"]["semantic_snapshot_sha256"] != before_items[
         "disclosed-a"
-    ]["snapshot_content_sha256"]
+    ]["semantic_snapshot_sha256"]
     assert [
         member["post_id"] for member in after_items["disclosed-a"]["evidence"]
     ] == ["disclosure-wrapper"]
@@ -1205,8 +1257,8 @@ def test_independent_reaction_topology_does_not_change_semantic_snapshot_hash(
         *[member["post_id"] for member in after_event["evidence"]],
     }
     assert after_members == before_members
-    assert after_event["snapshot_content_sha256"] == before_event[
-        "snapshot_content_sha256"
+    assert after_event["semantic_snapshot_sha256"] == before_event[
+        "semantic_snapshot_sha256"
     ]
 
 
@@ -1346,7 +1398,7 @@ def test_future_renderable_target_does_not_rewrite_prior_opaque_projection(
         "event_id",
         "canonical_root_post_id",
         "presentation_root_post_id",
-        "snapshot_content_sha256",
+        "semantic_snapshot_sha256",
         "anchor_types",
         "why_grouped",
     ):

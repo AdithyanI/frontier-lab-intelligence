@@ -69,7 +69,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     signal_events_p.add_argument("event_args", nargs=argparse.REMAINDER)
     audience_routing_p = sub.add_parser(
-        "audience-routing", help="Route Evidence envelopes by audience."
+        "audience-routing", help="Route Evidence Events by audience."
     )
     audience_routing_p.add_argument("audience_routing_args", nargs=argparse.REMAINDER)
     insights_p = sub.add_parser(
@@ -83,6 +83,11 @@ def main(argv: list[str] | None = None) -> int:
     daily_intelligence_p.add_argument(
         "daily_intelligence_args", nargs=argparse.REMAINDER
     )
+    daily_run_p = sub.add_parser(
+        "daily-run",
+        help="Prepare one date and launch its persisted Codex daily task.",
+    )
+    daily_run_p.add_argument("daily_run_args", nargs=argparse.REMAINDER)
     attention_score_p = sub.add_parser(
         "attention-score", help="Evaluate versioned Feed attention scores."
     )
@@ -96,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     evidence_refresh_p = sub.add_parser(
         "evidence-refresh",
-        help="Refresh Evidence, envelopes, and primary artifacts end to end.",
+        help="Refresh Feed Events and source artifacts end to end.",
         add_help=False,
     )
     evidence_refresh_p.add_argument("refresh_args", nargs=argparse.REMAINDER)
@@ -206,6 +211,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli.insights import editorial_cli
 
         return editorial_cli.main(args.daily_intelligence_args)
+
+    if args.command == "daily-run":
+        from fli.insights import daily_runner
+
+        return daily_runner.main(args.daily_run_args)
 
     if args.command == "attention-score":
         from fli.scoring import evaluation

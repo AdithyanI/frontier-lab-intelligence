@@ -5,7 +5,6 @@ src/fli/web/dist, which this app serves. During frontend development,
 `npm run dev` in frontend/ proxies /api to this server.
 
 Endpoints:
-- /api/status                    pipeline stages with live DB counts (health/ops)
 - /api/registry                  paged/searchable typed entity universe
 - /api/rankings                  derived cohort-trust ranking (read-only)
 - /api/rankings/followers/{id}   which cohort sources follow one account
@@ -83,44 +82,6 @@ def _model_conn():
     return conn
 
 
-def _counts() -> dict:
-    conn = _model_conn()
-    try:
-        def one(sql: str) -> int:
-            return conn.execute(sql).fetchone()[0]
-
-        return {
-            "channels": one("SELECT COUNT(*) FROM channels"),
-            "x_channels": one("SELECT COUNT(*) FROM channels WHERE kind = 'x'"),
-            "edges": one("SELECT COUNT(*) FROM graph_edges"),
-            "observations": one("SELECT COUNT(*) FROM channel_observations"),
-            "raw_items": one("SELECT COUNT(*) FROM raw_items"),
-            "observation_sources": one(
-                "SELECT COUNT(DISTINCT source) FROM channel_observations"
-            ),
-            "entities": one("SELECT COUNT(*) FROM entities"),
-            "classified_entities": one(
-                "SELECT COUNT(*) FROM entities WHERE kind <> 'unknown'"
-            ),
-            "unknown_entities": one(
-                "SELECT COUNT(*) FROM entities WHERE kind = 'unknown'"
-            ),
-            "unsure_entities": one(
-                """SELECT COUNT(*) FROM entities e
-                   WHERE e.kind = 'unsure'
-                     AND NOT EXISTS (
-                         SELECT 1 FROM entity_registry_rejections rejected
-                         WHERE rejected.entity_id = e.id
-                     )"""
-            ),
-            "rejected_entities": one(
-                "SELECT COUNT(*) FROM entity_registry_rejections"
-            ),
-        }
-    finally:
-        conn.close()
-
-
 def _registry_reach_ranks(conn) -> tuple[dict[int, int], int]:
     """Stable public-reach position across all active Registry entities."""
     rows = conn.execute(
@@ -192,65 +153,6 @@ def _add_registry_ranks(conn, entities: list[dict]) -> int:
             }
         )
     return reach_rank_total
-
-
-@app.get("/api/status")
-def status() -> JSONResponse:
-    c = _counts()
-    stages = [
-        {
-            "id": "sources",
-            "name": "Sources",
-            "state": "live",
-            "summary": "Curated public source lists + raw public-output corpus; trusted-follow graph starts empty.",
-            "stats": [
-                {"label": "graph edges", "value": c["edges"]},
-                {"label": "raw items", "value": c["raw_items"]},
-                {"label": "observation sources", "value": c["observation_sources"]},
-            ],
-        },
-        {
-            "id": "registry",
-            "name": "Registry",
-            "state": "live",
-            "summary": "Every observed channel resolves to a structurally typed entity; unsure identities remain explicit.",
-            "stats": [
-                {"label": "entity universe", "value": c["entities"]},
-                {"label": "classified", "value": c["classified_entities"]},
-                {"label": "unsure", "value": c["unsure_entities"]},
-                {"label": "rejected", "value": c["rejected_entities"]},
-            ],
-        },
-        {
-            "id": "ingestion",
-            "name": "Ingestion",
-            "state": "pending",
-            "summary": "Scheduled pulls around the accepted registry; dedup + clustering.",
-            "stats": [],
-        },
-        {
-            "id": "extraction",
-            "name": "Extraction",
-            "state": "pending",
-            "summary": "LLM → structured, cited insights tied to people and labs.",
-            "stats": [],
-        },
-        {
-            "id": "scoring",
-            "name": "Scoring",
-            "state": "pending",
-            "summary": "Visible dimensions incl. thesis-breaking; validated, not vibes.",
-            "stats": [],
-        },
-        {
-            "id": "delivery",
-            "name": "Delivery",
-            "state": "pending",
-            "summary": "Persona digests and alerts for investment and AI teams.",
-            "stats": [],
-        },
-    ]
-    return JSONResponse({"stages": stages})
 
 
 @app.get("/api/registry")
@@ -506,21 +408,30 @@ def insight_dates(
     """Available successor Insight dates for one audience."""
     payload = insight_store.insight_dates_payload(audience=audience)
     editorial = editorial_store.editorial_insight_dates_payload(audience=audience)
+    candidate_dates = {
+        str(item["day"]): {
+            "day": str(item["day"]),
+            "content_kind": "candidate_decisions",
+            "item_count": int(item["item_count"]),
+            "candidate_count": int(item["evaluated_count"]),
+            "included_candidate_count": int(item["item_count"]),
+            "not_selected_candidate_count": int(item["suppressed_count"]),
+        }
+        for item in payload.get("dates", [])
+    }
     if not editorial["available"]:
-        return JSONResponse(payload)
-    dates = {str(item["day"]): dict(item) for item in payload["dates"]}
+        return JSONResponse({**payload, "dates": list(candidate_dates.values())})
+    dates = candidate_dates
     for item in editorial["dates"]:
         day = str(item["day"])
-        current = dates.get(
-            day,
-            {
-                "day": day,
-                "suppressed_count": 0,
-                "evaluated_count": int(item["candidate_count"]),
-            },
-        )
-        current["item_count"] = int(item["item_count"])
-        dates[day] = current
+        dates[day] = {
+            "day": day,
+            "content_kind": "daily_editorial",
+            "item_count": int(item["item_count"]),
+            "candidate_count": int(item["candidate_count"]),
+            "included_candidate_count": int(item["included_candidate_count"]),
+            "not_selected_candidate_count": int(item["not_selected_candidate_count"]),
+        }
     ordered = [dates[day] for day in sorted(dates)]
     return JSONResponse(
         {

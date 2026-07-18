@@ -14,7 +14,7 @@ import {
   type EventResponse,
   type FeedDates,
   type FeedItem,
-  type SignalEvent,
+  type FeedEvent,
 } from '../../shared/api'
 import {
   getDateWindowEndForSelection,
@@ -220,7 +220,7 @@ function FeedMenuSelect<T extends string>({
         )}
         <span className="feed-menu-caret" aria-hidden="true" />
       </summary>
-      <div className="feed-menu-panel" role="menu" aria-label={label}>
+      <div className="feed-menu-panel" role="group" aria-label={label}>
         {options.map((option) => (
           <button
             type="button"
@@ -230,8 +230,7 @@ function FeedMenuSelect<T extends string>({
               onChange(option.value)
               detailsRef.current?.removeAttribute('open')
             }}
-            role="menuitemradio"
-            aria-checked={option.value === value}
+            aria-pressed={option.value === value}
             title={option.description}
           >
             <span>{option.label}</span>
@@ -247,7 +246,7 @@ function FeedMenuSelect<T extends string>({
   )
 }
 
-function RoutingNote({ item }: { item: SignalEvent }) {
+function RoutingNote({ item }: { item: FeedEvent }) {
   const routing = item.audience_routing
   if (!routing) return null
   const routedToNeither =
@@ -262,7 +261,7 @@ function RoutingNote({ item }: { item: SignalEvent }) {
             {routing.ai_engineering.relevant && (
               <>
                 <span className="event-audience-mark" aria-hidden="true">ENG</span>
-                <span className="sr-only">Relevant to Engineering. </span>
+                <span className="sr-only">Relevant to AI Engineering. </span>
               </>
             )}
             {routing.investment.relevant && (
@@ -285,7 +284,7 @@ function RoutingNote({ item }: { item: SignalEvent }) {
       <div className="event-routing-reasons">
         <div className="event-routing-reason">
           <span className="event-routing-reason-label mono">
-            Engineering · {routing.ai_engineering.relevant ? 'Relevant' : 'Not relevant'}
+            AI Engineering · {routing.ai_engineering.relevant ? 'Relevant' : 'Not relevant'}
           </span>
           <p>{routing.ai_engineering.reason}</p>
         </div>
@@ -310,7 +309,7 @@ function ScoreDisclosure({
   onToggle,
   onClose,
 }: {
-  item: SignalEvent
+  item: FeedEvent
   rank: number
   total: number
   date: string
@@ -516,7 +515,7 @@ function EventEvidenceDetails({
   date,
   relationshipSummary,
 }: {
-  item: SignalEvent
+  item: FeedEvent
   date: string
   relationshipSummary: string[]
 }) {
@@ -578,7 +577,7 @@ function EventRow({
   onCloseScore,
   focused,
 }: {
-  item: SignalEvent
+  item: FeedEvent
   rank: number
   total: number
   date: string
@@ -631,7 +630,9 @@ function EventRow({
             </a>
           </div>
           <div className="feed-meta mono">
-            {item.is_grouped && <span>{item.member_count} related</span>}
+            {item.is_grouped && (
+              <span>{item.member_count - 1} related {item.member_count === 2 ? 'post' : 'posts'}</span>
+            )}
             {!item.is_grouped && root.post_type === 'quote' && <span>quote</span>}
             <time dateTime={root.published_at}>{time.format(new Date(root.published_at))}</time>
           </div>
@@ -684,7 +685,7 @@ export default function Feed() {
   rememberDateRef.current = rememberDate
   setUrlSearchParamsRef.current = setUrlSearchParams
   const [targetEventId, setTargetEventId] = useState(
-    () => urlSearchParams.get('event') ?? '',
+    () => urlSearchParams.get('event_id') ?? '',
   )
   const [dates, setDates] = useState<FeedDates | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
@@ -695,7 +696,7 @@ export default function Feed() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [data, setData] = useState<EventResponse | null>(null)
-  const [items, setItems] = useState<SignalEvent[]>([])
+  const [items, setItems] = useState<FeedEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [openScoreEventId, setOpenScoreEventId] = useState<string | null>(null)
@@ -836,7 +837,7 @@ export default function Feed() {
     setSelectedDate(day)
     rememberDate(day)
     setUrlSearchParams(
-      setAuditDateParam(urlSearchParams, day, ['event']),
+      setAuditDateParam(urlSearchParams, day, ['event_id']),
       { replace: true },
     )
   }
@@ -845,7 +846,7 @@ export default function Feed() {
     if (!targetEventId) return
     setTargetEventId('')
     const nextParams = new URLSearchParams(urlSearchParams)
-    nextParams.delete('event')
+    nextParams.delete('event_id')
     setUrlSearchParams(nextParams, { replace: true })
   }
 
@@ -935,11 +936,11 @@ export default function Feed() {
           What is the network paying attention to?
         </h2>
         <p className="evidence-view-sub">
-          Each day&rsquo;s posts from tracked labs and people, ranked by who in
-          the network amplified them — not by raw engagement.
+          Events from tracked labs and people, ordered by a daily score led by
+          tracked amplification, with author-network support and public engagement.
         </p>
         <p className="page-method-line mono">
-          <a href="/architecture#ranking-methods">How scoring works ↗</a>
+          <a href="/system/architecture#ranking-methods">How scoring works ↗</a>
         </p>
       </header>
 
@@ -953,6 +954,7 @@ export default function Feed() {
           onShowOlderDates={() => moveDateWindow('older')}
           onShowNewerDates={() => moveDateWindow('newer')}
           ariaLabel="Feed date"
+          itemLabel="Events"
           loading={dates === null}
         />
       </section>
@@ -979,9 +981,9 @@ export default function Feed() {
             }}
             options={[
               { value: 'all', label: 'All', description: 'All Feed items', count: data?.routing_counts?.all },
-              { value: 'relevant', label: 'Relevant', description: 'Engineering or Investment', count: data?.routing_counts?.relevant },
+              { value: 'relevant', label: 'Relevant', description: 'AI Engineering or Investment', count: data?.routing_counts?.relevant },
               { value: 'not_relevant', label: 'Not relevant', description: 'Evaluated, but relevant to neither audience', count: data?.routing_counts?.not_relevant },
-              { value: 'not_evaluated', label: 'Not evaluated', description: 'No audience-routing result', count: data?.routing_counts?.not_evaluated },
+              { value: 'not_evaluated', label: 'Not evaluated', description: 'Outside the current cohort, stale, or unavailable', count: data?.routing_counts?.not_evaluated },
             ]}
           />
           <FeedMenuSelect
@@ -1039,7 +1041,7 @@ export default function Feed() {
             {selectedDate && !selectedDateIsAvailable
               ? `No complete Feed view is available for ${selectedDateLabel}. This audit date remains preserved across views.`
               : targetEventId
-                ? `This exact Feed envelope is not available for ${selectedDateLabel}. Check the date or envelope ID.`
+                ? `This exact Feed Event is not available for ${selectedDateLabel}. Check the date or Event ID.`
               : 'No evidence matches this search. Try another day or clear the search.'}
           </div>
         )}

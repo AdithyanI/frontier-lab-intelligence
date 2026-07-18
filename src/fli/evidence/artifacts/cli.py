@@ -18,7 +18,7 @@ from fli.evidence.artifacts.store import (
     DEFAULT_DB,
     audit_primary_author_lineage,
     connect,
-    import_feed_envelopes,
+    import_feed_events,
     import_reviewed_supplements,
     inspect_artifacts,
     summary,
@@ -103,7 +103,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="action", required=True)
     import_parser = sub.add_parser(
         "import-feed",
-        help="Index primary-author URLs from the published Feed envelopes.",
+        help="Index first-party URLs from the published Feed Events.",
     )
     import_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     import_parser.add_argument("--feed-db", type=Path, default=signal_feed.DEFAULT_FEED_DB)
@@ -191,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
         if parsed_limit is not None and parsed_limit <= 0:
             raise ValueError("limit must be greater than zero")
         if args.action == "import-feed":
-            data = import_feed_envelopes(
+            data = import_feed_events(
                 db_path=args.db,
                 feed_db=args.feed_db,
                 events_db=args.events_db,

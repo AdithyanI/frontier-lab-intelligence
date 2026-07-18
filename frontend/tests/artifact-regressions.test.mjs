@@ -13,7 +13,7 @@ const evidenceSource = await readFile(
 )
 const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url), 'utf8')
 
-test('Feed and Primary artifacts are separate views of one Evidence workspace', () => {
+test('Feed and Artifacts are separate views of one Evidence workspace', () => {
   assert.match(appSource, /useAuditDatePath\('\/evidence\/feed'\)/)
   assert.match(appSource, /<NavLink to=\{evidencePath\}>Evidence<\/NavLink>/)
   assert.match(appSource, /<Route path="\/evidence" element=\{<Evidence \/>\}>/)
@@ -26,7 +26,7 @@ test('Feed and Primary artifacts are separate views of one Evidence workspace', 
   assert.match(evidenceSource, /useAuditDatePath\('\/evidence\/feed'\)/)
   assert.match(evidenceSource, /useAuditDatePath\('\/evidence\/artifacts'\)/)
   assert.match(evidenceSource, /<NavLink to=\{feedPath\}>Feed<\/NavLink>/)
-  assert.match(evidenceSource, /<NavLink to=\{artifactsPath\}>Primary artifacts<\/NavLink>/)
+  assert.match(evidenceSource, /<NavLink to=\{artifactsPath\}>Artifacts<\/NavLink>/)
 })
 
 test('Feed and Artifacts share the same seven-date navigator', () => {
@@ -87,16 +87,17 @@ test('Artifacts inherit Feed rank while keeping the source timestamp in provenan
   assert.match(artifactSource, /sortArtifactsByFeedRank\(\[\.\.\.current, \.\.\.payload\.items\]\)/)
 })
 
-test('Artifacts from one exact Feed envelope share one visual rank rail', () => {
+test('Artifacts from one exact Feed Event share one visual rank rail', () => {
   assert.match(artifactSource, /previousGroup\?\.\[0\]\.source_event_id === item\.source_event_id/)
   assert.match(artifactSource, /rankIsContinuation=\{index > 0\}/)
   assert.match(artifactSource, /continuesRankGroup=\{index < group\.length - 1\}/)
   assert.match(artifactSource, /!rankIsContinuation && <strong>#\{item\.best_source_rank\}<\/strong>/)
 })
 
-test('Artifact provenance deep-links to the exact ranked Feed envelope', () => {
+test('Artifact provenance deep-links to the exact ranked Feed Event', () => {
   assert.match(artifactSource, /source_event_id/)
-  assert.match(artifactSource, /Feed envelope/)
+  assert.match(artifactSource, /Feed Event/)
+  assert.match(artifactSource, /event_id=/)
   assert.match(artifactSource, /<CopyEventId eventId=\{item\.source_event_id\} \/>/)
   assert.match(artifactSource, /\/evidence\/feed\?date=/)
   assert.match(feedSource, /useSearchParams/)

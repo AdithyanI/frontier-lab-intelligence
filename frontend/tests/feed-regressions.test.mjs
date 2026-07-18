@@ -36,9 +36,9 @@ test('Feed shows audience marks and keeps both routing reasons auditable', () =>
   assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">ENG</)
   assert.match(feedSource, /routing\.investment\.relevant/)
   assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">INV</)
-  assert.match(feedSource, /Relevant to Engineering/)
+  assert.match(feedSource, /Relevant to AI Engineering/)
   assert.match(feedSource, /Relevant to Investment/)
-  assert.match(feedSource, /Engineering · \{routing\.ai_engineering\.relevant \? 'Relevant' : 'Not relevant'\}/)
+  assert.match(feedSource, /AI Engineering · \{routing\.ai_engineering\.relevant \? 'Relevant' : 'Not relevant'\}/)
   assert.match(feedSource, /Investment · \{routing\.investment\.relevant \? 'Relevant' : 'Not relevant'\}/)
   assert.doesNotMatch(feedSource, /Feed triage|Kept for extraction|Dropped before extraction/)
   assert.match(appStyles, /\.event-audience-mark \{[\s\S]*?border: 1px solid var\(--border\);/)
@@ -56,14 +56,15 @@ test('Feed exposes one mutually exclusive routing Status control', () => {
   assert.doesNotMatch(feedSource, /triageFilter|triage_counts|auditFilter|audienceFilter/)
 })
 
-test('Feed exact-envelope links reveal the target outside the default Relevant filter', () => {
+test('Feed exact-Event links reveal the target outside the default Relevant filter', () => {
   assert.equal(initialFeedRoutingFilter(new URLSearchParams()), 'relevant')
   assert.equal(
-    initialFeedRoutingFilter(new URLSearchParams('event=exact-envelope-id')),
+    initialFeedRoutingFilter(new URLSearchParams('event_id=exact-event-id')),
     'all',
   )
   assert.match(feedSource, /initialFeedRoutingFilter\(initialSearchParams\.current\)/)
-  assert.match(feedSource, /This exact Feed envelope is not available/)
+  assert.match(feedSource, /This exact Feed Event is not available/)
+  assert.match(feedSource, /Check the date or Event ID/)
 })
 
 test('Feed search matches the compact ruled control language', () => {
@@ -74,6 +75,7 @@ test('Feed search matches the compact ruled control language', () => {
 })
 
 test('Feed preserves daily rank across search and discloses score on demand', () => {
+  assert.match(feedSource, /href="\/system\/architecture#ranking-methods"/)
   assert.match(feedSource, /<strong>#\{rank\}<\/strong>/)
   assert.match(feedSource, /rank=\{item\.daily_rank\}/)
   assert.match(feedSource, /Daily rank #\{rank\} of \{total\.toLocaleString/)
@@ -136,7 +138,8 @@ test('Feed keeps date navigation stable while loading and compact at narrower de
   assert.match(dateNavigatorSource, /loading\?: boolean/)
   assert.match(dateNavigatorSource, /Array\.from\(\{ length: 7 \}/)
   assert.match(dateNavigatorSource, /className="feed-day-placeholder"/)
-  assert.match(dateNavigatorSource, /itemLabel = 'posts'/)
+  assert.match(dateNavigatorSource, /itemLabel = 'items'/)
+  assert.match(feedSource, /itemLabel="Events"/)
   assert.match(
     dateNavigatorSource,
     /aria-label=\{`\$\{fullDateLabel\}, \$\{itemCountLabel\} \$\{itemLabel\}`\}/,

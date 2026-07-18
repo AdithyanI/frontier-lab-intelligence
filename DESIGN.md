@@ -98,10 +98,10 @@ Rules:
   Registry follows as the screened identity audit view. A third **Add Profile**
   subview owns manual admission as an operator action. Use one ruled secondary
   navigation for all three, not another row of top-level pills.
-- Feed and Primary artifacts share one top-level **Evidence** destination
+- Feed and Artifacts share one top-level **Evidence** destination
   because they are two inspection views over the same evidence layer. Feed is
   the first and default subview: it owns daily rank, score disclosure, and
-  direct audience routing. Primary artifacts follows as the canonical source
+  direct audience routing. Artifacts follows as the canonical source
   and retrieval-provenance index derived from selected Feed evidence. Keep the two
   object types in separate ruled views; do not blend events and artifacts into
   one list.
@@ -195,28 +195,28 @@ Rules:
   filter without inventing another evaluation state, followed by Relevant,
   Not relevant, and Not evaluated. Search shares their 44px square hairline treatment
   but remains a separate left-aligned input; the Status/Sort controls
-  anchor the right edge. They stack only on narrow screens. Per-envelope routing rationale is collapsed by
+  anchor the right edge. They stack only on narrow screens. Per-Event routing rationale is collapsed by
   default behind a quiet `View reasons` disclosure so evidence remains the
-  primary reading surface. A routed envelope shows neutral hairline `ENG`
+  primary reading surface. A routed Event shows neutral hairline `ENG`
   and/or `INV` marks, or the quiet `Neither audience`
   state when both judgments are negative. The disclosure presents only the
-  two audience-specific decisions and reasons. Unrouted or stale envelopes
+  two audience-specific decisions and reasons. Unrouted or stale Events
   show no routing status.
 - **Artifact index:** a flat, ruled list over the canonical artifact catalog.
   Within the selected source day, order by the best originating Feed rank; if
-  several accepted envelopes reveal the same artifact, the smallest rank wins.
+  several Events reveal the same artifact, the smallest rank wins.
   This is inherited provenance, not a second artifact score. Keep the default
   row to Feed rank, artifact title and host, fetch-oriented type, and source.
   Keep content status and the exact source timestamp inside the expansion so
-  the scan surface stays crisp. When one Feed envelope reveals several canonical
+  the scan surface stays crisp. When one Feed Event reveals several canonical
   artifacts, keep them as separate expandable rows but show their shared rank
-  once in one continuous left rail. Equal ranks from different envelopes do
+  once in one continuous left rail. Equal ranks from different Events do
   not visually merge. Native `<details>` expansion reveals
-  the canonical URL, a link back to the exact ranked Feed envelope that
+  the canonical URL, a link back to the exact ranked Feed Event that
   disclosed it, content status, and snapshot provenance. The status is
   one of text ready, not extracted, not supported yet, extracting, retry needed,
   or unavailable; expanded provenance explains that state in plain language
-  rather than exposing an internal error code. The Feed envelope
+  rather than exposing an internal error code. The Feed Event
   remains the evidence workspace and owns the onward X link; Artifacts does
   not duplicate that context. A single
   Feed-style date navigator filters by the UTC day of the source post that
@@ -232,7 +232,7 @@ Rules:
   Investment remains the default. For a date with a complete imported daily
   editorial run, `Kept` shows every selected Insight in agent-assigned priority
   order. The left rail is `Brief rank`, not Feed rank; each supporting Event
-  retains its exact Feed rank and envelope link inside provenance. Brief rank
+  retains its exact Feed rank and Event link inside provenance. Brief rank
   is a quiet disclosure control: opening it shows the item-specific editorial
   rationale and the shared qualitative ranking rubric without adding permanent
   metadata to the reading surface. The flat
@@ -245,7 +245,7 @@ Rules:
   `What to do next` section containing the bounded next step and its measurable
   decision rule; it does not expose separate action, system-surface, hypothesis,
   experiment-detail, or constraints labels. Sources remain visible in the
-  normal reading flow. Event provenance links only to the exact Feed envelope,
+  normal reading flow. Event provenance links only to the exact Feed Event,
   which already owns the onward original-post link. The date count is the number of final
   imported Insights when that run exists. Candidate-level decisions remain an
   audit fallback for unimported days and for explicit `Suppressed` / `All`

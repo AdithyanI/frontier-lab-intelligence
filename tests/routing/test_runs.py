@@ -13,7 +13,7 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     item = {
         "event_id": "event-1",
         "daily_rank": 3,
-        "snapshot_content_sha256": "snapshot-1",
+        "semantic_snapshot_sha256": "snapshot-1",
         "root": {
             "post_id": "post-1",
             "author": {"handle": "alice"},

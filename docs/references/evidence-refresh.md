@@ -5,7 +5,7 @@ workspace. It runs the dependent stages in order and reuses valid work at each
 boundary.
 
 ```text
-X timelines → Feed posts/relations → publish Event envelopes
+X timelines → Feed posts/relations → publish Events
             → primary artifact links → supported artifact text
             → optimize SQLite indexes → warm every visible Feed day
 ```
@@ -73,7 +73,7 @@ value through a flag or environment variable.
   post snapshots. An unchanged input reuses the existing run.
 - **Events:** the run ID hashes the Feed run and exact structural links. The
   validated run is published through one explicit pointer.
-- **Artifact catalog:** every current envelope root and verified same-author
+- **Artifact catalog:** every current Event root and verified same-author
   reply is scanned for owned URLs. Canonical URLs deduplicate observations.
   A new import prunes observations absent from the current Feed/Event snapshot
   while retaining successful content snapshots for artifacts that still exist.
@@ -89,20 +89,20 @@ value through a flag or environment variable.
   definitions are part of the schemas; they are not recreated on each browser
   visit. Use `--no-view-warmup` only for isolated diagnostics.
 
-The pipeline does not rerun audience routing automatically. Rebuilt envelope
+The pipeline does not rerun audience routing automatically. Rebuilt Event
 hashes make stale routing results disappear from the Feed; a later explicit
 routing run evaluates only the intended cohort against the corrected evidence.
 
 ## Refresh audience routing
 
 After the corrected Event run and artifact catalog are published, refresh the
-top 100 envelopes for the same nine-day window with one command:
+top 100 Events for the same nine-day window with one command:
 
 ```bash
 fli audience-routing refresh --through 2026-07-13 --replace
 ```
 
-The defaults are GPT-5.4-mini/high, nine days, 100 envelopes per day, 24 item
+The defaults are GPT-5.4-mini/high, nine days, 100 Events per day, 24 item
 workers per day, and up to nine model-running days in parallel. The command
 first freezes each day's packets sequentially against one published Event/Feed
 pair, then starts bounded parallel model work only after every packet is
@@ -117,7 +117,7 @@ plan without packaging packets or calling the model.
 
 LiteLLM/OpenAI prompt caching still applies to the stable instruction prefix;
 the run databases provide the stronger exact-response reuse when the source
-publication and frozen cohort are unchanged. A changed envelope correctly
+publication and frozen cohort are unchanged. A changed Event correctly
 produces a new request rather than reusing a stale judgment.
 
 For an artifact-only correction to an already complete day, use

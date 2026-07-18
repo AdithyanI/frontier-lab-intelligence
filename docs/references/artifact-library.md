@@ -2,7 +2,7 @@
 
 The Artifact Library is the deterministic boundary between **where a resource
 was observed** and **the underlying resource itself**. It indexes outbound
-links from the root X account's kept post and same-account reply thread without
+links from a Feed Event's root X post and same-account reply thread without
 fetching the whole corpus, then
 fetches a deliberately bounded cohort into replayable raw and clean-text
 snapshots.
@@ -17,14 +17,14 @@ immutable X evidence
     -> bounded fetch attempts
     -> content-addressed raw body and clean text
 
-frozen kept event + human-reviewed official source
+frozen Event snapshot + human-reviewed official source
     -> explicit event supplement ledger
     -> the same canonical artifact / fetch / snapshot boundary
 ```
 
 An ordinary X status permalink remains source evidence. A paper, article,
 repository, announcement, video, or X long-form Article linked by that source
-may become an artifact. Event envelopes never own artifacts: observations bind
+may become an artifact. Events never own artifacts: observations bind
 to the stable source kind, provider, external ID, and source snapshot hash, so
 event regrouping cannot orphan provenance.
 
@@ -46,7 +46,7 @@ evidence.
 | `artifact_observation` | Stable source record that points to an artifact. |
 | `artifact_disclosure` | The direct wrapper through which an embedded source became visible. |
 | `artifact_import_candidate` | Accepted and excluded URL decisions, including reason codes. |
-| `artifact_event_supplement` | Human-reviewed official primary sources attached to one exact frozen kept event, with triage hashes and review provenance. |
+| `artifact_event_supplement` | Human-reviewed official primary sources attached to one exact frozen Event, with source hashes and review provenance. |
 | `artifact_fetch_run` / `_item` | One frozen, ordered validation cohort. |
 | `artifact_fetch` | Append-only attempts, redirects, metadata, hashes, snapshots, and explicit errors. |
 
@@ -77,13 +77,13 @@ announcements, and unmatched HTML pages map to `web`. This keeps the UI honest
 without requiring fragile Article-versus-page inference, while preserving the
 one article subtype that is operationally exact.
 
-Artifact admission is narrower than the visible envelope. A URL is eligible
+Artifact admission is narrower than the visible Event. A URL is eligible
 only when its owning post is the root post or a reply from the same stable X
 account in the same root conversation. Other accounts' replies, quotes,
 retweets, and nested links remain visible reactions in Evidence but cannot
 create an artifact association or enter an Insight packet. Conversation
 identity retains valid same-account links when an intermediate reply is absent
-from the Feed snapshot. An envelope preview is never sufficient by itself: the
+from the Feed snapshot. An Event preview is never sufficient by itself: the
 URL must also be bound to that exact post in its immutable raw payload, or the
 candidate fails closed.
 
@@ -216,13 +216,13 @@ observation, never by retrieval time. Date counts are distinct canonical
 artifacts; an artifact appears on each day it was observed, and exact-day
 search matches every source observation for that artifact rather than only the
 representative latest one. Within a selected day, one row per canonical
-artifact inherits the best rank among the accepted Feed envelopes that exposed
+artifact inherits the best rank among the Feed Events that exposed
 it; the smallest rank wins when several observations converge. Source time is
 shown separately, and the inherited rank is provenance rather than a new
 artifact-quality score. Bounded pagination keeps the surface fast. Expanding a
-row shows the canonical URL and deep-links to the exact ranked Feed envelope
+row shows the canonical URL and deep-links to the exact ranked Feed Event
 that disclosed it; the Feed preserves the full evidence context and onward X
-link. When that exact envelope exposes multiple canonical artifacts, the UI
+link. When that exact Event exposes multiple canonical artifacts, the UI
 keeps every artifact independently expandable while rendering their inherited
 rank once in a shared left rail; no catalog records are merged. Expanded
 provenance also shows first-seen time, retrieval state and
@@ -248,15 +248,15 @@ observations, undisclosed observations, or artifacts without lineage. Later
 imports prune observations absent from the current Feed/Event snapshot while
 retaining successful content snapshots for canonical artifacts that remain.
 
-Anthropic's global-workspace envelope retains the Anthropic research page and
+Anthropic's global-workspace Event retains the Anthropic research page and
 the later Neuronpedia demo linked from Anthropic's own reply thread. Satya
-Nadella's envelope retains only his X Article; the Eve link from another
+Nadella's Event retains only his X Article; the Eve link from another
 account's reaction is absent.
 
 ## Historical Artifact Store v1 evidence
 
 The superseded 2026-07-14 rebuild indexed 3,072 candidate decisions from the corrected
-kept envelopes: 2,911 accepted occurrences, 161 exclusions, 1,739 source
+Feed Events: 2,911 accepted occurrences, 161 exclusions, 1,739 source
 observations/disclosures, and 1,566 final canonical artifacts after redirect
 convergence. The frozen 30-artifact cohort produced 19 clean-text successes,
 four explicit terminal failures, and seven exhausted retryable failures. All 19

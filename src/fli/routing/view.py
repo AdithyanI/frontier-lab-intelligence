@@ -109,7 +109,7 @@ def _routing_payload_cached(
     items = {
         str(row["event_id"]): {
             "feed_rank": int(row["feed_rank"]),
-            "snapshot_content_sha256": str(row["snapshot_content_sha256"]),
+            "semantic_snapshot_sha256": str(row["snapshot_content_sha256"]),
             "evidence_sha256": str(row["evidence_sha256"]),
             "input_sha256": str(row["input_sha256"]),
             "ai_engineering": {

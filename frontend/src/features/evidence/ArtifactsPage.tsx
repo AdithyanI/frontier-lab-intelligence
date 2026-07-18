@@ -220,7 +220,7 @@ function ArtifactRow({
 }: ArtifactRowProps) {
   const [extractedText, setExtractedText] = useState<string | null>(null)
   const [textState, setTextState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
-  const sourcePublishedAt = item.source_published_at || item.last_source_published_at || item.last_seen_at
+  const sourcePublishedAt = item.source_published_at
   const feedDate = sourcePublishedAt.slice(0, 10)
   const textUrl = `/api/artifacts/${encodeURIComponent(item.artifact_id)}/text`
   const textCharCount = item.text_char_count
@@ -256,7 +256,7 @@ function ArtifactRow({
           aria-label={rankIsContinuation
             ? undefined
             : rankGroupSize > 1
-              ? `Feed rank ${item.best_source_rank}, shared by ${rankGroupSize} artifacts from one Feed envelope`
+              ? `Feed rank ${item.best_source_rank}, shared by ${rankGroupSize} artifacts from one Feed Event`
               : `Feed rank ${item.best_source_rank}`}
         >
           {!rankIsContinuation && <strong>#{item.best_source_rank}</strong>}
@@ -268,8 +268,8 @@ function ArtifactRow({
         <span className="artifact-kind mono">{artifactTypeLabel(item.artifact_type)}</span>
         <span className="artifact-source">
           {sourceLabel(item.source_provider)}
-          {item.observation_count > 1 && (
-            <span className="mono">{item.observation_count} observations that day</span>
+          {item.day_observation_count > 1 && (
+            <span className="mono">{item.day_observation_count} observations that day</span>
           )}
         </span>
         <span className="artifact-caret" aria-hidden="true" />
@@ -289,8 +289,8 @@ function ArtifactRow({
             <dd>
               {item.source_event_id ? (
                 <>
-                  <Link to={`/evidence/feed?date=${feedDate}&event=${encodeURIComponent(item.source_event_id)}`}>
-                    Feed envelope →
+                  <Link to={`/evidence/feed?date=${feedDate}&event_id=${encodeURIComponent(item.source_event_id)}`}>
+                    Feed Event →
                   </Link>
                   <CopyEventId eventId={item.source_event_id} />
                 </>
@@ -304,7 +304,9 @@ function ArtifactRow({
               <span>
                 Source published {observedTimestamp.format(new Date(sourcePublishedAt))}
               </span>
-              <span>Catalogued {observedAt.format(new Date(item.first_seen_at))}</span>
+              <span>
+                First disclosed {observedAt.format(new Date(item.first_source_disclosed_at))}
+              </span>
             </dd>
           </div>
           <div>
@@ -522,16 +524,17 @@ export default function Artifacts() {
   }
 
   const issueCount =
-    (data?.counts?.retryable ?? 0) + (data?.counts?.unavailable ?? 0)
+    (data?.catalog_fetch_state_counts.retryable ?? 0)
+    + (data?.catalog_fetch_state_counts.unavailable ?? 0)
   const artifactRankGroups = useMemo(() => {
     const groups: ArtifactItem[][] = []
     for (const item of items) {
       const previousGroup = groups.at(-1)
-      const sharesExactEnvelope = Boolean(
+      const sharesExactEvent = Boolean(
         item.source_event_id
         && previousGroup?.[0].source_event_id === item.source_event_id,
       )
-      if (sharesExactEnvelope && previousGroup) previousGroup.push(item)
+      if (sharesExactEvent && previousGroup) previousGroup.push(item)
       else groups.push([item])
     }
     return groups
@@ -544,15 +547,15 @@ export default function Artifacts() {
     >
       <header className="page-head">
         <h2 className="evidence-view-title" id="artifacts-title">
-          Primary artifacts
+          Artifacts
         </h2>
         <p className="evidence-view-sub">
-          Durable source links selected from Feed evidence, by source date.
+          Canonical source links disclosed by first-party Event evidence, by source date.
         </p>
         {data?.available && (
           <p className="page-method-line mono">
-            <span>{data.total.toLocaleString('en-US')} canonical artifacts</span>
-            <span>{(data.counts?.ready ?? 0).toLocaleString('en-US')} text snapshots</span>
+            <span>{data.catalog_total.toLocaleString('en-US')} canonical artifacts</span>
+            <span>{data.catalog_fetch_state_counts.ready.toLocaleString('en-US')} text snapshots</span>
             {issueCount > 0 && <span>{issueCount} retrieval issues</span>}
           </p>
         )}
@@ -596,7 +599,7 @@ export default function Artifacts() {
       )}
 
       {data?.available && (
-        <section className="artifact-index" aria-label="Primary artifacts">
+        <section className="artifact-index" aria-label="Artifacts">
           <div className="artifact-columns mono" aria-hidden="true">
             <span>Feed rank</span>
             <span>Artifact</span>

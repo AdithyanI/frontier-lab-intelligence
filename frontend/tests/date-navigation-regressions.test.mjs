@@ -30,12 +30,12 @@ test('audit date paths preserve only the shared date filter', () => {
     '/insights?audience=investment&date=2026-07-13',
   )
   assert.equal(withAuditDate('/architecture#ranking', ''), '/architecture#ranking')
-  assert.equal(readAuditDate('?date=2026-07-12&event=abc'), '2026-07-12')
+  assert.equal(readAuditDate('?date=2026-07-12&event_id=abc'), '2026-07-12')
 
   const next = setAuditDateParam(
-    new URLSearchParams('date=2026-07-12&event=abc'),
+    new URLSearchParams('date=2026-07-12&event_id=abc'),
     '2026-07-13',
-    ['event'],
+    ['event_id'],
   )
   assert.equal(next.toString(), 'date=2026-07-13')
 })
@@ -54,7 +54,7 @@ test('all date-based views and their navigation use the shared audit date', () =
   assert.match(evidenceSource, /useAuditDatePath\('\/evidence\/feed'\)/)
   assert.match(evidenceSource, /useAuditDatePath\('\/evidence\/artifacts'\)/)
   assert.match(feedSource, /readAuditDate\(initialSearchParams\.current\)/)
-  assert.match(feedSource, /setAuditDateParam\(urlSearchParams, day, \['event'\]\)/)
+  assert.match(feedSource, /setAuditDateParam\(urlSearchParams, day, \['event_id'\]\)/)
   assert.match(feedSource, /const selectedDateIsAvailable = availableDates\.some/)
   assert.match(feedSource, /No complete Feed view is available for \$\{selectedDateLabel\}/)
   assert.match(feedSource, /This audit date remains preserved across views/)

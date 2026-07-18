@@ -1,4 +1,4 @@
-"""Primary-author evidence boundaries for Feed envelopes."""
+"""First-party evidence boundaries for Feed Events."""
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ import sqlite3
 from typing import Any
 
 
-def frozen_primary_post_ids(envelope: dict[str, Any]) -> set[str]:
+def frozen_primary_post_ids(event: dict[str, Any]) -> set[str]:
     """Return the root and explicitly frozen same-author reply continuations."""
 
-    root_id = str((envelope.get("root") or {}).get("post_id") or "")
+    root_id = str((event.get("root") or {}).get("post_id") or "")
     if not root_id:
-        raise ValueError("envelope root is missing post_id")
+        raise ValueError("Event root is missing post_id")
     post_ids = {root_id}
-    for raw in envelope.get("related_posts") or []:
+    for raw in event.get("related_posts") or []:
         item = dict(raw)
         if (
             item.get("same_author_as_root") is True
@@ -28,11 +28,11 @@ def verified_primary_post_ids(
     feed: sqlite3.Connection,
     *,
     feed_run_id: str,
-    envelope: dict[str, Any],
+    event: dict[str, Any],
 ) -> set[str]:
     """Return root-account posts in the root conversation, never reactions."""
 
-    root_id = str(envelope["root"]["post_id"])
+    root_id = str(event["root"]["post_id"])
     root = feed.execute(
         """SELECT post_id, author_x_id, conversation_id
            FROM feed_post

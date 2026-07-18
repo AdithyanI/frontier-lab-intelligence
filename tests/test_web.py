@@ -6,19 +6,6 @@ from fli.web.app import app
 client = TestClient(app)
 
 
-def test_status_reports_pipeline_stages():
-    r = client.get("/api/status")
-    assert r.status_code == 200
-    stages = r.json()["stages"]
-    ids = [s["id"] for s in stages]
-    assert ids == ["sources", "registry", "ingestion", "extraction", "scoring", "delivery"]
-    registry = stages[1]
-    assert registry["state"] == "live"
-    assert any(s["label"] == "entity universe" for s in registry["stats"])
-    assert any(s["label"] == "unsure" for s in registry["stats"])
-    assert any(s["label"] == "rejected" for s in registry["stats"])
-
-
 def test_registry_returns_complete_typed_entity_universe():
     r = client.get("/api/registry?limit=5000")
     assert r.status_code == 200

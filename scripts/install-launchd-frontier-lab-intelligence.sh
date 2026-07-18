@@ -131,7 +131,7 @@ LOG_DIR="${HOME}/.local/state/frontier-lab-intelligence/log"
 OUT_LOG="${LOG_DIR}/frontier-lab-intelligence.out.log"
 ERR_LOG="${LOG_DIR}/frontier-lab-intelligence.err.log"
 DOMAIN="gui/$(id -u)"
-LOCAL_HEALTH_URL="http://${HOST}:${PORT}/api/status"
+LOCAL_HEALTH_URL="http://${HOST}:${PORT}/api/registry?limit=1"
 
 print_status() {
   if ! launchctl list "${LABEL}" 2>/dev/null; then

@@ -235,7 +235,7 @@ def _canonical_identity(
     )
     terminal = sorted(member for member in members if not outbound.get(member))
     # A first-party thread can quote several older posts. Those quotes enrich
-    # the envelope but must not replace the thread root as its stable identity
+    # the Event but must not replace the thread root as its stable identity
     # or presentation post merely because an older quoted ID sorts first.
     terminal_thread_roots = [root for root in thread_roots if not outbound.get(root)]
     identity_node = (terminal_thread_roots or terminal or sorted(members))[0]
@@ -489,7 +489,7 @@ def materialize(
                 str(relation["provider"]),
                 str(relation["target_post_id"]),
             )
-            # A quoted reply is not promoted into a source envelope in this
+            # A quoted reply is not promoted into a source Event in this
             # first product boundary. The wrapper remains a standalone Feed
             # item and the complete relationship stays in the Feed ledger.
             target = posts.get(target_key)
@@ -523,7 +523,7 @@ def materialize(
             return left["author_x_id"] == right["author_x_id"]
         return left["author_handle"] == right["author_handle"]
 
-    # Only the source/root author's own replies extend an envelope. Replies by
+    # Only the source/root author's own replies extend an Event. Replies by
     # other accounts remain in the immutable Feed ledger but are deliberately
     # absent from Event grouping and the product Feed. A source-author reply
     # to an outside participant bridges directly back to the source root rather

@@ -58,7 +58,7 @@ def _artifact_fixture(path):
             accepted_count, excluded_count, failed_count, created_at,
             completed_at)
            VALUES ('import', ?, 'test-v1', 'feed-run', 'event-run', '[]',
-                   'test', 'artifact-fixture', 1, 1, 0, 0,
+                   'test', 'artifact-fixture', 2, 2, 0, 0,
                    '2026-07-11T10:00:00+00:00',
                    '2026-07-11T10:00:00+00:00')""",
         (artifacts.SCHEMA_VERSION,),
@@ -81,6 +81,25 @@ def _artifact_fixture(path):
                    'https://github.com/example/project', 'post_url', NULL,
                    'links_to', 'accepted', 'external_http_url', 'newer',
                    '2026-07-11T10:00:00+00:00')"""
+    )
+    conn.execute(
+        """INSERT INTO artifact_import_candidate
+           (candidate_id, import_run_id, envelope_day, event_id, source_rank,
+            day_candidate_count, source_kind, source_provider,
+            source_external_id, source_snapshot_sha256, source_url,
+            disclosure_external_id, disclosure_snapshot_sha256,
+            disclosure_url, disclosure_published_at, observed_url,
+            expanded_url, candidate_source, title_hint, relation, decision,
+            reason_code, artifact_id, created_at)
+           VALUES ('candidate-reshared', 'import', '2026-07-10', 'event-reshared',
+                   3, 2, 'x_post', 'twitterapi_io', 'post-3', 'sha',
+                   'https://x.com/example/status/3', 'post-3', 'sha',
+                   'https://x.com/example/status/3',
+                   '2026-07-11T11:00:00+00:00',
+                   'https://example.com/research',
+                   'https://example.com/research', 'post_url', NULL,
+                   'links_to', 'accepted', 'external_http_url', 'older',
+                   '2026-07-11T11:00:00+00:00')"""
     )
     conn.executemany(
         """INSERT INTO artifact_observation
@@ -185,8 +204,8 @@ def test_artifacts_api_defaults_to_latest_source_day_with_provenance(
     payload = response.json()
 
     assert payload["available"] is True
-    assert payload["total"] == 2
-    assert payload["counts"] == {
+    assert payload["catalog_total"] == 2
+    assert payload["catalog_fetch_state_counts"] == {
         "catalogued": 1,
         "ready": 1,
         "retryable": 0,
@@ -205,11 +224,12 @@ def test_artifacts_api_defaults_to_latest_source_day_with_provenance(
     assert payload["items"][0]["fetch_state"] == "catalogued"
     assert payload["items"][1]["best_source_rank"] == 3
     assert payload["items"][1]["artifact_type"] == "web"
-    assert payload["items"][1]["last_source_published_at"] == (
+    assert payload["items"][1]["day_last_source_published_at"] == (
         "2026-07-11T11:30:00+00:00"
     )
-    assert payload["items"][1]["observation_count"] == 2
+    assert payload["items"][1]["day_observation_count"] == 2
     assert payload["items"][1]["source_provider"] == "twitterapi_io"
+    assert payload["items"][1]["source_event_id"] == "event-reshared"
     assert payload["items"][1]["fetch_state"] == "ready"
     assert payload["items"][1]["fetch_method"] == "Direct fetch"
     assert payload["items"][1]["text_char_count"] == 4200

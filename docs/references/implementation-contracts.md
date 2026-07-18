@@ -31,7 +31,7 @@ The retired Digg edge plane survives only as offline historical evidence. The
 live ranking evidence comes from a frozen Registry-cohort outgoing-follow
 snapshot; entity overlap is the accepted inspectable ranking feature and
 personalized PageRank remains diagnostic. Raw X provider evidence is immutable,
-exact quote/retweet/reply envelopes are cutoff-correct, and current Registry
+exact quote/retweet/reply Events are cutoff-correct, and current Registry
 curation is overlaid at read time. Audience routing and canonical artifact
 storage are derived, replayable stages. Extraction consumes accepted first-party X
 evidence directly and may join canonical artifact text as optional
@@ -71,7 +71,7 @@ does not mutate canonical state. Search actions and sources remain operational
 metadata outside the four-field decision schema.
 
 Manual candidate intake is the application-owned mutation path over that
-boundary. `POST /api/registry/intake` and the inline Registry control accept an
+boundary. `POST /api/registry/intake` and the Add Profile Network subview accept an
 X profile in `screen` or `direct` mode. `screen` materializes current profile
 evidence, applies the follower/protected-account gates, runs the combined v3
 evaluator over up to 20 authored posts, and maps `keep` to active state while
@@ -121,11 +121,9 @@ follow support, then wrote a reversible, reason-bearing Registry rejection.
 Responses calls. It extracts only final message text, tolerates nullable blocks
 from translated responses, owns stable prompt-cache sharding and LiteLLM cost
 header parsing, supplies the Azure-compatible GPT-5.6 cache-retention adapter,
-and normalizes hosted-search actions and cited URLs. Luna is the default
-efficient model for structured routing, extraction, and Registry boundaries;
-routing and extraction use medium reasoning, while grounded identity and
-Registry evaluation use high. The durable routing and evaluation evidence live
-in `docs/references/model-routing.md`.
+and normalizes hosted-search actions and cited URLs. Current model and reasoning
+defaults are accuracy-first and boundary-specific; the durable routing and
+evaluation policy lives in `docs/references/model-routing.md`.
 Claude-native web search uses `tool_choice=auto` so the model can finish after
 searching; the audit still rejects any response with no observed search action.
 
@@ -191,16 +189,16 @@ Feed run. The `signal-events-v6` /
 `exact-structural-v10-root-owned-reactions` contract is a rooted forest rather
 than an unrestricted connected graph. Each post has at most one structural
 parent. Quote/retweet wrappers attach to one source, and only the source
-author's replies extend that envelope. Third-party replies remain preserved in
+author's replies extend that Event. Third-party replies remain preserved in
 the Feed ledger but do not render or group; a reaction can never import its own
 reply thread or bridge two independent roots. A shared conversation ID is not a
 general grouping edge. It bridges only a same-author reply to its captured
 conversation root when the provider omitted or deleted the immediate parent,
-preventing one first-party thread from splitting into separate envelopes.
+preventing one first-party thread from splitting into separate Events.
 Renderable posts and opaque
 provider anchors participate in
 the same structural component, so wrappers around an uncaptured original still
-form one envelope. Canonical event IDs derive from a provider-qualified terminal
+form one Event. Canonical Event IDs derive from a provider-qualified terminal
 post or opaque provider target—not the selected presentation root—so
 they remain stable across rebuilds of the same structural evidence. The Event
 store persists the multi-post components, members, links, anchors, and per-day
@@ -219,7 +217,7 @@ raw evidence posts or daily Event revisions. Registry curation remains dynamic:
 rejected renderable posts are removed, the surviving graph is re-componentized,
 rejected wrappers cannot bridge otherwise separate components, and opaque
 provider anchors continue to connect legitimate survivors. Unconsumed posts
-remain one-member envelopes.
+remain one-member Events.
 
 The weekly projection deduplicates those canonical publications across the
 seven-day window while retaining each Event's lifetime `activity_days` and
@@ -229,7 +227,7 @@ visibly active without introducing a second rank or a continuation row.
 The React `/evidence/feed` surface is one evidence browser rather than separate post,
 group, or lane modes. It offers complete-day navigation, search, the three
 transparent sort orders, score inputs, raw engagement, and direct X
-provenance. Each envelope renders the root once and exposes one flat expandable
+provenance. Each Event renders the root once and exposes one flat expandable
 activity ledger for same-author updates, independent quote/reply commentary,
 and compact amplification facts. The UI no longer presents current/prior
 sections or a continuation state. Audience routing and Insight generation
@@ -268,7 +266,8 @@ those rules without changing the two-judgment output schema.
 `fli.routing.view` is the read-only audit projection. It selects the
 newest fully completed schema-compatible run for the requested UTC day.
 `fli.web.events` attaches a route only when its stable `event_id` and current
-`snapshot_content_sha256` match the frozen record; display rank is not an
+public `semantic_snapshot_sha256` and the persisted routing
+`snapshot_content_sha256` match the frozen semantic record; display rank is not an
 identity key. The Feed renders positive `ENG` and `INV` marks, or `Neither
 audience` when both judgments are false, with the two reasons in one disclosure.
 The UI presents the derived states as one mutually exclusive Status control:
@@ -279,7 +278,7 @@ third relevance judgment or Insight prose is generated.
 
 `fli.evidence.artifacts.store`, `fli.evidence.artifacts.urls`, and
 `fli.evidence.artifacts.lineage` implement a parallel deterministic enrichment
-boundary for selected Feed envelopes; `fli.evidence.artifacts.cli` is the thin
+boundary for selected Feed Events; `fli.evidence.artifacts.cli` is the thin
 machine command adapter over those stores and the retrieval workflows. They
 admit outbound URLs only from the root X post or replies by the same stable X
 account in the same conversation. Other authors' replies, quotes, retweets, and
@@ -287,7 +286,7 @@ nested links remain visible reactions but cannot create artifact associations
 or enter Insight evidence. Conversation identity spans locally missing
 intermediate replies without relaxing the author boundary. Eligible URLs are
 bound to the post that actually contains them in the immutable raw payload and
-indexed without fetching the whole corpus; an envelope-only preview fails
+indexed without fetching the whole corpus; an Event-only preview fails
 closed. The read-only `fli artifacts audit-lineage` command mechanically checks
 the active policy, author/conversation identity, snapshot hashes, raw URL
 ownership, observation support, disclosure presence, and artifact provenance.
@@ -334,7 +333,8 @@ artifacts that remain current. Redirect convergence leaves 2,735 canonical
 artifacts: 2,507 have usable text, including all 221 arXiv artifacts and all
 167 X Articles. Videos remain deferred; 65 non-video pages are unavailable or
 retryable. Broad crawling,
-RSS/GitHub adapters and cited-insight generation remain deferred. The web
+RSS/GitHub discovery adapters remain deferred. Cited daily editorial Insights
+are implemented downstream. The web
 layer now exposes the live catalog through read-only `/api/artifacts/dates`
 and `/api/artifacts` projections plus a minimal `/evidence/artifacts` index. The shared
 Feed-style navigator selects the UTC publication day of the X observation
@@ -342,7 +342,7 @@ Feed-style navigator selects the UTC publication day of the X observation
 inherits the best originating Feed rank, with source time shown separately and
 retrieval state inside expandable provenance rather than in the collapsed index
 row. Expanded provenance deep-links through the stored source event ID to the
-exact Feed envelope; the Feed remains the evidence workspace and owns the
+exact Feed Event; the Feed remains the evidence workspace and owns the
 onward source link. This is a frozen ordering input carried from Feed, not a new artifact
 score. The same artifact
 may appear on multiple days when the network independently links it again. This
@@ -405,7 +405,7 @@ event/day/Feed rank, audiences, model, effort, exact request JSON, prompt/schema
 hashes, and input hash before any model call. Each audience completes or fails
 independently, exact completed rows are reused on resume, and response IDs,
 raw output, token/cache telemetry, reported cost, and errors remain auditable.
-`fli insights run` is the repeated-envelope operator path; `contract`,
+`fli insights run` is the repeated-Event operator path; `contract`,
 `summary`, `inspect`, and current-contract-only `import-result` are JSON-first
 inspection commands.
 `fli insights refresh` is the thin batch coordinator over that same primitive.
@@ -444,7 +444,7 @@ deduplication concern.
 The web layer treats these SQLite stores as versioned read models. Feed/Event
 and Ranking responses are cached in-process against main-database plus WAL
 version tokens, so a Registry change or rebuilt derived run invalidates the
-affected cache. Exact-envelope assembly is cached once per complete Feed day;
+affected cache. Exact-Event assembly is cached once per complete Feed day;
 search, sort, pagination, and routing-derived filters are then applied over that shared
 projection instead of rebuilding its SQLite joins. The SPA deduplicates and
 prefetches complete Feed days and
@@ -490,7 +490,7 @@ flowchart LR
     UI[Web UI<br/>FastAPI + React SPA]
     OBS[(Immutable X observations<br/>provider payload history)]
     FEED[Feed v8<br/>posts · disclosure-dated relation closure · opaque anchors]
-    EVENTS[Events v6<br/>root-owned envelopes · cutoff projections]
+    EVENTS[Events v6<br/>root-owned groups · cutoff projections]
     PUB[Published read model<br/>explicit validated run pointer]
     READ[Registry-aware projections<br/>daily delta · weekly dedupe · audience routing]
     ART[(Artifact catalog<br/>canonical URLs · aliases · source provenance)]
@@ -499,7 +499,7 @@ flowchart LR
     XLISTS --> REG
     XFOLLOW --> REG
     XPOSTS --> OBS --> FEED --> EVENTS --> PUB --> READ
-    READ -->|audience-relevant envelopes + first-party X| EXT
+    READ -->|audience-relevant Events + first-party X| EXT
     READ -->|outbound links| ART --> FETCH
     FETCH -.->|optional primary evidence| EXT
     REG -->|current active/rejected state| READ
@@ -755,8 +755,8 @@ subviews. Registry may also sort on entity-level Network support materialized
 with the latest immutable entity-overlap run. The target is one real-world
 Registry entity: distinct complete active Registry entities following any X
 account mapped to that target count once, and self-support is excluded. The UI
-leads with `support_count / eligible_source_entity_count`, then shows a dense
-tie-aware ordinal among active X-addressable Registry entities. Snapshot date
+leads with a dense tie-aware ordinal among active X-addressable Registry
+entities and keeps the support count as secondary scale evidence. Snapshot date
 and denominator stay visible. Ranking alone retains the deterministic global
 account position for candidate discovery. This does not mutate Registry
 identity, combine public reach into support, or create an importance score;

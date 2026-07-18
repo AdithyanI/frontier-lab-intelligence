@@ -45,5 +45,5 @@ def test_verified_primary_posts_require_stable_author_and_reply_chain():
     assert evidence_lineage.verified_primary_post_ids(
         conn,
         feed_run_id="run",
-        envelope=envelope,
+        event=envelope,
     ) == {"root", "reply-1", "middle", "reply-2"}

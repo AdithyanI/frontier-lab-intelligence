@@ -24,13 +24,13 @@ export interface ArtifactItem {
   artifact_kind: ArtifactKind
   artifact_type: ArtifactType
   title: string | null
-  first_seen_at: string
-  last_seen_at: string
-  observation_count: number
+  first_source_disclosed_at: string
+  last_source_disclosed_at: string
+  day_observation_count: number
   best_source_rank: number
   source_published_at: string
-  first_source_published_at: string | null
-  last_source_published_at: string | null
+  day_first_source_published_at: string | null
+  day_last_source_published_at: string | null
   source_kind: string | null
   source_provider: string | null
   source_url: string | null
@@ -47,11 +47,11 @@ export interface ArtifactLibrary {
   available: boolean
   reason?: string
   items: ArtifactItem[]
-  total: number
+  catalog_total: number
   matching_total: number
   date?: string
   query?: string
-  counts?: Record<ArtifactFetchState, number>
+  catalog_fetch_state_counts: Record<ArtifactFetchState, number>
   limit: number
   offset: number
 }

@@ -433,7 +433,7 @@ def _selected_rows(
     # continuations such as "details below" threads and tracked-account replies
     # to other captured roots. They also contain replies in conversations that
     # are otherwise absent from our evidence corpus. Keep a reply only when its
-    # conversation root is present in this materialization window; the envelope
+    # conversation root is present in this materialization window; the Event
     # later distinguishes same-author continuation from tracked-author reaction.
     roots: set[str] = set()
 
@@ -467,7 +467,7 @@ def _selected_rows(
 
     # A root first discovered as an embedded quote/retweet can have been
     # published just before this materialization window. Its authored thread
-    # is still part of the newly discovered envelope, so recover stored replies
+    # is still part of the newly discovered Event, so recover stored replies
     # up to the window cutoff instead of silently reducing the packet to the
     # embedded root. The upper bound prevents future-reply leakage.
     selected_keys = {(row["provider"], row["post_id"]) for row, _tweet in candidates}

@@ -152,7 +152,7 @@ function DaysGlyph({ x, y }: { x: number; y: number }) {
   )
 }
 
-function EnvelopeGlyph({ x, y }: { x: number; y: number }) {
+function EventGlyph({ x, y }: { x: number; y: number }) {
   const kids = [y - 18, y, y + 18]
   return (
     <g>
@@ -180,7 +180,7 @@ function AudienceRoutingGlyph({ x, y }: { x: number; y: number }) {
   )
 }
 
-function AcceptedEvidenceGlyph({ x, y }: { x: number; y: number }) {
+function ArtifactGlyph({ x, y }: { x: number; y: number }) {
   return (
     <g>
       <rect x={x} y={y - 18} width={38} height={42} fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
@@ -198,16 +198,16 @@ function EvidenceInputMap() {
   const stages = [
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
     { x: 234, kicker: 'SOURCE', title: 'X posts + threads', glyph: 'days' },
-    { x: 440, kicker: 'STRUCTURE', title: 'Exact envelopes', glyph: 'envelope' },
-    { x: 646, kicker: 'ROUTE', title: 'Audience relevance', glyph: 'audience', dark: true },
-    { x: 852, kicker: 'EVIDENCE', title: 'Routed evidence', glyph: 'accepted' },
+    { x: 440, kicker: 'STRUCTURE', title: 'Exact Events', glyph: 'event' },
+    { x: 646, kicker: 'ENRICH', title: 'Source artifacts', glyph: 'artifact' },
+    { x: 852, kicker: 'ROUTE', title: 'Audience relevance', glyph: 'audience', dark: true },
   ]
 
   return (
     <svg
       viewBox="0 0 1080 224"
       role="img"
-      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact envelopes are routed independently for AI Engineering and Investment. Routed evidence may be enriched with artifacts."
+      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact Events disclose source artifacts before the complete evidence packet is routed independently for AI Engineering and Investment."
     >
       <defs>
         <marker id="flow-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -231,9 +231,9 @@ function EvidenceInputMap() {
           <text x={stage.x + 18} y="122" fontFamily={UI} fontSize={stage.title.length > 16 ? 15.5 : 18} fontWeight="600" fill={stage.dark ? '#fff' : INK}>{stage.title}</text>
           {stage.glyph === 'roster' && <RosterGlyph x={stage.x + 18} y={144} dark />}
           {stage.glyph === 'days' && <DaysGlyph x={stage.x + 18} y={158} />}
-          {stage.glyph === 'envelope' && <EnvelopeGlyph x={stage.x + 18} y={158} />}
+          {stage.glyph === 'event' && <EventGlyph x={stage.x + 18} y={158} />}
+          {stage.glyph === 'artifact' && <ArtifactGlyph x={stage.x + 18} y={152} />}
           {stage.glyph === 'audience' && <AudienceRoutingGlyph x={stage.x + 18} y={158} />}
-          {stage.glyph === 'accepted' && <AcceptedEvidenceGlyph x={stage.x + 18} y={152} />}
         </g>
       ))}
       <Arrow x1={206} x2={228} />

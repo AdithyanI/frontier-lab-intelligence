@@ -1,4 +1,4 @@
-"""One resumable refresh path for Evidence, envelopes, and primary artifacts."""
+"""One resumable refresh path for Feed Events and source artifacts."""
 
 from __future__ import annotations
 
@@ -354,7 +354,7 @@ def refresh_evidence(
     if progress:
         progress("feed", "complete")
         progress("artifacts", "running")
-    catalog = artifacts.import_feed_envelopes(
+    catalog = artifacts.import_feed_events(
         db_path=artifact_db,
         feed_db=feed_db,
         events_db=events_db,
@@ -485,7 +485,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = sources.JsonArgumentParser(
         prog="fli evidence-refresh",
         description=(
-            "Refresh raw X evidence, Feed envelopes, primary links, and supported "
+            "Refresh raw X evidence, Feed Events, source links, and supported "
             "artifact text with cache reuse at every stage."
         ),
         epilog=(

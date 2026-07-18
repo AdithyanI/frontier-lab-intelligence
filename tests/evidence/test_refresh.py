@@ -50,7 +50,7 @@ def test_refresh_evidence_runs_cached_pipeline_in_dependency_order(monkeypatch):
     )
     monkeypatch.setattr(
         evidence_refresh.artifacts,
-        "import_feed_envelopes",
+        "import_feed_events",
         lambda **kwargs: (calls.append(("catalog", kwargs)), {"artifact_count": 3})[1],
     )
     monkeypatch.setattr(
@@ -136,7 +136,7 @@ def test_refresh_evidence_can_rebuild_without_collection_or_content(monkeypatch)
     )
     monkeypatch.setattr(
         evidence_refresh.artifacts,
-        "import_feed_envelopes",
+        "import_feed_events",
         lambda **kwargs: {"artifact_count": 3},
     )
     monkeypatch.setattr(
@@ -218,7 +218,7 @@ def test_refresh_evidence_proves_incremental_collection_covers_publication(
     )
     monkeypatch.setattr(
         evidence_refresh.artifacts,
-        "import_feed_envelopes",
+        "import_feed_events",
         lambda **_: {"artifact_count": 0},
     )
     monkeypatch.setattr(evidence_refresh, "_optimize_stores", lambda _: {})
@@ -403,7 +403,7 @@ def test_refresh_evidence_fetches_all_supported_content_by_default(monkeypatch):
     )
     monkeypatch.setattr(
         evidence_refresh.artifacts,
-        "import_feed_envelopes",
+        "import_feed_events",
         lambda **kwargs: {"artifact_count": 3},
     )
     monkeypatch.setattr(

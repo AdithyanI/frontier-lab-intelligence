@@ -256,7 +256,7 @@ def insights_payload(
     db_path: object | None = None,
     run_root: object | None = None,
 ) -> dict[str, Any]:
-    """Return latest decisions by envelope, ordered only by frozen Feed rank."""
+    """Return latest decisions by Event, ordered only by frozen Feed rank."""
     del run_root
     selected_audience = _audience(audience)
     selected_status = _status(status)

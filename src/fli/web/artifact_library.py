@@ -54,8 +54,15 @@ def _missing_catalog(
         "available": False,
         "reason": reason,
         "items": [],
-        "total": 0,
+        "catalog_total": 0,
         "matching_total": 0,
+        "catalog_fetch_state_counts": {
+            "catalogued": 0,
+            "ready": 0,
+            "retryable": 0,
+            "unavailable": 0,
+            "fetching": 0,
+        },
         "limit": limit,
         "offset": offset,
     }
@@ -272,13 +279,13 @@ def artifacts_payload(
                    SELECT observation.*,
                           COUNT(*) OVER (
                               PARTITION BY observation.artifact_id
-                          ) AS observation_count,
+                          ) AS day_observation_count,
                           MIN(observation.source_published_at) OVER (
                               PARTITION BY observation.artifact_id
-                          ) AS first_source_published_at,
+                          ) AS day_first_source_published_at,
                           MAX(observation.source_published_at) OVER (
                               PARTITION BY observation.artifact_id
-                          ) AS last_source_published_at,
+                          ) AS day_last_source_published_at,
                           ROW_NUMBER() OVER (
                               PARTITION BY observation.artifact_id
                               ORDER BY observation.best_source_rank,
@@ -320,12 +327,13 @@ def artifacts_payload(
                )
                SELECT artifact.artifact_id, artifact.canonical_url,
                       artifact.host, artifact.artifact_kind, artifact.title,
-                      artifact.first_seen_at, artifact.last_seen_at,
-                      observation.observation_count,
+                      artifact.first_seen_at AS first_source_disclosed_at,
+                      artifact.last_seen_at AS last_source_disclosed_at,
+                      observation.day_observation_count,
                       observation.best_source_rank,
                       observation.source_published_at,
-                      observation.first_source_published_at,
-                      observation.last_source_published_at,
+                      observation.day_first_source_published_at,
+                      observation.day_last_source_published_at,
                       observation.source_kind, observation.source_provider,
                       observation.source_url,
                       (
@@ -333,7 +341,6 @@ def artifacts_payload(
                           FROM artifact_import_candidate candidate
                           WHERE candidate.artifact_id = observation.artifact_id
                             AND candidate.decision = 'accepted'
-                            AND candidate.envelope_day = ?
                             AND candidate.source_provider = observation.source_provider
                             AND candidate.source_external_id = observation.source_external_id
                             AND candidate.source_snapshot_sha256 = observation.source_snapshot_sha256
@@ -355,13 +362,13 @@ def artifacts_payload(
                         observation.source_published_at DESC,
                         artifact.artifact_id
                LIMIT ? OFFSET ?""",
-            (selected_day, selected_day, *search_params, limit, offset),
+            (selected_day, *search_params, limit, offset),
         ).fetchall()
 
         items = []
         for row in rows:
             item = dict(row)
-            item["observation_count"] = int(item["observation_count"] or 0)
+            item["day_observation_count"] = int(item["day_observation_count"] or 0)
             item["artifact_type"] = _artifact_type(
                 str(item["artifact_kind"]), str(item["canonical_url"])
             )
@@ -371,9 +378,9 @@ def artifacts_payload(
         return {
             "available": True,
             "items": items,
-            "total": total,
+            "catalog_total": total,
             "matching_total": matching_total,
-            "counts": counts,
+            "catalog_fetch_state_counts": counts,
             "date": selected_day,
             "query": clean_query,
             "limit": limit,

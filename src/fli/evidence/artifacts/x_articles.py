@@ -2,7 +2,7 @@
 
 X Article URLs are catalog identities, but TwitterAPI.io retrieves an article
 by the ID of its publishing post.  The artifact catalog preserves that mapping
-from the source envelope.  This adapter fails closed when the mapping is absent
+from the source Event. This adapter fails closed when the mapping is absent
 or ambiguous and never promotes title or preview metadata into body evidence.
 """
 

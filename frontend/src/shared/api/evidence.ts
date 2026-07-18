@@ -118,7 +118,7 @@ export interface EventEvidence {
   observed_directly: boolean
   day: string
   relationship: 'reply' | 'quote' | 'retweet' | 'related'
-  relation_type: 'reply_parent' | 'quote' | 'retweet' | null
+  relation_type: 'reply_parent' | 'primary_thread' | 'quote' | 'retweet' | null
   target_post_id: string | null
   parent_post_id: string | null
   parent_missing: boolean
@@ -126,22 +126,23 @@ export interface EventEvidence {
   same_author_as_root: boolean
 }
 
-export interface SignalEvent {
+export interface FeedEvent {
   event_id: string
   canonical_root_post_id: string
   presentation_root_post_id: string
-  snapshot_cutoff: string
-  snapshot_content_sha256: string
+  semantic_snapshot_sha256: string
   first_activity_day: string
   is_grouped: boolean
   root: FeedItem
   why_grouped: string[]
-  anchor_types: Array<'same_target' | 'reply_parent'>
+  anchor_types: Array<'same_target' | 'reply_parent' | 'conversation_root'>
   member_count: number
   lifetime_member_count: number
+  day_member_count: number
+  activity_days: string[]
   link_count: number
   author_count: number
-  registry_account_count: number
+  registry_entity_count: number
   first_hand_count: number
   amplifiers: FeedAmplifier[]
   daily_rank: number
@@ -163,9 +164,10 @@ export interface SignalEvent {
     retweets: number
     related: number
   }
+  routing_state: 'evaluated' | 'not_selected' | 'stale' | 'unavailable'
   audience_routing: {
     feed_rank: number
-    snapshot_content_sha256: string
+    semantic_snapshot_sha256: string
     evidence_sha256: string
     input_sha256: string
     ai_engineering: {
@@ -186,6 +188,7 @@ export interface EventResponse {
   lane?: 'all' | 'network' | 'firsthand'
   sort?: 'attention' | 'recent' | 'engagement'
   query?: string
+  projection?: 'day' | 'week'
   routing_filter?:
     | 'all'
     | 'relevant'
@@ -218,12 +221,8 @@ export interface EventResponse {
   run?: {
     run_id: string
     feed_run_id: string
-    clustering_contract: 'exact-structural-v1'
-    cluster_count: number
-    member_count: number
-    link_count: number
+    clustering_contract: string
   }
   score_formula?: FeedResponse['score_formula']
-  items?: SignalEvent[]
+  items?: FeedEvent[]
 }
-

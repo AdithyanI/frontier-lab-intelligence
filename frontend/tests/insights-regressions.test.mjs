@@ -60,13 +60,13 @@ test('Insights keeps status in the audit URL without exposing a reader control s
   assert.doesNotMatch(insightSource, /role="menuitemradio"/)
 })
 
-test('Insights inherits Feed rank and links every decision to its exact envelope', () => {
+test('Insights inherits Feed rank and links every decision to its exact Event', () => {
   assert.match(insightSource, /<strong>#\{item\.feed_rank\}<\/strong>/)
   assert.match(insightSource, /<span>Feed rank ↗<\/span>/)
   assert.doesNotMatch(insightSource, /Editorial rank/)
-  assert.match(insightSource, /const envelopeUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
+  assert.match(insightSource, /const eventUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event_id=\$\{encodeURIComponent\(item\.event_id\)\}`/)
   assert.match(insightSource, /<CopyEventId eventId=\{item\.event_id\} \/>/)
-  assert.match(insightSource, /Open envelope ↗/)
+  assert.match(insightSource, /Open Event ↗/)
   assert.match(insightSource, /Open source ↗/)
   assert.match(insightSource, /Read artifact ↗/)
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)

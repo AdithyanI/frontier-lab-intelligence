@@ -17,30 +17,32 @@ app; no separate frontend server is required. Data-collection and model calls
 are explicit, resumable commands and are not part of the reviewer quick start.
 
 ## What to look at, in weighted order
-1. **Registry (20%)** — the entity/channel spine and structural-kind pass are
-   implemented. The cleaned Registry contains 2,220 observed identities: 2,104
-   active people, 93 active organizations, and 23 reversible rejections with
-   explicit reasons. Open an entity to inspect its observed profile,
-   classification reason, and channels. Exact rules live in
-   `docs/references/registry-curation.md`.
-2. **Signal-vs-noise (20%)** — inspect the immutable following snapshot,
-   entity-overlap ranking, exact event grouping, Feed daily-score inputs, and
-   keep/drop decisions. The accepted overlap run covers 2,456,305 edges;
-   PageRank remains a measured diagnostic. Triage evaluated 8,097 envelopes
-   with reason-bearing decisions, but downstream insight quality remains the
-   submission-critical test.
-3. **Scoring + validation (20%)** — the daily score is an explainable candidate
-   ordering aid, not importance or truth. The missing proof is whether primary-cited extracted
-   insights survive citation checks and human worth-attention judgment.
-4. **Actionable delivery (15%)** — the Insights surface, daily briefing, and
-   local alert/outbox proof are the active missing delivery boundary. No
-   external alert or submission is performed by the demo.
-5. **Ingestion (10%)** and **extraction (10%)** — X discovery, immutable raw
-   evidence, exact deduplication, triage, canonical artifact identity, and a
-   bounded content-fetch proof exist. Cited insight extraction is not yet
-   implemented; broad scheduled multi-source ingestion is deliberately
-   deferred.
-6. **Web interface (5%)** — minimal browse/config UI, not over-polished.
+1. **Registry (20%)** — inspect the entity/channel spine, reversible admission
+   state, Network-support position, public-reach position, and reason-bearing
+   manual intake. The dated checkpoint totals and graph coverage live in
+   `docs/STATUS.md`; the UI and `/api/registry` are the live read contract.
+2. **Signal-vs-noise (20%)** — start in Network Ranking, then open Feed. Each
+   row is one stable Event, not one raw post. Provider-declared relations form
+   exact structural Events; independent posts are never merged by topic. Open
+   the daily-score disclosure to inspect tracked amplification,
+   author-network support, public engagement, weights, and limitations.
+3. **Scoring + validation (20%)** — change Feed Status to compare Relevant,
+   Not relevant, and Not evaluated Events. Open `View reasons` to inspect the
+   independent AI Engineering and Investment judgments. Ranking is an
+   ordering aid; routing and final editorial selection are separate decisions.
+4. **Actionable delivery (15%)** — inspect both audience views in Insights.
+   Imported days show the newest complete, ranked, cited daily editorial run.
+   Each supporting source links back to the exact Feed Event; artifact
+   citations retain their frozen text provenance. Candidate-level Suppressed
+   and All views remain an audit fallback, not the final daily product.
+5. **Ingestion (10%)** and **extraction (10%)** — inspect Artifacts for
+   canonical source links disclosed by first-party Event evidence, retrieval
+   state, normalized text snapshots, and the exact originating Event. X is the
+   implemented discovery source; artifacts add papers, repositories, articles,
+   documents, and videos without pretending they are independent discovery.
+6. **Web interface (5%)** — use System → Architecture to inspect the actual
+   dependency order and System → Status for the checkpoint composed from live
+   product APIs. There is deliberately no second static backend status model.
 
 ## Evidence to check
 
@@ -66,8 +68,8 @@ are explicit, resumable commands and are not part of the reviewer quick start.
 - Exact event grouping intentionally uses provider-declared relations. It does
   not attempt semantic clustering of separately worded posts about one event.
 - The artifact fetcher records access failures rather than bypassing robots,
-  authentication, or publisher controls. Only inspectable primary evidence can
-  support a shipped primary-cited insight.
-- The five-record extraction oracle, second-day blind pass, Insights surface,
-  daily briefing, local alert/outbox proof, workflow tokenomics summary, public
-  reviewer landing page, final report, and package smoke path remain.
+  authentication, or publisher controls. Only inspectable evidence can support
+  a shipped citation.
+- The daily editorial corpus is implemented, but final human adjudication of
+  the strongest three to five Insights and the rubric-mapped submission package
+  remain. Nothing is submitted or delivered externally by the demo.

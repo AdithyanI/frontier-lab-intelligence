@@ -38,6 +38,15 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   before deciding which days need another editorial run.
 - Reassess the provisional weak-item and omission queues, then select the
   strongest 3–5 cited Insights for submission proof.
+- Add one repo-owned, date-keyed orchestration command that runs the existing
+  deterministic evidence, routing, and workspace stages before handing the
+  prepared workspace to a visible Codex App Server task.
+- Persist enough orchestration state to make retries safe and to link each day
+  to its exact evidence run, routing run, workspace, Codex thread, and imported
+  editorial run.
+- Prove the boundary incrementally on one new day: deterministic preparation
+  first, then one explicitly named Codex task under the
+  `frontier-lab-intelligence` Desktop project.
 
 ### Out of Scope
 
@@ -52,6 +61,8 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - An all-days rerun before the targeted chronology cases pass.
 - Model changes, broad source expansion, Registry work, alerts, or unrelated UI
   polish.
+- Scheduling, multi-day fan-out, remote execution, a permanent App Server
+  daemon, or a generalized workflow engine in the first orchestration version.
 
 ## Context / Constraints
 
@@ -98,6 +109,13 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [ ] The provisional weak-item and omission queues are adjudicated, the final
       3–5 submission candidates are named, and remaining findings are either
       fixed or explicitly deferred.
+- [ ] One machine-readable command can prepare a requested date through the
+      deterministic handoff, resume without duplicating completed stages, and
+      optionally launch a persisted, named Codex App Server task with an active
+      daily-intelligence goal.
+- [ ] A one-day canary proves that the deterministic outputs are inspectable
+      before task launch and that the resulting task is visible under the
+      repository in Codex Desktop with its thread id recorded durably.
 - [ ] Relevant tests and `scripts/check-fast.sh` pass; conceptual docs match the
       implemented boundary; project learnings are reviewed; the tracker is
       archived.
@@ -117,11 +135,17 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
       Acceptance: Jul 10 Thinking Machines, Jul 13 CaMeLs, Jul 14 teachers, and
       Jul 15 current-source control behave as specified under the seven-day
       rule. Validate: fresh v2 workspaces and deterministic canary inspection.
-- [ ] Milestone 4 — Adjudicate the editorial queues and decide the minimum rerun
+- [ ] Milestone 4 — Ship and canary the minimal daily orchestrator. Acceptance:
+      one command prepares a date through existing deterministic stages,
+      checkpoints exact identifiers, and launches one persisted App Server
+      thread with repository cwd, explicit name, active goal, and initial turn.
+      Validate: contract tests, stop-after-prepare run, live one-day task, and
+      durable task/run inspection.
+- [ ] Milestone 5 — Adjudicate the editorial queues and decide the minimum rerun
       set. Acceptance: every provisional weak item and strongest omission has a
       recorded keep/rewrite/suppress/defer judgment; no all-days rerun occurs
       merely for uniformity.
-- [ ] Milestone 5 — Produce and review the final submission proof. Acceptance:
+- [ ] Milestone 6 — Produce and review the final submission proof. Acceptance:
       strongest 3–5 Insights are chronologically accurate, primary-source
       traceable, audience-useful, and defensible against the BIT rubric.
       Validate: focused qualitative audit, product inspection, and fast checks.
@@ -141,6 +165,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   advancing.
 - Keep `tasks.md` current after every meaningful batch. When `Done When` is
   satisfied, finalize `learnings.md` and archive this project directly.
+- Keep the deterministic handoff and Codex reasoning separate: the command may
+  collect, route, freeze, and launch, but the daily task remains responsible for
+  editorial research, validation, import, and final inspection through the
+  existing `$fli-daily-intelligence` skill.
 
 ## Decisions
 
@@ -165,6 +193,14 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   Code owns disclosure timing and exact lineage; the daily agent owns semantic
   relevance. Require a verified excerpt for every artifact citation rather
   than adding another model gate or database entity.
+- 2026-07-18: Use a short-lived stdio `codex app-server` client for orchestration
+  v1. Create a non-ephemeral thread with the exact repo `cwd`, set its visible
+  name and persisted goal through App Server methods, start one turn, and wait
+  for completion. Do not use `codex exec`, a daemon, or an SDK abstraction for
+  the first canary.
+- 2026-07-18: Prove the deterministic stages separately before spending a Codex
+  turn. The first command contract must support a stop-after-prepare boundary
+  and stable JSON inspection.
 
 ## Open Questions / Blockers
 
@@ -179,9 +215,9 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Project inspectable artifact disclosure lineage into workspace v2 without an automatic artifact gate. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
-| done | Require and verify claim-grounding excerpts for artifact citations through the existing client validation path. | parent | [tests](../../../tests/insights/test_editorial.py) |
-| done | Update the daily skill and Paper Glider evaluation case, then run all-days and fast validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| in_progress | Freeze the orchestration contract and map existing stage/CLI boundaries. | parent | [contract](resources/codex-daily-orchestration.md) |
+| todo | Implement the date-keyed command, resumable ledger, and App Server client with contract tests. | parent | [contract](resources/codex-daily-orchestration.md) |
+| todo | Run a stop-after-prepare canary, then one live visible Codex task for a single new day. | parent | [contract](resources/codex-daily-orchestration.md) |
 
 ## Backlog / Remaining Work
 
@@ -202,7 +238,9 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [x] Update durable architecture/status docs when the chronology boundary is
       implemented.
 - [ ] Review and finalize `learnings.md`, run full milestone validation, and
-      archive the project.
+  archive the project.
+- [ ] After the one-day canary, decide whether scheduling, multi-day fan-out, or
+      a persistent App Server transport is justified; none is required for v1.
 
 ## Validation / Test Plan
 

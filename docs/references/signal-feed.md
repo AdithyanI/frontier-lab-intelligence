@@ -19,9 +19,9 @@ provider without changing Registry identity.
   whose conversation root is captured in the same run.
 - `data/derived/signal-events/events.db`: rebuildable `signal-events-v6` runs
   under `exact-structural-v10-root-owned-reactions`. It stores rooted
-  multi-post envelopes, member/link/anchor facts, per-day membership, and the one-row
+  multi-post Events, member/link/anchor facts, per-day membership, and the one-row
   `signal_publication` pointer that names the validated live run. Singleton
-  envelopes are added by the read model without duplicating post storage.
+  Events are added by the read model without duplicating post storage.
 - `data/fli.db`: current Registry identity and rejection state. It is read at
   API request time and is never copied into a Feed run.
 - `data/derived/following/*/analysis.db`: accepted entity-overlap network
@@ -72,9 +72,9 @@ Provider payloads and post observations land in `x-content.db`; the collection
 manifest does not duplicate them. The collection contract requests authored
 replies. Feed materialization preserves replies whose conversation root is
 captured and excludes reply activity whose root is absent. Event materialization
-admits only the source author's replies as envelope continuations; third-party
+admits only the source author's replies as Event continuations; third-party
 replies remain inspectable in the Feed ledger but do not group or render as
-product envelopes. When a same-author continuation survives but its immediate
+product Events. When a same-author continuation survives but its immediate
 parent is missing, the Event projection records an explicit conversation-root
 bridge rather than rewriting provider metadata.
 
@@ -92,7 +92,7 @@ An unchanged range therefore reuses the same Feed run ID even after a later
 provider refresh updates `x_post` engagement metrics. The default end date is
 the previous UTC calendar day; pin `--through` for a reproducible demo.
 
-The Event refresh materializes root-owned envelopes for that Feed run. Every
+The Event refresh materializes root-owned Events for that Feed run. Every
 member has at most one structural parent. Quote posts and retweets may point to
 one source root, while only that source author's replies may extend its thread;
 reaction replies cannot import their own branches or bridge two roots.
@@ -107,7 +107,7 @@ Neither rebuild command makes a provider or LLM call.
 ## Read Contract
 
 - `GET /api/events/dates` lists complete materialized dates and the number of
-  projected envelopes on each date. The number is not a raw post count.
+  projected Events on each date. The number is not a raw post count.
 - `GET /api/events?date=YYYY-MM-DD` returns the Registry-aware Events whose
   canonical source day is that date. An unrelated non-reply post is a
   singleton. Provider-declared quote and retweet wrappers attach to one source,
@@ -148,7 +148,7 @@ Registry rejection changes are dynamic. On the next request, a rejected author
 is absent and a rejected amplifier no longer votes. Raw/derived evidence is not
 deleted, so reversing the curation decision restores the evidence. The read
 model re-componentizes the surviving structural graph: a rejected renderable
-wrapper cannot bridge two otherwise separate envelopes, while an opaque
+wrapper cannot bridge two otherwise separate Events, while an opaque
 provider target remains a valid shared anchor.
 
 ## Audience Routing Projection
@@ -158,7 +158,8 @@ metadata, not event identity and not a replacement ranking. The v9 semantic
 snapshot contains the root, same-author authored updates, and accepted
 first-party artifacts; independently authored reactions and pure reposts are
 excluded. The UI displays a route only when the completed row's `event_id` and
-semantic `snapshot_content_sha256` match the canonical Event. Later third-party
+public `semantic_snapshot_sha256` matches the canonical Event. The routing store
+retains the historical `snapshot_content_sha256` column name. Later third-party
 activity does not trigger rerouting. The runner reuses work only when Event ID,
 snapshot hash, and exact rendered `input_sha256` match. The API derives
 kept/not-kept/not-evaluated and audience counts before pagination.
@@ -201,7 +202,7 @@ The daily score is an experimental, day-relative ordering aid:
 - 20% public-interaction percentile (log-scaled likes, replies, reposts, and
   quotes).
 
-Every component is returned with the exact post that produced an envelope's
+Every Event is returned with the exact post that produced its
 peak score. Each canonical entity votes at most once, self-amplification is
 excluded, and an amplifier's network-support position remains visible without
 multiplying its vote. Switching Audit filters or searching cannot change an
