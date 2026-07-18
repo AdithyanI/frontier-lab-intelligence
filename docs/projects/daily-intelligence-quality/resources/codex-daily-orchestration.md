@@ -84,12 +84,13 @@ racing two turns while still giving the task the full objective in context.
   --day 2026-07-16 --launch-codex \
   --codex-model gpt-5.6-sol \
   --codex-reasoning-effort xhigh \
-  --codex-service-tier fast \
   --json --no-input
 ```
 
-`fast` is the operator-facing alias for the current App Server catalog tier
-`priority`; the ledger stores the canonical value returned by App Server.
+Routine launches use the normal service tier by omitting
+`--codex-service-tier`. The optional value `fast` remains available as an
+operator-facing alias for App Server's `priority` tier; the ledger stores the
+canonical value returned by App Server.
 
 ## Explicitly Deferred
 

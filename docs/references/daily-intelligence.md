@@ -130,7 +130,7 @@ routing, and workspace owners without replacing them:
 .venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --launch-codex --json --no-input
 .venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --launch-codex \
   --codex-model gpt-5.6-sol --codex-reasoning-effort xhigh \
-  --codex-service-tier fast --json --no-input
+  --json --no-input
 ```
 
 The default stops at a validated workspace. `--launch-codex` starts one named,
@@ -144,9 +144,11 @@ the user later reuses for review is never resumed as pipeline work.
 Codex selection is explicit but optional. `--codex-model`,
 `--codex-reasoning-effort`, and `--codex-service-tier` override the normal
 Codex user/project configuration for a newly launched task; omitted values
-inherit it. The friendly tier value `fast` is normalized to the App Server
-catalog ID `priority`. App Server reports the effective model, reasoning
-effort, and tier, and the runner freezes that tuple in the day checkpoint.
+inherit it. Routine launches omit `--codex-service-tier` and therefore use the
+normal service tier. If explicitly requested, the friendly value `fast` is
+normalized to the App Server catalog ID `priority`. App Server reports the
+effective model, reasoning effort, and tier, and the runner freezes that tuple
+in the day checkpoint.
 Retries resume without sending overrides and first verify that the persisted
 task still has the frozen tuple; a task whose settings changed is left
 untouched rather than silently changed back.
