@@ -37,6 +37,9 @@ has a canonical path.
   `fli daily-intelligence` writes this boundary; the frontend reads its
   normalized API projection rather than draft files. Workspace v3 is the only
   supported authoring input; historical packets are not upgraded in place.
+  A launched task's effective Codex model, reasoning effort, and service tier
+  are frozen in its orchestration checkpoint so retries cannot silently change
+  or overwrite a reused task's settings.
 - `following/manifests/` — small tracked manifests that bind each local
   snapshot checksum to its cohort, provider, completeness, spend, ranking, and
   evaluation outputs.

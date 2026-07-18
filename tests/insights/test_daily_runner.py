@@ -171,17 +171,24 @@ class _Pipeline:
     def codex(self, **kwargs: Any) -> dict[str, Any]:
         self.order.append("codex")
         self.codex_calls.append(kwargs)
+        settings = {
+            "model": kwargs["model"] or "gpt-5.6-sol",
+            "reasoning_effort": kwargs["reasoning_effort"] or "xhigh",
+            "service_tier": kwargs["service_tier"],
+        }
         kwargs["checkpoint"](
             {
                 "status": "thread_started",
                 "thread_id": "thread-1",
                 "goal_status": "active",
+                "settings": settings,
             }
         )
         return {
             "status": "complete",
             "thread_id": "thread-1",
             "goal_status": "complete",
+            "settings": settings,
         }
 
 
@@ -191,12 +198,18 @@ def _run(
     pipeline: _Pipeline,
     launch_codex: bool = False,
     codex_runner: Any | None = None,
+    codex_model: str | None = None,
+    codex_reasoning_effort: str | None = None,
+    codex_service_tier: str | None = None,
 ) -> dict[str, Any]:
     return daily_runner.run_day(
         day=DAY,
         db_path=db_path,
         evidence_days=EVIDENCE_DAYS,
         launch_codex=launch_codex,
+        codex_model=codex_model,
+        codex_reasoning_effort=codex_reasoning_effort,
+        codex_service_tier=codex_service_tier,
         evidence_runner=pipeline.evidence,
         routing_runner=pipeline.routing,
         workspace_preparer=pipeline.prepare,
@@ -342,6 +355,11 @@ def test_obsolete_workspace_with_started_task_fails_closed(tmp_path):
                 "status": "thread_started",
                 "thread_id": "obsolete-thread",
                 "goal_status": "active",
+                "settings": {
+                    "model": kwargs["model"] or "gpt-5.6-sol",
+                    "reasoning_effort": kwargs["reasoning_effort"] or "xhigh",
+                    "service_tier": kwargs["service_tier"],
+                },
             }
         )
         raise KeyboardInterrupt
@@ -434,6 +452,9 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
     assert DAY in codex_call["prompt"]
     assert codex_call["skill_path"] == daily_runner.DEFAULT_SKILL_PATH
     assert codex_call["timeout_seconds"] == daily_runner.DEFAULT_CODEX_TIMEOUT_SECONDS
+    assert codex_call["model"] is None
+    assert codex_call["reasoning_effort"] is None
+    assert codex_call["service_tier"] is None
     assert codex_call["thread_id"] is None
     assert codex_call["progress"] is None
     assert callable(codex_call["checkpoint"])
@@ -448,7 +469,145 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
         "status": "complete",
         "thread_id": "thread-1",
         "completion_source": "editorial_run",
+        "requested_settings": {
+            "model": None,
+            "reasoning_effort": None,
+            "service_tier": None,
+        },
+        "settings": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "xhigh",
+            "service_tier": None,
+        },
     }
+
+
+def test_launch_binds_explicit_codex_settings_and_normalizes_fast_alias(
+    tmp_path, monkeypatch
+) -> None:
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+
+    monkeypatch.setattr(
+        daily_runner,
+        "_latest_editorial_run",
+        lambda **_: "editorial-run-1" if pipeline.codex_calls else None,
+    )
+
+    _run(db_path=db_path, pipeline=pipeline)
+    result = _run(
+        db_path=db_path,
+        pipeline=pipeline,
+        launch_codex=True,
+        codex_runner=pipeline.codex,
+        codex_model="gpt-5.6-terra",
+        codex_reasoning_effort="ultra",
+        codex_service_tier="fast",
+    )
+
+    codex_call = pipeline.codex_calls[0]
+    assert codex_call["model"] == "gpt-5.6-terra"
+    assert codex_call["reasoning_effort"] == "ultra"
+    assert codex_call["service_tier"] == "priority"
+    assert result["stages"]["codex"]["settings"] == {
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "ultra",
+        "service_tier": "priority",
+    }
+
+
+def test_resume_rejects_different_explicit_codex_settings_before_runner(
+    tmp_path,
+) -> None:
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+
+    def interrupted(**kwargs: Any) -> None:
+        kwargs["checkpoint"](
+            {
+                "status": "running",
+                "thread_id": "thread-1",
+                "settings": {
+                    "model": kwargs["model"],
+                    "reasoning_effort": kwargs["reasoning_effort"],
+                    "service_tier": kwargs["service_tier"],
+                },
+            }
+        )
+        raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        _run(
+            db_path=db_path,
+            pipeline=pipeline,
+            launch_codex=True,
+            codex_runner=interrupted,
+            codex_model="gpt-5.6-sol",
+            codex_reasoning_effort="xhigh",
+            codex_service_tier="fast",
+        )
+
+    with pytest.raises(daily_runner.DailyRunError) as raised:
+        _run(
+            db_path=db_path,
+            pipeline=pipeline,
+            launch_codex=True,
+            codex_runner=lambda **_: pytest.fail("must not touch the existing task"),
+            codex_model="gpt-5.6-terra",
+        )
+
+    assert raised.value.code == "E_CODEX_CONFIG_MISMATCH"
+    assert pipeline.order == ["evidence", "routing", "prepare"]
+
+
+def test_top_level_thread_without_settings_fails_before_resume(tmp_path) -> None:
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+    prepared = _run(db_path=db_path, pipeline=pipeline)
+    conn = daily_runner.connect(db_path)
+    with conn:
+        conn.execute(
+            "UPDATE daily_orchestration_run SET codex_thread_id = ? WHERE run_id = ?",
+            ("legacy-thread", prepared["run_id"]),
+        )
+    conn.close()
+
+    with pytest.raises(daily_runner.DailyRunError) as raised:
+        _run(
+            db_path=db_path,
+            pipeline=pipeline,
+            launch_codex=True,
+            codex_runner=lambda **_: pytest.fail("must not resume unknown settings"),
+        )
+
+    assert raised.value.code == "E_CODEX_SETTINGS_UNKNOWN"
+    assert pipeline.order == ["evidence", "routing", "prepare"]
+
+
+def test_partial_final_codex_settings_fail_closed(tmp_path) -> None:
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+
+    def partial_result(**_: Any) -> dict[str, Any]:
+        return {
+            "status": "complete",
+            "thread_id": "thread-1",
+            "goal_status": "complete",
+            "settings": {"model": "gpt-5.6-sol"},
+        }
+
+    with pytest.raises(daily_runner.DailyRunError) as raised:
+        _run(
+            db_path=db_path,
+            pipeline=pipeline,
+            launch_codex=True,
+            codex_runner=partial_result,
+        )
+
+    assert raised.value.code == "E_CODEX_SETTINGS_INVALID"
+    stored = daily_runner.inspect_run(db_path=db_path, day=DAY)
+    assert stored["status"] == "failed"
+    assert stored["error"]["code"] == "E_CODEX_SETTINGS_INVALID"
 
 
 def test_imported_run_closes_checkpoint_without_resuming_reused_task(
@@ -471,6 +630,11 @@ def test_imported_run_closes_checkpoint_without_resuming_reused_task(
                 "thread_id": "thread-reused-by-user",
                 "goal_status": "active",
                 "turn_id": "turn-original",
+                "settings": {
+                    "model": kwargs["model"] or "gpt-5.6-sol",
+                    "reasoning_effort": kwargs["reasoning_effort"] or "xhigh",
+                    "service_tier": kwargs["service_tier"],
+                },
             }
         )
         raise KeyboardInterrupt
@@ -498,6 +662,16 @@ def test_imported_run_closes_checkpoint_without_resuming_reused_task(
         "status": "complete",
         "thread_id": "thread-reused-by-user",
         "completion_source": "editorial_run",
+        "requested_settings": {
+            "model": None,
+            "reasoning_effort": None,
+            "service_tier": None,
+        },
+        "settings": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "xhigh",
+            "service_tier": None,
+        },
     }
 
 
@@ -624,6 +798,11 @@ def test_thread_starting_without_id_fails_closed_instead_of_launching_replacemen
     assert stored["stages"]["codex"] == {
         "status": "thread_starting",
         "thread_id": None,
+        "requested_settings": {
+            "model": None,
+            "reasoning_effort": None,
+            "service_tier": None,
+        },
     }
     assert stored["error"]["code"] == "E_CODEX_THREAD_UNKNOWN"
     assert stored["error"]["retryable"] is False
@@ -698,6 +877,11 @@ def test_cli_dry_run_defaults_to_stable_json_without_touching_store(
                 "will_collect_external_evidence": True,
                 "will_call_routing_model": True,
                 "will_launch_codex": False,
+                "codex_settings": {
+                    "model": None,
+                    "reasoning_effort": None,
+                    "service_tier": None,
+                },
                 "config": _expected_config(),
             },
         },

@@ -76,7 +76,7 @@ do not recreate generic `pages/` or `components/` buckets.
 | `data/derived/artifacts/artifacts.db` | Artifact catalog/fetch commands | Routing and artifact UI | Durable local catalog; raw bodies and clean text are content-addressed beside it. |
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, score evaluation | Frozen per-day current-contract runs; preserve all current v9 days. |
 | `data/derived/insights/insights.db` | `fli insights` | Insight read model/UI | Current audience Insight run store. |
-| `data/derived/daily-intelligence/editorial.db` | `fli daily-intelligence import-result` / `run-day` | Daily Insight read model/UI and orchestration inspection | Complete agent-authored daily runs plus one date-keyed orchestration ledger; strict v3 workspaces and the optional packet-keyed embedding cache live beside it. |
+| `data/derived/daily-intelligence/editorial.db` | `fli daily-intelligence import-result` / `run-day` | Daily Insight read model/UI and orchestration inspection | Complete agent-authored daily runs plus one date-keyed orchestration ledger with the effective Codex model/reasoning/tier tuple; strict v3 workspaces and the optional packet-keyed embedding cache live beside it. |
 
 See [`data/README.md`](../../data/README.md) for directory lifecycle and
 [`docs/references/data-lifecycle.md`](../references/data-lifecycle.md) before

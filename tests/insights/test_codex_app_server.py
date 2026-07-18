@@ -8,6 +8,7 @@ from typing import Any
 import pytest
 
 from fli.insights.codex_app_server import CodexAppServerClient, CodexTaskError
+from fli.insights.codex_app_server import _app_server_command
 
 
 OBJECTIVE = "Publish the cited daily brief."
@@ -83,6 +84,9 @@ def _thread_result(
     thread_id: str = "thread-1",
     turns: list[dict[str, Any]] | None = None,
     status: str = "idle",
+    model: str = "gpt-5.6-sol",
+    reasoning_effort: str = "xhigh",
+    service_tier: str | None = None,
 ) -> dict[str, Any]:
     return {
         "thread": {
@@ -93,6 +97,9 @@ def _thread_result(
         },
         "cwd": str(repo_root),
         "instructionSources": [str(repo_root / "AGENTS.md")],
+        "model": model,
+        "reasoningEffort": reasoning_effort,
+        "serviceTier": service_tier,
     }
 
 
@@ -111,6 +118,9 @@ def _run_task(
     *,
     thread_id: str | None = None,
     checkpoints: list[dict[str, Any]] | None = None,
+    model: str | None = None,
+    reasoning_effort: str | None = None,
+    service_tier: str | None = None,
 ) -> dict[str, Any]:
     repo_root = tmp_path / "repo"
     repo_root.mkdir(exist_ok=True)
@@ -132,6 +142,9 @@ def _run_task(
             prompt="Use the prepared routing run.",
             skill_path=skill_path,
             timeout_seconds=1.0,
+            model=model,
+            reasoning_effort=reasoning_effort,
+            service_tier=service_tier,
             thread_id=thread_id,
             checkpoint=checkpoints.append if checkpoints is not None else None,
         )
@@ -218,10 +231,210 @@ def test_new_task_uses_safe_rpc_order_and_checkpoints_ids_immediately(
         "turn_status": "completed",
         "goal_status": "complete",
         "turns_started": 1,
+        "requested_settings": {
+            "model": None,
+            "reasoning_effort": None,
+            "service_tier": None,
+        },
+        "settings": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "xhigh",
+            "service_tier": None,
+        },
         "instruction_sources": [str(repo_root / "AGENTS.md")],
     }
     transport.assert_exhausted()
     assert transport.closed
+
+
+def test_new_task_applies_explicit_model_effort_and_priority_tier(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    turn_completed = _notification(
+        "turn/completed",
+        {"turn": {"id": "turn-1", "status": "completed"}},
+    )
+
+    def assert_thread_start(message: dict[str, Any]) -> None:
+        params = message["params"]
+        assert params["model"] == "gpt-5.6-terra"
+        assert params["serviceTier"] == "priority"
+        assert "effort" not in params
+        assert params["config"] == {"model_reasoning_effort": "ultra"}
+
+    def assert_turn_start(message: dict[str, Any]) -> None:
+        params = message["params"]
+        assert params["model"] == "gpt-5.6-terra"
+        assert params["effort"] == "ultra"
+        assert params["serviceTier"] == "priority"
+
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/start",
+                result=_thread_result(
+                    repo_root,
+                    model="gpt-5.6-terra",
+                    reasoning_effort="ultra",
+                    service_tier="priority",
+                ),
+                on_send=assert_thread_start,
+            ),
+            _SendStep("thread/name/set", result={}),
+            _SendStep("thread/goal/get", result={"goal": None}),
+            _SendStep(
+                "turn/start",
+                result={"turn": {"id": "turn-1"}},
+                on_send=assert_turn_start,
+            ),
+            _SendStep(
+                "thread/goal/set",
+                result={"goal": {"status": "active"}},
+                after_response=(turn_completed,),
+            ),
+            _SendStep("thread/goal/get", result={"goal": {"status": "complete"}}),
+        ]
+    )
+
+    result = _run_task(
+        tmp_path,
+        transport,
+        model="gpt-5.6-terra",
+        reasoning_effort="ultra",
+        service_tier="priority",
+    )
+
+    assert result["settings"] == {
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "ultra",
+        "service_tier": "priority",
+    }
+    assert _app_server_command("codex") == (
+        "codex",
+        "app-server",
+        "--stdio",
+        "--enable",
+        "goals",
+    )
+    transport.assert_exhausted()
+
+
+def test_new_task_rejects_unapplied_reasoning_effort(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/start",
+                result=_thread_result(repo_root, reasoning_effort="xhigh"),
+                on_send=lambda message: (
+                    message["params"].get("config")
+                    == {"model_reasoning_effort": "ultra"}
+                    or pytest.fail("thread/start must request the reasoning override")
+                ),
+            ),
+        ]
+    )
+
+    with pytest.raises(CodexTaskError) as raised:
+        _run_task(tmp_path, transport, reasoning_effort="ultra")
+
+    assert raised.value.code == "E_CODEX_SETTINGS_NOT_APPLIED"
+    assert [message["method"] for message in transport.sent] == [
+        "initialize",
+        "initialized",
+        "thread/start",
+    ]
+    transport.assert_exhausted()
+
+
+def test_resume_validates_frozen_settings_without_overriding_changed_task(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/resume",
+                result=_thread_result(
+                    repo_root,
+                    thread_id="thread-existing",
+                    model="gpt-5.6-sol",
+                    reasoning_effort="ultra",
+                    service_tier="priority",
+                ),
+                on_send=lambda message: (
+                    message["params"] == {"threadId": "thread-existing"}
+                    or pytest.fail("resume must not mutate thread settings")
+                ),
+            ),
+        ]
+    )
+
+    with pytest.raises(CodexTaskError) as raised:
+        _run_task(
+            tmp_path,
+            transport,
+            thread_id="thread-existing",
+            model="gpt-5.6-sol",
+            reasoning_effort="xhigh",
+            service_tier="priority",
+        )
+
+    assert raised.value.code == "E_CODEX_SETTINGS_MISMATCH"
+    assert [message["method"] for message in transport.sent] == [
+        "initialize",
+        "initialized",
+        "thread/resume",
+    ]
+    transport.assert_exhausted()
+
+
+def test_resume_checks_goal_ownership_before_any_task_mutation(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/resume",
+                result=_thread_result(
+                    repo_root,
+                    thread_id="thread-reused",
+                    status="idle",
+                ),
+            ),
+            _SendStep(
+                "thread/goal/get",
+                result={
+                    "goal": {
+                        "status": "active",
+                        "objective": "A different user-owned goal.",
+                    }
+                },
+            ),
+        ]
+    )
+
+    with pytest.raises(CodexTaskError) as raised:
+        _run_task(tmp_path, transport, thread_id="thread-reused")
+
+    assert raised.value.code == "E_CODEX_GOAL_MISMATCH"
+    assert [message["method"] for message in transport.sent] == [
+        "initialize",
+        "initialized",
+        "thread/resume",
+        "thread/goal/get",
+    ]
+    transport.assert_exhausted()
 
 
 def test_native_continuation_does_not_send_another_turn_start(
@@ -297,7 +510,6 @@ def test_resuming_active_goal_does_not_start_or_set_another_turn(
                     status="active",
                 ),
             ),
-            _SendStep("thread/name/set", result={}),
             _SendStep(
                 "thread/goal/get",
                 result={"goal": {"status": "active", "objective": OBJECTIVE}},
@@ -341,7 +553,6 @@ def test_terminal_goal_refreshes_stale_turn_activity_from_persisted_thread(
                     status="active",
                 ),
             ),
-            _SendStep("thread/name/set", result={}),
             _SendStep(
                 "thread/goal/get",
                 result={"goal": {"status": "complete", "objective": OBJECTIVE}},
@@ -389,7 +600,6 @@ def test_resumed_task_without_goal_fails_without_starting_another_turn(
                     status="idle",
                 ),
             ),
-            _SendStep("thread/name/set", result={}),
             _SendStep("thread/goal/get", result={"goal": None}),
         ]
     )

@@ -21,6 +21,57 @@ TERMINAL_GOAL_STATUSES = {
     "usageLimited",
 }
 APP_SERVER_STREAM_LIMIT_BYTES = 16 * 1024 * 1024
+CODEX_SETTING_KEYS = ("model", "reasoning_effort", "service_tier")
+
+
+def _app_server_command(codex_binary: str) -> tuple[str, ...]:
+    return (
+        codex_binary,
+        "app-server",
+        "--stdio",
+        "--enable",
+        "goals",
+    )
+
+
+def _optional_setting(value: str | None, *, name: str) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError(f"{name} must not be empty")
+    return normalized
+
+
+def _request_settings(
+    *,
+    model: str | None,
+    reasoning_effort: str | None,
+    service_tier: str | None,
+) -> dict[str, str | None]:
+    return {
+        "model": _optional_setting(model, name="model"),
+        "reasoning_effort": _optional_setting(
+            reasoning_effort, name="reasoning_effort"
+        ),
+        "service_tier": _optional_setting(service_tier, name="service_tier"),
+    }
+
+
+def _effective_settings(opened: dict[str, Any]) -> dict[str, str | None]:
+    response_values = {
+        "model": opened.get("model"),
+        "reasoning_effort": opened.get("reasoningEffort"),
+        "service_tier": opened.get("serviceTier"),
+    }
+    return {
+        key: (
+            str(response_values[key]).strip()
+            if response_values[key] not in (None, "")
+            else None
+        )
+        for key in CODEX_SETTING_KEYS
+    }
 
 
 class CodexTaskError(RuntimeError):
@@ -67,11 +118,7 @@ class StdioAppServerTransport:
         codex_binary: str = "codex",
     ) -> StdioAppServerTransport:
         process = await asyncio.create_subprocess_exec(
-            codex_binary,
-            "app-server",
-            "--stdio",
-            "--enable",
-            "goals",
+            *_app_server_command(codex_binary),
             cwd=str(repo_root),
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
@@ -377,23 +424,31 @@ class CodexAppServerClient:
         *,
         prompt: str,
         skill_path: Path,
+        settings: dict[str, str | None],
         deadline: float,
         progress: ProgressCallback | None,
     ) -> dict[str, Any]:
+        params: dict[str, Any] = {
+            "threadId": state.thread_id,
+            "input": [
+                {
+                    "type": "skill",
+                    "name": "fli-daily-intelligence",
+                    "path": str(skill_path.resolve()),
+                },
+                {"type": "text", "text": prompt},
+            ],
+        }
+        if settings["model"] is not None:
+            params["model"] = settings["model"]
+        if settings["reasoning_effort"] is not None:
+            params["effort"] = settings["reasoning_effort"]
+        if settings["service_tier"] is not None:
+            params["serviceTier"] = settings["service_tier"]
         result = await self._request(
             transport,
             "turn/start",
-            {
-                "threadId": state.thread_id,
-                "input": [
-                    {
-                        "type": "skill",
-                        "name": "fli-daily-intelligence",
-                        "path": str(skill_path.resolve()),
-                    },
-                    {"type": "text", "text": prompt},
-                ],
-            },
+            params,
             state,
             deadline=deadline,
             progress=progress,
@@ -497,6 +552,9 @@ class CodexAppServerClient:
         prompt: str,
         skill_path: Path,
         timeout_seconds: float,
+        model: str | None = None,
+        reasoning_effort: str | None = None,
+        service_tier: str | None = None,
         thread_id: str | None = None,
         progress: ProgressCallback | None = None,
         checkpoint: CheckpointCallback | None = None,
@@ -505,10 +563,16 @@ class CodexAppServerClient:
             raise ValueError("timeout_seconds must be positive")
         if not skill_path.is_file():
             raise FileNotFoundError(skill_path)
+        requested_settings = _request_settings(
+            model=model,
+            reasoning_effort=reasoning_effort,
+            service_tier=service_tier,
+        )
         deadline = time.monotonic() + timeout_seconds
         state = _TaskState(thread_id=thread_id)
         transport = await self._open_transport()
         instruction_sources: list[str] = []
+        effective_settings = dict(requested_settings)
         try:
             await self._request(
                 transport,
@@ -543,18 +607,30 @@ class CodexAppServerClient:
                             "thread_id": None,
                             "turn_id": None,
                             "goal_status": None,
+                            "requested_settings": requested_settings,
                             "status": "thread_starting",
                         }
                     )
+                start_params: dict[str, Any] = {
+                    "cwd": str(self.repo_root),
+                    "ephemeral": False,
+                    "serviceName": "fli_daily_intelligence",
+                    "approvalPolicy": "never",
+                }
+                if requested_settings["model"] is not None:
+                    start_params["model"] = requested_settings["model"]
+                if requested_settings["service_tier"] is not None:
+                    start_params["serviceTier"] = requested_settings["service_tier"]
+                if requested_settings["reasoning_effort"] is not None:
+                    start_params["config"] = {
+                        "model_reasoning_effort": requested_settings[
+                            "reasoning_effort"
+                        ]
+                    }
                 opened = await self._request(
                     transport,
                     "thread/start",
-                    {
-                        "cwd": str(self.repo_root),
-                        "ephemeral": False,
-                        "serviceName": "fli_daily_intelligence",
-                        "approvalPolicy": "never",
-                    },
+                    start_params,
                     state,
                     deadline=deadline,
                     progress=progress,
@@ -569,12 +645,66 @@ class CodexAppServerClient:
                     retryable=False,
                     exit_code=4,
                 )
+            effective_settings = _effective_settings(opened)
+            if (
+                effective_settings["model"] is None
+                or effective_settings["reasoning_effort"] is None
+            ):
+                raise CodexTaskError(
+                    code="E_CODEX_SETTINGS_UNRESOLVED",
+                    message="App Server did not report the effective Codex model settings.",
+                    hint="Inspect the installed App Server protocol before retrying.",
+                    retryable=False,
+                    exit_code=4,
+                )
+            if thread_id and any(
+                requested_settings[key] is not None for key in CODEX_SETTING_KEYS
+            ):
+                mismatches = {
+                    key: {
+                        "expected": requested_settings[key],
+                        "actual": effective_settings[key],
+                    }
+                    for key in CODEX_SETTING_KEYS
+                    if effective_settings[key] != requested_settings[key]
+                }
+                if mismatches:
+                    raise CodexTaskError(
+                        code="E_CODEX_SETTINGS_MISMATCH",
+                        message="The persisted Codex task now uses different model settings.",
+                        hint=(
+                            "Leave the changed task untouched and inspect the durable "
+                            "daily-run checkpoint before deciding whether to replace it."
+                        ),
+                        retryable=False,
+                        exit_code=4,
+                    )
+            elif not thread_id:
+                mismatches = {
+                    key: {
+                        "requested": requested_settings[key],
+                        "actual": effective_settings[key],
+                    }
+                    for key in CODEX_SETTING_KEYS
+                    if requested_settings[key] is not None
+                    and effective_settings[key] != requested_settings[key]
+                }
+                if mismatches:
+                    raise CodexTaskError(
+                        code="E_CODEX_SETTINGS_NOT_APPLIED",
+                        message="App Server did not apply the requested Codex model settings.",
+                        hint="Inspect the model catalog and retry with supported settings.",
+                        retryable=False,
+                        exit_code=2,
+                    )
             if checkpoint:
                 checkpoint(
                     {
                         "thread_id": state.thread_id,
                         "turn_id": None,
                         "goal_status": None,
+                        "requested_settings": requested_settings,
+                        "settings": effective_settings,
                         "status": "thread_resumed" if thread_id else "thread_created",
                     }
                 )
@@ -591,14 +721,15 @@ class CodexAppServerClient:
             raw_sources = opened.get("instructionSources")
             if isinstance(raw_sources, list):
                 instruction_sources = [str(item) for item in raw_sources]
-            await self._request(
-                transport,
-                "thread/name/set",
-                {"threadId": state.thread_id, "name": name},
-                state,
-                deadline=deadline,
-                progress=progress,
-            )
+            if not thread_id:
+                await self._request(
+                    transport,
+                    "thread/name/set",
+                    {"threadId": state.thread_id, "name": name},
+                    state,
+                    deadline=deadline,
+                    progress=progress,
+                )
             goal_result = await self._request(
                 transport,
                 "thread/goal/get",
@@ -642,6 +773,7 @@ class CodexAppServerClient:
                     state,
                     prompt=f"Goal:\n{objective}\n\nExecution context:\n{prompt}",
                     skill_path=skill_path,
+                    settings=effective_settings,
                     deadline=deadline,
                     progress=progress,
                 )
@@ -652,6 +784,8 @@ class CodexAppServerClient:
                             "thread_name": name,
                             "turn_id": state.turn_id,
                             "goal_status": None,
+                            "requested_settings": requested_settings,
+                            "settings": effective_settings,
                             "status": "turn_started",
                         }
                     )
@@ -677,6 +811,8 @@ class CodexAppServerClient:
                         "thread_name": name,
                         "goal_status": state.goal_status,
                         "turn_id": state.turn_id,
+                        "requested_settings": requested_settings,
+                        "settings": effective_settings,
                         "status": "running",
                     }
                 )
@@ -777,6 +913,8 @@ class CodexAppServerClient:
                 "turn_status": state.turn_status,
                 "goal_status": state.goal_status,
                 "turns_started": state.turns_started,
+                "requested_settings": requested_settings,
+                "settings": effective_settings,
                 "instruction_sources": instruction_sources,
             }
             if checkpoint:

@@ -29,6 +29,12 @@ routing, editorial validation, or editorial persistence.
 - A complete imported editorial run for the exact workspace is terminal. The
   ledger closes from that row before opening App Server, even if the original
   task has since been reused for unrelated human review.
+- Codex model, reasoning effort, and service tier are optional per-launch
+  overrides. Omitted values inherit normal Codex configuration; the exact
+  effective tuple returned by App Server is frozen before goal work continues.
+- A resume sends no model-setting overrides. It compares the task's effective
+  tuple with the frozen checkpoint and fails before naming, goal, or turn work
+  if the task has changed.
 - Failures return stable codes, retryability, and the last durable stage.
 - Progress goes to stderr; the final structured result goes to stdout.
 
@@ -41,9 +47,11 @@ Use a short-lived stdio `codex app-server` child and the stable protocol:
    - `cwd=/Users/dobby/GitHub/frontier-lab-intelligence`;
    - `ephemeral=false`;
    - a stable service name;
+   - optional `model` and `serviceTier` overrides;
 3. `thread/name/set` with `FLI Daily Brief — YYYY-MM-DD`;
-4. `turn/start` with the complete objective, prepared workspace, and explicit
-   skill invocation;
+4. `turn/start` with the complete objective, prepared workspace, explicit
+   skill invocation, and optional `model`, `effort`, and `serviceTier`
+   overrides;
 5. after that turn is running, `thread/goal/set` with the same active objective
    (the persisted equivalent of `/goal`);
 6. follow native goal continuation turns until the goal is terminal, then
@@ -73,8 +81,15 @@ racing two turns while still giving the task the full objective in context.
   --day 2026-07-16 --json --no-input
 
 .venv/bin/fli daily-intelligence run-day \
-  --day 2026-07-16 --launch-codex --json --no-input
+  --day 2026-07-16 --launch-codex \
+  --codex-model gpt-5.6-sol \
+  --codex-reasoning-effort xhigh \
+  --codex-service-tier fast \
+  --json --no-input
 ```
+
+`fast` is the operator-facing alias for the current App Server catalog tier
+`priority`; the ledger stores the canonical value returned by App Server.
 
 ## Explicitly Deferred
 

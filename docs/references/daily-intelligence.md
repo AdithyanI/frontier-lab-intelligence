@@ -128,6 +128,9 @@ routing, and workspace owners without replacing them:
 .venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --json --no-input
 .venv/bin/fli daily-intelligence inspect-day-run --day YYYY-MM-DD --json --no-input
 .venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --launch-codex --json --no-input
+.venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --launch-codex \
+  --codex-model gpt-5.6-sol --codex-reasoning-effort xhigh \
+  --codex-service-tier fast --json --no-input
 ```
 
 The default stops at a validated workspace. `--launch-codex` starts one named,
@@ -137,6 +140,16 @@ same editorial store. Retries reuse completed deterministic stages. If a
 complete editorial run already exists for the workspace, that durable import
 closes orchestration before any App Server connection is opened; a task that
 the user later reuses for review is never resumed as pipeline work.
+
+Codex selection is explicit but optional. `--codex-model`,
+`--codex-reasoning-effort`, and `--codex-service-tier` override the normal
+Codex user/project configuration for a newly launched task; omitted values
+inherit it. The friendly tier value `fast` is normalized to the App Server
+catalog ID `priority`. App Server reports the effective model, reasoning
+effort, and tier, and the runner freezes that tuple in the day checkpoint.
+Retries resume without sending overrides and first verify that the persisted
+task still has the frozen tuple; a task whose settings changed is left
+untouched rather than silently changed back.
 
 The agent may use `search` and `inspect-event` while researching. `index` and
 `similar` are optional for paraphrase discovery or larger cross-day work. The

@@ -35,6 +35,7 @@ RUN_CONTRACT_VERSION = "daily-orchestration-v1"
 DEFAULT_CODEX_TIMEOUT_SECONDS = 4 * 60 * 60
 DEFAULT_EVIDENCE_WINDOW_DAYS = 9
 PREPARATION_STAGES = ("evidence", "routing", "prepare")
+CODEX_SETTING_KEYS = ("model", "reasoning_effort", "service_tier")
 
 
 class _ArgumentParser(argparse.ArgumentParser):
@@ -83,6 +84,128 @@ def _display_path(path: Path) -> str:
         return path.resolve().relative_to(REPO_ROOT).as_posix()
     except ValueError:
         return str(path.resolve())
+
+
+def _normalize_codex_setting(value: str | None, *, name: str) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError(f"{name} must not be empty")
+    if name == "codex-service-tier" and normalized.lower() == "fast":
+        return "priority"
+    return normalized
+
+
+def _codex_settings(
+    *,
+    model: str | None,
+    reasoning_effort: str | None,
+    service_tier: str | None,
+) -> dict[str, str | None]:
+    return {
+        "model": _normalize_codex_setting(model, name="codex-model"),
+        "reasoning_effort": _normalize_codex_setting(
+            reasoning_effort, name="codex-reasoning-effort"
+        ),
+        "service_tier": _normalize_codex_setting(
+            service_tier, name="codex-service-tier"
+        ),
+    }
+
+
+def _checkpoint_codex_settings(
+    value: Any, *, require_resolved: bool
+) -> dict[str, str | None]:
+    if not isinstance(value, dict) or any(
+        key not in value for key in CODEX_SETTING_KEYS
+    ):
+        raise DailyRunError(
+            code="E_CODEX_SETTINGS_INVALID",
+            message="Codex returned invalid effective model settings.",
+            hint="Inspect the App Server response before resuming this task.",
+            retryable=False,
+            exit_code=4,
+        )
+    settings: dict[str, str | None] = {}
+    for key in CODEX_SETTING_KEYS:
+        raw = value[key]
+        if raw is None:
+            settings[key] = None
+            continue
+        normalized = str(raw).strip()
+        if not normalized:
+            raise DailyRunError(
+                code="E_CODEX_SETTINGS_INVALID",
+                message="Codex returned blank effective model settings.",
+                hint="Inspect the App Server response before resuming this task.",
+                retryable=False,
+                exit_code=4,
+            )
+        settings[key] = normalized
+    if require_resolved and (
+        settings["model"] is None or settings["reasoning_effort"] is None
+    ):
+        raise DailyRunError(
+            code="E_CODEX_SETTINGS_INVALID",
+            message="Codex did not report an effective model and reasoning effort.",
+            hint="Inspect the App Server response before resuming this task.",
+            retryable=False,
+            exit_code=4,
+        )
+    return settings
+
+
+def _bound_codex_settings(
+    existing_codex: dict[str, Any],
+    requested: dict[str, str | None],
+    *,
+    thread_id: str | None,
+) -> tuple[dict[str, str | None], dict[str, str | None]]:
+    raw_requested = existing_codex.get("requested_settings")
+    if raw_requested is None:
+        if thread_id:
+            raise DailyRunError(
+                code="E_CODEX_SETTINGS_UNKNOWN",
+                message="The persisted Codex task predates the model-settings contract.",
+                hint=(
+                    "Leave that task untouched and inspect its imported editorial run; "
+                    "new dates record exact Codex settings before launch."
+                ),
+                retryable=False,
+                exit_code=4,
+            )
+        bound_requested = dict(requested)
+    else:
+        bound_requested = _checkpoint_codex_settings(
+            raw_requested, require_resolved=False
+        )
+    if thread_id:
+        effective = _checkpoint_codex_settings(
+            existing_codex.get("settings"), require_resolved=True
+        )
+        comparison = effective
+        launch_settings = effective
+    else:
+        comparison = bound_requested
+        launch_settings = bound_requested
+    mismatches = {
+        key: {"bound": comparison[key], "requested": requested[key]}
+        for key in CODEX_SETTING_KEYS
+        if requested[key] is not None and requested[key] != comparison[key]
+    }
+    if mismatches:
+        raise DailyRunError(
+            code="E_CODEX_CONFIG_MISMATCH",
+            message="The daily run is already bound to different Codex model settings.",
+            hint=(
+                "Resume without overrides or use the exact model, reasoning effort, "
+                "and service tier shown by inspect-day-run."
+            ),
+            retryable=False,
+            exit_code=2,
+        )
+    return launch_settings, bound_requested
 
 
 def _acquire_day_lock(db_path: Path, day: str) -> TextIO:
@@ -531,7 +654,7 @@ def _complete_from_editorial_run(
         "status": "complete",
         "completion_source": "editorial_run",
     }
-    for key in ("thread_id", "thread_name"):
+    for key in ("thread_id", "thread_name", "requested_settings", "settings"):
         if existing_codex.get(key):
             completed_codex[key] = existing_codex[key]
     stages["codex"] = completed_codex
@@ -562,6 +685,9 @@ def run_day(
     launch_codex: bool = False,
     codex_timeout_seconds: float = DEFAULT_CODEX_TIMEOUT_SECONDS,
     codex_binary: str = "codex",
+    codex_model: str | None = None,
+    codex_reasoning_effort: str | None = None,
+    codex_service_tier: str | None = None,
     skill_path: Path = DEFAULT_SKILL_PATH,
     dry_run: bool = False,
     progress: ProgressCallback | None = None,
@@ -584,6 +710,11 @@ def run_day(
     resolved_evidence_days = resolve_evidence_days(day, evidence_days)
     if collection_days > resolved_evidence_days:
         raise ValueError("collection-days cannot exceed evidence-days")
+    requested_codex_settings = _codex_settings(
+        model=codex_model,
+        reasoning_effort=codex_reasoning_effort,
+        service_tier=codex_service_tier,
+    )
     config = {
         "contract_version": RUN_CONTRACT_VERSION,
         "day": day,
@@ -605,6 +736,7 @@ def run_day(
         "will_collect_external_evidence": True,
         "will_call_routing_model": True,
         "will_launch_codex": launch_codex,
+        "codex_settings": requested_codex_settings,
         "config": config,
     }
     if dry_run:
@@ -810,6 +942,30 @@ def run_day(
             if progress:
                 progress("codex", "complete")
             return {**record, "reused": reused}
+        existing_codex = stages.get("codex") or {}
+        existing_thread_id = str(
+            record.get("codex_thread_id") or existing_codex.get("thread_id") or ""
+        ) or None
+        codex_settings, bound_requested_settings = _bound_codex_settings(
+            existing_codex,
+            requested_codex_settings,
+            thread_id=existing_thread_id,
+        )
+        if existing_codex.get("requested_settings") != bound_requested_settings:
+            stages["codex"] = {
+                **existing_codex,
+                "requested_settings": bound_requested_settings,
+                "status": existing_codex.get("status") or "configured",
+            }
+            record = _save_record(
+                conn,
+                record,
+                status="codex_running",
+                stage="codex",
+                error=None,
+            )
+            stages = record["stages"]
+            existing_codex = stages["codex"]
         name = f"FLI Daily Brief — {day}"
         objective = (
             f"Produce, validate, import, and inspect the complete Frontier Lab "
@@ -830,8 +986,27 @@ def run_day(
         )
 
         def checkpoint(codex: dict[str, Any]) -> None:
-            nonlocal record, stages
-            stages["codex"] = codex
+            nonlocal record, stages, codex_settings
+            reported_settings = codex.get("settings")
+            if reported_settings is not None:
+                codex_settings = _checkpoint_codex_settings(
+                    reported_settings, require_resolved=True
+                )
+            elif codex.get("thread_id") and existing_codex.get("settings") is None:
+                raise DailyRunError(
+                    code="E_CODEX_SETTINGS_INVALID",
+                    message="Codex created a task without effective model settings.",
+                    hint="Inspect the App Server response before resuming this task.",
+                    retryable=False,
+                    exit_code=4,
+                )
+            stage = {
+                **codex,
+                "requested_settings": bound_requested_settings,
+            }
+            if reported_settings is not None or existing_codex.get("settings") is not None:
+                stage["settings"] = codex_settings
+            stages["codex"] = stage
             record["codex_thread_id"] = codex.get("thread_id")
             record = _save_record(
                 conn,
@@ -843,9 +1018,6 @@ def run_day(
             stages = record["stages"]
 
         existing_codex = stages.get("codex") or {}
-        existing_thread_id = str(
-            record.get("codex_thread_id") or existing_codex.get("thread_id") or ""
-        ) or None
         if (
             existing_codex.get("status") == "thread_starting"
             and existing_thread_id is None
@@ -879,6 +1051,9 @@ def run_day(
                         prompt=prompt,
                         skill_path=skill_path,
                         timeout_seconds=codex_timeout_seconds,
+                        model=codex_settings["model"],
+                        reasoning_effort=codex_settings["reasoning_effort"],
+                        service_tier=codex_settings["service_tier"],
                         thread_id=existing_thread_id,
                         progress=progress,
                         checkpoint=checkpoint,
@@ -891,6 +1066,9 @@ def run_day(
                     prompt=prompt,
                     skill_path=skill_path,
                     timeout_seconds=codex_timeout_seconds,
+                    model=codex_settings["model"],
+                    reasoning_effort=codex_settings["reasoning_effort"],
+                    service_tier=codex_settings["service_tier"],
                     thread_id=existing_thread_id,
                     progress=progress,
                     checkpoint=checkpoint,
@@ -907,7 +1085,25 @@ def run_day(
             if progress:
                 progress("codex", "complete")
             return {**record, "reused": reused}
-        stages["codex"] = codex
+        reported_settings = codex.get("settings")
+        if reported_settings is not None:
+            codex_settings = _checkpoint_codex_settings(
+                reported_settings, require_resolved=True
+            )
+        elif existing_thread_id or codex.get("thread_id"):
+            if existing_codex.get("settings") is None:
+                raise DailyRunError(
+                    code="E_CODEX_SETTINGS_INVALID",
+                    message="Codex finished without effective model settings.",
+                    hint="Inspect the App Server response before resuming this task.",
+                    retryable=False,
+                    exit_code=4,
+                )
+        stages["codex"] = {
+            **codex,
+            "requested_settings": bound_requested_settings,
+            "settings": codex_settings,
+        }
         record["codex_thread_id"] = codex.get("thread_id")
         if codex.get("goal_status") != "complete":
             retryable = codex.get("goal_status") not in {
@@ -1018,6 +1214,24 @@ def add_cli_parsers(sub: Any) -> None:
         default=DEFAULT_CODEX_TIMEOUT_SECONDS,
     )
     run.add_argument("--codex-binary", default="codex")
+    run.add_argument(
+        "--codex-model",
+        help="Override the Codex model; omit to inherit the normal Codex default.",
+    )
+    run.add_argument(
+        "--codex-reasoning-effort",
+        help=(
+            "Override model reasoning effort (for example high, xhigh, max, or "
+            "ultra); omit to inherit."
+        ),
+    )
+    run.add_argument(
+        "--codex-service-tier",
+        help=(
+            "Override the App Server service tier. 'fast' is accepted and stored "
+            "as the canonical 'priority' tier."
+        ),
+    )
     run.add_argument("--skill-path", type=Path, default=DEFAULT_SKILL_PATH)
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--progress", choices=("off", "plain"), default="plain")
@@ -1145,6 +1359,9 @@ def main(argv: list[str] | None = None) -> int:
                 launch_codex=args.launch_codex,
                 codex_timeout_seconds=args.codex_timeout_seconds,
                 codex_binary=args.codex_binary,
+                codex_model=args.codex_model,
+                codex_reasoning_effort=args.codex_reasoning_effort,
+                codex_service_tier=args.codex_service_tier,
                 skill_path=args.skill_path,
                 dry_run=args.dry_run,
                 progress=progress,
