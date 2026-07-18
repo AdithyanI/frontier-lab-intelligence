@@ -10,6 +10,9 @@ import pytest
 from fli.insights.codex_app_server import CodexAppServerClient, CodexTaskError
 
 
+OBJECTIVE = "Publish the cited daily brief."
+
+
 @dataclass(frozen=True)
 class _SendStep:
     method: str
@@ -125,7 +128,7 @@ def _run_task(
     return asyncio.run(
         client.run_task(
             name="Daily intelligence 2026-07-18",
-            objective="Publish the cited daily brief.",
+            objective=OBJECTIVE,
             prompt="Use the prepared routing run.",
             skill_path=skill_path,
             timeout_seconds=1.0,
@@ -297,11 +300,12 @@ def test_resuming_active_goal_does_not_start_or_set_another_turn(
             _SendStep("thread/name/set", result={}),
             _SendStep(
                 "thread/goal/get",
-                result={"goal": {"status": "active"}},
+                result={"goal": {"status": "active", "objective": OBJECTIVE}},
                 after_response=(turn_completed,),
             ),
             _SendStep(
-                "thread/goal/get", result={"goal": {"status": "complete"}}
+                "thread/goal/get",
+                result={"goal": {"status": "complete", "objective": OBJECTIVE}},
             ),
         ]
     )
@@ -340,7 +344,7 @@ def test_terminal_goal_refreshes_stale_turn_activity_from_persisted_thread(
             _SendStep("thread/name/set", result={}),
             _SendStep(
                 "thread/goal/get",
-                result={"goal": {"status": "complete"}},
+                result={"goal": {"status": "complete", "objective": OBJECTIVE}},
             ),
             _SendStep(
                 "thread/read",
@@ -365,6 +369,36 @@ def test_terminal_goal_refreshes_stale_turn_activity_from_persisted_thread(
     assert result["goal_status"] == "complete"
     assert result["turns_started"] == 2
     assert [message["method"] for message in transport.sent].count("thread/read") == 1
+    transport.assert_exhausted()
+    assert transport.closed
+
+
+def test_resumed_task_without_goal_fails_without_starting_another_turn(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/resume",
+                result=_thread_result(
+                    repo_root,
+                    thread_id="thread-reused",
+                    status="idle",
+                ),
+            ),
+            _SendStep("thread/name/set", result={}),
+            _SendStep("thread/goal/get", result={"goal": None}),
+        ]
+    )
+
+    with pytest.raises(CodexTaskError) as raised:
+        _run_task(tmp_path, transport, thread_id="thread-reused")
+
+    assert raised.value.code == "E_CODEX_GOAL_MISSING"
+    assert "turn/start" not in [message["method"] for message in transport.sent]
     transport.assert_exhausted()
     assert transport.closed
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import redirect_stdout
+import fcntl
 import hashlib
 import io
 import json
@@ -13,7 +14,7 @@ import time
 from collections.abc import Callable
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, TextIO
 from uuid import uuid4
 
 from fli.evidence import events as signal_events
@@ -82,6 +83,31 @@ def _display_path(path: Path) -> str:
         return path.resolve().relative_to(REPO_ROOT).as_posix()
     except ValueError:
         return str(path.resolve())
+
+
+def _acquire_day_lock(db_path: Path, day: str) -> TextIO:
+    lock_path = db_path.parent / ".run-day-locks" / f"{db_path.name}.{day}.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    handle = lock_path.open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as error:
+        handle.close()
+        raise DailyRunError(
+            code="E_RUN_BUSY",
+            message=f"Daily orchestration for {day} is already running.",
+            hint="Wait for the existing command to finish, then inspect or resume it.",
+            retryable=True,
+            exit_code=5,
+        ) from error
+    return handle
+
+
+def _release_day_lock(handle: TextIO) -> None:
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    finally:
+        handle.close()
 
 
 def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
@@ -478,6 +504,10 @@ def _latest_editorial_run(
         return None
     conn = sqlite3.connect(f"file:{db_path.resolve().as_posix()}?mode=ro", uri=True)
     try:
+        if conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'editorial_run'"
+        ).fetchone() is None:
+            return None
         row = conn.execute(
             """SELECT run_id FROM editorial_run
                WHERE workspace_run_id = ? AND status = 'complete'
@@ -487,6 +517,26 @@ def _latest_editorial_run(
     finally:
         conn.close()
     return str(row[0]) if row else None
+
+
+def _complete_from_editorial_run(
+    conn: sqlite3.Connection,
+    record: dict[str, Any],
+    *,
+    editorial_run_id: str,
+) -> dict[str, Any]:
+    stages = record["stages"]
+    existing_codex = stages.get("codex") or {}
+    completed_codex = {
+        "status": "complete",
+        "completion_source": "editorial_run",
+    }
+    for key in ("thread_id", "thread_name"):
+        if existing_codex.get(key):
+            completed_codex[key] = existing_codex[key]
+    stages["codex"] = completed_codex
+    record["editorial_run_id"] = editorial_run_id
+    return _save_record(conn, record, status="complete", stage="codex", error=None)
 
 
 EvidenceRunner = Callable[..., dict[str, Any]]
@@ -560,7 +610,12 @@ def run_day(
     if dry_run:
         return {"dry_run": True, "plan": plan}
 
-    conn = connect(db_path)
+    run_lock = _acquire_day_lock(db_path, day)
+    try:
+        conn = connect(db_path)
+    except Exception:
+        _release_day_lock(run_lock)
+        raise
     current_stage = "planned"
     try:
         record, reused = _ensure_run(conn, day=day, config=config)
@@ -746,18 +801,11 @@ def run_day(
         workspace = stages["prepare"]
         workspace_path = REPO_ROOT / str(workspace["workspace"])
         editorial_run_id = _latest_editorial_run(
-            workspace_run_id=str(workspace["run_id"])
+            workspace_run_id=str(workspace["run_id"]), db_path=db_path
         )
         if editorial_run_id:
-            existing_codex = stages.get("codex") or {}
-            stages["codex"] = {
-                **existing_codex,
-                "status": "complete",
-                "completion_source": "editorial_run",
-            }
-            record["editorial_run_id"] = editorial_run_id
-            record = _save_record(
-                conn, record, status="complete", stage="codex", error=None
+            record = _complete_from_editorial_run(
+                conn, record, editorial_run_id=editorial_run_id
             )
             if progress:
                 progress("codex", "complete")
@@ -777,7 +825,8 @@ def run_day(
             f"prepared at {workspace['workspace']}. Read both audience contexts and "
             "the frozen manifest, follow the attached skill exactly, validate the full "
             "cohort, import it through the client, inspect the durable run, and then "
-            "mark the goal complete."
+            f"mark the goal complete. Use {_display_path(db_path)} as the exact "
+            "editorial database for index, import, and inspection commands."
         )
 
         def checkpoint(codex: dict[str, Any]) -> None:
@@ -815,15 +864,28 @@ def run_day(
             )
         if progress:
             progress("codex", "resuming" if existing_thread_id else "launching")
-        if codex_runner is None:
-            client = CodexAppServerClient(
-                repo_root=REPO_ROOT,
-                codex_binary=codex_binary,
-            )
-            import asyncio
+        try:
+            if codex_runner is None:
+                client = CodexAppServerClient(
+                    repo_root=REPO_ROOT,
+                    codex_binary=codex_binary,
+                )
+                import asyncio
 
-            codex = asyncio.run(
-                client.run_task(
+                codex = asyncio.run(
+                    client.run_task(
+                        name=name,
+                        objective=objective,
+                        prompt=prompt,
+                        skill_path=skill_path,
+                        timeout_seconds=codex_timeout_seconds,
+                        thread_id=existing_thread_id,
+                        progress=progress,
+                        checkpoint=checkpoint,
+                    )
+                )
+            else:
+                codex = codex_runner(
                     name=name,
                     objective=objective,
                     prompt=prompt,
@@ -833,18 +895,18 @@ def run_day(
                     progress=progress,
                     checkpoint=checkpoint,
                 )
+        except CodexTaskError:
+            editorial_run_id = _latest_editorial_run(
+                workspace_run_id=str(workspace["run_id"]), db_path=db_path
             )
-        else:
-            codex = codex_runner(
-                name=name,
-                objective=objective,
-                prompt=prompt,
-                skill_path=skill_path,
-                timeout_seconds=codex_timeout_seconds,
-                thread_id=existing_thread_id,
-                progress=progress,
-                checkpoint=checkpoint,
+            if not editorial_run_id:
+                raise
+            record = _complete_from_editorial_run(
+                conn, record, editorial_run_id=editorial_run_id
             )
+            if progress:
+                progress("codex", "complete")
+            return {**record, "reused": reused}
         stages["codex"] = codex
         record["codex_thread_id"] = codex.get("thread_id")
         if codex.get("goal_status") != "complete":
@@ -872,7 +934,7 @@ def run_day(
                 exit_code=4,
             )
         editorial_run_id = _latest_editorial_run(
-            workspace_run_id=str(workspace["run_id"])
+            workspace_run_id=str(workspace["run_id"]), db_path=db_path
         )
         if not editorial_run_id:
             raise DailyRunError(
@@ -882,9 +944,8 @@ def run_day(
                 retryable=True,
                 exit_code=4,
             )
-        record["editorial_run_id"] = editorial_run_id
-        record = _save_record(
-            conn, record, status="complete", stage="codex", error=None
+        record = _complete_from_editorial_run(
+            conn, record, editorial_run_id=editorial_run_id
         )
         if progress:
             progress("codex", "complete")
@@ -921,6 +982,7 @@ def run_day(
         raise
     finally:
         conn.close()
+        _release_day_lock(run_lock)
 
 
 def add_cli_parsers(sub: Any) -> None:

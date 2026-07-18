@@ -437,6 +437,7 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
     assert codex_call["thread_id"] is None
     assert codex_call["progress"] is None
     assert callable(codex_call["checkpoint"])
+    assert str(db_path) in codex_call["prompt"]
     assert editorial_lookups == [WORKSPACE_RUN_ID, WORKSPACE_RUN_ID]
     assert launched["status"] == "complete"
     assert launched["stage"] == "codex"
@@ -446,7 +447,7 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
     assert repeated["stages"]["codex"] == {
         "status": "complete",
         "thread_id": "thread-1",
-        "goal_status": "complete",
+        "completion_source": "editorial_run",
     }
 
 
@@ -496,10 +497,84 @@ def test_imported_run_closes_checkpoint_without_resuming_reused_task(
     assert resumed["stages"]["codex"] == {
         "status": "complete",
         "thread_id": "thread-reused-by-user",
-        "goal_status": "active",
-        "turn_id": "turn-original",
         "completion_source": "editorial_run",
     }
+
+
+def test_custom_store_import_closes_run_without_opening_codex(tmp_path) -> None:
+    pipeline = _Pipeline()
+    db_path = tmp_path / "custom-editorial.db"
+    _run(db_path=db_path, pipeline=pipeline)
+
+    conn = editorial_runs.connect(db_path)
+    with conn:
+        conn.execute(
+            """INSERT INTO editorial_run (
+                   run_id, schema_version, draft_schema_version, day,
+                   workspace_run_id, workspace_manifest_sha256,
+                   source_routing_run_id, source_routing_db,
+                   source_cohort_sha256, source_event_run_id,
+                   source_feed_run_id, skill_version, executor_model,
+                   executor_notes, result_sha256, result_json,
+                   candidate_count, candidate_pair_count, insight_count,
+                   citation_count, status, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                       ?, ?, ?, ?, 'complete', ?)""",
+            (
+                "editorial-custom",
+                editorial_runs.STORE_SCHEMA_VERSION,
+                editorial.DRAFT_SCHEMA_VERSION,
+                DAY,
+                WORKSPACE_RUN_ID,
+                "manifest-sha-1",
+                ROUTING_RUN_ID,
+                "routing.db",
+                "cohort-sha",
+                EVENT_RUN_ID,
+                FEED_RUN_ID,
+                "skill-v1",
+                "codex-test",
+                None,
+                "result-sha",
+                "{}",
+                8,
+                11,
+                1,
+                1,
+                "2026-07-18T10:00:00+00:00",
+            ),
+        )
+    conn.close()
+
+    result = _run(
+        db_path=db_path,
+        pipeline=pipeline,
+        launch_codex=True,
+        codex_runner=lambda **_: pytest.fail("must not open Codex"),
+    )
+
+    assert result["status"] == "complete"
+    assert result["editorial_run_id"] == "editorial-custom"
+    assert result["codex_thread_id"] is None
+    assert result["stages"]["codex"] == {
+        "status": "complete",
+        "completion_source": "editorial_run",
+    }
+
+
+def test_day_lock_rejects_concurrent_runner_before_any_stage(tmp_path) -> None:
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+    lock = daily_runner._acquire_day_lock(db_path, DAY)
+    try:
+        with pytest.raises(daily_runner.DailyRunError) as raised:
+            _run(db_path=db_path, pipeline=pipeline)
+    finally:
+        daily_runner._release_day_lock(lock)
+
+    assert raised.value.code == "E_RUN_BUSY"
+    assert raised.value.retryable is True
+    assert pipeline.order == []
 
 
 def test_thread_starting_without_id_fails_closed_instead_of_launching_replacement(

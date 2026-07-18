@@ -612,6 +612,30 @@ class CodexAppServerClient:
                 if isinstance(goal_result.get("goal"), dict)
                 else None
             )
+            if thread_id and goal is None:
+                raise CodexTaskError(
+                    code="E_CODEX_GOAL_MISSING",
+                    message="The persisted Codex task no longer has its daily goal.",
+                    hint=(
+                        "Do not restart work in this task. Inspect the exact imported "
+                        "editorial run or start a new date with a fresh task."
+                    ),
+                    retryable=False,
+                    exit_code=4,
+                )
+            if thread_id and goal is not None:
+                returned_objective = str(goal.get("objective") or "")
+                if returned_objective != objective:
+                    raise CodexTaskError(
+                        code="E_CODEX_GOAL_MISMATCH",
+                        message="The persisted Codex task now owns a different goal.",
+                        hint=(
+                            "Leave the reused task untouched and inspect the durable "
+                            "editorial run for the original workspace."
+                        ),
+                        retryable=False,
+                        exit_code=4,
+                    )
             if goal is None and not state.turn_in_progress:
                 await self._start_turn(
                     transport,
