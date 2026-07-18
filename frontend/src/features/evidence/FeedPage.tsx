@@ -23,7 +23,7 @@ import {
   type DateWindowDirection,
 } from '../../shared/date/dateWindow'
 import DateNavigator from '../../shared/components/DateNavigator'
-import CopyEnvelopeId from '../../shared/components/CopyEnvelopeId'
+import CopyEventId from '../../shared/components/CopyEventId'
 import { useAuditDate } from '../../shared/date/auditDateStore'
 import { readAuditDate, setAuditDateParam } from '../../shared/date/auditDate'
 import {
@@ -663,7 +663,7 @@ function EventRow({
             <Metric label="views" value={root.metrics.views} />
           </div>
           <div className="feed-footer-actions">
-            <CopyEnvelopeId envelopeId={item.event_id} />
+            <CopyEventId eventId={item.event_id} />
             <a href={root.url} target="_blank" rel="noreferrer">
               Open root post on X ↗
             </a>

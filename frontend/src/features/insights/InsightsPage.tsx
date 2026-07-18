@@ -14,7 +14,7 @@ import {
   type InvestmentEditorialAnalysis,
   type InvestmentImpactDirection,
 } from '../../shared/api'
-import CopyEnvelopeId from '../../shared/components/CopyEnvelopeId'
+import CopyEventId from '../../shared/components/CopyEventId'
 import DateNavigator from '../../shared/components/DateNavigator'
 import {
   getDateWindowEndForSelection,
@@ -184,7 +184,7 @@ function InsightRow({ item }: { item: InsightItem }) {
             <time dateTime={item.day}>{displayInsightDay(item.day)}</time>
             <span>{item.model}</span>
             <span>{item.prompt_version}</span>
-            <CopyEnvelopeId envelopeId={item.event_id} />
+            <CopyEventId eventId={item.event_id} />
             <Link
               to={envelopeUrl}
               aria-label={`Open the exact Feed envelope for ${accessibleName}`}

@@ -97,7 +97,7 @@ test('Artifacts from one exact Feed envelope share one visual rank rail', () => 
 test('Artifact provenance deep-links to the exact ranked Feed envelope', () => {
   assert.match(artifactSource, /source_event_id/)
   assert.match(artifactSource, /Feed envelope/)
-  assert.match(artifactSource, /<CopyEnvelopeId envelopeId=\{item\.source_event_id\} \/>/)
+  assert.match(artifactSource, /<CopyEventId eventId=\{item\.source_event_id\} \/>/)
   assert.match(artifactSource, /\/evidence\/feed\?date=/)
   assert.match(feedSource, /useSearchParams/)
   assert.match(feedSource, /event_id:/)

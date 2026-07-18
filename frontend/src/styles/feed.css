@@ -486,14 +486,14 @@
 .feed-footer-actions > a { flex: none; text-decoration: none; }
 .feed-footer-actions > a:hover { text-decoration: underline; }
 
-.copy-envelope-id {
+.copy-event-id {
   display: inline-flex;
   align-items: baseline;
   gap: 7px;
   white-space: nowrap;
 }
 
-.copy-envelope-id button {
+.copy-event-id button {
   padding: 0;
   border: 0;
   background: transparent;
@@ -502,18 +502,18 @@
   cursor: pointer;
 }
 
-.copy-envelope-id button:hover,
-.copy-envelope-id button:focus-visible {
+.copy-event-id button:hover,
+.copy-event-id button:focus-visible {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.copy-envelope-id button:focus-visible {
+.copy-event-id button:focus-visible {
   outline: 1px solid var(--blue-mid);
   outline-offset: 3px;
 }
 
-.copy-envelope-status {
+.copy-event-status {
   min-width: 38px;
   color: var(--positive);
   font-size: 9px;
@@ -802,4 +802,3 @@
   .feed-controls { justify-self: start; }
   .event-retweet-links { grid-template-columns: 1fr; }
 }
-

@@ -65,7 +65,7 @@ test('Insights inherits Feed rank and links every decision to its exact envelope
   assert.match(insightSource, /<span>Feed rank ↗<\/span>/)
   assert.doesNotMatch(insightSource, /Editorial rank/)
   assert.match(insightSource, /const envelopeUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event=\$\{encodeURIComponent\(item\.event_id\)\}`/)
-  assert.match(insightSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
+  assert.match(insightSource, /<CopyEventId eventId=\{item\.event_id\} \/>/)
   assert.match(insightSource, /Open envelope ↗/)
   assert.match(insightSource, /Open source ↗/)
   assert.match(insightSource, /Read artifact ↗/)

@@ -10,8 +10,8 @@ const dateNavigatorSource = await readFile(
   new URL('../src/shared/components/DateNavigator.tsx', import.meta.url),
   'utf8',
 )
-const copyEnvelopeSource = await readFile(
-  new URL('../src/shared/components/CopyEnvelopeId.tsx', import.meta.url),
+const copyEventSource = await readFile(
+  new URL('../src/shared/components/CopyEventId.tsx', import.meta.url),
   'utf8',
 )
 const appStyles = readStyles()
@@ -23,12 +23,12 @@ test('Feed uses semantic classes for optional menu and routing content', () => {
   assert.doesNotMatch(appStyles, /event-routing-heading span:first-child/)
 })
 
-test('Feed keeps routing secondary and exposes the exact envelope ID', () => {
+test('Feed keeps routing secondary and exposes the exact Event ID', () => {
   assert.ok(feedSource.indexOf('<EventEvidenceDetails') < feedSource.indexOf('<RoutingNote item={item} />'))
-  assert.match(feedSource, /<CopyEnvelopeId envelopeId=\{item\.event_id\} \/>/)
-  assert.match(copyEnvelopeSource, /navigator\.clipboard\.writeText\(envelopeId\)/)
-  assert.match(copyEnvelopeSource, /Copy envelope ID/)
-  assert.match(copyEnvelopeSource, /aria-live="polite"/)
+  assert.match(feedSource, /<CopyEventId eventId=\{item\.event_id\} \/>/)
+  assert.match(copyEventSource, /navigator\.clipboard\.writeText\(eventId\)/)
+  assert.match(copyEventSource, /Copy Event ID/)
+  assert.match(copyEventSource, /aria-live="polite"/)
 })
 
 test('Feed shows audience marks and keeps both routing reasons auditable', () => {
