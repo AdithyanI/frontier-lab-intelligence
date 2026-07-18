@@ -122,6 +122,32 @@ your own judgment for research, retrieval, grouping, and synthesis.
    complete run is imported, the Insights backend and UI select it
    automatically for that date and audience.
 
+## Parallel historical dates
+
+Do not start several full `daily-intelligence run-day` Evidence stages in
+parallel. Feed and Event publication is one global deterministic snapshot, so
+competing publishers can invalidate one another even though later workspaces
+are independent.
+
+For a historical batch:
+
+1. Publish Evidence once through the latest requested date with a retained
+   window that covers the earliest requested date.
+2. Run one `fli audience-routing refresh --through MAX --days N` command. Use
+   `--day-workers` for bounded per-day parallelism and do not use `--replace`.
+   The refresh reuses complete predecessor judgments only for exact matching
+   Event/evidence/model-input hashes under the same model contract, even when
+   the global publication ID changed.
+3. Prepare one immutable workspace per date. These local preparations may run
+   independently once the routing batch is complete.
+4. Launch one Codex task per exact workspace and let authoring, validation, and
+   import proceed in parallel. Never let a task inspect another date's draft or
+   workspace.
+
+This is a fan-out after one shared deterministic freeze, not several competing
+end-to-end publishers. A new or changed Event is evaluated; unchanged routed
+evidence is reused with explicit provenance.
+
 Do not schedule, publish, submit, or take another external action unless the
 user explicitly requests that action in the current session.
 

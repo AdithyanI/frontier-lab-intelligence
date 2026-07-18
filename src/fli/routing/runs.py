@@ -42,6 +42,14 @@ EXACT_REUSE_META_FIELDS = (
     "requested_event_id",
 )
 
+INCREMENTAL_TELEMETRY_FIELDS = (
+    "input_tokens",
+    "cached_tokens",
+    "cache_write_tokens",
+    "output_tokens",
+    "reported_cost_count",
+)
+
 RUN_SCHEMA = """
 CREATE TABLE IF NOT EXISTS run_meta (
     singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
@@ -335,6 +343,7 @@ def _execute_refresh_day(
                 "SELECT COUNT(*) FROM routing_item WHERE status != 'complete'"
             ).fetchone()[0]
         )
+        telemetry_before = _telemetry_totals(conn)
         if model_requests:
             client = entity_kinds.create_litellm_client()
             if hasattr(client, "with_options"):
@@ -342,6 +351,7 @@ def _execute_refresh_day(
             result = run_pending(conn, client=client, workers=workers)
         else:
             result = summary(conn)
+        telemetry_after = _telemetry_totals(conn)
         if int(result["counts"]["failed"] or 0):
             raise RuntimeError(
                 f"{item['day']} has {result['counts']['failed']} failed routing items; "
@@ -355,6 +365,10 @@ def _execute_refresh_day(
             "reused_exact_count": reuse["reused_exact_count"],
             "reuse_source_run_ids": reuse["source_run_ids"],
             "model_requests": model_requests,
+            "incremental_telemetry": _telemetry_delta(
+                telemetry_after,
+                telemetry_before,
+            ),
         }
     finally:
         conn.close()
@@ -513,6 +527,25 @@ def refresh_all_days(
         int(result.get("reused_exact_count") or 0)
         for result in results.values()
     )
+    incremental_telemetry = {
+        field: sum(
+            int((result.get("incremental_telemetry") or {}).get(field) or 0)
+            for result in results.values()
+        )
+        for field in INCREMENTAL_TELEMETRY_FIELDS
+    }
+    incremental_telemetry["reported_cost_usd"] = round(
+        sum(
+            float(
+                (result.get("incremental_telemetry") or {}).get(
+                    "reported_cost_usd"
+                )
+                or 0
+            )
+            for result in results.values()
+        ),
+        6,
+    )
     return {
         **base,
         "dry_run": False,
@@ -524,6 +557,7 @@ def refresh_all_days(
         ),
         "will_call_model": model_requests > 0,
         "model_requests": model_requests,
+        "incremental_telemetry": incremental_telemetry,
         "packaging": {
             "total_duration_ms": round(
                 sum(
@@ -975,6 +1009,38 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
     return {"run": dict(meta), "counts": counts}
 
 
+def _telemetry_totals(conn: sqlite3.Connection) -> dict[str, int | float]:
+    row = conn.execute(
+        """SELECT SUM(COALESCE(input_tokens, 0)) AS input_tokens,
+                  SUM(COALESCE(cached_tokens, 0)) AS cached_tokens,
+                  SUM(COALESCE(cache_write_tokens, 0)) AS cache_write_tokens,
+                  SUM(COALESCE(output_tokens, 0)) AS output_tokens,
+                  SUM(COALESCE(reported_cost_usd, 0)) AS reported_cost_usd,
+                  SUM(reported_cost_usd IS NOT NULL) AS reported_cost_count
+           FROM routing_item"""
+    ).fetchone()
+    return {
+        field: int(row[field] or 0)
+        for field in INCREMENTAL_TELEMETRY_FIELDS
+    } | {"reported_cost_usd": float(row["reported_cost_usd"] or 0)}
+
+
+def _telemetry_delta(
+    after: dict[str, int | float],
+    before: dict[str, int | float],
+) -> dict[str, int | float]:
+    return {
+        field: int(after[field]) - int(before[field])
+        for field in INCREMENTAL_TELEMETRY_FIELDS
+    } | {
+        "reported_cost_usd": round(
+            float(after["reported_cost_usd"])
+            - float(before["reported_cost_usd"]),
+            12,
+        )
+    }
+
+
 def reuse_exact_results(
     target: sqlite3.Connection,
     source: sqlite3.Connection,
@@ -1212,7 +1278,13 @@ def refresh_run_packets(
                     "SELECT COUNT(*) FROM routing_item WHERE status != 'complete'"
                 ).fetchone()[0]
             )
-            result = run_pending(target, client=client, workers=workers)
+            telemetry_before = _telemetry_totals(target)
+            result = (
+                run_pending(target, client=client, workers=workers)
+                if model_requests
+                else summary(target)
+            )
+            telemetry_after = _telemetry_totals(target)
             target.execute("PRAGMA wal_checkpoint(TRUNCATE)")
         finally:
             target.close()
@@ -1223,6 +1295,10 @@ def refresh_run_packets(
         "source_run_id": str(source_meta["run_id"]),
         "reused_exact_count": reused_count,
         "model_requests": model_requests,
+        "incremental_telemetry": _telemetry_delta(
+            telemetry_after,
+            telemetry_before,
+        ),
     }
 
 

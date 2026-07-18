@@ -69,7 +69,11 @@ def _routing_result() -> dict[str, Any]:
         "model": routing_model.DEFAULT_MODEL,
         "reasoning_effort": routing_model.DEFAULT_REASONING_EFFORT,
         "plan": [{"day": DAY, "run_id": ROUTING_RUN_ID, "reused": False}],
-        "model_requests": 8,
+        "reuse_policy": "exact-event-evidence-input",
+        "resumed_complete_count": 0,
+        "reused_exact_count": 7,
+        "days_with_exact_reuse": 1,
+        "model_requests": 1,
         "counts": {"complete": 8},
         "runs": [{"day": DAY, "run_id": ROUTING_RUN_ID}],
         "will_call_model": True,
@@ -803,6 +807,16 @@ def test_day_lock_rejects_concurrent_runner_before_any_stage(tmp_path) -> None:
     assert raised.value.code == "E_RUN_BUSY"
     assert raised.value.retryable is True
     assert pipeline.order == []
+
+
+def test_day_locks_allow_different_dates_to_run_independently(tmp_path) -> None:
+    db_path = tmp_path / "editorial.db"
+    first = daily_runner._acquire_day_lock(db_path, "2026-07-16")
+    try:
+        second = daily_runner._acquire_day_lock(db_path, "2026-07-17")
+        daily_runner._release_day_lock(second)
+    finally:
+        daily_runner._release_day_lock(first)
 
 
 def test_thread_starting_without_id_fails_closed_instead_of_launching_replacement(

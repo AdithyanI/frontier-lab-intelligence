@@ -96,10 +96,12 @@ routing run evaluates only the intended cohort against the corrected evidence.
 ## Refresh audience routing
 
 After the corrected Event run and artifact catalog are published, refresh the
-top 100 Events for the same nine-day window with one command:
+top 100 Events for the same window with one command:
 
 ```bash
-fli audience-routing refresh --through 2026-07-13 --replace
+fli audience-routing refresh \
+  --through 2026-07-17 --days 13 \
+  --top-ranked 100 --workers 24 --day-workers 9
 ```
 
 The defaults are GPT-5.4-mini/high, nine days, 100 Events per day, 24 item
@@ -110,22 +112,37 @@ stable. The current v9 packet contains the root, same-author authored updates,
 and accepted first-party artifacts; independently authored reactions and pure
 reposts remain Feed activity only. This keeps local CPU/GIL-heavy packet rendering fast while preserving
 parallel network throughput. Deterministic run IDs resume complete rows in
-place, and the result reports packet-packaging time plus the exact number of
-model requests. `--replace` removes older routing directories only after all
-requested days complete successfully. Use `--dry-run` to print the exact run
-plan without packaging packets or calling the model.
+place. For each new publication-qualified run, the refresh automatically finds
+complete compatible predecessors for the same day and reuses a judgment only
+when Event ID, frozen evidence SHA, and rendered model-input SHA are all exact
+under the same day/model/reasoning/prompt/schema and selection contract. Global
+Event and Feed run IDs, cohort size, rank, and semantic snapshot metadata may
+change without forcing an identical model request. The new target keeps its
+current publication, rank, packet, and snapshot provenance; only the completed
+judgment and response telemetry are copied with `reused_from_run_id`.
+
+The result separately reports resumed rows, exact cross-publication reuses, and
+new model requests per day and in aggregate. A changed or newly ranked Event is
+the only normal reason for a new request. `counts` describes the complete
+auditable run, including telemetry copied with reused judgments;
+`incremental_telemetry` is the tokens and reported cost incurred by this
+invocation only. Use `--dry-run` to print the exact run plan without packaging
+packets or calling the model. Do not use `--replace` in parallel or overlapping
+refreshes: immutable predecessor runs are the reuse and audit source, and one
+process must never prune another process's outputs.
 
 LiteLLM/OpenAI prompt caching still applies to the stable instruction prefix;
-the run databases provide the stronger exact-response reuse when the source
-publication and frozen cohort are unchanged. A changed Event correctly
-produces a new request rather than reusing a stale judgment.
+the run databases provide the stronger exact-response reuse even when the
+global publication changes. A changed Event, evidence packet, rendered input,
+model, reasoning effort, prompt, or schema correctly produces a new request
+rather than reusing a stale judgment.
 
 For an artifact-only correction to an already complete day, use
 `fli audience-routing refresh-run` with the prior run database and a fresh run
-ID/database. It freezes a new immutable full cohort, reuses a completed judgment
-only when Event ID and the exact rendered `input_sha256` match, records the
-source run on reused rows, and calls the model only for changed packets. This is
-the bounded repair path; it does not invoke Insight generation.
+ID/database. It freezes a new immutable full cohort, applies the same exact
+Event/evidence/input reuse contract, records the source run on reused rows, and
+calls the model only for changed packets. This is the bounded one-day repair
+path; the normal historical-range path is `audience-routing refresh`.
 
 ## Refresh audience Insights
 

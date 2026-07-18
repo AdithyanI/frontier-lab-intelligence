@@ -177,6 +177,19 @@ Retries resume without sending overrides and first verify that the persisted
 task still has the frozen tuple; a task whose settings changed is left
 untouched rather than silently changed back.
 
+`run-day` is the one-date entry point, not the historical parallelism boundary.
+Its Evidence stage owns the single global Feed/Event publication pointer, so
+several full `run-day` commands for different dates must not publish
+concurrently. For an all-date rerun, publish Evidence once through the maximum
+date, run one multi-day `audience-routing refresh` against that exact
+publication, then prepare and launch one immutable workspace/task per date in
+parallel. The routing batch automatically reuses compatible predecessor rows
+only when Event ID, evidence SHA, and rendered input SHA are exact; it records
+the predecessor run and reports resumed rows, exact reuses, and new model
+requests separately. This makes later global snapshots cheap without weakening
+lineage or copying stale judgments. Do not use routing `--replace` during an
+overlapping or parallel batch.
+
 The active goal owns the main Codex turns. The runner waits for both the goal's
 terminal status and its final turn's terminal status; it never treats an early
 `goal: complete` notification as permission to interrupt the finishing turn.

@@ -342,6 +342,279 @@ def test_selective_refresh_reuses_only_exact_complete_inputs(tmp_path):
     assert changed["reused_from_run_id"] is None
 
 
+def test_exact_reuse_crosses_publications_and_keeps_target_provenance(tmp_path):
+    source = routing_runs.connect_run(tmp_path / "source.db")
+    target = routing_runs.connect_run(tmp_path / "target.db")
+    now = "2026-07-18T00:00:00+00:00"
+
+    def seed_meta(
+        conn,
+        *,
+        run_id,
+        event_run_id,
+        feed_run_id,
+        expected_count,
+    ):
+        conn.execute(
+            """INSERT INTO run_meta
+               (singleton, run_id, day, model, reasoning_effort,
+                prompt_version, prompt_sha256, schema_version,
+                source_event_run_id, source_feed_run_id, source_artifact_db,
+                selection_kind, selection_limit, requested_event_id,
+                cohort_sha256, expected_count, created_at, updated_at)
+               VALUES (1, ?, '2026-07-16', 'model', 'high', 'prompt',
+                       'prompt-sha', 'schema', ?, ?, 'artifacts.db',
+                       'top_ranked', 100, NULL, ?, ?, ?, ?)""",
+            (
+                run_id,
+                event_run_id,
+                feed_run_id,
+                f"cohort-{run_id}",
+                expected_count,
+                now,
+                now,
+            ),
+        )
+
+    def seed_item(
+        conn,
+        *,
+        event_id,
+        rank,
+        evidence_sha,
+        input_sha,
+        complete=False,
+        semantic_sha="target-semantic",
+    ):
+        conn.execute(
+            """INSERT INTO routing_item
+               (event_id, feed_rank, root_url, semantic_snapshot_sha256,
+                packet_json, evidence_sha256, input_text, input_sha256,
+                status, attempts, ai_engineering_relevant,
+                ai_engineering_reason, investment_relevant,
+                investment_reason, raw_output_text, response_id,
+                response_model, input_tokens, cached_tokens,
+                cache_write_tokens, output_tokens, reported_cost_usd,
+                request_tags_json, completed_at, updated_at)
+               VALUES (?, ?, 'https://x.com/a/status/1', ?, '{}', ?, 'input', ?,
+                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                event_id,
+                rank,
+                semantic_sha,
+                evidence_sha,
+                input_sha,
+                "complete" if complete else "pending",
+                1 if complete else 0,
+                1 if complete else None,
+                "engineering" if complete else None,
+                0 if complete else None,
+                "investment" if complete else None,
+                "raw" if complete else None,
+                "response" if complete else None,
+                "model" if complete else None,
+                100 if complete else None,
+                20 if complete else None,
+                0 if complete else None,
+                10 if complete else None,
+                0.01 if complete else None,
+                '{"run":"source"}' if complete else None,
+                now if complete else None,
+                now,
+            ),
+        )
+
+    seed_meta(
+        source,
+        run_id="source",
+        event_run_id="events-old",
+        feed_run_id="feed-old",
+        expected_count=2,
+    )
+    seed_meta(
+        target,
+        run_id="target",
+        event_run_id="events-new",
+        feed_run_id="feed-new",
+        expected_count=3,
+    )
+    seed_item(
+        source,
+        event_id="same",
+        rank=9,
+        evidence_sha="evidence-same",
+        input_sha="input-same",
+        complete=True,
+        semantic_sha="source-semantic",
+    )
+    seed_item(
+        source,
+        event_id="changed",
+        rank=10,
+        evidence_sha="evidence-old",
+        input_sha="input-same",
+        complete=True,
+    )
+    seed_item(
+        target,
+        event_id="same",
+        rank=1,
+        evidence_sha="evidence-same",
+        input_sha="input-same",
+        semantic_sha="target-semantic",
+    )
+    seed_item(
+        target,
+        event_id="changed",
+        rank=2,
+        evidence_sha="evidence-new",
+        input_sha="input-same",
+    )
+    seed_item(
+        target,
+        event_id="new",
+        rank=3,
+        evidence_sha="evidence-new-event",
+        input_sha="input-new-event",
+    )
+
+    assert routing_runs.reuse_exact_results(target, source) == 1
+    reused = target.execute(
+        "SELECT * FROM routing_item WHERE event_id = 'same'"
+    ).fetchone()
+    changed = target.execute(
+        "SELECT * FROM routing_item WHERE event_id = 'changed'"
+    ).fetchone()
+    target_meta = target.execute("SELECT * FROM run_meta").fetchone()
+
+    assert reused["status"] == "complete"
+    assert reused["reused_from_run_id"] == "source"
+    assert reused["feed_rank"] == 1
+    assert reused["semantic_snapshot_sha256"] == "target-semantic"
+    assert changed["status"] == "pending"
+    assert target_meta["source_event_run_id"] == "events-new"
+    assert target_meta["source_feed_run_id"] == "feed-new"
+
+    target.execute("UPDATE run_meta SET prompt_sha256 = 'different-prompt'")
+    with pytest.raises(ValueError, match="metadata differ: prompt_sha256"):
+        routing_runs.reuse_exact_results(target, source)
+    source.close()
+    target.close()
+
+
+def test_automatic_reuse_ignores_partial_and_incompatible_runs(
+    tmp_path, monkeypatch
+):
+    run_root = tmp_path / "routing"
+    target_db = run_root / "target" / "routing.db"
+    source_db = run_root / "source" / "routing.db"
+    partial_db = run_root / "partial" / "routing.db"
+    incompatible_db = run_root / "incompatible" / "routing.db"
+    now = "2026-07-18T00:00:00+00:00"
+
+    def seed(path, *, run_id, prompt_sha="prompt-sha", complete=True):
+        conn = routing_runs.connect_run(path)
+        conn.execute(
+            """INSERT INTO run_meta
+               (singleton, run_id, day, model, reasoning_effort,
+                prompt_version, prompt_sha256, schema_version,
+                source_event_run_id, source_feed_run_id, source_artifact_db,
+                selection_kind, selection_limit, requested_event_id,
+                cohort_sha256, expected_count, created_at, updated_at)
+               VALUES (1, ?, '2026-07-16', 'model', 'high', 'prompt', ?,
+                       'schema', ?, ?, 'artifacts.db', 'top_ranked', 100, NULL,
+                       ?, 1, ?, ?)""",
+            (
+                run_id,
+                prompt_sha,
+                f"events-{run_id}",
+                f"feed-{run_id}",
+                f"cohort-{run_id}",
+                now,
+                now,
+            ),
+        )
+        conn.execute(
+            """INSERT INTO routing_item
+               (event_id, feed_rank, root_url, semantic_snapshot_sha256,
+                packet_json, evidence_sha256, input_text, input_sha256,
+                status, attempts, ai_engineering_relevant,
+                ai_engineering_reason, investment_relevant,
+                investment_reason, raw_output_text, response_id,
+                response_model, input_tokens, cached_tokens,
+                cache_write_tokens, output_tokens, reported_cost_usd,
+                request_tags_json, completed_at, updated_at)
+               VALUES ('event-1', 1, 'https://x.com/a/status/1', ?, '{}',
+                       'evidence', 'input', 'input-sha', ?, ?, ?, ?, ?, ?, ?,
+                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                f"semantic-{run_id}",
+                "complete" if complete else "pending",
+                1 if complete else 0,
+                1 if complete else None,
+                "engineering" if complete else None,
+                0 if complete else None,
+                "investment" if complete else None,
+                "raw" if complete else None,
+                "response" if complete else None,
+                "model" if complete else None,
+                100 if complete else None,
+                20 if complete else None,
+                0 if complete else None,
+                10 if complete else None,
+                0.01 if complete else None,
+                '{"run":"source"}' if complete else None,
+                now if complete else None,
+                now,
+            ),
+        )
+        conn.commit()
+        return conn
+
+    source = seed(source_db, run_id="source")
+    source.close()
+    partial = seed(partial_db, run_id="partial", complete=False)
+    partial.close()
+    incompatible = seed(
+        incompatible_db,
+        run_id="incompatible",
+        prompt_sha="other-prompt",
+    )
+    incompatible.close()
+    target = seed(target_db, run_id="target", complete=False)
+    target.close()
+    monkeypatch.setattr(
+        routing_runs.entity_kinds,
+        "create_litellm_client",
+        lambda: pytest.fail("exact reuse must avoid creating a model client"),
+    )
+
+    result = routing_runs._execute_refresh_day(
+        {"run_id": "target", "day": "2026-07-16"},
+        workers=4,
+        run_root=run_root,
+        packaging_duration_ms=3.0,
+    )
+    target = routing_runs.connect_run(target_db)
+    row = target.execute("SELECT * FROM routing_item").fetchone()
+    target.close()
+
+    assert result["reused_exact_count"] == 1
+    assert result["reuse_source_run_ids"] == ["source"]
+    assert result["model_requests"] == 0
+    assert result["incremental_telemetry"] == {
+        "input_tokens": 0,
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "output_tokens": 0,
+        "reported_cost_count": 0,
+        "reported_cost_usd": 0.0,
+    }
+    assert result["counts"]["complete"] == 1
+    assert row["status"] == "complete"
+    assert row["reused_from_run_id"] == "source"
+
+
 def test_artifact_sources_deduplicate_one_artifact_across_source_posts(
     tmp_path, monkeypatch
 ):

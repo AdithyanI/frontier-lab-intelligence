@@ -69,7 +69,12 @@ at the root of `fli`.
 7. Audience routing independently decides whether the packet matters to AI
    Engineering and Investment. New routing freezes admit only first-party X
    sources no more than seven days old; a current same-author continuation may
-   replace an older root, while old-only packets are excluded.
+   replace an older root, while old-only packets are excluded. A multi-day
+   refresh freezes every requested date against one global Event publication,
+   then routes days in parallel. New publication-qualified runs automatically
+   reuse a predecessor judgment only when the same Event has exact frozen
+   evidence and rendered model input under the same routing contract; changed
+   or newly ranked Events alone require model work.
 8. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. It loads a compact profile index once and retrieves
@@ -112,6 +117,10 @@ at the root of `fli`.
 - **Current versus historical state:** current readers use only canonical paths
   documented in the code map. Historical run identity remains in manifests,
   prompt/schema versions, hashes, and archived project records.
+- **Parallel historical authoring:** publish Feed and Events once through the
+  maximum requested date, route the complete date range against that one
+  snapshot, then fan out immutable per-day workspaces and Codex tasks. Several
+  full `run-day` Evidence publishers must not compete for the global pointer.
 - **Exact Event identity:** quote, retweet, reply-parent, and first-party thread
   relationships may group evidence; shared topic or conversation text may not.
 - **Dynamic curation:** Feed and Event readers overlay current Registry state so
