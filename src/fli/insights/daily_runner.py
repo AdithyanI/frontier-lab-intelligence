@@ -39,6 +39,9 @@ RUN_CONTRACT_VERSION = "daily-orchestration-v1"
 DEFAULT_CODEX_TIMEOUT_SECONDS = 4 * 60 * 60
 DEFAULT_CODEX_SERVICE_TIER = STANDARD_SERVICE_TIER
 DEFAULT_EVIDENCE_WINDOW_DAYS = 9
+AGENT_FEEDBACK_DIR = (
+    REPO_ROOT / "data/derived/daily-intelligence/agent-feedback"
+)
 PREPARATION_STAGES = ("evidence", "routing", "prepare")
 CODEX_SETTING_KEYS = ("model", "reasoning_effort", "service_tier")
 
@@ -89,6 +92,32 @@ def _display_path(path: Path) -> str:
         return path.resolve().relative_to(REPO_ROOT).as_posix()
     except ValueError:
         return str(path.resolve())
+
+
+def _agent_feedback_path(day: str) -> Path:
+    return AGENT_FEEDBACK_DIR / f"{day}.md"
+
+
+def _agent_feedback_prompt(day: str, output_path: Path) -> str:
+    display_path = _display_path(output_path)
+    return f"""The main daily-intelligence goal for {day} is complete. Do not reopen it.
+
+Write a short, candid post-run reflection to `{display_path}`. This is feedback about the harness, not another editorial pass. Do not modify the brief, editorial database, skill, tools, product code, or goal. Only write the designated Markdown file.
+
+Use these headings:
+
+# Daily intelligence run reflection — {day}
+## Overall assessment
+## Friction encountered
+## Tools or context I wished I had
+## Suggested improvements
+## What should be preserved
+## Anything else
+
+Ground every point in this run and clearly distinguish concrete experience from speculation. It is acceptable to say that nothing material was missing.
+
+Under “Anything else”, answer this open question: Beyond the questions above, was there anything else you wish you had—such as a tool, command, context, data representation, permission, instruction, or workflow—that would have made this run easier, faster, more reliable, or produced a better result? Include unexpected observations even if they do not fit the earlier sections. Clearly distinguish concrete run experience from speculation. It is acceptable to say “nothing else.”
+"""
 
 
 def _normalize_codex_setting(value: str | None, *, name: str) -> str | None:
@@ -1010,6 +1039,8 @@ def run_day(
             f"mark the goal complete. Use {_display_path(db_path)} as the exact "
             "editorial database for index, import, and inspection commands."
         )
+        feedback_path = _agent_feedback_path(day)
+        feedback_prompt = _agent_feedback_prompt(day, feedback_path)
 
         def checkpoint(codex: dict[str, Any]) -> None:
             nonlocal record, stages, codex_settings
@@ -1081,6 +1112,8 @@ def run_day(
                         reasoning_effort=codex_settings["reasoning_effort"],
                         service_tier=codex_settings["service_tier"],
                         thread_id=existing_thread_id,
+                        post_completion_prompt=feedback_prompt,
+                        post_completion_output_path=feedback_path,
                         progress=progress,
                         checkpoint=checkpoint,
                     )
@@ -1096,6 +1129,8 @@ def run_day(
                     reasoning_effort=codex_settings["reasoning_effort"],
                     service_tier=codex_settings["service_tier"],
                     thread_id=existing_thread_id,
+                    post_completion_prompt=feedback_prompt,
+                    post_completion_output_path=feedback_path,
                     progress=progress,
                     checkpoint=checkpoint,
                 )

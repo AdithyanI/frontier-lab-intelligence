@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import time
 from collections import deque
@@ -454,6 +455,7 @@ class CodexAppServerClient:
         deadline: float,
         progress: ProgressCallback | None,
     ) -> dict[str, Any]:
+        turns_before_request = state.turns_started
         params: dict[str, Any] = {
             "threadId": state.thread_id,
             "input": [
@@ -483,9 +485,56 @@ class CodexAppServerClient:
         state.turn_id = str(turn.get("id") or state.turn_id or "") or None
         state.turn_status = str(turn.get("status") or "inProgress")
         state.turn_in_progress = True
-        if state.turns_started == 0:
-            state.turns_started = 1
+        if state.turns_started == turns_before_request:
+            state.turns_started += 1
         return result
+
+    async def _wait_for_turn_completion(
+        self,
+        transport: AppServerTransport,
+        state: _TaskState,
+        *,
+        deadline: float,
+        progress: ProgressCallback | None,
+    ) -> None:
+        """Wait for one ordinary follow-up turn without reopening its goal."""
+
+        while state.turn_in_progress:
+            wait_seconds = min(self._remaining(deadline), self.goal_poll_seconds)
+            try:
+                message = await transport.receive(wait_seconds)
+            except TimeoutError:
+                await self._refresh_thread_state(
+                    transport,
+                    state,
+                    deadline=deadline,
+                    progress=progress,
+                )
+                continue
+            await self._handle_message(
+                transport,
+                message,
+                state,
+                progress=progress,
+            )
+        if state.turn_status == "failed":
+            raise CodexTaskError(
+                code="E_CODEX_FEEDBACK_TURN_FAILED",
+                message="The post-goal Codex feedback turn failed.",
+                hint="The completed daily brief remains valid; inspect the same task if feedback is still useful.",
+                retryable=True,
+                exit_code=4,
+            )
+
+    def _feedback_output_path(self, output_path: Path) -> Path:
+        resolved = (
+            output_path.resolve()
+            if output_path.is_absolute()
+            else (self.repo_root / output_path).resolve()
+        )
+        if not resolved.is_relative_to(self.repo_root):
+            raise ValueError("post_completion_output_path must be inside repo_root")
+        return resolved
 
     async def discard_task(
         self,
@@ -582,6 +631,8 @@ class CodexAppServerClient:
         reasoning_effort: str | None = None,
         service_tier: str | None = None,
         thread_id: str | None = None,
+        post_completion_prompt: str | None = None,
+        post_completion_output_path: Path | None = None,
         progress: ProgressCallback | None = None,
         checkpoint: CheckpointCallback | None = None,
     ) -> dict[str, Any]:
@@ -589,6 +640,17 @@ class CodexAppServerClient:
             raise ValueError("timeout_seconds must be positive")
         if not skill_path.is_file():
             raise FileNotFoundError(skill_path)
+        if (post_completion_prompt is None) != (
+            post_completion_output_path is None
+        ):
+            raise ValueError(
+                "post_completion_prompt and post_completion_output_path must be provided together"
+            )
+        feedback_output_path = (
+            self._feedback_output_path(post_completion_output_path)
+            if post_completion_output_path is not None
+            else None
+        )
         requested_settings = _request_settings(
             model=model,
             reasoning_effort=reasoning_effort,
@@ -935,7 +997,7 @@ class CodexAppServerClient:
                         exit_code=4,
                     )
 
-            result = {
+            result: dict[str, Any] = {
                 "thread_id": state.thread_id,
                 "thread_name": name,
                 "turn_id": state.turn_id,
@@ -946,6 +1008,58 @@ class CodexAppServerClient:
                 "settings": effective_settings,
                 "instruction_sources": instruction_sources,
             }
+            if (
+                state.goal_status == "complete"
+                and post_completion_prompt is not None
+                and feedback_output_path is not None
+            ):
+                feedback_output_path.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    await self._start_turn(
+                        transport,
+                        state,
+                        prompt=post_completion_prompt,
+                        skill_path=skill_path,
+                        settings=effective_settings,
+                        deadline=deadline,
+                        progress=progress,
+                    )
+                    feedback_turn_id = state.turn_id
+                    await self._wait_for_turn_completion(
+                        transport,
+                        state,
+                        deadline=deadline,
+                        progress=progress,
+                    )
+                    if feedback_output_path.is_file():
+                        content = feedback_output_path.read_bytes()
+                        feedback = {
+                            "status": "written",
+                            "path": str(feedback_output_path),
+                            "sha256": hashlib.sha256(content).hexdigest(),
+                            "turn_id": feedback_turn_id,
+                            "turn_status": state.turn_status,
+                        }
+                    else:
+                        feedback = {
+                            "status": "missing",
+                            "path": str(feedback_output_path),
+                            "turn_id": feedback_turn_id,
+                            "turn_status": state.turn_status,
+                            "message": (
+                                "The feedback turn completed without writing the requested file."
+                            ),
+                        }
+                except Exception as error:  # Feedback must not invalidate the brief.
+                    feedback = {
+                        "status": "failed",
+                        "path": str(feedback_output_path),
+                        "error": {
+                            "code": getattr(error, "code", type(error).__name__),
+                            "message": getattr(error, "message", str(error)),
+                        },
+                    }
+                result["feedback"] = feedback
             if checkpoint:
                 checkpoint({**result, "status": "finished"})
             return result
