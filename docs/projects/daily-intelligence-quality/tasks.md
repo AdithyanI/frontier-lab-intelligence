@@ -91,10 +91,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
       that silently turns the brief day into the source day.
 - [x] Regression cases for Jul 10, Jul 13, Jul 14, and Jul 15 pass, including
       the inclusive seven-day boundary and old-only exclusion.
-- [ ] Every workspace artifact exposes exact disclosure lineage so the daily
+- [x] Every workspace artifact exposes exact disclosure lineage so the daily
       agent can audit whether it was available by the brief day.
-- [ ] Every persisted artifact citation includes an excerpt verified against
-      the frozen artifact text and a claim-specific support explanation.
+- [x] Every newly persisted artifact citation includes an excerpt verified
+      against the frozen artifact text and a claim-specific support explanation.
 - [ ] The provisional weak-item and omission queues are adjudicated, the final
       3–5 submission candidates are named, and remaining findings are either
       fixed or explicitly deferred.
@@ -179,9 +179,9 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Project inspectable artifact disclosure lineage into workspace v2 without an automatic artifact gate. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
-| todo | Require and verify claim-grounding excerpts for artifact citations through the existing client validation path. | parent | [tests](../../../tests/insights/test_editorial.py) |
-| todo | Update the daily skill and Paper Glider evaluation case, then run all-days and fast validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| done | Project inspectable artifact disclosure lineage into workspace v2 without an automatic artifact gate. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| done | Require and verify claim-grounding excerpts for artifact citations through the existing client validation path. | parent | [tests](../../../tests/insights/test_editorial.py) |
+| done | Update the daily skill and Paper Glider evaluation case, then run all-days and fast validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 
 ## Backlog / Remaining Work
 
@@ -245,3 +245,11 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   lineage. The same artifact was then cited generically for an unrelated
   cost/capacity claim. Replanned one bounded fix for timing plus citation
   grounding before any editorial rerun.
+- 2026-07-18: [DONE] Projected exact artifact disclosure lineage into all eleven
+  fresh workspaces without automatically excluding artifacts. A calibration
+  rejected exact-post and date-only artifact gates in favor of agent audit.
+  New artifact citations require a non-empty excerpt that occurs in the exact
+  frozen Event artifact. Paper Glider remains visible in Jul 14 with its Jul 15
+  disclosure, while its future X reply stays outside the semantic packet.
+  Focused tests passed 18/18, all eleven workspaces prepared, and the full fast
+  suite passed 405 Python tests plus 56 frontend tests, lint, and build.

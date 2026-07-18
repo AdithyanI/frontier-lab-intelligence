@@ -263,8 +263,9 @@ Independent reviewers repeatedly wanted the following agent-facing support:
 14. Artifact-relevance warnings when a linked artifact does not establish the
     claim attributed to it.
 
-Only item 1 belongs in the immediate milestone. Items 2–14 remain preserved for
-evidence-led prioritization after chronology is calibrated.
+Items 1 and 14 entered the immediate milestone after the Paper Glider
+calibration. Items 2–13 remain preserved for evidence-led prioritization after
+chronology and citation grounding are calibrated.
 
 ### Artifact timing and relevance follow-up
 

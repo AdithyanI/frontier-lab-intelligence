@@ -73,8 +73,6 @@ def prune_packet_payload(
         "max_source_age_days": MAX_SOURCE_AGE_DAYS,
         "stale_x_source_ids": stale_source_ids,
         "stale_x_source_count": len(stale_source_ids),
-        "excluded_artifact_ids": [],
-        "excluded_artifact_count": 0,
         "root_replaced": False,
     }
     if not retained_x:
