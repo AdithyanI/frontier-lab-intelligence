@@ -30,6 +30,18 @@ DEFAULT_REFRESH_DAYS = 9
 DEFAULT_REFRESH_WORKERS = 24
 DEFAULT_REFRESH_DAY_WORKERS = 9
 
+EXACT_REUSE_META_FIELDS = (
+    "day",
+    "model",
+    "reasoning_effort",
+    "prompt_version",
+    "prompt_sha256",
+    "schema_version",
+    "selection_kind",
+    "selection_limit",
+    "requested_event_id",
+)
+
 RUN_SCHEMA = """
 CREATE TABLE IF NOT EXISTS run_meta (
     singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
@@ -308,15 +320,28 @@ def _execute_refresh_day(
     run_db = run_root / str(item["run_id"]) / "routing.db"
     conn = connect_run(run_db)
     try:
+        resumed_complete_count = int(
+            conn.execute(
+                "SELECT COUNT(*) FROM routing_item WHERE status = 'complete'"
+            ).fetchone()[0]
+        )
+        reuse = reuse_previous_results(
+            conn,
+            target_run_db=run_db,
+            run_root=run_root,
+        )
         model_requests = int(
             conn.execute(
                 "SELECT COUNT(*) FROM routing_item WHERE status != 'complete'"
             ).fetchone()[0]
         )
-        client = entity_kinds.create_litellm_client()
-        if hasattr(client, "with_options"):
-            client = client.with_options(max_retries=0, timeout=180.0)
-        result = run_pending(conn, client=client, workers=workers)
+        if model_requests:
+            client = entity_kinds.create_litellm_client()
+            if hasattr(client, "with_options"):
+                client = client.with_options(max_retries=0, timeout=180.0)
+            result = run_pending(conn, client=client, workers=workers)
+        else:
+            result = summary(conn)
         if int(result["counts"]["failed"] or 0):
             raise RuntimeError(
                 f"{item['day']} has {result['counts']['failed']} failed routing items; "
@@ -326,6 +351,9 @@ def _execute_refresh_day(
         return {
             **result,
             "packaging_duration_ms": packaging_duration_ms,
+            "resumed_complete_count": resumed_complete_count,
+            "reused_exact_count": reuse["reused_exact_count"],
+            "reuse_source_run_ids": reuse["source_run_ids"],
             "model_requests": model_requests,
         }
     finally:
@@ -376,6 +404,7 @@ def refresh_all_days(
         "workers_per_day": workers,
         "day_workers": min(day_workers, len(plan)),
         "replace": replace,
+        "reuse_policy": "exact-event-evidence-input",
         "plan": [
             {
                 **item,
@@ -458,6 +487,7 @@ def refresh_all_days(
         "reported_cost_count",
         "cache_eligible_requests",
         "cache_hit_requests",
+        "reused_exact_count",
     )
     counts = {
         field: sum(int(result["counts"].get(field) or 0) for result in results.values())
@@ -475,9 +505,23 @@ def refresh_all_days(
     model_requests = sum(
         int(result.get("model_requests") or 0) for result in results.values()
     )
+    resumed_complete_count = sum(
+        int(result.get("resumed_complete_count") or 0)
+        for result in results.values()
+    )
+    reused_exact_count = sum(
+        int(result.get("reused_exact_count") or 0)
+        for result in results.values()
+    )
     return {
         **base,
         "dry_run": False,
+        "resumed_complete_count": resumed_complete_count,
+        "reused_exact_count": reused_exact_count,
+        "days_with_exact_reuse": sum(
+            int(result.get("reused_exact_count") or 0) > 0
+            for result in results.values()
+        ),
         "will_call_model": model_requests > 0,
         "model_requests": model_requests,
         "packaging": {
@@ -917,7 +961,8 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
                       SUM(COALESCE(reported_cost_usd, 0)) AS reported_cost_usd,
                       SUM(reported_cost_usd IS NOT NULL) AS reported_cost_count,
                       SUM(COALESCE(input_tokens, 0) >= 1024) AS cache_eligible_requests,
-                      SUM(COALESCE(cached_tokens, 0) > 0) AS cache_hit_requests
+                      SUM(COALESCE(cached_tokens, 0) > 0) AS cache_hit_requests,
+                      SUM(reused_from_run_id IS NOT NULL) AS reused_exact_count
                FROM routing_item"""
         ).fetchone()
     )
@@ -934,7 +979,13 @@ def reuse_exact_results(
     target: sqlite3.Connection,
     source: sqlite3.Connection,
 ) -> int:
-    """Copy judgments only when the complete rendered model input is identical."""
+    """Copy exact judgments across immutable publications with compatible contracts.
+
+    Event and Feed run IDs, cohort size, rank, and semantic snapshot metadata may
+    change when a later global publication is built. They do not invalidate a
+    completed audience judgment when the same Event has identical frozen
+    evidence and identical rendered model input under the same model contract.
+    """
     source_meta = source.execute(
         "SELECT * FROM run_meta WHERE singleton = 1"
     ).fetchone()
@@ -943,35 +994,31 @@ def reuse_exact_results(
     ).fetchone()
     if source_meta is None or target_meta is None:
         raise ValueError("source and target run databases must both be frozen")
-    for key in (
-        "day",
-        "model",
-        "reasoning_effort",
-        "prompt_version",
-        "prompt_sha256",
-        "schema_version",
-        "source_event_run_id",
-        "source_feed_run_id",
-        "selection_kind",
-        "selection_limit",
-        "requested_event_id",
-        "expected_count",
-    ):
+    for key in EXACT_REUSE_META_FIELDS:
         if source_meta[key] != target_meta[key]:
             raise ValueError(f"source and target run metadata differ: {key}")
 
     source_rows = {
-        (str(row["event_id"]), str(row["input_sha256"])): row
+        (
+            str(row["event_id"]),
+            str(row["evidence_sha256"]),
+            str(row["input_sha256"]),
+        ): row
         for row in source.execute(
             "SELECT * FROM routing_item WHERE status = 'complete'"
         ).fetchall()
     }
     reusable = []
     for row in target.execute(
-        "SELECT event_id, input_sha256 FROM routing_item WHERE status != 'complete'"
+        """SELECT event_id, evidence_sha256, input_sha256
+           FROM routing_item WHERE status != 'complete'"""
     ).fetchall():
         source_row = source_rows.get(
-            (str(row["event_id"]), str(row["input_sha256"]))
+            (
+                str(row["event_id"]),
+                str(row["evidence_sha256"]),
+                str(row["input_sha256"]),
+            )
         )
         if source_row is not None:
             reusable.append(source_row)
@@ -1023,6 +1070,99 @@ def reuse_exact_results(
             (now,),
         )
     return len(reusable)
+
+
+def _complete_reuse_candidates(
+    target: sqlite3.Connection,
+    *,
+    target_run_db: Path,
+    run_root: Path,
+) -> list[Path]:
+    """Return newest complete compatible predecessor runs for one target."""
+    target_meta = target.execute(
+        "SELECT * FROM run_meta WHERE singleton = 1"
+    ).fetchone()
+    if target_meta is None:
+        raise ValueError("target run database has not been prepared")
+
+    candidates: list[tuple[str, str, Path]] = []
+    target_path = target_run_db.resolve()
+    for path in sorted(run_root.glob("*/routing.db")):
+        if path.resolve() == target_path:
+            continue
+        source = None
+        try:
+            source = _open_readonly(path)
+            source_meta = source.execute(
+                "SELECT * FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+            if source_meta is None or any(
+                source_meta[key] != target_meta[key]
+                for key in EXACT_REUSE_META_FIELDS
+            ):
+                continue
+            counts = source.execute(
+                """SELECT COUNT(*) AS total,
+                          SUM(status = 'complete') AS complete
+                   FROM routing_item"""
+            ).fetchone()
+            expected = int(source_meta["expected_count"])
+            if (
+                int(counts["total"] or 0) != expected
+                or int(counts["complete"] or 0) != expected
+            ):
+                continue
+            candidates.append(
+                (
+                    str(source_meta["updated_at"]),
+                    str(source_meta["run_id"]),
+                    path,
+                )
+            )
+        except (OSError, sqlite3.Error):
+            continue
+        finally:
+            if source is not None:
+                source.close()
+    return [path for _updated, _run_id, path in sorted(candidates, reverse=True)]
+
+
+def reuse_previous_results(
+    target: sqlite3.Connection,
+    *,
+    target_run_db: Path,
+    run_root: Path,
+) -> dict[str, Any]:
+    """Reuse exact completed rows from prior same-day publication snapshots."""
+    reused_exact_count = 0
+    source_run_ids: list[str] = []
+    for path in _complete_reuse_candidates(
+        target,
+        target_run_db=target_run_db,
+        run_root=run_root,
+    ):
+        source = _open_readonly(path)
+        try:
+            source_meta = source.execute(
+                "SELECT run_id FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+            reused = reuse_exact_results(target, source)
+            if reused:
+                reused_exact_count += reused
+                source_run_ids.append(str(source_meta["run_id"]))
+            pending = int(
+                target.execute(
+                    "SELECT COUNT(*) FROM routing_item WHERE status != 'complete'"
+                ).fetchone()[0]
+            )
+            if pending == 0:
+                break
+        finally:
+            source.close()
+    return {
+        "reused_exact_count": reused_exact_count,
+        "source_run_ids": source_run_ids,
+    }
 
 
 def refresh_run_packets(
