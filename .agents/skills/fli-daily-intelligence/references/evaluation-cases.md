@@ -170,3 +170,24 @@ Expected behavior:
   to publish adjacent material; and
 - applies the same one-claim, source-subtraction test to other topics rather
   than memorizing the named models in this case.
+
+## 9. Evidence strength and test calibration
+
+Prompt:
+
+> Review two draft decisions before validation. An Investment company is marked
+> negative because a new rival announced financing and the company has a generic
+> competition disclosure. An Engineering experiment changes verification,
+> isolation, and duplicate suppression together and invents exact percentage
+> gates without a baseline.
+
+Expected behavior:
+
+- treats the financing announcement and generic disclosure as evidence of
+  competitive exposure, not proof of a negative company effect;
+- uses `uncertain` unless development-specific evidence establishes direction;
+- does not manufacture conviction by accumulating weak context sources;
+- derives an Engineering gate from a baseline, cited requirement, or operating
+  constraint, or labels it as provisional and calibrates it in the test;
+- stages or ablates bundled controls when causal attribution matters; and
+- states the attribution limit when only the complete bundle can be tested.

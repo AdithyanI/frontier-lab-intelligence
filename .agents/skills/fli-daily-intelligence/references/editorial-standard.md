@@ -155,6 +155,13 @@ For each affected company record:
 - `impact`: `positive`, `negative`, `mixed`, or `uncertain`; and
 - `mechanism`: the company-specific operating or competitive transmission path.
 
+Match the impact label to the evidence for this development. A product page,
+partnership description, or generic risk-factor disclosure can establish that
+a company is exposed to a market or competitor. It does not establish that the
+current development has a positive or negative effect. Use `uncertain` unless
+development-specific evidence supports the direction. Do not use several weak
+context sources to simulate one strong causal source.
+
 Do not repeat portfolio dates or disclosure caveats in every entity. They live
 once in the context packet and the reader's portfolio note. `portfolio` means
 the company appears in that working baseline. `outside_portfolio` is an analyst
@@ -193,6 +200,18 @@ the evidence matters. `next_step` states one bounded, reproducible action.
 The only Engineering-specific field is `decision_rule`: one concise statement
 of the measurable result that justifies proceeding and the result that rejects,
 pauses, or constrains the idea.
+
+Numerical gates need a basis. Derive them from an observed baseline, a cited
+requirement, or a known operating constraint. When none exists, call the values
+provisional criteria and make baseline calibration part of the next step; do
+not present convenient percentages, sample counts, or latency limits as
+validated thresholds.
+
+Design the action so its result is interpretable. If verification, isolation,
+deduplication, routing, or other controls are introduced together, stage them
+or include an ablation that isolates their effects. If that is impractical,
+state that the combined test can assess the bundle but cannot identify which
+control caused the change.
 
 The author should still reason about hypothesis, workload, hardware,
 quantization, context, benchmark conditions, security limits, and operator

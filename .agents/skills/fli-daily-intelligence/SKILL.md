@@ -180,6 +180,11 @@ shared theme as an automatic merge.
   unknown. Keep the strongest challenge in `key_uncertainty` and use one to
   three measurable `watchpoints`; do not split the same argument across
   parallel mechanics fields.
+- For Investment, match each impact label to development-specific evidence. A
+  product page, partnership description, generic risk disclosure, or broad
+  competitive context may establish exposure, but not a positive or negative
+  effect from the current development. Use `uncertain` until the direction is
+  supported, and do not strengthen an inference by adding weak context.
 - For Investment, keep internal research-method controls under AI Engineering
   or `not_selected` unless they produce a defensible fund-thesis, company, or
   portfolio consequence. A shared model, company, or market theme is not such
@@ -188,6 +193,12 @@ shared theme as an automatic merge.
   its measurable proceed and stop conditions into one concise `decision_rule`.
   Keep affected surfaces, implications, hypotheses, and material constraints
   in the interpretation rather than duplicating them as parallel fields.
+- For Engineering, derive numerical gates from an existing baseline or label
+  them explicitly as provisional criteria to calibrate in the proposed test.
+  Do not present agent-chosen percentages or sample counts as validated
+  thresholds. When several controls change at once, stage or ablate them so the
+  result can identify which intervention helped; otherwise state that causal
+  attribution will remain unresolved.
 - Existing per-Event Insights are working annotations, not editorial truth.
   Re-evaluate them against the complete day.
 

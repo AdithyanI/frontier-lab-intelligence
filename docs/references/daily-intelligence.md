@@ -182,6 +182,12 @@ must examine a genuinely comparable subject and workload. Complete cohort
 accounting is satisfied by explicit non-selection; it never requires widening
 an Insight around a shared topic.
 
+Investment impact direction must come from development-specific evidence;
+generic company context establishes exposure but defaults to `uncertain`.
+Engineering decision thresholds come from baselines or operating constraints,
+or remain explicitly provisional, and bundled interventions are staged or
+ablated when the result needs causal attribution.
+
 ## Storage and Read Rules
 
 Workspaces live under `data/derived/daily-intelligence/workspaces/`. The durable
