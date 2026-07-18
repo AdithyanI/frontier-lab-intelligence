@@ -118,3 +118,27 @@ Expected behavior:
   path; and
 - does not build or run an embedding index when the relevant evidence is
   already present in the inspected packets.
+
+## 7. Reader-facing clarity pass
+
+Prompt:
+
+> Before validating the 2026-07-16 brief, rewrite the selected Kimi K3
+> Investment Insight so a smart non-expert can understand it on the first read
+> without changing the evidence or investment judgment.
+
+Expected behavior:
+
+- applies the shared Adi writing standard after completing the evidence and
+  reasoning work;
+- rewrites every reader-facing field, including company mechanisms,
+  uncertainty, watchpoints, and next step rather than polishing only the title;
+- keeps the judgment-led title and all material facts, causal steps,
+  qualifications, company mappings, and measurable watchpoints;
+- puts the conclusion first, uses one main idea per sentence, and rewrites most
+  sentences over 25 words;
+- states the operating and financial consequences in plain English and says
+  directly when the financial impact is unknown;
+- retains FLI's institutional voice without first-person opinions,
+  conversational asides, marketing language, or em dashes; and
+- does not trade technical precision or honest uncertainty for brevity.

@@ -69,14 +69,22 @@ your own judgment for research, retrieval, grouping, and synthesis.
    uncertainty or watchpoint rather than speculation. This is a reasoning
    review, not a reason to build or run an embedding index when the evidence is
    already present.
-7. Validate repeatedly until the complete cohort passes:
+7. After the reasoning is complete, run one mandatory reader-facing writing
+   pass over every selected Insight. Load and apply the shared
+   [Adi writing skill](../adi-writing/SKILL.md), including its voice standard,
+   and follow the institutional adaptation in
+   [the editorial standard](references/editorial-standard.md#reader-facing-writing).
+   Apply it to every field the reader sees, not only the title. Preserve the
+   facts, causal chain, technical precision, and honest uncertainty; simplify
+   the language and sentence structure, not the judgment.
+8. Validate repeatedly until the complete cohort passes:
 
    ```bash
    .venv/bin/fli daily-intelligence validate \
      --workspace <workspace> --draft <workspace>/draft.json --json --no-input
    ```
 
-8. For a requested daily brief, import the validated result atomically and
+9. For a requested daily brief, import the validated result atomically and
    inspect the durable run:
 
    ```bash

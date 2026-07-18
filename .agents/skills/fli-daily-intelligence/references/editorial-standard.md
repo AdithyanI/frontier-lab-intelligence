@@ -3,6 +3,7 @@
 ## Contents
 
 - Reader-facing shape
+- Reader-facing writing
 - Evidence roles
 - Grouping boundary
 - Editorial rank
@@ -28,6 +29,49 @@ It contains:
 
 Use `.venv/bin/fli daily-intelligence contract --json --no-input` as the authoritative
 field and enum contract. Start from the workspace's `draft.template.json`.
+
+## Reader-facing writing
+
+After the evidence and reasoning are complete, edit every reader-facing field
+against the shared
+[Adi writing standard](../../adi-writing/references/voice.md). This is a
+mandatory clarity pass, not permission to change the evidence or weaken the
+analysis.
+
+Apply the standard to `title`, `rank_rationale`, `what_changed`,
+`interpretation`, `next_step`, company `mechanism`, `key_uncertainty`,
+`watchpoints`, and Engineering `decision_rule`:
+
+- put the conclusion first, followed by the detail and background;
+- give each sentence one main idea and each paragraph one topic;
+- prefer active voice, concrete nouns, exact dates and everyday words;
+- aim for 15 to 20 words per sentence and rewrite most sentences over 25 words;
+- make the operating, financial, thesis, or engineering consequence explicit
+  instead of hiding it behind terms such as “bridge”, “transmission path”, or
+  “substitutability” when plain English is more precise;
+- preserve material qualifications as direct sentences, including “the
+  financial impact is still unknown” when that is the honest conclusion; and
+- remove filler, repetition, inflated language and em dashes.
+
+Keep FLI's institutional voice. Do not add first-person opinions,
+conversational asides, marketing language, or personal calls to the reader.
+The result should sound like a clear analyst, not like Adi speaking personally.
+
+For example, avoid compressing several steps into one sentence:
+
+> The operating bridge is greater buyer choice and the financial bridge would
+> be lower pricing or higher spending, but the magnitude is unknown.
+
+Prefer the same judgment in direct sentences:
+
+> K3 gives buyers another near-frontier option. That could pressure API prices
+> or force incumbents to spend more to maintain quality. The financial impact
+> is still unknown.
+
+Before validation, ask whether a smart non-expert and an expert could both
+understand every sentence on the first read. If simplification removes a
+material fact, causal step, uncertainty, or decision condition, restore it in
+clearer language.
 
 ## Evidence roles
 
