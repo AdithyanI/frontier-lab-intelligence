@@ -141,14 +141,15 @@ complete editorial run already exists for the workspace, that durable import
 closes orchestration before any App Server connection is opened; a task that
 the user later reuses for review is never resumed as pipeline work.
 
-Codex selection is explicit but optional. `--codex-model`,
-`--codex-reasoning-effort`, and `--codex-service-tier` override the normal
-Codex user/project configuration for a newly launched task; omitted values
-inherit it. Routine launches omit `--codex-service-tier` and therefore use the
-normal service tier. If explicitly requested, the friendly value `fast` is
-normalized to the App Server catalog ID `priority`. App Server reports the
-effective model, reasoning effort, and tier, and the runner freezes that tuple
-in the day checkpoint.
+Codex model and reasoning selection are explicit but optional:
+`--codex-model` and `--codex-reasoning-effort` inherit normal Codex
+user/project configuration when omitted. Service speed is deliberately
+different: `--codex-service-tier` defaults to `standard`, and the runner sends
+App Server the explicit `serviceTier: null` override that clears any inherited
+Fast tier. `normal` and `default` are accepted aliases for `standard`; `fast`
+remains an explicit opt-in and is normalized to App Server's `priority` tier.
+App Server reports the effective model, reasoning effort, and tier, and the
+runner freezes that tuple in the day checkpoint.
 Retries resume without sending overrides and first verify that the persisted
 task still has the frozen tuple; a task whose settings changed is left
 untouched rather than silently changed back.

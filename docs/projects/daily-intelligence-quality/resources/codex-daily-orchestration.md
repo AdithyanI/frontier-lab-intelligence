@@ -29,9 +29,11 @@ routing, editorial validation, or editorial persistence.
 - A complete imported editorial run for the exact workspace is terminal. The
   ledger closes from that row before opening App Server, even if the original
   task has since been reused for unrelated human review.
-- Codex model, reasoning effort, and service tier are optional per-launch
-  overrides. Omitted values inherit normal Codex configuration; the exact
-  effective tuple returned by App Server is frozen before goal work continues.
+- Codex model and reasoning effort are optional per-launch overrides; omitted
+  values inherit normal Codex configuration. Service tier defaults to an
+  explicit Standard override so user-level Fast configuration cannot leak into
+  the run. The exact effective tuple returned by App Server is frozen before
+  goal work continues.
 - A resume sends no model-setting overrides. It compares the task's effective
   tuple with the frozen checkpoint and fails before naming, goal, or turn work
   if the task has changed.
@@ -47,7 +49,8 @@ Use a short-lived stdio `codex app-server` child and the stable protocol:
    - `cwd=/Users/dobby/GitHub/frontier-lab-intelligence`;
    - `ephemeral=false`;
    - a stable service name;
-   - optional `model` and `serviceTier` overrides;
+   - optional `model`, plus explicit `serviceTier: null` for Standard unless a
+     different tier was requested;
 3. `thread/name/set` with `FLI Daily Brief — YYYY-MM-DD`;
 4. `turn/start` with the complete objective, prepared workspace, explicit
    skill invocation, and optional `model`, `effort`, and `serviceTier`
@@ -87,10 +90,13 @@ racing two turns while still giving the task the full objective in context.
   --json --no-input
 ```
 
-Routine launches use the normal service tier by omitting
-`--codex-service-tier`. The optional value `fast` remains available as an
-operator-facing alias for App Server's `priority` tier; the ledger stores the
-canonical value returned by App Server.
+Routine launches explicitly use Standard service even when the surrounding
+Codex configuration prefers Fast. The command defaults
+`--codex-service-tier` to `standard`, which is sent to App Server as
+`serviceTier: null`; `normal` and `default` are aliases. The optional value
+`fast` remains an operator-facing alias for App Server's `priority` tier. The
+ledger stores both the requested setting and the effective canonical value
+returned by App Server.
 
 ## Explicitly Deferred
 

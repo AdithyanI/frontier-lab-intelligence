@@ -92,11 +92,14 @@ at the root of `fli`.
    scaffolds are not separate reader fields.
 10. The date-keyed daily runner checkpoints the existing Evidence, routing,
    and strict-v3 workspace stages, then may hand the exact workspace to one
-   named Codex task. It records the effective Codex model, reasoning effort,
-   and service tier returned by App Server and validates that frozen tuple
-   before any resume work. A complete imported editorial run is terminal
-   product proof: retries close from that durable row before opening App
-   Server, so a task later reused by a human is outside orchestration control.
+   named Codex task. Model and reasoning may inherit Codex configuration, but
+   service speed defaults to an explicit Standard override (`serviceTier:
+   null`) so a user-level Fast preference cannot leak into an unattended run.
+   It records the effective model, reasoning effort, and service tier returned
+   by App Server and validates that frozen tuple before any resume work. A
+   complete imported editorial run is terminal product proof: retries close
+   from that durable row before opening App Server, so a task later reused by a
+   human is outside orchestration control.
 11. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners.
 

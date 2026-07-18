@@ -21,7 +21,11 @@ from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
 from fli.evidence import refresh as evidence_refresh
 from fli.insights import editorial, editorial_runs
-from fli.insights.codex_app_server import CodexAppServerClient, CodexTaskError
+from fli.insights.codex_app_server import (
+    STANDARD_SERVICE_TIER,
+    CodexAppServerClient,
+    CodexTaskError,
+)
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 
@@ -33,6 +37,7 @@ CLI_SCHEMA_VERSION = "1.0"
 STORE_SCHEMA_VERSION = "daily-orchestration-store-v1"
 RUN_CONTRACT_VERSION = "daily-orchestration-v1"
 DEFAULT_CODEX_TIMEOUT_SECONDS = 4 * 60 * 60
+DEFAULT_CODEX_SERVICE_TIER = STANDARD_SERVICE_TIER
 DEFAULT_EVIDENCE_WINDOW_DAYS = 9
 PREPARATION_STAGES = ("evidence", "routing", "prepare")
 CODEX_SETTING_KEYS = ("model", "reasoning_effort", "service_tier")
@@ -92,9 +97,21 @@ def _normalize_codex_setting(value: str | None, *, name: str) -> str | None:
     normalized = value.strip()
     if not normalized:
         raise ValueError(f"{name} must not be empty")
-    if name == "codex-service-tier" and normalized.lower() == "fast":
-        return "priority"
+    if name == "codex-service-tier":
+        lowered = normalized.lower()
+        if lowered in {"default", "normal", STANDARD_SERVICE_TIER}:
+            return STANDARD_SERVICE_TIER
+        if lowered == "fast":
+            return "priority"
     return normalized
+
+
+def _expected_effective_codex_setting(
+    key: str, value: str | None
+) -> str | None:
+    if key == "service_tier" and value == STANDARD_SERVICE_TIER:
+        return None
+    return value
 
 
 def _codex_settings(
@@ -185,14 +202,23 @@ def _bound_codex_settings(
             existing_codex.get("settings"), require_resolved=True
         )
         comparison = effective
-        launch_settings = effective
+        launch_settings = {
+            **effective,
+            "service_tier": (
+                STANDARD_SERVICE_TIER
+                if effective["service_tier"] is None
+                else effective["service_tier"]
+            ),
+        }
     else:
         comparison = bound_requested
         launch_settings = bound_requested
     mismatches = {
         key: {"bound": comparison[key], "requested": requested[key]}
         for key in CODEX_SETTING_KEYS
-        if requested[key] is not None and requested[key] != comparison[key]
+        if requested[key] is not None
+        and _expected_effective_codex_setting(key, requested[key])
+        != _expected_effective_codex_setting(key, comparison[key])
     }
     if mismatches:
         raise DailyRunError(
@@ -687,7 +713,7 @@ def run_day(
     codex_binary: str = "codex",
     codex_model: str | None = None,
     codex_reasoning_effort: str | None = None,
-    codex_service_tier: str | None = None,
+    codex_service_tier: str | None = DEFAULT_CODEX_SERVICE_TIER,
     skill_path: Path = DEFAULT_SKILL_PATH,
     dry_run: bool = False,
     progress: ProgressCallback | None = None,
@@ -1227,9 +1253,10 @@ def add_cli_parsers(sub: Any) -> None:
     )
     run.add_argument(
         "--codex-service-tier",
+        default=DEFAULT_CODEX_SERVICE_TIER,
         help=(
-            "Override the App Server service tier. 'fast' is accepted and stored "
-            "as the canonical 'priority' tier."
+            "Set the App Server service tier (default: standard). 'normal' and "
+            "'default' alias standard; 'fast' aliases the canonical priority tier."
         ),
     )
     run.add_argument("--skill-path", type=Path, default=DEFAULT_SKILL_PATH)

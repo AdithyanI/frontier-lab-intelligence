@@ -22,6 +22,7 @@ TERMINAL_GOAL_STATUSES = {
 }
 APP_SERVER_STREAM_LIMIT_BYTES = 16 * 1024 * 1024
 CODEX_SETTING_KEYS = ("model", "reasoning_effort", "service_tier")
+STANDARD_SERVICE_TIER = "standard"
 
 
 def _app_server_command(codex_binary: str) -> tuple[str, ...]:
@@ -49,13 +50,38 @@ def _request_settings(
     reasoning_effort: str | None,
     service_tier: str | None,
 ) -> dict[str, str | None]:
+    normalized_service_tier = _optional_setting(
+        service_tier, name="service_tier"
+    )
+    if normalized_service_tier is not None:
+        lowered_tier = normalized_service_tier.lower()
+        if lowered_tier in {"default", "normal", STANDARD_SERVICE_TIER}:
+            normalized_service_tier = STANDARD_SERVICE_TIER
+        elif lowered_tier == "fast":
+            normalized_service_tier = "priority"
     return {
         "model": _optional_setting(model, name="model"),
         "reasoning_effort": _optional_setting(
             reasoning_effort, name="reasoning_effort"
         ),
-        "service_tier": _optional_setting(service_tier, name="service_tier"),
+        "service_tier": normalized_service_tier,
     }
+
+
+def _protocol_service_tier(value: str | None) -> str | None:
+    """Map the operator-facing Standard tier to App Server's explicit null."""
+
+    return None if value == STANDARD_SERVICE_TIER else value
+
+
+def _expected_effective_settings(
+    requested: dict[str, str | None],
+) -> dict[str, str | None]:
+    expected = dict(requested)
+    expected["service_tier"] = _protocol_service_tier(
+        requested["service_tier"]
+    )
+    return expected
 
 
 def _effective_settings(opened: dict[str, Any]) -> dict[str, str | None]:
@@ -568,6 +594,7 @@ class CodexAppServerClient:
             reasoning_effort=reasoning_effort,
             service_tier=service_tier,
         )
+        expected_settings = _expected_effective_settings(requested_settings)
         deadline = time.monotonic() + timeout_seconds
         state = _TaskState(thread_id=thread_id)
         transport = await self._open_transport()
@@ -620,7 +647,9 @@ class CodexAppServerClient:
                 if requested_settings["model"] is not None:
                     start_params["model"] = requested_settings["model"]
                 if requested_settings["service_tier"] is not None:
-                    start_params["serviceTier"] = requested_settings["service_tier"]
+                    start_params["serviceTier"] = _protocol_service_tier(
+                        requested_settings["service_tier"]
+                    )
                 if requested_settings["reasoning_effort"] is not None:
                     start_params["config"] = {
                         "model_reasoning_effort": requested_settings[
@@ -662,11 +691,11 @@ class CodexAppServerClient:
             ):
                 mismatches = {
                     key: {
-                        "expected": requested_settings[key],
+                        "expected": expected_settings[key],
                         "actual": effective_settings[key],
                     }
                     for key in CODEX_SETTING_KEYS
-                    if effective_settings[key] != requested_settings[key]
+                    if effective_settings[key] != expected_settings[key]
                 }
                 if mismatches:
                     raise CodexTaskError(
@@ -687,7 +716,7 @@ class CodexAppServerClient:
                     }
                     for key in CODEX_SETTING_KEYS
                     if requested_settings[key] is not None
-                    and effective_settings[key] != requested_settings[key]
+                    and effective_settings[key] != expected_settings[key]
                 }
                 if mismatches:
                     raise CodexTaskError(

@@ -174,7 +174,12 @@ class _Pipeline:
         settings = {
             "model": kwargs["model"] or "gpt-5.6-sol",
             "reasoning_effort": kwargs["reasoning_effort"] or "xhigh",
-            "service_tier": kwargs["service_tier"],
+            "service_tier": (
+                None
+                if kwargs["service_tier"]
+                == daily_runner.DEFAULT_CODEX_SERVICE_TIER
+                else kwargs["service_tier"]
+            ),
         }
         kwargs["checkpoint"](
             {
@@ -200,7 +205,7 @@ def _run(
     codex_runner: Any | None = None,
     codex_model: str | None = None,
     codex_reasoning_effort: str | None = None,
-    codex_service_tier: str | None = None,
+    codex_service_tier: str | None = daily_runner.DEFAULT_CODEX_SERVICE_TIER,
 ) -> dict[str, Any]:
     return daily_runner.run_day(
         day=DAY,
@@ -358,7 +363,12 @@ def test_obsolete_workspace_with_started_task_fails_closed(tmp_path):
                 "settings": {
                     "model": kwargs["model"] or "gpt-5.6-sol",
                     "reasoning_effort": kwargs["reasoning_effort"] or "xhigh",
-                    "service_tier": kwargs["service_tier"],
+                    "service_tier": (
+                        None
+                        if kwargs["service_tier"]
+                        == daily_runner.DEFAULT_CODEX_SERVICE_TIER
+                        else kwargs["service_tier"]
+                    ),
                 },
             }
         )
@@ -454,7 +464,7 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
     assert codex_call["timeout_seconds"] == daily_runner.DEFAULT_CODEX_TIMEOUT_SECONDS
     assert codex_call["model"] is None
     assert codex_call["reasoning_effort"] is None
-    assert codex_call["service_tier"] is None
+    assert codex_call["service_tier"] == daily_runner.DEFAULT_CODEX_SERVICE_TIER
     assert codex_call["thread_id"] is None
     assert codex_call["progress"] is None
     assert callable(codex_call["checkpoint"])
@@ -472,7 +482,7 @@ def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(
         "requested_settings": {
             "model": None,
             "reasoning_effort": None,
-            "service_tier": None,
+            "service_tier": daily_runner.DEFAULT_CODEX_SERVICE_TIER,
         },
         "settings": {
             "model": "gpt-5.6-sol",
@@ -516,6 +526,35 @@ def test_launch_binds_explicit_codex_settings_and_normalizes_fast_alias(
     }
 
 
+def test_standard_tier_binds_null_effective_value_for_safe_resume() -> None:
+    requested = {
+        "model": None,
+        "reasoning_effort": None,
+        "service_tier": daily_runner.DEFAULT_CODEX_SERVICE_TIER,
+    }
+    existing = {
+        "requested_settings": requested,
+        "settings": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "xhigh",
+            "service_tier": None,
+        },
+    }
+
+    launch, bound = daily_runner._bound_codex_settings(
+        existing,
+        requested,
+        thread_id="thread-1",
+    )
+
+    assert bound == requested
+    assert launch == {
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "service_tier": daily_runner.DEFAULT_CODEX_SERVICE_TIER,
+    }
+
+
 def test_resume_rejects_different_explicit_codex_settings_before_runner(
     tmp_path,
 ) -> None:
@@ -530,7 +569,12 @@ def test_resume_rejects_different_explicit_codex_settings_before_runner(
                 "settings": {
                     "model": kwargs["model"],
                     "reasoning_effort": kwargs["reasoning_effort"],
-                    "service_tier": kwargs["service_tier"],
+                    "service_tier": (
+                        None
+                        if kwargs["service_tier"]
+                        == daily_runner.DEFAULT_CODEX_SERVICE_TIER
+                        else kwargs["service_tier"]
+                    ),
                 },
             }
         )
@@ -633,7 +677,12 @@ def test_imported_run_closes_checkpoint_without_resuming_reused_task(
                 "settings": {
                     "model": kwargs["model"] or "gpt-5.6-sol",
                     "reasoning_effort": kwargs["reasoning_effort"] or "xhigh",
-                    "service_tier": kwargs["service_tier"],
+                    "service_tier": (
+                        None
+                        if kwargs["service_tier"]
+                        == daily_runner.DEFAULT_CODEX_SERVICE_TIER
+                        else kwargs["service_tier"]
+                    ),
                 },
             }
         )
@@ -665,7 +714,7 @@ def test_imported_run_closes_checkpoint_without_resuming_reused_task(
         "requested_settings": {
             "model": None,
             "reasoning_effort": None,
-            "service_tier": None,
+            "service_tier": daily_runner.DEFAULT_CODEX_SERVICE_TIER,
         },
         "settings": {
             "model": "gpt-5.6-sol",
@@ -798,10 +847,10 @@ def test_thread_starting_without_id_fails_closed_instead_of_launching_replacemen
     assert stored["stages"]["codex"] == {
         "status": "thread_starting",
         "thread_id": None,
-        "requested_settings": {
-            "model": None,
-            "reasoning_effort": None,
-            "service_tier": None,
+            "requested_settings": {
+                "model": None,
+                "reasoning_effort": None,
+                "service_tier": daily_runner.DEFAULT_CODEX_SERVICE_TIER,
         },
     }
     assert stored["error"]["code"] == "E_CODEX_THREAD_UNKNOWN"
@@ -880,7 +929,7 @@ def test_cli_dry_run_defaults_to_stable_json_without_touching_store(
                 "codex_settings": {
                     "model": None,
                     "reasoning_effort": None,
-                    "service_tier": None,
+                    "service_tier": daily_runner.DEFAULT_CODEX_SERVICE_TIER,
                 },
                 "config": _expected_config(),
             },

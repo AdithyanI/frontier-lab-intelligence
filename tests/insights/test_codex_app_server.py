@@ -322,6 +322,48 @@ def test_new_task_applies_explicit_model_effort_and_priority_tier(
     transport.assert_exhausted()
 
 
+def test_new_task_explicit_standard_clears_inherited_service_tier(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    turn_completed = _notification(
+        "turn/completed",
+        {"turn": {"id": "turn-1", "status": "completed"}},
+    )
+
+    def assert_thread_start(message: dict[str, Any]) -> None:
+        params = message["params"]
+        assert "serviceTier" in params
+        assert params["serviceTier"] is None
+
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/start",
+                result=_thread_result(repo_root, service_tier=None),
+                on_send=assert_thread_start,
+            ),
+            _SendStep("thread/name/set", result={}),
+            _SendStep("thread/goal/get", result={"goal": None}),
+            _SendStep("turn/start", result={"turn": {"id": "turn-1"}}),
+            _SendStep(
+                "thread/goal/set",
+                result={"goal": {"status": "active"}},
+                after_response=(turn_completed,),
+            ),
+            _SendStep("thread/goal/get", result={"goal": {"status": "complete"}}),
+        ]
+    )
+
+    result = _run_task(tmp_path, transport, service_tier="standard")
+
+    assert result["requested_settings"]["service_tier"] == "standard"
+    assert result["settings"]["service_tier"] is None
+    transport.assert_exhausted()
+
+
 def test_new_task_rejects_unapplied_reasoning_effort(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     transport = _ScriptedTransport(
@@ -393,6 +435,43 @@ def test_resume_validates_frozen_settings_without_overriding_changed_task(
         "initialized",
         "thread/resume",
     ]
+    transport.assert_exhausted()
+
+
+def test_resume_standard_detects_a_task_changed_to_priority(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    transport = _ScriptedTransport(
+        [
+            _SendStep("initialize", result={}),
+            _SendStep("initialized", responds=False),
+            _SendStep(
+                "thread/resume",
+                result=_thread_result(
+                    repo_root,
+                    thread_id="thread-existing",
+                    service_tier="priority",
+                ),
+                on_send=lambda message: (
+                    message["params"] == {"threadId": "thread-existing"}
+                    or pytest.fail("resume must inspect without mutating the task")
+                ),
+            ),
+        ]
+    )
+
+    with pytest.raises(CodexTaskError) as raised:
+        _run_task(
+            tmp_path,
+            transport,
+            thread_id="thread-existing",
+            model="gpt-5.6-sol",
+            reasoning_effort="xhigh",
+            service_tier="standard",
+        )
+
+    assert raised.value.code == "E_CODEX_SETTINGS_MISMATCH"
     transport.assert_exhausted()
 
 
