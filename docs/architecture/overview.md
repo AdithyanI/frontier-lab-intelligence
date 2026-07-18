@@ -78,9 +78,14 @@ at the root of `fli`.
    the rank is not a synthetic score. Every
    candidate is linked once to an Insight or explicitly not selected. Its
    workspace applies the same seven-day X-source projection defensively to
-   existing routing runs and attaches application-owned publication times.
+   existing routing runs, attaches application-owned publication times, and
+   retains an artifact only when its exact catalogued disclosure post survives
+   that projection.
 9. Deterministic validation binds the draft to its frozen workspace and imports
    Insights, Event roles, dispositions, and citations in one transaction.
+   Artifact citations require an excerpt verified against the frozen artifact
+   text; the agent still owns the semantic judgment that the passage supports
+   the Insight.
    Optional embedding retrieval may find paraphrases but never decides a merge.
    Investment Insights persist one causal interpretation, company read-through,
    key uncertainty, watchpoints, and a diligence step; intermediate reasoning
@@ -105,6 +110,11 @@ at the root of `fli`.
   and daily authoring use only first-party X posts from the brief day through
   seven days earlier. Current same-author continuations may replace old roots;
   third-party reactions may not rescue them.
+- **Artifact availability versus support:** the artifact catalog owns exact
+  disclosure lineage, and the workspace removes artifacts whose disclosure
+  source is pruned. A surviving artifact is only available evidence; the daily
+  agent must still ground any citation in a verified passage relevant to the
+  Insight claim.
 - **Independent audiences:** Engineering and Investment are separate judgments
   over one shared evidence core, not two ingestion systems.
 - **Agent freedom behind a narrow write boundary:** the agent may search,

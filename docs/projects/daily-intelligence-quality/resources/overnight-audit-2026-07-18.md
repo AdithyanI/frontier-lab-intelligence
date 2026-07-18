@@ -266,6 +266,30 @@ Independent reviewers repeatedly wanted the following agent-facing support:
 Only item 1 belongs in the immediate milestone. Items 2–14 remain preserved for
 evidence-led prioritization after chronology is calibrated.
 
+### Artifact timing and relevance follow-up
+
+The Paper Glider citation exposed a second boundary during calibration. The Jul
+14 Event retained Romain Huet's Jul 14 Codex post, while the Jul 15 reply that
+disclosed the Paper Glider showcase was correctly pruned. The artifact itself
+survived because the old routing packet did not carry its disclosure lineage,
+and the saved Insight then cited it generically for a task-cost/capacity claim
+the showcase did not establish.
+
+A mechanical audit found 19 future artifact attachments across the Jul 7, 8,
+9, 10, 12, 13, and 14 packet cohorts. Five distinct future artifacts appeared
+in nine saved Insight citation uses. The bounded correction is therefore:
+
+1. project the accepted artifact candidate's exact disclosure post from the
+   catalog into the daily workspace;
+2. retain the artifact only when that disclosure post survives the source
+   window; and
+3. require every artifact citation to carry a short excerpt verified against
+   frozen artifact text plus a specific statement of what it supports.
+
+This does not infer the artifact's own publication date and does not add a
+second LLM relevance gate. The catalog owns availability and lineage; the daily
+agent owns semantic relevance behind a deterministic citation boundary.
+
 ## Minimal Chronology Contract
 
 ### Decision after calibration discussion

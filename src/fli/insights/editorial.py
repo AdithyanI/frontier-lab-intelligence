@@ -334,6 +334,8 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
         excerpt = _text(citation["excerpt"], f"{path}.excerpt", nullable=True)
         if kind == "web" and (retrieved_at is None or excerpt is None):
             raise ValueError(f"{path} web citations require retrieved_at and excerpt")
+        if kind == "artifact" and excerpt is None:
+            raise ValueError(f"{path} artifact citations require a supporting excerpt")
         published_at = _optional_date(
             citation["published_at"], f"{path}.published_at"
         )

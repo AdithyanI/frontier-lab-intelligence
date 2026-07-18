@@ -15,6 +15,7 @@ import numpy as np
 from fli.insights import consolidation
 from fli.insights import editorial
 from fli.insights import runs as insight_runs
+from fli.evidence.artifacts import store as artifact_store
 from fli.routing import model as routing_model
 from fli.routing import freshness
 from fli.routing import runs as routing_runs
@@ -475,6 +476,7 @@ def _source_index(packet: dict[str, Any]) -> tuple[list[str], list[dict[str, Any
                     "artifact_id": str(source.get("source_id") or ""),
                     "url": url,
                     "title": str(source.get("title") or "Primary artifact"),
+                    "disclosures": list(source.get("disclosures") or []),
                 }
             )
     return urls, artifacts
@@ -515,6 +517,60 @@ def _event_x_publication_times(
             if source_id and published_at:
                 times[source_id] = published_at
         result[event_id] = times
+    return result
+
+
+def _event_artifact_disclosures(
+    *,
+    artifact_db: Path,
+    event_ids: set[str],
+) -> dict[str, dict[str, list[dict[str, str]]]]:
+    """Resolve accepted artifact-to-disclosure lineage from the bound catalog."""
+    if not event_ids:
+        return {}
+    if not artifact_db.is_file():
+        raise FileNotFoundError(artifact_db)
+    placeholders = ",".join("?" for _ in event_ids)
+    conn = _open_readonly(artifact_db)
+    try:
+        rows = conn.execute(
+            f"""SELECT candidate.event_id, candidate.artifact_id,
+                       candidate.disclosure_external_id,
+                       candidate.disclosure_url,
+                       candidate.disclosure_published_at,
+                       candidate.relation
+                FROM artifact_import_candidate AS candidate
+                JOIN artifact_import_run AS import_run USING (import_run_id)
+                WHERE candidate.decision = 'accepted'
+                  AND candidate.artifact_id IS NOT NULL
+                  AND import_run.selection_policy = ?
+                  AND candidate.event_id IN ({placeholders})
+                ORDER BY candidate.event_id, candidate.artifact_id,
+                         candidate.disclosure_published_at,
+                         candidate.disclosure_external_id""",
+            (artifact_store.PRIMARY_AUTHOR_SELECTION_POLICY, *sorted(event_ids)),
+        ).fetchall()
+    finally:
+        conn.close()
+    result: dict[str, dict[str, list[dict[str, str]]]] = {}
+    seen: set[tuple[str, str, str, str]] = set()
+    for row in rows:
+        event_id = str(row["event_id"])
+        artifact_id = str(row["artifact_id"])
+        source_id = str(row["disclosure_external_id"])
+        published_at = str(row["disclosure_published_at"])
+        identity = (event_id, artifact_id, source_id, published_at)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        result.setdefault(event_id, {}).setdefault(artifact_id, []).append(
+            {
+                "source_id": source_id,
+                "source_url": str(row["disclosure_url"]),
+                "published_at": published_at,
+                "relation": str(row["relation"]),
+            }
+        )
     return result
 
 
@@ -625,6 +681,10 @@ def prepare_workspace(
         day=day,
         routing_meta=meta,
     )
+    artifact_disclosures = _event_artifact_disclosures(
+        artifact_db=_resolve_path(str(meta["source_artifact_db"])),
+        event_ids={str(row["event_id"]) for row in rows},
+    )
     identity = {
         "schema_version": WORKSPACE_SCHEMA_VERSION,
         "day": day,
@@ -642,6 +702,7 @@ def prepare_workspace(
     candidate_pair_count = 0
     stale_event_count = 0
     stale_x_source_count = 0
+    excluded_artifact_count = 0
     for row in rows:
         packet = json.loads(str(row["packet_json"]))
         if not isinstance(packet, dict):
@@ -651,8 +712,10 @@ def prepare_workspace(
             packet,
             evaluation_day=day,
             published_at_by_source_id=x_publication_times.get(event_id, {}),
+            artifact_disclosures_by_id=artifact_disclosures.get(event_id, {}),
         )
         stale_x_source_count += int(source_window["stale_x_source_count"])
+        excluded_artifact_count += int(source_window["excluded_artifact_count"])
         if packet is None:
             stale_event_count += 1
             continue
@@ -674,7 +737,10 @@ def prepare_workspace(
             and source.get("url")
             and source.get("posted")
         }
-        packet_was_pruned = int(source_window["stale_x_source_count"]) > 0
+        packet_was_pruned = (
+            int(source_window["stale_x_source_count"]) > 0
+            or int(source_window["excluded_artifact_count"]) > 0
+        )
         prior_items = (
             {}
             if packet_was_pruned
@@ -763,6 +829,7 @@ def prepare_workspace(
             "candidate_pairs": candidate_pair_count,
             "stale_events_excluded": stale_event_count,
             "stale_x_sources_excluded": stale_x_source_count,
+            "artifacts_excluded": excluded_artifact_count,
             **audience_counts,
         },
         "source_window": {
@@ -1043,6 +1110,36 @@ def validate_result(workspace: Path, draft_path: Path) -> tuple[dict[str, Any], 
         raise FileNotFoundError(draft_path)
     draft = _read_json(draft_path)
     normalized, report = editorial.validate_draft(draft, manifest)
+    event_payloads = {
+        str(event["event_id"]): _read_json(workspace / str(event["file"]))
+        for event in manifest["events"]
+    }
+    for citation in normalized["citations"]:
+        if citation["kind"] != "artifact":
+            continue
+        event_id = str(citation["event_id"])
+        artifact_id = str(citation["artifact_id"])
+        sources = event_payloads[event_id]["packet"].get("sources", [])
+        matches = [
+            source
+            for source in sources
+            if isinstance(source, dict)
+            and source.get("source_type") == "artifact"
+            and str(source.get("source_id") or "") == artifact_id
+            and str(source.get("url") or "") == citation["url"]
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                f"citation {citation['local_id']!r} must identify one exact frozen "
+                f"artifact for Event {event_id}"
+            )
+        artifact_text = " ".join(str(matches[0].get("text") or "").split())
+        excerpt = " ".join(str(citation["excerpt"] or "").split())
+        if excerpt.casefold() not in artifact_text.casefold():
+            raise ValueError(
+                f"citation {citation['local_id']!r} excerpt does not occur in the "
+                "frozen artifact text"
+            )
     result_sha256 = _sha256(_canonical_json(normalized))
     return normalized, report, {"result_sha256": result_sha256, "manifest": manifest}
 

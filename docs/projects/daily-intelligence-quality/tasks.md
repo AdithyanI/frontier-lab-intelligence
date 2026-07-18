@@ -30,6 +30,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   citation validation using data already present in the Feed store.
 - Exclude X sources older than seven days while retaining a current same-author
   quote or reply as the primary source when one exists.
+- Bind every workspace artifact to the exact retained disclosure post and
+  exclude artifacts disclosed outside the brief's eligible source window.
+- Require the daily agent to ground every proposed artifact citation in a
+  verified excerpt that directly supports the Insight claim.
 - Calibrate the change against known failure cases and a known-good control
   before deciding which days need another editorial run.
 - Reassess the provisional weak-item and omission queues, then select the
@@ -87,6 +91,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
       that silently turns the brief day into the source day.
 - [x] Regression cases for Jul 10, Jul 13, Jul 14, and Jul 15 pass, including
       the inclusive seven-day boundary and old-only exclusion.
+- [ ] Future or otherwise pruned disclosure posts cannot leave detached
+      artifacts in a daily workspace.
+- [ ] Every persisted artifact citation includes an excerpt verified against
+      the frozen artifact text and a claim-specific support explanation.
 - [ ] The provisional weak-item and omission queues are adjudicated, the final
       3–5 submission candidates are named, and remaining findings are either
       fixed or explicitly deferred.
@@ -153,6 +161,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   evidence, exclude old X sources from semantic packets, promote a current
   same-author continuation when available, and exclude the Event when no
   current first-party X source remains.
+- 2026-07-18: Keep artifact discovery broad, but make daily use conservative.
+  Code owns disclosure timing and exact lineage; the daily agent owns semantic
+  relevance. Require a verified excerpt for every artifact citation rather
+  than adding another model gate or database entity.
 
 ## Open Questions / Blockers
 
@@ -167,10 +179,9 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Add workspace v2 publication-time projection and seven-day pruning without mutating raw Events or existing routing runs. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
-| done | Apply the same seven-day rule to newly frozen routing packets; promote current same-author updates and exclude old-only packets. | parent | [tests](../../../tests/routing/test_freshness.py) |
-| done | Make Event citation dates deterministic and add mismatch tests. | parent | [tests](../../../tests/insights/test_editorial.py) |
-| done | Update skill/docs and complete Jul 10/13/14/15 plus all-days workspace preparation validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| in_progress | Add disclosure-aware artifact pruning to workspace v2 and preserve inspectable lineage. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| todo | Require and verify claim-grounding excerpts for artifact citations through the existing client validation path. | parent | [tests](../../../tests/insights/test_editorial.py) |
+| todo | Update the daily skill and Paper Glider evaluation case, then run all-days and fast validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 
 ## Backlog / Remaining Work
 
@@ -186,6 +197,8 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [ ] Consider a compact review matrix, web-citation helper, source-family cue,
       machine-readable Engineering stack, and richer BIT company-driver
       context after the submission-critical path is safe.
+- [ ] After citation grounding is proven, decide whether semantic artifact
+      warnings add value beyond the verified-excerpt requirement.
 - [x] Update durable architecture/status docs when the chronology boundary is
       implemented.
 - [ ] Review and finalize `learnings.md`, run full milestone validation, and
@@ -226,3 +239,9 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   guidance. Targeted tests passed; all eleven July 5–15 workspaces prepared.
   Jul 14 excluded four old-only Events and 53 stale X sources; Jul 10 retained
   Mira Murati's current quote/reply while removing the 2025 root.
+- 2026-07-18: [IN PROGRESS] Paper Glider exposed a second chronology boundary:
+  a Jul 15 disclosure reply was pruned from the Jul 14 workspace, but its
+  artifact survived because routing packets did not preserve disclosure
+  lineage. The same artifact was then cited generically for an unrelated
+  cost/capacity claim. Replanned one bounded fix for timing plus citation
+  grounding before any editorial rerun.

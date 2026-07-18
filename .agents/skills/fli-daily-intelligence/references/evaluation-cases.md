@@ -76,3 +76,19 @@ Expected behavior:
 - a current same-author quote or reply can replace the old root;
 - an old-only Event is excluded before agent disposition; and
 - the Feed still retains the complete raw envelope for audit.
+
+## 5. Artifact disclosure timing and claim support
+
+For July 14, Event #86 is rooted in Romain Huet's current Codex post. Its reply
+linking the Paper Glider showcase and the showcase artifact were published on
+July 15, after the brief day.
+
+Expected behavior:
+
+- the July 15 reply is pruned from the July 14 workspace;
+- Paper Glider is also absent because its exact disclosure post was pruned;
+- on a day where Paper Glider is eligible, Event membership alone never makes
+  it evidence for lower task cost, demand, or capacity;
+- an agent may cite it only for a claim established by a short excerpt from its
+  frozen text; and
+- validation rejects a missing or fabricated artifact excerpt.

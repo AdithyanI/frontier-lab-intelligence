@@ -14,6 +14,9 @@
   while preserving substantive current same-author updates.
 - Raw audit history and semantic authoring evidence are different products.
   Keeping the former does not require presenting all of it to the daily agent.
+- Event membership establishes that an artifact was discovered near an Event,
+  not that it supports every claim derived from that Event. Exact disclosure
+  lineage and excerpt grounding solve different parts of that failure.
 - Audit metrics need precise units. The current baseline has 196 citation
   records, 193 distinct URLs, and 114 Event-citation uses; calling all three
   “unique citations” obscures the result.

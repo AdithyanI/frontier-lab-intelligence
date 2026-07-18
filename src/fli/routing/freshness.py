@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import Any, Mapping
 
 
-POLICY_VERSION = "x-source-window-v1"
+POLICY_VERSION = "x-artifact-source-window-v2"
 MAX_SOURCE_AGE_DAYS = 7
 
 
@@ -33,14 +33,9 @@ def prune_packet_payload(
     *,
     evaluation_day: str,
     published_at_by_source_id: Mapping[str, str],
+    artifact_disclosures_by_id: Mapping[str, list[Mapping[str, str]]] | None = None,
 ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-    """Add X dates and remove stale X evidence from a routing packet projection.
-
-    Artifacts remain when the original root is current. When an old root is
-    replaced by a current same-author continuation, artifacts are dropped
-    because the frozen routing packet does not retain enough lineage to prove
-    that the current continuation disclosed them.
-    """
+    """Project one packet onto current X evidence and its disclosed artifacts."""
     raw_sources = packet.get("sources")
     if not isinstance(raw_sources, list):
         raise ValueError("routing packet sources must be a list")
@@ -78,6 +73,8 @@ def prune_packet_payload(
         "max_source_age_days": MAX_SOURCE_AGE_DAYS,
         "stale_x_source_ids": stale_source_ids,
         "stale_x_source_count": len(stale_source_ids),
+        "excluded_artifact_ids": [],
+        "excluded_artifact_count": 0,
         "root_replaced": False,
     }
     if not retained_x:
@@ -87,13 +84,43 @@ def prune_packet_payload(
         retained_x[0]["relation"] = "root"
         for source in retained_x[1:]:
             source["relation"] = "same_author_continuation"
-        artifacts = []
         summary["root_replaced"] = True
+
+    retained_source_ids = {
+        str(source.get("source_id") or "") for source in retained_x
+    }
+    disclosure_index = artifact_disclosures_by_id or {}
+    retained_artifacts: list[dict[str, Any]] = []
+    excluded_artifact_ids: list[str] = []
+    for artifact in artifacts:
+        artifact_id = str(artifact.get("source_id") or "")
+        disclosures = disclosure_index.get(artifact_id, [])
+        eligible_disclosures = [
+            dict(disclosure)
+            for disclosure in disclosures
+            if str(disclosure.get("source_id") or "") in retained_source_ids
+            and str(disclosure.get("published_at") or "")
+            and is_current(
+                published_at=str(disclosure["published_at"]),
+                evaluation_day=evaluation_day,
+            )
+        ]
+        if not eligible_disclosures:
+            excluded_artifact_ids.append(artifact_id)
+            continue
+        retained_artifacts.append(
+            {
+                **artifact,
+                "disclosures": eligible_disclosures,
+            }
+        )
+    summary["excluded_artifact_ids"] = excluded_artifact_ids
+    summary["excluded_artifact_count"] = len(excluded_artifact_ids)
 
     return (
         {
             **dict(packet),
-            "sources": [*retained_x, *artifacts],
+            "sources": [*retained_x, *retained_artifacts],
         },
         {**summary, "excluded": False},
     )

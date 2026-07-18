@@ -33,9 +33,12 @@ store. It keeps first-party X sources published on the brief day or the seven
 preceding calendar days. When an older root has a current same-author quote or
 reply, the current source becomes the workspace root. When no eligible
 first-party X source remains, the routed candidate is omitted. Raw Feed and
-Event history remains intact for audit. Artifact chronology stays separate:
-neither retrieval time nor the linking X post proves an artifact publication
-date. When a packet is pruned, inherited routing prose and prior per-Event
+Event history remains intact for audit. Artifact publication chronology stays
+separate: neither retrieval time nor link time proves when the artifact itself
+was published. The linking post does establish when that artifact became
+available to the Event, so a workspace retains an artifact only when its exact
+stored disclosure post survives the source window. When a packet is pruned,
+inherited routing prose and prior per-Event
 annotations are withheld because they may describe evidence that is no longer
 in the workspace; the positive audience route remains only as a recall cue for
 fresh editorial judgment.
@@ -134,6 +137,10 @@ For workspace v2, that cohort means the routed-positive candidates remaining
 after the seven-day X-source projection. Retained X sources carry their
 application-owned publication times; Event citations inherit that date and a
 conflicting agent-supplied date fails validation.
+Artifacts retain inspectable disclosure lineage. An artifact citation must
+identify the exact frozen Event artifact, include a short excerpt occurring in
+the frozen text, and explain the specific claim that passage supports. Artifact
+attachment alone never makes it a valid citation.
 The normalized run, candidates, Insights, dispositions, Event provenance, and
 citations are written in one transaction. Reimporting the identical result is a
 no-op; a conflicting result cannot overwrite the existing run identity.

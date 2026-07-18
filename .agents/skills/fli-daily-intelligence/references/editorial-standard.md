@@ -142,7 +142,12 @@ history remains available for audit, but it is not authoring evidence once
 pruned. If an Event's old root was replaced by a current same-author update,
 write and cite the update—not the historical announcement it referenced.
 Event citation dates are filled from frozen source truth; a conflicting date is
-invalid.
+invalid. A frozen artifact is authoring evidence only when its stored
+`disclosures` bind it to a retained X source. Even then, attachment to the Event
+does not show that the artifact supports the Insight: every artifact citation
+must include a short verbatim excerpt from the frozen artifact and a
+claim-specific explanation of what that passage establishes. Omit an artifact
+when no direct supporting passage exists.
 Use `web` for newly researched sources and include `retrieved_at` and a concise
 supporting excerpt. Use `context` for the encoded BIT or Engineering context
 and retain the underlying public URL when making a factual portfolio claim.

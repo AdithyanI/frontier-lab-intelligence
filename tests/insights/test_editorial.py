@@ -125,6 +125,23 @@ def _workspace(tmp_path, monkeypatch):
             for event_id in ("event-a", "event-b", "event-c")
         },
     )
+    monkeypatch.setattr(
+        editorial_runs,
+        "_event_artifact_disclosures",
+        lambda **_kwargs: {
+            event_id: {
+                f"artifact-{event_id}": [
+                    {
+                        "source_id": f"post-{event_id}",
+                        "source_url": f"https://x.com/example/status/{event_id}",
+                        "published_at": f"{DAY}T12:00:00+00:00",
+                        "relation": "links_to",
+                    }
+                ]
+            }
+            for event_id in ("event-a", "event-b")
+        },
+    )
     result = editorial_runs.prepare_workspace(
         day=DAY,
         routing_root=routing_root,
@@ -234,7 +251,7 @@ def _draft(workspace: Path):
                 "published_at": DAY,
                 "retrieved_at": None,
                 "supports": "The release and its model artifact.",
-                "excerpt": None,
+                "excerpt": "Primary research for Inkling open model release and weights",
             },
             {
                 "local_id": "source-b",
@@ -246,7 +263,7 @@ def _draft(workspace: Path):
                 "published_at": DAY,
                 "retrieved_at": None,
                 "supports": "The enterprise distribution evidence.",
-                "excerpt": None,
+                "excerpt": "Primary research for Inkling enterprise distribution and serving",
             },
         ],
     }
@@ -261,6 +278,7 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
         "candidate_pairs": 4,
         "stale_events_excluded": 0,
         "stale_x_sources_excluded": 0,
+        "artifacts_excluded": 0,
         "investment": 2,
         "ai_engineering": 2,
     }
@@ -376,6 +394,11 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
             ("event-pruned", "investment"): {"summary": "Old financing claim."}
         },
     )
+    monkeypatch.setattr(
+        editorial_runs,
+        "_event_artifact_disclosures",
+        lambda **_kwargs: {},
+    )
 
     result = editorial_runs.prepare_workspace(
         day=DAY,
@@ -456,6 +479,25 @@ def test_event_citation_date_is_filled_from_source_truth_and_conflicts_fail(
     citation["published_at"] = "2026-07-14"
     with pytest.raises(ValueError, match="must match frozen source date"):
         editorial.validate_draft(draft, manifest)
+
+
+def test_artifact_citations_require_and_verify_a_frozen_excerpt(
+    tmp_path, monkeypatch
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    manifest = editorial_runs.load_manifest(workspace)
+    draft = _draft(workspace)
+
+    draft["citations"][0]["excerpt"] = None
+    with pytest.raises(ValueError, match="artifact citations require a supporting excerpt"):
+        editorial.validate_draft(draft, manifest)
+
+    draft = _draft(workspace)
+    draft["citations"][0]["excerpt"] = "A claim the frozen artifact never makes"
+    draft_path = workspace / "bad-excerpt.json"
+    draft_path.write_text(json.dumps(draft), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not occur in the frozen artifact text"):
+        editorial_runs.validate_result(workspace, draft_path)
 
 
 def test_import_is_atomic_normalized_and_idempotent(tmp_path, monkeypatch):
