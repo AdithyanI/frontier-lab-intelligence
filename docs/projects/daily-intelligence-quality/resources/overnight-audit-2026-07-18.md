@@ -279,16 +279,23 @@ A mechanical audit found 19 future artifact attachments across the Jul 7, 8,
 9, 10, 12, 13, and 14 packet cohorts. Five distinct future artifacts appeared
 in nine saved Insight citation uses. The bounded correction is therefore:
 
-1. project the accepted artifact candidate's exact disclosure post from the
+1. project the accepted artifact candidate's exact disclosure lineage from the
    catalog into the daily workspace;
-2. retain the artifact only when that disclosure post survives the source
-   window; and
+2. preserve the artifact and its disclosure dates for agent audit rather than
+   adding a second code gate; and
 3. require every artifact citation to carry a short excerpt verified against
    frozen artifact text plus a specific statement of what it supports.
 
 This does not infer the artifact's own publication date and does not add a
 second LLM relevance gate. The catalog owns availability and lineage; the daily
 agent owns semantic relevance behind a deterministic citation boundary.
+
+Automatic artifact exclusion was rejected during calibration. Exact-post
+membership would have removed 109 artifacts disclosed inside the correct date
+window because their disclosure posts were not selected into the compact
+routing packet. Even a date-only gate was unnecessary once the agent citation
+audit became explicit. The workspace therefore exposes the 19 future-disclosed
+attachments with their dates, and the agent must omit them from earlier briefs.
 
 ## Minimal Chronology Contract
 

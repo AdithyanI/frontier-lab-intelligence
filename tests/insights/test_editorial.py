@@ -278,7 +278,6 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
         "candidate_pairs": 4,
         "stale_events_excluded": 0,
         "stale_x_sources_excluded": 0,
-        "artifacts_excluded": 0,
         "investment": 2,
         "ai_engineering": 2,
     }
@@ -305,6 +304,52 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
     )
 
 
+def test_artifact_disclosures_are_loaded_from_the_bound_catalog(tmp_path):
+    db = tmp_path / "artifacts.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(
+        """CREATE TABLE artifact_import_run (
+               import_run_id TEXT PRIMARY KEY,
+               selection_policy TEXT NOT NULL
+           );
+           CREATE TABLE artifact_import_candidate (
+               event_id TEXT NOT NULL,
+               artifact_id TEXT,
+               import_run_id TEXT NOT NULL,
+               disclosure_external_id TEXT NOT NULL,
+               disclosure_url TEXT NOT NULL,
+               disclosure_published_at TEXT NOT NULL,
+               relation TEXT NOT NULL,
+               decision TEXT NOT NULL
+           );"""
+    )
+    conn.execute(
+        "INSERT INTO artifact_import_run VALUES ('run', ?)",
+        (editorial_runs.artifact_store.PRIMARY_AUTHOR_SELECTION_POLICY,),
+    )
+    conn.execute(
+        """INSERT INTO artifact_import_candidate VALUES
+           ('event-a', 'artifact-a', 'run', 'post-a',
+            'https://x.com/example/status/post-a',
+            '2026-07-15T12:00:00+00:00', 'links_to', 'accepted')"""
+    )
+    conn.commit()
+    conn.close()
+
+    assert editorial_runs._event_artifact_disclosures(
+        artifact_db=db, event_ids={"event-a", "event-b"}
+    ) == {
+        "event-a": {
+            "artifact-a": [
+                {
+                    "source_id": "post-a",
+                    "source_url": "https://x.com/example/status/post-a",
+                    "published_at": "2026-07-15T12:00:00+00:00",
+                    "relation": "links_to",
+                }
+            ]
+        }
+    }
 def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkeypatch):
     routing_root = tmp_path / "routing"
     path = routing_root / "current" / "routing.db"

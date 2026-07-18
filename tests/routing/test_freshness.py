@@ -64,7 +64,7 @@ def test_pruning_excludes_an_event_with_only_an_old_root():
     assert summary["stale_x_source_ids"] == ["old"]
 
 
-def test_pruning_promotes_current_author_update_and_drops_unbound_artifact():
+def test_pruning_promotes_current_author_update_without_dropping_artifacts():
     packet, summary = freshness.prune_packet_payload(
         _packet(
             _x("old"),
@@ -79,14 +79,17 @@ def test_pruning_promotes_current_author_update_and_drops_unbound_artifact():
     )
 
     assert packet is not None
-    assert [source["source_id"] for source in packet["sources"]] == ["current"]
+    assert [source["source_id"] for source in packet["sources"]] == [
+        "current",
+        "artifact",
+    ]
     assert packet["sources"][0]["relation"] == "root"
     assert packet["sources"][0]["posted"] == "2026-07-10T12:00:00+00:00"
     assert summary["root_replaced"] is True
-    assert summary["excluded_artifact_ids"] == ["artifact"]
+    assert packet["sources"][1]["disclosures"] == []
 
 
-def test_pruning_keeps_only_artifacts_disclosed_by_retained_sources():
+def test_pruning_exposes_artifact_disclosures_without_filtering_them():
     packet, summary = freshness.prune_packet_payload(
         _packet(
             _x("root"),
@@ -101,7 +104,7 @@ def test_pruning_keeps_only_artifacts_disclosed_by_retained_sources():
         },
         artifact_disclosures_by_id={
             "current-artifact": [
-                _disclosure("root", "2026-07-14T12:00:00+00:00")
+                _disclosure("another-post", "2026-07-14T12:00:00+00:00")
             ],
             "future-artifact": [
                 _disclosure("future", "2026-07-15T12:00:00+00:00")
@@ -113,12 +116,15 @@ def test_pruning_keeps_only_artifacts_disclosed_by_retained_sources():
     assert [source["source_id"] for source in packet["sources"]] == [
         "root",
         "current-artifact",
+        "future-artifact",
     ]
     assert packet["sources"][1]["disclosures"] == [
-        _disclosure("root", "2026-07-14T12:00:00+00:00")
+        _disclosure("another-post", "2026-07-14T12:00:00+00:00")
+    ]
+    assert packet["sources"][2]["disclosures"] == [
+        _disclosure("future", "2026-07-15T12:00:00+00:00")
     ]
     assert summary["stale_x_source_ids"] == ["future"]
-    assert summary["excluded_artifact_ids"] == ["future-artifact"]
 
 
 def test_pruning_requires_application_owned_dates():

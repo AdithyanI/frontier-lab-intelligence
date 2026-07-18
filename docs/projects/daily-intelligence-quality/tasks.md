@@ -30,8 +30,8 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   citation validation using data already present in the Feed store.
 - Exclude X sources older than seven days while retaining a current same-author
   quote or reply as the primary source when one exists.
-- Bind every workspace artifact to the exact retained disclosure post and
-  exclude artifacts disclosed outside the brief's eligible source window.
+- Project exact disclosure lineage for every workspace artifact and let the
+  daily agent audit timing and relevance before citation.
 - Require the daily agent to ground every proposed artifact citation in a
   verified excerpt that directly supports the Insight claim.
 - Calibrate the change against known failure cases and a known-good control
@@ -91,8 +91,8 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
       that silently turns the brief day into the source day.
 - [x] Regression cases for Jul 10, Jul 13, Jul 14, and Jul 15 pass, including
       the inclusive seven-day boundary and old-only exclusion.
-- [ ] Future or otherwise pruned disclosure posts cannot leave detached
-      artifacts in a daily workspace.
+- [ ] Every workspace artifact exposes exact disclosure lineage so the daily
+      agent can audit whether it was available by the brief day.
 - [ ] Every persisted artifact citation includes an excerpt verified against
       the frozen artifact text and a claim-specific support explanation.
 - [ ] The provisional weak-item and omission queues are adjudicated, the final
@@ -179,7 +179,7 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Add disclosure-aware artifact pruning to workspace v2 and preserve inspectable lineage. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| in_progress | Project inspectable artifact disclosure lineage into workspace v2 without an automatic artifact gate. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 | todo | Require and verify claim-grounding excerpts for artifact citations through the existing client validation path. | parent | [tests](../../../tests/insights/test_editorial.py) |
 | todo | Update the daily skill and Paper Glider evaluation case, then run all-days and fast validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 

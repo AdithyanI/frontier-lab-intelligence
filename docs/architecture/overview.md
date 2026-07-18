@@ -79,8 +79,8 @@ at the root of `fli`.
    candidate is linked once to an Insight or explicitly not selected. Its
    workspace applies the same seven-day X-source projection defensively to
    existing routing runs, attaches application-owned publication times, and
-   retains an artifact only when its exact catalogued disclosure post survives
-   that projection.
+   projects exact catalogued artifact disclosure lineage without automatically
+   pruning artifacts.
 9. Deterministic validation binds the draft to its frozen workspace and imports
    Insights, Event roles, dispositions, and citations in one transaction.
    Artifact citations require an excerpt verified against the frozen artifact
@@ -111,10 +111,9 @@ at the root of `fli`.
   seven days earlier. Current same-author continuations may replace old roots;
   third-party reactions may not rescue them.
 - **Artifact availability versus support:** the artifact catalog owns exact
-  disclosure lineage, and the workspace removes artifacts whose disclosure
-  source is pruned. A surviving artifact is only available evidence; the daily
-  agent must still ground any citation in a verified passage relevant to the
-  Insight claim.
+  disclosure lineage, and the workspace exposes it without a second automatic
+  artifact gate. The daily agent audits timing and relevance, then grounds any
+  citation in a verified passage relevant to the Insight claim.
 - **Independent audiences:** Engineering and Investment are separate judgments
   over one shared evidence core, not two ingestion systems.
 - **Agent freedom behind a narrow write boundary:** the agent may search,

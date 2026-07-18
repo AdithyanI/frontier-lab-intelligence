@@ -702,7 +702,6 @@ def prepare_workspace(
     candidate_pair_count = 0
     stale_event_count = 0
     stale_x_source_count = 0
-    excluded_artifact_count = 0
     for row in rows:
         packet = json.loads(str(row["packet_json"]))
         if not isinstance(packet, dict):
@@ -715,7 +714,6 @@ def prepare_workspace(
             artifact_disclosures_by_id=artifact_disclosures.get(event_id, {}),
         )
         stale_x_source_count += int(source_window["stale_x_source_count"])
-        excluded_artifact_count += int(source_window["excluded_artifact_count"])
         if packet is None:
             stale_event_count += 1
             continue
@@ -737,10 +735,7 @@ def prepare_workspace(
             and source.get("url")
             and source.get("posted")
         }
-        packet_was_pruned = (
-            int(source_window["stale_x_source_count"]) > 0
-            or int(source_window["excluded_artifact_count"]) > 0
-        )
+        packet_was_pruned = int(source_window["stale_x_source_count"]) > 0
         prior_items = (
             {}
             if packet_was_pruned
@@ -829,7 +824,6 @@ def prepare_workspace(
             "candidate_pairs": candidate_pair_count,
             "stale_events_excluded": stale_event_count,
             "stale_x_sources_excluded": stale_x_source_count,
-            "artifacts_excluded": excluded_artifact_count,
             **audience_counts,
         },
         "source_window": {

@@ -41,6 +41,11 @@ def output_contract() -> dict[str, Any]:
             "Every positively routed Event/audience pair must appear exactly once "
             "in an insight event_links list or in not_selected."
         ),
+        "artifact_citation_rule": (
+            "An eligible Event artifact is only a citation candidate. Cite it only "
+            "when a short excerpt from the frozen artifact directly supports the "
+            "Insight claim, and describe that claim in supports."
+        ),
         "draft_shape": {
             "schema_version": DRAFT_SCHEMA_VERSION,
             "workspace_run_id": "<from manifest>",

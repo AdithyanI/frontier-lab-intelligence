@@ -35,9 +35,10 @@ your own judgment for research, retrieval, grouping, and synthesis.
    earlier. Raw Feed evidence is not deleted. If an old root has a current
    same-author quote or reply, that current post becomes the packet root; if no
    current first-party X source remains, the Event is absent from the workspace.
-   An artifact remains only when its stored disclosure lineage points to one of
-   those retained X sources. Inspect the artifact's `disclosures` before using
-   it; Event membership establishes availability, not relevance to a claim.
+   Artifacts are not automatically pruned with X sources. Their exact stored
+   `disclosures` remain inspectable even when a disclosure post is not part of
+   the compact semantic packet. Before citing one, check that its disclosure
+   timing is appropriate for the brief and that its content supports the claim.
    A pruned packet deliberately withholds inherited routing prose and prior
    per-Event annotations; judge it from the retained evidence.
 4. Investigate across the whole cohort. Start with deterministic retrieval,
@@ -119,6 +120,9 @@ shared theme as an automatic merge.
   short verbatim `excerpt` plus a claim-specific `supports` explanation. If no
   passage directly supports the Insight, omit that artifact citation. The
   validator rejects missing excerpts and excerpts absent from frozen text.
+- Treat artifact disclosure timing as an editorial audit, not an automatic
+  code gate. Do not use a disclosure later than the brief day as if it were
+  available then; retain the later source only as auditable packet context.
 - Treat each retained X source's `posted` date as application-owned truth.
   Never assign the brief day to an older source or cite a pruned URL. Event
   citation dates are filled from the frozen workspace and conflicting dates

@@ -36,8 +36,9 @@ first-party X source remains, the routed candidate is omitted. Raw Feed and
 Event history remains intact for audit. Artifact publication chronology stays
 separate: neither retrieval time nor link time proves when the artifact itself
 was published. The linking post does establish when that artifact became
-available to the Event, so a workspace retains an artifact only when its exact
-stored disclosure post survives the source window. When a packet is pruned,
+available to the Event. The workspace preserves every attached artifact and
+projects its exact stored disclosure lineage; the agent audits whether it was
+available by the brief day and whether it supports the claim. When a packet is pruned,
 inherited routing prose and prior per-Event
 annotations are withheld because they may describe evidence that is no longer
 in the workspace; the positive audience route remains only as a recall cue for

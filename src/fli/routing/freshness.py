@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import Any, Mapping
 
 
-POLICY_VERSION = "x-artifact-source-window-v2"
+POLICY_VERSION = "x-source-window-artifact-lineage-v2"
 MAX_SOURCE_AGE_DAYS = 7
 
 
@@ -86,41 +86,24 @@ def prune_packet_payload(
             source["relation"] = "same_author_continuation"
         summary["root_replaced"] = True
 
-    retained_source_ids = {
-        str(source.get("source_id") or "") for source in retained_x
-    }
     disclosure_index = artifact_disclosures_by_id or {}
-    retained_artifacts: list[dict[str, Any]] = []
-    excluded_artifact_ids: list[str] = []
+    annotated_artifacts: list[dict[str, Any]] = []
     for artifact in artifacts:
         artifact_id = str(artifact.get("source_id") or "")
-        disclosures = disclosure_index.get(artifact_id, [])
-        eligible_disclosures = [
-            dict(disclosure)
-            for disclosure in disclosures
-            if str(disclosure.get("source_id") or "") in retained_source_ids
-            and str(disclosure.get("published_at") or "")
-            and is_current(
-                published_at=str(disclosure["published_at"]),
-                evaluation_day=evaluation_day,
-            )
-        ]
-        if not eligible_disclosures:
-            excluded_artifact_ids.append(artifact_id)
-            continue
-        retained_artifacts.append(
+        annotated_artifacts.append(
             {
                 **artifact,
-                "disclosures": eligible_disclosures,
+                "disclosures": [
+                    dict(disclosure)
+                    for disclosure in disclosure_index.get(artifact_id, [])
+                ],
             }
         )
-    summary["excluded_artifact_ids"] = excluded_artifact_ids
-    summary["excluded_artifact_count"] = len(excluded_artifact_ids)
 
     return (
         {
             **dict(packet),
-            "sources": [*retained_x, *retained_artifacts],
+            "sources": [*retained_x, *annotated_artifacts],
         },
         {**summary, "excluded": False},
     )

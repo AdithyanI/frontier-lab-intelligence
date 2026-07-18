@@ -86,7 +86,8 @@ July 15, after the brief day.
 Expected behavior:
 
 - the July 15 reply is pruned from the July 14 workspace;
-- Paper Glider is also absent because its exact disclosure post was pruned;
+- Paper Glider remains inspectable with its Jul 15 disclosure lineage, but the
+  agent must not cite it as evidence available in the Jul 14 brief;
 - on a day where Paper Glider is eligible, Event membership alone never makes
   it evidence for lower task cost, demand, or capacity;
 - an agent may cite it only for a claim established by a short excerpt from its
