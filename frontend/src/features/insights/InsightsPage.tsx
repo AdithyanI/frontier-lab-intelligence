@@ -395,6 +395,42 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
   )
 }
 
+function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
+
+  const copyReference = async () => {
+    const reference = [
+      `Insight: ${item.day}`,
+      AUDIENCE_COPY[item.audience].label,
+      `Brief #${item.rank}`,
+      `“${decodeTextEntities(item.title)}”`,
+      `ID: ${item.insight_id}`,
+    ].join(' · ')
+
+    try {
+      await navigator.clipboard.writeText(reference)
+      setCopyStatus('copied')
+    } catch {
+      setCopyStatus('failed')
+    }
+  }
+
+  return (
+    <button
+      className="editorial-copy-reference mono"
+      type="button"
+      onClick={copyReference}
+      aria-label={`Copy reference for ${decodeTextEntities(item.title)}`}
+    >
+      {copyStatus === 'copied'
+        ? 'Copied'
+        : copyStatus === 'failed'
+          ? 'Copy failed'
+          : 'Copy reference'}
+    </button>
+  )
+}
+
 function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
   const titleId = `${item.insight_id}-title`
   const rankExplanationId = `${item.insight_id}-rank-explanation`
@@ -420,8 +456,9 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
         </button>
       </div>
       <div className="insight-body editorial-insight-body">
-        <header className="insight-head">
+        <header className="insight-head editorial-insight-head">
           <h2 id={titleId}>{decodeTextEntities(item.title)}</h2>
+          <CopyInsightReference item={item} />
         </header>
 
         <div

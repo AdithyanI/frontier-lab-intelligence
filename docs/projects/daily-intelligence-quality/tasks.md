@@ -79,14 +79,14 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [x] X sources older than seven days are absent from new routing packets and
       daily workspaces; an old-only candidate is excluded, while a current
       same-author update is promoted to primary evidence.
-- [ ] Event citation dates are filled from frozen source truth; a conflicting
+- [x] Event citation dates are filled from frozen source truth; a conflicting
       agent-supplied date fails validation; an unavailable date remains null.
 - [x] Search and inspection make source timing visible enough for the daily
       agent to reason about chronology.
-- [ ] Skill guidance states the seven-day evidence contract and forbids prose
+- [x] Skill guidance states the seven-day evidence contract and forbids prose
       that silently turns the brief day into the source day.
-- [ ] Regression cases for Jul 10, Jul 13, Jul 14, and Jul 15 pass, including an
-      entirely older-evidence synthesis that remains valid when honestly dated.
+- [x] Regression cases for Jul 10, Jul 13, Jul 14, and Jul 15 pass, including
+      the inclusive seven-day boundary and old-only exclusion.
 - [ ] The provisional weak-item and omission queues are adjudicated, the final
       3–5 submission candidates are named, and remaining findings are either
       fixed or explicitly deferred.
@@ -100,16 +100,15 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
       from reviewer judgment. Acceptance: totals, chronology, cases, quality
       queues, and harness suggestions are recorded with qualifications.
       Validate: direct SQLite checks plus source/skill inspection.
-- [ ] Milestone 2 — Ship the seven-day X source window plus deterministic
+- [x] Milestone 2 — Ship the seven-day X source window plus deterministic
       chronology in routing, the daily workspace, and citation validation.
       Acceptance: raw evidence remains intact, old-only packets are excluded,
       current same-author updates survive, and citations use source truth.
       Validate: targeted routing/editorial tests and workspace inspection.
-- [ ] Milestone 3 — Calibrate on demonstrated cases before a broad rerun.
+- [x] Milestone 3 — Calibrate on demonstrated cases before a broad rerun.
       Acceptance: Jul 10 Thinking Machines, Jul 13 CaMeLs, Jul 14 teachers, and
-      Jul 15 current-source control behave as specified; old synthesis is still
-      allowed. Validate: fresh v2 workspaces, validation canaries, and manual
-      draft inspection.
+      Jul 15 current-source control behave as specified under the seven-day
+      rule. Validate: fresh v2 workspaces and deterministic canary inspection.
 - [ ] Milestone 4 — Adjudicate the editorial queues and decide the minimum rerun
       set. Acceptance: every provisional weak item and strongest omission has a
       recorded keep/rewrite/suppress/defer judgment; no all-days rerun occurs
@@ -121,8 +120,8 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 
 ## Execution Rules
 
-- Keep work on Milestone 2 until chronology passes its tests; do not mix in the
-  longer harness backlog.
+- Milestones 2–3 are complete. Continue with editorial adjudication rather than
+  expanding the chronology harness.
 - Preserve existing routing runs and raw Events. New routing freezes apply the
   source window; workspace v2 applies it defensively to already-frozen runs.
 - Treat the brief day, X publication time, discovery time, artifact publication
@@ -137,9 +136,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 
 ## Decisions
 
-- 2026-07-18: Do not require every daily Insight to contain a current-day
-  development. Periodic synthesis is valid when its evidence is accurately
-  dated and the prose is honest about chronology.
+- 2026-07-18: [SUPERSEDED] The initial proposal allowed arbitrarily old dated
+  synthesis. The adopted daily-product window now permits the brief day plus
+  seven preceding days; older research belongs in separately cited web/context
+  evidence or a future longer-horizon product.
 - 2026-07-18: Do not add an Insight-type enum yet. The first change is source
   truth plus validation; add a reader-facing synthesis label only if calibrated
   output remains ambiguous.
@@ -170,7 +170,7 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 | done | Add workspace v2 publication-time projection and seven-day pruning without mutating raw Events or existing routing runs. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 | done | Apply the same seven-day rule to newly frozen routing packets; promote current same-author updates and exclude old-only packets. | parent | [tests](../../../tests/routing/test_freshness.py) |
 | done | Make Event citation dates deterministic and add mismatch tests. | parent | [tests](../../../tests/insights/test_editorial.py) |
-| in_progress | Update skill/docs and complete Jul 10/14 plus broader regression validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| done | Update skill/docs and complete Jul 10/13/14/15 plus all-days workspace preparation validation. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
 
 ## Backlog / Remaining Work
 
@@ -186,7 +186,7 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [ ] Consider a compact review matrix, web-citation helper, source-family cue,
       machine-readable Engineering stack, and richer BIT company-driver
       context after the submission-critical path is safe.
-- [ ] Update durable architecture/status docs when the chronology boundary is
+- [x] Update durable architecture/status docs when the chronology boundary is
       implemented.
 - [ ] Review and finalize `learnings.md`, run full milestone validation, and
       archive the project.
@@ -196,15 +196,15 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - Targeted unit tests for workspace timing, source URL matching, date autofill,
   mismatch rejection, null handling, and unchanged routing hashes.
 - Jul 10: `https://x.com/miramurati/status/1945166365834535247`
-  resolves to 2025-07-15, not the 2026-07-10 brief day.
+  is pruned; the Jul 10 quote/reply become the current packet.
 - Jul 13: `https://x.com/sebkrier/status/2060811780721418707`
-  resolves to 2026-05-30.
-- Jul 14: OpenAI teacher post `1991218197530378431` resolves to 2025-11-19;
-  Claude teacher post `2077047278078931243` resolves to 2026-07-14.
+  is absent from the v2 workspace because it is older than seven days.
+- Jul 14: the old-only OpenAI teacher packet `1991218197530378431` is excluded;
+  current Jul 14 evidence remains eligible.
 - Jul 15: GPT-Red, Anthropic agentic-misalignment, and Perplexity SPACE remain a
   valid current-day synthesis.
-- A synthetic all-historical Insight validates when dates are correct and prose
-  does not claim a same-day release.
+- A synthetic source exactly seven days old remains eligible; one eight days
+  old and any future-dated source are excluded.
 - `scripts/check-fast.sh` before milestone handoff.
 
 ## Progress Log
@@ -218,3 +218,11 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - 2026-07-18: [DONE] Chose deterministic chronology as the minimum first fix;
   explicitly rejected a mandatory current-day anchor, blanket stale filter,
   and premature Insight-type schema expansion.
+- 2026-07-18: [SUPERSEDED] After reviewing the old-root distribution and real
+  envelopes, Adi chose a seven-day inclusive first-party X window rather than
+  warning-only chronology. Raw Events remain intact.
+- 2026-07-18: [DONE] Implemented the source-level rule in routing freezes and
+  workspace v2, deterministic Event citation dates, and skill/architecture
+  guidance. Targeted tests passed; all eleven July 5–15 workspaces prepared.
+  Jul 14 excluded four old-only Events and 53 stale X sources; Jul 10 retained
+  Mira Murati's current quote/reply while removing the 2025 root.

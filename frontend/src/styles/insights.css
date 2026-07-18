@@ -350,10 +350,42 @@
   padding-bottom: 52px;
 }
 
+.editorial-insight-head {
+  display: flex;
+  max-width: 980px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
 .editorial-insight-row .insight-head h2 {
   max-width: 40ch;
   font-size: 29px;
   line-height: 1.2;
+}
+
+.editorial-copy-reference {
+  flex: none;
+  margin-top: 6px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 9.5px;
+  letter-spacing: 0.025em;
+  cursor: pointer;
+}
+
+.editorial-copy-reference:hover,
+.editorial-copy-reference:focus-visible {
+  color: var(--blue-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.editorial-copy-reference:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 3px;
 }
 
 .editorial-opening {

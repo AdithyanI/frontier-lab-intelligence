@@ -12,8 +12,8 @@ Prompt:
 Expected behavior:
 
 - reads both audience contexts before synthesis;
-- freezes 57 union-positive Events, representing 49 Investment and 41
-  Engineering candidate pairs;
+- freezes 55 eligible routed-positive Events after excluding two old-only
+  packets, representing 48 Investment and 40 Engineering candidate pairs;
 - searches across the complete cohort rather than reviewing only the current
   kept cards;
 - keeps every decision-useful Insight and ranks each audience contiguously;

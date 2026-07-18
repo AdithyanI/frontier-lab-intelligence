@@ -268,6 +268,32 @@ evidence-led prioritization after chronology is calibrated.
 
 ## Minimal Chronology Contract
 
+### Decision after calibration discussion
+
+Adi chose a stricter daily-product boundary on 18 July: first-party X sources
+older than seven calendar days are excluded from routing and daily editorial
+packets, while raw Feed/Event evidence remains unchanged. The full-corpus audit
+supports why this is narrower than a same-day-only rule:
+
+- 2,274 of 12,715 Feed Events had an old root under a same-day test;
+- only 465 Feed Events, 61 routed top-100 Events, and 35 union-positive Events
+  had a root more than seven days old;
+- 52 routed audience pairs were affected, of which 10 were included and 42
+  were not selected; and
+- nine selected Insights touched evidence more than seven days old, but none
+  depended exclusively on it.
+
+The application rule is source-level. A current same-author quote or reply may
+replace an old root. Independently authored reactions cannot rescue the packet.
+If no current first-party X source remains, the candidate is excluded before
+the daily agent sees it. Artifacts are not assigned an age from retrieval or
+link time; when an old root is replaced and artifact lineage cannot be proven
+to the retained continuation, the defensive workspace projection drops it.
+
+The contract below records the audit's earlier, looser proposal. Its timing and
+citation requirements remain valid; its “warning, never exclusion” decision is
+superseded by the seven-day policy above.
+
 The first implementation should:
 
 1. Version the daily workspace and add derived timing for every X source:
@@ -297,6 +323,13 @@ accurate dates and prose still leave the reader confused.
 - **Synthetic historical synthesis:** an Insight with entirely old sources
   validates when every date is correct and the writing presents it as synthesis.
 
+Under the adopted policy, the Jul 10 packet keeps Mira Murati's Jul 10 quote and
+reply but removes the 2025 financing root. The Jul 14 teacher packet is excluded
+because its only first-party semantic source is the November 2025 root. The
+synthetic entirely historical case is now intentionally invalid for a daily
+workspace, though it remains useful evidence for a future research product with
+a different time horizon.
+
 ## Prioritized Next Work
 
 1. Implement and test the minimal chronology contract.
@@ -306,4 +339,3 @@ accurate dates and prose still leave the reader confused.
 5. Select the best 3–5 submission Insights.
 6. Take later harness items only when they improve that proof before the
    deadline.
-
