@@ -185,7 +185,7 @@ def _draft(workspace: Path):
         "workspace_run_id": manifest["run_id"],
         "workspace_manifest_sha256": manifest["manifest_sha256"],
         "agent": {
-            "skill_version": "fli-daily-intelligence-v3",
+            "skill_version": editorial.SKILL_VERSION,
             "model": "codex-test",
             "notes": None,
         },
@@ -751,7 +751,7 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
     assert payload["reason"] is None
     assert payload["run"]["run_id"] == second["run_id"]
     assert payload["run"]["agent"] == {
-        "skill_version": "fli-daily-intelligence-v3",
+        "skill_version": editorial.SKILL_VERSION,
         "model": "codex-test",
         "notes": "Second editorial pass.",
     }

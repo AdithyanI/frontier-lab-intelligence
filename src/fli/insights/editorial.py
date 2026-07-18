@@ -14,6 +14,7 @@ from typing import Any
 
 
 DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v4"
+SKILL_VERSION = "fli-daily-intelligence-v4"
 AUDIENCES = ("investment", "ai_engineering")
 EVENT_ROLES = ("primary", "supporting", "context", "counterevidence")
 CITATION_KINDS = ("event", "artifact", "web", "context")
@@ -51,7 +52,7 @@ def output_contract() -> dict[str, Any]:
             "workspace_run_id": "<from manifest>",
             "workspace_manifest_sha256": "<from manifest>",
             "agent": {
-                "skill_version": "fli-daily-intelligence-v3",
+                "skill_version": SKILL_VERSION,
                 "model": "codex",
                 "notes": None,
             },
@@ -132,7 +133,7 @@ def draft_template(manifest: dict[str, Any]) -> dict[str, Any]:
         "workspace_run_id": str(manifest["run_id"]),
         "workspace_manifest_sha256": str(manifest["manifest_sha256"]),
         "agent": {
-            "skill_version": "fli-daily-intelligence-v3",
+            "skill_version": SKILL_VERSION,
             "model": "codex",
             "notes": None,
         },
