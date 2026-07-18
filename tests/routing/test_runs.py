@@ -19,6 +19,7 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
             "author": {"handle": "alice"},
             "text": "A concrete primary-source result.",
             "url": "https://x.com/alice/status/post-1",
+            "published_at": "2026-07-12T08:00:00+00:00",
         },
         "evidence": [
             {
@@ -27,6 +28,7 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
                 "text": "An independently authored reaction.",
                 "relationship": "quote",
                 "same_author_as_root": False,
+                "published_at": "2026-07-12T09:00:00+00:00",
             },
             {
                 "post_id": "post-3",
@@ -34,6 +36,7 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
                 "text": "RT @bob: An independently authored reaction.",
                 "relationship": "retweet",
                 "same_author_as_root": True,
+                "published_at": "2026-07-12T10:00:00+00:00",
             },
             {
                 "post_id": "post-4",
@@ -41,6 +44,7 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
                 "text": "My additional first-party interpretation.",
                 "relationship": "quote",
                 "same_author_as_root": True,
+                "published_at": "2026-07-12T11:00:00+00:00",
             },
         ],
     }

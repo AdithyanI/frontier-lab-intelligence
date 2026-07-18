@@ -116,6 +116,14 @@ def _workspace(tmp_path, monkeypatch):
         "_published_event_source",
         lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
     )
+    monkeypatch.setattr(
+        editorial_runs,
+        "_event_x_publication_times",
+        lambda **_kwargs: {
+            event_id: {f"post-{event_id}": f"{DAY}T12:00:00+00:00"}
+            for event_id in ("event-a", "event-b", "event-c")
+        },
+    )
     result = editorial_runs.prepare_workspace(
         day=DAY,
         routing_root=routing_root,
@@ -250,8 +258,14 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
     assert manifest["counts"] == {
         "events": 3,
         "candidate_pairs": 4,
+        "stale_events_excluded": 0,
+        "stale_x_sources_excluded": 0,
         "investment": 2,
         "ai_engineering": 2,
+    }
+    assert manifest["source_window"]["max_source_age_days"] == 7
+    assert manifest["events"][0]["source_dates"] == {
+        "https://x.com/example/status/event-a": DAY
     }
     assert [item["feed_rank"] for item in manifest["events"]] == [1, 4, 9]
     assert (workspace / "draft.template.json").is_file()

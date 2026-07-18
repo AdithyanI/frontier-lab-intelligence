@@ -17,6 +17,7 @@ from typing import Any
 
 from fli.evidence.artifacts import store as artifacts
 from fli.registry import classification as entity_kinds
+from fli.routing import freshness
 from fli.routing import model as routing_model
 
 
@@ -510,6 +511,7 @@ def _artifact_sources(
     event_id: str,
     post_authors: dict[str, str],
     primary_author: str,
+    eligible_source_ids: set[str] | None = None,
 ) -> list[routing_model.EvidenceSource]:
     """Load full accepted primary-author artifacts without old Insight state."""
     rows = conn.execute(
@@ -544,6 +546,12 @@ def _artifact_sources(
     sources: list[routing_model.EvidenceSource] = []
     seen_artifact_ids: set[str] = set()
     for row in rows:
+        source_external_id = str(row["source_external_id"])
+        if (
+            eligible_source_ids is not None
+            and source_external_id not in eligible_source_ids
+        ):
+            continue
         artifact_id = str(row["artifact_id"])
         if artifact_id in seen_artifact_ids:
             continue
@@ -554,7 +562,7 @@ def _artifact_sources(
         text = snapshot.read_text()
         relation = str(row["relation"])
         author = (
-            post_authors.get(str(row["source_external_id"]), primary_author)
+            post_authors.get(source_external_id, primary_author)
             if relation == "self_publishes"
             else None
         )
@@ -582,15 +590,20 @@ def packet_from_event(
     *,
     day: str,
     artifact_conn: sqlite3.Connection,
-) -> routing_model.RoutingPacket:
+) -> routing_model.RoutingPacket | None:
     root_item = dict(item["root"])
     root = {
         "post_id": str(root_item["post_id"]),
         "author": "@" + str(root_item["author"]["handle"]),
         "text": str(root_item.get("text") or ""),
+        "published_at": str(root_item.get("published_at") or ""),
     }
-    sources = [_x_source(root, relation="root")]
-    post_authors = {str(root["post_id"]): str(root.get("author") or "")}
+    x_posts: list[dict[str, Any]] = []
+    if freshness.is_current(
+        published_at=root["published_at"], evaluation_day=day
+    ):
+        x_posts.append({**root, "relation": "root"})
+    root_is_current = bool(x_posts)
     for evidence in item.get("evidence") or []:
         if (
             not evidence.get("same_author_as_root")
@@ -601,17 +614,30 @@ def packet_from_event(
             "post_id": str(evidence["post_id"]),
             "author": "@" + str(evidence["author"]["handle"]),
             "text": str(evidence.get("text") or ""),
+            "published_at": str(evidence.get("published_at") or ""),
         }
-        post_id = str(post["post_id"])
-        relation = "same_author_continuation"
-        post_authors[post_id] = str(post.get("author") or "")
-        sources.append(_x_source(post, relation=relation))
+        if freshness.is_current(
+            published_at=post["published_at"], evaluation_day=day
+        ):
+            x_posts.append({**post, "relation": "same_author_continuation"})
+    if not x_posts:
+        return None
+    if not root_is_current:
+        x_posts[0]["relation"] = "root"
+    sources = [
+        _x_source(post, relation=str(post["relation"])) for post in x_posts
+    ]
+    post_authors = {
+        str(post["post_id"]): str(post.get("author") or "") for post in x_posts
+    }
+    eligible_source_ids = set(post_authors)
     sources.extend(
         _artifact_sources(
             artifact_conn,
             event_id=str(item["event_id"]),
             post_authors=post_authors,
             primary_author=str(root.get("author") or ""),
+            eligible_source_ids=eligible_source_ids,
         )
     )
     return routing_model.RoutingPacket(
@@ -671,12 +697,28 @@ def freeze_run(
 
     artifact_conn = _open_readonly(artifact_db)
     try:
-        packets = [
-            packet_from_event(item, day=day, artifact_conn=artifact_conn)
+        frozen = [
+            (item, packet)
             for item in items
+            if (
+                packet := packet_from_event(
+                    item,
+                    day=day,
+                    artifact_conn=artifact_conn,
+                )
+            )
+            is not None
         ]
     finally:
         artifact_conn.close()
+
+    if not frozen:
+        raise ValueError(
+            f"Evidence projection has no first-party X sources within "
+            f"{freshness.MAX_SOURCE_AGE_DAYS} days of {day}"
+        )
+    items = [item for item, _packet in frozen]
+    packets = [packet for _item, packet in frozen]
 
     rendered_inputs = [routing_model.render_input(packet) for packet in packets]
 
@@ -752,7 +794,11 @@ def freeze_run(
                 (
                     packet.event_id,
                     int(item["daily_rank"]),
-                    str(item["root"]["url"]),
+                    next(
+                        source.url
+                        for source in packet.sources
+                        if source.relation == "root"
+                    ),
                     str(item["snapshot_content_sha256"]),
                     _canonical_json(_packet_payload(packet)),
                     packet.evidence_sha256,

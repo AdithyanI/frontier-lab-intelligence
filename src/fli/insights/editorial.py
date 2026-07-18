@@ -334,6 +334,23 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
         excerpt = _text(citation["excerpt"], f"{path}.excerpt", nullable=True)
         if kind == "web" and (retrieved_at is None or excerpt is None):
             raise ValueError(f"{path} web citations require retrieved_at and excerpt")
+        published_at = _optional_date(
+            citation["published_at"], f"{path}.published_at"
+        )
+        if kind == "event" and event_id is not None:
+            source_dates = events[event_id].get("source_dates", {})
+            expected_date = (
+                str(source_dates.get(url) or "")
+                if isinstance(source_dates, dict)
+                else ""
+            )
+            if expected_date:
+                if published_at is not None and published_at != expected_date:
+                    raise ValueError(
+                        f"{path}.published_at must match frozen source date "
+                        f"{expected_date!r}"
+                    )
+                published_at = expected_date
         citations[local_id] = {
             "local_id": local_id,
             "kind": kind,
@@ -341,7 +358,7 @@ def validate_draft(draft: Any, manifest: dict[str, Any]) -> tuple[dict[str, Any]
             "title": _text(citation["title"], f"{path}.title"),
             "event_id": event_id,
             "artifact_id": artifact_id,
-            "published_at": _optional_date(citation["published_at"], f"{path}.published_at"),
+            "published_at": published_at,
             "retrieved_at": retrieved_at,
             "supports": _text(citation["supports"], f"{path}.supports"),
             "excerpt": excerpt,

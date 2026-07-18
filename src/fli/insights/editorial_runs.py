@@ -16,6 +16,7 @@ from fli.insights import consolidation
 from fli.insights import editorial
 from fli.insights import runs as insight_runs
 from fli.routing import model as routing_model
+from fli.routing import freshness
 from fli.routing import runs as routing_runs
 
 
@@ -26,7 +27,7 @@ DEFAULT_DB = DEFAULT_ROOT / "editorial.db"
 DEFAULT_ROUTING_ROOT = routing_runs.DEFAULT_RUN_ROOT
 DEFAULT_INSIGHTS_DB = insight_runs.DEFAULT_DB
 DEFAULT_MODEL = consolidation.DEFAULT_MODEL
-WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v1"
+WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v2"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v3"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
 
@@ -479,6 +480,44 @@ def _source_index(packet: dict[str, Any]) -> tuple[list[str], list[dict[str, Any
     return urls, artifacts
 
 
+def _event_x_publication_times(
+    *, day: str, routing_meta: dict[str, Any]
+) -> dict[str, dict[str, str]]:
+    """Resolve X publication times from the Event run bound to routing."""
+    from fli.web import events as event_store
+
+    payload = event_store.events_payload(
+        day=day,
+        lane="all",
+        sort="attention",
+        query="",
+        routing_filter="all",
+        limit=1_000_000,
+        offset=0,
+    )
+    if not payload.get("available"):
+        raise ValueError(str(payload.get("reason") or "Evidence is unavailable"))
+    source = dict(payload.get("run") or {})
+    if (
+        str(source.get("run_id") or "")
+        != str(routing_meta["source_event_run_id"])
+        or str(source.get("feed_run_id") or "")
+        != str(routing_meta["source_feed_run_id"])
+    ):
+        raise ValueError("Event publication changed after the routing run was frozen")
+    result: dict[str, dict[str, str]] = {}
+    for item in payload.get("items") or []:
+        event_id = str(item["event_id"])
+        times: dict[str, str] = {}
+        for source in [item["root"], *(item.get("evidence") or [])]:
+            source_id = str(source.get("post_id") or "")
+            published_at = str(source.get("published_at") or "")
+            if source_id and published_at:
+                times[source_id] = published_at
+        result[event_id] = times
+    return result
+
+
 def _prior_insights(day: str, path: Path) -> dict[tuple[str, str], dict[str, Any]]:
     if not path.is_file():
         return {}
@@ -582,12 +621,17 @@ def prepare_workspace(
         raise ValueError(f"routing run for {day} has no positively routed Events")
 
     context_files = _context_files()
+    x_publication_times = _event_x_publication_times(
+        day=day,
+        routing_meta=meta,
+    )
     identity = {
         "schema_version": WORKSPACE_SCHEMA_VERSION,
         "day": day,
         "routing_run_id": str(meta["run_id"]),
         "cohort_sha256": str(meta["cohort_sha256"]),
         "context_files": context_files,
+        "source_window_policy": freshness.POLICY_VERSION,
     }
     run_id = f"daily-intelligence-{day}-{_sha256(_canonical_json(identity))[:12]}"
     workspace = workspace_root / run_id
@@ -596,11 +640,22 @@ def prepare_workspace(
     artifact_events: dict[str, list[dict[str, Any]]] = {}
     audience_counts = {audience: 0 for audience in editorial.AUDIENCES}
     candidate_pair_count = 0
+    stale_event_count = 0
+    stale_x_source_count = 0
     for row in rows:
         packet = json.loads(str(row["packet_json"]))
         if not isinstance(packet, dict):
             raise ValueError(f"routing packet is not an object: {row['event_id']}")
         event_id = str(row["event_id"])
+        packet, source_window = freshness.prune_packet_payload(
+            packet,
+            evaluation_day=day,
+            published_at_by_source_id=x_publication_times.get(event_id, {}),
+        )
+        stale_x_source_count += int(source_window["stale_x_source_count"])
+        if packet is None:
+            stale_event_count += 1
+            continue
         audiences = [
             audience
             for audience in editorial.AUDIENCES
@@ -611,6 +666,14 @@ def prepare_workspace(
         candidate_pair_count += len(audiences)
         root = _root_source(packet)
         source_urls, artifacts = _source_index(packet)
+        source_dates = {
+            str(source["url"]): str(source["posted"])[:10]
+            for source in packet.get("sources", [])
+            if isinstance(source, dict)
+            and source.get("source_type") == "x_post"
+            and source.get("url")
+            and source.get("posted")
+        }
         prior_items = {
             audience: prior[(event_id, audience)]
             for audience in audiences
@@ -620,7 +683,7 @@ def prepare_workspace(
             "event_id": event_id,
             "day": day,
             "feed_rank": int(row["feed_rank"]),
-            "root_url": str(row["root_url"]),
+            "root_url": str(root.get("url") or row["root_url"]),
             "snapshot_content_sha256": str(row["snapshot_content_sha256"]),
             "evidence_sha256": str(row["evidence_sha256"]),
             "input_sha256": str(row["input_sha256"]),
@@ -633,6 +696,7 @@ def prepare_workspace(
                 for audience in audiences
             },
             "packet": packet,
+            "source_window": source_window,
             "prior_per_event_insights": prior_items,
         }
         event_payloads.append(event_payload)
@@ -642,7 +706,7 @@ def prepare_workspace(
                 "event_id": event_id,
                 "feed_rank": int(row["feed_rank"]),
                 "audiences": audiences,
-                "root_url": str(row["root_url"]),
+                "root_url": str(root.get("url") or row["root_url"]),
                 "snapshot_content_sha256": str(row["snapshot_content_sha256"]),
                 "evidence_sha256": str(row["evidence_sha256"]),
                 "input_sha256": str(row["input_sha256"]),
@@ -650,6 +714,8 @@ def prepare_workspace(
                 "root_text": str(root.get("text") or ""),
                 "artifacts": artifacts,
                 "source_urls": source_urls,
+                "source_dates": source_dates,
+                "source_window": source_window,
                 "search_text": search_text,
                 "file": f"events/{int(row['feed_rank']):03d}-{event_id[:12]}.json",
             }
@@ -658,6 +724,12 @@ def prepare_workspace(
             artifact_events.setdefault(str(artifact["url"]), []).append(
                 {"event_id": event_id, "feed_rank": int(row["feed_rank"])}
             )
+
+    if not event_index:
+        raise ValueError(
+            f"routing run for {day} has no positive Events with first-party X "
+            f"evidence inside the {freshness.MAX_SOURCE_AGE_DAYS}-day window"
+        )
 
     exact_artifact_groups = [
         {"url": url, "members": sorted(members, key=lambda item: item["feed_rank"])}
@@ -679,7 +751,15 @@ def prepare_workspace(
         "counts": {
             "events": len(event_index),
             "candidate_pairs": candidate_pair_count,
+            "stale_events_excluded": stale_event_count,
+            "stale_x_sources_excluded": stale_x_source_count,
             **audience_counts,
+        },
+        "source_window": {
+            "policy_version": freshness.POLICY_VERSION,
+            "max_source_age_days": freshness.MAX_SOURCE_AGE_DAYS,
+            "boundary": "0 <= brief_day - x_publication_day <= 7",
+            "raw_evidence_retained": True,
         },
         "context_files": context_files,
         "events": event_index,
