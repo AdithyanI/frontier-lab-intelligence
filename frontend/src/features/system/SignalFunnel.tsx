@@ -25,8 +25,8 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace"
 
 const GOLDEN = Math.PI * (3 - Math.sqrt(5))
 
-const W = 460
-const CX = 205
+const W = 520
+const CX = 195
 
 type Plane = {
   id: FunnelStage
@@ -369,7 +369,7 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
         return (
           <g
             key={plane.id}
-            opacity={on ? 1 : 0.26}
+            opacity={on ? 1 : 0.35}
             style={{ transition: 'opacity 240ms ease-out' }}
           >
             {/* disc surface wash */}
@@ -410,17 +410,17 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
               <text
                 x={labelX}
                 y={plane.y - 4}
-                fontSize="10"
+                fontSize="10.5"
                 fontWeight="600"
                 letterSpacing="0.06em"
                 fill={active === plane.id ? BLUE_INK : INK}
               >
                 {plane.step ? `${plane.step} · ${plane.name.toUpperCase()}` : plane.name.toUpperCase()}
               </text>
-              <text x={labelX} y={plane.y + 9} fontSize="8.5" fill={INK_SOFT}>
+              <text x={labelX} y={plane.y + 9} fontSize="9" fill={INK_SOFT}>
                 {plane.count}
               </text>
-              <text x={labelX} y={plane.y + 21} fontSize="8" fill={MUTED}>
+              <text x={labelX} y={plane.y + 21} fontSize="8.5" fill={MUTED}>
                 {plane.detail}
               </text>
             </g>

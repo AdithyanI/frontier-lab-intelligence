@@ -1,10 +1,47 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
+import SignalFunnel, { type FunnelStage } from './SignalFunnel'
+
+const SCROLL_STAGES: FunnelStage[] = ['watch', 'collect', 'rank', 'judge', 'publish']
+
+/* Scroll spy: the funnel highlights the plane for the section being read. */
+function useActiveStage(): FunnelStage {
+  const [active, setActive] = useState<FunnelStage>('universe')
+
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const cut = window.innerHeight * 0.42
+      let current: FunnelStage = 'universe'
+      for (const id of SCROLL_STAGES) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top <= cut) current = id
+      }
+      setActive(current)
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  return active
+}
 
 export default function HowItWorks() {
   const insightsPath = useAuditDatePath('/insights')
   const feedPath = useAuditDatePath('/evidence/feed')
   const artifactsPath = useAuditDatePath('/evidence/artifacts')
+  const activeStage = useActiveStage()
 
   return (
     <section className="system-view how-page" aria-labelledby="how-title">
@@ -37,7 +74,9 @@ export default function HowItWorks() {
         <a href="#publish"><span className="mono">5</span>Publish</a>
       </nav>
 
-      <ol className="how-journey">
+      <div className="how-canvas">
+        <div className="how-canvas-main">
+          <ol className="how-journey">
         <li className="how-step" id="watch">
           <div className="how-step-index">
             <span className="mono">1</span>
@@ -222,6 +261,17 @@ export default function HowItWorks() {
           </div>
         </li>
       </ol>
+        </div>
+        <aside className="how-funnel-rail">
+          <figure className="how-funnel-sticky">
+            <SignalFunnel active={activeStage} />
+            <figcaption className="mono">
+              The signal funnel: each stage removes noise; two briefs leave
+              the tip.
+            </figcaption>
+          </figure>
+        </aside>
+      </div>
 
       <section className="how-audit" aria-labelledby="audit-title">
         <div className="how-section-heading">

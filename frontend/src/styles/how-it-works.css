@@ -79,6 +79,60 @@
   counter-reset: none;
 }
 
+/* ---- The signal funnel rail: sticky figure beside the narrated steps ---- */
+
+.how-canvas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 430px);
+  gap: 0 44px;
+  align-items: stretch;
+}
+
+.how-canvas-main { min-width: 0; }
+
+.how-funnel-rail {
+  border-left: 1px solid var(--border);
+  padding-left: 36px;
+}
+
+.how-funnel-sticky {
+  position: sticky;
+  top: 20px;
+  margin: 0;
+  padding-top: 24px;
+}
+
+.signal-funnel {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.how-funnel-sticky figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+@media (max-width: 1140px) {
+  .how-canvas { grid-template-columns: 1fr; }
+  .how-funnel-rail {
+    order: -1;
+    border-left: 0;
+    padding-left: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .how-funnel-sticky {
+    position: static;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 12px 0 24px;
+  }
+}
+
+
 .how-step {
   display: grid;
   grid-template-columns: 184px minmax(0, 1fr);
