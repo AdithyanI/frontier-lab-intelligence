@@ -261,10 +261,13 @@ Rules:
   Insight titles; report hashes, source counts, run counts, and authoring notes
   stay out of the opening. Each title jumps to one decision-analysis page,
   followed by a linked source-ledger page containing every original post and
-  artifact/context citation. PDF text stays vector/selectable;
-  Helvetica/Courier Base 14 are a
-  deliberate portable print analogue for Inter/IBM Plex Mono, with an embedded
-  mixed-script fallback for citation titles outside WinAnsi.
+  artifact/context citation; every later-page header returns to the brief
+  index. Serif display headings and restrained capital-blue slash markers echo
+  the case brief's editorial rhythm without reproducing BIT branding, while
+  flat rules and sans-serif body copy keep the workbook native to the product.
+  PDF text stays vector/selectable. Times/Helvetica/Courier Base 14 are a
+  deliberate portable print analogue for the editorial display/UI/mono stack,
+  with an embedded mixed-script fallback for citation titles outside WinAnsi.
 - **BIT Lens:** one text-first public-research briefing, without internal tabs,
   diagrams, dashboards, or collapsed holding detail. It preserves the full
   outside-in research in a linear reading order: flagship mandate and terms;

@@ -498,7 +498,10 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         ),
         Spacer(1, 8 * mm),
         HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=5 * mm),
-        Paragraph('<font color="#5BC5F2">/</font> Today\'s brief', styles["cover_section"]),
+        Paragraph(
+            '<font name="Helvetica-Bold" color="#5BC5F2">/</font> Today\'s brief',
+            styles["cover_section"],
+        ),
         Spacer(1, 2.5 * mm),
         Paragraph(
             "Click any title to jump to its analysis. Each brief is followed by its linked sources.",
@@ -558,7 +561,7 @@ def _section_title(title: str, styles: dict[str, ParagraphStyle]) -> list[Any]:
     return [
         Spacer(1, 6 * mm),
         Paragraph(
-            f'<font color="#5BC5F2">/</font> {_markup(title)}',
+            f'<font name="Helvetica-Bold" color="#5BC5F2">/</font> {_markup(title)}',
             styles["section"],
         ),
         Spacer(1, 2.8 * mm),

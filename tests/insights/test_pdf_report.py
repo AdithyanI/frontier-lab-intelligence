@@ -191,12 +191,15 @@ def _pdf_links(pdf_bytes: bytes) -> set[str]:
     return links
 
 
-def _pdf_internal_destinations(pdf_bytes: bytes) -> list[object]:
+def _pdf_internal_destinations(pdf_bytes: bytes) -> list[list[object]]:
     reader = PdfReader(BytesIO(pdf_bytes))
     return [
-        annotation_ref.get_object()["/Dest"]
-        for annotation_ref in reader.pages[0].get("/Annots", [])
-        if annotation_ref.get_object().get("/Dest")
+        [
+            annotation_ref.get_object()["/Dest"]
+            for annotation_ref in page.get("/Annots", [])
+            if annotation_ref.get_object().get("/Dest")
+        ]
+        for page in reader.pages
     ]
 
 
@@ -223,7 +226,11 @@ def test_report_renders_complete_audience_workbook(audience, expected, unexpecte
     assert "RESEARCH SOURCES" not in text
     assert "Complete run:" not in text
     assert "READING NOTE" not in text
-    assert len(_pdf_internal_destinations(pdf_bytes)) == 1
+    assert [len(destinations) for destinations in _pdf_internal_destinations(pdf_bytes)] == [
+        1,
+        1,
+        1,
+    ]
     assert expected in text
     assert unexpected not in text
     assert "Primary research artifact" in text
