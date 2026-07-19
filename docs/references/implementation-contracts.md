@@ -16,7 +16,8 @@ layers. The successor Insight path now has separate audience prompts, a
 first-party-only model view, one resumable SQLite run store, a machine-first
 operator CLI, and a live kept/suppressed UI projection. Explicit manual Daily
 Brief delivery is implemented for Slack and email; scheduling and unattended
-alerts remain deferred. See
+alerts remain deferred. Exact provider behavior, runtime configuration, proof,
+and limitations live in [the delivery reference](delivery.md). See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.

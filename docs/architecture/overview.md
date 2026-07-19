@@ -27,7 +27,7 @@ flowchart TD
     S --> Q
     Q --> I["Daily editorial agent<br/>ranked, cited Insights per audience"]
     I --> W["Web and CLI<br/>inspection and operation"]
-    I --> D["Manual delivery<br/>Slack summary or email with PDF"]
+    I --> D["Manual delivery<br/>Slack full brief or email with PDF"]
     E --> W
     A --> W
     N --> W

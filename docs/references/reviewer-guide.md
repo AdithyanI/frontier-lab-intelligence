@@ -34,7 +34,11 @@ are explicit, resumable commands and are not part of the reviewer quick start.
    Imported days show the newest complete, ranked, cited daily editorial run.
    Each supporting source links back to the exact Feed Event; artifact
    citations retain their frozen text provenance. Candidate-level Suppressed
-   and All views remain an audit fallback, not the final daily product.
+   and All views remain an audit fallback, not the final daily product. The
+   top-right actions download the selected audience PDF or open an explicit
+   Slack/email confirmation. Those final send buttons call real configured
+   providers; do not confirm a send unless you intend to notify the displayed
+   destination.
 5. **Ingestion (10%)** and **extraction (10%)** — inspect Artifacts for
    canonical source links disclosed by first-party Event evidence, retrieval
    state, normalized text snapshots, and the exact originating Event. X is the
@@ -53,6 +57,8 @@ are explicit, resumable commands and are not part of the reviewer quick start.
 - `docs/references/registry-evaluation.md` — exact evaluator modules, commands,
   storage boundaries, resumability, artifact checksums, and invariants.
 - `docs/architecture/overview.md` — current system shape and implemented schema.
+- `docs/references/delivery.md` — exact Slack/email behavior, configuration,
+  proof, and limitations.
 - `docs/references/registry-curation.md` — identity/kind/curation boundaries,
   model contract, evaluation outcome, usage, and cost.
 - `docs/references/build-log.md` — build history, AI tool usage, learning
@@ -72,4 +78,5 @@ are explicit, resumable commands and are not part of the reviewer quick start.
   a shipped citation.
 - The daily editorial corpus is implemented, but final human adjudication of
   the strongest three to five Insights and the rubric-mapped submission package
-  remain. Nothing is submitted or delivered externally by the demo.
+  remain. Nothing is submitted to BIT by the demo. Manual Slack and email
+  actions are live and can deliver only after an explicit final confirmation.

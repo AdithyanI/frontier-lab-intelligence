@@ -257,7 +257,7 @@ Rules:
   daily editorial run and exposes preparing, downloaded, and actionable error
   states without shifting the header. A quieter 44px `Send brief` action sits
   directly beside it. It opens one anchored flat panel—not a settings page—
-  with Slack and email choices, masked destination, audience/date/top-Insight
+  with Slack and email choices, masked destination, audience/date/content-scope
   summary, and an explicit final confirmation. Slack is labelled as all cited
   Insights plus the PDF link; its message shows every title and complete
   interpretation, then links onward. Email remains up to five

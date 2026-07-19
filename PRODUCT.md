@@ -16,12 +16,13 @@ professionals who live in data-dense tools all day:
   done: "surface the techniques, models, and papers that should change how we
   build."
 
-Both consume periodic digests and interrupt-driven alerts; both need every
-claim traceable to its primary source in one click. A completed daily digest
+Both consume periodic digests and timely pushed alerts; both need every claim
+traceable to its primary source in one click. A completed daily digest
 must remain readable in the product and downloadable as a self-contained,
 audience-specific PDF for offline review and assignment delivery. An operator
-can also explicitly send the top ranked brief through Slack (summary plus PDF
-link) or email (summary plus PDF attachment); automated alert scheduling is a
+can also explicitly send the selected brief through Slack (every cited Insight
+with its complete interpretation, plus brief and PDF links) or email (up to
+five ranked Insights plus the PDF attachment). Automated alert scheduling is a
 separate future concern.
 
 ## Product Purpose
