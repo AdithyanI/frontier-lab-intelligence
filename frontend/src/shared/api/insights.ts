@@ -3,6 +3,46 @@ import type { FeedDate } from './evidence'
 export type InsightAudience = 'investment' | 'ai_engineering'
 export type InsightDecision = 'surface' | 'suppress'
 export type InsightStatus = 'kept' | 'suppressed' | 'all'
+export type BriefDeliveryChannel = 'slack' | 'email'
+
+export interface BriefDeliveryChannelStatus {
+  channel: BriefDeliveryChannel
+  label: string
+  configured: boolean
+  available: boolean
+  destination: string
+  pdf_delivery: 'link' | 'attachment'
+}
+
+export interface BriefDeliveryStatus {
+  schema_version: string
+  available: boolean
+  reason: string | null
+  audience: InsightAudience
+  date: string | null
+  top_insight_count: number
+  access: {
+    required: boolean
+    configured: boolean
+  }
+  channels: BriefDeliveryChannelStatus[]
+}
+
+export interface BriefDeliveryResult {
+  schema_version: string
+  status: 'sent'
+  channel: BriefDeliveryChannel
+  destination: string
+  audience: InsightAudience
+  date: string
+  insight_count: number
+  pdf_delivery: 'link' | 'attachment'
+  pdf_filename: string
+  report_version: string
+  delivery_id: string
+  provider_id: string
+  sent_at: string
+}
 
 export interface InsightItem {
   candidate_id: string

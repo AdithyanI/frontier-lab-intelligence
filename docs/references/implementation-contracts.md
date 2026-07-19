@@ -14,8 +14,9 @@ those two booleans. The former model-based keep/drop gate and the older
 multi-stage Insight backends were removed rather than retained as compatibility
 layers. The successor Insight path now has separate audience prompts, a
 first-party-only model view, one resumable SQLite run store, a machine-first
-operator CLI, and a live kept/suppressed UI projection. External delivery is
-still deferred. See
+operator CLI, and a live kept/suppressed UI projection. Explicit manual Daily
+Brief delivery is implemented for Slack and email; scheduling and unattended
+alerts remain deferred. See
 [`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.

@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
+  type BriefDeliveryChannel,
+  type BriefDeliveryResult,
+  type BriefDeliveryStatus,
   type EditorialAnalysis,
   type EditorialInsightItem,
   type EditorialInsightsResponse,
@@ -77,6 +80,7 @@ const STATUS_COPY: Record<InsightStatus, { label: string; description: string }>
 }
 
 type ReportDownloadState = 'idle' | 'generating' | 'ready' | 'error'
+type BriefDeliveryState = 'idle' | 'loading' | 'choose' | 'confirm' | 'sending' | 'sent' | 'error'
 
 const INVESTMENT_IMPACT_COPY = {
   positive: { icon: '↗', label: 'Potential positive' },
@@ -228,6 +232,302 @@ function DailyBriefDownload({
       >
         {state === 'ready' ? 'PDF downloaded.' : error}
       </span>
+    </div>
+  )
+}
+
+function DailyBriefDelivery({
+  audience,
+  day,
+  available,
+  loading,
+}: {
+  audience: InsightAudience
+  day: string
+  available: boolean
+  loading: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const [state, setState] = useState<BriefDeliveryState>('idle')
+  const [status, setStatus] = useState<BriefDeliveryStatus | null>(null)
+  const [selected, setSelected] = useState<BriefDeliveryChannel | null>(null)
+  const [result, setResult] = useState<BriefDeliveryResult | null>(null)
+  const [accessKey, setAccessKey] = useState('')
+  const [error, setError] = useState('')
+  const actionRef = useRef<HTMLDivElement | null>(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const requestRef = useRef<AbortController | null>(null)
+  const panelId = 'daily-brief-delivery-panel'
+
+  useEffect(() => {
+    requestRef.current?.abort()
+    requestRef.current = null
+    setOpen(false)
+    setState('idle')
+    setStatus(null)
+    setSelected(null)
+    setResult(null)
+    setAccessKey('')
+    setError('')
+    return () => requestRef.current?.abort()
+  }, [audience, day])
+
+  useEffect(() => {
+    if (!open) return
+    panelRef.current?.focus()
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!actionRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setOpen(false)
+      buttonRef.current?.focus()
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [open])
+
+  const loadStatus = async () => {
+    if (!available || !day || loading) return
+    if (open) {
+      setOpen(false)
+      return
+    }
+    const controller = new AbortController()
+    requestRef.current?.abort()
+    requestRef.current = controller
+    setOpen(true)
+    setState('loading')
+    setSelected(null)
+    setResult(null)
+    setError('')
+    try {
+      const response = await fetch(
+        `/api/insights/delivery?audience=${audience}&date=${encodeURIComponent(day)}`,
+        { headers: { Accept: 'application/json' }, signal: controller.signal },
+      )
+      const payload = await response.json().catch(() => null) as BriefDeliveryStatus | { detail?: string } | null
+      if (!response.ok || !payload || !('channels' in payload)) {
+        const detail = payload && 'detail' in payload ? payload.detail : null
+        throw new Error(detail || 'Delivery options could not be loaded.')
+      }
+      if (requestRef.current !== controller) return
+      setStatus(payload)
+      setAccessKey(window.sessionStorage.getItem('fli-delivery-access-key') ?? '')
+      setState('choose')
+    } catch (cause) {
+      if (controller.signal.aborted) return
+      setError(cause instanceof Error ? cause.message : 'Delivery options could not be loaded.')
+      setState('error')
+    } finally {
+      if (requestRef.current === controller) requestRef.current = null
+    }
+  }
+
+  const selectChannel = (channel: BriefDeliveryChannel) => {
+    setSelected(channel)
+    setError('')
+    setState('confirm')
+  }
+
+  const send = async () => {
+    if (!selected || !status || state === 'sending') return
+    if (status.access.required && !accessKey.trim()) {
+      setError('Enter the delivery access key to continue.')
+      return
+    }
+    const controller = new AbortController()
+    requestRef.current?.abort()
+    requestRef.current = controller
+    setState('sending')
+    setError('')
+    try {
+      const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      }
+      if (accessKey.trim()) headers.Authorization = `Bearer ${accessKey.trim()}`
+      const response = await fetch('/api/insights/delivery', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ audience, date: day, channel: selected }),
+        signal: controller.signal,
+      })
+      const payload = await response.json().catch(() => null) as BriefDeliveryResult | { detail?: string } | null
+      if (!response.ok || !payload || !('status' in payload) || payload.status !== 'sent') {
+        const detail = payload && 'detail' in payload ? payload.detail : null
+        throw new Error(detail || `Delivery failed with status ${response.status}.`)
+      }
+      if (requestRef.current !== controller) return
+      if (status.access.required) {
+        window.sessionStorage.setItem('fli-delivery-access-key', accessKey.trim())
+      }
+      setResult(payload)
+      setState('sent')
+    } catch (cause) {
+      if (controller.signal.aborted) return
+      setError(cause instanceof Error ? cause.message : 'The Daily Brief could not be sent.')
+      setState('confirm')
+    } finally {
+      if (requestRef.current === controller) requestRef.current = null
+    }
+  }
+
+  const disabled = !available || !day || loading
+  const selectedStatus = status?.channels.find((channel) => channel.channel === selected)
+  const close = () => {
+    setOpen(false)
+    buttonRef.current?.focus()
+  }
+
+  return (
+    <div className="insight-delivery-action" ref={actionRef}>
+      <button
+        className="insight-delivery-button"
+        type="button"
+        onClick={loadStatus}
+        disabled={disabled}
+        aria-expanded={open}
+        aria-controls={open ? panelId : undefined}
+        title={disabled ? 'Send is available for complete kept daily briefs.' : 'Send this Daily Brief'}
+        ref={buttonRef}
+      >
+        <svg aria-hidden="true" viewBox="0 0 20 20">
+          <path d="m3 4 14 6-14 6 2.5-6L3 4Zm2.5 6H17" />
+        </svg>
+        <span>Send brief</span>
+      </button>
+
+      {open && (
+        <div
+          className="insight-delivery-panel"
+          id={panelId}
+          role="dialog"
+          aria-label="Send Daily Brief"
+          tabIndex={-1}
+          ref={panelRef}
+        >
+          <div className="insight-delivery-panel-head">
+            <div>
+              <span className="mono">Daily brief delivery</span>
+              <h2>{state === 'confirm' || state === 'sending' ? 'Confirm delivery' : state === 'sent' ? 'Brief sent' : 'Send this brief'}</h2>
+            </div>
+            <button type="button" onClick={close} aria-label="Close delivery panel">×</button>
+          </div>
+
+          {state === 'loading' && (
+            <p className="insight-delivery-loading" role="status">Checking delivery channels…</p>
+          )}
+
+          {state === 'error' && (
+            <div className="insight-delivery-message insight-delivery-message--error" role="alert">
+              <p>{error}</p>
+              <button type="button" onClick={loadStatus}>Try again</button>
+            </div>
+          )}
+
+          {state === 'choose' && status && (
+            <>
+              <p className="insight-delivery-summary">
+                {AUDIENCE_COPY[audience].label} · {displayInsightDay(day)} · Top {status.top_insight_count}
+              </p>
+              <div className="insight-delivery-options">
+                {status.channels.map((channel) => (
+                  <button
+                    type="button"
+                    onClick={() => selectChannel(channel.channel)}
+                    disabled={!channel.available}
+                    key={channel.channel}
+                  >
+                    <span className="insight-delivery-option-mark" aria-hidden="true">
+                      {channel.channel === 'slack' ? '#' : '@'}
+                    </span>
+                    <span>
+                      <strong>{channel.label}</strong>
+                      <small>{channel.destination}</small>
+                    </span>
+                    <em>
+                      {channel.configured
+                        ? `Top ${status.top_insight_count} + PDF ${channel.pdf_delivery}`
+                        : 'Not configured'}
+                    </em>
+                  </button>
+                ))}
+              </div>
+              {!status.access.configured && (
+                <p className="insight-delivery-note">Public delivery is waiting for an operator access key.</p>
+              )}
+            </>
+          )}
+
+          {(state === 'confirm' || state === 'sending') && status && selectedStatus && (
+            <div className="insight-delivery-confirm">
+              <p>
+                Send the top {status.top_insight_count} cited Insights to <strong>{selectedStatus.destination}</strong>.
+                The PDF will be included as {selected === 'email' ? 'an attachment' : 'a download link'}.
+              </p>
+              <dl>
+                <div><dt>Audience</dt><dd>{AUDIENCE_COPY[audience].label}</dd></div>
+                <div><dt>Date</dt><dd>{displayInsightDay(day)}</dd></div>
+              </dl>
+              {status.access.required && (
+                <label className="insight-delivery-access">
+                  <span>Delivery access key</span>
+                  <input
+                    type="password"
+                    value={accessKey}
+                    onChange={(event) => setAccessKey(event.target.value)}
+                    autoComplete="off"
+                    disabled={state === 'sending'}
+                  />
+                </label>
+              )}
+              {error && <p className="insight-delivery-inline-error" role="alert">{error}</p>}
+              <div className="insight-delivery-confirm-actions">
+                <button type="button" onClick={() => { setState('choose'); setError('') }} disabled={state === 'sending'}>Back</button>
+                <button type="button" className="is-primary" onClick={send} disabled={state === 'sending'}>
+                  {state === 'sending' ? 'Sending…' : selected === 'slack' ? 'Send to Slack' : 'Send email'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {state === 'sent' && result && (
+            <div className="insight-delivery-message insight-delivery-message--success" role="status">
+              <span aria-hidden="true">✓</span>
+              <p>
+                <strong>{result.channel === 'slack' ? 'Slack notification sent.' : 'Email sent.'}</strong>
+                {result.insight_count} Insights and the PDF {result.pdf_delivery} were delivered to {result.destination}.
+              </p>
+              <button type="button" onClick={close}>Done</button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DailyBriefActions({
+  audience,
+  day,
+  available,
+  loading,
+}: {
+  audience: InsightAudience
+  day: string
+  available: boolean
+  loading: boolean
+}) {
+  return (
+    <div className="insight-brief-actions">
+      <DailyBriefDelivery audience={audience} day={day} available={available} loading={loading} />
+      <DailyBriefDownload audience={audience} day={day} available={available} loading={loading} />
     </div>
   )
 }
@@ -796,7 +1096,7 @@ export default function Insights() {
           <h1 className="page-title">{copy.title}</h1>
           <p className="page-sub">{copy.subtitle}</p>
         </div>
-        <DailyBriefDownload
+        <DailyBriefActions
           audience={audience}
           day={selectedDate}
           available={Boolean(editorialData?.available)}

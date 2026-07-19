@@ -255,7 +255,16 @@ Rules:
   hairline `Download PDF` action sits at the top-right of the page header and
   follows the selected date and audience. It is enabled only for a complete
   daily editorial run and exposes preparing, downloaded, and actionable error
-  states without shifting the header. The exported A4 workbook uses the same
+  states without shifting the header. A quieter 44px `Send brief` action sits
+  directly beside it. It opens one anchored flat panel—not a settings page—
+  with Slack and email choices, masked destination, audience/date/top-Insight
+  summary, and an explicit final confirmation. Slack is labelled as top
+  Insights plus PDF link; email as top Insights plus PDF attachment. Public
+  sends request an operator access key only at confirmation and retain it in
+  session storage only after a successful send. Loading, unavailable, provider
+  error, sending, and sent states remain inside the same panel; provider
+  secrets and delivery metadata never enter the reading surface. The exported
+  A4 workbook uses the same
   paper-white, ink, capital-blue, flat-rule language. Its reader-first opening
   combines the report title, audience/date, and a ranked list of clickable
   Insight titles; report hashes, source counts, run counts, and authoring notes

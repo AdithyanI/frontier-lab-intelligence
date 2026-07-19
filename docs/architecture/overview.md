@@ -27,6 +27,7 @@ flowchart TD
     S --> Q
     Q --> I["Daily editorial agent<br/>ranked, cited Insights per audience"]
     I --> W["Web and CLI<br/>inspection and operation"]
+    I --> D["Manual delivery<br/>Slack summary or email with PDF"]
     E --> W
     A --> W
     N --> W
@@ -48,6 +49,7 @@ or reinterpret its upstream evidence.
 | Attention | `fli.scoring` | Versioned, inspectable ordering formulas and offline evaluation. |
 | Audience routing | `fli.routing` | Independent AI Engineering and Investment relevance decisions with durable runs. |
 | Insights | `fli.insights` | Per-Event working annotations plus agent-authored daily synthesis, strict validation, atomic storage, and the canonical read model. |
+| Delivery | `fli.delivery` | Explicitly confirmed Slack and email adapters over one canonical Daily Brief; credentials and provider behavior remain server-side. |
 | Product adapters | `fli.web`, `fli.cli` | HTTP/UI composition and non-interactive commands; no domain truth belongs here. |
 
 Cross-domain provider behavior belongs in `fli.llm_responses`; compact tracked
@@ -112,6 +114,12 @@ at the root of `fli`.
    daily editorial run, the web adapter can deterministically render the same
    audience/date projection as a linked A4 PDF. The content-addressed derived
    cache is an acceleration layer, not another report or editorial store.
+12. An operator may explicitly deliver that same complete audience/date brief.
+   Slack receives the top five available ranked Insights plus canonical brief
+   and PDF links; email receives the same summary with the cached PDF attached.
+   The public write route requires a server-configured bearer key, provider
+   secrets never enter the SPA, and no scheduler or automatic alert loop is
+   implied by this manual adapter.
 
 ## Important Boundaries
 
@@ -144,6 +152,9 @@ at the root of `fli`.
   canonical read schema, selected day and audience, and imported result hash.
   Cache files are atomically replaceable and may be deleted without losing
   editorial truth; the normalized run remains the only report input.
+- **Explicit delivery boundary:** delivery reads only the canonical complete
+  brief and its derived PDF. A human confirmation owns each send; Slack, SMTP,
+  and operator credentials are runtime secrets and never part of product data.
 - **Agent freedom behind a narrow write boundary:** the agent may search,
   compare, group, and research freely, but only a versioned Insight schema and
   complete candidate disposition may enter product state.

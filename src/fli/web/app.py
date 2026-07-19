@@ -18,6 +18,7 @@ Endpoints:
 - /api/insights/dates            successor audience Insight dates
 - /api/insights                  successor audience Insights
 - /api/insights/report.pdf       cached daily editorial PDF workbook
+- /api/insights/delivery         manual Slack/email Daily Brief delivery
 """
 
 from contextlib import asynccontextmanager
@@ -26,12 +27,13 @@ from pathlib import Path
 from threading import Thread
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from fli.ingestion import sources
+from fli.delivery import daily_brief as brief_delivery
 from fli.insights import editorial_runs as editorial_store
 from fli.insights import pdf_report
 from fli.insights import view as insight_store
@@ -67,6 +69,12 @@ class RegistryIntakeRequest(BaseModel):
     profile: str = Field(min_length=1, max_length=500)
     mode: Literal["screen", "direct"]
     reason: str | None = Field(default=None, max_length=500)
+
+
+class DailyBriefDeliveryRequest(BaseModel):
+    audience: Literal["investment", "ai_engineering"]
+    date: calendar_date
+    channel: Literal["slack", "email"]
 
 
 def _model_conn():
@@ -506,6 +514,56 @@ def insight_report_pdf(
         filename=artifact.filename,
         headers=headers,
     )
+
+
+@app.get("/api/insights/delivery")
+def insight_delivery_status(
+    request: Request,
+    insight_date: calendar_date = Query(..., alias="date"),
+    audience: Literal["investment", "ai_engineering"] = "investment",
+) -> JSONResponse:
+    """Describe safe, configured manual delivery choices for one complete brief."""
+    payload = editorial_store.editorial_insights_payload(
+        audience=audience,
+        day=insight_date.isoformat(),
+    )
+    return JSONResponse(
+        brief_delivery.delivery_status_payload(
+            payload,
+            remote_host=request.url.hostname,
+        )
+    )
+
+
+@app.post("/api/insights/delivery")
+def send_insight_delivery(
+    request: Request,
+    delivery_request: DailyBriefDeliveryRequest,
+    authorization: str | None = Header(default=None),
+) -> JSONResponse:
+    """Send one explicitly confirmed Daily Brief through a configured adapter."""
+    payload = editorial_store.editorial_insights_payload(
+        audience=delivery_request.audience,
+        day=delivery_request.date.isoformat(),
+    )
+    try:
+        result = brief_delivery.deliver_daily_brief(
+            payload,
+            channel=delivery_request.channel,
+            authorization=authorization,
+            remote_host=request.url.hostname,
+        )
+    except brief_delivery.DeliveryAuthorizationError as exc:
+        raise HTTPException(
+            status_code=401,
+            detail=str(exc),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
+    except (brief_delivery.DeliveryNotConfigured, pdf_report.ReportUnavailable) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except brief_delivery.DeliveryFailed as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return JSONResponse(result)
 
 
 if DIST_DIR.exists():

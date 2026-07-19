@@ -201,6 +201,25 @@ test('Insights exposes a production PDF download for the complete selected daily
   assert.doesNotMatch(appStyles, /\.insight-report-button \{[^}]*box-shadow:/)
 })
 
+test('Insights exposes guarded manual Slack and email delivery beside the PDF action', () => {
+  assert.match(apiSource, /export type BriefDeliveryChannel = 'slack' \| 'email'/)
+  assert.match(apiSource, /pdf_delivery: 'link' \| 'attachment'/)
+  assert.match(insightSource, /function DailyBriefDelivery/)
+  assert.match(insightSource, /\/api\/insights\/delivery\?audience=/)
+  assert.match(insightSource, /fetch\('\/api\/insights\/delivery'/)
+  assert.match(insightSource, /Top \{status\.top_insight_count\}/)
+  assert.match(insightSource, /Delivery access key/)
+  assert.match(insightSource, /window\.sessionStorage\.setItem\('fli-delivery-access-key'/)
+  assert.match(insightSource, /Confirm delivery/)
+  assert.match(insightSource, /Send to Slack/)
+  assert.match(insightSource, /Send email/)
+  assert.doesNotMatch(insightSource, /hooks\.slack\.com/)
+  assert.match(appStyles, /\.insight-brief-actions \{[^}]*display: flex;/)
+  assert.match(appStyles, /\.insight-delivery-button \{[^}]*min-height: 44px;/)
+  assert.match(appStyles, /\.insight-delivery-panel \{[^}]*border: 1px solid var\(--ink\);/)
+  assert.doesNotMatch(appStyles, /\.insight-delivery-panel \{[^}]*box-shadow:/)
+})
+
 test('Insights keeps honest loading, error, and thin-filter states', () => {
   assert.match(insightSource, /Insight dates are unavailable/)
   assert.match(insightSource, /This brief did not load/)

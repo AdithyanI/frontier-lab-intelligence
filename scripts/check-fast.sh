@@ -19,7 +19,7 @@ test -f docs/STATUS.md
 # Domain code is package-owned. Keep the root package restricted to shared
 # composition/runtime plumbing so new work cannot recreate the former flat
 # module pile.
-for domain in ingestion registry network evidence routing scoring insights web; do
+for domain in ingestion registry network evidence routing scoring insights delivery web; do
   test -d "src/fli/$domain"
 done
 unexpected_root_modules=$(find src/fli -maxdepth 1 -type f -name '*.py' \
