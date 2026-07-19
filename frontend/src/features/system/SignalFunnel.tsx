@@ -115,21 +115,30 @@ const FORK_Y = 574
 const H = 636
 
 /* Deterministic phyllotaxis field inside an ellipse — same construction as
-   the network orbit, so the two figures read as one system. */
+   the network orbit, so the two figures read as one system. `d` is depth:
+   1 = front rim (near the viewer), 0 = back rim. Dots shrink and fade as
+   they recede, which is what makes each plane read as a tilted 3D disc. */
 function field(plane: Plane) {
-  const pts: { x: number; y: number; t: number; i: number }[] = []
+  const pts: { x: number; y: number; t: number; d: number; i: number }[] = []
   for (let i = 0; i < plane.dots; i += 1) {
     const angle = i * GOLDEN
     const radius = Math.sqrt((i + 0.55) / plane.dots) * 0.94
+    const d = (Math.sin(angle) * radius + 1) / 2
     pts.push({
       x: CX + Math.cos(angle) * radius * plane.rx,
       y: plane.y + Math.sin(angle) * radius * plane.ry,
       t: 1 - radius,
+      d,
       i,
     })
   }
-  return pts
+  /* Paint back-to-front so near dots overlap far ones. */
+  return pts.sort((a, b) => a.d - b.d)
 }
+
+/* Perspective scale and atmospheric fade for one dot. */
+const persp = (d: number) => 0.72 + 0.42 * d
+const fade = (d: number) => 0.5 + 0.5 * d
 
 function PlaneDots({ plane }: { plane: Plane }) {
   const pts = field(plane)
@@ -138,7 +147,14 @@ function PlaneDots({ plane }: { plane: Plane }) {
     return (
       <>
         {pts.map((p) => (
-          <circle key={p.i} cx={p.x} cy={p.y} r={1.5} fill={PALE} />
+          <circle
+            key={p.i}
+            cx={p.x}
+            cy={p.y}
+            r={1.5 * persp(p.d)}
+            fill={PALE}
+            opacity={fade(p.d)}
+          />
         ))}
       </>
     )
@@ -149,20 +165,29 @@ function PlaneDots({ plane }: { plane: Plane }) {
        (blue squares) — the Registry vocabulary. */
     return (
       <>
-        {pts.map((p) =>
-          p.i % 13 === 5 ? (
+        {pts.map((p) => {
+          const s = 4.4 * persp(p.d)
+          return p.i % 13 === 5 ? (
             <rect
               key={p.i}
-              x={p.x - 2.2}
-              y={p.y - 2.2}
-              width={4.4}
-              height={4.4}
+              x={p.x - s / 2}
+              y={p.y - s / 2}
+              width={s}
+              height={s}
               fill={BLUE_MID}
+              opacity={fade(p.d)}
             />
           ) : (
-            <circle key={p.i} cx={p.x} cy={p.y} r={1.8} fill={INK} />
-          ),
-        )}
+            <circle
+              key={p.i}
+              cx={p.x}
+              cy={p.y}
+              r={1.8 * persp(p.d)}
+              fill={INK}
+              opacity={fade(p.d)}
+            />
+          )
+        })}
       </>
     )
   }
@@ -171,7 +196,14 @@ function PlaneDots({ plane }: { plane: Plane }) {
     return (
       <>
         {pts.map((p) => (
-          <circle key={p.i} cx={p.x} cy={p.y} r={1.9} fill={INK} />
+          <circle
+            key={p.i}
+            cx={p.x}
+            cy={p.y}
+            r={1.9 * persp(p.d)}
+            fill={INK}
+            opacity={fade(p.d)}
+          />
         ))}
       </>
     )
@@ -186,8 +218,9 @@ function PlaneDots({ plane }: { plane: Plane }) {
             key={p.i}
             cx={p.x}
             cy={p.y}
-            r={1.4 + 2.6 * Math.pow(p.t, 1.5)}
+            r={(1.4 + 2.6 * Math.pow(p.t, 1.5)) * persp(p.d)}
             fill={INK}
+            opacity={fade(p.d)}
           />
         ))}
       </>
@@ -204,13 +237,21 @@ function PlaneDots({ plane }: { plane: Plane }) {
               key={p.i}
               cx={p.x}
               cy={p.y}
-              r={2}
+              r={2 * persp(p.d)}
               fill="#ffffff"
               stroke={MUTED}
               strokeWidth={1}
+              opacity={fade(p.d)}
             />
           ) : (
-            <circle key={p.i} cx={p.x} cy={p.y} r={2.3} fill={INK} />
+            <circle
+              key={p.i}
+              cx={p.x}
+              cy={p.y}
+              r={2.3 * persp(p.d)}
+              fill={INK}
+              opacity={fade(p.d)}
+            />
           ),
         )}
       </>
@@ -225,10 +266,11 @@ function PlaneDots({ plane }: { plane: Plane }) {
           key={p.i}
           cx={p.x}
           cy={p.y}
-          r={2.6}
+          r={2.6 * persp(p.d)}
           fill={BLUE}
           stroke={BLUE_INK}
           strokeWidth={0.9}
+          opacity={0.75 + 0.25 * p.d}
         />
       ))}
     </>
@@ -316,29 +358,48 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
       <Brief x={CX - 74} label="INVESTMENT" active={isOn('publish')} />
       <Brief x={CX + 74} label="AI ENGINEERING" active={isOn('publish')} />
 
-      {/* planes */}
+      {/* planes: back rim behind the dots, solid front rim in front — the
+          split rim plus depth-scaled dots is what makes each disc read 3D */}
       {PLANES.map((plane) => {
         const on = isOn(plane.id)
+        const isActive = active === plane.id
         const labelX = CX + plane.rx + 14
+        const backArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 1 ${CX + plane.rx} ${plane.y}`
+        const frontArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 0 ${CX + plane.rx} ${plane.y}`
         return (
           <g
             key={plane.id}
             opacity={on ? 1 : 0.26}
             style={{ transition: 'opacity 240ms ease-out' }}
           >
+            {/* disc surface wash */}
             <ellipse
               cx={CX}
               cy={plane.y}
               rx={plane.rx}
               ry={plane.ry}
-              fill={active === plane.id ? 'rgba(91, 197, 242, 0.07)' : 'transparent'}
-              stroke={active === plane.id ? BLUE_MID : INK}
-              strokeOpacity={active === plane.id ? 0.85 : 0.3}
-              strokeWidth={active === plane.id ? 1.2 : 1}
-              strokeDasharray={active === plane.id ? undefined : '2 5'}
-              style={{ transition: 'stroke 240ms ease-out' }}
+              fill={isActive ? 'rgba(91, 197, 242, 0.10)' : 'rgba(21, 21, 21, 0.025)'}
+              style={{ transition: 'fill 240ms ease-out' }}
+            />
+            {/* back rim: fainter, dashed, hidden behind the dot field */}
+            <path
+              d={backArc}
+              fill="none"
+              stroke={isActive ? BLUE_MID : INK}
+              strokeOpacity={isActive ? 0.4 : 0.16}
+              strokeWidth={1}
+              strokeDasharray="2 5"
             />
             <PlaneDots plane={plane} />
+            {/* front rim: solid, closer to the viewer, drawn over the dots */}
+            <path
+              d={frontArc}
+              fill="none"
+              stroke={isActive ? BLUE_MID : INK}
+              strokeOpacity={isActive ? 0.95 : 0.42}
+              strokeWidth={isActive ? 1.4 : 1}
+              style={{ transition: 'stroke 240ms ease-out' }}
+            />
             {/* stage label, anchored to the plane's right edge */}
             <g
               fontFamily={MONO}
