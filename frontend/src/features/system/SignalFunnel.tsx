@@ -23,6 +23,7 @@ export type FunnelStage =
   | 'rank'
   | 'judge'
   | 'publish'
+  | 'complete'
 
 const INK = '#151515'
 const INK_SOFT = '#434343'
@@ -339,12 +340,16 @@ function isAdjacent(id: FunnelStage, active: FunnelStage | null) {
 }
 
 export default function SignalFunnel({ active }: { active: FunnelStage | null }) {
+  /* Three narrative modes: the overview poses the question, focused stages
+     answer it one plane at a time, and 'complete' zooms back out to show
+     the whole machine running. */
+  const complete = active === 'complete'
   const overview = active == null || active === 'universe'
-  const focusIdx = overview ? 0 : STAGE_ORDER.indexOf(active)
+  const focusIdx = overview || complete ? 0 : STAGE_ORDER.indexOf(active)
 
   const revealed = (id: FunnelStage) =>
-    overview ? id === 'universe' : STAGE_ORDER.indexOf(id) <= focusIdx
-  const publishOn = !overview && active === 'publish'
+    complete ? true : overview ? id === 'universe' : STAGE_ORDER.indexOf(id) <= focusIdx
+  const publishOn = complete || active === 'publish'
 
   /* Camera: each focused stage gets a precomputed pan/zoom that keeps the
      plane and its right-edge label inside the frame. */
@@ -355,6 +360,7 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
     rank: { fx: 250, fy: 350, s: 1.3 },
     judge: { fx: 258, fy: 420, s: 1.32 },
     publish: { fx: 225, fy: 510, s: 1.24 },
+    complete: { fx: CX, fy: 0, s: 1 },
   }
   const cam = FOCUS[active ?? 'universe']
   const zoomed = cam.s > 1
@@ -471,12 +477,12 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
                 stroke="#ffffff"
                 strokeWidth="3.5"
                 paintOrder="stroke"
-                opacity={overview ? (on ? 1 : 0) : isActive ? 1 : 0}
+                opacity={complete ? 1 : overview ? (on ? 1 : 0) : isActive ? 1 : 0}
                 style={{ transition: 'opacity 500ms ease-out' }}
               >
                 <text
                   x={labelX}
-                  y={plane.y - 4}
+                  y={complete ? plane.y + 3 : plane.y - 4}
                   fontSize="10.5"
                   fontWeight="600"
                   letterSpacing="0.06em"
@@ -484,12 +490,16 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
                 >
                   {plane.step ? `${plane.step} · ${plane.name.toUpperCase()}` : plane.name.toUpperCase()}
                 </text>
-                <text x={labelX} y={plane.y + 9} fontSize="9" fill={INK_SOFT}>
-                  {plane.concept}
-                </text>
-                <text x={labelX} y={plane.y + 21} fontSize="8.5" fill={MUTED}>
-                  {plane.detail}
-                </text>
+                {/* the finale shows a one-line recap per plane; sub-lines stay
+                    with the focused reading */}
+                <g opacity={complete ? 0 : 1} style={{ transition: 'opacity 500ms ease-out' }}>
+                  <text x={labelX} y={plane.y + 9} fontSize="9" fill={INK_SOFT}>
+                    {plane.concept}
+                  </text>
+                  <text x={labelX} y={plane.y + 21} fontSize="8.5" fill={MUTED}>
+                    {plane.detail}
+                  </text>
+                </g>
               </g>
             </g>
           )
