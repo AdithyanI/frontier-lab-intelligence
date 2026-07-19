@@ -350,7 +350,7 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
      plane and its right-edge label inside the frame. */
   const FOCUS: Record<FunnelStage, { fx: number; fy: number; s: number }> = {
     universe: { fx: CX, fy: 0, s: 1 },
-    watch: { fx: 262, fy: 178, s: 1.14 },
+    watch: { fx: 296, fy: 178, s: 1.14 },
     collect: { fx: 262, fy: 268, s: 1.22 },
     rank: { fx: 250, fy: 350, s: 1.3 },
     judge: { fx: 258, fy: 420, s: 1.32 },
