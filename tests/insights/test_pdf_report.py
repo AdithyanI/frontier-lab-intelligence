@@ -204,10 +204,16 @@ def test_report_renders_complete_audience_workbook(audience, expected, unexpecte
     text = _pdf_text(pdf_bytes)
 
     assert pdf_bytes.startswith(b"%PDF-")
-    assert len(reader.pages) == 4
+    assert len(reader.pages) == 3
     assert "DAILY" in text
     assert "INTELLIGENCE" in text
     assert "Evidence and sources" in text
+    assert "Today's brief" in text
+    assert "Click any title to jump to its analysis." in text
+    assert "SOURCE EVENTS" not in text
+    assert "RESEARCH SOURCES" not in text
+    assert "Complete run:" not in text
+    assert "READING NOTE" not in text
     assert expected in text
     assert unexpected not in text
     assert "Primary research artifact" in text

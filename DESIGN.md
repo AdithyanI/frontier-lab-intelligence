@@ -256,10 +256,13 @@ Rules:
   follows the selected date and audience. It is enabled only for a complete
   daily editorial run and exposes preparing, downloaded, and actionable error
   states without shifting the header. The exported A4 workbook uses the same
-  paper-white, ink, capital-blue, flat-rule language: one report cover, one
-  ranked index, one decision-analysis page per Insight, and a following linked
-  source-ledger page containing every original post and artifact/context
-  citation. PDF text stays vector/selectable; Helvetica/Courier Base 14 are a
+  paper-white, ink, capital-blue, flat-rule language. Its reader-first opening
+  combines the report title, audience/date, and a ranked list of clickable
+  Insight titles; report hashes, source counts, run counts, and authoring notes
+  stay out of the opening. Each title jumps to one decision-analysis page,
+  followed by a linked source-ledger page containing every original post and
+  artifact/context citation. PDF text stays vector/selectable;
+  Helvetica/Courier Base 14 are a
   deliberate portable print analogue for Inter/IBM Plex Mono, with an embedded
   mixed-script fallback for citation titles outside WinAnsi.
 - **BIT Lens:** one text-first public-research briefing, without internal tabs,

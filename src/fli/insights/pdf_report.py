@@ -38,7 +38,7 @@ from reportlab.platypus import (
 from fli.insights import editorial_runs
 
 
-REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v3"
+REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v4"
 DEFAULT_CACHE_ROOT = editorial_runs.DEFAULT_ROOT / "pdf-cache"
 
 PAPER = HexColor("#FFFFFF")
@@ -296,6 +296,15 @@ def _styles() -> dict[str, ParagraphStyle]:
             leading=16,
             textColor=INK_SOFT,
         ),
+        "cover_section": ParagraphStyle(
+            "CoverSection",
+            parent=sample["Heading2"],
+            fontName="Helvetica-Bold",
+            fontSize=16,
+            leading=19,
+            textColor=INK,
+            spaceAfter=0,
+        ),
         "title": ParagraphStyle(
             "InsightTitle",
             parent=sample["Heading1"],
@@ -379,25 +388,17 @@ def _styles() -> dict[str, ParagraphStyle]:
             "TocRank",
             parent=sample["Normal"],
             fontName="Courier-Bold",
-            fontSize=9,
-            leading=12,
+            fontSize=10,
+            leading=14,
             textColor=INK,
         ),
         "toc_title": ParagraphStyle(
             "TocTitle",
             parent=sample["Normal"],
             fontName="Helvetica-Bold",
-            fontSize=9.5,
-            leading=12,
-            textColor=INK,
-        ),
-        "toc_note": ParagraphStyle(
-            "TocNote",
-            parent=sample["Normal"],
-            fontName="Helvetica",
-            fontSize=8.5,
-            leading=11.5,
-            textColor=MUTED,
+            fontSize=10.5,
+            leading=14,
+            textColor=BLUE_INK,
         ),
     }
 
@@ -463,154 +464,35 @@ def _first_page_chrome(
 def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
     audience = str(payload["audience"])
     day = str(payload["date"])
-    run = payload.get("run") or {}
-    counts = run.get("counts") or {}
     items = list(payload.get("items") or [])
-    event_ids = {
-        str(event.get("event_id"))
-        for item in items
-        for event in item.get("events", [])
-        if event.get("event_id")
-    }
-    research_sources = [
-        citation
-        for item in items
-        for citation in item.get("citations", [])
-        if citation.get("kind") != "event"
-    ]
-    left = [
-        Paragraph("FRONTIER LAB INTELLIGENCE", styles["brand"]),
+    story: list[Any] = [
+        Spacer(1, 9 * mm),
+        Paragraph('<a name="brief-index"/>FRONTIER LAB INTELLIGENCE', styles["brand"]),
         Spacer(1, 10 * mm),
-        Paragraph("DAILY<br/>INTELLIGENCE<br/>BRIEF", styles["cover_title"]),
-        Spacer(1, 7 * mm),
-        HRFlowable(width="100%", thickness=0.65, color=INK, spaceBefore=0, spaceAfter=5 * mm),
+        Paragraph("DAILY<br/>INTELLIGENCE BRIEF", styles["cover_title"]),
+        Spacer(1, 6 * mm),
         Paragraph(
             f'{_markup(_audience_label(audience))}  <font color="#5BC5F2">/</font>  {_markup(_display_day(day))}',
             styles["cover_meta"],
         ),
-    ]
-    meta_rows = [
-        ("REPORT", "DAILY BRIEF"),
-        ("AUDIENCE", _audience_label(audience)),
-        ("INSIGHTS", str(len(items))),
-        ("SOURCE EVENTS", str(len(event_ids))),
-        ("RESEARCH SOURCES", str(len(research_sources))),
-        ("RESULT", str(run.get("result_sha256") or "-")[:12].upper()),
-    ]
-    right = [
-        Table(
-            [
-                [Paragraph(_markup(label), styles["label"]), Paragraph(_markup(value), styles["cover_meta"])]
-                for label, value in meta_rows
-            ],
-            colWidths=[34 * mm, 42 * mm],
-            style=TableStyle(
-                [
-                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                    ("ALIGN", (1, 0), (1, -1), "RIGHT"),
-                    ("LINEBELOW", (0, 0), (-1, -2), 0.35, BORDER),
-                    ("TOPPADDING", (0, 0), (-1, -1), 7),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ]
-            ),
-        )
-    ]
-    story: list[Any] = [
-        Spacer(1, 9 * mm),
-        Table(
-            [[left, right]],
-            colWidths=[CONTENT_WIDTH * 0.56, CONTENT_WIDTH * 0.44],
-            style=TableStyle(
-                [
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LEFTPADDING", (0, 0), (0, 0), 0),
-                    ("RIGHTPADDING", (0, 0), (0, 0), 8 * mm),
-                    ("LEFTPADDING", (1, 0), (1, 0), 8 * mm),
-                    ("RIGHTPADDING", (1, 0), (1, 0), 0),
-                    ("LINEBEFORE", (1, 0), (1, 0), 0.45, BORDER),
-                ]
-            ),
-        ),
-        Spacer(1, 11 * mm),
+        Spacer(1, 8 * mm),
         Paragraph(
             _markup(
-                "A ranked, cited daily workbook for investment decisions."
+                "The ranked developments most likely to change today's investment work."
                 if audience == "investment"
-                else "A ranked, cited daily workbook for engineering experiments and implementation decisions."
+                else "The ranked developments most likely to change today's engineering work."
             ),
             styles["cover_lede"],
         ),
-        Spacer(1, 9 * mm),
-        Table(
-            [
-                [
-                    Paragraph("READING NOTE", styles["label"]),
-                    Paragraph(
-                        _markup(
-                            "Each Insight opens with the decision-useful analysis, then carries its "
-                            "complete linked source ledger on the following page."
-                        ),
-                        styles["body"],
-                    ),
-                ]
-            ],
-            colWidths=[32 * mm, CONTENT_WIDTH - 32 * mm],
-            style=TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, -1), SURFACE),
-                    ("BOX", (0, 0), (-1, -1), 0.45, BORDER),
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("TOPPADDING", (0, 0), (-1, -1), 10),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-                    ("LEFTPADDING", (0, 0), (0, 0), 10),
-                    ("RIGHTPADDING", (0, 0), (0, 0), 8),
-                    ("LEFTPADDING", (1, 0), (1, 0), 0),
-                    ("RIGHTPADDING", (1, 0), (1, 0), 10),
-                ]
-            ),
+        Spacer(1, 8 * mm),
+        HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=5 * mm),
+        Paragraph("Today's brief", styles["cover_section"]),
+        Spacer(1, 2.5 * mm),
+        Paragraph(
+            "Click any title to jump to its analysis. Each brief is followed by its linked sources.",
+            styles["body"],
         ),
-    ]
-    portfolio = payload.get("portfolio_reference")
-    if portfolio:
-        story.extend(
-            [
-                Spacer(1, 5 * mm),
-                Paragraph(
-                    _markup(portfolio.get("reader_note"))
-                    + " "
-                    + _link(portfolio.get("source_url"), "Portfolio source"),
-                    styles["small"],
-                ),
-            ]
-        )
-    if counts:
-        story.extend(
-            [
-                Spacer(1, 4 * mm),
-                Paragraph(
-                    _markup(
-                        f"Complete run: {counts.get('candidate_events', 0)} candidate Events, "
-                        f"{counts.get('candidate_pairs', 0)} audience pairs, "
-                        f"{counts.get('included_candidates', 0)} included candidates."
-                    ),
-                    styles["label"],
-                ),
-            ]
-        )
-    story.extend([PageBreak(), *_contents(items, styles)])
-    return story
-
-
-def _contents(items: list[dict[str, Any]], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    story: list[Any] = [
-        Spacer(1, 7 * mm),
-        Paragraph("WORKBOOK INDEX", styles["label"]),
-        Spacer(1, 3 * mm),
-        Paragraph("Today's brief", styles["title"]),
         Spacer(1, 4 * mm),
-        HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=3 * mm),
     ]
     if not items:
         story.append(
@@ -630,11 +512,11 @@ def _contents(items: list[dict[str, Any]], styles: dict[str, ParagraphStyle]) ->
     toc_rows = [
         [
             Paragraph(f'#{int(item["rank"])}', styles["toc_rank"]),
-            [
-                Paragraph(_markup(item["title"]), styles["toc_title"]),
-                Spacer(1, 1.2 * mm),
-                Paragraph(_markup(item["rank_rationale"]), styles["toc_note"]),
-            ],
+            Paragraph(
+                f'<link href="#insight-{int(item["rank"])}" color="#235165">'
+                f'{_markup(item["title"])}</link>',
+                styles["toc_title"],
+            ),
         ]
         for item in items
     ]
@@ -648,8 +530,8 @@ def _contents(items: list[dict[str, Any]], styles: dict[str, ParagraphStyle]) ->
                     ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("LINEABOVE", (0, 0), (-1, 0), 0.5, INK),
                     ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("TOPPADDING", (0, 0), (-1, -1), 7),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
                     ("LEFTPADDING", (0, 0), (-1, -1), 0),
                     ("RIGHTPADDING", (0, 0), (0, -1), 8),
                     ("RIGHTPADDING", (1, 0), (1, -1), 0),
@@ -987,7 +869,10 @@ def _insight(item: dict[str, Any], payload: dict[str, Any], styles: dict[str, Pa
             [
                 Paragraph(f'#{int(item["rank"])}', styles["rank"]),
                 [
-                    Paragraph(_markup(item.get("title")), styles["title"]),
+                    Paragraph(
+                        f'<a name="insight-{int(item["rank"])}"/>{_markup(item.get("title"))}',
+                        styles["title"],
+                    ),
                     Spacer(1, 2.3 * mm),
                     Paragraph(
                         f'{_markup(_audience_label(audience))}  <font color="#5BC5F2">/</font>  {_markup(_display_day(day))}',
