@@ -267,7 +267,11 @@ Rules:
   to their exact internal Feed Event, which owns the onward source-post link.
   Feed rank and source-role codes remain dashboard audit metadata rather than
   fixed source-ledger labels; the PDF presents the linked title and its
-  evidence role in reader language.
+  evidence role in reader language. Repeated audience/date labels, source-page
+  kickers, duplicate role explanations, and empty source-group placeholders
+  stay out of the fixed reading path. A source group spans the page when it is
+  the only populated group. Investment company scope and direction collapse to
+  one section-level disclosure when every row shares the same state.
   Every later-page header returns to the brief index. Serif display headings
   and restrained capital-blue slash markers echo the case brief's editorial
   rhythm without reproducing BIT branding, while flat rules and sans-serif body

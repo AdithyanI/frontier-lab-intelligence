@@ -39,7 +39,7 @@ from reportlab.platypus import (
 from fli.insights import editorial_runs
 
 
-REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v7"
+REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v8"
 DEFAULT_CACHE_ROOT = editorial_runs.DEFAULT_ROOT / "pdf-cache"
 PUBLIC_APP_URL = "https://frontier-lab-intelligence.adithyan.io"
 
@@ -615,7 +615,10 @@ def _investment_sections(item: dict[str, Any], styles: dict[str, ParagraphStyle]
     entities = list(analysis.get("affected_entities") or [])
     story: list[Any] = []
     if entities:
-        rows = []
+        scopes = {str(entity.get("scope") or "outside_portfolio") for entity in entities}
+        impacts = {str(entity.get("impact") or "uncertain") for entity in entities}
+        compact_shared_state = len(scopes) == 1 and len(impacts) == 1
+        rows: list[list[Any]] = []
         for entity in entities:
             impact = str(entity.get("impact") or "uncertain")
             impact_color = {
@@ -629,27 +632,40 @@ def _investment_sections(item: dict[str, Any], styles: dict[str, ParagraphStyle]
                 parent=styles["impact"],
                 textColor=impact_color,
             )
-            scope = (
-                "PORTFOLIO"
-                if entity.get("scope") == "portfolio"
-                else "OUTSIDE PORTFOLIO"
-            )
-            rows.append(
-                [
+            name = Paragraph(_markup(entity.get("name")), styles["body_strong"])
+            mechanism = Paragraph(_markup(entity.get("mechanism")), styles["small"])
+            if compact_shared_state:
+                rows.append([name, mechanism])
+            else:
+                scope = (
+                    "PORTFOLIO"
+                    if entity.get("scope") == "portfolio"
+                    else "OUTSIDE PORTFOLIO"
+                )
+                rows.append(
                     [
-                        Paragraph(_markup(entity.get("name")), styles["body_strong"]),
-                        Spacer(1, 1 * mm),
-                        Paragraph(scope, styles["label"]),
-                    ],
-                    Paragraph(_markup(impact.upper()), impact_style),
-                    Paragraph(_markup(entity.get("mechanism")), styles["small"]),
+                        [name, Spacer(1, 1 * mm), Paragraph(scope, styles["label"])],
+                        Paragraph(_markup(impact.upper()), impact_style),
+                        mechanism,
+                    ]
+                )
+        story.extend(_section_title("Company read-through", styles))
+        if compact_shared_state:
+            scope = "PORTFOLIO" if "portfolio" in scopes else "OUTSIDE PORTFOLIO"
+            impact = next(iter(impacts)).upper()
+            story.extend(
+                [
+                    Paragraph(f"{scope}  /  DIRECTION {impact}", styles["label"]),
+                    Spacer(1, 1.8 * mm),
                 ]
             )
-        story.extend(_section_title("Company read-through", styles))
+            col_widths = [35 * mm, CONTENT_WIDTH - 35 * mm]
+        else:
+            col_widths = [35 * mm, 25 * mm, CONTENT_WIDTH - 60 * mm]
         story.append(
             Table(
                 rows,
-                colWidths=[35 * mm, 25 * mm, CONTENT_WIDTH - 60 * mm],
+                colWidths=col_widths,
                 style=TableStyle(
                     [
                         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -662,7 +678,7 @@ def _investment_sections(item: dict[str, Any], styles: dict[str, ParagraphStyle]
                         ("RIGHTPADDING", (0, 0), (0, -1), 7),
                         ("LEFTPADDING", (1, 0), (-1, -1), 7),
                         ("RIGHTPADDING", (1, 0), (-1, -1), 7),
-                        ("RIGHTPADDING", (2, 0), (2, -1), 0),
+                        ("RIGHTPADDING", (-1, 0), (-1, -1), 0),
                     ]
                 ),
             )
@@ -757,7 +773,8 @@ def _source_block(
     day: str,
 ) -> list[Any]:
     if events:
-        title = str(value.get("title") or "Open Feed Event")
+        support = value.get("supports") or value.get("reason")
+        title = str(value.get("title") or support or "Feed evidence")
         event_id = str(value.get("event_id") or "")
         url = (
             f"{PUBLIC_APP_URL}/evidence/feed?"
@@ -765,7 +782,6 @@ def _source_block(
             if event_id
             else value.get("url") or value.get("source_url")
         )
-        support = value.get("supports") or value.get("reason")
     else:
         title = str(value.get("title") or "Untitled source")
         url = value.get("url")
@@ -774,15 +790,8 @@ def _source_block(
         Paragraph(_link(url, title), styles["small_link"]),
         Spacer(1, 1.2 * mm),
     ]
-    flowables.append(Paragraph(_markup(support), styles["small"]))
-    event_reason = value.get("event_reason") if events else None
-    if event_reason and _plain(event_reason) != _plain(support):
-        flowables.extend(
-            [
-                Spacer(1, 1.2 * mm),
-                Paragraph(f"Insight role: {_markup(event_reason)}", styles["small"]),
-            ]
-        )
+    if support and _plain(support) != _plain(title):
+        flowables.append(Paragraph(_markup(support), styles["small"]))
     return flowables
 
 
@@ -814,12 +823,7 @@ def _sources_section(item: dict[str, Any], styles: dict[str, ParagraphStyle]) ->
             events.append(event)
     research = [citation for citation in citations if citation.get("kind") != "event"]
     story: list[Any] = [
-        Spacer(1, 7 * mm),
-        Paragraph(
-            f'SOURCE LEDGER  <font color="#5BC5F2">/</font>  INSIGHT #{int(item["rank"])}',
-            styles["label"],
-        ),
-        Spacer(1, 3 * mm),
+        Spacer(1, 9 * mm),
         Paragraph("Evidence and sources", styles["title"]),
         Spacer(1, 3 * mm),
         Paragraph(
@@ -829,47 +833,50 @@ def _sources_section(item: dict[str, Any], styles: dict[str, ParagraphStyle]) ->
         Spacer(1, 5 * mm),
         HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=5 * mm),
     ]
-    source_rows: list[list[Any]] = [
-        [
-            Paragraph("ORIGINAL FEED", styles["label"]),
-            Paragraph("ARTIFACTS &amp; CONTEXT", styles["label"]),
-        ]
-    ]
-    event_values: list[dict[str, Any] | None] = events or [None]
-    research_values: list[dict[str, Any] | None] = research or [None]
-    for row_index, (event, source) in enumerate(zip_longest(event_values, research_values)):
-        source_rows.append(
+    day = str(item.get("day") or "")
+    line_before: list[tuple[Any, ...]] = []
+    if events and research:
+        source_rows: list[list[Any]] = [
             [
-                _source_block(
-                    event,
-                    styles,
-                    events=True,
-                    day=str(item.get("day") or ""),
-                )
-                if event
-                else (
-                    [Paragraph("No sources in this group.", styles["small"])]
-                    if not events and row_index == 0
-                    else []
-                ),
-                _source_block(
-                    source,
-                    styles,
-                    events=False,
-                    day=str(item.get("day") or ""),
-                )
-                if source
-                else (
-                    [Paragraph("No sources in this group.", styles["small"])]
-                    if not research and row_index == 0
-                    else []
-                ),
+                Paragraph("FEED EVIDENCE", styles["label"]),
+                Paragraph("DOCUMENTS &amp; CONTEXT", styles["label"]),
             ]
-        )
+        ]
+        for event, source in zip_longest(events, research):
+            source_rows.append(
+                [
+                    _source_block(event, styles, events=True, day=day) if event else [],
+                    _source_block(source, styles, events=False, day=day) if source else [],
+                ]
+            )
+        col_widths = [CONTENT_WIDTH * 0.43, CONTENT_WIDTH * 0.57]
+        line_before = [("LINEBEFORE", (1, 0), (1, -1), 0.35, BORDER)]
+    else:
+        values = events or research
+        source_rows = [
+            [
+                Paragraph(
+                    "FEED EVIDENCE" if events else "DOCUMENTS &amp; CONTEXT",
+                    styles["label"],
+                )
+            ]
+        ]
+        for value in values:
+            source_rows.append(
+                [
+                    _source_block(
+                        value,
+                        styles,
+                        events=bool(events),
+                        day=day,
+                    )
+                ]
+            )
+        col_widths = [CONTENT_WIDTH]
     story.append(
         Table(
             source_rows,
-            colWidths=[CONTENT_WIDTH * 0.43, CONTENT_WIDTH * 0.57],
+            colWidths=col_widths,
             repeatRows=1,
             splitByRow=1,
             style=TableStyle(
@@ -877,7 +884,7 @@ def _sources_section(item: dict[str, Any], styles: dict[str, ParagraphStyle]) ->
                     ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("LINEABOVE", (0, 0), (-1, -1), 0.35, BORDER),
                     ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("LINEBEFORE", (1, 0), (1, -1), 0.35, BORDER),
+                    *line_before,
                     ("BACKGROUND", (0, 0), (-1, 0), SURFACE),
                     ("TOPPADDING", (0, 0), (-1, -1), 8),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
@@ -892,9 +899,7 @@ def _sources_section(item: dict[str, Any], styles: dict[str, ParagraphStyle]) ->
     return story
 
 
-def _insight(item: dict[str, Any], payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    day = str(payload["date"])
-    audience = str(payload["audience"])
+def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
     header = Table(
         [
             [
@@ -903,11 +908,6 @@ def _insight(item: dict[str, Any], payload: dict[str, Any], styles: dict[str, Pa
                     Paragraph(
                         f'<a name="insight-{int(item["rank"])}"/>{_markup(item.get("title"))}',
                         styles["title"],
-                    ),
-                    Spacer(1, 2.3 * mm),
-                    Paragraph(
-                        f'{_markup(_audience_label(audience))}  <font color="#5BC5F2">/</font>  {_markup(_display_day(day))}',
-                        styles["label"],
                     ),
                 ],
             ]
@@ -974,7 +974,7 @@ def build_report_pdf(payload: dict[str, Any]) -> bytes:
     items = list(payload.get("items") or [])
     for item in items:
         story.append(PageBreak())
-        story.extend(_insight(item, payload, styles))
+        story.extend(_insight(item, styles))
 
     doc.build(
         story,

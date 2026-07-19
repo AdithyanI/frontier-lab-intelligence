@@ -230,6 +230,11 @@ def test_report_renders_complete_audience_workbook(audience, expected, unexpecte
     assert "Highest decision consequence with primary-source evidence." not in text
     assert "FEED #7" not in text
     assert " / PRIMARY" not in text
+    assert "SOURCE LEDGER" not in text
+    assert "Insight role:" not in text
+    assert "No sources in this group." not in text
+    assert "FEED EVIDENCE" in text
+    assert "DOCUMENTS & CONTEXT" in text
     assert [len(destinations) for destinations in _pdf_internal_destinations(pdf_bytes)] == [
         1,
         1,
