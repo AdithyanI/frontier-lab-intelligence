@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
@@ -54,6 +54,15 @@ export default function HowItWorks() {
   const feedPath = useAuditDatePath('/evidence/feed')
   const artifactsPath = useAuditDatePath('/evidence/artifacts')
   const activeStage = useActiveStage()
+
+  /* Land on the visual: the heading stays above, but the page opens with
+     the funnel filling the viewport. */
+  const canvasRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (window.location.hash) return
+    const el = canvasRef.current
+    if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY)
+  }, [])
 
   const beats: (Beat & { to: string })[] = [
     {
@@ -163,7 +172,7 @@ export default function HowItWorks() {
         </p>
       </header>
 
-      <div className="how-canvas">
+      <div className="how-canvas" ref={canvasRef}>
         <figure className="how-funnel" aria-hidden="false">
           <div className="how-funnel-sticky">
             <SignalFunnel active={activeStage} />
@@ -210,6 +219,107 @@ export default function HowItWorks() {
           </div>
         </div>
       </div>
+
+      <section className="how-read" aria-labelledby="how-read-title">
+        <header className="how-read-head">
+          <p className="how-beat-kicker mono">In writing</p>
+          <h3 id="how-read-title">The same funnel, in words</h3>
+          <p>
+            The figure above is the whole system. Here is the same story in
+            words, one stage at a time, with the design choice behind each.
+          </p>
+        </header>
+
+        <article className="how-read-block">
+          <h4><span className="mono">1</span> Choose: start with people, not keywords</h4>
+          <p>
+            Keyword alerts fail because the words arrive after the signal. The
+            people come first. So the system starts with a screened Registry of
+            frontier labs and the researchers inside them, not a list of search
+            terms.
+          </p>
+          <p>
+            The cohort also extends itself. Who these researchers follow
+            reveals the layer below the obvious names, and that is often where
+            the earliest signal lives. Every admission keeps its provenance,
+            and a rejected identity disappears from every view without
+            rewriting history.
+          </p>
+        </article>
+
+        <article className="how-read-block">
+          <h4><span className="mono">2</span> Collect: capture everything, lose nothing</h4>
+          <p>
+            Everything the cohort publishes is stored raw and immutable before
+            anything interprets it. Replies, quotes, and threads are grouped
+            into exact Events using only relationships the platform itself
+            declares. There is no topic clustering at this stage, because
+            clustering is already an opinion, and this stage is not allowed to
+            have one.
+          </p>
+          <p>
+            When an author links a paper, a repo, or a model card, the system
+            fetches that document and freezes it. Every later stage cites the
+            frozen copy, not a live page that can change under you.
+          </p>
+        </article>
+
+        <article className="how-read-block">
+          <h4><span className="mono">3</span> Rank: order the day, do not judge it</h4>
+          <p>
+            A single day holds more Events than anyone reads. A transparent
+            attention score orders them: who wrote it, who inside the cohort
+            amplified it, how the public reacted. The formula is versioned and
+            every input is inspectable per Event.
+          </p>
+          <p>
+            The score deliberately stops there. It decides where to look
+            first. It never decides what is true or what matters, because
+            attention is evidence of noise as often as of signal.
+          </p>
+        </article>
+
+        <article className="how-read-block">
+          <h4><span className="mono">4</span> Judge: two independent questions</h4>
+          <p>
+            Every Event is asked two separate questions. Does this change an
+            investment position? Should an engineering team act on it? The
+            judgments never share an answer. An Event can matter to both
+            audiences, to one, or to neither, and each verdict keeps its
+            reasoning attached.
+          </p>
+          <p>
+            Only fresh first-party evidence counts here. A week-old post
+            cannot be rescued by someone else reacting to it today.
+          </p>
+        </article>
+
+        <article className="how-read-block">
+          <h4><span className="mono">5</span> Publish: surface it, or say why not</h4>
+          <p>
+            An editorial agent reads everything that survived and must do one
+            of two things with each candidate: turn it into an Insight or
+            explicitly decline it. Nothing is dropped silently. That forced
+            disposition is what keeps the funnel honest.
+          </p>
+          <p>
+            Every claim in the final brief cites its source, and citations to
+            documents are checked against the frozen text before the brief is
+            accepted. The order of the brief is a written rationale, not a
+            synthetic score.
+          </p>
+        </article>
+
+        <article className="how-read-block">
+          <h4><span className="mono">&rarr;</span> The result: nothing on trust</h4>
+          <p>
+            Two briefs a day, one for investment and one for AI engineering.
+            Each Insight traces back through the funnel: to the exact Event,
+            to the frozen document, to the original post. You never have to
+            take the system&apos;s word for anything it says.
+          </p>
+        </article>
+      </section>
 
       <section className="how-map" aria-labelledby="how-map-title">
         <header className="how-map-head">
