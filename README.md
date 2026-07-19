@@ -4,35 +4,33 @@ Frontier Lab Intelligence turns public output from frontier AI labs and key
 people into a cited daily brief for investors and AI engineers. I built it for
 the BIT Capital AI Engineer case study.
 
-## Try the reviewer demo
+## Open the live app
+
+[Open Frontier Lab Intelligence](https://frontier-lab-intelligence.adithyan.io/)
+
+The hosted application is the best way to experience the project. Start in
+[Insights](https://frontier-lab-intelligence.adithyan.io/insights) to read the
+audience-specific daily briefs, then move back through Evidence and Network to
+inspect why each item surfaced.
+
+The live [Architecture view](https://frontier-lab-intelligence.adithyan.io/system/architecture)
+explains the data model, account intake, evidence-to-insight pipeline, ranking
+methods, and deployed stack through the product's own visual diagrams.
+
+## Run it locally
 
 ```bash
 ./demo.command
 ```
 
-On macOS, you can also double-click `demo.command`. The first run needs Python
-3.13 and an internet connection. It downloads a 357 MB verified snapshot,
-installs the local app, opens `http://127.0.0.1:8797`, and serves it in
-read-only mode. It does not need API keys or provider credentials.
+The local client is the reproducibility path. On macOS, you can also
+double-click `demo.command`. The first run needs Python 3.13 and an internet
+connection. It downloads a 357 MB verified snapshot, installs the app, opens
+`http://127.0.0.1:8797`, and serves the frozen data in read-only mode. It does
+not need API keys or provider credentials.
 
 If the local app is already running on that port, the launcher simply opens it
 and leaves its data and process unchanged.
-
-The demo is local by design. The current product includes operator actions, so
-I did not expose the writable server as a public website just to make the
-submission easier to open.
-
-## What the system does
-
-```mermaid
-flowchart LR
-    R["Registry<br/>labs and people"] --> N["Trusted network<br/>who the cohort follows"]
-    N --> F["Evidence Feed<br/>normalized public output"]
-    F --> E["Events and artifacts<br/>exact source lineage"]
-    E --> A["Audience routing<br/>engineering and investment"]
-    A --> I["Daily intelligence<br/>ranked and cited briefs"]
-    I --> D["Web, PDF, Slack, and email"]
-```
 
 The product keeps the evidence trail visible at every step. A reviewer can move
 from a final Insight to its source Event, original post, artifact, routing
@@ -48,8 +46,8 @@ reason, and frozen run provenance.
   Investment relevance.
 - Daily editorial runs produce ranked, cited web briefs and deterministic PDF
   reports.
-- Real Slack and email delivery adapters have been validated, but they are
-  disabled in the reviewer demo.
+- Real Slack and email delivery adapters have been validated. They remain
+  operator actions rather than part of the passive reviewer walkthrough.
 
 The final five submission Insights and their selection rationale are recorded
 in the [submission proof selection](docs/projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).

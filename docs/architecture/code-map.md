@@ -101,6 +101,8 @@ removing or archiving local data.
 - Evaluate attention formulas offline: `fli attention-score`
 - Run the product: `fli web` or the always-on service at
   `http://127.0.0.1:8797`
+- Open the hosted product:
+  `https://frontier-lab-intelligence.adithyan.io/`
 - Restore and run the frozen reviewer release: `./demo.command`
 
 All repeated LLM work uses the shared LiteLLM path and the exact contracts in

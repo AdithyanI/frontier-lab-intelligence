@@ -3,7 +3,14 @@
 How to inspect the current case-study system. This guide describes implemented
 behavior and the intentionally bounded release.
 
-## Quick start
+## Open the live product
+
+[Open Frontier Lab Intelligence](https://frontier-lab-intelligence.adithyan.io/).
+This is the primary reviewer experience and requires no local setup. The live
+[Architecture view](https://frontier-lab-intelligence.adithyan.io/system/architecture)
+explains the system through the product's own diagrams.
+
+## Reproduce it locally
 
 ```bash
 ./demo.command
@@ -35,8 +42,8 @@ exact object, checksum, included data, and clean-checkout proof.
    citations retain their frozen text provenance. Candidate-level Suppressed
    and All views remain an audit fallback, not the final daily product. The
    top-right actions download the selected audience PDF or show delivery
-   options. Slack and email were validated in the operator environment, but
-   both sends are disabled in this reviewer release.
+   options. Slack and email are real operator actions. Inspect the delivery
+   flow, but do not confirm a send during passive review.
 5. **Ingestion (10%)** and **extraction (10%)** — inspect Artifacts for
    canonical source links disclosed by first-party Event evidence, retrieval
    state, normalized text snapshots, and the exact originating Event. X is the
@@ -78,4 +85,5 @@ exact object, checksum, included data, and clean-checkout proof.
   a shipped citation.
 - The final five Insights are human-adjudicated and locked, but the external
   rubric-mapped write-up and final delivery review remain. Nothing is submitted
-  to BIT by the demo. Registry mutation and Slack/email delivery are disabled.
+  to BIT by opening the application. Registry intake and delivery are operator
+  actions rather than passive reviewer steps.

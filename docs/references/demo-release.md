@@ -1,9 +1,10 @@
-# Reviewer demo release
+# Local reviewer release
 
 The repository stays small while a clean checkout remains reproducible. Git
 owns the code, documentation, compact manifests, and `data/fli.db`. An
-immutable object-storage release owns the larger read models needed by the web
-demo.
+immutable object-storage release owns the larger read models needed for local
+reproduction. The primary reviewer experience is the public hosted application
+at [frontier-lab-intelligence.adithyan.io](https://frontier-lab-intelligence.adithyan.io/).
 
 ## One-command contract
 
@@ -73,9 +74,9 @@ boundary. Delivery status also ignores local credentials, so a reviewer cannot
 accidentally expose a destination or send a message. Read endpoints and local
 PDF generation remain available.
 
-This is also the required boundary for any future hosted demo. Do not expose
-the normal writable app publicly without authentication, rate limiting, and a
-deployment-owned data lifecycle.
+This read-only boundary belongs to the frozen local reproduction path. The
+hosted application is a separate deployment of this repository's normal
+operator runtime.
 
 ## Rebuilding the release
 

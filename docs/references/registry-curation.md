@@ -355,6 +355,6 @@ Exact-handle lookup happens before client construction. An already-active
 profile therefore returns its existing entity with zero provider and model
 calls, preventing duplicates and spend. `entity_registry_intake_audit` records
 the requested mode, human reason, outcome, evaluator reasons, model contract,
-usage, reported cost, failure, and timestamps. The current case-study demo has
-no feature-level password; the route is intended to sit behind the same
-whole-site access boundary as the rest of the product when that is enabled.
+usage, reported cost, failure, and timestamps. The route shares the product's
+whole-site deployment boundary; the current hosted case-study application is
+public and has no feature-level password.
