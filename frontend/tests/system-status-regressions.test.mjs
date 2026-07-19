@@ -4,6 +4,7 @@ import { readSource, readStyles } from './source-files.mjs'
 
 const app = readSource('app/App.tsx')
 const layout = readSource('features/system/SystemLayout.tsx')
+const howItWorks = readSource('features/system/HowItWorksPage.tsx')
 const status = readSource('features/system/StatusPage.tsx')
 const styles = readStyles()
 
@@ -19,6 +20,18 @@ test('How it works is a top-level page and System keeps the technical views', ()
   assert.doesNotMatch(app, /<NavLink to="\/architecture">Architecture<\/NavLink>/)
   assert.match(layout, /<NavLink to="\/system\/architecture">Architecture<\/NavLink>[\s\S]*?<NavLink to="\/system\/status">Status<\/NavLink>/)
   assert.doesNotMatch(layout, /how-it-works/)
+})
+
+test('How it works describes the implemented evidence and operator boundaries', () => {
+  assert.match(howItWorks, /complete observed X days/)
+  assert.match(howItWorks, /successful text snapshots are frozen/)
+  assert.match(howItWorks, /Retrieval gaps remain visible/)
+  assert.match(howItWorks, /Today an operator starts the dated run/)
+  assert.match(howItWorks, /published SQLite models produced by the same pipeline/)
+  assert.doesNotMatch(howItWorks, /window\.scrollTo/)
+  assert.doesNotMatch(howItWorks, /Everything the cohort publishes/)
+  assert.doesNotMatch(howItWorks, /every paper, repo, or model card they cite is fetched and frozen/)
+  assert.doesNotMatch(howItWorks, /same database as the pipeline/)
 })
 
 test('Status derives a checkpoint from existing read APIs without claiming host health', () => {

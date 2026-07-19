@@ -8,117 +8,176 @@ const SAND = '#f4f1ea'
 const MONO = "'IBM Plex Mono', monospace"
 const UI = "'Inter', system-ui, sans-serif"
 
+/* One shared card so every diagram uses the same geometry: kicker at the
+   top, title in the middle, one detail line below. */
+function Card({
+  x,
+  y,
+  w,
+  h = 104,
+  kicker,
+  title,
+  detail,
+  tone = 'plain',
+}: {
+  x: number
+  y: number
+  w: number
+  h?: number
+  kicker?: string
+  title: string
+  detail?: string
+  tone?: 'plain' | 'dark' | 'sand' | 'surface'
+}) {
+  const dark = tone === 'dark'
+  const fill = dark ? INK : tone === 'sand' ? SAND : tone === 'surface' ? SURFACE : '#fff'
+  const midY = kicker ? y + h / 2 + 10 : y + h / 2 - 4
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} fill={fill} stroke={dark ? INK : BLUE_MID} strokeWidth="1.2" />
+      {kicker && (
+        <text x={x + 18} y={y + 28} fontFamily={MONO} fontSize="9.5" fill={dark ? BLUE : BLUE_INK} letterSpacing="0.08em">
+          {kicker}
+        </text>
+      )}
+      <text x={x + 18} y={midY} fontFamily={UI} fontSize={title.length > 16 ? 15.5 : 17} fontWeight="600" fill={dark ? '#fff' : INK}>
+        {title}
+      </text>
+      {detail && (
+        <text x={x + 18} y={midY + 25} fontFamily={UI} fontSize="12" fill={dark ? '#fff' : MUTED} opacity={dark ? 0.78 : 1}>
+          {detail}
+        </text>
+      )}
+    </g>
+  )
+}
+
+function FlowArrow({ x1, y1, x2, y2, marker }: { x1: number; y1: number; x2: number; y2: number; marker: string }) {
+  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={BLUE_MID} strokeWidth="1.5" markerEnd={`url(#${marker})`} />
+}
+
+function ArrowDefs({ id }: { id: string }) {
+  return (
+    <defs>
+      <marker id={id} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+      </marker>
+      <marker id={`${id}-muted`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L8,4 L0,8 z" fill={MUTED} />
+      </marker>
+    </defs>
+  )
+}
+
+/* ---- 1 · System at a glance ---- */
+
 function SystemOverview() {
   const stages = [
-    {
-      x: 30,
-      width: 170,
-      label: 'SOURCE',
-      title: 'Public sources',
-      detail: 'X · primary documents',
-      tone: 'plain',
-    },
-    {
-      x: 225,
-      width: 170,
-      label: 'PROCESS',
-      title: 'Python',
-      detail: 'collect · group · rank',
-      tone: 'dark',
-    },
-    {
-      x: 420,
-      width: 170,
-      label: 'STORE',
-      title: 'SQLite',
-      detail: 'raw · Registry · derived',
-      tone: 'surface',
-    },
-    {
-      x: 615,
-      width: 205,
-      label: 'SERVE',
-      title: 'FastAPI + React',
-      detail: 'typed API · built SPA',
-      tone: 'plain',
-    },
-    {
-      x: 845,
-      width: 205,
-      label: 'PUBLIC',
-      title: 'Cloudflare Tunnel',
-      detail: 'public reviewer URL',
-      tone: 'plain',
-    },
+    { x: 30, w: 178, kicker: 'SOURCE', title: 'Public sources', detail: 'X · primary documents', tone: 'plain' as const },
+    { x: 236, w: 178, kicker: 'PROCESS', title: 'Python pipeline', detail: 'collect · group · rank', tone: 'dark' as const },
+    { x: 442, w: 178, kicker: 'STORE', title: 'SQLite', detail: 'raw · Registry · derived', tone: 'surface' as const },
+    { x: 648, w: 188, kicker: 'SERVE', title: 'FastAPI + React', detail: 'typed API · built SPA', tone: 'plain' as const },
+    { x: 864, w: 186, kicker: 'PUBLIC', title: 'Cloudflare Tunnel', detail: 'public reviewer URL', tone: 'plain' as const },
   ]
-
   return (
     <svg
-      viewBox="0 0 1080 308"
+      viewBox="0 0 1080 300"
       role="img"
-      aria-label="Current deployed architecture. Public X evidence and linked documents enter a Python pipeline, which preserves raw, canonical, and derived data in SQLite. The pipeline calls models through LiteLLM and stores structured judgments. FastAPI serves the typed API and built React application on the Mac mini, and Cloudflare Tunnel exposes that service at the public reviewer URL."
+      aria-label="Deployed architecture. Public X evidence and linked documents enter a Python pipeline, which preserves raw, canonical, and derived data in SQLite. The pipeline calls models through LiteLLM. FastAPI serves the typed API and built React application, and Cloudflare Tunnel exposes the public reviewer URL."
     >
-      <defs>
-        <marker id="overview-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
-        </marker>
-      </defs>
+      <ArrowDefs id="overview-arrow" />
+      {stages.map((s) => (
+        <Card key={s.kicker} x={s.x} y={34} w={s.w} kicker={s.kicker} title={s.title} detail={s.detail} tone={s.tone} />
+      ))}
+      <FlowArrow x1={210} y1={86} x2={232} y2={86} marker="overview-arrow" />
+      <FlowArrow x1={416} y1={86} x2={438} y2={86} marker="overview-arrow" />
+      <FlowArrow x1={622} y1={86} x2={644} y2={86} marker="overview-arrow" />
+      <FlowArrow x1={838} y1={86} x2={860} y2={86} marker="overview-arrow" />
 
-      {stages.map((stage) => {
-        const dark = stage.tone === 'dark'
-        const fill = dark ? INK : stage.tone === 'surface' ? SURFACE : '#fff'
-        return (
-          <g key={stage.label}>
-            <rect
-              x={stage.x}
-              y="30"
-              width={stage.width}
-              height="112"
-              fill={fill}
-              stroke={dark ? INK : BLUE_MID}
-              strokeWidth="1.2"
-            />
-            <text x={stage.x + 16} y="57" fontFamily={MONO} fontSize="9.5" fill={dark ? BLUE : BLUE_INK} letterSpacing="0.08em">{stage.label}</text>
-            <text x={stage.x + 16} y="91" fontFamily={UI} fontSize="18" fontWeight="600" fill={dark ? '#fff' : INK}>{stage.title}</text>
-            <text x={stage.x + 16} y="119" fontFamily={UI} fontSize="12" fill={dark ? '#fff' : MUTED} opacity={dark ? 0.78 : 1}>{stage.detail}</text>
-          </g>
-        )
-      })}
+      {/* the model boundary hangs off the pipeline */}
+      <path d="M325 138 V172" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
+      <path d="M531 180 V146" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
+      <rect x="236" y="180" width="384" height="62" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="254" y="205" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
+      <text x="254" y="230" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>LiteLLM → models</text>
+      <text x="424" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>judgments · usage · cost</text>
 
-      <line x1="200" y1="86" x2="219" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
-      <line x1="395" y1="86" x2="414" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
-      <line x1="590" y1="86" x2="609" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
-      <line x1="820" y1="86" x2="839" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
-
-      <path d="M310 142 V176" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
-      <rect x="225" y="184" width="365" height="68" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
-      <text x="243" y="209" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
-      <text x="243" y="237" fontFamily={UI} fontSize="16" fontWeight="600" fill={INK}>LiteLLM → models</text>
-      <text x="399" y="237" fontFamily={UI} fontSize="11.5" fill={MUTED}>judgments · usage · cost</text>
-      <path d="M505 184 V150" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
-
-      <line x1="30" y1="278" x2="1050" y2="278" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="30" y="299" fontFamily={UI} fontSize="11.5" fill={MUTED}>Deterministic first. Model judgment stays auditable. The same code restores a frozen local reviewer release.</text>
+      <line x1="30" y1="270" x2="1050" y2="270" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="30" y="292" fontFamily={UI} fontSize="11.5" fill={MUTED}>
+        Deterministic first. Every model judgment stays auditable. The same code restores a frozen local reviewer release.
+      </text>
     </svg>
   )
 }
 
-function Arrow({ x1, x2, y = 128 }: { x1: number; x2: number; y?: number }) {
+/* ---- 2 · Models per task ---- */
+
+const MODEL_TASKS = [
+  {
+    task: 'Entity classification',
+    where: 'Registry intake',
+    model: 'gpt-5.6-luna',
+    effort: 'medium',
+    why: 'Bounded structured decision with an evaluated classifier contract. The efficient model matched the larger one here.',
+  },
+  {
+    task: 'Registry admission + identity research',
+    where: 'Registry intake',
+    model: 'gpt-5.6-luna',
+    effort: 'high',
+    why: 'Grounded multi-source identity resolution needs more checking than plain classification, so effort rises before model size does.',
+  },
+  {
+    task: 'Audience routing',
+    where: 'Judge stage',
+    model: 'gpt-5.4-mini',
+    effort: 'high',
+    why: 'Evaluated on a 900-decision run with zero failures. A higher effort tier changed no decisions and used 5.4× the tokens.',
+  },
+  {
+    task: 'Insight generation',
+    where: 'Publish stage',
+    model: 'gpt-5.6-terra',
+    effort: 'high',
+    why: 'Quality-first by choice: the brief is the product. Stable per-audience cache keys keep the repeated context cheap.',
+  },
+  {
+    task: 'Web-grounded relevance audit',
+    where: 'Evaluation',
+    model: 'gpt-5.6-terra',
+    effort: 'high',
+    why: 'Open-web research and synthesis is the one boundary where the broadest model is kept deliberately.',
+  },
+]
+
+function ModelTable() {
   return (
-    <line
-      x1={x1}
-      y1={y}
-      x2={x2}
-      y2={y}
-      stroke={BLUE_MID}
-      strokeWidth="1.5"
-      markerEnd="url(#flow-arrow)"
-    />
+    <div className="model-table" role="table" aria-label="Model selection per task">
+      <div className="model-table-row model-table-head" role="row">
+        <span role="columnheader">Task</span>
+        <span role="columnheader">Model · effort</span>
+        <span role="columnheader">Why this one</span>
+      </div>
+      {MODEL_TASKS.map((row) => (
+        <div className="model-table-row" role="row" key={row.task}>
+          <span role="cell" className="model-table-task">
+            <strong>{row.task}</strong>
+            <em className="mono">{row.where}</em>
+          </span>
+          <span role="cell" className="mono model-table-model">
+            {row.model}
+            <em>{row.effort}</em>
+          </span>
+          <span role="cell" className="model-table-why">{row.why}</span>
+        </div>
+      ))}
+    </div>
   )
 }
 
-function RosterGlyph({ x, y, dark }: { x: number; y: number; dark?: boolean }) {
-  const bar = dark ? '#fff' : MUTED
+/* ---- 3 · The pipeline ---- */
+
+function RosterGlyph({ x, y }: { x: number; y: number }) {
   const rows = [
     { w: 66, org: false },
     { w: 46, org: true },
@@ -133,7 +192,7 @@ function RosterGlyph({ x, y, dark }: { x: number; y: number; dark?: boolean }) {
           ) : (
             <circle cx={x + 4} cy={y + i * 15} r={4} fill={BLUE} />
           )}
-          <rect x={x + 16} y={y + i * 15 - 1.5} width={row.w} height={3} fill={bar} opacity={0.5} />
+          <rect x={x + 16} y={y + i * 15 - 1.5} width={row.w} height={3} fill="#fff" opacity={0.5} />
         </g>
       ))}
     </g>
@@ -153,29 +212,16 @@ function DaysGlyph({ x, y }: { x: number; y: number }) {
 }
 
 function EventGlyph({ x, y }: { x: number; y: number }) {
-  const kids = [y - 18, y, y + 18]
+  const kids = [y - 16, y, y + 16]
   return (
     <g>
-      <rect x={x} y={y - 11} width={32} height={22} fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
+      <rect x={x} y={y - 10} width={30} height={20} fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
       {kids.map((ky) => (
         <g key={ky}>
-          <line x1={x + 32} y1={y} x2={x + 74} y2={ky} stroke={MUTED} strokeWidth="1" opacity="0.5" />
-          <rect x={x + 74} y={ky - 6} width={26} height={12} fill="#fff" stroke={MUTED} strokeWidth="1" opacity="0.75" />
+          <line x1={x + 30} y1={y} x2={x + 68} y2={ky} stroke={MUTED} strokeWidth="1" opacity="0.5" />
+          <rect x={x + 68} y={ky - 5.5} width={24} height={11} fill="#fff" stroke={MUTED} strokeWidth="1" opacity="0.75" />
         </g>
       ))}
-    </g>
-  )
-}
-
-function AudienceRoutingGlyph({ x, y }: { x: number; y: number }) {
-  return (
-    <g>
-      <line x1={x} y1={y} x2={x + 38} y2={y} stroke={BLUE_MID} strokeWidth="1.3" />
-      <rect x={x + 38} y={y - 18} width={32} height={18} fill="none" stroke={BLUE} strokeWidth="1" />
-      <rect x={x + 76} y={y - 18} width={42} height={18} fill="none" stroke={BLUE} strokeWidth="1" />
-      <text x={x + 54} y={y - 5} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill="#fff">AI</text>
-      <text x={x + 97} y={y - 5} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill="#fff">INV</text>
-      <text x={x + 38} y={y + 20} fontFamily={MONO} fontSize="8" fill={MUTED}>OR NEITHER</text>
     </g>
   )
 }
@@ -183,13 +229,24 @@ function AudienceRoutingGlyph({ x, y }: { x: number; y: number }) {
 function ArtifactGlyph({ x, y }: { x: number; y: number }) {
   return (
     <g>
-      <rect x={x} y={y - 18} width={38} height={42} fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
-      <rect x={x + 50} y={y - 12} width={38} height={36} fill="#fff" stroke={MUTED} strokeWidth="1" />
-      <line x1={x + 8} y1={y - 6} x2={x + 30} y2={y - 6} stroke={BLUE_MID} strokeWidth="2" />
-      <line x1={x + 8} y1={y + 2} x2={x + 26} y2={y + 2} stroke={MUTED} strokeWidth="1" />
-      <line x1={x + 58} y1={y} x2={x + 80} y2={y} stroke={MUTED} strokeWidth="1" />
-      <line x1={x + 58} y1={y + 8} x2={x + 76} y2={y + 8} stroke={MUTED} strokeWidth="1" />
-      <text x={x + 44} y={y + 33} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED}>+ ARTIFACT</text>
+      <rect x={x} y={y - 16} width={34} height={38} fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
+      <rect x={x + 46} y={y - 10} width={34} height={32} fill="#fff" stroke={MUTED} strokeWidth="1" />
+      <line x1={x + 7} y1={y - 5} x2={x + 27} y2={y - 5} stroke={BLUE_MID} strokeWidth="2" />
+      <line x1={x + 7} y1={y + 3} x2={x + 23} y2={y + 3} stroke={MUTED} strokeWidth="1" />
+      <line x1={x + 53} y1={y + 1} x2={x + 73} y2={y + 1} stroke={MUTED} strokeWidth="1" />
+      <line x1={x + 53} y1={y + 9} x2={x + 69} y2={y + 9} stroke={MUTED} strokeWidth="1" />
+    </g>
+  )
+}
+
+function AudienceGlyph({ x, y }: { x: number; y: number }) {
+  return (
+    <g>
+      <rect x={x} y={y - 12} width={40} height={20} fill="none" stroke={BLUE} strokeWidth="1" />
+      <rect x={x + 48} y={y - 12} width={40} height={20} fill="none" stroke={BLUE} strokeWidth="1" />
+      <text x={x + 20} y={y + 2} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill="#fff">INV</text>
+      <text x={x + 68} y={y + 2} textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill="#fff">ENG</text>
+      <text x={x} y={y + 26} fontFamily={MONO} fontSize="8" fill={BLUE} opacity="0.85">BOTH · ONE · NEITHER</text>
     </g>
   )
 }
@@ -197,158 +254,93 @@ function ArtifactGlyph({ x, y }: { x: number; y: number }) {
 function EvidenceInputMap() {
   const stages = [
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
-    { x: 234, kicker: 'SOURCE', title: 'X posts + threads', glyph: 'days' },
-    { x: 440, kicker: 'STRUCTURE', title: 'Exact Events', glyph: 'event' },
-    { x: 646, kicker: 'ENRICH', title: 'Source artifacts', glyph: 'artifact' },
+    { x: 234, kicker: 'SOURCE', title: 'X posts + threads', glyph: 'days', dark: false },
+    { x: 440, kicker: 'STRUCTURE', title: 'Exact Events', glyph: 'event', dark: false },
+    { x: 646, kicker: 'ENRICH', title: 'Source artifacts', glyph: 'artifact', dark: false },
     { x: 852, kicker: 'ROUTE', title: 'Audience relevance', glyph: 'audience', dark: true },
   ]
-
   return (
     <svg
-      viewBox="0 0 1080 224"
+      viewBox="0 0 1080 226"
       role="img"
-      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact Events disclose source artifacts before the complete evidence packet is routed independently for AI Engineering and Investment."
+      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact Events disclose source artifacts before the complete evidence packet is routed independently for Investment and AI Engineering."
     >
-      <defs>
-        <marker id="flow-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
-        </marker>
-      </defs>
-
+      <ArrowDefs id="flow-arrow" />
       <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">EVIDENCE INPUT · INSPECTABLE BEFORE JUDGMENT</text>
       {stages.map((stage) => (
         <g key={stage.title}>
-          <rect
-            x={stage.x}
-            y="66"
-            width="178"
-            height="124"
-            fill={stage.dark ? INK : '#fff'}
-            stroke={stage.dark ? INK : BLUE_MID}
-            strokeWidth="1.2"
-          />
-          <text x={stage.x + 18} y="92" fontFamily={MONO} fontSize="10" fill={stage.dark ? BLUE : BLUE_INK} letterSpacing="0.08em">{stage.kicker}</text>
-          <text x={stage.x + 18} y="122" fontFamily={UI} fontSize={stage.title.length > 16 ? 15.5 : 18} fontWeight="600" fill={stage.dark ? '#fff' : INK}>{stage.title}</text>
-          {stage.glyph === 'roster' && <RosterGlyph x={stage.x + 18} y={144} dark />}
+          <rect x={stage.x} y="60" width="178" height="132" fill={stage.dark ? INK : '#fff'} stroke={stage.dark ? INK : BLUE_MID} strokeWidth="1.2" />
+          <text x={stage.x + 18} y="86" fontFamily={MONO} fontSize="9.5" fill={stage.dark ? BLUE : BLUE_INK} letterSpacing="0.08em">{stage.kicker}</text>
+          <text x={stage.x + 18} y="116" fontFamily={UI} fontSize={stage.title.length > 15 ? 15 : 17} fontWeight="600" fill={stage.dark ? '#fff' : INK}>{stage.title}</text>
+          {stage.glyph === 'roster' && <RosterGlyph x={stage.x + 18} y={144} />}
           {stage.glyph === 'days' && <DaysGlyph x={stage.x + 18} y={158} />}
           {stage.glyph === 'event' && <EventGlyph x={stage.x + 18} y={158} />}
-          {stage.glyph === 'artifact' && <ArtifactGlyph x={stage.x + 18} y={152} />}
-          {stage.glyph === 'audience' && <AudienceRoutingGlyph x={stage.x + 18} y={158} />}
+          {stage.glyph === 'artifact' && <ArtifactGlyph x={stage.x + 18} y={154} />}
+          {stage.glyph === 'audience' && <AudienceGlyph x={stage.x + 18} y={150} />}
         </g>
       ))}
-      <Arrow x1={206} x2={228} />
-      <Arrow x1={412} x2={434} />
-      <Arrow x1={618} x2={640} />
-      <Arrow x1={824} x2={846} />
+      <FlowArrow x1={206} y1={126} x2={230} y2={126} marker="flow-arrow" />
+      <FlowArrow x1={412} y1={126} x2={436} y2={126} marker="flow-arrow" />
+      <FlowArrow x1={618} y1={126} x2={642} y2={126} marker="flow-arrow" />
+      <FlowArrow x1={824} y1={126} x2={848} y2={126} marker="flow-arrow" />
     </svg>
   )
 }
 
 function InsightGenerationMap() {
+  /* Symmetric fork: shared core on top, one identical lane per audience
+     below it. Only the prompt differs between the lanes. */
+  const lane = (x0: number, label: string) => (
+    <g key={label}>
+      <text x={x0} y="212" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">{label}</text>
+      <rect x={x0} y="224" width="150" height="72" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
+      <text x={x0 + 14} y="254" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
+      <text x={x0 + 14} y="274" fontFamily={MONO} fontSize="8.5" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
+      <FlowArrow x1={x0 + 150} y1={260} x2={x0 + 166} y2={260} marker="insight-arrow" />
+      <rect x={x0 + 170} y="224" width="130" height="72" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
+      <text x={x0 + 184} y="254" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
+      <text x={x0 + 184} y="274" fontFamily={MONO} fontSize="8.5" fill={MUTED}>INDEPENDENT AUDIT</text>
+      <FlowArrow x1={x0 + 300} y1={260} x2={x0 + 316} y2={260} marker="insight-arrow" />
+      <rect x={x0 + 320} y="224" width="150" height="72" fill={INK} />
+      <text x={x0 + 334} y="254" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
+      <text x={x0 + 334} y="274" fontFamily={MONO} fontSize="8.5" fill={BLUE}>SEPARATE VIEW</text>
+    </g>
+  )
+
   return (
     <svg
-      viewBox="0 0 1080 360"
+      viewBox="0 0 1080 364"
       role="img"
-      aria-label="Insight generation path. Accepted evidence enters one shared citation-bound insight engine. Investment and AI Engineering then use separate audience prompts and editorial judgment, independent publication audits, and separate daily insight views."
+      aria-label="Insight generation path. Accepted evidence enters one shared citation-bound insight engine, which forks into two identical lanes: Investment and AI Engineering each use their own audience prompt and editorial judgment, an independent publication audit, and a separate daily insights view."
     >
-      <defs>
-        <marker id="insight-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
-        </marker>
-      </defs>
-
+      <ArrowDefs id="insight-arrow" />
       <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">FROM ACCEPTED EVIDENCE TO DAILY INSIGHTS</text>
 
+      <Card x={28} y={56} w={230} h={92} kicker="INPUT" title="Accepted evidence" tone="sand" />
+      <FlowArrow x1={258} y1={102} x2={282} y2={102} marker="insight-arrow" />
       <g>
-        <rect x="28" y="56" width="220" height="100" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
-        <text x="46" y="82" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">INPUT</text>
-        <text x="46" y="109" fontFamily={UI} fontSize="18" fontWeight="600" fill={INK}>Accepted evidence</text>
-        <text x="46" y="134" fontFamily={MONO} fontSize="9" fill={MUTED}>OPTIONAL ARTIFACT CONTEXT</text>
+        <rect x="288" y="56" width="470" height="92" fill={INK} />
+        <text x="308" y="84" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
+        <text x="308" y="112" fontFamily={UI} fontSize="17" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
+        <text x="308" y="134" fontFamily={MONO} fontSize="8.5" fill="#fff" opacity="0.65">FROZEN EVIDENCE · EXACT PASSAGES · SHARED PROVENANCE</text>
       </g>
 
-      <line x1="248" y1="106" x2="298" y2="106" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#insight-arrow)" />
+      {/* the fork: two symmetric drops from the core underside to each lane */}
+      <path d="M 420 148 V 178 H 263 V 216" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
+      <path d="M 626 148 V 178 H 817 V 216" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
 
-      <g>
-        <rect x="306" y="56" width="448" height="100" fill={INK} />
-        <text x="326" y="82" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
-        <text x="326" y="109" fontFamily={UI} fontSize="18" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
-        <text x="326" y="134" fontFamily={MONO} fontSize="8.5" fill="#fff" opacity="0.65">FROZEN EVIDENCE · EXACT PASSAGES · SHARED PROVENANCE</text>
-      </g>
+      {lane(28, 'INVESTMENT')}
+      {lane(582, 'AI ENGINEERING')}
 
-      <path d="M754 106 H786 V192 H240 V210" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
-      <path d="M786 192 V210" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
-
-      <g>
-        <text x="28" y="204" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">INVESTMENT</text>
-        <rect x="28" y="216" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="42" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
-        <text x="42" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
-        <line x1="176" y1="251" x2="188" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
-        <rect x="194" y="216" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="208" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
-        <text x="208" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
-        <line x1="322" y1="251" x2="334" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
-        <rect x="340" y="216" width="160" height="70" fill={INK} />
-        <text x="354" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
-        <text x="354" y="263" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
-
-        <text x="552" y="204" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">AI ENGINEERING</text>
-        <rect x="552" y="216" width="148" height="70" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="566" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
-        <text x="566" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
-        <line x1="700" y1="251" x2="712" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
-        <rect x="718" y="216" width="128" height="70" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
-        <text x="732" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
-        <text x="732" y="263" fontFamily={MONO} fontSize="9" fill={MUTED}>INDEPENDENT AUDIT</text>
-        <line x1="846" y1="251" x2="858" y2="251" stroke={BLUE_MID} strokeWidth="1.2" markerEnd="url(#insight-arrow)" />
-        <rect x="864" y="216" width="188" height="70" fill={INK} />
-        <text x="878" y="243" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
-        <text x="878" y="263" fontFamily={MONO} fontSize="9" fill={BLUE}>SEPARATE VIEW</text>
-      </g>
-
-      <line x1="28" y1="322" x2="1052" y2="322" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
-      <text x="28" y="343" fontFamily={UI} fontSize="12" fill={MUTED}>Evidence and citation rules stay shared. Audience prompts, judgment, audits, and published views do not.</text>
+      <line x1="28" y1="328" x2="1052" y2="328" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
+      <text x="28" y="350" fontFamily={UI} fontSize="12" fill={MUTED}>
+        Evidence and citation rules stay shared. Audience prompts, judgment, audits, and published views do not.
+      </text>
     </svg>
   )
 }
 
-function AccountIntake() {
-  const stages = [
-    { x: 34, title: 'X handle', detail: 'one supplied account', tone: 'dark' },
-    { x: 272, title: 'Profile gate', detail: 'public · collectable', tone: 'plain' },
-    { x: 510, title: 'Resolve identity', detail: 'person · organization', tone: 'plain' },
-    { x: 748, title: 'Registry', detail: 'tracked from now on', tone: 'dark' },
-  ]
-  return (
-    <svg viewBox="0 0 1080 306" role="img" aria-label="A supplied X handle passes a profile gate and identity resolution before entering the Registry; either checkpoint can reject it, and the rejection reason is kept">
-      <defs>
-        <marker id="intake-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
-        </marker>
-        <marker id="intake-arrow-muted" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={MUTED} />
-        </marker>
-      </defs>
-      <text x="34" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHEN AN X ACCOUNT IS SUPPLIED</text>
-      {stages.map((stage, index) => (
-        <g key={stage.title}>
-          <rect x={stage.x} y="70" width="190" height="100" fill={stage.tone === 'dark' ? INK : index === 1 ? SAND : '#fff'} stroke={stage.tone === 'dark' || index === 1 ? 'none' : BLUE_MID} strokeWidth="1.2" />
-          <text x={stage.x + 18} y="111" fontFamily={UI} fontSize="17" fontWeight="600" fill={stage.tone === 'dark' ? '#fff' : INK}>{stage.title}</text>
-          <text x={stage.x + 18} y="139" fontFamily={UI} fontSize="12.5" fill={stage.tone === 'dark' ? '#fff' : MUTED} opacity={stage.tone === 'dark' ? 0.78 : 1}>{stage.detail}</text>
-          {index < stages.length - 1 && <line x1={stage.x + 190} y1="120" x2={stages[index + 1].x - 8} y2="120" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#intake-arrow)" />}
-        </g>
-      ))}
-      {/* reject branch: either checkpoint can drop the account */}
-      <g opacity="0.75">
-        <line x1="367" y1="170" x2="367" y2="216" stroke={MUTED} strokeWidth="1.2" strokeDasharray="4 4" markerEnd="url(#intake-arrow-muted)" />
-        <line x1="605" y1="170" x2="605" y2="216" stroke={MUTED} strokeWidth="1.2" strokeDasharray="4 4" markerEnd="url(#intake-arrow-muted)" />
-        <rect x="272" y="222" width="428" height="52" fill="#fff" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" />
-        <text x="486" y="248" textAnchor="middle" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Rejected</text>
-        <text x="486" y="265" textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={MUTED} letterSpacing="0.06em">REASON KEPT · EVERY EXIT STAYS AUDITABLE</text>
-      </g>
-    </svg>
-  )
-}
+/* ---- 4 · The data model ---- */
 
 function CurrentDataModel() {
   const channels = [
@@ -372,22 +364,13 @@ function CurrentDataModel() {
       role="img"
       aria-label="Current data model. One real-world entity can resolve to several channels. X supplies the scheduled daily evidence. GitHub and paper identities support entity resolution and may enter evidence when a first-party X post discloses a linked primary document."
     >
-      <defs>
-        <marker id="data-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
-        </marker>
-        <marker id="data-arrow-muted" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={MUTED} />
-        </marker>
-      </defs>
+      <ArrowDefs id="data-arrow" />
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE IDENTITY · MANY CHANNELS · ONE SCHEDULED SOURCE</text>
 
-      {/* the real-world identity */}
       <rect x="430" y="58" width="220" height="72" fill={INK} />
       <text x="450" y="88" fontFamily={MONO} fontSize="10" fill={BLUE}>ENTITY</text>
       <text x="450" y="116" fontFamily={UI} fontSize="17" fontWeight="600" fill="#fff">Andrej Karpathy</text>
 
-      {/* one identity fans out to platform-specific channels */}
       {channels.map((c) => (
         <line
           key={`fan-${c.plane}`}
@@ -403,7 +386,6 @@ function CurrentDataModel() {
         />
       ))}
 
-      {/* channels (where) */}
       {channels.map((c) => (
         <g key={`chan-${c.plane}`} opacity={c.daily ? 1 : 0.72}>
           <rect
@@ -423,18 +405,8 @@ function CurrentDataModel() {
         </g>
       ))}
 
-      {/* every channel plugs into the same evidence stream */}
       {channels.filter((channel) => channel.daily).map((c) => (
-        <line
-          key={`stream-${c.plane}`}
-          x1={c.cx}
-          y1={CH_TOP + CH_H}
-          x2={c.cx}
-          y2="306"
-          stroke={BLUE_MID}
-          strokeWidth="1.6"
-          markerEnd="url(#data-arrow)"
-        />
+        <line key={`stream-${c.plane}`} x1={c.cx} y1={CH_TOP + CH_H} x2={c.cx} y2="306" stroke={BLUE_MID} strokeWidth="1.6" markerEnd="url(#data-arrow)" />
       ))}
 
       <rect x="90" y="312" width="900" height="110" fill={SURFACE} />
@@ -460,6 +432,38 @@ function CurrentDataModel() {
   )
 }
 
+function AccountIntake() {
+  const stages = [
+    { x: 34, title: 'X handle', detail: 'one supplied account', tone: 'dark' as const },
+    { x: 272, title: 'Profile gate', detail: 'public · collectable', tone: 'sand' as const },
+    { x: 510, title: 'Resolve identity', detail: 'person · organization', tone: 'plain' as const },
+    { x: 748, title: 'Registry', detail: 'tracked from now on', tone: 'dark' as const },
+  ]
+  return (
+    <svg viewBox="0 0 1080 306" role="img" aria-label="A supplied X handle passes a profile gate and identity resolution before entering the Registry; either checkpoint can reject it, and the rejection reason is kept">
+      <ArrowDefs id="intake-arrow" />
+      <text x="34" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHEN AN X ACCOUNT IS SUPPLIED</text>
+      {stages.map((stage, index) => (
+        <g key={stage.title}>
+          <Card x={stage.x} y={70} w={190} h={100} title={stage.title} detail={stage.detail} tone={stage.tone} />
+          {index < stages.length - 1 && (
+            <FlowArrow x1={stage.x + 190} y1={120} x2={stages[index + 1].x - 8} y2={120} marker="intake-arrow" />
+          )}
+        </g>
+      ))}
+      <g opacity="0.75">
+        <line x1="367" y1="170" x2="367" y2="216" stroke={MUTED} strokeWidth="1.2" strokeDasharray="4 4" markerEnd="url(#intake-arrow-muted)" />
+        <line x1="605" y1="170" x2="605" y2="216" stroke={MUTED} strokeWidth="1.2" strokeDasharray="4 4" markerEnd="url(#intake-arrow-muted)" />
+        <rect x="272" y="222" width="428" height="52" fill="#fff" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" />
+        <text x="486" y="248" textAnchor="middle" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Rejected</text>
+        <text x="486" y="265" textAnchor="middle" fontFamily={MONO} fontSize="10.5" fill={MUTED} letterSpacing="0.06em">REASON KEPT · EVERY EXIT STAYS AUDITABLE</text>
+      </g>
+    </svg>
+  )
+}
+
+/* ---- 5 · The numbers ---- */
+
 function NetworkRankFigure() {
   const leftFollowerField = Array.from({ length: 15 }, (_, index) => ({
     x: 82 + (index % 3) * 24,
@@ -478,46 +482,21 @@ function NetworkRankFigure() {
       role="img"
       aria-label="X follow graph and network support, observed as a slow-moving snapshot: Account A has fewer public followers but five screened Registry followers, while Account B has many public followers but only one screened Registry follower. The five screened signals count, public audience size does not."
     >
-      <defs>
-        <marker id="rank-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
-        </marker>
-      </defs>
+      <ArrowDefs id="rank-arrow" />
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">X FOLLOW GRAPH · WHY AN ACCOUNT RANKS HIGHER</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">SLOW-MOVING SNAPSHOT</text>
       <line x1="540" y1="60" x2="540" y2="276" stroke={MUTED} strokeWidth="1" opacity="0.22" />
 
-      {/* Account A: the same follower field, with five screened nodes. */}
       <text x="70" y="72" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">FEWER FOLLOWERS OVERALL</text>
       <text x="70" y="90" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.05em">BUT 5 SCREENED FOLLOWERS</text>
       {leftFollowerField.map((node, index) => (
         leftScreenedIndices.has(index) ? null : (
-          <line
-            key={`a-public-line-${index}`}
-            x1={node.x + 6}
-            y1={node.y}
-            x2="286"
-            y2="168"
-            stroke={MUTED}
-            strokeWidth="0.9"
-            strokeDasharray="2 5"
-            opacity="0.2"
-          />
+          <line key={`a-public-line-${index}`} x1={node.x + 6} y1={node.y} x2="286" y2="168" stroke={MUTED} strokeWidth="0.9" strokeDasharray="2 5" opacity="0.2" />
         )
       ))}
       {leftFollowerField.map((node, index) => (
         leftScreenedIndices.has(index) ? (
-          <line
-            key={`a-screened-line-${index}`}
-            x1={node.x + 7}
-            y1={node.y}
-            x2="286"
-            y2="168"
-            stroke={BLUE_MID}
-            strokeWidth="1.2"
-            opacity="0.72"
-            markerEnd="url(#rank-arrow)"
-          />
+          <line key={`a-screened-line-${index}`} x1={node.x + 7} y1={node.y} x2="286" y2="168" stroke={BLUE_MID} strokeWidth="1.2" opacity="0.72" markerEnd="url(#rank-arrow)" />
         ) : null
       ))}
       {leftFollowerField.map((node, index) => (
@@ -540,22 +519,11 @@ function NetworkRankFigure() {
       ))}
       <text x="296" y="264" fontFamily={UI} fontSize="12.5" fontWeight="600" fill={INK}>5 of the voter set → higher support</text>
 
-      {/* Account B: the same follower field, with only one screened node. */}
       <text x="582" y="72" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">MANY FOLLOWERS OVERALL</text>
       <text x="582" y="90" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.05em">BUT ONLY 1 SCREENED FOLLOWER</text>
       {rightFollowerField.map((node, index) => (
         index === rightScreenedIndex ? null : (
-          <line
-            key={`crowd-line-${index}`}
-            x1={node.x + 6}
-            y1={node.y}
-            x2="794"
-            y2="168"
-            stroke={MUTED}
-            strokeWidth="0.9"
-            strokeDasharray="2 5"
-            opacity="0.2"
-          />
+          <line key={`crowd-line-${index}`} x1={node.x + 6} y1={node.y} x2="794" y2="168" stroke={MUTED} strokeWidth="0.9" strokeDasharray="2 5" opacity="0.2" />
         )
       ))}
       {rightFollowerField.map((node, index) => (
@@ -596,7 +564,6 @@ function NetworkRankFigure() {
         />
       ))}
       <text x="804" y="264" fontFamily={UI} fontSize="12.5" fill={INK}>1 of the voter set → lower support</text>
-
     </svg>
   )
 }
@@ -651,56 +618,58 @@ export default function Architecture() {
   return (
     <section className="system-view arch-page" aria-labelledby="architecture-title">
       <h2 className="system-view-title" id="architecture-title">Architecture</h2>
-      <p className="page-sub">A technical map of the current implementation, its judgment boundaries, and the meaning of each number.</p>
+      <p className="page-sub">A technical map of the current implementation: the stack, the models, the pipeline, and the meaning of each number.</p>
 
       <nav className="ruled-nav arch-chapters" aria-label="Architecture chapters">
-        <a href="#data-model">Data model</a>
-        <a href="#account-intake">Account intake</a>
-        <a href="#system-today">Pipeline</a>
-        <a href="#ranking-methods">Numbers</a>
         <a href="#overview">Overview</a>
+        <a href="#models">Models</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#data-model">Data model</a>
+        <a href="#ranking-methods">Numbers</a>
       </nav>
 
-      <section className="arch-section arch-section--lead" id="data-model">
+      <section className="arch-section arch-section--lead" id="overview">
         <div className="arch-section-head">
-          <h2 className="arch-h">The data model</h2>
-          <p className="arch-p">The Registry resolves several channels to one identity. X supplies scheduled daily evidence; linked primary documents enter through Artifacts.</p>
+          <h2 className="arch-h">System at a glance</h2>
+          <p className="arch-p">The deployed stack in one view, from public evidence to the hosted reviewer interface. Every section below drills into one part of this picture.</p>
         </div>
-        <div className="arch-canvas"><CurrentDataModel /></div>
-        <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
+        <div className="arch-canvas"><SystemOverview /></div>
       </section>
 
-      <section className="arch-section" id="account-intake">
+      <section className="arch-section" id="models">
         <div className="arch-section-head">
-          <h2 className="arch-h">How an account enters the Registry</h2>
-          <p className="arch-p">A short, auditable path turns a supplied X handle into a resolved identity or a recorded rejection.</p>
+          <h2 className="arch-h">One model per task, chosen by evidence</h2>
+          <p className="arch-p">Every call goes through one LiteLLM boundary that records the model, tokens, cache reads, and cost per run. Defaults come from comparing effort tiers on real workloads, not from picking the biggest model.</p>
         </div>
-        <div className="arch-canvas"><AccountIntake /></div>
+        <div className="arch-canvas arch-canvas--methods"><ModelTable /></div>
+        <p className="arch-note">Measured, not estimated: the current insight batch made 947 surface-or-suppress decisions for $15.51, with 1.76M tokens served from prompt cache. Each immutable run keeps its own exact model, prompt version, and cost telemetry, so changing a default never relabels old results.</p>
       </section>
 
-      <section className="arch-section" id="system-today">
+      <section className="arch-section" id="pipeline">
         <div className="arch-section-head">
           <h2 className="arch-h">The evidence-to-insight path</h2>
-          <p className="arch-p">One evidence core preserves exact provenance. Investment and AI Engineering then use separate prompts, editorial judgment, publication audits, and daily views.</p>
+          <p className="arch-p">The funnel from How it works, as actual judgment boundaries. One evidence core preserves exact provenance; Investment and AI Engineering then run as two identical, fully separate lanes.</p>
         </div>
         <div className="arch-canvas"><EvidenceInputMap /></div>
         <div className="arch-canvas arch-canvas--sub"><InsightGenerationMap /></div>
       </section>
 
+      <section className="arch-section" id="data-model">
+        <div className="arch-section-head">
+          <h2 className="arch-h">The data model</h2>
+          <p className="arch-p">The Registry resolves several channels to one identity. X supplies scheduled daily evidence; linked primary documents enter through Artifacts. A supplied account passes an auditable gate before it is tracked.</p>
+        </div>
+        <div className="arch-canvas"><CurrentDataModel /></div>
+        <div className="arch-canvas arch-canvas--sub"><AccountIntake /></div>
+      </section>
+
       <section className="arch-section arch-section--methods" id="ranking-methods">
         <div className="arch-section-head">
           <h2 className="arch-h">The numbers answer different questions</h2>
-          <p className="arch-p">Reach, network support, discovery position, and the daily score answer different questions so none can masquerade as quality.</p>
+          <p className="arch-p">Reach, network support, and the daily score answer different questions so none can masquerade as quality.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><RankingMethods /></div>
-      </section>
-
-      <section className="arch-section" id="overview">
-        <div className="arch-section-head">
-          <h2 className="arch-h">System at a glance</h2>
-          <p className="arch-p">The deployed stack in one view, from public evidence to the hosted reviewer interface.</p>
-        </div>
-        <div className="arch-canvas"><SystemOverview /></div>
+        <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
       </section>
     </section>
   )

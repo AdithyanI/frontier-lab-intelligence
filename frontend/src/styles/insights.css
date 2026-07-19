@@ -517,6 +517,7 @@
 .insight-body {
   min-width: 0;
   padding: 30px 0 38px 32px;
+  container-type: inline-size;
 }
 
 .insight-decision-mark {
@@ -896,6 +897,18 @@
 .editorial-decision-grid .editorial-text-list li::before,
 .editorial-validation-grid .editorial-text-list li::before {
   top: 11px;
+}
+
+@container (max-width: 760px) {
+  .editorial-validation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .editorial-validation-grid > div + div {
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
 }
 
 .editorial-sources {

@@ -9,7 +9,7 @@ the BIT Capital AI Engineer case study.
 [Open Frontier Lab Intelligence](https://frontier-lab-intelligence.adithyan.io/)
 
 The hosted application is the best way to experience the project. Start in
-[How it works](https://frontier-lab-intelligence.adithyan.io/system/how-it-works)
+[How it works](https://frontier-lab-intelligence.adithyan.io/how)
 for a five-step walkthrough of the assignment and its working proof. Then open
 [Insights](https://frontier-lab-intelligence.adithyan.io/insights) to read the
 audience-specific daily briefs and move back through Evidence and Network to

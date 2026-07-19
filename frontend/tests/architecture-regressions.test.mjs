@@ -15,19 +15,19 @@ test('Architecture chapters are separated by one full-width structural rule', ()
   assert.match(appStyles, /\.arch-section:not\(\.arch-section--lead\) \{[\s\S]*?margin-top: 32px;[\s\S]*?padding-top: 32px;[\s\S]*?border-top: 1px solid var\(--border-strong\);/)
 })
 
-test('Architecture ends with the current end-to-end stack', () => {
+test('Architecture starts with the current end-to-end stack', () => {
   assert.match(architecture, /function SystemOverview/)
   assert.match(architecture, /Public sources/)
-  assert.match(architecture, /title: 'Python'/)
+  assert.match(architecture, /title: 'Python pipeline'/)
   assert.match(architecture, /title: 'SQLite'/)
   assert.match(architecture, /LiteLLM → models/)
   assert.match(architecture, /title: 'FastAPI \+ React'/)
   assert.match(architecture, /Cloudflare Tunnel/)
   assert.match(architecture, /public reviewer URL/)
-  assert.match(architecture, /Deterministic first\. Model judgment stays auditable\./)
+  assert.match(architecture, /Deterministic first\. Every model judgment stays auditable\./)
   assert.match(architecture, /System at a glance/)
-  assert.ok(architecture.indexOf('id="overview"') > architecture.indexOf('id="ranking-methods"'))
-  assert.ok(architecture.indexOf('href="#overview"') > architecture.indexOf('href="#ranking-methods"'))
+  assert.ok(architecture.indexOf('id="overview"') < architecture.indexOf('id="data-model"'))
+  assert.ok(architecture.indexOf('href="#overview"') < architecture.indexOf('href="#data-model"'))
 })
 
 test('Architecture maps one evidence core into two independently audited audience views', () => {
@@ -35,11 +35,22 @@ test('Architecture maps one evidence core into two independently audited audienc
   assert.match(architecture, /function InsightGenerationMap/)
   assert.match(architecture, /FROM ACCEPTED EVIDENCE TO DAILY INSIGHTS/)
   assert.match(architecture, /Citation-bound insight engine/)
-  assert.match(architecture, />INVESTMENT</)
-  assert.match(architecture, />AI ENGINEERING</)
-  assert.equal((architecture.match(/INDEPENDENT AUDIT/g) ?? []).length, 2)
-  assert.equal((architecture.match(/SEPARATE VIEW/g) ?? []).length, 2)
+  assert.match(architecture, /lane\(28, 'INVESTMENT'\)/)
+  assert.match(architecture, /lane\(582, 'AI ENGINEERING'\)/)
+  assert.equal((architecture.match(/INDEPENDENT AUDIT/g) ?? []).length, 1)
+  assert.equal((architecture.match(/SEPARATE VIEW/g) ?? []).length, 1)
   assert.match(architecture, /Audience prompts, judgment, audits, and published views do not/)
+})
+
+test('Architecture exposes the evaluated model choice for each judgment task', () => {
+  assert.match(architecture, /function ModelTable/)
+  assert.match(architecture, /Entity classification/)
+  assert.match(architecture, /Audience routing/)
+  assert.match(architecture, /Insight generation/)
+  assert.match(architecture, /model: 'gpt-5\.6-luna'/)
+  assert.match(architecture, /model: 'gpt-5\.4-mini'/)
+  assert.match(architecture, /model: 'gpt-5\.6-terra'/)
+  assert.match(architecture, /947 surface-or-suppress decisions for \$15\.51/)
 })
 
 test('Architecture does not publish stale proof counts or describe audience delivery as future', () => {

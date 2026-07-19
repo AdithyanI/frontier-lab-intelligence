@@ -7,7 +7,7 @@ behavior and the intentionally bounded release.
 
 [Open Frontier Lab Intelligence](https://frontier-lab-intelligence.adithyan.io/).
 This is the primary reviewer experience and requires no local setup. The live
-[How it works](https://frontier-lab-intelligence.adithyan.io/system/how-it-works)
+[How it works](https://frontier-lab-intelligence.adithyan.io/how)
 view maps the assignment to a five-step inspection path. The
 [Architecture view](https://frontier-lab-intelligence.adithyan.io/system/architecture)
 provides the deeper technical map.
@@ -51,9 +51,9 @@ exact object, checksum, included data, and clean-checkout proof.
    state, normalized text snapshots, and the exact originating Event. X is the
    implemented discovery source; artifacts add papers, repositories, articles,
    documents, and videos without pretending they are independent discovery.
-6. **Web interface (5%)** — use System → How it works for the complete reviewer
-   path, System → Architecture for the actual dependency order, and System →
-   Status for the checkpoint composed from live product APIs. There is
+6. **Web interface (5%)** — use How it works for the complete reviewer path,
+   System → Architecture for the actual dependency order, and System → Status
+   for the checkpoint composed from live product APIs. There is
    deliberately no second static backend status model.
 
 ## Evidence to check

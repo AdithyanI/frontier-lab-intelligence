@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
@@ -55,15 +55,6 @@ export default function HowItWorks() {
   const artifactsPath = useAuditDatePath('/evidence/artifacts')
   const activeStage = useActiveStage()
 
-  /* Land on the visual: the heading stays above, but the page opens with
-     the funnel filling the viewport. */
-  const canvasRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (window.location.hash) return
-    const el = canvasRef.current
-    if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY)
-  }, [])
-
   const beats: (Beat & { to: string })[] = [
     {
       id: 'watch',
@@ -77,7 +68,7 @@ export default function HowItWorks() {
       id: 'collect',
       step: '2',
       title: 'Collect',
-      text: 'Capture what the cohort publishes, with nothing lost. Replies, quotes, and threads are grouped into exact Events, and every paper, repo, or model card they cite is fetched and frozen.',
+      text: 'Capture complete observed X days for the screened cohort. Replies, quotes, and threads are grouped into exact Events. Linked papers, repos, and model cards enter a separate artifact catalogue, and successful text snapshots are frozen.',
       to: feedPath,
       linkLabel: 'See the evidence',
     },
@@ -101,7 +92,7 @@ export default function HowItWorks() {
       id: 'publish',
       step: '5',
       title: 'Publish',
-      text: 'An editorial agent reviews everything that survived and must surface or explicitly suppress each candidate. What remains becomes two daily briefs, and every claim in them cites its source.',
+      text: 'An editorial agent reviews everything that survived and must surface or explicitly suppress each candidate. What remains becomes two audience-specific briefs, and every claim in them cites its source.',
       to: insightsPath,
       linkLabel: 'Read the brief',
     },
@@ -132,14 +123,14 @@ export default function HowItWorks() {
     {
       weight: '15%',
       name: 'Actionable delivery',
-      text: 'One daily brief per audience, investment and AI engineering, and every claim in them cites its source.',
+      text: 'One brief per audience for each completed editorial day, investment and AI engineering, and every claim in them cites its source.',
       to: insightsPath,
       linkLabel: 'Insights',
     },
     {
       weight: '10%',
       name: 'Ingestion pipeline',
-      text: 'The cohort\u2019s output is captured losslessly, and every cited paper, repo, or model card is fetched and frozen.',
+      text: 'Completed observed X days are preserved before interpretation. Linked primary documents are catalogued, and successful normalized text snapshots are frozen with retrieval gaps visible.',
       to: artifactsPath,
       linkLabel: 'Artifacts',
     },
@@ -153,7 +144,7 @@ export default function HowItWorks() {
     {
       weight: '5%',
       name: 'Web interface',
-      text: 'You are in it. Everything shown here is the live product reading from the same database as the pipeline.',
+      text: 'You are in it. The live product reads the published SQLite models produced by the same pipeline.',
       to: '/system/status',
       linkLabel: 'Checkpoint',
     },
@@ -166,13 +157,13 @@ export default function HowItWorks() {
           How the signal is found
         </h1>
         <p>
-          Frontier labs publish constantly, and almost all of it is noise. The
-          system is one funnel: each stage removes what does not matter, until
-          only a cited brief for investors and one for AI engineers remain.
+          Frontier labs publish constantly. The system narrows that output
+          through one inspectable funnel until only a cited brief for investors
+          and one for AI engineers remain.
         </p>
       </header>
 
-      <div className="how-canvas" ref={canvasRef}>
+      <div className="how-canvas">
         <figure className="how-funnel" aria-hidden="false">
           <div className="how-funnel-sticky">
             <SignalFunnel active={activeStage} />
@@ -248,19 +239,19 @@ export default function HowItWorks() {
         </article>
 
         <article className="how-read-block">
-          <h4><span className="mono">2</span> Collect: capture everything, lose nothing</h4>
+          <h4><span className="mono">2</span> Collect: preserve before interpreting</h4>
           <p>
-            Everything the cohort publishes is stored raw and immutable before
-            anything interprets it. Replies, quotes, and threads are grouped
-            into exact Events using only relationships the platform itself
-            declares. There is no topic clustering at this stage, because
+            For each completed observed UTC day, the cohort&rsquo;s captured X
+            output is stored before interpretation. Replies, quotes, and threads
+            are grouped into exact Events using only relationships the platform
+            itself declares. There is no topic clustering at this stage because
             clustering is already an opinion, and this stage is not allowed to
             have one.
           </p>
           <p>
-            When an author links a paper, a repo, or a model card, the system
-            fetches that document and freezes it. Every later stage cites the
-            frozen copy, not a live page that can change under you.
+            Each linked paper, repo, or model card is catalogued. When retrieval
+            succeeds, the normalized text is frozen for later citation checks.
+            Retrieval gaps remain visible instead of being treated as evidence.
           </p>
         </article>
 
@@ -308,15 +299,20 @@ export default function HowItWorks() {
             accepted. The order of the brief is a written rationale, not a
             synthetic score.
           </p>
+          <p>
+            Today an operator starts the dated run. Its stages resume from
+            checkpoints, and delivery remains an explicit action.
+          </p>
         </article>
 
         <article className="how-read-block">
           <h4><span className="mono">&rarr;</span> The result: nothing on trust</h4>
           <p>
-            Two briefs a day, one for investment and one for AI engineering.
-            Each Insight traces back through the funnel: to the exact Event,
-            to the frozen document, to the original post. You never have to
-            take the system&apos;s word for anything it says.
+            Each completed editorial day can publish one brief for investment
+            and one for AI engineering. Every Insight traces back through the
+            funnel to the exact Event, the available frozen document, and the
+            original post. You never have to take the system&apos;s word for
+            anything it says.
           </p>
         </article>
       </section>

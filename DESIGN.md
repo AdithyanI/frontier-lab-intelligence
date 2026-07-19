@@ -84,17 +84,17 @@ Rules:
 
 - App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
   beneath. No sidebar — pages own their full width. Show only working routes;
-  unavailable future destinations do not occupy the navigation. The five
-  top-level workspaces are Insights, Network, Evidence, BIT Lens, and System.
-  Insights is the first navigation item and the default landing route because
-  the audience-ready brief is the clearest statement of product value.
+  unavailable future destinations do not occupy the navigation. The six
+  top-level destinations are Insights, How it works, Network, Evidence, BIT
+  Lens, and System. Insights is the first navigation item and the default
+  landing route because the audience-ready brief is the clearest statement of
+  product value. How it works is the reviewer walkthrough that connects the
+  assignment to the live product.
   BIT Lens holds the public client context used to translate frontier evidence
   into fund-specific research questions. It is one detailed reading page, not
   another dashboard or a set of subviews, and remains separate from generated
-  daily Insights. System groups three supporting views without adding more
-  top-level destinations: **How it works** is the default reviewer walkthrough,
-  **Architecture** is the technical map, and **Status** is the live published
-  checkpoint.
+  daily Insights. System groups two technical views: **Architecture** is the
+  current implementation map, and **Status** is the live published checkpoint.
 - Registry and Ranking share one top-level **Network** destination because they
   are two views of the same source system. Ranking is the first and default
   subview because it is the clearest demonstration of network discovery;

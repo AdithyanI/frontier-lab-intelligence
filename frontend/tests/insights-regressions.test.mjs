@@ -240,6 +240,11 @@ test('Insights keeps honest loading, error, and thin-filter states', () => {
   assert.match(insightSource, /aria-busy="true"/)
 })
 
+test('Investment validation columns respond to the Insight body, not the viewport', () => {
+  assert.match(appStyles, /\.insight-body \{[\s\S]*?container-type: inline-size;/)
+  assert.match(appStyles, /@container \(max-width: 760px\) \{[\s\S]*?\.editorial-validation-grid \{[\s\S]*?grid-template-columns: 1fr;/)
+})
+
 test('Insights retries failed date and brief requests without reloading the page', () => {
   assert.match(insightSource, /const \[datesRetryKey, setDatesRetryKey\] = useState\(0\)/)
   assert.match(insightSource, /const \[dataRetryKey, setDataRetryKey\] = useState\(0\)/)

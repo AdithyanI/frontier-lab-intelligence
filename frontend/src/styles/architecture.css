@@ -49,6 +49,77 @@
 .arch-canvas--methods { background: #fff; }
 .arch-canvas--sub { margin-top: 20px; }
 
+.arch-note {
+  max-width: 78ch;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+/* ---- model selection per task ---- */
+
+.model-table-row {
+  display: grid;
+  grid-template-columns: 280px 210px minmax(0, 1fr);
+  gap: 0 28px;
+  align-items: baseline;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.model-table-row:first-child { border-top: 0; }
+
+.model-table-head {
+  padding-top: 14px;
+  padding-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+}
+
+.model-table-task strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.model-table-task em {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.model-table-model {
+  color: var(--blue-ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.model-table-model em {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-style: normal;
+}
+
+.model-table-why {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
 .method-row {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr) 200px;
@@ -140,4 +211,7 @@
 @media (max-width: 1000px) {
   .method-row { grid-template-columns: 190px minmax(0, 1fr); }
   .method-limit { grid-column: 2; border-top: 1px solid var(--border); }
+  .model-table-row { grid-template-columns: minmax(0, 1fr) 170px; }
+  .model-table-why { grid-column: 1 / -1; margin-top: 8px; }
+  .model-table-head span:last-child { display: none; }
 }
