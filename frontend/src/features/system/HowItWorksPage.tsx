@@ -219,8 +219,8 @@ export default function HowItWorks() {
             The figure above is the whole system. Here is the same story in
             words, one stage at a time, with the design choice behind each and
             the numbers from one real day: 17 July 2026, when 4,537 captured
-            posts became 1,287 Events, 56 routed candidates, and 10 cited
-            Insights.
+            posts became 1,287 Events, 56 candidates worth judging, and 10
+            cited Insights.
           </p>
         </header>
 
@@ -282,12 +282,12 @@ export default function HowItWorks() {
           </p>
           <p>
             The weights are not hidden in code; the API response declares
-            them. Version attention-v1.1 weighs cohort amplification at 55%,
-            originator support at 25%, and public engagement at 20% as a
-            tie-breaker. The score is labeled an ordering
-            aid in the response itself, and no downstream judgment consumes
-            it. A simple formula honestly bounded beats a sophisticated one
-            pretending to measure importance.
+            them. Version attention-v1.1 weighs amplification by Registry
+            members at 55%, the standing of the author at 25%, and public
+            engagement at 20% as a tie-breaker. The score is labeled an
+            ordering aid in the response itself, and no downstream judgment
+            consumes it. A simple formula honestly bounded beats a
+            sophisticated one pretending to measure importance.
           </p>
         </article>
 
@@ -325,10 +325,11 @@ export default function HowItWorks() {
             synthetic score.
           </p>
           <p>
-            On 17 July the editorial run recorded 84 audience decisions across
-            the 56 routed Events and kept 10 Insights, 7 for engineering and 3
-            for investment. The other decisions are written declines, each
-            with its reason attached.
+            On 17 July, 56 Events reached the editorial run, each carrying a
+            decision for every audience it qualified for: 84 decisions in all.
+            The run kept 10 Insights, 7 for engineering and 3 for investment.
+            The other decisions are written declines, each with its reason
+            attached.
           </p>
           <p>
             A person starts each dated run, and its stages resume from saved
@@ -348,11 +349,12 @@ export default function HowItWorks() {
           </p>
           <p>
             Follow one chain from that same day. The 17 July engineering brief
-            warns that visible provider labels bias model-as-judge
-            comparisons. Its citation quotes the arXiv paper on value leakage
-            from the frozen snapshot, the citation names the exact Event, and
-            the Event holds the original announcement thread with its captured
-            metrics. That chain exists for every Insight in every brief.
+            warns that a model grading another model&apos;s answers is swayed
+            by visible provider labels. Its citation quotes the arXiv paper on
+            value leakage from the frozen snapshot, the citation names the
+            exact Event, and the Event holds the original announcement thread
+            with its captured metrics. That chain exists for every Insight in
+            every brief.
           </p>
           <p>
             <Link

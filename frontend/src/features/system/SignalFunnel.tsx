@@ -178,9 +178,10 @@ function mulberry32(seed: number) {
 
 /* The universe is drawn in the same vocabulary as every other plane — a
    tilted phyllotaxis disc — but so large it runs past both sides of the
-   frame: a plane too vast to fit. A few slightly darker dots are the
-   useful information buried in the noise. The dashed ring on its surface
-   is the decision to look here; the cone hangs from that ring. */
+   frame: a plane too vast to fit. A few blue dots are the useful signal
+   buried in the noise, the same blue that re-emerges at Publish and in
+   the two briefs. The dashed ring on its surface is the decision to look
+   here; the cone hangs from that ring. */
 const UNIVERSE_DISC = { y: 78, rx: 480, ry: 60 }
 const UNIVERSE_PTS = (() => {
   const rand = mulberry32(20260719)
@@ -232,13 +233,24 @@ function UniverseField({ ring }: { ring: Plane }) {
         {UNIVERSE_PTS.map((p) => {
           const inside =
             ((p.x - CX) / ring.rx) ** 2 + ((p.y - ring.y) / ring.ry) ** 2 <= 1
-          return (
+          return p.dark ? (
             <circle
               key={p.i}
               cx={p.x}
               cy={p.y}
-              r={(p.dark ? 1.9 : 1.4) * persp(p.d)}
-              fill={p.dark ? '#7d7d7a' : PALE}
+              r={1.9 * persp(p.d)}
+              fill={BLUE}
+              stroke={BLUE_INK}
+              strokeWidth={0.6}
+              opacity={(inside ? 1 : 0.8) * fade(p.d)}
+            />
+          ) : (
+            <circle
+              key={p.i}
+              cx={p.x}
+              cy={p.y}
+              r={1.4 * persp(p.d)}
+              fill={PALE}
               opacity={(inside ? 0.95 : 0.7) * fade(p.d)}
             />
           )
