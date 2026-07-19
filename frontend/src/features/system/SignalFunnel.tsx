@@ -1,10 +1,20 @@
-/* SignalFunnel — the How-it-works hero figure. One cone of progressive
-   signal-to-noise refinement: each ellipse is a cross-section plane of the
-   funnel, dots are the units that survive to that stage, and the tip forks
-   into the two audience briefs. Visual vocabulary matches /network/ranking:
-   phyllotaxis dot fields, circle = person/post, square = organization,
-   dashed hairlines, mono labels with white halos. Counts are the July 5–15
-   frozen checkpoint, matching the prose on the page. */
+/* SignalFunnel — the How-it-works hero. One cone of progressive
+   signal-to-noise refinement, told as a visual story:
+
+   Overview (stage null / 'universe'): the problem statement. A vast pale
+   field of dots at the top, a ghost cone with nothing inside, and the two
+   briefs waiting at the tip. The figure poses the question: how does
+   everything become exactly these two documents?
+
+   Focused stages ('watch' … 'publish'): the answer, revealed one plane at
+   a time. Planes at or above the focus are solved and visible; planes
+   below stay ghosts, so the machine appears to build itself as the reader
+   moves through the story. A gentle camera pan/zoom keeps the focused
+   plane centered.
+
+   Visual vocabulary matches /network/ranking: phyllotaxis dot fields,
+   circle = person/post, square = organization, dashed hairlines, mono
+   labels with white halos. Concept-first: no counts, no telemetry. */
 
 export type FunnelStage =
   | 'universe'
@@ -28,6 +38,15 @@ const GOLDEN = Math.PI * (3 - Math.sqrt(5))
 const W = 520
 const CX = 195
 
+const STAGE_ORDER: FunnelStage[] = [
+  'universe',
+  'watch',
+  'collect',
+  'rank',
+  'judge',
+  'publish',
+]
+
 type Plane = {
   id: FunnelStage
   y: number
@@ -36,11 +55,12 @@ type Plane = {
   dots: number
   step: string
   name: string
-  count: string
+  concept: string
   detail: string
 }
 
-/* Vertical rhythm: planes shrink as noise is removed. */
+/* Vertical rhythm: planes shrink as noise is removed. Labels carry the
+   concept, never the numbers. */
 const PLANES: Plane[] = [
   {
     id: 'universe',
@@ -49,9 +69,9 @@ const PLANES: Plane[] = [
     ry: 46,
     dots: 190,
     step: '',
-    name: 'The public record',
-    count: 'millions of posts a day',
-    detail: 'everyone, about everything',
+    name: 'Everything public',
+    concept: 'everyone, posting about everything',
+    detail: 'almost all of it is noise',
   },
   {
     id: 'watch',
@@ -61,8 +81,8 @@ const PLANES: Plane[] = [
     dots: 105,
     step: '1',
     name: 'Choose',
-    count: '2,630 screened identities',
-    detail: 'labs, people, one follow graph',
+    concept: 'a screened cohort of labs and people',
+    detail: 'decide who is worth listening to',
   },
   {
     id: 'collect',
@@ -72,8 +92,8 @@ const PLANES: Plane[] = [
     dots: 62,
     step: '2',
     name: 'Collect',
-    count: '51,323 posts → 9,646 Events',
-    detail: 'complete days, exact relations',
+    concept: 'their output, grouped into exact Events',
+    detail: 'plus the primary sources they cite',
   },
   {
     id: 'rank',
@@ -83,8 +103,8 @@ const PLANES: Plane[] = [
     dots: 34,
     step: '3',
     name: 'Rank',
-    count: 'one transparent score',
-    detail: 'where to look first',
+    concept: 'a transparent attention score',
+    detail: 'decides where to look first',
   },
   {
     id: 'judge',
@@ -94,8 +114,8 @@ const PLANES: Plane[] = [
     dots: 16,
     step: '4',
     name: 'Judge',
-    count: '404 surfaced of 947 judgments',
-    detail: 'two audiences, two questions',
+    concept: 'two questions asked of every Event',
+    detail: 'relevant to investors? to engineers?',
   },
   {
     id: 'publish',
@@ -105,8 +125,8 @@ const PLANES: Plane[] = [
     dots: 5,
     step: '5',
     name: 'Publish',
-    count: '≈5 cited Insights a day',
-    detail: 'per audience, every source checked',
+    concept: 'only what clears the bar',
+    detail: 'every claim cited to its source',
   },
 ]
 
@@ -228,7 +248,7 @@ function PlaneDots({ plane }: { plane: Plane }) {
   }
 
   if (plane.id === 'judge') {
-    /* Filled = routed relevant to an audience, hollow = explicitly not. */
+    /* Filled = relevant to an audience, hollow = explicitly not. */
     return (
       <>
         {pts.map((p) =>
@@ -277,27 +297,20 @@ function PlaneDots({ plane }: { plane: Plane }) {
   )
 }
 
-function Brief({
-  x,
-  label,
-  active,
-}: {
-  x: number
-  label: string
-  active: boolean
-}) {
+function Brief({ x, label, lit }: { x: number; label: string; lit: boolean }) {
   const w = 118
   const h = 44
   return (
-    <g opacity={active ? 1 : 0.34} style={{ transition: 'opacity 240ms ease-out' }}>
+    <g opacity={lit ? 1 : 0.45} style={{ transition: 'opacity 500ms ease-out' }}>
       <rect
         x={x - w / 2}
         y={FORK_Y}
         width={w}
         height={h}
         fill="#ffffff"
-        stroke={active ? BLUE_MID : INK}
-        strokeWidth={active ? 1.4 : 1}
+        stroke={lit ? BLUE_MID : INK}
+        strokeWidth={lit ? 1.4 : 1}
+        strokeDasharray={lit ? undefined : '3 4'}
       />
       {/* document rule lines */}
       <line x1={x - w / 2 + 12} y1={FORK_Y + 26} x2={x + w / 2 - 12} y2={FORK_Y + 26} stroke={PALE} strokeWidth={1} />
@@ -310,7 +323,7 @@ function Brief({
         fontSize="8.5"
         fontWeight="600"
         letterSpacing="0.08em"
-        fill={active ? BLUE_INK : INK_SOFT}
+        fill={lit ? BLUE_INK : INK_SOFT}
       >
         {label}
       </text>
@@ -318,25 +331,35 @@ function Brief({
   )
 }
 
+/* A plane directly above or below the focus keeps a whisper of presence so
+   the camera move stays legible. */
+function isAdjacent(id: FunnelStage, active: FunnelStage | null) {
+  if (!active) return false
+  return Math.abs(STAGE_ORDER.indexOf(active) - STAGE_ORDER.indexOf(id)) === 1
+}
+
 export default function SignalFunnel({ active }: { active: FunnelStage | null }) {
-  const isOn = (id: FunnelStage) =>
-    active == null || active === id || (active === 'publish' && id === 'publish')
+  const overview = active == null || active === 'universe'
+  const focusIdx = overview ? 0 : STAGE_ORDER.indexOf(active)
+
+  const revealed = (id: FunnelStage) =>
+    overview ? id === 'universe' : STAGE_ORDER.indexOf(id) <= focusIdx
+  const publishOn = !overview && active === 'publish'
 
   /* Camera: each focused stage gets a precomputed pan/zoom that keeps the
-     plane and its label inside the frame. The overview (universe / null)
-     shows the whole cone. */
+     plane and its right-edge label inside the frame. */
   const FOCUS: Record<FunnelStage, { fx: number; fy: number; s: number }> = {
     universe: { fx: CX, fy: 0, s: 1 },
-    watch: { fx: 267, fy: 190, s: 1.2 },
-    collect: { fx: 272, fy: 288, s: 1.36 },
-    rank: { fx: 254, fy: 372, s: 1.55 },
-    judge: { fx: 275, fy: 443, s: 1.62 },
-    publish: { fx: 230, fy: 528, s: 1.45 },
+    watch: { fx: 262, fy: 178, s: 1.18 },
+    collect: { fx: 268, fy: 270, s: 1.3 },
+    rank: { fx: 252, fy: 352, s: 1.42 },
+    judge: { fx: 268, fy: 420, s: 1.46 },
+    publish: { fx: 228, fy: 512, s: 1.34 },
   }
   const cam = FOCUS[active ?? 'universe']
   const zoomed = cam.s > 1
   const tx = zoomed ? W / 2 - cam.s * cam.fx : 0
-  const ty = zoomed ? H * 0.44 - cam.s * cam.fy : 0
+  const ty = zoomed ? H * 0.42 - cam.s * cam.fy : 0
 
   return (
     <svg
@@ -348,120 +371,149 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
       <g
         style={{
           transform: `translate(${tx}px, ${ty}px) scale(${cam.s})`,
-          transition: 'transform 750ms cubic-bezier(0.22, 1, 0.36, 1)',
+          transition: 'transform 800ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       >
-      {/* cone silhouette: dashed hairlines connecting the plane edges */}
-      {PLANES.slice(0, -1).map((p, i) => {
-        const q = PLANES[i + 1]
-        return (
-          <g key={p.id} stroke={INK} strokeOpacity="0.22" strokeDasharray="2 5" strokeWidth="1">
-            <line x1={CX - p.rx} y1={p.y} x2={CX - q.rx} y2={q.y} />
-            <line x1={CX + p.rx} y1={p.y} x2={CX + q.rx} y2={q.y} />
-          </g>
-        )
-      })}
-      {/* tip of the cone */}
-      {(() => {
-        const last = PLANES[PLANES.length - 1]
-        return (
-          <g stroke={INK} strokeOpacity="0.22" strokeDasharray="2 5" strokeWidth="1">
-            <line x1={CX - last.rx} y1={last.y} x2={CX} y2={TIP_Y} />
-            <line x1={CX + last.rx} y1={last.y} x2={CX} y2={TIP_Y} />
-          </g>
-        )
-      })()}
-
-      {/* fork from the tip into the two audience briefs */}
-      <g stroke={BLUE_MID} strokeWidth="1.1" fill="none">
-        <path d={`M ${CX} ${TIP_Y} Q ${CX} ${FORK_Y - 10} ${CX - 74} ${FORK_Y - 2}`} opacity={isOn('publish') ? 0.9 : 0.3} style={{ transition: 'opacity 240ms ease-out' }} />
-        <path d={`M ${CX} ${TIP_Y} Q ${CX} ${FORK_Y - 10} ${CX + 74} ${FORK_Y - 2}`} opacity={isOn('publish') ? 0.9 : 0.3} style={{ transition: 'opacity 240ms ease-out' }} />
-      </g>
-      <Brief x={CX - 74} label="INVESTMENT" active={isOn('publish')} />
-      <Brief x={CX + 74} label="AI ENGINEERING" active={isOn('publish')} />
-
-      {/* planes: back rim behind the dots, solid front rim in front — the
-          split rim plus depth-scaled dots is what makes each disc read 3D */}
-      {PLANES.map((plane) => {
-        const on = isOn(plane.id)
-        const isActive = active === plane.id
-        const labelX = CX + plane.rx + 14
-        const backArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 1 ${CX + plane.rx} ${plane.y}`
-        const frontArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 0 ${CX + plane.rx} ${plane.y}`
-        return (
-          <g
-            key={plane.id}
-            opacity={on ? 1 : 0.35}
-            style={{ transition: 'opacity 240ms ease-out' }}
-          >
-            {/* disc surface wash */}
-            <ellipse
-              cx={CX}
-              cy={plane.y}
-              rx={plane.rx}
-              ry={plane.ry}
-              fill={isActive ? 'rgba(91, 197, 242, 0.10)' : 'rgba(21, 21, 21, 0.025)'}
-              style={{ transition: 'fill 240ms ease-out' }}
-            />
-            {/* back rim: fainter, dashed, hidden behind the dot field */}
-            <path
-              d={backArc}
-              fill="none"
-              stroke={isActive ? BLUE_MID : INK}
-              strokeOpacity={isActive ? 0.4 : 0.16}
-              strokeWidth={1}
-              strokeDasharray="2 5"
-            />
-            <PlaneDots plane={plane} />
-            {/* front rim: solid, closer to the viewer, drawn over the dots */}
-            <path
-              d={frontArc}
-              fill="none"
-              stroke={isActive ? BLUE_MID : INK}
-              strokeOpacity={isActive ? 0.95 : 0.42}
-              strokeWidth={isActive ? 1.4 : 1}
-              style={{ transition: 'stroke 240ms ease-out' }}
-            />
-            {/* stage label, anchored to the plane's right edge */}
+        {/* cone silhouette: dashed hairlines connecting the plane edges */}
+        {PLANES.slice(0, -1).map((p, i) => {
+          const q = PLANES[i + 1]
+          return (
             <g
-              fontFamily={MONO}
-              stroke="#ffffff"
-              strokeWidth="3.5"
-              paintOrder="stroke"
+              key={p.id}
+              stroke={INK}
+              strokeOpacity={revealed(q.id) ? 0.26 : 0.12}
+              strokeDasharray="2 5"
+              strokeWidth="1"
+              style={{ transition: 'stroke-opacity 500ms ease-out' }}
             >
-              <text
-                x={labelX}
-                y={plane.y - 4}
-                fontSize="10.5"
-                fontWeight="600"
-                letterSpacing="0.06em"
-                fill={active === plane.id ? BLUE_INK : INK}
-              >
-                {plane.step ? `${plane.step} · ${plane.name.toUpperCase()}` : plane.name.toUpperCase()}
-              </text>
-              <text x={labelX} y={plane.y + 9} fontSize="9" fill={INK_SOFT}>
-                {plane.count}
-              </text>
-              <text x={labelX} y={plane.y + 21} fontSize="8.5" fill={MUTED}>
-                {plane.detail}
-              </text>
+              <line x1={CX - p.rx} y1={p.y} x2={CX - q.rx} y2={q.y} />
+              <line x1={CX + p.rx} y1={p.y} x2={CX + q.rx} y2={q.y} />
             </g>
-          </g>
-        )
-      })}
+          )
+        })}
+        {/* tip of the cone */}
+        {(() => {
+          const last = PLANES[PLANES.length - 1]
+          return (
+            <g
+              stroke={INK}
+              strokeOpacity={revealed('publish') ? 0.26 : 0.12}
+              strokeDasharray="2 5"
+              strokeWidth="1"
+              style={{ transition: 'stroke-opacity 500ms ease-out' }}
+            >
+              <line x1={CX - last.rx} y1={last.y} x2={CX} y2={TIP_Y} />
+              <line x1={CX + last.rx} y1={last.y} x2={CX} y2={TIP_Y} />
+            </g>
+          )
+        })()}
 
-      {/* checkpoint caption */}
-      <text
-        x={CX}
-        y={H - 6}
-        textAnchor="middle"
-        fontFamily={MONO}
-        fontSize="8"
-        letterSpacing="0.05em"
-        fill={MUTED}
-      >
-        counts: frozen July 5–15 evidence window
-      </text>
+        {/* the goal, always present: two audience briefs leave the tip */}
+        <g stroke={BLUE_MID} strokeWidth="1.1" fill="none">
+          <path
+            d={`M ${CX} ${TIP_Y} Q ${CX} ${FORK_Y - 10} ${CX - 74} ${FORK_Y - 2}`}
+            opacity={publishOn || overview ? 0.9 : 0.3}
+            style={{ transition: 'opacity 500ms ease-out' }}
+          />
+          <path
+            d={`M ${CX} ${TIP_Y} Q ${CX} ${FORK_Y - 10} ${CX + 74} ${FORK_Y - 2}`}
+            opacity={publishOn || overview ? 0.9 : 0.3}
+            style={{ transition: 'opacity 500ms ease-out' }}
+          />
+        </g>
+        <Brief x={CX - 74} label="INVESTMENT" lit={publishOn || overview} />
+        <Brief x={CX + 74} label="AI ENGINEERING" lit={publishOn || overview} />
+
+        {/* planes: back rim behind the dots, solid front rim in front */}
+        {PLANES.map((plane) => {
+          const on = revealed(plane.id)
+          const isActive = !overview && active === plane.id
+          const labelX = CX + plane.rx + 14
+          const backArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 1 ${CX + plane.rx} ${plane.y}`
+          const frontArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 0 ${CX + plane.rx} ${plane.y}`
+          return (
+            <g
+              key={plane.id}
+              opacity={on ? 1 : isAdjacent(plane.id, active) ? 0.3 : 0.18}
+              style={{ transition: 'opacity 600ms ease-out' }}
+            >
+              {/* disc surface wash */}
+              <ellipse
+                cx={CX}
+                cy={plane.y}
+                rx={plane.rx}
+                ry={plane.ry}
+                fill={isActive ? 'rgba(91, 197, 242, 0.10)' : 'rgba(21, 21, 21, 0.025)'}
+                style={{ transition: 'fill 500ms ease-out' }}
+              />
+              {/* back rim: fainter, dashed, hidden behind the dot field */}
+              <path
+                d={backArc}
+                fill="none"
+                stroke={isActive ? BLUE_MID : INK}
+                strokeOpacity={isActive ? 0.4 : 0.16}
+                strokeWidth={1}
+                strokeDasharray="2 5"
+              />
+              {on && <PlaneDots plane={plane} />}
+              {/* front rim: solid, closer to the viewer, drawn over the dots */}
+              <path
+                d={frontArc}
+                fill="none"
+                stroke={isActive ? BLUE_MID : INK}
+                strokeOpacity={isActive ? 0.95 : 0.42}
+                strokeWidth={isActive ? 1.4 : 1}
+                style={{ transition: 'stroke 500ms ease-out' }}
+              />
+              {/* stage label, anchored to the plane's right edge */}
+              <g
+                fontFamily={MONO}
+                stroke="#ffffff"
+                strokeWidth="3.5"
+                paintOrder="stroke"
+                opacity={on ? 1 : 0}
+                style={{ transition: 'opacity 500ms ease-out' }}
+              >
+                <text
+                  x={labelX}
+                  y={plane.y - 4}
+                  fontSize="10.5"
+                  fontWeight="600"
+                  letterSpacing="0.06em"
+                  fill={isActive ? BLUE_INK : INK}
+                >
+                  {plane.step ? `${plane.step} · ${plane.name.toUpperCase()}` : plane.name.toUpperCase()}
+                </text>
+                <text x={labelX} y={plane.y + 9} fontSize="9" fill={INK_SOFT}>
+                  {plane.concept}
+                </text>
+                <text x={labelX} y={plane.y + 21} fontSize="8.5" fill={MUTED}>
+                  {plane.detail}
+                </text>
+              </g>
+            </g>
+          )
+        })}
+
+        {/* overview only: the open question inside the ghost cone */}
+        <g
+          opacity={overview ? 1 : 0}
+          style={{ transition: 'opacity 500ms ease-out' }}
+          fontFamily={MONO}
+          stroke="#ffffff"
+          strokeWidth="4"
+          paintOrder="stroke"
+        >
+          <text x={CX} y={316} textAnchor="middle" fontSize="14" fontWeight="600" fill={INK_SOFT}>
+            ?
+          </text>
+          <text x={CX} y={338} textAnchor="middle" fontSize="8.5" fill={MUTED}>
+            how does all of that become
+          </text>
+          <text x={CX} y={350} textAnchor="middle" fontSize="8.5" fill={MUTED}>
+            exactly these two briefs
+          </text>
+        </g>
       </g>
     </svg>
   )
