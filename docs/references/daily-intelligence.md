@@ -10,6 +10,11 @@ The repo-local [`$fli-daily-intelligence`](../../.agents/skills/fli-daily-intell
 skill is the executable playbook. This document records the durable system
 contract behind it.
 
+The first multi-day editorial evaluation is preserved in
+[`daily-intelligence-batch-audit-2026-07-05-17.md`](daily-intelligence-batch-audit-2026-07-05-17.md).
+It records batch quality and proposed improvements but does not change this
+contract by itself.
+
 ## Flow
 
 ```text

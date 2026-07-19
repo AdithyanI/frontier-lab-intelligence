@@ -38,7 +38,7 @@ from reportlab.platypus import (
 from fli.insights import editorial_runs
 
 
-REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v4"
+REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v5"
 DEFAULT_CACHE_ROOT = editorial_runs.DEFAULT_ROOT / "pdf-cache"
 
 PAPER = HexColor("#FFFFFF")
@@ -273,9 +273,9 @@ def _styles() -> dict[str, ParagraphStyle]:
         "cover_title": ParagraphStyle(
             "CoverTitle",
             parent=sample["Title"],
-            fontName="Helvetica-Bold",
+            fontName="Times-Bold",
             fontSize=31,
-            leading=33,
+            leading=31.5,
             textColor=INK,
             alignment=TA_LEFT,
             spaceAfter=0,
@@ -299,8 +299,8 @@ def _styles() -> dict[str, ParagraphStyle]:
         "cover_section": ParagraphStyle(
             "CoverSection",
             parent=sample["Heading2"],
-            fontName="Helvetica-Bold",
-            fontSize=16,
+            fontName="Times-Bold",
+            fontSize=17,
             leading=19,
             textColor=INK,
             spaceAfter=0,
@@ -308,9 +308,9 @@ def _styles() -> dict[str, ParagraphStyle]:
         "title": ParagraphStyle(
             "InsightTitle",
             parent=sample["Heading1"],
-            fontName="Helvetica-Bold",
-            fontSize=21,
-            leading=24,
+            fontName="Times-Bold",
+            fontSize=22,
+            leading=23.5,
             textColor=INK,
             spaceAfter=0,
         ),
@@ -325,9 +325,9 @@ def _styles() -> dict[str, ParagraphStyle]:
         "section": ParagraphStyle(
             "Section",
             parent=sample["Heading2"],
-            fontName="Helvetica-Bold",
-            fontSize=12,
-            leading=15,
+            fontName="Times-Bold",
+            fontSize=13.5,
+            leading=16,
             textColor=INK,
             spaceBefore=0,
             spaceAfter=0,
@@ -411,12 +411,24 @@ def _later_page_chrome(pdf: canvas.Canvas, _: SimpleDocTemplate, *, audience: st
     pdf.setFillColor(INK)
     pdf.setFont("Helvetica-Bold", 7.2)
     pdf.drawString(PAGE_MARGIN + 5.3 * mm, PAGE_HEIGHT - 13.3 * mm, "FRONTIER LAB INTELLIGENCE")
-    pdf.setFillColor(MUTED)
-    pdf.setFont("Courier", 6.8)
-    pdf.drawRightString(
-        PAGE_WIDTH - PAGE_MARGIN,
-        PAGE_HEIGHT - 13.3 * mm,
-        f"{_audience_label(audience)}  /  {_display_day(day)}",
+    navigation = "BRIEF INDEX"
+    pdf.setFillColor(BLUE_INK)
+    pdf.setFont("Courier-Bold", 6.8)
+    navigation_x = PAGE_WIDTH - PAGE_MARGIN
+    navigation_y = PAGE_HEIGHT - 13.3 * mm
+    pdf.drawRightString(navigation_x, navigation_y, navigation)
+    navigation_width = pdf.stringWidth(navigation, "Courier-Bold", 6.8)
+    pdf.linkRect(
+        "Back to the brief index",
+        "brief-index",
+        (
+            navigation_x - navigation_width - 1.2 * mm,
+            navigation_y - 1.4 * mm,
+            navigation_x + 1.2 * mm,
+            navigation_y + 3 * mm,
+        ),
+        relative=0,
+        thickness=0,
     )
     pdf.setStrokeColor(INK)
     pdf.setLineWidth(0.55)
@@ -486,7 +498,7 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         ),
         Spacer(1, 8 * mm),
         HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=5 * mm),
-        Paragraph("Today's brief", styles["cover_section"]),
+        Paragraph('<font color="#5BC5F2">/</font> Today\'s brief', styles["cover_section"]),
         Spacer(1, 2.5 * mm),
         Paragraph(
             "Click any title to jump to its analysis. Each brief is followed by its linked sources.",
@@ -545,7 +557,10 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
 def _section_title(title: str, styles: dict[str, ParagraphStyle]) -> list[Any]:
     return [
         Spacer(1, 6 * mm),
-        Paragraph(_markup(title), styles["section"]),
+        Paragraph(
+            f'<font color="#5BC5F2">/</font> {_markup(title)}',
+            styles["section"],
+        ),
         Spacer(1, 2.8 * mm),
     ]
 
