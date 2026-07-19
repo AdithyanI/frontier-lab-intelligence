@@ -92,8 +92,8 @@ const PLANES: Plane[] = [
     dots: 62,
     step: '2',
     name: 'Collect',
-    concept: 'their output, grouped into exact Events',
-    detail: 'plus the primary sources they cite',
+    concept: 'output grouped into exact Events',
+    detail: 'and the sources they cite',
   },
   {
     id: 'rank',
@@ -114,8 +114,8 @@ const PLANES: Plane[] = [
     dots: 16,
     step: '4',
     name: 'Judge',
-    concept: 'two questions asked of every Event',
-    detail: 'relevant to investors? to engineers?',
+    concept: 'two questions for every Event',
+    detail: 'for investors? for engineers?',
   },
   {
     id: 'publish',
@@ -350,11 +350,11 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
      plane and its right-edge label inside the frame. */
   const FOCUS: Record<FunnelStage, { fx: number; fy: number; s: number }> = {
     universe: { fx: CX, fy: 0, s: 1 },
-    watch: { fx: 262, fy: 178, s: 1.18 },
-    collect: { fx: 268, fy: 270, s: 1.3 },
-    rank: { fx: 252, fy: 352, s: 1.42 },
-    judge: { fx: 268, fy: 420, s: 1.46 },
-    publish: { fx: 228, fy: 512, s: 1.34 },
+    watch: { fx: 262, fy: 178, s: 1.14 },
+    collect: { fx: 262, fy: 268, s: 1.22 },
+    rank: { fx: 250, fy: 350, s: 1.3 },
+    judge: { fx: 258, fy: 420, s: 1.32 },
+    publish: { fx: 225, fy: 510, s: 1.24 },
   }
   const cam = FOCUS[active ?? 'universe']
   const zoomed = cam.s > 1
