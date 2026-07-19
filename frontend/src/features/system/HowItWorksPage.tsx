@@ -283,8 +283,9 @@ export default function HowItWorks() {
           <p>
             The weights are not hidden in code; the API response declares
             them. Version attention-v1.1 weighs amplification by Registry
-            members at 55%, the standing of the author at 25%, and public
-            engagement at 20% as a tie-breaker. The score is labeled an
+            members at 55%, how many Registry members follow the author at
+            25%, and public engagement at 20% as a tie-breaker. The score is
+            labeled an
             ordering aid in the response itself, and no downstream judgment
             consumes it. A simple formula honestly bounded beats a
             sophisticated one pretending to measure importance.
