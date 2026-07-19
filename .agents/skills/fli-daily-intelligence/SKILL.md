@@ -107,12 +107,21 @@ your own judgment for research, retrieval, grouping, and synthesis.
    Apply it to every field the reader sees, not only the title. Preserve the
    facts, causal chain, technical precision, and honest uncertainty; simplify
    the language and sentence structure, not the judgment.
-9. Validate repeatedly until the complete cohort passes:
+9. Run the read-only coverage preflight, then validate repeatedly until the
+   complete cohort passes:
 
    ```bash
+   .venv/bin/fli daily-intelligence preflight \
+     --workspace <workspace> --draft <workspace>/draft.json --json --no-input
    .venv/bin/fli daily-intelligence validate \
      --workspace <workspace> --draft <workspace>/draft.json --json --no-input
    ```
+
+   Preflight is a compact coverage ledger, not an editorial judge. It must show
+   every expected Event/audience pair exactly once as either included or
+   `not_selected`, with zero missing, duplicate, or unexpected pairs. Use its
+   rows to locate omissions quickly; validation remains the authoritative
+   schema and evidence gate.
 
 10. For a requested daily brief, import the validated result atomically and
    inspect the durable run:
@@ -120,13 +129,16 @@ your own judgment for research, retrieval, grouping, and synthesis.
    ```bash
    .venv/bin/fli daily-intelligence import-result \
      --workspace <workspace> --draft <workspace>/draft.json --json --no-input
-   .venv/bin/fli daily-intelligence inspect-run --run-id <returned-run-id> --json --no-input
+   .venv/bin/fli daily-intelligence inspect-run \
+     --run-id <returned-run-id> --projection summary --json --no-input
    ```
 
    Review-only and client-evaluation tasks may stop after validation or use
    `import-result --dry-run`. Never edit the SQLite store directly. Once a
    complete run is imported, the Insights backend and UI select it
-   automatically for that date and audience.
+   automatically for that date and audience. Use the additive `insights`,
+   `citations`, or `dispositions` projections for focused inspection; request
+   the default `full` payload only when the complete durable record is needed.
 
 ## Parallel historical dates
 

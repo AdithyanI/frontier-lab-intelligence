@@ -142,7 +142,15 @@ The client is machine-primary and defaults to one versioned JSON object with
 `schema_version`, `command`, `status`, `data`, `error`, and `meta`. It supports
 `--no-input`, stable error codes and exit codes, explicit `--plain` inspection,
 timeouts for remote embedding work, dry-run for import, and idempotent prepare,
-index, and import operations.
+index, and import operations. `preflight` provides a read-only coverage ledger
+for the draft: one row per expected Event/audience pair, its included or
+`not_selected` disposition, and explicit missing, duplicate, or unexpected
+counts. It does not replace validation or make editorial decisions.
+
+`import-result` and `inspect-run` accept additive `--projection` values:
+`summary`, `insights`, `citations`, and `dispositions`. Their default remains
+`full`, preserving the existing complete payload contract. Agents should use
+the smallest projection that answers the current question.
 
 The normal run is:
 
@@ -150,9 +158,10 @@ The normal run is:
 .venv/bin/fli daily-intelligence context --audience investment --json --no-input
 .venv/bin/fli daily-intelligence context --audience ai_engineering --json --no-input
 .venv/bin/fli daily-intelligence prepare --day YYYY-MM-DD --json --no-input
+.venv/bin/fli daily-intelligence preflight --workspace <workspace> --draft <workspace>/draft.json --json --no-input
 .venv/bin/fli daily-intelligence validate --workspace <workspace> --draft <workspace>/draft.json --json --no-input
 .venv/bin/fli daily-intelligence import-result --workspace <workspace> --draft <workspace>/draft.json --json --no-input
-.venv/bin/fli daily-intelligence inspect-run --run-id <run-id> --json --no-input
+.venv/bin/fli daily-intelligence inspect-run --run-id <run-id> --projection summary --json --no-input
 ```
 
 The date-keyed orchestration entry point composes the existing Evidence,
