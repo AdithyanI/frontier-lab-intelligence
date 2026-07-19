@@ -69,8 +69,8 @@ const PLANES: Plane[] = [
   {
     id: 'universe',
     y: 78,
-    rx: 172,
-    ry: 46,
+    rx: 132,
+    ry: 35,
     dots: 190,
     step: '',
     name: 'Everything public',

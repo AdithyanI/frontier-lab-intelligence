@@ -240,10 +240,11 @@ export default function HowItWorks() {
             rewriting history.
           </p>
           <p>
-            The scale is concrete. A follow graph of 557,363 accounts and 2.8
-            million follow edges is distilled into a screened Registry of
-            2,591 active identities: 2,431 researchers and 160 organizations.
-            The 39 rejections stay on the books with their reasons.
+            The scale is concrete. The system screens a follow graph of
+            557,363 accounts and 2.8 million follow edges down to a Registry
+            of 2,591 active identities: 2,431 researchers and 160
+            organizations. The 39 rejections stay on the books with their
+            reasons.
           </p>
         </article>
 
@@ -281,9 +282,9 @@ export default function HowItWorks() {
           </p>
           <p>
             The weights are not hidden in code; the API response declares
-            them. Version attention-v1.1 weighs cohort amplification at 55
-            percent, originator support at 25 percent, and public engagement
-            at 20 percent as a tie-breaker. The score is labeled an ordering
+            them. Version attention-v1.1 weighs cohort amplification at 55%,
+            originator support at 25%, and public engagement at 20% as a
+            tie-breaker. The score is labeled an ordering
             aid in the response itself, and no downstream judgment consumes
             it. A simple formula honestly bounded beats a sophisticated one
             pretending to measure importance.
@@ -330,8 +331,8 @@ export default function HowItWorks() {
             with its reason attached.
           </p>
           <p>
-            A person starts each dated run, its stages resume from saved
-            checkpoints, and sending a brief anywhere is a deliberate human
+            A person starts each dated run, and its stages resume from saved
+            checkpoints. Sending a brief anywhere is a deliberate human
             action, not an automatic one.
           </p>
         </article>
