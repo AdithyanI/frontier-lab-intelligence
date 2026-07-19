@@ -70,7 +70,7 @@ const PLANES: Plane[] = [
     dots: 190,
     step: '',
     name: 'Everything public',
-    concept: 'everyone, posting about everything',
+    concept: 'everyone, about everything',
     detail: 'almost all of it is noise',
   },
   {
@@ -471,7 +471,7 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
                 stroke="#ffffff"
                 strokeWidth="3.5"
                 paintOrder="stroke"
-                opacity={on ? 1 : 0}
+                opacity={overview ? (on ? 1 : 0) : isActive ? 1 : 0}
                 style={{ transition: 'opacity 500ms ease-out' }}
               >
                 <text
