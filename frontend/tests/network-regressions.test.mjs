@@ -34,8 +34,9 @@ test('Network owns Registry, Ranking, and Add Profile as explicit subviews', () 
   assert.match(addProfileSource, /id="add-profile-title">Add Profile<\/h2>/)
 })
 
-test('Network defaults to Ranking while preserving Registry and reach', () => {
-  assert.match(appSource, /<Navigate to="\/network\/ranking" replace \/>/)
+test('Network defaults to Ranking while the product lands on Insights', () => {
+  assert.match(appSource, /<Route path="\/" element=\{<Navigate to="\/insights" replace \/>\} \/>/)
+  assert.match(appSource, /<Route path="\*" element=\{<Navigate to="\/insights" replace \/>\} \/>/)
   assert.match(appSource, /<Route index element=\{<Navigate to="ranking" replace \/>\} \/>/)
   assert.match(rankingSource, /<h2 className="network-view-title" id="ranking-title">/)
   assert.match(registrySource, /<h2 className="network-view-title" id="registry-title">Registry<\/h2>/)

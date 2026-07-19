@@ -85,7 +85,9 @@ Rules:
 - App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
   beneath. No sidebar — pages own their full width. Show only working routes;
   unavailable future destinations do not occupy the navigation. The five
-  top-level workspaces are Network, Evidence, Insights, BIT Lens, and System.
+  top-level workspaces are Insights, Network, Evidence, BIT Lens, and System.
+  Insights is the first navigation item and the default landing route because
+  the audience-ready brief is the clearest statement of product value.
   BIT Lens holds the public client context used to translate frontier evidence
   into fund-specific research questions. It is one detailed reading page, not
   another dashboard or a set of subviews, and remains separate from generated
@@ -240,13 +242,15 @@ Rules:
   then separates `Portfolio impact` from the optional `Outside the disclosed
   portfolio` mapping, gives every company a textual impact direction and one
   causal mechanism, and ends with two watchpoints plus the next diligence step.
-  A single page note identifies the audited working portfolio source; dates and
-  caveats are not repeated beside every company. Engineering uses one flat
-  `What to do next` section containing the bounded next step and its measurable
-  decision rule; it does not expose separate action, system-surface, hypothesis,
-  experiment-detail, or constraints labels. Sources remain visible in the
-  normal reading flow. Event provenance links only to the exact Feed Event,
-  which already owns the onward original-post link. The date count is the number of final
+  The web reader does not interrupt the brief with a page-level portfolio
+  caveat. Audited portfolio context remains in the data contract, and any
+  source cited by an Insight stays in its normal source ledger. Engineering
+  uses one flat `What to do next` section containing the bounded next step and
+  its measurable decision rule; it does not expose separate action,
+  system-surface, hypothesis, experiment-detail, or constraints labels. Sources
+  remain visible in the normal reading flow. Event provenance links only to the
+  exact Feed Event, which already owns the onward original-post link. The date
+  count is the number of final
   imported Insights when that run exists. Candidate-level decisions remain an
   audit fallback for unimported days and for explicit `Suppressed` / `All`
   views; they are not the final daily product. Honest zero/thin imported runs

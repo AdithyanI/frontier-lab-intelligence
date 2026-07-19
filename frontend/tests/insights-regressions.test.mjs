@@ -8,8 +8,16 @@ const insightSource = await readFile(
   new URL('../src/features/insights/InsightsPage.tsx', import.meta.url),
   'utf8',
 )
+const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url), 'utf8')
 const apiSource = await readFile(new URL('../src/shared/api/insights.ts', import.meta.url), 'utf8')
 const appStyles = readStyles()
+
+test('Insights is the first navigation destination and the product landing route', () => {
+  assert.ok(appSource.indexOf('>Insights</NavLink>') < appSource.indexOf('>Network</NavLink>'))
+  assert.ok(appSource.indexOf('>Network</NavLink>') < appSource.indexOf('>Evidence</NavLink>'))
+  assert.match(appSource, /<Route path="\/" element=\{<Navigate to="\/insights" replace \/>\} \/>/)
+  assert.match(appSource, /<Route path="\*" element=\{<Navigate to="\/insights" replace \/>\} \/>/)
+})
 
 test('Insights defaults to Investment and keeps audience, date, and decision status in the URL', () => {
   assert.match(apiSource, /export type InsightAudience = 'investment' \| 'ai_engineering'/)
@@ -142,8 +150,9 @@ test('Insights renders canonical daily editorial judgments as a ranked, cited br
   assert.match(insightSource, /<div className="editorial-source-columns">/)
   assert.match(insightSource, /Original feed/)
   assert.match(insightSource, /Artifacts &amp; context/)
-  assert.match(insightSource, /citation\.url !== portfolioSourceUrl/)
-  assert.match(insightSource, /portfolioSourceUrl=\{editorialData\.portfolio_reference\?\.source_url\}/)
+  assert.match(insightSource, /citation\.kind !== 'event'/)
+  assert.doesNotMatch(insightSource, /portfolioSourceUrl|editorial-portfolio-note|Portfolio impact uses/)
+  assert.doesNotMatch(appStyles, /\.editorial-portfolio-note/)
   assert.doesNotMatch(insightSource, /\{index \+ 1\}\. \{decodeTextEntities\(citation\.title\)\}/)
   assert.doesNotMatch(insightSource, /As of \{entity\.as_of\}/)
   assert.match(insightSource, /Feed #\{event\.feed_rank\} ↗/)

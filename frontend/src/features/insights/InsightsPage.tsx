@@ -758,15 +758,9 @@ function EngineeringDecision({
   )
 }
 
-function EditorialSources({
-  item,
-  portfolioSourceUrl,
-}: {
-  item: EditorialInsightItem
-  portfolioSourceUrl?: string
-}) {
+function EditorialSources({ item }: { item: EditorialInsightItem }) {
   const researchSources = item.citations.filter(
-    (citation) => citation.kind !== 'event' && citation.url !== portfolioSourceUrl,
+    (citation) => citation.kind !== 'event',
   )
   const titleId = `${item.insight_id}-sources`
 
@@ -846,13 +840,7 @@ function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
   )
 }
 
-function EditorialInsightRow({
-  item,
-  portfolioSourceUrl,
-}: {
-  item: EditorialInsightItem
-  portfolioSourceUrl?: string
-}) {
+function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
   const titleId = `${item.insight_id}-title`
   const rankExplanationId = `${item.insight_id}-rank-explanation`
   const [rankExplanationOpen, setRankExplanationOpen] = useState(false)
@@ -920,7 +908,7 @@ function EditorialInsightRow({
           <EngineeringDecision analysis={engineeringAnalysis} nextStep={item.next_step} />
         )}
 
-        <EditorialSources item={item} portfolioSourceUrl={portfolioSourceUrl} />
+        <EditorialSources item={item} />
       </div>
     </article>
   )
@@ -1160,27 +1148,11 @@ export default function Insights() {
       )}
 
       {editorialData?.available && editorialData.items.length > 0 && (
-        <>
-          {audience === 'investment' && editorialData.portfolio_reference && (
-            <p className="editorial-portfolio-note">
-              Portfolio impact uses BIT Global Technology Leaders’ complete audited 2025
-              disclosure. “Outside the disclosed portfolio” is analyst mapping, not a known
-              BIT holding or recommendation.{' '}
-              <a href={editorialData.portfolio_reference.source_url} target="_blank" rel="noreferrer">
-                Portfolio source ↗
-              </a>
-            </p>
-          )}
-          <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
-            {editorialData.items.map((item) => (
-              <EditorialInsightRow
-                item={item}
-                key={item.insight_id}
-                portfolioSourceUrl={editorialData.portfolio_reference?.source_url}
-              />
-            ))}
-          </section>
-        </>
+        <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
+          {editorialData.items.map((item) => (
+            <EditorialInsightRow item={item} key={item.insight_id} />
+          ))}
+        </section>
       )}
       {candidateData?.available && candidateData.items.length > 0 && (
         <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>

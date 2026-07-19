@@ -25,16 +25,16 @@ export default function App() {
           Frontier Lab Intelligence
         </div>
         <nav aria-label="Main">
+          <NavLink to={insightsPath}>Insights</NavLink>
           <NavLink to="/network">Network</NavLink>
           <NavLink to={evidencePath}>Evidence</NavLink>
-          <NavLink to={insightsPath}>Insights</NavLink>
           <NavLink to="/bit-lens">BIT Lens</NavLink>
           <NavLink to="/system">System</NavLink>
         </nav>
       </header>
       <main className="content">
         <Routes>
-          <Route path="/" element={<Navigate to="/network/ranking" replace />} />
+          <Route path="/" element={<Navigate to="/insights" replace />} />
           <Route path="/network" element={<Network />}>
             <Route index element={<Navigate to="ranking" replace />} />
             <Route path="registry" element={<Registry />} />
@@ -53,7 +53,7 @@ export default function App() {
             <Route path="status" element={<Status />} />
             <Route path="architecture" element={<Architecture />} />
           </Route>
-          <Route path="*" element={<Navigate to="/network/ranking" replace />} />
+          <Route path="*" element={<Navigate to="/insights" replace />} />
         </Routes>
       </main>
     </div>
