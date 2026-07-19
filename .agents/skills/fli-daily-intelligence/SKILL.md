@@ -279,6 +279,12 @@ shared theme as an automatic merge.
   The fact that an agent could use a technology is not a transfer path. Send
   distant, generic, or merely interesting work to `not_selected` unless a
   bounded experiment can resolve a named operating decision.
+- For Engineering, naming Aion or FLI is not enough. The interpretation must
+  identify the exact public BIT workflow or system surface affected, explain
+  how the development changes that workflow, and state the engineering decision
+  at stake. If “Aion” can be replaced with “any agent” without changing the
+  paragraph, rewrite it. Use FLI as a bounded testbed when useful, not as a
+  substitute for explaining the BIT reader's decision.
 - For Engineering, derive numerical gates from an existing baseline or label
   them explicitly as provisional criteria to calibrate in the proposed test.
   Do not present agent-chosen percentages or sample counts as validated

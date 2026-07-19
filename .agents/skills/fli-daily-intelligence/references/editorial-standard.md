@@ -263,6 +263,17 @@ evidence changes that decision now. Extra length is justified when it supplies
 missing setup or a causal bridge; repetition, benchmark inventory, and generic
 technical background are not.
 
+Do not make a generic agent-engineering paragraph appear specific by inserting
+“Aion” or “FLI.” Tie the evidence to a public BIT workflow such as extracting
+decision-useful signals, evaluating research-agent outputs, grounding claims in
+sources, controlling tool or data access, monitoring production agents, or
+operating the supporting data platform. Explain where the effect enters that
+workflow and which test, control, integration, or operating policy could change.
+If the paragraph remains equally true after replacing “Aion” with “any agent,”
+it has not completed the audience interpretation. Do not invent BIT's private
+architecture to add specificity; use only the public operating context and
+state the transfer boundary honestly.
+
 Numerical gates need a basis. Derive them from an observed baseline, a cited
 requirement, or a known operating constraint. When none exists, call the values
 provisional criteria and make baseline calibration part of the next step; do

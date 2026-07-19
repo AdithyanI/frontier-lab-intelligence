@@ -234,6 +234,11 @@ Expected behavior:
   model, prompt, and task rather than implying a universal fixed bias;
 - connects the finding to one named research-agent, evaluation, source-
   selection, or analyst workflow instead of saying only that bias matters;
+- identifies how that failure enters a public BIT workflow and which
+  engineering decision changes, rather than inserting “Aion” into an otherwise
+  generic agent paragraph;
+- fails the review when “Aion” can be replaced with “any agent” without changing
+  the substance, while avoiding invented claims about BIT's private stack;
 - explains why a single retry cannot reveal a distribution-level shift;
 - leaves the bounded test in `next_step` and the proceed and stop conditions in
   `decision_rule` rather than duplicating the full experiment in the opening;
