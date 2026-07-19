@@ -12,6 +12,10 @@ contract behind it.
 
 The first multi-day editorial evaluation is preserved in
 [`daily-intelligence-batch-audit-2026-07-05-17.md`](daily-intelligence-batch-audit-2026-07-05-17.md).
+The five-Insight submission proof is editorially locked in the archived
+[`submission selection`](../projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md);
+the complete reader remains the audit corpus rather than the reviewer entry
+point.
 It records batch quality and proposed improvements but does not change this
 contract by itself.
 

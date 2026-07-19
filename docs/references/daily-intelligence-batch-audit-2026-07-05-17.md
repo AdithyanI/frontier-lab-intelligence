@@ -14,21 +14,23 @@ company mappings fell from 81 to 47; only five of the new mappings are
 `uncertain`, compared with 66 previously. The change is materially more
 selective and makes directional labels useful without targeting a distribution.
 
-Across the latest 5–17 July reader there are now 142 Insights: 51 Investment
-and 91 AI Engineering, supported by 219 unique citations. All cited frozen
+After the later 16 July rerun and 17 July calibration, the latest 5–17 July
+reader contains 138 Insights: 49 Investment and 89 AI Engineering, supported
+by 177 unique citation URLs across 202 citation records. All cited frozen
 artifacts had an eligible disclosure by their brief day, and no cited Event
 fell outside the seven-day source window. The strongest Investment items are
 submission-quality. The strongest three to five Engineering items per day are
 also highly decision-useful, but several busy-day tails still turn a merely
 testable release or anecdote into an Aion experiment.
 
-Only one pre-submission correction is structural: 16 July still uses the older
-Investment semantics. All nine company rows are `uncertain`, and the audited
-portfolio report is repeated as context on all seven Investment Insights.
-Rerun that date with the current harness or omit it from the final showcase.
-Do not reopen a broad pruning cycle now. Curate the best three to five Insights
-for the submission and defer cross-day novelty memory, compact cohort review,
-historical web-publication metadata, and lower-ranked tail pruning.
+The structural correction is complete. The current 16 July run uses the latest
+Investment semantics, contains five Investment Insights with six directional
+company mappings, and no longer attaches the audited portfolio report to each
+Insight. The final proof is editorially locked in
+[`submission-proof-selection-2026-07-19.md`](../projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).
+Do not reopen a broad pruning cycle before submission. Cross-day novelty
+memory, historical web-publication metadata, and lower-ranked tail pruning are
+documented follow-up work rather than blockers to the curated proof.
 
 ## Scope
 
@@ -138,18 +140,19 @@ frontier-AI transmission path.
 
 ## Investment impact-label calibration
 
-Across the current 5–17 July Investment reader there are 67 Insights and 101
+Across the current 5–17 July Investment reader there are 49 Insights and 57
 company read-through rows:
 
 | Label | Company rows | Share |
 | --- | ---: | ---: |
-| `uncertain` | 86 | 85.1% |
-| `mixed` | 11 | 10.9% |
-| `positive` | 4 | 4.0% |
-| `negative` | 0 | 0.0% |
+| `positive` | 30 | 52.6% |
+| `negative` | 14 | 24.6% |
+| `mixed` | 8 | 14.0% |
+| `uncertain` | 5 | 8.8% |
 
-Fifty-four of 67 Investment Insights contain only `uncertain` company
-mappings. All eleven company mappings on 17 July are `uncertain`.
+Only three of the 48 mapped Investment Insights contain only `uncertain`
+company mappings. The current 17 July run has four mappings: one positive, one
+negative, and two mixed.
 
 This is intentional under the current contract: generic exposure, a product
 launch, or a plausible competitive mechanism does not prove financial impact.
@@ -159,19 +162,11 @@ signal and conflates two different states:
 1. a defensible directional hypothesis whose realization is unproven; and
 2. no defensible net direction at all.
 
-The smallest proposed experiment is wording and instruction calibration, not
-a schema migration. Interpret the existing field as a **potential directional
-read-through** and display `Potential positive`, `Potential negative`, `Mixed`,
-or `Direction unclear`. Direction still requires a concrete causal mechanism;
-the existing key uncertainty and watchpoints carry the qualification. Reserve
-`Direction unclear` for genuinely indeterminate direction, not merely for an
-unproven earnings result.
-
-Seventeen July is the best one-day experiment because its five Insights cover
-competition, cybersecurity demand, hardware substitution, trust cost, and
-software pull while currently assigning `uncertain` to every company. Do not
-rebalance labels toward a target distribution. Judge whether the proposed
-direction improves decision usefulness without overstating the evidence.
+The wording and instruction calibration succeeded without a schema migration.
+The field now represents a **potential directional read-through**: realization
+and magnitude remain in the key uncertainty and watchpoints, while `uncertain`
+is reserved for genuinely indeterminate direction. The resulting distribution
+was not targeted; each mapping still requires a concrete causal mechanism.
 
 ## Agent feedback
 
@@ -194,23 +189,22 @@ The feedback supports better inspection surfaces, not automated editorial
 choice. Grouping, selection, rank, causal direction, and company impact remain
 judgments.
 
-## Prioritized improvement backlog
+## Follow-up implementation status
 
-These are recorded observations, not implemented decisions:
-
-1. Add one compact `preflight` or review-ledger projection showing pair
+1. **Implemented:** a compact `preflight` review ledger showing pair
    coverage, rank/title preview, Event roles, affected entities, citation
    excerpts, disclosure eligibility, and missing or duplicate status. Omit
    prior annotations by default.
-2. Add cross-day development fingerprints and a required novelty delta without
+2. **Deferred:** cross-day development fingerprints and a required novelty delta without
    exposing prior prose as an authoring anchor.
-3. Add compact, consistent `inspect-run` projections and make import return
-   identity, hashes, and counts by default, with full detail explicit.
-4. Add exact source-text windows and historical-availability metadata for
+3. **Implemented:** compact, consistent `inspect-run` projections; the full
+   stored payload remains the backward-compatible default.
+4. **Deferred:** exact source-text windows and historical-availability metadata for
    citation review.
-5. Bound unattended Codex concurrency to roughly three or four tasks per host.
-6. Test the potential-direction label wording on 17 July before changing the
-   contract or rerunning other dates.
+5. **Deferred:** bounded unattended Codex concurrency of roughly three or four
+   tasks per host.
+6. **Implemented and calibrated:** potential-direction wording on 17 July,
+   followed by a current-harness rerun of 16 July.
 
 ## Validation evidence
 

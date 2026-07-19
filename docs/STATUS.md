@@ -138,12 +138,17 @@ cold-start implementation index, local-data lifecycle is explicit, and fast
 checks prevent the former flat source layout from returning. Attention Score
 v2 remains paused and archived without changing the production score.
 
-The active [`daily-intelligence-quality`](projects/daily-intelligence-quality/tasks.md)
-project preserves the full eleven-day audit and owns the submission-critical
-editorial correction. Its first milestone is deliberately narrow:
-deterministic X chronology using existing Feed data, while still allowing
-honestly dated synthesis. Broader cross-day memory, source-quality cues, and
-review-tool improvements remain recorded but are not current scope.
+The submission-critical daily-intelligence quality project is complete and
+archived under
+[`docs/projects/archive/daily-intelligence-quality/`](projects/archive/daily-intelligence-quality/).
+It shipped deterministic X chronology, artifact disclosure lineage, verified
+artifact excerpts, resumable Codex handoff, calibrated company direction,
+compact agent inspection, and current imported runs through 17 July. The final
+five-Insight proof is locked in its
+[`submission selection`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).
+Busy-day tail selection and cross-day novelty remain disclosed limitations,
+not blockers to the curated proof. The remaining submission work is packaging,
+not another intelligence-generation or harness cycle.
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a
@@ -156,7 +161,8 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
-| What should be done next, exactly? | [`projects/daily-intelligence-quality/tasks.md`](projects/daily-intelligence-quality/tasks.md) while that explicitly invoked project is active. |
+| Which Insights are the locked submission proof? | [`projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md) |
+| What should be done next, exactly? | Assemble the required submission deliverables against [`references/case-prompt.md`](references/case-prompt.md); start a new tracker only if Adi explicitly invokes `$project`. |
 | Which code/store/command/test owns a stage? | [`architecture/code-map.md`](architecture/code-map.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |

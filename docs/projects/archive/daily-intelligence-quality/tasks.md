@@ -69,9 +69,10 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - Date started: 2026-07-18.
 - Submission deadline: 2026-07-20.
 - Full preserved audit: [resources/overnight-audit-2026-07-18.md](resources/overnight-audit-2026-07-18.md).
-- Latest complete imported run per day covers July 5–15: 616 Events, 945
-  audience pairs, 105 selected Insights, and 685 not-selected pairs.
-- There was no tracked active project to archive. All prior trackers were
+- Latest complete imported runs now cover July 5–17. The canonical reader has
+  138 Insights: 49 Investment and 89 AI Engineering, supported by 177 unique
+  citation URLs across 202 citation records.
+- At project start there was no tracked active project to archive. All prior trackers were
   already under `docs/projects/archive/`; the empty leftover
   `docs/projects/artifact-content-refresh/` directory was removed because its
   completed tracker is already archived.
@@ -104,7 +105,7 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
       agent can audit whether it was available by the brief day.
 - [x] Every newly persisted artifact citation includes an excerpt verified
       against the frozen artifact text and a claim-specific support explanation.
-- [ ] The provisional weak-item and omission queues are adjudicated, the final
+- [x] The provisional weak-item and omission queues are adjudicated, the final
       3–5 submission candidates are named, and remaining findings are either
       fixed or explicitly deferred.
 - [x] One machine-readable command can prepare a requested date through the
@@ -114,7 +115,7 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - [x] A one-day canary proves that the deterministic outputs are inspectable
       before task launch and that the resulting task is visible under the
       repository in Codex Desktop with its thread id recorded durably.
-- [ ] Relevant tests and `scripts/check-fast.sh` pass; conceptual docs match the
+- [x] Relevant tests and `scripts/check-fast.sh` pass; conceptual docs match the
       implemented boundary; project learnings are reviewed; the tracker is
       archived.
 
@@ -141,19 +142,22 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
       durable task/run inspection. The canary froze 59 Events / 95 audience
       pairs and imported 15 Insights; retries close from the durable import
       without reopening a task later reused for review.
-- [ ] Milestone 5 — Adjudicate the editorial queues and decide the minimum rerun
+- [x] Milestone 5 — Adjudicate the editorial queues and decide the minimum rerun
       set. Acceptance: every provisional weak item and strongest omission has a
       recorded keep/rewrite/suppress/defer judgment; no all-days rerun occurs
-      merely for uniformity.
-- [ ] Milestone 6 — Produce and review the final submission proof. Acceptance:
+      merely for uniformity. The item-level outcome is preserved in
+      [the submission proof selection](resources/submission-proof-selection-2026-07-19.md).
+- [x] Milestone 6 — Produce and review the final submission proof. Acceptance:
       strongest 3–5 Insights are chronologically accurate, primary-source
       traceable, audience-useful, and defensible against the BIT rubric.
       Validate: focused qualitative audit, product inspection, and fast checks.
+      The final five are locked in
+      [the submission proof selection](resources/submission-proof-selection-2026-07-19.md).
 
 ## Execution Rules
 
-- Milestones 2–3 are complete. Continue with editorial adjudication rather than
-  expanding the chronology harness.
+- After chronology calibration, continue with editorial adjudication rather
+  than expanding the harness.
 - Preserve existing routing runs and raw Events. New routing freezes apply the
   source window; fresh workspace v3 packets apply it defensively to
   already-frozen current routing runs.
@@ -208,15 +212,20 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 - 2026-07-18: The imported editorial run, not a task's later mutable goal state,
   is terminal orchestration proof. Reconciliation checks the exact workspace's
   complete run before any App Server resume.
+- 2026-07-19: Lock five diverse submission Insights rather than presenting the
+  full corpus as proof. Preserve busy-day tail selection and cross-day novelty
+  as disclosed limitations; do not reopen broad corpus pruning before the
+  submission.
+- 2026-07-19: Treat the compact coverage preflight and run projections as
+  inspection support only. They reduce agent friction without automating
+  grouping, ranking, or editorial selection.
 
 ## Open Questions / Blockers
 
-- After accurate source dates are visible, does the reader still need an
-  explicit `Synthesis` label, or is honest prose sufficient?
-- Which historical days merit a rerun after the targeted calibration? Decide
-  from changed output quality, not from a desire for uniformity.
-- Which later harness improvements materially improve the final 3–5 before the
-  deadline? Everything else remains recorded but deferred.
+None for this project. Accurate dates and honest prose were sufficient without
+a `Synthesis` field. The current-harness reruns are complete through 17 July.
+The remaining novelty, source-window, and concurrency ideas are explicitly
+deferred and do not change the locked proof set.
 
 ## Current Batch
 
@@ -225,30 +234,21 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
 | done | Freeze the orchestration contract and map existing stage/CLI boundaries. | parent | [contract](resources/codex-daily-orchestration.md) |
 | done | Implement the date-keyed command, resumable ledger, and App Server client with contract tests. | parent | [contract](resources/codex-daily-orchestration.md) |
 | done | Run a stop-after-prepare canary, then one live visible Codex task for July 16. | parent | [contract](resources/codex-daily-orchestration.md) |
-| in_progress | Adjudicate the editorial quality queues and select the minimum rerun set. | parent | [audit](resources/overnight-audit-2026-07-18.md) |
+| done | Adjudicate the editorial quality queues and lock the final five submission Insights. | parent | [selection](resources/submission-proof-selection-2026-07-19.md) |
 
-## Backlog / Remaining Work
+## Deferred Follow-up Outside This Project
 
-- [ ] Adjudicate the 14 provisional weak selected Insights.
-- [ ] Review the strongest possible omissions and grouping mistakes.
-- [ ] Add cross-day prior-Insight search or story lineage if chronology alone
-      does not stop repeated judgments.
-- [ ] Add compact source-authority/social-only review cues if they improve
-      selection without hard-coding editorial taste.
-- [ ] Deduplicate repeated Event members inside exact-artifact groups.
-- [ ] Improve generic Event-link and not-selected reasons only where the audit
-      surface needs claim-specific explanations.
-- [ ] Consider a compact review matrix, web-citation helper, source-family cue,
-      machine-readable Engineering stack, and richer BIT company-driver
-      context after the submission-critical path is safe.
-- [ ] After citation grounding is proven, decide whether semantic artifact
-      warnings add value beyond the verified-excerpt requirement.
-- [x] Update durable architecture/status docs when the chronology boundary is
-      implemented.
-- [ ] Review and finalize `learnings.md`, run full milestone validation, and
-  archive the project.
-- [ ] After the one-day canary, decide whether scheduling, multi-day fan-out, or
-      a persistent App Server transport is justified; none is required for v1.
+- Cross-day prior-Insight fingerprints or story lineage.
+- Compact source-authority, source-family, and social-only review cues.
+- Repeated Event-member deduplication inside exact-artifact groups.
+- Optional improvements to generic Event-link and not-selected reasons.
+- Exact source-text windows, historical web-availability metadata, a bounded
+  web-citation helper, and a machine-readable Engineering stack.
+- Bounded unattended task concurrency, scheduling, multi-day fan-out, or a
+  persistent App Server transport.
+
+These are preserved post-submission improvements. None changes the locked
+five-Insight proof or the completed chronology and citation contracts.
 
 ## Validation / Test Plan
 
@@ -260,8 +260,8 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   is absent from a fresh current workspace because it is older than seven days.
 - Jul 14: the old-only OpenAI teacher packet `1991218197530378431` is excluded;
   current Jul 14 evidence remains eligible.
-- Jul 15: GPT-Red, Anthropic agentic-misalignment, and Perplexity SPACE remain a
-  valid current-day synthesis.
+- Jul 15: GPT-Red, Anthropic agentic-misalignment, and Perplexity SPACE remain
+  eligible current-day developments under the same chronology contract.
 - A synthetic source exactly seven days old remains eligible; one eight days
   old and any future-dated source are excluded.
 - `scripts/check-fast.sh` before milestone handoff.
@@ -299,3 +299,16 @@ than useful synthesis in this daily product. Adi chose the conservative rule:
   disclosure, while its future X reply stays outside the semantic packet.
   Focused tests passed 18/18, all eleven workspaces prepared, and the full fast
   suite passed 405 Python tests plus 56 frontend tests, lint, and build.
+- 2026-07-19: [DONE] Regenerated the historical corpus with the current
+  editorial contract, calibrated directional company mappings on 17 July, and
+  reran 16 July. The latest reader now contains 138 Insights across 13 days;
+  16 July no longer repeats the portfolio report or collapses every mapping to
+  `uncertain`.
+- 2026-07-19: [DONE] Added the read-only pair-coverage preflight and compact
+  `summary`, `insights`, `citations`, and `dispositions` run projections. The
+  daily skill and durable client reference now route future agents through
+  them; grouping and selection remain editorial judgments.
+- 2026-07-19: [DONE] Adjudicated the provisional weak and omission queues,
+  locked five diverse submission Insights, updated the cross-day audit, and
+  explicitly deferred lower-value tail pruning and novelty memory. Fast checks
+  passed 464 Python tests, 59 frontend tests, frontend lint, and build.
