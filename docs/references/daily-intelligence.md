@@ -87,6 +87,13 @@ The Investment context command returns the structured
 `bit-investment-context-v2` packet; the Engineering context remains markdown in
 the same stable response envelope.
 
+The Engineering context encodes BIT's publicly described Aion and data-platform
+operating mandate plus a current/near-term relevance map. It is a reader lens,
+not a claim about BIT's private architecture. An Engineering Insight must change
+a concrete research-agent, signal-production, evaluation, LLMOps, or supporting
+data-platform decision; technical novelty alone is a valid reason for
+`not_selected`.
+
 Version 2 includes one reusable profile for every company in the working
 portfolio baseline. Profiles keep attributable BIT views separate from FLI
 analyst context and provide stable company identity, operating drivers,

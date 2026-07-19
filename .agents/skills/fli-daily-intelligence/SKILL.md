@@ -27,6 +27,12 @@ your own judgment for research, retrieval, grouping, and synthesis.
    `source_scope` distinguishes firm-wide research, this flagship strategy,
    another BIT product, or mixed commentary.
 
+   The AI Engineering context describes BIT's public Aion, research-signal,
+   evaluation, LLMOps, and data-platform mandate. Use its relevance map to
+   distinguish current or near-term engineering decisions from merely
+   interesting frontier work. FLI is a bounded case-study testbed for that class
+   of system; never imply that its implementation is BIT's private architecture.
+
 3. Freeze or reuse the day's union-positive workspace:
 
    ```bash
@@ -250,6 +256,12 @@ shared theme as an automatic merge.
   its measurable proceed and stop conditions into one concise `decision_rule`.
   Keep affected surfaces, implications, hypotheses, and material constraints
   in the interpretation rather than duplicating them as parallel fields.
+- For Engineering, select a development only when it changes a concrete current
+  or plausible near-term decision for Aion, research-signal production,
+  evaluation, safe data or tool access, LLMOps, or the supporting data platform.
+  The fact that an agent could use a technology is not a transfer path. Send
+  distant, generic, or merely interesting work to `not_selected` unless a
+  bounded experiment can resolve a named operating decision.
 - For Engineering, derive numerical gates from an existing baseline or label
   them explicitly as provisional criteria to calibrate in the proposed test.
   Do not present agent-chosen percentages or sample counts as validated

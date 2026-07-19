@@ -1,16 +1,85 @@
 # AI Engineering Editorial Context
 
 This is the working context for the daily AI Engineering agent. The reader is
-an engineer building production research-agent infrastructure: retrieval,
-extraction, evidence processing, evaluation, observability, and human review.
-The target is not a generic model-release digest and not an instruction to
-adopt every new system.
+an engineer building production research-agent infrastructure for BIT Capital,
+not a generic software or model-research audience. The target is not a
+model-release digest and not an instruction to adopt every new system.
 
 Primary role context:
 
 - [BIT Capital AI Engineer role](https://bitcap.jobs.personio.com/job/2685548?language=en)
 - [BIT Capital Data Platforms role](https://bitcap.jobs.personio.com/job/1833794?language=en)
 - Long-form public-research synthesis in the product's `/bit-lens` page.
+
+## BIT operating context
+
+BIT publicly describes Aion as an agentic research platform already used daily
+by its investment team. Its agents have first-class access to BIT data, models,
+tools, research skills, and Python sidecars. The intended outputs are not merely
+answers: they include scores, alerts, signals, and insights that support equity
+research and other internal or client experiences.
+
+The public engineering mandate spans:
+
+- extraction pipelines that combine prompts, retrieval, model selection, and
+  evaluation to turn text and data into decision-useful signals;
+- production agents, reusable research skills, and safe data or tool access;
+- automated and human-in-the-loop evaluations for accuracy, hallucination,
+  uncertainty, latency, cost, and regressions;
+- LLMOps including versioning, fallbacks, error handling, monitoring, and cost
+  control; and
+- the data-platform foundations those agents depend on: Python, SQL, AWS,
+  Databricks, pipelines, APIs, lakehouse storage, orchestration, data quality,
+  security, observability, and incident response.
+
+The agent accelerates retrieval, extraction, comparison, prioritization, and
+drafting. A human still owns the investment thesis, forecast, valuation, risk,
+position size, and final decision. Engineering work is valuable when it makes
+the machine contribution more accurate, auditable, reliable, secure, or
+efficient without obscuring that boundary.
+
+These are public-role and public-product statements, not a specification of
+BIT's private architecture. Public material does not establish Aion's exact
+schema, model routing, evaluation scores, production reliability, or investment
+impact. Do not invent those details. Frontier Lab Intelligence is a case-study
+testbed for the same class of problems; do not claim that its implementation is
+BIT's implementation.
+
+## Relevance map
+
+Treat this as a priority map, not a closed technology list.
+
+**Current and high priority**
+
+- evidence extraction, retrieval, source grounding, and citation quality;
+- score, alert, signal, and insight pipelines for research;
+- research skills, agent orchestration, Python sidecars, and safe tool use;
+- model or harness selection, evaluation design, regression testing, and human
+  review;
+- hallucination, uncertainty, permissions, security, recovery, observability,
+  latency, and cost per accepted task; and
+- data ingestion, APIs, lakehouse or database primitives, data quality, and
+  production reliability that directly support the research platform.
+
+**Near-term when the transfer path is explicit**
+
+- sandboxing, durable execution, browser or computer use, MCP and other tool
+  integrations, embedding or retrieval alternatives, and workflow interfaces;
+- new models, inference techniques, or developer tools that could materially
+  improve a named Aion or FLI workload under a bounded comparison.
+
+**Normally watch or do not select**
+
+- model training, fine-tuning, robotics, speech, image or video generation,
+  payments, and unrelated serving infrastructure when no direct research-agent
+  or data-platform decision is established;
+- an interesting benchmark, paper, release, or general engineering practice
+  that does not change a current or plausible near-term workload.
+
+Do not confuse “an agent could use this” with “BIT's research platform needs
+this.” On a busy day, omit the lowest-priority item when it does not change a
+test, control, integration, operating policy, or architecture watchpoint for
+the reader.
 
 ## Reader decision
 
@@ -24,6 +93,8 @@ ignore a technique or product. It should answer:
 4. What remains unverified or does not transfer to the local stack?
 5. What is the smallest bounded experiment that can resolve the uncertainty?
 6. What success metric and stop condition prevent an endless prototype?
+7. Which current or near-term Aion, research-signal, evaluation, or data-platform
+   decision would the result actually change?
 
 ## Working principles
 
@@ -69,4 +140,7 @@ validation, persistence, and provenance.
 Reject or rewrite an Engineering Insight when it merely repeats a release,
 cannot explain the affected system in its interpretation, omits material
 transfer constraints, or proposes an unbounded next step without a measurable
-proceed-and-stop decision rule.
+proceed-and-stop decision rule. Mark it `not_selected` when it is only
+technically interesting, describes a distant possible use, or offers generic
+best practice without an attributable daily development and a concrete BIT or
+FLI decision path.

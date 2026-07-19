@@ -963,6 +963,22 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     assert len(compact["data"]["context"]["company_profile_index"]) == 34
 
 
+def test_ai_engineering_context_encodes_bit_operating_and_relevance_boundary(capsys):
+    assert editorial_cli.main(
+        ["context", "--audience", "ai_engineering", "--json", "--no-input"]
+    ) == 0
+    payload = json.loads(capsys.readouterr().out)
+    context = payload["data"]["context"]
+
+    assert payload["data"]["format"] == "markdown"
+    assert "Aion as an agentic research platform" in context
+    assert "scores, alerts, signals, and insights" in context
+    assert "Current and high priority" in context
+    assert "Do not confuse “an agent could use this”" in context
+    assert "BIT's private architecture" in context
+    assert "case-study\ntestbed" in context
+
+
 def test_company_context_lookup_is_exact_and_machine_readable(capsys):
     assert editorial_cli.main(
         ["company-context", "--company", "MSFT", "--json", "--no-input"]
