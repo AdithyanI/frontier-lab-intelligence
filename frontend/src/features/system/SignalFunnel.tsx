@@ -186,18 +186,18 @@ const UNIVERSE_DISC = { y: 78, rx: 480, ry: 60 }
 const UNIVERSE_PTS = (() => {
   const rand = mulberry32(20260719)
   const n = 780
+  const ring = PLANES[0]
   const pts: { x: number; y: number; d: number; dark: boolean; i: number }[] = []
   for (let i = 0; i < n; i += 1) {
     const angle = i * GOLDEN
     const radius = Math.sqrt((i + 0.55) / n) * 0.97
     const d = (Math.sin(angle) * radius + 1) / 2
-    pts.push({
-      x: CX + Math.cos(angle) * radius * UNIVERSE_DISC.rx,
-      y: UNIVERSE_DISC.y + Math.sin(angle) * radius * UNIVERSE_DISC.ry,
-      d,
-      dark: rand() < 0.05,
-      i,
-    })
+    const x = CX + Math.cos(angle) * radius * UNIVERSE_DISC.rx
+    const y = UNIVERSE_DISC.y + Math.sin(angle) * radius * UNIVERSE_DISC.ry
+    /* Signal lives everywhere, but concentrates where the frontier labs
+       actually talk — that concentration is why the funnel points here. */
+    const inside = ((x - CX) / ring.rx) ** 2 + ((y - ring.y) / ring.ry) ** 2 <= 1
+    pts.push({ x, y, d, dark: rand() < (inside ? 0.2 : 0.075), i })
   }
   return pts.sort((a, b) => a.d - b.d)
 })()
