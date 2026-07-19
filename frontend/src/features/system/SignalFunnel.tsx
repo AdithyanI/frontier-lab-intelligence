@@ -1,10 +1,13 @@
 /* SignalFunnel — the How-it-works hero. One cone of progressive
    signal-to-noise refinement, told as a visual story:
 
-   Overview (stage null / 'universe'): the problem statement. A vast pale
-   field of dots at the top, a ghost cone with nothing inside, and the two
-   briefs waiting at the tip. The figure poses the question: how does
-   everything become exactly these two documents?
+   Overview (stage null / 'universe'): the problem statement. A borderless
+   field of pale dots bleeding past the frame at the top — the universe is
+   not a shape, it is everything — with a few faintly darker dots buried in
+   it (the useful information) and one dashed focus ring: the decision to
+   look here. The ghost cone hangs from that ring, and the two briefs wait
+   at the tip. The figure poses the question: how does all of that become
+   exactly these two documents?
 
    Focused stages ('watch' … 'publish'): the answer, revealed one plane at
    a time. Planes at or above the focus are solved and visible; planes
@@ -161,25 +164,99 @@ function field(plane: Plane) {
 const persp = (d: number) => 0.72 + 0.42 * d
 const fade = (d: number) => 0.5 + 0.5 * d
 
+/* Deterministic PRNG so the universe field is stable across renders. */
+function mulberry32(seed: number) {
+  let a = seed
+  return () => {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+/* The universe is drawn in the same vocabulary as every other plane — a
+   tilted phyllotaxis disc — but so large it runs past both sides of the
+   frame: a plane too vast to fit. A few slightly darker dots are the
+   useful information buried in the noise. The dashed ring on its surface
+   is the decision to look here; the cone hangs from that ring. */
+const UNIVERSE_DISC = { y: 78, rx: 480, ry: 60 }
+const UNIVERSE_PTS = (() => {
+  const rand = mulberry32(20260719)
+  const n = 780
+  const pts: { x: number; y: number; d: number; dark: boolean; i: number }[] = []
+  for (let i = 0; i < n; i += 1) {
+    const angle = i * GOLDEN
+    const radius = Math.sqrt((i + 0.55) / n) * 0.97
+    const d = (Math.sin(angle) * radius + 1) / 2
+    pts.push({
+      x: CX + Math.cos(angle) * radius * UNIVERSE_DISC.rx,
+      y: UNIVERSE_DISC.y + Math.sin(angle) * radius * UNIVERSE_DISC.ry,
+      d,
+      dark: rand() < 0.05,
+      i,
+    })
+  }
+  return pts.sort((a, b) => a.d - b.d)
+})()
+
+function UniverseField({ ring }: { ring: Plane }) {
+  const { y, rx, ry } = UNIVERSE_DISC
+  const backArc = `M ${CX - rx} ${y} A ${rx} ${ry} 0 0 1 ${CX + rx} ${y}`
+  const frontArc = `M ${CX - rx} ${y} A ${rx} ${ry} 0 0 0 ${CX + rx} ${y}`
+  return (
+    <>
+      <defs>
+        {/* the universe has no edge: fade it out before the frame cuts it */}
+        <linearGradient id="universe-fade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#000" />
+          <stop offset="0.09" stopColor="#fff" />
+          <stop offset="0.91" stopColor="#fff" />
+          <stop offset="1" stopColor="#000" />
+        </linearGradient>
+        <mask id="universe-mask" maskUnits="userSpaceOnUse" x={0} y={0} width={W} height={H}>
+          <rect x={0} y={0} width={W} height={H} fill="url(#universe-fade)" />
+        </mask>
+      </defs>
+      <g mask="url(#universe-mask)">
+        <ellipse cx={CX} cy={y} rx={rx} ry={ry} fill="rgba(21, 21, 21, 0.02)" />
+        <path
+          d={backArc}
+          fill="none"
+          stroke={INK}
+          strokeOpacity={0.12}
+          strokeWidth={1}
+          strokeDasharray="2 5"
+        />
+        {UNIVERSE_PTS.map((p) => {
+          const inside =
+            ((p.x - CX) / ring.rx) ** 2 + ((p.y - ring.y) / ring.ry) ** 2 <= 1
+          return (
+            <circle
+              key={p.i}
+              cx={p.x}
+              cy={p.y}
+              r={(p.dark ? 1.9 : 1.4) * persp(p.d)}
+              fill={p.dark ? '#7d7d7a' : PALE}
+              opacity={(inside ? 0.95 : 0.7) * fade(p.d)}
+            />
+          )
+        })}
+        <path
+          d={frontArc}
+          fill="none"
+          stroke={INK}
+          strokeOpacity={0.3}
+          strokeWidth={1}
+        />
+      </g>
+    </>
+  )
+}
+
 function PlaneDots({ plane }: { plane: Plane }) {
   const pts = field(plane)
-
-  if (plane.id === 'universe') {
-    return (
-      <>
-        {pts.map((p) => (
-          <circle
-            key={p.i}
-            cx={p.x}
-            cy={p.y}
-            r={1.5 * persp(p.d)}
-            fill={PALE}
-            opacity={fade(p.d)}
-          />
-        ))}
-      </>
-    )
-  }
 
   if (plane.id === 'watch') {
     /* The screened cohort: mostly people (ink circles), some organizations
@@ -430,11 +507,63 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
         <Brief x={CX - 74} label="INVESTMENT" lit={publishOn || overview} />
         <Brief x={CX + 74} label="AI ENGINEERING" lit={publishOn || overview} />
 
-        {/* planes: back rim behind the dots, solid front rim in front */}
+        {/* planes: back rim behind the dots, solid front rim in front.
+            The universe is the exception: a borderless dot field with a
+            dashed focus ring instead of a disc. */}
         {PLANES.map((plane) => {
           const on = revealed(plane.id)
           const isActive = !overview && active === plane.id
           const labelX = CX + plane.rx + 14
+          if (plane.id === 'universe') {
+            return (
+              <g
+                key={plane.id}
+                opacity={on ? 1 : 0.18}
+                style={{ transition: 'opacity 600ms ease-out' }}
+              >
+                {on && <UniverseField ring={plane} />}
+                {/* the focus ring: the decision to look here */}
+                <ellipse
+                  cx={CX}
+                  cy={plane.y}
+                  rx={plane.rx}
+                  ry={plane.ry}
+                  fill="none"
+                  stroke={INK}
+                  strokeOpacity={0.55}
+                  strokeWidth={1.1}
+                  strokeDasharray="3 4"
+                />
+                <g
+                  fontFamily={MONO}
+                  stroke="#ffffff"
+                  strokeWidth="3.5"
+                  paintOrder="stroke"
+                  opacity={complete || overview ? 1 : 0}
+                  style={{ transition: 'opacity 500ms ease-out' }}
+                >
+                  <text
+                    x={labelX}
+                    y={complete ? plane.y + 3 : plane.y - 4}
+                    fontSize="10.5"
+                    fontWeight="600"
+                    letterSpacing="0.06em"
+                    fill={INK}
+                  >
+                    {plane.name.toUpperCase()}
+                  </text>
+                  <g opacity={complete ? 0 : 1} style={{ transition: 'opacity 500ms ease-out' }}>
+                    <text x={labelX} y={plane.y + 9} fontSize="9" fill={INK_SOFT}>
+                      {plane.concept}
+                    </text>
+                    <text x={labelX} y={plane.y + 21} fontSize="8.5" fill={MUTED}>
+                      {plane.detail}
+                    </text>
+                  </g>
+                </g>
+              </g>
+            )
+          }
           const backArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 1 ${CX + plane.rx} ${plane.y}`
           const frontArc = `M ${CX - plane.rx} ${plane.y} A ${plane.rx} ${plane.ry} 0 0 0 ${CX + plane.rx} ${plane.y}`
           return (

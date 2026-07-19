@@ -217,7 +217,10 @@ export default function HowItWorks() {
           <h3 id="how-read-title">The same funnel, in words</h3>
           <p>
             The figure above is the whole system. Here is the same story in
-            words, one stage at a time, with the design choice behind each.
+            words, one stage at a time, with the design choice behind each and
+            the numbers from one real day: 17 July 2026, when 4,537 captured
+            posts became 1,287 Events, 56 routed candidates, and 10 cited
+            Insights.
           </p>
         </header>
 
@@ -236,6 +239,12 @@ export default function HowItWorks() {
             and a rejected identity disappears from every view without
             rewriting history.
           </p>
+          <p>
+            The scale is concrete. A follow graph of 557,363 accounts and 2.8
+            million follow edges is distilled into a screened Registry of
+            2,591 active identities: 2,431 researchers and 160 organizations.
+            The 39 rejections stay on the books with their reasons.
+          </p>
         </article>
 
         <article className="how-read-block">
@@ -252,6 +261,8 @@ export default function HowItWorks() {
             Each linked paper, repo, or model card is catalogued. When retrieval
             succeeds, the normalized text is frozen for later citation checks.
             Retrieval gaps remain visible instead of being treated as evidence.
+            On 17 July this stage held 4,537 captured posts resolving into
+            1,287 exact Events.
           </p>
         </article>
 
@@ -268,6 +279,15 @@ export default function HowItWorks() {
             first. It never decides what is true or what matters, because
             attention is evidence of noise as often as of signal.
           </p>
+          <p>
+            The weights are not hidden in code; the API response declares
+            them. Version attention-v1.1 weighs cohort amplification at 55
+            percent, originator support at 25 percent, and public engagement
+            at 20 percent as a tie-breaker. The score is labeled an ordering
+            aid in the response itself, and no downstream judgment consumes
+            it. A simple formula honestly bounded beats a sophisticated one
+            pretending to measure importance.
+          </p>
         </article>
 
         <article className="how-read-block">
@@ -281,7 +301,9 @@ export default function HowItWorks() {
           </p>
           <p>
             Only fresh first-party evidence counts here. A week-old post
-            cannot be rescued by someone else reacting to it today.
+            cannot be rescued by someone else reacting to it today. On 17
+            July, 56 of the day&rsquo;s 1,287 Events crossed this bar for at
+            least one audience.
           </p>
         </article>
 
@@ -294,14 +316,23 @@ export default function HowItWorks() {
             disposition is what keeps the funnel honest.
           </p>
           <p>
-            Every claim in the final brief cites its source, and citations to
-            documents are checked against the frozen text before the brief is
-            accepted. The order of the brief is a written rationale, not a
+            Every claim in the final brief cites its source, and cited
+            excerpts are checked verbatim against the frozen text before the
+            brief is accepted. That check is the hallucination control: a
+            quote that cannot be matched to preserved source text does not
+            ship. The order of the brief is a written rationale, not a
             synthetic score.
           </p>
           <p>
-            Today an operator starts the dated run. Its stages resume from
-            checkpoints, and delivery remains an explicit action.
+            On 17 July the editorial run recorded 84 audience decisions across
+            the 56 routed Events and kept 10 Insights, 7 for engineering and 3
+            for investment. The other decisions are written declines, each
+            with its reason attached.
+          </p>
+          <p>
+            A person starts each dated run, its stages resume from saved
+            checkpoints, and sending a brief anywhere is a deliberate human
+            action, not an automatic one.
           </p>
         </article>
 
@@ -313,6 +344,22 @@ export default function HowItWorks() {
             funnel to the exact Event, the available frozen document, and the
             original post. You never have to take the system&apos;s word for
             anything it says.
+          </p>
+          <p>
+            Follow one chain from that same day. The 17 July engineering brief
+            warns that visible provider labels bias model-as-judge
+            comparisons. Its citation quotes the arXiv paper on value leakage
+            from the frozen snapshot, the citation names the exact Event, and
+            the Event holds the original announcement thread with its captured
+            metrics. That chain exists for every Insight in every brief.
+          </p>
+          <p>
+            <Link
+              className="how-beat-link"
+              to="/insights?audience=ai_engineering&status=kept&date=2026-07-17"
+            >
+              Read the 17 July engineering brief &rarr;
+            </Link>
           </p>
         </article>
       </section>
@@ -343,8 +390,10 @@ export default function HowItWorks() {
         <p className="how-map-note">
           The written deliverables travel with the repository: the
           architecture write-up with model choices per task, the prompts and
-          their rationale, the evaluation approach, and the token and cost
-          accounting per workflow.
+          their design rationale, the evaluation approach for extraction and
+          scoring, and the token and cost accounting per workflow. The{' '}
+          <Link to="/system/architecture">Architecture</Link> chapters cover
+          the same ground inside the product.
         </p>
       </section>
     </div>

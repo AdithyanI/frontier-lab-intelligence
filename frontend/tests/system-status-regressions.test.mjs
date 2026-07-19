@@ -26,7 +26,7 @@ test('How it works describes the implemented evidence and operator boundaries', 
   assert.match(howItWorks, /complete observed X days/)
   assert.match(howItWorks, /successful text snapshots are frozen/)
   assert.match(howItWorks, /Retrieval gaps remain visible/)
-  assert.match(howItWorks, /Today an operator starts the dated run/)
+  assert.match(howItWorks, /A person starts each dated run/)
   assert.match(howItWorks, /published SQLite models produced by the same pipeline/)
   assert.doesNotMatch(howItWorks, /window\.scrollTo/)
   assert.doesNotMatch(howItWorks, /Everything the cohort publishes/)
