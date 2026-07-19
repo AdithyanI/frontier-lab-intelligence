@@ -347,7 +347,7 @@ def _email_content(payload: dict[str, Any]) -> tuple[str, str, str]:
             f'<p style="margin:0 0 6px;color:#6b6b68;font-size:12px;letter-spacing:.04em;text-transform:uppercase">Frontier Lab Intelligence · {html.escape(_display_day(day))}</p>',
             f'<h1 style="margin:0 0 12px;font-size:30px;line-height:1.15">{html.escape(audience)} Daily Intelligence</h1>',
             f'<p style="margin:0 0 28px;color:#434343;line-height:1.55">The top {len(items)} cited Insights are below. The complete brief is attached as a PDF.</p>',
-            f'<ol style="margin:0;padding-left:24px">{"".join(html_items)}</ol>',
+            f'<ol style="margin:0;padding:0;list-style:none">{"".join(html_items)}</ol>',
             '<p style="margin:28px 0 0">',
             f'<a href="{html.escape(brief_url)}" style="display:inline-block;margin-right:10px;padding:11px 15px;background:#151515;color:#ffffff;text-decoration:none">Open brief</a>',
             f'<a href="{html.escape(report_url)}" style="display:inline-block;padding:10px 14px;border:1px solid #151515;color:#151515;text-decoration:none">Download PDF</a>',
