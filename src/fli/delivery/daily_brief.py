@@ -253,8 +253,9 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
         },
         {"type": "divider"},
     ]
-    if items:
-        item = items[0]
+    for index, item in enumerate(items):
+        if index:
+            blocks.append({"type": "divider"})
         rank = int(item.get("rank") or 1)
         title = _slack_escape(item.get("title"))
         event_url = _event_url(item, day)
@@ -276,30 +277,6 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
         )
         if item.get("interpretation"):
             blocks.extend(_slack_prose_blocks(item.get("interpretation")))
-
-        remaining_count = len(items) - 1
-        if remaining_count:
-            noun = "Insight" if remaining_count == 1 else "Insights"
-            more_copy = (
-                f"*{remaining_count} more cited {noun} in today’s brief.*\n"
-                "Read the complete brief for the remaining analysis, actions, and sources."
-            )
-            fallback_lines.extend(
-                [
-                    "",
-                    f"{remaining_count} more cited {noun} in today's brief.",
-                    f"Read the complete brief: {brief_url}",
-                ]
-            )
-            blocks.extend(
-                [
-                    {"type": "divider"},
-                    {
-                        "type": "section",
-                        "text": {"type": "mrkdwn", "text": more_copy},
-                    },
-                ]
-            )
     blocks.extend(
         [
             {"type": "divider"},
@@ -534,7 +511,11 @@ def deliver_daily_brief(
         "destination": resolved.destination_label(channel),
         "audience": audience,
         "date": day,
-        "insight_count": len(_top_items(payload)),
+        "insight_count": (
+            len(list(payload.get("items") or []))
+            if channel == "slack"
+            else len(_top_items(payload))
+        ),
         "pdf_delivery": pdf_delivery,
         "pdf_filename": artifact.filename,
         "report_version": artifact.report_version,

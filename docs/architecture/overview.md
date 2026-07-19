@@ -115,9 +115,8 @@ at the root of `fli`.
    audience/date projection as a linked A4 PDF. The content-addressed derived
    cache is an acceleration layer, not another report or editorial store.
 12. An operator may explicitly deliver that same complete audience/date brief.
-   Slack presents the highest-ranked title and interpretation without
-   truncation, then counts the remaining Insights and links to the complete
-   brief and PDF. Email
+   Slack presents every cited Insight with its complete interpretation, then
+   links to the complete brief and PDF. Email
    receives up to five ranked Insights with the cached PDF attached.
    The write route accepts only same-origin browser confirmations, provider
    secrets never enter the SPA, and no scheduler or automatic alert loop is

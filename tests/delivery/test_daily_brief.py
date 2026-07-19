@@ -71,7 +71,7 @@ def _artifact(tmp_path: Path) -> pdf_report.ReportArtifact:
     )
 
 
-def test_slack_delivery_shows_first_insight_in_full_then_links_to_the_rest(
+def test_slack_delivery_shows_every_insight_in_full(
     tmp_path,
     monkeypatch,
 ):
@@ -95,15 +95,17 @@ def test_slack_delivery_shows_first_insight_in_full_then_links_to_the_rest(
 
     rendered = json.dumps(captured)
     assert result["status"] == "sent"
-    assert result["insight_count"] == 5
+    assert result["insight_count"] == 6
     assert result["pdf_delivery"] == "link"
     assert "Insight 1" in rendered
     assert "FULL_INTERPRETATION_END" in rendered
-    assert "5 more cited Insights" in rendered
     assert "Read full brief" in rendered
-    assert "Insight 2" not in rendered
-    assert "Insight 5" not in rendered
-    assert "Insight 6" not in rendered
+    assert "Insight 2" in rendered
+    assert "Decision-useful interpretation 2." in rendered
+    assert "Insight 5" in rendered
+    assert "Insight 6" in rendered
+    assert "Decision-useful interpretation 6." in rendered
+    assert "more cited Insights" not in rendered
     assert "/api/insights/report.pdf" in rendered
     assert "hooks.slack" not in rendered
     section_text = [

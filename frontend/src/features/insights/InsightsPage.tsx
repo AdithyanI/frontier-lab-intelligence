@@ -368,7 +368,6 @@ function DailyBriefDelivery({
 
   const disabled = !available || !day || loading
   const selectedStatus = status?.channels.find((channel) => channel.channel === selected)
-  const remainingInsightCount = Math.max(0, (status?.total_insight_count ?? 0) - 1)
   const close = () => {
     setOpen(false)
     buttonRef.current?.focus()
@@ -443,7 +442,7 @@ function DailyBriefDelivery({
                     <em>
                       {channel.configured
                         ? channel.channel === 'slack'
-                          ? 'Top Insight + full brief'
+                          ? `All ${status.total_insight_count} Insights + PDF link`
                           : `Top ${status.top_insight_count} + PDF attachment`
                         : 'Not configured'}
                     </em>
@@ -457,8 +456,8 @@ function DailyBriefDelivery({
             <div className="insight-delivery-confirm">
               {selected === 'slack' ? (
                 <p>
-                  Send the highest-ranked title and interpretation without truncation to <strong>{selectedStatus.destination}</strong>.
-                  {remainingInsightCount > 0 && ` The message will link to the remaining ${remainingInsightCount} ${remainingInsightCount === 1 ? 'Insight' : 'Insights'} and the PDF.`}
+                  Send all {status.total_insight_count} cited Insights, with each complete interpretation, to <strong>{selectedStatus.destination}</strong>.
+                  The message will also link to the full brief and PDF.
                 </p>
               ) : (
                 <p>
@@ -486,7 +485,7 @@ function DailyBriefDelivery({
               {result.channel === 'slack' ? (
                 <p>
                   <strong>Slack notification sent.</strong>
-                  The lead title, full interpretation, and links to the complete brief and PDF were sent to {result.destination}.
+                  {result.insight_count} complete Insights and links to the full brief and PDF were sent to {result.destination}.
                 </p>
               ) : (
                 <p>

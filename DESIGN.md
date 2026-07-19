@@ -258,10 +258,9 @@ Rules:
   states without shifting the header. A quieter 44px `Send brief` action sits
   directly beside it. It opens one anchored flat panel—not a settings page—
   with Slack and email choices, masked destination, audience/date/top-Insight
-  summary, and an explicit final confirmation. Slack is labelled as one full
-  top Insight plus the complete brief; its message shows the lead title and
-  interpretation without ellipsizing them, then counts the remaining Insights
-  and links onward. Email remains up to five
+  summary, and an explicit final confirmation. Slack is labelled as all cited
+  Insights plus the PDF link; its message shows every title and complete
+  interpretation, then links onward. Email remains up to five
   Insights plus the PDF attachment. The explicit confirmation sends directly
   from the same-origin app without a second credential field. Loading,
   unavailable, provider
