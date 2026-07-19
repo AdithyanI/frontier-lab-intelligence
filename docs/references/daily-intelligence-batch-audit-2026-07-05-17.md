@@ -5,6 +5,31 @@ contract or an active project tracker. The current system contract remains in
 [`daily-intelligence.md`](daily-intelligence.md), and the repo-local skill
 remains the operational playbook.
 
+## Post-rerun conclusion
+
+Later on 19 July, the current harness regenerated 5–15 July while preserving
+the prior runs. Across those eleven dates, Investment selection fell from 55
+to 41 Insights and AI Engineering selection fell from 88 to 77. Investment
+company mappings fell from 81 to 47; only five of the new mappings are
+`uncertain`, compared with 66 previously. The change is materially more
+selective and makes directional labels useful without targeting a distribution.
+
+Across the latest 5–17 July reader there are now 142 Insights: 51 Investment
+and 91 AI Engineering, supported by 219 unique citations. All cited frozen
+artifacts had an eligible disclosure by their brief day, and no cited Event
+fell outside the seven-day source window. The strongest Investment items are
+submission-quality. The strongest three to five Engineering items per day are
+also highly decision-useful, but several busy-day tails still turn a merely
+testable release or anecdote into an Aion experiment.
+
+Only one pre-submission correction is structural: 16 July still uses the older
+Investment semantics. All nine company rows are `uncertain`, and the audited
+portfolio report is repeated as context on all seven Investment Insights.
+Rerun that date with the current harness or omit it from the final showcase.
+Do not reopen a broad pruning cycle now. Curate the best three to five Insights
+for the submission and defer cross-day novelty memory, compact cohort review,
+historical web-publication metadata, and lower-ranked tail pruning.
+
 ## Scope
 
 The deep audit covers the eleven newly generated daily briefs from 5 through
@@ -198,4 +223,3 @@ At the end of the batch:
 - `scripts/check-fast.sh` passed 451 Python tests, 57 frontend tests, frontend
   lint, and the production build; and
 - no tracked implementation changes were made as part of the audit.
-
