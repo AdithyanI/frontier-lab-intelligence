@@ -322,6 +322,22 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
   const isOn = (id: FunnelStage) =>
     active == null || active === id || (active === 'publish' && id === 'publish')
 
+  /* Camera: each focused stage gets a precomputed pan/zoom that keeps the
+     plane and its label inside the frame. The overview (universe / null)
+     shows the whole cone. */
+  const FOCUS: Record<FunnelStage, { fx: number; fy: number; s: number }> = {
+    universe: { fx: CX, fy: 0, s: 1 },
+    watch: { fx: 267, fy: 190, s: 1.2 },
+    collect: { fx: 272, fy: 288, s: 1.36 },
+    rank: { fx: 254, fy: 372, s: 1.55 },
+    judge: { fx: 275, fy: 443, s: 1.62 },
+    publish: { fx: 230, fy: 528, s: 1.45 },
+  }
+  const cam = FOCUS[active ?? 'universe']
+  const zoomed = cam.s > 1
+  const tx = zoomed ? W / 2 - cam.s * cam.fx : 0
+  const ty = zoomed ? H * 0.44 - cam.s * cam.fy : 0
+
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -329,6 +345,12 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
       aria-label="The signal funnel: from everything published publicly, a screened cohort chooses what to collect, exact Events are ranked, judged for two audiences, and distilled into two daily cited briefs."
       className="signal-funnel"
     >
+      <g
+        style={{
+          transform: `translate(${tx}px, ${ty}px) scale(${cam.s})`,
+          transition: 'transform 750ms cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      >
       {/* cone silhouette: dashed hairlines connecting the plane edges */}
       {PLANES.slice(0, -1).map((p, i) => {
         const q = PLANES[i + 1]
@@ -440,6 +462,7 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
       >
         counts: frozen July 5–15 evidence window
       </text>
+      </g>
     </svg>
   )
 }
