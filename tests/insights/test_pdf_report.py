@@ -226,6 +226,8 @@ def test_report_renders_complete_audience_workbook(audience, expected, unexpecte
     assert "RESEARCH SOURCES" not in text
     assert "Complete run:" not in text
     assert "READING NOTE" not in text
+    assert "WHY THIS RANK" not in text
+    assert "Highest decision consequence with primary-source evidence." not in text
     assert [len(destinations) for destinations in _pdf_internal_destinations(pdf_bytes)] == [
         1,
         1,
@@ -238,12 +240,13 @@ def test_report_renders_complete_audience_workbook(audience, expected, unexpecte
     assert "Portfolio context" in text
     assert "昇腾950发布说明" in text
     assert {
-        "https://x.com/example/status/1",
-        "https://x.com/example/status/2",
+        "https://frontier-lab-intelligence.adithyan.io/evidence/feed?date=2026-07-17&event_id=event-one",
         "https://example.com/research",
         "https://example.com/context",
         "https://example.com/launch",
     }.issubset(_pdf_links(pdf_bytes))
+    assert "https://x.com/example/status/1" not in _pdf_links(pdf_bytes)
+    assert "https://x.com/example/status/2" not in _pdf_links(pdf_bytes)
 
 
 def test_report_cache_is_content_addressed_and_atomic(tmp_path):

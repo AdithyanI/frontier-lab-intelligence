@@ -259,12 +259,16 @@ Rules:
   paper-white, ink, capital-blue, flat-rule language. Its reader-first opening
   combines the report title, audience/date, and a ranked list of clickable
   Insight titles; report hashes, source counts, run counts, and authoring notes
-  stay out of the opening. Each title jumps to one decision-analysis page,
+  stay out of the opening. Rank rationale remains optional audit detail in the
+  web reader and is omitted from the fixed PDF reading path. Each title jumps
+  to one decision-analysis page,
   followed by a linked source-ledger page containing every original post and
-  artifact/context citation; every later-page header returns to the brief
-  index. Serif display headings and restrained capital-blue slash markers echo
-  the case brief's editorial rhythm without reproducing BIT branding, while
-  flat rules and sans-serif body copy keep the workbook native to the product.
+  artifact/context citation; original-Feed titles use absolute canonical links
+  to their exact internal Feed Event, which owns the onward source-post link.
+  Every later-page header returns to the brief index. Serif display headings
+  and restrained capital-blue slash markers echo the case brief's editorial
+  rhythm without reproducing BIT branding, while flat rules and sans-serif body
+  copy keep the workbook native to the product.
   PDF text stays vector/selectable. Times/Helvetica/Courier Base 14 are a
   deliberate portable print analogue for the editorial display/UI/mono stack,
   with an embedded mixed-script fallback for citation titles outside WinAnsi.

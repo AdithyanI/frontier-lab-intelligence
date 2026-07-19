@@ -14,6 +14,7 @@ import re
 import tempfile
 from threading import Lock, get_ident
 from typing import Any
+from urllib.parse import urlencode
 from xml.sax.saxutils import escape
 
 from reportlab.lib.colors import HexColor
@@ -38,8 +39,9 @@ from reportlab.platypus import (
 from fli.insights import editorial_runs
 
 
-REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v5"
+REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v6"
 DEFAULT_CACHE_ROOT = editorial_runs.DEFAULT_ROOT / "pdf-cache"
+PUBLIC_APP_URL = "https://frontier-lab-intelligence.adithyan.io"
 
 PAPER = HexColor("#FFFFFF")
 SURFACE = HexColor("#F7F7F6")
@@ -654,10 +656,14 @@ def _investment_sections(item: dict[str, Any], styles: dict[str, ParagraphStyle]
                         ("VALIGN", (0, 0), (-1, -1), "TOP"),
                         ("LINEABOVE", (0, 0), (-1, 0), 0.35, BORDER),
                         ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
+                        ("LINEBEFORE", (1, 0), (-1, -1), 0.35, BORDER),
                         ("TOPPADDING", (0, 0), (-1, -1), 6),
                         ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                        ("LEFTPADDING", (0, 0), (0, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (0, -1), 7),
+                        ("LEFTPADDING", (1, 0), (-1, -1), 7),
+                        ("RIGHTPADDING", (1, 0), (-1, -1), 7),
+                        ("RIGHTPADDING", (2, 0), (2, -1), 0),
                     ]
                 ),
             )
@@ -749,12 +755,19 @@ def _source_block(
     styles: dict[str, ParagraphStyle],
     *,
     events: bool,
+    day: str,
 ) -> list[Any]:
     if events:
         feed_rank = int(value.get("feed_rank") or 0)
         role = str(value.get("role") or "source").upper()
         title = str(value.get("title") or f"Feed #{feed_rank}")
-        url = value.get("url") or value.get("source_url")
+        event_id = str(value.get("event_id") or "")
+        url = (
+            f"{PUBLIC_APP_URL}/evidence/feed?"
+            f"{urlencode({'date': day, 'event_id': event_id})}"
+            if event_id
+            else value.get("url") or value.get("source_url")
+        )
         support = value.get("supports") or value.get("reason")
     else:
         title = str(value.get("title") or "Untitled source")
@@ -837,14 +850,24 @@ def _sources_section(item: dict[str, Any], styles: dict[str, ParagraphStyle]) ->
     for row_index, (event, source) in enumerate(zip_longest(event_values, research_values)):
         source_rows.append(
             [
-                _source_block(event, styles, events=True)
+                _source_block(
+                    event,
+                    styles,
+                    events=True,
+                    day=str(item.get("day") or ""),
+                )
                 if event
                 else (
                     [Paragraph("No sources in this group.", styles["small"])]
                     if not events and row_index == 0
                     else []
                 ),
-                _source_block(source, styles, events=False)
+                _source_block(
+                    source,
+                    styles,
+                    events=False,
+                    day=str(item.get("day") or ""),
+                )
                 if source
                 else (
                     [Paragraph("No sources in this group.", styles["small"])]
@@ -909,35 +932,17 @@ def _insight(item: dict[str, Any], payload: dict[str, Any], styles: dict[str, Pa
             ]
         ),
     )
-    rationale = Table(
-        [
-            [
-                Paragraph("WHY THIS RANK", styles["label"]),
-                Paragraph(_markup(item.get("rank_rationale")), styles["small"]),
-            ]
-        ],
-        colWidths=[31 * mm, CONTENT_WIDTH - 31 * mm],
-        style=TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, -1), SURFACE),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("BOX", (0, 0), (-1, -1), 0.35, BORDER),
-                ("TOPPADDING", (0, 0), (-1, -1), 7),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-                ("LEFTPADDING", (0, 0), (0, 0), 7),
-                ("RIGHTPADDING", (0, 0), (0, 0), 7),
-                ("LEFTPADDING", (1, 0), (1, 0), 0),
-                ("RIGHTPADDING", (1, 0), (1, 0), 7),
-            ]
-        ),
-    )
     story: list[Any] = [
         Spacer(1, 7 * mm),
         header,
         Spacer(1, 4.5 * mm),
-        HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=4 * mm),
-        rationale,
-        Spacer(1, 5 * mm),
+        HRFlowable(
+            width="100%",
+            thickness=0.8,
+            color=BLUE,
+            spaceBefore=0,
+            spaceAfter=5 * mm,
+        ),
         _opening_table(item, styles),
     ]
     analysis = item.get("analysis") or {}
