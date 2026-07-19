@@ -35,7 +35,7 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace"
 
 const GOLDEN = Math.PI * (3 - Math.sqrt(5))
 
-const W = 520
+const W = 560
 const CX = 195
 
 const STAGE_ORDER: FunnelStage[] = [
