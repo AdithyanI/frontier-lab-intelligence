@@ -258,8 +258,11 @@ Rules:
   states without shifting the header. A quieter 44px `Send brief` action sits
   directly beside it. It opens one anchored flat panel—not a settings page—
   with Slack and email choices, masked destination, audience/date/top-Insight
-  summary, and an explicit final confirmation. Slack is labelled as top
-  Insights plus PDF link; email as top Insights plus PDF attachment. Public
+  summary, and an explicit final confirmation. Slack is labelled as one full
+  top Insight plus the complete brief; its message shows `What changed`, the
+  audience interpretation, and the next step without ellipsizing them, then
+  counts the remaining Insights and links onward. Email remains up to five
+  Insights plus the PDF attachment. Public
   sends request an operator access key only at confirmation and retain it in
   session storage only after a successful send. Loading, unavailable, provider
   error, sending, and sent states remain inside the same panel; provider

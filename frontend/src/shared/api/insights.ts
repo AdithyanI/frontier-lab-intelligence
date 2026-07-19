@@ -20,6 +20,7 @@ export interface BriefDeliveryStatus {
   reason: string | null
   audience: InsightAudience
   date: string | null
+  total_insight_count: number
   top_insight_count: number
   access: {
     required: boolean

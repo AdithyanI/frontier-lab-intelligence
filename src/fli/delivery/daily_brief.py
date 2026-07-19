@@ -229,15 +229,54 @@ def _slack_escape(value: Any) -> str:
     return _plain(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def _trim(value: Any, limit: int) -> str:
-    text = _plain(value)
-    if len(text) <= limit:
-        return text
-    return f"{text[: limit - 1].rstrip()}…"
+def _slack_text_chunks(value: Any, *, limit: int = 2700) -> list[str]:
+    """Split complete prose across Slack sections without ellipsizing it."""
+    words = _plain(value).split()
+    chunks: list[str] = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(_slack_escape(candidate)) <= limit:
+            current = candidate
+            continue
+        if current:
+            chunks.append(_slack_escape(current))
+            current = ""
+        while word and len(_slack_escape(word)) > limit:
+            low, high = 1, len(word)
+            while low < high:
+                midpoint = (low + high + 1) // 2
+                if len(_slack_escape(word[:midpoint])) <= limit:
+                    low = midpoint
+                else:
+                    high = midpoint - 1
+            chunks.append(_slack_escape(word[:low]))
+            word = word[low:]
+        current = word
+    if current:
+        chunks.append(_slack_escape(current))
+    return chunks
+
+
+def _slack_prose_blocks(label: str, value: Any) -> list[dict[str, Any]]:
+    chunks = _slack_text_chunks(value)
+    return [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*{label}*\n{chunk}" if index == 0 else chunk,
+            },
+        }
+        for index, chunk in enumerate(chunks)
+    ]
 
 
 def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    items = _top_items(payload)
+    items = sorted(
+        list(payload.get("items") or []),
+        key=lambda item: int(item.get("rank") or 0),
+    )
     day = str(payload.get("date") or payload.get("requested_date") or "")
     audience = _audience_label(str(payload.get("audience") or "investment"))
     brief_url, report_url = _urls(payload)
@@ -254,27 +293,66 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": f"*{_display_day(day)}* · Top {len(items)} cited Insights",
+                    "text": f"*{_display_day(day)}* · {len(items)} cited Insights",
                 }
             ],
         },
         {"type": "divider"},
     ]
-    for item in items:
-        rank = int(item.get("rank") or 0)
+    if items:
+        item = items[0]
+        rank = int(item.get("rank") or 1)
         title = _slack_escape(item.get("title"))
-        interpretation = _slack_escape(_trim(item.get("interpretation"), 240))
         event_url = _event_url(item, day)
-        fallback_lines.append(f"{rank}. {_plain(item.get('title'))} - {_trim(item.get('interpretation'), 180)}")
+        fallback_lines.extend(
+            [
+                "",
+                f"{rank}. {_plain(item.get('title'))}",
+                f"What changed: {_plain(item.get('what_changed'))}",
+                f"{audience} interpretation: {_plain(item.get('interpretation'))}",
+                f"Next step: {_plain(item.get('next_step'))}",
+            ]
+        )
         blocks.append(
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*<{event_url}|{rank}. {title}>*\n{interpretation}",
+                    "text": f"*<{event_url}|{rank}. {title}>*",
                 },
             }
         )
+        for label, value in (
+            ("What changed", item.get("what_changed")),
+            (f"{audience} interpretation", item.get("interpretation")),
+            ("Next step", item.get("next_step")),
+        ):
+            if value:
+                blocks.extend(_slack_prose_blocks(label, value))
+
+        remaining_count = len(items) - 1
+        if remaining_count:
+            noun = "Insight" if remaining_count == 1 else "Insights"
+            more_copy = (
+                f"*{remaining_count} more cited {noun} in today’s brief.*\n"
+                "Read the complete brief for the remaining analysis, actions, and sources."
+            )
+            fallback_lines.extend(
+                [
+                    "",
+                    f"{remaining_count} more cited {noun} in today's brief.",
+                    f"Read the complete brief: {brief_url}",
+                ]
+            )
+            blocks.extend(
+                [
+                    {"type": "divider"},
+                    {
+                        "type": "section",
+                        "text": {"type": "mrkdwn", "text": more_copy},
+                    },
+                ]
+            )
     blocks.extend(
         [
             {"type": "divider"},
@@ -283,7 +361,11 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 "elements": [
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "Open brief", "emoji": False},
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Read full brief",
+                            "emoji": False,
+                        },
                         "url": brief_url,
                     },
                     {
@@ -295,7 +377,7 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
             },
         ]
     )
-    fallback_lines.extend([f"Open brief: {brief_url}", f"Download PDF: {report_url}"])
+    fallback_lines.extend([f"Read full brief: {brief_url}", f"Download PDF: {report_url}"])
     return {"text": "\n".join(fallback_lines), "blocks": blocks}
 
 
@@ -434,6 +516,7 @@ def delivery_status_payload(
 ) -> dict[str, Any]:
     resolved = settings or DeliverySettings.from_environment()
     available = bool(payload.get("content_kind") == "daily_editorial" and payload.get("available"))
+    total_insight_count = len(list(payload.get("items") or [])) if available else 0
     access_ready = _public_access_ready(resolved, remote_host)
     channels = []
     for channel, label, pdf_delivery in (
@@ -457,6 +540,7 @@ def delivery_status_payload(
         "reason": None if available else str(payload.get("reason") or "No complete Daily Brief is available."),
         "audience": payload.get("audience"),
         "date": payload.get("date") or payload.get("requested_date"),
+        "total_insight_count": total_insight_count,
         "top_insight_count": len(_top_items(payload)) if available else 0,
         "access": {
             "required": not _is_loopback(remote_host),

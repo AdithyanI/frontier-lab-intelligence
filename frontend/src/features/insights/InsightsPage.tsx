@@ -380,6 +380,7 @@ function DailyBriefDelivery({
 
   const disabled = !available || !day || loading
   const selectedStatus = status?.channels.find((channel) => channel.channel === selected)
+  const remainingInsightCount = Math.max(0, (status?.total_insight_count ?? 0) - 1)
   const close = () => {
     setOpen(false)
     buttonRef.current?.focus()
@@ -434,7 +435,7 @@ function DailyBriefDelivery({
           {state === 'choose' && status && (
             <>
               <p className="insight-delivery-summary">
-                {AUDIENCE_COPY[audience].label} · {displayInsightDay(day)} · Top {status.top_insight_count}
+                {AUDIENCE_COPY[audience].label} · {displayInsightDay(day)} · {status.total_insight_count} Insights
               </p>
               <div className="insight-delivery-options">
                 {status.channels.map((channel) => (
@@ -453,7 +454,9 @@ function DailyBriefDelivery({
                     </span>
                     <em>
                       {channel.configured
-                        ? `Top ${status.top_insight_count} + PDF ${channel.pdf_delivery}`
+                        ? channel.channel === 'slack'
+                          ? 'Top Insight + full brief'
+                          : `Top ${status.top_insight_count} + PDF attachment`
                         : 'Not configured'}
                     </em>
                   </button>
@@ -467,10 +470,17 @@ function DailyBriefDelivery({
 
           {(state === 'confirm' || state === 'sending') && status && selectedStatus && (
             <div className="insight-delivery-confirm">
-              <p>
-                Send the top {status.top_insight_count} cited Insights to <strong>{selectedStatus.destination}</strong>.
-                The PDF will be included as {selected === 'email' ? 'an attachment' : 'a download link'}.
-              </p>
+              {selected === 'slack' ? (
+                <p>
+                  Send the highest-ranked Insight in full to <strong>{selectedStatus.destination}</strong>.
+                  {remainingInsightCount > 0 && ` The message will link to the remaining ${remainingInsightCount} ${remainingInsightCount === 1 ? 'Insight' : 'Insights'} and the PDF.`}
+                </p>
+              ) : (
+                <p>
+                  Send the top {status.top_insight_count} cited Insights to <strong>{selectedStatus.destination}</strong>.
+                  The complete PDF will be attached.
+                </p>
+              )}
               <dl>
                 <div><dt>Audience</dt><dd>{AUDIENCE_COPY[audience].label}</dd></div>
                 <div><dt>Date</dt><dd>{displayInsightDay(day)}</dd></div>
@@ -500,10 +510,17 @@ function DailyBriefDelivery({
           {state === 'sent' && result && (
             <div className="insight-delivery-message insight-delivery-message--success" role="status">
               <span aria-hidden="true">✓</span>
-              <p>
-                <strong>{result.channel === 'slack' ? 'Slack notification sent.' : 'Email sent.'}</strong>
-                {result.insight_count} Insights and the PDF {result.pdf_delivery} were delivered to {result.destination}.
-              </p>
+              {result.channel === 'slack' ? (
+                <p>
+                  <strong>Slack notification sent.</strong>
+                  The highest-ranked Insight and links to the complete brief and PDF were sent to {result.destination}.
+                </p>
+              ) : (
+                <p>
+                  <strong>Email sent.</strong>
+                  {result.insight_count} Insights and the attached PDF were sent to {result.destination}.
+                </p>
+              )}
               <button type="button" onClick={close}>Done</button>
             </div>
           )}

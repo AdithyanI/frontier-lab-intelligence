@@ -18,7 +18,7 @@ CLIENT = TestClient(app)
 
 
 def _payload() -> dict:
-    return {
+    payload = {
         "content_kind": "daily_editorial",
         "available": True,
         "reason": None,
@@ -30,6 +30,7 @@ def _payload() -> dict:
             {
                 "rank": rank,
                 "title": f"Insight {rank}",
+                "what_changed": f"What changed for Insight {rank}.",
                 "interpretation": f"Decision-useful interpretation {rank}.",
                 "next_step": f"Take next step {rank}.",
                 "events": [{"event_id": f"event-{rank}"}],
@@ -37,6 +38,11 @@ def _payload() -> dict:
             for rank in range(1, 7)
         ],
     }
+    payload["items"][0]["interpretation"] = (
+        "This complete interpretation must remain visible in Slack. " * 60
+        + "FULL_INTERPRETATION_END"
+    )
+    return payload
 
 
 def _settings(*, operator_token: str | None = "operator-secret") -> daily_brief.DeliverySettings:
@@ -67,7 +73,10 @@ def _artifact(tmp_path: Path) -> pdf_report.ReportArtifact:
     )
 
 
-def test_slack_delivery_contains_only_top_five_and_pdf_link(tmp_path, monkeypatch):
+def test_slack_delivery_shows_first_insight_in_full_then_links_to_the_rest(
+    tmp_path,
+    monkeypatch,
+):
     captured: dict = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -93,10 +102,22 @@ def test_slack_delivery_contains_only_top_five_and_pdf_link(tmp_path, monkeypatc
     assert result["insight_count"] == 5
     assert result["pdf_delivery"] == "link"
     assert "Insight 1" in rendered
-    assert "Insight 5" in rendered
+    assert "What changed for Insight 1." in rendered
+    assert "FULL_INTERPRETATION_END" in rendered
+    assert "Take next step 1." in rendered
+    assert "5 more cited Insights" in rendered
+    assert "Read full brief" in rendered
+    assert "Insight 2" not in rendered
+    assert "Insight 5" not in rendered
     assert "Insight 6" not in rendered
     assert "/api/insights/report.pdf" in rendered
     assert "hooks.slack" not in rendered
+    section_text = [
+        block["text"]["text"]
+        for block in captured["blocks"]
+        if block["type"] == "section"
+    ]
+    assert all(len(text) <= 3000 for text in section_text)
 
 
 def test_email_delivery_attaches_pdf_and_contains_only_top_five(tmp_path):
@@ -173,6 +194,7 @@ def test_status_discloses_labels_but_not_delivery_secrets():
     rendered = json.dumps(status)
 
     assert status["top_insight_count"] == 5
+    assert status["total_insight_count"] == 6
     assert status["access"] == {"required": True, "configured": True}
     assert all(channel["available"] for channel in status["channels"])
     assert "operator-secret" not in rendered
@@ -221,6 +243,7 @@ def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypa
 
     assert status.status_code == 200
     assert status.json()["top_insight_count"] == 5
+    assert status.json()["total_insight_count"] == 6
     assert response.status_code == 200
     assert response.json()["status"] == "sent"
     assert calls == [
