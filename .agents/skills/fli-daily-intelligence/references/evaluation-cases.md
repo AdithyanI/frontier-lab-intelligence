@@ -245,3 +245,21 @@ Expected behavior:
   and
 - remains concise by removing repetition, not by withholding the setup a new
   reader needs.
+
+Observed failure examples (from the 19 July v5 batch; use as negative
+references when forward-testing):
+
+- **One-sentence release note.** 7 July Engineering: *"Omnigent released
+  contextual policies that can use prior reads, accumulated risk, and session
+  spend before allowing the next tool call."* A cold reader learns neither
+  what Omnigent is nor why the change matters. Fails the named-thing and
+  floor checks.
+- **Anonymous actor with undefined terms.** 17 July Engineering ("Blind
+  provider labels"): *"Researchers used more than one million rollouts…"*
+  while its own citations name Owain Evans and the paper "Value Leakage".
+  Fails the named-actor check and leaves "rollouts" unexplained.
+- **Specificity laundering.** 14 July Engineering: *"Aion and FLI therefore
+  need human annotations as evolving evaluation data."* Replace "Aion and
+  FLI" with "any agent system" and the sentence is unchanged; it also
+  addresses FLI's needs to a BIT reader. Fails the replace-test and the
+  FLI self-reference rule.

@@ -14,7 +14,7 @@ from typing import Any
 
 
 DRAFT_SCHEMA_VERSION = "daily-intelligence-draft-v4"
-SKILL_VERSION = "fli-daily-intelligence-v5"
+SKILL_VERSION = "fli-daily-intelligence-v6"
 AUDIENCES = ("investment", "ai_engineering")
 EVENT_ROLES = ("primary", "supporting", "context", "counterevidence")
 CITATION_KINDS = ("event", "artifact", "web", "context")

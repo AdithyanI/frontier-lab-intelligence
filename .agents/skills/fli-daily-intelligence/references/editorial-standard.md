@@ -83,6 +83,26 @@ needed to answer:
 - what the evidence actually found; and
 - what important limit prevents a broader conclusion.
 
+Enforce that with a mechanical cold-analyst check on every `what_changed`
+before validation. Each one must:
+
+1. **Name the actor.** Never write "researchers" or "a study" when the
+   citation names the people, lab, or company. If the actor is unfamiliar,
+   add a plain-word apposition on first use ("Parlance Labs, an AI
+   consultancy, ...").
+2. **Name the thing.** State the paper, product, or benchmark by name and say
+   in one plain clause what it is or does.
+3. **Explain each term of art once.** "Rollouts", "soft F1", "zero data
+   retention", or similar terms get a short plain-English gloss at first use.
+   A number the reader cannot interpret is noise, not evidence.
+4. **Meet the floor.** `what_changed` is normally three to five full
+   sentences. A one-sentence `what_changed` is a defect unless the development
+   truly is one self-explanatory fact. The ceiling is padding, not length:
+   setup a cold reader needs is never padding.
+
+If any needed setup fact is not in the frozen packet or citation excerpts,
+retrieve it from the frozen evidence or bounded web research; never invent it.
+
 For a study, benchmark, or evaluation, name the tested setup in plain English
 before reporting the result. Explain a necessary term such as provider framing
 once rather than leaving the reader to infer it. For a release or operational
@@ -96,6 +116,19 @@ or failure mode, and the decision that should change. Keep the reproducible
 action in `next_step` and its measurable acceptance and rejection conditions in
 the Engineering `decision_rule`; the opening fields may motivate those controls
 without duplicating the complete experiment.
+
+Two naming rules protect the Engineering interpretation:
+
+- **Aion passes the replace-test or is rewritten.** Naming Aion is right when
+  the sentence ties the evidence to a specific public Aion workflow (signal
+  extraction, research-agent evaluation, source grounding, tool and data
+  access, monitoring, or the data platform). If replacing "Aion" with "any
+  agent" leaves the sentence equally true, the interpretation is not done.
+- **Do not address FLI's own needs to the reader.** The BIT reader does not
+  care what FLI needs. Never write "Aion and FLI therefore need X". When FLI
+  is genuinely useful as a bounded testbed, say so in reader-relative terms
+  ("the pipeline behind this brief") and only in `next_step` framing, not as
+  a second affected system in the interpretation.
 
 ## Evidence roles
 

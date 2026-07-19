@@ -112,6 +112,16 @@ your own judgment for research, retrieval, grouping, and synthesis.
    causal chain, technical precision, and honest uncertainty; simplify the
    language and sentence structure, not the judgment. Concise means no wasted
    words, not missing setup.
+
+   Close the pass with the editorial standard's mechanical checks on every
+   selected Insight; treat any failure as unfinished writing, not style:
+
+   - the cold-analyst check on `what_changed`: named actor, named thing,
+     each term of art explained once, and the three-to-five-sentence floor;
+   - the Aion replace-test on every Engineering `interpretation`: if "Aion"
+     can become "any agent" without changing the sentence, rewrite it around
+     the specific public workflow or remove the name; and
+   - no "FLI needs X" phrasing addressed to the BIT reader.
 9. Run the read-only coverage preflight, then validate repeatedly until the
    complete cohort passes:
 
