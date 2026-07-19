@@ -252,7 +252,6 @@ function DailyBriefDelivery({
   const [status, setStatus] = useState<BriefDeliveryStatus | null>(null)
   const [selected, setSelected] = useState<BriefDeliveryChannel | null>(null)
   const [result, setResult] = useState<BriefDeliveryResult | null>(null)
-  const [accessKey, setAccessKey] = useState('')
   const [error, setError] = useState('')
   const actionRef = useRef<HTMLDivElement | null>(null)
   const buttonRef = useRef<HTMLButtonElement | null>(null)
@@ -268,7 +267,6 @@ function DailyBriefDelivery({
     setStatus(null)
     setSelected(null)
     setResult(null)
-    setAccessKey('')
     setError('')
     return () => requestRef.current?.abort()
   }, [audience, day])
@@ -318,7 +316,6 @@ function DailyBriefDelivery({
       }
       if (requestRef.current !== controller) return
       setStatus(payload)
-      setAccessKey(window.sessionStorage.getItem('fli-delivery-access-key') ?? '')
       setState('choose')
     } catch (cause) {
       if (controller.signal.aborted) return
@@ -337,24 +334,18 @@ function DailyBriefDelivery({
 
   const send = async () => {
     if (!selected || !status || state === 'sending') return
-    if (status.access.required && !accessKey.trim()) {
-      setError('Enter the delivery access key to continue.')
-      return
-    }
     const controller = new AbortController()
     requestRef.current?.abort()
     requestRef.current = controller
     setState('sending')
     setError('')
     try {
-      const headers: Record<string, string> = {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      }
-      if (accessKey.trim()) headers.Authorization = `Bearer ${accessKey.trim()}`
       const response = await fetch('/api/insights/delivery', {
         method: 'POST',
-        headers,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ audience, date: day, channel: selected }),
         signal: controller.signal,
       })
@@ -364,9 +355,6 @@ function DailyBriefDelivery({
         throw new Error(detail || `Delivery failed with status ${response.status}.`)
       }
       if (requestRef.current !== controller) return
-      if (status.access.required) {
-        window.sessionStorage.setItem('fli-delivery-access-key', accessKey.trim())
-      }
       setResult(payload)
       setState('sent')
     } catch (cause) {
@@ -462,9 +450,6 @@ function DailyBriefDelivery({
                   </button>
                 ))}
               </div>
-              {!status.access.configured && (
-                <p className="insight-delivery-note">Public delivery is waiting for an operator access key.</p>
-              )}
             </>
           )}
 
@@ -485,18 +470,6 @@ function DailyBriefDelivery({
                 <div><dt>Audience</dt><dd>{AUDIENCE_COPY[audience].label}</dd></div>
                 <div><dt>Date</dt><dd>{displayInsightDay(day)}</dd></div>
               </dl>
-              {status.access.required && (
-                <label className="insight-delivery-access">
-                  <span>Delivery access key</span>
-                  <input
-                    type="password"
-                    value={accessKey}
-                    onChange={(event) => setAccessKey(event.target.value)}
-                    autoComplete="off"
-                    disabled={state === 'sending'}
-                  />
-                </label>
-              )}
               {error && <p className="insight-delivery-inline-error" role="alert">{error}</p>}
               <div className="insight-delivery-confirm-actions">
                 <button type="button" onClick={() => { setState('choose'); setError('') }} disabled={state === 'sending'}>Back</button>

@@ -26,8 +26,9 @@ from datetime import date as calendar_date
 from pathlib import Path
 from threading import Thread
 from typing import Literal
+from urllib.parse import urlsplit
 
-from fastapi import FastAPI, Header, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -75,6 +76,20 @@ class DailyBriefDeliveryRequest(BaseModel):
     audience: Literal["investment", "ai_engineering"]
     date: calendar_date
     channel: Literal["slack", "email"]
+
+
+def _require_same_origin_delivery(request: Request) -> None:
+    """Keep browser-triggered delivery on the app's own origin without a key UI."""
+    request_host = (request.url.hostname or "").lower()
+    if request_host in {"localhost", "127.0.0.1", "::1"}:
+        return
+    origin = request.headers.get("origin")
+    origin_host = (urlsplit(origin).hostname or "").lower() if origin else ""
+    if not origin_host or origin_host != request_host:
+        raise HTTPException(
+            status_code=403,
+            detail="Daily Brief delivery must be confirmed from the Insights page.",
+        )
 
 
 def _model_conn():
@@ -518,7 +533,6 @@ def insight_report_pdf(
 
 @app.get("/api/insights/delivery")
 def insight_delivery_status(
-    request: Request,
     insight_date: calendar_date = Query(..., alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
@@ -530,7 +544,6 @@ def insight_delivery_status(
     return JSONResponse(
         brief_delivery.delivery_status_payload(
             payload,
-            remote_host=request.url.hostname,
         )
     )
 
@@ -539,9 +552,9 @@ def insight_delivery_status(
 def send_insight_delivery(
     request: Request,
     delivery_request: DailyBriefDeliveryRequest,
-    authorization: str | None = Header(default=None),
 ) -> JSONResponse:
     """Send one explicitly confirmed Daily Brief through a configured adapter."""
+    _require_same_origin_delivery(request)
     payload = editorial_store.editorial_insights_payload(
         audience=delivery_request.audience,
         day=delivery_request.date.isoformat(),
@@ -550,15 +563,7 @@ def send_insight_delivery(
         result = brief_delivery.deliver_daily_brief(
             payload,
             channel=delivery_request.channel,
-            authorization=authorization,
-            remote_host=request.url.hostname,
         )
-    except brief_delivery.DeliveryAuthorizationError as exc:
-        raise HTTPException(
-            status_code=401,
-            detail=str(exc),
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from exc
     except (brief_delivery.DeliveryNotConfigured, pdf_report.ReportUnavailable) as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except brief_delivery.DeliveryFailed as exc:

@@ -6,7 +6,6 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 import httpx
-import pytest
 
 from fli.delivery import daily_brief
 from fli.insights import pdf_report
@@ -45,7 +44,7 @@ def _payload() -> dict:
     return payload
 
 
-def _settings(*, operator_token: str | None = "operator-secret") -> daily_brief.DeliverySettings:
+def _settings() -> daily_brief.DeliverySettings:
     return daily_brief.DeliverySettings(
         slack_webhook_url="https://hooks.slack.test/services/redacted",
         slack_destination_label="#frontier-lab-intelligence",
@@ -58,7 +57,6 @@ def _settings(*, operator_token: str | None = "operator-secret") -> daily_brief.
         smtp_from_email="briefs@example.com",
         smtp_from_name="Frontier Lab Intelligence",
         smtp_reply_to="reply@example.com",
-        operator_token=operator_token,
     )
 
 
@@ -91,8 +89,6 @@ def test_slack_delivery_shows_first_insight_in_full_then_links_to_the_rest(
     result = daily_brief.deliver_daily_brief(
         _payload(),
         channel="slack",
-        authorization="Bearer operator-secret",
-        remote_host="frontier-lab-intelligence.adithyan.io",
         settings=_settings(),
         slack_transport=httpx.MockTransport(handler),
     )
@@ -164,38 +160,16 @@ def test_email_delivery_attaches_pdf_and_contains_only_top_five(tmp_path):
     assert attachments[0].get_filename() == "fli-daily-brief-2026-07-17-investment.pdf"
 
 
-def test_public_delivery_requires_operator_key_before_provider_call(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        daily_brief.pdf_report,
-        "get_or_create_report",
-        lambda *_args, **_kwargs: _artifact(tmp_path),
-    )
-    with pytest.raises(daily_brief.DeliveryAuthorizationError):
-        daily_brief.deliver_daily_brief(
-            _payload(),
-            channel="slack",
-            authorization=None,
-            remote_host="frontier-lab-intelligence.adithyan.io",
-            settings=_settings(),
-            slack_transport=httpx.MockTransport(
-                lambda _request: pytest.fail("Slack must not be called")
-            ),
-        )
-
-
 def test_status_discloses_labels_but_not_delivery_secrets():
     status = daily_brief.delivery_status_payload(
         _payload(),
         settings=_settings(),
-        remote_host="frontier-lab-intelligence.adithyan.io",
     )
     rendered = json.dumps(status)
 
     assert status["top_insight_count"] == 5
     assert status["total_insight_count"] == 6
-    assert status["access"] == {"required": True, "configured": True}
     assert all(channel["available"] for channel in status["channels"])
-    assert "operator-secret" not in rendered
     assert "smtp-secret" not in rendered
     assert "hooks.slack" not in rendered
 
@@ -235,7 +209,12 @@ def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypa
     status = CLIENT.get(f"/api/insights/delivery?audience=investment&date={DAY}")
     response = CLIENT.post(
         "/api/insights/delivery",
-        headers={"Authorization": "Bearer operator-secret"},
+        headers={"Origin": "http://testserver"},
+        json={"audience": "investment", "date": DAY, "channel": "slack"},
+    )
+    cross_site = CLIENT.post(
+        "/api/insights/delivery",
+        headers={"Origin": "https://unrelated.example"},
         json={"audience": "investment", "date": DAY, "channel": "slack"},
     )
 
@@ -244,10 +223,5 @@ def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypa
     assert status.json()["total_insight_count"] == 6
     assert response.status_code == 200
     assert response.json()["status"] == "sent"
-    assert calls == [
-        {
-            "channel": "slack",
-            "authorization": "Bearer operator-secret",
-            "remote_host": "testserver",
-        }
-    ]
+    assert cross_site.status_code == 403
+    assert calls == [{"channel": "slack"}]

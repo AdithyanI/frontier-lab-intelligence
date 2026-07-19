@@ -1,7 +1,6 @@
 """Manual, audience-specific intelligence delivery."""
 
 from fli.delivery.daily_brief import (
-    DeliveryAuthorizationError,
     DeliveryFailed,
     DeliveryNotConfigured,
     DeliverySettings,
@@ -10,7 +9,6 @@ from fli.delivery.daily_brief import (
 )
 
 __all__ = [
-    "DeliveryAuthorizationError",
     "DeliveryFailed",
     "DeliveryNotConfigured",
     "DeliverySettings",

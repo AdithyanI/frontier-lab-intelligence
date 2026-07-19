@@ -119,9 +119,10 @@ at the root of `fli`.
    truncation, then counts the remaining Insights and links to the complete
    brief and PDF. Email
    receives up to five ranked Insights with the cached PDF attached.
-   The public write route requires a server-configured bearer key, provider
+   The write route accepts only same-origin browser confirmations, provider
    secrets never enter the SPA, and no scheduler or automatic alert loop is
-   implied by this manual adapter.
+   implied by this manual adapter. This is a deliberate lightweight boundary,
+   not user authentication.
 
 ## Important Boundaries
 
@@ -156,7 +157,7 @@ at the root of `fli`.
   editorial truth; the normalized run remains the only report input.
 - **Explicit delivery boundary:** delivery reads only the canonical complete
   brief and its derived PDF. A human confirmation owns each send; Slack, SMTP,
-  and operator credentials are runtime secrets and never part of product data.
+  and email credentials are runtime secrets and never part of product data.
 - **Agent freedom behind a narrow write boundary:** the agent may search,
   compare, group, and research freely, but only a versioned Insight schema and
   complete candidate disposition may enter product state.

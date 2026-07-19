@@ -22,10 +22,6 @@ export interface BriefDeliveryStatus {
   date: string | null
   total_insight_count: number
   top_insight_count: number
-  access: {
-    required: boolean
-    configured: boolean
-  }
   channels: BriefDeliveryChannelStatus[]
 }
 

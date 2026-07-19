@@ -262,9 +262,9 @@ Rules:
   top Insight plus the complete brief; its message shows the lead title and
   interpretation without ellipsizing them, then counts the remaining Insights
   and links onward. Email remains up to five
-  Insights plus the PDF attachment. Public
-  sends request an operator access key only at confirmation and retain it in
-  session storage only after a successful send. Loading, unavailable, provider
+  Insights plus the PDF attachment. The explicit confirmation sends directly
+  from the same-origin app without a second credential field. Loading,
+  unavailable, provider
   error, sending, and sent states remain inside the same panel; provider
   secrets and delivery metadata never enter the reading surface. The exported
   A4 workbook uses the same

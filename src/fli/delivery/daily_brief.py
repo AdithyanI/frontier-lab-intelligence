@@ -9,9 +9,7 @@ from datetime import datetime, timezone
 from email.message import EmailMessage
 from email.utils import formataddr, formatdate, make_msgid
 import hashlib
-import hmac
 import html
-import ipaddress
 import os
 from pathlib import Path
 import smtplib
@@ -34,10 +32,6 @@ DeliveryChannel = Literal["slack", "email"]
 
 class DeliveryNotConfigured(ValueError):
     """The selected delivery channel is not ready for use."""
-
-
-class DeliveryAuthorizationError(PermissionError):
-    """A public delivery request did not supply the operator credential."""
 
 
 class DeliveryFailed(RuntimeError):
@@ -81,7 +75,6 @@ class DeliverySettings:
     smtp_from_email: str
     smtp_from_name: str
     smtp_reply_to: str | None
-    operator_token: str | None
     timeout_seconds: float = 15.0
 
     @classmethod
@@ -123,7 +116,6 @@ class DeliverySettings:
             ),
             smtp_from_name=value("ACS_SMTP_FROM_NAME", "Frontier Lab Intelligence"),
             smtp_reply_to=value("ACS_SMTP_REPLY_TO", "adi@aipodcast.ing") or None,
-            operator_token=value("FLI_DELIVERY_OPERATOR_TOKEN") or None,
             timeout_seconds=float(value("FLI_DELIVERY_TIMEOUT_SECONDS", "15")),
         )
 
@@ -136,44 +128,6 @@ class DeliverySettings:
         if channel == "slack":
             return self.slack_destination_label
         return self.email_destination_label
-
-
-def _is_loopback(host: str | None) -> bool:
-    if not host:
-        return False
-    normalized = host.strip("[]").split("%", 1)[0]
-    if normalized.lower() == "localhost":
-        return True
-    try:
-        return ipaddress.ip_address(normalized).is_loopback
-    except ValueError:
-        return False
-
-
-def _public_access_ready(settings: DeliverySettings, remote_host: str | None) -> bool:
-    return _is_loopback(remote_host) or bool(settings.operator_token)
-
-
-def _authorize(
-    settings: DeliverySettings,
-    *,
-    remote_host: str | None,
-    authorization: str | None,
-) -> None:
-    if _is_loopback(remote_host):
-        return
-    if not settings.operator_token:
-        raise DeliveryAuthorizationError(
-            "Public brief delivery is not configured with an operator access key."
-        )
-    prefix = "Bearer "
-    supplied = (
-        authorization[len(prefix) :].strip()
-        if authorization and authorization.startswith(prefix)
-        else ""
-    )
-    if not supplied or not hmac.compare_digest(supplied, settings.operator_token):
-        raise DeliveryAuthorizationError("The delivery access key is missing or incorrect.")
 
 
 def _plain(value: Any) -> str:
@@ -505,12 +459,10 @@ def delivery_status_payload(
     payload: dict[str, Any],
     *,
     settings: DeliverySettings | None = None,
-    remote_host: str | None = None,
 ) -> dict[str, Any]:
     resolved = settings or DeliverySettings.from_environment()
     available = bool(payload.get("content_kind") == "daily_editorial" and payload.get("available"))
     total_insight_count = len(list(payload.get("items") or [])) if available else 0
-    access_ready = _public_access_ready(resolved, remote_host)
     channels = []
     for channel, label, pdf_delivery in (
         ("slack", "Slack", "link"),
@@ -522,7 +474,7 @@ def delivery_status_payload(
                 "channel": channel,
                 "label": label,
                 "configured": configured,
-                "available": bool(available and configured and access_ready),
+                "available": bool(available and configured),
                 "destination": resolved.destination_label(channel) if configured else "Not configured",
                 "pdf_delivery": pdf_delivery,
             }
@@ -535,10 +487,6 @@ def delivery_status_payload(
         "date": payload.get("date") or payload.get("requested_date"),
         "total_insight_count": total_insight_count,
         "top_insight_count": len(_top_items(payload)) if available else 0,
-        "access": {
-            "required": not _is_loopback(remote_host),
-            "configured": access_ready,
-        },
         "channels": channels,
     }
 
@@ -547,15 +495,12 @@ def deliver_daily_brief(
     payload: dict[str, Any],
     *,
     channel: DeliveryChannel,
-    authorization: str | None,
-    remote_host: str | None,
     settings: DeliverySettings | None = None,
     cache_root: Path = pdf_report.DEFAULT_CACHE_ROOT,
     slack_transport: httpx.BaseTransport | None = None,
     smtp_factory: Callable[..., Any] = smtplib.SMTP,
 ) -> dict[str, Any]:
     resolved = settings or DeliverySettings.from_environment()
-    _authorize(resolved, remote_host=remote_host, authorization=authorization)
     if payload.get("content_kind") != "daily_editorial" or not payload.get("available"):
         raise DeliveryNotConfigured(
             str(payload.get("reason") or "No complete Daily Brief is available for delivery.")

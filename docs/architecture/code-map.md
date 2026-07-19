@@ -38,7 +38,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Attention | `fli.scoring` | Versioned score formulas and offline comparison. Production remains `attention-v1.1`. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
 | Insights | `fli.insights` | Per-Event generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary: strict drafts, frozen workspaces, date-keyed orchestration, persisted Codex handoff, atomic runs, the canonical read model, and `pdf_report` for deterministic cached workbooks. |
-| Delivery | `fli.delivery.daily_brief` | Manual Slack lead-Insight and email top-five formatting, provider adapters, public-request authorization, and reuse of the canonical cached PDF. It does not own editorial data or scheduling. |
+| Delivery | `fli.delivery.daily_brief` | Manual Slack lead-Insight and email top-five formatting, provider adapters, a same-origin confirmation guard, and reuse of the canonical cached PDF. It does not own editorial data or scheduling. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.artifact_library` | HTTP composition and remaining projections only. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
 
