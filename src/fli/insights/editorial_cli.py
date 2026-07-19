@@ -139,6 +139,14 @@ def _parser() -> argparse.ArgumentParser:
     inspect_event.add_argument("--event-id", required=True)
     _add_output_flags(inspect_event)
 
+    preflight = sub.add_parser(
+        "preflight",
+        help="Inspect Event/audience coverage without making editorial decisions.",
+    )
+    preflight.add_argument("--workspace", type=Path, required=True)
+    preflight.add_argument("--draft", type=Path)
+    _add_output_flags(preflight)
+
     index = sub.add_parser("index", help="Embed only missing or changed Event packets.")
     index.add_argument("--workspace", type=Path, required=True)
     index.add_argument("--db", type=Path, default=editorial_runs.DEFAULT_DB)
@@ -166,11 +174,23 @@ def _parser() -> argparse.ArgumentParser:
     imported.add_argument("--draft", type=Path, required=True)
     imported.add_argument("--db", type=Path, default=editorial_runs.DEFAULT_DB)
     imported.add_argument("--dry-run", action="store_true")
+    imported.add_argument(
+        "--projection",
+        choices=editorial_runs.RUN_PROJECTIONS,
+        default="full",
+        help="Return the unchanged full result or one compact run projection.",
+    )
     _add_output_flags(imported)
 
     inspect_run = sub.add_parser("inspect-run", help="Inspect one durable editorial run.")
     inspect_run.add_argument("--run-id", required=True)
     inspect_run.add_argument("--db", type=Path, default=editorial_runs.DEFAULT_DB)
+    inspect_run.add_argument(
+        "--projection",
+        choices=editorial_runs.RUN_PROJECTIONS,
+        default="full",
+        help="Return the unchanged full run or one compact projection.",
+    )
     _add_output_flags(inspect_run)
 
     summary = sub.add_parser("summary", help="Inspect aggregate durable editorial state.")
@@ -246,6 +266,24 @@ def _plain(payload: dict[str, Any]) -> str:
             f"{data['event_count']} Events · {data['indexed_count']} indexed · "
             f"{data['reused_count']} reused"
         )
+    if command == "daily-intelligence.preflight":
+        lines = [
+            (
+                f"{data['day']} · {data['counts']['candidate_pairs']} pairs · "
+                f"{data['counts']['included']} included · "
+                f"{data['counts']['not_selected']} not selected · "
+                f"{data['counts']['missing']} missing · "
+                f"{data['counts']['duplicate']} duplicate"
+            )
+        ]
+        lines.extend(
+            (
+                f"#{row['feed_rank']} {row['audience']} {row['status']} · "
+                f"{row['event_id']}"
+            )
+            for row in data["pairs"]
+        )
+        return "\n".join(lines)
     return _canonical_json(data, pretty=True)
 
 
@@ -304,6 +342,11 @@ def main(
             )
         elif args.action == "inspect-event":
             data = editorial_runs.inspect_event(args.workspace, args.event_id)
+        elif args.action == "preflight":
+            data = editorial_runs.preflight_workspace(
+                args.workspace,
+                draft_path=args.draft,
+            )
         elif args.action == "index":
             if args.progress == "plain":
                 print(
@@ -343,13 +386,36 @@ def main(
                 db_path=args.db,
                 dry_run=args.dry_run,
             )
+            if args.projection != "full":
+                data = {**data, "projection": args.projection, "run": None}
+                if not args.dry_run:
+                    conn = editorial_runs.connect(args.db)
+                    try:
+                        data["run"] = editorial_runs.run_projection(
+                            conn,
+                            str(data["run_id"]),
+                            projection=args.projection,
+                        )
+                    finally:
+                        conn.close()
         elif args.action in {"inspect-run", "summary"}:
             if not args.db.is_file():
                 raise FileNotFoundError(args.db)
             conn = editorial_runs.connect(args.db)
             try:
                 data = (
-                    editorial_runs.run_payload(conn, args.run_id)
+                    (
+                        editorial_runs.run_payload(conn, args.run_id)
+                        if args.projection == "full"
+                        else {
+                            "projection": args.projection,
+                            "run": editorial_runs.run_projection(
+                                conn,
+                                args.run_id,
+                                projection=args.projection,
+                            ),
+                        }
+                    )
                     if args.action == "inspect-run"
                     else {"db": editorial_runs._display_path(args.db), **editorial_runs.summary_payload(conn)}
                 )

@@ -529,6 +529,56 @@ def test_validate_requires_exact_candidate_coverage(tmp_path, monkeypatch):
         raise AssertionError("missing coverage must fail validation")
 
 
+def test_preflight_ledger_exposes_pair_coverage_without_making_decisions(
+    tmp_path, monkeypatch
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    draft_path = workspace / "draft.json"
+    draft_path.write_text(json.dumps(_draft(workspace)), encoding="utf-8")
+
+    report = editorial_runs.preflight_workspace(workspace, draft_path=draft_path)
+
+    assert report["workspace_run_id"] == editorial_runs.load_manifest(workspace)["run_id"]
+    assert report["complete"] is True
+    assert report["counts"] == {
+        "events": 3,
+        "candidate_pairs": 4,
+        "included": 3,
+        "not_selected": 1,
+        "missing": 0,
+        "duplicate": 0,
+        "unexpected": 0,
+    }
+    by_pair = {
+        (row["event_id"], row["audience"]): row for row in report["pairs"]
+    }
+    selected = by_pair[("event-a", "investment")]
+    assert selected["status"] == "included"
+    assert selected["insight"] == {
+        "local_id": "investment-inkling",
+        "rank": 1,
+        "title": "Open models shorten the enterprise distribution path",
+    }
+    assert selected["event_role"] == "primary"
+    assert selected["citation_ids"] == ["source-a", "source-b"]
+    assert selected["affected_entities"] == ["Microsoft", "Toyota"]
+    rejected = by_pair[("event-c", "ai_engineering")]
+    assert rejected["status"] == "not_selected"
+    assert rejected["reason"].startswith("Useful but lower priority")
+
+    incomplete = _draft(workspace)
+    incomplete["not_selected"] = []
+    draft_path.write_text(json.dumps(incomplete), encoding="utf-8")
+    missing = editorial_runs.preflight_workspace(workspace, draft_path=draft_path)
+    assert missing["complete"] is False
+    assert missing["counts"]["missing"] == 1
+    assert {
+        (row["event_id"], row["audience"])
+        for row in missing["pairs"]
+        if row["status"] == "missing"
+    } == {("event-c", "ai_engineering")}
+
+
 def test_event_citation_date_is_filled_from_source_truth_and_conflicts_fail(
     tmp_path, monkeypatch
 ):
@@ -1044,3 +1094,94 @@ def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, cap
     missing_argument = json.loads(capsys.readouterr().out)
     assert missing_argument["command"] == "daily-intelligence"
     assert missing_argument["error"]["code"] == "E_INVALID_INPUT"
+
+
+def test_cli_preflight_and_additive_run_projections(
+    tmp_path, monkeypatch, capsys
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    draft_path = workspace / "draft.json"
+    draft_path.write_text(json.dumps(_draft(workspace)), encoding="utf-8")
+    db = tmp_path / "editorial.db"
+
+    assert editorial_cli.main(
+        [
+            "preflight",
+            "--workspace",
+            str(workspace),
+            "--draft",
+            str(draft_path),
+            "--json",
+            "--no-input",
+        ]
+    ) == 0
+    preflight = json.loads(capsys.readouterr().out)
+    assert preflight["command"] == "daily-intelligence.preflight"
+    assert preflight["data"]["complete"] is True
+    assert preflight["data"]["counts"]["candidate_pairs"] == 4
+
+    assert editorial_cli.main(
+        [
+            "import-result",
+            "--workspace",
+            str(workspace),
+            "--draft",
+            str(draft_path),
+            "--db",
+            str(db),
+            "--projection",
+            "summary",
+            "--json",
+            "--no-input",
+        ]
+    ) == 0
+    imported = json.loads(capsys.readouterr().out)["data"]
+    run_id = imported["run_id"]
+    assert imported["projection"] == "summary"
+    assert imported["run"]["counts"] == {
+        "candidate_events": 3,
+        "candidate_pairs": 4,
+        "insights": 2,
+        "citations": 2,
+        "included": 3,
+        "not_selected": 1,
+    }
+    assert "insights" not in imported["run"]
+
+    expected_keys = {
+        "summary": "counts",
+        "insights": "insights",
+        "citations": "citations",
+        "dispositions": "dispositions",
+    }
+    projections = {}
+    for projection, expected_key in expected_keys.items():
+        assert editorial_cli.main(
+            [
+                "inspect-run",
+                "--run-id",
+                run_id,
+                "--db",
+                str(db),
+                "--projection",
+                projection,
+                "--json",
+                "--no-input",
+            ]
+        ) == 0
+        payload = json.loads(capsys.readouterr().out)["data"]
+        assert payload["projection"] == projection
+        assert expected_key in payload["run"]
+        projections[projection] = payload["run"]
+
+    assert projections["insights"]["insights"][0] == {
+        "audience": "ai_engineering",
+        "citation_ids": [projections["citations"]["citations"][0]["citation_id"]],
+        "display_rank": 1,
+        "event_ids": ["event-a"],
+        "insight_id": projections["insights"]["insights"][0]["insight_id"],
+        "local_id": "engineering-inkling",
+        "title": "Test open-model serving before adopting the launch claim",
+    }
+    assert len(projections["citations"]["citations"]) == 2
+    assert len(projections["dispositions"]["dispositions"]) == 4

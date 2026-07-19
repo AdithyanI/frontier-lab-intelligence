@@ -1126,6 +1126,208 @@ def inspect_event(workspace: Path, event_id: str) -> dict[str, Any]:
     return {"workspace_run_id": manifest["run_id"], "event": _read_json(workspace / event["file"])}
 
 
+def _compact_text(value: Any, *, limit: int = 280) -> str:
+    text = " ".join(str(value or "").split())
+    if len(text) <= limit:
+        return text
+    return f"{text[: limit - 1].rstrip()}…"
+
+
+def preflight_workspace(
+    workspace: Path,
+    *,
+    draft_path: Path | None = None,
+) -> dict[str, Any]:
+    """Return one read-only coverage row per routed Event/audience pair."""
+
+    manifest = load_manifest(workspace)
+    draft: dict[str, Any] | None = None
+    if draft_path is not None:
+        if not draft_path.is_file():
+            raise FileNotFoundError(draft_path)
+        loaded = _read_json(draft_path)
+        if not isinstance(loaded, dict):
+            raise ValueError("draft must be an object")
+        if loaded.get("workspace_run_id") != manifest["run_id"]:
+            raise ValueError("draft workspace_run_id does not match the workspace")
+        if loaded.get("workspace_manifest_sha256") != manifest["manifest_sha256"]:
+            raise ValueError(
+                "draft workspace_manifest_sha256 does not match the workspace"
+            )
+        draft = loaded
+
+    expected_pairs = {
+        (str(event["event_id"]), str(audience))
+        for event in manifest["events"]
+        for audience in event["audiences"]
+    }
+    assignments: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    if draft is not None:
+        insights = draft.get("insights", [])
+        not_selected = draft.get("not_selected", [])
+        if not isinstance(insights, list):
+            raise ValueError("draft.insights must be an array")
+        if not isinstance(not_selected, list):
+            raise ValueError("draft.not_selected must be an array")
+        for insight in insights:
+            if not isinstance(insight, dict):
+                raise ValueError("each draft insight must be an object")
+            audience = str(insight.get("audience") or "")
+            analysis = insight.get("analysis")
+            entities = (
+                analysis.get("affected_entities", [])
+                if isinstance(analysis, dict)
+                else []
+            )
+            affected_entities = [
+                str(entity.get("name"))
+                for entity in entities
+                if isinstance(entity, dict) and entity.get("name")
+            ]
+            citation_ids = [
+                str(value) for value in insight.get("citation_ids", [])
+            ]
+            event_links = insight.get("event_links", [])
+            if not isinstance(event_links, list):
+                raise ValueError("each insight.event_links must be an array")
+            for link in event_links:
+                if not isinstance(link, dict):
+                    raise ValueError("each insight Event link must be an object")
+                pair = (str(link.get("event_id") or ""), audience)
+                assignments.setdefault(pair, []).append(
+                    {
+                        "status": "included",
+                        "insight": {
+                            "local_id": str(insight.get("local_id") or ""),
+                            "rank": insight.get("rank"),
+                            "title": str(insight.get("title") or ""),
+                        },
+                        "event_role": str(link.get("role") or ""),
+                        "reason": str(link.get("reason") or ""),
+                        "citation_ids": citation_ids,
+                        "affected_entities": affected_entities,
+                    }
+                )
+        for item in not_selected:
+            if not isinstance(item, dict):
+                raise ValueError("each draft not_selected item must be an object")
+            pair = (
+                str(item.get("event_id") or ""),
+                str(item.get("audience") or ""),
+            )
+            assignments.setdefault(pair, []).append(
+                {
+                    "status": "not_selected",
+                    "insight": None,
+                    "event_role": None,
+                    "reason": str(item.get("reason") or ""),
+                    "citation_ids": [],
+                    "affected_entities": [],
+                }
+            )
+
+    pairs: list[dict[str, Any]] = []
+    counts = {
+        "events": len(manifest["events"]),
+        "candidate_pairs": len(expected_pairs),
+        "included": 0,
+        "not_selected": 0,
+        "missing": 0,
+        "duplicate": 0,
+        "unexpected": 0,
+    }
+    audience_order = {value: index for index, value in enumerate(editorial.AUDIENCES)}
+    events = sorted(
+        manifest["events"],
+        key=lambda event: (int(event["feed_rank"]), str(event["event_id"])),
+    )
+    for event in events:
+        event_payload = _read_json(workspace / str(event["file"]))
+        for audience in sorted(
+            event["audiences"], key=lambda value: audience_order[str(value)]
+        ):
+            pair = (str(event["event_id"]), str(audience))
+            pair_assignments = assignments.get(pair, [])
+            if not pair_assignments:
+                status = "missing"
+                selected: dict[str, Any] | None = None
+            elif len(pair_assignments) > 1:
+                status = "duplicate"
+                selected = None
+            else:
+                selected = pair_assignments[0]
+                status = str(selected["status"])
+            counts[status] += 1
+            routing = event_payload.get("routing", {}).get(audience, {})
+            artifacts = [
+                {
+                    "artifact_id": str(artifact.get("artifact_id") or ""),
+                    "title": str(artifact.get("title") or ""),
+                    "url": str(artifact.get("url") or ""),
+                    "disclosure_dates": sorted(
+                        {
+                            str(disclosure.get("published_at") or "")[:10]
+                            for disclosure in artifact.get("disclosures", [])
+                            if isinstance(disclosure, dict)
+                            and disclosure.get("published_at")
+                        }
+                    ),
+                }
+                for artifact in event.get("artifacts", [])
+                if isinstance(artifact, dict)
+            ]
+            pairs.append(
+                {
+                    "event_id": pair[0],
+                    "feed_rank": int(event["feed_rank"]),
+                    "audience": pair[1],
+                    "root_author": str(event.get("root_author") or ""),
+                    "root_text": _compact_text(event.get("root_text")),
+                    "root_url": str(event.get("root_url") or ""),
+                    "source_dates": dict(event.get("source_dates") or {}),
+                    "routing_reason": str(routing.get("reason") or ""),
+                    "artifacts": artifacts,
+                    "status": status,
+                    "insight": selected["insight"] if selected else None,
+                    "event_role": selected["event_role"] if selected else None,
+                    "reason": selected["reason"] if selected else None,
+                    "citation_ids": selected["citation_ids"] if selected else [],
+                    "affected_entities": (
+                        selected["affected_entities"] if selected else []
+                    ),
+                    "assignments": pair_assignments if len(pair_assignments) > 1 else [],
+                }
+            )
+
+    unexpected = []
+    for pair, pair_assignments in sorted(assignments.items()):
+        if pair in expected_pairs:
+            continue
+        unexpected.append(
+            {
+                "event_id": pair[0],
+                "audience": pair[1],
+                "assignments": pair_assignments,
+            }
+        )
+    counts["unexpected"] = len(unexpected)
+    return {
+        "workspace_run_id": str(manifest["run_id"]),
+        "workspace_manifest_sha256": str(manifest["manifest_sha256"]),
+        "day": str(manifest["day"]),
+        "draft": _display_path(draft_path) if draft_path is not None else None,
+        "complete": (
+            draft is not None
+            and counts["missing"] == 0
+            and counts["duplicate"] == 0
+            and counts["unexpected"] == 0
+        ),
+        "counts": counts,
+        "pairs": pairs,
+        "unexpected": unexpected,
+    }
+
+
 def _terms(value: str) -> set[str]:
     return {term for term in re.findall(r"[a-z0-9][a-z0-9._+-]+", value.lower()) if len(term) > 1}
 
@@ -1640,6 +1842,116 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
         "insights": items,
         "dispositions": [dict(row) for row in dispositions],
     }
+
+
+RUN_PROJECTIONS = ("full", "summary", "insights", "citations", "dispositions")
+
+
+def _run_projection_base(payload: dict[str, Any]) -> dict[str, Any]:
+    disposition_counts: dict[str, int] = {}
+    for row in payload["dispositions"]:
+        status = str(row["status"])
+        disposition_counts[status] = (
+            disposition_counts.get(status, 0) + int(row["count"])
+        )
+    return {
+        "run_id": str(payload["run_id"]),
+        "day": str(payload["day"]),
+        "status": str(payload["status"]),
+        "created_at": str(payload["created_at"]),
+        "schema_version": str(payload["schema_version"]),
+        "draft_schema_version": str(payload["draft_schema_version"]),
+        "workspace": {
+            "run_id": str(payload["workspace_run_id"]),
+            "manifest_sha256": str(payload["workspace_manifest_sha256"]),
+        },
+        "source": {
+            "routing_run_id": str(payload["source_routing_run_id"]),
+            "cohort_sha256": str(payload["source_cohort_sha256"]),
+            "event_run_id": str(payload["source_event_run_id"]),
+            "feed_run_id": str(payload["source_feed_run_id"]),
+        },
+        "agent": {
+            "skill_version": str(payload["skill_version"]),
+            "model": str(payload["executor_model"]),
+        },
+        "result_sha256": str(payload["result_sha256"]),
+        "counts": {
+            "candidate_events": int(payload["candidate_count"]),
+            "candidate_pairs": int(payload["candidate_pair_count"]),
+            "insights": int(payload["insight_count"]),
+            "citations": int(payload["citation_count"]),
+            "included": disposition_counts.get("included", 0),
+            "not_selected": disposition_counts.get("not_selected", 0),
+        },
+    }
+
+
+def run_projection(
+    conn: sqlite3.Connection,
+    run_id: str,
+    *,
+    projection: str = "full",
+) -> dict[str, Any]:
+    """Return one additive, bounded projection of a durable editorial run."""
+
+    if projection not in RUN_PROJECTIONS:
+        raise ValueError(f"projection must be one of {list(RUN_PROJECTIONS)}")
+    payload = run_payload(conn, run_id)
+    if projection == "full":
+        return payload
+    result = _run_projection_base(payload)
+    if projection == "summary":
+        return result
+    if projection == "insights":
+        result["insights"] = [
+            {
+                "insight_id": str(insight["insight_id"]),
+                "local_id": str(insight["local_id"]),
+                "audience": str(insight["audience"]),
+                "display_rank": int(insight["display_rank"]),
+                "title": str(insight["title"]),
+                "event_ids": [str(event["event_id"]) for event in insight["events"]],
+                "citation_ids": [
+                    str(citation["citation_id"])
+                    for citation in insight["citations"]
+                ],
+            }
+            for insight in payload["insights"]
+        ]
+        return result
+    if projection == "citations":
+        citations: dict[str, dict[str, Any]] = {}
+        for insight in payload["insights"]:
+            for citation in insight["citations"]:
+                citations.setdefault(str(citation["citation_id"]), dict(citation))
+        result["citations"] = sorted(
+            citations.values(),
+            key=lambda citation: (
+                str(citation["local_id"]),
+                str(citation["citation_id"]),
+            ),
+        )
+        return result
+
+    rows = conn.execute(
+        """SELECT disposition.event_id, candidate.feed_rank,
+                  disposition.audience, disposition.status,
+                  disposition.insight_id, insight.local_id,
+                  insight.display_rank, insight.title, disposition.reason
+           FROM editorial_event_disposition AS disposition
+           JOIN editorial_candidate AS candidate
+             ON candidate.run_id = disposition.run_id
+            AND candidate.event_id = disposition.event_id
+           LEFT JOIN editorial_insight AS insight
+             ON insight.run_id = disposition.run_id
+            AND insight.insight_id = disposition.insight_id
+           WHERE disposition.run_id = ?
+           ORDER BY candidate.feed_rank, disposition.audience""",
+        (run_id,),
+    ).fetchall()
+    result["dispositions"] = [dict(row) for row in rows]
+    return result
 
 
 def editorial_insights_payload(
