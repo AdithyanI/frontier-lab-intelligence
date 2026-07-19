@@ -73,6 +73,30 @@ understand every sentence on the first read. If simplification removes a
 material fact, causal step, uncertainty, or decision condition, restore it in
 clearer language.
 
+Every selected Insight must also stand on its own for a reader who has not
+opened its Event, artifact, or source. Do not optimize `what_changed` for a
+reader who already knows the announcement or paper. Include the minimum context
+needed to answer:
+
+- what question, system, release, or development was examined;
+- what changed or what was compared;
+- what the evidence actually found; and
+- what important limit prevents a broader conclusion.
+
+For a study, benchmark, or evaluation, name the tested setup in plain English
+before reporting the result. Explain a necessary term such as provider framing
+once rather than leaving the reader to infer it. For a release or operational
+change, identify the previous state or practical difference when that is needed
+to understand the claim. Do not turn `what_changed` into an abstract, source-by-
+source summary or omit the setup merely to keep it short.
+
+Then use `interpretation` to explain the consequence for the named audience:
+the affected workflow or exposure, the mechanism that creates the opportunity
+or failure mode, and the decision that should change. Keep the reproducible
+action in `next_step` and its measurable acceptance and rejection conditions in
+the Engineering `decision_rule`; the opening fields may motivate those controls
+without duplicating the complete experiment.
+
 ## Evidence roles
 
 - `primary`: the most authoritative or direct evidence establishing the claim.
@@ -229,6 +253,15 @@ the evidence matters. `next_step` states one bounded, reproducible action.
 The only Engineering-specific field is `decision_rule`: one concise statement
 of the measurable result that justifies proceeding and the result that rejects,
 pauses, or constrains the idea.
+
+Write for an engineer or analyst who has not read the underlying packet. In
+`what_changed`, establish the tested or released system, the relevant method or
+comparison, the material result, and the transfer limit. In `interpretation`,
+name the affected Aion, research-signal, evaluation, safe-data, LLMOps, or data-
+platform decision. Explain the concrete failure mode or opportunity and why the
+evidence changes that decision now. Extra length is justified when it supplies
+missing setup or a causal bridge; repetition, benchmark inventory, and generic
+technical background are not.
 
 Numerical gates need a basis. Derive them from an observed baseline, a cited
 requirement, or a known operating constraint. When none exists, call the values

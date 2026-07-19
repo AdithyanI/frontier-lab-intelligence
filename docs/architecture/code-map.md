@@ -55,7 +55,8 @@ routes in a generic `pages/` directory:
 | Area | Owner | What belongs there |
 | --- | --- | --- |
 | App composition | `frontend/src/app/` | Route composition and the shared audit-date provider only. |
-| Architecture | `frontend/src/features/architecture/` | The system explanation route and its local presentation logic. |
+| System guide | `frontend/src/features/system/` | The assignment-to-product walkthrough, live checkpoint, and shared System layout. |
+| Architecture | `frontend/src/features/architecture/` | The deeper technical diagrams and their local presentation logic. |
 | Evidence | `frontend/src/features/evidence/` | Feed, Artifact index, their workspace layout, and Evidence-only view state. |
 | Insights | `frontend/src/features/insights/` | Audience Insight inspection, decision-state UI, selected daily brief PDF download, and the explicit Slack/email delivery confirmation. |
 | Network | `frontend/src/features/network/` | Registry, Ranking, Add Profile, their workspace layout, and the shared entity detail surface. |

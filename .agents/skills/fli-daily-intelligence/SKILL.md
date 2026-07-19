@@ -104,9 +104,14 @@ your own judgment for research, retrieval, grouping, and synthesis.
    [Adi writing skill](../adi-writing/SKILL.md), including its voice standard,
    and follow the institutional adaptation in
    [the editorial standard](references/editorial-standard.md#reader-facing-writing).
-   Apply it to every field the reader sees, not only the title. Preserve the
-   facts, causal chain, technical precision, and honest uncertainty; simplify
-   the language and sentence structure, not the judgment.
+   Apply it to every field the reader sees, not only the title. Assume the
+   reader has not opened the Event, artifact, or source. `what_changed` must
+   supply enough context to understand what happened, how the central result
+   was established, and its important boundary. `interpretation` must explain
+   the affected audience decision and causal mechanism. Preserve the facts,
+   causal chain, technical precision, and honest uncertainty; simplify the
+   language and sentence structure, not the judgment. Concise means no wasted
+   words, not missing setup.
 9. Run the read-only coverage preflight, then validate repeatedly until the
    complete cohort passes:
 

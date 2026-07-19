@@ -214,3 +214,29 @@ Expected behavior:
   does not imply that it belongs to a BIT watchlist; and
 - omits either mapping when no direct operating or competitive transmission
   path is defensible.
+
+## 11. Self-contained AI Engineering Insight
+
+Prompt:
+
+> Review an AI Engineering Insight about a large rollout study showing that
+> identical model answers can be judged differently when their provider,
+> model-family, or moral labels change. Rewrite it for an analyst who has not
+> opened the Event or paper.
+
+Expected behavior:
+
+- explains in plain English what labels or framing were changed and that the
+  compared answer content was otherwise identical;
+- states the scale or method only when it helps the reader understand the
+  strength and limits of the finding;
+- reports the central preference shift and states that the effect varies by
+  model, prompt, and task rather than implying a universal fixed bias;
+- connects the finding to one named research-agent, evaluation, source-
+  selection, or analyst workflow instead of saying only that bias matters;
+- explains why a single retry cannot reveal a distribution-level shift;
+- leaves the bounded test in `next_step` and the proceed and stop conditions in
+  `decision_rule` rather than duplicating the full experiment in the opening;
+  and
+- remains concise by removing repetition, not by withholding the setup a new
+  reader needs.

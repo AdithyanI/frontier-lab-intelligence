@@ -91,9 +91,10 @@ Rules:
   BIT Lens holds the public client context used to translate frontier evidence
   into fund-specific research questions. It is one detailed reading page, not
   another dashboard or a set of subviews, and remains separate from generated
-  daily Insights. System
-  groups the live Status surface with the explanatory Architecture surface;
-  neither becomes another top-level destination.
+  daily Insights. System groups three supporting views without adding more
+  top-level destinations: **How it works** is the default reviewer walkthrough,
+  **Architecture** is the technical map, and **Status** is the live published
+  checkpoint.
 - Registry and Ranking share one top-level **Network** destination because they
   are two views of the same source system. Ranking is the first and default
   subview because it is the clearest demonstration of network discovery;
@@ -311,6 +312,11 @@ Rules:
 - **Score breakdown:** inputs and weights are visible only on demand from the
   Feed rank. Trust through inspectability without making the decimal the primary
   reading cue (PRODUCT.md #3).
+- **System guide:** the default System view maps the original assignment to one
+  five-step path through the working product: choose, collect, rank, judge, and
+  publish. Each step links to its real proof surface. End with the exact audit
+  path and a clear split between implemented behavior and future work; do not
+  turn the page into a second dashboard or repeat volatile counts.
 - **System status:** a read-only, API-derived checkpoint view. Lead with data
   currency, observation time, and the operator-run refresh model, then use one
   ruled table for Registry, collection, Feed/Events, artifacts, routing, and
