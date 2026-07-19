@@ -9,6 +9,20 @@ import SignalFunnel, { type FunnelStage } from './SignalFunnel'
 
 const SCROLL_STAGES: FunnelStage[] = ['watch', 'collect', 'rank', 'judge', 'publish', 'complete']
 
+/* Step-by-step navigation: bring the next beat past the spy threshold,
+   so the funnel camera plays the transition by itself. */
+function scrollToBeat(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+function NextButton({ to }: { to: string }) {
+  return (
+    <button type="button" className="how-next mono" onClick={() => scrollToBeat(to)}>
+      next &darr;
+    </button>
+  )
+}
+
 /* Scroll spy: the funnel focuses the plane for the beat being read. */
 function useActiveStage(): FunnelStage {
   const [active, setActive] = useState<FunnelStage>('universe')
@@ -179,10 +193,10 @@ export default function HowItWorks() {
               depends on. Reading everything is impossible; keyword alerts
               drown you. The funnel is the answer, one stage at a time.
             </p>
-            <p className="how-scroll-hint mono">scroll &darr;</p>
+            <NextButton to="watch" />
           </div>
 
-          {beats.map((beat) => (
+          {beats.map((beat, i) => (
             <div className="how-beat" id={beat.id} key={beat.id}>
               <p className="how-beat-kicker mono">Stage {beat.step}</p>
               <h3>{beat.title}</h3>
@@ -190,6 +204,7 @@ export default function HowItWorks() {
               <Link className="how-beat-link" to={beat.to}>
                 {beat.linkLabel} &rarr;
               </Link>
+              <NextButton to={beats[i + 1]?.id ?? 'complete'} />
             </div>
           ))}
 
