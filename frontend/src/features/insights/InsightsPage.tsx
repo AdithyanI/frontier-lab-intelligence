@@ -472,7 +472,7 @@ function DailyBriefDelivery({
             <div className="insight-delivery-confirm">
               {selected === 'slack' ? (
                 <p>
-                  Send the highest-ranked Insight in full to <strong>{selectedStatus.destination}</strong>.
+                  Send the highest-ranked title and interpretation without truncation to <strong>{selectedStatus.destination}</strong>.
                   {remainingInsightCount > 0 && ` The message will link to the remaining ${remainingInsightCount} ${remainingInsightCount === 1 ? 'Insight' : 'Insights'} and the PDF.`}
                 </p>
               ) : (
@@ -513,7 +513,7 @@ function DailyBriefDelivery({
               {result.channel === 'slack' ? (
                 <p>
                   <strong>Slack notification sent.</strong>
-                  The highest-ranked Insight and links to the complete brief and PDF were sent to {result.destination}.
+                  The lead title, full interpretation, and links to the complete brief and PDF were sent to {result.destination}.
                 </p>
               ) : (
                 <p>

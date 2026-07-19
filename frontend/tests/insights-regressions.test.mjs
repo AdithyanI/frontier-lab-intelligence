@@ -208,7 +208,7 @@ test('Insights exposes guarded manual Slack and email delivery beside the PDF ac
   assert.match(insightSource, /\/api\/insights\/delivery\?audience=/)
   assert.match(insightSource, /fetch\('\/api\/insights\/delivery'/)
   assert.match(insightSource, /Top Insight \+ full brief/)
-  assert.match(insightSource, /highest-ranked Insight in full/)
+  assert.match(insightSource, /highest-ranked title and interpretation without truncation/)
   assert.match(insightSource, /remaining \$\{remainingInsightCount\}/)
   assert.match(insightSource, /Delivery access key/)
   assert.match(insightSource, /window\.sessionStorage\.setItem\('fli-delivery-access-key'/)

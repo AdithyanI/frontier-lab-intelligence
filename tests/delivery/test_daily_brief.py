@@ -102,9 +102,7 @@ def test_slack_delivery_shows_first_insight_in_full_then_links_to_the_rest(
     assert result["insight_count"] == 5
     assert result["pdf_delivery"] == "link"
     assert "Insight 1" in rendered
-    assert "What changed for Insight 1." in rendered
     assert "FULL_INTERPRETATION_END" in rendered
-    assert "Take next step 1." in rendered
     assert "5 more cited Insights" in rendered
     assert "Read full brief" in rendered
     assert "Insight 2" not in rendered

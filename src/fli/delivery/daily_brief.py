@@ -258,17 +258,17 @@ def _slack_text_chunks(value: Any, *, limit: int = 2700) -> list[str]:
     return chunks
 
 
-def _slack_prose_blocks(label: str, value: Any) -> list[dict[str, Any]]:
+def _slack_prose_blocks(value: Any) -> list[dict[str, Any]]:
     chunks = _slack_text_chunks(value)
     return [
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"*{label}*\n{chunk}" if index == 0 else chunk,
+                "text": chunk,
             },
         }
-        for index, chunk in enumerate(chunks)
+        for chunk in chunks
     ]
 
 
@@ -308,9 +308,7 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
             [
                 "",
                 f"{rank}. {_plain(item.get('title'))}",
-                f"What changed: {_plain(item.get('what_changed'))}",
-                f"{audience} interpretation: {_plain(item.get('interpretation'))}",
-                f"Next step: {_plain(item.get('next_step'))}",
+                _plain(item.get("interpretation")),
             ]
         )
         blocks.append(
@@ -322,13 +320,8 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 },
             }
         )
-        for label, value in (
-            ("What changed", item.get("what_changed")),
-            (f"{audience} interpretation", item.get("interpretation")),
-            ("Next step", item.get("next_step")),
-        ):
-            if value:
-                blocks.extend(_slack_prose_blocks(label, value))
+        if item.get("interpretation"):
+            blocks.extend(_slack_prose_blocks(item.get("interpretation")))
 
         remaining_count = len(items) - 1
         if remaining_count:
