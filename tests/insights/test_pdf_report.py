@@ -269,6 +269,46 @@ def test_report_cache_is_content_addressed_and_atomic(tmp_path):
     assert list(tmp_path.glob("*.tmp")) == []
 
 
+def test_investment_report_matches_ui_impact_labels_per_company():
+    payload = _payload()
+    payload["items"][0]["analysis"]["affected_entities"] = [
+        {
+            "name": "NVIDIA",
+            "scope": "portfolio",
+            "impact": "positive",
+            "mechanism": "Deployment demand could increase.",
+        },
+        {
+            "name": "Microsoft",
+            "scope": "portfolio",
+            "impact": "negative",
+            "mechanism": "Model pricing could face pressure.",
+        },
+        {
+            "name": "Meta",
+            "scope": "portfolio",
+            "impact": "mixed",
+            "mechanism": "Open models create both adoption and pricing effects.",
+        },
+        {
+            "name": "Snowflake",
+            "scope": "outside_portfolio",
+            "impact": "uncertain",
+            "mechanism": "The transmission path is not yet established.",
+        },
+    ]
+
+    text = _pdf_text(pdf_report.build_report_pdf(payload))
+
+    assert "PORTFOLIO COMPANIES" in text
+    assert "OUTSIDE THE DISCLOSED PORTFOLIO" in text
+    assert "Potential positive" in text
+    assert "Potential negative" in text
+    assert "Mixed" in text
+    assert "Direction unclear" in text
+    assert "DIRECTION UNCERTAIN" not in text
+
+
 def test_report_rejects_non_editorial_payload(tmp_path):
     with pytest.raises(pdf_report.ReportUnavailable, match="unavailable"):
         pdf_report.get_or_create_report(

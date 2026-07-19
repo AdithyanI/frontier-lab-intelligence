@@ -39,7 +39,7 @@ from reportlab.platypus import (
 from fli.insights import editorial_runs
 
 
-REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v8"
+REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v9"
 DEFAULT_CACHE_ROOT = editorial_runs.DEFAULT_ROOT / "pdf-cache"
 PUBLIC_APP_URL = "https://frontier-lab-intelligence.adithyan.io"
 
@@ -381,9 +381,9 @@ def _styles() -> dict[str, ParagraphStyle]:
         "impact": ParagraphStyle(
             "Impact",
             parent=sample["Normal"],
-            fontName="Courier-Bold",
-            fontSize=7.5,
-            leading=9.5,
+            fontName="Helvetica-Bold",
+            fontSize=8.25,
+            leading=11,
             textColor=MUTED,
         ),
         "toc_rank": ParagraphStyle(
@@ -615,74 +615,78 @@ def _investment_sections(item: dict[str, Any], styles: dict[str, ParagraphStyle]
     entities = list(analysis.get("affected_entities") or [])
     story: list[Any] = []
     if entities:
-        scopes = {str(entity.get("scope") or "outside_portfolio") for entity in entities}
-        impacts = {str(entity.get("impact") or "uncertain") for entity in entities}
-        compact_shared_state = len(scopes) == 1 and len(impacts) == 1
-        rows: list[list[Any]] = []
-        for entity in entities:
-            impact = str(entity.get("impact") or "uncertain")
-            impact_color = {
-                "positive": POSITIVE,
-                "negative": NEGATIVE,
-                "mixed": MUTED,
-                "uncertain": MUTED,
-            }.get(impact, MUTED)
-            impact_style = ParagraphStyle(
-                f"Impact-{impact}",
-                parent=styles["impact"],
-                textColor=impact_color,
-            )
-            name = Paragraph(_markup(entity.get("name")), styles["body_strong"])
-            mechanism = Paragraph(_markup(entity.get("mechanism")), styles["small"])
-            if compact_shared_state:
-                rows.append([name, mechanism])
-            else:
-                scope = (
-                    "PORTFOLIO"
-                    if entity.get("scope") == "portfolio"
-                    else "OUTSIDE PORTFOLIO"
-                )
-                rows.append(
-                    [
-                        [name, Spacer(1, 1 * mm), Paragraph(scope, styles["label"])],
-                        Paragraph(_markup(impact.upper()), impact_style),
-                        mechanism,
-                    ]
-                )
         story.extend(_section_title("Company read-through", styles))
-        if compact_shared_state:
-            scope = "PORTFOLIO" if "portfolio" in scopes else "OUTSIDE PORTFOLIO"
-            impact = next(iter(impacts)).upper()
+        impact_copy = {
+            "positive": ("↗", "Potential positive", POSITIVE),
+            "negative": ("↘", "Potential negative", NEGATIVE),
+            "mixed": ("↔", "Mixed", MUTED),
+            "uncertain": ("?", "Direction unclear", MUTED),
+        }
+        rendered_group_count = 0
+        for scope, scope_label in (
+            ("portfolio", "PORTFOLIO COMPANIES"),
+            ("outside_portfolio", "OUTSIDE THE DISCLOSED PORTFOLIO"),
+        ):
+            group = [
+                entity
+                for entity in entities
+                if str(entity.get("scope") or "outside_portfolio") == scope
+            ]
+            if not group:
+                continue
+            if rendered_group_count:
+                story.append(Spacer(1, 3.5 * mm))
             story.extend(
                 [
-                    Paragraph(f"{scope}  /  DIRECTION {impact}", styles["label"]),
+                    Paragraph(scope_label, styles["label"]),
                     Spacer(1, 1.8 * mm),
                 ]
             )
-            col_widths = [35 * mm, CONTENT_WIDTH - 35 * mm]
-        else:
-            col_widths = [35 * mm, 25 * mm, CONTENT_WIDTH - 60 * mm]
-        story.append(
-            Table(
-                rows,
-                colWidths=col_widths,
-                style=TableStyle(
+            rows: list[list[Any]] = []
+            for entity in group:
+                impact = str(entity.get("impact") or "uncertain")
+                symbol, label, impact_color = impact_copy.get(
+                    impact, impact_copy["uncertain"]
+                )
+                impact_style = ParagraphStyle(
+                    f"Impact-{impact}",
+                    parent=styles["impact"],
+                    textColor=impact_color,
+                )
+                symbol_markup = (
+                    f'<font name="{UNICODE_FONT}" size="9">{escape(symbol)}</font>'
+                    if symbol != "?"
+                    else "?"
+                )
+                rows.append(
                     [
-                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                        ("LINEABOVE", (0, 0), (-1, 0), 0.35, BORDER),
-                        ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                        ("LINEBEFORE", (1, 0), (-1, -1), 0.35, BORDER),
-                        ("TOPPADDING", (0, 0), (-1, -1), 6),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-                        ("LEFTPADDING", (0, 0), (0, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (0, -1), 7),
-                        ("LEFTPADDING", (1, 0), (-1, -1), 7),
-                        ("RIGHTPADDING", (1, 0), (-1, -1), 7),
-                        ("RIGHTPADDING", (-1, 0), (-1, -1), 0),
+                        Paragraph(_markup(entity.get("name")), styles["body_strong"]),
+                        Paragraph(f"{symbol_markup}  {_markup(label)}", impact_style),
+                        Paragraph(_markup(entity.get("mechanism")), styles["small"]),
                     ]
-                ),
+                )
+            story.append(
+                Table(
+                    rows,
+                    colWidths=[32 * mm, 37 * mm, CONTENT_WIDTH - 69 * mm],
+                    style=TableStyle(
+                        [
+                            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                            ("LINEABOVE", (0, 0), (-1, 0), 0.35, BORDER),
+                            ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
+                            ("LINEBEFORE", (1, 0), (-1, -1), 0.35, BORDER),
+                            ("TOPPADDING", (0, 0), (-1, -1), 6),
+                            ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                            ("LEFTPADDING", (0, 0), (0, -1), 0),
+                            ("RIGHTPADDING", (0, 0), (0, -1), 7),
+                            ("LEFTPADDING", (1, 0), (-1, -1), 7),
+                            ("RIGHTPADDING", (1, 0), (-1, -1), 7),
+                            ("RIGHTPADDING", (-1, 0), (-1, -1), 0),
+                        ]
+                    ),
+                )
             )
-        )
+            rendered_group_count += 1
     watchpoints = list(analysis.get("watchpoints") or [])
     signals = [
         Paragraph(f'<font color="#4391B4">/</font> {_markup(value)}', styles["small"])
