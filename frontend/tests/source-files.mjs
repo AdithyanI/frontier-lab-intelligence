@@ -4,6 +4,7 @@ const sourceRoot = new URL('../src/', import.meta.url)
 const styleOrder = [
   'base',
   'architecture',
+  'how-it-works',
   'status',
   'registry',
   'workspaces',

@@ -10,6 +10,7 @@ import Network from '../features/network/NetworkLayout'
 import Ranking from '../features/network/RankingPage'
 import Registry from '../features/network/RegistryPage'
 import Status from '../features/system/StatusPage'
+import HowItWorks from '../features/system/HowItWorksPage'
 import System from '../features/system/SystemLayout'
 import { useAuditDatePath } from '../shared/date/auditDateStore'
 
@@ -49,7 +50,8 @@ export default function App() {
           <Route path="/insights" element={<Insights />} />
           <Route path="/bit-lens" element={<BitLensPage />} />
           <Route path="/system" element={<System />}>
-            <Route index element={<Navigate to="architecture" replace />} />
+            <Route index element={<Navigate to="how-it-works" replace />} />
+            <Route path="how-it-works" element={<HowItWorks />} />
             <Route path="status" element={<Status />} />
             <Route path="architecture" element={<Architecture />} />
           </Route>

@@ -19,35 +19,35 @@ function SystemOverview() {
       tone: 'plain',
     },
     {
-      x: 236,
-      width: 190,
+      x: 225,
+      width: 170,
       label: 'PROCESS',
       title: 'Python',
       detail: 'collect · group · rank',
       tone: 'dark',
     },
     {
-      x: 462,
-      width: 190,
+      x: 420,
+      width: 170,
       label: 'STORE',
       title: 'SQLite',
       detail: 'raw · Registry · derived',
       tone: 'surface',
     },
     {
-      x: 688,
-      width: 160,
+      x: 615,
+      width: 205,
       label: 'SERVE',
-      title: 'FastAPI',
-      detail: 'typed JSON API',
+      title: 'FastAPI + React',
+      detail: 'typed API · built SPA',
       tone: 'plain',
     },
     {
-      x: 884,
-      width: 166,
-      label: 'INTERFACE',
-      title: 'React',
-      detail: 'inspect · audit',
+      x: 845,
+      width: 205,
+      label: 'PUBLIC',
+      title: 'Cloudflare Tunnel',
+      detail: 'public reviewer URL',
       tone: 'plain',
     },
   ]
@@ -56,7 +56,7 @@ function SystemOverview() {
     <svg
       viewBox="0 0 1080 308"
       role="img"
-      aria-label="Current high-level architecture. Public X evidence and linked documents enter a Python pipeline, which preserves canonical, raw, and derived data in SQLite. The pipeline calls models through LiteLLM and stores structured judgments. FastAPI exposes typed JSON to the React and TypeScript interface."
+      aria-label="Current deployed architecture. Public X evidence and linked documents enter a Python pipeline, which preserves raw, canonical, and derived data in SQLite. The pipeline calls models through LiteLLM and stores structured judgments. FastAPI serves the typed API and built React application on the Mac mini, and Cloudflare Tunnel exposes that service at the public reviewer URL."
     >
       <defs>
         <marker id="overview-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -85,20 +85,20 @@ function SystemOverview() {
         )
       })}
 
-      <line x1="200" y1="86" x2="230" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
-      <line x1="426" y1="86" x2="456" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
-      <line x1="652" y1="86" x2="682" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
-      <line x1="848" y1="86" x2="878" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+      <line x1="200" y1="86" x2="219" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+      <line x1="395" y1="86" x2="414" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+      <line x1="590" y1="86" x2="609" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
+      <line x1="820" y1="86" x2="839" y2="86" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#overview-arrow)" />
 
-      <path d="M331 142 V176" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
-      <rect x="236" y="184" width="416" height="68" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
-      <text x="254" y="209" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
-      <text x="254" y="237" fontFamily={UI} fontSize="16" fontWeight="600" fill={INK}>LiteLLM → models</text>
-      <text x="410" y="237" fontFamily={UI} fontSize="11.5" fill={MUTED}>judgments · usage · cost</text>
-      <path d="M557 184 V150" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
+      <path d="M310 142 V176" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
+      <rect x="225" y="184" width="365" height="68" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="243" y="209" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
+      <text x="243" y="237" fontFamily={UI} fontSize="16" fontWeight="600" fill={INK}>LiteLLM → models</text>
+      <text x="399" y="237" fontFamily={UI} fontSize="11.5" fill={MUTED}>judgments · usage · cost</text>
+      <path d="M505 184 V150" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
 
       <line x1="30" y1="278" x2="1050" y2="278" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="30" y="299" fontFamily={UI} fontSize="11.5" fill={MUTED}>Deterministic first. Model judgment stays auditable.</text>
+      <text x="30" y="299" fontFamily={UI} fontSize="11.5" fill={MUTED}>Deterministic first. Model judgment stays auditable. The same code restores a frozen local reviewer release.</text>
     </svg>
   )
 }
@@ -352,9 +352,9 @@ function AccountIntake() {
 
 function CurrentDataModel() {
   const channels = [
-    { cx: 245, label: '@karpathy', plane: 'X', live: true },
-    { cx: 540, label: 'github.com/karpathy', plane: 'GitHub', live: false },
-    { cx: 835, label: 'arXiv · A. Karpathy', plane: 'Papers', live: false },
+    { cx: 245, label: '@karpathy', plane: 'X', role: 'DAILY EVIDENCE', daily: true },
+    { cx: 540, label: 'github.com/karpathy', plane: 'GitHub', role: 'IDENTITY LINK', daily: false },
+    { cx: 835, label: 'arXiv · A. Karpathy', plane: 'Papers', role: 'IDENTITY LINK', daily: false },
   ]
   const CW = 250
   const CH_TOP = 174
@@ -370,7 +370,7 @@ function CurrentDataModel() {
     <svg
       viewBox="0 0 1080 444"
       role="img"
-      aria-label="Current data model: one real-world entity fans out to channels. X is live; GitHub and arXiv are planned. Dated, source-bound X output arrives as a daily event stream."
+      aria-label="Current data model. One real-world entity can resolve to several channels. X supplies the scheduled daily evidence. GitHub and paper identities support entity resolution and may enter evidence when a first-party X post discloses a linked primary document."
     >
       <defs>
         <marker id="data-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -380,7 +380,7 @@ function CurrentDataModel() {
           <path d="M0,0 L8,4 L0,8 z" fill={MUTED} />
         </marker>
       </defs>
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE IDENTITY · MANY CHANNELS · ONE EVIDENCE STREAM</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE IDENTITY · MANY CHANNELS · ONE SCHEDULED SOURCE</text>
 
       {/* the real-world identity */}
       <rect x="430" y="58" width="220" height="72" fill={INK} />
@@ -395,52 +395,50 @@ function CurrentDataModel() {
           y1="130"
           x2={c.cx}
           y2={CH_TOP - 6}
-          stroke={c.live ? BLUE_MID : MUTED}
-          strokeWidth={c.live ? 1.6 : 1.2}
-          strokeDasharray={c.live ? undefined : '5 5'}
-          opacity={c.live ? 1 : 0.55}
-          markerEnd={c.live ? 'url(#data-arrow)' : 'url(#data-arrow-muted)'}
+          stroke={c.daily ? BLUE_MID : MUTED}
+          strokeWidth={c.daily ? 1.6 : 1.2}
+          strokeDasharray={c.daily ? undefined : '5 5'}
+          opacity={c.daily ? 1 : 0.55}
+          markerEnd={c.daily ? 'url(#data-arrow)' : 'url(#data-arrow-muted)'}
         />
       ))}
 
       {/* channels (where) */}
       {channels.map((c) => (
-        <g key={`chan-${c.plane}`} opacity={c.live ? 1 : 0.62}>
+        <g key={`chan-${c.plane}`} opacity={c.daily ? 1 : 0.72}>
           <rect
             x={c.cx - CW / 2}
             y={CH_TOP}
             width={CW}
             height={CH_H}
             fill="#fff"
-            stroke={c.live ? BLUE_MID : MUTED}
+            stroke={c.daily ? BLUE_MID : MUTED}
             strokeWidth="1.2"
-            strokeDasharray={c.live ? undefined : '5 5'}
+            strokeDasharray={c.daily ? undefined : '5 5'}
           />
-          <text x={c.cx - CW / 2 + 16} y={CH_TOP + 27} fontFamily={MONO} fontSize="10" fill={c.live ? BLUE_INK : MUTED} letterSpacing="0.08em">
-            {c.plane.toUpperCase()} · {c.live ? 'LIVE' : 'PLANNED'}
+          <text x={c.cx - CW / 2 + 16} y={CH_TOP + 27} fontFamily={MONO} fontSize="10" fill={c.daily ? BLUE_INK : MUTED} letterSpacing="0.08em">
+            {c.plane.toUpperCase()} · {c.role}
           </text>
           <text x={c.cx - CW / 2 + 16} y={CH_TOP + 54} fontFamily={UI} fontSize="15.5" fontWeight="600" fill={INK}>{c.label}</text>
         </g>
       ))}
 
       {/* every channel plugs into the same evidence stream */}
-      {channels.map((c) => (
+      {channels.filter((channel) => channel.daily).map((c) => (
         <line
           key={`stream-${c.plane}`}
           x1={c.cx}
           y1={CH_TOP + CH_H}
           x2={c.cx}
           y2="306"
-          stroke={c.live ? BLUE_MID : MUTED}
-          strokeWidth={c.live ? 1.6 : 1.2}
-          strokeDasharray={c.live ? undefined : '5 5'}
-          opacity={c.live ? 1 : 0.42}
-          markerEnd={c.live ? 'url(#data-arrow)' : 'url(#data-arrow-muted)'}
+          stroke={BLUE_MID}
+          strokeWidth="1.6"
+          markerEnd="url(#data-arrow)"
         />
       ))}
 
       <rect x="90" y="312" width="900" height="110" fill={SURFACE} />
-      <text x="116" y="342" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">ONE EVIDENCE STREAM</text>
+      <text x="116" y="342" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">PUBLISHED EVIDENCE</text>
       <text x="116" y="371" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Dated observations</text>
       <text x="116" y="398" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.04em">source-bound · ordered in time</text>
       <line x1="308" y1="332" x2="308" y2="402" stroke={MUTED} strokeWidth="1" opacity="0.24" />
@@ -633,8 +631,8 @@ function RankingMethods() {
             <div className="method-weight-public"><b>20%</b><span>public engagement</span></div>
           </div>
           <p className="method-explain">
-            <strong>Tracked amplification</strong> counts every screened Registry member — person or
-            organization — exactly once per post: Andrej Karpathy and the newest
+            <strong>Tracked amplification</strong> counts every screened Registry member, person or
+            organization, exactly once per post: Andrej Karpathy and the newest
             member carry the same vote. Amplifier network position stays visible but
             does not multiply the vote. <strong>Author network support</strong> is the
             originator&rsquo;s own support percentile. <strong>Public engagement</strong> is
@@ -653,7 +651,7 @@ export default function Architecture() {
   return (
     <section className="system-view arch-page" aria-labelledby="architecture-title">
       <h2 className="system-view-title" id="architecture-title">Architecture</h2>
-      <p className="page-sub">A visual map of what is live, where judgment enters, and what each number means.</p>
+      <p className="page-sub">A technical map of the current implementation, its judgment boundaries, and the meaning of each number.</p>
 
       <nav className="ruled-nav arch-chapters" aria-label="Architecture chapters">
         <a href="#data-model">Data model</a>
@@ -666,7 +664,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--lead" id="data-model">
         <div className="arch-section-head">
           <h2 className="arch-h">The data model</h2>
-          <p className="arch-p">X is observed in two ways: dated output arrives daily; follow relationships change more slowly.</p>
+          <p className="arch-p">The Registry resolves several channels to one identity. X supplies scheduled daily evidence; linked primary documents enter through Artifacts.</p>
         </div>
         <div className="arch-canvas"><CurrentDataModel /></div>
         <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
@@ -675,7 +673,7 @@ export default function Architecture() {
       <section className="arch-section" id="account-intake">
         <div className="arch-section-head">
           <h2 className="arch-h">How an account enters the Registry</h2>
-          <p className="arch-p">A short, auditable path turns a supplied X handle into a resolved identity—or a recorded rejection.</p>
+          <p className="arch-p">A short, auditable path turns a supplied X handle into a resolved identity or a recorded rejection.</p>
         </div>
         <div className="arch-canvas"><AccountIntake /></div>
       </section>
@@ -700,7 +698,7 @@ export default function Architecture() {
       <section className="arch-section" id="overview">
         <div className="arch-section-head">
           <h2 className="arch-h">System at a glance</h2>
-          <p className="arch-p">The complete stack in one view—from public evidence to the operator interface.</p>
+          <p className="arch-p">The deployed stack in one view, from public evidence to the hosted reviewer interface.</p>
         </div>
         <div className="arch-canvas"><SystemOverview /></div>
       </section>

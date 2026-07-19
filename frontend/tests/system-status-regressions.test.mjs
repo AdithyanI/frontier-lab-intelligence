@@ -7,14 +7,15 @@ const layout = readSource('features/system/SystemLayout.tsx')
 const status = readSource('features/system/StatusPage.tsx')
 const styles = readStyles()
 
-test('System groups Status and Architecture without promoting either subview', () => {
+test('System opens with the reviewer walkthrough and keeps technical views together', () => {
   assert.match(app, /<NavLink to="\/system">System<\/NavLink>/)
   assert.match(app, /<Route path="\/system" element=\{<System \/>\}>/)
-  assert.match(app, /<Route index element=\{<Navigate to="architecture" replace \/>\} \/>/)
+  assert.match(app, /<Route index element=\{<Navigate to="how-it-works" replace \/>\} \/>/)
+  assert.match(app, /<Route path="how-it-works" element=\{<HowItWorks \/>\} \/>/)
   assert.match(app, /<Route path="status" element=\{<Status \/>\} \/>/)
   assert.match(app, /<Route path="architecture" element=\{<Architecture \/>\} \/>/)
   assert.doesNotMatch(app, /<NavLink to="\/architecture">Architecture<\/NavLink>/)
-  assert.match(layout, /<NavLink to="\/system\/architecture">Architecture<\/NavLink>[\s\S]*?<NavLink to="\/system\/status">Status<\/NavLink>/)
+  assert.match(layout, /<NavLink to="\/system\/how-it-works">How it works<\/NavLink>[\s\S]*?<NavLink to="\/system\/architecture">Architecture<\/NavLink>[\s\S]*?<NavLink to="\/system\/status">Status<\/NavLink>/)
 })
 
 test('Status derives a checkpoint from existing read APIs without claiming host health', () => {
