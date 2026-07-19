@@ -152,6 +152,22 @@ counts. It does not replace validation or make editorial decisions.
 `full`, preserving the existing complete payload contract. Agents should use
 the smallest projection that answers the current question.
 
+### Future-agent discovery and enforcement
+
+This workflow is intentionally durable at four layers:
+
+- root `AGENTS.md` routes generation, review, and reruns to the repo-local
+  `$fli-daily-intelligence` skill;
+- that skill requires `preflight` before validation and compact run inspection
+  after import;
+- this reference preserves the exact client behavior and commands;
+- CLI regression tests run under `scripts/check-fast.sh`, so the shared Stop
+  hook catches broken coverage or projection contracts without owning or
+  executing the editorial workflow itself.
+
+Do not duplicate these details in hook configuration. The hook is a validation
+boundary; the skill and this reference are the operating contract.
+
 The normal run is:
 
 ```bash
