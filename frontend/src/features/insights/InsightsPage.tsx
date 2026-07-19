@@ -79,10 +79,10 @@ const STATUS_COPY: Record<InsightStatus, { label: string; description: string }>
 type ReportDownloadState = 'idle' | 'generating' | 'ready' | 'error'
 
 const INVESTMENT_IMPACT_COPY = {
-  positive: { icon: '↗', label: 'Positive' },
-  negative: { icon: '↘', label: 'Negative' },
+  positive: { icon: '↗', label: 'Potential positive' },
+  negative: { icon: '↘', label: 'Potential negative' },
   mixed: { icon: '↔', label: 'Mixed' },
-  uncertain: { icon: '?', label: 'Uncertain' },
+  uncertain: { icon: '?', label: 'Direction unclear' },
 } satisfies Record<InvestmentImpactDirection, { icon: string; label: string }>
 
 function parseAudience(value: string | null): InsightAudience {
@@ -469,8 +469,16 @@ function EngineeringDecision({
   )
 }
 
-function EditorialSources({ item }: { item: EditorialInsightItem }) {
-  const researchSources = item.citations.filter((citation) => citation.kind !== 'event')
+function EditorialSources({
+  item,
+  portfolioSourceUrl,
+}: {
+  item: EditorialInsightItem
+  portfolioSourceUrl?: string
+}) {
+  const researchSources = item.citations.filter(
+    (citation) => citation.kind !== 'event' && citation.url !== portfolioSourceUrl,
+  )
   const titleId = `${item.insight_id}-sources`
 
   return (
@@ -549,7 +557,13 @@ function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
   )
 }
 
-function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
+function EditorialInsightRow({
+  item,
+  portfolioSourceUrl,
+}: {
+  item: EditorialInsightItem
+  portfolioSourceUrl?: string
+}) {
   const titleId = `${item.insight_id}-title`
   const rankExplanationId = `${item.insight_id}-rank-explanation`
   const [rankExplanationOpen, setRankExplanationOpen] = useState(false)
@@ -617,7 +631,7 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
           <EngineeringDecision analysis={engineeringAnalysis} nextStep={item.next_step} />
         )}
 
-        <EditorialSources item={item} />
+        <EditorialSources item={item} portfolioSourceUrl={portfolioSourceUrl} />
       </div>
     </article>
   )
@@ -870,7 +884,11 @@ export default function Insights() {
           )}
           <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
             {editorialData.items.map((item) => (
-              <EditorialInsightRow item={item} key={item.insight_id} />
+              <EditorialInsightRow
+                item={item}
+                key={item.insight_id}
+                portfolioSourceUrl={editorialData.portfolio_reference?.source_url}
+              />
             ))}
           </section>
         </>

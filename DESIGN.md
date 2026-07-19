@@ -265,6 +265,9 @@ Rules:
   followed by a linked source-ledger page containing every original post and
   artifact/context citation; original-Feed titles use absolute canonical links
   to their exact internal Feed Event, which owns the onward source-post link.
+  Feed rank and source-role codes remain dashboard audit metadata rather than
+  fixed source-ledger labels; the PDF presents the linked title and its
+  evidence role in reader language.
   Every later-page header returns to the brief index. Serif display headings
   and restrained capital-blue slash markers echo the case brief's editorial
   rhythm without reproducing BIT branding, while flat rules and sans-serif body

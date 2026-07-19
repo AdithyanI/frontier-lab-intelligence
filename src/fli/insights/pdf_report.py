@@ -39,7 +39,7 @@ from reportlab.platypus import (
 from fli.insights import editorial_runs
 
 
-REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v6"
+REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v7"
 DEFAULT_CACHE_ROOT = editorial_runs.DEFAULT_ROOT / "pdf-cache"
 PUBLIC_APP_URL = "https://frontier-lab-intelligence.adithyan.io"
 
@@ -597,7 +597,6 @@ def _opening_table(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> T
         style=TableStyle(
             [
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LINEABOVE", (0, 0), (-1, -1), 0.55, INK),
                 ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
                 ("LINEBEFORE", (1, 0), (1, 0), 0.35, BORDER),
                 ("TOPPADDING", (0, 0), (-1, -1), 9),
@@ -758,9 +757,7 @@ def _source_block(
     day: str,
 ) -> list[Any]:
     if events:
-        feed_rank = int(value.get("feed_rank") or 0)
-        role = str(value.get("role") or "source").upper()
-        title = str(value.get("title") or f"Feed #{feed_rank}")
+        title = str(value.get("title") or "Open Feed Event")
         event_id = str(value.get("event_id") or "")
         url = (
             f"{PUBLIC_APP_URL}/evidence/feed?"
@@ -777,13 +774,6 @@ def _source_block(
         Paragraph(_link(url, title), styles["small_link"]),
         Spacer(1, 1.2 * mm),
     ]
-    if events:
-        flowables.extend(
-            [
-                Paragraph(f"FEED #{feed_rank}  /  {_markup(role)}", styles["label"]),
-                Spacer(1, 1.2 * mm),
-            ]
-        )
     flowables.append(Paragraph(_markup(support), styles["small"]))
     event_reason = value.get("event_reason") if events else None
     if event_reason and _plain(event_reason) != _plain(support):

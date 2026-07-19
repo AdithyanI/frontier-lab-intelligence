@@ -212,6 +212,10 @@ shared theme as an automatic merge.
   consensus view. For this version, treat the packet's audited portfolio as the
   working portfolio context and keep its date and source in the packet rather
   than repeating them in every reader-facing company row.
+- The audited portfolio report is page-level context, not a default Insight
+  citation. Do not attach it to an individual Insight merely to establish that
+  a named company belongs to the working portfolio. Cite it inside an Insight
+  only when a report passage directly supports a development-specific claim.
 - Treat a company profile as reusable background, not evidence that today's
   development has an effect. Attribute a view to BIT only when
   `bit_public_view.grade` is `explicit_thesis` or `commentary` and cite its BIT
@@ -227,11 +231,17 @@ shared theme as an automatic merge.
   unknown. Keep the strongest challenge in `key_uncertainty` and use one to
   three measurable `watchpoints`; do not split the same argument across
   parallel mechanics fields.
-- For Investment, match each impact label to development-specific evidence. A
-  product page, partnership description, generic risk disclosure, or broad
-  competitive context may establish exposure, but not a positive or negative
-  effect from the current development. Use `uncertain` until the direction is
-  supported, and do not strengthen an inference by adding weak context.
+- For Investment, use `impact` as the potential development-specific company
+  direction, not as proof of a realized financial result or a stock call. Use
+  `positive` or `negative` only when one material operating or thesis direction
+  is better supported than its opposite; keep realization and magnitude in the
+  key uncertainty and watchpoints. Use `mixed` only when the current development
+  supports material benefit and harm. Use `uncertain` only when no defensible
+  net direction exists because opposite branches remain comparably plausible or
+  an unresolved variable determines the sign. Generic exposure, company-profile
+  context, rival financing, or risk disclosures do not establish direction.
+  Omit mappings without a direct material transmission path; `uncertain` is not
+  a safe harbor for weak mappings. Never optimize toward a target distribution.
 - For Investment, keep internal research-method controls under AI Engineering
   or `not_selected` unless they produce a defensible fund-thesis, company, or
   portfolio consequence. A shared model, company, or market theme is not such

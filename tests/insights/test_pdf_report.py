@@ -228,6 +228,8 @@ def test_report_renders_complete_audience_workbook(audience, expected, unexpecte
     assert "READING NOTE" not in text
     assert "WHY THIS RANK" not in text
     assert "Highest decision consequence with primary-source evidence." not in text
+    assert "FEED #7" not in text
+    assert " / PRIMARY" not in text
     assert [len(destinations) for destinations in _pdf_internal_destinations(pdf_bytes)] == [
         1,
         1,

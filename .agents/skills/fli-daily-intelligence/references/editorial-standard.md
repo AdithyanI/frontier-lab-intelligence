@@ -173,12 +173,17 @@ For each affected company record:
 - `impact`: `positive`, `negative`, `mixed`, or `uncertain`; and
 - `mechanism`: the company-specific operating or competitive transmission path.
 
-Match the impact label to the evidence for this development. A product page,
-partnership description, or generic risk-factor disclosure can establish that
-a company is exposed to a market or competitor. It does not establish that the
-current development has a positive or negative effect. Use `uncertain` unless
-development-specific evidence supports the direction. Do not use several weak
-context sources to simulate one strong causal source.
+Treat the impact label as the potential company direction supported by this
+development, not proof of realized financial impact, a BIT view, or a stock
+call. Use `positive` or `negative` when one material operating or thesis
+direction is better supported than its opposite; unknown realization,
+magnitude, or earnings effect belongs in the key uncertainty and watchpoints.
+Use `mixed` only when the current development supports material benefit and
+harm. Use `uncertain` only when opposite branches remain comparably plausible
+or an unresolved variable determines the sign. Generic exposure, company
+profiles, rival financing, or risk disclosures do not establish direction.
+Omit mappings without a direct material transmission path; `uncertain` is not
+a safe harbor for weak mappings. Never optimize toward a target distribution.
 
 Do not repeat portfolio dates or disclosure caveats in every entity. They live
 once in the context packet and the reader's portfolio note. `portfolio` means
@@ -186,6 +191,12 @@ the company appears in that working baseline. `outside_portfolio` is an analyst
 mapping, not a known BIT view, holding, or recommendation. Consider the
 portfolio first and omit the outside section when no direct public-company
 connection is defensible.
+
+The audited portfolio report is not a default Insight citation. Portfolio
+membership is already disclosed once in the reader's portfolio note. Attach
+the report to an individual Insight only when a specific passage supports a
+development-specific claim; never attach it solely to classify a company as
+`portfolio`.
 
 Then provide one `key_uncertainty` and one to three measurable `watchpoints`.
 Do not create separate operating-driver, financial-driver, edge, impact-chain,
