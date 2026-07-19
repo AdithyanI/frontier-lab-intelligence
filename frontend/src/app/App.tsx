@@ -26,8 +26,8 @@ export default function App() {
           Frontier Lab Intelligence
         </div>
         <nav aria-label="Main">
-          <NavLink to="/how">How it works</NavLink>
           <NavLink to={insightsPath}>Insights</NavLink>
+          <NavLink to="/how">How it works</NavLink>
           <NavLink to="/network">Network</NavLink>
           <NavLink to={evidencePath}>Evidence</NavLink>
           <NavLink to="/bit-lens">BIT Lens</NavLink>
