@@ -2,7 +2,97 @@
 
 .insight-page { max-width: 1220px; }
 
-.insight-page-head { padding-bottom: 28px; }
+.insight-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: start;
+  padding-bottom: 24px;
+}
+
+.insight-page-intro { min-width: 0; }
+
+.insight-report-action {
+  display: flex;
+  min-width: 168px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.insight-report-button {
+  display: inline-flex;
+  min-width: 168px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.insight-report-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-width: 1.5;
+}
+
+.insight-report-button:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.insight-report-button[data-state='ready'] {
+  border-color: var(--blue-ink);
+  color: var(--blue-ink);
+}
+
+.insight-report-button[data-state='ready']:hover {
+  border-color: var(--blue-ink);
+  background: var(--blue-ink);
+  color: #fff;
+}
+
+.insight-report-button:disabled {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.insight-report-button[data-state='generating'] { cursor: wait; }
+
+.insight-report-button:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 2px;
+}
+
+.insight-report-status {
+  min-height: 14px;
+  max-width: 30ch;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.insight-report-status--ready { color: var(--blue-ink); }
+.insight-report-status--error { color: var(--negative); }
 
 .insight-audience-switch {
   display: grid;
@@ -803,4 +893,11 @@
     gap: 6px 18px;
   }
   .editorial-entities li p { grid-column: 1 / -1; }
+}
+
+@media (max-width: 680px) {
+  .insight-page-head { grid-template-columns: minmax(0, 1fr); }
+  .insight-report-action { align-items: stretch; }
+  .insight-report-button { align-self: start; }
+  .insight-report-status { text-align: left; }
 }

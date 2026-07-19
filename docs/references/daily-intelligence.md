@@ -252,6 +252,14 @@ Candidate-level Insight decisions remain an audit fallback for dates without an
 imported run and for explicit suppressed/all inspection. A complete imported
 run wins even when it selected zero Insights for an audience.
 
+`GET /api/insights/report.pdf?audience=<audience>&date=<YYYY-MM-DD>` renders
+only that canonical complete projection. It returns 404 for an unavailable or
+non-editorial day, `application/pdf` with an audience/date filename otherwise,
+and emits `ETag`, `X-FLI-PDF-Cache`, and `X-FLI-Report-Version` headers.
+Conditional requests may return 304. The server-side cache is content-addressed
+by report schema, read schema, date, audience, and imported result hash and is
+written atomically; it never reads drafts or authors new report content.
+
 The canonical Investment reader shows the conclusion-led title, facts, one
 investment interpretation, company read-through, confirmation/challenge
 signals, and two source columns: exact original Feed Events and supporting

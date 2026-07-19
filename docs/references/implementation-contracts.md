@@ -449,7 +449,10 @@ projection instead of rebuilding its SQLite joins. The SPA deduplicates and
 prefetches complete Feed days and
 lazy-mounts closed evidence trees. Registry list reads stay uncached in the
 browser because their indexed queries are already fast and curation freshness
-matters more than another cache.
+matters more than another cache. Daily PDF exports use a separate immutable
+file cache keyed by report/read schema, audience, date, and editorial result
+hash. The response retains `private, no-cache` so a browser revalidates the
+stable audience/date URL when a newer complete run changes the ETag.
 
 Active derived storage uses Event-native names throughout:
 `event_day`, `first_event_day`, `last_event_day`, and
@@ -532,7 +535,8 @@ Target stages:
 3. **Extraction:** structured/cited insights from accepted X evidence,
    optionally strengthened by fetched artifacts.
 4. **Scoring:** visible dimensions plus validation, not an arbitrary weighted sum.
-5. **Delivery:** persona digests, alerts, reviewable UI, PDF/export later.
+5. **Delivery:** persona digests and reviewable UI, plus a cached, linked PDF
+   workbook for each complete audience/day; alerts remain deferred.
 
 ## Signal Funnel
 

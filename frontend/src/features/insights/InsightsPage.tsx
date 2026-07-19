@@ -76,6 +76,8 @@ const STATUS_COPY: Record<InsightStatus, { label: string; description: string }>
   all: { label: 'All', description: 'Every completed candidate evaluation' },
 }
 
+type ReportDownloadState = 'idle' | 'generating' | 'ready' | 'error'
+
 const INVESTMENT_IMPACT_COPY = {
   positive: { icon: '↗', label: 'Positive' },
   negative: { icon: '↘', label: 'Negative' },
@@ -114,6 +116,120 @@ function isEngineeringAnalysis(
   analysis: EditorialAnalysis,
 ): analysis is EngineeringEditorialAnalysis {
   return 'decision_rule' in analysis
+}
+
+function reportFilename(response: Response, audience: InsightAudience, day: string) {
+  const disposition = response.headers.get('content-disposition') ?? ''
+  const match = disposition.match(/filename="?([^";]+)"?/i)
+  if (match?.[1]) return match[1]
+  const audienceSlug = audience === 'investment' ? 'investment' : 'ai-engineering'
+  return `fli-daily-brief-${day}-${audienceSlug}.pdf`
+}
+
+function DailyBriefDownload({
+  audience,
+  day,
+  available,
+  loading,
+}: {
+  audience: InsightAudience
+  day: string
+  available: boolean
+  loading: boolean
+}) {
+  const [state, setState] = useState<ReportDownloadState>('idle')
+  const [error, setError] = useState('')
+  const requestRef = useRef<AbortController | null>(null)
+  const statusId = 'daily-brief-download-status'
+  const audienceLabel = AUDIENCE_COPY[audience].label
+
+  useEffect(() => {
+    requestRef.current?.abort()
+    requestRef.current = null
+    setState('idle')
+    setError('')
+    return () => requestRef.current?.abort()
+  }, [audience, day])
+
+  const download = async () => {
+    if (!available || !day || state === 'generating') return
+    const controller = new AbortController()
+    requestRef.current?.abort()
+    requestRef.current = controller
+    setState('generating')
+    setError('')
+    let objectUrl = ''
+    try {
+      const response = await fetch(
+        `/api/insights/report.pdf?audience=${audience}&date=${encodeURIComponent(day)}`,
+        { headers: { Accept: 'application/pdf' }, signal: controller.signal },
+      )
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as { detail?: string } | null
+        throw new Error(payload?.detail || `The report request failed with status ${response.status}.`)
+      }
+      const blob = await response.blob()
+      if (requestRef.current !== controller) return
+      objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = reportFilename(response, audience, day)
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
+      objectUrl = ''
+      setState('ready')
+    } catch (cause) {
+      if (controller.signal.aborted) return
+      setError(cause instanceof Error ? cause.message : 'The PDF could not be prepared.')
+      setState('error')
+    } finally {
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+      if (requestRef.current === controller) requestRef.current = null
+    }
+  }
+
+  const disabled = !available || !day || loading || state === 'generating'
+  const label = state === 'generating'
+    ? 'Preparing PDF…'
+    : state === 'ready'
+      ? 'Download again'
+      : 'Download PDF'
+  const disabledReason = loading
+    ? 'The daily brief is still loading.'
+    : !available
+      ? 'PDF export is available for complete kept daily briefs.'
+      : ''
+
+  return (
+    <div className="insight-report-action">
+      <button
+        className="insight-report-button"
+        data-state={state}
+        type="button"
+        onClick={download}
+        disabled={disabled}
+        aria-busy={state === 'generating'}
+        aria-describedby={state === 'ready' || state === 'error' ? statusId : undefined}
+        aria-label={`${label} for ${audienceLabel}, ${day}`}
+        title={disabledReason || `Download the ${audienceLabel} brief for ${day}`}
+      >
+        <svg aria-hidden="true" viewBox="0 0 20 20">
+          <path d="M10 2.5v10m0 0 3.5-3.5M10 12.5 6.5 9M3.5 16.5h13" />
+        </svg>
+        <span>{label}</span>
+      </button>
+      <span
+        className={`insight-report-status insight-report-status--${state}`}
+        id={statusId}
+        role={state === 'error' ? 'alert' : 'status'}
+        aria-live="polite"
+      >
+        {state === 'ready' ? 'PDF downloaded.' : error}
+      </span>
+    </div>
+  )
 }
 
 function InsightState({
@@ -662,8 +778,16 @@ export default function Insights() {
   return (
     <div className="page insight-page">
       <header className="page-head insight-page-head">
-        <h1 className="page-title">{copy.title}</h1>
-        <p className="page-sub">{copy.subtitle}</p>
+        <div className="insight-page-intro">
+          <h1 className="page-title">{copy.title}</h1>
+          <p className="page-sub">{copy.subtitle}</p>
+        </div>
+        <DailyBriefDownload
+          audience={audience}
+          day={selectedDate}
+          available={Boolean(editorialData?.available)}
+          loading={datesLoading || dataLoading}
+        />
       </header>
 
       <div className="insight-audience-switch" role="group" aria-label="Insight audience">

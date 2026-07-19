@@ -17,6 +17,7 @@ Endpoints:
 - /api/artifacts/{id}/text       normalized readable artifact snapshot
 - /api/insights/dates            successor audience Insight dates
 - /api/insights                  successor audience Insights
+- /api/insights/report.pdf       cached daily editorial PDF workbook
 """
 
 from contextlib import asynccontextmanager
@@ -25,13 +26,14 @@ from pathlib import Path
 from threading import Thread
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from fli.ingestion import sources
 from fli.insights import editorial_runs as editorial_store
+from fli.insights import pdf_report
 from fli.insights import view as insight_store
 from fli.network import view as rankings_store
 from fli.registry import channels
@@ -466,6 +468,44 @@ def insights(
     )
     payload["content_kind"] = "candidate_decisions"
     return JSONResponse(payload)
+
+
+@app.get("/api/insights/report.pdf")
+def insight_report_pdf(
+    request: Request,
+    insight_date: calendar_date | None = Query(None, alias="date"),
+    audience: Literal["investment", "ai_engineering"] = "investment",
+) -> Response:
+    """Download one cached PDF from the canonical complete daily editorial run."""
+    day = insight_date.isoformat() if insight_date else None
+    payload = editorial_store.editorial_insights_payload(
+        audience=audience,
+        day=day,
+    )
+    try:
+        artifact = pdf_report.get_or_create_report(
+            payload,
+            cache_root=pdf_report.DEFAULT_CACHE_ROOT,
+        )
+    except pdf_report.ReportUnavailable as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    etag = f'"{artifact.etag}"'
+    headers = {
+        "Cache-Control": "private, no-cache",
+        "Content-Language": "en",
+        "ETag": etag,
+        "X-FLI-PDF-Cache": "hit" if artifact.cache_hit else "miss",
+        "X-FLI-Report-Version": artifact.report_version,
+    }
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=headers)
+    return FileResponse(
+        artifact.path,
+        media_type="application/pdf",
+        filename=artifact.filename,
+        headers=headers,
+    )
 
 
 if DIST_DIR.exists():

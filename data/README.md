@@ -42,7 +42,9 @@ has a canonical path.
   or overwrite a reused task's settings. After a successful goal, the same
   task may write a best-effort local harness reflection under
   `derived/daily-intelligence/agent-feedback/`; it is not editorial input or
-  product data.
+  product data. `derived/daily-intelligence/pdf-cache/` contains rebuildable,
+  content-addressed A4 exports generated only from complete normalized runs;
+  deleting it costs render time but does not lose editorial state.
 - `following/manifests/` — small tracked manifests that bind each local
   snapshot checksum to its cohort, provider, completeness, spend, ranking, and
   evaluation outputs.

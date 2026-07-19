@@ -17,7 +17,9 @@ professionals who live in data-dense tools all day:
   build."
 
 Both consume periodic digests and interrupt-driven alerts; both need every
-claim traceable to its primary source in one click.
+claim traceable to its primary source in one click. A completed daily digest
+must remain readable in the product and downloadable as a self-contained,
+audience-specific PDF for offline review and assignment delivery.
 
 ## Product Purpose
 

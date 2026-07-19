@@ -173,6 +173,32 @@ test('Insights safely decodes model prose without interpreting markup', () => {
   assert.equal(decodeTextEntities('invalid &#xD800; value'), 'invalid &#xD800; value')
 })
 
+test('Insights exposes a production PDF download for the complete selected daily brief', () => {
+  assert.match(insightSource, /function DailyBriefDownload/)
+  assert.match(
+    insightSource,
+    /`\/api\/insights\/report\.pdf\?audience=\$\{audience\}&date=\$\{encodeURIComponent\(day\)\}`/,
+  )
+  assert.match(insightSource, /Accept: 'application\/pdf'/)
+  assert.match(insightSource, /new AbortController\(\)/)
+  assert.match(insightSource, /requestRef\.current\?\.abort\(\)/)
+  assert.match(insightSource, /signal: controller\.signal/)
+  assert.match(insightSource, /response\.headers\.get\('content-disposition'\)/)
+  assert.match(insightSource, /URL\.createObjectURL\(blob\)/)
+  assert.match(insightSource, /URL\.revokeObjectURL\(objectUrl\)/)
+  assert.match(insightSource, /window\.setTimeout\(\(\) => URL\.revokeObjectURL\(objectUrl\), 0\)/)
+  assert.match(insightSource, /anchor\.download = reportFilename\(response, audience, day\)/)
+  assert.match(insightSource, /aria-busy=\{state === 'generating'\}/)
+  assert.match(insightSource, /Preparing PDF…/)
+  assert.match(insightSource, /Download again/)
+  assert.match(insightSource, /PDF export is available for complete kept daily briefs\./)
+  assert.match(insightSource, /available=\{Boolean\(editorialData\?\.available\)\}/)
+  assert.match(appStyles, /\.insight-page-head \{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;/)
+  assert.match(appStyles, /\.insight-report-button \{[^}]*min-height: 44px;/)
+  assert.match(appStyles, /\.insight-report-button:focus-visible/)
+  assert.doesNotMatch(appStyles, /\.insight-report-button \{[^}]*box-shadow:/)
+})
+
 test('Insights keeps honest loading, error, and thin-filter states', () => {
   assert.match(insightSource, /Insight dates are unavailable/)
   assert.match(insightSource, /This brief did not load/)

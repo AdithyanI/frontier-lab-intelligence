@@ -36,7 +36,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
 | Attention | `fli.scoring` | Versioned score formulas and offline comparison. Production remains `attention-v1.1`. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
-| Insights | `fli.insights` | Per-Event generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary: strict drafts, frozen workspaces, date-keyed orchestration, persisted Codex handoff, atomic runs, and the canonical read model. |
+| Insights | `fli.insights` | Per-Event generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary: strict drafts, frozen workspaces, date-keyed orchestration, persisted Codex handoff, atomic runs, the canonical read model, and `pdf_report` for deterministic cached workbooks. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.artifact_library` | HTTP composition and remaining projections only. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
 
@@ -54,7 +54,7 @@ routes in a generic `pages/` directory:
 | App composition | `frontend/src/app/` | Route composition and the shared audit-date provider only. |
 | Architecture | `frontend/src/features/architecture/` | The system explanation route and its local presentation logic. |
 | Evidence | `frontend/src/features/evidence/` | Feed, Artifact index, their workspace layout, and Evidence-only view state. |
-| Insights | `frontend/src/features/insights/` | Audience Insight inspection and decision-state UI. |
+| Insights | `frontend/src/features/insights/` | Audience Insight inspection, decision-state UI, and the selected daily brief PDF download interaction. |
 | Network | `frontend/src/features/network/` | Registry, Ranking, Add Profile, their workspace layout, and the shared entity detail surface. |
 | Shared UI | `frontend/src/shared/` | Cross-feature API contracts, date state, text normalization, and genuinely reused components. |
 | Styles | `frontend/src/styles/` | Domain styles in cascade order; `app.css` is imports only and remains the single entrypoint. |
@@ -77,6 +77,7 @@ do not recreate generic `pages/` or `components/` buckets.
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, score evaluation | Immutable per-day runs. New global publications retain new target lineage while exact same-day Event/evidence/input judgments may be reused from compatible predecessors. |
 | `data/derived/insights/insights.db` | `fli insights` | Insight read model/UI | Current audience Insight run store. |
 | `data/derived/daily-intelligence/editorial.db` | `fli daily-intelligence import-result` / `run-day` | Daily Insight read model/UI and orchestration inspection | Complete agent-authored daily runs plus one date-keyed orchestration ledger with the effective Codex model/reasoning/tier tuple; strict v3 workspaces and the optional packet-keyed embedding cache live beside it. |
+| `data/derived/daily-intelligence/pdf-cache/` | `GET /api/insights/report.pdf` | Daily Insight PDF downloads | Rebuildable content-addressed PDFs keyed by report schema, read schema, date, audience, and editorial result hash; atomic writes make concurrent first requests safe. |
 
 See [`data/README.md`](../../data/README.md) for directory lifecycle and
 [`docs/references/data-lifecycle.md`](../references/data-lifecycle.md) before

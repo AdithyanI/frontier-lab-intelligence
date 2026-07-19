@@ -31,6 +31,10 @@ Preserve these exact stores during the submission sprint:
 - `data/derived/daily-intelligence/editorial.db` and its current validated workspaces
 - `data/derived/x-daily-collection.db`
 
+`data/derived/daily-intelligence/pdf-cache/` is deliberately absent from the
+preservation set. It is safe to delete because complete editorial rows
+deterministically rebuild every file.
+
 Before a destructive cleanup, trace every default path in code, inspect tracked
 manifests/lineage, and run `PRAGMA quick_check` on the replacement store. Move a
 historical output to `data/archive/` when its evidence remains useful but no

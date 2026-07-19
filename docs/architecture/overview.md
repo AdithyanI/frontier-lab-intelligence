@@ -108,7 +108,10 @@ at the root of `fli`.
    from that durable row before opening App Server, so a task later reused by a
    human is outside orchestration control.
 11. The web and CLI expose the frozen evidence, decisions, provenance, and
-   operational status without becoming alternate data owners.
+   operational status without becoming alternate data owners. For a complete
+   daily editorial run, the web adapter can deterministically render the same
+   audience/date projection as a linked A4 PDF. The content-addressed derived
+   cache is an acceleration layer, not another report or editorial store.
 
 ## Important Boundaries
 
@@ -137,6 +140,10 @@ at the root of `fli`.
   citation in a verified passage relevant to the Insight claim.
 - **Independent audiences:** Engineering and Investment are separate judgments
   over one shared evidence core, not two ingestion systems.
+- **Derived delivery cache:** a PDF cache key binds the report renderer version,
+  canonical read schema, selected day and audience, and imported result hash.
+  Cache files are atomically replaceable and may be deleted without losing
+  editorial truth; the normalized run remains the only report input.
 - **Agent freedom behind a narrow write boundary:** the agent may search,
   compare, group, and research freely, but only a versioned Insight schema and
   complete candidate disposition may enter product state.
