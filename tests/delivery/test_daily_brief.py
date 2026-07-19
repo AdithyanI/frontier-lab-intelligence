@@ -227,3 +227,23 @@ def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypa
     assert response.json()["status"] == "sent"
     assert cross_site.status_code == 403
     assert calls == [{"channel": "slack"}]
+
+
+def test_delivery_is_unconfigured_and_blocked_in_read_only_mode(monkeypatch):
+    monkeypatch.setenv("FLI_READ_ONLY", "true")
+    monkeypatch.setattr(
+        "fli.web.app.editorial_store.editorial_insights_payload",
+        lambda **_kwargs: _payload(),
+    )
+
+    status = CLIENT.get(f"/api/insights/delivery?audience=investment&date={DAY}")
+    response = CLIENT.post(
+        "/api/insights/delivery",
+        headers={"Origin": "http://testserver"},
+        json={"audience": "investment", "date": DAY, "channel": "slack"},
+    )
+
+    assert status.status_code == 200
+    assert not any(channel["configured"] for channel in status.json()["channels"])
+    assert response.status_code == 403
+    assert response.json()["detail"] == "This reviewer demo is read-only."

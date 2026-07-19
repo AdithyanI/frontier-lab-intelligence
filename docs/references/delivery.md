@@ -38,6 +38,11 @@ There is deliberately no schedule, unattended alert loop, provider settings
 page, or delivery-history store. The submission proves the cited push adapters;
 automation and stronger access control are documented next steps.
 
+The public reviewer release sets `FLI_READ_ONLY=1`. In that mode, delivery
+status ignores local provider credentials and the POST route returns `403`, so
+the downloadable demo cannot send a real message. The same boundary also
+disables Registry intake.
+
 ## Configuration
 
 Canonical secret values live in Azure Key Vault. Local development maps those

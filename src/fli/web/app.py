@@ -23,6 +23,7 @@ Endpoints:
 
 from contextlib import asynccontextmanager
 from datetime import date as calendar_date
+import os
 from pathlib import Path
 from threading import Thread
 from typing import Literal
@@ -66,6 +67,24 @@ async def _lifespan(_: FastAPI):
 app = FastAPI(title="Frontier Lab Intelligence", lifespan=_lifespan)
 
 
+def _read_only_mode() -> bool:
+    """Return whether this process is serving a non-mutating reviewer demo."""
+    return os.environ.get("FLI_READ_ONLY", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def _require_writable() -> None:
+    if _read_only_mode():
+        raise HTTPException(
+            status_code=403,
+            detail="This reviewer demo is read-only.",
+        )
+
+
 class RegistryIntakeRequest(BaseModel):
     profile: str = Field(min_length=1, max_length=500)
     mode: Literal["screen", "direct"]
@@ -94,6 +113,8 @@ def _require_same_origin_delivery(request: Request) -> None:
 
 def _model_conn():
     conn = channels.connect()
+    if _read_only_mode():
+        return conn
     unlinked = conn.execute(
         """SELECT 1 FROM channels c
            WHERE NOT EXISTS (
@@ -265,6 +286,7 @@ def registry_entity(entity_id: int) -> JSONResponse:
 @app.post("/api/registry/intake")
 def registry_profile_intake(request: RegistryIntakeRequest) -> JSONResponse:
     """Screen or directly admit one X profile from the operator UI."""
+    _require_writable()
     conn = _model_conn()
     try:
         try:
@@ -541,9 +563,16 @@ def insight_delivery_status(
         audience=audience,
         day=insight_date.isoformat(),
     )
+    settings = None
+    if _read_only_mode():
+        settings = brief_delivery.DeliverySettings.from_environment(
+            environ={},
+            env_path=DIST_DIR / ".read-only-no-env",
+        )
     return JSONResponse(
         brief_delivery.delivery_status_payload(
             payload,
+            settings=settings,
         )
     )
 
@@ -554,6 +583,7 @@ def send_insight_delivery(
     delivery_request: DailyBriefDeliveryRequest,
 ) -> JSONResponse:
     """Send one explicitly confirmed Daily Brief through a configured adapter."""
+    _require_writable()
     _require_same_origin_delivery(request)
     payload = editorial_store.editorial_insights_payload(
         audience=delivery_request.audience,

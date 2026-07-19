@@ -76,35 +76,27 @@ complete routed-positive cohort behind a strict validated write boundary.
 | Audience Insight generation | Complete v10/v7 evaluation of every routed-positive audience | Investment v10 and AI Engineering v7 address distinct readers through one shared decision core and per-audience action schemas: `Summary` → `Why it matters` → one trigger-shaped Investment `Watchpoint` or one bounded Engineering `Experiment`. Insight-only rendering adds the evaluation day and stored post dates without changing routing hashes, and suppresses resurfaced historical material that has no current development. `fli insights` freezes exact requests before execution, rejects non-current source or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The current production batch contains 947 unique Event/audience decisions: 404 surfaced and 543 suppressed. It reported 847 cache-hit requests, 1,755,904 cached tokens, and $15.512238 proxy-reported cost. The stale 2022 ChatGPT candidate is now suppressed with its date; all 189 surfaced Investment notes use trigger→assumption watchpoints, and no surfaced rationale contains editorial gate-talk. Cross-Event semantic duplicates remain an explicit downstream editorial boundary. |
 | Daily editorial agent | Strict workspace v3 plus safe post-freeze date fan-out | `$fli-daily-intelligence` freezes the routed-positive day, applies the seven-day first-party X window, projects authoritative X publication dates, and exposes exact artifact disclosure lineage without automatically filtering artifacts. Workspace v3 with `semantic_snapshot_sha256` is the only executable authoring contract; historical packets are not upgraded or resumed. `fli daily-intelligence run-day` checkpoints exact Evidence, routing, workspace, Codex-task, and editorial-run identities for one date. Historical parallel work instead publishes Evidence once, routes the full range against that publication, and then fans out independent immutable workspaces and Codex tasks; several full `run-day` Evidence publishers do not compete. Retries treat a durable import as terminal before touching App Server and validate frozen task settings before any live resume. Artifact citations still require verified excerpts; embeddings remain optional retrieval only. |
 | Insights UI and delivery | Canonical daily reader, cached PDF workbook, manual Slack/email delivery, plus candidate audit | For an imported day, `Kept` reads the newest complete daily editorial run. Investment presents the conclusion-led title, facts, one causal interpretation, company read-through, confirmation/challenge signals, and separate original-Feed and artifact/context sources without exposing intermediate reasoning scaffolding. Engineering retains its bounded experiment detail. The selected complete audience/day downloads from the top-right as a deterministic A4 workbook. Beside it, a muted `Send brief` action requires an explicit confirmation: Slack presents every cited Insight with its complete interpretation and links to the complete brief and PDF; email receives up to five ranked Insights with the cached PDF attached. Provider credentials remain server-side, and the same-origin app confirms sends without a separate access-key field. The PDF's reader-first opening combines the title, audience/date, and clickable ranked Insight titles without run hashes or pipeline counts; every title jumps directly to analysis without the web-only rank-rationale disclosure, then continues to its linked full source ledger, and every later page returns to the brief index. Original-Feed titles in the PDF open the exact internal Feed Event, which retains the onward original-post link; artifact/context titles still open their cited sources directly. Serif display headings and blue slash markers give the workbook a restrained visual relationship to the case brief without copying BIT branding. `/api/insights/report.pdf` renders only the canonical read projection into an atomic content-addressed cache with ETag revalidation. `Suppressed` / `All` and days without an imported run retain the per-Event candidate audit. `/api/insights` exposes a discriminated read contract and the date rail overlays final imported counts. All eleven July 5–15 days now have canonical imported runs. |
-| Submission package | Not complete | The rubric-mapped write-up, limitations, prompt/evaluation evidence, and final delivery review remain. Nothing has been submitted externally. |
+| Submission package | Reproducible demo complete; external package pending | A clean checkout now restores a checksummed read-only snapshot with one command. The rubric-mapped write-up and final delivery review remain. Nothing has been submitted to BIT. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
 current databases or APIs before using them as present-tense product claims.
 
 ## The Most Important Unproven Claim
 
-The repository now proves the mechanical path from a complete routed day to an
-agent-authored, validated, persisted, automatically rendered daily brief across
-the full July 5–15 cohort. The next unproven claim is editorial rather than
-architectural: whether source chronology is trustworthy, whether the strongest
-Insights are genuinely useful to BIT's two readers, and which three to five
-form the best submission proof.
+The repository proves the end-to-end product and the final five submission
+Insights are locked. The remaining claim is communicative: whether an external
+reviewer can understand the product, reproduce the evidence-backed demo, and
+see the rubric coverage without reconstructing the development history.
 
 ## Submission Finish Line
 
-The routing and per-Event Insight boundaries are frozen; the completed Insight
-Format v10 tracker is archived as milestone evidence. At system level, the
-remaining proof is:
+The intelligence and reproduction boundaries are frozen. At system level, the
+remaining work is:
 
-1. Finish validation of the seven-day X window, deterministic Event dates,
-   inspectable artifact disclosure lineage, and grounded artifact citations.
-2. Calibrate only the changed cases and one known-good day;
-   then decide the minimum rerun set from changed output quality.
-3. Adjudicate the provisional weak-item and omission queues and select the
-   strongest 3–5 across the proven runs for the submission proof.
-4. Assemble the rubric-mapped submission package and limitations.
-5. Perform the final delivery review before requesting explicit approval for
-   any external submission.
+1. Assemble the concise rubric-mapped write-up around the locked five Insights.
+2. Check every submitted link, attachment, limitation, and prompt requirement.
+3. Perform the final delivery review and request explicit approval before any
+   external submission.
 
 External submission or alert delivery remains blocked without Adi's explicit
 current-session approval.
@@ -117,8 +109,8 @@ current-session approval.
   production remains on the existing transparent day-relative formula.
 - Large discovered-account admission or recursive graph crawling.
 - Mobile/responsive polish.
-- Scheduled/unattended alerts, publishing, uploading, or submission. Any real
-  external send still requires Adi's explicit current-session approval.
+- Scheduled/unattended alerts, public application hosting, or submission. Any
+  real external send still requires Adi's explicit current-session approval.
 
 These are valid future extensions, not prerequisites for proving the current
 case-study thesis.
@@ -149,6 +141,12 @@ five-Insight proof is locked in its
 Busy-day tail selection and cross-day novelty remain disclosed limitations,
 not blockers to the curated proof. The remaining submission work is packaging,
 not another intelligence-generation or harness cycle.
+
+The reproduction layer is now complete. `./demo.command` restores an immutable
+357 MB object-storage snapshot into a clean checkout, verifies its SHA-256,
+installs the app, and serves it with Registry intake and external delivery
+disabled. The exact contract and verified public object are recorded in
+[`references/demo-release.md`](references/demo-release.md).
 
 Completed phases and their reasoning are preserved under
 [`docs/projects/archive/`](projects/archive/). They should be consulted when a

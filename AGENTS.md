@@ -1,102 +1,73 @@
-# Frontier Lab Intelligence - Agent Guide
+# Frontier Lab Intelligence agent guide
 
 Frontier Lab Intelligence tracks frontier AI labs and key people, turns public
-output into scored/cited signal, and delivers reports + alerts. Origin: BIT
-Capital AI Engineer case study.
+output into scored and cited signal, and delivers audience-specific reports.
+It began as the BIT Capital AI Engineer case study.
 
-## Start Here
+## Start here
 
-1. `docs/references/case-prompt.md` - external requirements.
-2. `docs/STATUS.md` - conceptual handoff: what is proven, active, missing, and
-   deliberately deferred.
-3. If Adi explicitly invoked `$project`, read the named active tracker for
-   execution state. Otherwise skip project tracking.
-4. `docs/architecture/code-map.md` - code, store, command, and test ownership.
-5. Relevant section of `docs/architecture/overview.md` - system boundaries.
-6. `PRODUCT.md` / `DESIGN.md` when changing product or UI behavior.
+1. Read `docs/references/case-prompt.md` for the external requirements.
+2. Read `docs/STATUS.md` for proven, active, missing, and deferred work.
+3. Read `docs/architecture/code-map.md` for code, store, command, and test ownership.
+4. Read only the relevant part of `docs/architecture/overview.md`.
+5. Use `PRODUCT.md` and `DESIGN.md` when changing product or UI behavior.
+6. Read an active tracker only when Adi explicitly invoked `$project`.
 
-If docs conflict with chat, follow the preserved prompt until Adi decides and
-record the resolution in the relevant durable doc. Use a tracker only when the
-work was explicitly started with `$project`.
+`README.md` is the public human landing page. If chat and docs conflict, follow
+the preserved case prompt until Adi decides, then record the resolution in the
+relevant durable document.
 
-## Submission North Star
+## Submission north star
 
-Until the 2026-07-20 submission, optimize for earning the next interview with
-a coherent, defensible, working case study—not a perfect platform. Prefer a
-narrow end-to-end proof and 3–5 excellent cited insights over broad graph or
-Registry completeness. Timebox infrastructure work, and challenge work that
-does not improve rubric coverage, demo proof, or interview discussion. See
-`docs/references/context.md` for the decision filter.
+Until the 20 July 2026 submission, optimize for a coherent, defensible, working
+case study that earns the next interview. Prefer a narrow end-to-end proof and
+3 to 5 excellent cited Insights over platform breadth. Use
+`docs/references/context.md` as the decision filter.
 
-## Hard Rules
+## Guardrails
 
-- No external action without explicit current-session Adi approval: submitting,
-  uploading, publishing, public pushes, or contacting BIT/Lars/Marc/Vlad. Before
-  asking, prepare artifacts, message text, validation evidence, limitations, and
-  prompt-requirement check.
-- Keep Dobby/person-memory architecture out of this product repo.
-- Put scratch in `tmp/`; put durable facts, decisions, provenance, and spend in
-  repo docs.
+- Do not submit, publish, publicly push, upload, or contact BIT, Lars, Marc, or
+  Vlad without Adi's explicit approval in the current session. Prepare the
+  artifact, message, validation, limitations, and prompt check first.
+- Keep Dobby and person-memory architecture out of this repository.
+- Put scratch under `tmp/`. Put durable facts, decisions, provenance, and spend
+  in the relevant repository document.
+- Do not commit `data/raw/`, `data/derived/`, secrets, or private inputs. The
+  public reviewer snapshot contract lives in `docs/references/demo-release.md`.
+- Treat cost as telemetry, not a reason to lower in-scope quality, unless Adi
+  sets an explicit cap.
 
-## Work Contracts
+## Implementation contracts
 
-- Data first: fetch raw evidence, inspect, then model. Preserve documented
-  schema invariants, but evolve unfinished pipeline stages from real evidence.
-- Product principles live in `PRODUCT.md`. Treat cost as observed telemetry,
-  not as a product or execution gate: record spend, but do not lower quality,
-  change model choice, or block in-scope work because of cost unless Adi sets
-  an explicit cap for that work.
-- The build log is historical submission evidence, not current state or a
-  cold-start document. Default to no entry, and do not create a tracker for
-  routine work. Use `scripts/build-log.py add` only when an explicitly tracked
-  milestone closes, a decision changes product or architecture direction, a
-  completed external run records material spend, or a learning changes future
-  operating policy. Batch related work into one entry; routine UI polish,
-  refactors, tests, reviews, and agent turns are not separate entries. When
-  uncertain, do not log. Use bounded `recent` or `search` only when history is
-  relevant; `scripts/check-fast.sh` validates and renders the reviewer artifact.
-- Route every LLM call through the shared LiteLLM endpoint with stable
-  `metadata.tags` for app, pipeline, job, scope, prompt, and run. Capture the
-  proxy-reported response cost as the operational source of truth. Use a dated
-  local price snapshot only when a pre-run estimate or zero-cost proxy fallback
-  is actually needed.
-- For bulk LLM jobs with a repeated 1,024+ token prefix, put stable content
-  first, use stable sharded `prompt_cache_key` values, and verify cache reads
-  from `cached_tokens`; do not assume an eligible prompt is getting cache hits.
-- Model routing is accuracy-first: use the evaluated Luna defaults and reasoning
-  efforts in `docs/references/model-routing.md`, and obtain GPT-5.6 Azure cache
-  kwargs from `fli.llm_responses` rather than adding provider fields per caller.
-- Update `docs/architecture/overview.md` when pipeline, schema, source classes,
-  or module boundaries change.
-- Update `docs/STATUS.md` only when the conceptual system status, active
-  critical path, or planned/proven boundary changes; do not turn it into a
-  second progress log.
-- Run `scripts/check-fast.sh` before handoff, or report why validation was
-  skipped. If the work is explicitly tracker-backed, record the reason there.
+- Work data first: fetch raw evidence, inspect it, then model it. Preserve the
+  schema and provenance invariants documented for the owning stage.
+- Follow `docs/architecture/code-map.md` for ownership and
+  `docs/references/data-lifecycle.md` before moving or deleting data.
+- Route every LLM call through the shared LiteLLM endpoint. The exact model,
+  metadata, cost, reasoning, and prompt-cache rules live in
+  `docs/references/model-routing.md`.
+- Use the build log only for the material decisions and milestones defined in
+  `docs/references/build-log.md`. Routine work does not get an entry.
+- Update `docs/architecture/overview.md` when a pipeline, schema, source class,
+  or module boundary changes.
+- Update `docs/STATUS.md` only when conceptual status, the critical path, or a
+  proven/planned boundary changes.
+- Run `scripts/check-fast.sh` before handoff, or report why it was skipped.
 
-## UI Preview & Visual Checks
+## UI preview
 
-- An always-on local server serves the built SPA at `http://127.0.0.1:8797`
-  (launchd `com.dobby.frontier-lab-intelligence`). Use it. Do **not** spin up a
-  throwaway `vite preview` / dev server on another port for screenshots.
-- To see UI changes: `npm --prefix frontend run build` (writes into
-  `src/fli/web/dist`, which the always-on server hosts), then reload
-  `127.0.0.1:8797`.
-- In Codex Desktop, prefer the in-app Browser for collaborative visual
-  inspection when it is available. Use `$agent-browser` for repeatable or
-  automation-heavy UI checks and as the fallback when the in-app Browser is
-  unavailable.
-  Put disposable captures in `tmp/`; presentation assets explicitly requested
-  for reuse belong under `docs/references/`.
-- **Desktop-first for now:** design and polish the desktop view; do not spend
-  effort on mobile/responsive polish unless Adi asks. (Decision 2026-07-09.)
+- The always-on app serves the built SPA at `http://127.0.0.1:8797`. Do not
+  start a throwaway preview server on another port for screenshots.
+- Build UI changes with `npm --prefix frontend run build`, then reload the
+  always-on app.
+- Prefer the in-app Browser for collaborative inspection. Use `$agent-browser`
+  for repeatable automation or as a fallback. Keep captures under `tmp/` unless
+  they are requested durable presentation assets.
+- The product is desktop-first until Adi requests mobile work.
 
-## Skill Routing
+## Skill routing
 
-- AGENTS/docs/harness review: `$agent-native-repo-playbook`.
-- Project tracking is opt-in: use `$project` only when Adi explicitly invokes
-  it. Routine implementation, review, and validation remain tracker-free.
-- Daily brief generation, review, or reruns: `$fli-daily-intelligence`. Its
-  validated client and schema are the only write path for agent-authored daily
-  Insights.
+- Repository harness, docs, or guardrail review: `$agent-native-repo-playbook`.
+- Daily brief generation, review, or reruns: `$fli-daily-intelligence`.
 - UI review or frontend polish: `$impeccable`.
+- Project tracking is opt-in. Use `$project` only when Adi explicitly invokes it.

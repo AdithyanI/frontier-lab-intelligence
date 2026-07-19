@@ -16,6 +16,11 @@ Current default store paths are listed in
 introduce a second database at the `data/` root when an owning domain already
 has a canonical path.
 
+`demo-release.json` is the tracked contract for the public read-only reviewer
+snapshot. It contains only the immutable URL, checksum, size, source
+checkpoint, and exact install roots. The archive itself remains in object
+storage; see [`docs/references/demo-release.md`](../docs/references/demo-release.md).
+
 - `raw/` — raw ingested source data (git-ignored; do not commit).
 - `private/` — any private/confidential inputs (git-ignored; do not commit).
 - `archive/` — ignored historical outputs removed from runtime discovery but

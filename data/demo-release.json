@@ -1,0 +1,31 @@
+{
+  "archive": {
+    "bytes": 357367846,
+    "filename": "fli-demo-2026-07-19.zip",
+    "sha256": "45b846acec1829f384cdceafb4d4313a868e2ff83b369589d811cecc07defedd",
+    "url": "https://storage.aipodcast.ing/permanent/frontier-lab-intelligence/demo/by-hash/45b846acec1829f384cdceafb4d4313a868e2ff83b369589d811cecc07defedd/fli-demo-2026-07-19.zip"
+  },
+  "contents": {
+    "delivery_credentials_included": false,
+    "event_run_id": "a866caf179699e928083800d8a4540d182f08d1095ac1d51da34a8badda3f00a",
+    "feed_run_id": "742714e4b489eccbd72ab0f75c7925f72c78ffb53a8f5346a6d588e1aeaeff46",
+    "file_count": 4225,
+    "following_snapshot_id": "registry-following-2026-07-14-aie-worldsfair-v2",
+    "raw_provider_responses_included": false,
+    "uncompressed_bytes": 1604137889
+  },
+  "created_at": "2026-07-19T15:28:38+00:00",
+  "install_roots": [
+    "data/derived/following/registry-following-2026-07-14-aie-worldsfair-v2",
+    "data/raw/following/registry-following-2026-07-14-aie-worldsfair-v2",
+    "data/derived/signal-feed",
+    "data/derived/signal-events",
+    "data/derived/artifacts",
+    "data/derived/audience-routing",
+    "data/derived/insights",
+    "data/derived/daily-intelligence"
+  ],
+  "release_id": "fli-demo-2026-07-19",
+  "schema_version": "fli-demo-release-v1",
+  "source_commit": "fee2dfe3e153cb37e3290415ebf38fe67b3f977d"
+}

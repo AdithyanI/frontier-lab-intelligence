@@ -1,20 +1,19 @@
 # Reviewer Guide
 
 How to inspect the current case-study system. This guide describes implemented
-behavior; unfinished deliverables are listed explicitly below.
+behavior and the intentionally bounded release.
 
 ## Quick start
+
 ```bash
-python3.13 -m venv .venv
-. .venv/bin/activate
-.venv/bin/pip install -e '.[dev]'
-scripts/check-fast.sh
-fli web
+./demo.command
 ```
 
-Then open `http://127.0.0.1:8797`. The tracked build is served by the Python
-app; no separate frontend server is required. Data-collection and model calls
-are explicit, resumable commands and are not part of the reviewer quick start.
+The command verifies and restores the frozen reviewer data, installs the local
+app, opens `http://127.0.0.1:8797`, and enforces read-only mode. It needs Python
+3.13 and an internet connection on the first run, but no API keys. No separate
+frontend server is required. See [`demo-release.md`](demo-release.md) for the
+exact object, checksum, included data, and clean-checkout proof.
 
 ## What to look at, in weighted order
 1. **Registry (20%)** — inspect the entity/channel spine, reversible admission
@@ -35,10 +34,9 @@ are explicit, resumable commands and are not part of the reviewer quick start.
    Each supporting source links back to the exact Feed Event; artifact
    citations retain their frozen text provenance. Candidate-level Suppressed
    and All views remain an audit fallback, not the final daily product. The
-   top-right actions download the selected audience PDF or open an explicit
-   Slack/email confirmation. Those final send buttons call real configured
-   providers; do not confirm a send unless you intend to notify the displayed
-   destination.
+   top-right actions download the selected audience PDF or show delivery
+   options. Slack and email were validated in the operator environment, but
+   both sends are disabled in this reviewer release.
 5. **Ingestion (10%)** and **extraction (10%)** — inspect Artifacts for
    canonical source links disclosed by first-party Event evidence, retrieval
    state, normalized text snapshots, and the exact originating Event. X is the
@@ -59,6 +57,8 @@ are explicit, resumable commands and are not part of the reviewer quick start.
 - `docs/architecture/overview.md` — current system shape and implemented schema.
 - `docs/references/delivery.md` — exact Slack/email behavior, configuration,
   proof, and limitations.
+- `docs/references/demo-release.md` — immutable snapshot, checksum, exclusions,
+  read-only boundary, and reproduction proof.
 - `docs/references/registry-curation.md` — identity/kind/curation boundaries,
   model contract, evaluation outcome, usage, and cost.
 - `docs/references/build-log.md` — build history, AI tool usage, learning
@@ -76,7 +76,6 @@ are explicit, resumable commands and are not part of the reviewer quick start.
 - The artifact fetcher records access failures rather than bypassing robots,
   authentication, or publisher controls. Only inspectable evidence can support
   a shipped citation.
-- The daily editorial corpus is implemented, but final human adjudication of
-  the strongest three to five Insights and the rubric-mapped submission package
-  remain. Nothing is submitted to BIT by the demo. Manual Slack and email
-  actions are live and can deliver only after an explicit final confirmation.
+- The final five Insights are human-adjudicated and locked, but the external
+  rubric-mapped write-up and final delivery review remain. Nothing is submitted
+  to BIT by the demo. Registry mutation and Slack/email delivery are disabled.

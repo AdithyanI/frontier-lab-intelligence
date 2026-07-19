@@ -41,6 +41,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Delivery | `fli.delivery.daily_brief` | Manual Slack all-Insight and email top-five formatting, provider adapters, a same-origin confirmation guard, and reuse of the canonical cached PDF. It does not own editorial data or scheduling. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.artifact_library` | HTTP composition and remaining projections only. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
+| Demo release | `demo.command`, `scripts/demo.py`, `scripts/build-demo-release.py` | Verified snapshot restore, read-only launch, and operator-only release construction. The release contract is `data/demo-release.json`. |
 
 The root package contains only cross-domain runtime plumbing (`cli`,
 `llm_responses`, and the compact product `store`). Domain behavior belongs in
@@ -100,6 +101,7 @@ removing or archiving local data.
 - Evaluate attention formulas offline: `fli attention-score`
 - Run the product: `fli web` or the always-on service at
   `http://127.0.0.1:8797`
+- Restore and run the frozen reviewer release: `./demo.command`
 
 All repeated LLM work uses the shared LiteLLM path and the exact contracts in
 `AGENTS.md`; do not introduce provider-specific calls inside a domain.

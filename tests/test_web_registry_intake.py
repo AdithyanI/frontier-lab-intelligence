@@ -65,3 +65,15 @@ def test_intake_validation_error_is_a_422(monkeypatch, tmp_path):
     )
     assert response.status_code == 422
     assert response.json()["detail"] == "bad profile"
+
+
+def test_intake_is_disabled_in_read_only_mode(monkeypatch):
+    monkeypatch.setenv("FLI_READ_ONLY", "1")
+
+    response = client.post(
+        "/api/registry/intake",
+        json={"profile": "https://x.com/example", "mode": "screen"},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "This reviewer demo is read-only."
