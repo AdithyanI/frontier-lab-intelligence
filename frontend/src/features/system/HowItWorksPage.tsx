@@ -323,6 +323,12 @@ export default function HowItWorks() {
             posts became 1,287 Events, 56 candidates worth judging, and 10
             cited Insights.
           </p>
+          <p>
+            One thing to hold on to while reading: the system works one day at
+            a time. Every brief covers a single day of evidence, judged on its
+            own. Rolling several days into one weekly digest is a natural next
+            step, but today every Insight belongs to a date.
+          </p>
         </header>
 
         <article className="how-read-block how-read-block--wide" id="why-watch">
@@ -330,19 +336,25 @@ export default function HowItWorks() {
 
           <p className="how-read-sub mono">1a · Where to look</p>
           <p>
-            I chose X as the single source to go deep on. The universe of
-            frontier output is too large to read, so the first call was where
-            to stand. My judgment: X is the front page of AI. When a paper,
-            repo, or blog post lands, its authors announce it there at the
-            same moment, and the argument about it happens in the replies.
-            The people I most want to hear, researchers up to lab CEOs, write
-            there themselves.
+            I chose X as the single source and went deep on it. My judgment:
+            X is the front page of AI. Almost everything breaks there first.
+            When a lab ships a model or a researcher publishes a paper, they
+            announce it on X themselves, and the argument about whether it
+            matters happens in the replies. The founders are in those replies
+            too.
+          </p>
+          <p>
+            There is a second reason. When news breaks, the artifact behind
+            it, the model card, the blog post, the repo, is almost always
+            linked in the post itself. So one source, read carefully, carries
+            the announcement, the argument, and the primary document. One
+            source done deeply beats six done shallowly, and the other source
+            classes can plug into the same Registry later.
           </p>
           <p>
             And I started from people, not keywords. A keyword alert only
-            catches what you already know to search for; the people come
-            first. One source done deeply beats six done shallowly. The
-            other sources plug in later as channels on the same Registry.
+            catches what you already know to search for. The people come
+            first.
           </p>
           <FigureFrame>
             <SourceChoiceFigure />
@@ -351,12 +363,14 @@ export default function HowItWorks() {
           <p className="how-read-sub mono">1b · Collect the trusted set</p>
           <p>
             From everything on X, the system keeps a small set it trusts:
-            frontier labs and the researchers who work there. Building that
-            set meant screening a follow graph of 557,363 accounts and 2.8
-            million follow edges down to a Registry of 2,591 active
-            identities: 2,431 researchers and 160 organizations. Every
-            admission keeps its provenance, and the 39 rejections stay on
-            the books with their reasons.
+            frontier labs and the researchers who work there. I started from
+            a seed list of people I already knew were signal, pulled who they
+            follow, and let the set grow outward from there. Growing it meant
+            screening a follow graph of 557,363 accounts and 2.8 million
+            follow edges down to a Registry of 2,591 active identities: 2,431
+            researchers and 160 organizations. Screening mixes simple gates
+            with LLM judgment. Every admission keeps its provenance, and the
+            39 rejections stay on the books with their reasons.
           </p>
           <FigureFrame>
             <TrustedSetFigure />
@@ -365,11 +379,22 @@ export default function HowItWorks() {
           <p className="how-read-sub mono">1c · Rank by trust, not popularity</p>
           <p>
             Within this network, the next call was whose word should carry
-            more weight. My
-            thesis: popularity is the wrong proxy for importance. A million
-            followers measures reach, not trust. So the system counts trust
-            from the screened set instead. An account ranks higher when the
-            blue dots follow it, not when the public does.
+            more weight. Here is the human intuition. If ten people I know
+            are good and authentic all follow and trust some other person,
+            that person is very likely worth trusting too. Trust flows
+            through the network. So the system ranks an account by how many
+            entities inside the screened set follow it, never by raw
+            follower count. A million followers measures reach, not trust.
+          </p>
+          <p>
+            Two examples make the difference concrete. Andrej Karpathy is
+            the most followed account inside the Registry, which is exactly
+            what you would expect. Elon Musk is one of the most popular
+            accounts on the platform, but inside this network he is nowhere
+            near the top. Popularity and trust are different measurements,
+            and this system uses the second one. Organizations earn their
+            place the same way: OpenAI and Anthropic bubble up because the
+            researchers follow them, not because I ranked them by hand.
           </p>
           <FigureFrame>
             <NetworkRankFigure />
@@ -392,20 +417,29 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-collect">
           <h4><span className="mono">2</span> Collect: preserve before interpreting</h4>
           <p>
-            The system collects whole days. When a UTC day completes,
-            everything the cohort posted in it is stored exactly as posted,
-            before any interpretation. Replies, quotes, and threads
-            are grouped into exact Events using only relationships the platform
-            itself declares. There is no topic clustering at this stage because
-            clustering is already an opinion, and this stage is not allowed to
-            have one.
+            The system collects whole days, one at a time. When a UTC day
+            completes, everything the cohort posted in it is stored exactly
+            as posted, before any interpretation.
           </p>
           <p>
-            Each linked paper, repo, or model card is catalogued. When retrieval
-            succeeds, the normalized text is frozen for later citation checks.
-            Retrieval gaps remain visible instead of being treated as evidence.
-            On 17 July this stage held 4,537 captured posts resolving into
-            1,287 exact Events.
+            X has its idiosyncrasies: a post can be replied to, quoted, or
+            reposted, and the same development ends up scattered across all
+            of them. So the system merges the scatter into one exact Event
+            per development, using only relationships the platform itself
+            declares. There is no topic clustering at this stage because
+            clustering is already an opinion, and this stage is not allowed
+            to have one. The result is our own version of the feed: what the
+            trusted network posted, plus what it engaged with.
+          </p>
+          <p>
+            Linked artifacts get the same care in a separate catalogue. When
+            a lab announces a model and links the blog post, an adapter for
+            that content type fetches the text and freezes a snapshot of it.
+            Websites, papers, and X articles each have their own adapter.
+            The frozen text is what later citation checks run against, and
+            retrieval gaps stay visible instead of being treated as
+            evidence. On 17 July this stage held 4,537 captured posts
+            resolving into 1,287 exact Events.
           </p>
           <FigureFrame>
             <CollectFigure />
@@ -420,15 +454,18 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-rank">
           <h4><span className="mono">3</span> Rank: order the day, do not judge it</h4>
           <p>
-            A single day holds more Events than anyone reads. A transparent
-            attention score orders them: who wrote it, who inside the cohort
-            amplified it, how the public reacted. The formula is versioned and
-            every input is inspectable per Event.
+            A single day holds over a thousand Events, and nobody reads a
+            thousand of anything. With an unlimited LLM budget I could judge
+            them all. With a real one, the day needs an order: which Events
+            get attention first. A transparent attention score provides it.
           </p>
           <p>
-            The score stops there on purpose. It decides where to look
-            first. It never decides what is true or what matters, because
-            attention is evidence of noise as often as of signal.
+            Sorting by raw engagement gives the wrong order. Whatever Elon
+            Musk posts floats to the top of that list, and it is rarely what
+            an analyst or an engineer needs. So the score leans on the
+            trusted network instead. When the Thinking Machines Lab model
+            release landed, it rose to the top of its day because the
+            researchers engaged with it, not because the public did.
           </p>
           <p>
             The weights are not hidden in code; the API response declares
@@ -457,7 +494,9 @@ export default function HowItWorks() {
           </ul>
           <p>
             The score does one job: it picks the top 100 Events of each day
-            for judging, and the judges never see it. A quarter of the kept
+            for judging, and the judges never see it. It decides where to
+            look first, never what is true or what matters, because attention
+            is evidence of noise as often as of signal. A quarter of the kept
             Insights came from the lower half of that window. I would rather
             defend a simple formula with known limits than a sophisticated one
             that pretends to measure importance.
@@ -475,11 +514,21 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-judge">
           <h4><span className="mono">4</span> Judge: two independent questions</h4>
           <p>
-            Every Event is asked two separate questions. Does this change an
+            An Event can top the attention ranking and still be useless to
+            both readers. So each of the top 100 Events is asked two separate
+            questions, by two independent LLM calls: does this change an
             investment position? Should an engineering team act on it? The
-            two answers never mix. An Event can matter to both
-            audiences, to one, or to neither, and each verdict keeps its
-            reasoning attached.
+            two answers never mix. An Event can matter to both audiences, to
+            one, or to neither, and each verdict comes back as a structured
+            yes or no with its reasoning attached, readable on the Event
+            itself.
+          </p>
+          <p>
+            The declines tell the story best. One post that day was a joke
+            about cancelled Claude subscriptions. Many in the trusted network
+            engaged with it, so attention ranked it high, and both judges
+            correctly turned it away: funny, but useless to an analyst and
+            an engineer. That is the filter working.
           </p>
           <p>
             Only fresh first-party evidence counts here. A week-old post
@@ -500,9 +549,19 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-publish">
           <h4><span className="mono">5</span> Publish: surface it, or say why not</h4>
           <p>
-            An editorial agent reads everything that survived and must do one
-            of two things with each candidate: turn it into an Insight or
+            The last stage turns surviving evidence into the two daily
+            briefs. An editorial agent, a small harness I built on the Codex
+            app server, reads everything that survived and must do one of
+            two things with each candidate: turn it into an Insight or
             decline it in writing. Nothing is dropped silently.
+          </p>
+          <p>
+            The agent does not judge in a vacuum. It carries packaged
+            context for each reader: for the investment brief, BIT
+            Capital&apos;s publicly known holdings and what would move a
+            position; for the engineering brief, what a production AI team
+            can act on. That context is why the same Event can become two
+            different Insights, or one, or none.
           </p>
           <p>
             Every claim in the final brief cites its source, and cited
@@ -530,6 +589,39 @@ export default function HowItWorks() {
           <p>
             <Link className="how-beat-link" to={insightsPath}>
               Read the brief &rarr;
+            </Link>
+          </p>
+        </article>
+
+        <article className="how-read-block how-read-block--wide" id="why-plumbing">
+          <h4><span className="mono">6</span> The plumbing: models, costs, delivery</h4>
+          <p>
+            Every LLM call in the system goes through one shared LiteLLM
+            gateway. That single choke point handles retries, backoff, and
+            model fallback, and it prices every request. Cost is telemetry
+            here: each run records exactly which model produced it, at what
+            reasoning effort, and what it cost.
+          </p>
+          <p>
+            Models are matched to the size of the job. Bounded structured
+            work like screening and audience routing runs on small, fast
+            models with prompt caching and structured schema output, so a
+            full day of judging the top 100 Events costs well under a
+            dollar. The editorial writing, where synthesis quality is the
+            boundary, runs on a large reasoning model. The exact model and
+            effort per task, and the reasoning behind each choice, live in
+            the <Link to="/system/architecture">Architecture</Link> chapters.
+          </p>
+          <p>
+            Reading the brief here is one option. Each completed day can
+            also be downloaded as a PDF, sent to Slack, or sent by email
+            with the PDF attached, all from the same canonical brief. Each
+            send is a deliberate human action: the system prepares, a person
+            decides.
+          </p>
+          <p>
+            <Link className="how-beat-link" to={insightsPath}>
+              Try the delivery options &rarr;
             </Link>
           </p>
         </article>
