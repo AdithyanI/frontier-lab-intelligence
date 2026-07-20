@@ -1985,6 +1985,7 @@ def editorial_insights_payload(
             ),
             "run": None,
             "items": [],
+            "declined": [],
         }
 
     if not path.is_file():
@@ -2029,6 +2030,43 @@ def editorial_insights_payload(
                 for event in item["events"]
             ]
             items.append(item)
+
+        declined = []
+        declined_rows = conn.execute(
+            """SELECT disposition.event_id, disposition.reason,
+                      candidate.feed_rank, candidate.packet_json
+               FROM editorial_event_disposition AS disposition
+               JOIN editorial_candidate AS candidate
+                 ON candidate.run_id = disposition.run_id
+                AND candidate.event_id = disposition.event_id
+               WHERE disposition.run_id = ?
+                 AND disposition.audience = ?
+                 AND disposition.status = 'not_selected'
+               ORDER BY candidate.feed_rank""",
+            (str(selected["run_id"]), audience),
+        ).fetchall()
+        for row in declined_rows:
+            packet = json.loads(str(row["packet_json"]))
+            root = next(
+                (
+                    source
+                    for source in packet.get("sources", [])
+                    if source.get("relation") == "root"
+                ),
+                None,
+            )
+            excerpt = " ".join(str(root.get("text", "")).split()) if root else ""
+            if len(excerpt) > 220:
+                excerpt = excerpt[:220].rstrip() + "…"
+            declined.append(
+                {
+                    "event_id": str(row["event_id"]),
+                    "feed_rank": int(row["feed_rank"]),
+                    "author": str(root.get("author", "")) if root else "",
+                    "excerpt": excerpt,
+                    "reason": str(row["reason"]),
+                }
+            )
 
         disposition_counts = {
             str(row["status"]): int(row["count"])
@@ -2086,6 +2124,7 @@ def editorial_insights_payload(
             ),
             "run": run,
             "items": items,
+            "declined": declined,
         }
     finally:
         conn.close()

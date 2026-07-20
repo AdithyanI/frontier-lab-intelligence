@@ -6,6 +6,7 @@ import {
   type BriefDeliveryResult,
   type BriefDeliveryStatus,
   type EditorialAnalysis,
+  type EditorialDeclinedItem,
   type EditorialInsightItem,
   type EditorialInsightsResponse,
   type EngineeringEditorialAnalysis,
@@ -914,6 +915,58 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
   )
 }
 
+function DeclinedCandidates({
+  items,
+  reviewedCount,
+  day,
+}: {
+  items: EditorialDeclinedItem[]
+  reviewedCount: number
+  day: string
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <section className="insight-declined" aria-label="Candidates declined in writing">
+      <button
+        type="button"
+        className="insight-declined-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="insight-declined-title mono">Declined in writing</span>
+        <span className="insight-declined-summary">
+          {reviewedCount} candidates reviewed · {items.length} declined with a written reason
+        </span>
+        <span className="insight-declined-caret mono" aria-hidden="true">{open ? '−' : '+'}</span>
+      </button>
+      {open && (
+        <ul className="insight-declined-list">
+          {items.map((item) => (
+            <li className="insight-declined-row" key={item.event_id}>
+              <div className="insight-declined-rank mono" aria-label={`Attention rank ${item.feed_rank}`}>
+                #{item.feed_rank}
+              </div>
+              <div className="insight-declined-body">
+                <p className="insight-declined-source">
+                  <Link
+                    className="insight-declined-author mono"
+                    to={`/evidence/feed?date=${day}&event_id=${encodeURIComponent(item.event_id)}`}
+                  >
+                    {item.author} ↗
+                  </Link>
+                  <span className="insight-declined-excerpt">“{decodeTextEntities(item.excerpt)}”</span>
+                </p>
+                <p className="insight-declined-reason">{decodeTextEntities(item.reason)}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { rememberDate } = useAuditDate()
@@ -1153,6 +1206,16 @@ export default function Insights() {
             <EditorialInsightRow item={item} key={item.insight_id} />
           ))}
         </section>
+      )}
+      {editorialData?.available && editorialData.date && (editorialData.declined?.length ?? 0) > 0 && (
+        <DeclinedCandidates
+          items={editorialData.declined}
+          reviewedCount={
+            (editorialData.run?.counts.included_candidates ?? 0) +
+            (editorialData.run?.counts.not_selected_candidates ?? 0)
+          }
+          day={editorialData.date}
+        />
       )}
       {candidateData?.available && candidateData.items.length > 0 && (
         <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>

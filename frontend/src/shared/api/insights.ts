@@ -139,6 +139,14 @@ export interface EngineeringEditorialAnalysis {
 
 export type EditorialAnalysis = InvestmentEditorialAnalysis | EngineeringEditorialAnalysis
 
+export interface EditorialDeclinedItem {
+  event_id: string
+  feed_rank: number
+  author: string
+  excerpt: string
+  reason: string
+}
+
 export interface EditorialInsightItem {
   insight_id: string
   local_id: string
@@ -201,6 +209,7 @@ export interface EditorialInsightsResponse {
   content_kind: 'daily_editorial'
   run: EditorialInsightRun | null
   items: EditorialInsightItem[]
+  declined: EditorialDeclinedItem[]
 }
 
 export type InsightsResponse = CandidateDecisionInsightsResponse | EditorialInsightsResponse

@@ -814,6 +814,19 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
     assert payload["items"][0]["events"][0]["event_id"] == "event-a"
     assert "root_url" not in payload["items"][0]["events"][0]
     assert payload["items"][0]["citations"][0]["local_id"] == "source-a"
+    assert payload["declined"] == []
+    engineering = editorial_runs.editorial_insights_payload(
+        audience="ai_engineering", day=DAY, db_path=db
+    )
+    assert engineering["declined"] == [
+        {
+            "event_id": "event-c",
+            "feed_rank": 9,
+            "author": "@example",
+            "excerpt": "A bounded agent recovery evaluation",
+            "reason": "Useful but lower priority than the selected bounded experiment.",
+        }
+    ]
     assert "analysis" in payload["items"][0]
     assert payload["items"][0]["analysis"]["key_uncertainty"].startswith("No customer")
     assert "impact_chain" not in payload["items"][0]
@@ -835,6 +848,7 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
     assert missing["available"] is False
     assert missing["run"] is None
     assert missing["items"] == []
+    assert missing["declined"] == []
 
 
 def test_web_prefers_editorial_for_kept_and_preserves_candidate_fallback(
