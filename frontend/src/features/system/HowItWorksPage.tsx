@@ -164,6 +164,16 @@ export default function HowItWorks() {
   const activeStage = useActiveStage()
   useBeatKeys(activeStage)
 
+  /* Deep link: /how#writing jumps straight to the written chapters. */
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '')
+    if (!hash) return
+    const id = hash === 'writing' ? 'how-read-title' : hash
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ block: 'start' })
+    })
+  }, [])
+
   const beats: Beat[] = [
     {
       id: 'watch',
