@@ -612,7 +612,7 @@ export default function HowItWorks() {
             gateway. That single choke point handles retries, backoff, and
             model fallback, and it prices every request. Cost is telemetry
             here: each run records exactly which model produced it, at what
-            reasoning effort, and what it cost.
+            reasoning effort, with which prompt version, and what it cost.
           </p>
           <p>
             Models are matched to the size of the job. Bounded structured
