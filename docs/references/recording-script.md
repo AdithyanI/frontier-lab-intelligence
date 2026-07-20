@@ -8,19 +8,24 @@ Status per section: `draft` → `recorded` → `final`.
 
 ---
 
-## Section 1 · Open on the result — `draft`
+## Section 1 · Intro — land on the site — `draft`
 
-Screen: https://frontier-lab-intelligence.adithyan.io/insights?audience=investment&status=kept&date=2026-07-19
+Screen: https://frontier-lab-intelligence.adithyan.io/ (lands on Insights), then navigate to /how.
 
-> This is Frontier Lab Intelligence. Every day it reads what frontier AI labs
-> and their researchers publish, and turns it into two short briefs. One for
-> investors. One for AI engineers.
+> Hi, my name is Adi, and this is Frontier Lab Intelligence.
 >
-> This is the investment brief for Saturday, 19 July. Three insights. Each one
-> says what changed, why it matters for a position, and cites its sources.
+> Everything I'm about to show you is live. When you open the site, you land
+> here: the final insights, for any date. This is the end product, and we'll
+> come back to it.
 >
-> The whole system exists to produce this page. Let me show you how it gets
-> here.
+> But first I want to show you how the system works. So let's go to the How
+> page.
+>
+> The core challenge is signal to noise. Frontier labs and their researchers
+> publish thousands of things every day, and almost all of it is noise. This
+> whole system is one funnel: wide at the top, and at the narrow end come out
+> a handful of cited insights per day. That's what I'll walk you through,
+> stage by stage.
 
 ---
 
