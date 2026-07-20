@@ -10,6 +10,7 @@ const insightSource = await readFile(
 )
 const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url), 'utf8')
 const apiSource = await readFile(new URL('../src/shared/api/insights.ts', import.meta.url), 'utf8')
+const evidenceApiSource = await readFile(new URL('../src/shared/api/evidence.ts', import.meta.url), 'utf8')
 const appStyles = readStyles()
 
 test('Insights leads the Evidence, Network, and How it works navigation sequence', () => {
@@ -73,7 +74,13 @@ test('Insights inherits Feed rank and links every decision to its exact Event', 
   assert.match(insightSource, /<strong>#\{item\.feed_rank\}<\/strong>/)
   assert.match(insightSource, /<span>Feed rank ↗<\/span>/)
   assert.doesNotMatch(insightSource, /Editorial rank/)
-  assert.match(insightSource, /const eventUrl = `\/evidence\/feed\?date=\$\{item\.day\}&event_id=\$\{encodeURIComponent\(item\.event_id\)\}`/)
+  assert.match(insightSource, /function ExactEventLink/)
+  assert.match(insightSource, /event_id=\$\{encodeURIComponent\(eventId\)\}/)
+  assert.match(insightSource, /prefetchExactEvent\(day, eventId\)/)
+  assert.match(insightSource, /onPointerEnter=\{preload\}/)
+  assert.match(insightSource, /onFocus=\{preload\}/)
+  assert.match(insightSource, /onTouchStart=\{preload\}/)
+  assert.match(evidenceApiSource, /getCachedJSON<EventResponse>/)
   assert.match(insightSource, /<CopyEventId eventId=\{item\.event_id\} \/>/)
   assert.match(insightSource, /Open Event ↗/)
   assert.match(insightSource, /Open source ↗/)

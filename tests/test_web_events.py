@@ -270,9 +270,13 @@ def test_event_peak_score_does_not_overwrite_root_score_components(
 def test_events_api_can_omit_heavy_evidence_from_list_rows(tmp_path, monkeypatch):
     _event_fixture(tmp_path, monkeypatch)
 
-    payload = client.get(
+    response = client.get(
         "/api/events?date=2026-07-11&limit=20&include_evidence=false"
-    ).json()
+    )
+    payload = response.json()
+    assert response.headers["cache-control"] == (
+        "public, max-age=60, stale-while-revalidate=300"
+    )
     target_group = next(item for item in payload["items"] if item["root"]["post_id"] == "1")
 
     assert payload["include_evidence"] is False
@@ -291,6 +295,17 @@ def test_events_api_can_omit_heavy_evidence_from_list_rows(tmp_path, monkeypatch
         },
     ).json()
     assert [item["post_id"] for item in detail["items"][0]["evidence"]] == ["2"]
+
+
+def test_event_dates_are_short_lived_browser_cacheable(tmp_path, monkeypatch):
+    _event_fixture(tmp_path, monkeypatch)
+
+    response = client.get("/api/events/dates")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == (
+        "public, max-age=60, stale-while-revalidate=300"
+    )
 
 
 def test_events_api_preserves_ungrouped_posts_as_singletons(tmp_path, monkeypatch):

@@ -10,6 +10,7 @@ import { useSearchParams } from 'react-router-dom'
 import {
   getJSON,
   getCachedJSON,
+  eventPageUrl,
   type EventEvidence,
   type EventResponse,
   type FeedDates,
@@ -78,18 +79,9 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
   if (cached) return Promise.resolve(cached)
   const inFlight = eventPageRequests.get(key)
   if (inFlight) return inFlight
-  const params = new URLSearchParams({
-    date: request.date,
-    lane: 'all',
-    sort: request.sort,
-    routing: request.routingFilter,
-    q: request.query,
-    event_id: request.eventId ?? '',
-    include_evidence: 'false',
-    limit: String(PAGE_SIZE),
-    offset: String(request.offset ?? 0),
-  })
-  const pending = getJSON<EventResponse>(`/api/events?${params}`)
+  const pending = getCachedJSON<EventResponse>(
+    eventPageUrl({ ...request, limit: PAGE_SIZE }),
+  )
     .then((value) => {
       eventPageCache.set(key, value)
       return value
@@ -976,7 +968,7 @@ export default function Feed() {
 
       <section className="feed-list" aria-live="polite" aria-busy={loading}>
         {loading && items.length === 0
-          ? Array.from({ length: 5 }, (_, index) => (
+          ? Array.from({ length: targetEventId ? 1 : 5 }, (_, index) => (
               <div className="feed-skeleton skeleton" key={index} />
             ))
           : items.map((item) => (

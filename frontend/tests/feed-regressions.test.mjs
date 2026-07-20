@@ -14,6 +14,10 @@ const copyEventSource = await readFile(
   new URL('../src/shared/components/CopyEventId.tsx', import.meta.url),
   'utf8',
 )
+const evidenceApiSource = await readFile(
+  new URL('../src/shared/api/evidence.ts', import.meta.url),
+  'utf8',
+)
 const appStyles = readStyles()
 
 test('Feed uses semantic classes for optional menu and routing content', () => {
@@ -50,7 +54,7 @@ test('Feed exposes one mutually exclusive routing Status control', () => {
   assert.match(feedSource, /value: 'relevant'/)
   assert.match(feedSource, /value: 'not_relevant'/)
   assert.match(feedSource, /value: 'not_evaluated'/)
-  assert.match(feedSource, /routing: request\.routingFilter/)
+  assert.match(evidenceApiSource, /routing: routingFilter/)
   assert.doesNotMatch(feedSource, /label="AUDIT"|label="AUDIENCE"/)
   assert.doesNotMatch(feedSource, /value: 'engineering'|value: 'investment'|value: 'both'/)
   assert.doesNotMatch(feedSource, /triageFilter|triage_counts|auditFilter|audienceFilter/)
@@ -99,11 +103,17 @@ test('Feed prioritizes the linked day and does no competing date prefetch', () =
   assert.match(feedSource, /const PAGE_SIZE = 20/)
   assert.match(feedSource, /getCachedJSON<FeedDates>\('\/api\/events\/dates'\)/)
   assert.match(feedSource, /useState\(\s*\(\) => initialLinkedDate\.current,\s*\)/)
-  assert.match(feedSource, /include_evidence: 'false'/)
+  assert.match(evidenceApiSource, /include_evidence: 'false'/)
+  assert.match(feedSource, /eventPageUrl\(\{ \.\.\.request, limit: PAGE_SIZE \}\)/)
+  assert.match(feedSource, /getCachedJSON<EventResponse>/)
   assert.match(feedSource, /function requestEventEvidence/)
   assert.match(feedSource, /include_evidence: 'true'/)
   assert.match(feedSource, /const counts = item\.relationship_counts/)
   assert.doesNotMatch(feedSource, /for \(const value of visibleDates\)/)
+})
+
+test('Feed exact-Event loading stays focused on the requested row', () => {
+  assert.match(feedSource, /targetEventId \? 1 : 5/)
 })
 
 test('Feed pages through fixed seven-date windows with explicit boundary controls', () => {

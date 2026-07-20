@@ -296,6 +296,10 @@ Rules:
   and restrained capital-blue slash markers echo the case brief's editorial
   rhythm without reproducing BIT branding, while flat rules and sans-serif body
   copy keep the workbook native to the product.
+  Exact Feed Event links begin preloading on pointer intent, keyboard focus, or
+  touch so the audit destination can reuse the same in-flight request. A direct
+  Event URL shows one focused loading row rather than pretending to load a full
+  page of evidence.
   PDF text stays vector/selectable. Times/Helvetica/Courier Base 14 are a
   deliberate portable print analogue for the editorial display/UI/mono stack,
   with an embedded mixed-script fallback for citation titles outside WinAnsi.

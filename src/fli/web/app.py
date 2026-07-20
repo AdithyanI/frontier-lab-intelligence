@@ -49,6 +49,9 @@ from fli.web import artifact_library as artifact_store
 from fli.web import events as event_store, feed as feed_store
 
 DIST_DIR = Path(__file__).parent / "dist"
+EVENT_READ_CACHE_HEADERS = {
+    "Cache-Control": "public, max-age=60, stale-while-revalidate=300"
+}
 
 
 @asynccontextmanager
@@ -372,7 +375,10 @@ def feed(
 @app.get("/api/events/dates")
 def event_dates() -> JSONResponse:
     """Exact structural Event groups available for each Feed date."""
-    return JSONResponse(event_store.dates_payload())
+    return JSONResponse(
+        event_store.dates_payload(),
+        headers=EVENT_READ_CACHE_HEADERS,
+    )
 
 
 @app.get("/api/events")
@@ -404,7 +410,8 @@ def events(
             include_evidence=include_evidence,
             limit=limit,
             offset=offset,
-        )
+        ),
+        headers=EVENT_READ_CACHE_HEADERS,
     )
 
 

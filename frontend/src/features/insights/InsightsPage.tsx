@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
+  prefetchExactEvent,
   type BriefDeliveryChannel,
   type BriefDeliveryResult,
   type BriefDeliveryStatus,
@@ -560,29 +561,61 @@ function InsightState({
   )
 }
 
+function ExactEventLink({
+  day,
+  eventId,
+  children,
+  className,
+  ariaLabel,
+  title,
+}: {
+  day: string
+  eventId: string
+  children: ReactNode
+  className?: string
+  ariaLabel?: string
+  title?: string
+}) {
+  const eventUrl = `/evidence/feed?date=${day}&event_id=${encodeURIComponent(eventId)}`
+  const preload = () => prefetchExactEvent(day, eventId)
+
+  return (
+    <Link
+      className={className}
+      to={eventUrl}
+      aria-label={ariaLabel}
+      title={title}
+      onPointerEnter={preload}
+      onFocus={preload}
+      onTouchStart={preload}
+    >
+      {children}
+    </Link>
+  )
+}
+
 function InsightRow({ item }: { item: InsightItem }) {
   const isKept = item.decision === 'surface'
   const feedRankLabel = `Feed rank ${item.feed_rank}`
   const title = item.title
   const accessibleName = `${feedRankLabel}: ${decodeTextEntities(title)}`
   const titleId = `${item.audience}-${item.candidate_id}-title`
-  const eventUrl = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(item.event_id)}`
-
   return (
     <article
       className={`insight-row insight-row--${isKept ? 'kept' : 'suppressed'}`}
       aria-labelledby={titleId}
     >
       <div className="insight-rank mono">
-        <Link
+        <ExactEventLink
+          day={item.day}
+          eventId={item.event_id}
           className="insight-feed-link"
-          to={eventUrl}
-          aria-label={`Open ${feedRankLabel.toLowerCase()} in its exact Feed Event`}
+          ariaLabel={`Open ${feedRankLabel.toLowerCase()} in its exact Feed Event`}
           title="Open exact Feed Event"
         >
           <strong>#{item.feed_rank}</strong>
           <span>Feed rank ↗</span>
-        </Link>
+        </ExactEventLink>
       </div>
       <div className="insight-body">
         <header className="insight-head">
@@ -595,12 +628,13 @@ function InsightRow({ item }: { item: InsightItem }) {
             <span>{item.model}</span>
             <span>{item.prompt_version}</span>
             <CopyEventId eventId={item.event_id} />
-            <Link
-              to={eventUrl}
-              aria-label={`Open the exact Feed Event for ${accessibleName}`}
+            <ExactEventLink
+              day={item.day}
+              eventId={item.event_id}
+              ariaLabel={`Open the exact Feed Event for ${accessibleName}`}
             >
               Open Event ↗
-            </Link>
+            </ExactEventLink>
             {item.root_source_url && (
               <a
                 href={item.root_source_url}
@@ -777,12 +811,15 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
           <h4 className="mono">Original feed</h4>
           <ul className="editorial-source-list">
             {item.events.map((event) => {
-              const eventUrl = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(event.event_id)}`
               return (
                 <li key={event.event_id}>
-                  <Link className="editorial-source-title" to={eventUrl}>
+                  <ExactEventLink
+                    day={item.day}
+                    eventId={event.event_id}
+                    className="editorial-source-title"
+                  >
                     Feed #{event.feed_rank} ↗
-                  </Link>
+                  </ExactEventLink>
                   <p>{decodeTextEntities(event.reason)}</p>
                 </li>
               )

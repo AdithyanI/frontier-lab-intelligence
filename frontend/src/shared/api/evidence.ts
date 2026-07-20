@@ -1,3 +1,5 @@
+import { getCachedJSON } from './client'
+
 export interface FeedDate {
   day: string
   item_count: number
@@ -225,4 +227,49 @@ export interface EventResponse {
   }
   score_formula?: FeedResponse['score_formula']
   items?: FeedEvent[]
+}
+
+export interface EventPageQuery {
+  date: string
+  sort: 'attention' | 'recent' | 'engagement'
+  routingFilter: 'all' | 'relevant' | 'not_relevant' | 'not_evaluated'
+  query: string
+  eventId?: string
+  offset?: number
+  limit?: number
+}
+
+export function eventPageUrl({
+  date,
+  sort,
+  routingFilter,
+  query,
+  eventId,
+  offset = 0,
+  limit = 20,
+}: EventPageQuery) {
+  const params = new URLSearchParams({
+    date,
+    lane: 'all',
+    sort,
+    routing: routingFilter,
+    q: query,
+    event_id: eventId ?? '',
+    include_evidence: 'false',
+    limit: String(limit),
+    offset: String(offset),
+  })
+  return `/api/events?${params}`
+}
+
+export function prefetchExactEvent(date: string, eventId: string) {
+  void getCachedJSON<EventResponse>(
+    eventPageUrl({
+      date,
+      sort: 'attention',
+      routingFilter: 'all',
+      query: '',
+      eventId,
+    }),
+  ).catch(() => undefined)
 }
