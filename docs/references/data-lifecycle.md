@@ -35,6 +35,11 @@ Preserve these exact stores during the submission sprint:
 preservation set. It is safe to delete because complete editorial rows
 deterministically rebuild every file.
 
+`data/derived/web-event-cache/` is also disposable. It retains compressed exact
+Event-day projections and their compact date summary so process restarts do not
+rebuild every historical day before serving a click. Cache keys bind the source
+database versions and projection code; deleting it affects latency only.
+
 Before a destructive cleanup, trace every default path in code, inspect tracked
 manifests/lineage, and run `PRAGMA quick_check` on the replacement store. Move a
 historical output to `data/archive/` when its evidence remains useful but no

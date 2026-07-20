@@ -95,15 +95,15 @@ test('Feed exposes the selected date and guards paginated responses by view iden
   assert.match(feedSource, /setItems\(\[\]\)/)
 })
 
-test('Feed prioritizes the visible page before background work', () => {
+test('Feed prioritizes the linked day and does no competing date prefetch', () => {
   assert.match(feedSource, /const PAGE_SIZE = 20/)
   assert.match(feedSource, /getCachedJSON<FeedDates>\('\/api\/events\/dates'\)/)
+  assert.match(feedSource, /useState\(\s*\(\) => initialLinkedDate\.current,\s*\)/)
   assert.match(feedSource, /include_evidence: 'false'/)
   assert.match(feedSource, /function requestEventEvidence/)
   assert.match(feedSource, /include_evidence: 'true'/)
   assert.match(feedSource, /const counts = item\.relationship_counts/)
-  assert.match(feedSource, /loading \|\|[\s\S]*?for \(const value of visibleDates\)/)
-  assert.match(feedSource, /}, 1200\)/)
+  assert.doesNotMatch(feedSource, /for \(const value of visibleDates\)/)
 })
 
 test('Feed pages through fixed seven-date windows with explicit boundary controls', () => {
@@ -129,7 +129,7 @@ test('Feed pages through fixed seven-date windows with explicit boundary control
   assert.match(dateNavigatorSource, /disabled=\{!canShowNewerDates\}/)
   assert.match(dateNavigatorSource, /aria-label="Show previous 7 available days"/)
   assert.match(dateNavigatorSource, /aria-label="Show next 7 available days"/)
-  assert.match(feedSource, /for \(const value of visibleDates\)/)
+  assert.doesNotMatch(feedSource, /for \(const value of visibleDates\)/)
   assert.doesNotMatch(appStyles, /\.feed-days button span:last-child/)
 })
 

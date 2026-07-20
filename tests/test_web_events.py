@@ -117,6 +117,7 @@ def _event_fixture(tmp_path, monkeypatch, *, include_singleton=False):
     monkeypatch.setattr(feed_store, "DEFAULT_DERIVED_ROOT", empty_rankings)
     monkeypatch.setattr(event_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(event_store, "DEFAULT_EVENTS_DB", events_db)
+    monkeypatch.setattr(event_store, "DEFAULT_EVENT_VIEW_CACHE_ROOT", None)
     monkeypatch.setattr(
         audience_routing_store, "DEFAULT_ROUTING_ROOT", routing_root
     )
@@ -327,6 +328,55 @@ def test_event_dates_cache_the_complete_summary(tmp_path, monkeypatch):
 
     assert first == second
     assert calls == 1
+
+
+def test_event_day_projection_reuses_persisted_exact_view(tmp_path, monkeypatch):
+    _event_fixture(tmp_path, monkeypatch)
+    cache_root = tmp_path / "web-event-cache"
+    monkeypatch.setattr(event_store, "DEFAULT_EVENT_VIEW_CACHE_ROOT", cache_root)
+    event_store._events_day_cached.cache_clear()
+    cache_token = event_store._cache_token("2026-07-11")
+
+    first = event_store._events_day_cached(
+        day="2026-07-11",
+        cache_token=cache_token,
+    )
+    assert (cache_root / "events-2026-07-11.json.gz").is_file()
+
+    event_store._events_day_cached.cache_clear()
+
+    def fail_source_projection(**_kwargs):
+        raise AssertionError("persisted view should avoid rebuilding source projection")
+
+    monkeypatch.setattr(event_store, "_all_feed_candidates", fail_source_projection)
+    second = event_store._events_day_cached(
+        day="2026-07-11",
+        cache_token=cache_token,
+    )
+
+    assert second == first
+
+
+def test_event_dates_reuse_persisted_exact_summary(tmp_path, monkeypatch):
+    _event_fixture(tmp_path, monkeypatch)
+    cache_root = tmp_path / "web-event-cache"
+    monkeypatch.setattr(event_store, "DEFAULT_EVENT_VIEW_CACHE_ROOT", cache_root)
+    event_store._events_day_cached.cache_clear()
+    event_store._dates_payload_cached.cache_clear()
+
+    first = event_store.dates_payload()
+    assert (cache_root / "dates.json.gz").is_file()
+
+    event_store._events_day_cached.cache_clear()
+    event_store._dates_payload_cached.cache_clear()
+
+    def fail_date_projection(*_args, **_kwargs):
+        raise AssertionError("persisted summary should avoid rebuilding date counts")
+
+    monkeypatch.setattr(feed_store, "dates_payload", fail_date_projection)
+    second = event_store.dates_payload()
+
+    assert second == first
 
 
 def test_events_api_projects_completed_audience_routing_directly(

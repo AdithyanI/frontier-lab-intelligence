@@ -82,6 +82,7 @@ do not recreate generic `pages/` or `components/` buckets.
 | `data/derived/insights/insights.db` | `fli insights` | Insight read model/UI | Current audience Insight run store. |
 | `data/derived/daily-intelligence/editorial.db` | `fli daily-intelligence import-result` / `run-day` | Daily Insight read model/UI and orchestration inspection | Complete agent-authored daily runs plus one date-keyed orchestration ledger with the effective Codex model/reasoning/tier tuple; strict v3 workspaces and the optional packet-keyed embedding cache live beside it. |
 | `data/derived/daily-intelligence/pdf-cache/` | `GET /api/insights/report.pdf` | Daily Insight PDF downloads | Rebuildable content-addressed PDFs keyed by report schema, read schema, date, audience, and editorial result hash; atomic writes make concurrent first requests safe. |
+| `data/derived/web-event-cache/` | Event API read model | Event API and Feed UI | Optional compressed exact-view cache, automatically invalidated by source database versions and projection code. Safe to delete; source stores remain authoritative. |
 
 Manual delivery adds no second report or outbox store. It reads the complete
 editorial projection and reuses the PDF cache at confirmation time.

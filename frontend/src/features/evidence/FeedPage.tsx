@@ -688,7 +688,9 @@ export default function Feed() {
     () => urlSearchParams.get('event_id') ?? '',
   )
   const [dates, setDates] = useState<FeedDates | null>(null)
-  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedDate, setSelectedDate] = useState(
+    () => initialLinkedDate.current,
+  )
   const [sort, setSort] = useState<Sort>('attention')
   const [routingFilter, setRoutingFilter] = useState<RoutingFilter>(() =>
     initialFeedRoutingFilter(initialSearchParams.current),
@@ -715,7 +717,6 @@ export default function Feed() {
   const canShowNewerDates = dateWindow.end < availableDates.length
 
   useEffect(() => {
-    setLoading(true)
     getCachedJSON<FeedDates>('/api/events/dates')
       .then((value) => {
         setDates(value)
@@ -735,7 +736,6 @@ export default function Feed() {
         }
       })
       .catch(() => setError('Couldn’t load available Feed dates. Reload to try again.'))
-      .finally(() => setLoading(false))
   }, [])
 
   useEffect(() => {
@@ -787,45 +787,6 @@ export default function Feed() {
       live = false
     }
   }, [selectedDate, sort, routingFilter, debouncedQuery, targetEventId])
-
-  useEffect(() => {
-    if (
-      loading ||
-      !selectedDate ||
-      sort !== 'attention' ||
-      debouncedQuery ||
-      targetEventId
-    ) return
-    let cancelled = false
-    const timer = window.setTimeout(async () => {
-      for (const value of visibleDates) {
-        if (cancelled || value.day === selectedDate) continue
-        try {
-          await requestEventPage({
-            date: value.day,
-            sort: 'attention',
-            routingFilter,
-            query: '',
-            offset: 0,
-          })
-        } catch {
-          // Prefetch is opportunistic; foreground requests still surface errors.
-        }
-      }
-    }, 1200)
-    return () => {
-      cancelled = true
-      window.clearTimeout(timer)
-    }
-  }, [
-    visibleDates,
-    selectedDate,
-    sort,
-    routingFilter,
-    debouncedQuery,
-    targetEventId,
-    loading,
-  ])
 
   useEffect(() => {
     if (!targetEventId || !items.some((item) => item.event_id === targetEventId)) return

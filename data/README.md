@@ -50,6 +50,10 @@ storage; see [`docs/references/demo-release.md`](../docs/references/demo-release
   product data. `derived/daily-intelligence/pdf-cache/` contains rebuildable,
   content-addressed A4 exports generated only from complete normalized runs;
   deleting it costs render time but does not lose editorial state.
+- `derived/web-event-cache/` — ignored, disposable compressed Event read views.
+  Source database versions and projection-code hashes invalidate them
+  automatically; deleting the directory changes startup latency, not product
+  data or truth.
 - `following/manifests/` — small tracked manifests that bind each local
   snapshot checksum to its cohort, provider, completeness, spend, ranking, and
   evaluation outputs.

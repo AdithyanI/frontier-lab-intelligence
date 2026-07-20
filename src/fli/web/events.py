@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
+import os
 import sqlite3
+import tempfile
 from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
@@ -19,6 +22,9 @@ from fli.web import feed as feed_store
 
 DEFAULT_EVENTS_DB = signal_events.DEFAULT_EVENTS_DB
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
+DEFAULT_EVENT_VIEW_CACHE_ROOT: Path | None = (
+    feed_store.REPO_ROOT / "data" / "derived" / "web-event-cache"
+)
 
 FeedKey = tuple[str, str]
 _dates_payload_lock = Lock()
@@ -383,6 +389,103 @@ def _dates_cache_token() -> tuple[tuple[str, int, int, int, int], ...]:
     )
 
 
+@lru_cache(maxsize=1)
+def _projection_code_sha256() -> str:
+    """Bind persisted views to the code that defines their exact projection."""
+    digest = hashlib.sha256()
+    modules = (
+        Path(__file__),
+        Path(signal_events.__file__),
+        Path(signal_feed.__file__),
+        Path(feed_store.__file__),
+        Path(audience_routing_store.__file__),
+        Path(feed_store.attention.__file__),
+    )
+    for path in modules:
+        digest.update(path.name.encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def _persisted_cache_key(
+    *,
+    kind: str,
+    cache_token: tuple[tuple[str, int, int, int, int], ...],
+) -> str:
+    stable_source_token = tuple(
+        (path, main_mtime, main_size, wal_mtime if wal_size else 0, wal_size)
+        for path, main_mtime, main_size, wal_mtime, wal_size in cache_token
+    )
+    value = {
+        "kind": kind,
+        "projection_code_sha256": _projection_code_sha256(),
+        # SQLite may create a zero-byte WAL during a read. Its mtime carries no
+        # state and must not invalidate a view that was exact before that read.
+        "source_token": stable_source_token,
+    }
+    return hashlib.sha256(
+        json.dumps(value, separators=(",", ":"), sort_keys=True).encode()
+    ).hexdigest()
+
+
+def _persisted_cache_path(name: str) -> Path | None:
+    root = DEFAULT_EVENT_VIEW_CACHE_ROOT
+    return None if root is None else root / name
+
+
+def _read_persisted_payload(*, name: str, cache_key: str) -> dict[str, Any] | None:
+    """Read an optional exact view cache; any cache fault falls back to sources."""
+    path = _persisted_cache_path(name)
+    if path is None:
+        return None
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            envelope = json.load(handle)
+    except (EOFError, OSError, json.JSONDecodeError, UnicodeError):
+        return None
+    if not isinstance(envelope, dict) or envelope.get("cache_key") != cache_key:
+        return None
+    payload = envelope.get("payload")
+    return payload if isinstance(payload, dict) else None
+
+
+def _write_persisted_payload(
+    *,
+    name: str,
+    cache_key: str,
+    payload: dict[str, Any],
+) -> None:
+    """Atomically retain a rebuildable compressed view for the next process."""
+    path = _persisted_cache_path(name)
+    if path is None:
+        return
+    temporary_path: Path | None = None
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_path = Path(temporary.name)
+        with gzip.open(
+            temporary_path,
+            "wt",
+            encoding="utf-8",
+            compresslevel=1,
+        ) as handle:
+            json.dump(
+                {"cache_key": cache_key, "payload": payload},
+                handle,
+                separators=(",", ":"),
+            )
+        os.replace(temporary_path, path)
+    except (OSError, TypeError, ValueError):
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
 def _visible_components(
     visible_keys: set[tuple[str, str]],
     cutoff_keys: set[tuple[str, str]],
@@ -729,7 +832,6 @@ def _events_day_cached(
     The card includes the Event's lifetime activity, while its score and rank
     remain frozen from the canonical publication day.
     """
-    del cache_token  # used only to invalidate this read-model cache
     if not DEFAULT_EVENTS_DB.is_file():
         return {
             "available": False,
@@ -737,6 +839,12 @@ def _events_day_cached(
         }
     if not DEFAULT_FEED_DB.is_file():
         return {"available": False, "reason": "No Feed store found."}
+
+    cache_name = f"events-{day}.json.gz"
+    cache_key = _persisted_cache_key(kind=f"events:{day}", cache_token=cache_token)
+    persisted = _read_persisted_payload(name=cache_name, cache_key=cache_key)
+    if persisted is not None:
+        return persisted
 
     events = _open_readonly(DEFAULT_EVENTS_DB)
     run = _latest_run(events)
@@ -1032,7 +1140,7 @@ def _events_day_cached(
             if routing_payload["available"]
             else "unavailable"
         )
-    return {
+    payload = {
         "available": True,
         "date": day,
         "audience_routing_run": routing_payload["run"],
@@ -1050,6 +1158,12 @@ def _events_day_cached(
         },
         "items": items,
     }
+    _write_persisted_payload(
+        name=cache_name,
+        cache_key=cache_key,
+        payload=payload,
+    )
+    return payload
 
 
 def _events_week_cached(
@@ -1356,7 +1470,6 @@ def _dates_payload_cached(
     cache_token: tuple[tuple[str, int, int, int, int], ...],
 ) -> dict[str, Any]:
     """Expose fast evidence-ledger counts for each complete Feed day."""
-    del cache_token
     if not DEFAULT_EVENTS_DB.is_file():
         return {
             "available": False,
@@ -1370,6 +1483,10 @@ def _dates_payload_cached(
             "available": False,
             "reason": "Event store has no published Feed/Event pair.",
         }
+    cache_key = _persisted_cache_key(kind="dates", cache_token=cache_token)
+    persisted = _read_persisted_payload(name="dates.json.gz", cache_key=cache_key)
+    if persisted is not None:
+        return persisted
     feed_dates = feed_store.dates_payload(run_id=run["feed_run_id"])
     if not feed_dates.get("available"):
         return feed_dates
@@ -1387,7 +1504,13 @@ def _dates_payload_cached(
                 ),
             }
         )
-    return {**feed_dates, "dates": dates, "run_id": run["run_id"]}
+    payload = {**feed_dates, "dates": dates, "run_id": run["run_id"]}
+    _write_persisted_payload(
+        name="dates.json.gz",
+        cache_key=cache_key,
+        payload=payload,
+    )
+    return payload
 
 
 def dates_payload() -> dict[str, Any]:
