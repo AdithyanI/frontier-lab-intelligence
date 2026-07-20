@@ -252,7 +252,11 @@ export default function HowItWorks() {
             reveals the layer below the obvious names, and that is often where
             the earliest signal lives. Every admission keeps its provenance,
             and a rejected identity disappears from every view without
-            rewriting history.
+            rewriting history. The resulting ranking was checked against an
+            independent external one: Digg&apos;s frozen tech ranking agrees
+            with a rank correlation of 0.877 across 872 shared accounts, and
+            the strongest disagreements are official lab channels that a
+            people-only ranking excludes by design.
           </p>
           <p>
             The scale is concrete. The system screens a follow graph of
@@ -299,10 +303,12 @@ export default function HowItWorks() {
             The weights are not hidden in code; the API response declares
             them. Version attention-v1.1 weighs amplification by Registry
             members at 55%, how many Registry members follow the author at
-            25%, and public engagement at 20% as a tie-breaker. The score is
-            labeled an
-            ordering aid in the response itself, and no downstream judgment
-            consumes it. A simple formula honestly bounded beats a
+            25%, and public engagement at 20% as a tie-breaker. The score has
+            one consumer: it selects the top 100 Events of each day for
+            judging. The judges never see the score itself, and the kept
+            Insights show it: 24% of them grew from the lower half of the
+            judged window. A simple formula
+            honestly bounded beats a
             sophisticated one pretending to measure importance.
           </p>
         </article>
