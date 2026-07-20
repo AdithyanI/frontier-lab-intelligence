@@ -252,11 +252,13 @@ export default function HowItWorks() {
             reveals the layer below the obvious names, and that is often where
             the earliest signal lives. Every admission keeps its provenance,
             and a rejected identity disappears from every view without
-            rewriting history. The resulting ranking was checked against an
-            independent external one: Digg&apos;s frozen tech ranking agrees
-            with a rank correlation of 0.877 across 872 shared accounts, and
-            the strongest disagreements are official lab channels that a
-            people-only ranking excludes by design.
+            rewriting history. The ranking is validated by what it produces:
+            across the 13 briefed days, Events written by authors in the top
+            half of the ranking became kept Insights at 12.2%, against 7.3%
+            for the bottom half, and the judges never see the author&apos;s
+            rank. An independent public ranking of AI accounts, frozen before
+            the comparison, agrees with ours at a rank correlation of 0.877
+            across 872 shared accounts.
           </p>
           <p>
             The scale is concrete. The system screens a follow graph of

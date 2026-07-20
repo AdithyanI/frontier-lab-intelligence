@@ -6,7 +6,28 @@ in the submission write-up. Method scripts are inline reproducible: every
 number below comes from `/api/registry`, `/api/events`, `/api/insights`, and
 `data/digg/rankings.csv` on the always-on service.
 
-## 1. Contributor ranking against an independent external baseline
+## 1. Contributor ranking against downstream editorial outcomes
+
+The strongest check uses no external reference. If the network ranking
+measures anything real, Events authored by higher-ranked people should more
+often survive the full judging and editorial funnel. Across all 13 briefed
+days (5 to 17 July 2026), bucketing judged Events by the author's rank
+quartile:
+
+| Author rank quartile | Judged Events | Kept Insights | Hit rate |
+| --- | --- | --- | --- |
+| Q1 (top 25%) | 288 | 34 | 11.8% |
+| Q2 | 243 | 31 | 12.8% |
+| Q3 | 155 | 11 | 7.1% |
+| Q4 (bottom 25%) | 51 | 4 | 7.8% |
+
+Top half 12.2% versus bottom half 7.3%, a 1.7x gradient. The editorial stages
+never see the author's rank, so the gradient is not self-fulfilling at the
+judging step. One caveat: attention selection includes author support, so
+higher-ranked authors get more Events judged; the hit rate conditions on
+being judged, which controls most of that.
+
+## 2. Contributor ranking against an independent external baseline
 
 The Registry network ranking (support within the trusted follow graph) was
 compared with Digg's independent tech ranking frozen on 8 July 2026
@@ -27,7 +48,7 @@ and disagree where our Registry deliberately includes organizational channels.
 Per `digg-ranking-baseline.md` this comparison is diagnostic, not ground
 truth, and the trusted ranking was not tuned toward it.
 
-## 2. Attention score versus editorial outcomes
+## 3. Attention score versus editorial outcomes
 
 The attention score (attention-v1.1) has one consumer: it selects the top 100
 Events per day for audience judging. The judges see packet content and
