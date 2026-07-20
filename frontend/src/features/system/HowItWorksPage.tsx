@@ -270,6 +270,20 @@ export default function HowItWorks() {
           through one inspectable funnel until only a cited brief for investors
           and one for AI engineers remain.
         </p>
+        <p>
+          The fastest way to understand the system is the video walkthrough.
+          It shows the moving parts this page can only describe.
+        </p>
+        <p>
+          <a
+            className="how-beat-link"
+            href="https://share.descript.com/view/LZkpHP29yub"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Watch the video walkthrough &rarr;
+          </a>
+        </p>
       </header>
 
       <div className="how-canvas">
