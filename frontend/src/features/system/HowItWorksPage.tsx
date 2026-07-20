@@ -304,10 +304,10 @@ export default function HowItWorks() {
             there themselves.
           </p>
           <p>
-            And I started from people, not keywords. Keyword alerts fire
-            after the words already exist; the people come first. One source
-            done deeply beats six done shallowly. The other classes plug in
-            later as channels on the same Registry.
+            And I started from people, not keywords. A keyword alert only
+            catches what you already know to search for; the people come
+            first. One source done deeply beats six done shallowly. The
+            other sources plug in later as channels on the same Registry.
           </p>
           <FigureFrame>
             <SourceChoiceFigure />
@@ -316,12 +316,12 @@ export default function HowItWorks() {
           <p className="how-read-sub mono">1b · Collect the trusted set</p>
           <p>
             From everything on X, the system keeps a small set it trusts:
-            frontier labs and the researchers who work there. The screening
-            is real work. A follow graph of 557,363 accounts and 2.8 million
-            follow edges narrows to a Registry of 2,591 active identities:
-            2,431 researchers and 160 organizations. Every admission keeps
-            its provenance, and the 39 rejections stay on the books with
-            their reasons.
+            frontier labs and the researchers who work there. Building that
+            set meant screening a follow graph of 557,363 accounts and 2.8
+            million follow edges down to a Registry of 2,591 active
+            identities: 2,431 researchers and 160 organizations. Every
+            admission keeps its provenance, and the 39 rejections stay on
+            the books with their reasons.
           </p>
           <FigureFrame>
             <TrustedSetFigure />
@@ -329,7 +329,8 @@ export default function HowItWorks() {
 
           <p className="how-read-sub mono">1c · Rank by trust, not popularity</p>
           <p>
-            Within this network, the next call was whom to weight most. My
+            Within this network, the next call was whose word should carry
+            more weight. My
             thesis: popularity is the wrong proxy for importance. A million
             followers measures reach, not trust. So the system counts trust
             from the screened set instead. An account ranks higher when the
@@ -356,8 +357,9 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-collect">
           <h4><span className="mono">2</span> Collect: preserve before interpreting</h4>
           <p>
-            For each completed observed UTC day, the cohort&rsquo;s captured X
-            output is stored before interpretation. Replies, quotes, and threads
+            The system collects whole days. When a UTC day completes,
+            everything the cohort posted in it is stored exactly as posted,
+            before any interpretation. Replies, quotes, and threads
             are grouped into exact Events using only relationships the platform
             itself declares. There is no topic clustering at this stage because
             clustering is already an opinion, and this stage is not allowed to
@@ -389,21 +391,20 @@ export default function HowItWorks() {
             every input is inspectable per Event.
           </p>
           <p>
-            The score deliberately stops there. It decides where to look
+            The score stops there on purpose. It decides where to look
             first. It never decides what is true or what matters, because
             attention is evidence of noise as often as of signal.
           </p>
           <p>
             The weights are not hidden in code; the API response declares
-            them. Version attention-v1.1 weighs amplification by Registry
-            members at 55%, how many Registry members follow the author at
-            25%, and public engagement at 20% as a tie-breaker. The score has
-            one consumer: it selects the top 100 Events of each day for
-            judging. The judges never see the score itself, and the kept
-            Insights show it: 24% of them grew from the lower half of the
-            judged window. A simple formula
-            honestly bounded beats a
-            sophisticated one pretending to measure importance.
+            them. Amplification by Registry members counts for 55%, the
+            author&apos;s own network support for 25%, and public engagement
+            for 20% as a tie-breaker. The score does one job: it picks the
+            top 100 Events of each day for judging, and the judges never see
+            it. A quarter of the kept Insights came from the lower half of
+            that window. I would rather defend a simple formula with known
+            limits than a sophisticated one that pretends to measure
+            importance.
           </p>
           <FigureFrame>
             <RankFigure />
@@ -420,7 +421,7 @@ export default function HowItWorks() {
           <p>
             Every Event is asked two separate questions. Does this change an
             investment position? Should an engineering team act on it? The
-            judgments never share an answer. An Event can matter to both
+            two answers never mix. An Event can matter to both
             audiences, to one, or to neither, and each verdict keeps its
             reasoning attached.
           </p>
@@ -445,8 +446,7 @@ export default function HowItWorks() {
           <p>
             An editorial agent reads everything that survived and must do one
             of two things with each candidate: turn it into an Insight or
-            explicitly decline it. Nothing is dropped silently. That forced
-            disposition is what keeps the funnel honest.
+            decline it in writing. Nothing is dropped silently.
           </p>
           <p>
             Every claim in the final brief cites its source, and cited

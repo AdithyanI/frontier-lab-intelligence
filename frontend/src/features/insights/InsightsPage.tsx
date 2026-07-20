@@ -948,12 +948,13 @@ function DeclinedCandidates({
                 #{item.feed_rank}
               </div>
               <div className="insight-declined-cell">
-                <h4 className="mono">Source post</h4>
+                <h4 className="mono">Event · root post</h4>
                 <Link
                   className="insight-declined-author mono"
                   to={`/evidence/feed?date=${day}&event_id=${encodeURIComponent(item.event_id)}`}
+                  aria-label={`Open the full event by ${item.author} on the evidence page`}
                 >
-                  {item.author} ↗
+                  {item.author} · open event ↗
                 </Link>
                 <p className="insight-declined-excerpt">“{decodeTextEntities(item.excerpt)}”</p>
               </div>
