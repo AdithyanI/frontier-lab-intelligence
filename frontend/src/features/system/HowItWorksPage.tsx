@@ -548,7 +548,7 @@ export default function HowItWorks() {
             itself.
           </p>
           <p>
-            The declines tell the story best. One post that day was a joke
+            The declined items make the filter easier to see. One post that day was a joke
             about cancelled Claude subscriptions. Many in the trusted network
             engaged with it, so attention ranked it high, and both judges
             correctly turned it away: funny, but useless to an analyst and
@@ -580,8 +580,7 @@ export default function HowItWorks() {
             decline it in writing. Nothing is dropped silently.
           </p>
           <p>
-            The agent does not judge in a vacuum. It carries packaged
-            context for each reader: for the investment brief, BIT
+            The agent receives context for each reader: for the investment brief, BIT
             Capital&apos;s publicly known holdings and what would move a
             position; for the engineering brief, what a production AI team
             can act on. That context is why the same Event can become two
@@ -619,14 +618,12 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-plumbing">
           <h4><span className="mono">6</span> The plumbing: models, costs, delivery</h4>
           <p>
-            The stack is simple on purpose: a Python pipeline
-            writing SQLite files, served by FastAPI and a built React app
-            through a Cloudflare tunnel. The page you are reading runs on
-            it. Every LLM call in the system goes through one shared LiteLLM
-            gateway. That single choke point handles retries, backoff, and
-            model fallback, and it prices every request. Cost is telemetry
-            here: each run records exactly which model produced it, at what
-            reasoning effort, with which prompt version, and what it cost.
+            The system uses a Python pipeline writing to SQLite, with FastAPI
+            and React serving the product through a Cloudflare tunnel. The
+            page you are reading runs on it. Every LLM call goes through one
+            shared LiteLLM gateway. It handles retries, backoff, and model
+            fallback, and prices every request. Each run records its model,
+            reasoning effort, prompt version, token usage, and cost.
           </p>
           <p>
             Models are matched to the size of the job. Bounded structured
@@ -656,7 +653,7 @@ export default function HowItWorks() {
         </article>
 
         <article className="how-read-block">
-          <h4><span className="mono">&rarr;</span> The result: nothing on trust</h4>
+          <h4><span className="mono">&rarr;</span> The result: every claim can be checked</h4>
           <p>
             Each completed editorial day can publish one brief for investment
             and one for AI engineering. Every Insight traces back through the
