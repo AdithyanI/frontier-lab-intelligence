@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
+import NetworkRankFigure from '../architecture/NetworkRankFigure'
+import { SourceChoiceFigure } from './DecisionFigures'
 
 /* The page is the figure. A sticky signal funnel carries the whole story;
    the scrolling rail beside it holds one short beat per stage and a single
@@ -239,33 +241,60 @@ export default function HowItWorks() {
           </p>
         </header>
 
-        <article className="how-read-block">
-          <h4><span className="mono">1</span> Choose: start with people, not keywords</h4>
+        <article className="how-read-block how-read-block--wide">
+          <h4><span className="mono">1</span> Choose: one source, and trust over popularity</h4>
+
+          <p className="how-read-sub mono">1a · Where to look</p>
           <p>
-            Keyword alerts fail because the words arrive after the signal. The
-            people come first. So the system starts with a screened Registry of
-            frontier labs and the researchers inside them, not a list of search
-            terms.
+            I chose X as the single source to go deep on. The universe of
+            frontier output is too large to read, so the first call was where
+            to stand. My judgment: X is the front page of AI. News breaks
+            there before the paper or the blog post lands, and what does land
+            elsewhere gets announced and argued there anyway. The people I
+            most want to hear, researchers up to lab CEOs, write there
+            themselves.
           </p>
           <p>
-            The cohort also extends itself. Who these researchers follow
-            reveals the layer below the obvious names, and that is often where
-            the earliest signal lives. Every admission keeps its provenance,
-            and a rejected identity disappears from every view without
-            rewriting history. The ranking is validated by what it produces:
-            across the 13 briefed days, Events written by authors in the top
-            half of the ranking became kept Insights at 12.2%, against 7.3%
-            for the bottom half, and the judges never see the author&apos;s
-            rank. An independent public ranking of AI accounts, frozen before
-            the comparison, agrees with ours at a rank correlation of 0.877
-            across 872 shared accounts.
+            And I started from people, not keywords. Keyword alerts fire
+            after the words already exist; the people come first. One source
+            done deeply beats six done shallowly. The other classes plug in
+            later as channels on the same Registry.
+          </p>
+          <div className="how-read-figure">
+            <SourceChoiceFigure />
+          </div>
+
+          <p className="how-read-sub mono">1b · Whom to trust</p>
+          <p>
+            Inside X, the next call was whom to listen to. My thesis:
+            popularity is the wrong proxy for importance. A million followers
+            measures reach, not trust. So the system uses trust inside an
+            already screened network instead. An account ranks higher when
+            the screened researchers themselves follow it, not when the
+            public does.
+          </p>
+          <div className="how-read-figure">
+            <NetworkRankFigure />
+          </div>
+          <p>
+            The screening is real work. A follow graph of 557,363 accounts
+            and 2.8 million follow edges narrows to a Registry of 2,591
+            active identities: 2,431 researchers and 160 organizations. Every
+            admission keeps its provenance, and the 39 rejections stay on the
+            books with their reasons.
           </p>
           <p>
-            The scale is concrete. The system screens a follow graph of
-            557,363 accounts and 2.8 million follow edges down to a Registry
-            of 2,591 active identities: 2,431 researchers and 160
-            organizations. The 39 rejections stay on the books with their
-            reasons.
+            The thesis held up. Across the 13 briefed days, Events by authors
+            in the top half of the ranking became kept Insights at 12.2%,
+            against 7.3% for the bottom half, and the judges never see the
+            author&apos;s rank. An independent public ranking of AI accounts,
+            frozen before the comparison, agrees with ours at a rank
+            correlation of 0.877 across 872 shared accounts.
+          </p>
+          <p>
+            <Link className="how-beat-link" to="/network/ranking">
+              See the live ranking &rarr;
+            </Link>
           </p>
         </article>
 
