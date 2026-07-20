@@ -34,10 +34,19 @@ Screen: https://frontier-lab-intelligence.adithyan.io/ (lands on Insights), then
 
 Screen: https://frontier-lab-intelligence.adithyan.io/how — scroll the sticky funnel with arrow keys.
 
-> I have limited attention, so the way I designed the system is a funnel. The
-> funnel decides what to pay attention to. As we go down, every stage raises
-> the signal-to-noise ratio. Think of the blue dots as signal and the gray
-> ones as noise: as we go down, we keep the blue and drop the gray.
+> Let me start with the why.
+>
+> Every day, everyone posts about everything. Think of these blue dots as
+> signal, and the gray ones as noise. The signal is buried. And two very
+> different people need it: an investment analyst at BIT Capital, and an AI
+> engineering team. Both from the same flood of public data.
+>
+> So the way I designed this is a funnel. At each stage going down, we raise
+> the signal-to-noise ratio: keep the blue, drop the gray. At the narrow end,
+> one single data source becomes exactly two briefs. One for investment, one
+> for AI engineering.
+>
+> That's the why. Now let me walk through each stage of the funnel: the how.
 >
 > It starts from a universe of over five hundred fifty thousand accounts on X.
 > That gets screened down to a Registry of about twenty six hundred trusted
