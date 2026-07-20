@@ -126,6 +126,8 @@ test('Insights renders canonical daily editorial judgments as a ranked, cited br
   assert.match(insightSource, /const permalinkId = `insight-\$\{item\.insight_id\}`/)
   assert.match(insightSource, /referenceUrl\.searchParams\.set\('insight', item\.insight_id\)/)
   assert.match(insightSource, /navigator\.clipboard\.writeText\(referenceUrl\.toString\(\)\)/)
+  assert.match(insightSource, /legacyInsightIdFromHash\(window\.location\.hash\)/)
+  assert.match(insightSource, /nextParams\.set\('insight', legacyInsightId\)/)
   assert.match(insightSource, /target\.scrollIntoView\(\{ block: 'start' \}\)/)
   assert.match(insightSource, /nextParams\.delete\('insight'\)/)
   assert.match(insightSource, /aria-expanded=\{rankExplanationOpen\}/)

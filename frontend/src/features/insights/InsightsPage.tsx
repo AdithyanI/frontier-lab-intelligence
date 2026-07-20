@@ -102,6 +102,10 @@ function parseStatus(value: string | null): InsightStatus {
     : DEFAULT_STATUS
 }
 
+function legacyInsightIdFromHash(hash: string) {
+  return hash.match(/^#insight-([a-f0-9]{64})$/)?.[1] ?? ''
+}
+
 function displayInsightDay(day: string) {
   const parsed = new Date(`${day}T12:00:00Z`)
   return Number.isNaN(parsed.getTime()) ? day : insightDay.format(parsed)
@@ -977,7 +981,8 @@ export default function Insights() {
   const audience = parseAudience(searchParams.get('audience'))
   const status = parseStatus(searchParams.get('status'))
   const selectedDate = searchParams.get('date') ?? ''
-  const selectedInsightId = searchParams.get('insight') ?? ''
+  const legacyInsightId = legacyInsightIdFromHash(window.location.hash)
+  const selectedInsightId = searchParams.get('insight') ?? legacyInsightId
   const [dates, setDates] = useState<InsightDates | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const [dataView, setDataView] = useState<{
@@ -1016,14 +1021,18 @@ export default function Insights() {
     if (
       searchParams.get('audience') === audience &&
       searchParams.get('status') === status &&
-      !searchParams.has('view')
+      !searchParams.has('view') &&
+      !legacyInsightId
     ) return
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('audience', audience)
     nextParams.set('status', status)
     nextParams.delete('view')
+    if (!nextParams.has('insight') && legacyInsightId) {
+      nextParams.set('insight', legacyInsightId)
+    }
     setSearchParams(nextParams, { replace: true })
-  }, [audience, searchParams, setSearchParams, status])
+  }, [audience, legacyInsightId, searchParams, setSearchParams, status])
 
   useEffect(() => {
     const viewKey = `dates:${audience}`
