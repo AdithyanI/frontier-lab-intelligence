@@ -79,7 +79,6 @@ type Beat = {
   step: string
   title: string
   text: string
-  linkLabel: string
 }
 
 export default function HowItWorks() {
@@ -88,46 +87,36 @@ export default function HowItWorks() {
   const artifactsPath = useAuditDatePath('/evidence/artifacts')
   const activeStage = useActiveStage()
 
-  const beats: (Beat & { to: string })[] = [
+  const beats: Beat[] = [
     {
       id: 'watch',
       step: '1',
       title: 'Choose',
-      text: 'Start with people, not keywords. A screened Registry of frontier labs and the researchers inside them decides whose word is worth collecting. Their own follow graph reveals the layer below the obvious names.',
-      to: '/network/ranking',
-      linkLabel: 'See the network',
+      text: 'Start with people, not keywords. A screened Registry of frontier labs and the researchers inside them decides whose posts get collected at all.',
     },
     {
       id: 'collect',
       step: '2',
       title: 'Collect',
       text: 'Capture complete observed X days for the screened cohort. Replies, quotes, and threads are grouped into exact Events. Linked papers, repos, and model cards enter a separate artifact catalogue, and successful text snapshots are frozen.',
-      to: feedPath,
-      linkLabel: 'See the evidence',
     },
     {
       id: 'rank',
       step: '3',
       title: 'Rank',
       text: 'A transparent attention score orders each day: who amplified it, who wrote it, how the public reacted. It decides where to look first, and never pretends to decide what is true.',
-      to: feedPath,
-      linkLabel: 'See a ranked day',
     },
     {
       id: 'judge',
       step: '4',
       title: 'Judge',
       text: 'Every Event is asked two independent questions. Does this change an investment position? Should an engineering team act on it? Each answer keeps its reasons attached.',
-      to: feedPath,
-      linkLabel: 'See the routing',
     },
     {
       id: 'publish',
       step: '5',
       title: 'Publish',
       text: 'An editorial agent reviews everything that survived and must surface or explicitly suppress each candidate. What remains becomes two audience-specific briefs, and every claim in them cites its source.',
-      to: insightsPath,
-      linkLabel: 'Read the brief',
     },
   ]
 
@@ -220,9 +209,6 @@ export default function HowItWorks() {
               <p className="how-beat-kicker mono">Stage {beat.step}</p>
               <h3>{beat.title}</h3>
               <p>{beat.text}</p>
-              <Link className="how-beat-link" to={beat.to}>
-                {beat.linkLabel} &rarr;
-              </Link>
               <WhyLink stage={beat.id} />
               <NextButton to={beats[i + 1]?.id ?? 'complete'} />
             </div>
@@ -333,6 +319,11 @@ export default function HowItWorks() {
             On 17 July this stage held 4,537 captured posts resolving into
             1,287 exact Events.
           </p>
+          <p>
+            <Link className="how-beat-link" to={feedPath}>
+              See the evidence &rarr;
+            </Link>
+          </p>
         </article>
 
         <article className="how-read-block" id="why-rank">
@@ -360,6 +351,11 @@ export default function HowItWorks() {
             honestly bounded beats a
             sophisticated one pretending to measure importance.
           </p>
+          <p>
+            <Link className="how-beat-link" to={feedPath}>
+              See a ranked day &rarr;
+            </Link>
+          </p>
         </article>
 
         <article className="how-read-block" id="why-judge">
@@ -376,6 +372,11 @@ export default function HowItWorks() {
             cannot be rescued by someone else reacting to it today. On 17
             July, 56 of the day&rsquo;s 1,287 Events crossed this bar for at
             least one audience.
+          </p>
+          <p>
+            <Link className="how-beat-link" to={feedPath}>
+              See the routing &rarr;
+            </Link>
           </p>
         </article>
 
@@ -406,6 +407,11 @@ export default function HowItWorks() {
             A person starts each dated run, and its stages resume from saved
             checkpoints. Sending a brief anywhere is a deliberate human
             action, not an automatic one.
+          </p>
+          <p>
+            <Link className="how-beat-link" to={insightsPath}>
+              Read the brief &rarr;
+            </Link>
           </p>
         </article>
 
