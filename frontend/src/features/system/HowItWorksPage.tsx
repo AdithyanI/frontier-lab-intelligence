@@ -351,11 +351,6 @@ export default function HowItWorks() {
             source done deeply beats six done shallowly, and the other source
             classes can plug into the same Registry later.
           </p>
-          <p>
-            And I started from people, not keywords. A keyword alert only
-            catches what you already know to search for. The people come
-            first.
-          </p>
           <FigureFrame>
             <SourceChoiceFigure />
           </FigureFrame>
