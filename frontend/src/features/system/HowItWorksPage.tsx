@@ -324,10 +324,10 @@ export default function HowItWorks() {
             cited Insights.
           </p>
           <p>
-            One thing to hold on to while reading: the system works one day at
-            a time. Every brief covers a single day of evidence, judged on its
-            own. Rolling several days into one weekly digest is a natural next
-            step, but today every Insight belongs to a date.
+            The system works one day at a time. Every brief covers a single
+            day of evidence, judged on its own, and every Insight belongs to
+            a date. Rolling several days into one weekly digest can come
+            later.
           </p>
         </header>
 
@@ -382,7 +382,7 @@ export default function HowItWorks() {
             follower count. A million followers measures reach, not trust.
           </p>
           <p>
-            Two examples make the difference concrete. Andrej Karpathy is
+            Two examples. Andrej Karpathy is
             the most followed account inside the Registry, which is exactly
             what you would expect. Elon Musk is one of the most popular
             accounts on the platform, but inside this network he is nowhere
@@ -427,7 +427,7 @@ export default function HowItWorks() {
             trusted network posted, plus what it engaged with.
           </p>
           <p>
-            Linked artifacts get the same care in a separate catalogue. When
+            Linked artifacts go into a separate catalogue. When
             a lab announces a model and links the blog post, an adapter for
             that content type fetches the text and freezes a snapshot of it.
             Websites, papers, and X articles each have their own adapter.
@@ -470,7 +470,7 @@ export default function HowItWorks() {
             <li>
               <span className="how-score-weight mono">55%</span>
               <span className="how-score-label">
-                Amplification by the trusted network &mdash; how many Registry
+                Amplification by the trusted network: how many Registry
                 members quoted or reposted it
               </span>
             </li>
@@ -591,7 +591,10 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-plumbing">
           <h4><span className="mono">6</span> The plumbing: models, costs, delivery</h4>
           <p>
-            Every LLM call in the system goes through one shared LiteLLM
+            The stack itself is deliberately boring: a Python pipeline
+            writing SQLite files, served by FastAPI and a built React app
+            through a Cloudflare tunnel. The page you are reading runs on
+            it. Every LLM call in the system goes through one shared LiteLLM
             gateway. That single choke point handles retries, backoff, and
             model fallback, and it prices every request. Cost is telemetry
             here: each run records exactly which model produced it, at what
@@ -602,9 +605,12 @@ export default function HowItWorks() {
             work like screening and audience routing runs on small, fast
             models with prompt caching and structured schema output, so a
             full day of judging the top 100 Events costs well under a
-            dollar. The editorial writing, where synthesis quality is the
-            boundary, runs on a large reasoning model. The exact model and
-            effort per task, and the reasoning behind each choice, live in
+            dollar. Measured, not estimated: the current Insight batch made
+            947 surface-or-suppress decisions for $15.51, with 1.76 million
+            tokens served from prompt cache. The editorial writing, where
+            synthesis quality is the boundary, runs on a large reasoning
+            model. The exact model and effort per task, and the reasoning
+            behind each choice, live in
             the <Link to="/system/architecture">Architecture</Link> chapters.
           </p>
           <p>
