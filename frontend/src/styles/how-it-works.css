@@ -231,15 +231,71 @@
 }
 
 .how-read-figure {
+  display: block;
+  position: relative;
+  width: 100%;
   margin-top: 18px;
+  padding: 0;
   border: 1px solid var(--border-strong);
   background: var(--bg);
+  text-align: left;
+  cursor: zoom-in;
 }
 
 .how-read-figure svg {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.how-figure-expand {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.how-read-figure:hover .how-figure-expand {
+  opacity: 1;
+}
+
+.how-figure-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  background: var(--bg, #f7f7f6);
+  cursor: zoom-out;
+}
+
+.how-figure-overlay-inner {
+  width: min(1500px, 100%);
+}
+
+.how-figure-overlay-inner svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 92vh;
+}
+
+.how-figure-close {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
 }
 
 .how-read-block p {

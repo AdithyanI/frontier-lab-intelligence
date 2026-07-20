@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
@@ -31,6 +31,51 @@ function WhyLink({ stage }: { stage: string }) {
     >
       Why this choice &darr;
     </button>
+  )
+}
+
+/* Decision figures open fullscreen on click, so they can be presented
+   and talked over. Esc or a click anywhere closes the overlay. */
+function FigureFrame({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [open])
+
+  return (
+    <>
+      <button
+        type="button"
+        className="how-read-figure"
+        onClick={() => setOpen(true)}
+        aria-label="Expand figure to full screen"
+      >
+        {children}
+        <span className="how-figure-expand mono" aria-hidden="true">expand &#x2921;</span>
+      </button>
+      {open && (
+        <div
+          className="how-figure-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Figure, full screen"
+          onClick={() => setOpen(false)}
+        >
+          <span className="how-figure-close mono" aria-hidden="true">esc / click to close &times;</span>
+          <div className="how-figure-overlay-inner">{children}</div>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -264,9 +309,9 @@ export default function HowItWorks() {
             done deeply beats six done shallowly. The other classes plug in
             later as channels on the same Registry.
           </p>
-          <div className="how-read-figure">
+          <FigureFrame>
             <SourceChoiceFigure />
-          </div>
+          </FigureFrame>
 
           <p className="how-read-sub mono">1b · Whom to trust</p>
           <p>
@@ -277,9 +322,9 @@ export default function HowItWorks() {
             the screened researchers themselves follow it, not when the
             public does.
           </p>
-          <div className="how-read-figure">
+          <FigureFrame>
             <NetworkRankFigure />
-          </div>
+          </FigureFrame>
           <p>
             The screening is real work. A follow graph of 557,363 accounts
             and 2.8 million follow edges narrows to a Registry of 2,591
