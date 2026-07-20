@@ -373,7 +373,7 @@ export default function HowItWorks() {
             <NetworkRankFigure />
           </FigureFrame>
           <p>
-            The thesis held up. Across the 13 briefed days, Events by authors
+            The thesis held up. Across the first 13 briefed days, Events by authors
             in the top half of the ranking became kept Insights at 12.2%,
             against 7.3% for the bottom half, and the judges never see the
             author&apos;s rank. An independent public ranking of AI accounts,
