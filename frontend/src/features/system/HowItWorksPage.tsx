@@ -92,7 +92,7 @@ export default function HowItWorks() {
       id: 'watch',
       step: '1',
       title: 'Choose',
-      text: 'Start with people, not keywords. A screened Registry of frontier labs and the researchers inside them decides whose posts get collected at all.',
+      text: 'The system watches one source: X. Inside it, a screened network of frontier labs and the researchers who work there. Only what this trusted cohort posts gets collected.',
     },
     {
       id: 'collect',
