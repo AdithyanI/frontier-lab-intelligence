@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 
 /* The page is the figure. A sticky signal funnel carries the whole story;
    the scrolling rail beside it holds one short beat per stage and a single
@@ -353,7 +353,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block" id="why-collect">
+        <article className="how-read-block how-read-block--wide" id="why-collect">
           <h4><span className="mono">2</span> Collect: preserve before interpreting</h4>
           <p>
             For each completed observed UTC day, the cohort&rsquo;s captured X
@@ -370,6 +370,9 @@ export default function HowItWorks() {
             On 17 July this stage held 4,537 captured posts resolving into
             1,287 exact Events.
           </p>
+          <FigureFrame>
+            <CollectFigure />
+          </FigureFrame>
           <p>
             <Link className="how-beat-link" to={feedPath}>
               See the evidence &rarr;
@@ -377,7 +380,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block" id="why-rank">
+        <article className="how-read-block how-read-block--wide" id="why-rank">
           <h4><span className="mono">3</span> Rank: order the day, do not judge it</h4>
           <p>
             A single day holds more Events than anyone reads. A transparent
@@ -402,6 +405,9 @@ export default function HowItWorks() {
             honestly bounded beats a
             sophisticated one pretending to measure importance.
           </p>
+          <FigureFrame>
+            <RankFigure />
+          </FigureFrame>
           <p>
             <Link className="how-beat-link" to={feedPath}>
               See a ranked day &rarr;
@@ -409,7 +415,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block" id="why-judge">
+        <article className="how-read-block how-read-block--wide" id="why-judge">
           <h4><span className="mono">4</span> Judge: two independent questions</h4>
           <p>
             Every Event is asked two separate questions. Does this change an
@@ -424,6 +430,9 @@ export default function HowItWorks() {
             July, 56 of the day&rsquo;s 1,287 Events crossed this bar for at
             least one audience.
           </p>
+          <FigureFrame>
+            <JudgeFigure />
+          </FigureFrame>
           <p>
             <Link className="how-beat-link" to={feedPath}>
               See the routing &rarr;
@@ -431,7 +440,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block" id="why-publish">
+        <article className="how-read-block how-read-block--wide" id="why-publish">
           <h4><span className="mono">5</span> Publish: surface it, or say why not</h4>
           <p>
             An editorial agent reads everything that survived and must do one
@@ -459,6 +468,9 @@ export default function HowItWorks() {
             checkpoints. Sending a brief anywhere is a deliberate human
             action, not an automatic one.
           </p>
+          <FigureFrame>
+            <PublishFigure />
+          </FigureFrame>
           <p>
             <Link className="how-beat-link" to={insightsPath}>
               Read the brief &rarr;
