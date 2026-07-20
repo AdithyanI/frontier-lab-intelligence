@@ -1518,3 +1518,34 @@ def dates_payload() -> dict[str, Any]:
     cache_token = _dates_cache_token()
     with _dates_payload_lock:
         return _dates_payload_cached(cache_token)
+
+
+def warm_current_event_views() -> dict[str, Any]:
+    """Warm every Event day in the published reviewer window.
+
+    The date summary has a narrower structural cache token than each daily
+    projection. A routing publication can therefore leave the summary valid
+    while invalidating one or more day views. Warming the days explicitly
+    keeps direct Event URLs fast after a service restart.
+    """
+    summary = dates_payload()
+    if not summary.get("available"):
+        return {
+            "available": False,
+            "reason": summary.get("reason") or "Event dates are unavailable.",
+            "days_warmed": 0,
+        }
+    date_from = str(summary.get("date_from") or "")
+    date_to = str(summary.get("date_to") or "")
+    days = [
+        str(row["day"])
+        for row in summary.get("dates") or []
+        if date_from <= str(row.get("day") or "") <= date_to
+    ]
+    for day in days:
+        _events_day_cached(day=day, cache_token=_cache_token(day))
+    return {
+        "available": True,
+        "run_id": summary.get("run_id"),
+        "days_warmed": len(days),
+    }

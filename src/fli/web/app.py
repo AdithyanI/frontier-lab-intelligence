@@ -56,12 +56,13 @@ EVENT_READ_CACHE_HEADERS = {
 
 @asynccontextmanager
 async def _lifespan(_: FastAPI):
-    # The always-on local production service starts at login. Warm the one
-    # expensive immutable summary before a person opens Feed, without delaying
-    # health/static responses while it is being built.
+    # The always-on local production service starts at login. Warm the summary
+    # and every current Event day without delaying health/static responses.
+    # Daily projections include routing state, whose publication can invalidate
+    # a day while leaving the narrower date-summary cache valid.
     Thread(
-        target=event_store.dates_payload,
-        name="fli-feed-date-warmup",
+        target=event_store.warm_current_event_views,
+        name="fli-event-view-warmup",
         daemon=True,
     ).start()
     yield

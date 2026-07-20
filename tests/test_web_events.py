@@ -394,6 +394,44 @@ def test_event_dates_reuse_persisted_exact_summary(tmp_path, monkeypatch):
     assert second == first
 
 
+def test_event_warmup_builds_each_day_in_the_published_window(monkeypatch):
+    monkeypatch.setattr(
+        event_store,
+        "dates_payload",
+        lambda: {
+            "available": True,
+            "run_id": "event-1",
+            "date_from": "2026-07-05",
+            "date_to": "2026-07-06",
+            "dates": [
+                {"day": "2025-01-01", "item_count": 1},
+                {"day": "2026-07-05", "item_count": 10},
+                {"day": "2026-07-06", "item_count": 11},
+            ],
+        },
+    )
+    warmed: list[str] = []
+    monkeypatch.setattr(
+        event_store,
+        "_cache_token",
+        lambda day: ((day, 0, 0, 0, 0),),
+    )
+    monkeypatch.setattr(
+        event_store,
+        "_events_day_cached",
+        lambda *, day, cache_token: warmed.append(day),
+    )
+
+    result = event_store.warm_current_event_views()
+
+    assert result == {
+        "available": True,
+        "run_id": "event-1",
+        "days_warmed": 2,
+    }
+    assert warmed == ["2026-07-05", "2026-07-06"]
+
+
 def test_events_api_projects_completed_audience_routing_directly(
     tmp_path, monkeypatch
 ):
