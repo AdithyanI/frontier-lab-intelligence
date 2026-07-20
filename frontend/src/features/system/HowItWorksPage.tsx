@@ -575,8 +575,7 @@ export default function HowItWorks() {
           </p>
           <p>
             A person starts each dated run, and its stages resume from saved
-            checkpoints. Sending a brief anywhere is a deliberate human
-            action, not an automatic one.
+            checkpoints.
           </p>
           <FigureFrame>
             <PublishFigure />
@@ -591,7 +590,7 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-plumbing">
           <h4><span className="mono">6</span> The plumbing: models, costs, delivery</h4>
           <p>
-            The stack itself is deliberately boring: a Python pipeline
+            The stack is simple on purpose: a Python pipeline
             writing SQLite files, served by FastAPI and a built React app
             through a Cloudflare tunnel. The page you are reading runs on
             it. Every LLM call in the system goes through one shared LiteLLM
@@ -608,7 +607,7 @@ export default function HowItWorks() {
             dollar. Measured, not estimated: the current Insight batch made
             947 surface-or-suppress decisions for $15.51, with 1.76 million
             tokens served from prompt cache. The editorial writing, where
-            synthesis quality is the boundary, runs on a large reasoning
+            quality matters most, runs on a large reasoning
             model. The exact model and effort per task, and the reasoning
             behind each choice, live in
             the <Link to="/system/architecture">Architecture</Link> chapters.
