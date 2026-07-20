@@ -17,6 +17,37 @@ function scrollToBeat(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
+/* Keyboard navigation for presenting: arrow keys (or j/k) step through the
+   beats while the funnel is on screen. Past the funnel, keys scroll normally. */
+function useBeatKeys(active: FunnelStage) {
+  useEffect(() => {
+    const order: FunnelStage[] = ['universe', ...SCROLL_STAGES]
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      const target = event.target as HTMLElement | null
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return
+      if (document.querySelector('.how-figure-overlay')) return
+
+      const canvas = document.querySelector('.how-canvas')
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
+      if (rect.bottom < window.innerHeight * 0.6 || rect.top > window.innerHeight * 0.6) return
+
+      const next = event.key === 'ArrowDown' || event.key === 'ArrowRight' || event.key === 'j'
+      const prev = event.key === 'ArrowUp' || event.key === 'ArrowLeft' || event.key === 'k'
+      if (!next && !prev) return
+
+      const i = order.indexOf(active)
+      const to = order[i + (next ? 1 : -1)]
+      if (!to) return
+      event.preventDefault()
+      scrollToBeat(to)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [active])
+}
+
 /* Each beat links down to the chapter that explains the decision behind it. */
 function WhyLink({ stage }: { stage: string }) {
   return (
@@ -131,6 +162,7 @@ export default function HowItWorks() {
   const feedPath = useAuditDatePath('/evidence/feed')
   const artifactsPath = useAuditDatePath('/evidence/artifacts')
   const activeStage = useActiveStage()
+  useBeatKeys(activeStage)
 
   const beats: Beat[] = [
     {
@@ -247,6 +279,7 @@ export default function HowItWorks() {
               drown you. The funnel is the answer, one stage at a time.
             </p>
             <NextButton to="watch" />
+            <p className="how-key-hint mono" aria-hidden="true">or use &uarr; &darr; arrow keys</p>
           </div>
 
           {beats.map((beat, i) => (

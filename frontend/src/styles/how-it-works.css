@@ -81,7 +81,7 @@
   line-height: 1.25;
 }
 
-.how-beat > p:not(.how-beat-kicker):not(.how-scroll-hint) {
+.how-beat > p:not(.how-beat-kicker):not(.how-scroll-hint):not(.how-key-hint) {
   max-width: 44ch;
   margin: 14px 0 0;
   color: var(--ink-soft);
@@ -122,6 +122,14 @@
 .how-next:hover {
   color: var(--ink);
   border-color: var(--ink);
+}
+
+.how-beat p.how-key-hint {
+  margin-top: 10px;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  opacity: 0.75;
 }
 
 .how-why {
