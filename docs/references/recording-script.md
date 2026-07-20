@@ -14,12 +14,13 @@ Screen: https://frontier-lab-intelligence.adithyan.io/ (lands on Insights), then
 
 > Hi, my name is Adi, and this is Frontier Lab Intelligence.
 >
-> Everything I'm about to show you is live. When you open the site, you land
-> here: the final insights, for any date. This is the end product, and we'll
-> come back to it.
+> Everything I'm about to show you is live, at
+> frontier-lab-intelligence.adithyan.io. Let's open it.
 >
-> But first I want to show you how the system works. So let's go to the How
-> page.
+> When you land on the site, you land on the insights: the final product, for
+> any date. We'll come back to this at the end.
+>
+> But first, how does the system work? Let's go to the How page.
 >
 > The core challenge is signal to noise. Frontier labs and their researchers
 > publish thousands of things every day, and almost all of it is noise. This
