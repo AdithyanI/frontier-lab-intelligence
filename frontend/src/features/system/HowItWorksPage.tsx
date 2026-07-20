@@ -275,8 +275,10 @@ export default function HowItWorks() {
             <h3>Almost everything is noise</h3>
             <p>
               Somewhere in the flood is the handful of developments a decision
-              depends on. Reading everything is impossible; keyword alerts
-              drown you. The funnel is the answer, one stage at a time.
+              depends on, and attention is limited. So the system is a funnel:
+              stage by stage it raises the signal-to-noise ratio, keeping the
+              signal and dropping the noise, until one data source becomes two
+              cited briefs.
             </p>
             <NextButton to="watch" />
             <p className="how-key-hint mono" aria-hidden="true">or use &uarr; &darr; arrow keys</p>

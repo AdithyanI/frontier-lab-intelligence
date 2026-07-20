@@ -33,7 +33,10 @@ Screen: https://frontier-lab-intelligence.adithyan.io/ (lands on Insights), then
 
 Screen: https://frontier-lab-intelligence.adithyan.io/how — scroll the sticky funnel with arrow keys.
 
-> Almost everything published every day is noise. The system is a funnel.
+> I have limited attention, so the way I designed the system is a funnel. The
+> funnel decides what to pay attention to. As we go down, every stage raises
+> the signal-to-noise ratio. Think of the blue dots as signal and the gray
+> ones as noise: as we go down, we keep the blue and drop the gray.
 >
 > It starts from a universe of over five hundred fifty thousand accounts on X.
 > That gets screened down to a Registry of about twenty six hundred trusted
@@ -45,7 +48,8 @@ Screen: https://frontier-lab-intelligence.adithyan.io/how — scroll the sticky 
 > judges route them per audience. And an editorial agent keeps three to six
 > insights per audience, declining everything else in writing.
 >
-> Nothing is dropped silently, at any stage.
+> So at the end, one single data source becomes two cited briefs. And nothing
+> is dropped silently, at any stage.
 
 ---
 
