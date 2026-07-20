@@ -805,18 +805,14 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
 
 function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const permalinkId = `insight-${item.insight_id}`
 
   const copyReference = async () => {
-    const reference = [
-      `Insight: ${item.day}`,
-      AUDIENCE_COPY[item.audience].label,
-      `Brief #${item.rank}`,
-      `“${decodeTextEntities(item.title)}”`,
-      `ID: ${item.insight_id}`,
-    ].join(' · ')
+    const referenceUrl = new URL(window.location.href)
+    referenceUrl.hash = permalinkId
 
     try {
-      await navigator.clipboard.writeText(reference)
+      await navigator.clipboard.writeText(referenceUrl.toString())
       setCopyStatus('copied')
     } catch {
       setCopyStatus('failed')
@@ -828,14 +824,14 @@ function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
       className="editorial-copy-reference mono"
       type="button"
       onClick={copyReference}
-      aria-label={`Copy reference for ${decodeTextEntities(item.title)}`}
+      aria-label={`Copy link to ${decodeTextEntities(item.title)}`}
     >
       <span role="status" aria-live="polite">
         {copyStatus === 'copied'
-          ? 'Copied'
+          ? 'Link copied'
           : copyStatus === 'failed'
             ? 'Copy failed'
-            : 'Copy reference'}
+            : 'Copy link'}
       </span>
     </button>
   )
@@ -847,9 +843,14 @@ function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
   const [rankExplanationOpen, setRankExplanationOpen] = useState(false)
   const investmentAnalysis = isInvestmentAnalysis(item.analysis) ? item.analysis : null
   const engineeringAnalysis = isEngineeringAnalysis(item.analysis) ? item.analysis : null
+  const permalinkId = `insight-${item.insight_id}`
 
   return (
-    <article className="insight-row editorial-insight-row" aria-labelledby={titleId}>
+    <article
+      className="insight-row editorial-insight-row"
+      id={permalinkId}
+      aria-labelledby={titleId}
+    >
       <div className="insight-rank editorial-rank mono">
         <button
           type="button"
@@ -1084,6 +1085,15 @@ export default function Insights() {
       })
     return () => { live = false }
   }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate, status])
+
+  useEffect(() => {
+    if (!editorialData || !window.location.hash) return
+    const targetId = window.location.hash.slice(1)
+    if (!targetId.startsWith('insight-')) return
+    const target = document.getElementById(targetId)
+    if (!target?.classList.contains('editorial-insight-row')) return
+    window.requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }))
+  }, [editorialData])
 
   const setView = (
     nextAudience: InsightAudience,

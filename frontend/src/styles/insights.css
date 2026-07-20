@@ -724,6 +724,10 @@
   padding-bottom: 52px;
 }
 
+.editorial-insight-row {
+  scroll-margin-top: 24px;
+}
+
 .editorial-insight-head {
   display: flex;
   max-width: 980px;
