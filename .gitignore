@@ -14,3 +14,7 @@ data/private/
 *.egg-info/
 *.partial.jsonl
 .playwright-mcp/
+
+# BIT private-process material stays local only
+docs/references/source-material/*.pdf
+docs/references/source-material/*.txt
