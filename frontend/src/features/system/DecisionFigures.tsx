@@ -70,7 +70,7 @@ export function SourceChoiceFigure() {
 
       <line x1="30" y1="352" x2="1050" y2="352" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="378" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        News breaks here before the paper or the blog post lands. The other classes plug in later as channels on the same Registry.
+        When something lands in any of these, it lands on X at the same moment, in one place. The other classes plug in later as channels.
       </text>
     </svg>
   )

@@ -252,11 +252,11 @@ export default function HowItWorks() {
           <p>
             I chose X as the single source to go deep on. The universe of
             frontier output is too large to read, so the first call was where
-            to stand. My judgment: X is the front page of AI. News breaks
-            there before the paper or the blog post lands, and what does land
-            elsewhere gets announced and argued there anyway. The people I
-            most want to hear, researchers up to lab CEOs, write there
-            themselves.
+            to stand. My judgment: X is the front page of AI. When a paper,
+            repo, or blog post lands, its authors announce it there at the
+            same moment, and the argument about it happens in the replies.
+            The people I most want to hear, researchers up to lab CEOs, write
+            there themselves.
           </p>
           <p>
             And I started from people, not keywords. Keyword alerts fire
