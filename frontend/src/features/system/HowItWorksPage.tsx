@@ -424,7 +424,9 @@ export default function HowItWorks() {
           <p>
             The system collects whole days, one at a time. When a UTC day
             completes, everything the cohort posted in it is stored exactly
-            as posted, before any interpretation.
+            as posted, before any interpretation. The posts come from
+            twitterapi.io, a third-party X data provider, since the official
+            API is priced far beyond a project like this.
           </p>
           <p>
             X has its idiosyncrasies: a post can be replied to, quoted, or
@@ -440,7 +442,10 @@ export default function HowItWorks() {
             Linked artifacts go into a separate catalogue. When
             a lab announces a model and links the blog post, an adapter for
             that content type fetches the text and freezes a snapshot of it.
-            Websites, papers, and X articles each have their own adapter.
+            Websites, papers, and X articles each have their own adapter:
+            web pages are fetched with respect for robots.txt and reduced to
+            article text with trafilatura, PDFs go through pypdf, and every
+            snapshot records which extractor produced it.
             The frozen text is what later citation checks run against, and
             retrieval gaps stay visible instead of being treated as
             evidence. On 17 July this stage held 4,537 captured posts
