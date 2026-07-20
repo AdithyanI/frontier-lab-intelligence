@@ -17,6 +17,23 @@ function scrollToBeat(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
+/* Each beat links down to the chapter that explains the decision behind it. */
+function WhyLink({ stage }: { stage: string }) {
+  return (
+    <button
+      type="button"
+      className="how-why"
+      onClick={() =>
+        document
+          .getElementById(`why-${stage}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    >
+      Why this choice &darr;
+    </button>
+  )
+}
+
 function NextButton({ to }: { to: string }) {
   return (
     <button type="button" className="how-next mono" onClick={() => scrollToBeat(to)}>
@@ -206,6 +223,7 @@ export default function HowItWorks() {
               <Link className="how-beat-link" to={beat.to}>
                 {beat.linkLabel} &rarr;
               </Link>
+              <WhyLink stage={beat.id} />
               <NextButton to={beats[i + 1]?.id ?? 'complete'} />
             </div>
           ))}
@@ -241,7 +259,7 @@ export default function HowItWorks() {
           </p>
         </header>
 
-        <article className="how-read-block how-read-block--wide">
+        <article className="how-read-block how-read-block--wide" id="why-watch">
           <h4><span className="mono">1</span> Choose: one source, and trust over popularity</h4>
 
           <p className="how-read-sub mono">1a · Where to look</p>
@@ -298,7 +316,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block">
+        <article className="how-read-block" id="why-collect">
           <h4><span className="mono">2</span> Collect: preserve before interpreting</h4>
           <p>
             For each completed observed UTC day, the cohort&rsquo;s captured X
@@ -317,7 +335,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block">
+        <article className="how-read-block" id="why-rank">
           <h4><span className="mono">3</span> Rank: order the day, do not judge it</h4>
           <p>
             A single day holds more Events than anyone reads. A transparent
@@ -344,7 +362,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block">
+        <article className="how-read-block" id="why-judge">
           <h4><span className="mono">4</span> Judge: two independent questions</h4>
           <p>
             Every Event is asked two separate questions. Does this change an
@@ -361,7 +379,7 @@ export default function HowItWorks() {
           </p>
         </article>
 
-        <article className="how-read-block">
+        <article className="how-read-block" id="why-publish">
           <h4><span className="mono">5</span> Publish: surface it, or say why not</h4>
           <p>
             An editorial agent reads everything that survived and must do one

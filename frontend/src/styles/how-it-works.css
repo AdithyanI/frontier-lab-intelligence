@@ -124,6 +124,25 @@
   border-color: var(--ink);
 }
 
+.how-why {
+  margin-top: 10px;
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-underline-offset: 3px;
+  transition: color 160ms ease;
+}
+
+.how-why:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
 .how-beat-links {
   display: flex;
   flex-wrap: wrap;
@@ -176,6 +195,7 @@
 .how-read-block {
   max-width: 68ch;
   margin-top: 34px;
+  scroll-margin-top: 24px;
 }
 
 .how-read-block h4 {
