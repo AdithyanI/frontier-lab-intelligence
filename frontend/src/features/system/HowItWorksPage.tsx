@@ -432,14 +432,35 @@ export default function HowItWorks() {
           </p>
           <p>
             The weights are not hidden in code; the API response declares
-            them. Amplification by Registry members counts for 55%, the
-            author&apos;s own network support for 25%, and public engagement
-            for 20% as a tie-breaker. The score does one job: it picks the
-            top 100 Events of each day for judging, and the judges never see
-            it. A quarter of the kept Insights came from the lower half of
-            that window. I would rather defend a simple formula with known
-            limits than a sophisticated one that pretends to measure
-            importance.
+            them. The score is deliberately simple, three parts:
+          </p>
+          <ul className="how-score-parts">
+            <li>
+              <span className="how-score-weight mono">55%</span>
+              <span className="how-score-label">
+                Amplification by the trusted network &mdash; how many Registry
+                members quoted or reposted it
+              </span>
+            </li>
+            <li>
+              <span className="how-score-weight mono">25%</span>
+              <span className="how-score-label">
+                The author&apos;s own standing inside the network
+              </span>
+            </li>
+            <li>
+              <span className="how-score-weight mono">20%</span>
+              <span className="how-score-label">
+                Public engagement, as a tie-breaker only
+              </span>
+            </li>
+          </ul>
+          <p>
+            The score does one job: it picks the top 100 Events of each day
+            for judging, and the judges never see it. A quarter of the kept
+            Insights came from the lower half of that window. I would rather
+            defend a simple formula with known limits than a sophisticated one
+            that pretends to measure importance.
           </p>
           <FigureFrame>
             <RankFigure />

@@ -425,3 +425,31 @@
     grid-column: 2;
   }
 }
+
+.how-score-parts {
+  list-style: none;
+  margin: 18px 0 22px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.how-score-parts li {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.how-score-weight {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: right;
+}
+
+.how-score-label {
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
