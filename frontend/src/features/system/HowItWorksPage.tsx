@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { SourceChoiceFigure } from './DecisionFigures'
+import { SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 
 /* The page is the figure. A sticky signal funnel carries the whole story;
    the scrolling rail beside it holds one short beat per stage and a single
@@ -313,25 +313,31 @@ export default function HowItWorks() {
             <SourceChoiceFigure />
           </FigureFrame>
 
-          <p className="how-read-sub mono">1b · Whom to trust</p>
+          <p className="how-read-sub mono">1b · Collect the trusted set</p>
           <p>
-            Inside X, the next call was whom to listen to. My thesis:
-            popularity is the wrong proxy for importance. A million followers
-            measures reach, not trust. So the system uses trust inside an
-            already screened network instead. An account ranks higher when
-            the screened researchers themselves follow it, not when the
-            public does.
+            From everything on X, the system keeps a small set it trusts:
+            frontier labs and the researchers who work there. The screening
+            is real work. A follow graph of 557,363 accounts and 2.8 million
+            follow edges narrows to a Registry of 2,591 active identities:
+            2,431 researchers and 160 organizations. Every admission keeps
+            its provenance, and the 39 rejections stay on the books with
+            their reasons.
+          </p>
+          <FigureFrame>
+            <TrustedSetFigure />
+          </FigureFrame>
+
+          <p className="how-read-sub mono">1c · Rank by trust, not popularity</p>
+          <p>
+            Within this network, the next call was whom to weight most. My
+            thesis: popularity is the wrong proxy for importance. A million
+            followers measures reach, not trust. So the system counts trust
+            from the screened set instead. An account ranks higher when the
+            blue dots follow it, not when the public does.
           </p>
           <FigureFrame>
             <NetworkRankFigure />
           </FigureFrame>
-          <p>
-            The screening is real work. A follow graph of 557,363 accounts
-            and 2.8 million follow edges narrows to a Registry of 2,591
-            active identities: 2,431 researchers and 160 organizations. Every
-            admission keeps its provenance, and the 39 rejections stay on the
-            books with their reasons.
-          </p>
           <p>
             The thesis held up. Across the 13 briefed days, Events by authors
             in the top half of the ranking became kept Insights at 12.2%,
