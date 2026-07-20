@@ -805,11 +805,11 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
 
 function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
-  const permalinkId = `insight-${item.insight_id}`
 
   const copyReference = async () => {
     const referenceUrl = new URL(window.location.href)
-    referenceUrl.hash = permalinkId
+    referenceUrl.searchParams.set('insight', item.insight_id)
+    referenceUrl.hash = ''
 
     try {
       await navigator.clipboard.writeText(referenceUrl.toString())
@@ -977,6 +977,7 @@ export default function Insights() {
   const audience = parseAudience(searchParams.get('audience'))
   const status = parseStatus(searchParams.get('status'))
   const selectedDate = searchParams.get('date') ?? ''
+  const selectedInsightId = searchParams.get('insight') ?? ''
   const [dates, setDates] = useState<InsightDates | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const [dataView, setDataView] = useState<{
@@ -1087,13 +1088,12 @@ export default function Insights() {
   }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate, status])
 
   useEffect(() => {
-    if (!editorialData || !window.location.hash) return
-    const targetId = window.location.hash.slice(1)
-    if (!targetId.startsWith('insight-')) return
+    if (!editorialData || !selectedInsightId) return
+    const targetId = `insight-${selectedInsightId}`
     const target = document.getElementById(targetId)
     if (!target?.classList.contains('editorial-insight-row')) return
     window.requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }))
-  }, [editorialData])
+  }, [editorialData, selectedInsightId])
 
   const setView = (
     nextAudience: InsightAudience,
@@ -1105,6 +1105,7 @@ export default function Insights() {
     nextParams.set('audience', nextAudience)
     nextParams.set('status', nextStatus)
     nextParams.delete('view')
+    nextParams.delete('insight')
     if (nextDate) nextParams.set('date', nextDate)
     else nextParams.delete('date')
     setSearchParams(nextParams, { replace: true })

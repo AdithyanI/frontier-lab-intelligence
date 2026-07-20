@@ -283,7 +283,11 @@ Rules:
   to their exact internal Feed Event, which owns the onward source-post link.
   Feed rank and source-role codes remain dashboard audit metadata rather than
   fixed source-ledger labels; the PDF presents the linked title and its
-  evidence role in reader language. Repeated audience/date labels, source-page
+  evidence role in reader language. Each imported Insight exposes one quiet
+  `Copy link` control beside its title. The copied URL retains the audience and
+  date, identifies the exact Insight, and scrolls to it after the asynchronous
+  brief loads. Switching the audience or date clears that item-level selection.
+  Repeated audience/date labels, source-page
   kickers, duplicate role explanations, and empty source-group placeholders
   stay out of the fixed reading path. A source group spans the page when it is
   the only populated group. Investment company scope and direction collapse to
