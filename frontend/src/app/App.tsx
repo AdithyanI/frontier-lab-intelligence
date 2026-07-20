@@ -27,9 +27,9 @@ export default function App() {
         </div>
         <nav aria-label="Main">
           <NavLink to={insightsPath}>Insights</NavLink>
-          <NavLink to="/how">How it works</NavLink>
-          <NavLink to="/network">Network</NavLink>
           <NavLink to={evidencePath}>Evidence</NavLink>
+          <NavLink to="/network">Network</NavLink>
+          <NavLink to="/how">How it works</NavLink>
           <NavLink to="/bit-lens">BIT Lens</NavLink>
           <NavLink to="/system">System</NavLink>
         </nav>

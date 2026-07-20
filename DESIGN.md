@@ -85,7 +85,7 @@ Rules:
 - App shell: 64px top bar (brand mark + pill nav), full-bleed ink rule
   beneath. No sidebar — pages own their full width. Show only working routes;
   unavailable future destinations do not occupy the navigation. The six
-  top-level destinations are Insights, How it works, Network, Evidence, BIT
+  top-level destinations are Insights, Evidence, Network, How it works, BIT
   Lens, and System. Insights is the first navigation item and the default
   landing route because the audience-ready brief is the clearest statement of
   product value. How it works is the reviewer walkthrough that connects the

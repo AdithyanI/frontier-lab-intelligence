@@ -12,9 +12,10 @@ const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url),
 const apiSource = await readFile(new URL('../src/shared/api/insights.ts', import.meta.url), 'utf8')
 const appStyles = readStyles()
 
-test('Insights is the first navigation destination and the product landing route', () => {
-  assert.ok(appSource.indexOf('>Insights</NavLink>') < appSource.indexOf('>Network</NavLink>'))
-  assert.ok(appSource.indexOf('>Network</NavLink>') < appSource.indexOf('>Evidence</NavLink>'))
+test('Insights leads the Evidence, Network, and How it works navigation sequence', () => {
+  assert.ok(appSource.indexOf('>Insights</NavLink>') < appSource.indexOf('>Evidence</NavLink>'))
+  assert.ok(appSource.indexOf('>Evidence</NavLink>') < appSource.indexOf('>Network</NavLink>'))
+  assert.ok(appSource.indexOf('>Network</NavLink>') < appSource.indexOf('>How it works</NavLink>'))
   assert.match(appSource, /<Route path="\/" element=\{<Navigate to="\/insights" replace \/>\} \/>/)
   assert.match(appSource, /<Route path="\*" element=\{<Navigate to="\/insights" replace \/>\} \/>/)
 })

@@ -1231,26 +1231,34 @@
 
 .insight-declined-row {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 0 18px;
-  padding: 12px 0 13px;
+  grid-template-columns: 52px minmax(0, 5fr) minmax(0, 6fr);
+  gap: 0 30px;
+  padding: 15px 0 17px;
   border-top: 1px solid var(--border);
 }
 
 .insight-declined-rank {
   color: var(--muted);
   font-size: 11px;
-  padding-top: 2px;
+  padding-top: 14px;
 }
 
-.insight-declined-source {
+.insight-declined-cell {
+  min-width: 0;
+}
+
+.insight-declined-cell h4 {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.55;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
 }
 
 .insight-declined-author {
-  margin-right: 8px;
+  display: inline-block;
+  margin-top: 7px;
   color: var(--blue-ink);
   font-size: 11.5px;
   text-decoration: none;
@@ -1264,19 +1272,30 @@
 }
 
 .insight-declined-excerpt {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  margin: 4px 0 0;
   color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .insight-declined-reason {
-  max-width: 78ch;
-  margin: 6px 0 0;
+  max-width: 62ch;
+  margin: 7px 0 0;
   color: var(--ink);
   font-size: 12.5px;
-  line-height: 1.55;
+  line-height: 1.6;
   text-wrap: pretty;
 }
 
 @media (max-width: 680px) {
   .insight-declined-row { grid-template-columns: 40px minmax(0, 1fr); }
+  .insight-declined-row .insight-declined-cell + .insight-declined-cell {
+    grid-column: 2;
+    margin-top: 10px;
+  }
   .insight-declined-toggle { flex-wrap: wrap; gap: 8px 18px; }
 }

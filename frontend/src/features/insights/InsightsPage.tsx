@@ -947,16 +947,18 @@ function DeclinedCandidates({
               <div className="insight-declined-rank mono" aria-label={`Attention rank ${item.feed_rank}`}>
                 #{item.feed_rank}
               </div>
-              <div className="insight-declined-body">
-                <p className="insight-declined-source">
-                  <Link
-                    className="insight-declined-author mono"
-                    to={`/evidence/feed?date=${day}&event_id=${encodeURIComponent(item.event_id)}`}
-                  >
-                    {item.author} ↗
-                  </Link>
-                  <span className="insight-declined-excerpt">“{decodeTextEntities(item.excerpt)}”</span>
-                </p>
+              <div className="insight-declined-cell">
+                <h4 className="mono">Source post</h4>
+                <Link
+                  className="insight-declined-author mono"
+                  to={`/evidence/feed?date=${day}&event_id=${encodeURIComponent(item.event_id)}`}
+                >
+                  {item.author} ↗
+                </Link>
+                <p className="insight-declined-excerpt">“{decodeTextEntities(item.excerpt)}”</p>
+              </div>
+              <div className="insight-declined-cell">
+                <h4 className="mono">Why declined</h4>
                 <p className="insight-declined-reason">{decodeTextEntities(item.reason)}</p>
               </div>
             </li>

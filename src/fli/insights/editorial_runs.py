@@ -2055,7 +2055,10 @@ def editorial_insights_payload(
                 ),
                 None,
             )
-            excerpt = " ".join(str(root.get("text", "")).split()) if root else ""
+            excerpt = ""
+            if root:
+                without_links = re.sub(r"https?://\S+", "", str(root.get("text", "")))
+                excerpt = " ".join(without_links.split())
             if len(excerpt) > 220:
                 excerpt = excerpt[:220].rstrip() + "…"
             declined.append(
