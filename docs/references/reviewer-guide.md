@@ -86,7 +86,7 @@ exact object, checksum, included data, and clean-checkout proof.
 - The artifact fetcher records access failures rather than bypassing robots,
   authentication, or publisher controls. Only inspectable evidence can support
   a shipped citation.
-- The final five Insights are human-adjudicated and locked, but the external
-  rubric-mapped write-up and final delivery review remain. Nothing is submitted
-  to BIT by opening the application. Registry intake and delivery are operator
-  actions rather than passive reviewer steps.
+- The final five submission Insights were human-adjudicated and locked. They
+  are a proof set, not an unbiased estimate of unattended editorial precision.
+  Opening the application does not trigger Registry intake or delivery; both
+  remain explicit operator actions.

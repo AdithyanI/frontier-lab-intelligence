@@ -4,21 +4,39 @@ Frontier Lab Intelligence turns public output from frontier AI labs and key
 people into a cited daily brief for investors and AI engineers. I built it for
 the BIT Capital AI Engineer case study.
 
-## Open the live app
+[Live app](https://frontier-lab-intelligence.adithyan.io/) ·
+[Video walkthrough](https://share.descript.com/view/LZkpHP29yub) ·
+[How it works](https://frontier-lab-intelligence.adithyan.io/how) ·
+[Technical architecture](https://frontier-lab-intelligence.adithyan.io/system/architecture)
 
-[Open Frontier Lab Intelligence](https://frontier-lab-intelligence.adithyan.io/)
+## Review the project
 
-The hosted application is the best way to experience the project. Start in
-[How it works](https://frontier-lab-intelligence.adithyan.io/how)
-for a five-step walkthrough of the assignment and its working proof. Then open
-[Insights](https://frontier-lab-intelligence.adithyan.io/insights) to read the
-audience-specific daily briefs and move back through Evidence and Network to
-inspect why each item surfaced.
+1. Start with the [video walkthrough](https://share.descript.com/view/LZkpHP29yub).
+   The system is interactive, so this is the quickest way to see the complete
+   path working.
+2. Read [How it works](https://frontier-lab-intelligence.adithyan.io/how) for
+   the product decisions, trade-offs, models, evaluation, and cost.
+3. Open [Insights](https://frontier-lab-intelligence.adithyan.io/insights) and
+   follow any citation backwards through its Event, evidence, and source post.
 
 The live
 [Architecture view](https://frontier-lab-intelligence.adithyan.io/system/architecture)
-is the deeper technical map: data model, account intake,
-evidence-to-insight pipeline, ranking methods, and deployed stack.
+is the deeper engineering map: data model, account intake,
+evidence-to-insight pipeline, model boundaries, ranking, and recovery.
+
+## System at a glance
+
+The daily path stays inspectable before judgment. One structured routing call
+produces two independent audience judgments for each Event, with separate
+criteria, booleans, and reasons.
+
+[![Evidence moves from the screened Registry through X output, exact Events, daily ranking, artifacts, and two independent audience judgments.](docs/references/presentation-assets/architecture/daily-evidence-pipeline.png)](https://frontier-lab-intelligence.adithyan.io/system/architecture#overview)
+
+Every positive candidate is then frozen into one dated workspace. A persisted
+Codex task researches the complete cohort, resolves duplication, writes both
+briefs, and passes a deterministic coverage and citation gate before import.
+
+[![A dated workspace is handed to one persisted Codex task, which runs the FLI daily agent, passes a strict draft gate, and serves two daily briefs.](docs/references/presentation-assets/architecture/daily-brief-run.png)](https://frontier-lab-intelligence.adithyan.io/system/architecture#overview)
 
 ## Run it locally
 

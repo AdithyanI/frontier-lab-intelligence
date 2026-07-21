@@ -40,6 +40,17 @@ def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
     return signal_events.published_run(conn)
 
 
+def _selected_run(
+    conn: sqlite3.Connection, event_run_id: str
+) -> sqlite3.Row | None:
+    if not event_run_id:
+        return _latest_run(conn)
+    return conn.execute(
+        "SELECT * FROM event_run WHERE run_id = ?",
+        (event_run_id,),
+    ).fetchone()
+
+
 def _feed_key(item: dict[str, Any]) -> FeedKey:
     """Return the provider-qualified identity of one Feed candidate."""
     return (str(item.get("provider", "twitterapi_io")), str(item["post_id"]))
@@ -826,6 +837,7 @@ def _events_day_cached(
     *,
     day: str,
     cache_token: tuple[tuple[str, int, int, int, int], ...],
+    event_run_id: str = "",
 ) -> dict[str, Any]:
     """Build the Events canonically published on one day.
 
@@ -840,17 +852,28 @@ def _events_day_cached(
     if not DEFAULT_FEED_DB.is_file():
         return {"available": False, "reason": "No Feed store found."}
 
-    cache_name = f"events-{day}.json.gz"
-    cache_key = _persisted_cache_key(kind=f"events:{day}", cache_token=cache_token)
+    run_suffix = f"-{event_run_id[:12]}" if event_run_id else ""
+    cache_name = f"events-{day}{run_suffix}.json.gz"
+    cache_key = _persisted_cache_key(
+        kind=f"events:{day}:{event_run_id or 'published'}",
+        cache_token=cache_token,
+    )
     persisted = _read_persisted_payload(name=cache_name, cache_key=cache_key)
     if persisted is not None:
         return persisted
 
     events = _open_readonly(DEFAULT_EVENTS_DB)
-    run = _latest_run(events)
+    run = _selected_run(events, event_run_id)
     if run is None:
         events.close()
-        return {"available": False, "reason": "Event store has no materialized run."}
+        return {
+            "available": False,
+            "reason": (
+                f"Event store has no run {event_run_id}."
+                if event_run_id
+                else "Event store has no materialized run."
+            ),
+        }
     clusters, member_rows, link_rows, claimed_member_keys = _event_rows(
         events, run["run_id"], day
     )
@@ -1345,13 +1368,20 @@ def events_payload(
     offset: int,
     projection: str = "day",
     include_evidence: bool = True,
+    event_run_id: str = "",
 ) -> dict[str, Any]:
     """Return a state-aware view over one cached day projection."""
+    if projection == "week" and event_run_id:
+        raise ValueError("An explicit Event run is supported only for a day projection")
     token = _cache_token(day)
     payload = (
         _events_week_cached(through=day)
         if projection == "week"
-        else _events_day_cached(day=day, cache_token=token)
+        else _events_day_cached(
+            day=day,
+            cache_token=token,
+            event_run_id=event_run_id,
+        )
     )
     if not payload.get("available"):
         return payload

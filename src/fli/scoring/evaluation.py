@@ -93,6 +93,11 @@ def load_labeled_days(
         conn = sqlite3.connect(path)
         conn.row_factory = sqlite3.Row
         try:
+            meta = conn.execute(
+                "SELECT source_event_run_id FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+            if meta is None:
+                raise RuntimeError(f"Routing run has no metadata: {path}")
             labels = conn.execute(
                 """SELECT event_id, feed_rank, ai_engineering_relevant,
                           investment_relevant
@@ -110,9 +115,13 @@ def load_labeled_days(
             limit=100_000,
             offset=0,
             include_evidence=False,
+            event_run_id=str(meta["source_event_run_id"]),
         )
         if not projection.get("available"):
-            raise RuntimeError(f"Event projection is unavailable for {day}")
+            raise RuntimeError(
+                f"Event projection is unavailable for {day}: "
+                f"{projection.get('reason', 'unknown reason')}"
+            )
         by_event_id = {str(item["event_id"]): item for item in projection["items"]}
         missing = [
             str(row["event_id"])
@@ -121,7 +130,7 @@ def load_labeled_days(
         ]
         if missing:
             raise RuntimeError(
-                f"{day} is missing {len(missing)} routed Events from the current projection"
+                f"{day} is missing {len(missing)} routed Events from its source projection"
             )
         days[day] = []
         for row in labels:
