@@ -779,6 +779,11 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
     second_draft.write_text(json.dumps(revised), encoding="utf-8")
     second = editorial_runs.import_result(workspace, second_draft, db_path=db)
 
+    assert (
+        second["run"]["insights"][0]["insight_id"]
+        == first["run"]["insights"][0]["insight_id"]
+    )
+
     conn = editorial_runs.connect(db)
     with conn:
         conn.execute(

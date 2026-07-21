@@ -1587,6 +1587,36 @@ def _derived_id(*values: str) -> str:
     return hashlib.sha256("|".join(values).encode()).hexdigest()
 
 
+def _insight_ids_for_import(
+    conn: sqlite3.Connection,
+    *,
+    day: str,
+    insights: list[dict[str, Any]],
+) -> dict[str, str]:
+    """Keep same-day Insight permalinks stable across editorial revisions."""
+    previous_by_key: dict[tuple[str, str], str] = {}
+    rows = conn.execute(
+        """SELECT insight.audience, insight.local_id, insight.insight_id
+           FROM editorial_run AS run
+           JOIN editorial_insight AS insight ON insight.run_id = run.run_id
+           WHERE run.day = ? AND run.status = 'complete'
+           ORDER BY run.created_at DESC, run.rowid DESC""",
+        (day,),
+    ).fetchall()
+    for row in rows:
+        previous_by_key.setdefault(
+            (str(row["audience"]), str(row["local_id"])),
+            str(row["insight_id"]),
+        )
+    return {
+        str(insight["local_id"]): previous_by_key.get(
+            (str(insight["audience"]), str(insight["local_id"])),
+            _derived_id(day, str(insight["audience"]), str(insight["local_id"])),
+        )
+        for insight in insights
+    }
+
+
 def import_result(
     workspace: Path,
     draft_path: Path,
@@ -1624,10 +1654,11 @@ def import_result(
             event_id: _read_json(workspace / event["file"])
             for event_id, event in events.items()
         }
-        insight_ids = {
-            insight["local_id"]: _derived_id(run_id, insight["audience"], insight["local_id"])
-            for insight in normalized["insights"]
-        }
+        insight_ids = _insight_ids_for_import(
+            conn,
+            day=str(manifest["day"]),
+            insights=normalized["insights"],
+        )
         citation_ids = {
             citation["local_id"]: _derived_id(run_id, "citation", citation["local_id"])
             for citation in normalized["citations"]
