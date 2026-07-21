@@ -292,7 +292,7 @@ export default function HowItWorks() {
       id: 'rank',
       step: '3',
       title: 'Rank',
-      text: 'A transparent attention score orders each day: who amplified it, who wrote it, how the public reacted. It decides where to look first, and never pretends to decide what is true.',
+      text: 'A transparent attention score orders each day: who amplified it, who wrote it, how the public reacted. It only decides where to look first; the judging comes later.',
     },
     {
       id: 'judge',
@@ -511,10 +511,9 @@ export default function HowItWorks() {
             the most followed account inside the Registry, which is exactly
             what you would expect. Elon Musk is one of the most popular
             accounts on the platform, but inside this network he is nowhere
-            near the top. Popularity and trust are different measurements,
-            and this system uses the second one. Organizations earn their
-            place the same way: OpenAI and Anthropic bubble up because the
-            researchers follow them, not because I ranked them by hand.
+            near the top. Organizations earn their place the same way: OpenAI
+            and Anthropic bubble up because the researchers follow them, not
+            because I ranked them by hand.
           </p>
           <FigureFrame>
             <NetworkRankFigure />
@@ -619,9 +618,9 @@ export default function HowItWorks() {
           </ul>
           <p>
             The score does one job: it picks the top 100 Events of each day
-            for judging, and the judges never see it. It decides where to
-            look first, never what is true or what matters, because attention
-            is evidence of noise as often as of signal. A quarter of the kept
+            for judging, and the judges never see it. Attention is evidence
+            of noise as often as of signal, so the score stays out of every
+            judgment that follows. A quarter of the kept
             Insights came from the lower half of that window. I would rather
             defend a simple formula with known limits than a sophisticated one
             that pretends to measure importance.
@@ -789,7 +788,8 @@ export default function HowItWorks() {
           </FigureFrame>
           <p className="how-cost-note">
             One 19 July routing call: 2,732 tokens, 4.385 seconds, and
-            $0.0033444. It is one measured request, not a fixed price promise.
+            $0.0033444. It is one measured request; real requests vary with
+            input size and cache state.
           </p>
           <p>
             Reading the brief here is one option. Each completed day can
@@ -840,7 +840,7 @@ export default function HowItWorks() {
           <h3 id="how-final-title">What works, what I learned, and what comes next</h3>
           <p>
             The case-study proof is the working path from public evidence to
-            2 audience-specific, cited briefs. The complete corpus remains
+            two audience-specific, cited briefs. The complete corpus remains
             open for audit; these are the conclusions I would carry into the
             next version.
           </p>
@@ -863,8 +863,8 @@ export default function HowItWorks() {
               Network trust is useful for deciding where to look, but it
               should never become a truth score. Exact structural grouping
               keeps provenance cleaner than early semantic clustering. And a
-              smaller model is the right choice only after it preserves the
-              decisions that matter, not simply because it is cheaper.
+              smaller model is the right choice only after checking that it
+              preserves the decisions that matter.
             </p>
           </article>
           <article>
