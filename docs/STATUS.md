@@ -38,7 +38,7 @@ Registry
   -> exact quote / retweet / reply Events over time
   -> transparent daily-score ordering
   -> independent AI Engineering + Investment routing
-  -> per-Event audience annotations
+  -> optional per-Event working annotations
   -> daily agent research, consolidation, and ranked cited Insights
   -> separate Investment + AI Engineering views
   -> explicit Slack or email Daily Brief delivery

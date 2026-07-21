@@ -1,24 +1,27 @@
 # Model Routing and Prompt Caching
 
-Last verified: 2026-07-16
+Last verified: 2026-07-21
 
 ## Current Policy
 
 Use `gpt-5.6-luna` as the default efficient model for bounded structured
-classification, routing, and Registry evaluation. This is an
-accuracy-first default, not a rule that the cheapest model or lowest reasoning
-effort always wins. Keep `gpt-5.6-terra` for the web-grounded relevance audit
-and the current audience Insight calibration, where broader synthesis quality
-is the active boundary.
+classification and Registry evaluation. This is an accuracy-first default,
+not a rule that the cheapest model or lowest reasoning effort always wins.
+The daily brief path uses `gpt-5.4-mini` for audience routing and a persisted
+`gpt-5.6-sol` Codex task for final research, consolidation, selection, and
+writing. Terra per-Event outputs remain optional working annotations, not a
+required authoring stage. The web-grounded Registry relevance audit was a
+one-time non-mutating evaluation, not part of the daily path.
 
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
 | Evidence audience routing | `gpt-5.4-mini` | `high` | The current v9 nine-day top-100 run completed 900/900 with zero failures: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither. All requests were cache-eligible; 805 reported cache reads totaling 1,442,560 tokens. The v9 semantic input is first-party only. A prior same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
-| Audience Insight generation | `gpt-5.6-terra` | `high` | Quality-first default confirmed by Adi. Investment v10 and AI Engineering v7 use separate stable cache keys and address BIT's actual readers with distinct internal-research and production-engineering voices. Current dated evaluation counts and spend live in `docs/STATUS.md`; immutable runs retain their own exact model, prompt, cache, and cost telemetry. |
+| Per-Event working annotations | `gpt-5.6-terra` | `high` | A completed calibration pass produced separate audience notes with stable cache keys. The daily Codex agent may inspect them but must re-evaluate the frozen evidence; they are not final brief outputs. |
+| FLI daily-intelligence agent | `gpt-5.6-sol` | `xhigh` | The persisted Codex task researches the complete routed cohort, consolidates overlapping Events, selects the final set, and writes both audience briefs. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |
-| Full web-grounded relevance audit | `gpt-5.6-terra` | `high` | Complex research boundary; not part of the Luna-for-efficient-work migration. |
+| Registry relevance audit | `gpt-5.6-terra` | `high` | One-time required-web-search evaluation of the initial Registry. It is non-mutating and does not run during daily brief generation. |
 
 Do not lower reasoning effort merely to reduce spend. OpenAI recommends using
 the lowest effort that still meets the task, preserving the prior effort as a

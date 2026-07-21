@@ -377,6 +377,100 @@
   line-height: 1.6;
 }
 
+.how-read-block p.how-cost-note code {
+  color: var(--blue-ink);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+.how-run-command {
+  max-width: 920px;
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.how-daily-run {
+  max-width: 920px;
+  margin: 22px 0 0;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.how-daily-run figcaption {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.how-daily-run ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.how-run-step {
+  min-width: 0;
+  padding: 18px 14px 20px;
+  border-left: 1px solid var(--border);
+}
+
+.how-run-step:first-child { border-left: 0; }
+
+.how-run-step-id {
+  display: block;
+  color: var(--blue-ink);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.how-run-step strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.how-run-step p {
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.how-run-step--checkpoint {
+  position: relative;
+  background: var(--surface);
+}
+
+.how-run-handoff {
+  display: block;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-strong);
+  color: var(--blue-ink);
+  font-size: 9.5px;
+  line-height: 1.45;
+}
+
 /* ---- Final report ---- */
 
 .how-final {
@@ -597,9 +691,33 @@
     grid-row: 2;
   }
   .how-cost-head > :nth-child(2) { display: none; }
+  .how-daily-run ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .how-run-step:nth-child(4) {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .how-run-step:nth-child(5) {
+    border-top: 1px solid var(--border);
+  }
 }
 
 @media (max-width: 700px) {
+  .how-run-command {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .how-daily-run ol {
+    grid-template-columns: 1fr;
+  }
+  .how-run-step,
+  .how-run-step:nth-child(4),
+  .how-run-step:nth-child(5) {
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+  .how-run-step:first-child { border-top: 0; }
   .how-final-rows article {
     grid-template-columns: 1fr;
     gap: 8px;

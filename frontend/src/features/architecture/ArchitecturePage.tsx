@@ -85,7 +85,7 @@ function SystemOverview() {
     <svg
       viewBox="0 0 1080 300"
       role="img"
-      aria-label="Deployed architecture. Public X evidence and linked documents enter a Python pipeline, which preserves raw, canonical, and derived data in SQLite. The pipeline calls models through LiteLLM. FastAPI serves the typed API and built React application, and Cloudflare Tunnel exposes the public reviewer URL."
+      aria-label="Deployed architecture. Public X evidence and linked documents enter a Python pipeline, which preserves raw, canonical, and derived data in SQLite. Bounded routing calls go through LiteLLM, while final brief authoring runs through Codex App Server. FastAPI serves the typed API and built React application, and Cloudflare Tunnel exposes the public reviewer URL."
     >
       <ArrowDefs id="overview-arrow" />
       {stages.map((s) => (
@@ -96,13 +96,13 @@ function SystemOverview() {
       <FlowArrow x1={622} y1={86} x2={644} y2={86} marker="overview-arrow" />
       <FlowArrow x1={838} y1={86} x2={860} y2={86} marker="overview-arrow" />
 
-      {/* the model boundary hangs off the pipeline */}
+      {/* the two model boundaries hang off the pipeline */}
       <path d="M325 138 V172" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
       <path d="M531 180 V146" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
       <rect x="236" y="180" width="384" height="62" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
       <text x="254" y="205" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
-      <text x="254" y="230" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>LiteLLM → models</text>
-      <text x="424" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>judgments · usage · cost</text>
+      <text x="254" y="230" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>LiteLLM + Codex</text>
+      <text x="406" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>routing telemetry · editorial task</text>
 
       <line x1="30" y1="270" x2="1050" y2="270" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="292" fontFamily={UI} fontSize="11.5" fill={MUTED}>
@@ -137,29 +137,33 @@ const MODEL_TASKS = [
     why: 'Evaluated on a 900-decision run with zero failures. A higher effort tier changed no decisions and used 5.4× the tokens.',
   },
   {
-    task: 'Insight generation',
-    where: 'Publish stage',
+    task: 'Per-Event working annotations',
+    where: 'Optional editorial input',
     model: 'gpt-5.6-terra',
     effort: 'high',
-    why: 'Audience-specific interpretation is quality-sensitive. Stable per-audience cache keys keep the repeated context cheap.',
+    why: 'A calibration pass produced audience-specific notes. The daily agent may inspect them, but must re-evaluate the frozen evidence and does not treat them as editorial truth.',
   },
   {
-    task: 'Daily brief editorial agent',
+    task: 'FLI daily-intelligence agent',
     where: 'Final selection',
     model: 'gpt-5.6-sol',
     effort: 'xhigh',
     why: 'Free-running synthesis must compare the complete routed cohort, resolve duplication, and produce one defensible brief for each audience.',
   },
   {
-    task: 'Web-grounded relevance audit',
-    where: 'Evaluation',
+    task: 'Registry relevance audit',
+    where: 'One-time evaluation',
     model: 'gpt-5.6-terra',
     effort: 'high',
-    why: 'Open-web research and synthesis is the one boundary where the broadest model is kept deliberately.',
+    why: 'Used once to audit the initial Registry with required web search. It does not run in the daily brief path and cannot mutate the Registry.',
   },
 ]
 
-export function ModelTable() {
+export function ModelTable({ tasks }: { tasks?: string[] } = {}) {
+  const visibleTasks = tasks
+    ? MODEL_TASKS.filter((row) => tasks.includes(row.task))
+    : MODEL_TASKS
+
   return (
     <div className="model-table" role="table" aria-label="Model selection per task">
       <div className="model-table-row model-table-head" role="row">
@@ -167,7 +171,7 @@ export function ModelTable() {
         <span role="columnheader">Model · effort</span>
         <span role="columnheader">Why this one</span>
       </div>
-      {MODEL_TASKS.map((row) => (
+      {visibleTasks.map((row) => (
         <div className="model-table-row" role="row" key={row.task}>
           <span role="cell" className="model-table-task">
             <strong>{row.task}</strong>
@@ -296,54 +300,33 @@ function EvidenceInputMap() {
   )
 }
 
-function InsightGenerationMap() {
-  /* Symmetric fork: shared core on top, one identical lane per audience
-     below it. Only the prompt differs between the lanes. */
-  const lane = (x0: number, label: string) => (
-    <g key={label}>
-      <text x={x0} y="212" fontFamily={MONO} fontSize="10" fill={BLUE_INK} letterSpacing="0.08em">{label}</text>
-      <rect x={x0} y="224" width="150" height="72" fill={SAND} stroke={BLUE_MID} strokeWidth="1.1" />
-      <text x={x0 + 14} y="254" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Audience prompt</text>
-      <text x={x0 + 14} y="274" fontFamily={MONO} fontSize="8.5" fill={MUTED}>+ EDITORIAL JUDGMENT</text>
-      <FlowArrow x1={x0 + 150} y1={260} x2={x0 + 166} y2={260} marker="insight-arrow" />
-      <rect x={x0 + 170} y="224" width="130" height="72" fill="#fff" stroke={BLUE_MID} strokeWidth="1.1" />
-      <text x={x0 + 184} y="254" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Publication</text>
-      <text x={x0 + 184} y="274" fontFamily={MONO} fontSize="8.5" fill={MUTED}>INDEPENDENT AUDIT</text>
-      <FlowArrow x1={x0 + 300} y1={260} x2={x0 + 316} y2={260} marker="insight-arrow" />
-      <rect x={x0 + 320} y="224" width="150" height="72" fill={INK} />
-      <text x={x0 + 334} y="254" fontFamily={UI} fontSize="13.5" fontWeight="600" fill="#fff">Daily insights</text>
-      <text x={x0 + 334} y="274" fontFamily={MONO} fontSize="8.5" fill={BLUE}>SEPARATE VIEW</text>
-    </g>
-  )
-
+function DailyIntelligenceMap() {
+  const stages = [
+    { x: 28, kicker: '1 · ROUTE', title: 'Audience routing', detail: 'one call · two judgments', tone: 'surface' as const },
+    { x: 232, kicker: '2 · FREEZE', title: 'Daily workspace', detail: 'union-positive · seven days', tone: 'sand' as const },
+    { x: 436, kicker: '3 · CODEX', title: 'FLI daily agent', detail: 'research · group · select', tone: 'dark' as const },
+    { x: 640, kicker: '4 · VERIFY', title: 'Strict draft gate', detail: 'coverage · citations', tone: 'surface' as const },
+    { x: 844, kicker: '5 · SERVE', title: 'Two daily briefs', detail: 'web · PDF · manual send', tone: 'plain' as const },
+  ]
   return (
     <svg
-      viewBox="0 0 1080 364"
+      viewBox="0 0 1080 236"
       role="img"
-      aria-label="Insight generation path. Accepted evidence enters one shared citation-bound insight engine, which forks into two identical lanes: Investment and AI Engineering each use their own audience prompt and editorial judgment, an independent publication audit, and a separate daily insights view."
+      aria-label="Daily brief path. Audience routing returns two independent judgments per Event. The date is frozen into one immutable workspace, then one persisted FLI daily-intelligence Codex task researches the complete cohort and writes both briefs. Deterministic validation checks coverage and citations before the run is imported for the web reader, PDF, and manual delivery."
     >
-      <ArrowDefs id="insight-arrow" />
-      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">FROM ACCEPTED EVIDENCE TO DAILY INSIGHTS</text>
-
-      <Card x={28} y={56} w={230} h={92} kicker="INPUT" title="Accepted evidence" tone="sand" />
-      <FlowArrow x1={258} y1={102} x2={282} y2={102} marker="insight-arrow" />
-      <g>
-        <rect x="288" y="56" width="470" height="92" fill={INK} />
-        <text x="308" y="84" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">SHARED CORE</text>
-        <text x="308" y="112" fontFamily={UI} fontSize="17" fontWeight="600" fill="#fff">Citation-bound insight engine</text>
-        <text x="308" y="134" fontFamily={MONO} fontSize="8.5" fill="#fff" opacity="0.65">FROZEN EVIDENCE · EXACT PASSAGES · SHARED PROVENANCE</text>
-      </g>
-
-      {/* the fork: two symmetric drops from the core underside to each lane */}
-      <path d="M 420 148 V 178 H 263 V 216" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
-      <path d="M 626 148 V 178 H 817 V 216" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#insight-arrow)" />
-
-      {lane(28, 'INVESTMENT')}
-      {lane(582, 'AI ENGINEERING')}
-
-      <line x1="28" y1="328" x2="1052" y2="328" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
-      <text x="28" y="350" fontFamily={UI} fontSize="12" fill={MUTED}>
-        Evidence and citation rules stay shared. Audience prompts, judgment, audits, and published views do not.
+      <ArrowDefs id="daily-arrow" />
+      <text x="28" y="30" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE DATE · ONE CHECKPOINTED DAILY RUN</text>
+      {stages.map((stage) => (
+        <Card key={stage.kicker} x={stage.x} y={54} w={180} h={108} kicker={stage.kicker} title={stage.title} detail={stage.detail} tone={stage.tone} />
+      ))}
+      <FlowArrow x1={208} y1={108} x2={228} y2={108} marker="daily-arrow" />
+      <FlowArrow x1={412} y1={108} x2={432} y2={108} marker="daily-arrow" />
+      <FlowArrow x1={616} y1={108} x2={636} y2={108} marker="daily-arrow" />
+      <FlowArrow x1={820} y1={108} x2={840} y2={108} marker="daily-arrow" />
+      <text x="426" y="44" fontFamily={MONO} fontSize="8.5" fill={BLUE_INK} textAnchor="middle">--launch-codex →</text>
+      <line x1="28" y1="194" x2="1024" y2="194" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
+      <text x="28" y="218" fontFamily={UI} fontSize="12" fill={MUTED}>
+        Without --launch-codex, run-day stops after freezing the workspace. A retry resumes the same dated run.
       </text>
     </svg>
   )
@@ -544,19 +527,19 @@ export default function Architecture() {
       <section className="arch-section" id="models">
         <div className="arch-section-head">
           <h2 className="arch-h">One model per task, chosen by evidence</h2>
-          <p className="arch-p">Every call goes through one LiteLLM boundary that records the model, tokens, cache reads, and cost per run. Defaults come from comparing effort tiers on real workloads, not from picking the biggest model.</p>
+          <p className="arch-p">Bounded pipeline calls go through LiteLLM, which records the model, tokens, cache reads, and request cost. Final brief authoring runs as a persisted Codex App Server task with its effective model, effort, tier, and thread attached to the editorial run. Defaults come from comparisons on real workloads, not from picking the biggest model.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><ModelTable /></div>
-        <p className="arch-note">Measured, not estimated: the current Insight batch averaged $0.01638 per surface-or-suppress decision, with 1.76M tokens served from prompt cache across the batch. Each immutable run keeps its own exact model, prompt version, and cost telemetry, so changing a default never relabels old results.</p>
+        <p className="arch-note">Measured, not estimated: the per-Event annotation batch averaged $0.01638 per surface-or-suppress decision, with 1.76M tokens served from prompt cache across the batch. That was working-note and calibration spend, not the cost of the final daily briefs. Each immutable run keeps its own exact model, prompt version, and cost telemetry, so changing a default never relabels old results.</p>
       </section>
 
       <section className="arch-section" id="pipeline">
         <div className="arch-section-head">
           <h2 className="arch-h">The evidence-to-insight path</h2>
-          <p className="arch-p">The funnel from How it works, as actual judgment boundaries. One evidence core preserves exact provenance; Investment and AI Engineering then run as two identical, fully separate lanes.</p>
+          <p className="arch-p">The deterministic path ends with two audience-routing judgments per Event. For each date, the runner freezes the union-positive cohort and can hand that exact workspace to one persisted FLI daily-intelligence task. The agent researches the complete day and writes one validated draft containing both audience briefs.</p>
         </div>
         <div className="arch-canvas"><EvidenceInputMap /></div>
-        <div className="arch-canvas arch-canvas--sub"><InsightGenerationMap /></div>
+        <div className="arch-canvas arch-canvas--sub"><DailyIntelligenceMap /></div>
       </section>
 
       <section className="arch-section" id="data-model">

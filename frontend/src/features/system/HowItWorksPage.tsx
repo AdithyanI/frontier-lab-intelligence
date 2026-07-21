@@ -167,21 +167,68 @@ type Beat = {
 
 const UNIT_COSTS = [
   {
-    workflow: 'Registry classification',
-    unit: 'one identity',
-    cost: '$0.00049',
-  },
-  {
     workflow: 'Audience routing',
     unit: 'one Event, two judgments',
     cost: '$0.00388 average',
   },
+]
+
+const DAILY_RUN_STEPS = [
   {
-    workflow: 'Insight generation',
-    unit: 'one audience-specific decision',
-    cost: '$0.01638 average',
+    id: '01',
+    label: 'Evidence',
+    title: 'Refresh the dated evidence state',
+    text: 'Collect the new day, then materialize the exact Feed, Events, artifacts, and attention order.',
+  },
+  {
+    id: '02',
+    label: 'Route',
+    title: 'Classify the top Events',
+    text: 'One structured gpt-5.4-mini call returns separate Investment and AI Engineering judgments.',
+  },
+  {
+    id: '03',
+    label: 'Freeze',
+    title: 'Prepare one immutable workspace',
+    text: 'Keep the union-positive cohort, apply the seven-day first-party window, and bind every source hash.',
+  },
+  {
+    id: '04',
+    label: 'Codex',
+    title: 'Research and write both briefs',
+    text: 'One persisted gpt-5.6-sol task reviews the whole cohort, resolves gaps, consolidates, selects, and writes.',
+  },
+  {
+    id: '05',
+    label: 'Publish',
+    title: 'Validate and import atomically',
+    text: 'Every candidate is included or declined, every citation is checked, and the completed run becomes the reader.',
   },
 ]
+
+function DailyRunFigure() {
+  return (
+    <figure className="how-daily-run" aria-labelledby="how-daily-run-title">
+      <figcaption id="how-daily-run-title">
+        One date, one resumable run
+      </figcaption>
+      <ol>
+        {DAILY_RUN_STEPS.map((step, index) => (
+          <li key={step.id} className={index === 2 ? 'how-run-step how-run-step--checkpoint' : 'how-run-step'}>
+            <span className="how-run-step-id mono">{step.id} · {step.label}</span>
+            <strong>{step.title}</strong>
+            <p>{step.text}</p>
+            {index === 2 && (
+              <span className="how-run-handoff mono">
+                add --launch-codex to continue →
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </figure>
+  )
+}
 
 const SHOWCASE_INSIGHTS = [
   {
@@ -672,26 +719,34 @@ export default function HowItWorks() {
           <p>
             The system uses a Python pipeline writing to SQLite, with FastAPI
             and React serving the product through a Cloudflare tunnel. The
-            page you are reading runs on it. Every LLM call goes through one
-            shared LiteLLM gateway. It handles retries, backoff, and model
-            fallback, and prices every request. Each run records its model,
-            reasoning effort, prompt version, token usage, and cost.
+            page you are reading runs on it. Pipeline API calls go through one
+            shared LiteLLM gateway, which handles retries, backoff, fallback,
+            and request-level cost telemetry. Final brief authoring runs as a
+            persisted task through Codex App Server.
           </p>
           <p>
-            Models are matched to the job. Small, fast models handle bounded
-            structured decisions. Audience-specific candidate Insights use a
-            larger reasoning model because interpretation quality matters. A
-            final editorial agent then compares the complete cohort and writes
-            each daily brief. I kept the cheaper model only when a comparison
-            preserved decision quality. The table below shows the current
-            choice for each task.
+            The daily intelligence path has two model stages. First, one small,
+            structured call classifies each top-ranked Event for both
+            audiences. Then the FLI daily-intelligence agent reviews the
+            complete routed cohort. It researches missing links, consolidates
+            overlapping Events, selects what matters, and writes both final
+            briefs.
           </p>
+          <pre className="how-run-command" aria-label="Daily intelligence command"><code>$ .venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --json --no-input</code></pre>
+          <p className="how-cost-note">
+            As written, the command stops after freezing the workspace. Add{' '}
+            <code>--launch-codex</code> to create or resume the one persisted
+            editorial task and continue through validation, import, and final
+            inspection. Every completed stage is checkpointed, so the same date
+            resumes instead of starting a second run.
+          </p>
+          <DailyRunFigure />
           <div className="how-model-table">
-            <ModelTable />
+            <ModelTable tasks={['Audience routing', 'FLI daily-intelligence agent']} />
           </div>
           <p>
-            Cost is recorded at the decision boundary. These are measured
-            LiteLLM costs from the production paths:
+            The LiteLLM-backed routing stage records cost at the decision
+            boundary:
           </p>
           <div className="how-cost-table" role="table" aria-label="Measured model cost per decision">
             <div className="how-cost-row how-cost-head" role="row">
@@ -708,13 +763,11 @@ export default function HowItWorks() {
             ))}
           </div>
           <p className="how-cost-note">
-            The routing average comes from 99 new model calls for 19 July. The
-            Insight average comes from 947 current-contract audience
-            decisions. The Registry figure comes from the complete 2,956-item
-            classification pass.
+            The routing average comes from 99 new Event calls for 19 July. Each
+            call returned both audience judgments.
           </p>
           <p className="how-cost-note">
-            The final daily editorial agent runs through Codex App Server. Its
+            The FLI daily-intelligence agent runs through Codex App Server. Its
             effective model, reasoning effort, service tier, thread, and
             resulting brief remain attached to the editorial run rather than
             being mixed into these LiteLLM unit prices.

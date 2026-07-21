@@ -33,6 +33,28 @@ current routed-positive Events for one UTC day
   -> Investment or AI Engineering reader
 ```
 
+## One-Day Command Boundary
+
+The date-keyed runner is the reproducible entry point:
+
+```bash
+.venv/bin/fli daily-intelligence run-day \
+  --day YYYY-MM-DD --json --no-input
+```
+
+As written, it collects or reuses the dated Evidence state, runs or reuses the
+top-ranked audience-routing decisions, freezes the union-positive cohort into
+one immutable workspace, and stops at `prepare`. It does not launch an
+editorial model.
+
+Add `--launch-codex` to create or resume the one persisted Codex App Server
+task bound to that exact workspace. The task follows this skill, researches
+the complete cohort, writes both audience briefs, passes coverage preflight and
+deterministic validation, imports the result atomically, and inspects the
+durable run before completion. Each stage is checkpointed in the date-keyed
+orchestration ledger, so retrying the same command resumes the same run rather
+than creating a second brief.
+
 There is no first-class `Development` row. Several Events can support one
 Insight through explicit evidence roles. The Event remains the frozen evidence
 unit; the Insight is the reader-facing judgment.
