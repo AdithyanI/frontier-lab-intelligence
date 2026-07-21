@@ -164,7 +164,6 @@ handoff.
 | Question | Source of truth |
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
-| What are we optimizing for and what context matters? | [`references/context.md`](references/context.md) |
 | Which Insights are the locked submission proof? | [`projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md) |
 | What should be done next, exactly? | Assemble the required submission deliverables against [`references/case-prompt.md`](references/case-prompt.md); start a new tracker only if Adi explicitly invokes `$project`. |
 | Which code/store/command/test owns a stage? | [`architecture/code-map.md`](architecture/code-map.md) |

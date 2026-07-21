@@ -21,8 +21,7 @@ relevant durable document.
 
 Until the 20 July 2026 submission, optimize for a coherent, defensible, working
 case study that earns the next interview. Prefer a narrow end-to-end proof and
-3 to 5 excellent cited Insights over platform breadth. Use
-`docs/references/context.md` as the decision filter.
+3 to 5 excellent cited Insights over platform breadth.
 
 ## Guardrails
 
