@@ -115,46 +115,32 @@ function SystemOverview() {
 
 /* ---- 2 · Current model boundaries ---- */
 
-const MODEL_TASKS = [
-  {
-    task: 'Entity classification',
-    where: 'Registry intake',
-    model: 'gpt-5.6-luna',
-    effort: 'medium',
-    why: 'Bounded structured decision with an evaluated classifier contract. The efficient model matched the larger one here.',
-  },
-  {
-    task: 'Registry admission + identity research',
-    where: 'Registry intake',
-    model: 'gpt-5.6-luna',
-    effort: 'high',
-    why: 'Grounded multi-source identity resolution needs more checking than plain classification, so effort rises before model size does.',
-  },
+const DAILY_MODEL_BOUNDARIES = [
   {
     task: 'Audience routing',
-    where: 'Daily brief path',
+    where: 'LiteLLM',
     model: 'gpt-5.4-mini',
     effort: 'high',
-    why: 'Evaluated on a 900-decision run with zero failures. A higher effort tier changed no decisions and used 5.4× the tokens.',
+    why: 'A 900-decision evaluation completed without failures. The xhigh comparison changed no decisions and used 5.4× the tokens.',
   },
   {
     task: 'FLI daily-intelligence agent',
-    where: 'Daily brief path',
+    where: 'Codex App Server',
     model: 'gpt-5.6-sol',
     effort: 'xhigh',
-    why: 'Free-running synthesis must compare the complete routed cohort, resolve duplication, and produce one defensible brief for each audience.',
+    why: 'Submitted runs recorded this effective setting. This is the only stage that researches the complete cohort, resolves duplication, and writes both briefs.',
   },
 ]
 
 export function ModelTable({ tasks }: { tasks?: string[] } = {}) {
   const visibleTasks = tasks
-    ? MODEL_TASKS.filter((row) => tasks.includes(row.task))
-    : MODEL_TASKS
+    ? DAILY_MODEL_BOUNDARIES.filter((row) => tasks.includes(row.task))
+    : DAILY_MODEL_BOUNDARIES
 
   return (
-    <div className="model-table" role="table" aria-label="Model selection per task">
+    <div className="model-table" role="table" aria-label="Daily brief model boundaries">
       <div className="model-table-row model-table-head" role="row">
-        <span role="columnheader">Task</span>
+        <span role="columnheader">Boundary</span>
         <span role="columnheader">Model · effort</span>
         <span role="columnheader">Why this one</span>
       </div>
@@ -591,11 +577,11 @@ export default function Architecture() {
 
       <section className="arch-section" id="models">
         <div className="arch-section-head">
-          <h2 className="arch-h">Models enter at four bounded tasks</h2>
-          <p className="arch-p">Two structured tasks maintain the Registry. The daily brief path then uses one audience-routing call per Event and one persisted editorial task for the complete cohort. These are the current defaults; historical calibration and one-time audits remain in the repository rather than the live architecture.</p>
+          <h2 className="arch-h">Two model boundaries produce each daily brief</h2>
+          <p className="arch-p">Audience routing is one structured LiteLLM call per Event. Final selection and writing run once for the complete day as a persisted Codex App Server task.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><ModelTable /></div>
-        <p className="arch-note">LiteLLM records the model, prompt version, tokens, cache reads, latency, and request cost for each bounded call. The editorial run records the Codex model, reasoning effort, service tier, and task identity. Changing a default never rewrites old run metadata.</p>
+        <p className="arch-note">Registry intake runs separately from daily brief generation: <code>gpt-5.6-luna</code> at medium classifies entity kind, while high handles admission and identity research. The system stores the effective model and run identity at each boundary; LiteLLM also records prompt, token, cache, latency, and cost telemetry.</p>
       </section>
 
       <section className="arch-section" id="data-model">

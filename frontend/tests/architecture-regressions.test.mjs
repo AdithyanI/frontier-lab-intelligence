@@ -52,14 +52,19 @@ test('Architecture maps routed evidence into the persisted daily Codex workflow'
   assert.doesNotMatch(architecture, /Citation-bound insight engine|INDEPENDENT AUDIT|SEPARATE VIEW/)
 })
 
-test('Architecture exposes the evaluated model choice for each judgment task', () => {
+test('Architecture gives the daily brief model boundaries visual priority', () => {
   assert.match(architecture, /function ModelTable/)
-  assert.match(architecture, /Entity classification/)
+  assert.match(architecture, /Two model boundaries produce each daily brief/)
   assert.match(architecture, /Audience routing/)
-  assert.match(architecture, /model: 'gpt-5\.6-luna'/)
+  assert.match(architecture, /where: 'LiteLLM'/)
   assert.match(architecture, /model: 'gpt-5\.4-mini'/)
   assert.match(architecture, /task: 'FLI daily-intelligence agent'/)
+  assert.match(architecture, /where: 'Codex App Server'/)
   assert.match(architecture, /model: 'gpt-5\.6-sol'/)
+  assert.match(architecture, /Submitted runs recorded this effective setting/)
+  assert.doesNotMatch(architecture, /task: 'Entity classification'|task: 'Registry admission/)
+  assert.match(architecture, /Registry intake runs separately from daily brief generation/)
+  assert.match(architecture, /gpt-5\.6-luna<\/code> at medium classifies entity kind, while high handles admission and identity research/)
   assert.doesNotMatch(architecture, /Per-Event working annotations|Registry relevance audit|gpt-5\.6-terra/)
   assert.doesNotMatch(architecture, /\$0\.01638 per surface-or-suppress decision/)
 })
