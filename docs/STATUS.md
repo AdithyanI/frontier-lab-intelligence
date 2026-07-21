@@ -165,7 +165,7 @@ handoff.
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
 | Which Insights are the locked submission proof? | [`projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md) |
-| What should be done next, exactly? | Assemble the required submission deliverables against [`references/case-prompt.md`](references/case-prompt.md); start a new tracker only if Adi explicitly invokes `$project`. |
+| What should be done next, exactly? | Keep the submitted reviewer path available and prepare the interview defenses listed in Post-submission State; start a new tracker only if Adi explicitly invokes `$project`. |
 | Which code/store/command/test owns a stage? | [`architecture/code-map.md`](architecture/code-map.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
