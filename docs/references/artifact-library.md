@@ -96,8 +96,12 @@ routable addresses. Robots directives, response size limits, timeouts, content
 types, retryability, and terminal errors are persisted.
 
 HTML uses Trafilatura, PDFs use pypdf, and textual JSON/XML/plain responses use
-bounded decoding. A page that exposes only a client-rendered loading/error shell
-is a terminal extraction failure rather than misleading clean text. Successful
+bounded decoding. Public Google Docs document URLs use the provider's bounded
+plain-text export endpoint while retaining the original Docs URL as the
+artifact identity; the export endpoint and its redirects remain visible in the
+fetch ledger. Private documents fail closed instead of persisting a sign-in or
+editor shell. A page that exposes only a client-rendered loading/error shell is
+a terminal extraction failure rather than misleading clean text. Successful
 raw and text payloads are written atomically under their SHA-256 paths.
 
 The Artifact UI loads normalized text only when the default-collapsed Preview

@@ -20,7 +20,7 @@ from datetime import datetime, timedelta, timezone
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Callable, Iterable
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 from urllib.robotparser import RobotFileParser
 
 import httpx
@@ -41,7 +41,9 @@ JINA_READER_EXTRACTOR = "jina-reader-markdown-v1"
 JINA_API_KEY_ENV = "JINA_API_KEY"
 DEFAULT_REPO_ENV = artifacts.REPO_ROOT / ".env"
 EXTRACTOR_CONTRACT = "artifact-text-v2"
-CONTENT_VALIDATION_CONTRACT = "artifact-content-v3"
+CONTENT_VALIDATION_CONTRACT = "artifact-content-v4"
+GOOGLE_DOCS_TEXT_EXPORT_EXTRACTOR = "google-docs-text-export-v1"
+GOOGLE_DOCS_TEXT_EXPORT_VERSION = "1"
 USER_AGENT = "frontier-lab-intelligence/0.1 artifact-fetch (+local research project)"
 RAW_ROOT = artifacts.REPO_ROOT / "data" / "raw" / "artifacts" / "body" / "sha256"
 TEXT_ROOT = (
@@ -87,6 +89,7 @@ SAFE_RESPONSE_HEADERS = frozenset(
         "cache-control",
         "content-language",
         "content-length",
+        "content-disposition",
         "content-type",
         "etag",
         "last-modified",
@@ -209,6 +212,33 @@ def extracted_text_issue(
         shell_kind = "region-unavailable"
     elif host in {"consent.google.com", "consent.youtube.com"}:
         shell_kind = "consent"
+    elif host == "docs.google.com" and path.startswith("/document/") and (
+        (
+            "javascript" in normalized_text
+            and (
+                "file cannot be opened" in normalized_text
+                or "file can't be opened" in normalized_text
+                or "datei kann" in normalized_text
+                or "nicht geöffnet werden" in normalized_text
+            )
+        )
+        or (
+            len(text) < 1_500
+            and sum(
+                marker in normalized_text
+                for marker in (
+                    "troubleshooting",
+                    "accessibility",
+                    "fehlerbehebung",
+                    "bedienungshilfen",
+                    "share",
+                    "freigeben",
+                )
+            )
+            >= 3
+        )
+    ):
+        shell_kind = "Google Docs editor"
     elif (
         normalized_title in {
             "sign in",
@@ -366,6 +396,96 @@ def _safe_headers(response: httpx.Response) -> dict[str, str]:
         for key, value in response.headers.items()
         if key.lower() in SAFE_RESPONSE_HEADERS
     }
+
+
+def _google_doc_text_export_url(url: str) -> str | None:
+    """Return the public text-export endpoint for a Google document URL.
+
+    The export endpoint is retrieval infrastructure only. The original Docs URL
+    remains the artifact identity so adding the adapter cannot churn artifact
+    IDs or turn a provider download URL into a new canonical artifact.
+    """
+    split = urlsplit(url)
+    if (split.hostname or "").lower() != "docs.google.com":
+        return None
+    match = re.match(
+        r"^/document/(?:u/\d+/)?d/([A-Za-z0-9_-]+)(?:/|$)",
+        split.path,
+    )
+    if match is None or match.group(1) == "e":
+        return None
+    document_id = match.group(1)
+    return f"https://docs.google.com/document/d/{document_id}/export?format=txt"
+
+
+def _content_disposition_title(value: str | None) -> str | None:
+    header = str(value or "")
+    extended = re.search(r"(?:^|;)\s*filename\*\s*=\s*UTF-8''([^;]+)", header, re.I)
+    if extended is not None:
+        filename = unquote(extended.group(1)).strip().strip('"')
+    else:
+        basic = re.search(r'(?:^|;)\s*filename\s*=\s*"([^"]+)"', header, re.I)
+        if basic is None:
+            basic = re.search(r"(?:^|;)\s*filename\s*=\s*([^;]+)", header, re.I)
+        filename = basic.group(1).strip().strip('"') if basic is not None else ""
+    if filename.lower().endswith(".txt"):
+        filename = filename[:-4]
+    return filename.strip() or None
+
+
+def _extract_google_doc_text_export(retrieved: Retrieved) -> Extraction:
+    """Extract a public Google document's bounded plain-text export."""
+    contract = GOOGLE_DOCS_TEXT_EXPORT_EXTRACTOR
+    contract_version = GOOGLE_DOCS_TEXT_EXPORT_VERSION
+    if retrieved.content_type != "text/plain":
+        return Extraction(
+            False,
+            contract,
+            contract_version,
+            None,
+            None,
+            None,
+            "google_doc_export_unavailable",
+            "Google Docs did not return a public plain-text document export",
+        )
+    encoding = retrieved.charset or "utf-8"
+    if encoding.lower().replace("_", "-") in {"utf-8", "utf8"}:
+        encoding = "utf-8-sig"
+    try:
+        decoded = retrieved.body.decode(encoding, errors="replace")
+    except LookupError:
+        decoded = retrieved.body.decode("utf-8-sig", errors="replace")
+    clean = _normalize_text(decoded)
+    if not clean.strip():
+        return Extraction(
+            False,
+            contract,
+            contract_version,
+            None,
+            None,
+            None,
+            "google_doc_export_empty",
+            "Google Docs returned an empty plain-text document export",
+        )
+    if len(clean) > MAX_TEXT_CHARS:
+        return Extraction(
+            False,
+            contract,
+            contract_version,
+            None,
+            None,
+            None,
+            "text_too_large",
+            f"Extracted text exceeded {MAX_TEXT_CHARS} characters",
+        )
+    return Extraction(
+        True,
+        contract,
+        contract_version,
+        _content_disposition_title(retrieved.headers.get("content-disposition")),
+        clean,
+        None,
+    )
 
 
 def _safe_get(
@@ -1984,7 +2104,8 @@ def fetch_cohort(
         for item in items:
             requested_url = str(item["selected_url"])
             current = conn.execute(
-                """SELECT artifact.artifact_id, artifact.artifact_kind
+                """SELECT artifact.artifact_id, artifact.artifact_kind,
+                          artifact.canonical_url
                    FROM artifact
                    LEFT JOIN artifact_alias alias
                      ON alias.artifact_id = artifact.artifact_id
@@ -2016,19 +2137,26 @@ def fetch_cohort(
                         "robots.txt disallows this artifact URL",
                         retryable=False,
                     )
-                origin = _origin(requested_url)
+                canonical_url = str(current["canonical_url"])
+                google_doc_export_url = _google_doc_text_export_url(canonical_url)
+                retrieval_url = google_doc_export_url or requested_url
+                origin = _origin(retrieval_url)
                 wait = delay - (time.monotonic() - last_origin_request.get(origin, 0.0))
                 if wait > 0:
                     time.sleep(wait)
-                retrieved = _safe_get(client, requested_url, resolver=resolver)
+                retrieved = _safe_get(client, retrieval_url, resolver=resolver)
                 last_origin_request[origin] = time.monotonic()
-                extraction = extract_content(
-                    retrieved.body,
-                    content_type=retrieved.content_type,
-                    charset=retrieved.charset,
-                    final_url=retrieved.final_url,
-                    artifact_kind=str(current["artifact_kind"]),
-                )
+                if google_doc_export_url is not None:
+                    extraction = _extract_google_doc_text_export(retrieved)
+                    retrieved = replace(retrieved, final_url=canonical_url)
+                else:
+                    extraction = extract_content(
+                        retrieved.body,
+                        content_type=retrieved.content_type,
+                        charset=retrieved.charset,
+                        final_url=retrieved.final_url,
+                        artifact_kind=str(current["artifact_kind"]),
+                    )
                 _finish_retrieved(
                     conn,
                     fetch_id=fetch_id,

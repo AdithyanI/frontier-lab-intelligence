@@ -452,6 +452,120 @@ def test_extract_content_uses_scoped_sec_archives_fallback():
     assert "approximately $19 billion" in result.text
 
 
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        (
+            "https://docs.google.com/document/d/document_123/edit?usp=sharing",
+            "https://docs.google.com/document/d/document_123/export?format=txt",
+        ),
+        (
+            "https://docs.google.com/document/u/1/d/document-456/view#heading=h.1",
+            "https://docs.google.com/document/d/document-456/export?format=txt",
+        ),
+        ("https://docs.google.com/document/d/e/published-id/pub", None),
+        ("https://docs.google.com/forms/d/e/form-id/viewform", None),
+        ("https://example.com/document/d/document-id/edit", None),
+    ],
+)
+def test_google_doc_text_export_url_is_narrow(url, expected):
+    assert artifact_fetch._google_doc_text_export_url(url) == expected
+
+
+def test_google_doc_editor_shell_is_rejected_by_content_validation():
+    text = """Die Datei kann in Ihrem Browser nicht geöffnet werden, weil
+    JavaScript nicht aktiviert ist. Aktivieren Sie JavaScript und laden Sie die
+    Seite noch einmal. Research notes. Tab. Freigeben. Datei. Bearbeiten.
+    Ansicht. Tools. Hilfe. Bedienungshilfen. Fehlerbehebung."""
+
+    issue = artifact_fetch.extracted_text_issue(
+        text,
+        title="Research notes - Google Docs",
+        final_url="https://docs.google.com/document/d/document-id/edit",
+    )
+
+    assert issue is not None
+    assert issue[0] == artifact_fetch.NON_CONTENT_ERROR_CODE
+
+
+def test_fetch_cohort_uses_public_google_doc_text_export_without_identity_churn(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    source_url = (
+        "https://docs.google.com/document/d/document_123/edit?usp=sharing"
+    )
+    artifact_id = _seed_artifact(db, url=source_url, artifact_kind="other")
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    requested_urls: list[str] = []
+    body = (
+        "\ufeffPublic research notes\n\nThis is the actual Google document body, "
+        "not the JavaScript editor shell.\n"
+    ).encode("utf-8")
+
+    def handler(request: httpx.Request):
+        requested_urls.append(str(request.url))
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        if request.url.host == "docs.google.com":
+            assert request.url.path == "/document/d/document_123/export"
+            assert request.url.params["format"] == "txt"
+            return httpx.Response(
+                307,
+                headers={
+                    "Location": (
+                        "https://doc-01-docstext.googleusercontent.com/"
+                        "exported/document_123.txt"
+                    )
+                },
+            )
+        return httpx.Response(
+            200,
+            headers={
+                "Content-Type": "text/plain; charset=utf-8",
+                "Content-Disposition": (
+                    "attachment; filename=\"ResearchNotes.txt\"; "
+                    "filename*=UTF-8''Research%20Notes.txt"
+                ),
+            },
+            content=body,
+        )
+
+    result = artifact_fetch.fetch_cohort(
+        db_path=db,
+        limit=1,
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(handler),
+    )
+
+    assert result["success"] == 1
+    assert requested_urls[1].endswith(
+        "/document/d/document_123/export?format=txt"
+    )
+    conn = artifacts.connect(db)
+    fetch = conn.execute("SELECT * FROM artifact_fetch").fetchone()
+    stored_artifacts = conn.execute(
+        "SELECT artifact_id, canonical_url FROM artifact"
+    ).fetchall()
+    conn.close()
+    assert fetch["artifact_id"] == artifact_id
+    assert fetch["final_url"] == source_url
+    assert fetch["extractor_contract"] == (
+        artifact_fetch.GOOGLE_DOCS_TEXT_EXPORT_EXTRACTOR
+    )
+    assert fetch["extracted_title"] == "Research Notes"
+    assert len(stored_artifacts) == 1
+    assert dict(stored_artifacts[0]) == {
+        "artifact_id": artifact_id,
+        "canonical_url": source_url,
+    }
+    text = Path(fetch["text_snapshot_ref"]).read_text(encoding="utf-8")
+    assert text.startswith("Public research notes")
+    assert "JavaScript editor shell" in text
+    assert not text.startswith("\ufeff")
+
+
 def test_fetch_cohort_snapshots_text_and_reuses_success(tmp_path, monkeypatch):
     db = tmp_path / "artifacts.db"
     artifact_id = _seed_artifact(db)
