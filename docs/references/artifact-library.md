@@ -100,7 +100,10 @@ bounded decoding. Public Google Docs document URLs use the provider's bounded
 plain-text export endpoint while retaining the original Docs URL as the
 artifact identity; the export endpoint and its redirects remain visible in the
 fetch ledger. Private documents fail closed instead of persisting a sign-in or
-editor shell. A page that exposes only a client-rendered loading/error shell is
+editor shell. A targeted historical repair is recorded as a new
+`google-docs-public-text-v1` attempt rather than mutating the original fetch;
+the Artifact UI reads the newest successful snapshot. A page that exposes only
+a client-rendered loading/error shell is
 a terminal extraction failure rather than misleading clean text. Successful
 raw and text payloads are written atomically under their SHA-256 paths.
 

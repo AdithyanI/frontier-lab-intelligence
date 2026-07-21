@@ -44,6 +44,7 @@ EXTRACTOR_CONTRACT = "artifact-text-v2"
 CONTENT_VALIDATION_CONTRACT = "artifact-content-v4"
 GOOGLE_DOCS_TEXT_EXPORT_EXTRACTOR = "google-docs-text-export-v1"
 GOOGLE_DOCS_TEXT_EXPORT_VERSION = "1"
+GOOGLE_DOCS_REPAIR_POLICY = "google-docs-public-text-v1"
 USER_AGENT = "frontier-lab-intelligence/0.1 artifact-fetch (+local research project)"
 RAW_ROOT = artifacts.REPO_ROOT / "data" / "raw" / "artifacts" / "body" / "sha256"
 TEXT_ROOT = (
@@ -1040,7 +1041,10 @@ def restore_pruned_run_items(
 
 
 def _create_explicit_fetch_run(
-    conn: Any, selection: list[dict[str, Any]]
+    conn: Any,
+    selection: list[dict[str, Any]],
+    *,
+    fetch_policy: str = FETCH_POLICY,
 ) -> tuple[str, bool]:
     payload = [
         [item["artifact_id"], item["selected_url"], item["event_id"]]
@@ -1049,7 +1053,7 @@ def _create_explicit_fetch_run(
     fingerprint = hashlib.sha256(_canonical_json(payload).encode()).hexdigest()
     fetch_run_id = hashlib.sha256(
         _canonical_json(
-            [FETCH_POLICY, EXPLICIT_SELECTION_POLICY, fingerprint]
+            [fetch_policy, EXPLICIT_SELECTION_POLICY, fingerprint]
         ).encode()
     ).hexdigest()
     run_items = [
@@ -1096,7 +1100,7 @@ def _create_explicit_fetch_run(
                        AND fetch.fetch_policy = ?
                  ), 0) < ?
                LIMIT 1""",
-            (fetch_run_id, FETCH_POLICY, FETCH_POLICY, MAX_ATTEMPTS),
+            (fetch_run_id, fetch_policy, fetch_policy, MAX_ATTEMPTS),
         ).fetchone()
         if pending is None:
             return fetch_run_id, True
@@ -1120,7 +1124,7 @@ def _create_explicit_fetch_run(
             (
                 fetch_run_id,
                 artifacts.SCHEMA_VERSION,
-                FETCH_POLICY,
+                fetch_policy,
                 EXPLICIT_SELECTION_POLICY,
                 fingerprint,
                 len(selection),
@@ -2054,6 +2058,7 @@ def fetch_cohort(
     resolver: Resolver = _default_resolver,
     transport: httpx.BaseTransport | None = None,
     _initialize_db: bool = True,
+    fetch_policy: str = FETCH_POLICY,
 ) -> dict[str, Any]:
     if _initialize_db:
         conn = artifacts.connect(db_path)
@@ -2063,11 +2068,17 @@ def fetch_cohort(
         conn.execute("PRAGMA foreign_keys = ON")
         conn.execute("PRAGMA busy_timeout = 60000")
     if artifact_ids is None:
+        if fetch_policy != FETCH_POLICY:
+            raise ValueError("a non-default fetch policy requires explicit artifact_ids")
         selection = select_cohort(conn, limit=limit)
         fetch_run_id, already_complete = _create_fetch_run(conn, selection)
     else:
         selection = select_explicit_artifacts(conn, artifact_ids=artifact_ids)
-        fetch_run_id, already_complete = _create_explicit_fetch_run(conn, selection)
+        fetch_run_id, already_complete = _create_explicit_fetch_run(
+            conn,
+            selection,
+            fetch_policy=fetch_policy,
+        )
     if already_complete:
         row = conn.execute(
             "SELECT * FROM artifact_fetch_run WHERE fetch_run_id = ?", (fetch_run_id,)
@@ -2124,6 +2135,7 @@ def fetch_cohort(
                 fetch_run_id=fetch_run_id,
                 artifact_id=artifact_id,
                 requested_url=requested_url,
+                fetch_policy=fetch_policy,
             )
             if fetch_id is None:
                 continue
@@ -2168,10 +2180,56 @@ def fetch_cohort(
                 _finish_failure(conn, fetch_id, failure)
     finally:
         client.close()
-    result = _complete_run(conn, fetch_run_id)
+    result = _complete_run(conn, fetch_run_id, fetch_policy=fetch_policy)
     result["reused"] = False
     conn.close()
     return result
+
+
+def repair_public_google_docs(
+    *,
+    db_path: Path | str = artifacts.DEFAULT_DB,
+    resolver: Resolver = _default_resolver,
+    transport: httpx.BaseTransport | None = None,
+) -> dict[str, Any]:
+    """Append corrected text exports for every catalogued Google Document.
+
+    This is intentionally a separate fetch policy: prior raw responses remain
+    immutable and auditable, while the newest successful snapshot becomes the
+    reviewer-facing Artifact preview.
+    """
+    conn = artifacts.connect(db_path)
+    try:
+        rows = conn.execute(
+            """SELECT artifact_id, canonical_url
+               FROM artifact
+               WHERE host = 'docs.google.com'
+                 AND canonical_url LIKE 'https://docs.google.com/document/%'
+               ORDER BY artifact_id"""
+        ).fetchall()
+        artifact_ids = [
+            str(row["artifact_id"])
+            for row in rows
+            if _google_doc_text_export_url(str(row["canonical_url"])) is not None
+        ]
+    finally:
+        conn.close()
+    if not artifact_ids:
+        return {
+            "fetch_run_id": None,
+            "expected_count": 0,
+            "success": 0,
+            "failed_retryable": 0,
+            "failed_terminal": 0,
+            "reused": True,
+        }
+    return fetch_cohort(
+        db_path=db_path,
+        artifact_ids=artifact_ids,
+        resolver=resolver,
+        transport=transport,
+        fetch_policy=GOOGLE_DOCS_REPAIR_POLICY,
+    )
 
 
 def fetch_all_supported(

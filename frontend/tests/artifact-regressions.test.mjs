@@ -63,6 +63,8 @@ test('Artifact content readiness is explained in expanded provenance without ano
   assert.match(artifactSource, /Extracted content/)
   assert.match(artifactSource, /Open full text/)
   assert.match(artifactSource, /\/api\/artifacts\/\$\{encodeURIComponent\(item\.artifact_id\)\}\/text/)
+  assert.match(artifactSource, /const textVersion = item\.fetched_at/)
+  assert.match(artifactSource, /\?v=\$\{encodeURIComponent\(textVersion\)\}/)
   assert.match(artifactSource, /<details className="artifact-extracted" onToggle=\{loadExtractedText\}>/)
   assert.doesNotMatch(artifactSource, /className=\{rowClassName\} onToggle/)
 })

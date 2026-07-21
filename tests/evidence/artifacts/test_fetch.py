@@ -566,6 +566,49 @@ def test_fetch_cohort_uses_public_google_doc_text_export_without_identity_churn(
     assert not text.startswith("\ufeff")
 
 
+def test_google_doc_repair_appends_new_policy_and_reuses_it(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    source_url = "https://docs.google.com/document/d/document_123/edit"
+    artifact_id = _seed_artifact(db, url=source_url, artifact_kind="other")
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+    calls = 0
+
+    def handler(request: httpx.Request):
+        nonlocal calls
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        calls += 1
+        return httpx.Response(
+            200,
+            headers={"Content-Type": "text/plain; charset=utf-8"},
+            content=b"The corrected public Google document body.\n",
+        )
+
+    first = artifact_fetch.repair_public_google_docs(
+        db_path=db,
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(handler),
+    )
+    second = artifact_fetch.repair_public_google_docs(
+        db_path=db,
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(handler),
+    )
+
+    assert first["success"] == 1
+    assert second["reused"] is True
+    assert calls == 1
+    conn = artifacts.connect(db)
+    fetch = conn.execute("SELECT * FROM artifact_fetch").fetchone()
+    conn.close()
+    assert fetch["artifact_id"] == artifact_id
+    assert fetch["fetch_policy"] == artifact_fetch.GOOGLE_DOCS_REPAIR_POLICY
+    assert fetch["extractor_contract"] == (
+        artifact_fetch.GOOGLE_DOCS_TEXT_EXPORT_EXTRACTOR
+    )
+
+
 def test_fetch_cohort_snapshots_text_and_reuses_success(tmp_path, monkeypatch):
     db = tmp_path / "artifacts.db"
     artifact_id = _seed_artifact(db)

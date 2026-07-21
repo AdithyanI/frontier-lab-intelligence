@@ -17,6 +17,12 @@ def test_product_artifact_type_keeps_x_articles_distinct():
     ) == "web"
 
 
+def test_google_docs_repair_has_a_reader_facing_fetch_method():
+    assert artifact_store._fetch_method("google-docs-public-text-v1") == (
+        "Google Docs export"
+    )
+
+
 def _artifact_fixture(path):
     conn = artifacts.connect(path)
     conn.executemany(
@@ -262,6 +268,7 @@ def test_artifact_text_api_returns_normalized_snapshot_without_exposing_path(
     assert response.text == "# Extracted title\n\nExact normalized evidence.\n"
     assert response.headers["x-artifact-format"] == "markdown"
     assert response.headers["x-artifact-extractor"] == "jina-reader-markdown-v1"
+    assert response.headers["cache-control"] == "private, max-age=0, must-revalidate"
     assert "snapshot.txt" not in response.text
 
 

@@ -201,6 +201,9 @@ function extractedContentLabel(item: ArtifactItem) {
   if (item.extractor_contract === 'twitterapi-io-x-article-body-v1') {
     return 'Normalized X Article text'
   }
+  if (item.extractor_contract === 'google-docs-text-export-v1') {
+    return 'Exported document text'
+  }
   if (item.extractor_contract === 'html-trafilatura-v1') return 'Extracted article text'
   return 'Normalized text'
 }
@@ -222,7 +225,8 @@ function ArtifactRow({
   const [textState, setTextState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const sourcePublishedAt = item.source_published_at
   const feedDate = sourcePublishedAt.slice(0, 10)
-  const textUrl = `/api/artifacts/${encodeURIComponent(item.artifact_id)}/text`
+  const textVersion = item.fetched_at ?? item.extractor_contract ?? 'current'
+  const textUrl = `/api/artifacts/${encodeURIComponent(item.artifact_id)}/text?v=${encodeURIComponent(textVersion)}`
   const textCharCount = item.text_char_count
   const hasReadableText = item.fetch_state === 'ready' && textCharCount != null
   const status = contentStatus(item)

@@ -449,7 +449,7 @@ def artifact_text(artifact_id: str) -> PlainTextResponse:
     return PlainTextResponse(
         payload["text"],
         headers={
-            "Cache-Control": "private, max-age=31536000, immutable",
+            "Cache-Control": "private, max-age=0, must-revalidate",
             "X-Artifact-Extractor": str(payload["extractor_contract"] or "unknown"),
             "X-Artifact-Format": str(payload["format"]),
         },
