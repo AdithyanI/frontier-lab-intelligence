@@ -120,6 +120,41 @@
   text-wrap: pretty;
 }
 
+/* ---- failure and recovery boundaries ---- */
+
+.recovery-table-row {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) minmax(0, 0.82fr);
+  gap: 0 28px;
+  align-items: start;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.recovery-table-row:first-child { border-top: 0; }
+
+.recovery-table-head {
+  padding-top: 14px;
+  padding-bottom: 12px;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.recovery-table-row strong {
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
 .method-row {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr) 200px;
@@ -214,4 +249,7 @@
   .model-table-row { grid-template-columns: minmax(0, 1fr) 170px; }
   .model-table-why { grid-column: 1 / -1; margin-top: 8px; }
   .model-table-head span:last-child { display: none; }
+  .recovery-table-row { grid-template-columns: 190px minmax(0, 1fr); }
+  .recovery-table-row span:last-child { grid-column: 2; margin-top: 8px; }
+  .recovery-table-head span:last-child { display: none; }
 }

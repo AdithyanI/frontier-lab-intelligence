@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import NetworkRankFigure from './NetworkRankFigure'
 
 const INK = '#151515'
@@ -112,7 +113,7 @@ function SystemOverview() {
   )
 }
 
-/* ---- 2 · Models per task ---- */
+/* ---- 2 · Current model boundaries ---- */
 
 const MODEL_TASKS = [
   {
@@ -131,31 +132,17 @@ const MODEL_TASKS = [
   },
   {
     task: 'Audience routing',
-    where: 'Judge stage',
+    where: 'Daily brief path',
     model: 'gpt-5.4-mini',
     effort: 'high',
     why: 'Evaluated on a 900-decision run with zero failures. A higher effort tier changed no decisions and used 5.4× the tokens.',
   },
   {
-    task: 'Per-Event working annotations',
-    where: 'Optional editorial input',
-    model: 'gpt-5.6-terra',
-    effort: 'high',
-    why: 'A calibration pass produced audience-specific notes. The daily agent may inspect them, but must re-evaluate the frozen evidence and does not treat them as editorial truth.',
-  },
-  {
     task: 'FLI daily-intelligence agent',
-    where: 'Final selection',
+    where: 'Daily brief path',
     model: 'gpt-5.6-sol',
     effort: 'xhigh',
     why: 'Free-running synthesis must compare the complete routed cohort, resolve duplication, and produce one defensible brief for each audience.',
-  },
-  {
-    task: 'Registry relevance audit',
-    where: 'One-time evaluation',
-    model: 'gpt-5.6-terra',
-    effort: 'high',
-    why: 'Used once to audit the initial Registry with required web search. It does not run in the daily brief path and cannot mutate the Registry.',
   },
 ]
 
@@ -213,10 +200,10 @@ function RosterGlyph({ x, y }: { x: number; y: number }) {
 }
 
 function DaysGlyph({ x, y }: { x: number; y: number }) {
-  const dots = Array.from({ length: 7 }, (_, i) => x + 6 + i * 22)
+  const dots = Array.from({ length: 7 }, (_, i) => x + 6 + i * 17)
   return (
     <g>
-      <line x1={x} y1={y} x2={x + 144} y2={y} stroke={MUTED} strokeWidth="1" opacity="0.45" />
+      <line x1={x} y1={y} x2={x + 116} y2={y} stroke={MUTED} strokeWidth="1" opacity="0.45" />
       {dots.map((cx) => (
         <circle key={cx} cx={cx} cy={y} r={3.5} fill={BLUE} />
       ))}
@@ -233,6 +220,20 @@ function EventGlyph({ x, y }: { x: number; y: number }) {
         <g key={ky}>
           <line x1={x + 30} y1={y} x2={x + 68} y2={ky} stroke={MUTED} strokeWidth="1" opacity="0.5" />
           <rect x={x + 68} y={ky - 5.5} width={24} height={11} fill="#fff" stroke={MUTED} strokeWidth="1" opacity="0.75" />
+        </g>
+      ))}
+    </g>
+  )
+}
+
+function RankGlyph({ x, y }: { x: number; y: number }) {
+  const rows = [64, 48, 34]
+  return (
+    <g>
+      {rows.map((width, index) => (
+        <g key={width}>
+          <text x={x} y={y + index * 17} fontFamily={MONO} fontSize="8.5" fill={BLUE_INK}>{index + 1}</text>
+          <rect x={x + 18} y={y + index * 17 - 7} width={width} height={7} fill={index === 0 ? BLUE : SURFACE} stroke={BLUE_MID} strokeWidth="1" />
         </g>
       ))}
     </g>
@@ -267,44 +268,53 @@ function AudienceGlyph({ x, y }: { x: number; y: number }) {
 function EvidenceInputMap() {
   const stages = [
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
-    { x: 234, kicker: 'SOURCE', title: 'X posts + threads', glyph: 'days', dark: false },
-    { x: 440, kicker: 'STRUCTURE', title: 'Exact Events', glyph: 'event', dark: false },
-    { x: 646, kicker: 'ENRICH', title: 'Source artifacts', glyph: 'artifact', dark: false },
-    { x: 852, kicker: 'ROUTE', title: 'Audience relevance', glyph: 'audience', dark: true },
+    { x: 202, kicker: 'SOURCE', title: 'X output', glyph: 'days', dark: false },
+    { x: 376, kicker: 'STRUCTURE', title: 'Exact Events', glyph: 'event', dark: false },
+    { x: 550, kicker: 'ORDER', title: 'Daily rank', glyph: 'rank', dark: false },
+    { x: 724, kicker: 'ENRICH', title: 'Artifacts', glyph: 'artifact', dark: false },
+    { x: 898, kicker: 'JUDGE', title: 'Audience routing', glyph: 'audience', dark: true },
   ]
+  const stageWidth = 154
   return (
     <svg
       viewBox="0 0 1080 226"
       role="img"
-      aria-label="Evidence input path. A screened Registry supplies dated X posts and threads. Exact Events disclose source artifacts before the complete evidence packet is routed independently for Investment and AI Engineering."
+      aria-label="Evidence input path. A screened Registry supplies dated X output. The system groups exact Events, orders the day, attaches source artifacts, and then routes each evidence packet independently for Investment and AI Engineering."
     >
       <ArrowDefs id="flow-arrow" />
       <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">EVIDENCE INPUT · INSPECTABLE BEFORE JUDGMENT</text>
       {stages.map((stage) => (
         <g key={stage.title}>
-          <rect x={stage.x} y="60" width="178" height="132" fill={stage.dark ? INK : '#fff'} stroke={stage.dark ? INK : BLUE_MID} strokeWidth="1.2" />
+          <rect x={stage.x} y="60" width={stageWidth} height="132" fill={stage.dark ? INK : '#fff'} stroke={stage.dark ? INK : BLUE_MID} strokeWidth="1.2" />
           <text x={stage.x + 18} y="86" fontFamily={MONO} fontSize="9.5" fill={stage.dark ? BLUE : BLUE_INK} letterSpacing="0.08em">{stage.kicker}</text>
           <text x={stage.x + 18} y="116" fontFamily={UI} fontSize={stage.title.length > 15 ? 15 : 17} fontWeight="600" fill={stage.dark ? '#fff' : INK}>{stage.title}</text>
           {stage.glyph === 'roster' && <RosterGlyph x={stage.x + 18} y={144} />}
           {stage.glyph === 'days' && <DaysGlyph x={stage.x + 18} y={158} />}
           {stage.glyph === 'event' && <EventGlyph x={stage.x + 18} y={158} />}
+          {stage.glyph === 'rank' && <RankGlyph x={stage.x + 18} y={148} />}
           {stage.glyph === 'artifact' && <ArtifactGlyph x={stage.x + 18} y={154} />}
           {stage.glyph === 'audience' && <AudienceGlyph x={stage.x + 18} y={150} />}
         </g>
       ))}
-      <FlowArrow x1={206} y1={126} x2={230} y2={126} marker="flow-arrow" />
-      <FlowArrow x1={412} y1={126} x2={436} y2={126} marker="flow-arrow" />
-      <FlowArrow x1={618} y1={126} x2={642} y2={126} marker="flow-arrow" />
-      <FlowArrow x1={824} y1={126} x2={848} y2={126} marker="flow-arrow" />
+      {stages.slice(0, -1).map((stage, index) => (
+        <FlowArrow
+          key={`${stage.title}-arrow`}
+          x1={stage.x + stageWidth}
+          y1={126}
+          x2={stages[index + 1].x - 4}
+          y2={126}
+          marker="flow-arrow"
+        />
+      ))}
     </svg>
   )
 }
 
 function DailyIntelligenceMap() {
   const stages = [
-    { x: 28, kicker: '1 · ROUTE', title: 'Audience routing', detail: 'one call · two judgments', tone: 'surface' as const },
-    { x: 232, kicker: '2 · FREEZE', title: 'Daily workspace', detail: 'union-positive · seven days', tone: 'sand' as const },
-    { x: 436, kicker: '3 · CODEX', title: 'FLI daily agent', detail: 'research · group · select', tone: 'dark' as const },
+    { x: 28, kicker: '1 · FREEZE', title: 'Daily workspace', detail: 'union-positive · seven days', tone: 'surface' as const },
+    { x: 232, kicker: '2 · HAND OFF', title: 'Persisted Codex task', detail: 'one date · one task', tone: 'sand' as const },
+    { x: 436, kicker: '3 · AUTHOR', title: 'FLI daily agent', detail: 'research · group · select', tone: 'dark' as const },
     { x: 640, kicker: '4 · VERIFY', title: 'Strict draft gate', detail: 'coverage · citations', tone: 'surface' as const },
     { x: 844, kicker: '5 · SERVE', title: 'Two daily briefs', detail: 'web · PDF · manual send', tone: 'plain' as const },
   ]
@@ -312,7 +322,7 @@ function DailyIntelligenceMap() {
     <svg
       viewBox="0 0 1080 236"
       role="img"
-      aria-label="Daily brief path. Audience routing returns two independent judgments per Event. The date is frozen into one immutable workspace, then one persisted FLI daily-intelligence Codex task researches the complete cohort and writes both briefs. Deterministic validation checks coverage and citations before the run is imported for the web reader, PDF, and manual delivery."
+      aria-label="Daily brief path. The union-positive audience-routing cohort is frozen into one immutable workspace. One persisted Codex task runs the FLI daily-intelligence agent, which researches the complete cohort and writes both briefs. Deterministic validation checks coverage and citations before the run is imported for the web reader, PDF, and manual delivery."
     >
       <ArrowDefs id="daily-arrow" />
       <text x="28" y="30" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE DATE · ONE CHECKPOINTED DAILY RUN</text>
@@ -323,12 +333,49 @@ function DailyIntelligenceMap() {
       <FlowArrow x1={412} y1={108} x2={432} y2={108} marker="daily-arrow" />
       <FlowArrow x1={616} y1={108} x2={636} y2={108} marker="daily-arrow" />
       <FlowArrow x1={820} y1={108} x2={840} y2={108} marker="daily-arrow" />
-      <text x="426" y="44" fontFamily={MONO} fontSize="8.5" fill={BLUE_INK} textAnchor="middle">--launch-codex →</text>
+      <text x="222" y="44" fontFamily={MONO} fontSize="8.5" fill={BLUE_INK} textAnchor="middle">--launch-codex →</text>
       <line x1="28" y1="194" x2="1024" y2="194" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
       <text x="28" y="218" fontFamily={UI} fontSize="12" fill={MUTED}>
         Without --launch-codex, run-day stops after freezing the workspace. A retry resumes the same dated run.
       </text>
     </svg>
+  )
+}
+
+const RECOVERY_BOUNDARIES = [
+  {
+    boundary: 'Bounded model calls',
+    response: 'LiteLLM handles retries, backoff, and provider fallback. Invalid structured output never becomes a judgment.',
+    invariant: 'The prompt version, input hash, and completed rows stay fixed.',
+  },
+  {
+    boundary: 'Daily editorial run',
+    response: 'The runner restarts from the last completed checkpoint and resumes the same persisted Codex task.',
+    invariant: 'The date, workspace, model settings, and task identity stay fixed.',
+  },
+  {
+    boundary: 'Draft validation',
+    response: 'An incomplete disposition or unmatched artifact excerpt rejects the draft before import.',
+    invariant: 'No partial brief replaces the last complete product state.',
+  },
+]
+
+function RecoveryTable() {
+  return (
+    <div className="recovery-table" role="table" aria-label="Failure and recovery boundaries">
+      <div className="recovery-table-row recovery-table-head" role="row">
+        <span role="columnheader">Boundary</span>
+        <span role="columnheader">What happens</span>
+        <span role="columnheader">What stays fixed</span>
+      </div>
+      {RECOVERY_BOUNDARIES.map((row) => (
+        <div className="recovery-table-row" role="row" key={row.boundary}>
+          <strong role="cell">{row.boundary}</strong>
+          <span role="cell">{row.response}</span>
+          <span role="cell">{row.invariant}</span>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -503,43 +550,52 @@ function RankingMethods() {
 }
 
 export default function Architecture() {
+  useEffect(() => {
+    const id = window.location.hash.replace('#', '')
+    if (!id) return
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ block: 'start' })
+    })
+  }, [])
+
   return (
     <section className="system-view arch-page" aria-labelledby="architecture-title">
       <h2 className="system-view-title" id="architecture-title">Architecture</h2>
-      <p className="page-sub">A technical map of the current implementation: the stack, the models, the pipeline, and the meaning of each number.</p>
+      <p className="page-sub">Start with one completed day, then open the stack, model boundaries, data model, scoring, and recovery behavior behind it.</p>
 
       <nav className="ruled-nav arch-chapters" aria-label="Architecture chapters">
-        <a href="#overview">Overview</a>
+        <a href="#overview">Daily run</a>
+        <a href="#stack">Stack</a>
         <a href="#models">Models</a>
-        <a href="#pipeline">Pipeline</a>
         <a href="#data-model">Data model</a>
         <a href="#ranking-methods">Numbers</a>
+        <a href="#recovery">Recovery</a>
       </nav>
 
       <section className="arch-section arch-section--lead" id="overview">
         <div className="arch-section-head">
-          <h2 className="arch-h">System at a glance</h2>
-          <p className="arch-p">The deployed stack in one view, from public evidence to the hosted reviewer interface. Every section below drills into one part of this picture.</p>
+          <h2 className="arch-h">One completed day, end to end</h2>
+          <p className="arch-p">The system collects X output from the screened Registry, groups exact Events, orders the day, and returns two independent audience judgments in one structured call. It freezes every positive candidate, then one persisted Codex task researches the cohort and writes both briefs. Nothing is published or sent until the complete draft passes deterministic validation.</p>
+        </div>
+        <div className="arch-canvas"><EvidenceInputMap /></div>
+        <div className="arch-canvas arch-canvas--sub"><DailyIntelligenceMap /></div>
+      </section>
+
+      <section className="arch-section" id="stack">
+        <div className="arch-section-head">
+          <h2 className="arch-h">The deployed system underneath it</h2>
+          <p className="arch-p">One Python pipeline owns collection, transformation, and orchestration. SQLite preserves raw evidence and every derived decision. FastAPI and React expose the same stored state through the reviewer interface, while LiteLLM and Codex App Server remain explicit model boundaries.</p>
         </div>
         <div className="arch-canvas"><SystemOverview /></div>
       </section>
 
       <section className="arch-section" id="models">
         <div className="arch-section-head">
-          <h2 className="arch-h">One model per task, chosen by evidence</h2>
-          <p className="arch-p">Bounded pipeline calls go through LiteLLM, which records the model, tokens, cache reads, and request cost. Final brief authoring runs as a persisted Codex App Server task with its effective model, effort, tier, and thread attached to the editorial run. Defaults come from comparisons on real workloads, not from picking the biggest model.</p>
+          <h2 className="arch-h">Models enter at four bounded tasks</h2>
+          <p className="arch-p">Two structured tasks maintain the Registry. The daily brief path then uses one audience-routing call per Event and one persisted editorial task for the complete cohort. These are the current defaults; historical calibration and one-time audits remain in the repository rather than the live architecture.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><ModelTable /></div>
-        <p className="arch-note">Measured, not estimated: the per-Event annotation batch averaged $0.01638 per surface-or-suppress decision, with 1.76M tokens served from prompt cache across the batch. That was working-note and calibration spend, not the cost of the final daily briefs. Each immutable run keeps its own exact model, prompt version, and cost telemetry, so changing a default never relabels old results.</p>
-      </section>
-
-      <section className="arch-section" id="pipeline">
-        <div className="arch-section-head">
-          <h2 className="arch-h">The evidence-to-insight path</h2>
-          <p className="arch-p">The deterministic path ends with two audience-routing judgments per Event. For each date, the runner freezes the union-positive cohort and can hand that exact workspace to one persisted FLI daily-intelligence task. The agent researches the complete day and writes one validated draft containing both audience briefs.</p>
-        </div>
-        <div className="arch-canvas"><EvidenceInputMap /></div>
-        <div className="arch-canvas arch-canvas--sub"><DailyIntelligenceMap /></div>
+        <p className="arch-note">LiteLLM records the model, prompt version, tokens, cache reads, latency, and request cost for each bounded call. The editorial run records the Codex model, reasoning effort, service tier, and task identity. Changing a default never rewrites old run metadata.</p>
       </section>
 
       <section className="arch-section" id="data-model">
@@ -558,6 +614,14 @@ export default function Architecture() {
         </div>
         <div className="arch-canvas arch-canvas--methods"><RankingMethods /></div>
         <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>
+      </section>
+
+      <section className="arch-section arch-section--methods" id="recovery">
+        <div className="arch-section-head">
+          <h2 className="arch-h">Failure recovery preserves the run</h2>
+          <p className="arch-p">Retries may continue work, but they cannot silently change the evidence or model settings. A daily brief enters product state only after one complete, validated import.</p>
+        </div>
+        <div className="arch-canvas arch-canvas--methods"><RecoveryTable /></div>
       </section>
     </section>
   )
