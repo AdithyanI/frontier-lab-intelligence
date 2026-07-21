@@ -1,3 +1,4 @@
+# Local workspace and environment state
 tmp/
 .env
 .venv/
