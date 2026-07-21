@@ -24,11 +24,11 @@ Selection criteria:
 | 2 | 9 Jul | Investment | **ChatGPT Work puts the agent interface above Microsoft and Google** (`ad491238…`) | Connects a shipped OpenAI product to portfolio interface control and AI monetization at Microsoft and Alphabet while separating product availability from still-unknown adoption economics. |
 | 3 | 9 Jul | AI Engineering | **FrontierFinance gives Aion a realistic evaluation target** (`8b8830c3…`) | Directly matches BIT's research-agent mandate: 220 public financial-research tasks, 11,543 expert rubric items, open evaluation code, and a concrete adoption test with leakage and grading checks. |
 | 4 | 13 Jul | AI Engineering | **Retention controls do not prove what a coding agent transmits** (`908551bf…`) | Turns conflicting provider and reproducible wire evidence into a precise security distinction—transmission, retention, and training consent are separate controls—and a bounded canary test. |
-| 5 | 15 Jul | Investment | **Gemini’s Southeast Asia growth strengthens Alphabet’s distribution case** (`5ca85719…`) | Uses a first-party adoption signal, native-language and multimodal behavior, a direct Alphabet distribution mechanism, and explicit retention, revenue, and inference-cost unknowns. |
+| 5 | 18 Jul | Investment | **Claude demand strengthens Amazon's capacity exposure** (`9dee6e36…`) | Connects first-party evidence of unpredictable Claude demand and continuing capacity investment to Anthropic's long-term AWS commitment, while keeping the undisclosed capacity source and economics explicit. |
 
 The five are intentionally mixed: three Investment and two AI Engineering;
 infrastructure, interface competition, research-agent evaluation, data
-security, and consumer distribution. No two depend on the same development.
+security, and contracted AI capacity. No two depend on the same development.
 
 ## Source check
 
@@ -39,7 +39,8 @@ security, and consumer distribution. No two depend on the same development.
 - Grok Build data boundary: same-day provider statement plus the original
   reproducible wire-analysis page; the Insight explicitly limits the result to
   the tested version and account configuration.
-- Gemini Southeast Asia: dated first-party Google executive source.
+- Claude capacity: first-party Anthropic demand and capacity statements dated
+  18 July plus Anthropic's published AWS commitment.
 
 All five are present in the latest complete imported run for their day. Their
 Event citations stay within the seven-day workspace window, and their frozen

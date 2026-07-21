@@ -1,6 +1,6 @@
 # System Status
 
-Last verified: 2026-07-19
+Last verified: 2026-07-21
 
 This is the conceptual handoff for Frontier Lab Intelligence. Read it before
 planning across projects or changing the system direction. It explains what
@@ -25,9 +25,10 @@ The product thesis is:
 > evidence grouping, transparent routing, and primary-source citations can
 > turn that activity into intelligence a human can trust.
 
-The submission deadline is 2026-07-20. Until then, a narrow evaluated path
-from evidence to cited delivery is more valuable than broader crawling, a
-larger graph, or additional UI polish.
+The case study was submitted on 2026-07-20. The current endpoint is earning the
+next interview through a stable reviewer path and a defensible discussion of
+the system's decisions, limits, and next steps. New platform breadth remains
+lower value than keeping the submitted proof coherent and available.
 
 ## Product Story
 
@@ -75,8 +76,8 @@ complete routed-positive cohort behind a strict validated write boundary.
 | Feed audience routing | Current v9 packet policy plus exact cross-publication reuse | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons. New freezes admit only first-party X sources from the evaluation day through seven days earlier: a current same-author continuation may replace an older root, while an old-only Event is excluded. Independently authored reactions and pure reposts remain outside model input. Multi-day refresh freezes one global publication before parallel day execution and creates immutable current-lineage targets. It reuses a compatible predecessor judgment only for the exact same Event, evidence SHA, and rendered input SHA; changed or newly ranked Events alone require model work, and reuse provenance remains stored per row. |
 | Audience Insight generation | Complete v10/v7 evaluation of every routed-positive audience | Investment v10 and AI Engineering v7 address distinct readers through one shared decision core and per-audience action schemas: `Summary` → `Why it matters` → one trigger-shaped Investment `Watchpoint` or one bounded Engineering `Experiment`. Insight-only rendering adds the evaluation day and stored post dates without changing routing hashes, and suppresses resurfaced historical material that has no current development. `fli insights` freezes exact requests before execution, rejects non-current source or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The current production batch contains 947 unique Event/audience decisions: 404 surfaced and 543 suppressed. It reported 847 cache-hit requests, 1,755,904 cached tokens, and $15.512238 proxy-reported cost. The stale 2022 ChatGPT candidate is now suppressed with its date; all 189 surfaced Investment notes use trigger→assumption watchpoints, and no surfaced rationale contains editorial gate-talk. Cross-Event semantic duplicates remain an explicit downstream editorial boundary. |
 | Daily editorial agent | Strict workspace v3 plus safe post-freeze date fan-out | `$fli-daily-intelligence` freezes the routed-positive day, applies the seven-day first-party X window, projects authoritative X publication dates, and exposes exact artifact disclosure lineage without automatically filtering artifacts. Workspace v3 with `semantic_snapshot_sha256` is the only executable authoring contract; historical packets are not upgraded or resumed. `fli daily-intelligence run-day` checkpoints exact Evidence, routing, workspace, Codex-task, and editorial-run identities for one date. Historical parallel work instead publishes Evidence once, routes the full range against that publication, and then fans out independent immutable workspaces and Codex tasks; several full `run-day` Evidence publishers do not compete. Retries treat a durable import as terminal before touching App Server and validate frozen task settings before any live resume. Artifact citations still require verified excerpts; embeddings remain optional retrieval only. |
-| Insights UI and delivery | Canonical daily reader, cached PDF workbook, manual Slack/email delivery, plus candidate audit | For an imported day, `Kept` reads the newest complete daily editorial run. Investment presents the conclusion-led title, facts, one causal interpretation, company read-through, confirmation/challenge signals, and separate original-Feed and artifact/context sources without exposing intermediate reasoning scaffolding. Engineering retains its bounded experiment detail. The selected complete audience/day downloads from the top-right as a deterministic A4 workbook. Beside it, a muted `Send brief` action requires an explicit confirmation: Slack presents every cited Insight with its complete interpretation and links to the complete brief and PDF; email receives up to five ranked Insights with the cached PDF attached. Provider credentials remain server-side, and the same-origin app confirms sends without a separate access-key field. The PDF's reader-first opening combines the title, audience/date, and clickable ranked Insight titles without run hashes or pipeline counts; every title jumps directly to analysis without the web-only rank-rationale disclosure, then continues to its linked full source ledger, and every later page returns to the brief index. Original-Feed titles in the PDF open the exact internal Feed Event, which retains the onward original-post link; artifact/context titles still open their cited sources directly. Serif display headings and blue slash markers give the workbook a restrained visual relationship to the case brief without copying BIT branding. `/api/insights/report.pdf` renders only the canonical read projection into an atomic content-addressed cache with ETag revalidation. `Suppressed` / `All` and days without an imported run retain the per-Event candidate audit. `/api/insights` exposes a discriminated read contract and the date rail overlays final imported counts. All eleven July 5–15 days now have canonical imported runs. |
-| Submission package | Live product, reviewer walkthrough, and reproducible local client complete; external package pending | The public hosted product is the primary reviewer path. Its System guide maps the assignment to a five-step inspection path and states the current scope boundary. A clean checkout also restores a checksummed read-only snapshot with one command. The final delivery review remains. Nothing has been submitted to BIT. |
+| Insights UI and delivery | Canonical daily reader, cached PDF workbook, manual Slack/email delivery, plus candidate audit | For an imported day, `Kept` reads the newest complete daily editorial run. Investment presents the conclusion-led title, facts, one causal interpretation, company read-through, confirmation/challenge signals, and separate original-Feed and artifact/context sources without exposing intermediate reasoning scaffolding. Engineering retains its bounded experiment detail. The selected complete audience/day downloads from the top-right as a deterministic A4 workbook. Beside it, a muted `Send brief` action requires an explicit confirmation: Slack presents every cited Insight with its complete interpretation and links to the complete brief and PDF; email receives up to five ranked Insights with the cached PDF attached. Provider credentials remain server-side, and the same-origin app confirms sends without a separate access-key field. The PDF's reader-first opening combines the title, audience/date, and clickable ranked Insight titles without run hashes or pipeline counts; every title jumps directly to analysis without the web-only rank-rationale disclosure, then continues to its linked full source ledger, and every later page returns to the brief index. Original-Feed titles in the PDF open the exact internal Feed Event, which retains the onward original-post link; artifact/context titles still open their cited sources directly. Serif display headings and blue slash markers give the workbook a restrained visual relationship to the case brief without copying BIT branding. `/api/insights/report.pdf` renders only the canonical read projection into an atomic content-addressed cache with ETag revalidation. `Suppressed` / `All` and days without an imported run retain the per-Event candidate audit. `/api/insights` exposes a discriminated read contract and the date rail overlays final imported counts. All fifteen July 5–19 days have canonical imported runs. |
+| Submission package | Submitted 20 July 2026; live reviewer path remains available | The submitted email leads with the public product and video, links the written How it works report, provides five exact showcase Insights, links the public repository, and attaches one sample PDF. A clean checkout restores a checksummed read-only snapshot with one command. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
 current databases or APIs before using them as present-tense product claims.
@@ -88,18 +89,19 @@ Insights are locked. The remaining claim is communicative: whether an external
 reviewer can understand the product, reproduce the evidence-backed demo, and
 see the rubric coverage without reconstructing the development history.
 
-## Submission Finish Line
+## Post-submission State
 
-The intelligence and reproduction boundaries are frozen. At system level, the
-remaining work is:
+The case study was submitted on 20 July 2026. The intelligence and
+reproduction boundaries remain frozen. The active priorities are:
 
-1. Assemble the concise rubric-mapped write-up around the locked five Insights.
-2. Check every submitted link, attachment, limitation, and prompt requirement.
-3. Perform the final delivery review and request explicit approval before any
-   external submission.
+1. Keep the submitted links and public product stable.
+2. Preserve one coherent explanation of the five showcase Insights, measured
+   costs, limitations, and next steps.
+3. Prepare concise interview defenses for source scope, ranking validation,
+   top-100 recall, model choice, and the human-triggered delivery boundary.
 
-External submission or alert delivery remains blocked without Adi's explicit
-current-session approval.
+Any additional external message or alert delivery remains blocked without
+Adi's explicit current-session approval.
 
 ## What Is Deliberately Deferred
 
@@ -109,8 +111,8 @@ current-session approval.
   production remains on the existing transparent day-relative formula.
 - Large discovered-account admission or recursive graph crawling.
 - Mobile/responsive polish.
-- Scheduled/unattended alerts or submission. Any real external send still
-  requires Adi's explicit current-session approval.
+- Scheduled/unattended alerts or additional submission messages. Any new
+  external send still requires Adi's explicit current-session approval.
 
 These are valid future extensions, not prerequisites for proving the current
 case-study thesis.
@@ -135,12 +137,13 @@ archived under
 [`docs/projects/archive/daily-intelligence-quality/`](projects/archive/daily-intelligence-quality/).
 It shipped deterministic X chronology, artifact disclosure lineage, verified
 artifact excerpts, resumable Codex handoff, calibrated company direction,
-compact agent inspection, and current imported runs through 17 July. The final
+compact agent inspection, and current imported runs through 19 July. The final
 five-Insight proof is locked in its
 [`submission selection`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).
 Busy-day tail selection and cross-day novelty remain disclosed limitations,
-not blockers to the curated proof. The remaining submission work is packaging,
-not another intelligence-generation or harness cycle.
+not blockers to the curated proof. Post-submission work is limited to reviewer
+clarity, availability, and interview preparation, not another
+intelligence-generation or harness cycle.
 
 The public product at
 [`frontier-lab-intelligence.adithyan.io`](https://frontier-lab-intelligence.adithyan.io/)

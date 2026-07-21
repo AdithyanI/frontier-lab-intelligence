@@ -1,7 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
+import { ModelTable } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
 import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 
@@ -67,7 +69,13 @@ function WhyLink({ stage }: { stage: string }) {
 
 /* Decision figures open fullscreen on click, so they can be presented
    and talked over. Esc or a click anywhere closes the overlay. */
-function FigureFrame({ children }: { children: ReactNode }) {
+function FigureFrame({
+  children,
+  label = 'Expand figure to full screen',
+}: {
+  children: ReactNode
+  label?: string
+}) {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -89,7 +97,7 @@ function FigureFrame({ children }: { children: ReactNode }) {
         type="button"
         className="how-read-figure"
         onClick={() => setOpen(true)}
-        aria-label="Expand figure to full screen"
+        aria-label={label}
       >
         {children}
         <span className="how-figure-expand mono" aria-hidden="true">expand &#x2921;</span>
@@ -156,6 +164,52 @@ type Beat = {
   title: string
   text: string
 }
+
+const UNIT_COSTS = [
+  {
+    workflow: 'Registry classification',
+    unit: 'one identity',
+    cost: '$0.00049',
+  },
+  {
+    workflow: 'Audience routing',
+    unit: 'one Event, two judgments',
+    cost: '$0.00388 average',
+  },
+  {
+    workflow: 'Insight generation',
+    unit: 'one audience-specific decision',
+    cost: '$0.01638 average',
+  },
+]
+
+const SHOWCASE_INSIGHTS = [
+  {
+    title: 'Anthropic gives TeraWulf a long lease; execution decides its value',
+    meta: '6 July · Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-06&insight=3f8ecb8de3fb7bf34d3756474ba502a43a724593e37862d72163222f3fc48065',
+  },
+  {
+    title: 'ChatGPT Work puts the agent interface above Microsoft and Google',
+    meta: '9 July · Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-09&insight=18f69c9ac6e3d5e8a0c2c737973284580978dd81c3121c755da07ff88727a9f4',
+  },
+  {
+    title: "Claude demand strengthens Amazon's capacity exposure",
+    meta: '18 July · Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-18&insight=9dee6e36371b150c60e9821006f2ece26cc60c7891cb59bd933e6a76f9d7a793',
+  },
+  {
+    title: 'FrontierFinance gives Aion a realistic evaluation target',
+    meta: '9 July · AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-09&insight=70a81026bd8bd1c43afb31e11451d5ab5cc66064b529274719f9ab1479923243',
+  },
+  {
+    title: 'Retention controls do not prove what a coding agent transmits',
+    meta: '13 July · AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-13&insight=b2d9973fc22c09df7c132c5f79309a612c7abed40a633a661ce4199bdeff926e',
+  },
+]
 
 export default function HowItWorks() {
   const insightsPath = useAuditDatePath('/insights')
@@ -539,13 +593,11 @@ export default function HowItWorks() {
           <h4><span className="mono">4</span> Judge: two independent questions</h4>
           <p>
             An Event can top the attention ranking and still be useless to
-            both readers. So each of the top 100 Events is asked two separate
-            questions, by two independent LLM calls: does this change an
-            investment position? Should an engineering team act on it? The
-            two answers never mix. An Event can matter to both audiences, to
-            one, or to neither, and each verdict comes back as a structured
-            yes or no with its reasoning attached, readable on the Event
-            itself.
+            both readers. One structured call produces two independent
+            audience judgments, with separate criteria, booleans and reasons:
+            does this change an investment position, and should an engineering
+            team act on it? An Event can matter to both audiences, to one, or
+            to neither. Each verdict remains readable on the Event itself.
           </p>
           <p>
             The declined items make the filter easier to see. One post that day was a joke
@@ -626,17 +678,65 @@ export default function HowItWorks() {
             reasoning effort, prompt version, token usage, and cost.
           </p>
           <p>
-            Models are matched to the size of the job. Bounded structured
-            work like screening and audience routing runs on small, fast
-            models with prompt caching and structured schema output, so a
-            full day of judging the top 100 Events costs well under a
-            dollar. Measured, not estimated: the current Insight batch made
-            947 surface-or-suppress decisions for $15.51, with 1.76 million
-            tokens served from prompt cache. The editorial writing, where
-            quality matters most, runs on a large reasoning
-            model. The exact model and effort per task, and the reasoning
-            behind each choice, live in
-            the <Link to="/system/architecture">Architecture</Link> chapters.
+            Models are matched to the job. Small, fast models handle bounded
+            structured decisions. Audience-specific candidate Insights use a
+            larger reasoning model because interpretation quality matters. A
+            final editorial agent then compares the complete cohort and writes
+            each daily brief. I kept the cheaper model only when a comparison
+            preserved decision quality. The table below shows the current
+            choice for each task.
+          </p>
+          <div className="how-model-table">
+            <ModelTable />
+          </div>
+          <p>
+            Cost is recorded at the decision boundary. These are measured
+            LiteLLM costs from the production paths:
+          </p>
+          <div className="how-cost-table" role="table" aria-label="Measured model cost per decision">
+            <div className="how-cost-row how-cost-head" role="row">
+              <span role="columnheader">Workflow</span>
+              <span role="columnheader">Measured unit</span>
+              <span role="columnheader">Cost</span>
+            </div>
+            {UNIT_COSTS.map((row) => (
+              <div className="how-cost-row" role="row" key={row.workflow}>
+                <strong role="cell">{row.workflow}</strong>
+                <span role="cell">{row.unit}</span>
+                <span role="cell" className="mono">{row.cost}</span>
+              </div>
+            ))}
+          </div>
+          <p className="how-cost-note">
+            The routing average comes from 99 new model calls for 19 July. The
+            Insight average comes from 947 current-contract audience
+            decisions. The Registry figure comes from the complete 2,956-item
+            classification pass.
+          </p>
+          <p className="how-cost-note">
+            The final daily editorial agent runs through Codex App Server. Its
+            effective model, reasoning effort, service tier, thread, and
+            resulting brief remain attached to the editorial run rather than
+            being mixed into these LiteLLM unit prices.
+          </p>
+          <p>
+            Every request is tagged with the app, pipeline, job, scope, prompt
+            version, and run identity. LiteLLM keeps the request and response,
+            model, tokens, cache state, latency, and cost together. I used
+            those logs to compare prompts and reasoning effort, then kept the
+            cheaper path only when the result held up.
+          </p>
+          <FigureFrame label="Expand the LiteLLM request log screenshot">
+            <img
+              src={litellmRequestLog}
+              alt="LiteLLM request log for a Frontier Lab Intelligence audience-routing call, showing its tags, 2,732 tokens, 4.385-second duration, and $0.0033444 cost."
+              loading="lazy"
+              decoding="async"
+            />
+          </FigureFrame>
+          <p className="how-cost-note">
+            One 19 July routing call: 2,732 tokens, 4.385 seconds, and
+            $0.0033444. It is one measured request, not a fixed price promise.
           </p>
           <p>
             Reading the brief here is one option. Each completed day can
@@ -681,6 +781,69 @@ export default function HowItWorks() {
         </article>
       </section>
 
+      <section className="how-final" aria-labelledby="how-final-title">
+        <header className="how-final-head">
+          <p className="how-beat-kicker mono">Final report</p>
+          <h3 id="how-final-title">What works, what I learned, and what comes next</h3>
+          <p>
+            The case-study proof is the working path from public evidence to
+            2 audience-specific, cited briefs. The complete corpus remains
+            open for audit; these are the conclusions I would carry into the
+            next version.
+          </p>
+        </header>
+
+        <div className="how-final-rows">
+          <article>
+            <h4>What works</h4>
+            <p>
+              The same evidence core has produced an Investment brief and an
+              AI Engineering brief for every completed day from 5 to 19 July.
+              Every selected claim traces back to an exact Event and its
+              available primary source. The brief can be read here, exported
+              as a PDF, or deliberately sent to Slack or email.
+            </p>
+          </article>
+          <article>
+            <h4>What I learned</h4>
+            <p>
+              Network trust is useful for deciding where to look, but it
+              should never become a truth score. Exact structural grouping
+              keeps provenance cleaner than early semantic clustering. And a
+              smaller model is the right choice only after it preserves the
+              decisions that matter, not simply because it is cheaper.
+            </p>
+          </article>
+          <article>
+            <h4>What I would build next</h4>
+            <p>
+              First, route ranks 101 to 200 on several busy days to measure
+              recall below the top-100 gate. Then add cross-day story memory so
+              recurring themes must contain a real change. Only after measuring
+              what X misses would I add independent RSS, GitHub, or arXiv
+              discovery and unattended scheduling.
+            </p>
+          </article>
+        </div>
+
+        <div className="how-showcase">
+          <h4>Five Insights I would hand to the teams</h4>
+          <p>
+            These are the small proof set, selected for evidence quality,
+            audience consequence, and variety. Each link opens the exact
+            Insight in the live reader.
+          </p>
+          <ol>
+            {SHOWCASE_INSIGHTS.map((insight) => (
+              <li key={insight.to}>
+                <Link to={insight.to}>{insight.title}</Link>
+                <span className="mono">{insight.meta}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
       <section className="how-map" aria-labelledby="how-map-title">
         <header className="how-map-head">
           <p className="how-beat-kicker mono">For the reviewer</p>
@@ -705,12 +868,13 @@ export default function HowItWorks() {
           ))}
         </ul>
         <p className="how-map-note">
-          The written deliverables travel with the repository: the
-          architecture write-up with model choices per task, the prompts and
-          their design rationale, the evaluation approach for extraction and
-          scoring, and the token and cost accounting per workflow. The{' '}
-          <Link to="/system/architecture">Architecture</Link> chapters cover
-          the same ground inside the product.
+          The <Link to="/system/architecture">Architecture</Link> page keeps
+          the reviewer-facing technical map concise. The complete prompts,
+          design rationale, evaluation notes, run telemetry, and cost records
+          travel with the{' '}
+          <a href="https://github.com/AdithyanI/frontier-lab-intelligence">
+            repository
+          </a>.
         </p>
       </section>
     </div>

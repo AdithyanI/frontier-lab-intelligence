@@ -141,7 +141,14 @@ const MODEL_TASKS = [
     where: 'Publish stage',
     model: 'gpt-5.6-terra',
     effort: 'high',
-    why: 'Quality-first by choice: the brief is the product. Stable per-audience cache keys keep the repeated context cheap.',
+    why: 'Audience-specific interpretation is quality-sensitive. Stable per-audience cache keys keep the repeated context cheap.',
+  },
+  {
+    task: 'Daily brief editorial agent',
+    where: 'Final selection',
+    model: 'gpt-5.6-sol',
+    effort: 'xhigh',
+    why: 'Free-running synthesis must compare the complete routed cohort, resolve duplication, and produce one defensible brief for each audience.',
   },
   {
     task: 'Web-grounded relevance audit',
@@ -152,7 +159,7 @@ const MODEL_TASKS = [
   },
 ]
 
-function ModelTable() {
+export function ModelTable() {
   return (
     <div className="model-table" role="table" aria-label="Model selection per task">
       <div className="model-table-row model-table-head" role="row">
@@ -540,7 +547,7 @@ export default function Architecture() {
           <p className="arch-p">Every call goes through one LiteLLM boundary that records the model, tokens, cache reads, and cost per run. Defaults come from comparing effort tiers on real workloads, not from picking the biggest model.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><ModelTable /></div>
-        <p className="arch-note">Measured, not estimated: the current insight batch made 947 surface-or-suppress decisions for $15.51, with 1.76M tokens served from prompt cache. Each immutable run keeps its own exact model, prompt version, and cost telemetry, so changing a default never relabels old results.</p>
+        <p className="arch-note">Measured, not estimated: the current Insight batch averaged $0.01638 per surface-or-suppress decision, with 1.76M tokens served from prompt cache across the batch. Each immutable run keeps its own exact model, prompt version, and cost telemetry, so changing a default never relabels old results.</p>
       </section>
 
       <section className="arch-section" id="pipeline">

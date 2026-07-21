@@ -50,7 +50,9 @@ test('Architecture exposes the evaluated model choice for each judgment task', (
   assert.match(architecture, /model: 'gpt-5\.6-luna'/)
   assert.match(architecture, /model: 'gpt-5\.4-mini'/)
   assert.match(architecture, /model: 'gpt-5\.6-terra'/)
-  assert.match(architecture, /947 surface-or-suppress decisions for \$15\.51/)
+  assert.match(architecture, /task: 'Daily brief editorial agent'/)
+  assert.match(architecture, /model: 'gpt-5\.6-sol'/)
+  assert.match(architecture, /\$0\.01638 per surface-or-suppress decision/)
 })
 
 test('Architecture does not publish stale proof counts or describe audience delivery as future', () => {
