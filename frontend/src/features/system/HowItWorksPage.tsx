@@ -439,11 +439,10 @@ export default function HowItWorks() {
           <p className="how-beat-kicker mono">In writing</p>
           <h3 id="how-read-title">The same funnel, in words</h3>
           <p>
-            The figure above is the whole system. Here is the same story in
-            words, one stage at a time, with the design choice behind each and
-            the numbers from one real day: 17 July 2026, when 4,537 captured
-            posts became 1,287 Events, 56 candidates worth judging, and 10
-            cited Insights.
+            The easiest way to understand the system is the video walkthrough,
+            and I recommend starting there. But if you prefer reading, I’ll
+            explain the same funnel below, step by step, with the visuals and
+            the reasoning behind each choice.
           </p>
           <p>
             The system works one day at a time. Every brief covers a single
