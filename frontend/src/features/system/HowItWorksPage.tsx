@@ -169,99 +169,6 @@ type Beat = {
   text: string
 }
 
-const UNIT_COSTS = [
-  {
-    workflow: 'Audience routing',
-    unit: 'one Event, two judgments',
-    cost: '$0.00388 average',
-  },
-]
-
-const DAILY_RUN_STEPS = [
-  {
-    id: '01',
-    label: 'Evidence',
-    title: 'Refresh the dated evidence state',
-    text: 'Collect the new day, then materialize the exact Feed, Events, artifacts, and attention order.',
-  },
-  {
-    id: '02',
-    label: 'Route',
-    title: 'Classify the top Events',
-    text: 'One structured gpt-5.4-mini call returns separate Investment and AI Engineering judgments.',
-  },
-  {
-    id: '03',
-    label: 'Freeze',
-    title: 'Prepare one immutable workspace',
-    text: 'Keep the union-positive cohort, apply the seven-day first-party window, and bind every source hash.',
-  },
-  {
-    id: '04',
-    label: 'Codex',
-    title: 'Research and write both briefs',
-    text: 'One persisted gpt-5.6-sol task reviews the whole cohort, resolves gaps, consolidates, selects, and writes.',
-  },
-  {
-    id: '05',
-    label: 'Publish',
-    title: 'Validate and import atomically',
-    text: 'Every candidate is included or declined, every citation is checked, and the completed run becomes the reader.',
-  },
-]
-
-function DailyRunFigure() {
-  return (
-    <figure className="how-daily-run" aria-labelledby="how-daily-run-title">
-      <figcaption id="how-daily-run-title">
-        One date, one resumable run
-      </figcaption>
-      <ol>
-        {DAILY_RUN_STEPS.map((step, index) => (
-          <li key={step.id} className={index === 2 ? 'how-run-step how-run-step--checkpoint' : 'how-run-step'}>
-            <span className="how-run-step-id mono">{step.id} · {step.label}</span>
-            <strong>{step.title}</strong>
-            <p>{step.text}</p>
-            {index === 2 && (
-              <span className="how-run-handoff mono">
-                add --launch-codex to continue →
-              </span>
-            )}
-          </li>
-        ))}
-      </ol>
-    </figure>
-  )
-}
-
-const SHOWCASE_INSIGHTS = [
-  {
-    title: 'Anthropic gives TeraWulf a long lease; execution decides its value',
-    meta: '6 July · Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-06&insight=3f8ecb8de3fb7bf34d3756474ba502a43a724593e37862d72163222f3fc48065',
-  },
-  {
-    title: 'ChatGPT Work puts the agent interface above Microsoft and Google',
-    meta: '9 July · Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-09&insight=18f69c9ac6e3d5e8a0c2c737973284580978dd81c3121c755da07ff88727a9f4',
-  },
-  {
-    title: "Claude demand strengthens Amazon's capacity exposure",
-    meta: '18 July · Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-18&insight=9dee6e36371b150c60e9821006f2ece26cc60c7891cb59bd933e6a76f9d7a793',
-  },
-  {
-    title: 'FrontierFinance gives Aion a realistic evaluation target',
-    meta: '9 July · AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-09&insight=70a81026bd8bd1c43afb31e11451d5ab5cc66064b529274719f9ab1479923243',
-  },
-  {
-    title: 'Retention controls do not prove what a coding agent transmits',
-    meta: '13 July · AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-13&insight=b2d9973fc22c09df7c132c5f79309a612c7abed40a633a661ce4199bdeff926e',
-  },
-]
-
 export default function HowItWorks() {
   const insightsPath = useAuditDatePath('/insights')
   const feedPath = useAuditDatePath('/evidence/feed')
@@ -713,38 +620,22 @@ export default function HowItWorks() {
         </article>
 
         <article className="how-read-block how-read-block--wide" id="why-plumbing">
-          <h4><span className="mono">6</span> The plumbing: models, costs, delivery</h4>
+          <h4><span className="mono">6</span> The models and cost</h4>
           <p>
-            The system uses a Python pipeline writing to SQLite, with FastAPI
-            and React serving the product through a Cloudflare tunnel. The
-            page you are reading runs on it. Pipeline API calls go through one
-            shared LiteLLM gateway, which handles retries, backoff, fallback,
-            and request-level cost telemetry. Final brief authoring runs as a
-            persisted task through Codex App Server.
+            There are only two model steps in the daily path.
           </p>
           <p>
-            The daily intelligence path has two model stages. First, one small,
-            structured call classifies each top-ranked Event for both
-            audiences. Then the FLI daily-intelligence agent reviews the
-            complete routed cohort. It researches missing links, consolidates
-            overlapping Events, selects what matters, and writes both final
-            briefs.
+            Audience routing uses <code>gpt-5.4-mini</code>. One structured
+            call reads an Event and returns a separate decision for investment
+            and AI engineering. The FLI daily-intelligence agent then uses{' '}
+            <code>gpt-5.6-sol</code> to review everything that passed, research
+            what is missing, and write both briefs.
           </p>
-          <pre className="how-run-command" aria-label="Daily intelligence command"><code>$ .venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --json --no-input</code></pre>
-          <p className="how-cost-note">
-            As written, the command stops after freezing the workspace. Add{' '}
-            <code>--launch-codex</code> to create or resume the one persisted
-            editorial task and continue through validation, import, and final
-            inspection. Every completed stage is checkpointed, so the same date
-            resumes instead of starting a second run.
-          </p>
-          <DailyRunFigure />
           <div className="how-model-table">
             <ModelTable tasks={['Audience routing', 'FLI daily-intelligence agent']} />
           </div>
           <p>
-            The LiteLLM-backed routing stage records cost at the decision
-            boundary:
+            The measured routing cost is simple:
           </p>
           <div className="how-cost-table" role="table" aria-label="Measured model cost per decision">
             <div className="how-cost-row how-cost-head" role="row">
@@ -752,30 +643,21 @@ export default function HowItWorks() {
               <span role="columnheader">Measured unit</span>
               <span role="columnheader">Cost</span>
             </div>
-            {UNIT_COSTS.map((row) => (
-              <div className="how-cost-row" role="row" key={row.workflow}>
-                <strong role="cell">{row.workflow}</strong>
-                <span role="cell">{row.unit}</span>
-                <span role="cell" className="mono">{row.cost}</span>
-              </div>
-            ))}
+            <div className="how-cost-row" role="row">
+              <strong role="cell">Audience routing</strong>
+              <span role="cell">one Event, two decisions</span>
+              <span role="cell" className="mono">$0.00388 average</span>
+            </div>
           </div>
           <p className="how-cost-note">
-            The routing average comes from 99 new Event calls for 19 July. Each
-            call returned both audience judgments.
-          </p>
-          <p className="how-cost-note">
-            The FLI daily-intelligence agent runs through Codex App Server. Its
-            effective model, reasoning effort, service tier, thread, and
-            resulting brief remain attached to the editorial run rather than
-            being mixed into these LiteLLM unit prices.
+            This average comes from 99 new Event calls on 19 July. The FLI
+            daily agent runs separately through Codex App Server, where its
+            model, reasoning, cost, and final brief stay attached to the run.
           </p>
           <p>
-            Every request is tagged with the app, pipeline, job, scope, prompt
-            version, and run identity. LiteLLM keeps the request and response,
-            model, tokens, cache state, latency, and cost together. I used
-            those logs to compare prompts and reasoning effort, then kept the
-            cheaper path only when the result held up.
+            Audience-routing calls pass through LiteLLM. It handles retries
+            and records the model, tokens, time, and cost for every request.
+            The screenshot below is one real call.
           </p>
           <FigureFrame label="Expand the LiteLLM request log screenshot">
             <img
@@ -786,41 +668,22 @@ export default function HowItWorks() {
             />
           </FigureFrame>
           <p className="how-cost-note">
-            One 19 July routing call: 2,732 tokens, 4.385 seconds, and
-            $0.0033444. It is one measured request; real requests vary with
-            input size and cache state.
+            This request used 2,732 tokens, took 4.385 seconds, and cost
+            $0.0033444. Other requests vary with the amount of evidence.
           </p>
           <p>
-            Reading the brief here is one option. Each completed day can
-            also be downloaded as a PDF, sent to Slack, or sent by email
-            with the PDF attached, all from the same canonical brief. Each
-            send is a deliberate human action: the system prepares, a person
-            decides.
-          </p>
-          <p>
-            <Link className="how-beat-link" to={insightsPath}>
-              Try the delivery options &rarr;
+            <Link className="how-beat-link" to="/system/architecture">
+              See the technical architecture &rarr;
             </Link>
           </p>
         </article>
 
         <article className="how-read-block">
-          <h4><span className="mono">&rarr;</span> The result: every claim can be checked</h4>
+          <h4><span className="mono">&rarr;</span> The result</h4>
           <p>
-            Each completed editorial day can publish one brief for investment
-            and one for AI engineering. Every Insight traces back through the
-            funnel to the exact Event, the available frozen document, and the
-            original post. You never have to take the system&apos;s word for
-            anything it says.
-          </p>
-          <p>
-            Follow one chain from that same day. The 17 July engineering brief
-            warns that a model grading another model&apos;s answers is swayed
-            by visible provider labels. Its citation quotes the arXiv paper on
-            value leakage from the frozen snapshot, the citation names the
-            exact Event, and the Event holds the original announcement thread
-            with its captured metrics. That chain exists for every Insight in
-            every brief.
+            Each day ends with one brief for investment and one for AI
+            engineering. Every Insight links back to the exact Event, the
+            available frozen source, and the original post.
           </p>
           <p>
             <Link
@@ -831,69 +694,6 @@ export default function HowItWorks() {
             </Link>
           </p>
         </article>
-      </section>
-
-      <section className="how-final" aria-labelledby="how-final-title">
-        <header className="how-final-head">
-          <p className="how-beat-kicker mono">Final report</p>
-          <h3 id="how-final-title">What works, what I learned, and what comes next</h3>
-          <p>
-            The case-study proof is the working path from public evidence to
-            two audience-specific, cited briefs. The complete corpus remains
-            open for audit; these are the conclusions I would carry into the
-            next version.
-          </p>
-        </header>
-
-        <div className="how-final-rows">
-          <article>
-            <h4>What works</h4>
-            <p>
-              The same evidence core has produced an Investment brief and an
-              AI Engineering brief for every completed day from 5 to 19 July.
-              Every selected claim traces back to an exact Event and its
-              available primary source. The brief can be read here, exported
-              as a PDF, or deliberately sent to Slack or email.
-            </p>
-          </article>
-          <article>
-            <h4>What I learned</h4>
-            <p>
-              Network trust is useful for deciding where to look, but it
-              should never become a truth score. Exact structural grouping
-              keeps provenance cleaner than early semantic clustering. And a
-              smaller model is the right choice only after checking that it
-              preserves the decisions that matter.
-            </p>
-          </article>
-          <article>
-            <h4>What I would build next</h4>
-            <p>
-              First, route ranks 101 to 200 on several busy days to measure
-              recall below the top-100 gate. Then add cross-day story memory so
-              recurring themes must contain a real change. Only after measuring
-              what X misses would I add independent RSS, GitHub, or arXiv
-              discovery and unattended scheduling.
-            </p>
-          </article>
-        </div>
-
-        <div className="how-showcase">
-          <h4>Five Insights I would hand to the teams</h4>
-          <p>
-            These are the small proof set, selected for evidence quality,
-            audience consequence, and variety. Each link opens the exact
-            Insight in the live reader.
-          </p>
-          <ol>
-            {SHOWCASE_INSIGHTS.map((insight) => (
-              <li key={insight.to}>
-                <Link to={insight.to}>{insight.title}</Link>
-                <span className="mono">{insight.meta}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
       </section>
 
       <section className="how-map" aria-labelledby="how-map-title">
