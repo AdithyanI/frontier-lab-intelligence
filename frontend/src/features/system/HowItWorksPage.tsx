@@ -429,9 +429,6 @@ export default function HowItWorks() {
             </p>
             <div className="how-beat-links">
               <Link className="how-primary-link" to={insightsPath}>Open Insights</Link>
-              <Link to={artifactsPath}>Artifact library</Link>
-              <Link to="/system/architecture">Architecture</Link>
-              <Link to="/system/status">Status</Link>
             </div>
           </div>
         </div>
