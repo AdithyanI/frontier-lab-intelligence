@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
-import { ModelTable } from '../architecture/ArchitecturePage'
+import {
+  EvidenceInputMap,
+  ModelTable,
+} from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
 import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 
@@ -448,6 +451,15 @@ export default function HowItWorks() {
             explain the same funnel below, step by step, with the visuals and
             the reasoning behind each choice.
           </p>
+          <div className="how-overview">
+            <p>
+              Here is the whole system at a glance. I’ll walk through each part
+              step by step below.
+            </p>
+            <FigureFrame label="Expand the complete daily intelligence flow">
+              <EvidenceInputMap includeDailyOutcome />
+            </FigureFrame>
+          </div>
           <p>
             The system works one day at a time. Every brief covers a single
             day of evidence, judged on its own, and every Insight belongs to

@@ -251,7 +251,11 @@ function AudienceGlyph({ x, y }: { x: number; y: number }) {
   )
 }
 
-function EvidenceInputMap() {
+export function EvidenceInputMap({
+  includeDailyOutcome = false,
+}: {
+  includeDailyOutcome?: boolean
+} = {}) {
   const stages = [
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
     { x: 202, kicker: 'SOURCE', title: 'X output', glyph: 'days', dark: false },
@@ -263,9 +267,11 @@ function EvidenceInputMap() {
   const stageWidth = 154
   return (
     <svg
-      viewBox="0 0 1080 226"
+      viewBox={includeDailyOutcome ? '0 0 1080 420' : '0 0 1080 226'}
       role="img"
-      aria-label="Evidence input path. A screened Registry supplies dated X output. The system groups exact Events, orders the day, attaches source artifacts, and then routes each evidence packet independently for Investment and AI Engineering."
+      aria-label={includeDailyOutcome
+        ? 'Daily intelligence path. A screened Registry supplies dated X output. The system groups exact Events, orders the day, attaches source artifacts, and routes each evidence packet for Investment and AI Engineering. Evidence relevant to either audience passes to the FLI daily agent, which produces two daily briefs.'
+        : 'Evidence input path. A screened Registry supplies dated X output. The system groups exact Events, orders the day, attaches source artifacts, and then routes each evidence packet independently for Investment and AI Engineering.'}
     >
       <ArrowDefs id="flow-arrow" />
       <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">EVIDENCE INPUT · INSPECTABLE BEFORE JUDGMENT</text>
@@ -292,6 +298,39 @@ function EvidenceInputMap() {
           marker="flow-arrow"
         />
       ))}
+      {includeDailyOutcome && (
+        <>
+          <text x="28" y="244" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">AFTER ROUTING · ONE DAILY EDITORIAL PASS</text>
+          <path
+            d="M975 192 V252 H385 V276"
+            fill="none"
+            stroke={BLUE_MID}
+            strokeWidth="1.5"
+            strokeDasharray="4 5"
+            markerEnd="url(#flow-arrow)"
+          />
+          <Card
+            x={260}
+            y={280}
+            w={250}
+            h={108}
+            kicker="AGENT"
+            title="FLI daily agent"
+            detail="research · group · select · write"
+            tone="dark"
+          />
+          <FlowArrow x1={510} y1={334} x2={566} y2={334} marker="flow-arrow" />
+          <Card
+            x={570}
+            y={280}
+            w={250}
+            h={108}
+            kicker="OUTCOME"
+            title="Two daily briefs"
+            detail="Investment · AI Engineering"
+          />
+        </>
+      )}
     </svg>
   )
 }

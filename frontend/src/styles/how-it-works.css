@@ -200,6 +200,19 @@
   line-height: 1.65;
 }
 
+.how-overview {
+  max-width: 1080px;
+  margin-top: 28px;
+}
+
+.how-overview > p {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
 .how-read-block {
   max-width: 68ch;
   margin-top: 34px;
