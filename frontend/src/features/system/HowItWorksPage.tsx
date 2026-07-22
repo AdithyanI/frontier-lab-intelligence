@@ -560,104 +560,70 @@ export default function HowItWorks() {
               Explore the live Network ranking &rarr;
             </Link>
           </p>
-          <p>
-            <Link className="how-beat-link" to="/network/ranking">
-              See the live ranking &rarr;
-            </Link>
-          </p>
         </article>
 
         <article className="how-read-block how-read-block--wide" id="why-collect">
-          <h4><span className="mono">2</span> Collect: preserve before interpreting</h4>
+          <h4><span className="mono">2</span> Collect: keep the evidence together</h4>
           <p>
-            The system collects whole days, one at a time. When a UTC day
-            completes, everything the cohort posted in it is stored exactly
-            as posted, before any interpretation. The posts come from
-            twitterapi.io, a third-party X data provider, since the official
-            API is priced far beyond a project like this.
+            Now we know which accounts to follow. The next step is to collect
+            what they publish.
           </p>
           <p>
-            X has its idiosyncrasies: a post can be replied to, quoted, or
-            reposted, and the same development ends up scattered across all
-            of them. So the system merges the scatter into one exact Event
-            per development, using only relationships the platform itself
-            declares. There is no topic clustering at this stage because
-            clustering is already an opinion, and this stage is not allowed
-            to have one. The result is our own version of the feed: what the
-            trusted network posted, plus what it engaged with.
+            X is not a clean list of announcements. The same development can
+            appear as the original post, a reply, a quote, or a repost. If we
+            treated each of those as a separate item, the same story would
+            appear several times.
           </p>
           <p>
-            Linked artifacts go into a separate catalogue. When
-            a lab announces a model and links the blog post, an adapter for
-            that content type fetches the text and freezes a snapshot of it.
-            Websites, papers, and X articles each have their own adapter:
-            web pages are fetched with respect for robots.txt and reduced to
-            article text with trafilatura, PDFs go through pypdf, and every
-            snapshot records which extractor produced it.
-            The frozen text is what later citation checks run against, and
-            retrieval gaps stay visible instead of being treated as
-            evidence. On 17 July this stage held 4,537 captured posts
-            resolving into 1,287 exact Events.
+            So the system follows the relationships that X already provides.
+            A post and the replies, quotes, or reposts connected to it become
+            one exact Event. It does not merge unrelated posts just because
+            they happen to discuss the same topic.
+          </p>
+          <p>
+            The post often links to the more useful source behind the
+            announcement: a paper, model card, blog post, GitHub repository,
+            or X article. The system collects that source, freezes a text copy,
+            and attaches it to the same Event. Later, if an Insight cites the
+            source, we can check it against the exact text that was collected.
+            Any retrieval gaps stay visible instead of being treated as
+            evidence.
           </p>
           <FigureFrame>
             <CollectFigure />
           </FigureFrame>
           <p>
             <Link className="how-beat-link" to={feedPath}>
-              See the evidence &rarr;
+              See the live Evidence feed &rarr;
             </Link>
           </p>
         </article>
 
         <article className="how-read-block how-read-block--wide" id="why-rank">
-          <h4><span className="mono">3</span> Rank: order the day, do not judge it</h4>
+          <h4><span className="mono">3</span> Rank: decide what to look at first</h4>
           <p>
-            A single day holds over a thousand Events, and nobody reads a
-            thousand of anything. With an unlimited LLM budget I could judge
-            them all. With a real one, the day needs an order: which Events
-            get attention first. A transparent attention score provides it.
+            By now, one day can contain a long list of Events. We cannot read
+            every one or send all of them through the more expensive judging
+            step, so we need a sensible place to start.
           </p>
           <p>
-            Sorting by raw engagement gives the wrong order. Whatever Elon
-            Musk posts floats to the top of that list, and it is rarely what
-            an analyst or an engineer needs. So the score leans on the
-            trusted network instead. When the Thinking Machines Lab model
-            release landed, it rose to the top of its day because the
-            researchers engaged with it, not because the public did.
+            A normal engagement ranking is not very useful here. It mostly
+            tells us what was popular on X. Instead, the attention score asks
+            three simple things: who posted it, how much the trusted network
+            engaged with it, and then how much attention it received more
+            broadly.
           </p>
           <p>
-            The weights are not hidden in code; the API response declares
-            them. The score is deliberately simple, three parts:
+            This is where the Registry ranking becomes useful again. An
+            announcement from a lab the network trusts, repeated by several
+            trusted researchers, should be looked at before a generally
+            popular post. That is how the Thinking Machines Lab model release
+            naturally rose to the top of its day.
           </p>
-          <ul className="how-score-parts">
-            <li>
-              <span className="how-score-weight mono">55%</span>
-              <span className="how-score-label">
-                Amplification by the trusted network: how many Registry
-                members quoted or reposted it
-              </span>
-            </li>
-            <li>
-              <span className="how-score-weight mono">25%</span>
-              <span className="how-score-label">
-                The author&apos;s own standing inside the network
-              </span>
-            </li>
-            <li>
-              <span className="how-score-weight mono">20%</span>
-              <span className="how-score-label">
-                Public engagement, as a tie-breaker only
-              </span>
-            </li>
-          </ul>
           <p>
-            The score does one job: it picks the top 100 Events of each day
-            for judging, and the judges never see it. Attention is evidence
-            of noise as often as of signal, so the score stays out of every
-            judgment that follows. A quarter of the kept
-            Insights came from the lower half of that window. I would rather
-            defend a simple formula with known limits than a sophisticated one
-            that pretends to measure importance.
+            The score only decides what we look at first. It does not say that
+            an Event is true, important, or relevant. The top Events move to
+            the next step, where they are judged without seeing this score.
           </p>
           <FigureFrame>
             <RankFigure />
@@ -670,27 +636,31 @@ export default function HowItWorks() {
         </article>
 
         <article className="how-read-block how-read-block--wide" id="why-judge">
-          <h4><span className="mono">4</span> Judge: two independent questions</h4>
+          <h4><span className="mono">4</span> Judge: useful for whom?</h4>
           <p>
-            An Event can top the attention ranking and still be useless to
-            both readers. One structured call produces two independent
-            audience judgments, with separate criteria, booleans and reasons:
-            does this change an investment position, and should an engineering
-            team act on it? An Event can matter to both audiences, to one, or
-            to neither. Each verdict remains readable on the Event itself.
+            Something can rank highly and still not be useful to either
+            reader. So each Event is now asked two separate questions. Could
+            this change an investment position? And is there something here
+            that an engineering team should act on?
           </p>
           <p>
-            The declined items make the filter easier to see. One post that day was a joke
-            about cancelled Claude subscriptions. Many in the trusted network
-            engaged with it, so attention ranked it high, and both judges
-            correctly turned it away: funny, but useless to an analyst and
-            an engineer. That is the filter working.
+            One structured call produces two independent audience decisions.
+            Each answer is a yes or no with a reason, and neither answer
+            affects the other. An Event can be useful to both audiences, to
+            one, or to neither. You can read both decisions on the Event
+            itself.
           </p>
           <p>
-            Only fresh first-party evidence counts here. A week-old post
-            cannot be rescued by someone else reacting to it today. On 17
-            July, 56 of the day&rsquo;s 1,287 Events crossed this bar for at
-            least one audience.
+            A good example is a joke about cancelled Claude subscriptions.
+            Many people in the trusted network engaged with it, so it ranked
+            highly. But it was not useful to an investor or an engineer, and
+            both decisions said no.
+          </p>
+          <p>
+            The decision uses what was actually published that day, together
+            with any first-party source attached to it. An old announcement
+            does not become fresh evidence just because somebody reacts to it
+            today.
           </p>
           <FigureFrame>
             <JudgeFigure />
@@ -703,39 +673,34 @@ export default function HowItWorks() {
         </article>
 
         <article className="how-read-block how-read-block--wide" id="why-publish">
-          <h4><span className="mono">5</span> Publish: surface it, or say why not</h4>
+          <h4><span className="mono">5</span> Write: turn the useful Events into two briefs</h4>
           <p>
-            The last stage turns surviving evidence into the two daily
-            briefs. An editorial agent, a small harness I built on the Codex
-            app server, reads everything that survived and must do one of
-            two things with each candidate: turn it into an Insight or
-            decline it in writing. Nothing is dropped silently.
+            At this point we have a much smaller set of Events that may matter.
+            I give all of them, along with their sources and audience
+            decisions, to the FLI daily-intelligence agent.
           </p>
           <p>
-            The agent receives context for each reader: for the investment brief, BIT
-            Capital&apos;s publicly known holdings and what would move a
-            position; for the engineering brief, what a production AI team
-            can act on. That context is why the same Event can become two
-            different Insights, or one, or none.
+            The agent has separate context for the two readers: what may
+            matter to an investment position, and what a production AI team
+            can actually use. It reviews the Events together, combines
+            overlapping developments, and decides what belongs in each brief.
           </p>
           <p>
-            Every claim in the final brief cites its source, and cited
-            excerpts are checked verbatim against the frozen text before the
-            brief is accepted. That check is the hallucination control: a
-            quote that cannot be matched to preserved source text does not
-            ship. The order of the brief is a written rationale, not a
-            synthetic score.
+            Every candidate must end in one of two places: it becomes an
+            Insight, or the agent writes down why it was declined. Nothing
+            quietly disappears between the filter and the final brief.
           </p>
           <p>
-            On 17 July, 56 Events reached the editorial run, each carrying a
-            decision for every audience it qualified for: 84 decisions in all.
-            The run kept 10 Insights, 7 for engineering and 3 for investment.
-            The other decisions are written declines, each with its reason
-            attached.
+            For every Insight it keeps, the agent explains what happened, why
+            it matters to that reader, and what they may want to look at next.
+            It also links back to the posts and source artifacts it used.
+            Every cited excerpt is checked against the frozen source text. If
+            it cannot be matched, it does not ship.
           </p>
           <p>
-            A person starts each dated run, and its stages resume from saved
-            checkpoints.
+            The result is two daily briefs: one for investment and one for AI
+            engineering. A person starts each dated run, and the system can
+            resume from its saved checkpoints if anything stops along the way.
           </p>
           <FigureFrame>
             <PublishFigure />

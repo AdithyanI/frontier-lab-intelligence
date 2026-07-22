@@ -141,7 +141,7 @@ export function CollectFigure() {
     <svg
       viewBox="0 0 1080 340"
       role="img"
-      aria-label="A post, its reply, and a quote are grouped into one exact Event using only relationships the platform declares. A linked paper is frozen as a text copy next to the Event."
+      aria-label="A post, its reply, and a quote are grouped into one exact Event using only relationships the platform declares. A linked paper or repository is frozen as text and attached to the same Event."
     >
       <defs>
         <marker id="collect-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -167,7 +167,7 @@ export function CollectFigure() {
       <text x="448" y="158" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">One exact Event</text>
       <text x="448" y="184" fontFamily={UI} fontSize="12" fill="#fff" opacity="0.78">nothing merged by topic</text>
 
-      <line x1="654" y1="164" x2="770" y2="164" stroke={MUTED} strokeWidth="1.2" strokeDasharray="4 4" opacity="0.7" />
+      <line x1="774" y1="164" x2="662" y2="164" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="4 4" markerEnd="url(#collect-arrow)" />
       <rect x="774" y="128" width="240" height="72" fill="#fff" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" />
       <text x="796" y="160" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Linked paper or repo</text>
       <text x="796" y="182" fontFamily={UI} fontSize="12" fill={MUTED}>text frozen for citation checks</text>
@@ -289,7 +289,7 @@ export function PublishFigure() {
     <svg
       viewBox="0 0 1080 340"
       role="img"
-      aria-label="Candidates that survived judging pass through an editorial agent. Each one becomes either a cited Insight or a written decline. Nothing is dropped silently."
+      aria-label="Candidates that survived judging pass through the FLI daily agent. Each one becomes either a cited Insight or a written decline. Nothing is dropped silently."
     >
       <defs>
         <marker id="publish-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -307,7 +307,7 @@ export function PublishFigure() {
       <line x1="188" y1="164" x2="296" y2="164" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#publish-arrow)" />
 
       <rect x="304" y="122" width="250" height="84" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
-      <text x="328" y="158" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Editorial agent</text>
+      <text x="328" y="158" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>FLI daily agent</text>
       <text x="328" y="182" fontFamily={UI} fontSize="12" fill={MUTED}>must decide, one way or the other</text>
 
       <line x1="554" y1="148" x2="672" y2="106" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#publish-arrow)" />
