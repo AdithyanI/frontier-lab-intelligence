@@ -3,10 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { useAuditDatePath } from '../../shared/date/auditDateStore'
 import SignalFunnel, { type FunnelStage } from './SignalFunnel'
-import {
-  EvidenceInputMap,
-  ModelTable,
-} from '../architecture/ArchitecturePage'
+import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
 import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 
@@ -168,6 +165,34 @@ type Beat = {
   title: string
   text: string
 }
+
+const SHOWCASE_INSIGHTS = [
+  {
+    title: 'Anthropic gives TeraWulf a long lease; execution decides its value',
+    meta: '6 July · Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-06&insight=3f8ecb8de3fb7bf34d3756474ba502a43a724593e37862d72163222f3fc48065',
+  },
+  {
+    title: 'ChatGPT Work puts the agent interface above Microsoft and Google',
+    meta: '9 July · Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-09&insight=18f69c9ac6e3d5e8a0c2c737973284580978dd81c3121c755da07ff88727a9f4',
+  },
+  {
+    title: "Claude demand strengthens Amazon's capacity exposure",
+    meta: '18 July · Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-18&insight=9dee6e36371b150c60e9821006f2ece26cc60c7891cb59bd933e6a76f9d7a793',
+  },
+  {
+    title: 'FrontierFinance gives Aion a realistic evaluation target',
+    meta: '9 July · AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-09&insight=70a81026bd8bd1c43afb31e11451d5ab5cc66064b529274719f9ab1479923243',
+  },
+  {
+    title: 'Retention controls do not prove what a coding agent transmits',
+    meta: '13 July · AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-13&insight=b2d9973fc22c09df7c132c5f79309a612c7abed40a633a661ce4199bdeff926e',
+  },
+]
 
 export default function HowItWorks() {
   const insightsPath = useAuditDatePath('/insights')
@@ -622,7 +647,7 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-plumbing">
           <h4><span className="mono">6</span> The models and cost</h4>
           <p>
-            There are only two model steps in the daily path.
+            There are only 2 model steps in the daily path.
           </p>
           <p>
             Audience routing uses <code>gpt-5.4-mini</code>. One structured
@@ -631,22 +656,21 @@ export default function HowItWorks() {
             <code>gpt-5.6-sol</code> to review everything that passed, research
             what is missing, and write both briefs.
           </p>
-          <div className="how-model-table">
-            <ModelTable tasks={['Audience routing', 'FLI daily-intelligence agent']} />
-          </div>
-          <p>
-            The measured routing cost is simple:
-          </p>
-          <div className="how-cost-table" role="table" aria-label="Measured model cost per decision">
+          <div className="how-cost-table" role="table" aria-label="Models and measured cost">
             <div className="how-cost-row how-cost-head" role="row">
-              <span role="columnheader">Workflow</span>
-              <span role="columnheader">Measured unit</span>
-              <span role="columnheader">Cost</span>
+              <span role="columnheader">Step</span>
+              <span role="columnheader">Model</span>
+              <span role="columnheader">Cost record</span>
             </div>
             <div className="how-cost-row" role="row">
               <strong role="cell">Audience routing</strong>
-              <span role="cell">one Event, two decisions</span>
-              <span role="cell" className="mono">$0.00388 average</span>
+              <span role="cell" className="mono">gpt-5.4-mini · high</span>
+              <span role="cell">$0.00388 average per Event</span>
+            </div>
+            <div className="how-cost-row" role="row">
+              <strong role="cell">FLI daily-intelligence agent</strong>
+              <span role="cell" className="mono">gpt-5.6-sol · xhigh</span>
+              <span role="cell">attached to each saved run</span>
             </div>
           </div>
           <p className="how-cost-note">
@@ -694,6 +718,22 @@ export default function HowItWorks() {
             </Link>
           </p>
         </article>
+      </section>
+
+      <section className="how-showcase" aria-labelledby="how-showcase-title">
+        <h3 id="how-showcase-title">Five Insights I would hand to the teams</h3>
+        <p>
+          These are five examples from the daily briefs. Each link opens the
+          exact Insight with its sources and reasoning.
+        </p>
+        <ol>
+          {SHOWCASE_INSIGHTS.map((insight) => (
+            <li key={insight.to}>
+              <Link to={insight.to}>{insight.title}</Link>
+              <span className="mono">{insight.meta}</span>
+            </li>
+          ))}
+        </ol>
       </section>
 
       <section className="how-map" aria-labelledby="how-map-title">
