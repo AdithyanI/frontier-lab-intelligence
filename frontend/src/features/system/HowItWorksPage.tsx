@@ -545,7 +545,7 @@ export default function HowItWorks() {
             Karpathy, and organizations such as OpenAI and Anthropic, rise
             naturally because the network follows them. Elon Musk is extremely
             popular on X, but he ranks much lower inside this AI-specific
-            network. That difference is exactly the point.
+            network.
           </p>
           <FigureFrame>
             <NetworkRankFigure />
