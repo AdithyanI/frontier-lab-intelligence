@@ -12,6 +12,7 @@ import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigu
    link into the live product surface that proves it. */
 
 const SCROLL_STAGES: FunnelStage[] = ['watch', 'collect', 'rank', 'judge', 'publish', 'complete']
+const VIDEO_WALKTHROUGH_URL = 'https://share.descript.com/view/LZkpHP29yub'
 
 /* Step-by-step navigation: bring the next beat past the spy threshold,
    so the funnel camera plays the transition by itself. */
@@ -378,7 +379,7 @@ export default function HowItWorks() {
         <p>
           <a
             className="how-beat-link"
-            href="https://share.descript.com/view/LZkpHP29yub"
+            href={VIDEO_WALKTHROUGH_URL}
             target="_blank"
             rel="noreferrer"
           >
@@ -439,8 +440,11 @@ export default function HowItWorks() {
           <p className="how-beat-kicker mono">In writing</p>
           <h3 id="how-read-title">The same funnel, in words</h3>
           <p>
-            The easiest way to understand the system is the video walkthrough,
-            and I recommend starting there. But if you prefer reading, I’ll
+            The easiest way to understand the system is the{' '}
+            <a href={VIDEO_WALKTHROUGH_URL} target="_blank" rel="noreferrer">
+              video walkthrough
+            </a>
+            , and I recommend starting there. But if you prefer reading, I’ll
             explain the same funnel below, step by step, with the visuals and
             the reasoning behind each choice.
           </p>
