@@ -35,7 +35,7 @@ export function SourceChoiceFigure() {
         </marker>
       </defs>
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHERE TO LOOK · SIX PUBLIC SOURCE CLASSES</text>
-      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">ONE SOURCE FIRST, DONE DEEPLY</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">WHY X FIRST</text>
 
       {sources.map((s, i) => (
         <g key={s.title}>
@@ -58,7 +58,7 @@ export function SourceChoiceFigure() {
       ))}
 
       <text x="540" y="172" textAnchor="middle" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">
-        ANNOUNCED AND ARGUED HERE ANYWAY
+        USUALLY ANNOUNCED HERE, WITH THE SOURCE LINK
       </text>
 
       <rect x="420" y="204" width="240" height="118" fill={INK} />
@@ -67,12 +67,12 @@ export function SourceChoiceFigure() {
       <text x="444" y="300" fontFamily={UI} fontSize="12.5" fill="#fff" opacity="0.78">the front page of AI</text>
 
       <text x="684" y="290" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">
-        RESEARCHERS UP TO CEOS WRITE HERE THEMSELVES
+        RESEARCHERS, FOUNDERS, AND LABS SPEAK HERE DIRECTLY
       </text>
 
       <line x1="30" y1="352" x2="1050" y2="352" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="378" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        When something lands in any of these, it lands on X at the same moment, in one place. The other classes plug in later as channels.
+        X is the starting point. The linked paper, blog, repository, talk, or model card is collected as primary evidence.
       </text>
     </svg>
   )

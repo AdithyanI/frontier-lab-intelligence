@@ -471,22 +471,33 @@ export default function HowItWorks() {
         <article className="how-read-block how-read-block--wide" id="why-watch">
           <h4><span className="mono">1</span> Choose: one source, and trust over popularity</h4>
 
+          <p>
+            Before collecting anything, I had to make two choices: where to
+            look, and who to listen to once I got there. I chose X as the
+            source, then built a trusted network of labs and researchers
+            inside it.
+          </p>
+
           <p className="how-read-sub mono">1a · Where to look</p>
           <p>
-            I chose X as the single source and went deep on it. My judgment:
-            X is the front page of AI. Almost everything breaks there first.
-            When a lab ships a model or a researcher publishes a paper, they
-            announce it on X themselves, and the argument about whether it
-            matters happens in the replies. The founders are in those replies
-            too.
+            There is a huge amount of public information about AI. I chose to
+            focus on X for two reasons.
           </p>
           <p>
-            There is a second reason. When news breaks, the artifact behind
-            it, the model card, the blog post, the repo, is almost always
-            linked in the post itself. So one source, read carefully, carries
-            the announcement, the argument, and the primary document. One
-            source done deeply beats six done shallowly, and the other source
-            classes can plug into the same Registry later.
+            First, my judgment is that X is the front page of AI. New models,
+            papers, funding announcements, and system cards often appear there
+            first. Researchers, founders, and labs also speak there directly,
+            so we get both the announcement and the discussion around it.
+          </p>
+          <p>
+            Second, the post usually links to the primary artifact behind the
+            announcement: the paper, model card, blog post, or GitHub
+            repository. We can start from X and still collect the documents
+            needed to understand what actually happened.
+          </p>
+          <p>
+            I chose to do one source properly instead of spreading the project
+            across six. We can add other sources to the same Registry later.
           </p>
           <FigureFrame>
             <SourceChoiceFigure />
