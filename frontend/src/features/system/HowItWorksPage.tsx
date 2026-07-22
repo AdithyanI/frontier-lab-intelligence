@@ -526,6 +526,11 @@ export default function HowItWorks() {
           <FigureFrame>
             <TrustedSetFigure />
           </FigureFrame>
+          <p>
+            <Link className="how-beat-link" to="/network/registry">
+              See the exact people and organizations in the live Registry &rarr;
+            </Link>
+          </p>
 
           <p className="how-read-sub mono">1c · Rank by trust, not popularity</p>
           <p>
