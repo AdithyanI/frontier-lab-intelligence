@@ -103,7 +103,7 @@ export function TrustedSetFigure() {
     <svg
       viewBox="0 0 1080 360"
       role="img"
-      aria-label="A wide field of grey dots stands for all observed X accounts. A dashed boundary holds a small set of blue dots: the screened Registry of 2,591 identities kept out of 557,363 observed accounts."
+      aria-label="A wide field of grey dots stands for public X accounts. A dashed boundary holds a smaller set of blue dots: the screened people and labs kept in the Registry."
     >
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">WHOM TO COLLECT · SCREENING X INTO A TRUSTED SET</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">FOLLOW GRAPH SNAPSHOT</text>
@@ -117,8 +117,8 @@ export function TrustedSetFigure() {
         <circle key={`b-${index}`} cx={dot.x} cy={dot.y} r="4.5" fill={BLUE} />
       ))}
 
-      <text x="60" y="322" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">557,363 ACCOUNTS OBSERVED</text>
-      <text x="760" y="322" textAnchor="middle" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">THE REGISTRY · 2,591 SCREENED IDENTITIES</text>
+      <text x="60" y="322" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">PUBLIC X ACCOUNTS</text>
+      <text x="760" y="322" textAnchor="middle" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">THE REGISTRY · SCREENED PEOPLE AND LABS</text>
 
       <line x1="30" y1="336" x2="1050" y2="336" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="356" fontFamily={UI} fontSize="11.5" fill={MUTED}>

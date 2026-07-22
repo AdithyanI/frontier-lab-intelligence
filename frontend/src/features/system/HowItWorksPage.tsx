@@ -503,17 +503,25 @@ export default function HowItWorks() {
             <SourceChoiceFigure />
           </FigureFrame>
 
-          <p className="how-read-sub mono">1b · Collect the trusted set</p>
+          <p className="how-read-sub mono">1b · Decide who to follow</p>
           <p>
-            From everything on X, the system keeps a small set it trusts:
-            frontier labs and the researchers who work there. I started from
-            a seed list of people I already knew were signal, pulled who they
-            follow, and let the set grow outward from there. Growing it meant
-            screening a follow graph of 557,363 accounts and 2.8 million
-            follow edges down to a Registry of 2,591 active identities: 2,431
-            researchers and 160 organizations. Screening mixes simple gates
-            with LLM judgment. Every admission keeps its provenance, and the
-            39 rejections stay on the books with their reasons.
+            Now that I had chosen X, the next question was who to follow. The
+            answer could not be everyone. I started with a small set of AI
+            researchers and labs whose work I already trusted, then looked at
+            who they followed.
+          </p>
+          <p>
+            The intuition is simple. If many people in that trusted group
+            independently follow the same account, that account is probably
+            worth looking at too. This lets the network discover researchers
+            and organizations beyond the obvious names.
+          </p>
+          <p>
+            Before an account enters the Registry, the system screens it. Some
+            checks are simple, such as whether the profile is public and can be
+            collected. An LLM helps with questions that need more context, such
+            as whether the account belongs to a person or an organization. If
+            an account is rejected, the reason is kept.
           </p>
           <FigureFrame>
             <TrustedSetFigure />
@@ -521,33 +529,31 @@ export default function HowItWorks() {
 
           <p className="how-read-sub mono">1c · Rank by trust, not popularity</p>
           <p>
-            Within this network, the next call was whose word should carry
-            more weight. Here is the human intuition. If ten people I know
-            are good and authentic all follow and trust some other person,
-            that person is very likely worth trusting too. Trust flows
-            through the network. So the system ranks an account by how many
-            entities inside the screened set follow it, never by raw
-            follower count. A million followers measures reach, not trust.
+            Once the network is built, we still need to decide whose posts
+            deserve more attention. I did not want to use public follower
+            count. A large audience tells us that someone is popular, not that
+            AI insiders trust their work.
           </p>
           <p>
-            Two examples. Andrej Karpathy is
-            the most followed account inside the Registry, which is exactly
-            what you would expect. Elon Musk is one of the most popular
-            accounts on the platform, but inside this network he is nowhere
-            near the top. Organizations earn their place the same way: OpenAI
-            and Anthropic bubble up because the researchers follow them, not
-            because I ranked them by hand.
+            Instead, the system asks how many people and labs inside the
+            screened Registry follow each account. If many people I already
+            trust independently follow the same researcher, that researcher is
+            probably worth listening to. That is the ranking.
+          </p>
+          <p>
+            Nobody is placed at the top by hand. People such as Andrej
+            Karpathy, and organizations such as OpenAI and Anthropic, rise
+            naturally because the network follows them. Elon Musk is extremely
+            popular on X, but he ranks much lower inside this AI-specific
+            network. That difference is exactly the point.
           </p>
           <FigureFrame>
             <NetworkRankFigure />
           </FigureFrame>
           <p>
-            The thesis held up. Across the first 13 briefed days, Events by authors
-            in the top half of the ranking became kept Insights at 12.2%,
-            against 7.3% for the bottom half, and the judges never see the
-            author&apos;s rank. An independent public ranking of AI accounts,
-            frozen before the comparison, agrees with ours at a rank
-            correlation of 0.877 across 872 shared accounts.
+            <Link className="how-beat-link" to="/network/ranking">
+              Explore the live Network ranking &rarr;
+            </Link>
           </p>
           <p>
             <Link className="how-beat-link" to="/network/ranking">
