@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { AttentionScoreFigure, CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 import { VIDEO_WALKTHROUGH_URL } from './howContent'
 
 /* Decision figures open fullscreen on click, so they can be presented
@@ -236,35 +236,18 @@ export default function HowNarrative({
             step, so we need a sensible place to start.
           </p>
           <p>
-            A normal engagement ranking mostly tells us what was popular on X.
-            My working thesis is different: an Event deserves attention when
-            several independent people or labs inside the trusted network
-            notice it.
+            A normal engagement ranking is not very useful here. It mostly
+            tells us what was popular on X. Instead, the attention score asks
+            three simple things: who posted it, how much the trusted network
+            engaged with it, and then how much attention it received more
+            broadly.
           </p>
           <p>
-            I am testing a simple additive score. Every distinct trusted
-            participant starts with 1 point because their attention itself
-            matters. Their position in the Network ranking can add up to 0.5
-            more: <code>participant points = 1 + 0.5 × network percentile</code>.
-            The lowest-ranked participant contributes 1.00, the middle
-            contributes about 1.25, and the highest contributes 1.50. An
-            account counts only once per Event.
-          </p>
-          <p>
-            Then I add 2 small adjustments: 0.25 if the original post comes
-            from a trusted organization, and 0 to 0.25 for broader public
-            reach. Both are capped. One more trusted participant always adds
-            at least 1 point, so neither adjustment can overpower independent
-            network attention.
-          </p>
-          <FigureFrame label="Expand the working attention-score proposal">
-            <AttentionScoreFigure />
-          </FigureFrame>
-          <p>
-            Because each day is ranked separately, this proposal does not need
-            a recency adjustment. The current Feed still uses
-            <code>attention-v1.1</code> while I replay the proposed score on
-            saved days and inspect what moves.
+            This is where the Registry ranking becomes useful again. An
+            announcement from a lab the network trusts, repeated by several
+            trusted researchers, should be looked at before a generally
+            popular post. That is how the Thinking Machines Lab model release
+            naturally rose to the top of its day.
           </p>
           <p>
             The score only decides what we look at first. It does not say that
