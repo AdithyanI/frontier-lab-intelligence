@@ -328,3 +328,120 @@ export function PublishFigure() {
     </svg>
   )
 }
+
+/* Stage 3b: how the ordering is decided. Four questions asked in order, each
+   one shown as the comparison it actually makes. Nothing is blended, so no
+   signal can quietly overpower another. */
+export function ScoreLayersFigure() {
+  const dot = (cx: number, cy: number, opacity: number, key: string) => (
+    <circle key={key} cx={cx} cy={cy} r="7" fill={BLUE_MID} opacity={opacity} />
+  )
+  const dots = (count: number, y: number, opacity: number, key: string) =>
+    Array.from({ length: count }, (_, i) => dot(688 + i * 21, y, opacity, `${key}-${i}`))
+
+  const rows = [
+    { n: '1', title: 'How many vouched?', note: 'DISTINCT TRUSTED PEOPLE · ONE VOTE EACH' },
+    { n: '2', title: 'Tie? How trusted were they.', note: 'AVERAGE NETWORK POSITION OF THE VOTERS' },
+    { n: '3', title: 'Tie? How trusted is the poster.', note: 'NETWORK POSITION OF THE AUTHOR' },
+    { n: '4', title: 'Tie? Public engagement.', note: 'LIKES · REPLIES · REPOSTS · QUOTES' },
+  ]
+
+  return (
+    <svg
+      viewBox="0 0 1080 580"
+      role="img"
+      aria-label="The daily score asks four questions in order instead of blending them into one weighted number. First, how many distinct trusted people vouched for the Event, one vote each. If that ties, the average network position of those voters. If that still ties, the network position of the author. If that still ties, public engagement. Below, a measured check: Events with one trusted vote became an Insight 43 percent of the time, two votes 57 percent, three to four votes 65 percent, five or more votes 70 percent."
+    >
+      <defs>
+        <marker id="score-layer-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+        </marker>
+      </defs>
+
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">RANK · FOUR QUESTIONS, ASKED IN ORDER</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">NOT A WEIGHTED SUM</text>
+
+      <text x="660" y="66" fontFamily={MONO} fontSize="9" fill={BLUE_INK} letterSpacing="0.06em">▸ THIS ONE GOES FIRST</text>
+
+      {rows.map((row, index) => {
+        const y = 82 + index * 104
+        const first = y + 30
+        const second = y + 66
+        const primary = index === 0
+        return (
+          <g key={row.n}>
+            <rect x="60" y={y} width="570" height="88" fill={primary ? INK : '#fff'} stroke={primary ? INK : BLUE_MID} strokeWidth={primary ? 0 : 1.2} />
+            <text x="88" y={y + 52} fontFamily={MONO} fontSize="21" fill={primary ? BLUE : BLUE_MID}>{row.n}</text>
+            <text x="126" y={y + 42} fontFamily={UI} fontSize="16" fontWeight="600" fill={primary ? '#fff' : INK}>{row.title}</text>
+            <text x="126" y={y + 64} fontFamily={MONO} fontSize="9.5" fill={primary ? BLUE : MUTED} letterSpacing="0.06em" opacity={primary ? 0.9 : 1}>{row.note}</text>
+
+            <polygon points={`660,${first - 7} 672,${first} 660,${first + 7}`} fill={BLUE} />
+
+            {index === 0 ? (
+              <>
+                {dots(5, first, 1, 'r1a')}
+                {dots(2, second, 1, 'r1b')}
+              </>
+            ) : null}
+
+            {index === 1 ? (
+              <>
+                {dots(3, first, 1, 'r2a')}
+                {dots(3, second, 0.28, 'r2b')}
+                <text x="770" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">HIGH IN THE NETWORK</text>
+                <text x="770" y={second + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">LOW IN THE NETWORK</text>
+              </>
+            ) : null}
+
+            {index === 2 ? (
+              <>
+                {dots(3, first, 0.55, 'r3a')}
+                {dots(3, second, 0.55, 'r3b')}
+                <rect x="770" y={first - 9} width="150" height="18" fill={BLUE_MID} opacity="0.85" />
+                <rect x="770" y={second - 9} width="52" height="18" fill={BLUE_MID} opacity="0.28" />
+                <text x="936" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">AUTHOR</text>
+              </>
+            ) : null}
+
+            {index === 3 ? (
+              <>
+                {dots(3, first, 0.55, 'r4a')}
+                {dots(3, second, 0.55, 'r4b')}
+                <rect x="770" y={first - 9} width="132" height="18" fill={MUTED} opacity="0.5" />
+                <rect x="770" y={second - 9} width="44" height="18" fill={MUTED} opacity="0.22" />
+                <text x="936" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">PUBLIC</text>
+              </>
+            ) : null}
+
+            {index < rows.length - 1 ? (
+              <>
+                <line x1="345" y1={y + 88} x2="345" y2={y + 102} stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#score-layer-arrow)" />
+                <text x="358" y={y + 100} fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">ONLY IF TIED</text>
+              </>
+            ) : null}
+          </g>
+        )
+      })}
+
+      <line x1="30" y1="502" x2="1050" y2="502" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="30" y="540" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">MORE VOUCHING ·</text>
+      <text x="30" y="556" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">MORE OFTEN USEFUL</text>
+      {[
+        ['1 VOTE', 43],
+        ['2 VOTES', 57],
+        ['3–4 VOTES', 65],
+        ['5+ VOTES', 70],
+      ].map(([label, rate], index) => {
+        const x = 300 + index * 156
+        const height = Number(rate) * 0.42
+        return (
+          <g key={String(label)}>
+            <rect x={x} y={546 - height} width="104" height={height} fill={BLUE} opacity={0.4 + index * 0.2} />
+            <text x={x} y="562" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.05em">{label}</text>
+            <text x={x + 104} y="562" textAnchor="end" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{rate}%</text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}

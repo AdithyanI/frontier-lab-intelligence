@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, ScoreLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 import { VIDEO_WALKTHROUGH_URL } from './howContent'
 
 /* Decision figures open fullscreen on click, so they can be presented
@@ -237,11 +237,21 @@ export default function HowNarrative({
           </p>
           <p>
             A normal engagement ranking is not very useful here. It mostly
-            tells us what was popular on X. Instead, the attention score asks
-            three simple things: who posted it, how much the trusted network
-            engaged with it, and then how much attention it received more
-            broadly.
+            tells us what was popular on X. Instead the score asks the
+            narrower question the network can actually answer: how many people
+            inside the trusted Registry independently vouched for this? One
+            person counts once, and vouching for your own post does not count.
           </p>
+          <p>
+            Plenty of Events tie on that count, so three further questions
+            break ties, each asked only when the one above it came out level.
+            They are kept as four separate questions rather than one weighted
+            formula, so there is no weight to tune and no lane can quietly
+            outvote another.
+          </p>
+          <FigureFrame label="Expand how the four questions decide the order">
+            <ScoreLayersFigure />
+          </FigureFrame>
           <p>
             This is where the Registry ranking becomes useful again. An
             announcement from a lab the network trusts, repeated by several

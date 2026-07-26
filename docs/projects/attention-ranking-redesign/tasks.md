@@ -177,6 +177,12 @@ without claiming that attention equals importance or relevance.
 - 2026-07-26: production is **not** rescored. Reranking would invalidate the
   five frozen submission Insights and `scoring-validation.md`. The deliverable
   is a measured self-audit plus a tested versioned successor.
+- 2026-07-26 (superseded, same day): Adi directed a **clean migration**
+  instead. The databases are snapshotted, so `daily-score-v2` replaces
+  `attention-v1.1` outright with no backward compatibility, no dual-read, and
+  no legacy toggle; rollback is a snapshot restore. The replay must report
+  which of the five submission Events change rank so the interview answer
+  stays precise.
 
 ## Open Questions / Blockers
 
@@ -193,9 +199,11 @@ without claiming that attention equals importance or relevance.
 | done | Remove the rejected fixed-bonus proposal from the How narrative while preserving the original rank-order figure | parent |  |
 | done | Audit what `attention-v1.1` actually does across the seven briefed days | parent | `resources/v1-1-behaviour-audit.md` |
 | done | Design the layered successor and reject the seed-vote and trust-constant variants on evidence | parent | `resources/layered-score-proposal.md` |
-| todo | Implement the layered score and replay it over the 15 saved days | parent | `resources/layered-score-proposal.md` |
-| todo | Run the bounded recall probe on ranks 101–200 for one day | parent | `docs/references/scoring-validation.md` |
-| todo | Write the interview defense: audit, fix, validation, and why production was not rescored | parent |  |
+| done | Ship the visual How-page figure for the layered contract (`ScoreLayersFigure`) | parent | `frontend/src/features/system/DecisionFigures.tsx` |
+| done | Write the descriptive overnight implementation spec | parent | `resources/implementation-spec.md` |
+| todo | Implement `daily-score-v2` as a clean migration and replay it over the 15 saved days | assigned engineer | `resources/implementation-spec.md` |
+| todo | Run the bounded recall probe on ranks 101–200 for one day (needs Adi's approval to spend) | parent | `docs/references/scoring-validation.md` |
+| todo | Write the interview defense: the audit, the fix, the validation, and the residual limits | parent |  |
 
 ## Backlog / Remaining Work
 
@@ -227,6 +235,11 @@ without claiming that attention equals importance or relevance.
   fixed `+0.25` adjustments.
 - 2026-07-26: [DONE] Preserved the original rank-order figure separately from
   the candidate-formula figure; both answer different questions.
+- 2026-07-26: [DONE] Designed the layered `daily-score-v2` contract, rejected
+  the seed-vote and `1 + 0.5 x trust` variants on evidence, shipped the visual
+  `ScoreLayersFigure` on `/how#why-rank`, and wrote
+  `resources/implementation-spec.md` for an overnight implementation pass.
+  Adi directed a clean migration with no backward compatibility.
 - 2026-07-26: [DONE] Audited live `attention-v1.1` behaviour across seven
   briefed days (`resources/v1-1-behaviour-audit.md`). The percentile transform
   over a zero-inflated amplifier count turns the 55% primary lane into a
