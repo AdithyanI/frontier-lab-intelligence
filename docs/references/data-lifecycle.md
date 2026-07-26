@@ -45,13 +45,25 @@ manifests/lineage, and run `PRAGMA quick_check` on the replacement store. Move a
 historical output to `data/archive/` when its evidence remains useful but no
 runtime reader should discover it.
 
-## Machine-Local Restore Points
+## Current Restore Point
 
-When `data/private/restore-points.md` exists, it is the local, ignored inventory
-of full restore points and their exact recovery instructions. Read it before a
-requested rollback. Never restore automatically: use a restore point only when
-Adi explicitly requests or approves returning to it, and preserve the current
-state before replacing code or data.
+The complete pre-interview-work restore point created on 2026-07-26 is stored
+at:
+
+```text
+/Volumes/DobbyData/Archives/project-snapshots/frontier-lab-intelligence/pre-scoring-cost-work-2026-07-26
+```
+
+It contains the complete local `data/` tree, a Git recovery bundle, and
+`RESTORE.md` with the full recovery procedure. The matching local Git tag is
+`local-snapshot/pre-scoring-cost-work-2026-07-26`, pointing to commit
+`b4147f34db2b557751989b0a894894d8bb0a25ea`.
+
+Never restore automatically. Restore only when Adi explicitly requests or
+approves returning to this state. Before restoring, stop database writers,
+inspect `git status`, and preserve the then-current `data/` directory. Follow
+the external `RESTORE.md`, then run `scripts/check-fast.sh` and inspect the
+application before discarding the pre-restore backup.
 
 ## Historical Retention
 
