@@ -180,6 +180,7 @@ handoff.
 | What product and UI principles are frozen? | [`../PRODUCT.md`](../PRODUCT.md) and [`../DESIGN.md`](../DESIGN.md) |
 | Why was a past decision made? | Active/archived project decisions and resources |
 | What happened chronologically, including spend and tools? | `scripts/build-log.py recent` / `search`; complete reviewer artifact at [`references/build-log.md`](references/build-log.md) |
+| What does each refresh stage cost? | [`references/tokenomics.md`](references/tokenomics.md) |
 | How should an external reviewer inspect the repository? | [`references/reviewer-guide.md`](references/reviewer-guide.md) |
 
 If this brief conflicts with an explicitly invoked active tracker, the tracker

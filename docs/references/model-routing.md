@@ -2,6 +2,9 @@
 
 Last verified: 2026-07-26
 
+For the cross-stage cost summary and X-provider units, see
+[`tokenomics.md`](tokenomics.md).
+
 ## Current Policy
 
 Use `gpt-5.6-luna` as the default efficient model for bounded structured
