@@ -1,6 +1,6 @@
 # System Status
 
-Last verified: 2026-07-21
+Last verified: 2026-07-26
 
 This is the conceptual handoff for Frontier Lab Intelligence. Read it before
 planning across projects or changing the system direction. It explains what
@@ -25,10 +25,17 @@ The product thesis is:
 > evidence grouping, transparent routing, and primary-source citations can
 > turn that activity into intelligence a human can trust.
 
-The case study was submitted on 2026-07-20. The current endpoint is earning the
-next interview through a stable reviewer path and a defensible discussion of
-the system's decisions, limits, and next steps. New platform breadth remains
-lower value than keeping the submitted proof coherent and available.
+The case study was submitted on 2026-07-20. As of 2026-07-26, Adi has three
+working days before the Thursday follow-up interview and case discussion with
+BIT's AI team. The immediate endpoint is no longer submission: it is being able
+to explain and defend the working system, its design choices, trade-offs,
+limits, costs, agent-assisted build process, and what should be built next.
+
+During this three-day window, prioritize interview evidence and explanation:
+stress-test the scoring and signal-to-noise choices, make token/API costs easy
+to retrieve, rehearse how the system was built, and verify that the surfaced
+brief is genuinely useful to a BIT analyst. Do not broaden the platform or
+change production behavior merely to make the system look more complete.
 
 ## Product Story
 

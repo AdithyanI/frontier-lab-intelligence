@@ -47,6 +47,15 @@ without claiming that attention equals importance or relevance.
 ## Context / Constraints
 
 - Date started: 2026-07-26.
+- As of 2026-07-26, three working days remain before the Thursday BIT
+  follow-up interview and case discussion. This is interview-hardening work,
+  not an open-ended scoring research project.
+- The interview is expected to probe design choices, trade-offs, what should
+  be built next, how Adi used agents and AI tools, how data was obtained, and
+  the token/API cost of the workflow. Ranking work must strengthen that
+  explanation directly.
+- A bounded replay and a clear limitation are more valuable in this window
+  than broad platform changes or a rushed production migration.
 - Production remains on versioned `attention-v1.1`: 55% tracked-amplification
   percentile, 25% author-support percentile, and 20% public-interaction
   percentile.
@@ -166,7 +175,9 @@ without claiming that attention equals importance or relevance.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| in_progress | Remove the rejected fixed-bonus proposal from the How narrative while preserving the original rank-order figure | parent |  |
+| done | Remove the rejected fixed-bonus proposal from the How narrative while preserving the original rank-order figure | parent |  |
+| done | Audit what `attention-v1.1` actually does across the seven briefed days | parent | `resources/v1-1-behaviour-audit.md` |
+| todo | Decide with Adi whether the audit ships as an interview artefact only, or also triggers a production rescore | parent | `resources/v1-1-behaviour-audit.md` |
 | todo | Formalize candidate invariants and construct the 3-family offline comparison | parent | `resources/candidate-comparison.md` |
 | todo | Replay candidates and inspect top ranks, movers, organization sources, and viral outliers | parent | `resources/candidate-comparison.md` |
 
@@ -200,4 +211,17 @@ without claiming that attention equals importance or relevance.
   fixed `+0.25` adjustments.
 - 2026-07-26: [DONE] Preserved the original rank-order figure separately from
   the candidate-formula figure; both answer different questions.
-
+- 2026-07-26: [DONE] Audited live `attention-v1.1` behaviour across seven
+  briefed days (`resources/v1-1-behaviour-audit.md`). The percentile transform
+  over a zero-inflated amplifier count turns the 55% primary lane into a
+  near-binary "amplified at all?" flag: 0→1 amplifier is worth +40.9 points
+  while 2→111 amplifiers is worth +2.3. Inside the top-100 routing gate the
+  nominally 25% author-support lane out-discriminates it on five of seven
+  days, and 11 Events with ≥3 trusted amplifiers miss the gate on 2026-07-15
+  while 37 Events with ≤1 amplifier are admitted. This is a stronger and more
+  checkable case for the redesign than the original explainability argument.
+- 2026-07-26: [CONTEXT] Three working days remain before Thursday's BIT
+  follow-up interview. Reframed the project as bounded interview hardening:
+  defensible explanation, replay evidence, working-method narrative, and
+  token/API cost clarity outrank platform breadth or a rushed production
+  score migration.
