@@ -78,17 +78,19 @@ test('Feed search matches the compact ruled control language', () => {
   assert.match(appStyles, /\.feed-search \{[\s\S]*?min-height: 44px;[\s\S]*?border: 1px solid var\(--border-strong\);[\s\S]*?border-radius: 0;/)
 })
 
-test('Feed preserves daily rank across search and discloses score on demand', () => {
+test('Feed preserves daily rank across search and discloses its layers on demand', () => {
   assert.match(feedSource, /href="\/system\/architecture#ranking-methods"/)
   assert.match(feedSource, /<strong>#\{rank\}<\/strong>/)
   assert.match(feedSource, /rank=\{item\.daily_rank\}/)
   assert.match(feedSource, /Daily rank #\{rank\} of \{total\.toLocaleString/)
   assert.doesNotMatch(feedSource, /rank=\{index \+ 1\}/)
-  assert.match(feedSource, /Daily score \{basis\.attention_score\.toFixed\(1\)\}/)
+  assert.match(feedSource, /components\.trusted_votes/)
+  assert.match(feedSource, /components\.mean_voter_position/)
+  assert.match(feedSource, /components\.author_position/)
+  assert.match(feedSource, /components\.public_interactions/)
   assert.match(feedSource, /aria-expanded=\{open\}/)
-  assert.match(feedSource, /Higher than \{\(row\.percentile \* 100\)\.toFixed\(1\)\}%/)
-  assert.match(feedSource, /Scores from different\s+days are not directly comparable/)
-  assert.doesNotMatch(feedSource, /<span>attention<\/span>/)
+  assert.match(feedSource, /Ranks from different\s+days are not directly comparable/)
+  assert.doesNotMatch(feedSource, /attention_score|score_components|score_formula/)
 })
 
 test('Feed exposes the selected date and guards paginated responses by view identity', () => {

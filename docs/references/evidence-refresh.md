@@ -14,17 +14,18 @@ X timelines → Feed posts/relations → publish Events
 
 ```bash
 fli evidence-refresh \
-  --through 2026-07-15 \
-  --days 11 \
+  --through 2026-07-21 \
+  --days 17 \
   --collection-days 3 \
   --workers 32 \
   --no-input --json
 ```
 
-In plain language, that command downloads only July 13–15, then rebuilds the
-July 5–15 app pages from the complete local cache. The local rebuild makes no X
-provider request. `--days` controls what remains visible; `--collection-days`
-controls what is fetched now.
+In plain language, that command verifies or downloads only July 19–21, then
+rebuilds the July 5–21 app pages from the complete local cache. Repeating it
+against complete cached coverage makes no X provider request. `--days`
+controls what remains visible; `--collection-days` controls what is fetched
+now.
 
 `--through` is the latest complete UTC day. `--days` defines the inclusive
 published Feed/Event window. `--collection-days` can collect only the newest
@@ -151,8 +152,8 @@ fresh all-positive Insight cohort without a model call:
 
 ```bash
 fli insights refresh \
-  --through 2026-07-13 \
-  --days 9 \
+  --through 2026-07-21 \
+  --days 17 \
   --all-routed \
   --audience all \
   --model gpt-5.6-terra \
@@ -160,15 +161,16 @@ fli insights refresh \
   --dry-run --json --no-input
 ```
 
-For a clean replacement, run the same command without `--dry-run` against a
-new `--db` path under `tmp/` and a new `--dump-dir`. Validate the exact expected
-request count, zero pending/failed rows, SQLite integrity, prompt/schema/source
-lineage, cache telemetry, and cost before atomically replacing
-`data/derived/insights/insights.db`. Do not append a new semantic contract to an
-old production database. The production store accepts only the current v4
-Insight prompts/output schema over current v9 routing; its first clean
-checkpoint contains six completed decisions over three Events. The complete
-plan is 492 unique Events and 751 audience requests.
+Run the same command without `--dry-run` against the canonical Insight store.
+Validate the exact expected request count, zero pending/failed rows, SQLite
+integrity, prompt/schema/source lineage, cache telemetry, and cost. The store
+may hold multiple immutable routing lineages under the same current Insight
+contract. An exact prior Event/audience output is reused only when input,
+prompt, schema, model, and reasoning effort match; the successor row retains
+its current rank/routing provenance plus explicit reuse provenance. A changed
+semantic contract still requires a clean migration, not a compatibility read.
+The current v10/v7 checkpoint contains 1,482 completed audience decisions over
+970 unique Events from 17 `daily-rank-v2` routing runs.
 
 ## Output
 

@@ -13,6 +13,7 @@ from fli.insights import editorial_runs
 from fli.insights import runs as insight_runs
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
+from fli.scoring import attention
 from fli.web.app import app
 
 
@@ -83,11 +84,11 @@ def _routing_fixture(root: Path) -> Path:
     conn.execute(
         """INSERT INTO run_meta (
                singleton, run_id, day, model, reasoning_effort,
-               prompt_version, prompt_sha256, schema_version,
+               prompt_version, prompt_sha256, schema_version, rank_version,
                source_event_run_id, source_feed_run_id, source_artifact_db,
                selection_kind, selection_limit, requested_event_id,
                cohort_sha256, expected_count, created_at, updated_at)
-           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?,
+           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?, ?,
                    'event-run', 'feed-run', 'artifacts.db', 'top_ranked', 3,
                    NULL, 'cohort-sha', 3, ?, ?)""",
         (
@@ -95,6 +96,7 @@ def _routing_fixture(root: Path) -> Path:
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
+            attention.DAILY_RANK_VERSION,
             now,
             now,
         ),
@@ -331,6 +333,29 @@ def test_prepare_freezes_union_positive_workspace_and_reuses_it(tmp_path, monkey
     )
 
 
+def test_prepare_omits_prior_insight_when_routing_input_hash_changed(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(
+        editorial_runs,
+        "_prior_insights",
+        lambda *_args, **_kwargs: {
+            ("event-a", "ai_engineering"): {
+                "summary": "An annotation from an older routing input.",
+                "input_sha256": "different-input",
+            }
+        },
+    )
+
+    workspace = _workspace(tmp_path, monkeypatch)
+    manifest = editorial_runs.load_manifest(workspace)
+    event = next(item for item in manifest["events"] if item["event_id"] == "event-a")
+    payload = json.loads((workspace / event["file"]).read_text())
+
+    assert payload["input_sha256"] != "different-input"
+    assert payload["prior_per_event_insights"] == {}
+
+
 def test_artifact_disclosures_are_loaded_from_the_bound_catalog(tmp_path):
     db = tmp_path / "artifacts.db"
     conn = sqlite3.connect(db)
@@ -385,11 +410,11 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
     conn.execute(
         """INSERT INTO run_meta (
                singleton, run_id, day, model, reasoning_effort,
-               prompt_version, prompt_sha256, schema_version,
+               prompt_version, prompt_sha256, schema_version, rank_version,
                source_event_run_id, source_feed_run_id, source_artifact_db,
                selection_kind, selection_limit, requested_event_id,
                cohort_sha256, expected_count, created_at, updated_at)
-           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?,
+           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?, ?,
                    'event-run', 'feed-run', 'artifacts.db', 'top_ranked', 1,
                    NULL, 'cohort-sha', 1, ?, ?)""",
         (
@@ -397,6 +422,7 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
+            attention.DAILY_RANK_VERSION,
             now,
             now,
         ),

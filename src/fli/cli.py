@@ -83,10 +83,10 @@ def main(argv: list[str] | None = None) -> int:
     daily_intelligence_p.add_argument(
         "daily_intelligence_args", nargs=argparse.REMAINDER
     )
-    attention_score_p = sub.add_parser(
-        "attention-score", help="Evaluate versioned Feed attention scores."
+    daily_rank_p = sub.add_parser(
+        "daily-rank", help="Evaluate the versioned daily Event ranking."
     )
-    attention_score_p.add_argument("attention_score_args", nargs=argparse.REMAINDER)
+    daily_rank_p.add_argument("daily_rank_args", nargs=argparse.REMAINDER)
     x_daily_collection_p = sub.add_parser(
         "x-daily-collection",
         help="Plan or resume date-complete Registry X collection.",
@@ -207,10 +207,10 @@ def main(argv: list[str] | None = None) -> int:
 
         return editorial_cli.main(args.daily_intelligence_args)
 
-    if args.command == "attention-score":
+    if args.command == "daily-rank":
         from fli.scoring import evaluation
 
-        return evaluation.main(args.attention_score_args)
+        return evaluation.main(args.daily_rank_args)
 
     if args.command == "x-daily-collection":
         from fli.ingestion.x import collection as x_daily_collection

@@ -19,6 +19,7 @@ from fli.evidence.artifacts import store as artifacts
 from fli.registry import classification as entity_kinds
 from fli.routing import freshness
 from fli.routing import model as routing_model
+from fli.scoring import attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -60,6 +61,7 @@ CREATE TABLE IF NOT EXISTS run_meta (
     prompt_version TEXT NOT NULL,
     prompt_sha256 TEXT NOT NULL,
     schema_version TEXT NOT NULL,
+    rank_version TEXT NOT NULL,
     source_event_run_id TEXT NOT NULL,
     source_feed_run_id TEXT NOT NULL,
     source_artifact_db TEXT NOT NULL,
@@ -186,6 +188,16 @@ def migrate_run_storage(path: Path | str) -> bool:
         elif "snapshot_content_sha256" not in columns:
             return False
         with conn:
+            meta_columns = {
+                str(row["name"])
+                for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
+            }
+            if "rank_version" not in meta_columns:
+                conn.execute(
+                    "ALTER TABLE run_meta ADD COLUMN rank_version TEXT NOT NULL "
+                    "DEFAULT 'attention-v1.1'"
+                )
+                changed = True
             if "snapshot_content_sha256" in columns:
                 conn.execute(
                     "ALTER TABLE routing_item RENAME COLUMN "
@@ -211,7 +223,7 @@ def migrate_run_storage(path: Path | str) -> bool:
                     raise RuntimeError(
                         "routing storage cohort hash does not match stored items"
                     )
-            conn.execute("PRAGMA user_version = 2")
+            conn.execute("PRAGMA user_version = 3")
         integrity = str(conn.execute("PRAGMA integrity_check").fetchone()[0])
         if integrity != "ok":
             raise RuntimeError(f"routing storage integrity check failed: {integrity}")
@@ -272,7 +284,8 @@ def _refresh_plan(
             "day": day,
             "run_id": (
                 f"{routing_model.PROMPT_VERSION}-{_run_label(model)}-{day}-"
-                f"top{top_ranked}-{_run_label(effort)}-{source_label}"
+                f"top{top_ranked}-{_run_label(effort)}-"
+                f"{_run_label(attention.DAILY_RANK_VERSION)}-{source_label}"
             ),
         }
         for day in _refresh_days(through, days)
@@ -415,6 +428,7 @@ def refresh_all_days(
         "top_ranked": top_ranked,
         "model": model,
         "reasoning_effort": effort,
+        "rank_version": attention.DAILY_RANK_VERSION,
         "workers_per_day": workers,
         "day_workers": min(day_workers, len(plan)),
         "replace": replace,
@@ -592,7 +606,16 @@ def connect_run(path: Path | str) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(RUN_SCHEMA)
-    conn.execute("PRAGMA user_version = 2")
+    meta_columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
+    }
+    if "rank_version" not in meta_columns:
+        conn.execute(
+            "ALTER TABLE run_meta ADD COLUMN rank_version TEXT NOT NULL "
+            "DEFAULT 'attention-v1.1'"
+        )
+    conn.execute("PRAGMA user_version = 3")
     conn.commit()
     return conn
 
@@ -900,6 +923,7 @@ def freeze_run(
         "prompt_version": routing_model.PROMPT_VERSION,
         "prompt_sha256": routing_model.prompt_sha256(),
         "schema_version": routing_model.SCHEMA_VERSION,
+        "rank_version": attention.DAILY_RANK_VERSION,
         "source_event_run_id": str(source_run["run_id"]),
         "source_feed_run_id": str(source_run["feed_run_id"]),
         "source_artifact_db": _display_path(artifact_db),
@@ -924,15 +948,17 @@ def freeze_run(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
                 prompt_version, prompt_sha256, schema_version,
+                rank_version,
                 source_event_run_id, source_feed_run_id, source_artifact_db,
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count,
                 created_at, updated_at)
-               VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 expected["run_id"], expected["day"], expected["model"],
                 expected["reasoning_effort"], expected["prompt_version"],
                 expected["prompt_sha256"], expected["schema_version"],
+                expected["rank_version"],
                 expected["source_event_run_id"], expected["source_feed_run_id"],
                 expected["source_artifact_db"], expected["selection_kind"],
                 expected["selection_limit"],

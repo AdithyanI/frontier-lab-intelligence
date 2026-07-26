@@ -5,6 +5,7 @@ import pytest
 
 from fli.evidence.artifacts import store as artifacts
 from fli.routing import runs as routing_runs
+from fli.scoring import attention
 from fli.web import events as event_store
 
 
@@ -27,7 +28,7 @@ def test_connect_run_migrates_legacy_snapshot_column(tmp_path):
     conn.executescript(
         routing_runs.RUN_SCHEMA.replace(
             "semantic_snapshot_sha256", "snapshot_content_sha256"
-        )
+        ).replace("    rank_version TEXT NOT NULL,\n", "")
     )
     conn.execute(
         """INSERT INTO run_meta (
@@ -67,6 +68,11 @@ def test_connect_run_migrates_legacy_snapshot_column(tmp_path):
             "SELECT cohort_sha256 FROM run_meta WHERE singleton = 1"
         ).fetchone()[0]
     )
+    rank_version = str(
+        migrated.execute(
+            "SELECT rank_version FROM run_meta WHERE singleton = 1"
+        ).fetchone()[0]
+    )
     user_version = int(migrated.execute("PRAGMA user_version").fetchone()[0])
 
     assert row["semantic_snapshot_sha256"] == "snapshot-sha"
@@ -84,8 +90,9 @@ def test_connect_run_migrates_legacy_snapshot_column(tmp_path):
         )
     )
     assert cohort_sha256 == current_cohort_sha256
+    assert rank_version == "attention-v1.1"
     assert "snapshot_content_sha256" not in columns
-    assert user_version == 2
+    assert user_version == 3
 
     migrated.execute(
         "UPDATE run_meta SET cohort_sha256 = ? WHERE singleton = 1",
@@ -270,14 +277,14 @@ def test_selective_refresh_reuses_only_exact_complete_inputs(tmp_path):
         conn.execute(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
-                prompt_version, prompt_sha256, schema_version,
+                prompt_version, prompt_sha256, schema_version, rank_version,
                 source_event_run_id, source_feed_run_id, source_artifact_db,
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count, created_at, updated_at)
                VALUES (1, ?, '2026-07-15', 'model', 'high', 'prompt',
-                       'prompt-sha', 'schema', 'events', 'feed', 'artifacts.db',
+                       'prompt-sha', 'schema', ?, 'events', 'feed', 'artifacts.db',
                        'top_ranked', 2, NULL, ?, 2, ?, ?)""",
-            (run_id, cohort_sha, now, now),
+            (run_id, attention.DAILY_RANK_VERSION, cohort_sha, now, now),
         )
 
     def seed_item(conn, event_id, input_sha, *, complete=False):
@@ -358,15 +365,16 @@ def test_exact_reuse_crosses_publications_and_keeps_target_provenance(tmp_path):
         conn.execute(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
-                prompt_version, prompt_sha256, schema_version,
+                prompt_version, prompt_sha256, schema_version, rank_version,
                 source_event_run_id, source_feed_run_id, source_artifact_db,
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count, created_at, updated_at)
                VALUES (1, ?, '2026-07-16', 'model', 'high', 'prompt',
-                       'prompt-sha', 'schema', ?, ?, 'artifacts.db',
+                       'prompt-sha', 'schema', ?, ?, ?, 'artifacts.db',
                        'top_ranked', 100, NULL, ?, ?, ?, ?)""",
             (
                 run_id,
+                attention.DAILY_RANK_VERSION,
                 event_run_id,
                 feed_run_id,
                 f"cohort-{run_id}",
@@ -517,16 +525,17 @@ def test_automatic_reuse_ignores_partial_and_incompatible_runs(
         conn.execute(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
-                prompt_version, prompt_sha256, schema_version,
+                prompt_version, prompt_sha256, schema_version, rank_version,
                 source_event_run_id, source_feed_run_id, source_artifact_db,
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count, created_at, updated_at)
                VALUES (1, ?, '2026-07-16', 'model', 'high', 'prompt', ?,
-                       'schema', ?, ?, 'artifacts.db', 'top_ranked', 100, NULL,
+                       'schema', ?, ?, ?, 'artifacts.db', 'top_ranked', 100, NULL,
                        ?, 1, ?, ?)""",
             (
                 run_id,
                 prompt_sha,
+                attention.DAILY_RANK_VERSION,
                 f"events-{run_id}",
                 f"feed-{run_id}",
                 f"cohort-{run_id}",

@@ -1,81 +1,176 @@
-import math
+import random
 
 import pytest
 
 from fli.scoring import attention
 
 
-def _components(*, amplifiers: int, support: int, engagement: float = 0.5):
-    return {
-        "registry_amplifiers": amplifiers,
-        "originator_network_support": support,
-        "network_attention_percentile": 0.75,
-        "originator_support_percentile": 0.6,
-        "public_engagement_percentile": engagement,
-    }
-
-
-def test_v1_1_reproduces_stored_percentile_formula():
-    score, factors = attention.score_components(
-        _components(amplifiers=1, support=50), attention.ATTENTION_V1_1
+def _voter(entity_id: int, position: float) -> attention.Voter:
+    return attention.Voter(
+        entity_id=entity_id,
+        position=position,
+        entity_name=f"Entity {entity_id}",
     )
 
-    # Python's round uses ties-to-even; production v1.1 does the same.
-    assert score == 66.2
-    assert factors == {
-        "network_attention_factor": 0.75,
-        "originator_support_factor": 0.6,
-        "public_engagement_factor": 0.5,
-    }
 
-
-def test_v2_uses_fixed_saturating_curves():
-    score, factors = attention.score_components(
-        _components(amplifiers=16, support=150),
-        attention.ATTENTION_V2_CANDIDATE,
+def _inputs(
+    event_id: str,
+    *,
+    voter_positions: tuple[float, ...] = (),
+    author_position: float = 0.0,
+    public_interactions: int = 0,
+) -> attention.RankInputs:
+    return attention.RankInputs(
+        voters=tuple(
+            _voter(entity_id, position)
+            for entity_id, position in enumerate(voter_positions, start=1)
+        ),
+        author_position=author_position,
+        public_interactions=public_interactions,
+        event_id=event_id,
     )
 
-    assert score == 87.5
-    assert factors["network_attention_factor"] == 1.0
-    assert factors["originator_support_factor"] == 1.0
+
+def test_dense_rank_positions_use_rank_levels_so_top_and_bottom_are_bounded():
+    positions = attention.entity_positions(
+        {
+            10: {
+                "network_rank": 1,
+                "network_rank_total": 2_524,
+                "network_rank_level_total": 663,
+            },
+            20: {
+                "network_rank": 332,
+                "network_rank_total": 2_524,
+                "network_rank_level_total": 663,
+            },
+            30: {
+                "network_rank": 663,
+                "network_rank_total": 2_524,
+                "network_rank_level_total": 663,
+            },
+        }
+    )
+
+    assert positions[10] == 1.0
+    assert positions[20] == pytest.approx(0.5)
+    assert positions[30] == 0.0
 
 
-def test_v2_preserves_resolution_across_multiple_amplifiers():
-    values = [
-        attention.score_components(
-            _components(amplifiers=count, support=50),
-            attention.ATTENTION_V2_CANDIDATE,
-        )[1]["network_attention_factor"]
-        for count in (0, 1, 2, 4, 8, 16, 40)
+def test_lexicographic_layers_only_break_ties_in_order():
+    rows = [
+        (
+            {"event_id": "three-low-voters"},
+            _inputs("three-low-voters", voter_positions=(0.1, 0.1, 0.1)),
+        ),
+        (
+            {"event_id": "two-top-voters"},
+            _inputs("two-top-voters", voter_positions=(1.0, 1.0)),
+        ),
+        (
+            {"event_id": "mean-wins"},
+            _inputs(
+                "mean-wins",
+                voter_positions=(0.9,),
+                author_position=0.1,
+                public_interactions=1,
+            ),
+        ),
+        (
+            {"event_id": "author-wins"},
+            _inputs(
+                "author-wins",
+                voter_positions=(0.5,),
+                author_position=0.9,
+                public_interactions=1,
+            ),
+        ),
+        (
+            {"event_id": "public-wins"},
+            _inputs(
+                "public-wins",
+                voter_positions=(0.5,),
+                author_position=0.5,
+                public_interactions=100,
+            ),
+        ),
+        (
+            {"event_id": "event-a"},
+            _inputs(
+                "event-a",
+                voter_positions=(0.5,),
+                author_position=0.5,
+                public_interactions=10,
+            ),
+        ),
+        (
+            {"event_id": "event-b"},
+            _inputs(
+                "event-b",
+                voter_positions=(0.5,),
+                author_position=0.5,
+                public_interactions=10,
+            ),
+        ),
     ]
 
-    assert values == sorted(values)
-    assert len(set(values[:6])) == 6
-    assert values[-1] == values[-2] == 1.0
+    ranked = attention.rank_events(rows)
+
+    assert [row["event_id"] for row in ranked] == [
+        "three-low-voters",
+        "two-top-voters",
+        "mean-wins",
+        "author-wins",
+        "public-wins",
+        "event-a",
+        "event-b",
+    ]
+    assert ranked[0]["rank_components"]["decided_at_layer"] == 1
+    assert ranked[2]["rank_components"]["decided_at_layer"] == 2
+    assert ranked[3]["rank_components"]["decided_at_layer"] == 3
+    assert ranked[4]["rank_components"]["decided_at_layer"] == 4
+    assert ranked[5]["rank_components"]["decided_at_layer"] == 5
 
 
-def test_attention_formula_rejects_invalid_contracts():
-    with pytest.raises(ValueError, match="sum to 1"):
-        attention.AttentionFormula(
-            version="bad",
-            network_attention_weight=0.5,
-            originator_support_weight=0.5,
-            public_engagement_weight=0.5,
+def test_daily_rank_is_deterministic_and_has_no_scalar_score():
+    rows = [
+        (
+            {"event_id": event_id, "title": event_id},
+            _inputs(
+                event_id,
+                voter_positions=(0.75,),
+                author_position=0.5,
+                public_interactions=10,
+            ),
         )
-    with pytest.raises(ValueError, match="both anchors"):
-        attention.AttentionFormula(
-            version="bad",
-            network_attention_weight=0.5,
-            originator_support_weight=0.25,
-            public_engagement_weight=0.25,
-            amplifier_cap=8,
+        for event_id in ("event-c", "event-a", "event-b")
+    ]
+    expected = ["event-a", "event-b", "event-c"]
+
+    for seed in range(10):
+        shuffled = list(rows)
+        random.Random(seed).shuffle(shuffled)
+        ranked = attention.rank_events(shuffled)
+
+        assert [row["event_id"] for row in ranked] == expected
+        assert [row["daily_rank"] for row in ranked] == [1, 2, 3]
+        assert all(row["rank_components"]["version"] == "daily-rank-v2" for row in ranked)
+        assert all("attention_score" not in row for row in ranked)
+        assert all("score" not in row for row in ranked)
+        assert all("score_components" not in row for row in ranked)
+        assert all("score" not in row["rank_components"] for row in ranked)
+
+
+def test_rank_inputs_reject_duplicate_voters_and_zero_voters_have_zero_mean():
+    with pytest.raises(ValueError, match="deduplicated"):
+        attention.RankInputs(
+            voters=(_voter(1, 0.2), _voter(1, 0.8)),
+            author_position=0.0,
+            public_interactions=0,
+            event_id="duplicate",
         )
 
+    inputs = _inputs("zero-voters", author_position=1.0)
 
-def test_percentiles_keep_tied_values_at_bottom_of_tie_range():
-    values = attention.percentiles([0.0, 1.0, 1.0, 2.0])
-
-    assert values[0.0] == 0.0
-    assert values[1.0] == pytest.approx(1 / 3)
-    assert values[2.0] == 1.0
-    assert math.isclose(attention.percentiles([0.0, 0.0])[0.0], 0.0)
+    assert inputs.trusted_votes == 0
+    assert inputs.mean_voter_position == 0.0

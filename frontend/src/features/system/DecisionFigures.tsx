@@ -190,7 +190,7 @@ export function RankFigure() {
     <svg
       viewBox="0 0 1080 350"
       role="img"
-      aria-label="Left: a day of Events as unordered bars. Right: the same bars ordered by attention, with the top of the day marked as what goes to judging first."
+      aria-label="Left: a day of Events as unordered bars. Right: the same bars ordered by the daily Event ranking rules, with the top of the day marked as what goes to judging first."
     >
       <defs>
         <marker id="rank-order-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -198,7 +198,7 @@ export function RankFigure() {
         </marker>
       </defs>
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">RANK · ORDER THE DAY, DO NOT JUDGE IT</text>
-      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">A TRANSPARENT FORMULA</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">TRANSPARENT ORDERING RULES</text>
 
       {heights.map((height, index) => (
         <rect key={`u-${index}`} x={70 + index * 34} y={baseline - height} width="22" height={height} fill={MUTED} opacity="0.35" />
@@ -207,7 +207,7 @@ export function RankFigure() {
       <text x="70" y="288" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">A DAY OF EVENTS, AS THEY ARRIVED</text>
 
       <line x1="460" y1="196" x2="586" y2="196" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#rank-order-arrow)" />
-      <text x="472" y="180" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">SCORED</text>
+      <text x="472" y="180" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">ORDERED</text>
 
       {sorted.map((height, index) => (
         <rect
@@ -223,11 +223,11 @@ export function RankFigure() {
       <line x1="620" y1={baseline} x2={620 + 9 * 34 + 22} y2={baseline} stroke={MUTED} strokeWidth="1" />
       <rect x="612" y="130" width="112" height="130" fill="none" stroke={BLUE_MID} strokeWidth="1" strokeDasharray="4 4" />
       <text x="612" y="122" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">JUDGED FIRST</text>
-      <text x="620" y="288" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">THE SAME DAY, ORDERED BY ATTENTION</text>
+      <text x="620" y="288" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">THE SAME DAY, ORDERED BY NETWORK ATTENTION</text>
 
       <line x1="30" y1="312" x2="1050" y2="312" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="334" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        The score decides where to look first. It never decides what is true or what matters.
+        The rank decides where to look first. It never decides what is true or what matters.
       </text>
     </svg>
   )
@@ -340,17 +340,17 @@ export function ScoreLayersFigure() {
     Array.from({ length: count }, (_, i) => dot(688 + i * 21, y, opacity, `${key}-${i}`))
 
   const rows = [
-    { n: '1', title: 'How many vouched?', note: 'DISTINCT TRUSTED PEOPLE · ONE VOTE EACH' },
+    { n: '1', title: 'How many voted?', note: 'DISTINCT TRUSTED ENTITIES · QUOTE OR REPOST · ONE EACH' },
     { n: '2', title: 'Tie? How trusted were they.', note: 'AVERAGE NETWORK POSITION OF THE VOTERS' },
-    { n: '3', title: 'Tie? How trusted is the poster.', note: 'NETWORK POSITION OF THE AUTHOR' },
-    { n: '4', title: 'Tie? Public engagement.', note: 'LIKES · REPLIES · REPOSTS · QUOTES' },
+    { n: '3', title: 'Tie? How trusted is the source.', note: 'NETWORK POSITION OF THE SOURCE AUTHOR' },
+    { n: '4', title: 'Tie? Public interaction.', note: 'MAX SAME-DAY POST · LIKES · REPLIES · REPOSTS · QUOTES' },
   ]
 
   return (
     <svg
       viewBox="0 0 1080 580"
       role="img"
-      aria-label="The daily score asks four questions in order instead of blending them into one weighted number. First, how many distinct trusted people vouched for the Event, one vote each. If that ties, the average network position of those voters. If that still ties, the network position of the author. If that still ties, public engagement. Below, a measured check: Events with one trusted vote became an Insight 43 percent of the time, two votes 57 percent, three to four votes 65 percent, five or more votes 70 percent."
+      aria-label="The daily rank asks four questions in order instead of blending them into one weighted number. First, how many distinct trusted Registry entities quoted or reposted the complete Event, one vote each and with the source author excluded. If that ties, the average network position of those voters. If that still ties, the network position of the source author. If that still ties, the maximum same-day public interactions on one Event post. Below is a censored check from the current daily-rank-v2 routing cohort: Events with one trusted vote were routing-relevant 34 percent of the time, two votes 55 percent, three to four votes 64 percent, and five or more votes 72 percent."
     >
       <defs>
         <marker id="score-layer-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -381,8 +381,8 @@ export function ScoreLayersFigure() {
               <>
                 {dots(3, first, 1, 'r1a')}
                 {dots(1, second, 1, 'r1b')}
-                <text x="770" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">MORE VOUCHED</text>
-                <text x="770" y={second + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">FEWER VOUCHED</text>
+                <text x="770" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">MORE TRUSTED VOTES</text>
+                <text x="770" y={second + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">FEWER TRUSTED VOTES</text>
               </>
             ) : null}
 
@@ -426,13 +426,13 @@ export function ScoreLayersFigure() {
       })}
 
       <line x1="30" y1="502" x2="1050" y2="502" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="30" y="540" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">MORE VOUCHING ·</text>
-      <text x="30" y="556" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">MORE OFTEN USEFUL</text>
+      <text x="30" y="532" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">CURRENT V2 ROUTING · CENSORED CHECK</text>
+      <text x="30" y="548" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">MORE VOTES · MORE OFTEN ROUTING-RELEVANT</text>
       {[
-        ['1 VOTE', 43],
-        ['2 VOTES', 57],
-        ['3–4 VOTES', 65],
-        ['5+ VOTES', 70],
+        ['1 VOTE', 34],
+        ['2 VOTES', 55],
+        ['3–4 VOTES', 64],
+        ['5+ VOTES', 72],
       ].map(([label, rate], index) => {
         const x = 300 + index * 156
         const height = Number(rate) * 0.42

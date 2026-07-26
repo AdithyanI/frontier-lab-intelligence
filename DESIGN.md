@@ -76,7 +76,7 @@ Rules:
 - Body 15–16px, line-height 1.55, max measure ~60ch.
 - Page headers begin with one direct title and one short, useful subtitle. Do
   not add a route-restating kicker or repeat counts already present in nearby
-  controls. Operational identifiers and formulas belong in a compact Method
+  controls. Operational identifiers and ranking rules belong in a compact Method
   disclosure or the canonical Architecture explanation.
 - Tabular numerals everywhere numbers column-align.
 
@@ -168,11 +168,11 @@ Rules:
   X, website, GitHub, or blog. Multiple X accounts are equal links on
   one row; there is no privileged footer CTA. Preserve bio line breaks; label
   source-truncated snapshots honestly; bound long content with internal
-  scrolling while keeping close access fixed. Daily-score/ranking evidence stays
+  scrolling while keeping close access fixed. Daily-ranking evidence stays
   out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
-- **Evidence Feed:** default to the decision-ready `Relevant` / `Score` view.
+- **Evidence Feed:** default to the decision-ready `Relevant` / `Rank` view.
   `Relevant` is a derived display state—Engineering, Investment, or both—not
   a separate model judgment.
   Date navigation shows the newest seven available complete UTC days in one
@@ -185,13 +185,15 @@ Rules:
   artifacts, and Insights. Switching between those views preserves the day;
   when a target view has no data for it, keep the date and show an honest empty
   state rather than silently selecting a different day.
-  The persistent left rail shows the event's stable daily score rank across all
-  evidence for the selected day (`#1`, `#2`, ...), never the composite decimal.
-  Status filters and search hide rows without restarting that rank. Clicking it opens one
-  anchored, non-modal disclosure with the daily score, its exact score-producing
-  member post, raw component values, within-day percentiles, weights, and
-  limitations. Rank is scope-aware: a future weekly view labels a weekly rank;
-  it must not average incomparable daily scores.
+  The persistent left rail shows the Event's stable daily rank across all
+  evidence for the selected day (`#1`, `#2`, ...). Status filters and search
+  hide rows without restarting that rank. Clicking it opens one anchored,
+  non-modal disclosure with the union of distinct trusted Event voters, mean
+  voter network position, source-author network position, maximum same-day
+  one-post public interactions, the deciding layer, and limitations. These are
+  ordered tiebreak layers, not a composite decimal or weighted score. Rank is
+  scope-aware: a future weekly view labels a weekly rank; it must not average
+  ranks from different daily candidate sets.
   Status and sort are compact labeled disclosures rather than persistent
   segmented bars; each option remains one click away and routing counts stay
   visible inside the menu. Status begins with `All`, which removes the routing
@@ -317,9 +319,9 @@ Rules:
   all claims dated or qualified. Never imply access to the complete current
   portfolio, internal forecasts, cost bases, position targets, or automated
   trade decisions.
-- **Score breakdown:** inputs and weights are visible only on demand from the
-  Feed rank. Trust through inspectability without making the decimal the primary
-  reading cue (PRODUCT.md #3).
+- **Rank explanation:** the ordered evidence layers and deciding layer are
+  visible only on demand from the Feed rank. Trust comes from inspectability
+  without inventing a synthetic number (PRODUCT.md #3).
 - **System guide:** the default System view maps the original assignment to one
   five-step path through the working product: choose, collect, rank, judge, and
   publish. Each step links to its real proof surface. End with the exact audit

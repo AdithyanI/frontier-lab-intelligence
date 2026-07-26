@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.insights import cli as insight_cli
+from fli.scoring import attention
 
 
 EVENT_ID = "event-spike-1"
@@ -58,12 +59,12 @@ def _routing_fixture(
         conn.execute(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
-                prompt_version, prompt_sha256, schema_version,
+                prompt_version, prompt_sha256, schema_version, rank_version,
                 source_event_run_id, source_feed_run_id, source_artifact_db,
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count, created_at, updated_at)
                VALUES (1, ?, ?, 'gpt-5.4-mini', 'high',
-                       ?, 'prompt-sha', ?, 'event-run', 'feed-run',
+                       ?, 'prompt-sha', ?, ?, 'event-run', 'feed-run',
                        'artifacts.db', 'top_ranked', 100, NULL,
                        'cohort-sha', 1, ?, ?)""",
             (
@@ -71,6 +72,7 @@ def _routing_fixture(
                 day,
                 routing_model.PROMPT_VERSION,
                 routing_model.SCHEMA_VERSION,
+                attention.DAILY_RANK_VERSION,
                 now,
                 now,
             ),
@@ -345,6 +347,73 @@ def test_run_records_results_cache_and_cost(tmp_path, capsys):
 
     assert second_exit == 0
     assert len(client.raw_api.calls) == 2
+
+
+def test_new_routing_lineage_reuses_exact_insights_without_model_calls(tmp_path):
+    routing_root = tmp_path / "routing"
+    _routing_fixture(routing_root, run_id="routing-old")
+    db = tmp_path / "insights.db"
+    client = _Client()
+
+    first = insight_cli.run_spike(
+        event_id=EVENT_ID,
+        day="2026-07-13",
+        audience="all",
+        model=insight_cli.DEFAULT_MODEL,
+        effort=insight_cli.DEFAULT_EFFORT,
+        run_id="insights-old",
+        db_path=db,
+        routing_root=routing_root,
+        dump_dir=tmp_path / "old-dump",
+        dry_run=False,
+        timeout_seconds=insight_cli.DEFAULT_TIMEOUT_SECONDS,
+        progress="off",
+        source_routing_run_id="routing-old",
+        client_factory=lambda: client,
+    )
+    assert first["telemetry"]["model_requests"] == 2
+
+    new_routing_db = _routing_fixture(routing_root, run_id="routing-new")
+    conn = routing_runs.connect_run(new_routing_db)
+    with conn:
+        conn.execute(
+            "UPDATE routing_item SET feed_rank = 9 WHERE event_id = ?",
+            (EVENT_ID,),
+        )
+    conn.close()
+
+    second = insight_cli.run_spike(
+        event_id=EVENT_ID,
+        day="2026-07-13",
+        audience="all",
+        model=insight_cli.DEFAULT_MODEL,
+        effort=insight_cli.DEFAULT_EFFORT,
+        run_id="insights-new",
+        db_path=db,
+        routing_root=routing_root,
+        dump_dir=tmp_path / "new-dump",
+        dry_run=False,
+        timeout_seconds=insight_cli.DEFAULT_TIMEOUT_SECONDS,
+        progress="off",
+        source_routing_run_id="routing-new",
+        client_factory=lambda: (_ for _ in ()).throw(
+            AssertionError("exact cross-routing reuse must not create a model client")
+        ),
+    )
+
+    assert second["source_routing_run_id"] == "routing-new"
+    assert second["feed_rank"] == 9
+    assert second["telemetry"]["model_requests"] == 0
+    assert second["telemetry"]["reused_results"] == 2
+    assert len(client.raw_api.calls) == 2
+    assert {
+        (item["reused_from_run_id"], item["reused_from_audience"])
+        for item in second["store"]["items"]
+    } == {
+        ("insights-old", "ai_engineering"),
+        ("insights-old", "investment"),
+    }
+    assert {item["feed_rank"] for item in second["evaluations"]} == {9}
 
 
 def test_missing_event_uses_stable_validation_error(tmp_path, capsys):

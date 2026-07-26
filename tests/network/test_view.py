@@ -150,6 +150,7 @@ def test_entity_network_ranks_use_entity_union_support(tmp_path, monkeypatch):
         "channel_count": 1,
         "network_source_total": 1,
         "network_rank_total": 1,
+        "network_rank_level_total": 1,
     }
 
 

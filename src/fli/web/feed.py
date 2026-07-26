@@ -20,12 +20,20 @@ DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_REGISTRY_DB = REPO_ROOT / "data" / "fli.db"
 DEFAULT_DERIVED_ROOT = following_rankings.DEFAULT_DERIVED_ROOT
 
-SCORE_FORMULA = {
-    **attention.ATTENTION_V1_1.payload(),
+RANK_CONTRACT = {
+    "version": attention.DAILY_RANK_VERSION,
+    "kind": "lexicographic_event_rank",
+    "layers": [
+        "trusted_votes",
+        "mean_voter_position",
+        "author_position",
+        "public_interactions",
+        "event_id",
+    ],
     "note": (
-        "Experimental daily ordering aid, not an importance or quality judgment. "
-        "Tracked amplification counts each active Registry entity once — people "
-        "and organizations alike; public engagement is a tie-breaker."
+        "Events are ranked once per canonical day. Distinct trusted voters lead; "
+        "voter position, root-author position, and public interactions only break "
+        "ties. The rank is not an importance or quality judgment."
     ),
 }
 
@@ -339,7 +347,8 @@ def feed_payload(
     relations = _relation_rows(conn, run["run_id"], requested_day)
 
     by_handle, by_x_id = _registry_maps()
-    support, positions, ranking_run = _network_support()
+    support, _, ranking_run = _network_support()
+    entity_positions = attention.entity_positions(rankings_store.entity_network_ranks())
     active_entity_support: dict[int, int] = defaultdict(int)
     for account in by_handle.values():
         if account["registry_state"] != "active":
@@ -372,6 +381,7 @@ def feed_payload(
                 "handle": relation["source_author_handle"],
                 "relation_type": relation["relation_type"],
                 "network_support": active_entity_support.get(entity_id, 0),
+                "network_position": entity_positions.get(entity_id, 0.0),
                 "source_url": relation["source_url"],
             }
             if existing is None or candidate["relation_type"] == "quote":
@@ -407,7 +417,6 @@ def feed_payload(
         )
         if not direct_active and not amp_values:
             continue
-        author_support = support.get(str(row["author_x_id"] or ""), 0)
         items.append(
             {
                 "provider": row["provider"],
@@ -436,19 +445,12 @@ def feed_payload(
                     "views": row["view_count"],
                     "bookmarks": row["bookmark_count"],
                 },
-                "_network_raw": len(amp_values),
-                "_amplifier_count": len(amp_values),
-                "_originator_support": author_support,
-                "_originator_rank": positions.get(str(row["author_x_id"] or "")),
-                "_engagement": _public_engagement(row),
             }
         )
     conn.close()
 
-    attention.apply_attention_scores(items)
-
-    # Scores are calibrated against the complete visible day so switching a
-    # lane or searching never changes an item's score.
+    # Event ranking happens after exact structural grouping. Feed candidates
+    # remain the complete, unranked member-post inputs to that projection.
     needle = query.strip().lower()
     items = [
         item
@@ -470,22 +472,38 @@ def feed_payload(
     elif sort == "engagement":
         items.sort(
             key=lambda item: (
-                item["score_components"]["public_interactions"],
+                sum(int(item["metrics"].get(key) or 0) for key in ("likes", "replies", "reposts", "quotes")),
                 item["published_at"],
                 item["post_id"],
             ),
             reverse=True,
         )
     else:
-        items.sort(
-            key=lambda item: (
-                item["attention_score"],
-                item["score_components"]["registry_amplifiers"],
-                item["score_components"]["originator_network_support"],
-                item["score_components"]["public_interactions"],
+        def candidate_order(item: dict[str, Any]) -> tuple[Any, ...]:
+            voters = item["amplifiers"]
+            mean_position = (
+                sum(float(voter["network_position"]) for voter in voters) / len(voters)
+                if voters
+                else 0.0
+            )
+            author_id = item["author"]["entity_id"]
+            public_interactions = sum(
+                int(item["metrics"].get(key) or 0)
+                for key in ("likes", "replies", "reposts", "quotes")
+            )
+            return (
+                len(voters),
+                mean_position,
+                entity_positions.get(int(author_id), 0.0)
+                if author_id is not None
+                else 0.0,
+                public_interactions,
                 item["published_at"],
                 item["post_id"],
-            ),
+            )
+
+        items.sort(
+            key=candidate_order,
             reverse=True,
         )
     total = len(items)
@@ -508,6 +526,6 @@ def feed_payload(
             "relation_count": run["relation_count"],
             "ranking": ranking_run,
         },
-        "score_formula": SCORE_FORMULA,
+        "rank_contract": RANK_CONTRACT,
         "items": visible,
     }

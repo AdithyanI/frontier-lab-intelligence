@@ -168,23 +168,29 @@ run ID.
 copying curation state into the derived database. Rejected authors disappear
 from the next response, and rejected amplifiers stop contributing, while the
 raw and historical normalized evidence remains unchanged. Each canonical
-Registry entity votes at most once and cannot amplify its own post. The
-provisional daily score, implemented by the versioned `attention-v1.1`
-contract, is an inspectable ordering aid—not an insight, importance, or quality
-judgment. It combines day-relative percentiles for tracked amplification (55%),
-author network support (25%), and public engagement (20%). Tracked amplification
-is breadth: every distinct active canonical entity contributes
-one flat vote, independent of its network-support position. The originator's own
-entity-overlap support is the separate 25% component; public interactions are
-log-scaled. This avoids multiplying amplifier prominence into the same signal
-while keeping every input visible for later evaluation. The same API also exposes
-chronological and public-engagement orderings. The Feed presents only the
-stable daily score rank across all evidence for the selected day (`#1`, `#2`,
-...). Audit filters and search only hide rows; they never restart the ranking.
-A click reveals the underlying daily score, raw inputs, within-day percentiles,
-weights, and limitations. Grouped evidence carries the exact member post and
-components that produced its peak daily score so the disclosure never explains
-the wrong root post.
+Registry entity votes at most once across a complete Event and cannot vote for
+an Event sourced from itself. The production `daily-rank-v2` contract is an
+inspectable lexicographic ordering aid—not an Insight, importance, or quality
+judgment. It orders the complete canonical-day Event by:
+
+1. the union count of distinct active Registry entities that quote or repost
+   any Event member, removing the source entity after the union;
+2. the mean entity-level network position of those voters;
+3. the source author's entity-level network position;
+4. the maximum `likes + replies + reposts + quotes` on one Event member
+   published on the canonical day;
+5. ascending stable Event ID.
+
+The first four layers sort descending. Later layers are consulted only when all
+earlier layers tie, so a public-interaction snapshot can never outvote another
+trusted participant. Organizations and people follow the same vote rule;
+network position carries inspectable authority without a hidden type bonus.
+The same API also exposes chronological and public-engagement orderings. The
+Feed presents only the stable daily Event rank across all evidence for the
+selected day (`#1`, `#2`, ...). Audit filters and search only hide rows; they
+never restart the ranking. A click reveals the four ordered inputs, voter
+identities, the deciding layer, snapshot limitation, and deterministic
+tiebreak. There is no scalar score, percentile transform, or weighted sum.
 
 `fli.evidence.events` is a separate content-addressed projection over one frozen
 Feed run. The `signal-events-v6` /
@@ -209,7 +215,7 @@ Event run and matching Feed run; readers never infer "live" from whichever run
 was created most recently.
 
 `fli.web.events` publishes each Event once on the earliest day of its canonical
-source component. That day owns the Event identity and frozen attention rank.
+source component. That day owns the Event identity and frozen daily Event rank.
 Evidence disclosed later is assigned back to the already-canonical Event and
 appears in its lifetime activity view; it never creates another dated Feed
 candidate, reranks history, or asks routing/Insight generation to reconsider
@@ -223,12 +229,12 @@ remain one-member Events.
 
 The weekly projection deduplicates those canonical publications across the
 seven-day window while retaining each Event's lifetime `activity_days` and
-peak attention/interaction facts. Later activity can make the original Event
+best daily-rank and peak-interaction facts. Later activity can make the original Event
 visibly active without introducing a second rank or a continuation row.
 
 The React `/evidence/feed` surface is one evidence browser rather than separate post,
 group, or lane modes. It offers complete-day navigation, search, the three
-transparent sort orders, score inputs, raw engagement, and direct X
+transparent sort orders, rank-layer inputs, raw engagement, and direct X
 provenance. Each Event renders the root once and exposes one flat expandable
 activity ledger for same-author updates, independent quote/reply commentary,
 and compact amplification facts. The UI no longer presents current/prior
@@ -238,9 +244,9 @@ remain later semantic stages after this deterministic layer is audited.
 `fli.routing.model` is the sole live model judgment over ranked Feed
 evidence. One GPT-5.4-mini/high call receives the readable first-party packet and
 returns two independently reasoned booleans: AI Engineering relevance and
-Investment relevance. Feed rank, score, engagement, prominence, and the
-derived audit state are not model inputs. `fli.routing.runs`
-freezes the exact cohort, snapshot/evidence/input hashes, prompt and schema
+Investment relevance. Feed rank, rank-layer values, engagement, prominence,
+and the derived audit state are not model inputs. `fli.routing.runs`
+freezes the exact cohort, `rank_version`, snapshot/evidence/input hashes, prompt and schema
 versions, model output, cache telemetry, cost, and failures in one resumable
 SQLite database. The run records its source event/feed run IDs and selection
 policy directly; it does not depend on a source classification run or read the
@@ -252,10 +258,11 @@ same-author replies/thread/quote commentary, and accepted first-party
 artifacts. Independently authored replies/quotes/reactions and pure reposts
 stay in the Feed activity ledger but do not enter the model. The model view is
 capped at 20,000 `o200k_base` tokens with an explicit truncation marker. The
-current clean nine-day top-100 run completed 900/900 packets with zero
-failures: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither.
-All 900 requests were cache-eligible; 805 reported cache reads totaling
-1,442,560 cached of 2,760,202 input tokens. Proxy-reported cost was $4.1366515.
+current v9 / `daily-rank-v2` 17-day cohort completed 1,674/1,674 packets with
+zero failures: 512 both, 182 Engineering-only, 276 Investment-only, and 704
+neither. Exact Event/evidence/input reuse supplied 976 rows. The remaining 698
+new requests recorded 636 cache reads, 1,139,712 cached of 2,000,998 input
+tokens, and $2.961695 incremental proxy cost.
 The current prompt asks for roughly
 40–50 words per reason as soft guidance, never a schema limit. The frozen v7
 boundary treats a specific attributed Investment thesis as potentially useful
@@ -536,7 +543,8 @@ Target stages:
 2. **Ingestion:** public source pulls, dedup, clustering, freshness.
 3. **Extraction:** structured/cited insights from accepted X evidence,
    optionally strengthened by fetched artifacts.
-4. **Scoring:** visible dimensions plus validation, not an arbitrary weighted sum.
+4. **Ranking and validation:** visible ordered evidence layers, replay
+   diagnostics, and no arbitrary weighted sum.
 5. **Delivery:** persona digests and reviewable UI, plus a cached, linked PDF
    workbook for each complete audience/day; alerts remain deferred.
 
@@ -546,7 +554,7 @@ Target stages:
 flowchart TD
     S0[Source scoping<br/>curated source list]
     S1[Exact grouping<br/>replies · quotes · retweets]
-    S2[Daily-score ordering<br/>transparent candidate generation]
+    S2[Daily Event ranking<br/>transparent candidate generation]
     S3[Audience routing<br/>AI Engineering · Investment]
     S4[Cited extraction<br/>X evidence + optional artifacts]
     S5[Persona framing<br/>investment vs AI team]

@@ -17,6 +17,7 @@ from typing import Any
 from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
 from fli.routing import view as audience_routing_store
+from fli.scoring import attention
 from fli.web import feed as feed_store
 
 
@@ -61,7 +62,7 @@ def _all_feed_candidates(*, day: str, run_id: str) -> dict[str, Any]:
     result = feed_store.feed_payload(
         day=day,
         lane="all",
-        sort="attention",
+        sort="rank",
         query="",
         limit=2**31 - 1,
         offset=0,
@@ -286,7 +287,30 @@ def _canonical_event_id(provider: str, identity_value: str) -> str:
     ).hexdigest()
 
 
-def _singleton(item: dict[str, Any]) -> dict[str, Any]:
+def _public_interactions(item: dict[str, Any]) -> int:
+    return sum(
+        int(item["metrics"].get(key) or 0)
+        for key in ("likes", "replies", "reposts", "quotes")
+    )
+
+
+def _voter(amplifier: dict[str, Any]) -> attention.Voter:
+    return attention.Voter(
+        entity_id=int(amplifier["entity_id"]),
+        position=float(amplifier["network_position"]),
+        entity_name=str(amplifier.get("entity_name") or ""),
+        entity_kind=str(amplifier.get("entity_kind") or ""),
+        handle=str(amplifier.get("handle") or ""),
+        relation_type=str(amplifier.get("relation_type") or ""),
+        source_url=str(amplifier.get("source_url") or ""),
+    )
+
+
+def _singleton(
+    item: dict[str, Any],
+    entity_positions: dict[int, float],
+    day: str,
+) -> dict[str, Any]:
     provider = str(item.get("provider", "twitterapi_io"))
     singleton_id = _canonical_event_id(provider, str(item["post_id"]))
     snapshot_hash = hashlib.sha256(
@@ -301,6 +325,13 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
             separators=(",", ":"),
         ).encode()
     ).hexdigest()
+    author_entity_id = item["author"]["entity_id"]
+    voters = tuple(
+        _voter(amplifier)
+        for amplifier in item["amplifiers"]
+        if author_entity_id is None
+        or int(amplifier["entity_id"]) != int(author_entity_id)
+    )
     return {
         "event_id": singleton_id,
         "canonical_root_post_id": item["post_id"],
@@ -320,34 +351,32 @@ def _singleton(item: dict[str, Any]) -> dict[str, Any]:
         "registry_entity_count": 1 if item["author"]["entity_id"] is not None else 0,
         "first_hand_count": int(item["observed_directly"]),
         "amplifiers": item["amplifiers"],
-        "peak_attention_score": item["attention_score"],
-        "daily_score_basis": _daily_score_basis(item),
-        "peak_public_interactions": item["score_components"]["public_interactions"],
+        "_rank_inputs": attention.RankInputs(
+            voters=voters,
+            author_position=(
+                entity_positions.get(int(author_entity_id), 0.0)
+                if author_entity_id is not None
+                else 0.0
+            ),
+            public_interactions=(
+                _public_interactions(item)
+                if str(item["published_at"])[:10] == day
+                else 0
+            ),
+            event_id=singleton_id,
+        ),
         "latest_evidence_at": item["published_at"],
         "evidence": [],
-    }
-
-
-def _daily_score_basis(item: dict[str, Any]) -> dict[str, Any]:
-    """Preserve the exact post and components behind an Event's peak score."""
-    return {
-        "post_id": item["post_id"],
-        "author": dict(item["author"]),
-        "published_at": item["published_at"],
-        "attention_score": item["attention_score"],
-        "score_components": dict(item["score_components"]),
     }
 
 
 def _root_feed_item(
     row: sqlite3.Row,
     member: dict[str, Any],
-    template: dict[str, Any],
     account: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    """Project the stable canonical root with the selected day's score."""
+    """Project the stable canonical root without inventing a member-post score."""
     return {
-        **template,
         "provider": str(row["provider"]),
         "post_id": str(row["post_id"]),
         "raw_sha256": str(row["raw_sha256"]),
@@ -365,6 +394,7 @@ def _root_feed_item(
         "post_type": row["post_type"],
         "observed_directly": bool(member["observed_directly"]),
         "context": None,
+        "amplifiers": [],
         "metrics": {
             "likes": row["like_count"],
             "replies": row["reply_count"],
@@ -373,7 +403,6 @@ def _root_feed_item(
             "views": row["view_count"],
             "bookmarks": row["bookmark_count"],
         },
-        "score_components": dict(template["score_components"]),
     }
 
 
@@ -631,6 +660,7 @@ def _project_component(
     posts: dict[tuple[str, str], sqlite3.Row],
     by_handle: dict[str, dict[str, Any]],
     by_x_id: dict[str, dict[str, Any]],
+    entity_positions: dict[int, float],
     day: str,
     consumed: set[FeedKey],
 ) -> dict[str, Any] | None:
@@ -642,7 +672,7 @@ def _project_component(
         singleton_candidate = candidates.get(singleton_key)
         if singleton_candidate is not None:
             consumed.add(singleton_key)
-            return _singleton(singleton_candidate)
+            return _singleton(singleton_candidate, entity_positions, day)
     event_candidates = [
         candidates[(str(member["provider"]), str(member["post_id"]))]
         for member in visible_members
@@ -665,14 +695,6 @@ def _project_component(
     if root_account and root_account["registry_state"] == "rejected":
         return None
 
-    template = max(
-        event_candidates,
-        key=lambda item: (
-            item["attention_score"],
-            item["published_at"],
-            item["post_id"],
-        ),
-    )
     root_key = (str(presentation_root_key[0]), str(presentation_root_key[1]))
     root_post_id = root_key[1]
     root = (
@@ -680,10 +702,9 @@ def _project_component(
             **candidates[root_key],
             "author": dict(candidates[root_key]["author"]),
             "metrics": dict(candidates[root_key]["metrics"]),
-            "score_components": dict(candidates[root_key]["score_components"]),
         }
         if root_key in candidates
-        else _root_feed_item(root_row, root_member, template, root_account)
+        else _root_feed_item(root_row, root_member, root_account)
     )
     related = _relationship_rows(visible_members, current_links, root_post_id)
     anchor_types = sorted(
@@ -718,9 +739,15 @@ def _project_component(
         for amplifier in candidate["amplifiers"]:
             amplifiers[amplifier["entity_id"]] = amplifier
             registry_entity_ids.add(amplifier["entity_id"])
+    root_author_entity_id = root["author"]["entity_id"]
+    if root_author_entity_id is not None:
+        amplifiers.pop(int(root_author_entity_id), None)
     sorted_amplifiers = sorted(
         amplifiers.values(),
-        key=lambda amplifier: (-amplifier["network_support"], amplifier["entity_name"]),
+        key=lambda amplifier: (
+            -float(amplifier["network_position"]),
+            int(amplifier["entity_id"]),
+        ),
     )
     root["amplifiers"] = sorted_amplifiers
     identity_provider, identity_type, identity_value = _component_identity(
@@ -822,10 +849,22 @@ def _project_component(
         "registry_entity_count": len(registry_entity_ids),
         "first_hand_count": sum(1 for item in event_candidates if item["observed_directly"]),
         "amplifiers": sorted_amplifiers,
-        "peak_attention_score": max(item["attention_score"] for item in event_candidates),
-        "daily_score_basis": _daily_score_basis(template),
-        "peak_public_interactions": max(
-            item["score_components"]["public_interactions"] for item in event_candidates
+        "_rank_inputs": attention.RankInputs(
+            voters=tuple(_voter(amplifier) for amplifier in sorted_amplifiers),
+            author_position=(
+                entity_positions.get(int(root_author_entity_id), 0.0)
+                if root_author_entity_id is not None
+                else 0.0
+            ),
+            public_interactions=max(
+                (
+                    _public_interactions(item)
+                    for item in event_candidates
+                    if str(item["published_at"])[:10] == day
+                ),
+                default=0,
+            ),
+            event_id=projected_event_id,
         ),
         "latest_evidence_at": max(member["published_at"] for member in visible_members),
         "evidence": related,
@@ -941,6 +980,9 @@ def _events_day_cached(
         for row in reply_candidate_rows
     }
     by_handle, by_x_id = feed_store._registry_maps()
+    entity_positions = attention.entity_positions(
+        feed_store.rankings_store.entity_network_ranks()
+    )
 
     members_by_event: dict[str, list[sqlite3.Row]] = {}
     for member in member_rows:
@@ -1133,6 +1175,7 @@ def _events_day_cached(
                 posts=posts,
                 by_handle=by_handle,
                 by_x_id=by_x_id,
+                entity_positions=entity_positions,
                 day=day,
                 consumed=consumed,
             )
@@ -1140,11 +1183,20 @@ def _events_day_cached(
                 items.append(item)
 
     items.extend(
-        _singleton(item)
+        _singleton(item, entity_positions, day)
         for item in feed_items
         if _feed_key(item) not in consumed
         and _feed_key(item) not in reply_candidate_keys
         and _feed_key(item) not in claimed_member_keys
+    )
+    items = attention.rank_events(
+        [
+            (
+                {key: value for key, value in item.items() if key != "_rank_inputs"},
+                item["_rank_inputs"],
+            )
+            for item in items
+        ]
     )
     for item in items:
         route = routing_items.get(item["event_id"])
@@ -1172,11 +1224,12 @@ def _events_day_cached(
             "feed_run_id": run["feed_run_id"],
             "clustering_contract": run["clustering_contract"],
         },
-        "score_formula": {
-            **feed_result["score_formula"],
+        "rank_contract": {
+            **feed_result["rank_contract"],
             "note": (
                 "Every Feed candidate is an Event. Provider-declared exact "
-                "relationships group evidence; all other posts remain singleton Events."
+                "relationships group evidence; the complete canonical-day Event "
+                "is ranked once and all other posts remain singleton Events."
             ),
         },
         "items": items,
@@ -1196,8 +1249,8 @@ def _events_week_cached(
     """Roll the same canonical events through a seven-day UTC window.
 
     The final daily revision supplies cumulative evidence through week-end;
-    attention remains a property of daily activity and is aggregated as the
-    highest daily score rather than recomputed from duplicated members.
+    rank remains a property of daily activity. A weekly row retains the Event's
+    best canonical daily rank rather than inventing a cross-day score.
     """
     end = date.fromisoformat(through)
     start = end - timedelta(days=6)
@@ -1217,29 +1270,25 @@ def _events_week_cached(
             event_id = str(item["event_id"])
             previous = weekly_states.get(event_id)
             inherited_days = set(previous["active_days"]) if previous else set()
-            peak_state = max(
+            rank_state = min(
                 [
                     {
-                        "peak_attention_score": item["peak_attention_score"],
-                        "daily_score_basis": item["daily_score_basis"],
+                        "daily_rank": item["daily_rank"],
+                        "rank_components": item["rank_components"],
+                        "rank_day": day,
                     }
                 ]
                 + ([
                     {
-                        "peak_attention_score": previous["peak_attention_score"],
-                        "daily_score_basis": previous["daily_score_basis"],
+                        "daily_rank": previous["best_daily_rank"],
+                        "rank_components": previous["rank_components"],
+                        "rank_day": previous["rank_day"],
                     }
                 ] if previous else []),
                 key=lambda state: (
-                    state["peak_attention_score"],
-                    state["daily_score_basis"]["published_at"],
-                    state["daily_score_basis"]["post_id"],
+                    state["daily_rank"],
+                    state["rank_day"],
                 ),
-            )
-            peak_score = peak_state["peak_attention_score"]
-            peak_interaction = max(
-                [item["peak_public_interactions"]]
-                + ([previous["peak_public_interactions"]] if previous else [])
             )
             richest_item = item
             if previous and previous["item"]["member_count"] > item["member_count"]:
@@ -1254,9 +1303,9 @@ def _events_week_cached(
                         if start.isoformat() <= activity_day <= end.isoformat()
                     ),
                 },
-                "peak_attention_score": peak_score,
-                "daily_score_basis": peak_state["daily_score_basis"],
-                "peak_public_interactions": peak_interaction,
+                "best_daily_rank": rank_state["daily_rank"],
+                "rank_components": rank_state["rank_components"],
+                "rank_day": rank_state["rank_day"],
             }
     if base is None:
         return {"available": False, "reason": "No complete Feed days in window."}
@@ -1284,9 +1333,9 @@ def _events_week_cached(
             "routing_state": "unavailable",
             "active_days": active_days,
             "weekly_active_day_count": len(active_days),
-            "peak_attention_score": state["peak_attention_score"],
-            "daily_score_basis": state["daily_score_basis"],
-            "peak_public_interactions": state["peak_public_interactions"],
+            "source_daily_rank": state["best_daily_rank"],
+            "rank_components": state["rank_components"],
+            "rank_day": state["rank_day"],
             "projection": "week",
             "window_from": start.isoformat(),
             "window_to": end.isoformat(),
@@ -1303,24 +1352,23 @@ def _events_week_cached(
     }
 
 
-def _score_order_key(item: dict[str, Any]) -> tuple[Any, ...]:
-    """Order by canonical-day score inputs, never later appended activity."""
-    score_components = item["daily_score_basis"]["score_components"]
-    return (
-        item["peak_attention_score"],
-        score_components["registry_amplifiers"],
-        item["day_member_count"],
-        item["daily_score_basis"]["published_at"],
-        item["event_id"],
-    )
-
-
 def _daily_rank_by_event_id(items: list[dict[str, Any]]) -> dict[str, int]:
-    return {
-        str(item["event_id"]): rank
-        for rank, item in enumerate(
-            sorted(items, key=_score_order_key, reverse=True), start=1
+    if all("source_daily_rank" in item for item in items):
+        ordered = sorted(
+            items,
+            key=lambda item: (
+                int(item["source_daily_rank"]),
+                str(item["rank_day"]),
+                str(item["event_id"]),
+            ),
         )
+        return {
+            str(item["event_id"]): rank
+            for rank, item in enumerate(ordered, start=1)
+        }
+    return {
+        str(item["event_id"]): int(item["daily_rank"])
+        for item in items
     }
 
 
@@ -1457,14 +1505,14 @@ def events_payload(
     elif sort == "engagement":
         items.sort(
             key=lambda item: (
-                item["peak_public_interactions"],
+                item["rank_components"]["public_interactions"],
                 item["latest_evidence_at"],
                 item["event_id"],
             ),
             reverse=True,
         )
     else:
-        items.sort(key=_score_order_key, reverse=True)
+        items.sort(key=lambda item: (item["daily_rank"], item["event_id"]))
 
     if event_id:
         items = [item for item in items if item["event_id"] == event_id]

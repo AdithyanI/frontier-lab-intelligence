@@ -32,8 +32,9 @@ exact object, checksum, included data, and clean-checkout proof.
 2. **Signal-vs-noise (20%)** — start in Network Ranking, then open Feed. Each
    row is one stable Event, not one raw post. Provider-declared relations form
    exact structural Events; independent posts are never merged by topic. Open
-   the daily-score disclosure to inspect tracked amplification,
-   author-network support, public engagement, weights, and limitations.
+   the rank disclosure to inspect the complete-Event voter union, voter-network
+   position, source-author position, same-day public-interaction tiebreak, and
+   limitations. The four evidence layers are applied in order, not blended.
 3. **Scoring + validation (20%)** — change Feed Status to compare Relevant,
    Not relevant, and Not evaluated Events. Open `View reasons` to inspect the
    independent AI Engineering and Investment judgments. Ranking is an

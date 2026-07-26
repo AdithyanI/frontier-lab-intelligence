@@ -22,6 +22,25 @@
   day. A lane that saturates near its ceiling has stopped discriminating no
   matter how large its coefficient looks.
 - A found-and-measured flaw in your own system is an interview asset, not a
-  liability, when the fix would invalidate frozen submitted evidence. The
-  defensible move is to arrive with the diagnostic and the reasoned decision
-  not to rerank, rather than to silently swap the formula.
+  liability. Before migration approval, the defensible move was to preserve
+  submitted evidence and explain the diagnostic. Once Adi explicitly approved
+  a full replay, the defensible move became a clean versioned migration with
+  every downstream lineage refreshed—not a silent in-place reinterpretation.
+- Compute rank only after exact Event grouping. Adding post-level voter counts
+  loses trusted reactions attached to other Event members and can count the
+  source entity before the complete union is known.
+- Lexicographic rules make priorities testable, but they do not eliminate the
+  need for behavioral measurement. Trusted-voter count defines the bands;
+  mean voter network position separated 79.4% of adjacent top-100 pairs in the
+  17-day replay, so it is a load-bearing second layer and should be described
+  honestly.
+- Downstream relevance labels are useful diagnostics, not ground truth. The
+  current top-100 labels show a monotonic 34.3% → 72.1% gradient by trusted
+  vote bucket, but they remain censored by the rank gate and the router's
+  freshness policy.
+- Version the rank at every consumer boundary. Routing, per-Event Insight
+  reuse, daily orchestration, APIs, PDFs, and persisted web projections can
+  otherwise look current while retaining an older ordering.
+- Exact Event/evidence/input reuse is the cost-control mechanism that matters:
+  the routing migration reused 976 of 1,674 judgments and the Insight migration
+  reused 524 of 1,482 outputs without weakening current rank provenance.

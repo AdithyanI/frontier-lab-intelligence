@@ -1,5 +1,5 @@
-"""Versioned candidate-ranking formulas and their evaluation harnesses."""
+"""Defensible Event-ranking primitives."""
 
-from .attention import ATTENTION_V1_1, ATTENTION_V2_CANDIDATE, AttentionFormula
+from .attention import DAILY_RANK_VERSION, RankInputs, Voter
 
-__all__ = ["ATTENTION_V1_1", "ATTENTION_V2_CANDIDATE", "AttentionFormula"]
+__all__ = ["DAILY_RANK_VERSION", "RankInputs", "Voter"]

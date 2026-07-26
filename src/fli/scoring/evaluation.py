@@ -1,10 +1,10 @@
-"""Reproducible offline evaluation of attention-score candidates."""
+"""Deterministic offline replay diagnostics for the layered daily Event rank."""
 
 from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 import json
 from pathlib import Path
 import sqlite3
@@ -13,32 +13,40 @@ from typing import Any, Iterable
 from uuid import uuid4
 
 from fli.routing import runs as routing_runs
-from fli.scoring.attention import (
-    ATTENTION_V1_1,
-    ATTENTION_V2_CANDIDATE,
-    AttentionFormula,
-    score_components,
-)
+from fli.scoring.attention import DAILY_RANK_VERSION, LAYER_NAMES
 from fli.web import events as event_store
 
 
-SCHEMA_VERSION = "1.0"
-DEFAULT_TOP_MOVERS = 10
-GRID_AMPLIFIER_CAPS = (8, 16, 32)
-GRID_SUPPORT_KNEES = (100, 150, 300)
-GRID_WEIGHTS = ((0.55, 0.25, 0.20), (0.55, 0.20, 0.25))
+SCHEMA_VERSION = "2.0"
+TOP_K = 100
+VOTE_BUCKETS = ("0", "1", "2", "3-4", "5+")
+ROUTING_PROMPT_VERSION = "audience-routing-v9"
 
 
 @dataclass(frozen=True)
-class LabeledEvent:
-    day: str
+class RoutingLabel:
     event_id: str
     baseline_rank: int
     relevant: bool
-    attention_score: float
-    score_components: dict[str, Any]
-    day_member_count: int
-    published_at: str
+
+
+@dataclass(frozen=True)
+class ReplayedEvent:
+    day: str
+    event_id: str
+    daily_rank: int
+    trusted_votes: int
+    decided_at_layer: int
+    relevant: bool | None
+    baseline_rank: int | None
+
+
+@dataclass(frozen=True)
+class ReplayedDay:
+    day: str
+    events: tuple[ReplayedEvent, ...]
+    routing_label_count: int
+    unmatched_label_count: int
 
 
 def _canonical_json(value: Any, *, pretty: bool = False) -> str:
@@ -52,6 +60,7 @@ def _canonical_json(value: Any, *, pretty: bool = False) -> str:
 
 
 def _routing_sources(root: Path) -> list[tuple[str, Path]]:
+    """Return the newest complete compatible routing store for each day."""
     selected: dict[str, tuple[str, Path]] = {}
     for path in sorted(root.glob("*/routing.db")):
         conn = sqlite3.connect(path)
@@ -60,7 +69,12 @@ def _routing_sources(root: Path) -> list[tuple[str, Path]]:
             meta = conn.execute(
                 "SELECT * FROM run_meta WHERE singleton = 1"
             ).fetchone()
-            if meta is None or str(meta["prompt_version"]) != "audience-routing-v9":
+            if (
+                meta is None
+                or str(meta["prompt_version"]) != ROUTING_PROMPT_VERSION
+                or "rank_version" not in meta.keys()
+                or str(meta["rank_version"]) != DAILY_RANK_VERSION
+            ):
                 continue
             incomplete = int(
                 conn.execute(
@@ -70,21 +84,22 @@ def _routing_sources(root: Path) -> list[tuple[str, Path]]:
             if incomplete:
                 continue
             day = str(meta["day"])
-            key = str(meta["updated_at"])
-            if day not in selected or key > selected[day][0]:
-                selected[day] = (key, path)
+            updated_at = str(meta["updated_at"])
+            if day not in selected or updated_at > selected[day][0]:
+                selected[day] = (updated_at, path)
         finally:
             conn.close()
     return [(day, selected[day][1]) for day in sorted(selected)]
 
 
-def load_labeled_days(
+def load_routing_labels(
     *,
     routing_root: Path = routing_runs.DEFAULT_RUN_ROOT,
     from_day: str | None = None,
     through: str | None = None,
-) -> dict[str, list[LabeledEvent]]:
-    days: dict[str, list[LabeledEvent]] = {}
+) -> dict[str, dict[str, RoutingLabel]]:
+    """Load current-rank audience judgments as optional, censored labels."""
+    days: dict[str, dict[str, RoutingLabel]] = {}
     for day, path in _routing_sources(routing_root):
         if from_day and day < from_day:
             continue
@@ -93,12 +108,7 @@ def load_labeled_days(
         conn = sqlite3.connect(path)
         conn.row_factory = sqlite3.Row
         try:
-            meta = conn.execute(
-                "SELECT source_event_run_id FROM run_meta WHERE singleton = 1"
-            ).fetchone()
-            if meta is None:
-                raise RuntimeError(f"Routing run has no metadata: {path}")
-            labels = conn.execute(
+            rows = conn.execute(
                 """SELECT event_id, feed_rank, ai_engineering_relevant,
                           investment_relevant
                    FROM routing_item
@@ -107,216 +117,197 @@ def load_labeled_days(
             ).fetchall()
         finally:
             conn.close()
+        days[day] = {
+            str(row["event_id"]): RoutingLabel(
+                event_id=str(row["event_id"]),
+                baseline_rank=int(row["feed_rank"]),
+                relevant=bool(
+                    row["ai_engineering_relevant"]
+                    or row["investment_relevant"]
+                ),
+            )
+            for row in rows
+        }
+    return days
+
+
+def _validated_day(value: str | None, *, flag: str) -> str | None:
+    if value is None:
+        return None
+    try:
+        return date.fromisoformat(value).isoformat()
+    except ValueError as exc:
+        raise ValueError(f"{flag} must be an ISO date (YYYY-MM-DD)") from exc
+
+
+def load_saved_days(
+    *,
+    routing_root: Path = routing_runs.DEFAULT_RUN_ROOT,
+    from_day: str | None = None,
+    through: str | None = None,
+) -> dict[str, ReplayedDay]:
+    """Replay every Event in each selected day of the current published run."""
+    from_day = _validated_day(from_day, flag="--from-day")
+    through = _validated_day(through, flag="--through")
+    if from_day and through and from_day > through:
+        raise ValueError("--from-day cannot be after --through")
+
+    summary = event_store.dates_payload()
+    if not summary.get("available"):
+        raise FileNotFoundError(
+            "Current Event dates are unavailable: "
+            f"{summary.get('reason', 'unknown reason')}"
+        )
+    effective_from = from_day or (
+        str(summary["date_from"]) if summary.get("date_from") else None
+    )
+    effective_through = through or (
+        str(summary["date_to"]) if summary.get("date_to") else None
+    )
+    selected_days = [
+        str(row["day"])
+        for row in summary.get("dates") or []
+        if (not effective_from or str(row["day"]) >= effective_from)
+        and (not effective_through or str(row["day"]) <= effective_through)
+    ]
+    if not selected_days:
+        raise FileNotFoundError("No saved Event days matched the requested range")
+
+    labels_by_day = load_routing_labels(
+        routing_root=routing_root,
+        from_day=from_day,
+        through=through,
+    )
+    replayed: dict[str, ReplayedDay] = {}
+    for day in selected_days:
         projection = event_store.events_payload(
             day=day,
             lane="all",
             sort="score",
             query="",
-            limit=100_000,
+            limit=2**31 - 1,
             offset=0,
             include_evidence=False,
-            event_run_id=str(meta["source_event_run_id"]),
         )
         if not projection.get("available"):
             raise RuntimeError(
                 f"Event projection is unavailable for {day}: "
                 f"{projection.get('reason', 'unknown reason')}"
             )
-        by_event_id = {str(item["event_id"]): item for item in projection["items"]}
-        missing = [
-            str(row["event_id"])
-            for row in labels
-            if str(row["event_id"]) not in by_event_id
-        ]
-        if missing:
-            raise RuntimeError(
-                f"{day} is missing {len(missing)} routed Events from its source projection"
-            )
-        days[day] = []
-        for row in labels:
-            item = by_event_id[str(row["event_id"])]
-            basis = item["daily_score_basis"]
-            days[day].append(
-                LabeledEvent(
+        items = sorted(
+            projection.get("items") or [],
+            key=lambda item: (int(item["daily_rank"]), str(item["event_id"])),
+        )
+        expected_ranks = list(range(1, len(items) + 1))
+        actual_ranks = [int(item["daily_rank"]) for item in items]
+        if actual_ranks != expected_ranks:
+            raise RuntimeError(f"{day} does not contain one contiguous daily rank")
+
+        labels = labels_by_day.get(day, {})
+        projected_ids = {str(item["event_id"]) for item in items}
+        events: list[ReplayedEvent] = []
+        for item in items:
+            event_id = str(item["event_id"])
+            components = item.get("rank_components") or {}
+            if str(components.get("version")) != DAILY_RANK_VERSION:
+                raise RuntimeError(
+                    f"{day} Event {event_id} does not use {DAILY_RANK_VERSION}"
+                )
+            trusted_votes = int(components["trusted_votes"])
+            decided_at_layer = int(components["decided_at_layer"])
+            if trusted_votes < 0:
+                raise RuntimeError(
+                    f"{day} Event {event_id} has negative trusted votes"
+                )
+            if decided_at_layer not in range(1, len(LAYER_NAMES) + 1):
+                raise RuntimeError(
+                    f"{day} Event {event_id} has invalid layer attribution"
+                )
+            label = labels.get(event_id)
+            events.append(
+                ReplayedEvent(
                     day=day,
-                    event_id=str(row["event_id"]),
-                    baseline_rank=int(row["feed_rank"]),
-                    relevant=bool(
-                        row["ai_engineering_relevant"]
-                        or row["investment_relevant"]
-                    ),
-                    attention_score=float(basis["attention_score"]),
-                    score_components=dict(basis["score_components"]),
-                    day_member_count=int(item["day_member_count"]),
-                    published_at=str(basis["published_at"]),
+                    event_id=event_id,
+                    daily_rank=int(item["daily_rank"]),
+                    trusted_votes=trusted_votes,
+                    decided_at_layer=decided_at_layer,
+                    relevant=label.relevant if label else None,
+                    baseline_rank=label.baseline_rank if label else None,
                 )
             )
-    if not days:
-        raise FileNotFoundError(
-            f"No complete audience-routing-v9 runs found under {routing_root}"
+        replayed[day] = ReplayedDay(
+            day=day,
+            events=tuple(events),
+            routing_label_count=len(labels),
+            unmatched_label_count=len(set(labels) - projected_ids),
         )
-    return days
+    return replayed
 
 
-def _precision(rows: list[dict[str, Any]], k: int) -> float:
-    selected = rows[: min(k, len(rows))]
-    return sum(bool(row["relevant"]) for row in selected) / len(selected)
+def _vote_bucket(votes: int) -> str:
+    if votes <= 0:
+        return "0"
+    if votes == 1:
+        return "1"
+    if votes == 2:
+        return "2"
+    if votes <= 4:
+        return "3-4"
+    return "5+"
 
 
-def _kendall_tau(baseline_ids: list[str], candidate_ids: list[str]) -> float:
-    candidate_position = {
-        event_id: index for index, event_id in enumerate(candidate_ids)
-    }
-    concordant = 0
-    discordant = 0
-    for left_index, left in enumerate(baseline_ids):
-        for right in baseline_ids[left_index + 1 :]:
-            if candidate_position[left] < candidate_position[right]:
-                concordant += 1
-            else:
-                discordant += 1
-    pairs = concordant + discordant
-    return (concordant - discordant) / pairs if pairs else 1.0
-
-
-def _candidate_rows(
-    labels: Iterable[LabeledEvent], formula: AttentionFormula
-) -> list[dict[str, Any]]:
-    rows = []
-    for item in labels:
-        score, factors = score_components(item.score_components, formula)
-        rows.append(
-            {
-                "event_id": item.event_id,
-                "relevant": item.relevant,
-                "baseline_rank": item.baseline_rank,
-                "baseline_score": item.attention_score,
-                "candidate_score": score,
-                "registry_amplifiers": int(
-                    item.score_components["registry_amplifiers"]
-                ),
-                "day_member_count": item.day_member_count,
-                "published_at": item.published_at,
-                "factors": factors,
-            }
-        )
-    return sorted(
-        rows,
-        key=lambda row: (
-            row["candidate_score"],
-            row["registry_amplifiers"],
-            row["day_member_count"],
-            row["published_at"],
-            row["event_id"],
-        ),
-        reverse=True,
-    )
-
-
-def evaluate_formula(
-    days: dict[str, list[LabeledEvent]], formula: AttentionFormula
-) -> dict[str, Any]:
-    per_day = []
-    all_movers = []
-    for day, labels in sorted(days.items()):
-        baseline = sorted(labels, key=lambda item: item.baseline_rank)
-        candidate = _candidate_rows(labels, formula)
-        candidate_rank = {
-            row["event_id"]: rank for rank, row in enumerate(candidate, start=1)
-        }
-        per_day.append(
-            {
-                "day": day,
-                "labeled_count": len(labels),
-                "relevant_count": sum(item.relevant for item in labels),
-                "precision_at_20": round(_precision(candidate, 20), 6),
-                "precision_at_50": round(_precision(candidate, 50), 6),
-                "precision_at_100": round(_precision(candidate, 100), 6),
-                "kendall_tau": round(
-                    _kendall_tau(
-                        [item.event_id for item in baseline],
-                        [row["event_id"] for row in candidate],
-                    ),
-                    6,
-                ),
-            }
-        )
-        for item in baseline:
-            new_rank = candidate_rank[item.event_id]
-            all_movers.append(
-                {
-                    "day": day,
-                    "event_id": item.event_id,
-                    "relevant": item.relevant,
-                    "baseline_rank": item.baseline_rank,
-                    "candidate_rank": new_rank,
-                    "rank_change": item.baseline_rank - new_rank,
-                    "candidate_score": next(
-                        row["candidate_score"]
-                        for row in candidate
-                        if row["event_id"] == item.event_id
-                    ),
-                    "score_components": item.score_components,
-                }
-            )
-    mean = {
-        key: round(sum(float(row[key]) for row in per_day) / len(per_day), 6)
-        for key in (
-            "precision_at_20",
-            "precision_at_50",
-            "precision_at_100",
-            "kendall_tau",
-        )
-    }
-    return {
-        "formula": formula.payload(),
-        "mean": mean,
-        "per_day": per_day,
-        "movers": all_movers,
-    }
-
-
-def _baseline_metrics(days: dict[str, list[LabeledEvent]]) -> dict[str, Any]:
-    per_day = []
-    for day, labels in sorted(days.items()):
-        baseline = [
-            {"relevant": item.relevant}
-            for item in sorted(labels, key=lambda item: item.baseline_rank)
-        ]
-        per_day.append(
-            {
-                "day": day,
-                "labeled_count": len(labels),
-                "relevant_count": sum(item.relevant for item in labels),
-                "precision_at_20": round(_precision(baseline, 20), 6),
-                "precision_at_50": round(_precision(baseline, 50), 6),
-                "precision_at_100": round(_precision(baseline, 100), 6),
-            }
-        )
-    mean = {
-        key: round(sum(float(row[key]) for row in per_day) / len(per_day), 6)
-        for key in ("precision_at_20", "precision_at_50", "precision_at_100")
-    }
-    return {"formula": ATTENTION_V1_1.payload(), "mean": mean, "per_day": per_day}
-
-
-def candidate_grid() -> list[AttentionFormula]:
-    return [
-        AttentionFormula(
-            version=(
-                f"attention-v2-candidate-a{cap}-s{knee}-"
-                f"w{int(network * 100)}-{int(support * 100)}-{int(engagement * 100)}"
+def _vote_bucket_stats(events: Iterable[ReplayedEvent]) -> dict[str, dict[str, Any]]:
+    rows = list(events)
+    total = len(rows)
+    output: dict[str, dict[str, Any]] = {}
+    for bucket in VOTE_BUCKETS:
+        selected = [event for event in rows if _vote_bucket(event.trusted_votes) == bucket]
+        labeled = [event for event in selected if event.relevant is not None]
+        relevant_count = sum(bool(event.relevant) for event in labeled)
+        output[bucket] = {
+            "event_count": len(selected),
+            "share": round(len(selected) / total, 6) if total else 0.0,
+            "labeled_count": len(labeled),
+            "relevant_count": relevant_count,
+            "hit_rate": (
+                round(relevant_count / len(labeled), 6) if labeled else None
             ),
-            network_attention_weight=network,
-            originator_support_weight=support,
-            public_engagement_weight=engagement,
-            amplifier_cap=cap,
-            support_knee=knee,
-        )
-        for cap in GRID_AMPLIFIER_CAPS
-        for knee in GRID_SUPPORT_KNEES
-        for network, support, engagement in GRID_WEIGHTS
-    ]
+        }
+    return output
+
+
+def _layer_attribution(
+    events: Iterable[ReplayedEvent],
+) -> dict[str, dict[str, Any]]:
+    rows = list(events)
+    total = len(rows)
+    output: dict[str, dict[str, Any]] = {}
+    for layer, name in enumerate(LAYER_NAMES, start=1):
+        count = sum(event.decided_at_layer == layer for event in rows)
+        output[str(layer)] = {
+            "name": name,
+            "event_count": count,
+            "share": round(count / total, 6) if total else 0.0,
+        }
+    return output
+
+
+def _day_diagnostics(day: ReplayedDay) -> dict[str, Any]:
+    events = list(day.events)
+    top = events[:TOP_K]
+    labeled = [event for event in events if event.relevant is not None]
+    return {
+        "day": day.day,
+        "event_count": len(events),
+        "top_100_count": len(top),
+        "routing_label_count": day.routing_label_count,
+        "matched_label_count": len(labeled),
+        "unmatched_label_count": day.unmatched_label_count,
+        "relevant_label_count": sum(bool(event.relevant) for event in labeled),
+        "vote_buckets": _vote_bucket_stats(events),
+        "top_100_vote_buckets": _vote_bucket_stats(top),
+        "top_100_layer_attribution": _layer_attribution(top),
+    }
 
 
 def evaluation_payload(
@@ -324,44 +315,56 @@ def evaluation_payload(
     routing_root: Path = routing_runs.DEFAULT_RUN_ROOT,
     from_day: str | None = None,
     through: str | None = None,
-    top_movers: int = DEFAULT_TOP_MOVERS,
 ) -> dict[str, Any]:
-    if top_movers < 1:
-        raise ValueError("top_movers must be positive")
-    days = load_labeled_days(
-        routing_root=routing_root, from_day=from_day, through=through
+    days = load_saved_days(
+        routing_root=routing_root,
+        from_day=from_day,
+        through=through,
     )
-    baseline = _baseline_metrics(days)
-    evaluated = [evaluate_formula(days, formula) for formula in candidate_grid()]
-    evaluated.sort(
-        key=lambda result: (
-            result["mean"]["precision_at_20"],
-            result["mean"]["precision_at_50"],
-            result["mean"]["kendall_tau"],
+    per_day = [_day_diagnostics(day) for day in days.values()]
+    all_events = [event for day in days.values() for event in day.events]
+    all_top = [event for day in days.values() for event in day.events[:TOP_K]]
+    matched_labels = [event for event in all_events if event.relevant is not None]
+    aggregate = {
+        "day_count": len(days),
+        "event_count": len(all_events),
+        "top_100_event_count": len(all_top),
+        "routing_label_count": sum(day.routing_label_count for day in days.values()),
+        "matched_label_count": len(matched_labels),
+        "unmatched_label_count": sum(
+            day.unmatched_label_count for day in days.values()
         ),
-        reverse=True,
-    )
-    initial = evaluate_formula(days, ATTENTION_V2_CANDIDATE)
-    best = evaluated[0]
-    biggest = sorted(
-        best.pop("movers"), key=lambda row: abs(row["rank_change"]), reverse=True
-    )[:top_movers]
-    for result in evaluated[1:]:
-        result.pop("movers")
-    initial.pop("movers")
+        "relevant_label_count": sum(
+            bool(event.relevant) for event in matched_labels
+        ),
+        "vote_buckets": _vote_bucket_stats(all_events),
+        "top_100_vote_buckets": _vote_bucket_stats(all_top),
+        "top_100_layer_attribution": _layer_attribution(all_top),
+    }
     return {
+        "rank_contract": {
+            "version": DAILY_RANK_VERSION,
+            "type": "lexicographic",
+            "layers": [
+                {"layer": index, "name": name}
+                for index, name in enumerate(LAYER_NAMES, start=1)
+            ],
+            "top_k": TOP_K,
+        },
         "routing_root": str(routing_root),
         "days": sorted(days),
-        "labeled_count": sum(len(rows) for rows in days.values()),
-        "label_source": "audience-routing-v9 ai_engineering OR investment",
-        "baseline": baseline,
-        "initial_candidate": initial,
-        "best_candidate": {**best, "largest_movers": biggest},
-        "grid": evaluated,
+        "per_day": per_day,
+        "aggregate": aggregate,
         "limitations": [
-            "Labels are model judgments, not human ground truth.",
-            "The labeled cohort is censored to the current top 100 per day.",
-            "Precision@100 is invariant because every labeled row remains selected.",
+            "Routing labels are model judgments, not human ground truth.",
+            (
+                "Routing labels were selected under the historical top-100 gate; "
+                "their hit rates do not measure recall below that gate."
+            ),
+            (
+                "Layer attribution names the first layer separating each top-100 "
+                "Event from its adjacent lower-ranked Event."
+            ),
         ],
     }
 
@@ -390,17 +393,16 @@ def _result(
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="fli attention-score")
+    parser = argparse.ArgumentParser(prog="fli daily-rank")
     sub = parser.add_subparsers(dest="action", required=True)
     evaluate = sub.add_parser(
-        "evaluate", help="Replay attention-v1.1 and the v2 candidate grid."
+        "evaluate", help=f"Replay {DAILY_RANK_VERSION} over current saved Event days."
     )
     evaluate.add_argument(
         "--routing-root", type=Path, default=routing_runs.DEFAULT_RUN_ROOT
     )
     evaluate.add_argument("--from-day")
     evaluate.add_argument("--through")
-    evaluate.add_argument("--top-movers", type=int, default=DEFAULT_TOP_MOVERS)
     evaluate.add_argument("--json", action="store_true")
     evaluate.add_argument("--plain", action="store_true")
     evaluate.add_argument("--no-input", action="store_true")
@@ -411,16 +413,20 @@ def _plain(payload: dict[str, Any]) -> str:
     if payload["status"] == "error":
         return f"{payload['error']['code']}: {payload['error']['message']}"
     data = payload["data"]
-    baseline = data["baseline"]["mean"]
-    best = data["best_candidate"]
+    aggregate = data["aggregate"]
+    votes = aggregate["top_100_vote_buckets"]
+    layers = aggregate["top_100_layer_attribution"]
+    vote_summary = " · ".join(
+        f"{bucket} votes {votes[bucket]['event_count']}" for bucket in VOTE_BUCKETS
+    )
+    layer_summary = " · ".join(
+        f"L{layer} {layers[layer]['share']:.1%}" for layer in layers
+    )
     return (
-        f"{data['labeled_count']} labels across {len(data['days'])} days\n"
-        f"v1.1 P@20 {baseline['precision_at_20']:.3f} · "
-        f"P@50 {baseline['precision_at_50']:.3f}\n"
-        f"best {best['formula']['version']} · "
-        f"P@20 {best['mean']['precision_at_20']:.3f} · "
-        f"P@50 {best['mean']['precision_at_50']:.3f} · "
-        f"tau {best['mean']['kendall_tau']:.3f}"
+        f"{DAILY_RANK_VERSION}: {aggregate['event_count']} Events across "
+        f"{aggregate['day_count']} days\n"
+        f"top-100 vote buckets: {vote_summary}\n"
+        f"top-100 deciding layers: {layer_summary}"
     )
 
 
@@ -428,13 +434,12 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     started = time.monotonic()
     request_id = str(uuid4())
-    command = f"attention-score.{args.action}"
+    command = f"daily-rank.{args.action}"
     try:
         data = evaluation_payload(
             routing_root=args.routing_root,
             from_day=args.from_day,
             through=args.through,
-            top_movers=args.top_movers,
         )
         payload = _result(
             command=command,
@@ -454,7 +459,7 @@ def main(argv: list[str] | None = None) -> int:
                 "code": "E_EVALUATION_INPUT",
                 "message": str(exc),
                 "retryable": False,
-                "hint": "Verify the routing root and current Event publication.",
+                "hint": "Verify the current Event publication and routing root.",
             },
             request_id=request_id,
             started=started,

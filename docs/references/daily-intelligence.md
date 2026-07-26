@@ -216,6 +216,10 @@ routing, and workspace owners without replacing them:
 .venv/bin/fli daily-intelligence run-day --day YYYY-MM-DD --launch-codex \
   --codex-model gpt-5.6-sol --codex-reasoning-effort xhigh \
   --json --no-input
+.venv/bin/fli daily-intelligence run-batch \
+  --through 2026-07-21 --days 17 --day-workers 3 \
+  --codex-model gpt-5.6-sol --codex-reasoning-effort xhigh \
+  --codex-service-tier standard --json --no-input
 ```
 
 The default stops at a validated workspace. `--launch-codex` starts one named,
@@ -240,13 +244,16 @@ Retries resume without sending overrides and first verify that the persisted
 task still has the frozen tuple; a task whose settings changed is left
 untouched rather than silently changed back.
 
-`run-day` is the one-date entry point, not the historical parallelism boundary.
+`run-day` is the one-date entry point. `run-batch` is the historical
+parallelism boundary: it selects one complete current routing run per day,
+requires `daily-rank-v2`, records a separate `daily-orchestration-v2` lineage
+for each date, and launches at most four independent days concurrently.
 Its Evidence stage owns the single global Feed/Event publication pointer, so
 several full `run-day` commands for different dates must not publish
 concurrently. For an all-date rerun, publish Evidence once through the maximum
 date, run one multi-day `audience-routing refresh` against that exact
-publication, then prepare and launch one immutable workspace/task per date in
-parallel. The routing batch automatically reuses compatible predecessor rows
+publication, then use `run-batch` to prepare and launch one immutable
+workspace/task per date in parallel. The routing batch automatically reuses compatible predecessor rows
 only when Event ID, evidence SHA, and rendered input SHA are exact; it records
 the predecessor run and reports resumed rows, exact reuses, and new model
 requests separately. This makes later global snapshots cheap without weakening

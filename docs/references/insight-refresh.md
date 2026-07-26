@@ -1,6 +1,6 @@
 # Insight Batch Refresh
 
-Last verified: 2026-07-15
+Last verified: 2026-07-26
 
 ## Purpose
 
@@ -13,13 +13,15 @@ The normal calibration loop is:
 
 ```bash
 fli insights refresh \
-  --through 2026-07-13 \
+  --through 2026-07-21 \
+  --days 17 \
   --limit-per-day 10 \
   --dry-run \
   --json
 
 fli insights refresh \
-  --through 2026-07-13 \
+  --through 2026-07-21 \
+  --days 17 \
   --limit-per-day 10 \
   --workers 8 \
   --json
@@ -29,21 +31,21 @@ After reviewing those results, expand the same day without repeating them:
 
 ```bash
 fli insights refresh \
-  --through 2026-07-13 \
+  --through 2026-07-21 \
+  --days 17 \
   --all-routed \
   --workers 8 \
   --json
 ```
 
-Use `--days 9` to select the same bounded cohort across the nine-day window.
 The limit counts positively routed Events per day. An Event relevant to both
 audiences produces two independent requests, so `request_count` can be larger
 than `event_count`.
 
 ## Contract
 
-- Only complete routing databases whose Event and Feed run IDs match the
-  current publication are eligible.
+- Only complete `daily-rank-v2` routing databases whose Event and Feed run IDs
+  match the current publication are eligible.
 - Selection is Feed-rank ordered and includes only positive routes for the
   requested audience or audiences.
 - The same Event appearing on two requested days is a contract failure, not a
@@ -55,6 +57,9 @@ than `event_count`.
   or failure is then committed immediately per request.
 - Rerunning the same command reuses completed local results and retries failed
   requests. Expanding from ten Events to all routed Events reuses the overlap.
+  A new routing lineage may also reuse an exact prior Event/audience result
+  when input, prompt, schema, model, and reasoning effort all match; reuse
+  provenance remains stored on the successor row.
 - Requests execute in bounded parallel. Progress goes to stderr; the final
   stable JSON object goes to stdout.
 - `--dry-run` reads and validates the cohort but does not create the Insight DB,

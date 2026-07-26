@@ -12,7 +12,7 @@ flowchart TD
     X --> F["Feed snapshots"]
     F --> E["Exact Events"]
     E --> A["Canonical artifacts"]
-    E --> S["Attention score"]
+    E --> S["Daily Event rank"]
     A --> U["Audience routing"]
     S --> U
     U --> I["Daily editorial agent<br/>ranked audience Insights"]
@@ -35,7 +35,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Trusted network | `fli.network` | Immutable outgoing-follow snapshots, derived support/ranking analysis, and its read model. `provenance` owns the canonical JSON, file hash, checkpoint, and UTC identity shared by those frozen data products. |
 | Evidence | `fli.evidence` | Deterministic Feed materialization, exact structural Events, and the end-to-end refresh client. |
 | Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
-| Attention | `fli.scoring` | Versioned score formulas and offline comparison. Production remains `attention-v1.1`. |
+| Daily Event rank | `fli.scoring` | Versioned lexicographic Event ordering and deterministic replay diagnostics. Production uses `daily-rank-v2`. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
 | Insights | `fli.insights` | Per-Event generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary: strict drafts, frozen workspaces, date-keyed orchestration, persisted Codex handoff, atomic runs, the canonical read model, and `pdf_report` for deterministic cached workbooks. |
 | Delivery | `fli.delivery.daily_brief` | Manual Slack all-Insight and email top-five formatting, provider adapters, a same-origin confirmation guard, and reuse of the canonical cached PDF. It does not own editorial data or scheduling. |
@@ -100,7 +100,7 @@ removing or archiving local data.
 - Generate or inspect Insights: `fli insights`
 - Prepare, launch, author, validate, persist, or inspect one daily brief:
   `fli daily-intelligence` (`run-day` is the end-to-end entry point)
-- Evaluate attention formulas offline: `fli attention-score`
+- Replay and validate the daily Event rank: `fli daily-rank evaluate`
 - Run the product: `fli web` or the always-on service at
   `http://127.0.0.1:8797`
 - Open the hosted product:

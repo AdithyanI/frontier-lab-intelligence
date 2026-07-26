@@ -25,7 +25,7 @@ provider without changing Registry identity.
 - `data/fli.db`: current Registry identity and rejection state. It is read at
   API request time and is never copied into a Feed run.
 - `data/derived/following/*/analysis.db`: accepted entity-overlap network
-  support used as one score input.
+  support used by the daily Event rank.
 - `data/derived/x-daily-collection.db`: durable collection plans, frozen
   Registry cohorts, per-account coverage state, and exact cached/provider page
   provenance for resumable UTC-day collection.
@@ -117,10 +117,10 @@ Neither rebuild command makes a provider or LLM call.
   target IDs can connect wrappers when the target payload itself is absent.
 - `GET /api/events?date=YYYY-MM-DD&projection=week` returns a deduplicated
   seven-day rollup ending on that date.
-- `sort=attention|recent|engagement` changes ordering.
+- `sort=rank|recent|engagement` changes ordering.
 - `q`, `limit`, and `offset` provide server-side search and pagination.
 - The lower-level `/api/feed` endpoint remains available for inspecting the
-  post ledger and score inputs; it is not a separate product mode.
+  post ledger and rank inputs; it is not a separate product mode.
 
 Each grouped response contains one `root` and a related `evidence` list. The
 root never repeats in that list. Its `event_id` comes from a stable
@@ -141,8 +141,8 @@ No URL, embedding, model, or semantic similarity is used to form components.
 
 The weekly projection deduplicates canonical Event publications by stable
 root-owned Event ID. Later activity contributes `active_days`,
-`weekly_active_day_count`, and peak attention/interaction facts without
-introducing another daily row or replacing the canonical Event.
+`weekly_active_day_count`, the best inherited daily rank, and peak interaction
+facts without introducing another daily row or replacing the canonical Event.
 
 Registry rejection changes are dynamic. On the next request, a rejected author
 is absent and a rejected amplifier no longer votes. Raw/derived evidence is not
@@ -183,28 +183,29 @@ and should reflect curation promptly. Derived Ranking payloads use the same
 state-aware server cache and a page-lifetime client cache; follower detail is
 bounded to the 300 nodes visible in the current visualization.
 
-## Daily Score and Daily Rank
+## Daily Event Rank
 
-The Feed presents one stable daily score rank across all projected evidence for
-the selected day. Audit filters and search hide rows without recalculating it,
-so the first visible not-evaluated event may correctly be `#1001` rather than
-another `#1`. Clicking the rank reveals the underlying daily score. The score remains
-implemented by the versioned `attention-v1.1` contract; “attention” is the
-internal contract name and the broad product question, not the UI label for the
-number.
+The Feed presents one stable rank for every complete canonical-day Event.
+Audit filters and search hide rows without recalculating it, so the first
+visible not-evaluated Event may correctly be `#1001` rather than another `#1`.
+Clicking the rank reveals the ordered evidence behind `daily-rank-v2`; there is
+no scalar score and no weighted blend.
 
-The daily score is an experimental, day-relative ordering aid:
+Events are ordered lexicographically, descending through the first four layers
+and then ascending by stable Event ID:
 
-- 55% tracked-amplification percentile: distinct active Registry amplifiers, one
-  flat vote per canonical entity regardless of network-support rank;
-- 25% author network-support percentile;
-- 20% public-interaction percentile (log-scaled likes, replies, reposts, and
-  quotes).
+1. the union of distinct active Registry entities that quote or repost any
+   member of the complete Event, with the source entity removed after union;
+2. the mean entity-level network position of those trusted voters;
+3. the source author's entity-level network position;
+4. the maximum `likes + replies + reposts + quotes` on one Event member
+   published on the canonical day;
+5. stable Event ID as the deterministic final tiebreak.
 
-Every Event is returned with the exact post that produced its
-peak score. Each canonical entity votes at most once, self-amplification is
-excluded, and an amplifier's network-support position remains visible without
-multiplying its vote. Switching Audit filters or searching cannot change an
-item's daily score or daily rank. Daily
-scores from different dates are not directly comparable. The score does not
-claim relevance, quality, truth, novelty, or investment importance.
+Each canonical entity contributes at most one vote across the whole Event.
+Organization and person voters use the same evidence rule; authority is
+represented by the inspectable network positions, not a hidden type bonus.
+Public interactions are a snapshot measure and are deliberately only the fourth
+layer. Switching filters, searching, or running audience routing cannot change
+the rank. The rank answers where to look first; it does not claim relevance,
+quality, truth, novelty, or investment importance.

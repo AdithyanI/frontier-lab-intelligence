@@ -530,7 +530,7 @@ function AccountIntake() {
 
 function RankingMethods() {
   return (
-    <div className="methodology" aria-label="Current ranking formulas">
+    <div className="methodology" aria-label="Current ranking methods">
       <div className="method-row">
         <div className="method-id mono"><span>REACH</span><strong>Registry</strong></div>
         <div className="method-main">
@@ -547,28 +547,28 @@ function RankingMethods() {
         </div>
         <p className="method-limit">Registry shows N / voter denominator. Ranking keeps the global account discovery order. Neither is relevance.</p>
       </div>
-      <div className="method-row method-row--attention">
-        <div className="method-id mono"><span>ATTENTION-V1.1</span><strong>Daily score</strong></div>
+      <div className="method-row method-row--rank">
+        <div className="method-id mono"><span>DAILY-RANK-V2</span><strong>Event rank</strong></div>
         <div className="method-main">
           <p className="method-question">How is evidence ordered within one observed day?</p>
-          <div className="method-equation method-equation--large mono">100 × (0.55 amplification + 0.25 author support + 0.20 engagement)</div>
-          <div className="method-weight" aria-label="Daily score weights">
-            <div className="method-weight-network"><b>55%</b><span>tracked amplification</span></div>
-            <div className="method-weight-origin"><b>25%</b><span>author support</span></div>
-            <div className="method-weight-public"><b>20%</b><span>public engagement</span></div>
+          <div className="method-equation method-equation--large mono">trusted votes → mean voter position → source-author position → public interactions → Event ID</div>
+          <div className="method-weight" aria-label="Daily Event ranking layers">
+            <div className="method-weight-network"><b>1</b><span>distinct trusted votes</span></div>
+            <div className="method-weight-origin"><b>2–3</b><span>network-position ties</span></div>
+            <div className="method-weight-public"><b>4–5</b><span>public then stable ID</span></div>
           </div>
           <p className="method-explain">
-            <strong>Tracked amplification</strong> counts every screened Registry member, person or
-            organization, exactly once per post: Andrej Karpathy and the newest
-            member carry the same vote. Amplifier network position stays visible but
-            does not multiply the vote. <strong>Author network support</strong> is the
-            originator&rsquo;s own support percentile. <strong>Public engagement</strong> is
-            log-scaled likes, replies, reposts, and quotes,
-            kept small as a tie-breaker. Each component is a percentile within the
-            day&rsquo;s posts.
+            <strong>Trusted votes</strong> are the union of distinct active Registry
+            entities that quoted or reposted any member of the complete Event on its
+            canonical day. The source author is excluded after the union. A vote is
+            never multiplied by status. <strong>Network position</strong> breaks
+            equal-vote ties, first across voters and then for the source author.
+            <strong>Public interactions</strong> use the largest same-day single-post
+            sum of likes, replies, reposts, and quotes. Event ID makes a full tie
+            deterministic.
           </p>
         </div>
-        <p className="method-limit">The Feed shows one stable daily rank across Audit filters; click it for this daily score. Not importance, quality, or truth.</p>
+        <p className="method-limit">The Feed shows one stable daily Event rank across filters. It is an attention order, not importance, quality, or truth.</p>
       </div>
     </div>
   )
@@ -586,7 +586,7 @@ export default function Architecture() {
   return (
     <section className="system-view arch-page" aria-labelledby="architecture-title">
       <h2 className="system-view-title" id="architecture-title">Architecture</h2>
-      <p className="page-sub">Start with one completed day, then open the stack, model boundaries, data model, scoring, and recovery behavior behind it.</p>
+      <p className="page-sub">Start with one completed day, then open the stack, model boundaries, data model, ranking, and recovery behavior behind it.</p>
 
       <nav className="ruled-nav arch-chapters" aria-label="Architecture chapters">
         <a href="#overview">Daily run</a>
@@ -635,7 +635,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--methods" id="ranking-methods">
         <div className="arch-section-head">
           <h2 className="arch-h">The numbers answer different questions</h2>
-          <p className="arch-p">Reach, network support, and the daily score answer different questions so none can masquerade as quality.</p>
+          <p className="arch-p">Reach, network support, and the daily Event rank answer different questions so none can masquerade as quality.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><RankingMethods /></div>
         <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>

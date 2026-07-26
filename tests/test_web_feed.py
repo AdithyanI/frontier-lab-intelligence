@@ -1,12 +1,12 @@
 import sqlite3
 from datetime import date
 
+import pytest
 from fastapi.testclient import TestClient
 
 from fli.evidence import feed as signal_feed
 from fli.ingestion.x import content as x_content
 from fli.registry import channels
-from fli.scoring import attention
 from fli.web import feed as feed_store
 from fli.web.app import app
 from tests.evidence.test_feed import _raw_fixture, _tweet
@@ -63,23 +63,55 @@ def _feed_fixture(tmp_path, monkeypatch):
     monkeypatch.setattr(feed_store, "DEFAULT_FEED_DB", derived)
     monkeypatch.setattr(feed_store, "DEFAULT_REGISTRY_DB", registry)
     monkeypatch.setattr(feed_store, "DEFAULT_DERIVED_ROOT", empty_rankings)
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_ranks",
+        lambda: {},
+    )
     return registry
 
 
-def test_feed_api_deduplicates_and_explains_network_attention(tmp_path, monkeypatch):
+def test_feed_api_emits_event_rank_contract_and_positioned_amplifiers(
+    tmp_path, monkeypatch
+):
     _feed_fixture(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_ranks",
+        lambda: {
+            2: {
+                "network_rank": 2,
+                "network_rank_total": 2_524,
+                "network_rank_level_total": 3,
+            }
+        },
+    )
 
     dates = client.get("/api/feed/dates").json()
     assert dates["latest_complete_date"] == "2026-07-11"
 
     payload = client.get("/api/feed?date=2026-07-11&limit=20").json()
     assert payload["available"] is True
-    assert payload["score_formula"]["version"] == "attention-v1.1"
+    assert payload["rank_contract"]["version"] == "daily-rank-v2"
+    assert payload["rank_contract"]["kind"] == "lexicographic_event_rank"
+    assert payload["rank_contract"]["layers"] == [
+        "trusted_votes",
+        "mean_voter_position",
+        "author_position",
+        "public_interactions",
+        "event_id",
+    ]
+    assert "score_formula" not in payload
     ids = [item["post_id"] for item in payload["items"]]
     assert "2" not in ids  # pure retweet wrapper collapses into target 1
     target = next(item for item in payload["items"] if item["post_id"] == "1")
-    assert target["score_components"]["registry_amplifiers"] == 1
+    assert len(target["amplifiers"]) == 1
     assert target["amplifiers"][0]["entity_name"] == "Bob"
+    assert target["amplifiers"][0]["network_position"] == pytest.approx(0.5)
+    assert "attention_score" not in target
+    assert "score_components" not in target
+    assert "daily_rank" not in target
+    assert "rank_components" not in target
     quote = next(item for item in payload["items"] if item["post_id"] == "3")
     assert quote["post_type"] == "quote"
     assert quote["context"] == {"target_post_id": "9", "target_handle": "outside"}
@@ -90,7 +122,7 @@ def test_feed_api_deduplicates_and_explains_network_attention(tmp_path, monkeypa
     searched_target = next(
         item for item in searched["items"] if item["post_id"] == "1"
     )
-    assert searched_target["attention_score"] == target["attention_score"]
+    assert searched_target["amplifiers"] == target["amplifiers"]
 
 
 def test_feed_support_and_context_are_provider_qualified(tmp_path, monkeypatch):
@@ -126,31 +158,9 @@ def test_feed_support_and_context_are_provider_qualified(tmp_path, monkeypatch):
         if item["post_id"] == "1"
     }
     assert set(duplicates) == {"twitterapi_io", "other.provider"}
-    assert duplicates["twitterapi_io"]["score_components"]["registry_amplifiers"] == 1
-    assert duplicates["other.provider"]["score_components"]["registry_amplifiers"] == 0
-
-
-def test_attention_uses_flat_amplifier_votes_and_separate_originator_support():
-    def item(*, amplifier_support: int, originator_support: int):
-        return {
-            "amplifiers": [{"network_support": amplifier_support}],
-            "_network_raw": 1,
-            "_amplifier_count": 1,
-            "_originator_support": originator_support,
-            "_originator_rank": None,
-            "_engagement": 10,
-        }
-
-    low_support_amplifier = item(amplifier_support=1, originator_support=5)
-    high_support_amplifier = item(amplifier_support=10_000, originator_support=5)
-    stronger_originator = item(amplifier_support=1, originator_support=50)
-    items = [low_support_amplifier, high_support_amplifier, stronger_originator]
-
-    attention.apply_attention_scores(items)
-
-    assert low_support_amplifier["attention_score"] == high_support_amplifier["attention_score"]
-    assert stronger_originator["attention_score"] > low_support_amplifier["attention_score"]
-    assert all(row["score_components"]["registry_amplifiers"] == 1 for row in items)
+    assert len(duplicates["twitterapi_io"]["amplifiers"]) == 1
+    assert duplicates["twitterapi_io"]["amplifiers"][0]["network_position"] == 0.0
+    assert duplicates["other.provider"]["amplifiers"] == []
 
 
 def test_feed_uses_current_registry_rejections_without_rebuild(tmp_path, monkeypatch):
@@ -179,7 +189,7 @@ def test_feed_removes_rejected_amplifier_vote_without_rebuild(tmp_path, monkeypa
     registry = _feed_fixture(tmp_path, monkeypatch)
     before = client.get("/api/feed?date=2026-07-11&limit=20").json()
     target = next(item for item in before["items"] if item["post_id"] == "1")
-    assert target["score_components"]["registry_amplifiers"] == 1
+    assert len(target["amplifiers"]) == 1
 
     conn = channels.connect(registry)
     conn.execute(
@@ -193,7 +203,7 @@ def test_feed_removes_rejected_amplifier_vote_without_rebuild(tmp_path, monkeypa
 
     after = client.get("/api/feed?date=2026-07-11&limit=20").json()
     target = next(item for item in after["items"] if item["post_id"] == "1")
-    assert target["score_components"]["registry_amplifiers"] == 0
+    assert target["amplifiers"] == []
 
 
 def test_embedded_relation_context_does_not_manufacture_day_activity(

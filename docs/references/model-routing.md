@@ -1,6 +1,6 @@
 # Model Routing and Prompt Caching
 
-Last verified: 2026-07-21
+Last verified: 2026-07-26
 
 ## Current Policy
 
@@ -16,7 +16,7 @@ one-time non-mutating evaluation, not part of the daily path.
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Evidence audience routing | `gpt-5.4-mini` | `high` | The current v9 nine-day top-100 run completed 900/900 with zero failures: 259 both, 100 Engineering-only, 133 Investment-only, and 408 neither. All requests were cache-eligible; 805 reported cache reads totaling 1,442,560 tokens. The v9 semantic input is first-party only. A prior same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
+| Evidence audience routing | `gpt-5.4-mini` | `high` | The current v9 / `daily-rank-v2` 17-day cohort completed 1,674/1,674 with zero failures: 512 both, 182 Engineering-only, 276 Investment-only, and 704 neither. Exact Event/evidence/input reuse supplied 976 rows; 698 calls were new. Of those calls, 636 reported cache reads totaling 1,139,712 tokens and $2.961695 incremental proxy cost. The v9 semantic input is first-party only. A prior same-two-packet comparison found xhigh unchanged on decisions and only marginally better on caveats while using 5.4× the hidden reasoning/output tokens. |
 | Per-Event working annotations | `gpt-5.6-terra` | `high` | A completed calibration pass produced separate audience notes with stable cache keys. The daily Codex agent may inspect them but must re-evaluate the frozen evidence; they are not final brief outputs. |
 | FLI daily-intelligence agent | `gpt-5.6-sol` | `xhigh` | The persisted Codex task researches the complete routed cohort, consolidates overlapping Events, selects the final set, and writes both audience briefs. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |

@@ -78,7 +78,7 @@ it looks. Argue against them in the tracker, not by silently deviating.
    noise suppression, and the UI must practice it.
 2. **Provenance is a first-class UI element** — sources and citations are
    always visible and reachable, never buried in tooltips.
-3. **Why-flagged over what-happened** — surface the reasoning (score inputs,
+3. **Why-flagged over what-happened** — surface the reasoning (ranking inputs,
    filter rationale) next to every insight; trust comes from inspectability.
 4. **Persona-true framing** — the same insight reads differently for an
    analyst than an engineer; the UI respects the split rather than averaging

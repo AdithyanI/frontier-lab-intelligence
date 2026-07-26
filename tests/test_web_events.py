@@ -10,6 +10,7 @@ from fli.registry import channels
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.routing import view as audience_routing_store
+from fli.scoring import attention
 from fli.web import events as event_store, feed as feed_store
 from fli.web.app import app
 from tests.evidence.test_feed import _raw_fixture, _tweet
@@ -136,19 +137,20 @@ def _write_audience_routing_run(root, *, items):
     conn.execute(
         """INSERT INTO run_meta
            (singleton, run_id, day, model, reasoning_effort, prompt_version,
-            prompt_sha256, schema_version, source_event_run_id,
+            prompt_sha256, schema_version, rank_version, source_event_run_id,
             source_feed_run_id, source_artifact_db, selection_kind,
             selection_limit,
             requested_event_id, cohort_sha256, expected_count,
             created_at, updated_at)
            VALUES (1, 'audience-run-1', '2026-07-11', 'gpt-5.4-mini',
-                   'xhigh', ?, ?, ?, 'event-run-1',
+                   'xhigh', ?, ?, ?, ?, 'event-run-1',
                    'feed-run-1', 'artifacts.db', 'review_cohort', ?, NULL,
                    'cohort-hash', ?, ?, ?)""",
         (
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
+            attention.DAILY_RANK_VERSION,
             len(items),
             len(items),
             now,
@@ -200,13 +202,11 @@ def test_events_api_returns_root_once_with_exact_relationships(tmp_path, monkeyp
     assert target_group["link_count"] == 1
     assert target_group["anchor_types"] == ["same_target"]
     assert target_group["why_grouped"] == ["Exact same quoted or reposted post"]
-    assert target_group["daily_score_basis"]["attention_score"] == (
-        target_group["peak_attention_score"]
-    )
-    assert target_group["daily_score_basis"]["post_id"] == "1"
-    assert target_group["daily_score_basis"]["score_components"] == (
-        target_group["root"]["score_components"]
-    )
+    assert target_group["rank_components"]["version"] == "daily-rank-v2"
+    assert target_group["rank_components"]["trusted_votes"] == 1
+    assert target_group["rank_components"]["public_interactions"] == 16
+    assert "attention_score" not in target_group
+    assert "score_components" not in target_group["root"]
     assert [item["post_id"] for item in target_group["evidence"]] == ["2"]
     assert target_group["evidence"][0]["relationship"] == "retweet"
     assert target_group["evidence"][0]["target_post_id"] == "1"
@@ -219,7 +219,7 @@ def test_events_api_returns_root_once_with_exact_relationships(tmp_path, monkeyp
     }
 
 
-def test_event_peak_score_does_not_overwrite_root_score_components(
+def test_event_uses_max_same_day_public_interactions_without_mutating_root(
     tmp_path, monkeypatch
 ):
     _event_fixture(tmp_path, monkeypatch)
@@ -227,7 +227,7 @@ def test_event_peak_score_does_not_overwrite_root_score_components(
     unmodified = original_feed_payload(
         day="2026-07-11",
         lane="all",
-        sort="attention",
+        sort="rank",
         query="",
         limit=20,
         offset=0,
@@ -236,14 +236,20 @@ def test_event_peak_score_does_not_overwrite_root_score_components(
         item for item in unmodified["items"] if item["post_id"] == "1"
     )
 
-    def feed_payload_with_scoring_reaction(**kwargs):
+    def feed_payload_with_high_interaction_reaction(**kwargs):
         payload = original_feed_payload(**kwargs)
         reaction = copy.deepcopy(root_candidate)
         reaction.update(
             {
                 "post_id": "2",
                 "published_at": "2026-07-11T09:00:00+00:00",
-                "attention_score": root_candidate["attention_score"] + 20,
+                "metrics": {
+                    **reaction["metrics"],
+                    "likes": 100,
+                    "replies": 20,
+                    "reposts": 10,
+                    "quotes": 5,
+                },
                 "author": {
                     **reaction["author"],
                     "handle": "bob",
@@ -256,15 +262,16 @@ def test_event_peak_score_does_not_overwrite_root_score_components(
         payload["items"] = [*payload["items"], reaction]
         return payload
 
-    monkeypatch.setattr(feed_store, "feed_payload", feed_payload_with_scoring_reaction)
+    monkeypatch.setattr(
+        feed_store, "feed_payload", feed_payload_with_high_interaction_reaction
+    )
     event_store._events_day_cached.cache_clear()
     payload = client.get("/api/events?date=2026-07-11&limit=20").json()
     grouped = next(item for item in payload["items"] if item["root"]["post_id"] == "1")
 
-    assert grouped["daily_score_basis"]["post_id"] == "2"
-    assert grouped["peak_attention_score"] > grouped["root"]["attention_score"]
-    assert grouped["root"]["attention_score"] == root_candidate["attention_score"]
-    assert grouped["root"]["score_components"] == root_candidate["score_components"]
+    assert grouped["rank_components"]["public_interactions"] == 135
+    assert grouped["root"]["metrics"] == root_candidate["metrics"]
+    assert "attention_score" not in grouped["root"]
 
 
 def test_events_api_can_omit_heavy_evidence_from_list_rows(tmp_path, monkeypatch):
@@ -317,10 +324,8 @@ def test_events_api_preserves_ungrouped_posts_as_singletons(tmp_path, monkeypatc
     singleton = next(item for item in payload["items"] if item["root"]["post_id"] == "4")
     assert singleton["is_grouped"] is False
     assert singleton["member_count"] == 1
-    assert singleton["daily_score_basis"]["post_id"] == "4"
-    assert singleton["daily_score_basis"]["attention_score"] == (
-        singleton["peak_attention_score"]
-    )
+    assert singleton["rank_components"]["version"] == "daily-rank-v2"
+    assert singleton["rank_components"]["trusted_votes"] == 0
     assert singleton["evidence"] == []
 
 
@@ -937,6 +942,7 @@ def test_future_reaction_appends_without_republishing_or_rerouting(
     assert after_event["event_id"] == before_event["event_id"]
     assert after_event["semantic_snapshot_sha256"] == before_event["semantic_snapshot_sha256"]
     assert after_event["daily_rank"] == before_event["daily_rank"]
+    assert after_event["rank_components"] == before_event["rank_components"]
     assert [item["post_id"] for item in after_event["evidence"]] == [
         "future-monday-quote",
         "future-wednesday-quote",
@@ -1521,15 +1527,18 @@ def test_singleton_event_ids_are_qualified_by_provider():
         "author": {"entity_id": 1},
         "observed_directly": True,
         "amplifiers": [],
-        "attention_score": 50.0,
-        "score_components": {"public_interactions": 10},
+        "metrics": {"likes": 10, "replies": 0, "reposts": 0, "quotes": 0},
     }
-    twitter = event_store._singleton({**item, "provider": "twitterapi.io"})
-    github = event_store._singleton({**item, "provider": "github"})
+    twitter = event_store._singleton(
+        {**item, "provider": "twitterapi.io"}, {1: 1.0}, "2026-07-11"
+    )
+    github = event_store._singleton(
+        {**item, "provider": "github"}, {1: 1.0}, "2026-07-11"
+    )
 
     assert twitter["event_id"] != github["event_id"]
     assert twitter["event_id"] == event_store._singleton(
-        {**item, "provider": "twitterapi.io"}
+        {**item, "provider": "twitterapi.io"}, {1: 1.0}, "2026-07-11"
     )["event_id"]
     assert twitter["event_id"] == event_store._canonical_event_id(
         "twitterapi.io", "shared-provider-id"
@@ -1551,7 +1560,7 @@ def test_event_reader_requests_complete_feed_candidates_once(monkeypatch):
             "total": total,
             "limit": limit,
             "offset": offset,
-            "score_formula": {},
+            "rank_contract": {},
             "items": [
                 {
                     "provider": "twitterapi_io",

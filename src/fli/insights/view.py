@@ -11,6 +11,7 @@ from typing import Any, Literal
 from fli.insights import generation as insight_generation
 from fli.insights import runs as insight_runs
 from fli.routing import model as routing_model
+from fli.scoring import attention
 
 
 DEFAULT_AUDIENCE = insight_generation.InsightAudience.INVESTMENT.value
@@ -70,13 +71,15 @@ def _routing_source_cached(
         return {"current": False, "packets": {}}
     try:
         meta = conn.execute(
-            """SELECT run_id, prompt_version, prompt_sha256, schema_version
+            """SELECT run_id, prompt_version, prompt_sha256, schema_version,
+                      rank_version
                FROM run_meta WHERE singleton = 1"""
         ).fetchone()
         if meta is None or (
             str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
             or str(meta["prompt_sha256"]) != routing_model.prompt_sha256()
             or str(meta["schema_version"]) != routing_model.SCHEMA_VERSION
+            or str(meta["rank_version"]) != attention.DAILY_RANK_VERSION
         ):
             return {"current": False, "packets": {}}
         rows = conn.execute(

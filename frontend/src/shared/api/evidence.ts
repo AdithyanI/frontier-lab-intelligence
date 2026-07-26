@@ -31,6 +31,7 @@ export interface FeedAmplifier {
   handle: string
   relation_type: 'quote' | 'retweet'
   network_support: number
+  network_position: number
   source_url: string
 }
 
@@ -43,14 +44,14 @@ export interface FeedMetrics {
   bookmarks: number | null
 }
 
-export interface FeedScoreComponents {
-  registry_amplifiers: number
-  originator_network_support: number
-  originator_network_rank: number | null
+export interface FeedRankComponents {
+  version: 'daily-rank-v2'
+  trusted_votes: number
+  voters: FeedAmplifier[]
+  mean_voter_position: number
+  author_position: number
   public_interactions: number
-  network_attention_percentile: number
-  originator_support_percentile: number
-  public_engagement_percentile: number
+  decided_at_layer: 1 | 2 | 3 | 4 | 5 | null
 }
 
 export interface FeedItem {
@@ -64,8 +65,6 @@ export interface FeedItem {
   context: { target_post_id: string; target_handle: string } | null
   amplifiers: FeedAmplifier[]
   metrics: FeedMetrics
-  attention_score: number
-  score_components: FeedScoreComponents
 }
 
 export interface FeedRun {
@@ -88,18 +87,17 @@ export interface FeedResponse {
   reason?: string
   date?: string
   lane?: 'all' | 'network' | 'firsthand'
-  sort?: 'attention' | 'recent' | 'engagement'
+  sort?: 'rank' | 'recent' | 'engagement'
   query?: string
   event_id?: string
   total?: number
   limit?: number
   offset?: number
   run?: FeedRun
-  score_formula?: {
+  rank_contract?: {
     version: string
-    network_attention_weight: number
-    originator_support_weight: number
-    public_engagement_weight: number
+    kind: string
+    layers: string[]
     note: string
   }
   items?: FeedItem[]
@@ -148,15 +146,7 @@ export interface FeedEvent {
   first_hand_count: number
   amplifiers: FeedAmplifier[]
   daily_rank: number
-  peak_attention_score: number
-  daily_score_basis: {
-    post_id: string
-    author: FeedAuthor
-    published_at: string
-    attention_score: number
-    score_components: FeedScoreComponents
-  }
-  peak_public_interactions: number
+  rank_components: FeedRankComponents
   latest_evidence_at: string
   evidence: EventEvidence[]
   relationship_counts: {
@@ -188,7 +178,7 @@ export interface EventResponse {
   reason?: string
   date?: string
   lane?: 'all' | 'network' | 'firsthand'
-  sort?: 'attention' | 'recent' | 'engagement'
+  sort?: 'rank' | 'recent' | 'engagement'
   query?: string
   projection?: 'day' | 'week'
   routing_filter?:
@@ -208,6 +198,7 @@ export interface EventResponse {
     model: string
     reasoning_effort: string
     prompt_version: string
+    rank_version: string
     source_event_run_id: string
     source_feed_run_id: string
     selection_kind: 'top_ranked' | 'single_event' | 'review_cohort'
@@ -225,13 +216,13 @@ export interface EventResponse {
     feed_run_id: string
     clustering_contract: string
   }
-  score_formula?: FeedResponse['score_formula']
+  rank_contract?: FeedResponse['rank_contract']
   items?: FeedEvent[]
 }
 
 export interface EventPageQuery {
   date: string
-  sort: 'attention' | 'recent' | 'engagement'
+  sort: 'rank' | 'recent' | 'engagement'
   routingFilter: 'all' | 'relevant' | 'not_relevant' | 'not_evaluated'
   query: string
   eventId?: string
@@ -266,7 +257,7 @@ export function prefetchExactEvent(date: string, eventId: string) {
   void getCachedJSON<EventResponse>(
     eventPageUrl({
       date,
-      sort: 'attention',
+      sort: 'rank',
       routingFilter: 'all',
       query: '',
       eventId,

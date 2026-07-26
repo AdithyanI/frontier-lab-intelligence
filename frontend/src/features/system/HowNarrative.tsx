@@ -237,10 +237,12 @@ export default function HowNarrative({
           </p>
           <p>
             A normal engagement ranking is not very useful here. It mostly
-            tells us what was popular on X. Instead the score asks the
-            narrower question the network can actually answer: how many people
-            inside the trusted Registry independently vouched for this? One
-            person counts once, and vouching for your own post does not count.
+            tells us what was popular on X. Instead the rank asks the narrower
+            question the network can actually answer: how many distinct
+            trusted Registry entities independently quoted or reposted this
+            Event? Each entity counts once across the complete Event. The
+            source author is removed from that union, so self-amplification
+            does not count.
           </p>
           <p>
             Plenty of Events tie on that count, so three further questions
@@ -254,15 +256,15 @@ export default function HowNarrative({
           </FigureFrame>
           <p>
             This is where the Registry ranking becomes useful again. An
-            announcement from a lab the network trusts, repeated by several
-            trusted researchers, should be looked at before a generally
-            popular post. That is how the Thinking Machines Lab model release
-            naturally rose to the top of its day.
+            announcement repeated by three trusted entities always ranks ahead
+            of one repeated by two, even if those two sit higher in the
+            network. Network position only decides between Events with the
+            same number of trusted votes.
           </p>
           <p>
-            The score only decides what we look at first. It does not say that
+            The rank only decides what we look at first. It does not say that
             an Event is true, important, or relevant. The top Events move to
-            the next step, where they are judged without seeing this score.
+            the next step, where they are judged without seeing this rank.
           </p>
           <FigureFrame label="Expand how ranking orders a day">
             <RankFigure />

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import redirect_stdout
 import fcntl
 import hashlib
@@ -28,14 +29,16 @@ from fli.insights.codex_app_server import (
 )
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
+from fli.routing import view as routing_view
+from fli.scoring import attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DB = editorial_runs.DEFAULT_DB
 DEFAULT_SKILL_PATH = REPO_ROOT / ".agents/skills/fli-daily-intelligence/SKILL.md"
 CLI_SCHEMA_VERSION = "1.0"
-STORE_SCHEMA_VERSION = "daily-orchestration-store-v1"
-RUN_CONTRACT_VERSION = "daily-orchestration-v1"
+STORE_SCHEMA_VERSION = "daily-orchestration-store-v2"
+RUN_CONTRACT_VERSION = "daily-orchestration-v2"
 DEFAULT_CODEX_TIMEOUT_SECONDS = 4 * 60 * 60
 DEFAULT_CODEX_SERVICE_TIER = STANDARD_SERVICE_TIER
 DEFAULT_EVIDENCE_WINDOW_DAYS = 9
@@ -303,7 +306,7 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
         );
         CREATE TABLE IF NOT EXISTS daily_orchestration_run (
             run_id TEXT PRIMARY KEY,
-            day TEXT NOT NULL UNIQUE,
+            day TEXT NOT NULL,
             contract_version TEXT NOT NULL,
             config_sha256 TEXT NOT NULL,
             config_json TEXT NOT NULL,
@@ -328,6 +331,44 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
             "INSERT INTO daily_orchestration_meta(singleton, schema_version) VALUES (1, ?)",
             (STORE_SCHEMA_VERSION,),
         )
+    elif str(row["schema_version"]) == "daily-orchestration-store-v1":
+        with conn:
+            conn.execute("DROP INDEX IF EXISTS idx_daily_orchestration_run_day_updated")
+            conn.execute(
+                "ALTER TABLE daily_orchestration_run "
+                "RENAME TO daily_orchestration_run_v1"
+            )
+            conn.execute(
+                """CREATE TABLE daily_orchestration_run (
+                       run_id TEXT PRIMARY KEY,
+                       day TEXT NOT NULL,
+                       contract_version TEXT NOT NULL,
+                       config_sha256 TEXT NOT NULL,
+                       config_json TEXT NOT NULL,
+                       status TEXT NOT NULL,
+                       stage TEXT NOT NULL,
+                       state_json TEXT NOT NULL,
+                       codex_thread_id TEXT,
+                       editorial_run_id TEXT,
+                       error_json TEXT,
+                       created_at TEXT NOT NULL,
+                       updated_at TEXT NOT NULL
+                   )"""
+            )
+            conn.execute(
+                """INSERT INTO daily_orchestration_run
+                   SELECT * FROM daily_orchestration_run_v1"""
+            )
+            conn.execute("DROP TABLE daily_orchestration_run_v1")
+            conn.execute(
+                """CREATE INDEX idx_daily_orchestration_run_day_updated
+                   ON daily_orchestration_run(day, updated_at DESC, run_id)"""
+            )
+            conn.execute(
+                """UPDATE daily_orchestration_meta SET schema_version = ?
+                   WHERE singleton = 1""",
+                (STORE_SCHEMA_VERSION,),
+            )
     elif str(row["schema_version"]) != STORE_SCHEMA_VERSION:
         raise ValueError(
             f"unsupported daily-run store schema {row['schema_version']!r}"
@@ -394,20 +435,12 @@ def _ensure_run(
     config_sha256 = _sha256(config)
     run_id = f"daily-run-{day}-{config_sha256[:12]}"
     row = conn.execute(
-        "SELECT * FROM daily_orchestration_run WHERE day = ?", (day,)
+        """SELECT * FROM daily_orchestration_run
+           WHERE day = ? AND config_sha256 = ?
+           ORDER BY updated_at DESC, run_id DESC LIMIT 1""",
+        (day, config_sha256),
     ).fetchone()
     if row is not None:
-        if str(row["config_sha256"]) != config_sha256:
-            raise DailyRunError(
-                code="E_RUN_CONFIG_MISMATCH",
-                message=f"Daily orchestration for {day} already uses another contract.",
-                hint=(
-                    "Inspect the existing day run and resume it with identical options; "
-                    "never create a second task for the same date implicitly."
-                ),
-                retryable=False,
-                exit_code=2,
-            )
         return _record_payload(row), True
     now = _now()
     state = {"stages": {}}
@@ -791,6 +824,7 @@ def run_day(
         "top_ranked": top_ranked,
         "routing_model": routing_model.DEFAULT_MODEL,
         "routing_reasoning_effort": routing_model.DEFAULT_REASONING_EFFORT,
+        "rank_version": attention.DAILY_RANK_VERSION,
         "routing_workers": routing_workers,
         "routing_day_workers": routing_day_workers,
         "repo_root": str(REPO_ROOT),
@@ -1256,6 +1290,155 @@ def run_day(
         _release_day_lock(run_lock)
 
 
+def _current_inputs(day: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Describe the already-published Evidence and current ranked routing."""
+    source = routing_runs._published_event_source()
+    routing_path = routing_view.latest_complete_run(day)
+    if routing_path is None:
+        raise ValueError(f"no complete {attention.DAILY_RANK_VERSION} routing for {day}")
+    conn = sqlite3.connect(
+        f"file:{routing_path.resolve().as_posix()}?mode=ro",
+        uri=True,
+    )
+    conn.row_factory = sqlite3.Row
+    try:
+        meta = conn.execute(
+            "SELECT * FROM run_meta WHERE singleton = 1"
+        ).fetchone()
+    finally:
+        conn.close()
+    if meta is None:
+        raise ValueError(f"routing metadata is missing for {day}")
+    evidence = {
+        "range": {"from": day, "through": day, "days": 1},
+        "collection_range": None,
+        "feed": {"run_id": source["feed_run_id"], "reused": True},
+        "events": {"run_id": source["event_run_id"], "reused": True},
+        "publication": {
+            "event_run_id": source["event_run_id"],
+            "feed_run_id": source["feed_run_id"],
+        },
+    }
+    routing = {
+        "source_event_run_id": source["event_run_id"],
+        "source_feed_run_id": source["feed_run_id"],
+        "through": day,
+        "days": 1,
+        "top_ranked": int(meta["selection_limit"] or 0),
+        "model": str(meta["model"]),
+        "reasoning_effort": str(meta["reasoning_effort"]),
+        "rank_version": str(meta["rank_version"]),
+        "plan": [{"day": day, "run_id": str(meta["run_id"])}],
+        "reuse_policy": "already-complete-current-routing",
+        "resumed_complete_count": int(meta["expected_count"]),
+        "reused_exact_count": 0,
+        "model_requests": 0,
+        "will_call_model": False,
+    }
+    return evidence, routing
+
+
+def run_batch(
+    *,
+    through: str,
+    days: int,
+    db_path: Path = DEFAULT_DB,
+    day_workers: int = 3,
+    codex_timeout_seconds: float = DEFAULT_CODEX_TIMEOUT_SECONDS,
+    codex_binary: str = "codex",
+    codex_model: str | None = None,
+    codex_reasoning_effort: str | None = None,
+    codex_service_tier: str | None = DEFAULT_CODEX_SERVICE_TIER,
+    skill_path: Path = DEFAULT_SKILL_PATH,
+    dry_run: bool = False,
+    progress: ProgressCallback | None = None,
+) -> dict[str, Any]:
+    """Launch revised historical briefs from one frozen routing lineage."""
+    if days < 1 or days > 90:
+        raise ValueError("days must be between 1 and 90")
+    if day_workers < 1 or day_workers > 4:
+        raise ValueError("day-workers must be between 1 and 4")
+    end = date.fromisoformat(through)
+    selected_days = [
+        (end - timedelta(days=offset)).isoformat()
+        for offset in range(days - 1, -1, -1)
+    ]
+    frozen = {day: _current_inputs(day) for day in selected_days}
+    plan = {
+        "through": through,
+        "days": days,
+        "selected_days": selected_days,
+        "day_workers": min(day_workers, days),
+        "rank_version": attention.DAILY_RANK_VERSION,
+        "will_collect_external_evidence": False,
+        "will_call_routing_model": False,
+        "will_launch_codex": not dry_run,
+        "codex_settings": _codex_settings(
+            model=codex_model,
+            reasoning_effort=codex_reasoning_effort,
+            service_tier=codex_service_tier,
+        ),
+    }
+    if dry_run:
+        return {"dry_run": True, "plan": plan}
+
+    # Perform the one-time orchestration-store migration before workers open it.
+    migration_conn = connect(db_path)
+    migration_conn.close()
+
+    def execute(day: str) -> dict[str, Any]:
+        evidence, routing = frozen[day]
+        return run_day(
+            day=day,
+            db_path=db_path,
+            evidence_days=1,
+            collection_days=1,
+            top_ranked=int(routing["top_ranked"]),
+            launch_codex=True,
+            codex_timeout_seconds=codex_timeout_seconds,
+            codex_binary=codex_binary,
+            codex_model=codex_model,
+            codex_reasoning_effort=codex_reasoning_effort,
+            codex_service_tier=codex_service_tier,
+            skill_path=skill_path,
+            progress=(
+                (lambda stage, status: progress(f"{day}.{stage}", status))
+                if progress
+                else None
+            ),
+            evidence_runner=lambda **_: evidence,
+            routing_runner=lambda **_: routing,
+        )
+
+    results: dict[str, dict[str, Any]] = {}
+    errors: dict[str, str] = {}
+    with ThreadPoolExecutor(max_workers=min(day_workers, days)) as executor:
+        futures = {executor.submit(execute, day): day for day in selected_days}
+        for future in as_completed(futures):
+            day = futures[future]
+            try:
+                results[day] = future.result()
+            except Exception as error:
+                errors[day] = f"{type(error).__name__}: {error}"
+    result = {
+        "dry_run": False,
+        "plan": plan,
+        "complete": len(results),
+        "failed": len(errors),
+        "runs": [results[day] for day in sorted(results)],
+        "errors": errors,
+    }
+    if errors:
+        raise DailyRunError(
+            code="E_BATCH_INCOMPLETE",
+            message=_canonical_json(result),
+            hint="Rerun the same batch; completed days resume and only failed days continue.",
+            retryable=True,
+            exit_code=4,
+        )
+    return result
+
+
 def add_cli_parsers(sub: Any) -> None:
     """Register orchestration actions on the daily-intelligence client."""
 
@@ -1315,6 +1498,34 @@ def add_cli_parsers(sub: Any) -> None:
     mode = run.add_mutually_exclusive_group()
     mode.add_argument("--json", action="store_true")
     mode.add_argument("--plain", action="store_true")
+
+    batch = sub.add_parser(
+        "run-batch",
+        help="Launch revised briefs from already-complete current routing.",
+    )
+    batch.add_argument("--through", required=True)
+    batch.add_argument("--days", type=int, required=True)
+    batch.add_argument("--db", type=Path, default=DEFAULT_DB)
+    batch.add_argument("--day-workers", type=int, default=3)
+    batch.add_argument(
+        "--codex-timeout-seconds",
+        type=float,
+        default=DEFAULT_CODEX_TIMEOUT_SECONDS,
+    )
+    batch.add_argument("--codex-binary", default="codex")
+    batch.add_argument("--codex-model")
+    batch.add_argument("--codex-reasoning-effort")
+    batch.add_argument(
+        "--codex-service-tier",
+        default=DEFAULT_CODEX_SERVICE_TIER,
+    )
+    batch.add_argument("--skill-path", type=Path, default=DEFAULT_SKILL_PATH)
+    batch.add_argument("--dry-run", action="store_true")
+    batch.add_argument("--progress", choices=("off", "plain"), default="plain")
+    batch.add_argument("--no-input", action="store_true")
+    batch_mode = batch.add_mutually_exclusive_group()
+    batch_mode.add_argument("--json", action="store_true")
+    batch_mode.add_argument("--plain", action="store_true")
 
     inspect = sub.add_parser(
         "inspect-day-run", help="Inspect one durable daily orchestration run."
@@ -1393,6 +1604,11 @@ def _plain(payload: dict[str, Any]) -> str:
     data = payload["data"]
     if data.get("dry_run"):
         return _canonical_json(data["plan"], pretty=True)
+    if "runs" in data and "complete" in data:
+        return (
+            f"days={data['complete']} complete "
+            f"failed={data['failed']} rank={data['plan']['rank_version']}"
+        )
     return " ".join(
         (
             f"run_id={data['run_id']}",
@@ -1416,6 +1632,26 @@ def main(argv: list[str] | None = None) -> int:
         command = f"daily-intelligence.{args.action}"
         if args.action == "inspect-day-run":
             data = inspect_run(db_path=args.db, run_id=args.run_id, day=args.day)
+        elif args.action == "run-batch":
+            progress = None
+            if args.progress == "plain":
+                progress = lambda stage, status: print(
+                    f"stage={stage} status={status}", file=sys.stderr, flush=True
+                )
+            data = run_batch(
+                through=args.through,
+                days=args.days,
+                db_path=args.db,
+                day_workers=args.day_workers,
+                codex_timeout_seconds=args.codex_timeout_seconds,
+                codex_binary=args.codex_binary,
+                codex_model=args.codex_model,
+                codex_reasoning_effort=args.codex_reasoning_effort,
+                codex_service_tier=args.codex_service_tier,
+                skill_path=args.skill_path,
+                dry_run=args.dry_run,
+                progress=progress,
+            )
         else:
             progress = None
             if args.progress == "plain":

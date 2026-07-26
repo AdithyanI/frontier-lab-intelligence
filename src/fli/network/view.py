@@ -199,7 +199,8 @@ def _entity_network_ranks_cached(
                       support.support_share AS cohort_follow_share,
                       support.channel_count,
                       run.eligible_source_entity_count AS network_source_total,
-                      COUNT(*) OVER () AS network_rank_total
+                      COUNT(*) OVER () AS network_rank_total,
+                      MAX(support.support_rank) OVER () AS network_rank_level_total
                FROM entity_support_result support
                JOIN ranking_run run ON run.run_id = support.run_id
                WHERE support.run_id = ?

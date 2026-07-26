@@ -8,6 +8,7 @@ import pytest
 from fli.insights import daily_runner, editorial, editorial_runs
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
+from fli.scoring import attention
 
 
 DAY = "2026-07-16"
@@ -239,6 +240,7 @@ def _expected_config() -> dict[str, Any]:
         "top_ranked": routing_runs.DEFAULT_REFRESH_TOP_RANKED,
         "routing_model": routing_model.DEFAULT_MODEL,
         "routing_reasoning_effort": routing_model.DEFAULT_REASONING_EFFORT,
+        "rank_version": attention.DAILY_RANK_VERSION,
         "routing_workers": routing_runs.DEFAULT_REFRESH_WORKERS,
         "routing_day_workers": 1,
         "repo_root": str(daily_runner.REPO_ROOT),
@@ -402,32 +404,118 @@ def test_obsolete_workspace_with_started_task_fails_closed(tmp_path):
     assert stored["error"]["code"] == "E_WORKSPACE_OBSOLETE_TASK"
 
 
-def test_same_day_rejects_a_different_contract_instead_of_creating_second_run(
-    tmp_path,
-):
+def test_same_day_supports_a_second_versioned_contract_lineage(tmp_path):
     pipeline = _Pipeline()
     db_path = tmp_path / "editorial.db"
-    _run(db_path=db_path, pipeline=pipeline)
+    first = _run(db_path=db_path, pipeline=pipeline)
 
-    with pytest.raises(daily_runner.DailyRunError) as exc_info:
-        daily_runner.run_day(
-            day=DAY,
-            db_path=db_path,
-            evidence_days=EVIDENCE_DAYS,
-            workers=16,
-            evidence_runner=pipeline.evidence,
-            routing_runner=pipeline.routing,
-            workspace_preparer=pipeline.prepare,
-        )
+    second = daily_runner.run_day(
+        day=DAY,
+        db_path=db_path,
+        evidence_days=EVIDENCE_DAYS,
+        workers=16,
+        evidence_runner=pipeline.evidence,
+        routing_runner=pipeline.routing,
+        workspace_preparer=pipeline.prepare,
+    )
 
-    assert exc_info.value.code == "E_RUN_CONFIG_MISMATCH"
+    assert second["run_id"] != first["run_id"]
+    assert second["config"]["workers"] == 16
+    assert second["config"]["rank_version"] == attention.DAILY_RANK_VERSION
     conn = daily_runner.connect(db_path)
     try:
         assert conn.execute(
             "SELECT COUNT(*) FROM daily_orchestration_run WHERE day = ?", (DAY,)
-        ).fetchone()[0] == 1
+        ).fetchone()[0] == 2
     finally:
         conn.close()
+
+
+def test_run_batch_dry_run_plans_current_rank_without_touching_store(
+    tmp_path, monkeypatch
+):
+    selected = []
+
+    def current_inputs(day):
+        selected.append(day)
+        return ({"day": day}, {"day": day, "top_ranked": 100})
+
+    monkeypatch.setattr(daily_runner, "_current_inputs", current_inputs)
+    db_path = tmp_path / "must-not-exist.db"
+
+    result = daily_runner.run_batch(
+        through=DAY,
+        days=2,
+        db_path=db_path,
+        day_workers=4,
+        dry_run=True,
+    )
+
+    assert selected == ["2026-07-15", DAY]
+    assert result["plan"]["selected_days"] == selected
+    assert result["plan"]["day_workers"] == 2
+    assert result["plan"]["rank_version"] == attention.DAILY_RANK_VERSION
+    assert result["plan"]["will_collect_external_evidence"] is False
+    assert result["plan"]["will_call_routing_model"] is False
+    assert result["plan"]["will_launch_codex"] is False
+    assert not db_path.exists()
+
+
+def test_run_batch_injects_frozen_inputs_into_each_daily_v2_lineage(
+    tmp_path, monkeypatch
+):
+    calls = []
+
+    def current_inputs(day):
+        return (
+            {"publication": {"event_run_id": f"events-{day}"}},
+            {
+                "source_event_run_id": f"events-{day}",
+                "source_feed_run_id": f"feed-{day}",
+                "top_ranked": 100,
+            },
+        )
+
+    def run_day(**kwargs):
+        evidence = kwargs["evidence_runner"]()
+        routing = kwargs["routing_runner"]()
+        calls.append(
+            {
+                "day": kwargs["day"],
+                "launch_codex": kwargs["launch_codex"],
+                "evidence": evidence,
+                "routing": routing,
+            }
+        )
+        return {
+            "run_id": f"daily-v2-{kwargs['day']}",
+            "day": kwargs["day"],
+            "contract_version": daily_runner.RUN_CONTRACT_VERSION,
+        }
+
+    monkeypatch.setattr(daily_runner, "_current_inputs", current_inputs)
+    monkeypatch.setattr(daily_runner, "run_day", run_day)
+
+    result = daily_runner.run_batch(
+        through=DAY,
+        days=2,
+        db_path=tmp_path / "editorial.db",
+        day_workers=2,
+    )
+
+    assert result["complete"] == 2
+    assert result["failed"] == 0
+    assert [item["day"] for item in result["runs"]] == ["2026-07-15", DAY]
+    assert {item["contract_version"] for item in result["runs"]} == {
+        daily_runner.RUN_CONTRACT_VERSION
+    }
+    assert {item["day"] for item in calls} == {"2026-07-15", DAY}
+    assert all(item["launch_codex"] is True for item in calls)
+    assert all(
+        item["evidence"]["publication"]["event_run_id"]
+        == item["routing"]["source_event_run_id"]
+        for item in calls
+    )
 
 
 def test_prepare_then_launch_reuses_stages_and_creates_only_one_task(

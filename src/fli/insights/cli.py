@@ -24,6 +24,7 @@ from fli.insights import runs as insight_runs
 from fli.registry import classification as entity_kinds
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_run_store
+from fli.scoring import attention
 
 
 CLI_SCHEMA_VERSION = "1.0"
@@ -224,6 +225,7 @@ def resolve_event(
         if (
             meta is None
             or row is None
+            or dict(meta).get("rank_version") != attention.DAILY_RANK_VERSION
             or str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
             or str(row["status"]) != "complete"
             or (day is not None and str(meta["day"]) != day)
@@ -549,6 +551,7 @@ def _current_routing_runs(
             day = str(meta["day"])
             if (
                 day not in requested
+                or meta.get("rank_version") != attention.DAILY_RANK_VERSION
                 or str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
                 or str(meta["schema_version"]) != routing_model.SCHEMA_VERSION
                 or str(meta["source_event_run_id"]) != source["event_run_id"]

@@ -35,7 +35,7 @@ export const HOW_BEATS: HowBeat[] = [
     id: 'rank',
     step: '3',
     title: 'Rank',
-    text: 'A transparent attention score orders each day: who amplified it, who wrote it, how the public reacted. It only decides where to look first; the judging comes later.',
+    text: 'A transparent Event rank orders each day. Distinct trusted quotes and reposts come first; voter position, source-author position, and same-day public interaction only break ties. It decides where to look first; the judging comes later.',
   },
   {
     id: 'judge',

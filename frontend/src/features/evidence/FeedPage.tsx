@@ -32,7 +32,7 @@ import {
   type FeedRoutingFilter,
 } from './feedState'
 
-type Sort = 'attention' | 'recent' | 'engagement'
+type Sort = 'rank' | 'recent' | 'engagement'
 type RoutingFilter = FeedRoutingFilter
 
 const PAGE_SIZE = 20
@@ -100,7 +100,7 @@ function requestEventEvidence(date: string, eventId: string): Promise<EventEvide
   const params = new URLSearchParams({
     date,
     lane: 'all',
-    sort: 'attention',
+    sort: 'rank',
     routing: 'all',
     q: '',
     event_id: eventId,
@@ -291,12 +291,11 @@ function RoutingNote({ item }: { item: FeedEvent }) {
   )
 }
 
-function ScoreDisclosure({
+function RankDisclosure({
   item,
   rank,
   total,
   date,
-  formula,
   open,
   onToggle,
   onClose,
@@ -305,7 +304,6 @@ function ScoreDisclosure({
   rank: number
   total: number
   date: string
-  formula: EventResponse['score_formula']
   open: boolean
   onToggle: () => void
   onClose: () => void
@@ -314,29 +312,35 @@ function ScoreDisclosure({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const headingId = useId()
   const panelId = useId()
-  const basis = item.daily_score_basis
-  const components = basis.score_components
-  const networkWeight = formula?.network_attention_weight ?? 0.55
-  const originatorWeight = formula?.originator_support_weight ?? 0.25
-  const engagementWeight = formula?.public_engagement_weight ?? 0.20
+  const components = item.rank_components
+  const voterNames = components.voters
+    .slice(0, 5)
+    .map((voter) => voter.entity_name || `@${voter.handle}`)
+    .join(', ')
   const rows = [
     {
-      label: 'Tracked amplification',
-      raw: `${components.registry_amplifiers.toLocaleString('en-US')} tracked ${components.registry_amplifiers === 1 ? 'entity' : 'entities'}`,
-      percentile: components.network_attention_percentile,
-      weight: networkWeight,
+      layer: 1,
+      label: 'Trusted votes',
+      raw: `${components.trusted_votes.toLocaleString('en-US')} distinct trusted ${components.trusted_votes === 1 ? 'entity' : 'entities'}`,
+      detail: voterNames || 'No trusted voter observed',
     },
     {
-      label: 'Author network support',
-      raw: `${components.originator_network_support.toLocaleString('en-US')} Registry entities follow the author`,
-      percentile: components.originator_support_percentile,
-      weight: originatorWeight,
+      layer: 2,
+      label: 'Who voted',
+      raw: `Average network position ${components.mean_voter_position.toFixed(3)}`,
+      detail: 'Highest position is 1.000; unranked is 0.000',
     },
     {
+      layer: 3,
+      label: 'Source author standing',
+      raw: `Network position ${components.author_position.toFixed(3)}`,
+      detail: 'Used only when the first two layers tie',
+    },
+    {
+      layer: 4,
       label: 'Public engagement',
       raw: `${components.public_interactions.toLocaleString('en-US')} likes, replies, reposts, and quotes`,
-      percentile: components.public_engagement_percentile,
-      weight: engagementWeight,
+      detail: 'Highest one-post total among same-day Event members',
     },
   ]
 
@@ -362,12 +366,12 @@ function ScoreDisclosure({
   }, [open, onClose])
 
   return (
-    <div className="feed-score-disclosure" ref={disclosureRef}>
+    <div className="feed-rank-disclosure" ref={disclosureRef}>
       <button
         ref={triggerRef}
         type="button"
         className="feed-rank mono"
-        aria-label={`Daily rank ${rank} of ${total}. Open daily score explanation.`}
+        aria-label={`Daily rank ${rank} of ${total}. Open rank explanation.`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onToggle}
@@ -376,23 +380,22 @@ function ScoreDisclosure({
       </button>
       {open && (
         <div
-          className="feed-score-popover"
+          className="feed-rank-popover"
           id={panelId}
           role="dialog"
           aria-labelledby={headingId}
         >
-          <div className="feed-score-popover-head">
+          <div className="feed-rank-popover-head">
             <div>
               <h3 id={headingId}>Daily rank #{rank} of {total.toLocaleString('en-US')}</h3>
               <p className="mono">
-                Daily score {basis.attention_score.toFixed(1)} ·{' '}
-                {shortDate.format(new Date(`${date}T12:00:00Z`))}
+                {components.version} · {shortDate.format(new Date(`${date}T12:00:00Z`))}
               </p>
             </div>
             <button
               type="button"
-              className="feed-score-close"
-              aria-label="Close score explanation"
+              className="feed-rank-close"
+              aria-label="Close rank explanation"
               onClick={() => {
                 onClose()
                 triggerRef.current?.focus()
@@ -401,29 +404,28 @@ function ScoreDisclosure({
               ×
             </button>
           </div>
-          {basis.post_id !== item.presentation_root_post_id && (
-            <p className="feed-score-source">
-              This evidence group uses its highest-scoring member: @{basis.author.handle}.
-            </p>
-          )}
-          <div className="feed-score-components">
+          <div className="feed-rank-components">
             {rows.map((row) => (
-              <div className="feed-score-component" key={row.label}>
-                <div className="feed-score-component-head">
-                  <strong>{row.label}</strong>
-                  <span className="mono">{Math.round(row.weight * 100)}%</span>
+              <div className="feed-rank-component" key={row.label}>
+                <div className="feed-rank-component-head">
+                  <strong>{row.layer}. {row.label}</strong>
+                  {components.decided_at_layer === row.layer && (
+                    <span className="mono">decided the adjacent tie</span>
+                  )}
                 </div>
                 <p>{row.raw}</p>
-                <p className="mono">
-                  Higher than {(row.percentile * 100).toFixed(1)}% of that day&rsquo;s
-                  scored posts · {(row.percentile * row.weight * 100).toFixed(1)} points
-                </p>
+                <p className="mono">{row.detail}</p>
               </div>
             ))}
           </div>
-          <p className="feed-score-limit">
-            The daily score prioritizes what to inspect. It is not importance, truth,
-            quality, or the percentage of the network that engaged. Scores from different
+          {components.decided_at_layer === 5 && (
+            <p className="feed-rank-source">
+              All four substantive layers tied; Event ID supplied deterministic order.
+            </p>
+          )}
+          <p className="feed-rank-limit">
+            The daily rank prioritizes what to inspect. It is not importance, truth,
+            quality, or the percentage of the network that engaged. Ranks from different
             days are not directly comparable.
           </p>
         </div>
@@ -563,20 +565,18 @@ function EventRow({
   rank,
   total,
   date,
-  formula,
-  scoreOpen,
-  onToggleScore,
-  onCloseScore,
+  rankOpen,
+  onToggleRank,
+  onCloseRank,
   focused,
 }: {
   item: FeedEvent
   rank: number
   total: number
   date: string
-  formula: EventResponse['score_formula']
-  scoreOpen: boolean
-  onToggleScore: () => void
-  onCloseScore: () => void
+  rankOpen: boolean
+  onToggleRank: () => void
+  onCloseRank: () => void
   focused: boolean
 }) {
   const root = item.root
@@ -602,15 +602,14 @@ function EventRow({
       className={`feed-row event-row${focused ? ' event-row--focused' : ''}`}
       id={`event-${item.event_id}`}
     >
-      <ScoreDisclosure
+      <RankDisclosure
         item={item}
         rank={rank}
         total={total}
         date={date}
-        formula={formula}
-        open={scoreOpen}
-        onToggle={onToggleScore}
-        onClose={onCloseScore}
+        open={rankOpen}
+        onToggle={onToggleRank}
+        onClose={onCloseRank}
       />
 
       <div className="feed-body">
@@ -683,7 +682,7 @@ export default function Feed() {
   const [selectedDate, setSelectedDate] = useState(
     () => initialLinkedDate.current,
   )
-  const [sort, setSort] = useState<Sort>('attention')
+  const [sort, setSort] = useState<Sort>('rank')
   const [routingFilter, setRoutingFilter] = useState<RoutingFilter>(() =>
     initialFeedRoutingFilter(initialSearchParams.current),
   )
@@ -693,7 +692,7 @@ export default function Feed() {
   const [items, setItems] = useState<FeedEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [openScoreEventId, setOpenScoreEventId] = useState<string | null>(null)
+  const [openRankEventId, setOpenRankEventId] = useState<string | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const activeViewKeyRef = useRef('')
   const availableDates = useMemo(() => dates?.dates ?? [], [dates])
@@ -748,7 +747,7 @@ export default function Feed() {
     }
     const viewKey = eventPageKey(request)
     activeViewKeyRef.current = viewKey
-    setOpenScoreEventId(null)
+    setOpenRankEventId(null)
     const cached = eventPageCache.get(viewKey)
     if (cached) {
       setData(cached)
@@ -889,11 +888,11 @@ export default function Feed() {
           What is the network paying attention to?
         </h2>
         <p className="evidence-view-sub">
-          Events from tracked labs and people, ordered by a daily score led by
-          tracked amplification, with author-network support and public engagement.
+          Complete Events ordered by distinct trusted quotes and reposts.
+          Network position and public interaction only break ties.
         </p>
         <p className="page-method-line mono">
-          <a href="/system/architecture#ranking-methods">How scoring works ↗</a>
+          <a href="/system/architecture#ranking-methods">How ranking works ↗</a>
         </p>
       </header>
 
@@ -947,7 +946,7 @@ export default function Feed() {
               setSort(value)
             }}
             options={[
-              { value: 'attention', label: 'Score', description: 'Daily score' },
+              { value: 'rank', label: 'Rank', description: 'Daily Event rank' },
               { value: 'recent', label: 'Recent', description: 'Most recent' },
               { value: 'engagement', label: 'Engagement', description: 'Public engagement' },
             ]}
@@ -978,14 +977,13 @@ export default function Feed() {
                 rank={item.daily_rank}
                 total={data?.daily_rank_total ?? items.length}
                 date={selectedDate}
-                formula={data?.score_formula}
-                scoreOpen={openScoreEventId === item.event_id}
-                onToggleScore={() =>
-                  setOpenScoreEventId((current) =>
+                rankOpen={openRankEventId === item.event_id}
+                onToggleRank={() =>
+                  setOpenRankEventId((current) =>
                     current === item.event_id ? null : item.event_id,
                   )
                 }
-                onCloseScore={() => setOpenScoreEventId(null)}
+                onCloseRank={() => setOpenRankEventId(null)}
                 focused={targetEventId === item.event_id}
               />
             ))}

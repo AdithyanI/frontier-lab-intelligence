@@ -1,195 +1,175 @@
-"""Versioned attention-score formulas shared by the Feed and offline replay."""
+"""Pure layered ranking for one canonical day of Events."""
 
 from __future__ import annotations
 
-import bisect
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 import math
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, Sequence
+
+
+DAILY_RANK_VERSION = "daily-rank-v2"
+LAYER_NAMES = (
+    "trusted_votes",
+    "mean_voter_position",
+    "author_position",
+    "public_interactions",
+    "event_id",
+)
+
+
+def network_position(*, network_rank: int, network_rank_total: int) -> float:
+    """Convert a 1-based entity support rank to a 0–1 network position."""
+    if network_rank < 1:
+        raise ValueError("network_rank must be positive")
+    if network_rank_total < network_rank:
+        raise ValueError("network_rank_total must include network_rank")
+    if network_rank_total == 1:
+        return 1.0
+    return 1 - (network_rank - 1) / (network_rank_total - 1)
 
 
 @dataclass(frozen=True)
-class AttentionFormula:
-    """One explicit attention-score contract.
-
-    Fixed ``amplifier_cap`` and ``support_knee`` values select saturating-log
-    transforms. ``None`` preserves the v1.1 day-relative percentile transform.
-    Public engagement remains a day-relative percentile in both contracts.
-    """
-
-    version: str
-    network_attention_weight: float
-    originator_support_weight: float
-    public_engagement_weight: float
-    amplifier_cap: int | None = None
-    support_knee: int | None = None
+class Voter:
+    entity_id: int
+    position: float
+    entity_name: str = ""
+    entity_kind: str = ""
+    handle: str = ""
+    relation_type: str = ""
+    source_url: str = ""
 
     def __post_init__(self) -> None:
-        weights = (
-            self.network_attention_weight,
-            self.originator_support_weight,
-            self.public_engagement_weight,
-        )
-        if any(not math.isfinite(weight) or weight < 0 for weight in weights):
-            raise ValueError("attention weights must be finite and non-negative")
-        total = (
-            self.network_attention_weight
-            + self.originator_support_weight
-            + self.public_engagement_weight
-        )
-        if not math.isclose(total, 1.0):
-            raise ValueError("attention weights must sum to 1")
-        if (self.amplifier_cap is None) != (self.support_knee is None):
-            raise ValueError("fixed attention transforms require both anchors")
-        if self.amplifier_cap is not None and self.amplifier_cap < 1:
-            raise ValueError("amplifier_cap must be positive")
-        if self.support_knee is not None and self.support_knee < 1:
-            raise ValueError("support_knee must be positive")
-
-    @property
-    def uses_fixed_curves(self) -> bool:
-        return self.amplifier_cap is not None
+        if self.entity_id < 1:
+            raise ValueError("entity_id must be positive")
+        if not math.isfinite(self.position) or not 0 <= self.position <= 1:
+            raise ValueError("voter position must be between 0 and 1")
 
     def payload(self) -> dict[str, Any]:
         return {
-            key: value for key, value in asdict(self).items() if value is not None
+            "entity_id": self.entity_id,
+            "entity_name": self.entity_name,
+            "entity_kind": self.entity_kind,
+            "handle": self.handle,
+            "relation_type": self.relation_type,
+            "position": round(self.position, 6),
+            "source_url": self.source_url,
         }
 
 
-ATTENTION_V1_1 = AttentionFormula(
-    version="attention-v1.1",
-    network_attention_weight=0.55,
-    originator_support_weight=0.25,
-    public_engagement_weight=0.20,
-)
+@dataclass(frozen=True)
+class RankInputs:
+    voters: tuple[Voter, ...]
+    author_position: float
+    public_interactions: int
+    event_id: str
 
-ATTENTION_V2_CANDIDATE = AttentionFormula(
-    version="attention-v2-candidate",
-    network_attention_weight=0.55,
-    originator_support_weight=0.20,
-    public_engagement_weight=0.25,
-    amplifier_cap=16,
-    support_knee=150,
-)
+    def __post_init__(self) -> None:
+        entity_ids = [voter.entity_id for voter in self.voters]
+        if len(entity_ids) != len(set(entity_ids)):
+            raise ValueError("voters must be deduplicated by entity_id")
+        if not math.isfinite(self.author_position) or not 0 <= self.author_position <= 1:
+            raise ValueError("author_position must be between 0 and 1")
+        if self.public_interactions < 0:
+            raise ValueError("public_interactions cannot be negative")
+        if not self.event_id:
+            raise ValueError("event_id is required")
 
+    @property
+    def trusted_votes(self) -> int:
+        return len(self.voters)
 
-def percentiles(values: Iterable[float]) -> dict[float, float]:
-    """Map each value to the share of observations strictly below it."""
-    sequence = list(values)
-    ordered = sorted(sequence)
-    if not ordered or ordered[-1] <= 0:
-        return {value: 0.0 for value in sequence}
-    denominator = max(len(ordered) - 1, 1)
-    return {
-        value: bisect.bisect_left(ordered, value) / denominator
-        for value in set(sequence)
-    }
+    @property
+    def mean_voter_position(self) -> float:
+        if not self.voters:
+            return 0.0
+        return sum(voter.position for voter in self.voters) / len(self.voters)
 
-
-def saturating_log(value: int | float, anchor: int) -> float:
-    if value <= 0:
-        return 0.0
-    return min(1.0, math.log1p(value) / math.log1p(anchor))
-
-
-def score_components(
-    components: Mapping[str, Any], formula: AttentionFormula
-) -> tuple[float, dict[str, float]]:
-    """Score stored raw components under one formula.
-
-    The stored public-engagement percentile is valid for both versions because
-    v2 deliberately leaves that day-relative transform unchanged.
-    """
-    engagement = float(
-        components.get(
-            "public_engagement_factor",
-            components["public_engagement_percentile"],
+    def substantive_key(self) -> tuple[int, float, float, int]:
+        """Return the four descending ranking layers in their natural units."""
+        return (
+            self.trusted_votes,
+            self.mean_voter_position,
+            self.author_position,
+            self.public_interactions,
         )
-    )
-    if not math.isfinite(engagement) or not 0 <= engagement <= 1:
-        raise ValueError("public engagement factor must be between 0 and 1")
-    if formula.uses_fixed_curves:
-        assert formula.amplifier_cap is not None
-        assert formula.support_knee is not None
-        network = saturating_log(
-            int(components["registry_amplifiers"]), formula.amplifier_cap
-        )
-        support = saturating_log(
-            int(components["originator_network_support"]), formula.support_knee
-        )
-    else:
-        network = float(
-            components.get(
-                "network_attention_factor",
-                components["network_attention_percentile"],
-            )
-        )
-        support = float(
-            components.get(
-                "originator_support_factor",
-                components["originator_support_percentile"],
-            )
-        )
-        if any(
-            not math.isfinite(value) or not 0 <= value <= 1
-            for value in (network, support)
-        ):
-            raise ValueError("attention factors must be between 0 and 1")
-    score = 100 * (
-        formula.network_attention_weight * network
-        + formula.originator_support_weight * support
-        + formula.public_engagement_weight * engagement
-    )
-    return round(score, 1), {
-        "network_attention_factor": round(network, 6),
-        "originator_support_factor": round(support, 6),
-        "public_engagement_factor": round(engagement, 6),
-    }
 
+    def sort_key(self) -> tuple[int | float | str, ...]:
+        """Return an ascending Python sort key for the descending layers."""
+        return (
+            -self.trusted_votes,
+            -self.mean_voter_position,
+            -self.author_position,
+            -self.public_interactions,
+            self.event_id,
+        )
 
-def apply_attention_scores(
-    items: list[dict[str, Any]], formula: AttentionFormula = ATTENTION_V1_1
-) -> None:
-    """Apply a formula to one complete visible Feed day in place."""
-    network_percentiles = percentiles(
-        float(item["_network_raw"]) for item in items
-    )
-    support_percentiles = percentiles(
-        float(item["_originator_support"]) for item in items
-    )
-    engagement_percentiles = percentiles(
-        math.log1p(item["_engagement"]) for item in items
-    )
-    for item in items:
-        raw_components = {
-            "registry_amplifiers": item["_amplifier_count"],
-            "originator_network_support": item["_originator_support"],
-            "network_attention_percentile": network_percentiles[
-                float(item["_network_raw"])
+    def payload(self, *, decided_at_layer: int | None = None) -> dict[str, Any]:
+        return {
+            "version": DAILY_RANK_VERSION,
+            "trusted_votes": self.trusted_votes,
+            "voters": [
+                voter.payload()
+                for voter in sorted(
+                    self.voters,
+                    key=lambda voter: (-voter.position, voter.entity_id),
+                )
             ],
-            "originator_support_percentile": support_percentiles[
-                float(item["_originator_support"])
-            ],
-            "public_engagement_percentile": engagement_percentiles[
-                math.log1p(item["_engagement"])
-            ],
+            "mean_voter_position": round(self.mean_voter_position, 6),
+            "author_position": round(self.author_position, 6),
+            "public_interactions": self.public_interactions,
+            "decided_at_layer": decided_at_layer,
         }
-        score, factors = score_components(raw_components, formula)
-        item["attention_score"] = score
-        item["score_components"] = {
-            "registry_amplifiers": item.pop("_amplifier_count"),
-            "originator_network_support": item.pop("_originator_support"),
-            "originator_network_rank": item.pop("_originator_rank"),
-            "public_interactions": item.pop("_engagement"),
-            "network_attention_percentile": round(
-                raw_components["network_attention_percentile"], 3
+
+
+def sort_key(inputs: RankInputs) -> tuple[int | float | str, ...]:
+    return inputs.sort_key()
+
+
+def deciding_layer(left: RankInputs, right: RankInputs) -> int:
+    """Return the first layer that separates two already ordered Events."""
+    for index, (left_value, right_value) in enumerate(
+        zip(left.substantive_key(), right.substantive_key(), strict=True),
+        start=1,
+    ):
+        if left_value != right_value:
+            return index
+    return 5
+
+
+def rank_events(
+    rows: Sequence[tuple[dict[str, Any], RankInputs]],
+) -> list[dict[str, Any]]:
+    """Order a complete day and attach rank plus adjacent-layer attribution."""
+    ordered = sorted(rows, key=lambda row: row[1].sort_key())
+    ranked: list[dict[str, Any]] = []
+    for index, (item, inputs) in enumerate(ordered):
+        if len(ordered) == 1:
+            layer = 5
+        elif index < len(ordered) - 1:
+            layer = deciding_layer(inputs, ordered[index + 1][1])
+        else:
+            layer = deciding_layer(ordered[index - 1][1], inputs)
+        ranked.append(
+            {
+                **item,
+                "daily_rank": index + 1,
+                "rank_components": inputs.payload(decided_at_layer=layer),
+            }
+        )
+    return ranked
+
+
+def entity_positions(
+    ranks: dict[int, dict[str, Any]] | Iterable[tuple[int, dict[str, Any]]],
+) -> dict[int, float]:
+    """Project the canonical entity-union rank table to 0–1 positions."""
+    items = ranks.items() if isinstance(ranks, dict) else ranks
+    positions: dict[int, float] = {}
+    for entity_id, row in items:
+        positions[int(entity_id)] = network_position(
+            network_rank=int(row["network_rank"]),
+            network_rank_total=int(
+                row.get("network_rank_level_total", row["network_rank_total"])
             ),
-            "originator_support_percentile": round(
-                raw_components["originator_support_percentile"], 3
-            ),
-            "public_engagement_percentile": round(
-                raw_components["public_engagement_percentile"], 3
-            ),
-            **factors,
-        }
-        item.pop("_network_raw")
+        )
+    return positions

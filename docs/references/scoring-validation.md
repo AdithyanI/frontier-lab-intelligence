@@ -48,32 +48,61 @@ and disagree where our Registry deliberately includes organizational channels.
 Per `digg-ranking-baseline.md` this comparison is diagnostic, not ground
 truth, and the trusted ranking was not tuned toward it.
 
-## 3. Attention score versus editorial outcomes
+## 3. Daily Event rank versus independent routing outcomes
 
-The attention score (attention-v1.1) has one consumer: it selects the top 100
-Events per day for audience judging. The judges see packet content and
-`feed_rank` position but never the score. Across all 13 briefed days
-(5 to 17 July 2026), the primary Events behind the 138 kept Insights sit
-within the judged 100 as follows:
+Recomputed 26 July 2026 after the clean `daily-rank-v2` migration. The replay
+covers all 17 saved days from 5 to 21 July: 19,657 Events and 1,700 top-100
+positions. Current v9 routing provides 1,674 labels for those positions; 26
+Events were omitted by the router's separate first-party freshness boundary.
+The routing model sees the frozen semantic evidence, not the rank or rank-layer
+values.
 
-- rank 1 to 25: 65 (47%)
-- rank 26 to 50: 40 (29%)
-- rank 51 to 75: 11 (8%)
-- rank 76 to 100: 22 (16%)
+The primary rank layer—distinct trusted entities that quote or repost the
+complete Event—shows a monotonic relationship with later independent routing:
 
-Reading: kept Insights concentrate toward the top of the attention ordering
-(76% in the top 50), but 24% come from the lower half of the judged window,
-so the audience judges are not simply reproducing the attention order.
+| Trusted Event voters | Top-100 Events | Labeled Events | Routing-relevant | Hit rate |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 213 | 204 | 70 | 34.3% |
+| 2 | 703 | 692 | 378 | 54.6% |
+| 3–4 | 499 | 495 | 318 | 64.2% |
+| 5+ | 285 | 283 | 204 | 72.1% |
+
+There are no zero-vote Events in the selected top 100 on these days. The
+gradient is useful evidence that independent convergence carries signal; it is
+not a precision estimate for the full corpus because the labels exist only
+inside the selected and freshness-eligible window.
+
+For adjacent positions within the 17 daily top-100 lists, the first differing
+layer was:
+
+- trusted-voter count: 182 comparisons (10.7%);
+- mean voter network position: 1,350 (79.4%);
+- source-author network position: 31 (1.8%);
+- maximum same-day one-post public interactions: 102 (6.0%);
+- stable Event ID: 35 (2.1%).
+
+This is behavior attribution, not a quality score. It makes the system's
+trade-off explicit: convergence chooses broad bands; voter-network position
+does most ordering within those bands; source authority and public response are
+late tiebreaks. The exact replay is `fli daily-rank evaluate --json --no-input`.
+
+### Historical submission baseline
+
+Before the migration, `attention-v1.1` selected the submitted cohort with a
+55/25/20 weighted percentile score. Across 13 briefed days, 76% of the 138
+ultimately kept Insights originated in ranks 1–50 and 24% in ranks 51–100.
+Those dated numbers explain the submitted proof set; they do not describe the
+current production ranking.
 
 ## Honest limits
 
-- The top-100 gate makes "all kept Insights come from the top 100" true by
-  construction. The unmeasured quantity is recall lost below the gate. A
+- The top-100 gate makes "all routed and authored Insights come from the top
+  100" true by construction. The unmeasured quantity is recall lost below the gate. A
   bounded probe exists but has not been run: route ranks 101 to 200 for one
   day with the same prompts and count how many would have been judged
   relevant.
-- The Digg comparison validates the contributor ranking, not the daily
-  attention ordering or the editorial judgments.
+- The Digg comparison validates the contributor ranking, not the daily Event
+  rank or the editorial judgments.
 - Editorial quality is validated separately: verbatim citation checking
   against frozen artifact text (hallucination control), forced per-Event
   dispositions with written reasons, and the human batch audit in

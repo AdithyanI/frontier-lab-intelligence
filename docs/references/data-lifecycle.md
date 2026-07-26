@@ -26,7 +26,8 @@ Preserve these exact stores during the submission sprint:
 - `data/derived/signal-feed/feed.db`
 - `data/derived/signal-events/events.db`
 - `data/derived/artifacts/`
-- all eleven current v9 top-100 directories under `data/derived/audience-routing/`
+- all 17 current v9 / `daily-rank-v2` top-100 directories under
+  `data/derived/audience-routing/`
 - `data/derived/insights/insights.db`
 - `data/derived/daily-intelligence/editorial.db` and its current validated workspaces
 - `data/derived/x-daily-collection.db`

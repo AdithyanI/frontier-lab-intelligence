@@ -19,7 +19,7 @@ flowchart TD
     C --> F["Feed<br/>complete daily evidence"]
     F --> E["Events<br/>exact structural groups"]
     E --> A["Artifacts<br/>first-party source extraction"]
-    N --> S["Attention<br/>transparent ordering"]
+    N --> S["Daily Event rank<br/>transparent ordering"]
     R --> S
     E --> S
     E --> Q["Audience routing<br/>AI Engineering and Investment"]
@@ -46,7 +46,7 @@ or reinterpret its upstream evidence.
 | Trusted network | `fli.network` | Frozen outgoing-follow evidence and derived entity-support rankings. |
 | Evidence | `fli.evidence` | Deterministic Feed snapshots, exact structural Events, and one refresh workflow. |
 | Artifacts | `fli.evidence.artifacts` | Canonical source links, lineage, retrieval, and extracted text. |
-| Attention | `fli.scoring` | Versioned, inspectable ordering formulas and offline evaluation. |
+| Daily Event rank | `fli.scoring` | Versioned, inspectable lexicographic ordering and offline replay diagnostics. |
 | Audience routing | `fli.routing` | Independent AI Engineering and Investment relevance decisions with durable runs. |
 | Insights | `fli.insights` | Per-Event working annotations plus agent-authored daily synthesis, strict validation, atomic storage, and the canonical read model. |
 | Delivery | `fli.delivery` | Explicitly confirmed Slack and email adapters over one canonical Daily Brief; credentials and provider behavior remain server-side. |
@@ -66,8 +66,11 @@ at the root of `fli`.
    perform topic clustering.
 5. Artifact enrichment admits source links only from the root author and that
    author's same-conversation continuation.
-6. Attention provides a transparent daily ordering aid. It is not an Insight
-   or a quality judgment.
+6. Daily Event ranking orders each complete canonical-day Event with the
+   inspectable `daily-rank-v2` layers: trusted-voter count, mean voter network
+   position, source-author network position, maximum same-day one-post public
+   interactions, then stable Event ID. It is not a scalar score, an Insight, or
+   a quality judgment.
 7. Audience routing independently decides whether the packet matters to AI
    Engineering and Investment. New routing freezes admit only first-party X
    sources no more than seven days old; a current same-author continuation may

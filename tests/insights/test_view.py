@@ -8,6 +8,7 @@ from fli.routing import model as routing_model
 from fli.insights import generation as insight_generation
 from fli.insights import runs as insight_runs
 from fli.insights import view as insight_store
+from fli.scoring import attention
 from fli.web.app import app
 
 
@@ -69,7 +70,8 @@ def _routing_db(tmp_path, *, current=True):
             run_id TEXT NOT NULL,
             prompt_version TEXT NOT NULL,
             prompt_sha256 TEXT NOT NULL,
-            schema_version TEXT NOT NULL
+            schema_version TEXT NOT NULL,
+            rank_version TEXT NOT NULL
         );
         CREATE TABLE routing_item (
             event_id TEXT PRIMARY KEY,
@@ -79,11 +81,12 @@ def _routing_db(tmp_path, *, current=True):
         """
     )
     conn.execute(
-        "INSERT INTO run_meta VALUES (1, 'routing-run', ?, ?, ?)",
+        "INSERT INTO run_meta VALUES (1, 'routing-run', ?, ?, ?, ?)",
         (
             routing_model.PROMPT_VERSION if current else "audience-routing-v8",
             routing_model.prompt_sha256() if current else "superseded",
             routing_model.SCHEMA_VERSION,
+            attention.DAILY_RANK_VERSION if current else "attention-v1.1",
         ),
     )
     conn.execute(

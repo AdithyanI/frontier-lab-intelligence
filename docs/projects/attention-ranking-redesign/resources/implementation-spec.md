@@ -1,4 +1,4 @@
-# Implementation spec — layered daily score (`daily-score-v2`)
+# Implementation spec — layered Event rank (`daily-rank-v2`)
 
 Owner: assigned engineer. Written 2026-07-26 for an overnight implementation
 pass. Read `layered-score-proposal.md` first for the reasoning, and
@@ -23,8 +23,8 @@ layer 1; only when layer 1 ties does layer 2 decide; and so on.
 ```text
 1. trusted_vote_count      int    distinct trusted Registry entities that vouched
 2. mean_voter_position     float  average network position of those voters, 0–1
-3. author_position         float  network position of the author, 0–1
-4. public_interactions     int    likes + replies + reposts + quotes
+3. author_position         float  network position of the Event root author, 0–1
+4. public_interactions     int    peak one-post likes + replies + reposts + quotes
 5. event_id                str    stable final tiebreak, determinism only
 ```
 
@@ -53,42 +53,54 @@ something has gone wrong — stop and re-read the proposal.
 
 These are product invariants. Enforce them in code and assert them in tests.
 
-1. **One entity, one vote.** A canonical Registry entity contributes at most
-   one vote to an Event regardless of how many posts it contributed. The
-   existing `amplifiers` dict in `src/fli/web/feed.py` is already keyed by
-   `entity_id`, so this holds today — keep it.
-2. **Only `active` Registry entities vote.** `rejected` entities are excluded
+1. **The complete Event is the ranking unit.** Do not score individual posts
+   and then choose a winning member. First construct the canonical-day Event,
+   then union the trusted voters from every same-day member post and rank that
+   Event once.
+2. **One entity, one vote.** A canonical Registry entity contributes at most
+   one vote to the complete Event regardless of how many member posts it
+   authored, quoted, or reposted.
+3. **Only `active` Registry entities vote.** `rejected` entities are excluded
    at read time, as today. Registry curation must keep changing derived views
    without touching raw evidence.
-3. **No self-voting.** An author cannot amplify their own post into a vote.
-   `feed.py` already filters `entity_id != author entity_id`; keep it.
-4. **Author is not a voter.** The current production behaviour excludes the
-   author from `amp_values`. Keep that. The author's standing enters at layer
-   3 only. (Note: `candidate-comparison.md` invariant 3 proposed counting the
-   author as a participant. That is superseded — do not implement it. Layer 3
-   already carries author standing, and counting the author would give every
-   first-party post a free vote, which is the seed-vote idea rejected above.)
-5. **Day-scoped.** All layers are computed within one frozen UTC day. Scores
-   and positions from different days are never compared.
-6. **Editorial-blind.** Audience routing judgments and editorial outcomes
+4. **The Event root author is not a voter.** Resolve the canonical
+   presentation/source root author after Event construction, then remove that
+   entity from the complete voter union. The author's standing enters at layer
+   3 only. A root author interacting with another Event member cannot create a
+   free vote.
+5. **Canonical-day scoped.** Voters and public interactions come only from
+   candidates visible on the Event's canonical publication day. Later Event
+   activity may enrich the card but must never retroactively change that
+   historical rank.
+6. **Root-author semantics.** Layer 3 is the entity-level network position of
+   the canonical presentation/source root author, or `0.0` when that author is
+   not a ranked Registry entity. It is never the highest-ranked member author.
+7. **Public-interaction semantics.** Calculate
+   `likes + replies + reposts + quotes` for each canonical-day member post and
+   use the maximum one-post total. Do not sum across the Event: that would
+   reward Events merely for having more member posts. Do not include views or
+   bookmarks.
+8. **Day-scoped.** Ranks from different UTC days are never compared.
+9. **Editorial-blind.** Audience routing judgments and editorial outcomes
    never enter any layer.
-7. **Deterministic.** Equal inputs must produce an identical order across
+10. **Deterministic.** Equal inputs must produce an identical order across
    runs and processes. `event_id` is the terminal tiebreak.
 
 ### Network position (used by layers 2 and 3)
 
 `position = 1 − (rank − 1) / (total − 1)`, where `rank` is the 1-based
-`support_rank` from the accepted entity-overlap ranking run and `total` is the
-count of ranked entities in that run. Top-ranked entity → `1.0`, lowest → `0.0`.
-If `total == 1`, position is `1.0`. An entity absent from the ranking run has
+`support_rank` from `entity_support_result` and `total` is the count of ranked
+canonical entities in that run. Top-ranked entity → `1.0`, lowest → `0.0`. If
+`total == 1`, position is `1.0`. An entity absent from the ranking run has
 position `0.0`.
 
 Use **rank**, not raw `support_count`. `support_count` is severely
 right-skewed (top entity 2,041; median in the low tens), so using it would let
 a handful of accounts dominate layer 2 — reintroducing the celebrity problem
-the layering exists to avoid. `trust_percentile()` in
-`src/fli/scoring/trusted_attention.py` already implements this correctly;
-reuse it.
+the layering exists to avoid. Use
+`fli.network.view.entity_network_ranks()` as the source. Do not use
+account-level `ranking_result.position`: a multi-channel organization is one
+canonical entity and must receive its entity-union `support_rank`.
 
 ---
 
@@ -96,18 +108,14 @@ reuse it.
 
 | Input | Source today | Notes |
 | --- | --- | --- |
-| Voters per Event | `amplifiers` list on each Event root, built in `src/fli/web/feed.py` (~line 360–410) | Already deduplicated by `entity_id`, already excludes the author and rejected entities. Each carries `entity_id`, `entity_name`, `entity_kind`, `network_support`. |
-| Author network support | `support` map in `feed.py` from `_network_support()` | Keyed by author `x_id`. |
-| Author rank position | `positions` map from `_network_support()` (`_originator_rank`) | 1-based `position` column of `ranking_result`. |
-| Public interactions | `_public_engagement(row)` in `feed.py` | Sum of likes, replies, reposts, quotes. |
-| Entity rank table | `data/derived/following/*/analysis.db`, tables `ranking_result` and `entity_support_result` | Loaded and cached by `_network_support_cached()`. |
+| Voters per member post | `amplifiers` on Feed candidates, built in `src/fli/web/feed.py` | Deduplicated per post and excludes rejected entities. Event projection unions these again by `entity_id` and then excludes the Event root author. |
+| Event membership and root | `src/fli/web/events.py::_project_component()` | This is the first seam where the complete canonical-day Event, root author, and same-day candidates are all known. Ranking belongs here. |
+| Public interactions | `_public_engagement(row)` in `feed.py` | One-post sum of likes, replies, reposts, and quotes. Event projection takes the maximum across canonical-day members. |
+| Entity rank table | `fli.network.view.entity_network_ranks()` over `entity_support_result` | Keyed by canonical `entity_id`; exposes `network_rank` and `network_rank_total`. |
 
-**Gap to close:** amplifier rows carry `network_support` (a raw count) but not
-a rank position. Layer 2 needs positions for voters. Extend
-`_network_support_cached()` to also return an `entity_id → position` map, or
-resolve each amplifier's `x_id` through the existing `positions` map when the
-amplifier candidate is built. Prefer the latter — it avoids a second lookup
-table and keeps one source of truth.
+**Gap to close:** amplifier rows carry raw account-derived `network_support`
+but not the canonical entity position. Add the entity position derived from
+`entity_network_ranks()` and use it for both voters and the root author.
 
 ---
 
@@ -121,7 +129,7 @@ Delete `AttentionFormula`, `ATTENTION_V1_1`, `ATTENTION_V2_CANDIDATE`,
 Replace with a small pure module:
 
 ```python
-DAILY_SCORE_VERSION = "daily-score-v2"
+DAILY_RANK_VERSION = "daily-rank-v2"
 
 @dataclass(frozen=True)
 class Voter:
@@ -129,13 +137,13 @@ class Voter:
     position: float          # 0–1 network position
 
 @dataclass(frozen=True)
-class ScoreInputs:
+class RankInputs:
     voters: tuple[Voter, ...]        # deduplicated, author excluded
     author_position: float           # 0–1, 0.0 if unranked
     public_interactions: int
     event_id: str
 
-def sort_key(inputs: ScoreInputs) -> tuple:
+def sort_key(inputs: RankInputs) -> tuple:
     """Lexicographic ordering key. Descending on layers 1-4."""
     votes = len(inputs.voters)
     mean_position = (
@@ -163,28 +171,34 @@ correct and moves to `attention.py`. Delete `TRUST_UPLIFT`,
 `DAILY_BUDGET`, `score_event`, `rank_events`, `candidate_contract`, and
 `participant_touch_counts`. Then delete the file.
 
-### 4.3 `src/fli/web/feed.py` — emit the new components
+### 4.3 `src/fli/web/feed.py` — expose Event inputs, not a post score
 
-`apply_attention_scores(items)` is called once per complete visible day. It
-becomes an ordering pass rather than a scoring pass:
+Remove `apply_attention_scores()` and every percentile/weight/scalar-score
+field. Feed candidates remain the raw member-post input to Event projection:
 
-- Build `ScoreInputs` per item from the existing `amplifiers` list, resolving
-  each amplifier to a network position.
-- Attach a stable `daily_rank` derived from the sorted order.
-- Replace the `score_components` payload (see §5).
-- Keep the existing behaviour that the **complete visible day** is ranked
-  before lane filtering and search, so filtering never changes an item's rank.
-- Keep the existing "Event uses its highest-scoring member" selection, but
-  "highest" now means "first under `sort_key`".
+- attach the canonical entity network position to each amplifier;
+- retain one-post `public_interactions`;
+- retain author identity so Event projection can resolve the root author;
+- do not assign a final daily rank to a member post.
 
-Remove `_network_raw` and the percentile plumbing.
+The public Feed product consumes Events, so no user-facing surface should claim
+that this intermediate post ordering is the daily Event rank.
 
 ### 4.4 `src/fli/web/events.py`
 
-`peak_attention_score` and `daily_score_basis` must move to the new
-contract. `peak_attention_score` becomes meaningless as a float — replace it
-with the winning member's rank/components rather than a synthetic number.
-Check every reader before renaming; `_daily_score_basis()` is the seam.
+`_project_component()` is the scoring boundary. After the complete Event and
+root are known:
+
+- union canonical-day member voters by `entity_id`;
+- remove the root author's entity;
+- resolve voter and author positions from `entity_network_ranks()`;
+- take the maximum one-post canonical-day public interaction count;
+- attach one top-level `rank_components` object to the Event.
+
+Delete `peak_attention_score`, `daily_score_basis`, and the highest-scoring
+member/template rule. Root presentation must not decide rank inputs. Sort the
+complete unfiltered daily Event projection once, attach stable `daily_rank`,
+then apply lane, routing, search, and pagination controls.
 
 ### 4.5 `src/fli/scoring/evaluation.py` — rewrite as the replay harness
 
@@ -199,16 +213,13 @@ goes. It becomes the **validation harness** described in §7:
   admissions were decided by each layer.
 - Keep the `--json` and `--no-input` CLI contract.
 
-`load_labeled_days()` reads `score_components` from stored routing runs. Those
-stored rows carry the **old** component names. Since routing runs are
-immutable historical artifacts, the harness must read the raw inputs it needs
-(`registry_amplifiers`, `originator_network_support`, `public_interactions`)
-from the Event projection rather than from the frozen payload where the names
-have changed. Verify this before assuming the replay works.
+Historical routing rows remain useful only as censored outcome labels. Join
+them to freshly projected Events by `(day, event_id)`; never reconstruct the
+new rank from old stored `score_components`.
 
 ### 4.6 `src/fli/cli.py`
 
-`attention-score evaluate` keeps its name and JSON contract. Remove any
+`daily-rank evaluate` replaces the old score command cleanly. Remove any
 subcommand, flag, or output field referring to formula versions, weights,
 `amplifier_cap`, or `support_knee`.
 
@@ -216,8 +227,8 @@ subcommand, flag, or output field referring to formula versions, weights,
 
 ## 5. API contract change
 
-`FeedScoreComponents` in `frontend/src/shared/api/evidence.ts` and its Python
-producer both change. New shape:
+`FeedRankComponents` in `frontend/src/shared/api/evidence.ts` and its Python
+producer become a top-level Event field. New shape:
 
 ```jsonc
 {
@@ -228,25 +239,27 @@ producer both change. New shape:
   "mean_voter_position": 0.936,
   "author_position": 0.957,
   "public_interactions": 14602,
-  "decided_at_layer": 1              // 1-4: which layer settled this Event's place
+  "decided_at_layer": 1              // 1-5 against the adjacent lower Event
 }
 ```
 
 Remove `network_attention_percentile`, `originator_support_percentile`,
 `public_engagement_percentile`, `network_attention_factor`,
-`originator_support_factor`, `public_engagement_factor`, and
-`originator_network_support`. Do not keep aliases.
+`originator_support_factor`, `public_engagement_factor`,
+`originator_network_support`, `attention_score`, `peak_attention_score`, and
+`daily_score_basis`. Do not keep aliases.
 
 `decided_at_layer` is what makes the UI honest and is worth the small cost:
-it names which question actually settled this Event's position against its
-neighbour. Compute it during the sort by comparing each item to the one ranked
-immediately above it — the first layer where they differ.
+it names which question first separates this Event from the Event ranked
+immediately below it. For the final Event, compare with the one immediately
+above. Layer `5` means the four substantive layers tied and `event_id` supplied
+determinism only.
 
 ---
 
 ## 6. UI changes
 
-### 6.1 Feed score disclosure — `frontend/src/features/evidence/FeedPage.tsx`
+### 6.1 Feed rank disclosure — `frontend/src/features/evidence/FeedPage.tsx`
 
 The disclosure at ~line 310–430 currently renders three lanes with
 `weight`, "Higher than X% of that day's scored posts", and "N points". All of
@@ -263,7 +276,7 @@ Mark the layer named by `decided_at_layer`. Show the voter names — they are
 the evidence, and they are already in the payload. Remove `networkWeight`,
 `originatorWeight`, `engagementWeight` and the `formula` prop entirely.
 
-Keep the existing limitation footer, updated: the score prioritizes what to
+Keep the existing limitation footer, updated: the rank prioritizes what to
 inspect; it is not importance, truth, or quality; days are not comparable.
 
 ### 6.2 How page — already done
@@ -297,8 +310,9 @@ to preserve the old layout.
 2. **Regression tests**: update `tests/test_web_feed.py` and
    `tests/test_web_events.py` to the new payload. Assert that lane filtering
    and search do not change an item's rank.
-3. **Replay** (`fli attention-score evaluate --json --no-input`) over the 15
-   saved days. Record the output under `resources/`. The **required** check is
+3. **Replay** (`fli daily-rank evaluate --json --no-input`) over every
+   currently published saved day. Record the output under `resources/`. The
+   **required** check is
    that the vote-count hit-rate gradient survives: 1 vote ≈ 43%, 2 ≈ 57%,
    3–4 ≈ 65%, 5+ ≈ 70%. If the gradient inverts or flattens, stop and report;
    the primary signal is the whole basis of the design.
@@ -342,9 +356,9 @@ Do not leave these describing the old formula:
    the numbers in `scoring-validation.md` were produced under
    `attention-v1.1`. After migration the live product will order days
    differently from what was submitted on 20 July. Adi has accepted this and
-   has a snapshot. Do not attempt to preserve the old ordering — but **do**
-   report, in the replay output, which of the five submission Events change
-   rank, so the interview answer can be precise.
+   has a snapshot. Do not attempt to preserve the old ordering. An
+   old-versus-new comparison is optional and must not block the clean
+   migration.
 2. **Public engagement cannot currently be validated.** Only 5 of 1,442 judged
    Events (0.3%) sit below the 50th engagement percentile, because engagement
    was itself part of the score that selected the judged set. Demoting it to
@@ -354,7 +368,13 @@ Do not leave these describing the old formula:
    receive zero trusted votes and will still rank low. This is a disclosed
    limitation, not a bug to patch with a seed vote.
 4. **The recall probe is not part of this task.** Routing ranks 101–200 for one
-   day is tracked separately and needs Adi's approval before spending.
+   day is tracked separately and does not block the migration.
+5. **Downstream state must move atomically as a product contract.** A new top
+   100 with old routing, Insights, or briefs is not a completed migration.
+   Refresh routing first, then per-Event Insights, then daily editorial
+   workspaces/briefs. Regenerate content-addressed PDFs and UI projections from
+   the completed new editorial state. Reuse exact cached judgments where the
+   current tools prove Event/evidence/input/model identity.
 
 ---
 
@@ -362,12 +382,15 @@ Do not leave these describing the old formula:
 
 - [ ] `attention.py` exposes only the layered contract; `trusted_attention.py`
       is deleted; no weight, cap, or knee constant remains in `src/fli/scoring/`.
-- [ ] Feed, Events, CLI, and API emit the new `score_components` with no
+- [ ] Events, CLI, and API emit the new `rank_components` with no
       legacy aliases.
 - [ ] Feed disclosure and `/how#why-rank` describe exactly the shipped
       behaviour.
 - [ ] Unit, web, and regression tests pass and cover every invariant in §2.
-- [ ] Replay output over 15 days is stored under `resources/`, including the
-      hit-rate gradient, layer-attribution shares, and submission-Event moves.
+- [ ] Replay output over every currently published day is stored under
+      `resources/`, including the hit-rate gradient and layer-attribution
+      shares.
+- [ ] Routing, per-Event Insights, daily editorial briefs, PDFs, and UI
+      projections are complete for the migrated cohorts.
 - [ ] All documents in §8 updated.
 - [ ] `scripts/check-fast.sh` passes and the local UI is visually verified.

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from fli.routing import model
+from fli.scoring import attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -39,9 +40,19 @@ def _complete_run(path: Path, day: str) -> tuple[str, str] | None:
     try:
         conn = _open_readonly(path)
         meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
+        meta_columns = {
+            str(row["name"])
+            for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
+        }
+        rank_version = (
+            str(meta["rank_version"])
+            if meta is not None and "rank_version" in meta_columns
+            else "attention-v1.1"
+        )
         if (
             meta is None
             or str(meta["day"]) != day
+            or rank_version != attention.DAILY_RANK_VERSION
             or str(meta["prompt_version"]) != model.PROMPT_VERSION
             or str(meta["prompt_sha256"]) != model.prompt_sha256()
             or str(meta["schema_version"]) != model.SCHEMA_VERSION
@@ -130,6 +141,7 @@ def _routing_payload_cached(
             "model": str(meta["model"]),
             "reasoning_effort": str(meta["reasoning_effort"]),
             "prompt_version": str(meta["prompt_version"]),
+            "rank_version": str(meta["rank_version"]),
             "source_event_run_id": str(meta["source_event_run_id"]),
             "source_feed_run_id": str(meta["source_feed_run_id"]),
             "selection_kind": str(meta["selection_kind"]),

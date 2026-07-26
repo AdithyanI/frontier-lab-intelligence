@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS insight_item (
     request_tags_json TEXT,
     error_type TEXT,
     error_message TEXT,
+    reused_from_run_id TEXT,
+    reused_from_audience TEXT,
     completed_at TEXT,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (run_id, audience)
@@ -111,6 +113,15 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode = WAL")
     conn.execute("PRAGMA busy_timeout = 60000")
     conn.executescript(SCHEMA)
+    columns = {
+        str(row["name"])
+        for row in conn.execute("PRAGMA table_info(insight_item)").fetchall()
+    }
+    if "reused_from_run_id" not in columns:
+        conn.execute("ALTER TABLE insight_item ADD COLUMN reused_from_run_id TEXT")
+    if "reused_from_audience" not in columns:
+        conn.execute("ALTER TABLE insight_item ADD COLUMN reused_from_audience TEXT")
+    conn.commit()
     return conn
 
 
@@ -275,6 +286,8 @@ def prepare_run(
             {**item_values, "updated_at": now},
         )
     conn.commit()
+    for audience in audiences:
+        reuse_completed_item(conn, run_id=run_id, audience=audience)
 
 
 def _refresh_run_status(conn: sqlite3.Connection, run_id: str) -> str:
@@ -360,6 +373,66 @@ def complete_item(
     conn.commit()
 
 
+def reuse_completed_item(
+    conn: sqlite3.Connection,
+    *,
+    run_id: str,
+    audience: str,
+) -> bool:
+    """Copy an exact prior model result into a new routing/rank lineage."""
+    audience = insight_generation.require_audience(audience).value
+    target = conn.execute(
+        """SELECT * FROM insight_item
+           WHERE run_id = ? AND audience = ?""",
+        (run_id, audience),
+    ).fetchone()
+    if target is None or str(target["status"]) == "complete":
+        return False
+    source = conn.execute(
+        """SELECT * FROM insight_item
+           WHERE run_id != ? AND audience = ? AND event_id = ?
+             AND input_sha256 = ? AND prompt_version = ? AND prompt_sha256 = ?
+             AND schema_version = ? AND model = ? AND reasoning_effort = ?
+             AND status = 'complete' AND evaluation_json IS NOT NULL
+           ORDER BY completed_at DESC, run_id DESC
+           LIMIT 1""",
+        (
+            run_id,
+            audience,
+            target["event_id"],
+            target["input_sha256"],
+            target["prompt_version"],
+            target["prompt_sha256"],
+            target["schema_version"],
+            target["model"],
+            target["reasoning_effort"],
+        ),
+    ).fetchone()
+    if source is None:
+        return False
+    evaluation = json.loads(str(source["evaluation_json"]))
+    evaluation["feed_rank"] = int(target["feed_rank"])
+    published = evaluation.get("published")
+    if isinstance(published, dict):
+        published["feed_rank"] = int(target["feed_rank"])
+    complete_item(conn, run_id=run_id, evaluation=evaluation)
+    with conn:
+        conn.execute(
+            """UPDATE insight_item
+               SET attempts = 0, reused_from_run_id = ?,
+                   reused_from_audience = ?, updated_at = ?
+               WHERE run_id = ? AND audience = ?""",
+            (
+                str(source["run_id"]),
+                str(source["audience"]),
+                _now(),
+                run_id,
+                audience,
+            ),
+        )
+    return True
+
+
 def fail_item(
     conn: sqlite3.Connection,
     *,
@@ -403,6 +476,7 @@ def run_payload(conn: sqlite3.Connection, run_id: str) -> dict[str, Any]:
                   input_sha256, response_id, response_model, input_tokens,
                   cached_tokens, cache_write_tokens, output_tokens,
                   reported_cost_usd, error_type, error_message, completed_at
+                  , reused_from_run_id, reused_from_audience
            FROM insight_item WHERE run_id = ? ORDER BY audience""",
         (run_id,),
     ).fetchall()

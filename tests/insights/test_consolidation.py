@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 from fli.insights import consolidation
 from fli.routing import runs as routing_runs
+from fli.scoring import attention
 
 
 class FakeEmbeddings:
@@ -54,9 +55,10 @@ def _routing_db(path: Path) -> Path:
     conn.execute(
         """INSERT INTO run_meta VALUES (
                1, 'routing-test', '2026-07-15', 'gpt-5.4-mini', 'high',
-               'prompt-v1', 'prompt-sha', 'schema-v1', 'event-run', 'feed-run',
+               'prompt-v1', 'prompt-sha', 'schema-v1', ?, 'event-run', 'feed-run',
                'artifacts.db', 'top_ranked', 3, NULL, 'cohort-sha', 3,
-               '2026-07-15T00:00:00+00:00', '2026-07-15T00:00:00+00:00')"""
+               '2026-07-15T00:00:00+00:00', '2026-07-15T00:00:00+00:00')""",
+        (attention.DAILY_RANK_VERSION,),
     )
     packets = [
         {

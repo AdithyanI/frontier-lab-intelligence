@@ -26,7 +26,7 @@ without claiming that attention equals importance or relevance.
   Event, not over an individual post selected afterward.
 - Replace the old weighted score with the approved layered `daily-rank-v2`
   contract and no backward-compatibility path.
-- Replay all 15 saved days from the evidence already stored locally and select
+- Replay all 17 saved days from the evidence already stored locally and select
   each day's new top 100.
 - Refresh audience routing, per-Event audience Insights, daily editorial
   briefs, PDFs, and UI projections downstream of the new rank.
@@ -55,7 +55,7 @@ without claiming that attention equals importance or relevance.
   be built next, how Adi used agents and AI tools, how data was obtained, and
   the token/API cost of the workflow. Ranking work must strengthen that
   explanation directly.
-- Production currently remains on versioned `attention-v1.1`: 55%
+- The pre-migration product used versioned `attention-v1.1`: 55%
   tracked-amplification percentile, 25% author-support percentile, and 20%
   public-interaction percentile. The approved overnight task replaces it
   cleanly.
@@ -80,9 +80,9 @@ without claiming that attention equals importance or relevance.
 
 ## Approved Overnight Execution Contract
 
-This contract was approved in conversation on 2026-07-26 but is
-**intentionally not started yet**. Begin only after Adi explicitly assigns or
-starts the overnight task.
+This contract was approved and explicitly started in conversation on
+2026-07-26. Adi asked the agent to continue through completion without pausing
+for routine approval.
 
 - Work through implementation, replay, downstream refresh, validation,
   documentation, and final product proof without pausing for routine status
@@ -102,17 +102,18 @@ starts the overnight task.
 
 ## Done When
 
-- [ ] The ranking question and invariants are explicit and internally
+- [x] The ranking question and invariants are explicit and internally
       consistent.
-- [ ] The new rank is computed once per complete Event from the union of its
+- [x] The new rank is computed once per complete Event from the union of its
       distinct canonical-day trusted voters.
-- [ ] All 15 saved days are reranked and each day's new top 100 is materialized
+- [x] All 17 saved days are reranked and each day's new top 100 is materialized
       without requiring an X refetch.
 - [ ] Audience routing, per-Event Insights, daily briefs, PDFs, and UI
       projections agree with the new top-100 cohorts and ranks.
-- [ ] Exact reusable model judgments are preserved and every missing or
-      invalidated downstream output is regenerated.
-- [ ] Code, API contracts, score disclosure, How narrative,
+- [x] Exact reusable routing and per-Event Insight judgments are preserved;
+      every missing or invalidated routing/Insight output is regenerated.
+- [ ] Every missing or invalidated daily editorial output is regenerated.
+- [ ] Code, API contracts, rank disclosure, How narrative,
       architecture/reference docs, tests, built SPA assets, and cost telemetry
       agree on the same versioned contract.
 - [ ] `scripts/check-fast.sh` passes and the relevant local UI is visually
@@ -123,8 +124,8 @@ starts the overnight task.
 - [x] Milestone 1 — Audit the old score and approve the layered replacement.
       Acceptance: the measured saturation defect, rejected alternatives, and
       selected ordering are documented.
-- [ ] Milestone 2 — Implement and replay `daily-rank-v2`.
-      Acceptance: the complete Event is the scoring boundary, all 15 saved
+- [x] Milestone 2 — Implement and replay `daily-rank-v2`.
+      Acceptance: the complete Event is the scoring boundary, all 17 saved
       days produce deterministic ranks, and each new top 100 is materialized.
 - [ ] Milestone 3 — Refresh all downstream intelligence.
       Acceptance: routing, per-Event Insights, daily editorial briefs, PDFs,
@@ -188,7 +189,7 @@ starts the overnight task.
   five frozen submission Insights and `scoring-validation.md`. The deliverable
   is a measured self-audit plus a tested versioned successor.
 - 2026-07-26 (superseded, same day): Adi directed a **clean migration**
-  instead. The databases are snapshotted, so `daily-score-v2` replaces
+  instead. The databases are snapshotted, so `daily-rank-v2` replaces
   `attention-v1.1` outright with no backward compatibility, no dual-read, and
   no legacy toggle; rollback is a snapshot restore. The later overnight
   contract makes an old-versus-new comparison optional rather than blocking
@@ -211,18 +212,17 @@ starts the overnight task.
 ## Open Questions / Blockers
 
 - No design or spending blocker remains.
-- Execution is intentionally paused because Adi asked to document the
-  assignment before starting it. Start only on his explicit overnight-task
-  instruction.
+- No open blocker. The migration is active.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Correct the implementation spec around the Event boundary, entity-level network positions, layer semantics, and downstream refresh | parent | `resources/implementation-spec.md` |
-| todo | Implement the clean `daily-rank-v2` backend/API migration and replay all 15 saved days | parent | `resources/implementation-spec.md` |
-| todo | Refresh routing, Insights, daily briefs, PDFs, and UI projections, reusing only exact cached judgments | parent |  |
-| todo | Validate backend and frontend, inspect the local product, document costs/limits, finalize learnings, and archive | parent |  |
+| done | Correct the implementation spec around the Event boundary, entity-level network positions, layer semantics, and downstream refresh | parent | `resources/implementation-spec.md` |
+| done | Audit the exact downstream refresh commands, reuse boundaries, dates, and completion checks without changing files or data | explorer |  |
+| done | Audit the Event projection seam, affected contracts, and highest-risk regression tests without changing files | explorer |  |
+| done | Implement the clean `daily-rank-v2` backend/API migration and replay all 17 saved days | parent | `resources/implementation-spec.md` |
+| in_progress | Materialize the 17 new routing cohorts, refresh Insights and daily briefs, then rebuild PDFs and product projections | parent |  |
 
 ## Backlog / Remaining Work
 
@@ -233,7 +233,7 @@ starts the overnight task.
 ## Validation / Test Plan
 
 - `python -m pytest -q tests/scoring`
-- `python -m fli.cli attention-score evaluate --json --no-input`
+- `.venv/bin/fli daily-rank evaluate --json --no-input`
 - Candidate-specific unit tests for monotonicity, scale behavior, ties, and
   entity deduplication.
 - Named replay inspection for low-, medium-, and high-participation Events,
@@ -241,8 +241,8 @@ starts the overnight task.
 - `npm --prefix frontend run test`
 - `npm --prefix frontend run lint`
 - `npm --prefix frontend run build`
-- Local `/how#why-rank` and Feed score-disclosure visual checks.
-- Downstream completeness checks for all 15 routing cohorts, per-Event
+- Local `/how#why-rank` and Feed rank-disclosure visual checks.
+- Downstream completeness checks for all 17 routing cohorts, per-Event
   Insights, daily briefs, PDFs, and UI projections.
 - `scripts/check-fast.sh`
 
@@ -253,7 +253,7 @@ starts the overnight task.
   fixed `+0.25` adjustments.
 - 2026-07-26: [DONE] Preserved the original rank-order figure separately from
   the candidate-formula figure; both answer different questions.
-- 2026-07-26: [DONE] Designed the layered `daily-score-v2` contract, rejected
+- 2026-07-26: [DONE] Designed the layered `daily-rank-v2` contract, rejected
   the seed-vote and `1 + 0.5 x trust` variants on evidence, shipped the visual
   `ScoreLayersFigure` on `/how#why-rank`, and wrote
   `resources/implementation-spec.md` for an overnight implementation pass.
@@ -279,3 +279,22 @@ starts the overnight task.
   top-100 comparison is optional. Per Adi's instruction, no implementation,
   replay, or external call starts until he explicitly assigns the overnight
   task.
+- 2026-07-26: [DONE] Implemented `daily-rank-v2` at the complete Event
+  boundary, added rank-versioned routing lineage, exact cross-lineage Insight
+  reuse, input-matched prior annotations, and multi-lineage historical brief
+  orchestration. All 486 backend and 66 frontend tests pass. The 17-day replay
+  covers 19,657 Events and 1,700 top-100 rows; historical censored usefulness
+  rates in the final current routing cohort rise from 34.3% at one vote to
+  72.1% at five or more votes.
+- 2026-07-26: [DONE] Refreshed all 17 `daily-rank-v2` routing stores with
+  1,674/1,674 complete and zero failures. Exact Event/evidence/input reuse
+  supplied 976 rows; 698 new GPT-5.4-mini/high calls cost $2.961695
+  incrementally. No X call was made.
+- 2026-07-26: [DONE] Refreshed the Event-native artifact projection and all
+  1,482 routed-positive per-Event Insight rows. The Insight pass reused 524
+  exact prior Event/audience outputs, completed 958 new Terra/high calls for
+  $15.561773 incremental proxy cost, and resumed one transient timeout to zero
+  failures.
+- 2026-07-26: [IN PROGRESS] Launched the resumable 17-day
+  `daily-intelligence run-batch` with three concurrent GPT-5.6-sol/xhigh
+  Standard tasks over frozen current routing and `daily-rank-v2` workspaces.

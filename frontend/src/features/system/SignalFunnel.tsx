@@ -107,7 +107,7 @@ const PLANES: Plane[] = [
     dots: 34,
     step: '3',
     name: 'Rank',
-    concept: 'a transparent attention score',
+    concept: 'a transparent Event rank',
     detail: 'decides where to look first',
   },
   {
@@ -320,7 +320,7 @@ function PlaneDots({ plane }: { plane: Plane }) {
   }
 
   if (plane.id === 'rank') {
-    /* Ordered: size now encodes the day's attention score, biggest first. */
+    /* Ordered: size now encodes the day's Event rank, biggest first. */
     return (
       <>
         {pts.map((p) => (

@@ -293,7 +293,7 @@ def main(
     client_factory: Callable[[], Any] = entity_kinds.create_litellm_client,
 ) -> int:
     raw_args = list(argv) if argv is not None else sys.argv[1:]
-    if raw_args and raw_args[0] in {"run-day", "inspect-day-run"}:
+    if raw_args and raw_args[0] in {"run-day", "run-batch", "inspect-day-run"}:
         from fli.insights import daily_runner
 
         return daily_runner.main(raw_args)

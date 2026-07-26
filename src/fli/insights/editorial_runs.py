@@ -19,6 +19,7 @@ from fli.evidence.artifacts import store as artifact_store
 from fli.routing import model as routing_model
 from fli.routing import freshness
 from fli.routing import runs as routing_runs
+from fli.scoring import attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -468,6 +469,7 @@ def _current_routing_run(day: str, routing_root: Path) -> tuple[Path, dict[str, 
             continue
         if (
             str(meta["day"]) != day
+            or meta.get("rank_version") != attention.DAILY_RANK_VERSION
             or str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
             or str(meta["prompt_sha256"]) != routing_model.prompt_sha256()
             or str(meta["schema_version"]) != routing_model.SCHEMA_VERSION
@@ -649,6 +651,7 @@ def _prior_insights(day: str, path: Path) -> dict[tuple[str, str], dict[str, Any
             "action": row["action"],
             "suppression_reason": row["suppression_reason"],
             "prompt_version": str(row["prompt_version"]),
+            "input_sha256": str(row["input_sha256"]),
             "source_routing_db": str(row["source_routing_db"]),
         }
         for row in rows
@@ -986,6 +989,8 @@ def prepare_workspace(
                 audience: prior[(event_id, audience)]
                 for audience in audiences
                 if (event_id, audience) in prior
+                and str(prior[(event_id, audience)]["input_sha256"])
+                == str(row["input_sha256"])
             }
         )
         event_payload = {
