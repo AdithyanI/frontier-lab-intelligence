@@ -200,8 +200,8 @@ export function RankFigure() {
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">RANK · ORDER THE DAY, DO NOT JUDGE IT</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">A TRANSPARENT FORMULA</text>
 
-      {heights.map((h, i) => (
-        <rect key={`u-${i}`} x={70 + i * 34} y={baseline - h} width="22" height={h} fill={MUTED} opacity="0.35" />
+      {heights.map((height, index) => (
+        <rect key={`u-${index}`} x={70 + index * 34} y={baseline - height} width="22" height={height} fill={MUTED} opacity="0.35" />
       ))}
       <line x1="70" y1={baseline} x2={70 + 9 * 34 + 22} y2={baseline} stroke={MUTED} strokeWidth="1" />
       <text x="70" y="288" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">A DAY OF EVENTS, AS THEY ARRIVED</text>
@@ -209,15 +209,15 @@ export function RankFigure() {
       <line x1="460" y1="196" x2="586" y2="196" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#rank-order-arrow)" />
       <text x="472" y="180" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">SCORED</text>
 
-      {sorted.map((h, i) => (
+      {sorted.map((height, index) => (
         <rect
-          key={`s-${i}`}
-          x={620 + i * 34}
-          y={baseline - h}
+          key={`s-${index}`}
+          x={620 + index * 34}
+          y={baseline - height}
           width="22"
-          height={h}
-          fill={i < 3 ? BLUE : MUTED}
-          opacity={i < 3 ? 1 : 0.35}
+          height={height}
+          fill={index < 3 ? BLUE : MUTED}
+          opacity={index < 3 ? 1 : 0.35}
         />
       ))}
       <line x1="620" y1={baseline} x2={620 + 9 * 34 + 22} y2={baseline} stroke={MUTED} strokeWidth="1" />
@@ -228,6 +228,68 @@ export function RankFigure() {
       <line x1="30" y1="312" x2="1050" y2="312" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="334" fontFamily={UI} fontSize="11.5" fill={MUTED}>
         The score decides where to look first. It never decides what is true or what matters.
+      </text>
+    </svg>
+  )
+}
+
+/* The candidate formula that could produce that order. It stays separate from
+   the ranking outcome because the proposal has not replaced the live score. */
+export function AttentionScoreFigure() {
+  const examples = [
+    { label: 'Lowest trusted', percentile: '0th percentile', uplift: '0.00', points: '1.00' },
+    { label: 'Middle of network', percentile: '50th percentile', uplift: '0.25', points: '1.25' },
+    { label: 'Highest trusted', percentile: '100th percentile', uplift: '0.50', points: '1.50' },
+  ]
+  return (
+    <svg
+      viewBox="0 0 1080 420"
+      role="img"
+      aria-label="Working attention-score proposal, not yet the live score. Each distinct trusted participant contributes 1 plus half their Network percentile, from 1 point at the bottom to 1.5 points at the top. Event score sums those participant points, then adds 0.25 when a trusted organization authored the original post and a capped public-reach adjustment from 0 to 0.25."
+    >
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">RANK · WORKING PROPOSAL</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">NOT YET THE LIVE SCORE</text>
+
+      <rect x="30" y="58" width="650" height="68" fill={INK} />
+      <text x="54" y="84" fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.07em">EACH DISTINCT TRUSTED PARTICIPANT</text>
+      <text x="54" y="111" fontFamily={UI} fontSize="19" fontWeight="600" fill="#fff">1 + (0.5 × Network percentile)</text>
+
+      <text x="54" y="158" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">PARTICIPANT</text>
+      <text x="330" y="158" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">NETWORK POSITION</text>
+      <text x="548" y="158" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">1 + TRUST</text>
+      <text x="654" y="158" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">POINTS</text>
+
+      {examples.map((example, index) => (
+        <g key={example.label} transform={`translate(0 ${index * 60})`}>
+          <line x1="30" y1="176" x2="680" y2="176" stroke={index === 0 ? INK : MUTED} strokeWidth="1" opacity={index === 0 ? 1 : 0.35} />
+          <text x="54" y="210" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>{example.label}</text>
+          <text x="330" y="210" fontFamily={MONO} fontSize="11" fill={MUTED}>{example.percentile}</text>
+          <text x="548" y="210" fontFamily={MONO} fontSize="11" fill={BLUE_INK}>1 + {example.uplift}</text>
+          <text x="654" y="210" textAnchor="end" fontFamily={MONO} fontSize="15" fontWeight="600" fill={INK}>{example.points}</text>
+        </g>
+      ))}
+
+      <rect x="724" y="58" width="326" height="298" fill={SAND} stroke={MUTED} strokeWidth="1" />
+      <text x="750" y="88" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.07em">EVENT SCORE</text>
+      <text x="750" y="123" fontFamily={UI} fontSize="17" fontWeight="600" fill={INK}>Sum every distinct participant</text>
+      <text x="750" y="146" fontFamily={UI} fontSize="12" fill={MUTED}>The network contribution has no fixed ceiling.</text>
+
+      <line x1="750" y1="172" x2="1024" y2="172" stroke={MUTED} strokeWidth="1" opacity="0.45" />
+      <text x="750" y="202" fontFamily={MONO} fontSize="14" fontWeight="600" fill={INK}>+ 0.25</text>
+      <text x="840" y="202" fontFamily={UI} fontSize="13" fill={INK}>trusted organization author</text>
+      <text x="840" y="221" fontFamily={UI} fontSize="11" fill={MUTED}>rewards a primary lab source</text>
+
+      <line x1="750" y1="244" x2="1024" y2="244" stroke={MUTED} strokeWidth="1" opacity="0.45" />
+      <text x="750" y="274" fontFamily={MONO} fontSize="14" fontWeight="600" fill={INK}>+ 0 to 0.25</text>
+      <text x="872" y="274" fontFamily={UI} fontSize="13" fill={INK}>public reach</text>
+      <text x="872" y="293" fontFamily={UI} fontSize="11" fill={MUTED}>kept as a capped tie-breaker</text>
+
+      <line x1="750" y1="316" x2="1024" y2="316" stroke={INK} strokeWidth="1" />
+      <text x="750" y="340" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">NETWORK ATTENTION REMAINS DOMINANT</text>
+
+      <line x1="30" y1="382" x2="1050" y2="382" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="30" y="406" fontFamily={UI} fontSize="11.5" fill={MUTED}>
+        The 2 adjustments add at most 0.50. One more trusted participant adds at least 1.00.
       </text>
     </svg>
   )

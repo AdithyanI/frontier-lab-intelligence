@@ -8,6 +8,7 @@ const howItWorks = [
   'features/system/HowItWorksPage.tsx',
   'features/system/HowNarrative.tsx',
   'features/system/HowStory.tsx',
+  'features/system/DecisionFigures.tsx',
   'features/system/howContent.ts',
 ].map(readSource).join('\n')
 const status = readSource('features/system/StatusPage.tsx')
@@ -45,6 +46,11 @@ test('How it works describes the implemented evidence and operator boundaries', 
   assert.match(howItWorks, /Five Insights I would hand to the teams/)
   assert.match(howItWorks, /Claude demand strengthens Amazon's capacity exposure/)
   assert.match(howItWorks, /published SQLite models produced by the same pipeline/)
+  assert.match(howItWorks, /participant points = 1 \+ 0\.5 × network percentile/)
+  assert.match(howItWorks, /The current Feed still uses/)
+  assert.match(howItWorks, /attention-v1\.1/)
+  assert.match(howItWorks, /NOT YET THE LIVE SCORE/)
+  assert.match(howItWorks, /RANK · ORDER THE DAY, DO NOT JUDGE IT/)
   assert.doesNotMatch(howItWorks, /window\.scrollTo/)
   assert.doesNotMatch(howItWorks, /Everything the cohort publishes/)
   assert.doesNotMatch(howItWorks, /every paper, repo, or model card they cite is fetched and frozen/)
