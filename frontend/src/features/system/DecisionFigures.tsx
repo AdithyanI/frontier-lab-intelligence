@@ -379,8 +379,10 @@ export function ScoreLayersFigure() {
 
             {index === 0 ? (
               <>
-                {dots(5, first, 1, 'r1a')}
-                {dots(2, second, 1, 'r1b')}
+                {dots(3, first, 1, 'r1a')}
+                {dots(1, second, 1, 'r1b')}
+                <text x="770" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">MORE VOUCHED</text>
+                <text x="770" y={second + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">FEWER VOUCHED</text>
               </>
             ) : null}
 
