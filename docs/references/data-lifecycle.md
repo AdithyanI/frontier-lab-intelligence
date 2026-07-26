@@ -45,6 +45,14 @@ manifests/lineage, and run `PRAGMA quick_check` on the replacement store. Move a
 historical output to `data/archive/` when its evidence remains useful but no
 runtime reader should discover it.
 
+## Machine-Local Restore Points
+
+When `data/private/restore-points.md` exists, it is the local, ignored inventory
+of full restore points and their exact recovery instructions. Read it before a
+requested rollback. Never restore automatically: use a restore point only when
+Adi explicitly requests or approves returning to it, and preserve the current
+state before replacing code or data.
+
 ## Historical Retention
 
 The corrected July 14 World's Fair v2 snapshot is self-contained and is the
