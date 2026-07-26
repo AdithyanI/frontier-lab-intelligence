@@ -375,7 +375,7 @@ def _root_feed_item(
     member: dict[str, Any],
     account: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    """Project the stable canonical root without inventing a member-post score."""
+    """Project the stable canonical root without inventing a member-post rank."""
     return {
         "provider": str(row["provider"]),
         "post_id": str(row["post_id"]),
@@ -880,8 +880,8 @@ def _events_day_cached(
 ) -> dict[str, Any]:
     """Build the Events canonically published on one day.
 
-    The card includes the Event's lifetime activity, while its score and rank
-    remain frozen from the canonical publication day.
+    The card includes the Event's lifetime activity, while its rank inputs and
+    position remain frozen from the canonical publication day.
     """
     if not DEFAULT_EVENTS_DB.is_file():
         return {
