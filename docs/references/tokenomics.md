@@ -19,14 +19,17 @@ X provider request.
 | Audience routing | 1,674 Events | 976 exact judgments | 698 GPT-5.4-mini/high calls | $2.961695 |
 | Per-Event working Insights | 1,482 Event/audience pairs | 524 exact outputs | 958 GPT-5.6-terra/high calls | $15.561773 |
 | Artifact projection | 6,298 observations; 5,378 artifacts | Existing bodies and snapshots | None | $0 |
-| Daily editorial briefs | 17 persisted GPT-5.6-sol/xhigh tasks | Existing exact evidence and prior annotations where valid | One agent task per day | App Server does not report dollar spend here |
-| PDFs and UI projections | Two audiences across 17 days | Deterministic local rendering and cache | None | $0 |
+| Semantic index | 524 stored `text-embedding-3-large` vectors | Existing packet-keyed vectors | None in this replay | Aggregate historical cost was not durably reconciled |
+| Daily editorial briefs | 17-day GPT-5.6-sol/xhigh batch launched | Existing exact evidence and prior annotations where valid | One persisted agent task per day | App Server does not report dollar spend here; replay still in progress |
+| PDFs and UI projections | Target: two audiences across 17 days | Deterministic local rendering and cache | None | $0; final refresh still in progress |
 
 The measured LiteLLM increment before the daily editorial tasks is
-**$18.523467**. The corresponding stored cost of the complete current routing
-and per-Event Insight cohorts, including compatible reused outputs produced in
-earlier runs, is **$31.999374**. That larger number is useful for replacement
-cost; it was not charged again during this migration.
+**$18.523467**. The corresponding known stored cost of the complete current
+routing and per-Event Insight cohorts, including compatible reused outputs
+produced in earlier runs, is **$31.999374**. One reused routing row lacks
+historical cost telemetry, so this is a recorded known-cost total rather than a
+complete replacement-cost estimate. It was not charged again during this
+migration.
 
 ## What a Normal Refresh Pays For
 
@@ -56,7 +59,7 @@ unless a command can calculate a defensible estimate.
 | --- | --- |
 | Profile lookup | Approximately $0.00018 per profile at the documented $0.18 per 1,000 profiles used by the repository's estimators. |
 | Timeline collection | Historical complete refreshes recorded 3,147 and 4,246 provider requests. The provider did not expose attributable run spend; returned-tweet pricing and cache reuse make request count alone an unsafe dollar conversion. |
-| X Article body | 100 credits per Article, or approximately $0.001 with the repository's `credits / 100,000` estimate. A complete historical 167-Article catalog therefore represents about $0.167 before reuse. |
+| X Article body | 100 credits per Article, or approximately $0.001 with the repository's `credits / 100,000` estimate. The live store currently records 353 requests and 35,300 estimated credits, about $0.353 cumulatively; cache hits make later replays free. |
 | Outgoing-follow graph | The current incremental World's Fair expansion was estimated at $4.37070. The earlier projected full 2,231-source crawl from cold state was $27.83826. Page caches make later extensions materially cheaper than a cold rebuild. |
 
 Provider prices can change. Recheck the live provider contract before approving
@@ -69,8 +72,8 @@ Three figures answer different questions:
 
 1. **Incremental replay cost** is what this exact change charged after valid
    reuse.
-2. **Current-cohort replacement cost** adds the stored cost of outputs reused
-   from earlier compatible runs.
+2. **Current-cohort known cost** adds the recorded cost of outputs reused from
+   earlier compatible runs; telemetry gaps remain explicit.
 3. **Fresh-day operating cost** is variable because the number of new X pages,
    routed-positive Events, cache hits, and editorial research steps changes by
    day.

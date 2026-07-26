@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, ScoreLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 import { VIDEO_WALKTHROUGH_URL } from './howContent'
 
 /* Decision figures open fullscreen on click, so they can be presented
@@ -252,7 +252,7 @@ export default function HowNarrative({
             outvote another.
           </p>
           <FigureFrame label="Expand how the four questions decide the order">
-            <ScoreLayersFigure />
+            <RankLayersFigure />
           </FigureFrame>
           <p>
             This is where the Registry ranking becomes useful again. An

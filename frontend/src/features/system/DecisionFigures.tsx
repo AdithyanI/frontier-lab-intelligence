@@ -332,7 +332,7 @@ export function PublishFigure() {
 /* Stage 3b: how the ordering is decided. Four questions asked in order, each
    one shown as the comparison it actually makes. Nothing is blended, so no
    signal can quietly overpower another. */
-export function ScoreLayersFigure() {
+export function RankLayersFigure() {
   const dot = (cx: number, cy: number, opacity: number, key: string) => (
     <circle key={key} cx={cx} cy={cy} r="7" fill={BLUE_MID} opacity={opacity} />
   )
@@ -353,7 +353,7 @@ export function ScoreLayersFigure() {
       aria-label="The daily rank asks four questions in order instead of blending them into one weighted number. First, how many distinct trusted Registry entities quoted or reposted the complete Event, one vote each and with the source author excluded. If that ties, the average network position of those voters. If that still ties, the network position of the source author. If that still ties, the maximum same-day public interactions on one Event post. Below is a censored check from the current daily-rank-v2 routing cohort: Events with one trusted vote were routing-relevant 34 percent of the time, two votes 55 percent, three to four votes 64 percent, and five or more votes 72 percent."
     >
       <defs>
-        <marker id="score-layer-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker id="rank-layer-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
         </marker>
       </defs>
@@ -417,7 +417,7 @@ export function ScoreLayersFigure() {
 
             {index < rows.length - 1 ? (
               <>
-                <line x1="345" y1={y + 88} x2="345" y2={y + 102} stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#score-layer-arrow)" />
+                <line x1="345" y1={y + 88} x2="345" y2={y + 102} stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#rank-layer-arrow)" />
                 <text x="358" y={y + 100} fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">ONLY IF TIED</text>
               </>
             ) : null}
