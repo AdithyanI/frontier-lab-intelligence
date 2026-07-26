@@ -162,6 +162,21 @@ without claiming that attention equals importance or relevance.
 - Candidate reasoning belongs in this tracker and its resources until a
   formula is selected. The public How page should describe implemented
   behavior honestly.
+- 2026-07-26: the successor is **layered, not weighted**. Order by trusted
+  vote count; break ties by average voter network position, then author
+  network position, then public interactions. See
+  `resources/layered-score-proposal.md`.
+- 2026-07-26: the `1 + 0.5 × trust` participant weight is dropped in the
+  layered design. Averaging is affine, so the constants provably cannot change
+  the ordering; they would be an unjustifiable number doing no work. Layer 2
+  uses raw network position.
+- 2026-07-26: an organization or first-party seed vote is **rejected on
+  evidence**. 577 org-authored zero-vote Events across 15 days are ~70% vendor
+  marketing, and frontier labs already clear 1+ vote 66% of the time versus 30%
+  for other organizations.
+- 2026-07-26: production is **not** rescored. Reranking would invalidate the
+  five frozen submission Insights and `scoring-validation.md`. The deliverable
+  is a measured self-audit plus a tested versioned successor.
 
 ## Open Questions / Blockers
 
@@ -177,9 +192,10 @@ without claiming that attention equals importance or relevance.
 | --- | --- | --- | --- |
 | done | Remove the rejected fixed-bonus proposal from the How narrative while preserving the original rank-order figure | parent |  |
 | done | Audit what `attention-v1.1` actually does across the seven briefed days | parent | `resources/v1-1-behaviour-audit.md` |
-| todo | Decide with Adi whether the audit ships as an interview artefact only, or also triggers a production rescore | parent | `resources/v1-1-behaviour-audit.md` |
-| todo | Formalize candidate invariants and construct the 3-family offline comparison | parent | `resources/candidate-comparison.md` |
-| todo | Replay candidates and inspect top ranks, movers, organization sources, and viral outliers | parent | `resources/candidate-comparison.md` |
+| done | Design the layered successor and reject the seed-vote and trust-constant variants on evidence | parent | `resources/layered-score-proposal.md` |
+| todo | Implement the layered score and replay it over the 15 saved days | parent | `resources/layered-score-proposal.md` |
+| todo | Run the bounded recall probe on ranks 101–200 for one day | parent | `docs/references/scoring-validation.md` |
+| todo | Write the interview defense: audit, fix, validation, and why production was not rescored | parent |  |
 
 ## Backlog / Remaining Work
 
