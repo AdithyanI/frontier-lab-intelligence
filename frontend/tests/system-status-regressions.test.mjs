@@ -4,7 +4,12 @@ import { readSource, readStyles } from './source-files.mjs'
 
 const app = readSource('app/App.tsx')
 const layout = readSource('features/system/SystemLayout.tsx')
-const howItWorks = readSource('features/system/HowItWorksPage.tsx')
+const howItWorks = [
+  'features/system/HowItWorksPage.tsx',
+  'features/system/HowNarrative.tsx',
+  'features/system/HowStory.tsx',
+  'features/system/howContent.ts',
+].map(readSource).join('\n')
 const status = readSource('features/system/StatusPage.tsx')
 const styles = readStyles()
 
