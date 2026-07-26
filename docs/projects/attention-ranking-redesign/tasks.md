@@ -2,9 +2,9 @@
 
 ## Goal
 
-Produce an evidence-backed, scale-coherent daily Event ranking that answers
-which developments received the strongest independent attention from the
-trusted AI network, and explain it plainly enough to defend in the interview.
+Cleanly replace `attention-v1.1` with an evidence-backed daily Event ranking,
+replay the saved evidence, and refresh every downstream product output so the
+working system and interview explanation agree.
 
 ## Why / Impact
 
@@ -22,27 +22,28 @@ without claiming that attention equals importance or relevance.
 
 ### In Scope
 
-- Define the exact question the daily rank answers.
-- Define invariants for entity counting, author treatment, trust weighting,
-  public engagement, daily scope, and ties.
-- Compare a small set of coherent candidate families against the frozen saved
-  days.
-- Inspect top-ranked Events, large movers, organization-authored Events,
-  high-participation Events, and viral public outliers.
-- Produce a recommendation with a plain-language formula, worked examples,
-  limitations, and evidence.
-- Keep the How page honest while the candidate is unresolved.
-- Implement a selected production score only after Adi approves the product
-  tradeoff.
+- Correct the implementation spec so ranking is computed over the complete
+  Event, not over an individual post selected afterward.
+- Replace the old weighted score with the approved layered `daily-rank-v2`
+  contract and no backward-compatibility path.
+- Replay all 15 saved days from the evidence already stored locally and select
+  each day's new top 100.
+- Refresh audience routing, per-Event audience Insights, daily editorial
+  briefs, PDFs, and UI projections downstream of the new rank.
+- Reuse an existing model judgment only when its Event, audience, evidence,
+  prompt contract, and model contract are exactly reusable.
+- Align backend schemas, API contracts, UI disclosure, How narrative, tests,
+  architecture/reference docs, validation evidence, and cost telemetry.
 
 ### Out of Scope
 
 - Expanding the Registry from roughly 2,500 to 5,000 entities.
 - Adding another source beyond X.
-- Replacing audience relevance judgment or editorial selection.
 - Training a learned ranker.
 - Treating routing labels as human ground truth.
 - Public deployment or external communication.
+- A separate ranks 101–200 recall probe; it may be done later and does not
+  block this migration.
 
 ## Context / Constraints
 
@@ -54,11 +55,10 @@ without claiming that attention equals importance or relevance.
   be built next, how Adi used agents and AI tools, how data was obtained, and
   the token/API cost of the workflow. Ranking work must strengthen that
   explanation directly.
-- A bounded replay and a clear limitation are more valuable in this window
-  than broad platform changes or a rushed production migration.
-- Production remains on versioned `attention-v1.1`: 55% tracked-amplification
-  percentile, 25% author-support percentile, and 20% public-interaction
-  percentile.
+- Production currently remains on versioned `attention-v1.1`: 55%
+  tracked-amplification percentile, 25% author-support percentile, and 20%
+  public-interaction percentile. The approved overnight task replaces it
+  cleanly.
 - The Feed rank selects where to look first. It does not claim truth, novelty,
   relevance, usefulness, or investment importance.
 - Each canonical Registry entity may contribute at most once to one Event.
@@ -78,52 +78,62 @@ without claiming that attention equals importance or relevance.
   - `frontend/src/features/system/HowNarrative.tsx`
   - `frontend/src/features/system/DecisionFigures.tsx`
 
+## Approved Overnight Execution Contract
+
+This contract was approved in conversation on 2026-07-26 but is
+**intentionally not started yet**. Begin only after Adi explicitly assigns or
+starts the overnight task.
+
+- Work through implementation, replay, downstream refresh, validation,
+  documentation, and final product proof without pausing for routine status
+  approval.
+- Adi authorizes the model/API spend needed to complete this refresh, with no
+  project-specific spend cap.
+- X API calls are also authorized if genuinely required, but they are not
+  expected: use the saved evidence snapshot by default and do not refresh X
+  merely to recompute rank.
+- External publication, deployment, submission, email, or contact remains
+  prohibited without separate explicit approval.
+- A comparison against the old top 100 is optional diagnostic work, not a
+  prerequisite. Correctness of the new contract and the completed refreshed
+  product are the priority.
+- Intended morning outcome: the new ranking and all downstream outputs are
+  ready for Adi to inspect.
+
 ## Done When
 
 - [ ] The ranking question and invariants are explicit and internally
       consistent.
-- [ ] At least 3 coherent candidate families are replayed on the same frozen
-      days with their component scales and tie rules documented.
-- [ ] The comparison reports rank stability, top-window precision diagnostics,
-      large movers, and named failure cases rather than one aggregate metric.
-- [ ] Organization authorship and public engagement each have an explicit
-      role: primary component, comparable normalized lane, tie-breaker, or
-      context only.
-- [ ] One recommendation can be explained with a worked low-, medium-, and
-      high-participation example without a component becoming accidentally
-      meaningless.
-- [ ] Adi reviews the evidence-backed recommendation and the decision is
-      recorded here.
-- [ ] If approved, code, score disclosure, How narrative, architecture or
-      reference docs, tests, and built SPA assets agree on the same versioned
-      contract.
+- [ ] The new rank is computed once per complete Event from the union of its
+      distinct canonical-day trusted voters.
+- [ ] All 15 saved days are reranked and each day's new top 100 is materialized
+      without requiring an X refetch.
+- [ ] Audience routing, per-Event Insights, daily briefs, PDFs, and UI
+      projections agree with the new top-100 cohorts and ranks.
+- [ ] Exact reusable model judgments are preserved and every missing or
+      invalidated downstream output is regenerated.
+- [ ] Code, API contracts, score disclosure, How narrative,
+      architecture/reference docs, tests, built SPA assets, and cost telemetry
+      agree on the same versioned contract.
 - [ ] `scripts/check-fast.sh` passes and the relevant local UI is visually
       verified.
 
 ## Milestones
 
-- [ ] Milestone 1 — Restore an honest baseline and freeze the design question.
-      Acceptance: the rejected fixed-bonus proposal is not presented as a
-      viable How-page formula; the original rank-order figure remains; the
-      objective and invariants are recorded here. Validate:
-      `npm --prefix frontend run test && npm --prefix frontend run build`.
-- [ ] Milestone 2 — Build a bounded candidate comparison.
-      Acceptance: at least a network-primary lexicographic candidate, a
-      coherent normalized-lane candidate, and a saturating-network candidate
-      replay the same frozen Events with deterministic outputs. Validate:
-      targeted scoring tests plus the replay command.
-- [ ] Milestone 3 — Stress-test and recommend.
-      Acceptance: the comparison includes organization-authored, 1-participant,
-      many-participant, and high-public-engagement cases; the recommendation
-      states what each non-primary signal can and cannot change.
-- [ ] Milestone 4 — Record Adi's decision and, if approved, implement the
-      versioned contract. Acceptance: all product surfaces and durable docs
-      describe exactly the implemented score; no candidate language is
-      presented as live.
-- [ ] Milestone 5 — Validate, finalize learnings, and archive.
-      Acceptance: fast checks and local product proof pass, residual limits are
-      documented, `learnings.md` is reviewed, and the tracker moves to
-      `docs/projects/archive/attention-ranking-redesign/`.
+- [x] Milestone 1 — Audit the old score and approve the layered replacement.
+      Acceptance: the measured saturation defect, rejected alternatives, and
+      selected ordering are documented.
+- [ ] Milestone 2 — Implement and replay `daily-rank-v2`.
+      Acceptance: the complete Event is the scoring boundary, all 15 saved
+      days produce deterministic ranks, and each new top 100 is materialized.
+- [ ] Milestone 3 — Refresh all downstream intelligence.
+      Acceptance: routing, per-Event Insights, daily editorial briefs, PDFs,
+      and UI projections refer to the new cohorts and ranks; exact cached
+      judgments are reused where valid.
+- [ ] Milestone 4 — Validate, document, and archive.
+      Acceptance: backend/frontend checks and local product proof pass, costs
+      and residual limits are documented, `learnings.md` is reviewed, and the
+      tracker moves to `docs/projects/archive/attention-ranking-redesign/`.
 
 ## Execution Rules
 
@@ -133,8 +143,8 @@ without claiming that attention equals importance or relevance.
   advancing.
 - Continue until the scoped project is done or a true blocker requires human
   input.
-- Keep production on `attention-v1.1` until the evidence-backed product choice
-  is approved.
+- Replace `attention-v1.1` cleanly once the overnight task is explicitly
+  started; do not add a dual read, legacy fallback, or compatibility toggle.
 - Reject formulas whose terms cannot be compared or whose intended signals
   disappear accidentally at realistic scale.
 - Do not optimize solely against routing labels; inspect concrete ranking
@@ -180,39 +190,45 @@ without claiming that attention equals importance or relevance.
 - 2026-07-26 (superseded, same day): Adi directed a **clean migration**
   instead. The databases are snapshotted, so `daily-score-v2` replaces
   `attention-v1.1` outright with no backward compatibility, no dual-read, and
-  no legacy toggle; rollback is a snapshot restore. The replay must report
-  which of the five submission Events change rank so the interview answer
-  stays precise.
+  no legacy toggle; rollback is a snapshot restore. The later overnight
+  contract makes an old-versus-new comparison optional rather than blocking
+  the migration.
+- 2026-07-26: the unit of ranking is the complete same-day Event. Layer 1 uses
+  the union of distinct trusted voters across all Event members, with the
+  source author excluded. Do not score posts independently and then select a
+  winning member.
+- 2026-07-26: layer 2 uses the mean entity-level network position of those
+  voters. Layer 3 uses the canonical source/root author's entity-level network
+  position.
+- 2026-07-26: layer 4 is the maximum same-day public interaction count among
+  the Event's member posts, where one post's count is
+  `likes + reposts + replies + quotes`. It is a tie-breaker, not a blended
+  popularity weight.
+- 2026-07-26: Adi approved the complete downstream refresh and the required
+  LLM/API spend. Existing evidence should be reused; X calls are permitted if
+  actually necessary but are not expected.
 
 ## Open Questions / Blockers
 
-- Product decision after replay: should organization authorship affect the
-  primary score, act only as an explicit tie-breaker, or remain visible context?
-- Product decision after replay: should public engagement affect rank at all,
-  or remain a displayed diagnostic?
-- These questions do not block candidate construction and replay.
+- No design or spending blocker remains.
+- Execution is intentionally paused because Adi asked to document the
+  assignment before starting it. Start only on his explicit overnight-task
+  instruction.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Remove the rejected fixed-bonus proposal from the How narrative while preserving the original rank-order figure | parent |  |
-| done | Audit what `attention-v1.1` actually does across the seven briefed days | parent | `resources/v1-1-behaviour-audit.md` |
-| done | Design the layered successor and reject the seed-vote and trust-constant variants on evidence | parent | `resources/layered-score-proposal.md` |
-| done | Ship the visual How-page figure for the layered contract (`ScoreLayersFigure`) | parent | `frontend/src/features/system/DecisionFigures.tsx` |
-| done | Write the descriptive overnight implementation spec | parent | `resources/implementation-spec.md` |
-| todo | Implement `daily-score-v2` as a clean migration and replay it over the 15 saved days | assigned engineer | `resources/implementation-spec.md` |
-| todo | Run the bounded recall probe on ranks 101–200 for one day (needs Adi's approval to spend) | parent | `docs/references/scoring-validation.md` |
-| todo | Write the interview defense: the audit, the fix, the validation, and the residual limits | parent |  |
+| todo | Correct the implementation spec around the Event boundary, entity-level network positions, layer semantics, and downstream refresh | parent | `resources/implementation-spec.md` |
+| todo | Implement the clean `daily-rank-v2` backend/API migration and replay all 15 saved days | parent | `resources/implementation-spec.md` |
+| todo | Refresh routing, Insights, daily briefs, PDFs, and UI projections, reusing only exact cached judgments | parent |  |
+| todo | Validate backend and frontend, inspect the local product, document costs/limits, finalize learnings, and archive | parent |  |
 
 ## Backlog / Remaining Work
 
-- [ ] Produce the evidence-backed recommendation and worked examples.
-- [ ] Review the recommendation with Adi and record the decision.
-- [ ] Implement and version the selected score only if approved.
-- [ ] Align How, Feed disclosure, architecture/reference docs, and tests.
-- [ ] Run full validation and visual proof.
-- [ ] Review `learnings.md`, close out, and archive the project.
+- [ ] Optional old-versus-new mover comparison for interview discussion.
+- [ ] Optional ranks 101–200 recall probe after the migration.
+- [ ] Consider Registry expansion and additional sources as later projects.
 
 ## Validation / Test Plan
 
@@ -226,6 +242,8 @@ without claiming that attention equals importance or relevance.
 - `npm --prefix frontend run lint`
 - `npm --prefix frontend run build`
 - Local `/how#why-rank` and Feed score-disclosure visual checks.
+- Downstream completeness checks for all 15 routing cohorts, per-Event
+  Insights, daily briefs, PDFs, and UI projections.
 - `scripts/check-fast.sh`
 
 ## Progress Log
@@ -254,3 +272,10 @@ without claiming that attention equals importance or relevance.
   defensible explanation, replay evidence, working-method narrative, and
   token/API cost clarity outrank platform breadth or a rushed production
   score migration.
+- 2026-07-26: [APPROVED, NOT STARTED] Adi approved a clean overnight
+  `daily-rank-v2` migration and full downstream refresh, including the model
+  and API spend required to finish it. X calls are permitted if required but
+  are not expected because the evidence snapshot is already stored. The old
+  top-100 comparison is optional. Per Adi's instruction, no implementation,
+  replay, or external call starts until he explicitly assigns the overnight
+  task.
