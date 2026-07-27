@@ -1,6 +1,6 @@
 {
   "schema_version": "bit-investment-context-v2",
-  "company_profiles_reviewed_at": "2026-07-18",
+  "company_profiles_reviewed_at": "2026-07-27",
   "fund": {
     "name": "BIT Global Technology Leaders",
     "manager": "BIT Capital GmbH",
@@ -149,40 +149,142 @@
     "derivative_weight_pct": 0.18,
     "liabilities_weight_pct": -0.49,
     "holdings": [
-      { "name": "IREN", "weight_pct": 8.93 },
-      { "name": "AUTO1", "weight_pct": 8.40 },
-      { "name": "Hinge Health", "weight_pct": 6.74 },
-      { "name": "TSMC", "weight_pct": 5.66 },
-      { "name": "Micron", "weight_pct": 5.07 },
-      { "name": "Reddit", "weight_pct": 4.93 },
-      { "name": "Alphabet", "weight_pct": 4.48 },
-      { "name": "Datadog", "weight_pct": 4.34 },
-      { "name": "Lemonade", "weight_pct": 3.95 },
-      { "name": "Robinhood", "weight_pct": 3.77 },
-      { "name": "Oscar Health", "weight_pct": 3.70 },
-      { "name": "Meta", "weight_pct": 3.49 },
-      { "name": "Rubrik", "weight_pct": 3.37 },
-      { "name": "Kaspi", "weight_pct": 3.32 },
-      { "name": "NVIDIA", "weight_pct": 3.26 },
-      { "name": "Microsoft", "weight_pct": 2.89 },
-      { "name": "HUT 8", "weight_pct": 2.22 },
-      { "name": "Duolingo", "weight_pct": 2.02 },
-      { "name": "Amazon", "weight_pct": 1.78 },
-      { "name": "Netskope", "weight_pct": 1.76 },
-      { "name": "Luckin Coffee", "weight_pct": 1.72 },
-      { "name": "Palo Alto Networks", "weight_pct": 1.66 },
-      { "name": "InPost", "weight_pct": 1.42 },
-      { "name": "Grindr", "weight_pct": 1.07 },
-      { "name": "Coherent", "weight_pct": 1.07 },
-      { "name": "AMD", "weight_pct": 1.04 },
-      { "name": "Intel", "weight_pct": 1.02 },
-      { "name": "Axon", "weight_pct": 0.97 },
-      { "name": "Broadcom", "weight_pct": 0.82 },
-      { "name": "Pure Storage", "weight_pct": 0.78 },
-      { "name": "Lumentum", "weight_pct": 0.57 },
-      { "name": "Xometry", "weight_pct": 0.55 },
-      { "name": "Omada Health", "weight_pct": 0.55 },
-      { "name": "GCL-Poly", "weight_pct": 0.11 }
+      {
+        "name": "IREN",
+        "weight_pct": 8.93
+      },
+      {
+        "name": "AUTO1",
+        "weight_pct": 8.4
+      },
+      {
+        "name": "Hinge Health",
+        "weight_pct": 6.74
+      },
+      {
+        "name": "TSMC",
+        "weight_pct": 5.66
+      },
+      {
+        "name": "Micron",
+        "weight_pct": 5.07
+      },
+      {
+        "name": "Reddit",
+        "weight_pct": 4.93
+      },
+      {
+        "name": "Alphabet",
+        "weight_pct": 4.48
+      },
+      {
+        "name": "Datadog",
+        "weight_pct": 4.34
+      },
+      {
+        "name": "Lemonade",
+        "weight_pct": 3.95
+      },
+      {
+        "name": "Robinhood",
+        "weight_pct": 3.77
+      },
+      {
+        "name": "Oscar Health",
+        "weight_pct": 3.7
+      },
+      {
+        "name": "Meta",
+        "weight_pct": 3.49
+      },
+      {
+        "name": "Rubrik",
+        "weight_pct": 3.37
+      },
+      {
+        "name": "Kaspi",
+        "weight_pct": 3.32
+      },
+      {
+        "name": "NVIDIA",
+        "weight_pct": 3.26
+      },
+      {
+        "name": "Microsoft",
+        "weight_pct": 2.89
+      },
+      {
+        "name": "HUT 8",
+        "weight_pct": 2.22
+      },
+      {
+        "name": "Duolingo",
+        "weight_pct": 2.02
+      },
+      {
+        "name": "Amazon",
+        "weight_pct": 1.78
+      },
+      {
+        "name": "Netskope",
+        "weight_pct": 1.76
+      },
+      {
+        "name": "Luckin Coffee",
+        "weight_pct": 1.72
+      },
+      {
+        "name": "Palo Alto Networks",
+        "weight_pct": 1.66
+      },
+      {
+        "name": "InPost",
+        "weight_pct": 1.42
+      },
+      {
+        "name": "Grindr",
+        "weight_pct": 1.07
+      },
+      {
+        "name": "Coherent",
+        "weight_pct": 1.07
+      },
+      {
+        "name": "AMD",
+        "weight_pct": 1.04
+      },
+      {
+        "name": "Intel",
+        "weight_pct": 1.02
+      },
+      {
+        "name": "Axon",
+        "weight_pct": 0.97
+      },
+      {
+        "name": "Broadcom",
+        "weight_pct": 0.82
+      },
+      {
+        "name": "Pure Storage",
+        "weight_pct": 0.78
+      },
+      {
+        "name": "Lumentum",
+        "weight_pct": 0.57
+      },
+      {
+        "name": "Xometry",
+        "weight_pct": 0.55
+      },
+      {
+        "name": "Omada Health",
+        "weight_pct": 0.55
+      },
+      {
+        "name": "GCL-Poly",
+        "weight_pct": 0.11
+      }
     ],
     "other_exposures": [
       {
@@ -1669,7 +1771,7 @@
           }
         ],
         "cautions": [
-        "A July 2026 recommended all-cash offer made the listing status time-sensitive; verify the current status before treating INPST as a tradable public equity.",
+          "A July 2026 recommended all-cash offer made the listing status time-sensitive; verify the current status before treating INPST as a tradable public equity.",
           "Network density can create advantages, but expansion requires capital before utilization and local merchant demand are proven."
         ]
       },
@@ -2366,6 +2468,208 @@
           "url": "https://www.gcltech.com/en/goods/innovation.html"
         }
       ]
+    },
+    {
+      "name": "SanDisk",
+      "ticker": "SNDK",
+      "aliases": [
+        "SanDisk Corporation",
+        "Sandisk"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "SanDisk designs and sells NAND flash storage, spanning client and enterprise SSDs, embedded storage, and consumer memory products. It was separated from Western Digital as a standalone flash business in 2025 and retains a joint-venture manufacturing relationship with Kioxia.",
+        "operating_drivers": [
+          "NAND bit shipments, pricing, and cost-per-bit progression",
+          "Enterprise SSD mix versus client and consumer mix",
+          "Joint-venture fab capacity, technology-node transitions, and capital intensity",
+          "Inventory cycles across handset, PC, and data-center customers"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Enterprise SSD demand from AI training and inference storage tiers",
+            "potential_upside": "Larger training corpora, checkpointing, vector stores, and retrieval tiers raise demand for high-capacity enterprise flash and can tighten NAND supply alongside HBM.",
+            "potential_downside": "AI storage demand is a smaller share of NAND than DRAM's HBM exposure, and consumer or handset weakness can dominate the cycle regardless of data-center strength.",
+            "watchpoints": [
+              "Enterprise SSD revenue share and exabyte shipments",
+              "NAND contract pricing direction",
+              "Capex discipline and JV node transitions"
+            ]
+          },
+          {
+            "channel": "Substitution pressure between flash and disk in AI data centers",
+            "potential_upside": "Density, power, and rack-space constraints can accelerate flash displacement of nearline HDD capacity.",
+            "potential_downside": "Cost-per-bit gaps persist and displacement timelines have repeatedly proven slower than vendor projections.",
+            "watchpoints": [
+              "Nearline flash design wins",
+              "Cost-per-bit crossover claims",
+              "Hyperscaler qualification announcements"
+            ]
+          }
+        ],
+        "cautions": [
+          "The standalone company has limited independent reporting history following the 2025 separation; pre-separation Western Digital figures are not directly comparable.",
+          "NAND is more cyclical and less supply-constrained than HBM DRAM; do not transfer Micron's scarcity thesis onto SanDisk without evidence.",
+          "Joint-venture accounting means reported capacity and capex do not map one-to-one onto wholly owned output."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "SanDisk investor relations",
+          "url": "https://investor.sandisk.com/"
+        },
+        {
+          "label": "SanDisk corporate overview",
+          "url": "https://www.sandisk.com/about"
+        }
+      ]
+    },
+    {
+      "name": "Marvell",
+      "ticker": "MRVL",
+      "aliases": [
+        "Marvell Technology",
+        "Marvell Technology, Inc."
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "commentary",
+        "source_scope": "flagship",
+        "thesis": "BIT named Marvell a positive contributor in the June 2026 flagship factsheet, citing its role in letting hyperscalers connect non-NVIDIA AI accelerators into NVIDIA's networking architecture, and pointed to expected further custom XPU design wins with hyperscalers as a growth driver.",
+        "edge": "Interconnect and custom-silicon content is a bottleneck in scaling heterogeneous accelerator clusters, which is a different exposure from merchant GPU demand.",
+        "signals": [
+          "Custom XPU design wins with hyperscalers",
+          "Electro-optics and high-speed interconnect content per cluster",
+          "Data-center revenue mix versus legacy networking and storage end markets"
+        ],
+        "countercase": "Custom-silicon programs are concentrated in few customers, can be insourced or re-awarded, and design-win announcements precede revenue by several quarters.",
+        "sources": [
+          {
+            "label": "BIT Global Technology Leaders factsheet, 30 June 2026 — monthly commentary",
+            "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf"
+          }
+        ]
+      },
+      "analyst_context": {
+        "business_summary": "Marvell supplies data-infrastructure semiconductors spanning custom compute (XPU) silicon for hyperscalers, electro-optics and high-speed interconnect, ethernet switching, and storage controllers, alongside legacy carrier, enterprise networking, and automotive lines.",
+        "operating_drivers": [
+          "Custom silicon design wins, program ramps, and customer concentration",
+          "Electro-optics and interconnect content per AI cluster",
+          "Data-center revenue share versus cyclical legacy end markets",
+          "Advanced-node access, packaging supply, and gross-margin mix"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Custom accelerator (XPU) silicon for hyperscalers",
+            "potential_upside": "Labs and hyperscalers pursuing cost and supply independence from merchant GPUs increase demand for custom compute programs and the interconnect around them.",
+            "potential_downside": "Programs are concentrated, can be insourced, delayed, or re-awarded, and custom silicon carries lower margins than merchant accelerators.",
+            "watchpoints": [
+              "Named XPU program ramps and volumes",
+              "Customer concentration disclosure",
+              "Gross-margin mix as custom share rises"
+            ]
+          },
+          {
+            "channel": "Scale-up and scale-out interconnect for heterogeneous clusters",
+            "potential_upside": "Connecting non-NVIDIA accelerators into NVIDIA networking fabric addresses a stated bottleneck in scaling mixed clusters, raising interconnect content per deployment.",
+            "potential_downside": "Networking standards and vertical integration by NVIDIA or hyperscalers can absorb this content over time.",
+            "watchpoints": [
+              "800G/1.6T optics and DSP content",
+              "Ethernet versus proprietary fabric adoption",
+              "Co-packaged optics roadmap position"
+            ]
+          }
+        ],
+        "cautions": [
+          "BIT's June commentary is marketing material describing a past month; it is not a current recommendation or evidence of a current position size.",
+          "Design-win language is forward-looking and frequently precedes revenue by several quarters.",
+          "Legacy carrier, enterprise networking, and automotive segments can mask or amplify data-center trends in headline results."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Marvell investor relations",
+          "url": "https://investor.marvell.com/"
+        },
+        {
+          "label": "Marvell company overview",
+          "url": "https://www.marvell.com/company/about-us.html"
+        }
+      ]
+    },
+    {
+      "name": "Infineon",
+      "ticker": "IFX",
+      "aliases": [
+        "Infineon Technologies",
+        "Infineon Technologies AG",
+        "IFNNY"
+      ],
+      "listing_status": "public",
+      "bit_public_view": {
+        "grade": "none",
+        "source_scope": "none",
+        "thesis": null,
+        "edge": null,
+        "signals": [],
+        "countercase": null,
+        "sources": []
+      },
+      "analyst_context": {
+        "business_summary": "Infineon is a German semiconductor manufacturer supplying power semiconductors, microcontrollers, sensors, and security products across automotive, industrial and infrastructure, power and sensor systems, and connected secure systems.",
+        "operating_drivers": [
+          "Data-center power-conversion content and design wins",
+          "Automotive cycle, electrification content per vehicle, and inventory correction",
+          "Industrial and renewable-energy demand",
+          "Fab utilisation, wide-bandgap (SiC, GaN) capacity, and pricing"
+        ],
+        "frontier_ai_channels": [
+          {
+            "channel": "Power delivery and conversion for AI data centers",
+            "potential_upside": "Rising rack power density pushes architectures toward higher-voltage distribution and more efficient conversion stages, raising silicon and wide-bandgap content per rack.",
+            "potential_downside": "Data-center power is a modest share of group revenue relative to automotive and industrial, so a strong AI cycle can be offset by an automotive downcycle.",
+            "watchpoints": [
+              "Disclosed AI/data-center power revenue and run-rate targets",
+              "800V DC and high-voltage architecture design wins",
+              "SiC and GaN capacity utilisation"
+            ]
+          },
+          {
+            "channel": "Grid, renewables, and energy-infrastructure build-out around AI load growth",
+            "potential_upside": "Data-center load growth raises demand for grid, storage, and renewable power-electronics content.",
+            "potential_downside": "Grid and industrial projects have long, policy-dependent lead times that do not track frontier-lab news cycles.",
+            "watchpoints": [
+              "Industrial and infrastructure segment orders",
+              "Energy-related design wins",
+              "Order backlog and book-to-bill"
+            ]
+          }
+        ],
+        "cautions": [
+          "Infineon's exposure to frontier-lab developments is indirect and lagged; it is a power-infrastructure read-through, not a compute read-through.",
+          "Group results are dominated by automotive and industrial cycles, which can move opposite to AI capex.",
+          "Euro reporting and European listing introduce currency and disclosure-timing differences relative to US peers."
+        ]
+      },
+      "identity_sources": [
+        {
+          "label": "Infineon investor relations",
+          "url": "https://www.infineon.com/cms/en/about-infineon/investor/"
+        },
+        {
+          "label": "Infineon company profile",
+          "url": "https://www.infineon.com/cms/en/about-infineon/company/"
+        }
+      ]
     }
   ],
   "outside_portfolio_policy": {
@@ -2422,5 +2726,68 @@
       "use": "First-principles company decomposition and semiconductor research expectations."
     }
   ],
-  "reader_note": "Portfolio mappings use the complete audited public portfolio. They are research context, not a claim about a live portfolio or a trade recommendation."
+  "reader_note": "Portfolio mappings use the complete audited public portfolio. They are research context, not a claim about a live portfolio or a trade recommendation.",
+  "portfolio_current_top_ten": {
+    "as_of": "2026-06-30",
+    "basis": "top ten disclosed in the monthly retail factsheet; the fund held 28 positions and the remaining 18 (~33.9% of assets) are not publicly disclosed",
+    "source": {
+      "label": "BIT Global Technology Leaders R-I (EUR) factsheet, 30 June 2026",
+      "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf",
+      "isin": "DE000A2N8127"
+    },
+    "fund_assets_eur": 1593900000,
+    "position_count": 28,
+    "equity_weight_pct": 94.6,
+    "cash_and_derivative_weight_pct": 5.4,
+    "sector_allocation_pct": {
+      "Information Technology": 56.7,
+      "Consumer Discretionary": 18.5,
+      "Financials": 12.5,
+      "Health Care": 6.8,
+      "Materials": 5.5
+    },
+    "holdings": [
+      {
+        "name": "Amazon",
+        "weight_pct": 10.4
+      },
+      {
+        "name": "Micron",
+        "weight_pct": 8.6
+      },
+      {
+        "name": "IREN",
+        "weight_pct": 8.5
+      },
+      {
+        "name": "SanDisk",
+        "weight_pct": 6.0
+      },
+      {
+        "name": "Robinhood",
+        "weight_pct": 5.0
+      },
+      {
+        "name": "Marvell",
+        "weight_pct": 4.8
+      },
+      {
+        "name": "TSMC",
+        "weight_pct": 4.6
+      },
+      {
+        "name": "Infineon",
+        "weight_pct": 4.4
+      },
+      {
+        "name": "Hinge Health",
+        "weight_pct": 4.2
+      },
+      {
+        "name": "Oscar Health",
+        "weight_pct": 4.2
+      }
+    ],
+    "usage_note": "Weights here supersede the 2025-12-31 audited weights for these ten names. Names present in the audited baseline but absent here are not confirmed current and must be treated as historical_holding. Names here that are absent from the audited baseline entered the portfolio during 2026."
+  }
 }

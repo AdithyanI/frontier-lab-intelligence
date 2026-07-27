@@ -734,16 +734,47 @@ def company_context(query: str) -> dict[str, Any]:
         raise ValueError(f"company query {query!r} is ambiguous")
     profile, match_type = matches[0]
     holding = next(
-        item for item in context["portfolio"]["holdings"] if item["name"] == profile["name"]
+        item for item in _covered_holdings(context) if item["name"] == profile["name"]
     )
+    current = context.get("portfolio_current_top_ten")
+    current_holding = None
+    if isinstance(current, dict) and isinstance(current.get("holdings"), list):
+        current_holding = next(
+            (
+                item
+                for item in current["holdings"]
+                if isinstance(item, dict) and item.get("name") == profile["name"]
+            ),
+            None,
+        )
     return {
         "context_schema_version": context["schema_version"],
         "company_profiles_reviewed_at": context["company_profiles_reviewed_at"],
         "query": query,
         "matched_by": match_type,
         "portfolio_holding": holding,
+        "current_top_ten_holding": current_holding,
         "profile": profile,
     }
+
+
+def _covered_holdings(context: dict[str, Any]) -> list[dict[str, Any]]:
+    """Audited baseline holdings plus later-disclosed positions, in disclosure order.
+
+    The 31 December 2025 annual report is the last complete public portfolio. The
+    monthly factsheet discloses only a current top ten, so positions opened during
+    2026 appear there and nowhere else. Both are kept with their own provenance
+    rather than merged into one undated list.
+    """
+    holdings = [item for item in context["portfolio"]["holdings"] if isinstance(item, dict)]
+    seen = {item.get("name") for item in holdings}
+    current = context.get("portfolio_current_top_ten")
+    if isinstance(current, dict) and isinstance(current.get("holdings"), list):
+        for item in current["holdings"]:
+            if isinstance(item, dict) and item.get("name") not in seen:
+                holdings.append(item)
+                seen.add(item.get("name"))
+    return holdings
 
 
 def _validate_company_profiles(context: dict[str, Any]) -> None:
@@ -762,11 +793,10 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
     except ValueError as exc:
         raise ValueError("company_profiles_reviewed_at must be an ISO date") from exc
 
-    holding_names = [
-        item.get("name") for item in portfolio["holdings"] if isinstance(item, dict)
-    ]
+    covered = _covered_holdings(context)
+    holding_names = [item.get("name") for item in covered]
     profile_names = [item.get("name") for item in profiles if isinstance(item, dict)]
-    if len(holding_names) != len(portfolio["holdings"]) or any(
+    if len(holding_names) != len(covered) or any(
         not isinstance(name, str) or not name for name in holding_names
     ):
         raise ValueError("Investment context portfolio contains an invalid holding name")

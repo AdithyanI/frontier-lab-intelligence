@@ -1140,12 +1140,12 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     assert context["research_process"]["challenge_process"]["principle"]
     assert context["outside_portfolio_policy"]["label"] == "Outside the disclosed portfolio"
     profiles = context["company_profiles"]
-    assert context["company_profiles_reviewed_at"] == "2026-07-18"
-    assert len(profiles) == 34
+    assert context["company_profiles_reviewed_at"] == "2026-07-27"
+    assert len(profiles) == 37
     assert [profile["name"] for profile in profiles] == [
-        holding["name"] for holding in portfolio["holdings"]
+        holding["name"] for holding in editorial_runs._covered_holdings(context)
     ]
-    assert len({profile["ticker"] for profile in profiles}) == 34
+    assert len({profile["ticker"] for profile in profiles}) == 37
     assert {profile["bit_public_view"]["grade"] for profile in profiles} <= {
         "explicit_thesis",
         "commentary",
@@ -1174,6 +1174,17 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     assert by_name["Grindr"]["bit_public_view"]["source_scope"] == "flagship"
     assert "Finisar" not in by_name["Coherent"]["aliases"]
 
+    current = context["portfolio_current_top_ten"]
+    assert current["as_of"] == "2026-06-30"
+    assert current["position_count"] == 28
+    assert len(current["holdings"]) == 10
+    assert current["source"]["isin"] == "DE000A2N8127"
+    assert by_name["Marvell"]["bit_public_view"]["grade"] == "commentary"
+    assert by_name["Marvell"]["bit_public_view"]["source_scope"] == "flagship"
+    assert {holding["name"] for holding in current["holdings"]} - {
+        holding["name"] for holding in portfolio["holdings"]
+    } == {"SanDisk", "Marvell", "Infineon"}
+
     assert editorial_cli.main(
         ["context", "--audience", "investment", "--json", "--no-input"]
     ) == 0
@@ -1196,7 +1207,7 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     compact = json.loads(capsys.readouterr().out)
     assert compact["data"]["projection"] == "compact"
     assert "company_profiles" not in compact["data"]["context"]
-    assert len(compact["data"]["context"]["company_profile_index"]) == 34
+    assert len(compact["data"]["context"]["company_profile_index"]) == 37
 
 
 def test_ai_engineering_context_encodes_bit_operating_and_relevance_boundary(capsys):

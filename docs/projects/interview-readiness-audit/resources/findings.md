@@ -26,8 +26,12 @@ Severity is judged by one question: **does this cost Adi the job?**
 | 13 | Only 45% of citations are actually verified | high | **B5** — 16% unverified `web` tier |
 | 14 | The "3–5 most interesting insights" deliverable does not exist | high | **B0** — cheapest, highest-weighted |
 | 15 | 17 days vs suggested ~3-month window, 68% of budget unspent | medium | needs a one-sentence answer |
+| 16 | Coverage does not track the portfolio (rho 0.205) | high | **B6** — the case for the cascade |
+| 17 | Three current top-ten positions absent from the system | high | **fixed this session** — roster merged |
+| 18 | Company linkage is high quality wherever it happens | — | **asset** — 614/614 labels correct |
+| 19 | The blind spot is disruption-side, not small-cap | high | **B7** — needs a coverage universe |
 
-Findings 7 and 9 are strengths, recorded here because they were discovered by
+Findings 7, 9 and 18 are strengths, recorded here because they were discovered by
 measurement rather than assumed. Findings 10 and 12 were independently found by
 the pipeline agents during the 5–17 July batch audit; their write-ups are better
 than this one's and are quoted in place.
@@ -720,6 +724,211 @@ retrieval constraint from provider docs or the ingestion code. It is inferred
 from the seven-day projection language. Adi should be able to state the real
 reason in one sentence. If the true reason is "I ran out of time," say that —
 still defensible, but a different sentence.
+
+---
+
+## 16. Coverage does not track the portfolio
+
+The strongest measurement in the second half of this audit, and the reason to
+take the cascade proposal seriously.
+
+The full BIT portfolio is already loaded into every Investment editorial call.
+`.agents/skills/fli-daily-intelligence/references/bit-investment-context.json`
+is 103,115 characters and carries `portfolio.holdings` — 34 audited names with
+weights, cited to page 8 of the 31 December 2025 annual report — plus 34
+`company_profiles` with business summaries and operating drivers. It is wired
+in at `src/fli/insights/editorial_runs.py:41`.
+
+So the model has the book. It does not use it in proportion to the book.
+
+Across 442 Investment insights there are 703 `affected_entities` mentions, 624
+of them to audited roster names.
+
+    Spearman(position weight, mention count) across 34 holdings = 0.205
+
+Measured against the **current** top ten (30 June 2026 factsheet):
+
+| Holding | Weight | Mentions |
+| --- | ---: | ---: |
+| Amazon | 10.4% | 40 |
+| Micron | 8.6% | 6 |
+| IREN | 8.5% | 4 |
+| SanDisk | 6.0% | 0 |
+| Robinhood | 5.0% | 0 |
+| Marvell | 4.8% | 0 |
+| TSMC | 4.6% | 7 |
+| Infineon | 4.4% | 0 |
+| Hinge Health | 4.2% | 1 |
+| Oscar Health | 4.2% | 1 |
+| **total** | **60.7%** | **59 — 8.5% of coverage** |
+
+Against four names that are *not* in the current top ten:
+
+| Holding | Dec-2025 weight | Mentions |
+| --- | ---: | ---: |
+| Alphabet | 4.48% | 160 |
+| NVIDIA | 3.26% | 141 |
+| Microsoft | 2.89% | 137 |
+| Meta | 3.49% | 70 |
+| **total** | **14.1%** | **508 — 73.4% of coverage** |
+
+Eleven audited holdings, 27.3% of fund weight, were never named once in 17
+days.
+
+**The honest counter-argument, which should be conceded before it is raised.**
+Those four are the frontier labs' closest public proxies — Alphabet is
+DeepMind, Microsoft is OpenAI, Meta is Llama, NVIDIA is the substrate. A system
+tracking frontier labs will mention them because they are the subject matter,
+not because it is biased. "Not in the June top ten" also does not mean sold;
+Alphabet at 4.48% in December could sit just under the 4.2% cut today.
+
+So do not claim the system is broken. The defensible sentence is narrower:
+
+> Coverage is a function of who the news is about, not of what the fund owns.
+
+For a system whose stated job is connecting private-lab developments to
+public-equity landing spots, that relationship should not be near zero.
+
+**Why this matters for the cascade proposal.** The passive fix — put the roster
+in context and let the model use it — has already been tried, for 17 days, and
+this is the result. Availability is not consideration. A fan-out stage that
+requires an explicit verdict per company is the difference between the two.
+
+Commands:
+
+    .venv/bin/python  # editorial_insight.analysis_json over audience='investment'
+    # roster from bit-investment-context.json portfolio.holdings
+    # weights cross-checked against the 30 Jun 2026 factsheet, ISIN DE000A2N8127
+
+---
+
+## 17. Three current top-ten positions do not exist in the system
+
+The loaded roster is the 31 December 2025 audited baseline: 34 names, €1.088bn
+fund assets. The fund as of 30 June 2026 is **28 positions, €1.594bn**. Three
+names in the current top ten are absent from `bit-investment-context.json`
+entirely — no holding row, no company profile, no aliases:
+
+| Holding | Current weight |
+| --- | ---: |
+| SanDisk | 6.0% |
+| Marvell Technology | 4.8% |
+| Infineon | 4.4% |
+| **total** | **15.2% of the fund** |
+
+These are 2026 additions made after the audited baseline. The system is
+structurally incapable of naming them, which is why each scores zero in finding
+16 rather than scoring low.
+
+**Marvell is the sharpest instance in this audit.** BIT's own June 2026
+factsheet commentary supplies the mechanism:
+
+> Marvell enables hyperscalers to connect non-NVIDIA AI accelerators to
+> NVIDIA's networking architecture, addressing a key bottleneck in scaling
+> heterogeneous AI clusters.
+
+That is a frontier-lab read-through written by the client, in a document the
+repository already cites, about a company the system cannot mention.
+
+**Fix, roughly half a day.** Keep one roster with one provenance story — the
+last complete audited portfolio — and add these three as rows carrying their
+own `as_of: 2026-06-30` and the factsheet URL. Every row dated and cited, which
+is the house style everywhere else in the repo. Do not build a
+`confirmed_current` / `historical` tier vocabulary; it buys little and costs a
+clean answer to "where did this list come from?".
+
+**Disclosure limit worth stating out loud.** The June factsheet names only 10
+of 28 positions — 60.7% of the fund. The remaining 18 positions, ~33.9%, are
+not public. The 30 June 2026 semi-annual report would give the complete
+current roster; it was not published as of 2026-07-27 (404 at the HansaInvest
+path, while the 2025-06-30 equivalent returns 200). December therefore remains
+the only complete roster that exists publicly, and using it is correct.
+
+Suggested framing: *"I can see 60.7% of the book from public disclosure. Here
+is the coverage gap I measured inside it, and here is the one file you would
+swap on day one to point this at the live portfolio."*
+
+---
+
+## 18. Company linkage is high quality wherever it happens — strength
+
+Recorded because two plausible failure modes were tested and both came back
+clean. These should be said out loud, and they narrow the problem in finding 16
+to *which companies get considered* rather than *how well they are linked*.
+
+**No hallucinated holdings.** Of 614 entity mentions labelled
+`scope: "portfolio"`, **614 matched an audited roster name or a declared alias.
+Zero false claims** that a company is a BIT holding. Given that the scope label
+is model-asserted and nothing validates it at write time, this could have gone
+badly and did not.
+
+**Mechanism is real, not decorative.** Median `mechanism` length is 147
+characters — a sentence of transmission, not a tag.
+
+**Impact direction is not cheerleading.**
+
+| impact | count | share |
+| --- | ---: | ---: |
+| positive | 272 | 39% |
+| mixed | 186 | 27% |
+| uncertain | 137 | 20% |
+| negative | 97 | 14% |
+
+Alphabet's own mix is 50 positive / 44 mixed / 38 negative / 28 uncertain,
+which is the profile of a system willing to argue against a holding.
+
+Note for future auditors: 11 of the 703 entities use a legacy shape
+(`as_of` / `name` / `relationship`) from a single early run. The current shape
+is `name` / `scope` / `impact` / `mechanism`. Querying the wrong key returns
+zeros and reads like a catastrophic gap. It is not one.
+
+---
+
+## 19. The blind spot is disruption-side, not small-cap
+
+Finding 1 framed the concentration problem as mega-cap versus small-cap. That
+framing is wrong, and a flat position-weight metric is the wrong denominator —
+a frontier-lab intelligence system has no business writing about Luckin Coffee.
+
+Splitting the roster by transmission mechanism instead:
+
+- **Build-side** — TSMC, Micron, IREN, SanDisk, Marvell, Infineon, Coherent,
+  Lumentum, Broadcom, AMD, Intel, HUT 8, Pure Storage. AI capex and scarcity
+  flow to them.
+- **Disruption-side** — Duolingo, Lemonade, Xometry, Axon, Datadog, Reddit,
+  Rubrik, Netskope. A frontier model release changes their competitive
+  position.
+- **Out of scope** — Luckin Coffee, InPost, GCL-Poly, Kaspi, Grindr, AUTO1,
+  Robinhood. Write the reason once and stop measuring against them.
+
+The system covers build-side and is close to blind on disruption-side. Four
+never-mentioned names are described as AI-native **in the repository's own
+company profiles**:
+
+| Holding | Repo's own description | Mentions |
+| --- | --- | ---: |
+| Duolingo | BIT thesis cites "Duolingo Max's generative-AI video call" | 0 |
+| Lemonade | "an AI-powered, full-stack insurer" | 0 |
+| Xometry | "an AI-native, two-sided marketplace" | 0 |
+| Axon | "AI-enabled workflows" | 0 |
+
+**And this is the direction where BIT actually acted.**
+`docs/references/bit-capital-editorial-context.md` records that the team exited
+software exposure in February 2026 "as application-layer disruption risk
+increased," cutting from 39 positions to 29. That was a disruption-side call.
+The system is blind in precisely the direction of the client's most visible
+recent decision.
+
+**Design consequence.** Define the coverage universe **once, in the repository,
+with a written reason per name, in and out.** Not per-day by the model — if the
+model chooses the universe each morning it will choose the mega-caps again and
+the bias is simply laundered. BIT's own factsheet supplies the boundary
+language: *"the structural beneficiaries of the AI investment cycle."*
+
+Caution against over-excluding: Oscar Health and Hinge Health are both current
+top-ten positions and Oscar was June's strongest contributor, so "healthtech is
+out of scope" is wrong for the fund. Out of scope for *frontier-lab
+transmission* is the accurate and more honest reason.
 
 ---
 

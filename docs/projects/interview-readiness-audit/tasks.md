@@ -265,10 +265,101 @@ enforced verification from 45% to 61% of citations.
 
 Until then, **disclose the tiers rather than claiming blanket verification.**
 
+### B6 — Portfolio-aware company fan-out (the cascade)
+
+**Adi's proposal, 27 July. This is the highest-value architectural item in the
+project and it is backed by a measurement, not a hunch.**
+
+The idea: stop asking one editorial call to do everything, and split the last
+stage the way the front of the pipeline is already split — cheap to expensive,
+high-recall to high-precision, high-cache to low-cache.
+
+1. **Gate** — exists. Cheap model, yes/no relevance, prompt-cached.
+2. **Fan-out** — new. For each surviving development, require an explicit
+   verdict for every company in the coverage universe: affected or not, and
+   through what mechanism. Cheap model, deliberately tolerant of false
+   positives because a later stage filters.
+3. **Deterministic rank** — new. Score the resulting development × company
+   graph without a model.
+4. **Heavy model** — writes insights for the top-scoring pairs only.
+
+**Why it is justified.** Finding 16 measured the passive version of this. The
+full roster is already in the prompt and coverage still correlates with
+position weight at rho = 0.205; the current top ten is 60.7% of the fund and
+receives 8.5% of coverage. Availability is not consideration. A required
+per-company verdict is the difference.
+
+It also implements the case prompt's own sentence — "connect private-lab
+developments to public-equity landing spots" — as a pipeline stage rather than
+as an emergent property of one large call.
+
+**Design constraints, all of which matter.**
+
+- **Batch, do not fan out literally.** One call per development with the whole
+  universe in a cached prefix, returning a verdict per company. Roughly 77
+  developments/day instead of 77 × N calls. The prompt-cache adapter is already
+  proven at a 61.86% hit rate (`docs/references/model-routing.md`).
+- **Layer 3 must be lexicographic, not weighted.** A weighted sum of
+  position size, affected count and supply-chain spread is exactly the
+  "arbitrary weighted score" the case prompt names as a red flag. Sort in
+  priority order the way `daily-rank-v2` already does.
+- **Stay on the shared LiteLLM endpoint.** Native Responses-API built-in web
+  search would break the repo's routing contract and, more importantly, the
+  "here is exactly what the model saw" property that makes the evidence layer
+  defensible. Keep web retrieval an explicit, logged stage.
+- **The negative verdicts are the deliverable.** "Why nothing on Micron today?"
+  becoming an auditable row with a reason is worth as much as the insights.
+
+**Do not attempt a full re-architecture before Thursday.** Build one read-only
+proof on a single day (21 July is well understood) showing the development ×
+company matrix beside what the current system published. That is a stronger
+interview artifact than a half-migrated pipeline.
+
+### B7 — Define the coverage universe once, in the repo
+
+Blocking prerequisite for B6, and independently useful.
+
+Finding 19: the blind spot is not small-cap, it is disruption-side. Duolingo,
+Lemonade, Xometry and Axon are described as AI-native in the repo's own company
+profiles and were never mentioned once in 17 days, while build-side names are
+covered well.
+
+Write a static, human-reviewed universe with a one-line reason per name, **in
+and out**, split by transmission mechanism (build-side / disruption-side /
+out of scope). Reuse the existing `frontier_ai_channels` field — the schema
+already supports this and most profiles already populate it.
+
+**The universe must not be chosen per-day by the model.** If it is, the model
+will choose the mega-caps again and the bias is laundered rather than fixed.
+
+BIT's own factsheet supplies the boundary language: "the structural
+beneficiaries of the AI investment cycle."
+
+## Shipped this session
+
+- [x] **Roster merge (finding 17).** Added `portfolio_current_top_ten` to
+      `bit-investment-context.json` — the 30 June 2026 factsheet top ten with
+      current weights, fund assets, position count and sector allocation, cited
+      to the HansaInvest PDF and ISIN. The 31 December 2025 audited baseline is
+      untouched, so each disclosure keeps its own provenance.
+- [x] **Three missing profiles.** SanDisk (6.0%), Marvell (4.8%) and Infineon
+      (4.4%) — 15.2% of the current fund — now have full company profiles with
+      `frontier_ai_channels`. Marvell carries a real `bit_public_view` of grade
+      `commentary`, sourced to BIT's own June factsheet text about connecting
+      non-NVIDIA accelerators into NVIDIA's networking fabric.
+- [x] Recorded that weights were materially stale for names already present:
+      **Amazon 1.78% -> 10.40%** (now the largest position), Micron 5.07% ->
+      8.60%, Hinge Health 6.74% -> 4.20%.
+
+**These take effect on the next run. They do not alter the frozen 17-day
+corpus, so the demo is unaffected.**
+
 ## Backlog / Remaining Work
 
 - [ ] Prepare the answer for mega-cap concentration (finding 1 — now diagnosed,
       needs rehearsing rather than fixing).
+- [ ] Decide whether to re-run one day against the merged roster before
+      Thursday, to show Marvell/SanDisk/Infineon actually landing.
 - [ ] Prepare the answer for insight scoring absence (findings 3 and 9).
 - [ ] Prepare the answer for cross-platform entity resolution (finding 2).
 - [ ] Consider aligning the Insights page subtitle to BIT's own wording
