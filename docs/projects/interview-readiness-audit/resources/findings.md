@@ -30,6 +30,8 @@ Severity is judged by one question: **does this cost Adi the job?**
 | 17 | Three current top-ten positions absent from the system | high | **fixed this session** — roster merged |
 | 18 | Company linkage is high quality wherever it happens | — | **asset** — 614/614 labels correct |
 | 19 | The blind spot is disruption-side, not small-cap | high | **B7** — needs a coverage universe |
+| 20 | The prompt's examples are a coverage taxonomy; half is thin | high | **B9** — talent lane at 3.6% |
+| 21 | Output does not use the requested "implications, tickers, theses" framing | high | **B10** — 13/442 carry a ticker |
 
 Findings 7, 9 and 18 are strengths, recorded here because they were discovered by
 measurement rather than assumed. Findings 10 and 12 were independently found by
@@ -929,6 +931,100 @@ Caution against over-excluding: Oscar Health and Hinge Health are both current
 top-ten positions and Oscar was June's strongest contributor, so "healthtech is
 out of scope" is wrong for the fund. Out of scope for *frontier-lab
 transmission* is the accurate and more honest reason.
+
+---
+
+## 20. The case prompt's examples are a coverage taxonomy, and half of it is thin
+
+The prompt does not just describe two audiences. It names **four concrete
+archetypes per lane**. Read as a specification rather than as illustration, it
+is a coverage contract the system can be measured against.
+
+Measured across the frozen corpus with keyword proxies — treat as direction,
+not precision.
+
+**Investment — 442 insights**
+
+| The prompt's own example | Coverage |
+| --- | ---: |
+| "a star researcher leaving a lab to found a startup" | **3.6%** |
+| "a capability jump that threatens a holding's moat or validates a thesis" | 15.8% |
+| "shifts in the competitive map between the public names exposed to AI" | 9.3% |
+| "implications for the semiconductor ... supply chain" | 10.6% |
+| "implications for the ... energy supply chain" | 7.0% |
+
+**AI Engineering — 697 insights**
+
+| The prompt's own example | Coverage |
+| --- | ---: |
+| "a new agentic-orchestration ... technique" | 32.3% |
+| "evaluation technique to bring into our own platform" | 41.8% |
+| "a cheaper/better open model" | **6.0%** |
+| "a paper that changes how we'd build a pipeline" | **7.6%** |
+
+**Both lanes cover two archetypes well and two badly.** That is a more useful
+organising principle than "improve insight quality," because it is countable
+and it comes from the client's own words.
+
+**The sharpest miss is talent movement.** It is the *first* example the prompt
+gives, and it is the weakest lane at 3.6% — while this repository runs a person
+registry (`src/fli/registry/`) and a tracked X following graph. The people
+signal is collected and does not become Investment output. That is an
+unconnected pipe, not missing data. It is also the archetype where a
+private-lab tracker has the most natural edge: lab departures are visible on X
+long before they appear in any filing.
+
+**Second sharpest: "a cheaper/better open model" at 6.0% in the engineering
+lane.** That is the archetype with the most direct build consequence — it is
+the one where a reader would actually swap something — and it is nearly absent.
+This is consistent with the theme concentration recorded in finding 8
+(eval/traces 41%, containment 19%, routing 16%, retrieval 10%).
+
+**Design consequence — a coverage report, not a quota.** The daily brief should
+be able to state which archetypes it covered and which it did not: *"no
+talent-movement signal today."* Stated absence is a feature and matches the
+declined-log discipline that already makes this system credible. Padding four
+slots every day would destroy exactly the property that makes the funnel
+defensible.
+
+Commands: regex proxies over `editorial_insight` title / what_changed /
+interpretation / next_step, split by audience.
+
+---
+
+## 21. The output does not use the framing the prompt asked for
+
+The prompt specifies the framing for each lane in four words.
+
+**Investment: "implications, tickers, theses."**
+
+- *Implications* — the system does this well. Interpretation fields carry real
+  second-order reasoning.
+- *Tickers* — **13 of 442 Investment insights contain a ticker symbol.**
+  Companies are named as companies, not as tradeable instruments. A PM reading
+  "memory makers" cannot act; "Micron (MU)" is actionable.
+- *Theses* — largely absent. Every position is held for a reason, and the
+  useful question is whether a development *validates or threatens that
+  reason*. The system reports impact direction (finding 18) but does not tie it
+  to a stated thesis.
+
+This is the frustrating part: `bit-investment-context.json` already stores
+`bit_public_view.thesis`, `edge`, `signals` and `countercase` for every
+company. **The data exists and the output layer does not use it.** Wiring
+thesis-impact into the insight schema is plumbing, not research.
+
+**AI Engineering: "technical, build-relevant."** This lane is closer — finding
+7 recorded that all 124 engineering insights carry a `decision_rule`. What is
+missing is the *target*: build-relevant to which part of a platform? See B8.
+
+**Cheapest high-value fix in the project.** Add three fields to the Investment
+insight schema — `ticker`, `thesis_touched`, `thesis_effect`
+(validates / threatens / neutral) — populated from context the system already
+loads. It converts prose that happens to contain implications into a structure
+that *is* implications, tickers, theses.
+
+Command: ticker-symbol regex over the four Investment prose fields; thesis
+fields inspected in `bit-investment-context.json`.
 
 ---
 

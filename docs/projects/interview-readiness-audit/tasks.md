@@ -315,6 +315,17 @@ proof on a single day (21 July is well understood) showing the development ×
 company matrix beside what the current system published. That is a stronger
 interview artifact than a half-migrated pipeline.
 
+A runnable starting point is checked in at
+`resources/fanout-probe.py` — it reads the gated candidates for one day,
+forces a verdict per company, and writes JSON under `tmp/`. It touches no
+pipeline state.
+
+**The architecture generalises to both lanes.** The fan-out needs a *target
+roster* on each side. Investment now has one (37 companies with weights,
+tickers and theses). AI Engineering has no equivalent — see B8. Once both
+exist, the same cascade runs twice with a different roster, which is what makes
+this a system rather than two prompts.
+
 ### B7 — Define the coverage universe once, in the repo
 
 Blocking prerequisite for B6, and independently useful.
@@ -334,6 +345,57 @@ will choose the mega-caps again and the bias is laundered rather than fixed.
 
 BIT's own factsheet supplies the boundary language: "the structural
 beneficiaries of the AI investment cycle."
+
+### B8 — Build-surface roster for the AI Engineering lane
+
+The symmetric object to the portfolio roster, and it does not exist.
+
+The prompt asks for insights that are "build-relevant" and names the target:
+"bring into our own platform", "a paper that changes how we'd build a
+pipeline." That implies a named set of build surfaces to land developments on.
+
+Write 8–12 surfaces with a one-line scope each — orchestration, evaluation
+harness, retrieval, model routing, containment and sandboxing, observability
+and tracing, cost control, data collection, prompt and context management.
+Derive them from this repository's own architecture where possible, so the
+claims stay first-party and verifiable, and keep them generic enough not to
+assert anything about BIT's private Aion internals
+(`docs/references/ai-engineering-editorial-context.md` forbids that).
+
+Then the fan-out asks, per surface: *does this development change how we would
+build X?* Verdict, mechanism, direction. "Why nothing on retrieval today?"
+becomes an auditable row.
+
+### B9 — Archetype coverage report
+
+Finding 20: the prompt names four archetypes per lane and the corpus covers two
+well and two badly in each.
+
+Tag each insight with the archetype it serves, then report coverage per day.
+The output is a line the brief can state honestly: *"no talent-movement signal
+today."*
+
+**This must not become a quota.** Padding four slots every day would destroy
+the declined-log discipline that makes the funnel credible. Stated absence is
+the feature.
+
+Highest-value single gap: **talent movement, 3.6%**, the prompt's first
+example, while a person registry and a tracked X following graph already run in
+this repo. Connecting that pipe is likely a routing and prompt change rather
+than new collection.
+
+### B10 — Emit the framing the prompt asked for
+
+Finding 21. Cheapest high-value item in the project.
+
+Add to the Investment insight schema: `ticker`, `thesis_touched`,
+`thesis_effect` (validates / threatens / neutral). All three are populated from
+`bit-investment-context.json`, which the system already loads — the thesis,
+edge, signals and countercase fields are there and unused by the output layer.
+
+Currently 13 of 442 Investment insights contain a ticker symbol. The framing
+words in the prompt are "implications, tickers, theses"; the schema should read
+back as those three things rather than hoping the prose contains them.
 
 ## Shipped this session
 
@@ -360,6 +422,10 @@ corpus, so the demo is unaffected.**
       needs rehearsing rather than fixing).
 - [ ] Decide whether to re-run one day against the merged roster before
       Thursday, to show Marvell/SanDisk/Infineon actually landing.
+- [ ] Run `resources/fanout-probe.py` (start `--limit 5`) and compare the
+      matrix against what was published on 21 July. Unrun as of 2026-07-27.
+- [ ] Connect the person registry to the Investment lane — the prompt's first
+      example (talent movement) is the weakest archetype at 3.6% (finding 20).
 - [ ] Prepare the answer for insight scoring absence (findings 3 and 9).
 - [ ] Prepare the answer for cross-platform entity resolution (finding 2).
 - [ ] Consider aligning the Insights page subtitle to BIT's own wording
@@ -425,3 +491,34 @@ corpus, so the demo is unaffected.**
   one-sentence answer. Also confirmed alerts (Slack + email) and PDF export are
   real, zero Event double-counting across 199 Insights, and AI Engineering
   rho=0.42 vs Investment rho=0.18 on the finding-9 measurement.
+- 2026-07-27: [DONE] Portfolio lane, prompted by Adi's cascade proposal.
+  **Corrected an earlier error in this audit:** the portfolio roster *does*
+  exist as structured data and *is* already loaded into every Investment call
+  (`bit-investment-context.json`, 34 audited holdings + 34 company profiles,
+  103K chars). **16:** coverage does not track it — Spearman(weight, mentions)
+  = 0.205; the current top ten is 60.7% of the fund and receives 8.5% of
+  coverage, while four names outside it receive 73.4%. **17:** SanDisk (6.0%),
+  Marvell (4.8%) and Infineon (4.4%) were absent from the system entirely.
+  **18:** linkage quality is a strength — 614/614 `scope: portfolio` labels
+  matched a real holding, zero hallucinated holdings, median mechanism 147
+  chars, impact 39/27/20/14 positive/mixed/uncertain/negative. **19:** the
+  blind spot is disruption-side (Duolingo, Lemonade, Xometry, Axon — all
+  AI-native per the repo's own profiles, all zero mentions), not small-cap.
+  **Roster merged this session**; `_covered_holdings()` extends the
+  one-lens-per-holding invariant rather than weakening it. Discovered while
+  merging: weights were stale for names already present — **Amazon 1.78% ->
+  10.40%**, now the largest position in the fund.
+- 2026-07-27: [DONE] Read the case prompt's audience section as a
+  specification. **20:** its examples are a four-archetype taxonomy per lane,
+  and both lanes cover two well and two badly. Talent movement — the prompt's
+  *first* example — sits at 3.6% despite a person registry and a tracked X
+  network already running; "a cheaper/better open model" sits at 6.0% in the
+  engineering lane. **21:** the requested framing "implications, tickers,
+  theses" is not emitted — 13 of 442 Investment insights contain a ticker, and
+  `bit_public_view.thesis` is stored per company but unused by the output
+  layer. Added B8 (build-surface roster, the symmetric object to the portfolio
+  roster for the engineering lane), B9 (archetype coverage report, explicitly
+  not a quota) and B10 (emit ticker/thesis fields). Saved a runnable read-only
+  fan-out probe at `resources/fanout-probe.py`; verified it assembles a
+  37-company × 66-development matrix with a ~15K-char cacheable prefix, and
+  left it unrun pending Adi's decision.
