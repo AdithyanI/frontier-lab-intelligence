@@ -1,6 +1,6 @@
 # Workflow Economics
 
-Last verified: 2026-07-26
+Last verified: 2026-07-27
 
 This is the glanceable cost map for the current Frontier Lab Intelligence
 workflow. It separates measured spend from provider estimates and from local
@@ -20,8 +20,8 @@ X provider request.
 | Per-Event working Insights | Final cohort: 1,474 Event/audience pairs across 965 Events | Final correction reused 1,451 exact outputs; initial migration reused 524 | 981 GPT-5.6-terra/high calls across both migration passes; 23 in the final correction | $15.923542 total; $0.361769 in the final correction |
 | Artifact projection | 6,298 observations; 5,378 artifacts | Existing bodies and snapshots | None | $0 |
 | Semantic index | 524 stored `text-embedding-3-large` vectors | Existing packet-keyed vectors | None in this replay | Aggregate historical cost was not durably reconciled |
-| Daily editorial briefs | 17-day GPT-5.6-sol/xhigh batch launched | Existing exact evidence and prior annotations where valid | One persisted agent task per day | App Server does not report dollar spend here; replay still in progress |
-| PDFs and UI projections | Target: two audiences across 17 days | Deterministic local rendering and cache | None | $0; final refresh still in progress |
+| Daily editorial briefs | 17 complete GPT-5.6-sol/xhigh tasks; 965 Events and 1,474 audience pairs reviewed | Existing exact evidence and current per-Event annotations | One persisted agent task per day; 199 published Insights with 353 citations | App Server does not report dollar spend for these tasks |
+| PDFs and UI projections | Two audiences across all 17 days; 34 current PDFs | Deterministic local rendering and content-addressed cache | None | $0 |
 
 The measured LiteLLM increment before the daily editorial tasks is
 **$18.974288** across the initial clean migration and the final tie-aware

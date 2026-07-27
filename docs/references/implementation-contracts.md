@@ -264,10 +264,11 @@ artifacts. Independently authored replies/quotes/reactions and pure reposts
 stay in the Feed activity ledger but do not enter the model. The model view is
 capped at 20,000 `o200k_base` tokens with an explicit truncation marker. The
 current v9 / `daily-rank-v2` 17-day cohort completed 1,674/1,674 packets with
-zero failures: 512 both, 182 Engineering-only, 276 Investment-only, and 704
-neither. Exact Event/evidence/input reuse supplied 976 rows. The remaining 698
-new requests recorded 636 cache reads, 1,139,712 cached of 2,000,998 input
-tokens, and $2.961695 incremental proxy cost.
+zero failures: 509 both, 183 Engineering-only, 273 Investment-only, and 709
+neither. The final tie-aware correction reused 1,647 exact
+Event/evidence/input judgments and made 27 new calls for $0.089051 incremental
+proxy cost. Across the initial migration and final correction, 725 calls cost
+$3.050746.
 The current prompt asks for roughly
 40–50 words per reason as soft guidance, never a schema limit. The frozen v7
 boundary treats a specific attributed Investment thesis as potentially useful

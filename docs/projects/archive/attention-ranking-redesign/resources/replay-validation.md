@@ -60,3 +60,24 @@ Event rank.
 The authoritative reusable narrative lives in
 `docs/references/scoring-validation.md`; this file preserves the project-close
 replay checkpoint.
+
+## Downstream completion
+
+The clean migration reaches every consumer of the daily top 100:
+
+- Audience routing: 1,674 Events across 17 complete days; 509 both,
+  183 Engineering-only, 273 Investment-only, and 709 neither. The final
+  correction reused 1,647 exact judgments and made 27 new calls.
+- Per-Event working Insights: 1,474 Event/audience decisions across 965
+  Events; 619 surfaced and 855 suppressed. The final correction reused 1,451
+  exact outputs and made 23 new calls.
+- Daily editorial: 17 exact-lineage `daily-orchestration-v3` runs covering 965
+  candidate Events and 1,474 audience pairs, publishing 199 Insights with 353
+  citations.
+- Product projection: all 17 dates are readable in the live UI and both
+  audiences render from the current editorial lineage. The content-addressed
+  cache was rebuilt as 34 PDFs; all passed PDF signature, text, page-count,
+  content-type, and report-version checks.
+
+The migration made no X provider request. Saved raw evidence, artifact bodies,
+and exact compatible model judgments supplied the reusable inputs.

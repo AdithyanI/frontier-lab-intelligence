@@ -31,7 +31,7 @@
   source entity before the complete union is known.
 - Lexicographic rules make priorities testable, but they do not eliminate the
   need for behavioral measurement. Trusted-voter count defines the bands;
-  mean voter network position separated 79.4% of adjacent top-100 pairs in the
+  mean voter network position separated 80.1% of adjacent top-100 pairs in the
   17-day replay, so it is a load-bearing second layer and should be described
   honestly.
 - Downstream relevance labels are useful diagnostics, not ground truth. The
@@ -67,3 +67,11 @@
   1,451 of 1,474 per-Event Insight outputs. Strict lineage therefore made a
   mathematical correction cheap while still regenerating every genuinely new
   boundary item.
+- A replay is not complete when model rows finish. The reader, PDF endpoint,
+  and deterministic caches must all prove that they resolve the same exact
+  editorial lineage. Rebuilding and validating all 34 audience/day PDFs caught
+  that boundary explicitly instead of assuming the UI made it current.
+- The strongest completion check is a second no-op run. After the 17-day batch
+  completed, a dry run reported no routing call, no external evidence
+  collection, and no Codex launch for any date. That proves the durable state,
+  rather than the terminal output alone, is complete and resumable.

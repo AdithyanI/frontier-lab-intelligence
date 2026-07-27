@@ -108,15 +108,15 @@ for routine approval.
       distinct canonical-day trusted voters.
 - [x] All 17 saved days are reranked and each day's new top 100 is materialized
       without requiring an X refetch.
-- [ ] Audience routing, per-Event Insights, daily briefs, PDFs, and UI
+- [x] Audience routing, per-Event Insights, daily briefs, PDFs, and UI
       projections agree with the new top-100 cohorts and ranks.
 - [x] Exact reusable routing and per-Event Insight judgments are preserved;
       every missing or invalidated routing/Insight output is regenerated.
-- [ ] Every missing or invalidated daily editorial output is regenerated.
-- [ ] Code, API contracts, rank disclosure, How narrative,
+- [x] Every missing or invalidated daily editorial output is regenerated.
+- [x] Code, API contracts, rank disclosure, How narrative,
       architecture/reference docs, tests, built SPA assets, and cost telemetry
       agree on the same versioned contract.
-- [ ] `scripts/check-fast.sh` passes and the relevant local UI is visually
+- [x] `scripts/check-fast.sh` passes and the relevant local UI is visually
       verified.
 
 ## Milestones
@@ -127,11 +127,11 @@ for routine approval.
 - [x] Milestone 2 — Implement and replay `daily-rank-v2`.
       Acceptance: the complete Event is the scoring boundary, all 17 saved
       days produce deterministic ranks, and each new top 100 is materialized.
-- [ ] Milestone 3 — Refresh all downstream intelligence.
+- [x] Milestone 3 — Refresh all downstream intelligence.
       Acceptance: routing, per-Event Insights, daily editorial briefs, PDFs,
       and UI projections refer to the new cohorts and ranks; exact cached
       judgments are reused where valid.
-- [ ] Milestone 4 — Validate, document, and archive.
+- [x] Milestone 4 — Validate, document, and archive.
       Acceptance: backend/frontend checks and local product proof pass, costs
       and residual limits are documented, `learnings.md` is reviewed, and the
       tracker moves to `docs/projects/archive/attention-ranking-redesign/`.
@@ -214,8 +214,9 @@ for routine approval.
 
 ## Open Questions / Blockers
 
-- No design or spending blocker remains.
-- No open blocker. The migration is active.
+- No design, spending, or execution blocker remains.
+- The migration is complete. Optional recall and source-expansion questions
+  remain deferred rather than blocking this project.
 
 ## Current Batch
 
@@ -226,7 +227,7 @@ for routine approval.
 | done | Audit the Event projection seam, affected contracts, and highest-risk regression tests without changing files | explorer |  |
 | done | Implement the clean `daily-rank-v2` backend/API migration and replay all 17 saved days | parent | `resources/implementation-spec.md` |
 | done | Materialize the 17 exact-rank routing cohorts and refresh every routed-positive per-Event Insight | parent | `resources/replay-validation.md` |
-| in_progress | Import 17 exact-lineage v3 daily briefs, then rebuild PDFs and product projections | parent |  |
+| done | Import 17 exact-lineage v3 daily briefs, then rebuild PDFs and product projections | parent | `resources/replay-validation.md` |
 
 ## Backlog / Remaining Work
 
@@ -317,6 +318,18 @@ for routine approval.
   editorials now fail closed, weekly Event responses no longer expose a
   misleading single-day rank SHA, and normal one-day orchestration resumes
   require the same Event/Feed/routing/cohort/rank lineage as batch runs.
-- 2026-07-27: [IN PROGRESS] Launched the authoritative 17-day
-  `daily-orchestration-v3` batch with four concurrent GPT-5.6-sol/xhigh
-  Standard tasks over the final routing and Insight cohort.
+- 2026-07-27: [DONE] Completed the authoritative 17-day
+  `daily-orchestration-v3` batch with zero failed days. The final editorial
+  state covers 965 candidate Events and 1,474 audience pairs, publishing 199
+  Insights with 353 citations.
+- 2026-07-27: [DONE] Rebuilt both audience PDFs for all 17 dates into 34
+  content-addressed cache entries, verified every file's PDF signature,
+  version, text, page count, and content type, and visually inspected opening,
+  interior, and closing pages for both audiences. The live How, Feed,
+  Architecture, and 21 July Insights surfaces render the current rank and
+  editorial lineage with no browser warnings or errors.
+- 2026-07-27: [DONE] Closed the clean migration after 507 backend tests, 66
+  frontend tests, frontend lint/build, and `scripts/check-fast.sh` passed. No X
+  provider request was made. The measured LiteLLM migration increment was
+  $18.974288; App Server did not expose dollar spend for the 17 editorial
+  tasks.

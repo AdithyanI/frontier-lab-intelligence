@@ -386,17 +386,17 @@ Do not leave these describing the old formula:
 
 ## 10. Done when
 
-- [ ] `attention.py` exposes only the layered contract; `trusted_attention.py`
+- [x] `attention.py` exposes only the layered contract; `trusted_attention.py`
       is deleted; no weight, cap, or knee constant remains in `src/fli/scoring/`.
-- [ ] Events, CLI, and API emit the new `rank_components` with no
+- [x] Events, CLI, and API emit the new `rank_components` with no
       legacy aliases.
-- [ ] Feed disclosure and `/how#why-rank` describe exactly the shipped
+- [x] Feed disclosure and `/how#why-rank` describe exactly the shipped
       behaviour.
-- [ ] Unit, web, and regression tests pass and cover every invariant in §2.
-- [ ] Replay output over every currently published day is stored under
+- [x] Unit, web, and regression tests pass and cover every invariant in §2.
+- [x] Replay output over every currently published day is stored under
       `resources/`, including the hit-rate gradient and layer-attribution
       shares.
-- [ ] Routing, per-Event Insights, daily editorial briefs, PDFs, and UI
+- [x] Routing, per-Event Insights, daily editorial briefs, PDFs, and UI
       projections are complete for the migrated cohorts.
-- [ ] All documents in §8 updated.
-- [ ] `scripts/check-fast.sh` passes and the local UI is visually verified.
+- [x] All documents in §8 updated.
+- [x] `scripts/check-fast.sh` passes and the local UI is visually verified.
