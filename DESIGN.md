@@ -319,10 +319,18 @@ Rules:
   standard; contradictions, unknowns, and a source ledger. The **Company
   universe** is a searchable, filterable, expandable ledger derived from the
   canonical Investment context packet. It keeps every sourced profile visible
-  for review and exposes dated portfolio context, business descriptions,
-  operating drivers, two-sided frontier-AI transmission channels, source-graded
-  BIT views, cautions, and source links. Its four-control row remains Search
-  context, Disclosure, Public evidence, and Sort. Each collapsed company row
+  for review. Each expanded row leads with one compact **Context used by the
+  agent** block: the business model, operating drivers, and known AI exposures
+  that cold-start Event analysis. These exposures are starting hypotheses, not
+  a closed taxonomy or relevance score. Detailed opportunity, risk, and
+  watchpoint research remains available through one subordinate disclosure,
+  while source-graded BIT views, research limits, company sources, and
+  disclosure history stay visibly separate. The UI never shows or ranks by an
+  AI-pathway count. The view opens directly on one compact disclosure note and
+  the working controls; it does not repeat the BIT Lens title with a second
+  landing header or a statistics band. Its four-control row remains Search
+  context, Disclosure, Public evidence, and Sort, with the three menus using the
+  same editorial menu grammar as Evidence. Each collapsed company row
   shows exactly one dated reference weight: the 30 June 2026 current top-ten
   weight when available, otherwise the 31 December 2025 audited weight marked
   `Last confirmed`. Expanded Disclosure history keeps both dated public values

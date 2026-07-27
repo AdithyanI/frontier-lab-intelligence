@@ -226,67 +226,11 @@
 /* ---- Company universe: inspectable context ledger ---- */
 
 .company-universe-view {
-  margin-top: 36px;
+  margin-top: 20px;
   padding-bottom: 72px;
 }
 
-.company-universe-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
-  gap: 48px;
-  align-items: end;
-}
-
-.company-universe-intro h2 {
-  max-width: 18ch;
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.12;
-}
-
-.company-universe-intro > div > p {
-  max-width: 68ch;
-  margin: 14px 0 0;
-  color: var(--ink-soft);
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-.company-scope-note {
-  margin: 0;
-  padding: 16px 0 2px 20px;
-  border-left: 1px solid var(--border-strong);
-  color: var(--ink-soft);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.company-scope-note strong { color: var(--ink); }
-
-.company-universe-facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 32px 0 0;
-  border-top: 1px solid var(--border-strong);
-  border-bottom: 1px solid var(--border-strong);
-}
-
-.company-universe-facts > div {
-  min-width: 0;
-  padding: 15px 18px;
-  border-right: 1px solid var(--border);
-}
-
-.company-universe-facts > div:first-child { padding-left: 0; }
-
-.company-universe-facts > div:last-child {
-  padding-right: 0;
-  border-right: 0;
-}
-
-.company-universe-facts dt,
-.company-universe-tools label > span {
+.company-search > span {
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 9.5px;
@@ -294,28 +238,26 @@
   text-transform: uppercase;
 }
 
-.company-universe-facts dd {
-  margin: 6px 0 0;
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
 .company-universe-method {
   display: flex;
   justify-content: space-between;
   gap: 32px;
-  padding: 14px 0;
+  padding: 12px 0 14px;
+  border-top: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border);
 }
 
 .company-universe-method p {
-  max-width: 76ch;
+  max-width: 92ch;
   margin: 0;
   color: var(--muted);
   font-size: 11.5px;
   line-height: 1.55;
+}
+
+.company-universe-method p strong {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .company-universe-method > div {
@@ -333,36 +275,55 @@
 
 .company-universe-tools {
   display: grid;
-  grid-template-columns: minmax(260px, 1.45fr) repeat(3, minmax(160px, 0.75fr));
-  gap: 12px;
-  margin-top: 32px;
+  grid-template-columns: minmax(280px, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-top: 24px;
 }
 
-.company-universe-tools label {
+.company-search {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 7px;
 }
 
-.company-universe-tools input,
-.company-universe-tools select {
+.company-search input {
   width: 100%;
-  height: 42px;
+  min-height: 44px;
   padding: 0 12px;
   border: 1px solid var(--border-strong);
   border-radius: 0;
   background: var(--bg);
   color: var(--ink);
   font: 12.5px/1 var(--font-ui);
+  transition: background 150ms var(--ease-out), border-color 150ms var(--ease-out);
 }
 
-.company-universe-tools input::placeholder { color: var(--muted); }
+.company-search input::placeholder { color: var(--muted); }
+.company-search input:hover { background: var(--surface); }
 
-.company-universe-tools input:focus-visible,
-.company-universe-tools select:focus-visible {
+.company-search input:focus-visible {
   outline: 2px solid var(--blue-mid);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+.company-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.company-filter-menu > summary {
+  min-width: 178px;
+}
+
+.company-filter-menu:last-child > summary {
+  min-width: 190px;
+}
+
+.company-filter-menu .feed-menu-caret {
+  margin-left: auto;
 }
 
 .company-ledger-head {
@@ -414,7 +375,7 @@
   border-bottom: 1px solid var(--border);
 }
 
-.company-ledger summary {
+.company-ledger > details > summary {
   position: relative;
   display: grid;
   grid-template-columns: minmax(120px, 0.75fr) minmax(150px, 0.9fr) minmax(0, 2.2fr) minmax(145px, 0.8fr);
@@ -427,9 +388,9 @@
   transition: background 150ms var(--ease-out);
 }
 
-.company-ledger summary::-webkit-details-marker { display: none; }
+.company-ledger > details > summary::-webkit-details-marker { display: none; }
 
-.company-ledger summary::before {
+.company-ledger > details > summary::before {
   position: absolute;
   top: 21px;
   left: 5px;
@@ -438,15 +399,15 @@
   font: 13px/1 var(--font-mono);
 }
 
-.company-ledger details[open] summary {
+.company-ledger > details[open] > summary {
   background: var(--surface);
 }
 
-.company-ledger details[open] summary::before { content: "−"; }
+.company-ledger > details[open] > summary::before { content: "−"; }
 
-.company-ledger summary:hover { background: var(--surface); }
+.company-ledger > details > summary:hover { background: var(--surface); }
 
-.company-ledger summary:focus-visible {
+.company-ledger > details > summary:focus-visible {
   z-index: 1;
   outline: 2px solid var(--blue-mid);
   outline-offset: -2px;
@@ -497,7 +458,7 @@
   font-size: 9.5px;
 }
 
-.company-ledger summary > p {
+.company-ledger > details > summary > p {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
@@ -514,11 +475,6 @@
   align-items: flex-end;
   flex-direction: column;
   gap: 9px;
-}
-
-.company-row-evidence > .mono {
-  color: var(--muted);
-  font-size: 9.5px;
 }
 
 .company-evidence-grade {
@@ -556,27 +512,24 @@
   border-top: 1px solid var(--border);
 }
 
-.company-business-context,
-.company-detail-footer {
+.company-agent-context {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  grid-template-columns: minmax(180px, 0.55fr) minmax(0, 1.45fr);
   gap: 44px;
 }
 
 .company-disclosure-history {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 44px;
+  min-width: 0;
 }
 
-.company-disclosure-history > div > p {
-  max-width: 58ch;
+.company-disclosure-history > p {
+  max-width: 42ch;
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 10.5px;
 }
 
 .company-disclosure-history dl {
-  margin: 0;
+  margin: 12px 0 0;
   border-top: 1px solid var(--border-strong);
 }
 
@@ -626,6 +579,88 @@
 
 .company-detail p { margin: 9px 0 0; }
 
+.company-context-heading > p {
+  max-width: 30ch;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.company-context-heading > .mono {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--blue-ink);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.company-context-copy {
+  max-width: 74ch;
+}
+
+.company-context-copy > p:first-child {
+  margin-top: 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.company-context-copy strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.company-context-rule {
+  margin-top: 18px !important;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  color: var(--muted) !important;
+  font-size: 11.5px !important;
+}
+
+.company-supporting-context {
+  grid-column: 2;
+  margin-top: 2px;
+  border-top: 1px solid var(--border-strong);
+}
+
+.company-supporting-context > summary {
+  position: relative;
+  padding: 13px 24px 13px 0;
+  color: var(--blue-ink);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+
+.company-supporting-context > summary::-webkit-details-marker { display: none; }
+
+.company-supporting-context > summary::after {
+  position: absolute;
+  top: 17px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  content: "";
+  transform: rotate(45deg);
+  transition: transform 150ms var(--ease-out);
+}
+
+.company-supporting-context[open] > summary::after {
+  top: 20px;
+  transform: rotate(225deg);
+}
+
+.company-supporting-context > summary:hover { color: var(--ink); }
+
+.company-supporting-context > summary:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 2px;
+}
+
 .company-text-list {
   margin: 9px 0 0;
   padding: 0;
@@ -668,7 +703,7 @@
 }
 
 .company-channel-list {
-  margin-top: 18px;
+  margin-top: 0;
   border-top: 1px solid var(--border-strong);
 }
 
@@ -756,7 +791,6 @@
 .company-missing-view {
   max-width: 72ch;
   padding: 14px 0;
-  border-bottom: 1px solid var(--border);
 }
 
 .company-source-list {
@@ -767,7 +801,13 @@
 
 .company-source-list li + li { margin-top: 6px; }
 
-.company-detail-footer > div { min-width: 0; }
+.company-support-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) minmax(250px, 0.9fr);
+  gap: 40px;
+}
+
+.company-support-grid > div { min-width: 0; }
 
 .company-universe-state,
 .company-universe-empty {
@@ -792,20 +832,20 @@
 .company-universe-state button { margin-top: 16px; padding: 0; }
 
 @media (max-width: 980px) {
-  .company-universe-intro {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .company-scope-note {
-    max-width: 72ch;
-  }
-
   .company-universe-tools {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
-  .company-ledger summary {
+  .company-filter-controls {
+    justify-content: flex-start;
+  }
+
+  .company-filter-menu > summary,
+  .company-filter-menu:last-child > summary {
+    min-width: 0;
+  }
+
+  .company-ledger > details > summary {
     grid-template-columns: minmax(120px, 0.7fr) minmax(145px, 0.8fr) minmax(0, 1.8fr);
   }
 
@@ -825,23 +865,26 @@
   }
 
   .company-universe-tools,
-  .company-ledger summary,
-  .company-disclosure-history,
-  .company-business-context,
-  .company-detail-footer,
+  .company-ledger > details > summary,
+  .company-agent-context,
+  .company-support-grid,
   .company-channel-directions {
     grid-template-columns: 1fr;
   }
 
-  .company-ledger summary { gap: 12px; }
+  .company-ledger > details > summary { gap: 12px; }
   .company-row-evidence { grid-column: auto; }
   .company-detail { padding-right: 20px; padding-left: 20px; }
+  .company-supporting-context { grid-column: 1; }
 
-  .company-universe-facts { grid-template-columns: 1fr; }
-  .company-universe-facts > div {
-    padding-left: 0;
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
+  .company-filter-controls {
+    display: grid;
+    grid-template-columns: 1fr;
   }
-  .company-universe-facts > div:last-child { border-bottom: 0; }
+
+  .company-filter-menu > summary,
+  .company-filter-menu:last-child > summary {
+    width: 100%;
+  }
+
 }

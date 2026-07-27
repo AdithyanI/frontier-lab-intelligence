@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   getCachedJSON,
   type BitPublicViewGrade,
@@ -32,12 +32,102 @@ const sourceScopeCopy = {
   none: 'No public BIT view',
 }
 
+interface CompanyMenuOption<T extends string> {
+  value: T
+  label: string
+  description: string
+}
+
+const disclosureOptions: readonly CompanyMenuOption<DisclosureFilter>[] = [
+  { value: 'all', label: 'All profiles', description: 'Show every company profile' },
+  { value: 'current', label: 'Current top ten', description: 'Show the June 2026 top ten' },
+  { value: 'audited', label: 'Audited baseline', description: 'Show companies in the complete December 2025 portfolio' },
+  { value: 'later', label: 'Later additions', description: 'Show current top-ten names absent from the audited baseline' },
+]
+
+const evidenceOptions: readonly CompanyMenuOption<EvidenceFilter>[] = [
+  { value: 'all', label: 'All grades', description: 'Show every public-evidence grade' },
+  { value: 'explicit_thesis', label: 'BIT thesis', description: 'Show companies with a sourced public BIT thesis' },
+  { value: 'commentary', label: 'BIT commentary', description: 'Show companies with sourced public BIT commentary' },
+  { value: 'none', label: 'Analyst context only', description: 'Show companies without a public BIT view in the packet' },
+]
+
+const sortOptions: readonly CompanyMenuOption<CompanySort>[] = [
+  { value: 'portfolio', label: 'Portfolio disclosure', description: 'Show current top-ten names first, then the audited baseline by weight' },
+  { value: 'name', label: 'Company name', description: 'Sort companies alphabetically' },
+]
+
 function formatDay(day: string) {
   return dayFormatter.format(new Date(`${day}T12:00:00Z`))
 }
 
 function formatWeight(weight: number) {
   return `${weight.toFixed(2).replace(/\.?0+$/, '')}%`
+}
+
+function joinContextItems(items: string[]) {
+  if (items.length < 2) return items[0] ?? ''
+  if (items.length === 2) return `${items[0]} and ${items[1]}`
+  return `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`
+}
+
+function CompanyMenuSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: T
+  options: readonly CompanyMenuOption<T>[]
+  onChange: (value: T) => void
+}) {
+  const detailsRef = useRef<HTMLDetailsElement>(null)
+  const selected = options.find((option) => option.value === value) ?? options[0]
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!detailsRef.current?.contains(event.target as Node)) {
+        detailsRef.current?.removeAttribute('open')
+      }
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') detailsRef.current?.removeAttribute('open')
+    }
+    window.addEventListener('pointerdown', closeOnOutsideClick)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.removeEventListener('pointerdown', closeOnOutsideClick)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [])
+
+  return (
+    <details className="feed-menu company-filter-menu" ref={detailsRef}>
+      <summary aria-label={`${label}: ${selected.description}`}>
+        <span className="feed-menu-label mono">{label}</span>
+        <span className="feed-menu-value">{selected.label}</span>
+        <span className="feed-menu-caret" aria-hidden="true" />
+      </summary>
+      <div className="feed-menu-panel" role="group" aria-label={label}>
+        {options.map((option) => (
+          <button
+            type="button"
+            key={option.value}
+            className={option.value === value ? 'is-active' : ''}
+            onClick={() => {
+              onChange(option.value)
+              detailsRef.current?.removeAttribute('open')
+            }}
+            aria-pressed={option.value === value}
+            title={option.description}
+          >
+            <span>{option.label}</span>
+          </button>
+        ))}
+      </div>
+    </details>
+  )
 }
 
 function SourceList({ sources }: { sources: CompanySource[] }) {
@@ -102,84 +192,62 @@ function PortfolioContext({ company }: { company: InvestmentCompany }) {
 function CompanyDetail({ company }: { company: InvestmentCompany }) {
   const analyst = company.analyst_context
   const publicView = company.bit_public_view
+  const knownExposureNames = analyst.frontier_ai_channels.map((channel) => channel.channel)
 
   return (
     <div className="company-detail">
-      <section className="company-detail-section company-disclosure-history">
-        <div>
-          <h3>Disclosure history</h3>
+      <section className="company-detail-section company-agent-context">
+        <div className="company-context-heading">
+          <div>
+            <h3>Context used by the agent</h3>
+            <p>The company mental model supplied before the agent reads a new Event.</p>
+          </div>
+          <span className="mono">Starting context</span>
+        </div>
+        <div className="company-context-copy">
+          <p>{analyst.business_summary}</p>
           <p>
-            The row uses one reference weight. Earlier public values stay here
-            for audit and are never silently blended.
+            <strong>What moves the economics.</strong>{' '}
+            {joinContextItems(analyst.operating_drivers)}.
+          </p>
+          <p>
+            <strong>Known AI exposure.</strong>{' '}
+            {joinContextItems(knownExposureNames)}.
+          </p>
+          <p className="company-context-rule">
+            These are starting hypotheses, not a closed list. The Event must
+            establish a defensible connection to an operating driver, or support
+            another mechanism.
           </p>
         </div>
-        <dl>
-          {company.portfolio_context.current_top_ten && (
-            <div>
-              <dt>Current top ten · {formatDay(company.portfolio_context.current_top_ten.as_of)}</dt>
-              <dd>{formatWeight(company.portfolio_context.current_top_ten.weight_pct)}</dd>
-            </div>
-          )}
-          {company.portfolio_context.audited_baseline && (
-            <div>
-              <dt>Audited baseline · {formatDay(company.portfolio_context.audited_baseline.as_of)}</dt>
-              <dd>{formatWeight(company.portfolio_context.audited_baseline.weight_pct)}</dd>
-            </div>
-          )}
-        </dl>
-      </section>
-
-      <section className="company-detail-section company-business-context">
-        <div>
-          <h3>Business context</h3>
-          <p>{analyst.business_summary}</p>
-        </div>
-        <div>
-          <h3>Operating drivers</h3>
-          <ul className="company-text-list">
-            {analyst.operating_drivers.map((driver) => (
-              <li key={driver}>{driver}</li>
+        <details className="company-supporting-context">
+          <summary>Inspect supporting hypotheses and watchpoints</summary>
+          <div className="company-channel-list">
+            {analyst.frontier_ai_channels.map((channel) => (
+              <article className="company-channel" key={channel.channel}>
+                <h4>{channel.channel}</h4>
+                <div className="company-channel-directions">
+                  <div>
+                    <span>Opportunity</span>
+                    <p>{channel.potential_upside}</p>
+                  </div>
+                  <div>
+                    <span>Risk</span>
+                    <p>{channel.potential_downside}</p>
+                  </div>
+                </div>
+                <div className="company-watchpoints">
+                  <span>Watch</span>
+                  <ul>
+                    {channel.watchpoints.map((watchpoint) => (
+                      <li key={watchpoint}>{watchpoint}</li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
             ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="company-detail-section">
-        <div className="company-section-heading">
-          <div>
-            <h3>Frontier-AI pathways</h3>
-            <p>
-              Reusable hypotheses for how a frontier development could reach this
-              company. The Event still has to activate the pathway.
-            </p>
           </div>
-          <span className="mono">{analyst.frontier_ai_channels.length} pathways</span>
-        </div>
-        <div className="company-channel-list">
-          {analyst.frontier_ai_channels.map((channel) => (
-            <article className="company-channel" key={channel.channel}>
-              <h4>{channel.channel}</h4>
-              <div className="company-channel-directions">
-                <div>
-                  <span>Potential upside</span>
-                  <p>{channel.potential_upside}</p>
-                </div>
-                <div>
-                  <span>Potential downside</span>
-                  <p>{channel.potential_downside}</p>
-                </div>
-              </div>
-              <div className="company-watchpoints">
-                <span>Watchpoints</span>
-                <ul>
-                  {channel.watchpoints.map((watchpoint) => (
-                    <li key={watchpoint}>{watchpoint}</li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
-        </div>
+        </details>
       </section>
 
       <section className="company-detail-section company-public-view">
@@ -215,9 +283,9 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         {publicView.sources.length > 0 && <SourceList sources={publicView.sources} />}
       </section>
 
-      <section className="company-detail-section company-detail-footer">
+      <section className="company-detail-section company-support-grid">
         <div>
-          <h3>Research cautions</h3>
+          <h3>Research limits</h3>
           {analyst.cautions.length > 0 ? (
             <ul className="company-text-list">
               {analyst.cautions.map((caution) => (
@@ -231,6 +299,24 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         <div>
           <h3>Company sources</h3>
           <SourceList sources={company.identity_sources} />
+        </div>
+        <div className="company-disclosure-history">
+          <h3>Disclosure history</h3>
+          <dl>
+            {company.portfolio_context.current_top_ten && (
+              <div>
+                <dt>Top ten · {formatDay(company.portfolio_context.current_top_ten.as_of)}</dt>
+                <dd>{formatWeight(company.portfolio_context.current_top_ten.weight_pct)}</dd>
+              </div>
+            )}
+            {company.portfolio_context.audited_baseline && (
+              <div>
+                <dt>Audited · {formatDay(company.portfolio_context.audited_baseline.as_of)}</dt>
+                <dd>{formatWeight(company.portfolio_context.audited_baseline.weight_pct)}</dd>
+              </div>
+            )}
+          </dl>
+          <p>The row shows the newest available reference weight. Values are never blended.</p>
         </div>
       </section>
     </div>
@@ -315,43 +401,13 @@ export default function CompanyUniversePage() {
   }
 
   return (
-    <section className="company-universe-view" aria-labelledby="company-universe-title">
-      <div className="company-universe-intro">
-        <div>
-          <h2 id="company-universe-title">The context behind each company</h2>
-          <p>
-            Inspect what the Investment pass will know before it reads a new
-            Event: the business, operating drivers, two-sided AI pathways,
-            public BIT evidence, cautions, and sources.
-          </p>
-        </div>
-        <p className="company-scope-note">
-          <strong>No automatic inclusion.</strong> All {payload.counts.companies} sourced
-          profiles remain visible here for review. A company appears in an
-          Investment output only when the Event activates a credible channel.
-        </p>
-      </div>
-
-      <dl className="company-universe-facts">
-        <div>
-          <dt>Profile set</dt>
-          <dd>{payload.counts.companies} companies · reviewed {formatDay(payload.profiles_reviewed_at)}</dd>
-        </div>
-        <div>
-          <dt>Latest visible holdings</dt>
-          <dd>{payload.counts.current_top_ten} top-ten names · {formatDay(payload.disclosures.current_top_ten.as_of)}</dd>
-        </div>
-        <div>
-          <dt>Complete baseline</dt>
-          <dd>{payload.counts.audited_baseline} audited holdings · {formatDay(payload.disclosures.audited_baseline.as_of)}</dd>
-        </div>
-      </dl>
-
+    <section className="company-universe-view" aria-label="Company context">
       <div className="company-universe-method">
         <p>
-          The June disclosure contains only the current top ten. The December
-          report is the latest complete audited portfolio. Absence from the June
-          list does not prove that a position was sold.
+          <strong>{payload.counts.companies} sourced company profiles.</strong>{' '}
+          June shows only the current top ten; December 2025 is the latest complete
+          audited portfolio, and absence from June does not prove a sale. Presence
+          here is not automatic inclusion in an Investment output.
         </p>
         <div>
           <a href={payload.disclosures.current_top_ten.source.url} target="_blank" rel="noreferrer">
@@ -370,34 +426,29 @@ export default function CompanyUniversePage() {
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Company, ticker, driver, or AI pathway"
+            placeholder="Company, ticker, business, or driver"
           />
         </label>
-        <label>
-          <span>Disclosure</span>
-          <select value={disclosure} onChange={(event) => setDisclosure(event.target.value as DisclosureFilter)}>
-            <option value="all">All profiles</option>
-            <option value="current">Current top ten</option>
-            <option value="audited">Audited baseline</option>
-            <option value="later">Later additions</option>
-          </select>
-        </label>
-        <label>
-          <span>Public evidence</span>
-          <select value={evidence} onChange={(event) => setEvidence(event.target.value as EvidenceFilter)}>
-            <option value="all">All grades</option>
-            <option value="explicit_thesis">BIT thesis</option>
-            <option value="commentary">BIT commentary</option>
-            <option value="none">Analyst context only</option>
-          </select>
-        </label>
-        <label>
-          <span>Sort</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value as CompanySort)}>
-            <option value="portfolio">Portfolio disclosure</option>
-            <option value="name">Company name</option>
-          </select>
-        </label>
+        <div className="company-filter-controls">
+          <CompanyMenuSelect
+            label="Disclosure"
+            value={disclosure}
+            options={disclosureOptions}
+            onChange={setDisclosure}
+          />
+          <CompanyMenuSelect
+            label="Public evidence"
+            value={evidence}
+            options={evidenceOptions}
+            onChange={setEvidence}
+          />
+          <CompanyMenuSelect
+            label="Sort"
+            value={sort}
+            options={sortOptions}
+            onChange={setSort}
+          />
+        </div>
       </div>
 
       <div className="company-ledger-head">
@@ -446,10 +497,6 @@ export default function CompanyUniversePage() {
                 <div className="company-row-evidence">
                   <span className={`company-evidence-grade is-${company.bit_public_view.grade}`}>
                     {gradeCopy[company.bit_public_view.grade]}
-                  </span>
-                  <span className="mono">
-                    {company.analyst_context.frontier_ai_channels.length}{' '}
-                    AI {company.analyst_context.frontier_ai_channels.length === 1 ? 'pathway' : 'pathways'}
                   </span>
                 </div>
               </summary>
