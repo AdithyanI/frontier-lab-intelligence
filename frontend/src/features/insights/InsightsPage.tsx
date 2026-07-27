@@ -81,6 +81,8 @@ const STATUS_COPY: Record<InsightStatus, { label: string; description: string }>
   all: { label: 'All', description: 'Every completed candidate evaluation' },
 }
 
+const DECLINED_SECTION_ID = 'insight-declined'
+
 type ReportDownloadState = 'idle' | 'generating' | 'ready' | 'error'
 type BriefDeliveryState = 'idle' | 'loading' | 'choose' | 'confirm' | 'sending' | 'sent' | 'error'
 
@@ -961,20 +963,26 @@ function DeclinedCandidates({
   items,
   reviewedCount,
   day,
+  open,
+  onToggle,
 }: {
   items: EditorialDeclinedItem[]
   reviewedCount: number
   day: string
+  open: boolean
+  onToggle: () => void
 }) {
-  const [open, setOpen] = useState(false)
-
   return (
-    <section className="insight-declined" aria-label="Candidates declined in writing">
+    <section
+      className="insight-declined"
+      id={DECLINED_SECTION_ID}
+      aria-label="Candidates declined in writing"
+    >
       <button
         type="button"
         className="insight-declined-toggle"
         aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
+        onClick={onToggle}
       >
         <span className="insight-declined-title mono">Declined in writing</span>
         <span className="insight-declined-summary">
@@ -1012,6 +1020,43 @@ function DeclinedCandidates({
   )
 }
 
+function InsightYield({
+  keptCount,
+  reviewedCount,
+  declinedCount,
+  onRevealDeclined,
+}: {
+  keptCount: number
+  reviewedCount: number
+  declinedCount: number
+  onRevealDeclined: () => void
+}) {
+  return (
+    <p className="insight-yield">
+      <span className="insight-yield-part">
+        <strong>{keptCount}</strong> published
+      </span>
+      <span className="insight-yield-sep" aria-hidden="true">·</span>
+      <span className="insight-yield-part">
+        <strong>{reviewedCount}</strong> candidates reviewed
+      </span>
+      {declinedCount > 0 && (
+        <>
+          <span className="insight-yield-sep" aria-hidden="true">·</span>
+          <button
+            type="button"
+            className="insight-yield-part insight-yield-link"
+            onClick={onRevealDeclined}
+            aria-label={`Show the ${declinedCount} candidates declined in writing`}
+          >
+            <strong>{declinedCount}</strong> declined in writing
+          </button>
+        </>
+      )}
+    </p>
+  )
+}
+
 export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { rememberDate } = useAuditDate()
@@ -1030,6 +1075,7 @@ export default function Insights() {
   const [dataError, setDataError] = useState<string | null>(null)
   const [datesRetryKey, setDatesRetryKey] = useState(0)
   const [dataRetryKey, setDataRetryKey] = useState(0)
+  const [declinedOpen, setDeclinedOpen] = useState(false)
   const activeDatesViewRef = useRef('')
   const activeDataViewRef = useRef('')
   const searchParamsRef = useRef(searchParams)
@@ -1053,6 +1099,10 @@ export default function Insights() {
     [availableDates, dateWindow],
   )
   const copy = AUDIENCE_COPY[audience]
+  const declinedItems = editorialData?.declined ?? []
+  const reviewedCandidateCount =
+    (editorialData?.run?.counts.included_candidates ?? 0) +
+    (editorialData?.run?.counts.not_selected_candidates ?? 0)
 
   useEffect(() => {
     if (
@@ -1157,6 +1207,15 @@ export default function Insights() {
     setSearchParams(nextParams, { replace: true })
   }
 
+  const revealDeclined = () => {
+    setDeclinedOpen(true)
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById(DECLINED_SECTION_ID)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
   const moveDateWindow = (direction: DateWindowDirection) => {
     const selectedIndex = availableDates.findIndex((value) => value.day === selectedDate)
     const nextWindow = shiftDateWindow(
@@ -1185,6 +1244,14 @@ export default function Insights() {
         <div className="insight-page-intro">
           <h1 className="page-title">{copy.title}</h1>
           <p className="page-sub">{copy.subtitle}</p>
+          {editorialData?.available && editorialData.items.length > 0 && reviewedCandidateCount > 0 && (
+            <InsightYield
+              keptCount={editorialData.items.length}
+              reviewedCount={reviewedCandidateCount}
+              declinedCount={declinedItems.length}
+              onRevealDeclined={revealDeclined}
+            />
+          )}
         </div>
         <DailyBriefActions
           audience={audience}
@@ -1267,14 +1334,13 @@ export default function Insights() {
           ))}
         </section>
       )}
-      {editorialData?.available && editorialData.date && (editorialData.declined?.length ?? 0) > 0 && (
+      {editorialData?.available && editorialData.date && declinedItems.length > 0 && (
         <DeclinedCandidates
-          items={editorialData.declined}
-          reviewedCount={
-            (editorialData.run?.counts.included_candidates ?? 0) +
-            (editorialData.run?.counts.not_selected_candidates ?? 0)
-          }
+          items={declinedItems}
+          reviewedCount={reviewedCandidateCount}
           day={editorialData.date}
+          open={declinedOpen}
+          onToggle={() => setDeclinedOpen((value) => !value)}
         />
       )}
       {candidateData?.available && candidateData.items.length > 0 && (

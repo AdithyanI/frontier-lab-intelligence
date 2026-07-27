@@ -12,6 +12,47 @@
 
 .insight-page-intro { min-width: 0; }
 
+.insight-yield {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 10px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+
+.insight-yield-part {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.insight-yield-part strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.insight-yield-sep { color: var(--border-strong); }
+
+.insight-yield-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+
+.insight-yield-link:hover,
+.insight-yield-link:focus-visible {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
 .insight-brief-actions {
   position: relative;
   display: flex;
