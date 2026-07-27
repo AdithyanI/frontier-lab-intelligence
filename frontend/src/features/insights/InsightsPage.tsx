@@ -9,6 +9,7 @@ import {
   type EditorialAnalysis,
   type EditorialDeclinedItem,
   type EditorialInsightItem,
+  type EditorialEventRole,
   type EditorialInsightsResponse,
   type EngineeringEditorialAnalysis,
   type InsightAudience,
@@ -799,6 +800,13 @@ function EngineeringDecision({
   )
 }
 
+const EDITORIAL_ROLE_COPY: Record<EditorialEventRole, string> = {
+  primary: 'Primary',
+  supporting: 'Supporting',
+  context: 'Context',
+  counterevidence: 'Counterevidence',
+}
+
 function EditorialSources({ item }: { item: EditorialInsightItem }) {
   const researchSources = item.citations.filter(
     (citation) => citation.kind !== 'event',
@@ -810,18 +818,30 @@ function EditorialSources({ item }: { item: EditorialInsightItem }) {
       <h3 id={titleId}>Sources</h3>
       <div className="editorial-source-columns">
         <section aria-label="Original feed sources">
-          <h4 className="mono">Original feed</h4>
+          <h4 className="mono">
+            Original feed
+            {item.events.length > 1 && (
+              <span className="editorial-source-count"> · {item.events.length} Events merged</span>
+            )}
+          </h4>
           <ul className="editorial-source-list">
             {item.events.map((event) => {
               return (
                 <li key={event.event_id}>
-                  <ExactEventLink
-                    day={item.day}
-                    eventId={event.event_id}
-                    className="editorial-source-title"
-                  >
-                    Feed #{event.feed_rank} ↗
-                  </ExactEventLink>
+                  <div className="editorial-source-head">
+                    <span
+                      className={`editorial-source-role mono editorial-source-role--${event.role}`}
+                    >
+                      {EDITORIAL_ROLE_COPY[event.role] ?? event.role}
+                    </span>
+                    <ExactEventLink
+                      day={item.day}
+                      eventId={event.event_id}
+                      className="editorial-source-title"
+                    >
+                      Feed #{event.feed_rank} ↗
+                    </ExactEventLink>
+                  </div>
                   <p>{decodeTextEntities(event.reason)}</p>
                 </li>
               )

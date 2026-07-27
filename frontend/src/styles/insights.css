@@ -1011,6 +1011,36 @@
   border-bottom: 0;
 }
 
+.editorial-source-count {
+  color: var(--muted);
+  letter-spacing: inherit;
+}
+
+.editorial-source-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.editorial-source-role {
+  min-width: 96px;
+  color: var(--muted);
+  font-size: 8.5px;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.editorial-source-role--counterevidence {
+  width: max-content;
+  min-width: 0;
+  margin-right: 6px;
+  padding: 1px 5px;
+  border: 1px solid var(--border-strong);
+  color: var(--ink);
+}
+
 .editorial-source-title {
   color: var(--blue-ink);
   font-weight: 500;
