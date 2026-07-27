@@ -319,11 +319,15 @@ citations are written in one transaction. Reimporting the identical result is a
 no-op; a conflicting result cannot overwrite the existing run identity.
 
 For a date with a complete imported run, `/api/insights` returns that run for
-the requested audience in editorial rank order. The frontend reads only this
-normalized backend projection; it never loads `draft.json` or SQLite directly.
-Candidate-level Insight decisions remain an audit fallback for dates without an
-imported run and for explicit suppressed/all inspection. A complete imported
-run wins even when it selected zero Insights for an audience.
+the requested audience in editorial rank order only when its routing run,
+cohort, source Event/Feed runs, rank version, and full-day rank-input SHA all
+match the current authoritative lineage. The read payload exposes that rank
+version and SHA under `run.source`. A stale same-day import fails closed rather
+than winning because it is newer. The frontend reads only this normalized
+backend projection; it never loads `draft.json` or SQLite directly.
+Candidate-level Insight decisions remain an audit fallback for dates without a
+current import and for explicit suppressed/all inspection. A current complete
+import wins even when it selected zero Insights for an audience.
 
 `GET /api/insights/report.pdf?audience=<audience>&date=<YYYY-MM-DD>` renders
 only that canonical complete projection. It returns 404 for an unavailable or
