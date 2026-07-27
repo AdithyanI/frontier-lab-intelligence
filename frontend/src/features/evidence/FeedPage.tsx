@@ -317,33 +317,40 @@ function RankDisclosure({
     .slice(0, 5)
     .map((voter) => voter.entity_name || `@${voter.handle}`)
     .join(', ')
+  const meanVoterPercent = (components.mean_voter_position * 100).toFixed(1)
+  const authorPercent = (components.author_position * 100).toFixed(1)
   const rows = [
     {
       layer: 1,
       label: 'Trusted votes',
-      raw: `${components.trusted_votes.toLocaleString('en-US')} distinct trusted ${components.trusted_votes === 1 ? 'entity' : 'entities'}`,
+      raw: components.trusted_votes === 1
+        ? '1 trusted person or organization quoted or reposted this Event'
+        : `${components.trusted_votes.toLocaleString('en-US')} trusted people and organizations quoted or reposted this Event`,
       detail: voterNames
-        ? `One vote per Registry entity across the complete Event; source entity excluded after union. ${voterNames}`
-        : 'One vote per Registry entity across the complete Event; source entity excluded after union. No trusted voter observed.',
+        ? `Each Registry entity counts once, even if it quoted or reposted several posts in this Event. The original author does not count. Example voters: ${voterNames}.`
+        : 'Each Registry entity counts once. The original author does not count. No trusted voter was observed.',
     },
     {
       layer: 2,
       label: 'Who voted',
-      raw: `Average network position ${components.mean_voter_position.toFixed(6)}`,
-      detail:
-        'Mean entity percentile: the share of other ranked Registry entities with lower network support. Ties share one value.',
+      raw: components.trusted_votes
+        ? `On average, these voters rank above ${meanVoterPercent}% of the Registry`
+        : 'There were no trusted voters to compare',
+      detail: components.trusted_votes
+        ? `This comes from support inside the trusted network. Entities with equal support share the same position. Exact average: ${components.mean_voter_position.toFixed(6)}.`
+        : 'Without a trusted voter, this layer stays at 0.000000.',
     },
     {
       layer: 3,
-      label: 'Source author standing',
-      raw: `Network position ${components.author_position.toFixed(6)}`,
-      detail: 'The same tie-aware entity percentile, used only when the first two layers tie',
+      label: 'Original author',
+      raw: `The author ranks above ${authorPercent}% of the Registry`,
+      detail: `This is used only when two Events have the same trusted-vote count and the same voter average. Exact position: ${components.author_position.toFixed(6)}.`,
     },
     {
       layer: 4,
       label: 'Public engagement',
-      raw: `${components.public_interactions.toLocaleString('en-US')} likes, replies, reposts, and quotes`,
-      detail: 'Highest one-post total among same-day Event members',
+      raw: `The most-engaged post received ${components.public_interactions.toLocaleString('en-US')} public interactions`,
+      detail: 'This adds its likes, replies, reposts, and quotes from the same day. It is used only if the first three layers are tied.',
     },
   ]
 
@@ -392,7 +399,7 @@ function RankDisclosure({
             <div>
               <h3 id={headingId}>Daily rank #{rank} of {total.toLocaleString('en-US')}</h3>
               <p className="mono">
-                {components.version} · {shortDate.format(new Date(`${date}T12:00:00Z`))}
+                {shortDate.format(new Date(`${date}T12:00:00Z`))} · ranking method {components.version}
               </p>
             </div>
             <button
@@ -413,7 +420,7 @@ function RankDisclosure({
                 <div className="feed-rank-component-head">
                   <strong>{row.layer}. {row.label}</strong>
                   {components.decided_at_layer === row.layer && (
-                    <span className="mono">first difference from adjacent Event</span>
+                    <span className="mono">first difference from the Event beside it</span>
                   )}
                 </div>
                 <p>{row.raw}</p>
@@ -423,13 +430,13 @@ function RankDisclosure({
           </div>
           {components.decided_at_layer === 5 && (
             <p className="feed-rank-source">
-              All four substantive layers tied; Event ID supplied deterministic order.
+              The first four layers were identical. The Event ID keeps the final order stable.
             </p>
           )}
           <p className="feed-rank-limit">
-            The daily rank prioritizes what to inspect. It is not importance, truth,
-            quality, or the percentage of the network that engaged. Ranks from different
-            days are not directly comparable.
+            This rank tells us what to inspect first. It does not decide whether the
+            Event is true, important, or useful. The trusted-vote number is not a
+            percentage of the whole network. Compare ranks only within the same day.
           </p>
         </div>
       )}
