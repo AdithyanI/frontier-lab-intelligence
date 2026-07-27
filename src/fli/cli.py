@@ -12,6 +12,10 @@ def main(argv: list[str] | None = None) -> int:
         from fli.evidence import refresh as evidence_refresh
 
         return evidence_refresh.main(raw_args[1:])
+    if raw_args and raw_args[0] == "prompt-cache-canary":
+        from fli.diagnostics import prompt_cache
+
+        return prompt_cache.main(raw_args[1:])
     parser = argparse.ArgumentParser(
         prog="fli",
         description="Frontier Lab Intelligence pipeline.",

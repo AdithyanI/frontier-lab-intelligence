@@ -1273,6 +1273,12 @@ def test_investment_company_universe_payload_is_complete_and_dated():
     }
     companies = {company["name"]: company for company in payload["companies"]}
     assert companies["Amazon"]["portfolio_context"] == {
+        "reference_holding": {
+            "as_of": "2026-06-30",
+            "weight_pct": 10.4,
+            "basis": "current_top_ten",
+            "currently_confirmed": True,
+        },
         "current_top_ten": {
             "as_of": "2026-06-30",
             "rank": 1,
@@ -1285,6 +1291,12 @@ def test_investment_company_universe_payload_is_complete_and_dated():
     }
     assert companies["SanDisk"]["portfolio_context"]["audited_baseline"] is None
     assert companies["SanDisk"]["portfolio_context"]["current_top_ten"]["rank"] == 4
+    assert companies["Microsoft"]["portfolio_context"]["reference_holding"] == {
+        "as_of": "2025-12-31",
+        "weight_pct": 2.89,
+        "basis": "audited_baseline",
+        "currently_confirmed": False,
+    }
     assert companies["Microsoft"]["bit_public_view"]["grade"] == "commentary"
     assert companies["Microsoft"]["analyst_context"]["frontier_ai_channels"]
     assert companies["Microsoft"]["identity_sources"]

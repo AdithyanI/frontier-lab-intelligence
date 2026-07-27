@@ -9,7 +9,7 @@ import {
 
 type DisclosureFilter = 'all' | 'current' | 'audited' | 'later'
 type EvidenceFilter = 'all' | BitPublicViewGrade
-type CompanySort = 'portfolio' | 'name' | 'channels'
+type CompanySort = 'portfolio' | 'name'
 
 const dayFormatter = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
@@ -83,26 +83,18 @@ function comparePortfolio(a: InvestmentCompany, b: InvestmentCompany) {
 }
 
 function PortfolioContext({ company }: { company: InvestmentCompany }) {
-  const current = company.portfolio_context.current_top_ten
-  const audited = company.portfolio_context.audited_baseline
+  const reference = company.portfolio_context.reference_holding
 
   return (
     <div className="company-portfolio-lines">
-      {current && (
+      <span>
+        <strong>{formatWeight(reference.weight_pct)}</strong>
         <span>
-          <strong>{formatWeight(current.weight_pct)}</strong>
-          <span>{formatDay(current.as_of)} top ten</span>
+          {reference.basis === 'current_top_ten'
+            ? `${formatDay(reference.as_of)} top ten`
+            : `Last confirmed ${formatDay(reference.as_of)}`}
         </span>
-      )}
-      {audited && (
-        <span>
-          <strong>{formatWeight(audited.weight_pct)}</strong>
-          <span>{formatDay(audited.as_of)} audited</span>
-        </span>
-      )}
-      {!audited && current && (
-        <small>Added after the audited baseline</small>
-      )}
+      </span>
     </div>
   )
 }
@@ -113,6 +105,30 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
 
   return (
     <div className="company-detail">
+      <section className="company-detail-section company-disclosure-history">
+        <div>
+          <h3>Disclosure history</h3>
+          <p>
+            The row uses one reference weight. Earlier public values stay here
+            for audit and are never silently blended.
+          </p>
+        </div>
+        <dl>
+          {company.portfolio_context.current_top_ten && (
+            <div>
+              <dt>Current top ten · {formatDay(company.portfolio_context.current_top_ten.as_of)}</dt>
+              <dd>{formatWeight(company.portfolio_context.current_top_ten.weight_pct)}</dd>
+            </div>
+          )}
+          {company.portfolio_context.audited_baseline && (
+            <div>
+              <dt>Audited baseline · {formatDay(company.portfolio_context.audited_baseline.as_of)}</dt>
+              <dd>{formatWeight(company.portfolio_context.audited_baseline.weight_pct)}</dd>
+            </div>
+          )}
+        </dl>
+      </section>
+
       <section className="company-detail-section company-business-context">
         <div>
           <h3>Business context</h3>
@@ -131,13 +147,13 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
       <section className="company-detail-section">
         <div className="company-section-heading">
           <div>
-            <h3>Frontier-AI transmission channels</h3>
+            <h3>Frontier-AI pathways</h3>
             <p>
               Reusable hypotheses for how a frontier development could reach this
-              company. The Event still has to activate the channel.
+              company. The Event still has to activate the pathway.
             </p>
           </div>
-          <span className="mono">{analyst.frontier_ai_channels.length} channels</span>
+          <span className="mono">{analyst.frontier_ai_channels.length} pathways</span>
         </div>
         <div className="company-channel-list">
           {analyst.frontier_ai_channels.map((channel) => (
@@ -263,11 +279,6 @@ export default function CompanyUniversePage() {
 
     return companies.sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name)
-      if (sort === 'channels') {
-        return b.analyst_context.frontier_ai_channels.length
-          - a.analyst_context.frontier_ai_channels.length
-          || a.name.localeCompare(b.name)
-      }
       return comparePortfolio(a, b)
     })
   }, [payload, query, disclosure, evidence, sort])
@@ -310,7 +321,7 @@ export default function CompanyUniversePage() {
           <h2 id="company-universe-title">The context behind each company</h2>
           <p>
             Inspect what the Investment pass will know before it reads a new
-            Event: the business, operating drivers, two-sided AI channels,
+            Event: the business, operating drivers, two-sided AI pathways,
             public BIT evidence, cautions, and sources.
           </p>
         </div>
@@ -333,10 +344,6 @@ export default function CompanyUniversePage() {
         <div>
           <dt>Complete baseline</dt>
           <dd>{payload.counts.audited_baseline} audited holdings · {formatDay(payload.disclosures.audited_baseline.as_of)}</dd>
-        </div>
-        <div>
-          <dt>Reusable context</dt>
-          <dd>{payload.counts.frontier_ai_channels} AI channels · {payload.counts.bit_public_views} public BIT views</dd>
         </div>
       </dl>
 
@@ -363,7 +370,7 @@ export default function CompanyUniversePage() {
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Company, ticker, driver, or AI channel"
+            placeholder="Company, ticker, driver, or AI pathway"
           />
         </label>
         <label>
@@ -389,7 +396,6 @@ export default function CompanyUniversePage() {
           <select value={sort} onChange={(event) => setSort(event.target.value as CompanySort)}>
             <option value="portfolio">Portfolio disclosure</option>
             <option value="name">Company name</option>
-            <option value="channels">AI channel count</option>
           </select>
         </label>
       </div>
@@ -443,7 +449,7 @@ export default function CompanyUniversePage() {
                   </span>
                   <span className="mono">
                     {company.analyst_context.frontier_ai_channels.length}{' '}
-                    {company.analyst_context.frontier_ai_channels.length === 1 ? 'channel' : 'channels'}
+                    AI {company.analyst_context.frontier_ai_channels.length === 1 ? 'pathway' : 'pathways'}
                   </span>
                 </div>
               </summary>

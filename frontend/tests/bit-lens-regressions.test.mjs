@@ -90,12 +90,14 @@ test('The redesign is text-first and removes the diagram-heavy UI', () => {
 test('Company universe exposes the canonical context without implying automatic scope', () => {
   assert.match(universe, /getCachedJSON<InvestmentCompanyUniverse>\('\/api\/bit-lens\/companies'\)/)
   assert.match(universe, /No automatic inclusion\./)
-  assert.match(universe, /The Event still has to activate the channel\./)
-  assert.match(universe, /Frontier-AI transmission channels/)
+  assert.match(universe, /The Event still has to activate the pathway\./)
+  assert.match(universe, /Frontier-AI pathways/)
   assert.match(universe, /BIT’s public view/)
   assert.match(universe, /Research cautions/)
   assert.match(universe, /Company sources/)
   assert.match(universe, /Open visible/)
+  assert.doesNotMatch(universe, /AI channel count/)
+  assert.match(universe, /Public evidence/)
   assert.doesNotMatch(universe, /const companies = \[/)
 })
 

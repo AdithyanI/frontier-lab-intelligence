@@ -979,10 +979,24 @@ def investment_company_universe_payload() -> dict[str, Any]:
         name = profile["name"]
         audited_holding = audited_by_name.get(name)
         current_holding = current_by_name.get(name)
+        reference_holding = current_holding or audited_holding
+        reference_basis = (
+            "current_top_ten" if current_holding else "audited_baseline"
+        )
         companies.append(
             {
                 **profile,
                 "portfolio_context": {
+                    "reference_holding": {
+                        "as_of": (
+                            current["as_of"]
+                            if current_holding
+                            else audited["as_of"]
+                        ),
+                        "weight_pct": reference_holding["weight_pct"],
+                        "basis": reference_basis,
+                        "currently_confirmed": current_holding is not None,
+                    },
                     "current_top_ten": (
                         {
                             "as_of": current["as_of"],

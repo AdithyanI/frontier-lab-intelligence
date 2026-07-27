@@ -50,11 +50,13 @@ or reinterpret its upstream evidence.
 | Audience routing | `fli.routing` | Independent AI Engineering and Investment relevance decisions with durable runs. |
 | Insights | `fli.insights` | Per-Event working annotations plus agent-authored daily synthesis, strict validation, atomic storage, and the canonical read model. |
 | Delivery | `fli.delivery` | Explicitly confirmed Slack and email adapters over one canonical Daily Brief; credentials and provider behavior remain server-side. |
+| Provider diagnostics | `fli.diagnostics` | Non-mutating machine-readable checks of shared provider behavior, including reusable-prefix cache telemetry. |
 | Product adapters | `fli.web`, `fli.cli` | HTTP/UI composition and non-interactive commands; no domain truth belongs here. |
 
 Cross-domain provider behavior belongs in `fli.llm_responses`; compact tracked
-product state belongs in `fli.store`. Those are the only shared runtime modules
-at the root of `fli`.
+product state belongs in `fli.store`; operational probes belong in
+`fli.diagnostics`. The root-level modules remain limited to shared runtime and
+composition.
 
 ## Main Flow
 
@@ -173,6 +175,8 @@ at the root of `fli`.
   immutable runs store prompt version, schema version, and prompt/input hashes.
 - **Shared model adapter:** every LLM call goes through the LiteLLM Responses
   boundary with stable metadata, measured cache telemetry, and captured cost.
+  Cache-key lanes serialize requests sharing one prefix while allowing bounded
+  parallelism across different prefixes.
 - **No compatibility maze:** migrations use direct imports and canonical data
   paths. Old module aliases and dual reads are not retained by default.
 - **Artifact targets remain document-shaped:** exact generic `/search`

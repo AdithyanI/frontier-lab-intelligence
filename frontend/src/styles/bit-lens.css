@@ -266,7 +266,7 @@
 
 .company-universe-facts {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 32px 0 0;
   border-top: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border-strong);
@@ -563,6 +563,45 @@
   gap: 44px;
 }
 
+.company-disclosure-history {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 44px;
+}
+
+.company-disclosure-history > div > p {
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.company-disclosure-history dl {
+  margin: 0;
+  border-top: 1px solid var(--border-strong);
+}
+
+.company-disclosure-history dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.company-disclosure-history dt {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+.company-disclosure-history dd {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
 .company-detail h3 {
   margin: 0;
   font-size: 14px;
@@ -762,14 +801,6 @@
     max-width: 72ch;
   }
 
-  .company-universe-facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .company-universe-facts > div:nth-child(2) { border-right: 0; }
-  .company-universe-facts > div:nth-child(-n + 2) { border-bottom: 1px solid var(--border); }
-  .company-universe-facts > div:nth-child(3) { padding-left: 0; }
-
   .company-universe-tools {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -795,6 +826,7 @@
 
   .company-universe-tools,
   .company-ledger summary,
+  .company-disclosure-history,
   .company-business-context,
   .company-detail-footer,
   .company-channel-directions {
@@ -804,4 +836,12 @@
   .company-ledger summary { gap: 12px; }
   .company-row-evidence { grid-column: auto; }
   .company-detail { padding-right: 20px; padding-left: 20px; }
+
+  .company-universe-facts { grid-template-columns: 1fr; }
+  .company-universe-facts > div {
+    padding-left: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .company-universe-facts > div:last-child { border-bottom: 0; }
 }

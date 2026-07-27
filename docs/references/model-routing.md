@@ -1,6 +1,6 @@
 # Model Routing and Prompt Caching
 
-Last verified: 2026-07-26
+Last verified: 2026-07-27
 
 For the cross-stage cost summary and X-provider units, see
 [`tokenomics.md`](tokenomics.md).
@@ -57,60 +57,55 @@ This is deliberately centralized. OpenAI's native GPT-5.6 API guidance now
 prefers `prompt_cache_options.ttl`, while the Azure-backed route used by this
 repository was live-verified with Azure's `prompt_cache_retention="24h"`.
 Do not scatter either provider field through individual pipelines or send both.
-Revisit the adapter when the shared route is migrated or Azure documents and
-proves the newer explicit-cache contract.
+Azure does not currently support OpenAI's explicit
+`prompt_cache_options`/`prompt_cache_breakpoint` controls. Revisit the adapter
+when the shared route is migrated or Azure documents and proves a different
+contract.
 
-The 2026-07-14 migration checks established:
+Prompt caching is automatic and best-effort. A cache-eligible request is not
+proof of a hit; only Responses
+`usage.input_tokens_details.cached_tokens` is. Every model boundary records
+that value, `cache_write_tokens` when supplied, input/output tokens, and
+LiteLLM's response-cost header.
+
+## Current Live Evidence
+
+The current different-input canary ran through FLI's real LiteLLM Responses
+path on 2026-07-27. It used the active roughly 1,975-token audience-routing
+request shape, one fresh stable key per model, explicit 24-hour retention, and
+five sequential calls. The first request is excluded from the warm-hit
+criterion because Azure may already hold the same prefix:
+
+| Model | Cached tokens by call | Warm hits |
+| --- | --- | --- |
+| `gpt-5.6-luna` | `1792, 1792, 1792, 0, 1792` | 3 of 4 |
+| `gpt-5.6-terra` | `0, 1792, 1792, 1792, 1792` | 4 of 4 |
+
+This proves Luna and Terra prompt caching currently works through the shared
+Azure-backed route. It also proves why an individual miss cannot be interpreted
+as “the model does not support caching”: Luna missed one warm request in the
+same run that produced three warm hits. Earlier controls remain useful incident
+history:
 
 - an exact-repeat Luna canary read 1,792 cached tokens from a 1,990-token input
-  when `24h` was explicit;
+  on 2026-07-14 when `24h` was explicit;
 - the historical 64-envelope Luna-medium classification run had 58 cache-hit
-  requests and read
-  103,936 cached tokens from 168,022 input tokens (61.86%);
-- the five-item Luna extraction oracle recorded zero cache reads, so eligibility
-  is never treated as proof of a hit.
+  requests and read 103,936 cached tokens from 168,022 input tokens (61.86%);
+- a five-item Luna extraction oracle and later two-call same-key control
+  recorded zero reads despite eligible prefixes.
 
-A 2026-07-15 control found that the same Azure Responses deployment had
-regressed or become intermittent again. A cache-eligible audience-routing
-prefix returned zero reads for different evidence, and two fresh variable
-inputs through the previously successful 1,670-word Feed-triage prefix also
-returned zero reads. LiteLLM's request transform forwarded the key, `24h`
-retention, instructions, and structured schema unchanged to one deployment.
-Treat this as an upstream operational limitation, not a reason to pad prompts
-or change classification quality. The exact diagnostic is recorded in
-`docs/projects/evidence-audience-routing/resources/audience-routing-v3-cache-diagnostic.md`.
-The same v3 different-input control also returned zero reads on the available
-GPT-5.5 Azure Responses deployment despite an explicit shared key and `24h`
-retention, so the live failure is not isolated to the Luna model alias.
+The 2026-07-15 miss controls confirmed that the Azure route can become
+intermittent even when LiteLLM forwards the key, retention, instructions, and
+schema unchanged. The same request shape produced a positive GPT-5.4-mini
+control and later 88 cache-hit requests out of 90 in the nine-day production
+routing run. The accepted v7 prompt calibration then read 1,792 cached tokens
+on each of its four warm requests.
 
-A same-day positive control localized the failure further. The exact current
-v4 request shape sent through `gpt-5.4-mini` returned 1,280 cached tokens on the
-second different-input call. The shared LiteLLM Responses path, v4 prompt,
-schema, and explicit cache key are therefore valid; the observed miss belongs
-to the current GPT-5.5/GPT-5.6 routes or their backing Azure deployments, not
-the application contract or shared proxy in general.
-
-The production follow-up removed event sharding, per-item keys, padding, and
-the retention override. GPT-5.4 mini received one stable prompt-level key and
-ran sequentially. An implicit-only two-call test missed twice; the single-key
-test read 1,280 tokens on call two. The nine-day top-10 run then returned 88
-cache-hit requests out of 90 and read 152,576 of 305,600 input tokens from the
-provider cache. This is the current proven audience-routing contract.
-
-The accepted v7 prompt revision was calibrated on exactly five disputed or
-borderline packets. Its cold request missed, while the next four requests each
-read 1,792 cached tokens. The run read 7,168 of 12,482 input tokens (57.43%)
-from the provider cache and cost $0.0256731. The result confirms that the same
-one-key sequential contract remains effective after a prompt version change.
-
-A final Luna-specific control removed the remaining sharding ambiguity: two
-different v4 evidence packets ran sequentially with the exact same forced
-cache key and an 8,284-character / 1,516-token stable prefix. The 3,289-token cold request
-and 1,953-token follow-up both returned zero cached tokens. Catalog jobs must
-therefore be budgeted as uncached when using the GPT-5.6 Luna route; keep
-telemetry and treat any future reads as measured upside rather than a
-prerequisite. Do not switch models for cache savings alone—the routing model
-decision remains accuracy-first.
+The 2026-07-27 positive Luna run supersedes the old “budget as always uncached”
+conclusion, but not the evidence that Azure availability can be intermittent.
+Cost plans must use measured hit rates and retain an uncached upper bound. Do
+not switch models for cache savings alone—the routing decision remains
+accuracy-first.
 
 The proxy also has a separate Redis full-response cache. An exact complete
 request repeat can therefore return instantly at zero proxy spend while still
@@ -119,18 +114,57 @@ different catalog items. On such a full-response hit, LiteLLM 1.92.0 replays
 the original `x-litellm-response-cost` header even though its persisted spend
 record is zero, so use the persisted proxy record when reconciling that case.
 
-Keep stable 1,024+ token content first, reuse one stable `prompt_cache_key` for
-requests sharing that prefix, and record `cached_tokens`, `cache_write_tokens`,
-and LiteLLM's reported response cost. Partition traffic only when one key
-approaches the documented roughly 15-request-per-minute routing threshold;
-do not introduce shards for low-rate sequential work.
-GPT-5.6 cache writes can cost more than ordinary input, so cache telemetry—not
-the presence of a cache parameter—is the cost evidence.
+## Cache-Lane Execution Contract
+
+The repository follows Azure's documented request-shape guidance:
+
+1. Put identical, cacheable instructions first and variable evidence last.
+2. Keep the shared prefix at least 1,024 tokens. Do not pad a short prompt just
+   to cross the boundary; improve the actual contract or accept no cache.
+3. Reuse one stable `prompt_cache_key` for requests with the same exact prefix.
+4. Partition only when a prefix/key approaches Azure's roughly 15-request per
+   minute guidance.
+5. Execute one request at a time within each cache-key lane. Different keys may
+   run in parallel.
+
+The fifth rule and the default partition count are FLI scheduling choices, not
+Azure requirements. Registry jobs use eight deterministic lanes instead of the
+former 64 so a normal cohort can warm each lane; each lane is serial. Audience
+routing uses one prompt-level key and cache-first refresh defaults of one item
+and one day at a time. Insight refreshes use one serial lane per audience prompt
+and may run the two distinct audience lanes in parallel. Operators may override
+worker counts when throughput matters more than cache locality, then must judge
+the result from telemetry.
 
 Azure rejects `prompt_cache_key` values longer than 64 characters. The shared
 key helper preserves readable keys when they fit and compacts longer
-namespace/version identities into a stable hash-backed key. All callers must
-use that helper rather than constructing cache keys directly.
+namespace/version identities into a stable hash-backed key. All sharded callers
+use that helper. `group_prompt_cache_lanes` is the shared scheduler primitive.
+
+No output-token value enables prompt caching. In particular,
+`max_tokens=16384` is not an Azure requirement. Production output budgets remain
+owned by the task's quality contract. The canary's deliberately small
+`max_output_tokens=64` only limits diagnostic cost; an `incomplete` response
+still contains valid prompt-cache usage telemetry.
+
+## Repeatable Canary
+
+Run the different-input canary without prompts:
+
+```bash
+fli prompt-cache-canary --no-input
+```
+
+It tests Luna and Terra by default, uses a fresh per-execution routing key,
+ignores the first request as warm evidence, changes the suffix on every request
+so LiteLLM's full-response cache cannot create a false pass, and emits one JSON
+document. `data.models[].calls[]` records `input_tokens`, `cached_tokens`,
+`cache_write_tokens`, response status, duration, and reported cost. Exit `0`
+means every selected model produced at least one post-first-request cache read;
+exit `1` with `E_CACHE_NOT_OBSERVED` is a retryable no-hit result. Invalid
+usage, authentication, network, and timeout/interruption use exits `2`, `3`,
+`4`, and `5`. Use repeated `--model` flags to narrow or extend the probe, and
+`--plain` only for human inspection.
 
 ## Source Guidance
 

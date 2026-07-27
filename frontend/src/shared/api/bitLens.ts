@@ -40,6 +40,10 @@ export interface InvestmentCompany {
   }
   identity_sources: CompanySource[]
   portfolio_context: {
+    reference_holding: CompanyPortfolioDisclosure & {
+      basis: 'current_top_ten' | 'audited_baseline'
+      currently_confirmed: boolean
+    }
     current_top_ten: CompanyPortfolioDisclosure | null
     audited_baseline: CompanyPortfolioDisclosure | null
   }

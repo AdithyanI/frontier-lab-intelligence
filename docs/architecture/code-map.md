@@ -29,7 +29,8 @@ the Event read model moves out of `web`, not through new aliases.
 
 | Area | Owner | What belongs there |
 | --- | --- | --- |
-| Shared runtime | `fli.llm_responses`, `fli.store` | Provider response normalization and the compact product DB boundary. |
+| Shared runtime | `fli.llm_responses`, `fli.store` | Provider response normalization, deterministic cache-key lane grouping, and the compact product DB boundary. |
+| Provider diagnostics | `fli.diagnostics.prompt_cache` | Non-mutating Luna/Terra reusable-prefix canary with stable JSON, typed errors, and cache/cost telemetry. |
 | Ingestion | `fli.ingestion` | Public-source adapters, conference imports, raw X evidence, and date-complete collection. |
 | Registry | `fli.registry.store`, `fli.registry.view`, and the other `fli.registry` workflows | Entity/channel mutation and curation stay in `store`; the API-facing read projection stays in `view`; admission, classification, evaluation, and seeds own their workflows. |
 | Trusted network | `fli.network` | Immutable outgoing-follow snapshots, derived support/ranking analysis, and its read model. `provenance` owns the canonical JSON, file hash, checkpoint, and UTC identity shared by those frozen data products. |
@@ -44,8 +45,9 @@ the Event read model moves out of `web`, not through new aliases.
 | Demo release | `demo.command`, `scripts/demo.py`, `scripts/build-demo-release.py` | Verified snapshot restore, read-only launch, and operator-only release construction. The release contract is `data/demo-release.json`. |
 
 The root package contains only cross-domain runtime plumbing (`cli`,
-`llm_responses`, and the compact product `store`). Domain behavior belongs in
-the packages above; do not add compatibility modules at former flat paths.
+`llm_responses`, and the compact product `store`). Operational provider probes
+live in `fli.diagnostics`; domain behavior belongs in the packages above. Do
+not add compatibility modules at former flat paths.
 
 ## Frontend Ownership
 

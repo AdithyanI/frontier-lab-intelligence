@@ -321,8 +321,15 @@ Rules:
   canonical Investment context packet. It keeps every sourced profile visible
   for review and exposes dated portfolio context, business descriptions,
   operating drivers, two-sided frontier-AI transmission channels, source-graded
-  BIT views, cautions, and source links. Presence in this ledger does not imply
-  that every Event affects the company. Use ordinary prose,
+  BIT views, cautions, and source links. Its four-control row remains Search
+  context, Disclosure, Public evidence, and Sort. Each collapsed company row
+  shows exactly one dated reference weight: the 30 June 2026 current top-ten
+  weight when available, otherwise the 31 December 2025 audited weight marked
+  `Last confirmed`. Expanded Disclosure history keeps both dated public values
+  when both exist; the canonical API likewise preserves the reference date,
+  basis, and current-confirmation state alongside both disclosure records.
+  Presence in this ledger does not imply that every Event affects the company.
+  Use ordinary prose,
   descriptive headings, lists, and flat tables only where rows make exact dates
   or weights easier to compare. Keep body copy at 16px with a 72ch maximum and
   all claims dated or qualified. Never imply access to the complete current
