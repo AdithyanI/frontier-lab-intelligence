@@ -20,24 +20,6 @@ DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_REGISTRY_DB = REPO_ROOT / "data" / "fli.db"
 DEFAULT_DERIVED_ROOT = following_rankings.DEFAULT_DERIVED_ROOT
 
-RANK_CONTRACT = {
-    "version": attention.DAILY_RANK_VERSION,
-    "kind": "lexicographic_event_rank",
-    "layers": [
-        "trusted_votes",
-        "mean_voter_position",
-        "author_position",
-        "public_interactions",
-        "event_id",
-    ],
-    "note": (
-        "Events are ranked once per canonical day. Distinct trusted voters lead; "
-        "voter position, root-author position, and public interactions only break "
-        "ties. The rank is not an importance or quality judgment."
-    ),
-}
-
-
 def _open_readonly(path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
@@ -331,6 +313,8 @@ def feed_payload(
     offset: int,
     run_id: str | None = None,
 ) -> dict[str, Any]:
+    if sort not in {"recent", "engagement"}:
+        raise ValueError("sort must be 'recent' or 'engagement'")
     requested_day = _iso_day(day)
     if not DEFAULT_FEED_DB.is_file():
         return {"available": False, "reason": "No Feed store found."}
@@ -478,34 +462,6 @@ def feed_payload(
             ),
             reverse=True,
         )
-    else:
-        def candidate_order(item: dict[str, Any]) -> tuple[Any, ...]:
-            voters = item["amplifiers"]
-            mean_position = (
-                sum(float(voter["network_position"]) for voter in voters) / len(voters)
-                if voters
-                else 0.0
-            )
-            author_id = item["author"]["entity_id"]
-            public_interactions = sum(
-                int(item["metrics"].get(key) or 0)
-                for key in ("likes", "replies", "reposts", "quotes")
-            )
-            return (
-                len(voters),
-                mean_position,
-                entity_positions.get(int(author_id), 0.0)
-                if author_id is not None
-                else 0.0,
-                public_interactions,
-                item["published_at"],
-                item["post_id"],
-            )
-
-        items.sort(
-            key=candidate_order,
-            reverse=True,
-        )
     total = len(items)
     visible = items[offset : offset + limit]
     return {
@@ -526,6 +482,5 @@ def feed_payload(
             "relation_count": run["relation_count"],
             "ranking": ranking_run,
         },
-        "rank_contract": RANK_CONTRACT,
         "items": visible,
     }

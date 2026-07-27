@@ -71,7 +71,7 @@ def _feed_fixture(tmp_path, monkeypatch):
     return registry
 
 
-def test_feed_api_emits_event_rank_contract_and_positioned_amplifiers(
+def test_feed_api_is_unranked_and_emits_positioned_amplifiers(
     tmp_path, monkeypatch
 ):
     _feed_fixture(tmp_path, monkeypatch)
@@ -81,8 +81,8 @@ def test_feed_api_emits_event_rank_contract_and_positioned_amplifiers(
         lambda: {
             2: {
                 "network_rank": 2,
+                "network_entities_below": 1,
                 "network_rank_total": 2_524,
-                "network_rank_level_total": 3,
             }
         },
     )
@@ -92,22 +92,15 @@ def test_feed_api_emits_event_rank_contract_and_positioned_amplifiers(
 
     payload = client.get("/api/feed?date=2026-07-11&limit=20").json()
     assert payload["available"] is True
-    assert payload["rank_contract"]["version"] == "daily-rank-v2"
-    assert payload["rank_contract"]["kind"] == "lexicographic_event_rank"
-    assert payload["rank_contract"]["layers"] == [
-        "trusted_votes",
-        "mean_voter_position",
-        "author_position",
-        "public_interactions",
-        "event_id",
-    ]
+    assert payload["sort"] == "recent"
+    assert "rank_contract" not in payload
     assert "score_formula" not in payload
     ids = [item["post_id"] for item in payload["items"]]
     assert "2" not in ids  # pure retweet wrapper collapses into target 1
     target = next(item for item in payload["items"] if item["post_id"] == "1")
     assert len(target["amplifiers"]) == 1
     assert target["amplifiers"][0]["entity_name"] == "Bob"
-    assert target["amplifiers"][0]["network_position"] == pytest.approx(0.5)
+    assert target["amplifiers"][0]["network_position"] == pytest.approx(0.000396)
     assert "attention_score" not in target
     assert "score_components" not in target
     assert "daily_rank" not in target
@@ -123,6 +116,18 @@ def test_feed_api_emits_event_rank_contract_and_positioned_amplifiers(
         item for item in searched["items"] if item["post_id"] == "1"
     )
     assert searched_target["amplifiers"] == target["amplifiers"]
+
+
+@pytest.mark.parametrize("sort", ["rank", "attention", "score"])
+def test_feed_api_rejects_rank_sorts(sort):
+    response = client.get(f"/api/feed?date=2026-07-11&sort={sort}")
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("sort", ["attention", "score"])
+def test_event_api_rejects_legacy_rank_aliases(sort):
+    response = client.get(f"/api/events?date=2026-07-11&sort={sort}")
+    assert response.status_code == 422
 
 
 def test_feed_support_and_context_are_provider_qualified(tmp_path, monkeypatch):

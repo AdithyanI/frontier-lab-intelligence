@@ -355,7 +355,7 @@ def feed_dates() -> JSONResponse:
 def feed(
     feed_date: calendar_date = Query(..., alias="date"),
     lane: str = Query("all", pattern="^(all|network|firsthand)$"),
-    sort: str = Query("rank", pattern="^(rank|recent|engagement)$"),
+    sort: str = Query("recent", pattern="^(recent|engagement)$"),
     q: str = Query("", max_length=200),
     limit: int = Query(40, ge=1, le=200),
     offset: int = Query(0, ge=0),

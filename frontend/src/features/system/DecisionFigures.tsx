@@ -341,8 +341,8 @@ export function RankLayersFigure() {
 
   const rows = [
     { n: '1', title: 'How many voted?', note: 'DISTINCT TRUSTED ENTITIES · QUOTE OR REPOST · ONE EACH' },
-    { n: '2', title: 'Tie? How trusted were they.', note: 'AVERAGE NETWORK POSITION OF THE VOTERS' },
-    { n: '3', title: 'Tie? How trusted is the source.', note: 'NETWORK POSITION OF THE SOURCE AUTHOR' },
+    { n: '2', title: 'Tie? Voter network support.', note: 'MEAN TIE-AWARE ENTITY-SUPPORT PERCENTILE' },
+    { n: '3', title: 'Tie? Source network support.', note: 'SOURCE-AUTHOR ENTITY-SUPPORT PERCENTILE' },
     { n: '4', title: 'Tie? Public interaction.', note: 'MAX SAME-DAY POST · LIKES · REPLIES · REPOSTS · QUOTES' },
   ]
 
@@ -350,7 +350,7 @@ export function RankLayersFigure() {
     <svg
       viewBox="0 0 1080 580"
       role="img"
-      aria-label="The daily rank asks four questions in order instead of blending them into one weighted number. First, how many distinct trusted Registry entities quoted or reposted the complete Event, one vote each and with the source author excluded. If that ties, the average network position of those voters. If that still ties, the network position of the source author. If that still ties, the maximum same-day public interactions on one Event post. Below is a censored check from the current daily-rank-v2 routing cohort: Events with one trusted vote were routing-relevant 34 percent of the time, two votes 55 percent, three to four votes 64 percent, and five or more votes 72 percent."
+      aria-label="The daily rank asks four questions in order instead of blending them into one weighted number. First, how many distinct trusted Registry entities quoted or reposted the complete Event, one vote each and with the source author excluded. If that ties, the average network position of those voters. If that still ties, the network position of the source author. If that still ties, the maximum same-day public interactions on one Event post. Below is a censored check from the current daily-rank-v2 routing cohort: Events with one trusted vote were routing-relevant 34 percent of the time, two votes 54 percent, three to four votes 64 percent, and five or more votes 72 percent."
     >
       <defs>
         <marker id="rank-layer-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -430,7 +430,7 @@ export function RankLayersFigure() {
       <text x="30" y="548" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">MORE VOTES · MORE OFTEN ROUTING-RELEVANT</text>
       {[
         ['1 VOTE', 34],
-        ['2 VOTES', 55],
+        ['2 VOTES', 54],
         ['3–4 VOTES', 64],
         ['5+ VOTES', 72],
       ].map(([label, rate], index) => {

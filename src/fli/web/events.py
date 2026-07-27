@@ -58,11 +58,11 @@ def _feed_key(item: dict[str, Any]) -> FeedKey:
 
 
 def _all_feed_candidates(*, day: str, run_id: str) -> dict[str, Any]:
-    """Read every ranked candidate once without an API pagination ceiling."""
+    """Read every raw Feed candidate once without an API pagination ceiling."""
     result = feed_store.feed_payload(
         day=day,
         lane="all",
-        sort="rank",
+        sort="recent",
         query="",
         limit=2**31 - 1,
         offset=0,
@@ -135,7 +135,7 @@ def _event_rows(
 def _root_post_id(
     members: list[dict[str, Any]], links: list[sqlite3.Row], candidates: set[FeedKey]
 ) -> str:
-    """Choose the exact relationship root, constrained to ranked Feed candidates."""
+    """Choose the exact relationship root from renderable Feed candidates."""
     inbound: dict[str, int] = {}
     outbound: dict[str, list[str]] = {}
     for link in links:
@@ -415,6 +415,46 @@ def _cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
         *(feed_store._db_version(path) for path in paths),
         *audience_routing_store.cache_token(day),
     )
+
+
+def _rank_input_sha256(*, day: str, items: list[dict[str, Any]]) -> str:
+    """Bind a daily rank to every exact input, not only the selected top 100."""
+    events = []
+    for item in sorted(items, key=lambda value: str(value["event_id"])):
+        components = item["rank_components"]
+        events.append(
+            {
+                "event_id": str(item["event_id"]),
+                "voters": sorted(
+                    [
+                        [
+                            int(voter["entity_id"]),
+                            f"{float(voter['position']):.6f}",
+                        ]
+                        for voter in components["voters"]
+                    ],
+                    key=lambda value: value[0],
+                ),
+                "author_position": (
+                    f"{float(components['author_position']):.6f}"
+                ),
+                "public_interactions": int(
+                    components["public_interactions"]
+                ),
+            }
+        )
+    return hashlib.sha256(
+        json.dumps(
+            {
+                "day": day,
+                "rank_version": attention.DAILY_RANK_VERSION,
+                "events": events,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+    ).hexdigest()
 
 
 def _dates_cache_token() -> tuple[tuple[str, int, int, int, int], ...]:
@@ -980,9 +1020,17 @@ def _events_day_cached(
         for row in reply_candidate_rows
     }
     by_handle, by_x_id = feed_store._registry_maps()
-    entity_positions = attention.entity_positions(
-        feed_store.rankings_store.entity_network_ranks()
-    )
+    network_context = feed_store.rankings_store.entity_network_context()
+    entity_ranks = feed_store.rankings_store.entity_network_ranks()
+    if network_context is None or not entity_ranks:
+        return {
+            "available": False,
+            "reason": (
+                "The Event rank is unavailable because no completed Registry "
+                "network analysis is present."
+            ),
+        }
+    entity_positions = attention.entity_positions(entity_ranks)
 
     members_by_event: dict[str, list[sqlite3.Row]] = {}
     for member in member_rows:
@@ -991,8 +1039,6 @@ def _events_day_cached(
     for link in link_rows:
         links_by_event.setdefault(link["event_id"], []).append(link)
 
-    routing_payload = audience_routing_store.routing_payload(day)
-    routing_items = routing_payload["items"]
     items: list[dict[str, Any]] = []
     consumed: set[FeedKey] = set()
     for cluster in clusters:
@@ -1198,6 +1244,14 @@ def _events_day_cached(
             for item in items
         ]
     )
+    rank_input_sha256 = _rank_input_sha256(day=day, items=items)
+    routing_payload = audience_routing_store.routing_payload(
+        day,
+        expected_rank_input_sha256=rank_input_sha256,
+        expected_event_run_id=str(run["run_id"]),
+        expected_feed_run_id=str(run["feed_run_id"]),
+    )
+    routing_items = routing_payload["items"]
     for item in items:
         route = routing_items.get(item["event_id"])
         route_matches = bool(
@@ -1225,7 +1279,11 @@ def _events_day_cached(
             "clustering_contract": run["clustering_contract"],
         },
         "rank_contract": {
-            **feed_result["rank_contract"],
+            "version": attention.DAILY_RANK_VERSION,
+            "kind": "daily_event_lexicographic",
+            "layers": list(attention.LAYER_NAMES),
+            "input_sha256": rank_input_sha256,
+            "network": network_context,
             "note": (
                 "Every Feed candidate is an Event. Provider-declared exact "
                 "relationships group evidence; the complete canonical-day Event "
@@ -1342,12 +1400,26 @@ def _events_week_cached(
         }
         items.append(revision)
     return {
-        **{key: value for key, value in base.items() if key != "items"},
+        **{
+            key: value
+            for key, value in base.items()
+            if key not in {"items", "rank_contract"}
+        },
         "date": through,
         "projection": "week",
         "window_from": start.isoformat(),
         "window_to": end.isoformat(),
         "audience_routing_run": None,
+        "rank_contract": {
+            "version": attention.DAILY_RANK_VERSION,
+            "kind": "weekly_inherited_daily_rank",
+            "layers": ["best_daily_rank", "rank_day", "event_id"],
+            "note": (
+                "Weekly rows inherit each Event's best canonical daily rank, "
+                "then use rank day and Event ID for deterministic ordering. "
+                "This is not a new cross-day score or a single-day rank input."
+            ),
+        },
         "items": items,
     }
 
@@ -1378,6 +1450,31 @@ def current_daily_rank_by_event_id(*, day: str) -> dict[str, int]:
     if not payload.get("available"):
         return {}
     return _daily_rank_by_event_id(payload["items"])
+
+
+def current_rank_identity(*, day: str) -> dict[str, str]:
+    """Return the immutable source identity for the authoritative daily rank."""
+    payload = _events_day_cached(day=day, cache_token=_cache_token(day))
+    if not payload.get("available"):
+        raise ValueError(
+            str(payload.get("reason") or f"Event rank is unavailable for {day}")
+        )
+    run = payload.get("run") or {}
+    rank_contract = payload.get("rank_contract") or {}
+    rank_input_sha256 = str(rank_contract.get("input_sha256") or "")
+    if (
+        not run.get("run_id")
+        or not run.get("feed_run_id")
+        or not rank_input_sha256
+    ):
+        raise ValueError(f"Event rank provenance is incomplete for {day}")
+    return {
+        "day": day,
+        "rank_version": attention.DAILY_RANK_VERSION,
+        "rank_input_sha256": rank_input_sha256,
+        "event_run_id": str(run["run_id"]),
+        "feed_run_id": str(run["feed_run_id"]),
+    }
 
 
 def _relationship_counts(item: dict[str, Any]) -> dict[str, int]:
@@ -1419,6 +1516,8 @@ def events_payload(
     event_run_id: str = "",
 ) -> dict[str, Any]:
     """Return a state-aware view over one cached day projection."""
+    if sort not in {"rank", "recent", "engagement"}:
+        raise ValueError("sort must be 'rank', 'recent', or 'engagement'")
     if projection == "week" and event_run_id:
         raise ValueError("An explicit Event run is supported only for a day projection")
     token = _cache_token(day)
@@ -1435,7 +1534,7 @@ def events_payload(
         return payload
 
     # Search is a visibility control, not a separate competition. Freeze one
-    # score rank over the complete projection before applying it.
+    # daily rank over the complete projection before applying it.
     daily_rank_by_event_id = _daily_rank_by_event_id(payload["items"])
     daily_rank_total = len(daily_rank_by_event_id)
     needle = query.strip().lower()

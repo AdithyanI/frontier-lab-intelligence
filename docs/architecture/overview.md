@@ -70,7 +70,9 @@ at the root of `fli`.
    inspectable `daily-rank-v2` layers: trusted-voter count, mean voter network
    position, source-author network position, maximum same-day one-post public
    interactions, then stable Event ID. It is not a scalar score, an Insight, or
-   a quality judgment.
+   a quality judgment. Network positions are tie-aware entity-support
+   percentiles, and the complete day's exact rank inputs are bound into one
+   lineage hash.
 7. Audience routing independently decides whether the packet matters to AI
    Engineering and Investment. New routing freezes admit only first-party X
    sources no more than seven days old; a current same-author continuation may
@@ -79,7 +81,9 @@ at the root of `fli`.
    then routes days in parallel. New publication-qualified runs automatically
    reuse a predecessor judgment only when the same Event has exact frozen
    evidence and rendered model input under the same routing contract; changed
-   or newly ranked Events alone require model work.
+   or newly ranked Events alone require model work. Every new run records the
+   current source Feed/Event IDs and full-day rank-input hash, and readers reject
+   stale rank lineage.
 8. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. It loads a compact profile index once and retrieves
@@ -135,8 +139,10 @@ at the root of `fli`.
   prompt/schema versions, hashes, and archived project records.
 - **Parallel historical authoring:** publish Feed and Events once through the
   maximum requested date, route the complete date range against that one
-  snapshot, then fan out immutable per-day workspaces and Codex tasks. Several
-  full `run-day` Evidence publishers must not compete for the global pointer.
+  snapshot, then fan out immutable per-day workspaces and Codex tasks.
+  `daily-orchestration-v3` freezes the Event, Feed, routing, cohort, and
+  rank-input identities for each day. Several full `run-day` Evidence
+  publishers must not compete for the global pointer.
 - **Exact Event identity:** quote, retweet, reply-parent, and first-party thread
   relationships may group evidence; shared topic or conversation text may not.
 - **Dynamic curation:** Feed and Event readers overlay current Registry state so

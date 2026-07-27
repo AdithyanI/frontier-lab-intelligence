@@ -10,15 +10,37 @@ from fli.insights import runs as insight_runs
 from fli.insights import view as insight_store
 from fli.scoring import attention
 from fli.web.app import app
+from fli.web import events as event_store
 
 
 client = TestClient(app)
+DAY = "2026-07-13"
+EVENT_RUN_ID = "event-run-insight-view"
+FEED_RUN_ID = "feed-run-insight-view"
+SOURCE_RANK_INPUT_SHA256 = "rank-input-sha-insight-view"
+
+
+@pytest.fixture(autouse=True)
+def _current_rank_identity(monkeypatch):
+    monkeypatch.setattr(
+        event_store,
+        "current_rank_identity",
+        lambda *, day: {
+            "day": day,
+            "rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
+            "event_run_id": EVENT_RUN_ID,
+            "feed_run_id": FEED_RUN_ID,
+        },
+    )
+    insight_store._routing_source_cached.cache_clear()
+    yield
+    insight_store._routing_source_cached.cache_clear()
 
 
 def _packet() -> routing_model.RoutingPacket:
     return routing_model.RoutingPacket(
         event_id="event-insight-1",
-        day="2026-07-13",
+        day=DAY,
         sources=(
             routing_model.EvidenceSource(
                 source_type="x_post",
@@ -71,7 +93,11 @@ def _routing_db(tmp_path, *, current=True):
             prompt_version TEXT NOT NULL,
             prompt_sha256 TEXT NOT NULL,
             schema_version TEXT NOT NULL,
-            rank_version TEXT NOT NULL
+            rank_version TEXT NOT NULL,
+            day TEXT NOT NULL,
+            source_rank_input_sha256 TEXT NOT NULL,
+            source_event_run_id TEXT NOT NULL,
+            source_feed_run_id TEXT NOT NULL
         );
         CREATE TABLE routing_item (
             event_id TEXT PRIMARY KEY,
@@ -81,12 +107,21 @@ def _routing_db(tmp_path, *, current=True):
         """
     )
     conn.execute(
-        "INSERT INTO run_meta VALUES (1, 'routing-run', ?, ?, ?, ?)",
+        """INSERT INTO run_meta (
+               singleton, run_id, prompt_version, prompt_sha256,
+               schema_version, rank_version, day,
+               source_rank_input_sha256, source_event_run_id,
+               source_feed_run_id
+           ) VALUES (1, 'routing-run', ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             routing_model.PROMPT_VERSION if current else "audience-routing-v8",
             routing_model.prompt_sha256() if current else "superseded",
             routing_model.SCHEMA_VERSION,
             attention.DAILY_RANK_VERSION if current else "attention-v1.1",
+            DAY,
+            SOURCE_RANK_INPUT_SHA256,
+            EVENT_RUN_ID,
+            FEED_RUN_ID,
         ),
     )
     conn.execute(

@@ -179,6 +179,8 @@ export interface EditorialInsightRun {
     cohort_sha256: string
     event_run_id: string
     feed_run_id: string
+    rank_version: string
+    rank_input_sha256: string
   }
   agent: {
     skill_version: string

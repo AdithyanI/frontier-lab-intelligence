@@ -19,6 +19,7 @@ from fli.evidence.artifacts import store as artifact_store
 from fli.routing import model as routing_model
 from fli.routing import freshness
 from fli.routing import runs as routing_runs
+from fli.routing import view as routing_view
 from fli.scoring import attention
 
 
@@ -444,57 +445,51 @@ def load_manifest(workspace: Path) -> dict[str, Any]:
     return manifest
 
 
-def _current_routing_run(day: str, routing_root: Path) -> tuple[Path, dict[str, Any]]:
-    try:
-        published = routing_runs._published_event_source()
-    except (FileNotFoundError, ValueError):
-        published = None
-    candidates: list[tuple[str, str, Path, dict[str, Any]]] = []
-    for path in sorted(routing_root.glob("*/routing.db")):
-        try:
-            conn = _open_readonly(path)
-            meta_row = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
-            if meta_row is None:
-                conn.close()
-                continue
-            meta = dict(meta_row)
-            counts = conn.execute(
-                """SELECT COUNT(*) AS total,
-                          SUM(status = 'complete') AS complete,
-                          MAX(COALESCE(completed_at, updated_at)) AS latest
-                   FROM routing_item"""
-            ).fetchone()
-            conn.close()
-        except (sqlite3.Error, OSError):
-            continue
-        if (
-            str(meta["day"]) != day
-            or meta.get("rank_version") != attention.DAILY_RANK_VERSION
-            or str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
-            or str(meta["prompt_sha256"]) != routing_model.prompt_sha256()
-            or str(meta["schema_version"]) != routing_model.SCHEMA_VERSION
-            or int(counts["total"] or 0) != int(meta["expected_count"])
-            or int(counts["complete"] or 0) != int(meta["expected_count"])
-            or (
-                published is not None
-                and (
-                    str(meta["source_event_run_id"]) != published["event_run_id"]
-                    or str(meta["source_feed_run_id"]) != published["feed_run_id"]
-                )
-            )
-        ):
-            continue
-        candidates.append(
-            (
-                str(counts["latest"] or meta["updated_at"]),
-                str(meta["run_id"]),
-                path,
-                meta,
-            )
-        )
-    if not candidates:
+def _current_routing_lineage(
+    day: str, routing_root: Path
+) -> tuple[Path, dict[str, Any], dict[str, str]]:
+    from fli.web import events as event_store
+
+    identity = event_store.current_rank_identity(day=day)
+    if str(identity["rank_version"]) != attention.DAILY_RANK_VERSION:
+        raise ValueError(f"current Event rank version is invalid for {day}")
+    path = routing_view.latest_complete_run(
+        day,
+        expected_rank_input_sha256=identity["rank_input_sha256"],
+        expected_event_run_id=identity["event_run_id"],
+        expected_feed_run_id=identity["feed_run_id"],
+        root=routing_root,
+    )
+    if path is None:
         raise ValueError(f"no complete current routing run found for {day}")
-    _, _, path, meta = max(candidates, key=lambda item: (item[0], item[1]))
+    conn = _open_readonly(path)
+    try:
+        meta_row = conn.execute(
+            "SELECT * FROM run_meta WHERE singleton = 1"
+        ).fetchone()
+    finally:
+        conn.close()
+    if meta_row is None:
+        raise ValueError(f"routing metadata is missing for {day}")
+    meta = dict(meta_row)
+    if (
+        str(meta["rank_version"]) != str(identity["rank_version"])
+        or str(meta["source_rank_input_sha256"])
+        != str(identity["rank_input_sha256"])
+        or str(meta["source_event_run_id"]) != str(identity["event_run_id"])
+        or str(meta["source_feed_run_id"]) != str(identity["feed_run_id"])
+    ):
+        raise ValueError(f"routing lineage is not current for {day}")
+    return path, meta, {
+        "rank_version": str(identity["rank_version"]),
+        "rank_input_sha256": str(identity["rank_input_sha256"]),
+        "event_run_id": str(identity["event_run_id"]),
+        "feed_run_id": str(identity["feed_run_id"]),
+    }
+
+
+def _current_routing_run(day: str, routing_root: Path) -> tuple[Path, dict[str, Any]]:
+    path, meta, _ = _current_routing_lineage(day, routing_root)
     return path, meta
 
 
@@ -536,7 +531,7 @@ def _event_x_publication_times(
     payload = event_store.events_payload(
         day=day,
         lane="all",
-        sort="attention",
+        sort="rank",
         query="",
         routing_filter="all",
         limit=1_000_000,
@@ -1990,6 +1985,70 @@ def run_projection(
     return result
 
 
+def _current_editorial_lineage(row: sqlite3.Row) -> dict[str, str] | None:
+    """Return authoritative source lineage only when an editorial is current."""
+    try:
+        source_routing_db = _resolve_path(str(row["source_routing_db"]))
+        current_path, routing_meta, rank_identity = _current_routing_lineage(
+            str(row["day"]),
+            source_routing_db.parent.parent,
+        )
+        exact_matches = (
+            current_path.resolve() == source_routing_db.resolve(),
+            str(row["source_routing_run_id"]) == str(routing_meta["run_id"]),
+            str(row["source_cohort_sha256"])
+            == str(routing_meta["cohort_sha256"]),
+            str(row["source_event_run_id"]) == rank_identity["event_run_id"],
+            str(row["source_feed_run_id"]) == rank_identity["feed_run_id"],
+            str(routing_meta["rank_version"]) == rank_identity["rank_version"],
+            str(routing_meta["source_rank_input_sha256"])
+            == rank_identity["rank_input_sha256"],
+        )
+    except (FileNotFoundError, KeyError, OSError, sqlite3.Error, ValueError):
+        return None
+    if not all(exact_matches):
+        return None
+    return {
+        "rank_version": rank_identity["rank_version"],
+        "rank_input_sha256": rank_identity["rank_input_sha256"],
+    }
+
+
+def _current_editorial_rows(
+    conn: sqlite3.Connection,
+    *,
+    day: str | None = None,
+) -> list[tuple[sqlite3.Row, dict[str, str]]]:
+    parameters: tuple[str, ...] = ()
+    day_filter = ""
+    if day is not None:
+        day_filter = " AND day = ?"
+        parameters = (day,)
+    rows = conn.execute(
+        f"""SELECT rowid AS import_ordinal, run_id, day, created_at,
+                   candidate_count, candidate_pair_count,
+                   source_routing_run_id, source_routing_db,
+                   source_cohort_sha256, source_event_run_id,
+                   source_feed_run_id
+            FROM editorial_run
+            WHERE status = 'complete'{day_filter}
+            ORDER BY day DESC, created_at DESC, rowid DESC""",
+        parameters,
+    ).fetchall()
+    current: list[tuple[sqlite3.Row, dict[str, str]]] = []
+    selected_days: set[str] = set()
+    for row in rows:
+        selected_day = str(row["day"])
+        if selected_day in selected_days:
+            continue
+        lineage = _current_editorial_lineage(row)
+        if lineage is None:
+            continue
+        current.append((row, lineage))
+        selected_days.add(selected_day)
+    return current
+
+
 def editorial_insights_payload(
     *,
     audience: str = "investment",
@@ -2034,24 +2093,13 @@ def editorial_insights_payload(
         ).fetchone()
         if table is None:
             return unavailable("No complete daily editorial run has been imported.")
-        if day is None:
-            selected = conn.execute(
-                """SELECT run_id FROM editorial_run
-                   WHERE status = 'complete'
-                   ORDER BY day DESC, created_at DESC, rowid DESC
-                   LIMIT 1"""
-            ).fetchone()
-        else:
-            selected = conn.execute(
-                """SELECT run_id FROM editorial_run
-                   WHERE status = 'complete' AND day = ?
-                   ORDER BY created_at DESC, rowid DESC
-                   LIMIT 1""",
-                (day,),
-            ).fetchone()
-        if selected is None:
+        current_rows = _current_editorial_rows(conn, day=day)
+        if not current_rows:
             scope = f" for {day}" if day is not None else ""
-            return unavailable(f"No complete daily editorial run is available{scope}.")
+            return unavailable(
+                f"No current complete daily editorial run is available{scope}."
+            )
+        selected, current_lineage = current_rows[0]
 
         payload = run_payload(conn, str(selected["run_id"]))
         items = []
@@ -2128,6 +2176,8 @@ def editorial_insights_payload(
                 "cohort_sha256": payload["source_cohort_sha256"],
                 "event_run_id": payload["source_event_run_id"],
                 "feed_run_id": payload["source_feed_run_id"],
+                "rank_version": current_lineage["rank_version"],
+                "rank_input_sha256": current_lineage["rank_input_sha256"],
             },
             "agent": {
                 "skill_version": payload["skill_version"],
@@ -2195,18 +2245,10 @@ def editorial_insight_dates_payload(
         ).fetchone()
         if table is None:
             return empty
-        rows = conn.execute(
-            """SELECT rowid AS import_ordinal, run_id, day, created_at,
-                      candidate_count, candidate_pair_count
-               FROM editorial_run
-               WHERE status = 'complete'
-               ORDER BY day, created_at DESC, rowid DESC"""
-        ).fetchall()
-        latest_by_day: dict[str, sqlite3.Row] = {}
-        for row in rows:
-            latest_by_day.setdefault(str(row["day"]), row)
+        rows = _current_editorial_rows(conn)
         dates = []
-        for selected_day, row in sorted(latest_by_day.items()):
+        for row, _lineage in sorted(rows, key=lambda item: str(item[0]["day"])):
+            selected_day = str(row["day"])
             insight_count = int(
                 conn.execute(
                     """SELECT COUNT(*) FROM editorial_insight

@@ -72,7 +72,8 @@ def _routing_source_cached(
     try:
         meta = conn.execute(
             """SELECT run_id, prompt_version, prompt_sha256, schema_version,
-                      rank_version
+                      rank_version, day, source_rank_input_sha256,
+                      source_event_run_id, source_feed_run_id
                FROM run_meta WHERE singleton = 1"""
         ).fetchone()
         if meta is None or (
@@ -80,6 +81,19 @@ def _routing_source_cached(
             or str(meta["prompt_sha256"]) != routing_model.prompt_sha256()
             or str(meta["schema_version"]) != routing_model.SCHEMA_VERSION
             or str(meta["rank_version"]) != attention.DAILY_RANK_VERSION
+        ):
+            return {"current": False, "packets": {}}
+        from fli.web import events as event_store
+
+        try:
+            identity = event_store.current_rank_identity(day=str(meta["day"]))
+        except ValueError:
+            return {"current": False, "packets": {}}
+        if (
+            str(meta["source_rank_input_sha256"])
+            != identity["rank_input_sha256"]
+            or str(meta["source_event_run_id"]) != identity["event_run_id"]
+            or str(meta["source_feed_run_id"]) != identity["feed_run_id"]
         ):
             return {"current": False, "packets": {}}
         rows = conn.execute(

@@ -322,19 +322,22 @@ function RankDisclosure({
       layer: 1,
       label: 'Trusted votes',
       raw: `${components.trusted_votes.toLocaleString('en-US')} distinct trusted ${components.trusted_votes === 1 ? 'entity' : 'entities'}`,
-      detail: voterNames || 'No trusted voter observed',
+      detail: voterNames
+        ? `One vote per Registry entity across the complete Event; source entity excluded after union. ${voterNames}`
+        : 'One vote per Registry entity across the complete Event; source entity excluded after union. No trusted voter observed.',
     },
     {
       layer: 2,
       label: 'Who voted',
-      raw: `Average network position ${components.mean_voter_position.toFixed(3)}`,
-      detail: 'Highest position is 1.000; unranked is 0.000',
+      raw: `Average network position ${components.mean_voter_position.toFixed(6)}`,
+      detail:
+        'Mean entity percentile: the share of other ranked Registry entities with lower network support. Ties share one value.',
     },
     {
       layer: 3,
       label: 'Source author standing',
-      raw: `Network position ${components.author_position.toFixed(3)}`,
-      detail: 'Used only when the first two layers tie',
+      raw: `Network position ${components.author_position.toFixed(6)}`,
+      detail: 'The same tie-aware entity percentile, used only when the first two layers tie',
     },
     {
       layer: 4,
@@ -888,8 +891,10 @@ export default function Feed() {
           What is the network paying attention to?
         </h2>
         <p className="evidence-view-sub">
-          Complete Events ordered by distinct trusted quotes and reposts.
-          Network position and public interaction only break ties.
+          Complete Events ordered first by distinct trusted Registry entities
+          that quoted or reposted any Event member. Mean voter position,
+          source-author position, and maximum same-day one-post public
+          interactions break ties in that order.
         </p>
         <p className="page-method-line mono">
           <a href="/system/architecture#ranking-methods">How ranking works ↗</a>
@@ -932,7 +937,7 @@ export default function Feed() {
               setRoutingFilter(value)
             }}
             options={[
-              { value: 'all', label: 'All', description: 'All Feed items', count: data?.routing_counts?.all },
+              { value: 'all', label: 'All', description: 'All Events', count: data?.routing_counts?.all },
               { value: 'relevant', label: 'Relevant', description: 'AI Engineering or Investment', count: data?.routing_counts?.relevant },
               { value: 'not_relevant', label: 'Not relevant', description: 'Evaluated, but relevant to neither audience', count: data?.routing_counts?.not_relevant },
               { value: 'not_evaluated', label: 'Not evaluated', description: 'Outside the current cohort, stale, or unavailable', count: data?.routing_counts?.not_evaluated },
@@ -957,7 +962,7 @@ export default function Feed() {
       {hasSearch && (
         <div className="feed-summary mono">
           {(data?.total ?? 0).toLocaleString('en-US')}{' '}
-          {routingSummaryLabels[routingFilter]} Feed items
+          {routingSummaryLabels[routingFilter]} Events
         </div>
       )}
 

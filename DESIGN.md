@@ -103,8 +103,9 @@ Rules:
   navigation for all three, not another row of top-level pills.
 - Feed and Artifacts share one top-level **Evidence** destination
   because they are two inspection views over the same evidence layer. Feed is
-  the first and default subview: it owns daily rank, score disclosure, and
-  direct audience routing. Artifacts follows as the canonical source
+  the first and default subview: the `/evidence/feed` product view owns daily
+  Event-rank disclosure and direct audience routing, while the lower-level raw
+  Feed ledger remains unranked. Artifacts follows as the canonical source
   and retrieval-provenance index derived from selected Feed evidence. Keep the two
   object types in separate ruled views; do not blend events and artifacts into
   one list.

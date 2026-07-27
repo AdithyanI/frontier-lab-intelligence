@@ -16,20 +16,27 @@ X provider request.
 | Stage | Scope | Reuse | New external work | Measured incremental cost |
 | --- | --- | --- | --- | ---: |
 | Daily Event rank | 19,657 Events; 1,700 top-100 positions | Complete local replay | None | $0 |
-| Audience routing | 1,674 Events | 976 exact judgments | 698 GPT-5.4-mini/high calls | $2.961695 |
-| Per-Event working Insights | 1,482 Event/audience pairs | 524 exact outputs | 958 GPT-5.6-terra/high calls | $15.561773 |
+| Audience routing | Final cohort: 1,674 Events | Final tie-aware correction reused 1,647 exact judgments; initial migration reused 976 | 725 GPT-5.4-mini/high calls across both migration passes; 27 in the final correction | $3.050746 total; $0.089051 in the final correction |
+| Per-Event working Insights | Final cohort: 1,474 Event/audience pairs across 965 Events | Final correction reused 1,451 exact outputs; initial migration reused 524 | 981 GPT-5.6-terra/high calls across both migration passes; 23 in the final correction | $15.923542 total; $0.361769 in the final correction |
 | Artifact projection | 6,298 observations; 5,378 artifacts | Existing bodies and snapshots | None | $0 |
 | Semantic index | 524 stored `text-embedding-3-large` vectors | Existing packet-keyed vectors | None in this replay | Aggregate historical cost was not durably reconciled |
 | Daily editorial briefs | 17-day GPT-5.6-sol/xhigh batch launched | Existing exact evidence and prior annotations where valid | One persisted agent task per day | App Server does not report dollar spend here; replay still in progress |
 | PDFs and UI projections | Target: two audiences across 17 days | Deterministic local rendering and cache | None | $0; final refresh still in progress |
 
 The measured LiteLLM increment before the daily editorial tasks is
-**$18.523467**. The corresponding known stored cost of the complete current
-routing and per-Event Insight cohorts, including compatible reused outputs
-produced in earlier runs, is **$31.999374**. One reused routing row lacks
+**$18.974288** across the initial clean migration and the final tie-aware
+percentile correction. The corresponding known stored cost of the complete
+current routing and per-Event Insight cohorts, including compatible reused
+outputs produced in earlier runs, is **$31.797248**. One reused routing row lacks
 historical cost telemetry, so this is a recorded known-cost total rather than a
 complete replacement-cost estimate. It was not charged again during this
 migration.
+
+The final corrective routing pass reported 62,349 input tokens, of which
+41,216 were cached, and 15,580 output tokens. The final corrective per-Event
+Insight pass reported 73,725 input tokens, of which 24,064 were cached, and
+15,440 output tokens. These are incremental-call counters; reused rows
+correctly contribute zero new tokens.
 
 ## What a Normal Refresh Pays For
 

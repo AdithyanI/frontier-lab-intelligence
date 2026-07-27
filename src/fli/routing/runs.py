@@ -1,4 +1,4 @@
-"""Freeze and route ranked Feed Events directly by audience."""
+"""Freeze and route ranked Event packets projected from Feed evidence."""
 
 from __future__ import annotations
 
@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS run_meta (
     prompt_sha256 TEXT NOT NULL,
     schema_version TEXT NOT NULL,
     rank_version TEXT NOT NULL,
+    source_rank_input_sha256 TEXT NOT NULL
+        CHECK (length(source_rank_input_sha256) = 64),
     source_event_run_id TEXT NOT NULL,
     source_feed_run_id TEXT NOT NULL,
     source_artifact_db TEXT NOT NULL,
@@ -167,67 +169,38 @@ def _stored_cohort_sha256(
 
 
 def migrate_run_storage(path: Path | str) -> bool:
-    """Migrate one routing database to the Event-native storage schema."""
+    """Validate current routing storage without upgrading stale lineage."""
     path = Path(path)
     if not path.is_file():
         return False
     conn = sqlite3.connect(path, timeout=60.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA busy_timeout = 60000")
-    changed = False
     try:
+        meta_columns = {
+            str(row["name"])
+            for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
+        }
         columns = {
             str(row["name"])
             for row in conn.execute("PRAGMA table_info(routing_item)").fetchall()
         }
-        if "semantic_snapshot_sha256" in columns:
-            if "snapshot_content_sha256" in columns:
-                raise RuntimeError(
-                    "routing_item contains both legacy and Event-native snapshot columns"
-                )
-        elif "snapshot_content_sha256" not in columns:
+        if (
+            "source_rank_input_sha256" not in meta_columns
+            or "semantic_snapshot_sha256" not in columns
+        ):
             return False
-        with conn:
-            meta_columns = {
-                str(row["name"])
-                for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
-            }
-            if "rank_version" not in meta_columns:
-                conn.execute(
-                    "ALTER TABLE run_meta ADD COLUMN rank_version TEXT NOT NULL "
-                    "DEFAULT 'attention-v1.1'"
-                )
-                changed = True
-            if "snapshot_content_sha256" in columns:
-                conn.execute(
-                    "ALTER TABLE routing_item RENAME COLUMN "
-                    "snapshot_content_sha256 TO semantic_snapshot_sha256"
-                )
-                changed = True
-            meta = conn.execute(
-                "SELECT cohort_sha256 FROM run_meta WHERE singleton = 1"
-            ).fetchone()
-            if meta is not None:
-                recorded = str(meta["cohort_sha256"])
-                legacy = _stored_cohort_sha256(
-                    conn, snapshot_key="snapshot_content_sha256"
-                )
-                current = _stored_cohort_sha256(conn)
-                if recorded == legacy and recorded != current:
-                    conn.execute(
-                        "UPDATE run_meta SET cohort_sha256 = ? WHERE singleton = 1",
-                        (current,),
-                    )
-                    changed = True
-                elif recorded != current:
-                    raise RuntimeError(
-                        "routing storage cohort hash does not match stored items"
-                    )
-            conn.execute("PRAGMA user_version = 3")
+        meta = conn.execute(
+            "SELECT cohort_sha256 FROM run_meta WHERE singleton = 1"
+        ).fetchone()
+        if meta is not None and str(meta["cohort_sha256"]) != _stored_cohort_sha256(conn):
+            raise RuntimeError(
+                "routing storage cohort hash does not match stored items"
+            )
         integrity = str(conn.execute("PRAGMA integrity_check").fetchone()[0])
         if integrity != "ok":
             raise RuntimeError(f"routing storage integrity check failed: {integrity}")
-        return changed
+        return False
     finally:
         conn.close()
 
@@ -255,6 +228,16 @@ def _published_event_source() -> dict[str, str]:
     return {"event_run_id": str(row["run_id"]), "feed_run_id": str(row["feed_run_id"])}
 
 
+def _current_rank_identities(days: list[str]) -> dict[str, dict[str, str]]:
+    """Resolve the exact full-day rank inputs before routing is frozen."""
+    from fli.web import events as event_store
+
+    return {
+        day: event_store.current_rank_identity(day=day)
+        for day in days
+    }
+
+
 def _refresh_days(through: str, days: int) -> list[str]:
     if days < 1 or days > 90:
         raise ValueError("days must be between 1 and 90")
@@ -275,6 +258,7 @@ def _refresh_plan(
     model: str,
     effort: str,
     source_event_run_id: str,
+    rank_identities: dict[str, dict[str, str]],
 ) -> list[dict[str, Any]]:
     if top_ranked < 1:
         raise ValueError("top_ranked must be positive")
@@ -282,10 +266,14 @@ def _refresh_plan(
     return [
         {
             "day": day,
+            "source_rank_input_sha256": rank_identities[day][
+                "rank_input_sha256"
+            ],
             "run_id": (
                 f"{routing_model.PROMPT_VERSION}-{_run_label(model)}-{day}-"
                 f"top{top_ranked}-{_run_label(effort)}-"
-                f"{_run_label(attention.DAILY_RANK_VERSION)}-{source_label}"
+                f"{_run_label(attention.DAILY_RANK_VERSION)}-{source_label}-"
+                f"{rank_identities[day]['rank_input_sha256'][:12]}"
             ),
         }
         for day in _refresh_days(through, days)
@@ -315,13 +303,21 @@ def _freeze_refresh_day(
             artifact_db=artifact_db,
             model=model,
             effort=effort,
+            expected_rank_input_sha256=str(
+                item["source_rank_input_sha256"]
+            ),
         )
         packaging_duration_ms = round(
             (time.monotonic() - packaging_started) * 1000,
             3,
         )
         meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
-        if meta is None or str(meta["source_event_run_id"]) != expected_event_run_id:
+        if (
+            meta is None
+            or str(meta["source_event_run_id"]) != expected_event_run_id
+            or str(meta["source_rank_input_sha256"])
+            != str(item["source_rank_input_sha256"])
+        ):
             raise RuntimeError(
                 f"{item['day']} froze a different Event publication; rerun the refresh."
             )
@@ -412,6 +408,16 @@ def refresh_all_days(
     if day_workers < 1 or day_workers > 31:
         raise ValueError("day_workers must be between 1 and 31")
     source = _published_event_source()
+    refresh_days = _refresh_days(through, days)
+    rank_identities = _current_rank_identities(refresh_days)
+    if any(
+        identity["event_run_id"] != source["event_run_id"]
+        or identity["feed_run_id"] != source["feed_run_id"]
+        for identity in rank_identities.values()
+    ):
+        raise RuntimeError(
+            "The current daily rank is not bound to the published Event source."
+        )
     plan = _refresh_plan(
         through=through,
         days=days,
@@ -419,6 +425,7 @@ def refresh_all_days(
         model=model,
         effort=effort,
         source_event_run_id=source["event_run_id"],
+        rank_identities=rank_identities,
     )
     base = {
         "source_event_run_id": source["event_run_id"],
@@ -457,10 +464,13 @@ def refresh_all_days(
             run_root=run_root,
         )
 
-    if _published_event_source() != source:
+    if (
+        _published_event_source() != source
+        or _current_rank_identities(refresh_days) != rank_identities
+    ):
         raise RuntimeError(
-            "The published Event run changed while audience packets were frozen; "
-            "model calls were not started. Rerun the refresh."
+            "The published Event run or daily rank inputs changed while audience "
+            "packets were frozen; model calls were not started. Rerun the refresh."
         )
 
     results: dict[str, dict[str, Any]] = {}
@@ -486,10 +496,14 @@ def refresh_all_days(
         raise RuntimeError("Audience refresh did not complete: " + " | ".join(errors))
 
     current_source = _published_event_source()
-    if current_source != source:
+    if (
+        current_source != source
+        or _current_rank_identities(refresh_days) != rank_identities
+    ):
         raise RuntimeError(
-            "The published Event run changed during audience routing; completed "
-            "runs were retained, but old runs were not removed. Rerun the refresh."
+            "The published Event run or daily rank inputs changed during audience "
+            "routing; completed runs were retained, but old runs were not removed. "
+            "Rerun the refresh."
         )
 
     keep = {str(item["run_id"]) for item in plan}
@@ -610,12 +624,12 @@ def connect_run(path: Path | str) -> sqlite3.Connection:
         str(row["name"])
         for row in conn.execute("PRAGMA table_info(run_meta)").fetchall()
     }
-    if "rank_version" not in meta_columns:
-        conn.execute(
-            "ALTER TABLE run_meta ADD COLUMN rank_version TEXT NOT NULL "
-            "DEFAULT 'attention-v1.1'"
+    if "source_rank_input_sha256" not in meta_columns:
+        conn.close()
+        raise RuntimeError(
+            "routing database predates rank-input lineage; create a new run"
         )
-    conn.execute("PRAGMA user_version = 3")
+    conn.execute("PRAGMA user_version = 4")
     conn.commit()
     return conn
 
@@ -836,6 +850,7 @@ def freeze_run(
     artifact_db: Path,
     model: str,
     effort: str,
+    expected_rank_input_sha256: str | None = None,
 ) -> int:
     if top_ranked < 1:
         raise ValueError("top_ranked must be positive")
@@ -844,7 +859,7 @@ def freeze_run(
     payload = event_store.events_payload(
         day=day,
         lane="all",
-        sort="attention",
+        sort="rank",
         query="",
         event_id=event_id or "",
         routing_filter="all",
@@ -854,8 +869,21 @@ def freeze_run(
     if not payload.get("available"):
         raise ValueError(str(payload.get("reason") or "Evidence is unavailable"))
     source_run = dict(payload.get("run") or {})
+    rank_contract = dict(payload.get("rank_contract") or {})
+    source_rank_input_sha256 = str(
+        rank_contract.get("input_sha256") or ""
+    )
     if not source_run.get("run_id") or not source_run.get("feed_run_id"):
         raise ValueError("Evidence projection is missing run provenance")
+    if not source_rank_input_sha256:
+        raise ValueError("Evidence projection is missing rank-input provenance")
+    if (
+        expected_rank_input_sha256 is not None
+        and source_rank_input_sha256 != expected_rank_input_sha256
+    ):
+        raise RuntimeError(
+            "The daily rank inputs changed before audience packets were frozen."
+        )
     items = list(payload.get("items") or [])
     if event_id:
         items = [item for item in items if item["event_id"] == event_id]
@@ -924,6 +952,7 @@ def freeze_run(
         "prompt_sha256": routing_model.prompt_sha256(),
         "schema_version": routing_model.SCHEMA_VERSION,
         "rank_version": attention.DAILY_RANK_VERSION,
+        "source_rank_input_sha256": source_rank_input_sha256,
         "source_event_run_id": str(source_run["run_id"]),
         "source_feed_run_id": str(source_run["feed_run_id"]),
         "source_artifact_db": _display_path(artifact_db),
@@ -948,17 +977,18 @@ def freeze_run(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
                 prompt_version, prompt_sha256, schema_version,
-                rank_version,
+                rank_version, source_rank_input_sha256,
                 source_event_run_id, source_feed_run_id, source_artifact_db,
                 selection_kind, selection_limit, requested_event_id,
                 cohort_sha256, expected_count,
                 created_at, updated_at)
-               VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 expected["run_id"], expected["day"], expected["model"],
                 expected["reasoning_effort"], expected["prompt_version"],
                 expected["prompt_sha256"], expected["schema_version"],
                 expected["rank_version"],
+                expected["source_rank_input_sha256"],
                 expected["source_event_run_id"], expected["source_feed_run_id"],
                 expected["source_artifact_db"], expected["selection_kind"],
                 expected["selection_limit"],

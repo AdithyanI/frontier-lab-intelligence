@@ -6,9 +6,10 @@ operational behavior. Use the short
 [code map](../architecture/code-map.md) for current ownership.
 
 Current system: the Registry, immutable trusted-following snapshot, X evidence
-store, exact event projection, rank-first Feed view, canonical artifact library,
-and direct audience-routing boundary are implemented and inspectable. Audience
-routing freezes ranked Evidence directly and returns independent AI Engineering
+store, exact Event projection, ranked Event view over the unranked Feed ledger,
+canonical artifact library, and direct audience-routing boundary are
+implemented and inspectable. Audience routing freezes top-ranked Event evidence
+and returns independent AI Engineering
 and Investment relevance judgments; the Feed derives its audit states from
 those two booleans. The former model-based keep/drop gate and the older
 multi-stage Insight backends were removed rather than retained as compatibility
@@ -167,11 +168,13 @@ run ID.
 `fli.web.feed` deliberately joins the current Registry at read time rather than
 copying curation state into the derived database. Rejected authors disappear
 from the next response, and rejected amplifiers stop contributing, while the
-raw and historical normalized evidence remains unchanged. Each canonical
-Registry entity votes at most once across a complete Event and cannot vote for
-an Event sourced from itself. The production `daily-rank-v2` contract is an
-inspectable lexicographic ordering aid—not an Insight, importance, or quality
-judgment. It orders the complete canonical-day Event by:
+raw and historical normalized evidence remains unchanged. It exposes an
+unranked post ledger. `fli.web.events` constructs the complete Event projection;
+there, each canonical Registry entity votes at most once across the Event and
+cannot vote for an Event sourced from itself. The production `daily-rank-v2`
+contract is an inspectable lexicographic ordering aid—not an Insight,
+importance, or quality judgment. It orders the complete canonical-day Event
+by:
 
 1. the union count of distinct active Registry entities that quote or repost
    any Event member, removing the source entity after the union;
@@ -185,12 +188,13 @@ The first four layers sort descending. Later layers are consulted only when all
 earlier layers tie, so a public-interaction snapshot can never outvote another
 trusted participant. Organizations and people follow the same vote rule;
 network position carries inspectable authority without a hidden type bonus.
-The same API also exposes chronological and public-engagement orderings. The
-Feed presents only the stable daily Event rank across all evidence for the
-selected day (`#1`, `#2`, ...). Audit filters and search only hide rows; they
-never restart the ranking. A click reveals the four ordered inputs, voter
-identities, the deciding layer, snapshot limitation, and deterministic
-tiebreak. There is no scalar score, percentile transform, or weighted sum.
+The Event API also exposes chronological and public-engagement orderings. The
+`/evidence/feed` Event view presents the stable daily Event rank across all
+evidence for the selected day (`#1`, `#2`, ...). Audit filters and search only
+hide rows; they never restart the ranking. A click reveals the four ordered
+inputs, voter identities, the deciding layer, snapshot limitation, and
+deterministic tiebreak. There is no scalar Event score or weighted blend; only
+the two network-position layers use tie-aware entity-support percentiles.
 
 `fli.evidence.events` is a separate content-addressed projection over one frozen
 Feed run. The `signal-events-v6` /
@@ -241,10 +245,11 @@ and compact amplification facts. The UI no longer presents current/prior
 sections or a continuation state. Audience routing and Insight generation
 remain later semantic stages after this deterministic layer is audited.
 
-`fli.routing.model` is the sole live model judgment over ranked Feed
-evidence. One GPT-5.4-mini/high call receives the readable first-party packet and
-returns two independently reasoned booleans: AI Engineering relevance and
-Investment relevance. Feed rank, rank-layer values, engagement, prominence,
+`fli.routing.model` is the sole live model judgment over top-ranked Event
+packets projected from Feed evidence. One GPT-5.4-mini/high call receives the
+readable first-party packet and returns two independently reasoned booleans: AI
+Engineering relevance and Investment relevance. Event rank, rank-layer values,
+engagement, prominence,
 and the derived audit state are not model inputs. `fli.routing.runs`
 freezes the exact cohort, `rank_version`, snapshot/evidence/input hashes, prompt and schema
 versions, model output, cache telemetry, cost, and failures in one resumable

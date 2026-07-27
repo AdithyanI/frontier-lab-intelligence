@@ -44,3 +44,26 @@
 - Exact Event/evidence/input reuse is the cost-control mechanism that matters:
   the routing migration reused 976 of 1,674 judgments and the Insight migration
   reused 524 of 1,482 outputs without weakening current rank provenance.
+- A network percentile must account for tied population mass, not just dense
+  support levels. Counting entities with strictly lower support makes equal
+  support equal, preserves the intended 0–1 meaning, and avoids arbitrary gaps
+  created by differently sized tie groups.
+- Hash the full day of Event rank inputs, not only the selected Event or rank
+  version. A route can have identical semantic evidence while its admission or
+  feed rank changed because another Event changed; the full-day SHA makes that
+  hidden dependency explicit.
+- “Latest complete for this date” is not a sufficient read contract. Editorial
+  and PDF/UI readers must prove exact current routing, cohort, Event, Feed, and
+  rank lineage or fail closed to the current per-Event view.
+- Weekly inherited daily rank is a different contract from one day's
+  lexicographic rank. Reusing a final-day rank SHA on a seven-day projection
+  made the response look more exact than it was; the weekly view now declares
+  its inherited ordering without a false input hash.
+- Reuse lookup can become the slow part even when external spend is tiny. The
+  final Insight correction made only 23 model calls, but serial request
+  freezing and repeated SQLite predecessor scans dominated wall time. A future
+  harness pass should batch or index those reads without weakening exact reuse.
+- The final tie-aware correction reused 1,647 of 1,674 routing judgments and
+  1,451 of 1,474 per-Event Insight outputs. Strict lineage therefore made a
+  mathematical correction cheap while still regenerating every genuinely new
+  boundary item.

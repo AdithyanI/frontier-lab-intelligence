@@ -246,8 +246,11 @@ untouched rather than silently changed back.
 
 `run-day` is the one-date entry point. `run-batch` is the historical
 parallelism boundary: it selects one complete current routing run per day,
-requires `daily-rank-v2`, records a separate `daily-orchestration-v2` lineage
+requires `daily-rank-v2`, records a separate `daily-orchestration-v3` lineage
 for each date, and launches at most four independent days concurrently.
+That lineage freezes the source Event run, Feed run, routing run, routing
+cohort hash, and full-day `source_rank_input_sha256`; a workspace or completed
+editorial run from another rank input cannot be resumed as current.
 Its Evidence stage owns the single global Feed/Event publication pointer, so
 several full `run-day` commands for different dates must not publish
 concurrently. For an all-date rerun, publish Evidence once through the maximum

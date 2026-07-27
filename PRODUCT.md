@@ -28,7 +28,8 @@ separate future concern.
 ## Product Purpose
 
 Frontier Lab Intelligence: track frontier AI labs and their key people, turn
-their public output into scored, cited, structured insights, and deliver the
+their public output into ranked Event evidence and cited, structured,
+audience-specific Insights, and deliver the
 few things that matter to each audience while suppressing the noise. Success
 is defined by the client's own bar: "did this surface something we'd genuinely
 want to know, and did it keep the noise out?"
@@ -60,8 +61,9 @@ it looks. Argue against them in the tracker, not by silently deviating.
    known, caching and cheaper equivalent paths may bend the cost curve without
    changing the result.
 2. **Automatically done, human-correctable.** Every pipeline stage runs
-   end-to-end without a human gate: the LLM curates, scores, and decides,
-   always writing down *why* with cited evidence and a reason. Humans audit the
+   end-to-end without a human gate: the deterministic pipeline orders evidence;
+   models make audience judgments and editorial selections, always writing
+   down *why* with cited evidence and a reason. Humans audit the
    finished artifact and override where wrong; overrides are stored as data —
    the strongest evidence tier — and survive recomputation. No stage may
    require manual per-item approval to produce output.

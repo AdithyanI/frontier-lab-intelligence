@@ -2,6 +2,7 @@ import copy
 from datetime import date
 
 from fastapi.testclient import TestClient
+import pytest
 
 from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
@@ -116,6 +117,30 @@ def _event_fixture(tmp_path, monkeypatch, *, include_singleton=False):
     monkeypatch.setattr(feed_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(feed_store, "DEFAULT_REGISTRY_DB", registry)
     monkeypatch.setattr(feed_store, "DEFAULT_DERIVED_ROOT", empty_rankings)
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_context",
+        lambda: {
+            "snapshot_id": "test-network",
+            "snapshot_completed_at": "2026-07-12T00:00:00+00:00",
+            "network_source_total": 3,
+            "network_rank_total": 5,
+            "parent_snapshot_id": None,
+            "incremental": False,
+        },
+    )
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_ranks",
+        lambda: {
+            entity_id: {
+                "network_rank": entity_id,
+                "network_entities_below": 5 - entity_id,
+                "network_rank_total": 5,
+            }
+            for entity_id in range(1, 6)
+        },
+    )
     monkeypatch.setattr(event_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(event_store, "DEFAULT_EVENTS_DB", events_db)
     monkeypatch.setattr(event_store, "DEFAULT_EVENT_VIEW_CACHE_ROOT", None)
@@ -130,7 +155,14 @@ def _event_fixture(tmp_path, monkeypatch, *, include_singleton=False):
     }
 
 
-def _write_audience_routing_run(root, *, items):
+def _write_audience_routing_run(
+    root,
+    *,
+    items,
+    source_rank_input_sha256,
+    source_event_run_id,
+    source_feed_run_id,
+):
     path = root / "audience-run-1" / "routing.db"
     conn = routing_runs.connect_run(path)
     now = "2026-07-13T10:05:00+00:00"
@@ -138,19 +170,23 @@ def _write_audience_routing_run(root, *, items):
         """INSERT INTO run_meta
            (singleton, run_id, day, model, reasoning_effort, prompt_version,
             prompt_sha256, schema_version, rank_version, source_event_run_id,
+            source_rank_input_sha256,
             source_feed_run_id, source_artifact_db, selection_kind,
             selection_limit,
             requested_event_id, cohort_sha256, expected_count,
             created_at, updated_at)
            VALUES (1, 'audience-run-1', '2026-07-11', 'gpt-5.4-mini',
-                   'xhigh', ?, ?, ?, ?, 'event-run-1',
-                   'feed-run-1', 'artifacts.db', 'review_cohort', ?, NULL,
+                   'xhigh', ?, ?, ?, ?, ?,
+                   ?, ?, 'artifacts.db', 'review_cohort', ?, NULL,
                    'cohort-hash', ?, ?, ?)""",
         (
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
             attention.DAILY_RANK_VERSION,
+            source_event_run_id,
+            source_rank_input_sha256,
+            source_feed_run_id,
             len(items),
             len(items),
             now,
@@ -219,6 +255,44 @@ def test_events_api_returns_root_once_with_exact_relationships(tmp_path, monkeyp
     }
 
 
+def test_event_rank_fails_closed_without_network_analysis(tmp_path, monkeypatch):
+    _event_fixture(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_context",
+        lambda: None,
+    )
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_ranks",
+        lambda: {},
+    )
+    event_store._events_day_cached.cache_clear()
+
+    payload = client.get("/api/events?date=2026-07-11&limit=20").json()
+
+    assert payload == {
+        "available": False,
+        "reason": (
+            "The Event rank is unavailable because no completed Registry "
+            "network analysis is present."
+        ),
+    }
+
+
+@pytest.mark.parametrize("sort", ["attention", "score", "unknown"])
+def test_events_payload_rejects_non_contract_sort_aliases(sort):
+    with pytest.raises(ValueError, match="sort must be"):
+        event_store.events_payload(
+            day="2026-07-11",
+            lane="all",
+            sort=sort,
+            query="",
+            limit=20,
+            offset=0,
+        )
+
+
 def test_event_uses_max_same_day_public_interactions_without_mutating_root(
     tmp_path, monkeypatch
 ):
@@ -227,7 +301,7 @@ def test_event_uses_max_same_day_public_interactions_without_mutating_root(
     unmodified = original_feed_payload(
         day="2026-07-11",
         lane="all",
-        sort="rank",
+        sort="recent",
         query="",
         limit=20,
         offset=0,
@@ -446,6 +520,9 @@ def test_events_api_projects_completed_audience_routing_directly(
     _write_audience_routing_run(
         audience_routing_store.DEFAULT_ROUTING_ROOT,
         items=baseline["items"],
+        source_rank_input_sha256=baseline["rank_contract"]["input_sha256"],
+        source_event_run_id=baseline["run"]["run_id"],
+        source_feed_run_id=baseline["run"]["feed_run_id"],
     )
 
     all_items = client.get("/api/events?date=2026-07-11&limit=20").json()
@@ -525,6 +602,25 @@ def test_events_api_projects_completed_audience_routing_directly(
     assert neither["items"][0]["event_id"] == all_items["items"][1]["event_id"]
 
 
+def test_events_ignore_routing_from_different_full_day_rank_inputs(
+    tmp_path, monkeypatch
+):
+    _event_fixture(tmp_path, monkeypatch)
+    baseline = client.get("/api/events?date=2026-07-11&limit=20").json()
+    _write_audience_routing_run(
+        audience_routing_store.DEFAULT_ROUTING_ROOT,
+        items=baseline["items"],
+        source_rank_input_sha256="f" * 64,
+        source_event_run_id=baseline["run"]["run_id"],
+        source_feed_run_id=baseline["run"]["feed_run_id"],
+    )
+
+    payload = client.get("/api/events?date=2026-07-11&limit=20").json()
+
+    assert payload["audience_routing_run"] is None
+    assert {item["routing_state"] for item in payload["items"]} == {"unavailable"}
+
+
 def test_events_api_publishes_once_and_appends_later_activity(tmp_path, monkeypatch):
     raw = tmp_path / "x-content.db"
     feed_db = tmp_path / "feed.db"
@@ -566,6 +662,30 @@ def test_events_api_publishes_once_and_appends_later_activity(tmp_path, monkeypa
     monkeypatch.setattr(feed_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(feed_store, "DEFAULT_REGISTRY_DB", registry)
     monkeypatch.setattr(feed_store, "DEFAULT_DERIVED_ROOT", rankings)
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_context",
+        lambda: {
+            "snapshot_id": "test-network",
+            "snapshot_completed_at": "2026-07-16T00:00:00+00:00",
+            "network_source_total": 5,
+            "network_rank_total": 10,
+            "parent_snapshot_id": None,
+            "incremental": False,
+        },
+    )
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_ranks",
+        lambda: {
+            entity_id: {
+                "network_rank": entity_id,
+                "network_entities_below": 10 - entity_id,
+                "network_rank_total": 10,
+            }
+            for entity_id in range(1, 11)
+        },
+    )
     monkeypatch.setattr(event_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(event_store, "DEFAULT_EVENTS_DB", events_db)
 
@@ -581,6 +701,18 @@ def test_events_api_publishes_once_and_appends_later_activity(tmp_path, monkeypa
     weekly = client.get(
         "/api/events?date=2026-07-11&projection=week&limit=20"
     ).json()
+    assert weekly["rank_contract"] == {
+        "version": attention.DAILY_RANK_VERSION,
+        "kind": "weekly_inherited_daily_rank",
+        "layers": ["best_daily_rank", "rank_day", "event_id"],
+        "note": (
+            "Weekly rows inherit each Event's best canonical daily rank, "
+            "then use rank day and Event ID for deterministic ordering. "
+            "This is not a new cross-day score or a single-day rank input."
+        ),
+    }
+    assert "input_sha256" not in weekly["rank_contract"]
+    assert "network" not in weekly["rank_contract"]
     weekly_event = next(
         item for item in weekly["items"] if item["event_id"] == monday_event["event_id"]
     )
@@ -830,6 +962,30 @@ def _configure_event_read_model(
     monkeypatch.setattr(feed_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(feed_store, "DEFAULT_REGISTRY_DB", registry)
     monkeypatch.setattr(feed_store, "DEFAULT_DERIVED_ROOT", rankings)
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_context",
+        lambda: {
+            "snapshot_id": "test-network",
+            "snapshot_completed_at": "2026-07-16T00:00:00+00:00",
+            "network_source_total": 5,
+            "network_rank_total": 10,
+            "parent_snapshot_id": None,
+            "incremental": False,
+        },
+    )
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_ranks",
+        lambda: {
+            entity_id: {
+                "network_rank": entity_id,
+                "network_entities_below": 10 - entity_id,
+                "network_rank_total": 10,
+            }
+            for entity_id in range(1, 11)
+        },
+    )
     monkeypatch.setattr(event_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(event_store, "DEFAULT_EVENTS_DB", events_db)
     monkeypatch.setattr(
@@ -869,6 +1025,167 @@ def _materialize_published_events(*, raw, feed_db, events_db, through, days):
     )
     event_store._events_day_cached.cache_clear()
     return event_run
+
+
+def test_event_rank_unions_distinct_trusted_voters_across_all_members(
+    tmp_path, monkeypatch
+):
+    raw = tmp_path / "x-content.db"
+    feed_db = tmp_path / "feed.db"
+    events_db = tmp_path / "events.db"
+    registry = tmp_path / "registry.db"
+    root = _tweet(
+        "union-root",
+        "alice",
+        "2026-07-11T08:00:00Z",
+        "Primary result",
+    )
+    quote = _tweet(
+        "union-quote",
+        "carol",
+        "2026-07-11T08:30:00Z",
+        "Independent interpretation",
+        relation="quote",
+        target=root,
+    )
+    quote.update(
+        {
+            "likeCount": 21,
+            "replyCount": 4,
+            "retweetCount": 3,
+            "quoteCount": 2,
+        }
+    )
+    bob_root = _tweet(
+        "bob-root-vote",
+        "bob",
+        "2026-07-11T09:00:00Z",
+        "RT @alice",
+        relation="retweet",
+        target=root,
+    )
+    dave_root = _tweet(
+        "dave-root-vote",
+        "dave",
+        "2026-07-11T09:10:00Z",
+        "RT @alice",
+        relation="retweet",
+        target=root,
+    )
+    bob_quote = _tweet(
+        "bob-quote-vote",
+        "bob",
+        "2026-07-11T09:20:00Z",
+        "RT @carol",
+        relation="retweet",
+        target=quote,
+    )
+    alice_quote = _tweet(
+        "root-author-vote",
+        "alice",
+        "2026-07-11T09:30:00Z",
+        "RT @carol",
+        relation="retweet",
+        target=quote,
+    )
+    eve_quote = _tweet(
+        "rejected-vote",
+        "eve",
+        "2026-07-11T09:40:00Z",
+        "RT @carol",
+        relation="retweet",
+        target=quote,
+    )
+    _store_tweets(
+        raw,
+        ("alice", [root, alice_quote]),
+        ("bob", [bob_root, bob_quote]),
+        ("carol", [quote]),
+        ("dave", [dave_root]),
+        ("eve", [eve_quote]),
+    )
+    _registry_fixture(registry)
+    conn = channels.connect(registry)
+    now = "2026-07-12T00:00:00+00:00"
+    for entity_id, handle in ((4, "dave"), (5, "eve")):
+        conn.execute(
+            """INSERT INTO entities
+               (id, kind, slug, name, created_at, updated_at)
+               VALUES (?, 'person', ?, ?, ?, ?)""",
+            (entity_id, handle, handle.title(), now, now),
+        )
+        conn.execute(
+            """INSERT INTO channels
+               (kind, key, label, url, first_seen_at, last_seen_at)
+               VALUES ('x', ?, ?, ?, ?, ?)""",
+            (
+                handle,
+                handle.title(),
+                f"https://x.com/{handle}",
+                now,
+                now,
+            ),
+        )
+        channel_id = conn.execute(
+            "SELECT id FROM channels WHERE kind = 'x' AND key = ?",
+            (handle,),
+        ).fetchone()[0]
+        conn.execute(
+            """INSERT INTO entity_channels
+               (entity_id, channel_id, relationship, confidence, created_at)
+               VALUES (?, ?, 'identity', 1.0, ?)""",
+            (entity_id, channel_id, now),
+        )
+        conn.execute(
+            """INSERT INTO accounts
+               (platform, handle, display_name, x_id, followers_count,
+                first_seen_at, last_seen_at)
+               VALUES ('x', ?, ?, ?, 1000, ?, ?)""",
+            (handle, handle.title(), f"x-{handle}", now, now),
+        )
+    conn.execute(
+        """INSERT INTO entity_registry_rejections
+           (entity_id, reason_code, reason, source, rejected_at)
+           VALUES (5, 'test', 'Rejected voter.', 'test', ?)""",
+        (now,),
+    )
+    conn.commit()
+    conn.close()
+    _materialize_published_events(
+        raw=raw,
+        feed_db=feed_db,
+        events_db=events_db,
+        through=date(2026, 7, 11),
+        days=1,
+    )
+    _configure_event_read_model(
+        tmp_path,
+        monkeypatch,
+        feed_db=feed_db,
+        events_db=events_db,
+        registry=registry,
+    )
+
+    payload = client.get("/api/events?date=2026-07-11&limit=50").json()
+    containing_root = [
+        item
+        for item in payload["items"]
+        if "union-root"
+        in {
+            item["root"]["post_id"],
+            *[row["post_id"] for row in item["evidence"]],
+        }
+    ]
+    assert len(containing_root) == 1
+    ranked = containing_root[0]
+    assert [
+        voter["entity_id"] for voter in ranked["rank_components"]["voters"]
+    ] == [2, 3, 4]
+    assert ranked["rank_components"]["trusted_votes"] == 3
+    assert ranked["rank_components"]["mean_voter_position"] == 0.777778
+    assert ranked["rank_components"]["author_position"] == 1.0
+    assert ranked["rank_components"]["public_interactions"] == 30
+    assert ranked["daily_rank"] >= 1
 
 
 def test_future_reaction_appends_without_republishing_or_rerouting(

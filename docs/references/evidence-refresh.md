@@ -169,8 +169,8 @@ contract. An exact prior Event/audience output is reused only when input,
 prompt, schema, model, and reasoning effort match; the successor row retains
 its current rank/routing provenance plus explicit reuse provenance. A changed
 semantic contract still requires a clean migration, not a compatibility read.
-The current v10/v7 checkpoint contains 1,482 completed audience decisions over
-970 unique Events from 17 `daily-rank-v2` routing runs.
+The current v10/v7 checkpoint contains 1,474 completed audience decisions over
+965 unique Events from 17 `daily-rank-v2` routing runs.
 
 ## Output
 

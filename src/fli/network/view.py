@@ -193,19 +193,40 @@ def _entity_network_ranks_cached(
         if run is None:
             return {}
         rows = conn.execute(
-            """SELECT support.entity_id,
+            """WITH support_levels AS (
+                   SELECT support_count, COUNT(*) AS entity_count
+                   FROM entity_support_result
+                   WHERE run_id = ?
+                   GROUP BY support_count
+               ),
+               support_percentiles AS (
+                   SELECT support_count,
+                          COALESCE(
+                              SUM(entity_count) OVER (
+                                  ORDER BY support_count
+                                  ROWS BETWEEN UNBOUNDED PRECEDING
+                                           AND 1 PRECEDING
+                              ),
+                              0
+                          ) AS network_entities_below,
+                          SUM(entity_count) OVER () AS network_rank_total
+                   FROM support_levels
+               )
+               SELECT support.entity_id,
                       support.support_rank AS network_rank,
                       support.support_count AS cohort_follow_count,
                       support.support_share AS cohort_follow_share,
                       support.channel_count,
                       run.eligible_source_entity_count AS network_source_total,
-                      COUNT(*) OVER () AS network_rank_total,
-                      MAX(support.support_rank) OVER () AS network_rank_level_total
+                      percentile.network_entities_below,
+                      percentile.network_rank_total
                FROM entity_support_result support
                JOIN ranking_run run ON run.run_id = support.run_id
+               JOIN support_percentiles percentile
+                 ON percentile.support_count = support.support_count
                WHERE support.run_id = ?
                ORDER BY support.support_rank, support.entity_id""",
-            [run["run_id"]],
+            [run["run_id"], run["run_id"]],
         ).fetchall()
         return {int(row["entity_id"]): dict(row) for row in rows}
     finally:

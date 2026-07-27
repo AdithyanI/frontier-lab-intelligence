@@ -38,7 +38,7 @@ DEFAULT_DB = editorial_runs.DEFAULT_DB
 DEFAULT_SKILL_PATH = REPO_ROOT / ".agents/skills/fli-daily-intelligence/SKILL.md"
 CLI_SCHEMA_VERSION = "1.0"
 STORE_SCHEMA_VERSION = "daily-orchestration-store-v2"
-RUN_CONTRACT_VERSION = "daily-orchestration-v2"
+RUN_CONTRACT_VERSION = "daily-orchestration-v3"
 DEFAULT_CODEX_TIMEOUT_SECONDS = 4 * 60 * 60
 DEFAULT_CODEX_SERVICE_TIER = STANDARD_SERVICE_TIER
 DEFAULT_EVIDENCE_WINDOW_DAYS = 9
@@ -47,6 +47,13 @@ AGENT_FEEDBACK_DIR = (
 )
 PREPARATION_STAGES = ("evidence", "routing", "prepare")
 CODEX_SETTING_KEYS = ("model", "reasoning_effort", "service_tier")
+SOURCE_LINEAGE_KEYS = (
+    "event_run_id",
+    "feed_run_id",
+    "routing_run_id",
+    "routing_cohort_sha256",
+    "source_rank_input_sha256",
+)
 
 
 class _ArgumentParser(argparse.ArgumentParser):
@@ -614,6 +621,9 @@ def _compact_routing(value: dict[str, Any]) -> dict[str, Any]:
             "top_ranked",
             "model",
             "reasoning_effort",
+            "rank_version",
+            "routing_cohort_sha256",
+            "source_rank_input_sha256",
             "plan",
             "reuse_policy",
             "resumed_complete_count",
@@ -627,6 +637,87 @@ def _compact_routing(value: dict[str, Any]) -> dict[str, Any]:
         )
         if key in value
     }
+
+
+def _routing_checkpoint(value: dict[str, Any], *, day: str) -> dict[str, Any]:
+    """Normalize one completed refresh day to its exact immutable lineage."""
+    plan_items = [
+        item
+        for item in value.get("plan") or []
+        if isinstance(item, dict) and str(item.get("day") or "") == day
+    ]
+    if len(plan_items) != 1:
+        raise ValueError(f"routing refresh must contain exactly one plan item for {day}")
+    plan_item = plan_items[0]
+    routing_run_id = str(plan_item.get("run_id") or "").strip()
+    if not routing_run_id:
+        raise ValueError(f"routing refresh plan has no run ID for {day}")
+
+    run_meta_rows = [
+        item["run"]
+        for item in value.get("runs") or []
+        if isinstance(item, dict)
+        and isinstance(item.get("run"), dict)
+        and str(item["run"].get("run_id") or "") == routing_run_id
+    ]
+    if len(run_meta_rows) > 1:
+        raise ValueError(f"routing refresh has duplicate run metadata for {day}")
+    run_meta = run_meta_rows[0] if run_meta_rows else {}
+
+    def exact_value(name: str, *candidates: Any) -> str:
+        values = {
+            str(candidate).strip()
+            for candidate in candidates
+            if candidate is not None and str(candidate).strip()
+        }
+        if len(values) > 1:
+            raise ValueError(f"routing refresh has inconsistent {name} for {day}")
+        return next(iter(values), "")
+
+    source_rank_input_sha256 = exact_value(
+        "source rank-input SHA",
+        value.get("source_rank_input_sha256"),
+        plan_item.get("source_rank_input_sha256"),
+        run_meta.get("source_rank_input_sha256"),
+    )
+    routing_cohort_sha256 = exact_value(
+        "routing cohort SHA",
+        value.get("routing_cohort_sha256"),
+        run_meta.get("cohort_sha256"),
+    )
+    source_event_run_id = exact_value(
+        "source Event run ID",
+        value.get("source_event_run_id"),
+        run_meta.get("source_event_run_id"),
+    )
+    source_feed_run_id = exact_value(
+        "source Feed run ID",
+        value.get("source_feed_run_id"),
+        run_meta.get("source_feed_run_id"),
+    )
+    missing = [
+        name
+        for name, candidate in (
+            ("source_rank_input_sha256", source_rank_input_sha256),
+            ("routing_cohort_sha256", routing_cohort_sha256),
+            ("source_event_run_id", source_event_run_id),
+            ("source_feed_run_id", source_feed_run_id),
+        )
+        if not candidate
+    ]
+    if missing:
+        raise ValueError(
+            "routing refresh is missing required lineage: " + ", ".join(missing)
+        )
+    return _compact_routing(
+        {
+            **value,
+            "source_event_run_id": source_event_run_id,
+            "source_feed_run_id": source_feed_run_id,
+            "routing_cohort_sha256": routing_cohort_sha256,
+            "source_rank_input_sha256": source_rank_input_sha256,
+        }
+    )
 
 
 def _event_run_id(evidence: dict[str, Any]) -> str:
@@ -650,6 +741,118 @@ def _expected_routing_run_id(routing: dict[str, Any], day: str) -> str:
         ),
         "",
     )
+
+
+def _normalize_source_lineage(
+    source_lineage: dict[str, Any] | None,
+) -> dict[str, str] | None:
+    if source_lineage is None:
+        return None
+    if not isinstance(source_lineage, dict):
+        raise ValueError("source_lineage must be an object")
+    unexpected = sorted(set(source_lineage) - set(SOURCE_LINEAGE_KEYS))
+    if unexpected:
+        raise ValueError(
+            "source_lineage has unsupported fields: " + ", ".join(unexpected)
+        )
+    normalized = {
+        key: str(source_lineage.get(key) or "").strip()
+        for key in SOURCE_LINEAGE_KEYS
+    }
+    missing = [key for key, value in normalized.items() if not value]
+    if missing:
+        raise ValueError(
+            "source_lineage is missing required fields: " + ", ".join(missing)
+        )
+    return normalized
+
+
+def _checkpoint_source_lineage(
+    *,
+    day: str,
+    evidence: dict[str, Any],
+    routing: dict[str, Any],
+) -> dict[str, str]:
+    return {
+        "event_run_id": _event_run_id(evidence),
+        "feed_run_id": _feed_run_id(evidence),
+        "routing_run_id": _expected_routing_run_id(routing, day),
+        "routing_cohort_sha256": str(
+            routing.get("routing_cohort_sha256") or ""
+        ),
+        "source_rank_input_sha256": str(
+            routing.get("source_rank_input_sha256") or ""
+        ),
+    }
+
+
+def _require_checkpoint_source_lineage(
+    *,
+    day: str,
+    evidence: dict[str, Any],
+    routing: dict[str, Any],
+) -> dict[str, str]:
+    lineage = _checkpoint_source_lineage(
+        day=day,
+        evidence=evidence,
+        routing=routing,
+    )
+    missing = [key for key, value in lineage.items() if not value]
+    if missing:
+        _raise_source_lineage_mismatch(missing)
+    return lineage
+
+
+def _raise_source_lineage_mismatch(mismatches: list[str]) -> None:
+    raise DailyRunError(
+        code="E_SOURCE_LINEAGE_MISMATCH",
+        message=(
+            "The frozen Evidence/routing checkpoint does not match this daily "
+            "run's source lineage: "
+            + ", ".join(mismatches)
+        ),
+        hint=(
+            "Inspect the frozen batch inputs and start or resume the run with "
+            "their exact source lineage."
+        ),
+        retryable=False,
+        exit_code=4,
+    )
+
+
+def _validate_evidence_source_lineage(
+    *,
+    expected: dict[str, str],
+    evidence: dict[str, Any],
+) -> None:
+    actual = {
+        "event_run_id": _event_run_id(evidence),
+        "feed_run_id": _feed_run_id(evidence),
+    }
+    mismatches = [
+        key for key, value in actual.items() if value != expected[key]
+    ]
+    if mismatches:
+        _raise_source_lineage_mismatch(mismatches)
+
+
+def _validate_source_lineage(
+    *,
+    day: str,
+    expected: dict[str, str],
+    evidence: dict[str, Any],
+    routing: dict[str, Any],
+) -> None:
+    actual = _checkpoint_source_lineage(
+        day=day,
+        evidence=evidence,
+        routing=routing,
+    )
+    mismatches = [
+        key for key, value in actual.items() if value != expected[key]
+    ]
+    if mismatches:
+        _raise_source_lineage_mismatch(mismatches)
 
 
 def _validate_prepared_workspace(
@@ -796,6 +999,7 @@ def run_day(
     workspace_loader: WorkspaceLoader = editorial_runs.load_manifest,
     workspace_template_loader: WorkspaceTemplateLoader = _load_json_object,
     codex_runner: CodexRunner | None = None,
+    source_lineage: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     datetime.strptime(day, "%Y-%m-%d")
     if stop_after not in PREPARATION_STAGES:
@@ -814,6 +1018,7 @@ def run_day(
         reasoning_effort=codex_reasoning_effort,
         service_tier=codex_service_tier,
     )
+    normalized_source_lineage = _normalize_source_lineage(source_lineage)
     config = {
         "contract_version": RUN_CONTRACT_VERSION,
         "day": day,
@@ -830,6 +1035,8 @@ def run_day(
         "repo_root": str(REPO_ROOT),
         "skill_path": str(skill_path.resolve()),
     }
+    if normalized_source_lineage is not None:
+        config["source_lineage"] = normalized_source_lineage
     plan = {
         "day": day,
         "stop_after": "codex" if launch_codex else stop_after,
@@ -852,7 +1059,40 @@ def run_day(
     try:
         record, reused = _ensure_run(conn, day=day, config=config)
         stages = record["stages"]
+        if normalized_source_lineage is not None and "evidence" in stages:
+            _validate_evidence_source_lineage(
+                expected=normalized_source_lineage,
+                evidence=stages["evidence"],
+            )
+        if "routing" in stages:
+            if "evidence" not in stages:
+                _raise_source_lineage_mismatch(["evidence"])
+            try:
+                routing_checkpoint = _routing_checkpoint(
+                    stages["routing"],
+                    day=day,
+                )
+            except ValueError as error:
+                _raise_source_lineage_mismatch([str(error)])
+            checkpoint_lineage = _require_checkpoint_source_lineage(
+                day=day,
+                evidence=stages["evidence"],
+                routing=routing_checkpoint,
+            )
+            if (
+                normalized_source_lineage is not None
+                and checkpoint_lineage != normalized_source_lineage
+            ):
+                _raise_source_lineage_mismatch(
+                    [
+                        key
+                        for key, value in checkpoint_lineage.items()
+                        if value != normalized_source_lineage[key]
+                    ]
+                )
         if record["status"] == "complete":
+            if "evidence" not in stages or "routing" not in stages:
+                _raise_source_lineage_mismatch(["evidence/routing checkpoint"])
             return {**record, "reused": reused}
 
         if "evidence" not in stages:
@@ -870,6 +1110,11 @@ def run_day(
                     else None
                 ),
             )
+            if normalized_source_lineage is not None:
+                _validate_evidence_source_lineage(
+                    expected=normalized_source_lineage,
+                    evidence=raw_evidence,
+                )
             stages["evidence"] = _compact_evidence(raw_evidence)
             record = _save_record(
                 conn, record, status="running", stage="evidence", error=None
@@ -902,8 +1147,11 @@ def run_day(
                     replace=False,
                     dry_run=False,
                 )
+            routing_checkpoint = _routing_checkpoint(raw_routing, day=day)
             evidence = stages["evidence"]
-            if str(raw_routing.get("source_event_run_id") or "") != _event_run_id(evidence):
+            if str(routing_checkpoint["source_event_run_id"]) != _event_run_id(
+                evidence
+            ):
                 raise DailyRunError(
                     code="E_SOURCE_CHANGED",
                     message="Audience routing used a different Event publication.",
@@ -911,7 +1159,9 @@ def run_day(
                     retryable=True,
                     exit_code=4,
                 )
-            if str(raw_routing.get("source_feed_run_id") or "") != _feed_run_id(evidence):
+            if str(routing_checkpoint["source_feed_run_id"]) != _feed_run_id(
+                evidence
+            ):
                 raise DailyRunError(
                     code="E_SOURCE_CHANGED",
                     message="Audience routing used a different Feed publication.",
@@ -919,7 +1169,14 @@ def run_day(
                     retryable=True,
                     exit_code=4,
                 )
-            stages["routing"] = _compact_routing(raw_routing)
+            if normalized_source_lineage is not None:
+                _validate_source_lineage(
+                    day=day,
+                    expected=normalized_source_lineage,
+                    evidence=evidence,
+                    routing=routing_checkpoint,
+                )
+            stages["routing"] = routing_checkpoint
             record = _save_record(
                 conn, record, status="running", stage="routing", error=None
             )
@@ -1292,8 +1549,15 @@ def run_day(
 
 def _current_inputs(day: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """Describe the already-published Evidence and current ranked routing."""
-    source = routing_runs._published_event_source()
-    routing_path = routing_view.latest_complete_run(day)
+    from fli.web import events as event_store
+
+    rank_identity = event_store.current_rank_identity(day=day)
+    routing_path = routing_view.latest_complete_run(
+        day,
+        expected_rank_input_sha256=rank_identity["rank_input_sha256"],
+        expected_event_run_id=rank_identity["event_run_id"],
+        expected_feed_run_id=rank_identity["feed_run_id"],
+    )
     if routing_path is None:
         raise ValueError(f"no complete {attention.DAILY_RANK_VERSION} routing for {day}")
     conn = sqlite3.connect(
@@ -1309,6 +1573,10 @@ def _current_inputs(day: str) -> tuple[dict[str, Any], dict[str, Any]]:
         conn.close()
     if meta is None:
         raise ValueError(f"routing metadata is missing for {day}")
+    source = {
+        "event_run_id": str(meta["source_event_run_id"]),
+        "feed_run_id": str(meta["source_feed_run_id"]),
+    }
     evidence = {
         "range": {"from": day, "through": day, "days": 1},
         "collection_range": None,
@@ -1328,6 +1596,8 @@ def _current_inputs(day: str) -> tuple[dict[str, Any], dict[str, Any]]:
         "model": str(meta["model"]),
         "reasoning_effort": str(meta["reasoning_effort"]),
         "rank_version": str(meta["rank_version"]),
+        "routing_cohort_sha256": str(meta["cohort_sha256"]),
+        "source_rank_input_sha256": str(meta["source_rank_input_sha256"]),
         "plan": [{"day": day, "run_id": str(meta["run_id"])}],
         "reuse_policy": "already-complete-current-routing",
         "resumed_complete_count": int(meta["expected_count"]),
@@ -1388,6 +1658,19 @@ def run_batch(
 
     def execute(day: str) -> dict[str, Any]:
         evidence, routing = frozen[day]
+        source_lineage = _normalize_source_lineage(
+            {
+                "event_run_id": _event_run_id(evidence),
+                "feed_run_id": _feed_run_id(evidence),
+                "routing_run_id": _expected_routing_run_id(routing, day),
+                "routing_cohort_sha256": routing.get(
+                    "routing_cohort_sha256"
+                ),
+                "source_rank_input_sha256": routing.get(
+                    "source_rank_input_sha256"
+                ),
+            }
+        )
         return run_day(
             day=day,
             db_path=db_path,
@@ -1406,6 +1689,7 @@ def run_batch(
                 if progress
                 else None
             ),
+            source_lineage=source_lineage,
             evidence_runner=lambda **_: evidence,
             routing_runner=lambda **_: routing,
         )

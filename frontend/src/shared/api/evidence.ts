@@ -87,19 +87,13 @@ export interface FeedResponse {
   reason?: string
   date?: string
   lane?: 'all' | 'network' | 'firsthand'
-  sort?: 'rank' | 'recent' | 'engagement'
+  sort?: 'recent' | 'engagement'
   query?: string
   event_id?: string
   total?: number
   limit?: number
   offset?: number
   run?: FeedRun
-  rank_contract?: {
-    version: string
-    kind: string
-    layers: string[]
-    note: string
-  }
   items?: FeedItem[]
 }
 
@@ -199,6 +193,7 @@ export interface EventResponse {
     reasoning_effort: string
     prompt_version: string
     rank_version: string
+    source_rank_input_sha256: string
     source_event_run_id: string
     source_feed_run_id: string
     selection_kind: 'top_ranked' | 'single_event' | 'review_cohort'
@@ -216,7 +211,28 @@ export interface EventResponse {
     feed_run_id: string
     clustering_contract: string
   }
-  rank_contract?: FeedResponse['rank_contract']
+  rank_contract?:
+    | {
+        version: string
+        kind: 'daily_event_lexicographic'
+        layers: string[]
+        input_sha256: string
+        network: {
+          snapshot_id: string
+          snapshot_completed_at: string | null
+          network_source_total: number
+          network_rank_total: number
+          parent_snapshot_id: string | null
+          incremental: boolean
+        }
+        note: string
+      }
+    | {
+        version: string
+        kind: 'weekly_inherited_daily_rank'
+        layers: ['best_daily_rank', 'rank_day', 'event_id']
+        note: string
+      }
   items?: FeedEvent[]
 }
 

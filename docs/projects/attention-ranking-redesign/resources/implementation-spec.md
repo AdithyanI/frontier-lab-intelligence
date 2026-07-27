@@ -88,19 +88,23 @@ These are product invariants. Enforce them in code and assert them in tests.
 
 ### Network position (used by layers 2 and 3)
 
-`position = 1 − (rank − 1) / (total − 1)`, where `rank` is the 1-based
-`support_rank` from `entity_support_result` and `total` is the count of ranked
-canonical entities in that run. Top-ranked entity → `1.0`, lowest → `0.0`. If
-`total == 1`, position is `1.0`. An entity absent from the ranking run has
-position `0.0`.
+`position = entities_below / (total − 1)`, where `entities_below` is the count
+of ranked canonical entities with a **strictly lower** entity-union
+`support_count`, and `total` is the count of ranked canonical entities in that
+run. The top unique support level → `1.0`; entities tied on support receive the
+same position; the bottom support level → `0.0`. If `total == 1`, position is
+`1.0`. An entity absent from the ranking run has position `0.0`.
 
-Use **rank**, not raw `support_count`. `support_count` is severely
-right-skewed (top entity 2,041; median in the low tens), so using it would let
-a handful of accounts dominate layer 2 — reintroducing the celebrity problem
-the layering exists to avoid. Use
-`fli.network.view.entity_network_ranks()` as the source. Do not use
-account-level `ranking_result.position`: a multi-channel organization is one
-canonical entity and must receive its entity-union `support_rank`.
+Use `support_count` only to order entities into this tie-aware percentile; do
+not put its raw magnitude into the Event rank. `support_count` is severely
+right-skewed (top entity 2,041; median in the low tens), so using its magnitude
+would let a handful of accounts dominate layer 2 — reintroducing the celebrity
+problem the layering exists to avoid. A dense `support_rank` transform is also
+wrong because it spaces support levels equally regardless of how many entities
+are tied at each level. Use `fli.network.view.entity_network_ranks()` as the
+source, specifically `network_entities_below` and `network_rank_total`. Do not
+use account-level `ranking_result.position`: a multi-channel organization is
+one canonical entity and must receive its entity-union position.
 
 ---
 
@@ -111,7 +115,7 @@ canonical entity and must receive its entity-union `support_rank`.
 | Voters per member post | `amplifiers` on Feed candidates, built in `src/fli/web/feed.py` | Deduplicated per post and excludes rejected entities. Event projection unions these again by `entity_id` and then excludes the Event root author. |
 | Event membership and root | `src/fli/web/events.py::_project_component()` | This is the first seam where the complete canonical-day Event, root author, and same-day candidates are all known. Ranking belongs here. |
 | Public interactions | `_public_engagement(row)` in `feed.py` | One-post sum of likes, replies, reposts, and quotes. Event projection takes the maximum across canonical-day members. |
-| Entity rank table | `fli.network.view.entity_network_ranks()` over `entity_support_result` | Keyed by canonical `entity_id`; exposes `network_rank` and `network_rank_total`. |
+| Entity rank table | `fli.network.view.entity_network_ranks()` over `entity_support_result` | Keyed by canonical `entity_id`; exposes the audit-only `network_rank`, plus `network_entities_below` and `network_rank_total` for the tie-aware position. |
 
 **Gap to close:** amplifier rows carry raw account-derived `network_support`
 but not the canonical entity position. Add the entity position derived from
@@ -285,7 +289,8 @@ inspect; it is not importance, truth, or quality; days are not comparable.
 `frontend/src/features/system/DecisionFigures.tsx` and the surrounding
 narrative in `HowNarrative.tsx` were updated on 2026-07-26 and already
 describe the layered contract. Verify they still match the shipped behaviour
-at the end of the migration, particularly the 43/57/65/70 validation figures.
+at the end of the migration, particularly the final
+34.3/53.9/64.2/72.1 routing-label gradient.
 
 ### 6.3 Anything rendering a 0–100 score
 
@@ -313,9 +318,10 @@ to preserve the old layout.
 3. **Replay** (`fli daily-rank evaluate --json --no-input`) over every
    currently published saved day. Record the output under `resources/`. The
    **required** check is
-   that the vote-count hit-rate gradient survives: 1 vote ≈ 43%, 2 ≈ 57%,
-   3–4 ≈ 65%, 5+ ≈ 70%. If the gradient inverts or flattens, stop and report;
-   the primary signal is the whole basis of the design.
+   that the vote-count hit-rate gradient survives. The final current cohort is
+   1 vote 34.3%, 2 votes 53.9%, 3–4 votes 64.2%, and 5+ votes 72.1%. If the
+   gradient inverts or flattens, stop and report; the primary signal is the
+   whole basis of the design.
 4. **Layer attribution**: report what share of top-100 admissions each layer
    decided, per day. Expect layer 1 to dominate on busy days and layers 2–4 to
    decide most admissions on quiet days (2026-07-19 has 397 Events at ≥1 vote

@@ -201,6 +201,9 @@ for routine approval.
 - 2026-07-26: layer 2 uses the mean entity-level network position of those
   voters. Layer 3 uses the canonical source/root author's entity-level network
   position.
+- 2026-07-27: network position is the six-decimal fraction of ranked canonical
+  entities with strictly lower entity-union support. Equal support receives
+  equal position; raw support magnitude and dense-rank spacing are excluded.
 - 2026-07-26: layer 4 is the maximum same-day public interaction count among
   the Event's member posts, where one post's count is
   `likes + reposts + replies + quotes`. It is a tie-breaker, not a blended
@@ -222,7 +225,8 @@ for routine approval.
 | done | Audit the exact downstream refresh commands, reuse boundaries, dates, and completion checks without changing files or data | explorer |  |
 | done | Audit the Event projection seam, affected contracts, and highest-risk regression tests without changing files | explorer |  |
 | done | Implement the clean `daily-rank-v2` backend/API migration and replay all 17 saved days | parent | `resources/implementation-spec.md` |
-| in_progress | Materialize the 17 new routing cohorts, refresh Insights and daily briefs, then rebuild PDFs and product projections | parent |  |
+| done | Materialize the 17 exact-rank routing cohorts and refresh every routed-positive per-Event Insight | parent | `resources/replay-validation.md` |
+| in_progress | Import 17 exact-lineage v3 daily briefs, then rebuild PDFs and product projections | parent |  |
 
 ## Backlog / Remaining Work
 
@@ -298,3 +302,21 @@ for routine approval.
 - 2026-07-26: [IN PROGRESS] Launched the resumable 17-day
   `daily-intelligence run-batch` with three concurrent GPT-5.6-sol/xhigh
   Standard tasks over frozen current routing and `daily-rank-v2` workspaces.
+- 2026-07-27: [DONE] Corrected network position to a tie-aware entity-support
+  percentile, reran all 19,657 Events, and bound every full day's exact Event
+  rank inputs into one SHA. The final routing correction completed 1,674/1,674
+  rows with 1,647 exact reuses, 27 new calls, zero failures, and $0.089051
+  incremental cost. The artifact projection remains 6,298 accepted
+  observations, 5,378 artifacts, and zero failures; no X call was needed.
+- 2026-07-27: [DONE] Refreshed the final routed-positive Insight cohort:
+  1,474/1,474 Event/audience decisions across 965 Events, with 1,451 exact
+  reuses, 23 Terra/high calls, zero failures, and $0.361769 incremental cost.
+  The current cohort contains 619 surfaced and 855 suppressed decisions.
+- 2026-07-27: [DONE] Independent read-only review caught and fixed three
+  downstream lineage gaps before the authoritative brief replay: stale
+  editorials now fail closed, weekly Event responses no longer expose a
+  misleading single-day rank SHA, and normal one-day orchestration resumes
+  require the same Event/Feed/routing/cohort/rank lineage as batch runs.
+- 2026-07-27: [IN PROGRESS] Launched the authoritative 17-day
+  `daily-orchestration-v3` batch with four concurrent GPT-5.6-sol/xhigh
+  Standard tasks over the final routing and Insight cohort.

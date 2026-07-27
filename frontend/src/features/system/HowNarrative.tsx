@@ -259,7 +259,9 @@ export default function HowNarrative({
             announcement repeated by three trusted entities always ranks ahead
             of one repeated by two, even if those two sit higher in the
             network. Network position only decides between Events with the
-            same number of trusted votes.
+            same number of trusted votes. It is a tie-aware percentile of
+            entity-union support, so entities with equal support receive the
+            same position.
           </p>
           <p>
             The rank only decides what we look at first. It does not say that

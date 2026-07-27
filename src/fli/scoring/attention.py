@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import math
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Iterable, Sequence
 
 
 DAILY_RANK_VERSION = "daily-rank-v2"
+POSITION_QUANTUM = Decimal("0.000001")
+POSITION_ZERO = Decimal("0.000000")
+POSITION_ONE = Decimal("1.000000")
 LAYER_NAMES = (
     "trusted_votes",
     "mean_voter_position",
@@ -17,21 +20,36 @@ LAYER_NAMES = (
 )
 
 
-def network_position(*, network_rank: int, network_rank_total: int) -> float:
-    """Convert a 1-based entity support rank to a 0–1 network position."""
-    if network_rank < 1:
-        raise ValueError("network_rank must be positive")
-    if network_rank_total < network_rank:
-        raise ValueError("network_rank_total must include network_rank")
+def _position(value: Decimal | float | int | str) -> Decimal:
+    """Return the one canonical six-decimal representation of a position."""
+    position = value if isinstance(value, Decimal) else Decimal(str(value))
+    if not position.is_finite() or not POSITION_ZERO <= position <= POSITION_ONE:
+        raise ValueError("network position must be between 0 and 1")
+    return position.quantize(POSITION_QUANTUM, rounding=ROUND_HALF_UP)
+
+
+def network_position(
+    *, network_entities_below: int, network_rank_total: int
+) -> Decimal:
+    """Return an entity's tie-aware support percentile on the 0–1 scale."""
+    if network_rank_total < 1:
+        raise ValueError("network_rank_total must be positive")
+    if not 0 <= network_entities_below < network_rank_total:
+        raise ValueError(
+            "network_entities_below must identify fewer entities than "
+            "network_rank_total"
+        )
     if network_rank_total == 1:
-        return 1.0
-    return 1 - (network_rank - 1) / (network_rank_total - 1)
+        return POSITION_ONE
+    return _position(
+        Decimal(network_entities_below) / Decimal(network_rank_total - 1)
+    )
 
 
 @dataclass(frozen=True)
 class Voter:
     entity_id: int
-    position: float
+    position: Decimal
     entity_name: str = ""
     entity_kind: str = ""
     handle: str = ""
@@ -41,8 +59,7 @@ class Voter:
     def __post_init__(self) -> None:
         if self.entity_id < 1:
             raise ValueError("entity_id must be positive")
-        if not math.isfinite(self.position) or not 0 <= self.position <= 1:
-            raise ValueError("voter position must be between 0 and 1")
+        object.__setattr__(self, "position", _position(self.position))
 
     def payload(self) -> dict[str, Any]:
         return {
@@ -51,7 +68,7 @@ class Voter:
             "entity_kind": self.entity_kind,
             "handle": self.handle,
             "relation_type": self.relation_type,
-            "position": round(self.position, 6),
+            "position": float(self.position),
             "source_url": self.source_url,
         }
 
@@ -59,7 +76,7 @@ class Voter:
 @dataclass(frozen=True)
 class RankInputs:
     voters: tuple[Voter, ...]
-    author_position: float
+    author_position: Decimal
     public_interactions: int
     event_id: str
 
@@ -67,8 +84,7 @@ class RankInputs:
         entity_ids = [voter.entity_id for voter in self.voters]
         if len(entity_ids) != len(set(entity_ids)):
             raise ValueError("voters must be deduplicated by entity_id")
-        if not math.isfinite(self.author_position) or not 0 <= self.author_position <= 1:
-            raise ValueError("author_position must be between 0 and 1")
+        object.__setattr__(self, "author_position", _position(self.author_position))
         if self.public_interactions < 0:
             raise ValueError("public_interactions cannot be negative")
         if not self.event_id:
@@ -79,12 +95,18 @@ class RankInputs:
         return len(self.voters)
 
     @property
-    def mean_voter_position(self) -> float:
+    def mean_voter_position(self) -> Decimal:
         if not self.voters:
-            return 0.0
-        return sum(voter.position for voter in self.voters) / len(self.voters)
+            return POSITION_ZERO
+        return _position(
+            sum(
+                (voter.position for voter in self.voters),
+                start=POSITION_ZERO,
+            )
+            / len(self.voters)
+        )
 
-    def substantive_key(self) -> tuple[int, float, float, int]:
+    def substantive_key(self) -> tuple[int, Decimal, Decimal, int]:
         """Return the four descending ranking layers in their natural units."""
         return (
             self.trusted_votes,
@@ -93,7 +115,7 @@ class RankInputs:
             self.public_interactions,
         )
 
-    def sort_key(self) -> tuple[int | float | str, ...]:
+    def sort_key(self) -> tuple[int | Decimal | str, ...]:
         """Return an ascending Python sort key for the descending layers."""
         return (
             -self.trusted_votes,
@@ -114,14 +136,14 @@ class RankInputs:
                     key=lambda voter: (-voter.position, voter.entity_id),
                 )
             ],
-            "mean_voter_position": round(self.mean_voter_position, 6),
-            "author_position": round(self.author_position, 6),
+            "mean_voter_position": float(self.mean_voter_position),
+            "author_position": float(self.author_position),
             "public_interactions": self.public_interactions,
             "decided_at_layer": decided_at_layer,
         }
 
 
-def sort_key(inputs: RankInputs) -> tuple[int | float | str, ...]:
+def sort_key(inputs: RankInputs) -> tuple[int | Decimal | str, ...]:
     return inputs.sort_key()
 
 
@@ -162,14 +184,14 @@ def rank_events(
 def entity_positions(
     ranks: dict[int, dict[str, Any]] | Iterable[tuple[int, dict[str, Any]]],
 ) -> dict[int, float]:
-    """Project the canonical entity-union rank table to 0–1 positions."""
+    """Project entity-union support counts to tie-aware 0–1 percentiles."""
     items = ranks.items() if isinstance(ranks, dict) else ranks
     positions: dict[int, float] = {}
     for entity_id, row in items:
-        positions[int(entity_id)] = network_position(
-            network_rank=int(row["network_rank"]),
-            network_rank_total=int(
-                row.get("network_rank_level_total", row["network_rank_total"])
-            ),
+        positions[int(entity_id)] = float(
+            network_position(
+                network_entities_below=int(row["network_entities_below"]),
+                network_rank_total=int(row["network_rank_total"]),
+            )
         )
     return positions

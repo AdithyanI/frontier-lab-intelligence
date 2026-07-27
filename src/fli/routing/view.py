@@ -36,7 +36,13 @@ def _db_version(path: Path) -> tuple[str, int, int, int, int]:
     return str(path.resolve()), main_mtime, main_size, wal_mtime, wal_size
 
 
-def _complete_run(path: Path, day: str) -> tuple[str, str] | None:
+def _complete_run(
+    path: Path,
+    day: str,
+    expected_rank_input_sha256: str | None,
+    expected_event_run_id: str | None = None,
+    expected_feed_run_id: str | None = None,
+) -> tuple[str, str] | None:
     try:
         conn = _open_readonly(path)
         meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
@@ -47,12 +53,26 @@ def _complete_run(path: Path, day: str) -> tuple[str, str] | None:
         rank_version = (
             str(meta["rank_version"])
             if meta is not None and "rank_version" in meta_columns
-            else "attention-v1.1"
+            else ""
         )
         if (
             meta is None
+            or "source_rank_input_sha256" not in meta_columns
             or str(meta["day"]) != day
             or rank_version != attention.DAILY_RANK_VERSION
+            or (
+                expected_rank_input_sha256 is not None
+                and str(meta["source_rank_input_sha256"])
+                != expected_rank_input_sha256
+            )
+            or (
+                expected_event_run_id is not None
+                and str(meta["source_event_run_id"]) != expected_event_run_id
+            )
+            or (
+                expected_feed_run_id is not None
+                and str(meta["source_feed_run_id"]) != expected_feed_run_id
+            )
             or str(meta["prompt_version"]) != model.PROMPT_VERSION
             or str(meta["prompt_sha256"]) != model.prompt_sha256()
             or str(meta["schema_version"]) != model.SCHEMA_VERSION
@@ -73,13 +93,27 @@ def _complete_run(path: Path, day: str) -> tuple[str, str] | None:
     return str(status["latest_completion"] or meta["updated_at"]), str(meta["run_id"])
 
 
-def latest_complete_run(day: str) -> Path | None:
+def latest_complete_run(
+    day: str,
+    *,
+    expected_rank_input_sha256: str | None = None,
+    expected_event_run_id: str | None = None,
+    expected_feed_run_id: str | None = None,
+    root: Path | None = None,
+) -> Path | None:
     """Select the newest fully completed run for the current routing contract."""
-    if not DEFAULT_ROUTING_ROOT.is_dir():
+    routing_root = DEFAULT_ROUTING_ROOT if root is None else root
+    if not routing_root.is_dir():
         return None
     candidates: list[tuple[str, str, Path]] = []
-    for path in DEFAULT_ROUTING_ROOT.glob("*/routing.db"):
-        identity = _complete_run(path, day)
+    for path in routing_root.glob("*/routing.db"):
+        identity = _complete_run(
+            path,
+            day,
+            expected_rank_input_sha256,
+            expected_event_run_id,
+            expected_feed_run_id,
+        )
         if identity is not None:
             candidates.append((*identity, path))
     if not candidates:
@@ -87,20 +121,43 @@ def latest_complete_run(day: str) -> Path | None:
     return max(candidates, key=lambda candidate: (candidate[0], candidate[1]))[2]
 
 
-def cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
-    """Invalidate when a current-contract run appears or changes."""
-    root_version = _db_version(DEFAULT_ROUTING_ROOT)
-    selected = latest_complete_run(day)
-    return (root_version,) if selected is None else (root_version, _db_version(selected))
+def cache_token(
+    day: str,
+    *,
+    expected_rank_input_sha256: str | None = None,
+    expected_event_run_id: str | None = None,
+    expected_feed_run_id: str | None = None,
+) -> tuple[tuple[str, int, int, int, int], ...]:
+    """Invalidate when a matching run becomes complete or is replaced."""
+    return tuple(
+        _db_version(path)
+        for path in sorted(DEFAULT_ROUTING_ROOT.glob("*/routing.db"))
+        if _complete_run(
+            path,
+            day,
+            expected_rank_input_sha256,
+            expected_event_run_id,
+            expected_feed_run_id,
+        )
+        is not None
+    )
 
 
 @lru_cache(maxsize=16)
 def _routing_payload_cached(
     day: str,
+    expected_rank_input_sha256: str,
+    expected_event_run_id: str,
+    expected_feed_run_id: str,
     token: tuple[tuple[str, int, int, int, int], ...],
 ) -> dict[str, Any]:
     del token
-    path = latest_complete_run(day)
+    path = latest_complete_run(
+        day,
+        expected_rank_input_sha256=expected_rank_input_sha256,
+        expected_event_run_id=expected_event_run_id,
+        expected_feed_run_id=expected_feed_run_id,
+    )
     if path is None:
         return {"available": False, "run": None, "items": {}}
     conn = _open_readonly(path)
@@ -142,6 +199,9 @@ def _routing_payload_cached(
             "reasoning_effort": str(meta["reasoning_effort"]),
             "prompt_version": str(meta["prompt_version"]),
             "rank_version": str(meta["rank_version"]),
+            "source_rank_input_sha256": str(
+                meta["source_rank_input_sha256"]
+            ),
             "source_event_run_id": str(meta["source_event_run_id"]),
             "source_feed_run_id": str(meta["source_feed_run_id"]),
             "selection_kind": str(meta["selection_kind"]),
@@ -158,5 +218,23 @@ def _routing_payload_cached(
     }
 
 
-def routing_payload(day: str) -> dict[str, Any]:
-    return _routing_payload_cached(day, cache_token(day))
+def routing_payload(
+    day: str,
+    *,
+    expected_rank_input_sha256: str,
+    expected_event_run_id: str,
+    expected_feed_run_id: str,
+) -> dict[str, Any]:
+    """Return only routing bound to the exact current full-day rank inputs."""
+    return _routing_payload_cached(
+        day,
+        expected_rank_input_sha256,
+        expected_event_run_id,
+        expected_feed_run_id,
+        cache_token(
+            day,
+            expected_rank_input_sha256=expected_rank_input_sha256,
+            expected_event_run_id=expected_event_run_id,
+            expected_feed_run_id=expected_feed_run_id,
+        ),
+    )

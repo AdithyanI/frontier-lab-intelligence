@@ -63,7 +63,7 @@ complete Event—shows a monotonic relationship with later independent routing:
 | Trusted Event voters | Top-100 Events | Labeled Events | Routing-relevant | Hit rate |
 | --- | ---: | ---: | ---: | ---: |
 | 1 | 213 | 204 | 70 | 34.3% |
-| 2 | 703 | 692 | 378 | 54.6% |
+| 2 | 703 | 692 | 373 | 53.9% |
 | 3–4 | 499 | 495 | 318 | 64.2% |
 | 5+ | 285 | 283 | 204 | 72.1% |
 
@@ -76,15 +76,18 @@ For adjacent positions within the 17 daily top-100 lists, the first differing
 layer was:
 
 - trusted-voter count: 182 comparisons (10.7%);
-- mean voter network position: 1,350 (79.4%);
-- source-author network position: 31 (1.8%);
-- maximum same-day one-post public interactions: 102 (6.0%);
+- mean voter network position: 1,362 (80.1%);
+- source-author network position: 22 (1.3%);
+- maximum same-day one-post public interactions: 99 (5.8%);
 - stable Event ID: 35 (2.1%).
 
 This is behavior attribution, not a quality score. It makes the system's
 trade-off explicit: convergence chooses broad bands; voter-network position
 does most ordering within those bands; source authority and public response are
-late tiebreaks. The exact replay is `fli daily-rank evaluate --json --no-input`.
+late tiebreaks. Network position is the six-decimal, tie-aware percentile of
+entity-union support: entities with equal support receive equal position, and
+raw support magnitude never enters the Event rank. The exact replay is
+`fli daily-rank evaluate --json --no-input`.
 
 ### Historical submission baseline
 

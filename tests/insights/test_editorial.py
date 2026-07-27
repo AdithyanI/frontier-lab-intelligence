@@ -15,9 +15,11 @@ from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.scoring import attention
 from fli.web.app import app
+from fli.web import events as event_store
 
 
 DAY = "2026-07-15"
+SOURCE_RANK_INPUT_SHA256 = "a" * 64
 CLIENT = TestClient(app)
 
 
@@ -77,26 +79,41 @@ def _packet(event_id: str, text: str, *, artifact: bool = False):
     )
 
 
-def _routing_fixture(root: Path) -> Path:
-    path = root / "current" / "routing.db"
+def _routing_fixture(
+    root: Path,
+    *,
+    directory: str = "current",
+    run_id: str = "routing-current",
+    source_rank_input_sha256: str = SOURCE_RANK_INPUT_SHA256,
+    source_event_run_id: str = "event-run",
+    source_feed_run_id: str = "feed-run",
+    cohort_sha256: str = "cohort-sha",
+) -> Path:
+    path = root / directory / "routing.db"
     conn = routing_runs.connect_run(path)
     now = "2026-07-17T12:00:00+00:00"
     conn.execute(
         """INSERT INTO run_meta (
                singleton, run_id, day, model, reasoning_effort,
                prompt_version, prompt_sha256, schema_version, rank_version,
-               source_event_run_id, source_feed_run_id, source_artifact_db,
+               source_rank_input_sha256, source_event_run_id,
+               source_feed_run_id, source_artifact_db,
                selection_kind, selection_limit, requested_event_id,
                cohort_sha256, expected_count, created_at, updated_at)
-           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?, ?,
-                   'event-run', 'feed-run', 'artifacts.db', 'top_ranked', 3,
-                   NULL, 'cohort-sha', 3, ?, ?)""",
+           VALUES (1, ?, ?, 'gpt-5.4-mini', 'high', ?, ?, ?, ?, ?,
+                   ?, ?, 'artifacts.db', 'top_ranked', 3,
+                   NULL, ?, 3, ?, ?)""",
         (
+            run_id,
             DAY,
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
             attention.DAILY_RANK_VERSION,
+            source_rank_input_sha256,
+            source_event_run_id,
+            source_feed_run_id,
+            cohort_sha256,
             now,
             now,
         ),
@@ -145,6 +162,17 @@ def _workspace(tmp_path, monkeypatch):
         routing_runs,
         "_published_event_source",
         lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
+    )
+    monkeypatch.setattr(
+        event_store,
+        "current_rank_identity",
+        lambda *, day: {
+            "day": day,
+            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
+            "event_run_id": "event-run",
+            "feed_run_id": "feed-run",
+        },
     )
     monkeypatch.setattr(
         editorial_runs,
@@ -411,10 +439,11 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
         """INSERT INTO run_meta (
                singleton, run_id, day, model, reasoning_effort,
                prompt_version, prompt_sha256, schema_version, rank_version,
-               source_event_run_id, source_feed_run_id, source_artifact_db,
+               source_rank_input_sha256, source_event_run_id,
+               source_feed_run_id, source_artifact_db,
                selection_kind, selection_limit, requested_event_id,
                cohort_sha256, expected_count, created_at, updated_at)
-           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?, ?,
+           VALUES (1, 'routing-current', ?, 'gpt-5.4-mini', 'high', ?, ?, ?, ?, ?,
                    'event-run', 'feed-run', 'artifacts.db', 'top_ranked', 1,
                    NULL, 'cohort-sha', 1, ?, ?)""",
         (
@@ -423,6 +452,7 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
             attention.DAILY_RANK_VERSION,
+            SOURCE_RANK_INPUT_SHA256,
             now,
             now,
         ),
@@ -474,6 +504,17 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
         routing_runs,
         "_published_event_source",
         lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
+    )
+    monkeypatch.setattr(
+        event_store,
+        "current_rank_identity",
+        lambda *, day: {
+            "day": day,
+            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
+            "event_run_id": "event-run",
+            "feed_run_id": "feed-run",
+        },
     )
     monkeypatch.setattr(
         editorial_runs,
@@ -837,6 +878,11 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
         "notes": "Second editorial pass.",
     }
     assert payload["run"]["counts"]["insights"] == 1
+    assert payload["run"]["source"]["rank_version"] == attention.DAILY_RANK_VERSION
+    assert (
+        payload["run"]["source"]["rank_input_sha256"]
+        == SOURCE_RANK_INPUT_SHA256
+    )
     assert [item["audience"] for item in payload["items"]] == ["investment"]
     assert payload["items"][0]["rank"] == 1
     assert payload["items"][0]["rank_rationale"].startswith("Ranked first")
@@ -915,6 +961,62 @@ def test_web_prefers_editorial_for_kept_and_preserves_candidate_fallback(
             "not_selected_candidate_count": 0,
         }
     ]
+
+
+def test_reader_and_api_reject_editorial_from_superseded_rank_lineage(
+    tmp_path, monkeypatch
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    draft_path = workspace / "draft.json"
+    draft_path.write_text(json.dumps(_draft(workspace)), encoding="utf-8")
+    db = tmp_path / "editorial.db"
+    editorial_runs.import_result(workspace, draft_path, db_path=db)
+
+    replacement_rank_sha = "b" * 64
+    _routing_fixture(
+        tmp_path / "routing",
+        directory="replacement",
+        run_id="routing-v3",
+        source_rank_input_sha256=replacement_rank_sha,
+        source_event_run_id="event-run-v3",
+        source_feed_run_id="feed-run-v3",
+        cohort_sha256="cohort-sha-v3",
+    )
+    monkeypatch.setattr(
+        event_store,
+        "current_rank_identity",
+        lambda *, day: {
+            "day": day,
+            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_input_sha256": replacement_rank_sha,
+            "event_run_id": "event-run-v3",
+            "feed_run_id": "feed-run-v3",
+        },
+    )
+
+    payload = editorial_runs.editorial_insights_payload(
+        audience="investment", day=DAY, db_path=db
+    )
+    dates = editorial_runs.editorial_insight_dates_payload(
+        audience="investment", db_path=db
+    )
+
+    assert payload["available"] is False
+    assert payload["run"] is None
+    assert "No current complete daily editorial run" in payload["reason"]
+    assert dates["available"] is False
+    assert dates["dates"] == []
+
+    monkeypatch.setattr(editorial_runs, "DEFAULT_DB", db)
+    monkeypatch.setattr(insight_runs, "DEFAULT_DB", tmp_path / "missing-insights.db")
+    kept = CLIENT.get(
+        f"/api/insights?audience=investment&date={DAY}&status=kept"
+    ).json()
+    api_dates = CLIENT.get("/api/insights/dates?audience=investment").json()
+
+    assert kept["content_kind"] == "candidate_decisions"
+    assert kept["available"] is False
+    assert api_dates["dates"] == []
 
 
 class _RawResponse:

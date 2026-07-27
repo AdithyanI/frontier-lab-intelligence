@@ -117,10 +117,10 @@ Neither rebuild command makes a provider or LLM call.
   target IDs can connect wrappers when the target payload itself is absent.
 - `GET /api/events?date=YYYY-MM-DD&projection=week` returns a deduplicated
   seven-day rollup ending on that date.
-- `sort=rank|recent|engagement` changes ordering.
+- `/api/events` accepts `sort=rank|recent|engagement`.
 - `q`, `limit`, and `offset` provide server-side search and pagination.
-- The lower-level `/api/feed` endpoint remains available for inspecting the
-  post ledger and rank inputs; it is not a separate product mode.
+- The lower-level `/api/feed` endpoint is an unranked post ledger and accepts
+  only `sort=recent|engagement`; it is not a separate product mode.
 
 Each grouped response contains one `root` and a related `evidence` list. The
 root never repeats in that list. Its `event_id` comes from a stable
@@ -157,11 +157,15 @@ Completed AI Engineering and Investment judgments are snapshot-bound audit
 metadata, not event identity and not a replacement ranking. The v9 semantic
 snapshot contains the root, same-author authored updates, and accepted
 first-party artifacts; independently authored reactions and pure reposts are
-excluded. The UI displays a route only when the completed row's `event_id` and
-public and stored `semantic_snapshot_sha256` match the canonical Event. Later
-third-party activity does not trigger rerouting. The runner reuses work only when Event ID,
-snapshot hash, and exact rendered `input_sha256` match. The API derives
-kept/not-kept/not-evaluated and audience counts before pagination.
+excluded. The UI displays a route only when the completed row's `event_id`,
+public and stored `semantic_snapshot_sha256`, source Feed/Event run IDs, and
+full-day `source_rank_input_sha256` all match the current canonical Event
+publication. Later third-party activity does not trigger rerouting, while any
+change to the day's exact Event rank inputs invalidates the old route
+projection. The runner reuses a judgment only when Event ID, snapshot hash,
+and exact rendered `input_sha256` match; the new run still records the current
+full-day rank lineage. The API derives kept/not-kept/not-evaluated and audience
+counts before pagination.
 
 ## Read Performance
 
@@ -185,7 +189,9 @@ bounded to the 300 nodes visible in the current visualization.
 
 ## Daily Event Rank
 
-The Feed presents one stable rank for every complete canonical-day Event.
+The `/evidence/feed` Event view, backed by `/api/events`, presents one stable
+rank for every complete canonical-day Event. The raw `/api/feed` ledger remains
+unranked.
 Audit filters and search hide rows without recalculating it, so the first
 visible not-evaluated Event may correctly be `#1001` rather than another `#1`.
 Clicking the rank reveals the ordered evidence behind `daily-rank-v2`; there is
@@ -205,7 +211,21 @@ and then ascending by stable Event ID:
 Each canonical entity contributes at most one vote across the whole Event.
 Organization and person voters use the same evidence rule; authority is
 represented by the inspectable network positions, not a hidden type bonus.
+Network position is the fraction of ranked canonical entities with a strictly
+lower entity-union support count, divided by `total − 1`. Entities tied on
+support receive the same six-decimal position; the unique top support level is
+`1.000000`, the bottom level is `0.000000`, a singleton is `1.000000`, and an
+entity absent from the ranking run receives `0.000000`. Raw support magnitude
+does not enter the Event rank.
 Public interactions are a snapshot measure and are deliberately only the fourth
 layer. Switching filters, searching, or running audience routing cannot change
 the rank. The rank answers where to look first; it does not claim relevance,
 quality, truth, novelty, or investment importance.
+
+The complete daily rank-input payload is hashed into `rank_input_sha256`:
+day, rank version, and every Event's ID, exact voter identities and positions,
+source-author position, and public-interaction count. Source Feed/Event run IDs
+are stored and checked separately. Event ranking fails closed when the required
+network analysis is unavailable rather than silently assigning every entity a
+zero position; routing and readers reject either a lineage-ID or full-day-SHA
+mismatch.

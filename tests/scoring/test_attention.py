@@ -1,4 +1,5 @@
 import random
+from decimal import Decimal
 
 import pytest
 
@@ -31,30 +32,79 @@ def _inputs(
     )
 
 
-def test_dense_rank_positions_use_rank_levels_so_top_and_bottom_are_bounded():
+def test_entity_positions_use_strictly_lower_entity_percentiles():
     positions = attention.entity_positions(
         {
             10: {
                 "network_rank": 1,
-                "network_rank_total": 2_524,
-                "network_rank_level_total": 663,
+                "network_entities_below": 3,
+                "network_rank_total": 4,
             },
             20: {
-                "network_rank": 332,
-                "network_rank_total": 2_524,
-                "network_rank_level_total": 663,
+                "network_rank": 2,
+                "network_entities_below": 2,
+                "network_rank_total": 4,
             },
             30: {
-                "network_rank": 663,
-                "network_rank_total": 2_524,
-                "network_rank_level_total": 663,
+                "network_rank": 3,
+                "network_entities_below": 0,
+                "network_rank_total": 4,
+            },
+            40: {
+                "network_rank": 3,
+                "network_entities_below": 0,
+                "network_rank_total": 4,
+            },
+            50: {
+                "network_rank": 1,
+                "network_entities_below": 0,
+                "network_rank_total": 1,
             },
         }
     )
 
-    assert positions[10] == 1.0
-    assert positions[20] == pytest.approx(0.5)
-    assert positions[30] == 0.0
+    assert positions == {
+        10: 1.0,
+        20: 0.666667,
+        30: 0.0,
+        40: 0.0,
+        50: 1.0,
+    }
+    assert attention.network_position(
+        network_entities_below=2, network_rank_total=4
+    ) == Decimal("0.666667")
+
+
+def test_sub_half_micro_position_difference_falls_through_to_author():
+    ranked = attention.rank_events(
+        [
+            (
+                {"event_id": "raw-mean-would-win"},
+                _inputs(
+                    "raw-mean-would-win",
+                    voter_positions=(0.5000004,),
+                    author_position=0.1,
+                ),
+            ),
+            (
+                {"event_id": "author-wins-visible-tie"},
+                _inputs(
+                    "author-wins-visible-tie",
+                    voter_positions=(0.5,),
+                    author_position=0.9,
+                ),
+            ),
+        ]
+    )
+
+    assert [row["event_id"] for row in ranked] == [
+        "author-wins-visible-tie",
+        "raw-mean-would-win",
+    ]
+    assert {
+        row["rank_components"]["mean_voter_position"] for row in ranked
+    } == {0.5}
+    assert ranked[0]["rank_components"]["decided_at_layer"] == 3
 
 
 def test_lexicographic_layers_only_break_ties_in_order():

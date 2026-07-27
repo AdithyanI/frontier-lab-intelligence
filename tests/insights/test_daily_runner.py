@@ -1,4 +1,5 @@
 import json
+import sqlite3
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -17,10 +18,16 @@ EVENT_RUN_ID = "event-run-1"
 FEED_RUN_ID = "feed-run-1"
 ROUTING_RUN_ID = "routing-run-1"
 WORKSPACE_RUN_ID = "workspace-run-1"
+ROUTING_COHORT_SHA256 = "routing-cohort-sha-1"
+SOURCE_RANK_INPUT_SHA256 = "source-rank-input-sha-1"
 
 
-def _evidence_result() -> dict[str, Any]:
-    return {
+def _evidence_result(
+    *,
+    event_run_id: str = EVENT_RUN_ID,
+    feed_run_id: str = FEED_RUN_ID,
+) -> dict[str, Any]:
+    result = {
         "range": {"date_from": "2026-07-08", "date_to": DAY},
         "collection_range": {"date_from": DAY, "date_to": DAY},
         "collection": {
@@ -34,7 +41,7 @@ def _evidence_result() -> dict[str, Any]:
         },
         "collection_coverage": {"complete": True},
         "feed": {
-            "run_id": FEED_RUN_ID,
+            "run_id": feed_run_id,
             "date_from": "2026-07-08",
             "date_to": DAY,
             "normalized_post_count": 41,
@@ -43,7 +50,7 @@ def _evidence_result() -> dict[str, Any]:
             "discarded_detail": "not persisted in the compact checkpoint",
         },
         "events": {
-            "run_id": EVENT_RUN_ID,
+            "run_id": event_run_id,
             "cluster_count": 8,
             "member_count": 19,
             "link_count": 6,
@@ -51,51 +58,89 @@ def _evidence_result() -> dict[str, Any]:
             "discarded_detail": "not persisted in the compact checkpoint",
         },
         "publication": {
-            "event_run_id": EVENT_RUN_ID,
-            "feed_run_id": FEED_RUN_ID,
+            "event_run_id": event_run_id,
+            "feed_run_id": feed_run_id,
         },
         "artifacts": {"counts": {"fetched": 5, "failed": 0}},
         "view_cache": {"refreshed": True},
         "discarded_detail": "not persisted in the compact checkpoint",
     }
+    return result
 
 
-def _routing_result() -> dict[str, Any]:
+def _routing_result(
+    *,
+    event_run_id: str = EVENT_RUN_ID,
+    feed_run_id: str = FEED_RUN_ID,
+    routing_run_id: str = ROUTING_RUN_ID,
+    routing_cohort_sha256: str = ROUTING_COHORT_SHA256,
+    source_rank_input_sha256: str = SOURCE_RANK_INPUT_SHA256,
+) -> dict[str, Any]:
     return {
-        "source_event_run_id": EVENT_RUN_ID,
-        "source_feed_run_id": FEED_RUN_ID,
+        "source_event_run_id": event_run_id,
+        "source_feed_run_id": feed_run_id,
         "through": DAY,
         "days": 1,
         "top_ranked": routing_runs.DEFAULT_REFRESH_TOP_RANKED,
         "model": routing_model.DEFAULT_MODEL,
         "reasoning_effort": routing_model.DEFAULT_REASONING_EFFORT,
-        "plan": [{"day": DAY, "run_id": ROUTING_RUN_ID, "reused": False}],
+        "rank_version": attention.DAILY_RANK_VERSION,
+        "routing_cohort_sha256": routing_cohort_sha256,
+        "source_rank_input_sha256": source_rank_input_sha256,
+        "plan": [{"day": DAY, "run_id": routing_run_id, "reused": False}],
         "reuse_policy": "exact-event-evidence-input",
         "resumed_complete_count": 0,
         "reused_exact_count": 7,
         "days_with_exact_reuse": 1,
         "model_requests": 1,
         "counts": {"complete": 8},
-        "runs": [{"day": DAY, "run_id": ROUTING_RUN_ID}],
+        "runs": [{"day": DAY, "run_id": routing_run_id}],
         "will_call_model": True,
         "discarded_detail": "not persisted in the compact checkpoint",
     }
 
 
-def _workspace_result(*, source_overrides: dict[str, str] | None = None) -> dict[str, Any]:
+def _production_routing_result() -> dict[str, Any]:
+    result = _routing_result()
+    result.pop("routing_cohort_sha256")
+    result.pop("source_rank_input_sha256")
+    result["plan"][0]["source_rank_input_sha256"] = SOURCE_RANK_INPUT_SHA256
+    result["runs"] = [
+        {
+            "run": {
+                "run_id": ROUTING_RUN_ID,
+                "source_event_run_id": EVENT_RUN_ID,
+                "source_feed_run_id": FEED_RUN_ID,
+                "source_rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
+                "cohort_sha256": ROUTING_COHORT_SHA256,
+            },
+            "counts": {"complete": 8},
+        }
+    ]
+    return result
+
+
+def _workspace_result(
+    *,
+    run_id: str = WORKSPACE_RUN_ID,
+    event_run_id: str = EVENT_RUN_ID,
+    feed_run_id: str = FEED_RUN_ID,
+    routing_run_id: str = ROUTING_RUN_ID,
+    source_overrides: dict[str, str] | None = None,
+) -> dict[str, Any]:
     source = {
-        "routing_run_id": ROUTING_RUN_ID,
-        "event_run_id": EVENT_RUN_ID,
-        "feed_run_id": FEED_RUN_ID,
+        "routing_run_id": routing_run_id,
+        "event_run_id": event_run_id,
+        "feed_run_id": feed_run_id,
     }
     source.update(source_overrides or {})
     return {
-        "workspace": f"tmp/daily-intelligence/{WORKSPACE_RUN_ID}",
-        "manifest": f"tmp/daily-intelligence/{WORKSPACE_RUN_ID}/manifest.json",
+        "workspace": f"tmp/daily-intelligence/{run_id}",
+        "manifest": f"tmp/daily-intelligence/{run_id}/manifest.json",
         "draft_template": (
-            f"tmp/daily-intelligence/{WORKSPACE_RUN_ID}/draft.template.json"
+            f"tmp/daily-intelligence/{run_id}/draft.template.json"
         ),
-        "run_id": WORKSPACE_RUN_ID,
+        "run_id": run_id,
         "manifest_sha256": "manifest-sha-1",
         "day": DAY,
         "counts": {"events": 8, "candidate_pairs": 11},
@@ -112,6 +157,8 @@ class _Pipeline:
         self,
         *,
         workspace: dict[str, Any] | None = None,
+        evidence: dict[str, Any] | None = None,
+        routing: dict[str, Any] | None = None,
     ) -> None:
         self.order: list[str] = []
         self.evidence_calls: list[dict[str, Any]] = []
@@ -121,18 +168,20 @@ class _Pipeline:
         self.template_loads: list[Path] = []
         self.codex_calls: list[dict[str, Any]] = []
         self.workspace = workspace or _workspace_result()
+        self.evidence_result = evidence or _evidence_result()
+        self.routing_result = routing or _routing_result()
         self.workspace_obsolete = False
         self.template_obsolete = False
 
     def evidence(self, **kwargs: Any) -> dict[str, Any]:
         self.order.append("evidence")
         self.evidence_calls.append(kwargs)
-        return deepcopy(_evidence_result())
+        return deepcopy(self.evidence_result)
 
     def routing(self, **kwargs: Any) -> dict[str, Any]:
         self.order.append("routing")
         self.routing_calls.append(kwargs)
-        return deepcopy(_routing_result())
+        return deepcopy(self.routing_result)
 
     def prepare(self, **kwargs: Any) -> dict[str, Any]:
         self.order.append("prepare")
@@ -211,6 +260,7 @@ def _run(
     codex_model: str | None = None,
     codex_reasoning_effort: str | None = None,
     codex_service_tier: str | None = daily_runner.DEFAULT_CODEX_SERVICE_TIER,
+    source_lineage: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return daily_runner.run_day(
         day=DAY,
@@ -226,7 +276,25 @@ def _run(
         workspace_loader=pipeline.load_workspace,
         workspace_template_loader=pipeline.load_template,
         codex_runner=codex_runner,
+        source_lineage=source_lineage,
     )
+
+
+def _source_lineage(
+    *,
+    event_run_id: str = EVENT_RUN_ID,
+    feed_run_id: str = FEED_RUN_ID,
+    routing_run_id: str = ROUTING_RUN_ID,
+    routing_cohort_sha256: str = ROUTING_COHORT_SHA256,
+    source_rank_input_sha256: str = SOURCE_RANK_INPUT_SHA256,
+) -> dict[str, str]:
+    return {
+        "event_run_id": event_run_id,
+        "feed_run_id": feed_run_id,
+        "routing_run_id": routing_run_id,
+        "routing_cohort_sha256": routing_cohort_sha256,
+        "source_rank_input_sha256": source_rank_input_sha256,
+    }
 
 
 def _expected_config() -> dict[str, Any]:
@@ -302,6 +370,45 @@ def test_default_run_prepares_in_order_with_exact_stage_args_and_lineage(tmp_pat
         "event_run_id": EVENT_RUN_ID,
         "feed_run_id": FEED_RUN_ID,
     }
+
+
+def test_run_day_normalizes_production_routing_refresh_lineage(tmp_path):
+    pipeline = _Pipeline(routing=_production_routing_result())
+
+    result = _run(db_path=tmp_path / "editorial.db", pipeline=pipeline)
+
+    assert result["stages"]["routing"]["routing_cohort_sha256"] == (
+        ROUTING_COHORT_SHA256
+    )
+    assert result["stages"]["routing"]["source_rank_input_sha256"] == (
+        SOURCE_RANK_INPUT_SHA256
+    )
+
+
+def test_v3_resume_fails_closed_when_checkpoint_rank_lineage_is_missing(tmp_path):
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+    first = _run(db_path=db_path, pipeline=pipeline)
+    stages = deepcopy(first["stages"])
+    stages["routing"].pop("source_rank_input_sha256")
+    conn = daily_runner.connect(db_path)
+    with conn:
+        conn.execute(
+            """UPDATE daily_orchestration_run
+               SET state_json = ?
+               WHERE run_id = ?""",
+            (
+                daily_runner._canonical_json({"stages": stages}),
+                first["run_id"],
+            ),
+        )
+    conn.close()
+
+    with pytest.raises(daily_runner.DailyRunError) as raised:
+        _run(db_path=db_path, pipeline=pipeline)
+
+    assert raised.value.code == "E_SOURCE_LINEAGE_MISMATCH"
+    assert "source_rank_input_sha256" in raised.value.message
 
 
 def test_resume_reuses_all_prepared_stages(tmp_path):
@@ -431,6 +538,242 @@ def test_same_day_supports_a_second_versioned_contract_lineage(tmp_path):
         conn.close()
 
 
+def test_same_source_lineage_reuses_the_exact_daily_run(tmp_path):
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+    lineage = _source_lineage()
+
+    first = _run(
+        db_path=db_path,
+        pipeline=pipeline,
+        source_lineage=lineage,
+    )
+    resumed = _run(
+        db_path=db_path,
+        pipeline=pipeline,
+        source_lineage=dict(reversed(list(lineage.items()))),
+    )
+
+    assert resumed["run_id"] == first["run_id"]
+    assert resumed["reused"] is True
+    assert resumed["config"]["source_lineage"] == lineage
+    conn = daily_runner.connect(db_path)
+    try:
+        assert conn.execute(
+            "SELECT COUNT(*) FROM daily_orchestration_run WHERE day = ?", (DAY,)
+        ).fetchone()[0] == 1
+    finally:
+        conn.close()
+
+
+def test_new_source_lineage_cannot_be_short_circuited_by_complete_prior_run(
+    tmp_path,
+):
+    db_path = tmp_path / "editorial.db"
+    first_pipeline = _Pipeline()
+    first = _run(
+        db_path=db_path,
+        pipeline=first_pipeline,
+        source_lineage=_source_lineage(),
+    )
+    conn = daily_runner.connect(db_path)
+    with conn:
+        conn.execute(
+            """UPDATE daily_orchestration_run
+               SET status = 'complete', stage = 'codex'
+               WHERE run_id = ?""",
+            (first["run_id"],),
+        )
+    conn.close()
+
+    second_ids = {
+        "event": "event-run-2",
+        "feed": "feed-run-2",
+        "routing": "routing-run-2",
+        "workspace": "workspace-run-2",
+        "cohort": "routing-cohort-sha-2",
+        "rank_input": "source-rank-input-sha-2",
+    }
+    second_pipeline = _Pipeline(
+        evidence=_evidence_result(
+            event_run_id=second_ids["event"],
+            feed_run_id=second_ids["feed"],
+        ),
+        routing=_routing_result(
+            event_run_id=second_ids["event"],
+            feed_run_id=second_ids["feed"],
+            routing_run_id=second_ids["routing"],
+            routing_cohort_sha256=second_ids["cohort"],
+            source_rank_input_sha256=second_ids["rank_input"],
+        ),
+        workspace=_workspace_result(
+            run_id=second_ids["workspace"],
+            event_run_id=second_ids["event"],
+            feed_run_id=second_ids["feed"],
+            routing_run_id=second_ids["routing"],
+        ),
+    )
+
+    second = _run(
+        db_path=db_path,
+        pipeline=second_pipeline,
+        source_lineage=_source_lineage(
+            event_run_id=second_ids["event"],
+            feed_run_id=second_ids["feed"],
+            routing_run_id=second_ids["routing"],
+            routing_cohort_sha256=second_ids["cohort"],
+            source_rank_input_sha256=second_ids["rank_input"],
+        ),
+    )
+
+    assert second["run_id"] != first["run_id"]
+    assert second["reused"] is False
+    assert second["status"] == "prepared"
+    assert second["stages"]["prepare"]["run_id"] == second_ids["workspace"]
+    assert (
+        second["stages"]["prepare"]["run_id"]
+        != first["stages"]["prepare"]["run_id"]
+    )
+    assert second_pipeline.order == ["evidence", "routing", "prepare"]
+    conn = daily_runner.connect(db_path)
+    try:
+        assert conn.execute(
+            "SELECT COUNT(*) FROM daily_orchestration_run WHERE day = ?", (DAY,)
+        ).fetchone()[0] == 2
+    finally:
+        conn.close()
+
+
+def test_injected_routing_checkpoint_must_match_config_source_lineage(tmp_path):
+    pipeline = _Pipeline(
+        routing=_routing_result(
+            source_rank_input_sha256="different-rank-input-sha",
+        )
+    )
+    db_path = tmp_path / "editorial.db"
+
+    with pytest.raises(daily_runner.DailyRunError) as raised:
+        _run(
+            db_path=db_path,
+            pipeline=pipeline,
+            source_lineage=_source_lineage(),
+        )
+
+    assert raised.value.code == "E_SOURCE_LINEAGE_MISMATCH"
+    assert raised.value.retryable is False
+    stored = daily_runner.inspect_run(db_path=db_path, day=DAY)
+    assert set(stored["stages"]) == {"evidence"}
+    assert stored["error"]["code"] == "E_SOURCE_LINEAGE_MISMATCH"
+
+
+def test_resumed_routing_checkpoint_must_match_config_source_lineage(tmp_path):
+    pipeline = _Pipeline()
+    db_path = tmp_path / "editorial.db"
+    first = _run(
+        db_path=db_path,
+        pipeline=pipeline,
+        source_lineage=_source_lineage(),
+    )
+    stages = deepcopy(first["stages"])
+    stages["routing"]["routing_cohort_sha256"] = "different-cohort-sha"
+    conn = daily_runner.connect(db_path)
+    with conn:
+        conn.execute(
+            """UPDATE daily_orchestration_run
+               SET state_json = ?
+               WHERE run_id = ?""",
+            (
+                daily_runner._canonical_json({"stages": stages}),
+                first["run_id"],
+            ),
+        )
+    conn.close()
+
+    with pytest.raises(daily_runner.DailyRunError) as raised:
+        _run(
+            db_path=db_path,
+            pipeline=pipeline,
+            source_lineage=_source_lineage(),
+        )
+
+    assert raised.value.code == "E_SOURCE_LINEAGE_MISMATCH"
+    assert pipeline.order == ["evidence", "routing", "prepare"]
+    stored = daily_runner.inspect_run(db_path=db_path, run_id=first["run_id"])
+    assert stored["status"] == "failed"
+    assert stored["error"]["code"] == "E_SOURCE_LINEAGE_MISMATCH"
+
+
+def test_current_inputs_exposes_exact_routing_source_hashes(
+    tmp_path, monkeypatch
+):
+    from fli.web import events as event_store
+
+    routing_path = tmp_path / "routing.db"
+    conn = sqlite3.connect(routing_path)
+    conn.execute(
+        """CREATE TABLE run_meta (
+               singleton INTEGER PRIMARY KEY,
+               run_id TEXT NOT NULL,
+               source_event_run_id TEXT NOT NULL,
+               source_feed_run_id TEXT NOT NULL,
+               selection_limit INTEGER NOT NULL,
+               model TEXT NOT NULL,
+               reasoning_effort TEXT NOT NULL,
+               rank_version TEXT NOT NULL,
+               cohort_sha256 TEXT NOT NULL,
+               source_rank_input_sha256 TEXT NOT NULL,
+               expected_count INTEGER NOT NULL
+           )"""
+    )
+    conn.execute(
+        """INSERT INTO run_meta VALUES (
+               1, ?, ?, ?, 100, ?, ?, ?, ?, ?, 100
+           )""",
+        (
+            ROUTING_RUN_ID,
+            EVENT_RUN_ID,
+            FEED_RUN_ID,
+            routing_model.DEFAULT_MODEL,
+            routing_model.DEFAULT_REASONING_EFFORT,
+            attention.DAILY_RANK_VERSION,
+            ROUTING_COHORT_SHA256,
+            SOURCE_RANK_INPUT_SHA256,
+        ),
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setattr(
+        daily_runner.routing_view,
+        "latest_complete_run",
+        lambda day, **_kwargs: routing_path if day == DAY else None,
+    )
+    monkeypatch.setattr(
+        event_store,
+        "current_rank_identity",
+        lambda *, day: {
+            "day": day,
+            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
+            "event_run_id": EVENT_RUN_ID,
+            "feed_run_id": FEED_RUN_ID,
+        },
+    )
+    monkeypatch.setattr(
+        daily_runner.routing_runs,
+        "_published_event_source",
+        lambda: pytest.fail("lineage must come from the frozen routing store"),
+    )
+
+    evidence, routing = daily_runner._current_inputs(DAY)
+
+    assert evidence["publication"] == {
+        "event_run_id": EVENT_RUN_ID,
+        "feed_run_id": FEED_RUN_ID,
+    }
+    assert routing["routing_cohort_sha256"] == ROUTING_COHORT_SHA256
+    assert routing["source_rank_input_sha256"] == SOURCE_RANK_INPUT_SHA256
+
+
 def test_run_batch_dry_run_plans_current_rank_without_touching_store(
     tmp_path, monkeypatch
 ):
@@ -461,18 +804,27 @@ def test_run_batch_dry_run_plans_current_rank_without_touching_store(
     assert not db_path.exists()
 
 
-def test_run_batch_injects_frozen_inputs_into_each_daily_v2_lineage(
+def test_run_batch_injects_frozen_inputs_into_each_daily_v3_lineage(
     tmp_path, monkeypatch
 ):
     calls = []
 
     def current_inputs(day):
         return (
-            {"publication": {"event_run_id": f"events-{day}"}},
+            {
+                "feed": {"run_id": f"feed-{day}"},
+                "publication": {
+                    "event_run_id": f"events-{day}",
+                    "feed_run_id": f"feed-{day}",
+                },
+            },
             {
                 "source_event_run_id": f"events-{day}",
                 "source_feed_run_id": f"feed-{day}",
                 "top_ranked": 100,
+                "routing_cohort_sha256": f"cohort-{day}",
+                "source_rank_input_sha256": f"rank-input-{day}",
+                "plan": [{"day": day, "run_id": f"routing-{day}"}],
             },
         )
 
@@ -485,10 +837,11 @@ def test_run_batch_injects_frozen_inputs_into_each_daily_v2_lineage(
                 "launch_codex": kwargs["launch_codex"],
                 "evidence": evidence,
                 "routing": routing,
+                "source_lineage": kwargs["source_lineage"],
             }
         )
         return {
-            "run_id": f"daily-v2-{kwargs['day']}",
+            "run_id": f"daily-v3-{kwargs['day']}",
             "day": kwargs["day"],
             "contract_version": daily_runner.RUN_CONTRACT_VERSION,
         }
@@ -514,6 +867,17 @@ def test_run_batch_injects_frozen_inputs_into_each_daily_v2_lineage(
     assert all(
         item["evidence"]["publication"]["event_run_id"]
         == item["routing"]["source_event_run_id"]
+        for item in calls
+    )
+    assert all(
+        item["source_lineage"]
+        == {
+            "event_run_id": f"events-{item['day']}",
+            "feed_run_id": f"feed-{item['day']}",
+            "routing_run_id": f"routing-{item['day']}",
+            "routing_cohort_sha256": f"cohort-{item['day']}",
+            "source_rank_input_sha256": f"rank-input-{item['day']}",
+        }
         for item in calls
     )
 

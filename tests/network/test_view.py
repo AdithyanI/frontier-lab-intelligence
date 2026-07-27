@@ -149,8 +149,49 @@ def test_entity_network_ranks_use_entity_union_support(tmp_path, monkeypatch):
         "cohort_follow_share": 0.5,
         "channel_count": 1,
         "network_source_total": 1,
+        "network_entities_below": 0,
         "network_rank_total": 1,
-        "network_rank_level_total": 1,
+    }
+
+
+def test_entity_network_ranks_count_strictly_lower_support_with_equal_ties(
+    tmp_path, monkeypatch
+):
+    _ranking_fixture(tmp_path, monkeypatch)
+    analysis_db = tmp_path / "derived" / "fixture" / "analysis.db"
+    conn = sqlite3.connect(analysis_db)
+    conn.execute(
+        """UPDATE entity_support_result
+           SET support_rank = 2
+           WHERE run_id = 'overlap' AND entity_id = 1"""
+    )
+    conn.executemany(
+        """INSERT INTO entity_support_result
+           (run_id, entity_id, support_rank, support_count, support_share,
+            channel_count)
+           VALUES ('overlap', ?, ?, ?, ?, 1)""",
+        [
+            (2, 3, 0, 0.0),
+            (3, 3, 0, 0.0),
+            (4, 1, 2, 1.0),
+        ],
+    )
+    conn.commit()
+    conn.close()
+
+    ranks = rankings_store.entity_network_ranks()
+
+    assert {
+        entity_id: (
+            row["network_entities_below"],
+            row["network_rank_total"],
+        )
+        for entity_id, row in ranks.items()
+    } == {
+        1: (2, 4),
+        2: (0, 4),
+        3: (0, 4),
+        4: (3, 4),
     }
 
 

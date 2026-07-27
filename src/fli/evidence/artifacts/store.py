@@ -654,7 +654,7 @@ def _iter_feed_candidates(
         payload = event_store.events_payload(
             day=day,
             lane="all",
-            sort="attention",
+            sort="rank",
             query="",
             routing_filter="all",
             limit=2**31 - 1,

@@ -543,7 +543,7 @@ function RankingMethods() {
         <div className="method-id mono"><span>ENTITY-OVERLAP-V3</span><strong>Network support</strong></div>
         <div className="method-main">
           <p className="method-question">How many screened Registry entities point here?</p>
-          <div className="method-equation mono">support = distinct active Registry entities following any represented X account · self excluded · dense rank within Registry</div>
+          <div className="method-equation mono">support = distinct active Registry entities following any represented X account · self excluded · tied counts share one percentile</div>
         </div>
         <p className="method-limit">Registry shows N / voter denominator. Ranking keeps the global account discovery order. Neither is relevance.</p>
       </div>
@@ -562,13 +562,15 @@ function RankingMethods() {
             entities that quoted or reposted any member of the complete Event on its
             canonical day. The source author is excluded after the union. A vote is
             never multiplied by status. <strong>Network position</strong> breaks
-            equal-vote ties, first across voters and then for the source author.
+            equal-vote ties, first across voters and then for the source author. It
+            is the share of all other ranked Registry entities with strictly lower
+            entity-union support; equal support receives an equal position.
             <strong>Public interactions</strong> use the largest same-day single-post
             sum of likes, replies, reposts, and quotes. Event ID makes a full tie
             deterministic.
           </p>
         </div>
-        <p className="method-limit">The Feed shows one stable daily Event rank across filters. It is an attention order, not importance, quality, or truth.</p>
+        <p className="method-limit">The ranked Event view shows one stable daily rank across filters; the raw Feed ledger is unranked. Exact rank inputs are SHA-bound, stale routing is rejected, and ranking is unavailable without current network analysis.</p>
       </div>
     </div>
   )

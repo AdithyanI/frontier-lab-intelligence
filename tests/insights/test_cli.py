@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.insights import cli as insight_cli
@@ -9,6 +11,24 @@ from fli.scoring import attention
 
 
 EVENT_ID = "event-spike-1"
+RANK_INPUT_SHA256 = "a" * 64
+
+
+@pytest.fixture(autouse=True)
+def _current_event_rank_identity(monkeypatch):
+    from fli.web import events as event_store
+
+    monkeypatch.setattr(
+        event_store,
+        "current_rank_identity",
+        lambda *, day: {
+            "day": day,
+            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_input_sha256": RANK_INPUT_SHA256,
+            "event_run_id": "event-run",
+            "feed_run_id": "feed-run",
+        },
+    )
 
 
 def _packet(*, event_id: str = EVENT_ID, day: str = "2026-07-13"):
@@ -60,19 +80,22 @@ def _routing_fixture(
             """INSERT INTO run_meta
                (singleton, run_id, day, model, reasoning_effort,
                 prompt_version, prompt_sha256, schema_version, rank_version,
-                source_event_run_id, source_feed_run_id, source_artifact_db,
-                selection_kind, selection_limit, requested_event_id,
-                cohort_sha256, expected_count, created_at, updated_at)
+                source_rank_input_sha256, source_event_run_id, source_feed_run_id,
+                source_artifact_db, selection_kind, selection_limit,
+                requested_event_id, cohort_sha256, expected_count, created_at,
+                updated_at)
                VALUES (1, ?, ?, 'gpt-5.4-mini', 'high',
-                       ?, 'prompt-sha', ?, ?, 'event-run', 'feed-run',
+                       ?, ?, ?, ?, ?, 'event-run', 'feed-run',
                        'artifacts.db', 'top_ranked', 100, NULL,
                        'cohort-sha', 1, ?, ?)""",
             (
                 run_id,
                 day,
                 routing_model.PROMPT_VERSION,
+                routing_model.prompt_sha256(),
                 routing_model.SCHEMA_VERSION,
                 attention.DAILY_RANK_VERSION,
+                RANK_INPUT_SHA256,
                 now,
                 now,
             ),

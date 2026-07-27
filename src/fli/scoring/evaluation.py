@@ -183,7 +183,7 @@ def load_saved_days(
         projection = event_store.events_payload(
             day=day,
             lane="all",
-            sort="score",
+            sort="rank",
             query="",
             limit=2**31 - 1,
             offset=0,

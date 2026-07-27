@@ -10,6 +10,9 @@ from fli.routing import runs as routing_runs
 from fli.scoring import attention
 
 
+RANK_INPUT_SHA256 = "a" * 64
+
+
 class FakeEmbeddings:
     def __init__(self, vectors):
         self.vectors = vectors
@@ -55,10 +58,10 @@ def _routing_db(path: Path) -> Path:
     conn.execute(
         """INSERT INTO run_meta VALUES (
                1, 'routing-test', '2026-07-15', 'gpt-5.4-mini', 'high',
-               'prompt-v1', 'prompt-sha', 'schema-v1', ?, 'event-run', 'feed-run',
-               'artifacts.db', 'top_ranked', 3, NULL, 'cohort-sha', 3,
+               'prompt-v1', 'prompt-sha', 'schema-v1', ?, ?, 'event-run',
+               'feed-run', 'artifacts.db', 'top_ranked', 3, NULL, 'cohort-sha', 3,
                '2026-07-15T00:00:00+00:00', '2026-07-15T00:00:00+00:00')""",
-        (attention.DAILY_RANK_VERSION,),
+        (attention.DAILY_RANK_VERSION, RANK_INPUT_SHA256),
     )
     packets = [
         {

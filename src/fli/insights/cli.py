@@ -24,6 +24,7 @@ from fli.insights import runs as insight_runs
 from fli.registry import classification as entity_kinds
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_run_store
+from fli.routing import view as routing_view
 from fli.scoring import attention
 
 
@@ -209,6 +210,9 @@ def resolve_event(
     routing_root: Path,
     source_routing_run_id: str | None = None,
 ) -> dict[str, Any]:
+    from fli.web import events as event_store
+
+    identities: dict[str, dict[str, str]] = {}
     matches: list[dict[str, Any]] = []
     for path in sorted(routing_root.glob("*/routing.db")):
         try:
@@ -222,10 +226,22 @@ def resolve_event(
             conn.close()
         except sqlite3.Error:
             continue
+        route_day = str(meta["day"]) if meta is not None else ""
+        try:
+            identity = identities.setdefault(
+                route_day,
+                event_store.current_rank_identity(day=route_day),
+            )
+        except ValueError:
+            continue
         if (
             meta is None
             or row is None
             or dict(meta).get("rank_version") != attention.DAILY_RANK_VERSION
+            or dict(meta).get("source_rank_input_sha256")
+            != identity["rank_input_sha256"]
+            or str(meta["source_event_run_id"]) != identity["event_run_id"]
+            or str(meta["source_feed_run_id"]) != identity["feed_run_id"]
             or str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
             or str(row["status"]) != "complete"
             or (day is not None and str(meta["day"]) != day)
@@ -535,58 +551,34 @@ def _current_routing_runs(
     days: list[str],
     routing_root: Path,
 ) -> tuple[dict[str, str], dict[str, dict[str, Any]]]:
-    source = routing_run_store._published_event_source()
-    requested = set(days)
-    matches: dict[str, list[dict[str, Any]]] = {day: [] for day in days}
-    for path in sorted(routing_root.glob("*/routing.db")):
-        try:
-            conn = _open_readonly(path)
-            meta_row = conn.execute(
-                "SELECT * FROM run_meta WHERE singleton = 1"
-            ).fetchone()
-            if meta_row is None:
-                conn.close()
-                continue
-            meta = dict(meta_row)
-            day = str(meta["day"])
-            if (
-                day not in requested
-                or meta.get("rank_version") != attention.DAILY_RANK_VERSION
-                or str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
-                or str(meta["schema_version"]) != routing_model.SCHEMA_VERSION
-                or str(meta["source_event_run_id"]) != source["event_run_id"]
-                or str(meta["source_feed_run_id"]) != source["feed_run_id"]
-            ):
-                conn.close()
-                continue
-            counts = conn.execute(
-                """SELECT COUNT(*) AS total,
-                          SUM(status = 'complete') AS complete
-                   FROM routing_item"""
-            ).fetchone()
-            conn.close()
-        except sqlite3.Error:
-            continue
-        if counts is None or int(counts["total"] or 0) != int(meta["expected_count"]):
-            continue
-        if int(counts["complete"] or 0) != int(meta["expected_count"]):
-            continue
-        matches[day].append({"path": path, "meta": meta})
+    from fli.web import events as event_store
 
+    source = routing_run_store._published_event_source()
     selected: dict[str, dict[str, Any]] = {}
     for day in days:
-        if not matches[day]:
+        identity = event_store.current_rank_identity(day=day)
+        path = routing_view.latest_complete_run(
+            day,
+            expected_rank_input_sha256=identity["rank_input_sha256"],
+            expected_event_run_id=identity["event_run_id"],
+            expected_feed_run_id=identity["feed_run_id"],
+            root=routing_root,
+        )
+        if path is None:
             raise ValueError(
                 f"no complete current routing run found for {day}; "
                 "rerun audience routing first"
             )
-        selected[day] = max(
-            matches[day],
-            key=lambda value: (
-                str(value["meta"]["updated_at"]),
-                str(value["meta"]["run_id"]),
-            ),
-        )
+        conn = _open_readonly(path)
+        try:
+            meta_row = conn.execute(
+                "SELECT * FROM run_meta WHERE singleton = 1"
+            ).fetchone()
+        finally:
+            conn.close()
+        if meta_row is None:
+            raise ValueError(f"routing metadata is missing for {day}")
+        selected[day] = {"path": path, "meta": dict(meta_row)}
     return source, selected
 
 
