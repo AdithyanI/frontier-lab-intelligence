@@ -92,6 +92,8 @@ test('Feed preserves daily rank across search and discloses its layers on demand
   assert.match(feedSource, /author_position\.toFixed\(6\)/)
   assert.match(feedSource, /share of other ranked Registry entities with lower network support/)
   assert.match(feedSource, /Ties share one value/)
+  assert.match(feedSource, /first difference from adjacent Event/)
+  assert.doesNotMatch(feedSource, /decided the adjacent tie/)
   assert.doesNotMatch(feedSource, /mean_voter_position\.toFixed\(3\)/)
   assert.doesNotMatch(feedSource, /author_position\.toFixed\(3\)/)
   assert.match(feedSource, /aria-expanded=\{open\}/)

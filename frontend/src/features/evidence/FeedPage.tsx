@@ -413,7 +413,7 @@ function RankDisclosure({
                 <div className="feed-rank-component-head">
                   <strong>{row.layer}. {row.label}</strong>
                   {components.decided_at_layer === row.layer && (
-                    <span className="mono">decided the adjacent tie</span>
+                    <span className="mono">first difference from adjacent Event</span>
                   )}
                 </div>
                 <p>{row.raw}</p>
