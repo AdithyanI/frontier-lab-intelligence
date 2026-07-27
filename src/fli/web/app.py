@@ -15,6 +15,7 @@ Endpoints:
 - /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
 - /api/artifacts/{id}/text       normalized readable artifact snapshot
+- /api/bit-lens/companies        complete dated Investment company context
 - /api/insights/dates            successor audience Insight dates
 - /api/insights                  successor audience Insights
 - /api/insights/report.pdf       cached daily editorial PDF workbook
@@ -555,6 +556,12 @@ def insights(
     )
     payload["content_kind"] = "candidate_decisions"
     return JSONResponse(payload)
+
+
+@app.get("/api/bit-lens/companies")
+def bit_lens_companies() -> JSONResponse:
+    """Complete auditable company context derived from the canonical packet."""
+    return JSONResponse(editorial_store.investment_company_universe_payload())
 
 
 @app.get("/api/insights/report.pdf")

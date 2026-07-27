@@ -20,7 +20,7 @@ SCHEMA_VERSION = "registry-relevance-output-v1"
 DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_REASONING_EFFORT = "high"
 DEFAULT_WORKERS = 8
-PROMPT_CACHE_SHARDS = 64
+PROMPT_CACHE_SHARDS = llm_responses.DEFAULT_PROMPT_CACHE_SHARDS
 PROMPT_PATH = Path(__file__).with_name("prompts") / "relevance.txt"
 
 DECISIONS = frozenset({"keep", "remove", "review"})
@@ -404,56 +404,84 @@ def main(argv: list[str] | None = None) -> int:
     pending = [
         entity for entity in selected if entity.entity_id not in completed_by_id
     ]
-    client = entity_kinds.create_litellm_client()
     latest_errors = {
         entity_id: error
         for entity_id, error in prior_errors.items()
         if entity_id in selected_ids and entity_id not in completed_by_id
     }
-    with checkpoint.open("a", encoding="utf-8") as checkpoint_stream:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
-            future_to_entity = {
-                executor.submit(
-                    audit_one,
-                    client,
-                    entity,
-                    model=args.model,
-                    effort=args.reasoning_effort,
-                    run=args.run,
-                ): entity
-                for entity in pending
-            }
-            for completed_count, future in enumerate(
-                concurrent.futures.as_completed(future_to_entity), start=1
-            ):
-                entity = future_to_entity[future]
-                try:
-                    result = future.result()
-                    completed_by_id[entity.entity_id] = result
-                    latest_errors.pop(entity.entity_id, None)
-                    _append_checkpoint(checkpoint_stream, "result", result)
-                except Exception as exc:  # preserve per-identity failures
-                    error = {
-                        "entity_id": entity.entity_id,
-                        "entity_name": entity.name,
-                        "error_type": type(exc).__name__,
-                        "error": str(exc),
-                    }
-                    latest_errors[entity.entity_id] = error
-                    _append_checkpoint(checkpoint_stream, "error", error)
-                if completed_count % 25 == 0 or completed_count == len(pending):
-                    print(
-                        json.dumps(
-                            {
-                                "progress": completed_count,
-                                "pending_at_start": len(pending),
-                                "stored_total": len(completed_by_id),
-                                "errors": len(latest_errors),
-                            },
-                            sort_keys=True,
+    lanes = llm_responses.group_prompt_cache_lanes(
+        pending,
+        lambda entity: prompt_cache_key(entity.entity_id),
+    )
+
+    def run_lane(
+        lane: list[RelevanceInput],
+    ) -> list[tuple[RelevanceInput, dict[str, Any] | None, Exception | None]]:
+        client = entity_kinds.create_litellm_client()
+        if hasattr(client, "with_options"):
+            client = client.with_options(max_retries=0)
+        outcomes = []
+        for entity in lane:
+            try:
+                outcomes.append(
+                    (
+                        entity,
+                        audit_one(
+                            client,
+                            entity,
+                            model=args.model,
+                            effort=args.reasoning_effort,
+                            run=args.run,
                         ),
-                        flush=True,
+                        None,
                     )
+                )
+            except Exception as exc:  # preserve per-identity failures
+                outcomes.append((entity, None, exc))
+        return outcomes
+
+    completed_count = 0
+    with checkpoint.open("a", encoding="utf-8") as checkpoint_stream:
+        if lanes:
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=min(args.workers, len(lanes))
+            ) as executor:
+                futures = [
+                    executor.submit(run_lane, lane) for lane in lanes.values()
+                ]
+                for future in concurrent.futures.as_completed(futures):
+                    for entity, result, exc in future.result():
+                        completed_count += 1
+                        if result is not None:
+                            completed_by_id[entity.entity_id] = result
+                            latest_errors.pop(entity.entity_id, None)
+                            _append_checkpoint(checkpoint_stream, "result", result)
+                        else:
+                            assert exc is not None
+                            error = {
+                                "entity_id": entity.entity_id,
+                                "entity_name": entity.name,
+                                "error_type": type(exc).__name__,
+                                "error": str(exc),
+                            }
+                            latest_errors[entity.entity_id] = error
+                            _append_checkpoint(checkpoint_stream, "error", error)
+                        if (
+                            completed_count % 25 == 0
+                            or completed_count == len(pending)
+                        ):
+                            print(
+                                json.dumps(
+                                    {
+                                        "progress": completed_count,
+                                        "pending_at_start": len(pending),
+                                        "stored_total": len(completed_by_id),
+                                        "errors": len(latest_errors),
+                                    },
+                                    sort_keys=True,
+                                ),
+                                flush=True,
+                            )
     results = sorted(completed_by_id.values(), key=lambda item: item["entity_id"])
     errors = sorted(latest_errors.values(), key=lambda item: item["entity_id"])
     artifact = {

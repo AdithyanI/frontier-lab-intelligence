@@ -1,4 +1,5 @@
 export * from './artifacts'
+export * from './bitLens'
 export * from './client'
 export * from './evidence'
 export * from './insights'

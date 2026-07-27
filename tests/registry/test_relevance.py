@@ -139,7 +139,10 @@ def test_prompt_cache_key_is_stable_and_sharded():
     assert relevance.prompt_cache_key(6).startswith(
         "fli:registry-relevance:registry-relevance-v1:shard-"
     )
-    assert len({relevance.prompt_cache_key(i) for i in range(256)}) > 32
+    assert (
+        len({relevance.prompt_cache_key(i) for i in range(256)})
+        == relevance.PROMPT_CACHE_SHARDS
+    )
 
 
 def test_relevance_uses_shared_prompt_cache_sharding():

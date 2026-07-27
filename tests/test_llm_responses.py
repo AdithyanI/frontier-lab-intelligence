@@ -38,3 +38,23 @@ def test_short_prompt_cache_keys_remain_readable():
 
     assert key.startswith("fli:audience-routing:v3:shard-")
     assert len(key) <= llm_responses.AZURE_PROMPT_CACHE_KEY_MAX_LENGTH
+
+
+def test_prompt_cache_lanes_preserve_lane_and_item_order():
+    items = [
+        {"id": 1, "key": "b"},
+        {"id": 2, "key": "a"},
+        {"id": 3, "key": "b"},
+        {"id": 4, "key": "a"},
+    ]
+
+    lanes = llm_responses.group_prompt_cache_lanes(
+        items, lambda item: item["key"]
+    )
+
+    assert list(lanes) == ["b", "a"]
+    assert [[item["id"] for item in lane] for lane in lanes.values()] == [
+        [1, 3],
+        [2, 4],
+    ]
+    assert llm_responses.DEFAULT_PROMPT_CACHE_SHARDS == 8

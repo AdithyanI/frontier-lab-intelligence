@@ -131,7 +131,7 @@ def test_cache_keys_are_stable_shards_for_shared_prompt():
         registry_evaluation.prompt_cache_key(6)
     )
     keys = {registry_evaluation.prompt_cache_key(i) for i in range(256)}
-    assert len(keys) > 32
+    assert len(keys) == registry_evaluation.PROMPT_CACHE_SHARDS
     assert all(
         key.startswith(
             "fli:registry-evaluation:registry-evaluation-v3:shard-"

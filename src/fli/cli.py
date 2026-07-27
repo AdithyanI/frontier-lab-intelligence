@@ -104,6 +104,11 @@ def main(argv: list[str] | None = None) -> int:
         "artifacts", help="Catalog and fetch canonical external artifacts."
     )
     artifacts_p.add_argument("artifact_args", nargs=argparse.REMAINDER)
+    prompt_cache_p = sub.add_parser(
+        "prompt-cache-canary",
+        help="Verify reusable-prefix caching through LiteLLM.",
+    )
+    prompt_cache_p.add_argument("prompt_cache_args", nargs=argparse.REMAINDER)
     args = parser.parse_args(raw_args)
 
     if args.command == "web":
@@ -226,6 +231,11 @@ def main(argv: list[str] | None = None) -> int:
         from fli.evidence.artifacts import cli as artifacts
 
         return artifacts.main(args.artifact_args)
+
+    if args.command == "prompt-cache-canary":
+        from fli.diagnostics import prompt_cache
+
+        return prompt_cache.main(args.prompt_cache_args)
 
     parser.print_help()
     return 0

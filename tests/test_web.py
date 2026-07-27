@@ -170,3 +170,15 @@ def test_spa_served_when_built():
     r = client.get("/")
     assert r.status_code == 200
     assert "Frontier Lab Intelligence" in r.text
+
+
+def test_bit_lens_company_universe_is_a_complete_read_only_projection():
+    r = client.get("/api/bit-lens/companies")
+
+    assert r.status_code == 200
+    data = r.json()
+    assert data["schema_version"] == "investment-company-universe-v1"
+    assert data["counts"]["companies"] == 37
+    assert data["scope"]["status"] == "unfiltered"
+    assert len(data["companies"]) == 37
+    assert all(company["analyst_context"]["frontier_ai_channels"] for company in data["companies"])

@@ -958,6 +958,114 @@ def portfolio_reference_payload() -> dict[str, Any]:
     }
 
 
+def investment_company_universe_payload() -> dict[str, Any]:
+    """Return the complete, dated company-context read model for BIT Lens."""
+    context = investment_context()
+    audited = context["portfolio"]
+    current = context["portfolio_current_top_ten"]
+    audited_by_name = {
+        item["name"]: item
+        for item in audited["holdings"]
+        if isinstance(item, dict)
+    }
+    current_by_name = {
+        item["name"]: {**item, "rank": rank}
+        for rank, item in enumerate(current["holdings"], start=1)
+        if isinstance(item, dict)
+    }
+
+    companies = []
+    for profile in context["company_profiles"]:
+        name = profile["name"]
+        audited_holding = audited_by_name.get(name)
+        current_holding = current_by_name.get(name)
+        companies.append(
+            {
+                **profile,
+                "portfolio_context": {
+                    "current_top_ten": (
+                        {
+                            "as_of": current["as_of"],
+                            "rank": current_holding["rank"],
+                            "weight_pct": current_holding["weight_pct"],
+                        }
+                        if current_holding
+                        else None
+                    ),
+                    "audited_baseline": (
+                        {
+                            "as_of": audited["as_of"],
+                            "weight_pct": audited_holding["weight_pct"],
+                        }
+                        if audited_holding
+                        else None
+                    ),
+                },
+            }
+        )
+
+    grade_counts = {
+        grade: sum(
+            profile["bit_public_view"]["grade"] == grade
+            for profile in context["company_profiles"]
+        )
+        for grade in ("explicit_thesis", "commentary", "none")
+    }
+    channel_count = sum(
+        len(profile["analyst_context"]["frontier_ai_channels"])
+        for profile in context["company_profiles"]
+    )
+    later_additions = sum(
+        company["portfolio_context"]["current_top_ten"] is not None
+        and company["portfolio_context"]["audited_baseline"] is None
+        for company in companies
+    )
+
+    return {
+        "schema_version": "investment-company-universe-v1",
+        "source_context_schema_version": context["schema_version"],
+        "profiles_reviewed_at": context["company_profiles_reviewed_at"],
+        "scope": {
+            "status": "unfiltered",
+            "label": "Working portfolio universe",
+            "note": (
+                "Every sourced company profile remains visible for review. "
+                "Presence here does not mean every frontier-AI Event affects the company."
+            ),
+        },
+        "disclosures": {
+            "current_top_ten": {
+                "as_of": current["as_of"],
+                "position_count": current["position_count"],
+                "visible_holding_count": len(current["holdings"]),
+                "source": {
+                    "label": current["source"]["label"],
+                    "url": current["source"]["url"],
+                },
+            },
+            "audited_baseline": {
+                "as_of": audited["as_of"],
+                "visible_holding_count": len(audited["holdings"]),
+                "source": {
+                    "label": audited["source"]["label"],
+                    "url": audited["source"]["url"],
+                },
+            },
+        },
+        "counts": {
+            "companies": len(companies),
+            "current_top_ten": len(current["holdings"]),
+            "audited_baseline": len(audited["holdings"]),
+            "later_top_ten_additions": later_additions,
+            "frontier_ai_channels": channel_count,
+            "bit_public_views": grade_counts["explicit_thesis"]
+            + grade_counts["commentary"],
+            "bit_public_view_grades": grade_counts,
+        },
+        "companies": companies,
+    }
+
+
 def prepare_workspace(
     *,
     day: str,

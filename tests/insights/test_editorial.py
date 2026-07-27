@@ -1253,6 +1253,43 @@ def test_company_context_lookup_is_exact_and_machine_readable(capsys):
     assert "--compact" in missing["error"]["hint"]
 
 
+def test_investment_company_universe_payload_is_complete_and_dated():
+    payload = editorial_runs.investment_company_universe_payload()
+
+    assert payload["schema_version"] == "investment-company-universe-v1"
+    assert payload["scope"]["status"] == "unfiltered"
+    assert payload["counts"] == {
+        "companies": 37,
+        "current_top_ten": 10,
+        "audited_baseline": 34,
+        "later_top_ten_additions": 3,
+        "frontier_ai_channels": 63,
+        "bit_public_views": 14,
+        "bit_public_view_grades": {
+            "explicit_thesis": 4,
+            "commentary": 10,
+            "none": 23,
+        },
+    }
+    companies = {company["name"]: company for company in payload["companies"]}
+    assert companies["Amazon"]["portfolio_context"] == {
+        "current_top_ten": {
+            "as_of": "2026-06-30",
+            "rank": 1,
+            "weight_pct": 10.4,
+        },
+        "audited_baseline": {
+            "as_of": "2025-12-31",
+            "weight_pct": 1.78,
+        },
+    }
+    assert companies["SanDisk"]["portfolio_context"]["audited_baseline"] is None
+    assert companies["SanDisk"]["portfolio_context"]["current_top_ten"]["rank"] == 4
+    assert companies["Microsoft"]["bit_public_view"]["grade"] == "commentary"
+    assert companies["Microsoft"]["analyst_context"]["frontier_ai_channels"]
+    assert companies["Microsoft"]["identity_sources"]
+
+
 def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, capsys):
     workspace = _workspace(tmp_path, monkeypatch)
     draft_path = workspace / "invalid.json"

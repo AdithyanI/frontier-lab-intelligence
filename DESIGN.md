@@ -91,8 +91,9 @@ Rules:
   product value. How it works is the reviewer walkthrough that connects the
   assignment to the live product.
   BIT Lens holds the public client context used to translate frontier evidence
-  into fund-specific research questions. It is one detailed reading page, not
-  another dashboard or a set of subviews, and remains separate from generated
+  into fund-specific research questions. Its ruled secondary navigation keeps
+  the long-form **Research brief** separate from the auditable **Company
+  universe** used by the Investment pass. Both remain separate from generated
   daily Insights. System groups two technical views: **Architecture** is the
   current implementation map, and **Status** is the live published checkpoint.
 - Registry and Ranking share one top-level **Network** destination because they
@@ -306,7 +307,8 @@ Rules:
   PDF text stays vector/selectable. Times/Helvetica/Courier Base 14 are a
   deliberate portable print analogue for the editorial display/UI/mono stack,
   with an embedded mixed-script fallback for citation titles outside WinAnsi.
-- **BIT Lens:** one text-first public-research briefing, without internal tabs,
+- **BIT Lens:** two ruled views of one public client-context workspace. The
+  **Research brief** remains a text-first public-research briefing without
   diagrams, dashboards, or collapsed holding detail. It preserves the full
   outside-in research in a linear reading order: flagship mandate and terms;
   dated portfolio disclosures and the latest complete audited holdings; the
@@ -314,7 +316,13 @@ Rules:
   grades; BIT's public Thesis → Edge → Signal → Key Move grammar; Volume × Price
   × Mix × Margin company analysis; alternative data, Aion, human investment
   judgment, and Devil's Advocate review; the resulting Investment-insight
-  standard; contradictions, unknowns, and a source ledger. Use ordinary prose,
+  standard; contradictions, unknowns, and a source ledger. The **Company
+  universe** is a searchable, filterable, expandable ledger derived from the
+  canonical Investment context packet. It keeps every sourced profile visible
+  for review and exposes dated portfolio context, business descriptions,
+  operating drivers, two-sided frontier-AI transmission channels, source-graded
+  BIT views, cautions, and source links. Presence in this ledger does not imply
+  that every Event affects the company. Use ordinary prose,
   descriptive headings, lists, and flat tables only where rows make exact dates
   or weights easier to compare. Keep body copy at 16px with a 72ch maximum and
   all claims dated or qualified. Never imply access to the complete current

@@ -3,16 +3,21 @@ import test from 'node:test'
 import { readSource, readStyles } from './source-files.mjs'
 
 const app = readSource('app/App.tsx')
+const layout = readSource('features/bit-lens/BitLensLayout.tsx')
 const lens = readSource('features/bit-lens/BitLensPage.tsx')
+const universe = readSource('features/bit-lens/CompanyUniversePage.tsx')
 const data = readSource('features/bit-lens/bitLensData.ts')
 const styles = readStyles()
 
-test('BIT Lens is one top-level reading page without internal tabs', () => {
+test('BIT Lens keeps research and company context in one ruled workspace', () => {
   assert.ok(app.indexOf('>Insights</NavLink>') < app.indexOf('>BIT Lens</NavLink>'))
   assert.ok(app.indexOf('>BIT Lens</NavLink>') < app.indexOf('>System</NavLink>'))
-  assert.match(app, /path="\/bit-lens" element=\{<BitLensPage \/>\}/)
-  assert.doesNotMatch(app, /BitLensLayout|FlagshipPage|ResearchProcessPage/)
-  assert.doesNotMatch(lens, /role="tab"|ruled-nav|bit-lens-tabs/)
+  assert.match(app, /path="\/bit-lens" element=\{<BitLensLayout \/>\}/)
+  assert.match(app, /<Route index element=\{<BitLensPage \/>\} \/>/)
+  assert.match(app, /<Route path="companies" element=\{<CompanyUniversePage \/>\} \/>/)
+  assert.match(layout, /className="ruled-nav bit-lens-tabs"/)
+  assert.match(layout, />Research brief<\/NavLink>/)
+  assert.match(layout, />Company universe<\/NavLink>/)
   assert.match(lens, /<article className="lens-reading">/)
 })
 
@@ -80,4 +85,24 @@ test('The redesign is text-first and removes the diagram-heavy UI', () => {
   assert.match(styles, /\.lens-reading p,[\s\S]*?font-size: 1rem;[\s\S]*?line-height: 1\.7/)
   assert.doesNotMatch(lens, /<svg|<details|lens-canvas|lens-theme-bar/)
   assert.doesNotMatch(styles, /\.lens-canvas|\.lens-svg-|\.lens-theme-bar/)
+})
+
+test('Company universe exposes the canonical context without implying automatic scope', () => {
+  assert.match(universe, /getCachedJSON<InvestmentCompanyUniverse>\('\/api\/bit-lens\/companies'\)/)
+  assert.match(universe, /No automatic inclusion\./)
+  assert.match(universe, /The Event still has to activate the channel\./)
+  assert.match(universe, /Frontier-AI transmission channels/)
+  assert.match(universe, /BIT’s public view/)
+  assert.match(universe, /Research cautions/)
+  assert.match(universe, /Company sources/)
+  assert.match(universe, /Open visible/)
+  assert.doesNotMatch(universe, /const companies = \[/)
+})
+
+test('Company universe uses the existing flat research-ledger grammar', () => {
+  assert.match(styles, /\.company-ledger \{[\s\S]*?border-top: 1px solid var\(--border-strong\)/)
+  assert.match(styles, /\.company-ledger summary \{[\s\S]*?display: grid/)
+  assert.match(styles, /\.company-detail \{[\s\S]*?background: var\(--surface\)/)
+  assert.match(styles, /\.company-evidence-grade\.is-explicit_thesis/)
+  assert.doesNotMatch(styles, /\.company-[^{]*\{[^}]*box-shadow/)
 })

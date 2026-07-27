@@ -115,17 +115,7 @@ const sourceLedger = [
 
 export default function BitLensPage() {
   return (
-    <div className="page bit-lens-page">
-      <header className="bit-lens-head">
-        <h1 className="page-title">BIT Lens</h1>
-        <p className="page-sub">
-          A detailed public-research briefing on BIT Global Technology Leaders,
-          BIT’s investment process, and the standard Frontier Lab Intelligence
-          should meet when writing for the fund.
-        </p>
-      </header>
-
-      <article className="lens-reading">
+    <article className="lens-reading">
         <section className="lens-reading-intro" aria-labelledby="lens-purpose-title">
           <h2 id="lens-purpose-title">What this page is for</h2>
           <p>
@@ -663,7 +653,6 @@ export default function BitLensPage() {
             <li><SourceLink href={sources.iren}>IREN company announcement</SourceLink> — primary source used to resolve the public transaction-description conflict.</li>
           </ul>
         </section>
-      </article>
-    </div>
+    </article>
   )
 }

@@ -15,7 +15,7 @@ PROMPT_VERSION = "identity-context-v1"
 SCHEMA_VERSION = "identity-context-output-v1"
 DEFAULT_MODEL = llm_responses.DEFAULT_EFFICIENT_MODEL
 DEFAULT_REASONING_EFFORT = "high"
-PROMPT_CACHE_SHARDS = 16
+PROMPT_CACHE_SHARDS = llm_responses.DEFAULT_PROMPT_CACHE_SHARDS
 PROMPT_PATH = Path(__file__).with_name("prompts") / "identity_context.txt"
 PARENTHESIZED_CITATION_RE = re.compile(
     r"\s*\(\s*\[[^\]]+\]\(https?://[^)]+\)\s*\)"

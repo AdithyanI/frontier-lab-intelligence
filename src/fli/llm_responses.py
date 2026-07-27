@@ -4,16 +4,18 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any
+from collections.abc import Callable, Iterable
+from typing import Any, TypeVar
 
 
-DEFAULT_PROMPT_CACHE_SHARDS = 64
+DEFAULT_PROMPT_CACHE_SHARDS = 8
 DEFAULT_EFFICIENT_MODEL = "gpt-5.6-luna"
 AZURE_GPT56_PROMPT_CACHE_RETENTION = "24h"
 AZURE_PROMPT_CACHE_KEY_MAX_LENGTH = 64
 _CACHE_NAMESPACE_PREVIEW_LENGTH = 24
 _CACHE_VERSION_PREVIEW_LENGTH = 8
 _CACHE_IDENTITY_HEX_LENGTH = 20
+_CacheLaneItem = TypeVar("_CacheLaneItem")
 
 
 def litellm_prompt_cache_kwargs(model: str) -> dict[str, str]:
@@ -55,6 +57,22 @@ def sharded_prompt_cache_key(
     if len(compact_key) > AZURE_PROMPT_CACHE_KEY_MAX_LENGTH:
         raise AssertionError("compacted prompt cache key exceeds Azure's limit")
     return compact_key
+
+
+def group_prompt_cache_lanes(
+    items: Iterable[_CacheLaneItem],
+    cache_key: Callable[[_CacheLaneItem], str],
+) -> dict[str, list[_CacheLaneItem]]:
+    """Group work into stable cache-key lanes while preserving input order.
+
+    Callers execute each lane serially and may run distinct lanes in parallel.
+    This keeps one in-flight request per cache key without coupling provider
+    cache behavior to a particular client instance.
+    """
+    lanes: dict[str, list[_CacheLaneItem]] = {}
+    for item in items:
+        lanes.setdefault(cache_key(item), []).append(item)
+    return lanes
 
 
 def reported_cost(headers: Any) -> float | None:

@@ -128,6 +128,11 @@ background research without deciding the impact of a daily development. BIT
 views also carry a source scope so firm-wide or other-product commentary cannot
 be mistaken for this flagship strategy's thesis.
 
+The dated human inspection map for all covered companies, disclosure boundaries,
+and frontier-AI transmission channels lives in
+[`investment-company-universe.md`](investment-company-universe.md). The
+structured JSON packet remains canonical for runtime use.
+
 Daily agents load the compact Investment projection first, then retrieve only
 the matching company profiles by exact canonical name, ticker, or alias:
 

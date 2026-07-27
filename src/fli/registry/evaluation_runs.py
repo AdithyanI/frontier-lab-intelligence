@@ -9,12 +9,11 @@ import json
 import sqlite3
 import threading
 import time
-from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from fli import store
+from fli import llm_responses, store
 from fli.ingestion import sources
 from fli.ingestion.x import content as x_content
 from fli.registry import classification as entity_kinds
@@ -525,9 +524,10 @@ def collect_identity_contexts(
              AND (context.status IS NULL OR context.status != 'complete')
            ORDER BY item.entity_id"""
     ).fetchall()
-    by_key: dict[str, list[sqlite3.Row]] = defaultdict(list)
-    for row in rows:
-        by_key[identity_contexts.prompt_cache_key(row["entity_id"])].append(row)
+    by_key = llm_responses.group_prompt_cache_lanes(
+        rows,
+        lambda row: identity_contexts.prompt_cache_key(row["entity_id"]),
+    )
 
     write_lock = threading.Lock()
     progress_lock = threading.Lock()
@@ -700,9 +700,10 @@ def evaluate_pending(
              )
            ORDER BY item.prompt_cache_key, item.entity_id"""
     ).fetchall()
-    by_key: dict[str, list[sqlite3.Row]] = defaultdict(list)
-    for row in rows:
-        by_key[row["prompt_cache_key"]].append(row)
+    by_key = llm_responses.group_prompt_cache_lanes(
+        rows,
+        lambda row: str(row["prompt_cache_key"]),
+    )
 
     write_lock = threading.Lock()
     progress_lock = threading.Lock()

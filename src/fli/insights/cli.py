@@ -18,6 +18,7 @@ from uuid import uuid4
 
 from openai import APIConnectionError, APITimeoutError, AuthenticationError
 
+from fli import llm_responses
 from fli.evidence import feed as signal_feed
 from fli.insights import generation as insight_generation
 from fli.insights import runs as insight_runs
@@ -737,10 +738,19 @@ def refresh_insights(
         effort=effort,
         routing_root=routing_root,
     )
+    cache_lanes = llm_responses.group_prompt_cache_lanes(
+        plan["requests"],
+        lambda item: insight_generation.contract(
+            str(item["audience"])
+        ).cache_key,
+    )
     base = {
         **plan,
         "db": _display_path(db_path),
-        "workers": min(workers, max(plan["request_count"], 1)),
+        "requested_workers": workers,
+        "workers": min(workers, max(len(cache_lanes), 1)),
+        "cache_lanes": len(cache_lanes),
+        "cache_execution": "serial_per_key",
         "timeout_seconds": timeout_seconds,
         "dry_run": dry_run,
         "will_call_model": False if dry_run else None,
@@ -811,61 +821,82 @@ def refresh_insights(
             client_factory=client_factory,
         )
 
-    with ThreadPoolExecutor(max_workers=base["workers"]) as executor:
-        futures = {executor.submit(execute, item): item for item in plan["requests"]}
-        for future in as_completed(futures):
-            item = futures[future]
+    def execute_lane(
+        lane: list[dict[str, Any]],
+    ) -> list[tuple[dict[str, Any], dict[str, Any] | None, Exception | None]]:
+        outcomes = []
+        for item in lane:
             try:
-                completed = future.result()
-                evaluation = completed["evaluations"][0]
-                result = evaluation["result"]
-                results.append(
-                    {
-                        **item,
-                        "decision": result["decision"],
-                        "title": result["title"],
-                        "model_requests": completed["telemetry"]["model_requests"],
-                        "reused_results": completed["telemetry"]["reused_results"],
-                        "input_tokens": completed["telemetry"][
-                            "incremental_input_tokens"
-                        ],
-                        "cached_tokens": completed["telemetry"][
-                            "incremental_cached_tokens"
-                        ],
-                        "output_tokens": completed["telemetry"][
-                            "incremental_output_tokens"
-                        ],
-                        "reported_cost_usd": completed["telemetry"][
-                            "incremental_reported_cost_usd"
-                        ],
-                    }
-                )
-                if progress == "plain":
-                    print(
-                        "insights: "
-                        f"{len(results) + len(errors)}/{plan['request_count']} "
-                        f"{item['day']} rank {item['feed_rank']} "
-                        f"{item['audience']} complete",
-                        file=sys.stderr,
-                        flush=True,
-                    )
+                outcomes.append((item, execute(item), None))
             except Exception as error:
-                errors.append(
-                    {
-                        **item,
-                        "error_type": type(error).__name__,
-                        "error_message": str(error),
-                    }
-                )
-                if progress == "plain":
-                    print(
-                        "insights: "
-                        f"{len(results) + len(errors)}/{plan['request_count']} "
-                        f"{item['day']} rank {item['feed_rank']} "
-                        f"{item['audience']} failed",
-                        file=sys.stderr,
-                        flush=True,
+                outcomes.append((item, None, error))
+        return outcomes
+
+    if cache_lanes:
+        with ThreadPoolExecutor(max_workers=base["workers"]) as executor:
+            futures = [
+                executor.submit(execute_lane, lane)
+                for lane in cache_lanes.values()
+            ]
+            for future in as_completed(futures):
+                for item, completed, error in future.result():
+                    if completed is not None:
+                        evaluation = completed["evaluations"][0]
+                        result = evaluation["result"]
+                        results.append(
+                            {
+                                **item,
+                                "decision": result["decision"],
+                                "title": result["title"],
+                                "model_requests": completed["telemetry"][
+                                    "model_requests"
+                                ],
+                                "reused_results": completed["telemetry"][
+                                    "reused_results"
+                                ],
+                                "input_tokens": completed["telemetry"][
+                                    "incremental_input_tokens"
+                                ],
+                                "cached_tokens": completed["telemetry"][
+                                    "incremental_cached_tokens"
+                                ],
+                                "output_tokens": completed["telemetry"][
+                                    "incremental_output_tokens"
+                                ],
+                                "reported_cost_usd": completed["telemetry"][
+                                    "incremental_reported_cost_usd"
+                                ],
+                            }
+                        )
+                        if progress == "plain":
+                            print(
+                                "insights: "
+                                f"{len(results) + len(errors)}/"
+                                f"{plan['request_count']} "
+                                f"{item['day']} rank {item['feed_rank']} "
+                                f"{item['audience']} complete",
+                                file=sys.stderr,
+                                flush=True,
+                            )
+                        continue
+                    assert error is not None
+                    errors.append(
+                        {
+                            **item,
+                            "error_type": type(error).__name__,
+                            "error_message": str(error),
+                        }
                     )
+                    if progress == "plain":
+                        print(
+                            "insights: "
+                            f"{len(results) + len(errors)}/"
+                            f"{plan['request_count']} "
+                            f"{item['day']} rank {item['feed_rank']} "
+                            f"{item['audience']} failed",
+                            file=sys.stderr,
+                            flush=True,
+                        )
 
     results.sort(key=lambda item: (item["day"], item["feed_rank"], item["audience"]))
     errors.sort(key=lambda item: (item["day"], item["feed_rank"], item["audience"]))
