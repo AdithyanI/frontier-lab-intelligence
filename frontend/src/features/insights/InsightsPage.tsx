@@ -1176,9 +1176,14 @@ export default function Insights() {
 
   useEffect(() => {
     if (
-      !currentDates?.available ||
       !selectedDate ||
-      !currentDates.dates.some((value) => value.day === selectedDate)
+      (
+        currentDates !== null &&
+        (
+          !currentDates.available ||
+          !currentDates.dates.some((value) => value.day === selectedDate)
+        )
+      )
     ) {
       activeDataViewRef.current = ''
       setDataView(null)

@@ -963,6 +963,45 @@ def test_web_prefers_editorial_for_kept_and_preserves_candidate_fallback(
     ]
 
 
+def test_editorial_date_lineage_is_reused_until_a_source_changes(
+    tmp_path, monkeypatch
+):
+    workspace = _workspace(tmp_path, monkeypatch)
+    draft_path = workspace / "draft.json"
+    draft_path.write_text(json.dumps(_draft(workspace)), encoding="utf-8")
+    db = tmp_path / "editorial.db"
+    editorial_runs.import_result(workspace, draft_path, db_path=db)
+
+    current_rank_identity = event_store.current_rank_identity
+    calls = 0
+
+    def counted_rank_identity(*, day):
+        nonlocal calls
+        calls += 1
+        return current_rank_identity(day=day)
+
+    monkeypatch.setattr(
+        event_store,
+        "current_rank_identity",
+        counted_rank_identity,
+    )
+    editorial_runs._current_editorial_lineage_cached.cache_clear()
+
+    investment = editorial_runs.editorial_insight_dates_payload(
+        audience="investment",
+        db_path=db,
+    )
+    engineering = editorial_runs.editorial_insight_dates_payload(
+        audience="ai_engineering",
+        db_path=db,
+    )
+
+    assert investment["available"] is True
+    assert engineering["available"] is True
+    assert calls == 1
+    editorial_runs._current_editorial_lineage_cached.cache_clear()
+
+
 def test_reader_and_api_reject_editorial_from_superseded_rank_lineage(
     tmp_path, monkeypatch
 ):

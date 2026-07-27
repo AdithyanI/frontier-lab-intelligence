@@ -6,7 +6,7 @@ from functools import lru_cache
 import json
 from pathlib import Path
 import sqlite3
-from typing import Any, Literal
+from typing import Any, Collection, Literal
 
 from fli.insights import generation as insight_generation
 from fli.insights import runs as insight_runs
@@ -216,11 +216,68 @@ def _dates_payload(audience: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _current_date_rows(
+    conn: sqlite3.Connection,
+    *,
+    audience: str,
+    exclude_days: Collection[str] = (),
+) -> list[dict[str, Any]]:
+    """Read only the columns needed by the date strip and validate lineage."""
+    prompt = insight_generation.contract(audience)
+    excluded = tuple(sorted(set(exclude_days)))
+    exclusion_sql = ""
+    parameters: list[str] = [
+        audience,
+        prompt.version,
+        prompt.sha256,
+        insight_generation.SCHEMA_VERSION,
+    ]
+    if excluded:
+        placeholders = ",".join("?" for _ in excluded)
+        exclusion_sql = f" AND item.day NOT IN ({placeholders})"
+        parameters.extend(excluded)
+    rows = conn.execute(
+        f"""WITH ranked AS (
+                 SELECT item.run_id, item.event_id, item.audience, item.day,
+                        item.decision, item.completed_at,
+                        run.source_routing_run_id, run.source_routing_db,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY item.event_id, item.audience
+                            ORDER BY item.completed_at DESC, item.run_id DESC
+                        ) AS recency_order
+                 FROM insight_item AS item
+                 JOIN insight_run AS run ON run.run_id = item.run_id
+                 WHERE item.status = 'complete'
+                   AND item.audience = ?
+                   AND item.prompt_version = ?
+                   AND item.prompt_sha256 = ?
+                   AND item.schema_version = ?
+                   AND item.title IS NOT NULL
+                   {exclusion_sql}
+             )
+             SELECT * FROM ranked WHERE recency_order = 1
+             ORDER BY day, event_id""",
+        parameters,
+    ).fetchall()
+    projected: list[dict[str, Any]] = []
+    for row in rows:
+        source = _routing_source(str(row["source_routing_db"]))
+        if (
+            not source["current"]
+            or str(row["source_routing_run_id"]) != source.get("run_id")
+            or str(row["event_id"]) not in source["packets"]
+        ):
+            continue
+        projected.append(dict(row))
+    return projected
+
+
 def insight_dates_payload(
     *,
     audience: str = DEFAULT_AUDIENCE,
     db_path: object | None = None,
     run_root: object | None = None,
+    exclude_days: Collection[str] = (),
 ) -> dict[str, Any]:
     """Return every evaluated day; the pill count is the number kept."""
     del run_root
@@ -229,7 +286,14 @@ def insight_dates_payload(
     if conn is None:
         return _dates_payload(selected, [])
     try:
-        return _dates_payload(selected, _current_rows(conn, audience=selected))
+        return _dates_payload(
+            selected,
+            _current_date_rows(
+                conn,
+                audience=selected,
+                exclude_days=exclude_days,
+            ),
+        )
     finally:
         conn.close()
 

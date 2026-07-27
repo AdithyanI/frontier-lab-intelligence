@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from functools import lru_cache
 import hashlib
 import json
 from pathlib import Path
@@ -491,6 +492,41 @@ def _current_routing_lineage(
 def _current_routing_run(day: str, routing_root: Path) -> tuple[Path, dict[str, Any]]:
     path, meta, _ = _current_routing_lineage(day, routing_root)
     return path, meta
+
+
+def _db_version(path: Path) -> tuple[str, int, int, int, int]:
+    """Return a compact invalidation token for one SQLite source."""
+    try:
+        stat = path.stat()
+        main_mtime, main_size = stat.st_mtime_ns, stat.st_size
+    except FileNotFoundError:
+        main_mtime, main_size = 0, 0
+    wal = Path(f"{path}-wal")
+    try:
+        wal_stat = wal.stat()
+        wal_size = wal_stat.st_size
+        wal_mtime = wal_stat.st_mtime_ns if wal_size else 0
+    except FileNotFoundError:
+        wal_mtime, wal_size = 0, 0
+    return str(path.resolve()), main_mtime, main_size, wal_mtime, wal_size
+
+
+def _editorial_lineage_source_token(
+    routing_root: Path,
+) -> tuple[tuple[str, int, int, int, int], ...]:
+    """Track every source whose replacement can stale an editorial run."""
+    from fli.web import events as event_store
+
+    paths = [
+        event_store.DEFAULT_EVENTS_DB,
+        event_store.DEFAULT_FEED_DB,
+        event_store.feed_store.DEFAULT_REGISTRY_DB,
+    ]
+    analysis = event_store.feed_store._latest_analysis_db()
+    if analysis is not None:
+        paths.append(analysis)
+    paths.extend(sorted(routing_root.glob("*/routing.db")))
+    return tuple(_db_version(path) for path in paths)
 
 
 def _root_source(packet: dict[str, Any]) -> dict[str, Any]:
@@ -1985,21 +2021,31 @@ def run_projection(
     return result
 
 
-def _current_editorial_lineage(row: sqlite3.Row) -> dict[str, str] | None:
-    """Return authoritative source lineage only when an editorial is current."""
+@lru_cache(maxsize=128)
+def _current_editorial_lineage_cached(
+    *,
+    day: str,
+    source_routing_db: str,
+    source_routing_run_id: str,
+    source_cohort_sha256: str,
+    source_event_run_id: str,
+    source_feed_run_id: str,
+    source_token: tuple[tuple[str, int, int, int, int], ...],
+) -> tuple[str, str] | None:
+    """Validate one immutable editorial lineage once per exact source state."""
+    del source_token
     try:
-        source_routing_db = _resolve_path(str(row["source_routing_db"]))
+        source_routing_path = _resolve_path(source_routing_db)
         current_path, routing_meta, rank_identity = _current_routing_lineage(
-            str(row["day"]),
-            source_routing_db.parent.parent,
+            day,
+            source_routing_path.parent.parent,
         )
         exact_matches = (
-            current_path.resolve() == source_routing_db.resolve(),
-            str(row["source_routing_run_id"]) == str(routing_meta["run_id"]),
-            str(row["source_cohort_sha256"])
-            == str(routing_meta["cohort_sha256"]),
-            str(row["source_event_run_id"]) == rank_identity["event_run_id"],
-            str(row["source_feed_run_id"]) == rank_identity["feed_run_id"],
+            current_path.resolve() == source_routing_path.resolve(),
+            source_routing_run_id == str(routing_meta["run_id"]),
+            source_cohort_sha256 == str(routing_meta["cohort_sha256"]),
+            source_event_run_id == rank_identity["event_run_id"],
+            source_feed_run_id == rank_identity["feed_run_id"],
             str(routing_meta["rank_version"]) == rank_identity["rank_version"],
             str(routing_meta["source_rank_input_sha256"])
             == rank_identity["rank_input_sha256"],
@@ -2008,9 +2054,35 @@ def _current_editorial_lineage(row: sqlite3.Row) -> dict[str, str] | None:
         return None
     if not all(exact_matches):
         return None
+    return rank_identity["rank_version"], rank_identity["rank_input_sha256"]
+
+
+def _current_editorial_lineage(
+    row: sqlite3.Row,
+    *,
+    source_token: tuple[tuple[str, int, int, int, int], ...] | None = None,
+) -> dict[str, str] | None:
+    """Return authoritative source lineage only when an editorial is current."""
+    source_routing_path = _resolve_path(str(row["source_routing_db"]))
+    token = (
+        source_token
+        if source_token is not None
+        else _editorial_lineage_source_token(source_routing_path.parent.parent)
+    )
+    lineage = _current_editorial_lineage_cached(
+        day=str(row["day"]),
+        source_routing_db=str(source_routing_path),
+        source_routing_run_id=str(row["source_routing_run_id"]),
+        source_cohort_sha256=str(row["source_cohort_sha256"]),
+        source_event_run_id=str(row["source_event_run_id"]),
+        source_feed_run_id=str(row["source_feed_run_id"]),
+        source_token=token,
+    )
+    if lineage is None:
+        return None
     return {
-        "rank_version": rank_identity["rank_version"],
-        "rank_input_sha256": rank_identity["rank_input_sha256"],
+        "rank_version": lineage[0],
+        "rank_input_sha256": lineage[1],
     }
 
 
@@ -2037,11 +2109,18 @@ def _current_editorial_rows(
     ).fetchall()
     current: list[tuple[sqlite3.Row, dict[str, str]]] = []
     selected_days: set[str] = set()
+    source_tokens: dict[Path, tuple[tuple[str, int, int, int, int], ...]] = {}
     for row in rows:
         selected_day = str(row["day"])
         if selected_day in selected_days:
             continue
-        lineage = _current_editorial_lineage(row)
+        source_routing_path = _resolve_path(str(row["source_routing_db"]))
+        routing_root = source_routing_path.parent.parent
+        source_token = source_tokens.get(routing_root)
+        if source_token is None:
+            source_token = _editorial_lineage_source_token(routing_root)
+            source_tokens[routing_root] = source_token
+        lineage = _current_editorial_lineage(row, source_token=source_token)
         if lineage is None:
             continue
         current.append((row, lineage))
@@ -2246,26 +2325,39 @@ def editorial_insight_dates_payload(
         if table is None:
             return empty
         rows = _current_editorial_rows(conn)
+        run_ids = [str(row["run_id"]) for row, _lineage in rows]
+        insight_counts: dict[str, int] = {}
+        disposition_counts: dict[str, dict[str, int]] = {}
+        if run_ids:
+            placeholders = ",".join("?" for _ in run_ids)
+            insight_counts = {
+                str(value["run_id"]): int(value["count"])
+                for value in conn.execute(
+                    f"""SELECT run_id, COUNT(*) AS count
+                        FROM editorial_insight
+                        WHERE audience = ?
+                          AND run_id IN ({placeholders})
+                        GROUP BY run_id""",
+                    (audience, *run_ids),
+                ).fetchall()
+            }
+            for value in conn.execute(
+                f"""SELECT run_id, status, COUNT(*) AS count
+                    FROM editorial_event_disposition
+                    WHERE audience = ?
+                      AND run_id IN ({placeholders})
+                    GROUP BY run_id, status""",
+                (audience, *run_ids),
+            ).fetchall():
+                disposition_counts.setdefault(str(value["run_id"]), {})[
+                    str(value["status"])
+                ] = int(value["count"])
         dates = []
         for row, _lineage in sorted(rows, key=lambda item: str(item[0]["day"])):
             selected_day = str(row["day"])
-            insight_count = int(
-                conn.execute(
-                    """SELECT COUNT(*) FROM editorial_insight
-                       WHERE run_id = ? AND audience = ?""",
-                    (row["run_id"], audience),
-                ).fetchone()[0]
-            )
-            dispositions = {
-                str(value["status"]): int(value["count"])
-                for value in conn.execute(
-                    """SELECT status, COUNT(*) AS count
-                       FROM editorial_event_disposition
-                       WHERE run_id = ? AND audience = ?
-                       GROUP BY status""",
-                    (row["run_id"], audience),
-                ).fetchall()
-            }
+            run_id = str(row["run_id"])
+            insight_count = insight_counts.get(run_id, 0)
+            dispositions = disposition_counts.get(run_id, {})
             dates.append(
                 {
                     "day": selected_day,
@@ -2287,6 +2379,19 @@ def editorial_insight_dates_payload(
         }
     finally:
         conn.close()
+
+
+def warm_editorial_read_views() -> dict[str, Any]:
+    """Warm current date-lineage validation without blocking static responses."""
+    payloads = [
+        editorial_insight_dates_payload(audience=audience)
+        for audience in editorial.AUDIENCES
+    ]
+    return {
+        "available": any(payload["available"] for payload in payloads),
+        "audiences_warmed": len(payloads),
+        "days_warmed": max((len(payload["dates"]) for payload in payloads), default=0),
+    }
 
 
 def summary_payload(conn: sqlite3.Connection) -> dict[str, Any]:

@@ -52,17 +52,44 @@ DIST_DIR = Path(__file__).parent / "dist"
 EVENT_READ_CACHE_HEADERS = {
     "Cache-Control": "public, max-age=60, stale-while-revalidate=300"
 }
+STARTUP_EVENT_WARM_DAYS = 7
+
+
+def _warm_recent_event_views() -> None:
+    """Warm only the newest visible Event window, not all historical days."""
+    summary = event_store.dates_payload()
+    if not summary.get("available"):
+        return
+    date_from = str(summary.get("date_from") or "")
+    date_to = str(summary.get("date_to") or "")
+    days = [
+        str(row["day"])
+        for row in summary.get("dates") or []
+        if date_from <= str(row.get("day") or "") <= date_to
+    ][-STARTUP_EVENT_WARM_DAYS:]
+    for day in days:
+        event_store._events_day_cached(
+            day=day,
+            cache_token=event_store._cache_token(day),
+        )
+
+
+def _warm_current_read_views() -> None:
+    """Prime Insight lineage and the newest Event pages in the background."""
+    editorial_store.warm_editorial_read_views()
+    _warm_recent_event_views()
 
 
 @asynccontextmanager
 async def _lifespan(_: FastAPI):
-    # The always-on local production service starts at login. Warm the summary
-    # and every current Event day without delaying health/static responses.
+    # The always-on local production service starts at login. Warm the compact
+    # Insight lineage view first, then the newest Event window, without delaying
+    # health/static responses.
     # Daily projections include routing state, whose publication can invalidate
     # a day while leaving the narrower date-summary cache valid.
     Thread(
-        target=event_store.warm_current_event_views,
-        name="fli-event-view-warmup",
+        target=_warm_current_read_views,
+        name="fli-read-view-warmup",
         daemon=True,
     ).start()
     yield
@@ -461,8 +488,15 @@ def insight_dates(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
     """Available successor Insight dates for one audience."""
-    payload = insight_store.insight_dates_payload(audience=audience)
     editorial = editorial_store.editorial_insight_dates_payload(audience=audience)
+    editorial_days = {
+        str(item["day"])
+        for item in editorial.get("dates", [])
+    }
+    payload = insight_store.insight_dates_payload(
+        audience=audience,
+        exclude_days=editorial_days,
+    )
     candidate_dates = {
         str(item["day"]): {
             "day": str(item["day"]),

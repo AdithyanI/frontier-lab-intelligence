@@ -13,12 +13,23 @@ from fli.routing import runs as routing_runs
 from fli.routing import view as audience_routing_store
 from fli.scoring import attention
 from fli.web import events as event_store, feed as feed_store
+import fli.web.app as web_app_module
 from fli.web.app import app
 from tests.evidence.test_feed import _raw_fixture, _tweet
 from tests.test_web_feed import _registry_fixture
 
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def _isolate_event_view_cache(tmp_path, monkeypatch):
+    """Never let read-model fixtures overwrite the live persisted cache."""
+    monkeypatch.setattr(
+        event_store,
+        "DEFAULT_EVENT_VIEW_CACHE_ROOT",
+        tmp_path / "web-event-cache",
+    )
 
 
 def test_cutoff_component_identity_prefers_primary_thread_over_quoted_target():
@@ -509,6 +520,35 @@ def test_event_warmup_builds_each_day_in_the_published_window(monkeypatch):
         "days_warmed": 2,
     }
     assert warmed == ["2026-07-05", "2026-07-06"]
+
+
+def test_service_startup_warms_only_the_newest_visible_event_window(monkeypatch):
+    days = [f"2026-07-{day:02d}" for day in range(1, 11)]
+    monkeypatch.setattr(
+        event_store,
+        "dates_payload",
+        lambda: {
+            "available": True,
+            "date_from": days[0],
+            "date_to": days[-1],
+            "dates": [{"day": day, "item_count": 1} for day in days],
+        },
+    )
+    monkeypatch.setattr(
+        event_store,
+        "_cache_token",
+        lambda day: ((day, 0, 0, 0, 0),),
+    )
+    warmed: list[str] = []
+    monkeypatch.setattr(
+        event_store,
+        "_events_day_cached",
+        lambda *, day, cache_token: warmed.append(day),
+    )
+
+    web_app_module._warm_recent_event_views()
+
+    assert warmed == days[-web_app_module.STARTUP_EVENT_WARM_DAYS:]
 
 
 def test_events_api_projects_completed_audience_routing_directly(

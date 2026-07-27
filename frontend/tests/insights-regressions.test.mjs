@@ -55,6 +55,15 @@ test('Insights uses the durable successor API and guards status-specific respons
   assert.match(insightSource, /payload\.content_kind === 'daily_editorial'/)
 })
 
+test('A directly linked brief loads in parallel with the date index', () => {
+  assert.match(insightSource, /currentDates !== null/)
+  assert.doesNotMatch(insightSource, /!currentDates\?\.available/)
+  assert.match(
+    insightSource,
+    /`\/api\/insights\?audience=\$\{audience\}&date=\$\{selectedDate\}&status=\$\{status\}`/,
+  )
+})
+
 test('Insights reuses the Feed week strip without explanatory reader clutter', () => {
   assert.match(insightSource, /<DateNavigator/)
   assert.match(insightSource, /itemLabel=\{copy\.itemLabel\}/)

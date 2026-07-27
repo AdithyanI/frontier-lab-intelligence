@@ -238,6 +238,20 @@ def test_dates_include_evaluated_days_and_count_kept_items(tmp_path):
     assert investment["dates"][0]["suppressed_count"] == 1
 
 
+def test_dates_skip_days_already_owned_by_editorial_runs(tmp_path):
+    db = _insight_db(tmp_path)
+
+    payload = insight_store.insight_dates_payload(
+        audience="ai_engineering",
+        db_path=db,
+        exclude_days={DAY},
+    )
+
+    assert payload["available"] is False
+    assert payload["latest_date"] is None
+    assert payload["dates"] == []
+
+
 def test_status_views_expose_kept_and_suppressed_rationales(tmp_path):
     db = _insight_db(tmp_path)
 
