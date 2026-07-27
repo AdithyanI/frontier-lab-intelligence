@@ -234,6 +234,16 @@ def _current_date_rows(
     ]
     if excluded:
         placeholders = ",".join("?" for _ in excluded)
+        uncovered = conn.execute(
+            f"""SELECT 1
+                FROM insight_item INDEXED BY idx_insight_item_day_audience_decision
+                WHERE audience = ?
+                  AND day NOT IN ({placeholders})
+                LIMIT 1""",
+            (audience, *excluded),
+        ).fetchone()
+        if uncovered is None:
+            return []
         exclusion_sql = f" AND item.day NOT IN ({placeholders})"
         parameters.extend(excluded)
     rows = conn.execute(
