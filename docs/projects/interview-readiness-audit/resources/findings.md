@@ -54,12 +54,65 @@ correct reflection of the world rather than a defect of the system.
 **What is not defensible is not having noticed.** Adi should walk in with this
 number already measured.
 
+### DIAGNOSED — 27 July. The cause is network coverage, not selection.
+
+The obvious follow-up question is: *are you dropping the smaller companies, or
+were they never there?* That is answerable for free, from data already stored,
+with no model calls. Compare the company mix of the 75 **kept** Insights to the
+690 **declined** candidates across the same 17 days.
+
+| Bucket | n | Mentions a non-mega-cap and **no** mega-cap |
+| --- | ---: | ---: |
+| Kept Insights | 75 | **12 (16%)** |
+| Declined candidates | 690 | **12 (1%)** |
+
+Declined-pool company mix: Meta 30, Alphabet 27, NVIDIA 25, Microsoft 19 —
+against Palantir 3, AMD 3, Alibaba 2, Intel 2, Cloudflare 2, Salesforce 2, and
+single mentions of Dell, Qualcomm, TSMC, IREN.
+
+**The selection stage is not the cause. It is the corrective.** A published
+Insight is roughly sixteen times more likely to reach outside the mega-caps than
+a declined candidate is. The concentration is inherited from the evidence pool,
+and editorial selection measurably widens it.
+
+The twelve declined non-mega-cap candidates were also declined for good reasons,
+not lazy ones:
+
+- Qualcomm ModCon — "an event advertisement, not a shipped product,
+  partnership result, adoption signal, or financial development."
+- TSMC — "the Taiwan import claim lacks a durable company-specific TSMC bridge;
+  aggregate value is confounded by packaging, memory, tariff timing, and product
+  mix."
+- IREN — "New York's one-year permitting pause is real, but the evidence does
+  not tie it to a current IREN or Hut 8 hyperscale project."
+
+The TSMC rejection in particular identifies a genuine confound. None of the
+twelve reads as an error.
+
+**So the real constraint is upstream: who the registry listens to.** The ~2,400
+tracked accounts are frontier-AI researchers and lab staff. They discuss
+frontier labs. They do not discuss Vertiv, Credo, Astera Labs, Coherent or
+Constellation Energy. To reach the semiconductor and energy supply chains the
+prompt names, the registry needs a *different class* of source — sell-side semis
+analysts, datacenter and power trade press, supply-chain trackers — not more
+frontier-AI researchers one hop further out in the same follow graph.
+
+This reframes the Thursday answer from an apology into a diagnosis:
+
+> "I measured it. Selection isn't the cause — my published insights are sixteen
+> times more likely to reach outside the mega-caps than the candidates I
+> declined. The constraint is my source network: frontier-AI researchers talk
+> about frontier labs. Covering semis and energy needs a different tier of
+> source, and that's the top of my roadmap."
+
+**Severity revised: high → medium.** It remains the top roadmap item, but it is
+a known, measured, correctly-diagnosed coverage limit rather than a hidden bias.
+
 Command:
 
 ```bash
-for d in 2026-07-05 ... 2026-07-21; do
-  curl -s "http://127.0.0.1:8797/api/insights?audience=investment&date=$d&status=kept"
-done  # then count analysis.affected_entities by scope
+# tmp/inv_kept.jsonl = all 17 days of investment kept payloads
+# then regex company names across items[] vs declined[]
 ```
 
 ---
