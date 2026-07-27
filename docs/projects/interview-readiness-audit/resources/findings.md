@@ -7,6 +7,31 @@ finding can be re-checked or shown live.
 
 Severity is judged by one question: **does this cost Adi the job?**
 
+## Index
+
+| # | Finding | Severity | Status |
+| --- | --- | --- | --- |
+| 1 | Investment read-through concentrated on four mega-caps | medium | **diagnosed** — cause is registry coverage, not selection |
+| 2 | Cross-platform entity resolution ~1% populated | medium | open |
+| 3 | Insights are ranked but never scored | medium | addressable by B1 |
+| 4 | Ranks 101–200 recall probe designed and never run | high | **B2** |
+| 5 | Insights page subtitle over-promises | low | open |
+| 6 | "Aion" leaks into Investment rejection reasons | low | needs a decision |
+| 7 | The AI Engineering lane is the stronger of the two | — | **asset** — lead the demo here |
+| 8 | Both lanes concentrate harder than the input does | medium | open |
+| 9 | Editorial layer measurably overrides the deterministic rank | — | **asset** — best answer in the audit |
+| 10 | Every day is written as if it is day one | high | **B3** — designed, deferred |
+| 11 | No stability measurement | medium | **B4** |
+| 12 | Quote validation is not claim validation | medium | 5 audited defects; fix deferred |
+
+Findings 7 and 9 are strengths, recorded here because they were discovered by
+measurement rather than assumed. Findings 10 and 12 were independently found by
+the pipeline agents during the 5–17 July batch audit; their write-ups are better
+than this one's and are quoted in place.
+
+Recommended build order and design constraints live in `../tasks.md` under
+**Recommended Work Order**.
+
 ---
 
 ## 1. Investment read-through is concentrated on four mega-caps
@@ -335,6 +360,187 @@ concentrates on four companies; Engineering concentrates on two themes.
 Some of this is the world, not the system — frontier AI in July 2026 genuinely
 was mostly about agent safety and evaluation. But it is the second-sharpest
 question available, and it should not be a surprise.
+
+---
+
+## 9. The editorial layer measurably overrides the deterministic rank — in a legible direction
+
+**Severity: none. This is the strongest single measurement in the audit.**
+
+The obvious challenge to the insight layer is: *"the model just decides, and you
+trust it."* The answer is not to replace judgment with a formula — the prompt
+calls an arbitrary weighted sum a red flag. The answer is to **anchor the
+judgment against the deterministic rank and measure the disagreement.**
+
+Every Insight carries the `feed_rank` of its source Events. That rank is
+`daily-rank-v2`: lexicographic, replayable, hash-pinned, already validated.
+So for each day, correlate published Insight rank against the best evidence rank
+behind it.
+
+Spearman across 16 days, 75 Investment Insights:
+
+- **mean rho = 0.179**, median 0.350
+- editor agreed with evidence order (rho > 0.5) on **3 of 16** days
+- editor substantially overrode it (rho < 0.2) on **5 of 16** days
+
+Near-zero correlation. The editor is not echoing the rank. **The direction of
+the override is the finding:**
+
+**Demoted — strong evidence rank, low Insight rank:**
+
+| Evidence rank | Insight | Title |
+| ---: | ---: | --- |
+| 1 / 1360 | #4 | "Inkling creates a new NVIDIA workload, **not yet a material demand**" |
+| 1 / 1360 | #3 | "Claude demand supports AWS usage, **not yet AWS returns**" |
+| 2 / 1360 | #3 | "Enterprise-owned learning can strengthen Microsoft's control point" |
+| 3 / 1360 | #3 | "Sol demand is strong, **but Microsoft economics remain unclear**" |
+| 4 / 1360 | #5 | "Meta's physics result strengthens capability perception, **not economics**" |
+| 5 / 1360 | #3 | "GPT's verified Erdős proof strengthens Microsoft's OpenAI exposure" |
+
+**Promoted — weak evidence rank, high Insight rank:**
+
+| Evidence rank | Insight | Title |
+| ---: | ---: | --- |
+| 86 / 1360 | #2 | "Oracle's OpenAI backlog now carries an **investment-grade warning**" |
+| 84 / 1360 | #2 | "Managed Agents can deepen Gemini API usage" |
+| 73 / 1360 | #1 | "NVIDIA's Diffusers integration strengthens its software moat" |
+| 58 / 1360 | #2 | "Chrome **distribution** gives Gemini a stronger adoption path" |
+| 54 / 1360 | #1 | "Gemini's Southeast Asia growth strengthens Alphabet's **distribution**" |
+| 53 / 1360 | #1 | "CXMT's HBM lag keeps **Micron's** AI-memory advantage intact" |
+
+Every demotion is a loud story with no financial transmission — and the title
+says so unprompted ("not economics", "not yet returns", "economics remain
+unclear"). Every promotion is a quieter story with a concrete mechanism: credit
+risk, memory supply, distribution channel.
+
+**The two layers are measuring different things, and they are supposed to
+disagree.** The deterministic rank measures *attention* — how much of the
+trusted network engaged. The editorial layer measures *consequence* — whether
+anything lands for a public-equity reader. A correlation near 1.0 would mean the
+model adds nothing. A correlation near 0 with random swaps would mean noise.
+rho ≈ 0.18 with a consistent, readable direction means the editor is doing real
+work in the intended direction.
+
+Note also: two of the six promotions are **Oracle and Micron** — non-mega-caps.
+Independent corroboration of the finding-1 diagnosis that selection reaches
+*down* the cap curve, not up it.
+
+**Use this as the answer to "how do you know the model isn't just deciding?"**
+
+> "It is deciding — that's the point of the layer. But I can measure how far it
+> departs from the deterministic rank, and in which direction. It demotes loud
+> stories with no financial transmission and promotes quiet ones with a real
+> mechanism. If it agreed with my deterministic rank I'd delete it."
+
+**Follow-up worth doing:** the same measurement on the AI Engineering lane, and
+surfacing the evidence rank per Insight in the UI so a reader can see the
+override without running a script.
+
+Command: `tmp/inv_kept.jsonl` → per-day Spearman of `item.rank` against
+`min(events[].feed_rank)`.
+
+---
+
+## 10. Every day is written as if it is day one
+
+**Severity: high. This is the most visible defect in the output, and the fix is
+already designed.**
+
+`_prior_insights` in `src/fli/insights/editorial_runs.py:653` queries
+`WHERE item.day = ?`. Same day only. It is a resume-and-reuse mechanism for
+re-running a single day, **not** cross-day memory. Nothing in the editorial
+packet tells the editor what was published yesterday.
+
+The consequence is visible in the output. In the AI Engineering lane, some
+version of "agents need enforced containment boundaries" is published on 5, 7,
+8, 9, 10, 13, 15, 16, 19, 20 and 21 July. Each day is internally deduplicated;
+across days it is not.
+
+The pipeline agents found this independently during the 5–17 July batch audit,
+with a sharper diagnosis than the theme count:
+
+> The same NVIDIA announcement supported near-identical Investment conclusions
+> on 5 and 6 July. The Apple complaint reappeared on 10 and 11 July without a
+> new ruling, remedy, or other decision-relevant development. **Event IDs
+> differed, so within-day identity validation could not detect the repetition.**
+
+That last clause is the mechanism: dedup keys on Event identity, and a
+continuing story generates new Events each day.
+
+**The fix is designed and deferred** — follow-up item 2 in
+`docs/references/daily-intelligence-batch-audit-2026-07-05-17.md`:
+
+> expose compact recent-development fingerprints — canonical source URLs,
+> accepted Insight IDs, company/mechanism keys, and the prior core claim — and
+> require the editor to state what is new. It should **not** inject prior
+> Insight prose wholesale because that would anchor the next editor.
+
+The prose-versus-fingerprint constraint is the non-obvious part and it is
+correct. Feeding yesterday's prose forward would make each day's editor write in
+the shadow of the last one.
+
+**Why this matters beyond repetition:** a daily briefing that cannot say "this
+extends what I told you Thursday" is not really a briefing. It is seventeen
+unrelated documents. The prompt asks for what matters *today*, and part of what
+matters today is what is new relative to what the reader already knows.
+
+**This is the recommended build (B3).**
+
+---
+
+## 11. There is no stability measurement
+
+**Severity: medium. Cheap to close.**
+
+Nobody has re-run the same day twice and compared the output. So the question
+"if you re-ran 21 July right now, would you get the same six Insights?" has no
+answer.
+
+This matters because it is the honest form of the objection Adi raised himself:
+*"we're just relying on the model to behave."* The defense is not that the
+system is deterministic — the editorial layer is deliberately not, and finding 9
+shows that is the point. The defense is that it is **stable**: the same input
+produces substantially the same output.
+
+Everything upstream of the editorial layer is already replayable and
+hash-pinned (`input_sha256`, `source_rank_input_sha256`, frozen artifact
+manifests). Only the final 100 → 6 step is unmeasured for stability.
+
+Bounded: one day, three runs, count recurrence. ~$10. **B4.**
+
+---
+
+## 12. Quote validation is not claim validation
+
+**Severity: medium — and this one has named, audited defects.**
+
+`src/fli/insights/editorial_runs.py:1613` enforces
+`if excerpt.casefold() not in artifact_text.casefold(): raise`. That is a real
+control at the write boundary — the system cannot persist a fabricated quote.
+
+But it is a containment check, not an entailment check. A genuine quote can sit
+underneath a claim it does not support. The pipeline agents found the same gap
+and, unlike this audit, produced a defect list:
+
+> Validation proves that an artifact excerpt exists in the frozen text. It does
+> not prove that the excerpt supports every material clause written around it.
+> The audit found gaps in NVIDIA credit-risk detail, Muse distribution claims,
+> trace-mining metrics, Inkling reasoning-effort claims, and SPACE scale claims.
+> **These were citation-selection failures, not necessarily missing underlying
+> evidence.**
+
+Five named cases, with a diagnosis: the evidence existed, the wrong slice of it
+was cited.
+
+**The better fix is follow-up item 4, not a prompt change.** The agents asked
+for exact source-text windows and historical-availability metadata so a reviewer
+can see a citation's surroundings and judge support directly. That is
+infrastructure for human review rather than another model-graded check. It is
+deferred.
+
+**Disclose this before being asked.** "My quote check is enforced and my quotes
+are real. It does not prove the sentence around the quote is right, I have five
+audited examples of exactly that failure, and I know which fix I want."
 
 ---
 

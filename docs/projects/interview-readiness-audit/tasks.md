@@ -116,11 +116,15 @@ So this audit is not optional polish. It is the requested preparation.
 
 ## Open Questions / Blockers
 
-- Does Adi want the ranks 101–200 recall probe actually run before Thursday?
-  It is the one named, designed, unrun measurement in `scoring-validation.md`,
-  and it is the most likely quant question. Bounded to one day, ~$1–2.
+- **Does Adi want B3 (cross-day novelty) built before Thursday?** It is the
+  highest-value improvement and the only one that touches the pipeline. Needs
+  a fallback snapshot and a narrow re-run. Decision not yet made.
+- Confirm the budget for B2 (~$2) and B4 (~$10). Adi has said cost is not the
+  constraint if the result is good.
 - Unclear who Carlos is. Vlad Gheorghe appears in the original interview
   thread subject. Marc handles welcome. Worth a public check before Thursday.
+- Is the "Aion" reference in Investment rejection reasons intended
+  cross-audience reasoning or prompt bleed? (finding 6)
 
 ## Current Batch
 
@@ -128,20 +132,100 @@ So this audit is not optional polish. It is the requested preparation.
 | --- | --- | --- | --- |
 | done | Audit Investment lane against prompt + BIT context | parent | `resources/findings.md` |
 | done | Ship funnel yield line and merge/role labels | parent | — |
-| in_progress | Audit AI Engineering lane to the same depth | parent | `resources/findings.md` |
+| done | Audit AI Engineering lane to the same depth | parent | findings 7–8 |
+| done | Diagnose the concentration finding with a free measurement | parent | finding 1 |
+| done | Anchor editorial rank against deterministic rank | parent | finding 9 |
+| todo | **B1 — Surface evidence rank on each Insight** | handoff | finding 9 |
+| todo | **B2 — Run the ranks 101–200 recall probe** | handoff | finding 4 |
+| todo | **B3 — Cross-day novelty delta** | handoff | finding 10 |
+| todo | **B4 — Stability re-run** | handoff | finding 11 |
 | todo | Build quant-session defense pack | parent | — |
 | todo | Rank the improvement list for Carlos/Vlad | parent | — |
 
+## Recommended Work Order
+
+Adi asked for a prioritized implementation list to hand to another engineer.
+Ordered by (value × visibility) ÷ risk. **Do B1 and B2 before B3.** Both are
+safe — B1 is display-only, B2 does not touch the product — so if the pipeline
+work goes badly there is still a shipped improvement and a measured number.
+
+### B1 — Surface evidence rank on each Insight
+
+**Half a day. Zero risk. No model calls, no pipeline re-run.**
+
+The number already exists. Every Insight carries `events[].feed_rank`, the
+position of its source Event in that day's deterministic `daily-rank-v2`
+ordering, out of `daily_rank_total` (1,360 on 21 July). It is never displayed.
+
+Show it per Insight — for example "evidence ranked #39 of 1,360 that day" — and
+ideally show the delta against the Insight's own rank, since finding 9 proves
+the two disagree in a meaningful direction.
+
+This is the honest answer to "you never scored the Insights." It does not invent
+a score, which the prompt calls a red flag. It exposes a measured, replayable,
+hash-pinned quantity the system already computes.
+
+**Do not** derive a composite or weighted number from it.
+
+### B2 — Ranks 101–200 recall probe
+
+**Half a day. ~$1–2. Read-only; does not modify the product.**
+
+Named in `scoring-validation.md` under "Honest limits" and never run. Route one
+day's Events at ranks 101–200 through the same routing prompts and count how
+many would have been marked relevant. This is the most likely Quant Research
+question and currently has no answer.
+
+There is already a known miss: on 5 July, Anthropic research sat at rank 111,
+below a football rumour at 109. The question is not whether the gate is lossy,
+it is how lossy.
+
+### B3 — Cross-day novelty delta
+
+**One day. The real build. Carries the only real risk.**
+
+Already designed and explicitly deferred as follow-up item 2 in
+`docs/references/daily-intelligence-batch-audit-2026-07-05-17.md`. Read that
+section before starting — the design decision is already made and reasoned:
+
+> expose compact recent-development fingerprints — canonical source URLs,
+> accepted Insight IDs, company/mechanism keys, and the prior core claim — and
+> require the editor to state what is new. It should **not** inject prior
+> Insight prose wholesale because that would anchor the next editor.
+
+That constraint is the important part. Fingerprints, never prose.
+
+Guardrails for whoever builds it:
+
+- **Freeze a fallback first.** The existing 17 days are the demo. Keep the
+  current runs intact and readable no matter what happens.
+- **Re-run narrow.** Two or three recent days, not all seventeen. Enough to
+  prove it works, not enough to risk the corpus.
+- Before/after on the same day is the better demo anyway.
+
+### B4 — Stability re-run
+
+**Half a day. ~$10.**
+
+Re-run one day's editorial three times and count how many of the published
+Insights recur. Converts "you are trusting the model to behave" from an opinion
+into a number. Nondeterministic is not the same as unstable, and right now
+there is no evidence either way.
+
 ## Backlog / Remaining Work
 
-- [ ] Audit the AI Engineering lane: candidate quality, experiment shape,
-      suppression reasons, and whether it serves "what should we adopt".
-- [ ] Decide with Adi whether to run the ranks 101–200 recall probe.
-- [ ] Prepare the answer for mega-cap concentration (see finding 1).
-- [ ] Prepare the answer for insight scoring absence (see finding 3).
-- [ ] Prepare the answer for cross-platform entity resolution (see finding 2).
-- [ ] Consider aligning the Insights page subtitle to BIT's own wording.
-- [ ] Check whether "Aion" leaks into Investment rejection reasons by design.
+- [ ] Prepare the answer for mega-cap concentration (finding 1 — now diagnosed,
+      needs rehearsing rather than fixing).
+- [ ] Prepare the answer for insight scoring absence (findings 3 and 9).
+- [ ] Prepare the answer for cross-platform entity resolution (finding 2).
+- [ ] Consider aligning the Insights page subtitle to BIT's own wording
+      (finding 5).
+- [ ] Check whether "Aion" leaks into Investment rejection reasons by design
+      (finding 6).
+- [ ] Run finding 9's Spearman measurement on the AI Engineering lane too.
+- [ ] Consider follow-up 4 from the batch audit — exact source-text windows and
+      historical-availability metadata. This is the missing half of the
+      entailment gap (finding 12) and is a stronger fix than a prompt change.
 - [ ] Validation pass: `scripts/check-fast.sh` plus browser verification.
 - [ ] Closeout: finalize `learnings.md`, then archive the project directory.
 
@@ -167,6 +251,20 @@ So this audit is not optional polish. It is the requested preparation.
   part reveals and scrolls to the declined log) and the merge/role labels in
   the Sources block (`3 EVENTS MERGED`, `PRIMARY` / `SUPPORTING` /
   `COUNTEREVIDENCE`). Verified in browser on both audiences; check-fast OK.
+- 2026-07-27: [DONE] Free measurement on concentration. Kept Insights reach
+  outside the mega-caps 16x more often than declined candidates (16% vs 1%).
+  Selection is the corrective, not the cause; the constraint is registry
+  coverage. Finding 1 re-diagnosed, severity high → medium.
+- 2026-07-27: [DONE] Anchored the editorial layer against the deterministic
+  rank. Spearman(insight rank, evidence rank) mean **0.179** across 16 days.
+  The override direction is legible: demotes loud-but-financially-empty,
+  promotes quiet-but-mechanical. Finding 9 recorded — best answer available to
+  "how do you know the model isn't just deciding?"
+- 2026-07-27: [NOTE] Read `daily-intelligence-batch-audit-2026-07-05-17.md`.
+  The pipeline agents independently found cross-day novelty (deferred item 2)
+  and the excerpt-vs-entailment gap, with five named citation-selection
+  defects. Their design constraint — fingerprints, never prior prose, because
+  prose anchors the next editor — is better than the one proposed in session.
 - 2026-07-27: [DONE] AI Engineering lane audited across all 17 days / 124
   Insights. Every one carries a `decision_rule` (0 missing). Recurring house
   style: refuses adoption on benchmarks alone (8+ instances), prices work by
