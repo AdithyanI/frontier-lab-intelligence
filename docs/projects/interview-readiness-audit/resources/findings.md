@@ -23,11 +23,18 @@ Severity is judged by one question: **does this cost Adi the job?**
 | 10 | Every day is written as if it is day one | high | **B3** — designed, deferred |
 | 11 | No stability measurement | medium | **B4** |
 | 12 | Quote validation is not claim validation | medium | 5 audited defects; fix deferred |
+| 13 | Only 45% of citations are actually verified | high | **B5** — 16% unverified `web` tier |
+| 14 | The "3–5 most interesting insights" deliverable does not exist | high | **B0** — cheapest, highest-weighted |
+| 15 | 17 days vs suggested ~3-month window, 68% of budget unspent | medium | needs a one-sentence answer |
 
 Findings 7 and 9 are strengths, recorded here because they were discovered by
 measurement rather than assumed. Findings 10 and 12 were independently found by
 the pipeline agents during the 5–17 July batch audit; their write-ups are better
 than this one's and are quoted in place.
+
+**If only one thing gets done: finding 14.** It is an explicit required
+deliverable, it answers the prompt's self-declared most important question, the
+material already exists, and it carries zero risk.
 
 Recommended build order and design constraints live in `../tasks.md` under
 **Recommended Work Order**.
@@ -432,12 +439,33 @@ Independent corroboration of the finding-1 diagnosis that selection reaches
 > stories with no financial transmission and promotes quiet ones with a real
 > mechanism. If it agreed with my deterministic rank I'd delete it."
 
-**Follow-up worth doing:** the same measurement on the AI Engineering lane, and
-surfacing the evidence rank per Insight in the UI so a reader can see the
-override without running a script.
+**Follow-up worth doing:** surface the evidence rank per Insight in the UI so a
+reader can see the override without running a script (B1).
 
-Command: `tmp/inv_kept.jsonl` → per-day Spearman of `item.rank` against
-`min(events[].feed_rank)`.
+### Both lanes measured — and the difference is interpretable
+
+| Lane | mean rho | median | days |
+| --- | ---: | ---: | ---: |
+| Investment | **0.179** | 0.350 | 16 |
+| AI Engineering | **0.421** | 0.536 | 17 |
+
+The Engineering editor follows the deterministic rank roughly twice as closely
+as the Investment editor. That is the right direction: for the Engineering
+reader the trusted network *is* the audience — AI engineers ranking what AI
+engineers published — so attention is a decent proxy for "what should we look
+at." For the Investment reader attention is a poor proxy for financial
+consequence, so the editor must override far more.
+
+The divergence is not noise. It is audience-appropriate, and it is measured.
+
+### Free invariant found alongside: zero double-counting
+
+Across all 17 days and both lanes, **no Event is used by more than one published
+Insight on the same day.** Zero reuses over 199 Insights. Within-day evidence
+partitioning is clean, so no story is silently counted twice.
+
+Command: `tmp/audit/{investment,ai_engineering}.jsonl` → per-day Spearman of
+`item.rank` against `min(events[].feed_rank)`; event-id counter per day.
 
 ---
 
@@ -541,6 +569,157 @@ deferred.
 **Disclose this before being asked.** "My quote check is enforced and my quotes
 are real. It does not prove the sentence around the quote is right, I have five
 audited examples of exactly that failure, and I know which fix I want."
+
+---
+
+## 13. Only 45% of citations are actually verified
+
+**Severity: high. This is the most precise version of the integrity claim, and
+it is currently overstated.**
+
+The enforced check at `editorial_runs.py:1613` is real. But two lines above it:
+
+```python
+for citation in normalized["citations"]:
+    if citation["kind"] != "artifact":
+        continue
+```
+
+**The substring check runs on artifact citations only.** Measured across all 199
+published Insights, 398 citations:
+
+| Kind | n | Share | What is actually enforced |
+| --- | ---: | ---: | --- |
+| `artifact` | 179 | **45%** | URL must be frozen evidence for the Event; `artifact_id` required; excerpt required; **excerpt must occur in the frozen artifact text** |
+| `event` | 157 | **39%** | URL must be in that Event's frozen `source_urls`; `published_at` must match the frozen source date. Excerpt present on only 36 of 157, and never checked |
+| `web` | 62 | **16%** | `retrieved_at` and `excerpt` required to be *present*. Nothing else. **The URL is not required to be frozen evidence of any Event, and the excerpt is never compared to anything** |
+
+Tiers: 45% excerpt-verified, 39% provenance-verified, **16% model-asserted and
+unchecked.**
+
+The `web` class is the exposure. `editorial.py:341` requires only that the
+fields exist:
+
+```python
+if kind == "web" and (retrieved_at is None or excerpt is None):
+    raise ValueError(...)
+```
+
+No stored fetched page text exists to check against, so the excerpt, the URL and
+the retrieval timestamp are all model output.
+
+**In fairness, the web sources are good ones.** Domains include `sec.gov`,
+`blogs.microsoft.com`, `anthropic.com`, `arxiv.org`, `hkexnews.hk`,
+`aisi.gov.uk`, and the Illinois legislature's own bill text. This is not the
+model inventing blogspam. It is the model quoting real, well-chosen primary
+sources with no mechanism to confirm the quote.
+
+**A hypothesis worth recording as refuted:** quantitative claims are *not*
+concentrated in the unverified tier. Numbers appear in 22% of artifact excerpts,
+24% of web, 22% of event — flat. The exposure is uniform, not targeted at the
+hard numbers.
+
+**Related, and smaller:** 63 of 199 Insights (32%) rest on **no artifact-backed
+citation at all** — 28/75 Investment, 35/124 Engineering. Those are built from
+post text plus web references. Not necessarily wrong for a story with no
+document behind it, but "we read the documents, not the tweets" holds for two
+thirds of the output, not all of it.
+
+**Also:** 164 of 398 citations carry no `published_at`, including 146 of the 179
+artifact citations. The batch audit already flagged exactly this.
+
+**How to say it Thursday, before being asked:**
+
+> "45% of my citations are excerpt-verified against frozen text and cannot be
+> fabricated. 39% are provenance-verified — the URL must be frozen evidence of
+> that Event. 16% are web references where I require an excerpt and a retrieval
+> time but never verify them, because I don't store the fetched page. That tier
+> is where I'd spend next."
+
+**The fix is already designed** — batch-audit follow-up 4, exact source-text
+windows and historical-availability capture. Promoting `web` citations into the
+artifact store extends the enforced check to 61% of citations.
+
+---
+
+## 14. The "3–5 most interesting insights" deliverable does not exist
+
+**Severity: high, and it is the cheapest thing on this list to fix.**
+
+The prompt's final-report deliverable, verbatim:
+
+> the 3–5 most interesting *real* insights the system surfaced — **"proof that
+> it works"**
+
+Searching the entire repository, `"most interesting"` appears in exactly two
+files: `case-prompt.md` and the source-material transcript of the prompt itself.
+**It appears in no deliverable, no doc, and no page of the app.**
+
+`docs/references/reviewer-guide.md` is genuinely good — organized by rubric
+weight, which is the right instinct, walking a reviewer through Registry →
+Signal-vs-noise → Scoring → Delivery → Ingestion → UI. But it is a **navigation
+guide, not a result showcase.** It says where to look. It never says "here are
+the five best things this system found, and why each is non-obvious."
+
+Frontend features are `architecture`, `bit-lens`, `evidence`, `insights`,
+`network`, `system`. No highlights or best-of surface exists.
+
+**Why this is the sharpest gap in the audit:**
+
+The prompt names one question as the most important of all — *"did this surface
+something we'd genuinely want to know, and did it keep the noise out?"* — and
+weights signal-vs-noise at 20%. The 3–5 showcase is the direct answer to the
+first half. Without it a reviewer must browse 199 Insights across 17 days and
+two audiences and hope to be impressed on their own time.
+
+**The material exists.** 199 Insights, all cited, all ranked, with written
+rationales. This is curation and a short write-up, not engineering. An hour or
+two, zero risk to the demo, touching the highest-weighted criterion.
+
+The submission is frozen so it cannot be added retroactively — but Adi drives
+the demo himself on Thursday. Arriving with five chosen, rehearsed, non-obvious
+examples *is* the deliverable, moved to the room where it now matters more.
+
+**Nominate from measured strength, not taste.** Finding 9 gives the selection
+rule for free: the biggest evidence-rank-to-Insight-rank promotions are exactly
+the cases where the system saw something the crowd did not. "Oracle's OpenAI
+backlog now carries an investment-grade warning" came from evidence rank 86 of
+1,360. "CXMT's HBM lag keeps Micron's AI-memory advantage intact" from rank 53.
+Those are demonstrably non-obvious *by the system's own deterministic measure* —
+a far better story than "I liked this one."
+
+---
+
+## 15. 17 days delivered against a suggested ~3-month window, with 68% of the budget unspent
+
+**Severity: medium. Likely defensible, but the answer must be ready.**
+
+The prompt, on extraction: structured, attributed, cited insights **"over a
+recent window (~3 months suggested)."**
+
+Delivered: **17 days**, 5–21 July 2026. Roughly 19% of the suggested window.
+
+Separately, from `tokenomics.md`: total recorded spend is **$31.797248** against
+a stated **€100 reimbursable budget** — about a third. The prompt explicitly
+says they are interested in *how* it is spent.
+
+Together those invite one question: *you had two thirds of the budget left, why
+not more coverage?*
+
+**The likely honest answer is a data constraint, not a budget one.** X's
+first-party search does not allow cheap backfill of three months of timeline
+data across ~2,400 accounts, and the repository already operates a "seven-day
+first-party X evidence projection." Collection ran forward from the start of the
+case rather than backwards from it. If that is right the answer is strong: the
+window is bounded by what can be *honestly retrieved*, not by effort or money,
+and 17 consecutive fully-replayable days with frozen evidence beats 90 shallow
+ones. The prompt itself says "scoped-well beats broad-badly."
+
+**Open question — verify before Thursday.** This audit did not confirm the
+retrieval constraint from provider docs or the ingestion code. It is inferred
+from the seven-day projection language. Adi should be able to state the real
+reason in one sentence. If the true reason is "I ran out of time," say that —
+still defensible, but a different sentence.
 
 ---
 

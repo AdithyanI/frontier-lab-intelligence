@@ -116,9 +116,13 @@ So this audit is not optional polish. It is the requested preparation.
 
 ## Open Questions / Blockers
 
+- **Why 17 days rather than the suggested ~3 months, with 68% of the €100
+  budget unspent?** (finding 15) The inferred answer is X's first-party
+  retrieval window, not budget or effort — but this audit did not confirm it
+  from provider docs or ingestion code. Adi needs this as one sentence.
 - **Does Adi want B3 (cross-day novelty) built before Thursday?** It is the
-  highest-value improvement and the only one that touches the pipeline. Needs
-  a fallback snapshot and a narrow re-run. Decision not yet made.
+  highest-value pipeline improvement and the only build that can break the
+  demo. Decision not yet made.
 - Confirm the budget for B2 (~$2) and B4 (~$10). Adi has said cost is not the
   constraint if the result is good.
 - Unclear who Carlos is. Vlad Gheorghe appears in the original interview
@@ -135,19 +139,52 @@ So this audit is not optional polish. It is the requested preparation.
 | done | Audit AI Engineering lane to the same depth | parent | findings 7–8 |
 | done | Diagnose the concentration finding with a free measurement | parent | finding 1 |
 | done | Anchor editorial rank against deterministic rank | parent | finding 9 |
+| done | Second sweep: citations, deliverables, rubric coverage | parent | findings 13–15 |
+| todo | **B0 — The 3–5 most interesting insights showcase** | handoff | finding 14 |
 | todo | **B1 — Surface evidence rank on each Insight** | handoff | finding 9 |
 | todo | **B2 — Run the ranks 101–200 recall probe** | handoff | finding 4 |
 | todo | **B3 — Cross-day novelty delta** | handoff | finding 10 |
 | todo | **B4 — Stability re-run** | handoff | finding 11 |
+| todo | **B5 — Extend verification to `web` citations** (post-Thursday) | handoff | finding 13 |
 | todo | Build quant-session defense pack | parent | — |
 | todo | Rank the improvement list for Carlos/Vlad | parent | — |
 
 ## Recommended Work Order
 
 Adi asked for a prioritized implementation list to hand to another engineer.
-Ordered by (value × visibility) ÷ risk. **Do B1 and B2 before B3.** Both are
-safe — B1 is display-only, B2 does not touch the product — so if the pipeline
-work goes badly there is still a shipped improvement and a measured number.
+Ordered by (value × visibility) ÷ risk. **B0 first — it is the cheapest item
+here and it touches the highest-weighted criterion in the rubric.** Then B1 and
+B2, both safe. B3 last, because it is the only one that can break the demo.
+
+### B0 — The 3–5 most interesting insights showcase
+
+**One to two hours. Zero risk. No code, no model calls.**
+
+An explicit required deliverable that does not exist anywhere in the repo or the
+app (finding 14). The prompt calls it "proof that it works", and it answers the
+question the prompt names as most important: *did this surface something we'd
+genuinely want to know?*
+
+Pick 5, write a paragraph each: what the system saw, what a human would have
+missed, and the citation trail. Both audiences represented.
+
+**Select from measured strength, not taste.** Finding 9 gives the rule: the
+largest evidence-rank → Insight-rank promotions are where the system saw what
+the crowd did not. Starting candidates, all Investment:
+
+| Evidence rank | Insight |
+| ---: | --- |
+| 86 / 1360 | Oracle's OpenAI backlog now carries an investment-grade warning |
+| 73 / 1360 | NVIDIA's Diffusers integration strengthens its software moat |
+| 53 / 1360 | CXMT's HBM lag keeps Micron's AI-memory advantage intact |
+
+The rank-12 evidence example is the best single demo of the ingestion layer: a
+post whose entire text is three `t.co` links and zero words, behind which the
+system resolved a 65,708-character Dwarkesh interview and a 114,642-character
+Forecasting Research Institute report.
+
+Engineering candidates should come from the merge cases — 15 of 84 Insights
+merge multiple Events, and 4 carry an explicit `counterevidence` role.
 
 ### B1 — Surface evidence rank on each Insight
 
@@ -158,12 +195,13 @@ position of its source Event in that day's deterministic `daily-rank-v2`
 ordering, out of `daily_rank_total` (1,360 on 21 July). It is never displayed.
 
 Show it per Insight — for example "evidence ranked #39 of 1,360 that day" — and
-ideally show the delta against the Insight's own rank, since finding 9 proves
-the two disagree in a meaningful direction.
+ideally the delta against the Insight's own rank, since finding 9 proves the two
+disagree in a meaningful and audience-appropriate direction.
 
 This is the honest answer to "you never scored the Insights." It does not invent
 a score, which the prompt calls a red flag. It exposes a measured, replayable,
-hash-pinned quantity the system already computes.
+hash-pinned quantity the system already computes. It also makes B0's selection
+rule visible in the product rather than only in a script.
 
 **Do not** derive a composite or weighted number from it.
 
@@ -207,10 +245,25 @@ Guardrails for whoever builds it:
 
 **Half a day. ~$10.**
 
-Re-run one day's editorial three times and count how many of the published
-Insights recur. Converts "you are trusting the model to behave" from an opinion
-into a number. Nondeterministic is not the same as unstable, and right now
-there is no evidence either way.
+Re-run one day's editorial three times and count how many published Insights
+recur. Converts "you are trusting the model to behave" from an opinion into a
+number. Nondeterministic is not the same as unstable, and there is currently no
+evidence either way.
+
+### B5 — Extend citation verification to the `web` tier
+
+**Not before Thursday. Recorded because it is the right next fix.**
+
+Finding 13: the enforced excerpt check covers artifact citations only — 45% of
+398 citations. The 62 `web` citations (16%) have a model-asserted URL, a
+model-asserted excerpt and a model-asserted retrieval time, with nothing stored
+to check against.
+
+Same fix as batch-audit follow-up 4: capture and freeze fetched page text, then
+drop the `kind != "artifact"` guard at `editorial_runs.py:1613`. That extends
+enforced verification from 45% to 61% of citations.
+
+Until then, **disclose the tiers rather than claiming blanket verification.**
 
 ## Backlog / Remaining Work
 
@@ -271,3 +324,13 @@ there is no evidence either way.
   accepted-task cost rather than tokens (5+). Aion confirmed as BIT's real
   public platform, not invented. Findings 7–8 recorded. **Recommendation: lead
   Thursday's walkthrough with this lane, not Investment.**
+- 2026-07-27: [DONE] Second sweep — citations, deliverables, and rubric
+  coverage. Three new findings. **13:** the enforced excerpt check covers
+  artifact citations only; measured tiers are 45% excerpt-verified / 39%
+  provenance-verified / 16% (`web`) unchecked. **14:** the explicit "3–5 most
+  interesting insights" deliverable exists nowhere in the repo or app — now B0,
+  the cheapest and highest-weighted item on the list. **15:** 17 days against a
+  suggested ~3-month window with 68% of the €100 budget unspent; needs a
+  one-sentence answer. Also confirmed alerts (Slack + email) and PDF export are
+  real, zero Event double-counting across 199 Insights, and AI Engineering
+  rho=0.42 vs Investment rho=0.18 on the finding-9 measurement.
