@@ -271,6 +271,18 @@ export default function HowNarrative({
           <FigureFrame label="Expand how ranking orders a day">
             <RankFigure />
           </FigureFrame>
+          <p className="how-read-sub mono">Future work · Give the network more time</p>
+          <p>
+            Today, the rank counts reactions that happen on the same calendar
+            day as the original post. This keeps each daily rank stable, but a
+            post published late has less time to be noticed.
+          </p>
+          <p>
+            If this becomes a real problem, we can wait for a fixed period
+            after every post before freezing the rank. A shorter wait gives us
+            faster briefs. A longer wait gives the network more time. For now,
+            I am keeping the simpler rule.
+          </p>
           <p>
             <Link className="how-beat-link" to={feedPath}>
               See a ranked day &rarr;

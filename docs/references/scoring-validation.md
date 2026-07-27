@@ -106,6 +106,11 @@ current production ranking.
   relevant.
 - The Digg comparison validates the contributor ranking, not the daily Event
   rank or the editorial judgments.
+- The rank counts reactions from the Event's canonical UTC day. A post
+  published late therefore gets less time to collect trusted reactions. A
+  future version may wait for the same fixed period after every post before
+  freezing the rank. A shorter wait favors faster briefs; a longer wait gives
+  the network more time. This remains deferred until the effect is measured.
 - Editorial quality is validated separately: verbatim citation checking
   against frozen artifact text (hallucination control), forced per-Event
   dispositions with written reasons, and the human batch audit in
