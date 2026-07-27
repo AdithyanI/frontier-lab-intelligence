@@ -49,7 +49,7 @@ test('How it works describes the implemented evidence and operator boundaries', 
   assert.doesNotMatch(howItWorks, /participant points = 1 \+ 0\.5 × network percentile/)
   assert.doesNotMatch(howItWorks, /NOT YET THE LIVE SCORE/)
   assert.match(howItWorks, /RANK · ORDER THE DAY, DO NOT JUDGE IT/)
-  assert.match(howItWorks, /Future work · Give the network more time/)
+  assert.match(howItWorks, /<article className="how-read-block how-read-block--wide" id="future-work">[\s\S]*?<h4>Future work<\/h4>[\s\S]*?Give the network more time/)
   assert.match(howItWorks, /A shorter wait gives us\s+faster briefs/)
   assert.match(howItWorks, /For now,\s+I am keeping the simpler rule/)
   assert.doesNotMatch(howItWorks, /window\.scrollTo/)
