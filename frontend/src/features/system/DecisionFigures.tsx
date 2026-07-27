@@ -128,20 +128,22 @@ export function TrustedSetFigure() {
   )
 }
 
-/* Stage 2: preserve before interpreting. Declared reply and quote
-   relationships group posts into one exact Event; linked documents are
-   frozen alongside. No opinions yet. */
+/* Stage 2: preserve before interpreting. Posts come only from the accounts
+   we chose to track; the platform's own retweet, quote, and reply links
+   group them into one exact Event, and linked documents are frozen
+   alongside. No opinions yet. */
 export function CollectFigure() {
-  const posts = [
-    { y: 70, title: 'Post' },
-    { y: 140, title: 'Reply' },
-    { y: 210, title: 'Quote' },
+  const relations = [
+    { y: 62, title: 'Post', root: true },
+    { y: 116, title: 'Retweet', root: false },
+    { y: 170, title: 'Quote', root: false },
+    { y: 224, title: 'Reply', root: false },
   ]
   return (
     <svg
-      viewBox="0 0 1080 340"
+      viewBox="0 0 1080 380"
       role="img"
-      aria-label="A post, its reply, and a quote are grouped into one exact Event using only relationships the platform declares. A linked paper or repository is frozen as text and attached to the same Event."
+      aria-label="Posts come only from the tracked network of 2,431 people and 160 organizations. A post and the retweets, quotes, and replies the platform declares against it are grouped into one exact Event. A linked paper or repository is frozen as text and attached to the same Event."
     >
       <defs>
         <marker id="collect-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -151,30 +153,46 @@ export function CollectFigure() {
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">COLLECT · PRESERVE BEFORE INTERPRETING</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">ONE OBSERVED DAY AT A TIME</text>
 
-      {posts.map((post) => (
-        <g key={post.title}>
-          <rect x="70" y={post.y} width="150" height="48" fill="#fff" stroke={MUTED} strokeWidth="1" />
-          <text x="94" y={post.y + 30} fontFamily={UI} fontSize="14" fontWeight="600" fill={INK} opacity="0.8">{post.title}</text>
-          <line x1="220" y1={post.y + 24} x2="330" y2="164" stroke={MUTED} strokeWidth="1" opacity="0.6" />
+      <text x="30" y="107" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">TRACKED NETWORK</text>
+      <rect x="30" y="121" width="200" height="88" fill="#fff" stroke={BLUE_MID} strokeWidth="1.4" />
+      <text x="52" y="155" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>2,431 people</text>
+      <text x="52" y="185" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>160 organizations</text>
+      <text x="30" y="233" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">WE CHOOSE WHO WE WATCH</text>
+      <line x1="230" y1="165" x2="274" y2="165" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#collect-arrow)" />
+
+      <text x="278" y="48" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">DECLARED RELATIONS</text>
+      {relations.map((relation) => (
+        <g key={relation.title}>
+          <rect
+            x="278"
+            y={relation.y}
+            width="132"
+            height="44"
+            fill="#fff"
+            stroke={relation.root ? BLUE_MID : MUTED}
+            strokeWidth="1"
+          />
+          <text x="298" y={relation.y + 28} fontFamily={UI} fontSize="14" fontWeight="600" fill={INK} opacity="0.85">{relation.title}</text>
+          <line x1="410" y1={relation.y + 22} x2="470" y2="165" stroke={MUTED} strokeWidth="1" opacity="0.6" />
         </g>
       ))}
-      <text x="118" y="292" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">AS POSTED, UNCHANGED</text>
+      <text x="278" y="294" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">AS POSTED, UNCHANGED</text>
 
-      <line x1="330" y1="164" x2="416" y2="164" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#collect-arrow)" />
-      <text x="290" y="106" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">GROUPED BY DECLARED LINKS</text>
+      <line x1="470" y1="165" x2="500" y2="165" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#collect-arrow)" />
 
-      <rect x="424" y="122" width="230" height="84" fill={INK} />
-      <text x="448" y="158" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">One exact Event</text>
-      <text x="448" y="184" fontFamily={UI} fontSize="12" fill="#fff" opacity="0.78">nothing merged by topic</text>
+      <text x="508" y="107" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">GROUPED BY DECLARED LINKS</text>
+      <rect x="508" y="123" width="224" height="84" fill={INK} />
+      <text x="530" y="159" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">One exact Event</text>
+      <text x="530" y="185" fontFamily={UI} fontSize="12" fill="#fff" opacity="0.78">nothing merged by topic</text>
 
-      <line x1="774" y1="164" x2="662" y2="164" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="4 4" markerEnd="url(#collect-arrow)" />
-      <rect x="774" y="128" width="240" height="72" fill="#fff" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" />
-      <text x="796" y="160" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Linked paper or repo</text>
-      <text x="796" y="182" fontFamily={UI} fontSize="12" fill={MUTED}>text frozen for citation checks</text>
+      <line x1="800" y1="165" x2="740" y2="165" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="4 4" markerEnd="url(#collect-arrow)" />
+      <rect x="800" y="129" width="250" height="72" fill="#fff" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 5" />
+      <text x="822" y="161" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Linked paper or repo</text>
+      <text x="822" y="183" fontFamily={UI} fontSize="12" fill={MUTED}>text frozen for citation checks</text>
 
-      <line x1="30" y1="312" x2="1050" y2="312" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="30" y="334" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        Grouping uses only relationships the platform itself declares. No topics, no opinions at this stage.
+      <line x1="30" y1="336" x2="1050" y2="336" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="30" y="358" fontFamily={UI} fontSize="11.5" fill={MUTED}>
+        Every post comes from an account we chose to track. Grouping then uses only relationships the platform itself declares.
       </text>
     </svg>
   )
