@@ -19,7 +19,7 @@ one-time non-mutating evaluation, not part of the daily path.
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Evidence audience routing | `gpt-5.6-luna` | `medium` | The self-contained v13 router is an upstream recall-oriented gate over one complete Development packet. Its July 21 top-10 calibration completed without failures: five both, two Engineering-only, one Investment-only, and two neither. All ten reasons preserved the evidence status and named the downstream decision hook or its absence. The pass reported 83,288 input tokens, 2,618 output tokens, no cache reads, and $0.098996. The historical mini/high v9 17-day Event cohort remains preserved rather than relabeled. |
+| Evidence audience routing | `gpt-5.6-luna` | `medium` | The self-contained v13 router is an upstream recall-oriented candidate gate over one complete Development packet. Its July 21 top-100 pass completed all 97 routable Developments without failure: 55 both, 10 Engineering-only, 11 Investment-only, and 21 neither. The three other displayed ranks had no current first-party X source from which to freeze a packet. The reasons preserved evidence status and named the downstream decision hook or its absence. The pass reported 429,003 input tokens, 26,659 output tokens, no cache reads, and $0.588957. The historical mini/high v9 17-day Event cohort remains preserved rather than relabeled. |
 | Per-Event working annotations | `gpt-5.6-terra` | `high` | A completed calibration pass produced separate audience notes with stable cache keys. The daily Codex agent may inspect them but must re-evaluate the frozen evidence; they are not final brief outputs. |
 | FLI daily-intelligence agent | `gpt-5.6-sol` | `xhigh` | The persisted Codex task researches the complete routed cohort, consolidates overlapping Events, selects the final set, and writes both audience briefs. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
@@ -34,11 +34,14 @@ envelopes but dropped a post that named a specific Thinking Machines Lab essay.
 That historical comparison remains relevant to the retired keep/drop boundary.
 For the live two-audience router, v13 moves the default to Luna/medium and
 rewrites the stable prompt as a self-contained source, audience, and decision
-contract. The first Development-lineage top-10 calibration produced coherent
-separations: a usage reset and a content-free pre-training announcement went
-to neither audience; a technical book and an anecdotal voice workflow went
-only to Engineering; and an economic-forecast paper went only to Investment.
-This is a bounded quality check, not yet a top-100 evaluation.
+contract. The first Development-lineage top-100 pass rejected vague
+announcements, unsupported opinions, conference logistics, and ordinary
+interface changes while retaining concrete technical, economic, policy, and
+organizational leads. Its 76/97 any-audience pass rate is intentionally
+recall-oriented: a positive route means the Development merits downstream
+investigation, not that it is already publishable intelligence. Company
+mapping and the audience Insight gate remain responsible for rejecting
+speculative or immaterial leads.
 
 The model string and reasoning effort are part of every run identity. Existing
 run databases and historical reports remain immutable evidence of the model

@@ -10,17 +10,20 @@ guarantee.
 
 ## Current Development-Router Calibration
 
-The July 21 `audience-routing-v13` top-10 calibration used
+The July 21 `audience-routing-v13` calibration and top-100 pass used
 `gpt-5.6-luna` at medium reasoning, one sequential cache lane, and the saved
 Development evidence. It made no X or artifact-provider requests.
 
-| Requests | Input tokens | Cached tokens | Output tokens | Measured cost |
-| ---: | ---: | ---: | ---: | ---: |
-| 10 | 83,288 | 0 | 2,618 | $0.098996 |
+| Scope | Requests | Input tokens | Cached tokens | Output tokens | Measured cost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Initial top-10 calibration | 10 | 83,288 | 0 | 2,618 | $0.098996 |
+| Clean top-100 pass | 97 | 429,003 | 0 | 26,659 | $0.588957 |
 
-The stable prompt was cache-eligible, but this run observed no reusable-prefix
-reads. Treat the measured value as the current uncached top-10 cost rather than
-projecting an assumed cache discount.
+The top-100 selector displayed 100 ranks but froze 97 packets because three
+Developments had no current first-party X source. The stable prompt was
+cache-eligible, but both runs observed no reusable-prefix reads. Treat the
+measured values as the current uncached operating cost rather than projecting
+an assumed cache discount.
 
 ## Current 17-Day Rank Migration
 

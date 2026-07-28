@@ -180,8 +180,9 @@ The only proof of reusable-prefix caching is a positive
   1,700-token stable prompt, one stable key, an unchanged schema, and 24-hour
   retention. A same-session different-input diagnostic then observed 0/2 Luna
   warm hits and 2/2 Terra warm hits. This is a model-specific best-effort miss,
-  not a prompt-layout failure; retain the uncached cost bound and do not change
-  model solely to chase caching.
+  not a prompt-layout failure. The subsequent sequential top-100 pass also
+  reported zero reads across 97 eligible requests. Retain the uncached cost
+  bound and do not change model solely to chase caching.
 
 Historical build-log entries remain immutable evidence of what was observed at
 the time. Their earlier zero-hit conclusions are incident history, not the
