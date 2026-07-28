@@ -120,11 +120,11 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v13_prompt_explains_the_source_and_router_boundary():
+def test_v14_prompt_explains_the_source_and_router_boundary():
     prompt = routing_model.instructions()
     flat_prompt = " ".join(prompt.split())
 
-    assert routing_model.PROMPT_VERSION == "audience-routing-v13"
+    assert routing_model.PROMPT_VERSION == "audience-routing-v14"
     assert "The current discovery source is X" in prompt
     assert "independently authored original posts" in flat_prompt
     assert "groups same-day Events into one Development" in flat_prompt
@@ -137,7 +137,7 @@ def test_v13_prompt_explains_the_source_and_router_boundary():
     assert "Never add filler" in prompt
 
 
-def test_v13_prompt_defines_the_two_decision_hooks():
+def test_v14_prompt_defines_the_two_decision_hooks():
     prompt = routing_model.instructions()
     flat_prompt = " ".join(prompt.split())
 
@@ -148,7 +148,11 @@ def test_v13_prompt_defines_the_two_decision_hooks():
     assert "Do not route model availability, subscription access" in prompt
     assert "persistent operational" in prompt
     assert "claim rather than established fact" in prompt
-    assert "Relevance is existential across the packet" in prompt
+    assert "technology-focused public-equity investment team" in flat_prompt
+    assert "The later Investment analysis stage performs detailed company mapping" in flat_prompt
+    assert "plausible causal path" in prompt
+    assert "central development or context necessary to understand it" in flat_prompt
+    assert "incidental detail elsewhere in the packet" in flat_prompt
     assert "explicitly corrects, retracts, or disproves it" in flat_prompt
 
 
@@ -358,7 +362,7 @@ def test_request_uses_luna_medium_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v13",
+        "prompt:audience-routing-v14",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True

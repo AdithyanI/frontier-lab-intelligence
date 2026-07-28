@@ -144,9 +144,18 @@ operational decision after reading this packet?
 
 ## Investment
 
-This audience studies public companies, markets, industry structure, and
-investment theses, with particular attention to how frontier AI developments
-may affect the economy and competitive landscape.
+This audience is a technology-focused public-equity investment team. It studies
+public companies, markets, industry structure, and investment theses. It wants
+to understand how frontier AI developments may reach investable businesses
+before the consequences are fully visible in reported financial results or
+market prices.
+
+The team uses early evidence to decide what deserves diligence, which existing
+assumptions should be revisited, which exposures or competitive relationships
+should be monitored, and what evidence would support or challenge an investment
+thesis. The router is not expected to complete that analysis. Its job is to
+recognize when the central development contains a concrete economic or
+strategic mechanism worth investigating.
 
 Route a development to Investment when the supplied evidence could plausibly
 change how an investor investigates or thinks about:
@@ -162,9 +171,84 @@ change how an investor investigates or thinks about:
 - labor, productivity, or organizational behavior;
 - market structure or an investable industry theme.
 
-A public company or ticker does not need to be named at this stage.
-Developments at private laboratories can be relevant when the supplied facts
-support a plausible first-order economic or strategic consequence.
+Common transmission paths include:
+
+- a capability, cost, or reliability change that could alter product
+  substitution, customer adoption, or competitive advantage;
+- model pricing, inference efficiency, or deployment changes that could affect
+  cloud usage, software economics, margins, or the cost of serving customers;
+- training or inference changes that could affect demand for compute, chips,
+  memory, networking, power, data centers, or other capacity;
+- an open model, distribution change, or new interface that could alter pricing
+  power, customer control, switching costs, or routes to market;
+- agent behavior that could change software usage, security needs,
+  observability, labor, or operational workflows;
+- a material organizational or talent change that could affect a company's
+  ability to execute, build capabilities, or sustain a competitive position;
+- a partnership, transaction, customer commitment, funding event, or capacity
+  decision that could change supply, demand, execution, or industry structure;
+- regulation or policy with an identifiable commercial, competitive, capital,
+  or operating consequence;
+- demonstrated adoption, customer behavior, or operational evidence that could
+  change a market assumption;
+- a failure, safety incident, or misuse case that could affect purchasing,
+  liability, regulation, or demand for protective products.
+
+This list is illustrative, not exhaustive. Do not reject a development merely
+because its mechanism is novel or does not fit one listed category.
+
+## The Investment routing boundary
+
+A public company or ticker does not need to be named at this stage. The later
+Investment analysis stage performs detailed company mapping.
+
+Developments at private laboratories, research groups, or private companies can
+be relevant when the supplied evidence supports a credible path to a public
+company, supplier, customer, supply chain, industry structure, or investable
+theme. If the economic mechanism is concrete and central but the eventual
+beneficiary or loser is uncertain, route the development and state that
+uncertainty in the reason.
+
+First identify the central development described by the packet. Investment
+relevance must follow from that development or from context needed to understand
+it. Do not build a positive route from an interesting but incidental sentence,
+background statistic, personnel detail, funding figure, valuation, or market
+claim embedded in a broader and otherwise unrelated source.
+
+The connection may be early and does not need to be quantified. However, the
+reason must be able to describe a plausible causal path:
+
+1. what changed;
+2. which business, market, cost, capability, or competitive relationship it
+   could affect; and
+3. what diligence question, economic variable, strategic consequence, or
+   thesis assumption may therefore need attention.
+
+Do not require the packet to prove revenue materiality, identify the winning
+company, establish a market-share shift, or contain a complete financial case.
+Those questions belong downstream. But do not route when the investment case
+requires inventing an unsupported chain of consequences.
+
+Useful distinctions include:
+
+- A model or product release can qualify when its economics, performance,
+  deployment model, or distribution could change adoption or competition.
+  Availability or promotional claims alone are insufficient.
+- A research result can qualify when the packet supports a path to compute
+  demand, infrastructure economics, software demand, productivity, or
+  competitive position. Interesting technical work without such a path may be
+  Engineering-only.
+- A talent or organizational change can qualify when the development is
+  materially about that change and the evidence supports an execution,
+  capability, or competitive consequence. A person mentioned as background in
+  an unrelated story is insufficient.
+- Funding, valuation, partnerships, or transactions can qualify when they are
+  central to the development and could change capacity, execution, competition,
+  or market structure. Headline figures used only as background are
+  insufficient.
+- A broad forecast or opinion can qualify when it identifies a concrete
+  mechanism and something an investor should monitor. General optimism,
+  pessimism, or claims that AI is growing are insufficient.
 
 Do not perform detailed company mapping. Do not invent revenue, valuation,
 market-share, margin, demand, or competitive consequences that the evidence
@@ -181,6 +265,11 @@ packet?
 Read the complete packet before deciding. A short source post may be explained
 or qualified by an author update or supporting artifact.
 
+For each audience, first identify the central development in one sentence.
+Then judge whether that central change creates the audience-specific decision
+hook. Do not let a long artifact's unrelated background material silently
+replace the development being routed.
+
 Preserve attribution between every original author and any separately authored
 artifact.
 
@@ -196,10 +285,11 @@ Preserve epistemic status. Distinguish:
 A claim does not need to be independently proven before it can be routed.
 However, the reason must describe it as a claim rather than established fact.
 
-Relevance is existential across the packet. One substantive source can provide
-a sufficient decision hook even when the remaining sources are repetitive or
-weak. Later evidence should negate that hook only when it explicitly corrects,
-retracts, or disproves it.
+One substantive source can provide a sufficient decision hook even when the
+remaining sources are repetitive or weak. The hook must still arise from the
+central development or context necessary to understand it, not from an
+incidental detail elsewhere in the packet. Later evidence should negate that
+hook only when it explicitly corrects, retracts, or disproves it.
 
 Do not infer relevance from the prominence of an author, the popularity of a
 post, engagement, or the amount of surrounding activity.
