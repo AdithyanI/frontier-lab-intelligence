@@ -173,8 +173,10 @@ composition.
   rejected identities disappear without rewriting raw history.
 - **First-party model evidence:** independent reactions remain auditable in the
   Feed but cannot silently become primary artifact or Insight evidence. The
-  Feed's analysis-packet preview renders the same deterministic input used by
-  routing; opening it does not run routing or Insight generation.
+  Feed's analysis-packet preview renders the same deterministic Markdown
+  reading view used by routing: attributed source posts, substantive author
+  updates, and each supporting artifact once. Opening it does not run routing
+  or Insight generation.
 - **Fresh semantic evidence:** raw Events retain their history, while routing
   and daily authoring use only first-party X posts from the brief day through
   seven days earlier. Current same-author continuations may replace old roots;

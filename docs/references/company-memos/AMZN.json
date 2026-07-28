@@ -1,0 +1,625 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Amazon",
+    "ticker": "AMZN"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Amazon is a diversified operating platform. Consumers buy first-party inventory and services; third-party sellers pay marketplace, fulfillment, and related fees; advertisers buy performance and brand inventory; and enterprises and developers pay for AWS infrastructure and software consumption. Prime and other subscriptions deepen engagement across commerce, media, and services. AWS contributes a disproportionate share of operating income, while the stores network supplies scale, purchase intent, logistics density, and advertising inventory.",
+      "revenue_engines": [
+        {
+          "engine": "First-party stores and physical retail",
+          "who_pays": "Consumers buying products sold by Amazon through online and physical stores.",
+          "economic_logic": "Amazon earns the retail spread between selling price and product, fulfillment, payment, and delivery costs. Economics depend on unit volume, category and geographic mix, inventory turns, delivery density, and fulfillment productivity.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+              "claim_date": "2026-02-05"
+            }
+          ]
+        },
+        {
+          "engine": "Third-party seller services and subscriptions",
+          "who_pays": "Independent sellers using Amazon's marketplace, fulfillment, and logistics services, plus consumers paying for Prime and other subscriptions.",
+          "economic_logic": "Seller commissions, fulfillment fees, and subscription revenue monetize marketplace traffic and shared infrastructure without Amazon owning every item sold. Seller selection and Prime engagement can increase purchase frequency and spread logistics costs across more volume.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+              "claim_date": "2026-02-05"
+            }
+          ]
+        },
+        {
+          "engine": "Amazon Web Services",
+          "who_pays": "Startups, enterprises, public-sector organizations, and developers consuming compute, storage, databases, networking, analytics, security, and AI services.",
+          "economic_logic": "AWS is predominantly consumption-led: customers pay as workloads use infrastructure and higher-level services. Revenue and margin depend on customer workload growth, capacity availability, utilization, pricing, service mix, power, and the cost and performance of servers, accelerators, and networking.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+              "claim_date": "2026-02-05"
+            },
+            {
+              "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+              "claim_date": "2026-04-29"
+            }
+          ]
+        },
+        {
+          "engine": "Advertising services",
+          "who_pays": "Brands, agencies, vendors, sellers, publishers, and other advertisers seeking access to Amazon's commerce and media audiences.",
+          "economic_logic": "Amazon monetizes high-intent shopping and media surfaces through sponsored listings, display, video, and measurement products. Economics depend on traffic, conversion, advertiser return, inventory, targeting quality, and the incremental cost of serving and measuring ads.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+              "claim_date": "2026-02-05"
+            },
+            {
+              "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+              "claim_date": "2026-04-29"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "claim_date": "2026-02-05"
+        },
+        {
+          "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+          "claim_date": "2026-04-29"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "AWS workload growth, capacity availability, and utilization",
+        "why_it_matters": "AI and conventional workloads can only become billable consumption when power, data-center space, chips, servers, and networking are installed and used. Capacity shortages defer revenue, while excess or poorly utilized capacity depresses returns because cash is committed before customer billing begins.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "gross_margin",
+          "capital_expenditure",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "driver": "AI compute mix and custom-silicon economics",
+        "why_it_matters": "The balance between Amazon-designed Trainium, Graviton, and Nitro and third-party accelerators affects price-performance, supply access, capital cost, and AWS margin. Custom silicon creates leverage only if customers adopt it at high utilization and software support keeps switching costs manageable.",
+        "financial_lines": [
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "driver": "Store demand, selection, conversion, and fulfillment productivity",
+        "why_it_matters": "Revenue and retail margin improve when more useful selection and faster delivery raise purchase frequency while inventory placement, robotics, routing, and regionalization lower cost per unit. Poor recommendations, returns, delivery failures, or costly capacity can reverse those gains.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "working_capital"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          },
+          {
+            "url": "https://www.aboutamazon.com/news/retail/amazon-agentic-ai-gen-ai-shopping",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Advertising demand, relevance, and measurable conversion",
+        "why_it_matters": "Amazon's first-party commerce signals and owned surfaces can support attractive advertising economics. Better creation, targeting, and measurement can increase advertiser return and inventory monetization, while degraded relevance, privacy limits, or weak measurement can reduce pricing and demand.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "driver": "Capital intensity and conversion of committed infrastructure into cash flow",
+        "why_it_matters": "Land, power, buildings, chips, servers, and networks require cash well before monetization. Amazon's medium-term economics depend on customer commitments, build timing, utilization, asset life, and revenue growth eventually outpacing capital expenditure.",
+        "financial_lines": [
+          "capital_expenditure",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Consumers, third-party sellers, advertisers, developers, enterprises, public-sector organizations, and content creators",
+        "why_it_matters": "Amazon's businesses reinforce one another but respond to different demand cycles. AI can change cloud consumption, shopping conversion, seller productivity, advertising yield, and media engagement through separate mechanisms, so company-level conclusions require segment-specific evidence.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Anthropic, OpenAI, and other model providers available through or committed to AWS infrastructure",
+        "why_it_matters": "Frontier-model developers can generate large training and inference demand, strengthen Bedrock model choice, and validate Trainium. Concentrated commitments also create execution, financing, and counterparty exposure if deployments or commercial adoption lag.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-aws-anthropic-ai",
+            "claim_date": "2023-09-25"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "NVIDIA and the semiconductor, networking, memory, power, construction, and data-center supply chain",
+        "why_it_matters": "AWS must combine Amazon-designed chips with third-party accelerators and a constrained physical supply chain. Lead times, pricing, energy availability, and component performance govern how quickly committed AI demand becomes usable capacity.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ai-investment-us-federal-agencies",
+            "claim_date": "2025-11-24"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Microsoft Azure, Google Cloud, Oracle Cloud, model providers, online and physical retailers, advertising platforms, logistics networks, and media services",
+        "why_it_matters": "Competition can affect cloud pricing and workload share, access to leading models and chips, consumer traffic, seller economics, advertising budgets, delivery promises, and content spending. The relevant comparison changes by business line.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Competition, privacy, consumer-protection, product-safety, labor, content, financial-services, export-control, and AI regulators across Amazon's markets",
+        "why_it_matters": "Rules can constrain marketplace conduct, data use, model deployment, advertising, acquisitions, worker practices, and access to advanced chips. Remedies may affect several segments simultaneously and raise cost or reduce cross-business advantages.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Expand AWS AI capacity ahead of demand, including power, data centers, networking, NVIDIA infrastructure, and successive Trainium generations.",
+        "investment_relevance": "This can convert constrained demand into cloud revenue and deepen infrastructure advantage, but it creates a large timing gap between cash outlay and billing. Customer commitments, commissioned capacity, utilization, and returns on invested capital are the decisive evidence.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "action": "Offer a model-agnostic AI stack spanning SageMaker, Bedrock, Nova, Trainium, Strands, AgentCore, and packaged agents.",
+        "investment_relevance": "Breadth can capture value across infrastructure, model access, orchestration, and production operations while driving adjacent AWS consumption. The thesis requires durable paid usage and customer retention rather than feature count alone.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-bedrock-agentcore-new-optimization-capabilities/",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://docs.aws.amazon.com/nova/latest/userguide/what-is-nova.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Embed generative and agentic AI into shopping discovery and purchasing workflows.",
+        "investment_relevance": "Shopping assistants can improve discovery, conversion, purchase frequency, and seller value, but may add inference cost, route demand away from sponsored placements, or weaken trust if recommendations and actions are inaccurate.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/retail/amazon-agentic-ai-gen-ai-shopping",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Use AI and automation across fulfillment, advertising, customer service, and internal workflows.",
+        "investment_relevance": "Material value would appear as faster delivery, higher conversion or ad yield, lower cost per unit, or slower headcount and operating-cost growth at comparable service quality. Announced tools are not sufficient evidence without operating metrics.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier-model training and inference demand rises faster than the supply of deployed accelerators and power.",
+        "company_exposure": "AWS sells accelerated compute, networking, storage, databases, model access, and adjacent services, and has disclosed large customer commitments and current capacity constraints.",
+        "affected_driver": "AWS workload growth, capacity commissioning, utilization, and customer concentration",
+        "financial_consequence": "Higher utilized capacity can lift AWS revenue and operating income; delayed builds, underutilization, or counterparty weakness can depress free cash flow and returns on invested capital.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material when contracted or observable AI demand converts into commissioned, billable capacity at utilization and pricing sufficient to cover the elevated capital base.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AWS growth and operating margin",
+          "Power and accelerator capacity added versus committed demand",
+          "Remaining performance obligations and disclosed customer commitments",
+          "Capital expenditure, free cash flow, and return on invested capital"
+        ],
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "development": "Custom accelerators improve frontier-model training and inference price-performance.",
+        "company_exposure": "AWS designs Trainium and operates it beside NVIDIA infrastructure; Bedrock and major model partners can create captive demand for the silicon and its software stack.",
+        "affected_driver": "AI compute mix, cost per token, capacity access, and AWS gross margin",
+        "financial_consequence": "Successful adoption can lower infrastructure cost, reduce dependence on scarce third-party chips, support competitive pricing, and expand margin; weak performance or software adoption can strand development and capital spending.",
+        "direction": "mixed",
+        "materiality_condition": "Trainium must deliver verified workload-level economics and broad production adoption, not merely reservations or internal deployment.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Trainium instance consumption and repeat customers",
+          "Price-performance against current alternatives",
+          "Bedrock inference mix on custom silicon",
+          "Capital savings and AWS margin progression"
+        ],
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-aws-anthropic-ai",
+            "claim_date": "2023-09-25"
+          }
+        ]
+      },
+      {
+        "development": "Enterprises move from model experiments to production agents that require secure runtimes, tools, identity, memory, evaluation, and observability.",
+        "company_exposure": "AWS offers Bedrock, AgentCore, Strands, and the surrounding cloud data and infrastructure used by enterprise applications.",
+        "affected_driver": "AI platform adoption and pull-through consumption across AWS services",
+        "financial_consequence": "Production agents can raise recurring compute, inference, storage, database, security, and monitoring consumption; platform fragmentation or model-provider disintermediation can limit capture.",
+        "direction": "upside",
+        "materiality_condition": "Customers must deploy agents into sustained production use with measurable workload consumption and retention across AWS services.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Production AgentCore workloads and customer references",
+          "Bedrock inference and adjacent-service consumption",
+          "Agent reliability, governance, and evaluation adoption",
+          "Pricing and competitive win rates"
+        ],
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-bedrock-agentcore-new-optimization-capabilities/",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          }
+        ]
+      },
+      {
+        "development": "Agentic shopping systems become capable of discovery, comparison, cart construction, and delegated purchasing.",
+        "company_exposure": "Amazon controls a large commerce catalog, transaction history, seller network, fulfillment system, advertising inventory, and the Alexa for Shopping interface.",
+        "affected_driver": "Store conversion, purchase frequency, third-party seller value, advertising yield, and serving cost",
+        "financial_consequence": "Useful agents can increase gross merchandise volume and seller services; they can also alter sponsored-ad placement, increase inference expense, create erroneous purchases, or redirect demand to off-Amazon inventory.",
+        "direction": "mixed",
+        "materiality_condition": "Agent users must show durable incremental purchases or higher retention after accounting for cannibalization, returns, incentives, inference, and customer-service costs.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Shopping-assistant adoption and repeat use",
+          "Incremental conversion and purchase frequency",
+          "Return, cancellation, and complaint rates",
+          "Advertising monetization within agent-led journeys"
+        ],
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/retail/amazon-agentic-ai-gen-ai-shopping",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "AI improves prediction, generation, robotics, and workflow automation across advertising and fulfillment.",
+        "company_exposure": "Amazon operates high-volume advertising, warehouse, delivery, support, and corporate workflows with large proprietary datasets and repeated decisions.",
+        "affected_driver": "Advertising relevance, fulfillment cost per unit, delivery speed, and operating leverage",
+        "financial_consequence": "Verified productivity can expand retail and advertising margin; model errors, safety failures, labor disruption, or added infrastructure cost can offset gains and create regulatory risk.",
+        "direction": "mixed",
+        "materiality_condition": "AI must improve audited operating outcomes at scale while preserving customer experience, worker safety, and compliance.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Cost per unit and delivery speed",
+          "Advertising growth and advertiser return",
+          "Customer-service resolution and repeat-contact rates",
+          "Safety, labor, privacy, and regulatory incidents"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          },
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": []
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Disclosed AI demand, reservations, revenue run rates, power capacity, and customer commitments use different economic units and timing.",
+        "why_it_matters": "Mixing contracted value, installed power, chip shipments, annualized revenue, and recognized revenue can overstate current utilization and understate the cash required before billing.",
+        "next_research_trigger": "Build a dated bridge from disclosed commitments to commissioned capacity, billable consumption, recognized AWS revenue, and cash capital expenditure after each earnings report.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          },
+          {
+            "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Management's custom-chip price-performance and prospective margin claims are not a segment-level economic disclosure.",
+        "why_it_matters": "Internal transfer economics, utilization, software costs, yield, networking, and workload suitability determine whether Trainium actually lowers total cost and improves AWS returns.",
+        "next_research_trigger": "Use independent customer benchmarks, disclosed production workloads, instance pricing, utilization evidence, and AWS margin progression to test Trainium economics by generation.",
+        "sources": [
+          {
+            "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+            "claim_date": "2026-04-08"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Amazon does not separately disclose the revenue or full cost of Bedrock, Nova, AgentCore, shopping assistants, or most internal AI deployments.",
+        "why_it_matters": "Product launches and usage anecdotes cannot establish incremental revenue, retention, margin, or productivity, and some AI experiences may cannibalize existing economics.",
+        "next_research_trigger": "Look for durable paid-use metrics, customer cohorts, workload consumption, conversion lift, cost-to-serve, and segment financial changes attributable to each AI surface.",
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-bedrock-agentcore-new-optimization-capabilities/",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.aboutamazon.com/news/retail/amazon-agentic-ai-gen-ai-shopping",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      },
+      {
+        "uncertainty": "No attributable public BIT Capital thesis for Amazon is represented in the current source packet.",
+        "why_it_matters": "The large disclosed portfolio weight establishes exposure, not BIT's cost basis, valuation framework, expected return, or falsifiable operating thesis.",
+        "next_research_trigger": "Only add a BIT thesis after locating dated manager commentary, a fund letter, factsheet commentary, or another BIT publication that states Amazon-specific assumptions or milestones.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+        "title": "Amazon.com, Inc. 2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-05",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+        "title": "Amazon.com Announces First Quarter 2026 Results",
+        "publisher": "Amazon.com, Inc.",
+        "published_at": "2026-04-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+        "title": "CEO Andy Jassy's 2025 Letter to Shareholders",
+        "publisher": "Amazon.com, Inc.",
+        "published_at": "2026-04-08",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/company-news/amazon-aws-anthropic-ai",
+        "title": "Amazon and Anthropic Announce Strategic Collaboration to Advance Generative AI",
+        "publisher": "Amazon.com, Inc.",
+        "published_at": "2023-09-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/company-news/amazon-ai-investment-us-federal-agencies",
+        "title": "Amazon to Invest Up to $50 Billion to Expand AI and Supercomputing Infrastructure for U.S. Government Agencies",
+        "publisher": "Amazon.com, Inc.",
+        "published_at": "2025-11-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-bedrock-agentcore-new-optimization-capabilities/",
+        "title": "Amazon Bedrock AgentCore Introduces New Optimization Capabilities",
+        "publisher": "Amazon Web Services",
+        "published_at": "2026-06-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://docs.aws.amazon.com/nova/latest/userguide/what-is-nova.html",
+        "title": "What Is Amazon Nova?",
+        "publisher": "Amazon Web Services",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/retail/amazon-agentic-ai-gen-ai-shopping",
+        "title": "How Amazon Is Using Generative and Agentic AI to Transform the Shopping Experience",
+        "publisher": "Amazon.com, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "codex-manual-research",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1-manual-repair",
+    "prompt_cache_key": null,
+    "response_id": null,
+    "response_model": null,
+    "input_tokens": 0,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 0,
+    "reasoning_tokens": 0,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "manual_primary_source_research",
+        "queries": [
+          "Amazon 2025 Form 10-K",
+          "Amazon Q1 2026 results",
+          "Amazon 2025 shareholder letter AI AWS Trainium",
+          "Amazon AWS AgentCore and AI shopping"
+        ]
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://ir.aboutamazon.com/news-release/news-release-details/2026/Amazon-com-Announces-First-Quarter-Results/",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-2025-letter-to-shareholders",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/company-news/amazon-aws-anthropic-ai",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/company-news/amazon-ai-investment-us-federal-agencies",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-bedrock-agentcore-new-optimization-capabilities/",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://docs.aws.amazon.com/nova/latest/userguide/what-is-nova.html",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.aboutamazon.com/news/retail/amazon-agentic-ai-gen-ai-shopping",
+        "type": "manual_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-manual-repair",
+      "company:amzn",
+      "researcher:codex",
+      "reasoning:xhigh"
+    ]
+  }
+}

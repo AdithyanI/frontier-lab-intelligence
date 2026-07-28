@@ -1,0 +1,597 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Lemonade",
+    "ticker": "LMND"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Lemonade is a direct, full-stack insurer offering renters, homeowners, car, pet, and life products in the United States and parts of Europe. Customers buy policies through digital interfaces; Lemonade earns insurance revenue by retaining a portion of premiums and bearing insured risk, while ceded reinsurance changes premium retention, volatility, capital needs, and reported revenue. Proprietary data and automation are intended to improve acquisition, pricing, underwriting, servicing, and claims economics.",
+      "revenue_engines": [
+        {
+          "engine": "Insurance premiums retained across renters, homeowners, car, pet, and life products",
+          "who_pays": "Individual policyholders and households buying coverage directly from Lemonade.",
+          "economic_logic": "In-force premium becomes earned premium over the policy term; Lemonade recognizes the retained portion after reinsurance and pays claims, loss-adjustment expenses, distribution, servicing, and operating costs. Economics depend on customer and premium growth, retention, pricing adequacy, loss ratios, product mix, reinsurance, and operating leverage.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+              "claim_date": "2026-02-25"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+              "claim_date": "2026-04-30"
+            }
+          ]
+        },
+        {
+          "engine": "Investment income and other insurance-related revenue",
+          "who_pays": "Issuers of securities held in Lemonade's investment portfolio and counterparties to ancillary insurance arrangements.",
+          "economic_logic": "Premium float and corporate cash generate investment income, while ancillary items contribute smaller revenue. Returns support earnings but expose the company to interest-rate, credit, liquidity, and asset-liability considerations.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+              "claim_date": "2026-02-25"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+              "claim_date": "2026-04-30"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+          "claim_date": "2026-02-25"
+        },
+        {
+          "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+          "claim_date": "2026-04-29"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "In-force premium, customer growth, retention, and premium per customer",
+        "why_it_matters": "Lemonade's top line expands when it acquires and retains customers, cross-sells more products, and earns adequate rates. Growth that depends on excessive marketing or underpricing may increase exposure faster than gross profit.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "operating_cost",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "driver": "Gross loss ratio and reserve adequacy by product and cohort",
+        "why_it_matters": "Pricing and underwriting create value only when earned premium covers claims and loss-adjustment expenses over the mature life of a cohort. Catastrophes, inflation, adverse selection, model drift, and immature products can make early loss experience misleading.",
+        "financial_lines": [
+          "gross_margin",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "driver": "Claims automation, loss-adjustment expense, and policies per employee",
+        "why_it_matters": "Automation can allow policy and claims volume to grow without proportional headcount, shorten resolution time, and lower loss-adjustment expense. Incorrect automation, escalations, complaints, or hidden manual work can instead increase cost and regulatory exposure.",
+        "financial_lines": [
+          "operating_cost",
+          "gross_margin",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.lemonade.com/claims",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lemonade.com/blog/lemonades-claim-automation/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Reinsurance structure, capital efficiency, and premium retention",
+        "why_it_matters": "Ceding more premium can reduce volatility and capital requirements but also gives up economics; retaining more can increase reported revenue and gross profit while raising required capital and exposure to adverse losses. Period-to-period accounting can obscure underlying policy economics.",
+        "financial_lines": [
+          "revenue",
+          "gross_margin",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "driver": "Regulatory approval, product and state expansion, and data access",
+        "why_it_matters": "Insurance rates, forms, capital, claims conduct, privacy, telematics, and AI use are regulated. Product expansion and more precise pricing require approvals and reliable data, while noncompliance can delay growth, force model changes, or create remediation and reputational cost.",
+        "financial_lines": [
+          "volume",
+          "pricing",
+          "operating_cost",
+          "capital_expenditure",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-unveils-autonomous-car-insurance-slashing-rates-for-tesla-fsd-miles-by-50",
+            "claim_date": "2026-01-21"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Individual renters, homeowners, drivers, pet owners, and households buying life coverage in the United States and selected European markets",
+        "why_it_matters": "Customer mix determines premium per customer, retention, cross-sell opportunity, claims frequency and severity, acquisition economics, and catastrophe exposure. Product and geographic cohorts mature at different rates.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Reinsurers and reinsurance intermediaries",
+        "why_it_matters": "Reinsurance capacity, price, coverage terms, collateral, and counterparty performance determine how much risk Lemonade retains and how efficiently it can deploy regulatory capital.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Tesla and its Fleet API for permissioned vehicle telemetry",
+        "why_it_matters": "The connection lets Lemonade distinguish autonomous from human-driven miles and price them differently. The opportunity depends on data continuity, approved state availability, customer adoption, and whether observed safety translates into credible loss economics.",
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-unveils-autonomous-car-insurance-slashing-rates-for-tesla-fsd-miles-by-50",
+            "claim_date": "2026-01-21"
+          },
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-brings-autonomous-car-insurance-to-indiana",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Large multiline insurers, direct and digital insurers, specialist pet and life carriers, insurtech platforms, brokers, and agent distribution networks",
+        "why_it_matters": "Competitors can match rates, spend more on acquisition, use broader historical data, bundle more products, or absorb volatility with larger balance sheets. Lemonade argues its integrated AI-native operating model creates a structural efficiency advantage, but this must be tested through public operating metrics.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "U.S. state insurance regulators, European insurance and data-protection authorities, and capital, rate, claims, telematics, privacy, and AI rules",
+        "why_it_matters": "Lemonade needs approvals for products and rates and must demonstrate fair, explainable, secure, and lawful use of customer data and models. Regulatory actions can constrain deployment or require costly human controls and remediation.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.lemonade.com/blog/lemonades-claim-automation/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Operate a direct, AI-native insurance stack spanning acquisition, quoting, underwriting, servicing, claims, fraud detection, and internal workflows.",
+        "investment_relevance": "The proposed advantage is structural operating leverage and faster learning, not AI branding. It should be visible in customer or policy growth relative to headcount, loss-adjustment expense, gross profit per exposure, acquisition efficiency, and service outcomes.",
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "action": "Grow in-force premium across products and geographies while improving underwriting and approaching adjusted EBITDA profitability.",
+        "investment_relevance": "Growth creates value only if pricing and claims performance mature favorably and acquisition and operating costs scale more slowly than gross profit. Product and geographic cohorts should be tested separately.",
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "action": "Use a revised reinsurance structure to retain more premium and improve capital efficiency while managing volatility.",
+        "investment_relevance": "Higher retention can accelerate revenue and gross profit but also increases loss exposure and capital needs. Investors must separate accounting effects from customer, pricing, and underwriting improvement.",
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "action": "Build autonomy-aware car insurance that prices Tesla FSD miles separately using permissioned vehicle telemetry.",
+        "investment_relevance": "If data supports lower loss frequency and regulators approve expansion, Lemonade can price a new risk class more precisely and grow car insurance. Materiality requires policy adoption, credible loss experience, retention, and access to reliable vehicle data.",
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-unveils-autonomous-car-insurance-slashing-rates-for-tesla-fsd-miles-by-50",
+            "claim_date": "2026-01-21"
+          },
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-brings-autonomous-car-insurance-to-indiana",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models improve reliable document, image, voice, and conversational understanding for regulated service workflows.",
+        "company_exposure": "Lemonade acquires and services customers digitally and uses automated systems to collect claims information, triage cases, detect fraud indicators, and route work to people.",
+        "affected_driver": "Claims cycle time, straight-through handling, customer-service productivity, and loss-adjustment expense",
+        "financial_consequence": "Reliable automation can lower cost per policy and claim while improving response speed; errors, hallucinations, missed escalation, or unfair treatment can increase leakage, complaints, remediation, and regulatory cost.",
+        "direction": "mixed",
+        "materiality_condition": "Automation must increase verified end-to-end resolution without raising reversals, complaints, claim leakage, safety incidents, or hidden human review.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Straight-through claim and service resolution rates",
+          "Loss-adjustment expense ratio",
+          "Policies or customers per employee",
+          "Escalations, reversals, complaints, and regulatory findings"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/claims",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lemonade.com/blog/lemonades-claim-automation/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "development": "More capable predictive and generative models improve risk segmentation, pricing, retention, and cross-sell decisions.",
+        "company_exposure": "Lemonade's direct platform collects first-party quote, policy, claims, behavior, and product-interaction data and uses proprietary models in underwriting and customer operations.",
+        "affected_driver": "Pricing adequacy, gross loss ratio, customer lifetime value, retention, and acquisition efficiency",
+        "financial_consequence": "Better calibrated risk and propensity estimates can increase gross profit per exposure and per acquisition dollar; overfitting, drift, proxy discrimination, or aggressive growth can worsen mature loss ratios and regulatory exposure.",
+        "direction": "mixed",
+        "materiality_condition": "Model-led decisions must improve mature, cohort-adjusted underwriting and acquisition economics after controlling for rate changes, reinsurance, product mix, and catastrophe experience.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Gross loss ratio by product and cohort",
+          "Gross profit per exposure",
+          "Gross profit relative to sales and marketing",
+          "Retention and premium per customer",
+          "Fairness testing and regulatory outcomes"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "development": "Autonomous-driving systems take a larger share of miles and expose machine-specific safety performance.",
+        "company_exposure": "Lemonade uses permissioned Tesla Fleet API data to distinguish FSD-engaged from human-driven miles and price the modes separately.",
+        "affected_driver": "Car premium growth, pricing precision, claim frequency and severity, and product mix",
+        "financial_consequence": "Verified safer autonomous miles can support lower prices, customer acquisition, and profitable share; adverse loss experience, data interruption, concentration, or regulatory limits can undermine the product.",
+        "direction": "mixed",
+        "materiality_condition": "The autonomous cohort must scale across states while generating credible, mature loss experience and adequate unit economics after the advertised discount.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Policies, premium, and autonomous miles covered",
+          "Loss frequency and severity by driving mode and software version",
+          "State approvals and geographic expansion",
+          "Fleet API continuity and customer consent rates"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-unveils-autonomous-car-insurance-slashing-rates-for-tesla-fsd-miles-by-50",
+            "claim_date": "2026-01-21"
+          },
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-brings-autonomous-car-insurance-to-indiana",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      },
+      {
+        "development": "Frontier AI lowers the cost of sophisticated fraud generation, identity manipulation, and adversarial attacks on automated insurance workflows.",
+        "company_exposure": "Lemonade accepts digital applications and claims and relies on models, customer-supplied data, mobile interfaces, and automated triage.",
+        "affected_driver": "Fraud losses, claim leakage, manual review, cybersecurity, and customer trust",
+        "financial_consequence": "Attack volume or quality can raise losses and review expense or force slower automation; stronger detection can preserve low handling cost without sacrificing claim accuracy.",
+        "direction": "downside",
+        "materiality_condition": "The risk becomes material if fraud and security losses or manual-review rates rise faster than premiums and offset automation gains.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Suspected fraud and claim leakage",
+          "Manual review and escalation rates",
+          "Security and identity incidents",
+          "Claim delays, complaints, and false-positive reversals"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.lemonade.com/blog/lemonades-claim-automation/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": []
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Lemonade's public AI narrative combines workflow automation, predictive underwriting, generative interfaces, and organizational design, but product-level economics are not fully disclosed.",
+        "why_it_matters": "AI branding and aggregate efficiency measures do not identify which model or workflow caused growth, lower expense, better losses, or improved service.",
+        "next_research_trigger": "Reconcile each claimed AI mechanism with policies per employee, loss-adjustment expense, automation rates, complaints, mature cohort loss ratios, and gross profit per exposure after every annual update.",
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Recent growth and improving loss ratios may reflect rate, mix, reinsurance, catastrophe experience, and cohort maturation as well as better models.",
+        "why_it_matters": "Without cohort and product controls, attributing financial improvement to AI can overstate structural advantage and understate insurance-cycle effects.",
+        "next_research_trigger": "Track gross loss ratio, reserve development, rate change, retention, reinsurance, and catastrophe exposure by product and vintage as cohorts mature.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Autonomous-car pricing is supported by management's safety interpretation and an early product launch, but scaled, mature loss economics are not yet established.",
+        "why_it_matters": "A lower per-mile price can be profitable only if frequency, severity, data reliability, acquisition, retention, and regulatory costs validate the discount across a sufficiently large cohort.",
+        "next_research_trigger": "Require state-level policy count, autonomous miles, premium, claim frequency and severity by driving mode, and loss-ratio evidence before treating the product as financially material.",
+        "sources": [
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-unveils-autonomous-car-insurance-slashing-rates-for-tesla-fsd-miles-by-50",
+            "claim_date": "2026-01-21"
+          },
+          {
+            "url": "https://www.lemonade.com/investor/news/lemonade-brings-autonomous-car-insurance-to-indiana",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      },
+      {
+        "uncertainty": "No attributable public BIT Capital thesis for Lemonade is represented in the current source packet.",
+        "why_it_matters": "Portfolio ownership and weight establish exposure but do not reveal BIT's valuation, expected return, underwriting assumptions, or falsifiable thesis.",
+        "next_research_trigger": "Only classify a future Event against a BIT thesis after finding dated BIT manager commentary, a fund letter, or company-specific research that states the mechanism and milestones.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+        "title": "Lemonade, Inc. 2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-25",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+        "title": "Lemonade, Inc. Form 10-Q for the Quarter Ended March 31, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-04-30",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+        "title": "Lemonade Q1 2026 Letter to Shareholders",
+        "publisher": "Lemonade, Inc.",
+        "published_at": "2026-04-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+        "title": "Why Incumbents Won't Catch Up",
+        "publisher": "Lemonade, Inc.",
+        "published_at": "2026-03-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lemonade.com/claims",
+        "title": "How Lemonade's Tech-Powered Claims Work",
+        "publisher": "Lemonade, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lemonade.com/blog/lemonades-claim-automation/",
+        "title": "Lemonade's Claim Automation",
+        "publisher": "Lemonade, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lemonade.com/investor/news/lemonade-unveils-autonomous-car-insurance-slashing-rates-for-tesla-fsd-miles-by-50",
+        "title": "Lemonade Unveils Autonomous Car Insurance, Slashing Rates for Tesla FSD Miles by 50%",
+        "publisher": "Lemonade, Inc.",
+        "published_at": "2026-01-21",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lemonade.com/investor/news/lemonade-brings-autonomous-car-insurance-to-indiana",
+        "title": "Lemonade Brings Autonomous Car Insurance to Indiana",
+        "publisher": "Lemonade, Inc.",
+        "published_at": "2026-06-03",
+        "source_type": "company_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "codex-manual-research",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1-manual-repair",
+    "prompt_cache_key": null,
+    "response_id": null,
+    "response_model": null,
+    "input_tokens": 0,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 0,
+    "reasoning_tokens": 0,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "manual_primary_source_research",
+        "queries": [
+          "Lemonade 2025 Form 10-K",
+          "Lemonade Q1 2026 results and 10-Q",
+          "Lemonade AI operating KPIs",
+          "Lemonade autonomous car insurance Tesla FSD"
+        ]
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000016/lmnd-20251231.htm",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000034/lmnd-20260331.htm",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.lemonade.com/investor-relations-bo/wp-content/uploads/docs/LMND-Shareholder-Letter-Q1-2026.pdf",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.lemonade.com/blog/why-incumbents-wont-catch-up/",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.lemonade.com/claims",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.lemonade.com/blog/lemonades-claim-automation/",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.lemonade.com/investor/news/lemonade-unveils-autonomous-car-insurance-slashing-rates-for-tesla-fsd-miles-by-50",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.lemonade.com/investor/news/lemonade-brings-autonomous-car-insurance-to-indiana",
+        "type": "manual_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-manual-repair",
+      "company:lmnd",
+      "researcher:codex",
+      "reasoning:xhigh"
+    ]
+  }
+}

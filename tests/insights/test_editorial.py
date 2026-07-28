@@ -1366,7 +1366,9 @@ def test_investment_company_universe_payload_is_complete_and_dated():
         "business_and_economics"
     ]["summary"]
     assert companies["IREN"]["research_memo"]["provenance"]["model"] == "gpt-5.6-sol"
-    assert companies["Amazon"]["research_memo"] is None
+    assert companies["Amazon"]["research_memo"]["memo"][
+        "business_and_economics"
+    ]["summary"]
     assert companies["Microsoft"]["analyst_context"]["frontier_ai_channels"]
     assert companies["Microsoft"]["identity_sources"]
     assert "frontier_lab_relevance" not in companies["GCL-Poly"]

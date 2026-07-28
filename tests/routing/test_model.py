@@ -120,16 +120,18 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v10_prompt_uses_soft_reason_word_guidance_without_truncation():
+def test_v11_prompt_uses_soft_reason_word_guidance_without_truncation():
     prompt = routing_model.instructions()
 
-    assert routing_model.PROMPT_VERSION == "audience-routing-v10"
+    assert routing_model.PROMPT_VERSION == "audience-routing-v11"
     assert "Aim for roughly 40 to 50 words" in prompt
     assert "guidance, not a hard limit" in prompt
     assert "never truncate, reject, or add filler" in prompt
+    assert "automated page extraction" in prompt
+    assert "Ignore that extraction noise" in prompt
 
 
-def test_v10_prompt_defines_the_approved_audience_boundaries():
+def test_v11_prompt_defines_the_approved_audience_boundaries():
     prompt = routing_model.instructions()
 
     assert "temporary access extensions or resets" in prompt
@@ -152,19 +154,19 @@ def test_v10_prompt_defines_the_approved_audience_boundaries():
 def test_render_input_uses_readable_first_party_hierarchy_only():
     rendered = routing_model.render_input(make_packet())
 
-    assert "evidence_packet:" in rendered
-    assert "  primary_source:" in rendered
-    assert '    author: "Satya Nadella"' in rendered
-    assert "    post:" in rendered
-    assert "      kind: x_post" in rendered
-    assert "    - kind: authored_artifact" in rendered
-    assert '      title: "Serving system report"' in rendered
+    assert rendered.startswith("# Evidence about one development")
+    assert "Date: 2026-07-12" in rendered
+    assert "## Source posts (1)" in rendered
+    assert "### 1. Satya Nadella" in rendered
+    assert "## Supporting artifacts (1)" in rendered
+    assert "### 1. Serving system report" in rendered
+    assert "Author: Satya Nadella" in rendered
     assert "independent_reactions" not in rendered
     assert "Independent Engineer" not in rendered
     assert "burst traffic & load" not in rendered
     assert "&amp;" not in rendered
-    assert rendered.index("    post:") < rendered.index(
-        "    - kind: authored_artifact"
+    assert rendered.index("## Source posts") < rendered.index(
+        "## Supporting artifacts"
     )
     assert "reduced inference latency" in rendered
     assert "event-secret-42" not in rendered
@@ -213,7 +215,7 @@ def test_render_input_replaces_link_only_post_and_omits_transport_reaction():
         )
     )
 
-    assert "      kind: artifact_link" in rendered
+    assert "No substantive post text beyond the supporting artifact link." in rendered
     assert "https://t.co/example" not in rendered
     assert "Link Only" not in rendered
     assert "https://t.co/another-link" not in rendered
@@ -262,7 +264,7 @@ def test_render_input_keeps_same_author_updates_and_omits_independent_reactions(
         )
     )
 
-    assert "continuations:" in rendered
+    assert "## Author updates (1)" in rendered
     assert "distinct reliability implication" in rendered
     assert "https://t.co/opaque" not in rendered
     assert "Short Reaction" not in rendered
@@ -300,20 +302,29 @@ def test_render_input_does_not_mark_packet_within_budget():
     assert "TRUNCATED_EVIDENCE:" not in rendered
 
 
-def test_evidence_hash_binds_hidden_provenance_while_input_hash_does_not():
+def test_evidence_hash_binds_hidden_ids_and_urls_without_changing_model_input():
     packet = make_packet()
-    changed_source = replace(
+    changed_id = replace(
         packet.sources[0],
         source_id="different-source-id",
+    )
+    changed_id_packet = replace(
+        packet,
+        sources=(changed_id, *packet.sources[1:]),
+    )
+    changed_url = replace(
+        packet.sources[0],
         url="https://example.com/different-url",
     )
-    changed_packet = replace(
+    changed_url_packet = replace(
         packet,
-        sources=(changed_source, *packet.sources[1:]),
+        sources=(changed_url, *packet.sources[1:]),
     )
 
-    assert changed_packet.evidence_sha256 != packet.evidence_sha256
-    assert changed_packet.input_sha256 == packet.input_sha256
+    assert changed_id_packet.evidence_sha256 != packet.evidence_sha256
+    assert changed_id_packet.input_sha256 == packet.input_sha256
+    assert changed_url_packet.evidence_sha256 != packet.evidence_sha256
+    assert changed_url_packet.input_sha256 == packet.input_sha256
 
 
 def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
@@ -346,7 +357,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v10",
+        "prompt:audience-routing-v11",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True

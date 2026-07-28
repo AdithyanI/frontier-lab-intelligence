@@ -1,0 +1,496 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Axon",
+    "ticker": "AXON"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Axon sells an integrated public-safety platform that connects TASER energy weapons, body and vehicle cameras, drones and counter-drone systems, real-time operations, digital evidence, records, emergency communications, training, and AI-assisted workflows. The business combines connected-device revenue with higher-margin recurring software and services, and uses long-duration bundled subscriptions to expand products and users inside public agencies and adjacent enterprise, justice, corrections, federal, and international markets.",
+      "revenue_engines": [
+        {
+          "engine": "Software and services subscriptions",
+          "who_pays": "Law-enforcement, corrections, justice, federal, international, healthcare, and enterprise customers that license Axon Evidence, Records, Fusus, AI Era products, and related cloud and support services.",
+          "economic_logic": "Recurring revenue grows through new users, premium-plan adoption, additional software modules, and retention. The economic benefit depends on subscription attachment, deployment completion, net revenue retention, cloud-service cost, professional-services intensity, and responsible adoption of AI workflows.",
+          "sources": [
+            {
+              "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+              "claim_date": "2026-05-06"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+              "claim_date": "2026-02-24"
+            }
+          ]
+        },
+        {
+          "engine": "Connected devices and platform hardware",
+          "who_pays": "Public-safety and enterprise customers purchasing TASER devices and cartridges, body and fleet cameras, vehicle-intelligence equipment, drones, counter-drone systems, sensors, and related deployment services.",
+          "economic_logic": "Revenue depends on agency procurement, installed-base refresh, shipment timing, product mix, hardware supply, tariffs, warranty and deployment costs, and attachment to higher-value software plans. Devices seed data and workflow adoption that can pull through recurring software.",
+          "sources": [
+            {
+              "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+              "claim_date": "2026-05-06"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+              "claim_date": "2026-02-24"
+            }
+          ]
+        },
+        {
+          "engine": "Long-duration integrated subscription plans",
+          "who_pays": "Agencies and other institutions committing to multi-product bundles over several years.",
+          "economic_logic": "Bundled plans combine devices, refreshes, software, cloud storage, training, and support into contracted deployments. Future contracted bookings can indicate demand visibility, but they include obligations with different deployment schedules and termination provisions and therefore are not equivalent to near-term recognized revenue or cash.",
+          "sources": [
+            {
+              "url": "https://investor.axon.com/2026-02-24-Axon-reports-Q4-2025-revenue-of-797-million%2C-up-39-year-over-year",
+              "claim_date": "2026-02-24"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+              "claim_date": "2026-02-24"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+          "claim_date": "2026-02-24"
+        },
+        {
+          "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+          "claim_date": "2026-05-06"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Software users, premium-plan adoption, and net revenue retention",
+        "why_it_matters": "New cloud users and expansion into premium offerings increase annual recurring revenue and deepen product attachment. Durable economics require agencies to deploy the products, retain them, and add modules without professional-services and cloud costs offsetting software-margin benefits.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "Agency procurement, deployment timing, and conversion of contracted bookings",
+        "why_it_matters": "Public-sector budgets, approvals, implementation capacity, and phased rollouts determine when booked commitments become shipped devices, active users, recognized revenue, and cash. Long contract duration improves visibility but can mask timing and cancellation differences.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-02-24-Axon-reports-Q4-2025-revenue-of-797-million%2C-up-39-year-over-year",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "driver": "Connected-device demand, supply, mix, and deployment cost",
+        "why_it_matters": "TASER, camera, sensor, drone, and counter-drone volumes expand the installed base and software opportunity, but hardware supply, tariffs, inventory, product mix, and professional-services requirements can reduce gross margin and absorb working capital.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "AI accuracy, workflow adoption, evidence integrity, and governance",
+        "why_it_matters": "Draft One, Axon Assistant, Vision, and evidence-analysis products create value only when outputs save time or improve situational awareness while preserving human review, auditability, privacy, security, and evidentiary integrity. Material errors or weak controls can create legal, reputational, and adoption risk.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-04-07-Axon-Tackles-Public-Safetys-Data-Overload-With-Three-New-AI-Tools",
+            "claim_date": "2026-04-07"
+          },
+          {
+            "url": "https://www.axon.com/help/draft-one/software/draft-one/draft-one.htm",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Law-enforcement, corrections, courts and prosecutors, federal and international public-safety agencies, healthcare, retail, and other frontline enterprises",
+        "why_it_matters": "These customers bring durable mission-critical workflows and long deployments, but adoption remains subject to budgets, procurement, politics, local policy, training, integration, and public trust.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Third-party camera, sensor, communications, retail-evidence, and community-safety systems integrated through Axon Fusus and Works With Axon",
+        "why_it_matters": "Interoperability can expand the data available to real-time operations without requiring Axon to replace every installed system. Partner breadth strengthens the platform only if data permissions, reliability, security, and operational workflows remain coherent.",
+        "sources": [
+          {
+            "url": "https://www.axon.com/newsroom/press-releases/axon-announces-new-fixed-ALPR-camera-solutions-and-next-gen-AI-advancements-to-expand-real-time-public-safety-ecosystem",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Public-safety device vendors, digital-evidence and records platforms, computer-aided dispatch and emergency-communications providers, surveillance and real-time-operations vendors, and drone or counter-drone specialists",
+        "why_it_matters": "Axon's platform breadth can support cross-product attachment, but agencies may retain best-of-breed vendors or resist concentration in one provider. Competition affects pricing, procurement wins, interoperability requirements, and acquisition needs.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Courts, evidence and records rules, privacy and civil-liberties requirements, public procurement regimes, cybersecurity standards, and FAA drone regulation",
+        "why_it_matters": "Product use touches liberty, surveillance, evidence, safety, and airspace. Local and national rules determine whether AI, live video, automated alerts, drones, and counter-drone products can be deployed at scale and what safeguards customers must operate.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://www.faa.gov/newsroom/beyond-visual-line-sight-bvlos",
+            "claim_date": "2025-08-06"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Embed the AI Era Plan and standalone AI products across the existing device, evidence, records, and real-time-operations installed base.",
+        "investment_relevance": "This can raise subscription value and software mix using data already captured by Axon devices, but material value depends on adoption, measurable workflow gains, controlled deployment costs, and trustworthy outputs.",
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://investor.axon.com/2026-04-07-Axon-Tackles-Public-Safetys-Data-Overload-With-Three-New-AI-Tools",
+            "claim_date": "2026-04-07"
+          }
+        ]
+      },
+      {
+        "action": "Build a unified real-time intelligence layer through Fusus, Axon Vision, Assistant, 911, cameras, sensors, locations, and operational data.",
+        "investment_relevance": "A shared operational picture can increase platform differentiation and multi-product attachment. It also raises the consequence of false alerts, outages, privacy failures, or poor integration across high-stakes workflows.",
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-04-07-Axon-Tackles-Public-Safetys-Data-Overload-With-Three-New-AI-Tools",
+            "claim_date": "2026-04-07"
+          },
+          {
+            "url": "https://www.axon.com/newsroom/press-releases/axon-announces-new-fixed-ALPR-camera-solutions-and-next-gen-AI-advancements-to-expand-real-time-public-safety-ecosystem",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "action": "Expand drone, counter-drone, and airspace-awareness products through Dedrone and integration into the broader Axon platform.",
+        "investment_relevance": "This opens public-safety, defense, critical-infrastructure, and enterprise demand, but adds hardware inventory, deployment, regulatory, and execution exposure. Routine operations depend partly on evolving airspace rules.",
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.faa.gov/newsroom/beyond-visual-line-sight-bvlos",
+            "claim_date": "2025-08-06"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "More capable multimodal and agentic models can summarize audio and video, draft records, answer policy questions, and coordinate evidence workflows with less manual effort.",
+        "company_exposure": "Axon controls a large body of permissioned public-safety evidence and embeds Draft One, Assistant, Evidence, and Records inside daily customer workflows.",
+        "affected_driver": "Premium software adoption, user expansion, workflow time saved, retention, professional-services intensity, and trust in AI-assisted outputs.",
+        "financial_consequence": "Successful deployment could increase recurring revenue, software mix, retention, and customer willingness to adopt premium plans. Errors or weak governance could slow adoption and increase support, legal, or remediation cost.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material when agencies adopt the tools broadly, documented time savings and quality persist in production, human-review controls work, and software gross profit exceeds deployment and governance costs.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AI Era Plan and standalone AI revenue and customer adoption",
+          "Usage, time saved, correction rates, and report-quality evidence",
+          "Software gross margin and professional-services cost",
+          "Audit, disclosure, bias, privacy, or evidentiary incidents"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.axon.com/help/draft-one/software/draft-one/draft-one.htm",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Frontier computer-vision systems become better at understanding live scenes, searching large video corpora, and fusing signals from cameras, calls, sensors, and locations.",
+        "company_exposure": "Fusus, Axon Vision, body and vehicle cameras, ALPR products, Axon 911, and Evidence create a connected real-time and post-incident data surface.",
+        "affected_driver": "Real-time-operations adoption, device and camera attachment, alert quality, investigation speed, platform pricing, and regulatory acceptance.",
+        "financial_consequence": "Better verified detection and search can support product expansion and recurring revenue; false positives, surveillance misuse, or poor data controls can create customer, legal, and reputational losses.",
+        "direction": "mixed",
+        "materiality_condition": "The upside requires reliable operational outcomes, auditable human verification, clear permissions, and agency willingness to expand deployments across jurisdictions.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Fusus and Axon Vision deployments and paid attachment",
+          "Precision, recall, false-alert, and human-verification metrics",
+          "Customer-reported response or investigation outcomes",
+          "Privacy, retention, audit, and community-governance rules"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-04-07-Axon-Tackles-Public-Safetys-Data-Overload-With-Three-New-AI-Tools",
+            "claim_date": "2026-04-07"
+          },
+          {
+            "url": "https://www.axon.com/newsroom/press-releases/axon-announces-new-fixed-ALPR-camera-solutions-and-next-gen-AI-advancements-to-expand-real-time-public-safety-ecosystem",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "development": "Autonomy, sensor fusion, and airspace-management software improve enough to support routine drone-as-first-responder and counter-drone operations.",
+        "company_exposure": "Axon owns drone and counter-drone products through its platform and Dedrone, while the FAA is developing a framework for normalized beyond-visual-line-of-sight operations.",
+        "affected_driver": "Drone and counter-drone volume, software attachment, inventory, deployment pace, addressable jurisdictions, and regulatory compliance.",
+        "financial_consequence": "Routine approved operations could expand hardware and recurring platform revenue. Delayed rules, safety incidents, weak detection, or costly deployment could strand inventory and compress margin.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material when regulation permits scalable operations, customers fund deployments, systems demonstrate reliable outcomes, and recurring software economics accompany hardware growth.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Final BVLOS rules, waivers, and operational authorizations",
+          "Dedrone and drone-as-first-responder bookings and deployment",
+          "Inventory, product mix, and connected-device gross margin",
+          "Safety, detection, mitigation, and false-positive outcomes"
+        ],
+        "sources": [
+          {
+            "url": "https://www.faa.gov/newsroom/beyond-visual-line-sight-bvlos",
+            "claim_date": "2025-08-06"
+          },
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": []
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Reported growth in AI products does not by itself disclose the customer count, recurring mix, unit economics, production usage, or contribution of each product.",
+        "why_it_matters": "A high growth rate from a small base can overstate near-term materiality, while bundled plans can make standalone pricing and adoption difficult to observe.",
+        "next_research_trigger": "Reconcile future filings and shareholder letters for AI Era Plan revenue, customer or user adoption, attach rates, software gross margin, professional-services cost, and evidence of sustained production usage.",
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Company safeguards describe required human review and auditability, but public materials do not establish independent production error rates across agencies, evidence types, languages, and legal settings.",
+        "why_it_matters": "Small rates of omission, hallucination, bias, or false alert can have outsized consequences in criminal-justice and emergency-response workflows.",
+        "next_research_trigger": "Inspect model documentation, independent evaluations, procurement records, agency policies, correction logs, court challenges, and incident reporting before treating workflow claims as validated outcomes.",
+        "sources": [
+          {
+            "url": "https://www.axon.com/help/draft-one/software/draft-one/draft-one.htm",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.axon.com/2026-04-07-Axon-Tackles-Public-Safetys-Data-Overload-With-Three-New-AI-Tools",
+            "claim_date": "2026-04-07"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Future contracted bookings include obligations with long fulfillment periods and contracts with termination or other clauses, so they are not equivalent to recognized revenue or cash.",
+        "why_it_matters": "Using the headline balance without deployment and cancellation detail can overstate near-term visibility and understate implementation requirements.",
+        "next_research_trigger": "Track remaining performance obligations, expected twelve-month conversion, cancellations, deployments, inventory, receivables, and operating cash flow in each subsequent filing.",
+        "sources": [
+          {
+            "url": "https://investor.axon.com/2026-02-24-Axon-reports-Q4-2025-revenue-of-797-million%2C-up-39-year-over-year",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The timetable and final requirements for normalized BVLOS drone operations remain regulatory variables rather than completed operating permissions.",
+        "why_it_matters": "Drone and counter-drone demand may grow before agencies can operate every use case routinely, affecting deployment timing, costs, and the addressable market.",
+        "next_research_trigger": "Monitor final FAA rules, waiver and authorization activity, agency procurement documents, site-level operating approvals, safety reporting, and recurring software attachment to deployed systems.",
+        "sources": [
+          {
+            "url": "https://www.faa.gov/newsroom/beyond-visual-line-sight-bvlos",
+            "claim_date": "2025-08-06"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+        "title": "Axon Enterprise 2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-24",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investor.axon.com/2026-02-24-Axon-reports-Q4-2025-revenue-of-797-million%2C-up-39-year-over-year",
+        "title": "Axon reports Q4 2025 revenue of $797 million, up 39% year over year",
+        "publisher": "Axon Enterprise",
+        "published_at": "2026-02-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+        "title": "Axon reports Q1 2026 revenue of $807 million, up 34% year over year",
+        "publisher": "Axon Enterprise",
+        "published_at": "2026-05-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.axon.com/2026-04-07-Axon-Tackles-Public-Safetys-Data-Overload-With-Three-New-AI-Tools",
+        "title": "Axon tackles public safety's data overload with three new AI tools",
+        "publisher": "Axon Enterprise",
+        "published_at": "2026-04-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.axon.com/help/draft-one/software/draft-one/draft-one.htm",
+        "title": "Draft One product guide",
+        "publisher": "Axon Enterprise",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.axon.com/newsroom/press-releases/axon-announces-new-fixed-ALPR-camera-solutions-and-next-gen-AI-advancements-to-expand-real-time-public-safety-ecosystem",
+        "title": "Axon announces fixed ALPR camera solutions and next-generation AI advancements",
+        "publisher": "Axon Enterprise",
+        "published_at": "2025-04-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.faa.gov/newsroom/beyond-visual-line-sight-bvlos",
+        "title": "Beyond Visual Line of Sight (BVLOS)",
+        "publisher": "Federal Aviation Administration",
+        "published_at": "2025-08-06",
+        "source_type": "regulator_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "codex-manual-primary-source-research",
+    "reasoning_effort": "manual",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "manual-AXON-2026-07-28",
+    "response_model": "codex-manual-primary-source-research",
+    "input_tokens": 0,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 0,
+    "reasoning_tokens": 0,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "manual_primary_source_review",
+        "query": "Axon 2025 Form 10-K, 2026 results, AI product documentation, and FAA BVLOS rulemaking"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1069183/000162828026011360/axon-20251231.htm",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investor.axon.com/2026-02-24-Axon-reports-Q4-2025-revenue-of-797-million%2C-up-39-year-over-year",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investor.axon.com/2026-05-06-Axon-reports-Q1-2026-revenue-of-807-million%2C-up-34-year-over-year",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investor.axon.com/2026-04-07-Axon-Tackles-Public-Safetys-Data-Overload-With-Three-New-AI-Tools",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://www.axon.com/help/draft-one/software/draft-one/draft-one.htm",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://www.axon.com/newsroom/press-releases/axon-announces-new-fixed-ALPR-camera-solutions-and-next-gen-AI-advancements-to-expand-real-time-public-safety-ecosystem",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://www.faa.gov/newsroom/beyond-visual-line-sight-bvlos",
+        "type": "manual_review"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-manual-repair",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:axon",
+      "model:codex-manual-primary-source-research",
+      "reasoning:manual"
+    ]
+  }
+}

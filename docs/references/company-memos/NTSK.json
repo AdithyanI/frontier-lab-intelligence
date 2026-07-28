@@ -1,0 +1,880 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Netskope",
+    "ticker": "NTSK"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The business sells a unified, cloud-native security, networking, analytics and AI-security platform to large enterprises and mid-sized organizations, primarily through recurring subscriptions and an indirect channel. The economic model depends on winning customers, retaining them, attaching additional products, and operating the NewEdge private network with sufficient performance, reliability and cost efficiency.",
+      "revenue_engines": [
+        {
+          "engine": "Core One-platform subscriptions",
+          "who_pays": "Enterprise and mid-market organizations, generally from security, networking and data-protection budgets and often through resellers, distributors, systems integrators or managed-service providers.",
+          "economic_logic": "Customers subscribe to products spanning SSE, SASE, data protection, zero-trust access, networking and analytics. Subscription revenue represented approximately 99% of revenue for the quarter ended April 30, 2026; growth therefore compounds through new customers, renewals and additional products or deployments within existing customers.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+              "claim_date": "2026-01-31"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+              "claim_date": "2026-04-30"
+            }
+          ]
+        },
+        {
+          "engine": "AI-security and agentic-operations product expansion",
+          "who_pays": "Security operations, data-security, AI-platform and governance teams at new and existing customers.",
+          "economic_logic": "AI Guardrails, Agentic Broker, AI Gateway, AI Red Teaming, AI Command Center and AgentSkope create incremental products to attach to the installed platform. Material economics require these launches to convert into paid production deployments rather than remaining evaluation or preview capabilities.",
+          "sources": [
+            {
+              "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+              "claim_date": "2026-03-11"
+            },
+            {
+              "url": "https://www.netskope.com/press-releases/netskope-unveils-ai-command-center-delivering-comprehensive-ai-discovery-and-correlated-risk-intelligence-with-fully-coordinated-agentic-response",
+              "claim_date": "2026-06-02"
+            },
+            {
+              "url": "https://www.netskope.com/press-releases/netskope-announces-strong-fiscal-first-quarter-2027-financial-results",
+              "claim_date": "2026-04-30"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+          "claim_date": "2026-01-31"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+          "claim_date": "2026-04-30"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Recurring-revenue retention and expansion",
+        "why_it_matters": "ARR captures the active subscription base and is driven by renewals, new customers and expansion. ARR was $845 million at April 30, 2026, up 29% year over year, providing a dated anchor for the scale of the recurring business. Churn, downsells and product attach determine how efficiently growth compounds.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-strong-fiscal-first-quarter-2027-financial-results",
+            "claim_date": "2026-04-30"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "driver": "Large-enterprise acquisition and multiproduct adoption",
+        "why_it_matters": "Enterprise deployments can support high contract values and expansion across web security, private access, data protection, networking, analytics and AI security. Long procurement and implementation cycles, sales-representative productivity and the number of products used per customer govern net-new ARR and sales efficiency.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "operating_cost",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-strong-fiscal-first-quarter-2027-financial-results",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "driver": "Channel productivity and concentration",
+        "why_it_matters": "The great majority of revenue is transacted through channel partners and managed-service providers. These partners extend market reach and implementation capacity, but partner concentration, incentives, inventory of sales opportunities and execution quality can affect bookings, collections and bargaining power.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "driver": "NewEdge performance, utilization and capacity economics",
+        "why_it_matters": "Inline inspection must preserve low latency and high availability. Data-center capacity, servers, bandwidth, peering, route optimization and utilization affect customer experience, gross margin, capital expenditure and service resilience. AI traffic can increase both the network's strategic value and its capacity burden.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-slashes-network-latency-90-enterprise-ai-traffic",
+            "claim_date": "2026-07-21"
+          }
+        ]
+      },
+      {
+        "driver": "Security efficacy and service reliability",
+        "why_it_matters": "Detection quality, policy accuracy, false-positive rates, availability and incident response directly influence trust, renewal and expansion. A material breach, missed threat, unsafe automated action or prolonged outage could create remediation expense, contractual exposure and reputational damage.",
+        "financial_lines": [
+          "revenue",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Large enterprises and mid-sized organizations; security, networking, data-protection and AI-governance teams",
+        "why_it_matters": "Customer demand is driven by cloud migration, distributed work, tool consolidation, sensitive-data protection and adoption of public, private and agentic AI. Enterprise budget cycles and deployment complexity can lengthen sales and expansion timelines.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Resellers, distributors, systems integrators and managed-service providers",
+        "why_it_matters": "Indirect partners originate and implement most business, making partner coverage, certification, incentives and concentration central to customer acquisition and renewal economics.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "AWS and Google Cloud AI platforms",
+        "why_it_matters": "Integrations can place detection and policy signals inside agent runtimes, gateways and inference infrastructure. They broaden distribution and coverage, but also make product value partly dependent on third-party APIs, platform road maps and commercial alignment.",
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-upcoming-integration-with-amazon-bedrock-agentcore",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-ai-guardrails-solution-powered-by-google-cloud-tpus-to-help-secure-high-performance-ai-workflows-at-scale",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Large network-security suites, cloud-edge platforms, hyperscalers, identity vendors and point CASB, DLP, ZTNA or AI-security tools",
+        "why_it_matters": "Competition affects win rates, pricing and product attach. Vendors controlling browsers, identities, cloud runtimes, models or network infrastructure can bundle adjacent controls, while specialist products may compete on depth or deployment simplicity.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Colocation facilities, server and networking equipment, internet exchanges, carriers and peering partners supporting NewEdge",
+        "why_it_matters": "The platform depends on distributed physical infrastructure and network connectivity even though it controls its software and routing architecture. Capacity shortages, equipment delays, carrier failures or inefficient routing can impair service or raise delivery costs.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-slashes-network-latency-90-enterprise-ai-traffic",
+            "claim_date": "2026-07-21"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Global privacy, cybersecurity, data-localization and emerging AI-governance regimes",
+        "why_it_matters": "Regulation influences customer demand, data residency, product controls and regional infrastructure. It can support spending on governance and data protection while increasing compliance, localization and liability requirements for the platform itself.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Converge security, networking, analytics and data protection on the One platform and expand products used per customer.",
+        "investment_relevance": "A unified platform can increase contract value, retention and sales efficiency if customers consolidate tools. It also raises the consequence of platform-wide outages or security failures.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "action": "Commercialize a broad AI-security suite covering users, public and private models, applications, agents, tools and MCP traffic.",
+        "investment_relevance": "AI Guardrails, Agentic Broker, AI Gateway and AI Red Teaming create an explicit route from enterprise AI adoption to incremental product attach and ARR, subject to demonstrated paid adoption and security efficacy.",
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "action": "Add autonomous security and network operations through AgentSkope and AI Command Center.",
+        "investment_relevance": "Automated triage, investigation, policy work, configuration review and troubleshooting can increase platform value and address customer staffing constraints. Production safety, approval, audit and rollback controls determine whether automation becomes a durable advantage or a liability.",
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-ai-command-center-delivering-comprehensive-ai-discovery-and-correlated-risk-intelligence-with-fully-coordinated-agentic-response",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "action": "Optimize NewEdge for latency-sensitive AI traffic through AI Fast Path, direct peering and automated route control.",
+        "investment_relevance": "As of June 2026, NewEdge comprised more than 120 data centers in over 80 regions and more than 12,000 network adjacencies. Better AI-route performance may improve differentiation and transit efficiency, while expansion increases capacity and availability obligations.",
+        "sources": [
+          {
+            "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-slashes-network-latency-90-enterprise-ai-traffic",
+            "claim_date": "2026-07-21"
+          }
+        ]
+      },
+      {
+        "action": "Integrate AI-security signals with cloud and agent platforms rather than relying solely on inline inspection.",
+        "investment_relevance": "AWS AgentCore and Google Cloud integrations can extend enforcement into agent-to-tool and model workflows and reduce the risk that new AI architectures bypass existing controls. The strategy also creates dependence on partner interfaces and priorities.",
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-upcoming-integration-with-amazon-bedrock-agentcore",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-ai-guardrails-solution-powered-by-google-cloud-tpus-to-help-secure-high-performance-ai-workflows-at-scale",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Enterprise adoption of public, private and agentic AI expands sensitive-data flows, shadow AI and governance requirements.",
+        "company_exposure": "The installed SSE/SASE platform can attach AI Guardrails, Agentic Broker, AI Gateway, AI Red Teaming and AI Command Center around users, models, applications, agents, tools and data.",
+        "affected_driver": "New-customer wins, AI-product attach, products per customer, retention and ARR expansion.",
+        "financial_consequence": "Paid AI-security adoption could increase recurring revenue and improve product mix; gross-margin leverage is possible if software attach grows faster than incremental infrastructure cost.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if launched products convert into paid production use and generate measurable expansion or competitive wins without merely replacing revenue from existing bundles.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AI-specific ARR or revenue disclosure",
+          "Paid AI-security customers and module attach rates",
+          "Production versus preview availability",
+          "Renewal and expansion rates for AI-security adopters",
+          "Customer references showing active policy enforcement"
+        ],
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-ai-command-center-delivering-comprehensive-ai-discovery-and-correlated-risk-intelligence-with-fully-coordinated-agentic-response",
+            "claim_date": "2026-06-02"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-strong-fiscal-first-quarter-2027-financial-results",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "development": "MCP and other agent-to-tool, agent-to-model and agent-to-agent protocols become standard in production systems.",
+        "company_exposure": "Agentic Broker is designed to inspect and control MCP transactions, while AI Gateway and cloud-platform integrations can apply controls to API-based agent workflows.",
+        "affected_driver": "Protocol coverage, inspected transaction volume, AI-product attach, interoperability and competitive win rates.",
+        "financial_consequence": "Becoming a default policy point could expand revenue; protocol fragmentation, traffic bypass or bundled hyperscaler controls could instead reduce adoption and increase R&D requirements.",
+        "direction": "mixed",
+        "materiality_condition": "Production agent traffic must reach meaningful scale, and the products must remain generally available, interoperable and low latency across leading models, clouds, tools and protocol versions.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "General-availability dates and supported protocol versions",
+          "MCP and agent-transaction volumes inspected",
+          "Coverage of public, private and agent-to-agent workflows",
+          "Policy-enforcement latency and bypass rates",
+          "Cloud-platform bundling and competing native controls"
+        ],
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-upcoming-integration-with-amazon-bedrock-agentcore",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models improve tool use, reasoning and autonomy for security and network operations.",
+        "company_exposure": "AgentSkope and AI Command Center automate DLP triage, investigation, policy creation, configuration review, risk queries, remediation and troubleshooting.",
+        "affected_driver": "Customer productivity, module attach, platform retention, support burden, case throughput and time to resolution.",
+        "financial_consequence": "Successful automation could increase ARR and lower service or support costs; inaccurate conclusions or unsafe actions could cause outages, missed threats, remediation cost and customer loss.",
+        "direction": "mixed",
+        "materiality_condition": "Customers must delegate meaningful production workflows while measurable accuracy, throughput and resolution-time improvements exceed the cost and risk of human review, errors and rollback.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Production workflows delegated to agents",
+          "Cases processed per analyst and time to resolution",
+          "False-positive and false-negative rates",
+          "Human approval and override frequency",
+          "Audit, rollback and agent-caused incident records"
+        ],
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-ai-command-center-delivering-comprehensive-ai-discovery-and-correlated-risk-intelligence-with-fully-coordinated-agentic-response",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "development": "AI applications, RAG systems and multi-step agents create latency-sensitive, high-volume network traffic.",
+        "company_exposure": "NewEdge AI Fast Path optimizes routes and peering between users, sites, agents and AI destinations while applying security services at the edge.",
+        "affected_driver": "Time to first token, availability, customer experience, network utilization, transit cost and capacity additions.",
+        "financial_consequence": "Performance differentiation can improve customer wins and retention and routing efficiency can support gross margin; higher traffic may also require additional servers, bandwidth and data-center capacity.",
+        "direction": "mixed",
+        "materiality_condition": "AI traffic must become material to purchasing decisions, and latency or transit savings must exceed the incremental capital and operating cost required to scale capacity and resilience.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Time-to-first-token and route-performance benchmarks",
+          "AI traffic as a share of inspected traffic",
+          "Network utilization and adjacency growth",
+          "Capital expenditure and data-center commitments",
+          "Gross margin and service-level performance"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-slashes-network-latency-90-enterprise-ai-traffic",
+            "claim_date": "2026-07-21"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          }
+        ]
+      },
+      {
+        "development": "Frontier labs, cloud platforms, browsers, identity providers and security incumbents embed native AI guardrails, agent permissions, DLP and observability.",
+        "company_exposure": "The platform competes with adjacent enforcement layers and depends on continued access to model, cloud and protocol telemetry. Partner integrations can extend coverage but may not prevent bundling pressure.",
+        "affected_driver": "Win rates, pricing, product attach, renewals, sales intensity and R&D requirements.",
+        "financial_consequence": "Customer consolidation or reduced inspectability could slow recurring-revenue growth and raise sales or development costs; successful cross-platform integrations could partly turn the threat into distribution.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if buyers prefer bundled native controls or platform owners restrict access faster than cross-platform visibility, data context and network performance can differentiate the offering.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Competitive win-loss and displacement commentary",
+          "Renewal discounts and bundle composition",
+          "Model, browser and cloud API-access changes",
+          "Adoption of AWS and Google Cloud integrations",
+          "Customer consolidation of security vendors"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-upcoming-integration-with-amazon-bedrock-agentcore",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-ai-guardrails-solution-powered-by-google-cloud-tpus-to-help-secure-high-performance-ai-workflows-at-scale",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": [
+        {
+          "url": "https://bitcap.com/beckers-bets-podcast",
+          "claim_date": "2026-07-28"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "AI-product monetization is not separately quantified in public financial reporting.",
+        "why_it_matters": "Without paid-customer, attach, transaction-volume or AI-specific ARR disclosure, product launches cannot yet be translated reliably into material revenue or product-mix effects.",
+        "next_research_trigger": "Inspect subsequent 10-Q filings, earnings presentations and calls for AI-specific ARR, paid customers, attach rates, transaction-based revenue or quantified pipeline commentary.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+            "claim_date": "2026-04-30"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Production maturity and efficacy of the newest agentic-security and operations products remain insufficiently evidenced.",
+        "why_it_matters": "Preview status, limited beta evidence, false conclusions or unsafe automated remediation could prevent adoption and create operational or liability risk.",
+        "next_research_trigger": "Review general-availability notices, release notes, independent tests, named customer references and disclosures of agent accuracy, human overrides, rollbacks or material incidents.",
+        "sources": [
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-unveils-ai-command-center-delivering-comprehensive-ai-discovery-and-correlated-risk-intelligence-with-fully-coordinated-agentic-response",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The net economics of scaling NewEdge for AI traffic are not separately disclosed.",
+        "why_it_matters": "Latency and routing advantages may improve sales and transit efficiency, but server, bandwidth, colocation and redundancy requirements could absorb the benefit.",
+        "next_research_trigger": "Track quarterly gross margin, cost-of-revenue commentary, capital expenditure, equipment purchases, data-center commitments, utilization and AI-traffic growth.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-slashes-network-latency-90-enterprise-ai-traffic",
+            "claim_date": "2026-07-21"
+          }
+        ]
+      },
+      {
+        "uncertainty": "It is unclear which layer will control enterprise agent security as cloud, model, browser, identity and network vendors converge.",
+        "why_it_matters": "The winner may capture policy authority and telemetry while other products become features or integrations. This affects pricing power, attach rates and R&D intensity.",
+        "next_research_trigger": "Inspect competitive replacements, bundle pricing, customer architecture decisions, protocol changes and whether AWS or Google integrations produce reference customers and incremental revenue.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+            "claim_date": "2026-01-31"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-upcoming-integration-with-amazon-bedrock-agentcore",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.netskope.com/press-releases/netskope-announces-ai-guardrails-solution-powered-by-google-cloud-tpus-to-help-secure-high-performance-ai-workflows-at-scale",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      },
+      {
+        "uncertainty": "No attributable company-specific public BIT Capital thesis was identified in the reviewed public commentary.",
+        "why_it_matters": "Portfolio ownership or general views on AI infrastructure cannot establish the investment assumptions, expected edge or countercase required to classify a future event against a BIT thesis.",
+        "next_research_trigger": "Reassess if BIT Capital publishes a company-specific research note, interview, podcast transcript or fund commentary that states the operating and financial thesis.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/beckers-bets-podcast",
+            "claim_date": "2026-07-28"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+        "title": "Annual Report on Form 10-K for the fiscal year ended January 31, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-03-31",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+        "title": "Quarterly Report on Form 10-Q for the quarter ended April 30, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-06-03",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-announces-strong-fiscal-first-quarter-2027-financial-results",
+        "title": "Fiscal First Quarter 2027 Financial Results",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+        "title": "One AI Security Launch",
+        "publisher": "Company newsroom",
+        "published_at": "2026-03-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage",
+        "title": "AgentSkope Launch",
+        "publisher": "Company newsroom",
+        "published_at": "2026-05-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-unveils-ai-command-center-delivering-comprehensive-ai-discovery-and-correlated-risk-intelligence-with-fully-coordinated-agentic-response",
+        "title": "AI Command Center Launch",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-announces-upcoming-integration-with-amazon-bedrock-agentcore",
+        "title": "Upcoming Integration with Amazon Bedrock AgentCore",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-announces-ai-guardrails-solution-powered-by-google-cloud-tpus-to-help-secure-high-performance-ai-workflows-at-scale",
+        "title": "AI Guardrails Solution Powered by Google Cloud TPUs",
+        "publisher": "Company newsroom",
+        "published_at": "2026-04-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-slashes-network-latency-90-enterprise-ai-traffic",
+        "title": "NewEdge AI Fast Path Performance Results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-07-21",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/beckers-bets-podcast",
+        "title": "Beckers Bets Podcast Archive",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_HM1iDAEHZO6wJSqgNOsyR2pdVav4YXF7GDTbKePxIvge6jqbNftGoUkKDqKaprZo9xQHmppITELk03wSFYqqfBoRHiLL1AmdG0APg0i26fab-2bUof5p7s81G1NGZE6MDvSl1No9a0OOGpqFM8ddKmg3X56MBOXzPZCPU-c-kLCQ0DLOuCFYPqC19vGcc8Fj4iXi_XrXmvTf-nZtBkG7BWJOWKTfLGor9XfofQeWH-cS3stzm6JHmfcjTEwjNp4LKhXjq2eMeniQjktua2-oLdRZqByAuSN8I_WIl0jSPvIa6Foghm1BQMToFE5KV-OSi2Qd3pFVJFn5OvbPrnq4AyOr1vGakWY1WSAIj4q7NubkjP4cBjRILlukNBSC3jVQ0JXEh58Fa40rXWfTZOVMJktwDVYKvYeray7wvOUbW8XRCRwSISdpF-TWVGGPdr8oaWSUfcKgfnTeGnpf5Utiidku",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 113445,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 62939,
+    "reasoning_tokens": 11553,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investors.netskope.com SEC filings annual report 10-K Netskope NTSK",
+        "type": "search",
+        "queries": [
+          "site:investors.netskope.com SEC filings annual report 10-K Netskope NTSK",
+          "site:sec.gov/Archives/edgar/data Netskope NTSK 10-K S-1",
+          "site:investors.netskope.com quarterly results Netskope revenue ARR customers NewEdge",
+          "site:netskope.com AI Security Agentic Broker AI Gateway AgentSkope MCP"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Netskope 2026 10-K annual report January 31 2026 pdf",
+        "type": "search",
+        "queries": [
+          "Netskope 2026 10-K annual report January 31 2026 pdf",
+          "site:sec.gov/Archives/edgar/data/ Netskope 10-K 2026 46-1141117",
+          "site:investors.netskope.com \"Annual Report\" \"March 31, 2026\" Netskope",
+          "site:investors.netskope.com/static-files Netskope fiscal 2026 annual report revenue subscription NewEdge customers"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-announces-strong-fiscal-first-quarter-2027-financial"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526238336/ck0002063196-20260430.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://fintel.io/doc/sec-netskope-inc-2063196-10k-2026-march-31-20543-4630"
+      },
+      {
+        "query": "site:investors.netskope.com/sec-filings/sec-filing/10-k Netskope 2026",
+        "type": "search",
+        "queries": [
+          "site:investors.netskope.com/sec-filings/sec-filing/10-k Netskope 2026",
+          "site:investors.netskope.com/sec-filings/sec-filing/10-q \"June 3, 2026\" Netskope",
+          "site:sec.gov/Archives/edgar/data/2063196/ \"Netskope One\" \"NewEdge\" 2026",
+          "site:sec.gov/Archives/edgar/data/2063196/ \"Annual recurring revenue\" \"January 31, 2026\" Netskope"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/"
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.netskope.com/sec-filings/sec-filing/10-k/0001193125-26-135011"
+      },
+      {
+        "query": "\"0001193125-26-135011\" Netskope 10-K",
+        "type": "search",
+        "queries": [
+          "\"0001193125-26-135011\" Netskope 10-K",
+          "\"ck0002063196-20260131.htm\"",
+          "\"For the fiscal year ended January 31, 2026\" \"Netskope One\"",
+          "\"Netskope One platform\" \"January 31, 2026\" 10-K"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.netskope.com/press-releases/netskope-announces-strong-fourth-quarter-and-fiscal-year-2026-financial-results"
+      },
+      {
+        "pattern": "We generate revenue primarily",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526242133/ntsk_ars_2026.pdf"
+      },
+      {
+        "pattern": "We generate revenue primarily",
+        "type": "find_in_page",
+        "url": "https://www.publicnow.com/view/85F67E028ABFCCEC087598B13F2DFFF70424C4A8"
+      },
+      {},
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2063196 Netskope S-1 subscriptions revenue NewEdge customers ARR",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2063196 Netskope S-1 subscriptions revenue NewEdge customers ARR",
+          "site:sec.gov/Archives/edgar/data/2063196/ Netskope \"subscription revenue\" \"99%\"",
+          "site:sec.gov/Archives/edgar/data/2063196/ Netskope \"more than 4,000 customers\"",
+          "site:sec.gov/Archives/edgar/data/2063196/ Netskope \"NewEdge\" \"data centers\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Netskope S-1 2025 subscription revenue 99% customer ARR NewEdge",
+        "type": "search",
+        "queries": [
+          "Netskope S-1 2025 subscription revenue 99% customer ARR NewEdge",
+          "Netskope IPO prospectus NewEdge 75 data centers customers ARR million",
+          "Netskope 10-K 2026 subscription revenue customers greater than $1 million ARR",
+          "Netskope 10-Q 2026 annual recurring revenue large customers net retention rate"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.fool.com/earnings/call-transcripts/2026/03/11/netskope-ntsk-q4-2026-earnings-call-transcript/"
+      },
+      {
+        "query": "\"0001193125-25-204285\" Netskope prospectus pdf",
+        "type": "search",
+        "queries": [
+          "\"0001193125-25-204285\" Netskope prospectus pdf",
+          "\"Netskope\" \"more than 120 full-compute edge data centers\"",
+          "\"Netskope\" \"more than 25 products\" \"subscription revenue\"",
+          "\"Netskope\" \"95%\" \"channel partners\" S-1"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Netskope 10-K competitors Palo Alto Zscaler Cisco Cloudflare Microsoft 2026",
+        "type": "search",
+        "queries": [
+          "Netskope 10-K competitors Palo Alto Zscaler Cisco Cloudflare Microsoft 2026",
+          "Netskope annual report 2026 channel partners revenue Exclusive Networks Arrow Carahsoft",
+          "Netskope S-1 cloud service providers colocation facilities network transit suppliers",
+          "Netskope 10-K risk NewEdge third-party data centers network service providers"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:netskope.com/press-releases Netskope AgentSkope AI Gateway AI Guardrails Red Teaming 2026",
+        "type": "search",
+        "queries": [
+          "site:netskope.com/press-releases Netskope AgentSkope AI Gateway AI Guardrails Red Teaming 2026",
+          "site:investors.netskope.com/news-releases AI Security Netskope 2026 AgentSkope",
+          "site:netskope.com Netskope Amazon Bedrock AgentCore integration July 2026",
+          "site:netskope.com Netskope AI Fast Path June 2026 latency 90%"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com Netskope",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com Netskope",
+          "site:bitcapital.de Netskope",
+          "site:bitcap.com \"NTSK\"",
+          "\"BIT Capital\" Netskope"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"0001193125-26-255732\" SEC Netskope 10-Q",
+        "type": "search",
+        "queries": [
+          "\"0001193125-26-255732\" SEC Netskope 10-Q",
+          "\"ck0002063196-20260430.htm\" Netskope",
+          "site:sec.gov/Archives/edgar/data/2063196/000119312526255732 Netskope",
+          "\"No single end customer represented 10%\" Netskope April 30 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm?output=1"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2063196/000119312526255732 \"We generate revenue primarily\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2063196/000119312526255732 \"We generate revenue primarily\"",
+          "site:sec.gov/Archives/edgar/data/2063196/000119312526255732 \"Cost of revenue consists primarily\"",
+          "site:sec.gov/Archives/edgar/data/2063196/000119312526255732 \"subscription revenue accounted for approximately 99%\"",
+          "site:sec.gov/Archives/edgar/data/2063196/000119312526255732 \"channel partners\" \"total revenue\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"We generate revenue primarily from subscriptions\" Netskope",
+        "type": "search",
+        "queries": [
+          "\"We generate revenue primarily from subscriptions\" Netskope",
+          "\"Cost of revenue consists primarily\" Netskope",
+          "\"subscription revenue accounted for approximately 99%\" Netskope",
+          "\"channel partners that represented 10% or more\" Netskope 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526135011/ck0002063196-20260131.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2063196/000119312526255732/ck0002063196-20260430.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-announces-strong-fiscal-first-quarter-2027-financial-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-unveils-netskope-one-ai-security-delivering-high-performance-protection-across-the-entire-ai-ecosystem",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-revolutionizes-security-and-network-operations-with-agentskope-including-first-of-kind-agentic-ai-dlp-analysis-and-insider-threat-triage",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-unveils-ai-command-center-delivering-comprehensive-ai-discovery-and-correlated-risk-intelligence-with-fully-coordinated-agentic-response",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-announces-upcoming-integration-with-amazon-bedrock-agentcore",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.netskope.com/press-releases/netskope-announces-ai-guardrails-solution-powered-by-google-cloud-tpus-to-help-secure-high-performance-ai-workflows-at-scale",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.netskope.com/news-releases/news-release-details/netskope-slashes-network-latency-90-enterprise-ai-traffic",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/beckers-bets-podcast",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:ntsk",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

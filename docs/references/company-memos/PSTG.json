@@ -1,0 +1,1098 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Pure Storage",
+    "ticker": "PSTG"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A unified all-flash data-storage and management platform spanning block, file, object, Kubernetes, on-premises, hosted and public-cloud environments. Economics combine upfront systems sales with recurring support, software and consumption-based services. Installed-base expansion and non-disruptive Evergreen upgrades extend customer relationships, while newer hyperscaler and AI offerings target DirectFlash licensing, high-throughput storage and AI-data preparation.",
+      "revenue_engines": [
+        {
+          "engine": "Storage systems and platform products",
+          "who_pays": "Enterprises, public-sector entities, cloud and SaaS providers, AI/HPC operators and hyperscalers, generally purchasing through authorized channel partners.",
+          "economic_logic": "Customers buy FlashArray, FlashBlade, DirectFlash modules and embedded platform software. New workload wins, capacity expansion and upgrades produce follow-on product revenue; large enterprise and hyperscaler orders can make quarterly timing and product mix lumpy.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+              "claim_date": "2026-03-25"
+            },
+            {
+              "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+              "claim_date": "2026-05-27"
+            },
+            {
+              "url": "https://www.everpuredata.com/products.html",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.everpuredata.com/company/newsroom/press-releases/partner-program-reinforces-commitment-to-gtm-strategy.html",
+              "claim_date": "2026-02-04"
+            }
+          ]
+        },
+        {
+          "engine": "Subscription services and software",
+          "who_pays": "Installed-base customers, storage-as-a-service users, cloud customers and platform teams running Kubernetes applications and virtual machines.",
+          "economic_logic": "Support renewals, Evergreen//One consumption commitments, cloud services and Portworx term or consumption licenses generate recurring revenue, ARR and contracted backlog. Revenue expands through renewal, higher capacity consumption and software cross-sell rather than being interchangeable with product revenue.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+              "claim_date": "2026-03-25"
+            },
+            {
+              "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+              "claim_date": "2026-05-27"
+            },
+            {
+              "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.everpuredata.com/products/kubernetes-data-management.html",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Hyperscaler technology, products and support",
+          "who_pays": "Large cloud and hyperscale data-center operators.",
+          "economic_logic": "DirectFlash technology is qualified for hyperscale storage architectures and can generate product, licensing and support revenue. The opportunity can be large but has long qualification cycles, demanding price and performance requirements, customer concentration and irregular order timing.",
+          "sources": [
+            {
+              "url": "https://investor.everpuredata.com/news-and-events/press-releases/press-release-details/2024/Pure-Storage-Announces-Third-Quarter-Fiscal-2025-Financial-Results/default.aspx",
+              "claim_date": "2024-12-03"
+            },
+            {
+              "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+              "claim_date": "2026-05-27"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+          "claim_date": "2026-03-25"
+        },
+        {
+          "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+          "claim_date": "2026-05-27"
+        },
+        {
+          "url": "https://www.everpuredata.com/products.html",
+          "claim_date": null
+        },
+        {
+          "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+          "claim_date": null
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Product bookings, deployment timing and large-customer mix",
+        "why_it_matters": "Product remains a separate, material commercial motion: for the quarter ended 2026-05-03, product revenue was $577 million versus $476 million of subscription-services revenue. Large orders, acceptance schedules and hyperscaler deployments can therefore move reported revenue, mix and working capital between periods.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+            "claim_date": "2026-05-27"
+          }
+        ]
+      },
+      {
+        "driver": "Subscription ARR, RPO, renewals and consumption expansion",
+        "why_it_matters": "Subscription ARR was $2.0 billion and RPO was $3.8 billion as of 2026-05-03. Renewal rates, contracted commitments, usage growth and software attach determine recurring-revenue durability and cash-flow visibility; they should not be blended analytically with hardware orders.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "cash_flow",
+          "working_capital"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Flash, DRAM and CPU availability, input cost and price pass-through",
+        "why_it_matters": "The systems require substantial semiconductor content. On 2026-04-23, management described severe component inflation and said average customer prices had risen approximately 70% since the start of 2026. The timing and completeness of pass-through affect unit demand, gross margin, inventory requirements and shipment capacity.",
+        "financial_lines": [
+          "pricing",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/letters/a-letter-to-our-customers-on-the-current-supply-chain-crisis.html",
+            "claim_date": "2026-04-23"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm",
+            "claim_date": "2026-06-05"
+          }
+        ]
+      },
+      {
+        "driver": "Flash-versus-disk economics, performance, density and energy consumption",
+        "why_it_matters": "Customer adoption depends on whether DirectFlash and data-reduction software deliver attractive cost per effective terabyte, power use, rack density and workload performance versus HDD and competing flash systems. These variables are particularly important for capacity storage, AI clusters and hyperscaler qualification.",
+        "financial_lines": [
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/products.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+            "claim_date": "2025-03-11"
+          },
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/press-releases/press-release-details/2024/Pure-Storage-Announces-Third-Quarter-Fiscal-2025-Financial-Results/default.aspx",
+            "claim_date": "2024-12-03"
+          }
+        ]
+      },
+      {
+        "driver": "Channel execution and software or data-management attach",
+        "why_it_matters": "The company uses a 100% partner go-to-market strategy while broadening from arrays into Enterprise Data Cloud, Portworx, Data Stream and Data Intelligence. Partner enablement and cross-selling determine sales reach, recurring mix and whether software investment produces growth without disproportionate sales and R&D expense.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/partner-program-reinforces-commitment-to-gtm-strategy.html",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://www.everpuredata.com/enterprise-data-cloud.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/products/kubernetes-data-management.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-unveils-data-centric-architecture.html",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Global enterprises, public-sector organizations, SaaS and cloud providers, AI/HPC operators and hyperscalers",
+        "why_it_matters": "Demand spans databases, virtualization, analytics, backup, unstructured data, Kubernetes and AI. Diversified enterprise demand can offset project timing, while hyperscaler and very large AI deployments can create concentrated, high-volume opportunities.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+            "claim_date": "2026-03-25"
+          },
+          {
+            "url": "https://www.everpuredata.com/products.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+            "claim_date": "2025-03-11"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Vendors of flash memory, DRAM, CPUs and other electronic components",
+        "why_it_matters": "Availability and cost determine system build capacity, delivery times and product gross margin. AI-driven semiconductor demand can redirect fabrication capacity toward higher-margin accelerator components, tightening supply for storage systems.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+            "claim_date": "2026-03-25"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/letters/a-letter-to-our-customers-on-the-current-supply-chain-crisis.html",
+            "claim_date": "2026-04-23"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Resellers, distributors, managed-service providers and cloud partners",
+        "why_it_matters": "These partners are the primary route to market under the 100% partner strategy. Their technical capability, pipeline generation and willingness to lead with the platform affect geographic reach, sales productivity and adoption of AI, cyber-resilience, cloud and application-modernization solutions.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/partner-program-reinforces-commitment-to-gtm-strategy.html",
+            "claim_date": "2026-02-04"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "NVIDIA and Cisco AI-infrastructure ecosystems",
+        "why_it_matters": "Validated designs combine accelerators, networking, compute and storage, reducing deployment risk and providing access to enterprise AI-factory projects. Data Stream also uses the NVIDIA AI Data Platform reference design, making ecosystem compatibility important to commercial adoption.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-cisco-deliver-ai-factories-with-nvidia.html",
+            "claim_date": "2025-10-28"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-announces-data-stream.html",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Dell Technologies, NetApp, HPE, Hitachi Vantara, VAST Data, public-cloud-native storage and legacy HDD systems",
+        "why_it_matters": "Competition spans array performance, data-management software, consumption pricing, channel relationships and AI reference architectures. Cloud-native or locally attached storage can substitute for external arrays, while HDD remains a cost benchmark for capacity workloads.",
+        "sources": [
+          {
+            "url": "https://www.gartner.com/reviews/market/enterprise-storage-platforms/vendor/everpure/alternatives",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/products.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+            "claim_date": "2026-03-25"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Establish Enterprise Data Cloud and Fusion as a unified, policy-driven control layer across storage estates.",
+        "investment_relevance": "Successful adoption could expand the addressable market from individual arrays to fleet-wide data management, improve software attach and deepen switching costs. The key test is whether customers deploy the architecture broadly rather than treating it as management packaging around hardware.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/enterprise-data-cloud.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-unveils-data-centric-architecture.html",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "action": "Scale the AI portfolio through FlashBlade//EXA, Evergreen//One for AI, Data Stream and validated AI-factory designs.",
+        "investment_relevance": "This targets high-throughput training, inference, retrieval and data-preparation workloads through both product and consumption models. Materiality depends on paid production deployments, repeat capacity expansion and measurable storage attachment to accelerator clusters.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+            "claim_date": "2025-03-11"
+          },
+          {
+            "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-announces-data-stream.html",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-cisco-deliver-ai-factories-with-nvidia.html",
+            "claim_date": "2025-10-28"
+          }
+        ]
+      },
+      {
+        "action": "Integrate the completed 1touch acquisition into Data Intelligence for discovery, classification, security posture and semantic context.",
+        "investment_relevance": "The acquisition extends the platform above infrastructure into data understanding and governance. It can increase software and recurring mix if customers pay for the capability, but integration, product overlap and go-to-market execution create operating-cost and adoption risk.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-becomes-everpure.html",
+            "claim_date": "2026-05-11"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-unveils-data-centric-architecture.html",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "action": "Grow SLA-backed storage and software consumption through Evergreen//One and the partner channel.",
+        "investment_relevance": "Higher consumption and renewal can improve recurring-revenue visibility and customer lifetime value. Economics must be evaluated alongside service-delivery obligations, installed hardware, pricing commitments and the pace at which usage exceeds reserved capacity.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/partner-program-reinforces-commitment-to-gtm-strategy.html",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+            "claim_date": "2026-05-27"
+          }
+        ]
+      },
+      {
+        "action": "Expand the top-four hyperscaler DirectFlash design win and qualify additional hyperscale customers.",
+        "investment_relevance": "A successful expansion could create a large new revenue pool and validate flash replacement of disk at hyperscale. Failure to meet price, performance or supply requirements would limit the opportunity; a small number of customers could also increase revenue concentration and volatility.",
+        "sources": [
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/press-releases/press-release-details/2024/Pure-Storage-Announces-Third-Quarter-Fiscal-2025-Financial-Results/default.aspx",
+            "claim_date": "2024-12-03"
+          },
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+            "claim_date": "2026-05-27"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models become more multimodal and data-intensive, increasing dataset size, checkpoint traffic, metadata operations and concurrent retrieval.",
+        "company_exposure": "FlashBlade//EXA and Evergreen//One for AI provide shared high-throughput file and object storage intended to keep accelerator clusters supplied with data.",
+        "affected_driver": "AI storage orders, capacity expansion, throughput consumption and the mix between products and subscription services.",
+        "financial_consequence": "Potential increases in product revenue, subscription ARR and installed-base expansion; gross-margin impact depends on hardware, consumption and services mix.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if independent or customer benchmarks show storage improves accelerator utilization and customers move from pilots to repeat, production-scale deployments.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "FlashBlade//EXA and Evergreen//One for AI production customers",
+          "Repeat capacity expansion and consumption growth",
+          "Customer-level accelerator-utilization or time-to-train evidence",
+          "AI-related orders or revenue disclosed separately"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+            "claim_date": "2025-03-11"
+          },
+          {
+            "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-cisco-deliver-ai-factories-with-nvidia.html",
+            "claim_date": "2025-10-28"
+          }
+        ]
+      },
+      {
+        "development": "Enterprise adoption shifts from model pilots toward production retrieval, agentic workflows and inference over proprietary data.",
+        "company_exposure": "Data Stream, Data Intelligence and Enterprise Data Cloud address data discovery, classification, semantic context, governance and movement into AI infrastructure.",
+        "affected_driver": "Software attach, subscription ARR, sales-cycle duration, customer expansion and RPO.",
+        "financial_consequence": "Potentially higher recurring revenue and software mix, partly offset by acquisition integration, product-development and specialist-sales costs.",
+        "direction": "upside",
+        "materiality_condition": "The products must become generally available, attract paid production customers and demonstrate incremental attach or expansion rather than being included without separate economic value.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Paid Data Stream and Data Intelligence customers",
+          "General-availability milestones and pricing",
+          "Software attach to existing storage customers",
+          "Subscription ARR and RPO contribution",
+          "1touch integration costs and retention of key personnel"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-announces-data-stream.html",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-unveils-data-centric-architecture.html",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-becomes-everpure.html",
+            "claim_date": "2026-05-11"
+          },
+          {
+            "url": "https://www.everpuredata.com/enterprise-data-cloud.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "AI data growth and data-center power constraints improve the relative case for replacing hyperscale disk systems with dense flash.",
+        "company_exposure": "A top-four hyperscaler selected DirectFlash technology, and management is pursuing expansion with the current customer and qualification of additional hyperscalers.",
+        "affected_driver": "Hyperscaler qualification, unit volume, licensing and support mix, pricing and customer concentration.",
+        "financial_consequence": "Potentially large product, licensing and support revenue, but with demanding pricing, uncertain margin and lumpy recognition tied to a small number of programs.",
+        "direction": "mixed",
+        "materiality_condition": "The existing design must progress to sustained production volume and at least one additional hyperscaler must validate the flash-versus-disk operating economics.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Revenue and orders from the existing hyperscale customer",
+          "Additional hyperscaler design wins",
+          "Customer concentration disclosures",
+          "Licensing and support versus hardware revenue mix",
+          "Independent flash-versus-HDD power and cost metrics"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/press-releases/press-release-details/2024/Pure-Storage-Announces-Third-Quarter-Fiscal-2025-Financial-Results/default.aspx",
+            "claim_date": "2024-12-03"
+          },
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+            "claim_date": "2026-05-27"
+          }
+        ]
+      },
+      {
+        "development": "Accelerator-led semiconductor demand absorbs fabrication capacity and raises prices for flash, DRAM, CPUs and related components.",
+        "company_exposure": "The company purchases large quantities of these components for enterprise, AI and hyperscale storage systems and has already raised prices in response to cost inflation.",
+        "affected_driver": "Component cost, supply availability, shipment timing, customer pricing, inventory and purchase commitments.",
+        "financial_consequence": "Product gross-margin compression, delayed revenue, higher working capital or demand destruction if costs rise faster than pricing can be passed through.",
+        "direction": "downside",
+        "materiality_condition": "The effect is material if supplier allocations constrain shipment volume or input-cost increases exceed realized price and mix benefits for multiple quarters.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Product gross margin and price/mix commentary",
+          "Component lead times and supply allocations",
+          "Inventory and purchase commitments",
+          "Further customer price changes",
+          "Order cancellations or lengthening sales cycles"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/letters/a-letter-to-our-customers-on-the-current-supply-chain-crisis.html",
+            "claim_date": "2026-04-23"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm",
+            "claim_date": "2026-06-05"
+          },
+          {
+            "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+            "claim_date": "2026-05-27"
+          }
+        ]
+      },
+      {
+        "development": "Model, checkpoint and retrieval efficiency improves, or AI builders favor local NVMe and custom cloud-native object stores over shared external storage.",
+        "company_exposure": "The AI growth case assumes that accelerator clusters and enterprise AI pipelines require substantial external file or object storage content.",
+        "affected_driver": "AI product volume, storage content per accelerator, competitive win rate and pricing.",
+        "financial_consequence": "Slower FlashBlade//EXA adoption, weaker product mix and greater pricing pressure despite continued growth in accelerator deployments.",
+        "direction": "downside",
+        "materiality_condition": "The downside becomes material if shared-storage content per AI cluster declines and product orders fail to grow alongside industry AI compute capacity.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Storage-to-accelerator capital-spending ratios",
+          "Customer use of local NVMe or internally developed object stores",
+          "Win-loss data versus VAST Data and cloud-native alternatives",
+          "Checkpoint-frequency and data-pipeline architecture changes",
+          "AI storage order growth relative to accelerator deployment"
+        ],
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+            "claim_date": "2025-03-11"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-cisco-deliver-ai-factories-with-nvidia.html",
+            "claim_date": "2025-10-28"
+          },
+          {
+            "url": "https://www.gartner.com/reviews/market/enterprise-storage-platforms/vendor/everpure/alternatives",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en",
+          "claim_date": null
+        },
+        {
+          "url": "https://bitcap.com/en/news",
+          "claim_date": null
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "AI-related revenue and orders are not separately disclosed from broader product and subscription results.",
+        "why_it_matters": "Capability announcements and certifications do not establish financial materiality. Without customer, order or revenue attribution, general storage growth cannot be confidently assigned to frontier AI.",
+        "next_research_trigger": "Inspect each earnings release, prepared remarks and filing for quantified AI orders, customer counts, product attach, capacity expansion or revenue contribution.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+            "claim_date": "2025-03-11"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The scale, concentration, margin and recognition structure of hyperscaler revenue remain insufficiently disclosed.",
+        "why_it_matters": "A single program could materially change growth and mix while increasing volatility and customer bargaining power. Licensing, support and hardware can have different timing and margin profiles.",
+        "next_research_trigger": "Review future 10-Q customer-concentration notes, contract disclosures and management commentary for production volume, additional design wins and revenue classification.",
+        "sources": [
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/press-releases/press-release-details/2024/Pure-Storage-Announces-Third-Quarter-Fiscal-2025-Financial-Results/default.aspx",
+            "claim_date": "2024-12-03"
+          },
+          {
+            "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+            "claim_date": "2026-03-25"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The duration of semiconductor shortages and effectiveness of unprecedented price pass-through are unknown.",
+        "why_it_matters": "Reported revenue may rise through pricing while units, demand elasticity, backlog conversion and gross margin weaken. Higher inventory or supply commitments could also absorb cash.",
+        "next_research_trigger": "Track product gross margin, units or capacity shipped, backlog commentary, inventory, purchase commitments, supplier lead times and further pricing notices.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/letters/a-letter-to-our-customers-on-the-current-supply-chain-crisis.html",
+            "claim_date": "2026-04-23"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm",
+            "claim_date": "2026-06-05"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Data Stream and the acquired Data Intelligence capabilities have limited disclosed paid-production evidence.",
+        "why_it_matters": "The strategic shift toward AI-ready data management only changes economics if software creates incremental bookings, renewal or expansion rather than adding development and integration expense.",
+        "next_research_trigger": "Look for general availability, named paying customers, standalone pricing, software ARR, attach rates, renewal behavior and acquisition-related operating expense.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-announces-data-stream.html",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-unveils-data-centric-architecture.html",
+            "claim_date": "2026-06-17"
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-becomes-everpure.html",
+            "claim_date": "2026-05-11"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Vendor benchmarks do not establish whether shared flash storage is the economically preferred architecture for most frontier-AI workloads.",
+        "why_it_matters": "AI systems can use local drives, internally developed object stores or competing parallel file systems. Storage content per accelerator, not headline model growth alone, determines addressable demand.",
+        "next_research_trigger": "Seek independent benchmark disclosure, customer reference architectures, storage-to-accelerator spending data and competitive win-loss evidence under production workloads.",
+        "sources": [
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+            "claim_date": "2025-03-11"
+          },
+          {
+            "url": "https://www.gartner.com/reviews/market/enterprise-storage-platforms/vendor/everpure/alternatives",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-cisco-deliver-ai-factories-with-nvidia.html",
+            "claim_date": "2025-10-28"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+        "title": "Fiscal 2026 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-03-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm",
+        "title": "Q1 fiscal 2027 Form 10-Q",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-06-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+        "title": "Q1 fiscal 2027 financial results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-05-27",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/products.html",
+        "title": "Product portfolio overview",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+        "title": "Evergreen//One storage-as-a-service overview",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/products/kubernetes-data-management.html",
+        "title": "Portworx Kubernetes data-management overview",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+        "title": "Q1 fiscal 2027 earnings presentation",
+        "publisher": "Company investor relations",
+        "published_at": "2026-05-27",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.everpuredata.com/news-and-events/press-releases/press-release-details/2024/Pure-Storage-Announces-Third-Quarter-Fiscal-2025-Financial-Results/default.aspx",
+        "title": "Q3 fiscal 2025 results and hyperscaler design win",
+        "publisher": "Company investor relations",
+        "published_at": "2024-12-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/letters/a-letter-to-our-customers-on-the-current-supply-chain-crisis.html",
+        "title": "Customer letter on semiconductor supply-chain disruption",
+        "publisher": "Company website",
+        "published_at": "2026-04-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/partner-program-reinforces-commitment-to-gtm-strategy.html",
+        "title": "Partner program and go-to-market strategy update",
+        "publisher": "Company website",
+        "published_at": "2026-02-04",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-cisco-deliver-ai-factories-with-nvidia.html",
+        "title": "AI-factory collaboration with Cisco and NVIDIA",
+        "publisher": "Company website",
+        "published_at": "2025-10-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+        "title": "FlashBlade//EXA launch",
+        "publisher": "Company website",
+        "published_at": "2025-03-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-announces-data-stream.html",
+        "title": "Data Stream availability announcement",
+        "publisher": "Company website",
+        "published_at": "2026-06-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-unveils-data-centric-architecture.html",
+        "title": "Data-primacy architecture and Data Intelligence announcement",
+        "publisher": "Company website",
+        "published_at": "2026-06-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-becomes-everpure.html",
+        "title": "1touch acquisition announcement and completion update",
+        "publisher": "Company website",
+        "published_at": "2026-02-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.everpuredata.com/enterprise-data-cloud.html",
+        "title": "Enterprise Data Cloud overview",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.gartner.com/reviews/market/enterprise-storage-platforms/vendor/everpure/alternatives",
+        "title": "Enterprise storage platform alternatives",
+        "publisher": "Gartner Peer Insights",
+        "published_at": null,
+        "source_type": "high_quality_secondary"
+      },
+      {
+        "url": "https://bitcap.com/en",
+        "title": "Investment platform overview",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "title": "Public news and research archive",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_i2Z8qEYXNf6B4X0hCSdNSYqTGz77JDykK_VqZxCUob0w2n4P3kf8fr4jtnDNy6H3550GcyL6pXJGYp3Qj2flftr_hsmhSS2wppP_wGMpKSWeSaGOpK-mAt0ROQMYN0rZObjfxDquUL9DOuygNdYFNCeIh2CysQVSV8g1EeS5YGjDIznr_ylF01nzpw9hSDBXnBrSvk8iXevKNRWXwRcO7OUw5I0mwbfFxiBZ_mj1ukxY37b6lZu9FOa2cHkzbEg5_62InCeLjm5tvWpYkWiG7evsRPSvmbpeshYm9I2PrVRZZBEsSvGiWZdj4_8pPMVetn-_6pWClaAoWleAj5RBAMlsjORbU0q1i_bcrmRAxfExioCThW-Vy9golm0YFvZQ0NOLw0_gMHts5ubEKT3k1Hn5DyZFge3EIPbva3ViXBhj4bPwcmMWYMo-iMOy97wcpzu3Ayjai8qFuyRj7qnD6d0o",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 106399,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 84262,
+    "reasoning_tokens": 13741,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investor.purestorage.com Pure Storage annual report 2026 10-K AI hyperscaler Evergreen subscription ARR",
+        "type": "search",
+        "queries": [
+          "site:investor.purestorage.com Pure Storage annual report 2026 10-K AI hyperscaler Evergreen subscription ARR",
+          "site:investor.purestorage.com Pure Storage quarterly results 2026 hyperscaler design win revenue",
+          "site:purestorage.com AI storage NVIDIA FlashBlade official Pure Storage",
+          "site:bitcap.com Pure Storage PSTG BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1474432 2026 10-k Pure Storage",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1474432 2026 10-k Pure Storage",
+          "site:investor.purestorage.com \"Fiscal 2026\" \"Pure Storage\" full year results",
+          "site:investor.purestorage.com \"Fiscal 2027\" \"Pure Storage\" first quarter results",
+          "site:investor.purestorage.com hyperscaler Pure Storage design win 2025 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.purestorage.com/news-and-events/events-and-presentations/default.aspx"
+      },
+      {
+        "type": "open_page",
+        "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001474432.json"
+      },
+      {
+        "query": "Pure Storage 2026 10-K filed March 2026",
+        "type": "search",
+        "queries": [
+          "Pure Storage 2026 10-K filed March 2026",
+          "Pure Storage FY2026 annual report pdf",
+          "Pure Storage Q1 FY2027 earnings release PDF May 2026",
+          "Pure Storage investor presentation June 2026 pdf"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.everpuredata.com/financial-information/quarterly-results/default.aspx"
+      },
+      {
+        "type": "open_page",
+        "url": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/edgar/browse/?CIK=0001474432"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1474432 \"quarter ended May 3, 2026\" Everpure 10-Q",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1474432 \"quarter ended May 3, 2026\" Everpure 10-Q",
+          "site:sec.gov/Archives/edgar/data/1474432 \"May 3, 2026\" \"FORM 10-Q\" Everpure",
+          "site:sec.gov/Archives/edgar/data/1474432 2026 0001474432 10-Q June 5"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"pstg-20260503\"",
+        "type": "search",
+        "queries": [
+          "\"pstg-20260503\"",
+          "\"everpure\" \"20260503\" 10-q",
+          "\"000147443226\" \"May 3, 2026\""
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "product revenue",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf"
+      },
+      {
+        "pattern": "hyperscale",
+        "type": "find_in_page",
+        "url": "https://www.everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm \"hyperscale\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm \"hyperscale\"",
+          "site:sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm \"subscription services\"",
+          "site:sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm \"NAND\"",
+          "site:sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm \"Evergreen//One\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/0001474432-26-000061.txt"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm"
+      },
+      {
+        "query": "site:everpuredata.com/content/dam/pdf Q1 FY27 prepared remarks Everpure May 27 2026",
+        "type": "search",
+        "queries": [
+          "site:everpuredata.com/content/dam/pdf Q1 FY27 prepared remarks Everpure May 27 2026",
+          "site:everpuredata.com/content/dam/pdf q1 fy27 earnings presentation Everpure",
+          "site:everpuredata.com/content/dam/pdf \"Q1 Fiscal 2027 Financial Results\" Everpure",
+          "site:everpuredata.com/content/dam/pdf \"hyperscale\" \"Everpure\" 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Everpure Q1 Fiscal 2027 Financial Results\" pdf",
+        "type": "search",
+        "queries": [
+          "\"Everpure Q1 Fiscal 2027 Financial Results\" pdf",
+          "\"Q1 FY27 Earnings Conference Call Prepared Remarks\" Everpure",
+          "\"Everpure Announces First Quarter Fiscal 2027 Financial Results\" PDF",
+          "\"Everpure Data Stream\" beta AI curation orchestration"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:everpuredata.com 2026 annual report product revenue subscription services Evergreen//One business model",
+        "type": "search",
+        "queries": [
+          "site:everpuredata.com 2026 annual report product revenue subscription services Evergreen//One business model",
+          "site:everpuredata.com \"Subscription services revenue\" \"Evergreen//One\" Everpure 2026",
+          "site:everpuredata.com \"product revenue\" \"subscription services\" \"fiscal 2026\" Everpure",
+          "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf revenue products subscription"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.everpuredata.com hyperscaler Q1 FY27 Everpure current hyperscale customer revenue orders",
+        "type": "search",
+        "queries": [
+          "site:investor.everpuredata.com hyperscaler Q1 FY27 Everpure current hyperscale customer revenue orders",
+          "site:everpuredata.com/company/newsroom hyperscaler Everpure 2026 current customer",
+          "site:investor.everpuredata.com hyperscale \"May 27, 2026\" Everpure",
+          "site:everpuredata.com \"hyperscale\" \"Q1 FY27\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.everpuredata.com/rss/presentation.aspx"
+      },
+      {
+        "type": "open_page",
+        "url": "https://s21.q4cdn.com/687136699/files/doc_downloads/2025/09/Pure-Storage-2025.pdf"
+      },
+      {},
+      {
+        "query": "site:everpuredata.com hyperscaler licensing support services revenue Pure Storage",
+        "type": "search",
+        "queries": [
+          "site:everpuredata.com hyperscaler licensing support services revenue Pure Storage",
+          "site:investor.everpuredata.com \"hyperscaler licensing and support services\"",
+          "site:everpuredata.com \"licensing\" \"hyperscaler\" \"Pure Storage\"",
+          "site:investor.everpuredata.com \"current hyperscale customer\" Everpure"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf Dell NetApp competition",
+        "type": "search",
+        "queries": [
+          "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf Dell NetApp competition",
+          "site:sec.gov/Archives/edgar/data/1474432/000147443226000027 \"NetApp\"",
+          "site:sec.gov/Archives/edgar/data/1474432/000147443226000027 \"Dell\"",
+          "Everpure 2026 10-K competitors Dell NetApp HPE"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:everpuredata.com FlashBlade EXA official",
+        "type": "search",
+        "queries": [
+          "site:everpuredata.com FlashBlade EXA official",
+          "site:everpuredata.com Enterprise Data Cloud Fusion official June 2026",
+          "site:everpuredata.com \"Data-Primacy Architecture\" AI era Everpure",
+          "site:everpuredata.com Cisco AI Factories NVIDIA Pure Storage October 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:everpuredata.com Portworx official Kubernetes data management subscription",
+        "type": "search",
+        "queries": [
+          "site:everpuredata.com Portworx official Kubernetes data management subscription",
+          "site:everpuredata.com/products Portworx cloud native data platform",
+          "site:everpuredata.com \"Portworx\" \"subscription\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf \"Product revenue is derived\"",
+        "type": "search",
+        "queries": [
+          "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf \"Product revenue is derived\"",
+          "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf \"Subscription services revenue\" support Evergreen Portworx",
+          "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf \"We sell\" products subscription services channel partners",
+          "site:everpuredata.com/content/dam/pdf/en/legal/2026-form-10-k.pdf \"customers\" \"resellers\" \"service providers\""
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000027/pstg-20260201.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/content/dam/pdf/en/quarter-report/q1-2027.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/products.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/products/evergreen-staas.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/products/kubernetes-data-management.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.everpuredata.com/news-and-events/events-and-presentations/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.everpuredata.com/news-and-events/press-releases/press-release-details/2024/Pure-Storage-Announces-Third-Quarter-Fiscal-2025-Financial-Results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/letters/a-letter-to-our-customers-on-the-current-supply-chain-crisis.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/partner-program-reinforces-commitment-to-gtm-strategy.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-cisco-deliver-ai-factories-with-nvidia.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-introduces-flashblade-exa.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-announces-data-stream.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-unveils-data-centric-architecture.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/company/newsroom/press-releases/pure-storage-becomes-everpure.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.everpuredata.com/enterprise-data-cloud.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.gartner.com/reviews/market/enterprise-storage-platforms/vendor/everpure/alternatives",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:pstg",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

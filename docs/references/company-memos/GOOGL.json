@@ -1,0 +1,1037 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Alphabet",
+    "ticker": "GOOGL"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The core economic engine is ad-supported consumer services, especially Search and YouTube. Cloud monetizes infrastructure, models, developer platforms, agents, security, data tools, and collaboration software through consumption fees and subscriptions. Consumer subscriptions, platform transactions, devices, and Other Bets add diversification. Shared frontier-model R&D is reported centrally, while common compute infrastructure serves both internal products and external Cloud customers, creating reuse benefits but also capital-allocation and capacity conflicts.",
+      "revenue_engines": [
+        {
+          "engine": "Search, YouTube, and network advertising",
+          "who_pays": "Advertisers and agencies seeking measurable performance, commercial discovery, brand reach, or video audiences.",
+          "economic_logic": "Revenue is driven by query and viewing volume, commercial intent, ad relevance, auction pricing, advertiser return on spend, and available inventory. Distribution-partner payments and publisher or creator revenue shares reduce the retained economics.",
+          "sources": [
+            {
+              "url": "https://abc.xyz/investor/faqs-and-general-information/",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+              "claim_date": "2026-02-05"
+            }
+          ]
+        },
+        {
+          "engine": "Consumer subscriptions, platforms, apps, and devices",
+          "who_pays": "Consumers purchasing YouTube, Google One, and other subscriptions; app and content buyers; and device customers.",
+          "economic_logic": "Recurring subscriptions depend on acquisition, retention, pricing, and service engagement. Platform transactions and devices add revenue but have different gross-margin and working-capital profiles from advertising.",
+          "sources": [
+            {
+              "url": "https://abc.xyz/investor/faqs-and-general-information/",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Cloud infrastructure and enterprise software",
+          "who_pays": "Enterprises, developers, startups, public-sector organizations, and channel partners.",
+          "economic_logic": "Revenue primarily comes from consumption-based infrastructure and platform usage plus subscriptions for collaboration, security, data, Gemini Enterprise, and agent products. Growth depends on workload migration, sustained AI usage, contract conversion, capacity availability, pricing, and product mix.",
+          "sources": [
+            {
+              "url": "https://abc.xyz/investor/faqs-and-general-information/",
+              "claim_date": null
+            },
+            {
+              "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+              "claim_date": "2026-07-22"
+            }
+          ]
+        },
+        {
+          "engine": "Other Bets",
+          "who_pays": "Autonomous-ride customers and partners, healthcare customers, and fiber-internet subscribers.",
+          "economic_logic": "Commercialization is earlier-stage and capital intensive. Waymo economics depend on ride volume, geographic expansion, fleet utilization, vehicle and sensor cost, remote-support requirements, insurance, and local operating density.",
+          "sources": [
+            {
+              "url": "https://abc.xyz/investor/faqs-and-general-information/",
+              "claim_date": null
+            },
+            {
+              "url": "https://waymo.com/blog/2026/02/ro-on-6th-gen-waymo-driver/",
+              "claim_date": "2026-02-12"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://abc.xyz/investor/faqs-and-general-information/",
+          "claim_date": null
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+          "claim_date": "2026-02-05"
+        },
+        {
+          "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+          "claim_date": "2026-07-22"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Search and YouTube engagement, commercial intent, ad relevance, and advertiser returns",
+        "why_it_matters": "Query growth, viewing time, follow-up behavior, conversion quality, click or impression pricing, and advertiser budget allocation govern the largest revenue pool. AI interfaces matter only if incremental engagement and monetization exceed serving costs and any reduction in traditional clicks or inventory.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      },
+      {
+        "driver": "Cloud consumption, backlog conversion, customer retention, and available AI capacity",
+        "why_it_matters": "Cloud revenue and margins depend on customers moving from pilots to recurring production workloads, consuming committed capacity, and adopting higher-value software, security, and agent products. A large backlog supports visibility but does not establish timing, concentration, utilization, or cash conversion.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "driver": "AI-compute efficiency, accelerator utilization, power availability, and infrastructure build timing",
+        "why_it_matters": "Training and serving require semiconductors, networking, data centers, and power. Custom TPUs can improve performance per watt and reduce unit costs, but rapid model scaling, underutilized capacity, construction delays, depreciation, or technological obsolescence can pressure margins and free cash flow.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive",
+            "claim_date": "2026-04-22"
+          },
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Upsize-and-Pricing-of-84-75-Billion-Equity-Capital-Raise-to-Expand-AI-Infrastructure--and-Compute-2026-QzN3D9yMAj/default.aspx",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2025/Alphabet-Announces-Agreement-to-Acquire-Intersect-to-Advance-U-S--Energy-Innovation-2025-DVIuVDM9wW/default.aspx",
+            "claim_date": "2025-12-22"
+          }
+        ]
+      },
+      {
+        "driver": "Distribution access, traffic-acquisition costs, and platform regulation",
+        "why_it_matters": "Browser, device, app-store, and default-distribution arrangements affect traffic volume and acquisition cost. U.S. search remedies and EU platform rules can restrict exclusivity, mandate data or syndication access, alter self-preferencing, or increase rival access to Android and Search distribution.",
+        "financial_lines": [
+          "volume",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/faqs-and-general-information/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google",
+            "claim_date": "2025-09-02"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1670/IP_26_1670_EN.pdf",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "driver": "Consumer-subscription retention and Waymo utilization and unit cost",
+        "why_it_matters": "Subscriptions can diversify the advertising mix through recurring revenue, while Waymo can create a separate volume business. The latter remains dependent on safe geographic expansion, fleet density, vehicle cost, maintenance, insurance, and service reliability.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/faqs-and-general-information/",
+            "claim_date": null
+          },
+          {
+            "url": "https://waymo.com/blog/2026/02/ro-on-6th-gen-waymo-driver/",
+            "claim_date": "2026-02-12"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Advertisers, consumers and creators, app developers, enterprises, startups, governments, and autonomous-ride customers",
+        "why_it_matters": "The payer base spans advertising auctions, recurring subscriptions, platform transactions, cloud consumption, enterprise software, and rides. Frontier-AI relevance should therefore be tied to a specific payer behavior rather than assumed across the portfolio.",
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/faqs-and-general-information/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Semiconductor fabrication and packaging, accelerators, memory, networking, data-center construction, power generation, utilities, and transmission",
+        "why_it_matters": "Compute and energy availability constrain both internal AI deployment and sellable Cloud capacity. Custom TPUs and tighter integration with data-center and energy development reduce some dependencies but increase capital commitments and execution exposure.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+            "claim_date": "2026-02-05"
+          },
+          {
+            "url": "https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive",
+            "claim_date": "2026-04-22"
+          },
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2025/Alphabet-Announces-Agreement-to-Acquire-Intersect-to-Advance-U-S--Energy-Innovation-2025-DVIuVDM9wW/default.aspx",
+            "claim_date": "2025-12-22"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Anthropic and other third-party frontier-model providers distributed through or consuming Cloud infrastructure",
+        "why_it_matters": "Third-party labs can be large compute customers and broaden enterprise model choice, but they also compete with Gemini and may use multiple clouds and accelerator architectures. Their commitments can materially affect capacity allocation, backlog quality, and infrastructure returns.",
+        "sources": [
+          {
+            "url": "https://www.anthropic.com/news/google-broadcom-partnership-compute",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "General search engines and AI assistants, social and video platforms, commerce discovery services, hyperscale clouds, mobile ecosystems, and proprietary or open foundation models",
+        "why_it_matters": "Competition can shift discovery behavior, advertiser budgets, cloud workloads, developer mindshare, default placement, and model pricing. The most material threat would be migration of high-commercial-intent activity or large production AI workloads rather than undifferentiated chatbot usage.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+            "claim_date": "2026-02-05"
+          },
+          {
+            "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google",
+            "claim_date": "2025-09-02"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "U.S. courts and antitrust agencies, the European Commission under the Digital Markets Act, privacy and AI regulators, and local autonomous-vehicle authorities",
+        "why_it_matters": "Regulators can change distribution contracts, data access, search syndication, app-store steering, interoperability, product ranking, advertising technology, privacy practices, and the pace of autonomous-service expansion.",
+        "sources": [
+          {
+            "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google",
+            "claim_date": "2025-09-02"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1670/IP_26_1670_EN.pdf",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://waymo.com/blog/2026/02/ro-on-6th-gen-waymo-driver/",
+            "claim_date": "2026-02-12"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Integrate Gemini and agentic capabilities throughout Search, YouTube, advertising, Android, Workspace, and consumer applications.",
+        "investment_relevance": "This uses existing distribution to defend consumer engagement and advertising while creating subscription and transaction opportunities. The relevant test is whether usage, commercial activity, and retention improve faster than inference and product-development costs.",
+        "sources": [
+          {
+            "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "action": "Sell a vertically integrated enterprise AI stack spanning TPUs and GPUs, Gemini and third-party models, Vertex AI, agents, data, collaboration, and security.",
+        "investment_relevance": "The strategy seeks revenue at multiple layers while reusing internal research and infrastructure. Success requires durable production consumption, capacity availability, model choice, and competitive price-performance.",
+        "sources": [
+          {
+            "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/",
+            "claim_date": "2026-04-22"
+          },
+          {
+            "url": "https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive",
+            "claim_date": "2026-04-22"
+          },
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "action": "Accelerate AI infrastructure and power capacity through elevated capital expenditure, an $84.75 billion equity capital raise priced on June 3, 2026, and the March 2026 closing of the Intersect acquisition.",
+        "investment_relevance": "The program can relieve supply constraints and deepen barriers to entry, but increases depreciation, construction and power execution risk, balance-sheet complexity, and the need to prove that revenue and cash returns justify dilution and capital intensity.",
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Upsize-and-Pricing-of-84-75-Billion-Equity-Capital-Raise-to-Expand-AI-Infrastructure--and-Compute-2026-QzN3D9yMAj/default.aspx",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q1-Earnings-Call-2026-nW8kCrBAKS/default.aspx",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2025/Alphabet-Announces-Agreement-to-Acquire-Intersect-to-Advance-U-S--Energy-Innovation-2025-DVIuVDM9wW/default.aspx",
+            "claim_date": "2025-12-22"
+          }
+        ]
+      },
+      {
+        "action": "Integrate Wiz into Cloud while retaining multicloud availability and expanding AI-focused security from code through runtime.",
+        "investment_relevance": "Security can raise Cloud attach rates and trust for enterprise AI deployments. Returns depend on integration, customer retention, cross-selling, and whether defensive capabilities keep pace with AI-enabled attacks.",
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2026/Google-Completes-Acquisition-of-Wiz-2026-ta7OaU2uA0/default.aspx",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      },
+      {
+        "action": "Scale Waymo geographically while deploying a sixth-generation Driver designed to reduce system cost and support additional environments and vehicle platforms.",
+        "investment_relevance": "This is a long-duration commercialization route for embodied AI. Material value requires safe expansion, higher ride density, lower vehicle and operating cost, and acceptable regulatory and insurance outcomes.",
+        "sources": [
+          {
+            "url": "https://waymo.com/blog/2026/02/ro-on-6th-gen-waymo-driver/",
+            "claim_date": "2026-02-12"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models become materially better at reasoning, multimodal understanding, planning, and personalized assistance.",
+        "company_exposure": "Search, AI Overviews, AI Mode, Gemini, YouTube recommendations, and advertising systems can incorporate the capabilities across large existing audiences.",
+        "affected_driver": "Query frequency, follow-up depth, commercial-intent coverage, user retention, ad relevance, conversion quality, and inference cost per session.",
+        "financial_consequence": "Potential advertising and subscription revenue growth, offset by higher serving costs or weaker click and ad behavior in answer-heavy interfaces.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material only if AI sessions generate sustained incremental or retained high-value activity and monetization that exceeds inference costs and any cannibalization of conventional search inventory.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "AI Mode and AI Overview adoption, repeat use, and follow-up-query behavior",
+          "Search and YouTube advertising growth, pricing, conversion rates, and advertiser returns",
+          "Monetization disclosures for AI-assisted sessions",
+          "Model-serving cost, latency, and performance per watt"
+        ],
+        "sources": [
+          {
+            "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "development": "Competing assistants or open models become preferred gateways for research, shopping, local discovery, navigation, or task completion.",
+        "company_exposure": "The advertising engine depends on continued access to high-commercial-intent discovery and benefits from browser, device, and default distribution that regulators are making more contestable.",
+        "affected_driver": "Search traffic share, commercial-query volume, default placement, traffic-acquisition costs, advertiser budget allocation, and data advantages.",
+        "financial_consequence": "Lower advertising volume or pricing, higher distribution costs, and reduced operating leverage; required data access or syndication could also help competitors improve faster.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if rivals take a sustained share of commercially valuable activity, advertisers reallocate measurable budgets, or remedies materially weaken distribution and proprietary-data advantages.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Commercial-query and referral-share estimates across search and assistants",
+          "Changes to default-distribution agreements and traffic-acquisition costs",
+          "Rival use of mandated search data or syndication services",
+          "Advertiser budget shifts toward commerce, social, retail-media, or AI-assistant channels"
+        ],
+        "sources": [
+          {
+            "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google",
+            "claim_date": "2025-09-02"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1670/IP_26_1670_EN.pdf",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+            "claim_date": "2026-02-05"
+          }
+        ]
+      },
+      {
+        "development": "Enterprise AI moves from experimentation to persistent agents, inference, model training, and automated business workflows.",
+        "company_exposure": "Cloud sells accelerators, Gemini and third-party models, Vertex AI, Gemini Enterprise, agents, data services, collaboration software, and security.",
+        "affected_driver": "Compute consumption, backlog conversion, customer retention, software attach rates, pricing, capacity utilization, and Cloud product mix.",
+        "financial_consequence": "Higher Cloud revenue and operating leverage if production usage scales; margin pressure if capacity is scarce, third-party compute is expensive, or model and infrastructure pricing commoditize.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material when pilots convert into recurring production consumption, committed contracts are utilized, and capacity additions earn returns above depreciation, energy, and support costs.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Cloud backlog conversion and remaining performance obligations",
+          "Model API token consumption and paid agent usage",
+          "Customer concentration and large frontier-lab compute commitments",
+          "Cloud operating margin and capacity-constraint commentary",
+          "Gemini Enterprise, Vertex AI, security, and third-party-model adoption"
+        ],
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/",
+            "claim_date": "2026-04-22"
+          },
+          {
+            "url": "https://www.anthropic.com/news/google-broadcom-partnership-compute",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Model architectures, quantization, inference systems, or specialized accelerators deliver large gains in training throughput or performance per watt.",
+        "company_exposure": "The company operates a vertically integrated stack with custom training and inference TPUs, global networking, data centers, power projects, and internal and external workloads competing for capacity.",
+        "affected_driver": "Accelerator utilization, tokens per unit of compute, power consumption, capacity timing, third-party hardware purchases, and asset-obsolescence risk.",
+        "financial_consequence": "Efficiency can improve gross margin and defer capital expenditure, while rapid capability scaling can instead expand total compute demand and deepen depreciation, financing, and free-cash-flow pressure.",
+        "direction": "mixed",
+        "materiality_condition": "Efficiency is financially material only if performance and utilization gains outpace growth in model size, agent activity, idle capacity, and the cost of replacing infrastructure generations.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Capital expenditure, depreciation, operating cash flow, and further external financing",
+          "TPU adoption by internal products and external customers",
+          "Supply constraints, third-party compute procurement, and accelerator utilization",
+          "Performance-per-watt and inference-cost disclosures",
+          "Power-project commissioning and data-center construction timing"
+        ],
+        "sources": [
+          {
+            "url": "https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive",
+            "claim_date": "2026-04-22"
+          },
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Upsize-and-Pricing-of-84-75-Billion-Equity-Capital-Raise-to-Expand-AI-Infrastructure--and-Compute-2026-QzN3D9yMAj/default.aspx",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2025/Alphabet-Announces-Agreement-to-Acquire-Intersect-to-Advance-U-S--Energy-Innovation-2025-DVIuVDM9wW/default.aspx",
+            "claim_date": "2025-12-22"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models materially improve autonomous vulnerability discovery, code repair, threat automation, and defensive security agents.",
+        "company_exposure": "Cloud combines Gemini-based security capabilities with Wiz's code-to-cloud-to-runtime platform and existing threat-intelligence and security-operations products.",
+        "affected_driver": "Security-product adoption, cross-selling, customer trust, analyst productivity, incident frequency, response cost, and legal or compliance exposure.",
+        "financial_consequence": "Stronger defense can increase Cloud subscriptions and retention and lower response costs; stronger offensive capability can increase breach, remediation, liability, and customer-trust risk.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if the capabilities operate reliably at enterprise scale and either create measurable paid adoption or cause incidents and compliance costs large enough to affect Cloud economics.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Wiz integration, renewal, and cross-sell indicators",
+          "Paid adoption of AI security agents and protection products",
+          "Material security incidents, customer claims, or regulatory actions",
+          "Independent cyber evaluations of frontier models",
+          "Security-related Cloud margin and support-cost commentary"
+        ],
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2026/Google-Completes-Acquisition-of-Wiz-2026-ta7OaU2uA0/default.aspx",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "BIT Capital argues at the firm level that this company and the other hyperscalers can fund exceptional AI investment from current earnings, while the scale of that spending creates entry barriers and can reinforce an oligopolistic market structure. BIT also describes a high-expectations equilibrium in which failure to produce sufficient growth and returns creates disproportionate downside.",
+      "what_would_support_it": [
+        "Operating cash flow sustainably covers AI capital expenditure without repeated external equity or debt financing.",
+        "AI-enhanced Search and YouTube preserve or improve commercial engagement, advertising growth, advertiser returns, and unit economics.",
+        "Cloud backlog converts into recurring consumption, cash flow, and margins while AI infrastructure remains highly utilized.",
+        "Custom silicon, data-center scale, and power integration produce durable cost or capacity advantages that smaller competitors cannot replicate.",
+        "AI investment creates multiple monetization routes across advertising, Cloud, subscriptions, security, and autonomous services."
+      ],
+      "what_would_challenge_it": [
+        "The June 2026 equity raise proves to be the start of continuing dependence on external capital rather than an exceptional financing action.",
+        "Capital expenditure and depreciation continue rising faster than recurring AI revenue and operating cash flow.",
+        "AI interfaces weaken high-value search monetization or materially shift discovery and advertising budgets to competing assistants and platforms.",
+        "Model commoditization or customer multicloud strategies reduce infrastructure utilization, pricing power, or software differentiation.",
+        "Regulatory remedies erode distribution, data, self-preferencing, or advertising advantages faster than product innovation replaces them."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+          "claim_date": "2026-05-06"
+        },
+        {
+          "url": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Upsize-and-Pricing-of-84-75-Billion-Equity-Capital-Raise-to-Expand-AI-Infrastructure--and-Compute-2026-QzN3D9yMAj/default.aspx",
+          "claim_date": "2026-06-03"
+        },
+        {
+          "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+          "claim_date": "2026-07-22"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The company does not disclose complete revenue, ad behavior, or inference-cost economics for AI Overviews and AI Mode.",
+        "why_it_matters": "Strong aggregate Search growth does not isolate whether AI sessions are incremental, cannibalistic, more expensive to serve, or monetized comparably with conventional queries.",
+        "next_research_trigger": "Inspect any cohort-level disclosure on AI-session frequency, commercial intent, ad load, conversion, revenue per query, latency, and serving cost.",
+        "sources": [
+          {
+            "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The long-run return on the enlarged infrastructure program and the role of external financing remain unproven.",
+        "why_it_matters": "The $84.75 billion equity raise and elevated 2026 capital program weaken a simple assumption that the investment cycle is funded solely from current earnings, even if added capacity ultimately earns attractive returns.",
+        "next_research_trigger": "Track capital expenditure, depreciation, operating cash flow, utilization, power commissioning, Cloud backlog conversion, and whether further equity or debt is issued for AI infrastructure.",
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Upsize-and-Pricing-of-84-75-Billion-Equity-Capital-Raise-to-Expand-AI-Infrastructure--and-Compute-2026-QzN3D9yMAj/default.aspx",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Cloud backlog quality, duration, cancellation rights, concentration, and dependence on large frontier-lab customers are not fully visible.",
+        "why_it_matters": "Headline backlog can overstate near-term revenue or diversification if commitments are long-dated, contingent on capacity, or concentrated among customers that use several clouds.",
+        "next_research_trigger": "Inspect remaining-performance-obligation disclosures, backlog conversion rates, capacity reservations, customer concentration, and changes in major model-provider commitments.",
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://www.anthropic.com/news/google-broadcom-partnership-compute",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The final economic impact of U.S. search remedies, EU platform obligations, appeals, and compliance implementation is unresolved.",
+        "why_it_matters": "The same rules could affect defaults, traffic costs, rival data access, search syndication, Android interoperability, product ranking, and Play economics.",
+        "next_research_trigger": "Review final implementation schedules, appellate decisions, revised distribution contracts, data-access take-up, syndication usage, traffic-acquisition costs, and compliance-related product changes.",
+        "sources": [
+          {
+            "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google",
+            "claim_date": "2025-09-02"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1670/IP_26_1670_EN.pdf",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Central reporting of general-model R&D and shared infrastructure obscures product-level AI returns, while Waymo unit economics remain limited.",
+        "why_it_matters": "It is difficult to attribute model-development cost and compute capacity among advertising, consumer subscriptions, Cloud, and Other Bets or to determine whether emerging businesses are approaching self-funding economics.",
+        "next_research_trigger": "Look for expanded disclosure on shared AI R&D, internal versus Cloud compute allocation, depreciation by workload, Waymo fleet utilization, hardware cost, cost per ride, and Other Bets operating losses.",
+        "sources": [
+          {
+            "url": "https://abc.xyz/investor/faqs-and-general-information/",
+            "claim_date": null
+          },
+          {
+            "url": "https://waymo.com/blog/2026/02/ro-on-6th-gen-waymo-driver/",
+            "claim_date": "2026-02-12"
+          },
+          {
+            "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://abc.xyz/investor/faqs-and-general-information/",
+        "title": "Alphabet Investor Relations — FAQs and General Information",
+        "publisher": "Alphabet Investor Relations",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+        "title": "Annual Report on Form 10-K for the Year Ended December 31, 2025",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm",
+        "title": "Quarterly Report on Form 10-Q for the Period Ended June 30, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-07-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+        "title": "2026 Q2 Earnings Call",
+        "publisher": "Alphabet Investor Relations",
+        "published_at": "2026-07-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/",
+        "title": "Q2 2026 Earnings Call: Remarks from the CEO",
+        "publisher": "Google",
+        "published_at": "2026-07-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q1-Earnings-Call-2026-nW8kCrBAKS/default.aspx",
+        "title": "2026 Q1 Earnings Call",
+        "publisher": "Alphabet Investor Relations",
+        "published_at": "2026-04-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Upsize-and-Pricing-of-84-75-Billion-Equity-Capital-Raise-to-Expand-AI-Infrastructure--and-Compute-2026-QzN3D9yMAj/default.aspx",
+        "title": "Alphabet Announces Upsize and Pricing of $84.75 Billion Equity Capital Raise to Expand AI Infrastructure and Compute",
+        "publisher": "Alphabet Investor Relations",
+        "published_at": "2026-06-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive",
+        "title": "TPU 8t and TPU 8i Technical Deep Dive",
+        "publisher": "Google Cloud",
+        "published_at": "2026-04-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/",
+        "title": "Cloud Next 2026: Momentum and Innovation at Google Scale",
+        "publisher": "Google",
+        "published_at": "2026-04-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://abc.xyz/investor/news/news-details/2025/Alphabet-Announces-Agreement-to-Acquire-Intersect-to-Advance-U-S--Energy-Innovation-2025-DVIuVDM9wW/default.aspx",
+        "title": "Alphabet Announces Agreement to Acquire Intersect to Advance U.S. Energy Innovation",
+        "publisher": "Alphabet Investor Relations",
+        "published_at": "2025-12-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://abc.xyz/investor/news/news-details/2026/Google-Completes-Acquisition-of-Wiz-2026-ta7OaU2uA0/default.aspx",
+        "title": "Google Completes Acquisition of Wiz",
+        "publisher": "Alphabet Investor Relations",
+        "published_at": "2026-03-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.anthropic.com/news/google-broadcom-partnership-compute",
+        "title": "Anthropic Expands Partnership with Google and Broadcom for Compute",
+        "publisher": "Anthropic",
+        "published_at": null,
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google",
+        "title": "Department of Justice Wins Significant Remedies Against Google",
+        "publisher": "U.S. Department of Justice",
+        "published_at": "2025-09-02",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1670/IP_26_1670_EN.pdf",
+        "title": "Commission Fines Google for Breaches of the Digital Markets Act",
+        "publisher": "European Commission",
+        "published_at": "2026-07-23",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://waymo.com/blog/2026/02/ro-on-6th-gen-waymo-driver/",
+        "title": "Beginning Fully Autonomous Operations with the Sixth-Generation Waymo Driver",
+        "publisher": "Waymo",
+        "published_at": "2026-02-12",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+        "title": "F.A.Z.: AI Bubble: When Everyone Is Talking About It, It Isn't One",
+        "publisher": "BIT Capital",
+        "published_at": "2026-05-06",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_kpdmFIw1d8b_yCa36vNLh6bUd9vBPL7EtvQp_3wvzQqbvJWIciTLljO1m9qnvy7f0ZadaXMqh6qVtgg44De0r0p7BEaWMgKszJYLxK1DrgEzwwLmedoHj97qsuwYWaBEj11AlWiwSrrAWvw0O1vPkLrrqAYv6L1Hllr_gvrkvtWigReDBOUeF6LrgOXbbVs3NV5YDvGHajvvgn02VEmRJ9ozgvVVPJfwhvKdUd_xyBV05EyYUjP77EiipxgSA6KfAvaASoO3KGXk5CHy713M6Io_PdYKOwq-IUafXfZMstwlocSRxYSwjL10J2ecTw45KiQ_6OOtNOkzjd67rdI6bRXKefCJyjYuN1gMb6QSWmUWbRwHYMBOlEISfecjcy8H-RfQvkJhsn9uHxGmqbPjuenJb52Jr4K-YTPW-GuG6Wrzun9fg5q802Z8DB1PcvqvpK9uBcDNsMAGlvWupmc9e5R0",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 112610,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 65258,
+    "reasoning_tokens": 12096,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:abc.xyz/investor Alphabet 2025 annual report 10-K PDF",
+        "type": "search",
+        "queries": [
+          "site:abc.xyz/investor Alphabet 2025 annual report 10-K PDF",
+          "site:abc.xyz/investor/events Alphabet 2026 Q2 earnings call",
+          "site:bitcap.com/en/news Alphabet hyperscalers AI spending earnings oligopoly F.A.Z. AI bubble",
+          "site:abc.xyz/investor Alphabet 2025 Q4 earnings release capex cloud backlog Gemini"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://abc.xyz/investor/annual-meeting/"
+      },
+      {
+        "query": "site:abc.xyz/investor/static-files 2025 Alphabet annual report pdf",
+        "type": "search",
+        "queries": [
+          "site:abc.xyz/investor/static-files 2025 Alphabet annual report pdf",
+          "site:abc.xyz/investor/static-files 2026 Q2 Alphabet earnings release pdf",
+          "site:abc.xyz/investor/news/news-details/2026 Alphabet Announces Second Quarter 2026 Results",
+          "site:sec.gov/Archives/edgar/data/1652044 2025 10-k Alphabet 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Alphabet 2025 10-K filed February 2026 SEC accession",
+        "type": "search",
+        "queries": [
+          "Alphabet 2025 10-K filed February 2026 SEC accession",
+          "Alphabet Q2 2026 10-Q SEC",
+          "Alphabet 2026 Q2 earnings release July 22 2026",
+          "Alphabet 2025 annual report Google AI capex 2026"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "We generate revenues primarily by delivering relevant, cost-effective online advertising",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/Alphabet-GOOG-_AR_2025_WO2_TRD_WR.pdf"
+      },
+      {
+        "pattern": "Google Services generates revenues primarily by delivering both performance and brand advertising",
+        "type": "find_in_page",
+        "url": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/q4/GOOG-10-K-2025.pdf"
+      },
+      {},
+      {},
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/0001652044-26-000071.txt"
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine"
+      },
+      {
+        "query": "site:bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine Alphabet hyperscalers current earnings capex oligopoly",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine Alphabet hyperscalers current earnings capex oligopoly",
+          "\"KI-Blase\" \"wenn alle davon reden\" BIT Capital Alphabet",
+          "site:bitcap.com \"Alphabet\" \"oligopoly\" AI investment",
+          "site:bitcap.com \"current earnings\" \"Alphabet\" AI"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:justice.gov/opa Alphabet Google search antitrust remedies 2025 default distribution official",
+        "type": "search",
+        "queries": [
+          "site:justice.gov/opa Alphabet Google search antitrust remedies 2025 default distribution official",
+          "site:justice.gov/opa Google advertising technology antitrust remedies 2026 official",
+          "site:ec.europa.eu/commission/presscorner Google DMA search advertising 2026 Alphabet",
+          "site:abc.xyz/investor 2025 10-K antitrust default search distribution agreements"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call AI Mode queries monetization 2026 Alphabet",
+        "type": "search",
+        "queries": [
+          "site:abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call AI Mode queries monetization 2026 Alphabet",
+          "site:abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call capex 195 205 supply constrained",
+          "site:abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call Gemini monthly active users TPU 2026",
+          "site:abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call Cloud backlog $514 billion 90% Fortune 100"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/"
+      },
+      {
+        "pattern": "AI Mode",
+        "type": "find_in_page",
+        "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/"
+      },
+      {
+        "query": "\"Alphabet Second Quarter 2026 Earnings Call\" PDF transcript",
+        "type": "search",
+        "queries": [
+          "\"Alphabet Second Quarter 2026 Earnings Call\" PDF transcript",
+          "\"full year 2026 CapEx\" Alphabet \"195\" \"205\"",
+          "\"supply constrained\" \"Gemini\" Alphabet Q2 2026",
+          "\"AI Mode\" \"Q2 2026\" Alphabet earnings"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://abc.xyz/investor/faqs-and-general-information/"
+      },
+      {
+        "pattern": "Google Search & Other",
+        "type": "find_in_page",
+        "url": "https://abc.xyz/investor/faqs-and-general-information/"
+      },
+      {
+        "query": "site:cloud.google.com/blog Anthropic Google Cloud TPU partnership official",
+        "type": "search",
+        "queries": [
+          "site:cloud.google.com/blog Anthropic Google Cloud TPU partnership official",
+          "site:anthropic.com/news Google Cloud TPU Anthropic partnership",
+          "site:blog.google Alphabet Anthropic partnership cloud TPU",
+          "site:cloud.google.com/customers Anthropic Google Cloud"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1652044/000165204426000018 \"Microsoft\" \"OpenAI\" competition Alphabet 2025 10-K",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1652044/000165204426000018 \"Microsoft\" \"OpenAI\" competition Alphabet 2025 10-K",
+          "site:sec.gov/Archives/edgar/data/1652044/000165204426000018 \"social networks\" \"digital video services\" Alphabet",
+          "site:sec.gov/Archives/edgar/data/1652044/000165204426000018 \"search engines\" \"AI products\" competition",
+          "site:s206.q4cdn.com/479360582/files/doc_financials/2025/q4/GOOG-10-K-2025.pdf competition search AI"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:blog.google/inside-google/infrastructure 2026 data centers power AI Alphabet energy infrastructure",
+        "type": "search",
+        "queries": [
+          "site:blog.google/inside-google/infrastructure 2026 data centers power AI Alphabet energy infrastructure",
+          "site:blog.google/innovation-and-ai/infrastructure-and-cloud 2026 power data center Alphabet AI infrastructure",
+          "site:abc.xyz/investor/events 2026 Q2 Alphabet \"power\" \"supply constrained\"",
+          "site:abc.xyz/investor/events 2026 Alphabet \"third-party compute\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:blog.google/company-news/inside-google/message-ceo Alphabet Q2 2026 Waymo rides cities",
+        "type": "search",
+        "queries": [
+          "site:blog.google/company-news/inside-google/message-ceo Alphabet Q2 2026 Waymo rides cities",
+          "site:waymo.com/blog 2026 paid trips weekly Waymo expansion official",
+          "site:abc.xyz/investor/events 2026 Waymo weekly paid rides",
+          "site:waymo.com/blog 2026 Uber Lyft expansion cities"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:abc.xyz/investor/news March 11 2026 Google completes acquisition Wiz official",
+        "type": "search",
+        "queries": [
+          "site:abc.xyz/investor/news March 11 2026 Google completes acquisition Wiz official",
+          "site:blog.google/company-news Wiz acquisition completed 2026 Google Cloud official",
+          "site:abc.xyz/investor \"Google Completes Acquisition of Wiz\"",
+          "site:cloud.google.com/blog Wiz acquisition completed March 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://abc.xyz/investor/news/news-details/2026/Google-Completes-Acquisition-of-Wiz-2026-ta7OaU2uA0/default.aspx"
+      },
+      {
+        "query": "site:abc.xyz/investor/news 2026 Alphabet completes acquisition Intersect",
+        "type": "search",
+        "queries": [
+          "site:abc.xyz/investor/news 2026 Alphabet completes acquisition Intersect",
+          "site:blog.google 2026 Intersect acquisition completed Alphabet",
+          "site:abc.xyz/investor \"Intersect\" \"completed\" 2026",
+          "site:abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call Intersect"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:abc.xyz/investor/events/event-details/default.aspx \"195 to 205\" Alphabet 2026 CapEx",
+        "type": "search",
+        "queries": [
+          "site:abc.xyz/investor/events/event-details/default.aspx \"195 to 205\" Alphabet 2026 CapEx",
+          "site:abc.xyz/investor/events/event-details/default.aspx \"AI Mode\" \"commercial\" Alphabet Q2 2026",
+          "site:abc.xyz/investor/events/event-details/default.aspx \"supply constrained\" \"third-party\" compute Alphabet Q2 2026",
+          "site:abc.xyz/investor/events/event-details/default.aspx \"Search\" \"monetization\" \"AI Overviews\" Q2 2026 Alphabet"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://abc.xyz/investor/faqs-and-general-information/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q2-Earnings-Call-2026-GgTAq7Is0z/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q2-2026/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://abc.xyz/investor/events/event-details/2026/2026-Q1-Earnings-Call-2026-nW8kCrBAKS/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Upsize-and-Pricing-of-84-75-Billion-Equity-Capital-Raise-to-Expand-AI-Infrastructure--and-Compute-2026-QzN3D9yMAj/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://abc.xyz/investor/news/news-details/2025/Alphabet-Announces-Agreement-to-Acquire-Intersect-to-Advance-U-S--Energy-Innovation-2025-DVIuVDM9wW/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://abc.xyz/investor/news/news-details/2026/Google-Completes-Acquisition-of-Wiz-2026-ta7OaU2uA0/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.anthropic.com/news/google-broadcom-partnership-compute",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.justice.gov/opa/pr/department-justice-wins-significant-remedies-against-google",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1670/IP_26_1670_EN.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://waymo.com/blog/2026/02/ro-on-6th-gen-waymo-driver/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:googl",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

@@ -24,6 +24,8 @@ Read the complete Development together. Do not treat the primary source as more 
 
 The longer artifact may contain the most substantive information in the packet even when the accompanying X post is brief. Give its actual content appropriate attention. At the same time, neither an artifact nor a prominent author is automatically correct or relevant; judge the substance that is present.
 
+Artifact text is produced by automated page extraction and may contain navigation menus, cookie notices, repeated headings, footers, related links, or other obvious page boilerplate. Ignore that extraction noise. Base the judgment on the substantive article, paper, document, or repository content.
+
 # Your task
 
 Using only the supplied evidence packet, decide independently whether it contains decision-useful information for:

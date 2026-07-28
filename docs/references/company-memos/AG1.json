@@ -1,0 +1,979 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "AUTO1",
+    "ticker": "AG1"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A vertically integrated European used-car platform serving consumers and professional dealers. The core economics come from acquiring and reselling owned vehicle inventory through a high-volume Merchant segment and a higher-gross-profit Retail segment, supplemented by consumer and dealer financing. Technology, proprietary transaction data, production centers, logistics and securitization funding are integral to the model; it is not a capital-light classifieds marketplace.",
+      "revenue_engines": [
+        {
+          "engine": "Merchant vehicle sales",
+          "who_pays": "Professional used-car dealers buying vehicles through the wholesale platform.",
+          "economic_logic": "Consumer-facing brands source vehicles that are resold to partner dealers. Revenue scales with units and average selling price; gross profit depends on appraisal accuracy, dealer demand, cross-market matching and the spread between acquisition and resale value.",
+          "sources": [
+            {
+              "url": "https://www.auto1-group.com/company/",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+              "claim_date": "2026-05-13"
+            }
+          ]
+        },
+        {
+          "engine": "Retail vehicle sales",
+          "who_pays": "Consumers purchasing refurbished used vehicles through the retail brand.",
+          "economic_logic": "The company owns, refurbishes, markets and delivers vehicles. Retail generates more gross profit per unit than Merchant but requires more inventory, production, logistics, marketing and customer-service activity.",
+          "sources": [
+            {
+              "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+              "claim_date": "2026-05-13"
+            },
+            {
+              "url": "https://ir.auto1-group.com/news/auto1-group-expands-european-used-car-production-footprint-to-meet-growing-customer-demand/e36cf744-0df6-4a51-a7a0-258bd5ee44d0",
+              "claim_date": "2025-09-30"
+            }
+          ]
+        },
+        {
+          "engine": "Consumer vehicle financing",
+          "who_pays": "Retail customers making payments on vehicle loans originated through the retail platform.",
+          "economic_logic": "Interest income and other financing economics are earned against funding cost, expected credit losses and servicing expense. Public ABS issuance recycles capital and supports additional originations and retail conversion.",
+          "sources": [
+            {
+              "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+              "claim_date": "2026-02-25"
+            },
+            {
+              "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+              "claim_date": "2026-07-06"
+            }
+          ]
+        },
+        {
+          "engine": "Merchant inventory financing",
+          "who_pays": "Partner dealers financing vehicles purchased through the wholesale platform.",
+          "economic_logic": "One-click inventory financing produces standalone financing economics while allowing dealers to hold more inventory, potentially increasing platform purchases and dealer retention. Returns depend on utilization, pricing, credit losses and funding cost.",
+          "sources": [
+            {
+              "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+              "claim_date": "2024-10-31"
+            },
+            {
+              "url": "https://ir.auto1-group.com/news/auto1-group-erhoeht-bestandsfinanzierung-auf-16-milliarden-euro-fuer-kontinuierliches-wachstum/d491defb-6dd1-431e-ad80-f4690413d505",
+              "claim_date": "2025-12-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.auto1-group.com/company/",
+          "claim_date": null
+        },
+        {
+          "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+          "claim_date": "2026-02-25"
+        },
+        {
+          "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+          "claim_date": "2026-05-13"
+        },
+        {
+          "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+          "claim_date": "2026-06-17"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Merchant and Retail unit growth and channel mix",
+        "why_it_matters": "Merchant supplies most volume, while Retail carries materially higher gross profit per unit and greater operating intensity. Growth rates and mix therefore determine revenue, gross profit, inventory requirements and operating leverage.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+            "claim_date": "2026-05-13"
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "driver": "Appraisal accuracy, purchase-to-resale spread and inventory velocity",
+        "why_it_matters": "The company commits capital before resale. Better valuations and market routing support gross profit per unit and faster cash conversion; systematic overpayment, weak demand forecasts or slow sales create markdowns and inventory risk.",
+        "financial_lines": [
+          "pricing",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.auto1-group.com/index/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Retail production throughput, refurbishment quality and SG&A per unit",
+        "why_it_matters": "Inspection, repair, photography, cleaning and logistics affect lead time, available retail inventory, customer claims and per-unit cost. Management's long-term Retail targets require lower SG&A per unit alongside higher throughput and gross profit per unit.",
+        "financial_lines": [
+          "volume",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-expands-european-used-car-production-footprint-to-meet-growing-customer-demand/e36cf744-0df6-4a51-a7a0-258bd5ee44d0",
+            "claim_date": "2025-09-30"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-scales-ai-powered-damage-detection-to-five-production-centers-enhancing-quality-and-efficiency/b0d603a3-4637-46b0-be8a-94463310e747",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "driver": "Financing penetration, credit performance and securitization cost",
+        "why_it_matters": "Captive financing can increase vehicle conversion and add interest economics, but it introduces receivables, funding, delinquency and residual credit risks. ABS advance rates, spreads and investor access affect capital efficiency and growth capacity.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+            "claim_date": "2024-10-31"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-erhoeht-bestandsfinanzierung-auf-16-milliarden-euro-fuer-kontinuierliches-wachstum/d491defb-6dd1-431e-ad80-f4690413d505",
+            "claim_date": "2025-12-04"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+            "claim_date": "2026-07-06"
+          }
+        ]
+      },
+      {
+        "driver": "European used-car supply and price dispersion",
+        "why_it_matters": "Changes in wholesale prices, powertrain values and country-level demand affect seller offers, dealer bids, retail pricing, inventory availability and the risk of adverse price movements while vehicles are held.",
+        "financial_lines": [
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/index/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.auto1-group.com/company/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "European consumers buying or selling vehicles and professional dealers acquiring wholesale inventory",
+        "why_it_matters": "Consumer sourcing determines inventory availability; consumer retail demand and dealer bidding determine sell-through, pricing and platform liquidity.",
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/company/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+            "claim_date": "2026-05-13"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Consumers supplying vehicles through local car-buying brands",
+        "why_it_matters": "Seller conversion, appraisal trust and offer competitiveness determine acquisition volume and cost. A weaker sourcing proposition can constrain both Merchant and Retail growth.",
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/company/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "In-house retail production centers and pan-European fulfillment operations",
+        "why_it_matters": "Physical inspection, refurbishment, photography, documentation and transport are necessary to convert acquired inventory into saleable vehicles. Capacity, utilization and process quality constrain Retail growth and unit economics.",
+        "sources": [
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-expands-european-used-car-production-footprint-to-meet-growing-customer-demand/e36cf744-0df6-4a51-a7a0-258bd5ee44d0",
+            "claim_date": "2025-09-30"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-scales-ai-powered-damage-detection-to-five-production-centers-enhancing-quality-and-efficiency/b0d603a3-4637-46b0-be8a-94463310e747",
+            "claim_date": "2025-12-18"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Bank lenders and public ABS investors funding vehicle inventory and captive-finance receivables",
+        "why_it_matters": "The inventory-owning and lending model requires scalable external funding. Availability, advance rates, spreads, covenants and asset performance influence growth, liquidity and returns on equity.",
+        "sources": [
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-erhoeht-bestandsfinanzierung-auf-16-milliarden-euro-fuer-kontinuierliches-wachstum/d491defb-6dd1-431e-ad80-f4690413d505",
+            "claim_date": "2025-12-04"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+            "claim_date": "2026-07-06"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "EU and national consumer-credit, data-protection and artificial-intelligence authorities",
+        "why_it_matters": "Consumer lending requires creditworthiness and disclosure controls. GDPR restricts solely automated decisions with significant effects, while AI systems used to evaluate natural-person creditworthiness are classified as high-risk under the EU AI framework. Compliance can affect model deployment, approval speed, documentation and cost.",
+        "sources": [
+          {
+            "url": "https://eur-lex.europa.eu/eli/dir/2023/2225/2023-10-30/eng",
+            "claim_date": "2023-10-30"
+          },
+          {
+            "url": "https://eur-lex.europa.eu/eli/reg/2016/679/2016-05-04/eng",
+            "claim_date": "2016-05-04"
+          },
+          {
+            "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng",
+            "claim_date": "2024-07-12"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Pursue disclosed long-term segment targets: 10-15% annual Merchant unit growth with EUR 1,080-1,200 GPU, and 20-40% annual Retail unit growth with EUR 3,880-4,470 GPU, alongside lower SG&A per unit.",
+        "investment_relevance": "The targets make volume, GPU, marketing cost and SG&A per unit explicit tests of operating leverage rather than relying on revenue growth alone.",
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "action": "Internalize and expand Retail production. The company reported twelve production centers with capacity of up to 248,400 vehicles annually at full utilization and approximately 95% of retail vehicles refurbished internally as of September 2025.",
+        "investment_relevance": "Internalization increases control over quality and lead times and creates scope for automation, but also raises fixed-cost, utilization and execution exposure.",
+        "sources": [
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-expands-european-used-car-production-footprint-to-meet-growing-customer-demand/e36cf744-0df6-4a51-a7a0-258bd5ee44d0",
+            "claim_date": "2025-09-30"
+          }
+        ]
+      },
+      {
+        "action": "Scale the in-house AI damage-detection system beyond the five production centers using it as of December 2025.",
+        "investment_relevance": "This is a concrete deployed AI workflow tied to inspection speed, repair decisions, quality control and retail production economics, rather than a general AI aspiration.",
+        "sources": [
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-scales-ai-powered-damage-detection-to-five-production-centers-enhancing-quality-and-efficiency/b0d603a3-4637-46b0-be8a-94463310e747",
+            "claim_date": "2025-12-18"
+          }
+        ]
+      },
+      {
+        "action": "Expand captive finance and maintain scalable securitization access, including EUR 1.6 billion of inventory-financing capacity through November 2027 and recurring public consumer-loan ABS issuance.",
+        "investment_relevance": "Financing can increase conversion, loyalty and profit per transaction, but makes credit quality, funding spreads, retained risk and regulatory compliance increasingly material.",
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+            "claim_date": "2024-10-31"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-erhoeht-bestandsfinanzierung-auf-16-milliarden-euro-fuer-kontinuierliches-wachstum/d491defb-6dd1-431e-ad80-f4690413d505",
+            "claim_date": "2025-12-04"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+            "claim_date": "2026-07-06"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier multimodal vision systems improve vehicle-damage detection, severity estimation and post-repair quality inspection.",
+        "company_exposure": "The deployed car-audit system combines multi-camera scanning with AI image recognition, detects around 90% of reported damage categories and feeds results into the internal refurbishment workflow. It was operating in five of twelve production centers as of 2025-12-18.",
+        "affected_driver": "Inspection labor minutes, repair-scope accuracy, rework rates, production lead time and retail throughput.",
+        "financial_consequence": "Successful deployment could reduce production cost per unit, increase available retail inventory and support Retail GPU and adjusted EBITDA per unit. False negatives or poor severity estimates could instead increase rework, claims, returns and reputational cost.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if deployment reaches most retail production volume and produces measurable reductions in inspection time or rework without higher customer claims or undisclosed damage.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Production centers and percentage of Retail units using the system",
+          "Inspection time and vehicles processed per production employee",
+          "Repair-estimate overrides, rework and post-repair defects",
+          "Retail returns, warranty claims and customer complaints",
+          "Retail SG&A, GPU and adjusted EBITDA per unit"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-scales-ai-powered-damage-detection-to-five-production-centers-enhancing-quality-and-efficiency/b0d603a3-4637-46b0-be8a-94463310e747",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-expands-european-used-car-production-footprint-to-meet-growing-customer-demand/e36cf744-0df6-4a51-a7a0-258bd5ee44d0",
+            "claim_date": "2025-09-30"
+          }
+        ]
+      },
+      {
+        "development": "More capable multimodal appraisal and forecasting models combine images, vehicle history and cross-market demand to improve purchase offers, pricing and inventory routing.",
+        "company_exposure": "Management describes an AI-driven pricing engine as central to the platform, supported by a pan-European transaction dataset used to calculate the used-car price index.",
+        "affected_driver": "Seller conversion, acquisition cost, realized purchase-to-sale spread, dealer bid liquidity, inventory days and markdowns.",
+        "financial_consequence": "Better predictions could increase sourced units and GPU while reducing working-capital duration. Correlated model errors could cause systematic overpayment, underpricing, inventory accumulation or loss of seller and dealer trust.",
+        "direction": "mixed",
+        "materiality_condition": "The effect is material if model changes improve realized GPU and inventory velocity across multiple countries and vehicle categories after controlling for market prices, without a sustained rise in appraisal overrides, markdowns or loss-making cohorts.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Realized resale price versus initial appraisal",
+          "Merchant and Retail GPU by vehicle cohort",
+          "Inventory days, aged inventory and markdowns",
+          "Seller acceptance and appraisal-override rates",
+          "Performance by country, vehicle age and powertrain"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.auto1-group.com/index/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "development": "Reliable multilingual AI agents automate seller and dealer support, listing preparation, document checks, finance handoffs and routine transaction exception handling.",
+        "company_exposure": "The business operates digital buying, selling and financing journeys across numerous European markets, including integrated one-click merchant financing. These workflows contain document-heavy and multilingual operational steps.",
+        "affected_driver": "Lead conversion, transaction cycle time, customer-service labor, marketing cost per unit, SG&A per unit and financing attachment.",
+        "financial_consequence": "Higher conversion and lower service cost could accelerate units and adjusted EBITDA per unit. Uncontrolled agent errors could create incorrect offers, documentation failures, complaints or regulatory remediation.",
+        "direction": "upside",
+        "materiality_condition": "The impact is material only if agents handle a meaningful share of completed transactions and reduce human touches or response times while maintaining conversion quality, complaint rates and legal-document accuracy.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Share of customer interactions and documents completed without manual handling",
+          "Seller and dealer conversion rates",
+          "Customer-service contacts and labor hours per unit",
+          "Marketing and SG&A cost per unit",
+          "Complaint, cancellation and documentation-error rates"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/company/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+            "claim_date": "2024-10-31"
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+            "claim_date": "2026-06-17"
+          }
+        ]
+      },
+      {
+        "development": "Advanced models improve document extraction, fraud detection and credit-risk segmentation for consumer and merchant financing.",
+        "company_exposure": "The company originates consumer vehicle loans, offers instant-approval merchant inventory financing and depends on bank and public ABS funding. Natural-person creditworthiness models face specific EU data-protection and AI obligations.",
+        "affected_driver": "Approval rate, financing attachment, underwriting expense, fraud loss, delinquency, expected credit loss and ABS funding terms.",
+        "financial_consequence": "Improved risk selection could raise finance revenue and vehicle conversion at stable losses. Biased or poorly governed models could create correlated credit losses, regulatory restrictions, customer remediation and weaker securitization economics.",
+        "direction": "mixed",
+        "materiality_condition": "The benefit is material only if approval or attachment rises while vintage delinquency and loss rates remain stable or improve, funding remains available and automated decisions satisfy human-oversight and explanation requirements.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Consumer and merchant finance originations and attachment rates",
+          "Approval and manual-review rates",
+          "Delinquencies, net credit losses and fraud losses by vintage",
+          "ABS advance rates, spreads, oversubscription and retained risk",
+          "Regulatory disclosures, complaints and model-governance controls"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+            "claim_date": "2024-10-31"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+            "claim_date": "2026-07-06"
+          },
+          {
+            "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng",
+            "claim_date": "2024-07-12"
+          },
+          {
+            "url": "https://eur-lex.europa.eu/eli/reg/2016/679/2016-05-04/eng",
+            "claim_date": "2016-05-04"
+          },
+          {
+            "url": "https://eur-lex.europa.eu/eli/dir/2023/2225/2023-10-30/eng",
+            "claim_date": "2023-10-30"
+          }
+        ]
+      },
+      {
+        "development": "Low-cost frontier and open multimodal models allow dealers, marketplaces and other intermediaries to replicate basic valuation, inspection, listing and customer-service capabilities.",
+        "company_exposure": "A central claimed advantage is the combination of an AI-driven pricing engine, proprietary transaction data and integrated physical execution. Foundation-model commoditization may narrow the software portion of that advantage even if proprietary data and fulfillment remain differentiated.",
+        "affected_driver": "Seller acquisition, dealer retention, pricing spread, marketing cost and platform liquidity.",
+        "financial_consequence": "If competitors match quote speed and accuracy, the company may need more aggressive purchase offers or higher marketing spending, reducing GPU and adjusted EBITDA per unit.",
+        "direction": "downside",
+        "materiality_condition": "The risk becomes material if competing channels achieve comparable appraisal accuracy and transaction speed without equivalent proprietary scale, followed by weaker seller conversion, dealer activity or higher acquisition costs.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Seller conversion and marketing cost per acquired vehicle",
+          "Dealer activity, repeat purchasing and bid density",
+          "Merchant GPU and appraisal acceptance rates",
+          "Competitor price guarantees and automated inspection launches",
+          "Evidence that proprietary data improves outcomes beyond commodity models"
+        ],
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.auto1-group.com/index/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "BIT Capital described market conditions for the company as \"perfect\" on a 2025-10-25 WELT podcast landing page. Separately, on 2025-07-01 it identified the company as the largest single position, at roughly 5%, in BIT Defensive Growth; the release characterized selected securities in the strategy as offering above-average return potential. These are attributable positive signals, but neither source supplies a company-specific operating thesis, analytical edge, forecast or countercase.",
+      "what_would_support_it": [
+        "Merchant and Retail units grow toward management's long-term corridors while GPU and adjusted EBITDA per unit also advance, demonstrating profitable network effects rather than volume bought through lower prices or higher marketing.",
+        "Retail production automation and utilization reduce inspection, refurbishment and SG&A cost per unit without higher returns, claims or quality problems.",
+        "Captive-finance penetration expands vehicle conversion and standalone profit while delinquencies, credit losses, capital consumption and ABS funding costs remain controlled.",
+        "The AI-driven pricing and routing system sustains higher seller conversion, faster inventory turns and stable or rising GPU across countries and powertrains."
+      ],
+      "what_would_challenge_it": [
+        "Unit growth requires structurally weaker purchase-to-sale spreads, higher marketing cost or more working capital, preventing progress toward the disclosed unit-economics targets.",
+        "Pricing or inspection errors produce inventory write-downs, rework, customer claims or loss of trust at platform scale.",
+        "Commodity AI tools narrow the company's technological advantage faster than proprietary data, liquidity and physical infrastructure can compensate.",
+        "Financing growth creates deteriorating credit vintages, higher retained risk, regulatory friction or materially worse ABS economics."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/welt-podcast-alles-auf-aktien-die-bullenmarkt-these-des-jan-beckers-und-seine-etf-idee",
+          "claim_date": "2025-10-25"
+        },
+        {
+          "url": "https://bitcap.com/en/news/presseinformation-bit-capital-zieht-jahresbilanz-zum-bit-defensive-growth",
+          "claim_date": "2025-07-01"
+        },
+        {
+          "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+          "claim_date": "2026-06-17"
+        },
+        {
+          "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+          "claim_date": "2026-02-25"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The operating assumptions behind BIT Capital's phrase \"perfect conditions\" are not publicly disclosed in the accessible landing page.",
+        "why_it_matters": "Without the underlying argument, later AI events cannot be mapped confidently to BIT's thesis rather than merely to a generic positive view.",
+        "next_research_trigger": "Obtain the full WELT episode or an attributable BIT transcript and extract any statements on market share, unit economics, financing, competitive position, valuation or risk.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/en/news/welt-podcast-alles-auf-aktien-die-bullenmarkt-these-des-jan-beckers-und-seine-etf-idee",
+            "claim_date": "2025-10-25"
+          },
+          {
+            "url": "https://bitcap.com/en/news/presseinformation-bit-capital-zieht-jahresbilanz-zum-bit-defensive-growth",
+            "claim_date": "2025-07-01"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public disclosures do not isolate the financial contribution of the pricing engine or damage-detection system.",
+        "why_it_matters": "Reported unit growth, GPU and operating leverage may reflect market conditions, scale, physical execution or pricing discipline rather than incremental AI capability.",
+        "next_research_trigger": "Look for controlled rollout metrics: inspection minutes, labor hours, repair-estimate error, inventory days, appraisal overrides, claims and GPU for AI-enabled versus comparison cohorts.",
+        "sources": [
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-scales-ai-powered-damage-detection-to-five-production-centers-enhancing-quality-and-efficiency/b0d603a3-4637-46b0-be8a-94463310e747",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Captive-finance profitability and credit quality are not fully visible from segment-level vehicle metrics.",
+        "why_it_matters": "Financing can increase conversion and profit but also shift risk onto the balance sheet; gross originations alone do not show economic value.",
+        "next_research_trigger": "Inspect receivable growth, financing attachment, net interest economics, delinquencies, losses by vintage, recoveries, retained ABS positions, advance rates and funding spreads.",
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+            "claim_date": "2024-10-31"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-erhoeht-bestandsfinanzierung-auf-16-milliarden-euro-fuer-kontinuierliches-wachstum/d491defb-6dd1-431e-ad80-f4690413d505",
+            "claim_date": "2025-12-04"
+          },
+          {
+            "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+            "claim_date": "2026-07-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The sensitivity of inventory economics to rapid country, model and powertrain price changes is not disclosed in sufficient cohort detail.",
+        "why_it_matters": "Aggregate market-price stability can conceal losses in electric vehicles, older cars or specific countries, and correlated appraisal errors could scale quickly.",
+        "next_research_trigger": "Compare the price index with inventory days, aged stock, write-downs and GPU by powertrain, sourcing month and destination market.",
+        "sources": [
+          {
+            "url": "https://www.auto1-group.com/index/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+            "claim_date": "2026-05-13"
+          }
+        ]
+      },
+      {
+        "uncertainty": "It is unclear which consumer-finance decisions use AI, how much human review exists and which systems will be treated as high-risk under EU rules.",
+        "why_it_matters": "The answer determines potential compliance cost, deployment speed, explainability requirements and exposure to biased or unlawful automated decisions.",
+        "next_research_trigger": "Inspect future risk, privacy and financing disclosures for model purpose, provider versus deployer status, human oversight, adverse-action explanations, monitoring and conformity-assessment plans.",
+        "sources": [
+          {
+            "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng",
+            "claim_date": "2024-07-12"
+          },
+          {
+            "url": "https://eur-lex.europa.eu/eli/reg/2016/679/2016-05-04/eng",
+            "claim_date": "2016-05-04"
+          },
+          {
+            "url": "https://eur-lex.europa.eu/eli/dir/2023/2225/2023-10-30/eng",
+            "claim_date": "2023-10-30"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.auto1-group.com/company/",
+        "title": "Company overview",
+        "publisher": "Issuer corporate site",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+        "title": "FY2025 results",
+        "publisher": "Issuer corporate site",
+        "published_at": "2026-02-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+        "title": "Q1 2026 results",
+        "publisher": "Issuer corporate site",
+        "published_at": "2026-05-13",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+        "title": "2026 Capital Markets Event targets",
+        "publisher": "Issuer corporate site",
+        "published_at": "2026-06-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-scales-ai-powered-damage-detection-to-five-production-centers-enhancing-quality-and-efficiency/b0d603a3-4637-46b0-be8a-94463310e747",
+        "title": "AI-powered damage-detection rollout",
+        "publisher": "Issuer investor relations",
+        "published_at": "2025-12-18",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-expands-european-used-car-production-footprint-to-meet-growing-customer-demand/e36cf744-0df6-4a51-a7a0-258bd5ee44d0",
+        "title": "European production-footprint expansion",
+        "publisher": "Issuer investor relations",
+        "published_at": "2025-09-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+        "title": "Merchant-financing expansion",
+        "publisher": "Issuer corporate site",
+        "published_at": "2024-10-31",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-erhoeht-bestandsfinanzierung-auf-16-milliarden-euro-fuer-kontinuierliches-wachstum/d491defb-6dd1-431e-ad80-f4690413d505",
+        "title": "Inventory-financing capacity increase",
+        "publisher": "Issuer investor relations",
+        "published_at": "2025-12-04",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+        "title": "Third consumer car-loan ABS",
+        "publisher": "Issuer investor relations",
+        "published_at": "2026-07-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.auto1-group.com/index/",
+        "title": "European Used Car Price Index",
+        "publisher": "Issuer corporate site",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/welt-podcast-alles-auf-aktien-die-bullenmarkt-these-des-jan-beckers-und-seine-etf-idee",
+        "title": "WELT podcast landing page mentioning perfect conditions",
+        "publisher": "BIT Capital",
+        "published_at": "2025-10-25",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/presseinformation-bit-capital-zieht-jahresbilanz-zum-bit-defensive-growth",
+        "title": "One-year review of BIT Defensive Growth",
+        "publisher": "BIT Capital",
+        "published_at": "2025-07-01",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng",
+        "title": "Artificial Intelligence Act",
+        "publisher": "European Union, EUR-Lex",
+        "published_at": "2024-07-12",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://eur-lex.europa.eu/eli/reg/2016/679/2016-05-04/eng",
+        "title": "General Data Protection Regulation",
+        "publisher": "European Union, EUR-Lex",
+        "published_at": "2016-05-04",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://eur-lex.europa.eu/eli/dir/2023/2225/2023-10-30/eng",
+        "title": "Consumer Credit Directive",
+        "publisher": "European Union, EUR-Lex",
+        "published_at": "2023-10-30",
+        "source_type": "regulator_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_JdCb2cwwIlbXjHSAFzclb1ZcKIpk2cOy9KckXdATzsu1GU6NksVjdIKrSIuM-o3cvDQZAdhtRfkKUbuVmYRncx9XTS9QNtEIH9fm7FVWHkWg-p2XCzcGarQ5aHEEIuWNdSdLrY43naoAWRff1XSEX7IoXhdJARPjpOXEZByoM1yV0PBEi_3U27t07Jt2BACz9HAmKqRp5TPGb_XdKyjCw9XTTB1MF1rZaAF8bfWMT5fVcHPaNSveFXKFOjzAXkzAdPNNwwz_GY1HH95IE6mINtyR0Elbr0uPPGgpMeR_AwyqfrAu_bgj4M9Olz9hohqh52csvDGQlIc0uIpdfW-xTZW4TC4kfIrpNV2if1NZ0srDxMxYdfLekYJLXfJmKcCf0WSItCYdEE6En2EX8vTD5FuhGmXgXJFkM2Otry0TXpYIcsmNVoQCaRJ9sSRd-rPnnI9BilSfBqLQBCFiP26Xvzji",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 106488,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 81562,
+    "reasoning_tokens": 10552,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:ir.auto1-group.com AUTO1 Group annual report 2024 pdf",
+        "type": "search",
+        "queries": [
+          "site:ir.auto1-group.com AUTO1 Group annual report 2024 pdf",
+          "site:ir.auto1-group.com AUTO1 Group Q1 2025 results pdf",
+          "site:auto1-group.com AUTO1 Group AI pricing algorithms financing Autohero official",
+          "site:bitcap.com/en AUTO1 BIT Capital Jan Beckers AUTO1 perfect conditions"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.auto1-group.com/index/"
+      },
+      {
+        "query": "site:ir.auto1-group.com/media/document \"Q1 2026 Financial Report\" AUTO1",
+        "type": "search",
+        "queries": [
+          "site:ir.auto1-group.com/media/document \"Q1 2026 Financial Report\" AUTO1",
+          "site:ir.auto1-group.com/media/document \"AUTO1 Group Annual Report 2025\"",
+          "site:ir.auto1-group.com/media/document \"2026 Capital Markets Event\" AUTO1 Group presentation",
+          "site:ir.auto1-group.com/news \"AUTO1 Group Outlines Long-Term Merchant and Retail Segment Targets\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.auto1-group.com/news/auto1-group-gibt-langfristige-ziele-fuer-die-merchant-und-retail-segmente-auf-dem-capital-markets/df8948be-00b8-47aa-a640-0d0500b4a501"
+      },
+      {
+        "query": "AUTO1 Group Annual Report 2025 PDF",
+        "type": "search",
+        "queries": [
+          "AUTO1 Group Annual Report 2025 PDF",
+          "AUTO1 Group Q1 2026 Financial Report PDF",
+          "AUTO1 Group 2025 shareholder letter pdf",
+          "AUTO1 Group 2026 capital markets event presentation pdf"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.auto1-group.com/events"
+      },
+      {
+        "query": "site:ir.auto1-group.com/news \"record-breaking 2025 results\" AUTO1",
+        "type": "search",
+        "queries": [
+          "site:ir.auto1-group.com/news \"record-breaking 2025 results\" AUTO1",
+          "site:ir.auto1-group.com/news \"record Q1 2026 results\" AUTO1",
+          "site:auto1-group.com/press/pressrelease \"FinanceHero 3\" AUTO1",
+          "site:auto1-group.com/press/pressrelease \"scales AI-powered damage detection\" AUTO1"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/"
+      },
+      {
+        "query": "site:auto1-group.com/press/pressrelease \"third consumer car loan ABS\"",
+        "type": "search",
+        "queries": [
+          "site:auto1-group.com/press/pressrelease \"third consumer car loan ABS\"",
+          "site:ir.auto1-group.com/news \"FinanceHero 3\"",
+          "site:auto1-group.com/press/pressrelease AUTO1 Financing merchant ABS 2025 2026",
+          "site:auto1-group.com/press/pressrelease AUTO1 Group AI pricing engine technology 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-price-index-october-2025/"
+      },
+      {
+        "query": "\"AUTO1 Group successfully prices its third consumer car loan ABS: FinanceHero 3\"",
+        "type": "search",
+        "queries": [
+          "\"AUTO1 Group successfully prices its third consumer car loan ABS: FinanceHero 3\"",
+          "\"FinanceHero 3\" AUTO1 Group EUR",
+          "site:auto1-group.com \"FinanceHero 3\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en/news \"BIT Defensive Growth\" AUTO1",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news \"BIT Defensive Growth\" AUTO1",
+          "site:bitcap.com/en/news \"largest position\" AUTO1",
+          "site:bitcap.com/en/news \"perfect conditions\" Auto1 Jan Beckers",
+          "site:bitcap.com Auto1 Beckers thesis"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news/welt-podcast-alles-auf-aktien-die-bullenmarkt-these-des-jan-beckers-und-seine-etf-idee"
+      },
+      {
+        "query": "\"Presseinformation: BIT Capital zieht Jahresbilanz zum BIT Defensive Growth\" date",
+        "type": "search",
+        "queries": [
+          "\"Presseinformation: BIT Capital zieht Jahresbilanz zum BIT Defensive Growth\" date",
+          "\"largest single position\" \"AUTO1\" \"BIT Defensive Growth\"",
+          "site:bitcap.com/en/news/presseinformation-bit-capital-zieht-jahresbilanz-zum-bit-defensive-growth 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.eqs-news.com/news/corporate/ein-jahr-bit-defensive-growth-positive-bilanz-fur-bit-capitals-defensiven-wachstumsfonds/b26aa761-8cf0-4336-9ce9-b9e3b36fcd04_de"
+      },
+      {
+        "query": "\"above-average return potential\" \"AUTO1\" BIT Capital",
+        "type": "search",
+        "queries": [
+          "\"above-average return potential\" \"AUTO1\" BIT Capital",
+          "\"überdurchschnittliches Renditepotenzial\" AUTO1 BIT Capital",
+          "\"largest single position\" \"selected securities\" BIT Capital AUTO1",
+          "\"größte Einzelposition\" AUTO1 \"Renditepotenzial\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.eqs-news.com/company/auto1-group-se/reports/a417dbce-0ecb-1015-8dba-62e516257b19"
+      },
+      {},
+      {
+        "query": "site:ir.auto1-group.com/media/document AUTO1 Group \"Merchant revenue\" \"Retail revenue\" financing commission",
+        "type": "search",
+        "queries": [
+          "site:ir.auto1-group.com/media/document AUTO1 Group \"Merchant revenue\" \"Retail revenue\" financing commission",
+          "site:auto1-group.com AUTO1 Group business model Merchant Retail gross profit per unit",
+          "site:ir.auto1-group.com AUTO1 Group annual report 2025 merchant retail revenue financing",
+          "site:ir.auto1-group.com/download/companies AUTO1 Group annual report 2024 merchant retail"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.auto1-group.com/media/document/ assets \"ANNUAL REPORT 2025\" \"AUTO1 GROUP\"",
+        "type": "search",
+        "queries": [
+          "site:ir.auto1-group.com/media/document/ assets \"ANNUAL REPORT 2025\" \"AUTO1 GROUP\"",
+          "site:ir.auto1-group.com/media/document/ \"842K Group Units Sold\"",
+          "site:ir.auto1-group.com/media/document/ \"2025 was a Fantastic Year for AUTO1 Group\"",
+          "site:ir.auto1-group.com/media/document/ \"AUTO1 Group Annual Report 2025\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:eur-lex.europa.eu Regulation EU 2024 1689 creditworthiness natural persons high-risk AI Annex III",
+        "type": "search",
+        "queries": [
+          "site:eur-lex.europa.eu Regulation EU 2024 1689 creditworthiness natural persons high-risk AI Annex III",
+          "site:eur-lex.europa.eu GDPR Article 22 automated decision making legal effects",
+          "site:eur-lex.europa.eu Consumer Credit Directive 2023 2225 creditworthiness automated processing",
+          "site:europa.eu AI Act timeline high-risk systems August 2026 official"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.auto1-group.com/company/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-achieves-record-breaking-2025-results/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-reports-record-q1-2026-results/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/capital-markets-event-2026/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-scales-ai-powered-damage-detection-to-five-production-centers-enhancing-quality-and-efficiency/b0d603a3-4637-46b0-be8a-94463310e747",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-expands-european-used-car-production-footprint-to-meet-growing-customer-demand/e36cf744-0df6-4a51-a7a0-258bd5ee44d0",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.auto1-group.com/press/pressrelease/auto1-group-expands-its-inhouse-merchant-financing-solution-to-belgium-and-the-netherlands/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-erhoeht-bestandsfinanzierung-auf-16-milliarden-euro-fuer-kontinuierliches-wachstum/d491defb-6dd1-431e-ad80-f4690413d505",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.auto1-group.com/news/auto1-group-platziert-mit-financehero-3-drittes-abs-fuer-kfz-ratenkaufvertraege-erfolgreich/c0027aca-1246-4219-953a-0628b8334109",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.auto1-group.com/index/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/welt-podcast-alles-auf-aktien-die-bullenmarkt-these-des-jan-beckers-und-seine-etf-idee",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/presseinformation-bit-capital-zieht-jahresbilanz-zum-bit-defensive-growth",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://eur-lex.europa.eu/eli/reg/2016/679/2016-05-04/eng",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://eur-lex.europa.eu/eli/dir/2023/2225/2023-10-30/eng",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:ag1",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

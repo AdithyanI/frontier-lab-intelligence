@@ -1,0 +1,557 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Broadcom",
+    "ticker": "AVGO"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Broadcom combines a fabless semiconductor business with infrastructure software. Semiconductor solutions include custom AI accelerators, Ethernet switching and routing, optical and electrical connectivity, broadband, wireless, storage, and industrial products. Infrastructure software is led by VMware Cloud Foundation and also includes mainframe, security, and enterprise software. The durable AI question is how frontier-lab compute demand converts into shipped custom XPUs and networking content while enterprise AI affects VMware adoption.",
+      "revenue_engines": [
+        {
+          "engine": "Semiconductor solutions",
+          "who_pays": "Hyperscalers and frontier AI developers, cloud and data-center operators, networking and storage equipment vendors, smartphone and broadband manufacturers, and industrial customers.",
+          "economic_logic": "Broadcom earns product revenue from custom accelerators, switches, routers, NICs, optical DSPs, SerDes, connectivity, storage, wireless, and other chips. Economics depend on design wins, deployment volume, product mix, foundry and packaging supply, customer concentration, pricing, and the cadence of new process and bandwidth generations.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+              "claim_date": "2025-12-18"
+            },
+            {
+              "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+              "claim_date": "2026-06-03"
+            }
+          ]
+        },
+        {
+          "engine": "Infrastructure software subscriptions, licenses, and services",
+          "who_pays": "Large enterprises, governments, financial institutions, service providers, and other organizations operating private and hybrid cloud, mainframe, security, and mission-critical infrastructure.",
+          "economic_logic": "Broadcom monetizes durable installed software through subscriptions, licenses, support, and services, with VMware Cloud Foundation positioned as an integrated private-cloud platform. Revenue and cash generation depend on renewals, customer standardization, product simplification, workload migration, price realization, and retention after the VMware integration.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+              "claim_date": "2025-12-18"
+            },
+            {
+              "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+              "claim_date": "2026-06-09"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+          "claim_date": "2025-12-18"
+        },
+        {
+          "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+          "claim_date": "2026-06-03"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Custom AI accelerator design wins, deployment schedules, and customer concentration",
+        "why_it_matters": "Each multi-generation XPU program can create substantial volume, but customers control architecture, deployment pace, and capital plans. A limited set of large programs makes revenue sensitive to tape-out success, acceptance, foundry capacity, and changes in a customer's model or infrastructure strategy.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      },
+      {
+        "driver": "AI networking bandwidth, architecture, and product cadence",
+        "why_it_matters": "Larger clusters require scale-up, scale-out, and scale-across data movement. Broadcom's content opportunity depends on Ethernet adoption, port speeds, switch and router generations, NICs, retimers, optical DSPs, SerDes, and co-packaged optics, while alternative fabrics or integration choices can shift value among components.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom/showcases-industry-leading-solutions-scaling-ai",
+            "claim_date": "2026-03-12"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-tomahawk-6-worlds-first-1024-tbps-switch",
+            "claim_date": "2026-03-12"
+          }
+        ]
+      },
+      {
+        "driver": "Foundry, advanced packaging, optical, substrate, and supply-chain execution",
+        "why_it_matters": "Broadcom is fabless and depends on external manufacturing and a limited supplier base for advanced products. Leading-edge process and packaging access, yields, component availability, lead times, and geopolitical or export restrictions determine how design wins convert into shippable revenue and margin.",
+        "financial_lines": [
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-35d-face-face-compute-soc-powering-ai-revolution",
+            "claim_date": "2026-02-26"
+          }
+        ]
+      },
+      {
+        "driver": "VMware Cloud Foundation adoption, renewal, integration, and operating leverage",
+        "why_it_matters": "Infrastructure software supplies recurring revenue and cash flow outside semiconductor cycles. The value of VMware depends on customers renewing, standardizing on the full platform, deploying production private-cloud and AI workloads, and accepting the post-acquisition product and commercial model.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "driver": "Cash generation, acquisition debt, and capital allocation",
+        "why_it_matters": "Strong semiconductor and software cash generation supports debt service, dividends, acquisitions, and R&D. The VMware transaction increased indebtedness, so integration performance and free cash flow affect balance-sheet flexibility and the ability to sustain investment through product cycles.",
+        "financial_lines": [
+          "operating_cost",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Frontier AI labs, hyperscalers, cloud providers, enterprise data centers, telecommunications networks, smartphone and broadband manufacturers, storage systems, and industrial markets",
+        "why_it_matters": "Frontier AI customers can drive unusually large custom-accelerator and networking programs, while Broadcom's broader end markets diversify revenue but introduce separate cycles. Customer concentration means a few deployment decisions can materially change growth and mix.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-apollo-and-blackstone-establish-landmark-strategic",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "External wafer foundries, advanced-packaging providers, substrate and optical-component suppliers, and contract manufacturers",
+        "why_it_matters": "Leading-edge AI products require scarce process, packaging, interconnect, and manufacturing capability. Supplier concentration, yield, allocation, lead times, trade restrictions, or quality failures can delay revenue and raise cost.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-35d-face-face-compute-soc-powering-ai-revolution",
+            "claim_date": "2026-02-26"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Apollo, Blackstone, infrastructure developers, and customers participating in the AI XPV Platform",
+        "why_it_matters": "External capital and infrastructure coordination can accelerate deployments of Broadcom XPUs and networking for frontier labs. Realization depends on financing closure, site power and construction, customer commitments, product delivery, and acceptable economics for every participant.",
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-apollo-and-blackstone-establish-landmark-strategic",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Merchant accelerator vendors, hyperscaler in-house silicon teams, custom-silicon competitors, proprietary and Ethernet networking vendors, optical suppliers, and alternative virtualization or cloud platforms",
+        "why_it_matters": "Broadcom competes both for the custom silicon engagement and for networking or software content around it. Customer insourcing, competing accelerators, alternative fabrics, or cloud-native substitutes can reduce content, pricing power, or renewal.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom/showcases-industry-leading-solutions-scaling-ai",
+            "claim_date": "2026-03-12"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "U.S. and foreign export controls, trade policy, antitrust rules, data-sovereignty requirements, cybersecurity regulation, and software-licensing obligations",
+        "why_it_matters": "Restrictions can limit customers, products, manufacturing, acquisitions, or software deployment. Data-sovereignty and security requirements can support private cloud demand while also raising compliance and localization costs.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Co-design multi-generation custom AI accelerators and pair them with an end-to-end Ethernet, optical, and connectivity portfolio.",
+        "investment_relevance": "This strategy can increase Broadcom content per AI cluster and create durable customer programs, but it concentrates execution in a limited number of large deployments and depends on advanced manufacturing and customer-controlled roadmaps.",
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom/showcases-industry-leading-solutions-scaling-ai",
+            "claim_date": "2026-03-12"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-35d-face-face-compute-soc-powering-ai-revolution",
+            "claim_date": "2026-02-26"
+          }
+        ]
+      },
+      {
+        "action": "Use the AI XPV Platform with Apollo and Blackstone to coordinate financing and deployment of Broadcom XPU-based compute capacity for frontier AI labs.",
+        "investment_relevance": "The platform is intended to convert lab demand into larger and faster infrastructure deployments. Headline gigawatts and transaction values should be treated as contingent plans until financing, sites, hardware, acceptance, and revenue recognition are visible.",
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-apollo-and-blackstone-establish-landmark-strategic",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Consolidate enterprise private-cloud infrastructure around VMware Cloud Foundation and position it for governed production AI.",
+        "investment_relevance": "If enterprises standardize production inference and data control on private cloud, AI can support VMware renewal and expansion. Company-sponsored survey findings demonstrate management's thesis, not audited customer migration or Broadcom-specific revenue.",
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier labs scale training and inference with larger, workload-specific accelerator fleets and commit to multi-generation custom silicon.",
+        "company_exposure": "Broadcom co-designs custom XPUs and the packaging and connectivity required to deploy them, with current demand concentrated in a small number of large customers.",
+        "affected_driver": "Custom accelerator design wins, tape-outs, deployment volume, product mix, customer concentration, foundry allocation, and gross margin.",
+        "financial_consequence": "Successful programs can produce large semiconductor revenue and cash flow across several generations. Delays, customer insourcing, architecture changes, or manufacturing constraints can create abrupt revenue and inventory risk.",
+        "direction": "mixed",
+        "materiality_condition": "The upside becomes material when design wins enter volume production on schedule, end-customer compute is financed and deployed, Broadcom retains content across generations, and program gross margin remains attractive.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AI semiconductor revenue separated between XPUs and networking",
+          "Named or otherwise evidenced multi-generation programs",
+          "Tape-out, manufacturing, and deployment milestones",
+          "Customer concentration, inventory, and gross-margin movement"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-35d-face-face-compute-soc-powering-ai-revolution",
+            "claim_date": "2026-02-26"
+          }
+        ]
+      },
+      {
+        "development": "AI clusters require faster and more power-efficient scale-up, scale-out, and inter-data-center communication as accelerator counts and distributed workloads grow.",
+        "company_exposure": "Broadcom supplies Tomahawk and Jericho switches, NICs, retimers, optical DSPs, SerDes, co-packaged-optics technology, and software for open Ethernet AI fabrics.",
+        "affected_driver": "Ethernet adoption, bandwidth generation, port and optical content per cluster, product ramp timing, pricing, and mix.",
+        "financial_consequence": "Higher networking content and faster replacement cycles can expand revenue and product mix. Alternative fabrics, architectural integration, slower data-center builds, or customer sourcing changes can reduce content or pressure pricing.",
+        "direction": "mixed",
+        "materiality_condition": "The benefit becomes material when large customers deploy Broadcom-based Ethernet architectures at volume and higher bandwidth or optical content translates into sustained revenue rather than isolated qualifications.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Tomahawk, Jericho, NIC, DSP, and optical product ramps",
+          "Ethernet share in scale-up and scale-out AI networks",
+          "Port speeds, optical attach, and co-packaged-optics adoption",
+          "Networking revenue, customer concentration, and margin"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom/showcases-industry-leading-solutions-scaling-ai",
+            "claim_date": "2026-03-12"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-tomahawk-6-worlds-first-1024-tbps-switch",
+            "claim_date": "2026-03-12"
+          }
+        ]
+      },
+      {
+        "development": "Production inference shifts toward governed private and hybrid infrastructure because enterprises require control over cost, security, data, and sovereignty.",
+        "company_exposure": "VMware Cloud Foundation is Broadcom's integrated private-cloud platform and sits within a large enterprise installed base.",
+        "affected_driver": "VMware renewal, full-stack adoption, pricing, workload migration, services cost, and software retention.",
+        "financial_consequence": "AI workloads can create a new reason to renew and expand VCF, supporting recurring software revenue and cash flow. If enterprises prefer public cloud, cloud-native platforms, or alternative private-cloud stacks, AI may not improve VMware economics.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material when production AI workloads are deployed on VCF at scale and generate attributable renewals, expansion, and durable margin rather than survey interest or pilot activity.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "VCF renewal and full-stack customer adoption",
+          "Named production AI deployments and workload scale",
+          "Infrastructure software revenue, bookings, and margin",
+          "Customer migration, churn, and competitive substitutions"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          }
+        ]
+      },
+      {
+        "development": "Algorithmic efficiency, model compression, sparse computation, or shifts between training and inference reduce the accelerator or networking required per unit of useful AI output.",
+        "company_exposure": "Broadcom's AI semiconductor revenue depends on deployment volume and silicon and networking content, while lower cost per token can also expand total usage and stimulate additional custom programs.",
+        "affected_driver": "XPU volume, networking content, pricing, product cadence, customer capital intensity, and utilization.",
+        "financial_consequence": "Efficiency could slow hardware demand or extend product lives, reducing revenue, but it could also unlock enough additional inference and agent usage to increase aggregate deployments.",
+        "direction": "mixed",
+        "materiality_condition": "The downside becomes material if compute and networking required per workload fall faster than total AI demand grows or customers delay planned deployments; upside requires elasticity to produce more aggregate shipped capacity.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Customer accelerator deployment plans and revisions",
+          "Training versus inference mix",
+          "AI semiconductor revenue relative to power and capacity additions",
+          "Product utilization, replacement cadence, and pricing"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": []
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Management's AI semiconductor revenue combines custom accelerators and AI networking, while public materials do not fully disclose program-level revenue, customer economics, or margin.",
+        "why_it_matters": "Treating the category as homogeneous can obscure whether growth comes from a few accelerator ramps, broader networking content, pricing, or one-time deployment timing.",
+        "next_research_trigger": "Reconcile future filings, earnings materials, and product announcements for accelerator versus networking revenue, customer and program concentration, deployment generations, gross margin, inventory, and remaining commitments.",
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Announced XPU capacity, gigawatts, partnership values, and customer roadmaps are not equivalent to Broadcom revenue, shipments, or cash.",
+        "why_it_matters": "Projects require financing, power, construction, foundry and packaging capacity, product delivery, customer acceptance, and revenue recognition; delays at any layer can change timing or economics.",
+        "next_research_trigger": "Track SEC filings and counterparties for binding commitments, Broadcom obligations, funding closure, site milestones, XPU shipments, acceptance, customer concentration, and recognized revenue.",
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-apollo-and-blackstone-establish-landmark-strategic",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Broadcom depends on external manufacturing and limited suppliers for advanced semiconductor products, but public disclosures do not provide a complete product-level capacity and yield bridge.",
+        "why_it_matters": "A design win cannot generate revenue without leading-edge wafers, packaging, substrates, optics, and qualified volume. Supply constraints or export controls can also change product mix and working capital.",
+        "next_research_trigger": "Inspect each filing for purchase commitments, inventory, supplier concentration, capacity reservations, export-control exposure, yield or shipment delays, and changes in customer forecasts.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+            "claim_date": "2025-12-18"
+          },
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-35d-face-face-compute-soc-powering-ai-revolution",
+            "claim_date": "2026-02-26"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Broadcom's private-cloud survey supports management's market narrative but does not establish VCF-specific production deployment, renewal, or financial contribution.",
+        "why_it_matters": "Enterprise intent can differ from implemented workload placement, and broader private-cloud growth may benefit competitors or internal platforms rather than Broadcom.",
+        "next_research_trigger": "Look for named VCF production AI deployments, renewal and full-stack adoption metrics, infrastructure-software bookings and margin, customer migrations, and independently verifiable workload scale.",
+        "sources": [
+          {
+            "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+        "title": "Broadcom 2025 Annual Report on Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2025-12-18",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+        "title": "Broadcom announces second quarter fiscal year 2026 financial results",
+        "publisher": "Broadcom",
+        "published_at": "2026-06-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom/showcases-industry-leading-solutions-scaling-ai",
+        "title": "Broadcom showcases industry-leading solutions for scaling AI infrastructure at OFC 2026",
+        "publisher": "Broadcom",
+        "published_at": "2026-03-12",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-tomahawk-6-worlds-first-1024-tbps-switch",
+        "title": "Broadcom ships Tomahawk 6, the world's first 102.4 Tbps switch",
+        "publisher": "Broadcom",
+        "published_at": "2026-03-12",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-35d-face-face-compute-soc-powering-ai-revolution",
+        "title": "Broadcom ships 3.5D face-to-face compute SoC powering AI",
+        "publisher": "Broadcom",
+        "published_at": "2026-02-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-apollo-and-blackstone-establish-landmark-strategic",
+        "title": "Broadcom, Apollo, and Blackstone establish strategic platform for global AI deployments",
+        "publisher": "Broadcom",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+        "title": "Broadcom's Private Cloud Outlook 2026",
+        "publisher": "Broadcom",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "codex-manual-primary-source-research",
+    "reasoning_effort": "manual",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "manual-AVGO-2026-07-28",
+    "response_model": "codex-manual-primary-source-research",
+    "input_tokens": 0,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 0,
+    "reasoning_tokens": 0,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "manual_primary_source_review",
+        "query": "Broadcom 2025 Form 10-K, fiscal Q2 2026 results, custom XPU and AI networking releases, XPV platform, and VMware private-cloud evidence"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016825000121/avgo-20251102.htm",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-second-quarter-fiscal-year-2026-financial",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom/showcases-industry-leading-solutions-scaling-ai",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-tomahawk-6-worlds-first-1024-tbps-switch",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-ships-35d-face-face-compute-soc-powering-ai-revolution",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-apollo-and-blackstone-establish-landmark-strategic",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point",
+        "type": "manual_review"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-manual-repair",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:avgo",
+      "model:codex-manual-primary-source-research",
+      "reasoning:manual"
+    ]
+  }
+}

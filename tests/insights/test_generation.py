@@ -61,8 +61,8 @@ def test_contracts_are_separate_and_use_audience_specific_schemas():
     investment = insight_generation.contract("investment")
     engineering = insight_generation.contract("ai_engineering")
 
-    assert investment.version == "investment-insight-v10"
-    assert engineering.version == "ai-engineering-insight-v7"
+    assert investment.version == "investment-insight-v11"
+    assert engineering.version == "ai-engineering-insight-v8"
     assert investment.cache_key != engineering.cache_key
     assert investment.sha256 != engineering.sha256
     assert "Investment decision standard" in investment.instructions()
@@ -111,12 +111,18 @@ def test_candidate_input_reuses_attributed_event_without_rank_or_router_reason()
 
     rendered = insight_generation.render_input(candidate)
 
-    assert rendered.startswith("<candidate_evidence>\nevidence_packet:")
+    assert rendered.startswith(
+        "<candidate_evidence>\n# Evidence about one development"
+    )
     assert rendered.endswith("\n</candidate_evidence>")
-    assert 'author: "@alice"' in rendered
-    assert 'evaluation_day: "2026-07-15"' in rendered
-    assert 'posted: "2026-07-15"' in rendered
-    assert "kind: authored_artifact" in rendered
+    assert "Date: 2026-07-15" in rendered
+    assert "## Source posts (1)" in rendered
+    assert "### 1. @alice" in rendered
+    assert "Posted: 2026-07-15" in rendered
+    assert "## Supporting artifacts (1)" in rendered
+    assert "### 1. Recovery evaluation" in rendered
+    assert "https://x.com" not in rendered
+    assert "https://example.com" not in rendered
     assert "This looks exciting" not in rendered
     assert "independent_reactions" not in rendered
     assert "feed_rank" not in rendered
@@ -165,7 +171,7 @@ def test_build_request_is_pure_and_keeps_variable_evidence_last():
         "investment"
     ).instructions()
     assert request["input"] == insight_generation.render_input(candidate)
-    assert request["prompt_cache_key"] == "fli:insights:investment:v10"
+    assert request["prompt_cache_key"] == "fli:insights:investment:v11"
     assert request["text"]["format"] == insight_generation.output_format(
         "investment"
     )

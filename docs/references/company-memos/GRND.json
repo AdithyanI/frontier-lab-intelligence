@@ -1,0 +1,615 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Grindr",
+    "ticker": "GRND"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Grindr operates a freemium social-networking platform for gay, bisexual, transgender, queer, and sexually explorative adults. The free product builds reach, engagement, and the pool of users who may convert to paid products. Most revenue comes from subscriptions and consumable add-ons; advertising is the smaller second engine. The business therefore depends on preserving community trust and engagement while improving payer conversion, paid-product mix, pricing, and advertising yield.",
+      "revenue_engines": [
+        {
+          "engine": "XTRA and Unlimited subscriptions",
+          "who_pays": "Individual Grindr users who purchase recurring premium access, primarily through Apple App Store and Google Play.",
+          "economic_logic": "Subscriptions provide additional controls and features for terms ranging from one week to one year. Revenue scales with the active-user pool, payer conversion, retention, local pricing, and mix toward higher-priced plans. In Q1 2026, app-based revenue represented 82.1% of total revenue, and management attributed growth to stronger merchandising, paywall optimization, pricing experiments, and mix.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+              "claim_date": "2026-05-08"
+            }
+          ]
+        },
+        {
+          "engine": "Consumable premium add-ons",
+          "who_pays": "Individual users purchasing short-duration, pay-per-use features.",
+          "economic_logic": "Consumables monetize specific high-intent moments without requiring a recurring subscription. Revenue is recognized when the feature is used, so adoption, repeat purchase, product placement, and perceived utility determine the contribution.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+              "claim_date": "2026-05-08"
+            }
+          ]
+        },
+        {
+          "engine": "Advertising",
+          "who_pays": "Brands and third-party advertising platforms seeking to reach Grindr's user base.",
+          "economic_logic": "Grindr sells in-app banners, interstitials, and customized units, generally on a CPM basis. Advertising revenue depends on active reach, inventory, advertiser demand, formats, geography, and brand suitability; Q1 2026 advertising revenue grew as campaigns and formats broadened.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+              "claim_date": "2026-05-08"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+              "claim_date": "2026-03-02"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+          "claim_date": "2026-03-02"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+          "claim_date": "2026-05-08"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Active-user reach, engagement, and community trust",
+        "why_it_matters": "The free network supplies prospective payers, interactions, product data, and advertising inventory. More useful connections and sustained engagement can strengthen organic acquisition and monetization; safety, privacy, authenticity, or product-quality failures can reduce use of the platform before their effect appears in paid conversion.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://trust.grindr.com/en-US/privacy",
+            "claim_date": "2026-07-06"
+          }
+        ]
+      },
+      {
+        "driver": "Paying-user conversion and retention",
+        "why_it_matters": "Subscriptions and consumables are the main revenue engine. Product utility, merchandising, paywall design, and feature packaging determine how many active users pay and whether they remain payers. In Q1 2026, Average Paying Users increased 18.6% year over year, making the metric a direct bridge from product execution to revenue.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "driver": "Pricing, plan mix, and app-based revenue per paying user",
+        "why_it_matters": "Local pricing, weekly versus longer-duration subscriptions, XTRA versus Unlimited mix, and consumable usage govern ARPPU. Q1 2026 ARPPU increased 12.1% year over year as higher-priced product mix and pricing experiments expanded, but aggressive monetization can weaken user value or trust.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "driver": "AI-product adoption and differentiated connection quality",
+        "why_it_matters": "Grindr is building gAI across a model layer, an architecture layer using proprietary behavioral and conversational data, and consumer applications. The financial case requires products such as A-List, recommendations, summaries, and future assistants to improve connection outcomes, engagement, or paid conversion enough to offset product-development, inference, privacy, and moderation costs.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "driver": "Distribution, infrastructure, and content-moderation unit costs",
+        "why_it_matters": "Apple and Google distribution fees, AWS infrastructure, and content moderation are core cost-of-revenue items. More paid volume raises app-store fees, while richer AI features may raise compute and safety workloads. Alternative payments, lower model costs, efficient serving, and effective automated moderation can improve unit economics if they do not impair user safety.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          },
+          {
+            "url": "https://help.grindr.com/hc/en-us/articles/7169085929491-Your-Privacy-Artificial-Intelligence-at-Grindr",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Free users, XTRA and Unlimited subscribers, and consumable purchasers across more than 190 countries and territories",
+        "why_it_matters": "The user community is simultaneously the network, the conversion pool, and the source of interactions that make recommendations and other AI-native experiences possible. Geography affects price, regulation, safety, and product availability.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Healthcare, gaming, travel, entertainment, and consumer-goods advertisers",
+        "why_it_matters": "Advertisers monetize free reach and can diversify revenue, but demand is sensitive to campaign economics, macro conditions, brand suitability, and public sentiment toward the platform.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Apple App Store, Google Play, and Amazon Web Services",
+        "why_it_matters": "Apple and Google control primary mobile distribution and substantially all app-based payment processing, while AWS supports platform infrastructure. Fees, outages, access restrictions, policy changes, or removal from app stores can affect reach, revenue, cost, and product deployment.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Third-party foundation-model providers, including OpenAI and Anthropic as examples identified by Grindr",
+        "why_it_matters": "Frontier-model capability, latency, safety controls, and price shape the quality and unit economics of gAI applications. Grindr's strategy is to combine third-party models with proprietary data and architecture, so portability and the defensibility of that middle layer matter.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Dating and social-networking platforms serving overlapping connection use cases",
+        "why_it_matters": "Users can multi-home or shift time to alternative apps. Grindr must preserve liquidity, cultural specificity, safety, and connection quality as competitors deploy similar generative-AI discovery and conversation features.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "relationship": "substitute",
+        "entities_or_group": "General-purpose AI assistants and AI-powered companion or digital-relationship products",
+        "why_it_matters": "Always-available synthetic companions may compete for attention or satisfy some conversational and relationship needs without a human network. Conversely, foundation models can become commoditized inputs that Grindr uses to improve real-world connections.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Privacy, consumer-protection, online-safety, age-assurance, and AI regulators across Grindr's markets",
+        "why_it_matters": "The product processes sexual-orientation, gender, location, message, image, and other sensitive data. Consent requirements, limits on automated decisions, AI disclosure rules, and enforcement can constrain training and personalization, increase compliance cost, or reduce engagement if users distrust the controls.",
+        "sources": [
+          {
+            "url": "https://trust.grindr.com/en-US/privacy",
+            "claim_date": "2026-07-06"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Build gAI as a full-stack foundation spanning models, a proprietary architecture layer, and consumer applications.",
+        "investment_relevance": "Management's AI thesis is not a single feature. It depends on using Grindr-specific behavioral and conversational context to produce differentiated experiences that improve connection quality and create monetizable surfaces rather than merely reselling commodity model access.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "action": "Deploy AI-native products such as A-List, recommendations, conversation summaries, insights, and assistant-like features.",
+        "investment_relevance": "A-List was presented as the first scaled proof point, with broader monetization expected from 2026. The relevant test is whether feature adoption lifts meaningful connections, retention, payer conversion, or plan mix, not whether an AI feature merely launches.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          },
+          {
+            "url": "https://investors.grindr.com/news/news-details/2024/Grindr-Hosts-First-Investor-Day/default.aspx",
+            "claim_date": "2024-06-26"
+          }
+        ]
+      },
+      {
+        "action": "Expand monetization through pricing, packaging, merchandising, subscriptions, and consumables while maintaining a large free network.",
+        "investment_relevance": "This is the current financial engine and the bridge from new product utility to revenue. Q1 2026 evidence shows that paywall optimization, higher-priced mix, and pricing experiments can move both paying users and ARPPU.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "action": "Give users controls over AI training and AI-powered personalization while retaining mandatory AI-assisted safeguards against harmful activity.",
+        "investment_relevance": "The availability, clarity, and credibility of these controls are part of the product rather than a separate compliance issue. They influence what data can be used, the quality of personalization, regulatory exposure, and whether users continue to trust a platform handling exceptionally sensitive information.",
+        "sources": [
+          {
+            "url": "https://help.grindr.com/hc/en-us/articles/7169085929491-Your-Privacy-Artificial-Intelligence-at-Grindr",
+            "claim_date": null
+          },
+          {
+            "url": "https://trust.grindr.com/en-US/privacy",
+            "claim_date": "2026-07-06"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models become materially better at recommendation, long-context conversation understanding, summarization, and intent inference.",
+        "company_exposure": "Grindr can combine improved models with its network, interaction history, and gAI architecture to rank connections, summarize chats, provide insights, and reduce navigation or conversational friction.",
+        "affected_driver": "AI-product adoption, engagement, payer conversion, and higher-value paid-product mix",
+        "financial_consequence": "Successful products could increase app-based revenue through more paying users, higher ARPPU, and stronger retention; weak or intrusive experiences could reduce engagement and raise churn.",
+        "direction": "mixed",
+        "materiality_condition": "The features must produce measurable improvements in connection outcomes or retained usage and convert into incremental paid adoption or retention after controlling for pricing and paywall changes.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "A-List and other gAI feature activation and repeat use",
+          "Payer conversion and retention for exposed versus unexposed cohorts",
+          "ARPPU and plan-mix changes attributable to AI features",
+          "User reports, opt-outs, and trust or safety complaints"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          },
+          {
+            "url": "https://help.grindr.com/hc/en-us/articles/7169085929491-Your-Privacy-Artificial-Intelligence-at-Grindr",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Foundation-model inference costs fall and agentic coding systems become more capable.",
+        "company_exposure": "Grindr depends on third-party foundation models within gAI and says agentic AI supports engineering work. Lower serving cost and higher development throughput could make more personalized features economical and accelerate product iteration.",
+        "affected_driver": "AI inference unit cost, product-development productivity, release velocity, and gross margin",
+        "financial_consequence": "Lower cost per AI interaction or more shipped product per engineer could support margins and cash flow while expanding the product surface; savings may be absorbed by higher usage, evaluation, safety, and specialist staffing.",
+        "direction": "upside",
+        "materiality_condition": "Measured cost per useful AI interaction or product cycle must fall without worsening latency, quality, privacy, safety, or rework, and the savings must remain after additional infrastructure and personnel costs.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Infrastructure cost relative to AI-feature usage",
+          "Product-development expense and release cadence",
+          "Model-provider mix and portability",
+          "Gross margin as gAI usage scales"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "development": "AI-powered companions and general assistants improve at persistent, intimate, and relationship-oriented interaction.",
+        "company_exposure": "Synthetic companions can compete for user attention or satisfy some conversational needs, while general assistants can reproduce generic profile, messaging, and dating advice outside Grindr.",
+        "affected_driver": "Active-user engagement, differentiation, organic acquisition, and willingness to pay",
+        "financial_consequence": "Substitution could slow engagement, paying-user growth, and ARPPU unless Grindr's live human network, cultural specificity, safety systems, and proprietary context sustain a differentiated outcome.",
+        "direction": "downside",
+        "materiality_condition": "AI companions must take measurable time or connection intent from Grindr's core cohorts, or commoditized assistants must reduce willingness to pay for Grindr-native AI features.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "MAU and engagement trends in cohorts adopting AI companions",
+          "Retention of users seeking long-term relationships or conversation",
+          "Paid adoption of Grindr-native AI versus free external substitutes",
+          "Changes in user acquisition channels and organic growth"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "development": "AI safety, fraud detection, age-assurance, and content-moderation systems improve, while AI privacy and automated-decision regulation becomes more demanding.",
+        "company_exposure": "Grindr already combines AI with human review for scams, prohibited activity, profile content, and other safeguards, and it processes highly sensitive location, identity, message, and image data under user controls.",
+        "affected_driver": "Community trust, harmful-activity incidence, moderation workload, regulatory compliance, and usable training data",
+        "financial_consequence": "Better detection could improve retention and reduce manual workload, but false positives, invasive processing, weak consent, or regulatory restrictions could raise cost, reduce personalization, trigger penalties, and damage engagement.",
+        "direction": "mixed",
+        "materiality_condition": "Safety systems must reduce verified harm and moderator workload at acceptable false-positive and appeal rates while data use remains legally valid and trusted by users.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Scam, spam, abuse, and safety incident rates",
+          "False-positive, appeal, and reversal rates",
+          "AI-training and feature opt-out rates",
+          "Regulatory investigations, required product changes, and privacy complaints",
+          "Content-moderation cost per active user"
+        ],
+        "sources": [
+          {
+            "url": "https://help.grindr.com/hc/en-us/articles/7169085929491-Your-Privacy-Artificial-Intelligence-at-Grindr",
+            "claim_date": null
+          },
+          {
+            "url": "https://trust.grindr.com/en-US/privacy",
+            "claim_date": "2026-07-06"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "In its June 2024 flagship factsheet, BIT Capital described Grindr as the largest LGBTQ+ social network, highlighted high engagement and insufficient monetization, and treated the product roadmap spanning AI features, travel experiences, and serious relationships as a route to 20–25% annual growth through 2027. The attributable view is therefore a monetization-gap thesis: a large, engaged network could support materially more revenue if new products and pricing convert utility into paid adoption without damaging the community.",
+      "what_would_support_it": [
+        "Sustained growth in active and paying users alongside stable or improving engagement and trust indicators",
+        "Higher payer penetration and ARPPU driven by retained product utility rather than only short-duration pricing or paywall pressure",
+        "Measurable adoption of gAI products that improves connection outcomes, retention, or paid conversion",
+        "Revenue growth that preserves attractive gross margin, Adjusted EBITDA, and cash conversion after AI, safety, and product investment",
+        "Evidence that new relationship, travel, or Gayborhood use cases add incremental demand rather than distracting from the core network"
+      ],
+      "what_would_challenge_it": [
+        "User or payer growth slows as monetization becomes more aggressive or new products fail to improve outcomes",
+        "AI features see weak repeat use, fail to convert into paid demand, or are easily substituted by general-purpose assistants",
+        "Privacy, safety, consent, or regulatory failures reduce engagement, constrain data use, or create material cost and liability",
+        "Infrastructure, model, moderation, and product-development costs rise faster than incremental AI-related revenue",
+        "The 2027 growth framework is missed without transparent evidence that newer product cohorts are creating durable value"
+      ],
+      "sources": [
+        {
+          "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-06%20-%20Juni/2024-06%20BIT%20Global%20Internet%20Leaders%2030%20R-I.pdf?_hsmi=314792919",
+          "claim_date": "2024-06-30"
+        },
+        {
+          "url": "https://investors.grindr.com/news/news-details/2024/Grindr-Hosts-First-Investor-Day/default.aspx",
+          "claim_date": "2024-06-26"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Public disclosures do not yet isolate the incremental effect of gAI products from pricing, paywall, merchandising, and broader product changes.",
+        "why_it_matters": "Paying-user and ARPPU growth can support the BIT monetization thesis without proving that AI created the improvement. Treating all monetization gains as AI-driven would make future Event analysis circular.",
+        "next_research_trigger": "When management reports an AI-product launch or expansion, look for exposed-versus-control cohort data on activation, repeat use, connection outcomes, retention, payer conversion, and plan mix before attributing financial impact.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The cost and supplier structure of gAI is not disclosed at a level that permits model-level unit economics or concentration analysis.",
+        "why_it_matters": "A differentiated consumer experience can still dilute gross margin if inference, evaluation, storage, moderation, and specialist staffing grow faster than monetization. Dependence on a small set of model providers could also weaken bargaining power or resilience.",
+        "next_research_trigger": "Review future filings and earnings materials for AI-related infrastructure cost, model-provider commitments, usage growth, cost per AI interaction, fallback architecture, and gross-margin movement as A-List and other gAI products scale.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+            "claim_date": "2025-08-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+            "claim_date": "2026-05-08"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Consent choices, opt-out behavior, and jurisdictional restrictions may change the breadth and representativeness of data available for personalization and model improvement.",
+        "why_it_matters": "Grindr's proposed architecture advantage depends partly on sensitive behavioral and conversational context, but the product must earn valid consent and trust. Lower or skewed data coverage may reduce model quality, while overly broad use may create regulatory and reputational harm.",
+        "next_research_trigger": "Track changes to Grindr's AI controls and privacy policy, opt-out or consent disclosures, regulator actions, and any product-quality differences across jurisdictions or user cohorts with different data permissions.",
+        "sources": [
+          {
+            "url": "https://help.grindr.com/hc/en-us/articles/7169085929491-Your-Privacy-Artificial-Intelligence-at-Grindr",
+            "claim_date": null
+          },
+          {
+            "url": "https://trust.grindr.com/en-US/privacy",
+            "claim_date": "2026-07-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "BIT Capital's attributable thesis is a dated June 2024 commentary rather than a complete current valuation framework with explicit operating thresholds.",
+        "why_it_matters": "The commentary establishes the monetization-gap logic and product-roadmap angle, but it does not disclose a full downside case, current expected return, or the precise KPI levels at which BIT would change its view.",
+        "next_research_trigger": "Search future dated BIT factsheets, letters, podcasts, or analyst publications for a refreshed Grindr thesis, explicit AI-product milestones, payer and engagement thresholds, valuation logic, and conditions that would falsify the position.",
+        "sources": [
+          {
+            "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-06%20-%20Juni/2024-06%20BIT%20Global%20Internet%20Leaders%2030%20R-I.pdf?_hsmi=314792919",
+            "claim_date": "2024-06-30"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+        "title": "Grindr Inc. 2025 Annual Report on Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission / Grindr Inc.",
+        "published_at": "2026-03-02",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+        "title": "Grindr Inc. Quarterly Report on Form 10-Q for the quarter ended March 31, 2026",
+        "publisher": "U.S. Securities and Exchange Commission / Grindr Inc.",
+        "published_at": "2026-05-08",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+        "title": "AI Native by Design: Building gAI to reimagine how Grindr delivers value to users",
+        "publisher": "Grindr Inc.",
+        "published_at": "2025-08-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.grindr.com/news/news-details/2024/Grindr-Hosts-First-Investor-Day/default.aspx",
+        "title": "Grindr Hosts First Investor Day",
+        "publisher": "Grindr Inc.",
+        "published_at": "2024-06-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://help.grindr.com/hc/en-us/articles/7169085929491-Your-Privacy-Artificial-Intelligence-at-Grindr",
+        "title": "Your Privacy & Artificial Intelligence at Grindr",
+        "publisher": "Grindr",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://trust.grindr.com/en-US/privacy",
+        "title": "Grindr Privacy Policy",
+        "publisher": "Grindr",
+        "published_at": "2026-07-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-06%20-%20Juni/2024-06%20BIT%20Global%20Internet%20Leaders%2030%20R-I.pdf?_hsmi=314792919",
+        "title": "BIT Global Internet Leaders 30 R-I Factsheet, June 2024",
+        "publisher": "BIT Capital GmbH",
+        "published_at": "2024-06-30",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "codex-manual-research",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "manual-codex-grnd-2026-07-28",
+    "response_model": "codex-manual-research",
+    "input_tokens": 0,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 0,
+    "reasoning_tokens": 0,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "manual_web_research",
+        "queries": [
+          "Grindr 2025 10-K and Q1 2026 10-Q",
+          "Grindr gAI AI-native strategy privacy and safety",
+          "BIT Capital Grindr public thesis"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000007/grnd-20251231.htm",
+        "type": "manual_primary_source_review"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000011/grnd-20260331.htm",
+        "type": "manual_primary_source_review"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1820144/000182014425000033/q22025supplementalaistra.htm",
+        "type": "manual_primary_source_review"
+      },
+      {
+        "url": "https://investors.grindr.com/news/news-details/2024/Grindr-Hosts-First-Investor-Day/default.aspx",
+        "type": "manual_primary_source_review"
+      },
+      {
+        "url": "https://help.grindr.com/hc/en-us/articles/7169085929491-Your-Privacy-Artificial-Intelligence-at-Grindr",
+        "type": "manual_primary_source_review"
+      },
+      {
+        "url": "https://trust.grindr.com/en-US/privacy",
+        "type": "manual_primary_source_review"
+      },
+      {
+        "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-06%20-%20Juni/2024-06%20BIT%20Global%20Internet%20Leaders%2030%20R-I.pdf?_hsmi=314792919",
+        "type": "manual_primary_source_review"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-manual-repair",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:grnd",
+      "model:codex-manual-research",
+      "reasoning:xhigh"
+    ]
+  }
+}

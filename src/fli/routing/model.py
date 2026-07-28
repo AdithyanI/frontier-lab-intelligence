@@ -21,7 +21,7 @@ import tiktoken
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v10"
+PROMPT_VERSION = "audience-routing-v11"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "high"
@@ -55,7 +55,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v10",
+    "name": "audience_routing_v11",
     "strict": True,
     "schema": {
         "type": "object",
@@ -173,19 +173,13 @@ def _display_text(source: EvidenceSource) -> str:
     return text
 
 
-def _yaml_value(value: str) -> str:
-    return json.dumps(value, ensure_ascii=False)
+def _one_line(value: str) -> str:
+    return " ".join(html.unescape(value).split())
 
 
-def _literal_field(
-    field: str,
-    text: str,
-    *,
-    indent: str,
-) -> list[str]:
-    lines = [f"{indent}{field}: |"]
-    lines.extend(f"{indent}  {line}" if line else "" for line in text.splitlines())
-    return lines
+def _quoted_text(text: str) -> list[str]:
+    lines = text.splitlines() or [""]
+    return [f"> {line}" if line else ">" for line in lines]
 
 
 def _is_transport_only(text: str) -> bool:
@@ -206,7 +200,7 @@ def is_model_visible(source: EvidenceSource) -> bool:
 def _render_full_input(
     packet: RoutingPacket, *, include_dates: bool = False
 ) -> str:
-    """Render first-party semantic evidence without internal provenance."""
+    """Render a compact reading view without internal provenance."""
     roots = [source for source in packet.sources if source.relation == "root"]
     if len(roots) != 1:
         raise ValueError("routing packet must contain exactly one root source")
@@ -226,66 +220,56 @@ def _render_full_input(
     artifacts = [
         source for source in packet.sources if source.source_type == "artifact"
     ]
-    lines = ["evidence_packet:"]
-    if include_dates:
-        lines.append(f"  evaluation_day: {_yaml_value(packet.day)}")
-    lines.append("  primary_source:")
-    if root.author:
-        lines.append(f"    author: {_yaml_value(root.author)}")
-    lines.append("    post:")
-    root_text = _display_text(root)
-    if _is_transport_only(root_text):
-        lines.append(
-            "      kind: artifact_link" if artifacts else "      kind: link_only"
-        )
-    else:
-        lines.append("      kind: x_post")
-        if include_dates and root.posted:
-            lines.append(f"      posted: {_yaml_value(root.posted)}")
-        lines.extend(_literal_field("text", root_text, indent="      "))
+    source_posts = [root, *independent_originals]
+    lines = [
+        "# Evidence about one development",
+        "",
+        f"Date: {packet.day}",
+        "",
+        f"## Source posts ({len(source_posts)})",
+    ]
 
-    if independent_originals:
-        lines.append("  independent_sources:")
-        for source in independent_originals:
-            text = _display_text(source)
-            kind = "artifact_link" if _is_transport_only(text) else "x_post"
-            lines.append(f"    - kind: {kind}")
-            if source.author:
-                lines.append(f"      author: {_yaml_value(source.author)}")
-            if include_dates and source.posted:
-                lines.append(f"      posted: {_yaml_value(source.posted)}")
-            if not _is_transport_only(text):
-                lines.extend(_literal_field("text", text, indent="      "))
+    for ordinal, source in enumerate(source_posts, start=1):
+        author = _one_line(source.author or "Unknown author")
+        lines.extend(["", f"### {ordinal}. {author}"])
+        if include_dates and source.posted:
+            lines.append(f"Posted: {_one_line(source.posted)}")
+        lines.append("")
+        text = _display_text(source)
+        if _is_transport_only(text):
+            lines.append(
+                "> No substantive post text beyond the supporting artifact link."
+                if artifacts
+                else "> No substantive post text was available."
+            )
+        else:
+            lines.extend(_quoted_text(text))
 
     if continuations:
-        lines.append("  supporting_continuations:")
-        for source in continuations:
-            text = _display_text(source)
-            kind = "artifact_link" if _is_transport_only(text) else "x_post"
-            lines.append(f"    - kind: {kind}")
-            if source.author:
-                lines.append(f"      author: {_yaml_value(source.author)}")
+        lines.extend(["", f"## Author updates ({len(continuations)})"])
+        for ordinal, source in enumerate(continuations, start=1):
+            author = _one_line(source.author or "Unknown author")
+            lines.extend(["", f"### {ordinal}. {author}"])
             if include_dates and source.posted:
-                lines.append(f"      posted: {_yaml_value(source.posted)}")
-            if not _is_transport_only(text):
-                lines.extend(_literal_field("text", text, indent="      "))
+                lines.append(f"Posted: {_one_line(source.posted)}")
+            lines.append("")
+            lines.extend(_quoted_text(_display_text(source)))
 
-    if artifacts:
-        lines.append("  artifacts:")
-        for source in artifacts:
-            kind = (
-                "authored_artifact"
-                if source.relation == "self_published_artifact"
-                else "linked_artifact"
-            )
-            lines.append(f"    - kind: {kind}")
-            if kind == "linked_artifact" and source.author:
-                lines.append(f"      author: {_yaml_value(source.author)}")
-            if source.title:
-                lines.append(f"      title: {_yaml_value(source.title)}")
-            lines.extend(
-                _literal_field("text", _display_text(source), indent="      ")
-            )
+    lines.extend(["", f"## Supporting artifacts ({len(artifacts)})"])
+    if not artifacts:
+        lines.extend(
+            [
+                "",
+                "No supporting artifact text was included in this packet.",
+            ]
+        )
+    for ordinal, source in enumerate(artifacts, start=1):
+        title = _one_line(source.title or f"Artifact {ordinal}")
+        lines.extend(["", f"### {ordinal}. {title}"])
+        if source.author:
+            lines.append(f"Author: {_one_line(source.author)}")
+        lines.append("")
+        lines.extend(_quoted_text(_display_text(source)))
 
     return "\n".join(lines)
 

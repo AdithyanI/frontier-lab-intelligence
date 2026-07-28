@@ -1,0 +1,913 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "GCL-Poly",
+    "ticker": "03800.HK"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Current economics remain dominated by cyclical photovoltaic materials. In 2025, polysilicon generated about 68% of revenue and wafers about 14%; FBR granular silicon is the core product and primary source of differentiation through cost, purity, handling characteristics and carbon intensity. Industrial silicon, processing services, other silicon products and a small solar-farm business provide additional revenue. The 2026 strategy adds lithium iron phosphate, silicon-carbon anodes and other materials, while perovskite modules remain a commercialization opportunity rather than a proven material earnings engine.",
+      "revenue_engines": [
+        {
+          "engine": "FBR granular polysilicon and related polysilicon products",
+          "who_pays": "Primarily monocrystalline wafer and crystal-pulling manufacturers serving high-efficiency photovoltaic cell and module supply chains.",
+          "economic_logic": "Revenue is driven by tonnes shipped multiplied by market-linked selling prices. Gross profit depends on the spread between selling price and full production cost, with cash cost, purity, customer qualification, plant utilization and inventory discipline determining resilience through the polysilicon cycle.",
+          "sources": [
+            {
+              "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+              "claim_date": "2026-04-29"
+            },
+            {
+              "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+              "claim_date": "2026-03-30"
+            },
+            {
+              "url": "https://www.gcltech.com/en/goods/produce1/9",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Photovoltaic wafers and wafer-processing services",
+          "who_pays": "Solar-cell manufacturers and other downstream photovoltaic manufacturers, including customers using original-equipment-manufacturing arrangements.",
+          "economic_logic": "Revenue depends on gigawatts sold, wafer prices and the mix of self-produced versus processing volumes. Profitability is sensitive to crystal-pulling and slicing utilization, silicon input costs, product dimensions and the severity of downstream price competition.",
+          "sources": [
+            {
+              "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+              "claim_date": "2026-04-29"
+            },
+            {
+              "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+              "claim_date": "2026-03-30"
+            }
+          ]
+        },
+        {
+          "engine": "Adjacent silicon materials, processing and electricity sales",
+          "who_pays": "Industrial-material buyers, third-party processing customers and electricity-grid or power-purchasing counterparties.",
+          "economic_logic": "This combines industrial silicon, external silane gas, processing fees, ingots, silicon rods, silicon powder and limited solar-farm electricity sales. Economics vary by product but generally depend on tonnes or services delivered, utilization of existing assets, input costs and customer qualification; the portfolio can monetize by-products or spare capacity but is less important than polysilicon.",
+          "sources": [
+            {
+              "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+              "claim_date": "2026-04-29"
+            },
+            {
+              "url": "https://www.gcltech.com/en/goods/produce/78.html",
+              "claim_date": null
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+          "claim_date": "2026-04-29"
+        },
+        {
+          "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+          "claim_date": "2026-03-30"
+        },
+        {
+          "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf",
+          "claim_date": "2026-05-17"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Polysilicon selling price, shipment volume and inventory discipline",
+        "why_it_matters": "Polysilicon is the largest revenue stream and operates in a structurally volatile market. Produce-to-order discipline and a high sales-to-production ratio can protect working capital, but industry inventory and capacity utilization determine whether cost advantages translate into gross profit or are transferred to customers through lower prices.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://www.gcltech.com/en/about/newsinfo/968.html",
+            "claim_date": "2025-08-30"
+          },
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0506/2026050600447.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "Granular-silicon cash cost, energy intensity, yield and product purity",
+        "why_it_matters": "The FBR advantage must appear in repeatable unit economics. The 2025 average cash manufacturing cost, including R&D, was RMB25.12/kg. Electricity and hydrogen use, plant uptime, impurity distribution and turbidity affect both cost and qualification for high-efficiency N-type and back-contact applications. Verified low carbon intensity can improve customer acceptance where supply-chain emissions matter.",
+        "financial_lines": [
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+            "claim_date": "2026-03-30"
+          },
+          {
+            "url": "https://www.gcltech.com/en/goods/produce1/9",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Customer adoption and concentration in leading wafer manufacturers",
+        "why_it_matters": "Leading customers provide scale and qualification credibility, but concentration increases exposure to procurement changes and bargaining power. The company stated that its five largest granular-silicon customers represented more than 70% of shipments in 2025.",
+        "financial_lines": [
+          "volume",
+          "pricing",
+          "product_mix",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://gcltech.com/en/about/newsinfo/959.html",
+            "claim_date": "2025-11-24"
+          },
+          {
+            "url": "https://www.gcltech.com/en/goods/produce1/9",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Wafer utilization, pricing and outsourcing mix",
+        "why_it_matters": "Wafer revenue fell 40.1% in 2025. Low utilization or unfavorable pricing can create fixed-cost under-absorption, while processing arrangements can support volume but may carry different margins from self-manufactured wafers.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure"
+        ],
+        "sources": [
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+            "claim_date": "2026-03-30"
+          }
+        ]
+      },
+      {
+        "driver": "Commercial scale-up and capital allocation for perovskite, LFP and silicon-carbon materials",
+        "why_it_matters": "These businesses could diversify earnings but introduce qualification, ramp, working-capital and capital-allocation risks. Material value requires saleable yields, customer certifications, contracted shipments and margins sufficient to cover incremental R&D and capital expenditure; nominal capacity alone is not evidence of economic success.",
+        "financial_lines": [
+          "revenue",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf",
+            "claim_date": "2026-05-17"
+          },
+          {
+            "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+            "claim_date": "2025-06-25"
+          },
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0506/2026050600447.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Large monocrystalline-wafer manufacturers and downstream N-type, back-contact and other high-efficiency photovoltaic supply chains",
+        "why_it_matters": "Customer qualification determines granular-silicon adoption, product mix and pricing. Concentration among leading customers can accelerate market penetration but also gives a small number of buyers meaningful negotiating leverage.",
+        "sources": [
+          {
+            "url": "https://gcltech.com/en/about/newsinfo/959.html",
+            "claim_date": "2025-11-24"
+          },
+          {
+            "url": "https://www.gcltech.com/en/goods/produce1/9",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Regional electricity systems and the company's integrated silane-gas and FBR production infrastructure",
+        "why_it_matters": "Continuous polysilicon production requires reliable energy and plant uptime. FBR's lower electricity and hydrogen consumption is central to cost differentiation, while more than 600,000 tonnes of stated internal silane capacity reduces dependence on external silane supply and can support adjacent silicon-carbon products.",
+        "sources": [
+          {
+            "url": "https://www.gcltech.com/en/goods/produce1/9",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.gcltech.com/en/goods/produce/78.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "substitute",
+        "entities_or_group": "Conventional Siemens-route dense polysilicon and competing integrated polysilicon-wafer producers",
+        "why_it_matters": "Dense polysilicon is a direct input substitute. If conventional producers match FBR on cost, purity or carbon footprint, GCL's price premium and customer share can compress; conversely, tighter energy or carbon requirements can favor FBR.",
+        "sources": [
+          {
+            "url": "https://www.gcltech.com/en/goods/produce1/9",
+            "claim_date": null
+          },
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Suzhou Laboratory and Soochow University",
+        "why_it_matters": "The parties established an AI High-throughput Joint R&D Center for perovskite formulas, processes, applications and industrialization. Its relevance depends on whether laboratory learning transfers into reproducible full-size module performance and manufacturing yield.",
+        "sources": [
+          {
+            "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+            "claim_date": "2025-06-25"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Chinese industrial, market-regulation and product-standard authorities",
+        "why_it_matters": "Rules governing project establishment, energy and water consumption, product quality, carbon-footprint reporting, project capital and disorderly low-price competition can affect capacity additions, compliance costs and industry pricing behavior. The policy direction favors efficiency, quality and innovation over undifferentiated capacity expansion.",
+        "sources": [
+          {
+            "url": "https://wap.miit.gov.cn/gyhxxhb/jgsj/dzxxs/zlgh/art/2024/art_8997116730504e5b85f97f9e63c2da3a.html",
+            "claim_date": "2024-11-20"
+          },
+          {
+            "url": "https://www.samr.gov.cn/xw/mtjj/art/2026/art_68dba84fd76d40278483e7eb264af0a7.html",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Concentrate the core photovoltaic business on proprietary FBR granular silicon while controlling production, inventory and expansion discipline.",
+        "investment_relevance": "This prioritizes a cost- and quality-differentiated product rather than undifferentiated capacity. The strategy supports cash preservation only if plant utilization remains adequate and the cost advantage is not fully competed away through lower selling prices.",
+        "sources": [
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://www.gcltech.com/en/about/newsinfo/968.html",
+            "claim_date": "2025-08-30"
+          }
+        ]
+      },
+      {
+        "action": "Improve granular-silicon purity, energy efficiency and certified carbon footprint for high-efficiency photovoltaic applications and international supply chains.",
+        "investment_relevance": "Higher qualification rates can expand the addressable customer base and product mix, while lower energy intensity directly reduces unit cost. A commercial premium is not assured and must be demonstrated through realized pricing, customer share and margin.",
+        "sources": [
+          {
+            "url": "https://www.gcltech.com/en/goods/produce1/9",
+            "claim_date": null
+          },
+          {
+            "url": "https://gcltech.com/en/about/newsinfo/959.html",
+            "claim_date": "2025-11-24"
+          }
+        ]
+      },
+      {
+        "action": "Industrialize perovskite modules through the Kunshan gigawatt-scale base and an AI high-throughput research center.",
+        "investment_relevance": "The initial commercial line and AI research infrastructure create a route to a second photovoltaic platform, but value depends on full-size efficiency, stability, yield, certification, warranties and customer acceptance rather than announced nameplate capacity.",
+        "sources": [
+          {
+            "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+            "claim_date": "2025-06-25"
+          },
+          {
+            "url": "https://www.gcltech.com/en/about/newsinfo/968.html",
+            "claim_date": "2025-08-30"
+          }
+        ]
+      },
+      {
+        "action": "Transform toward a multi-product materials platform spanning silicon, lithium and carbon, including commissioning 200,000 tonnes of LFP capacity and repurposing relevant FBR capabilities for silicon-carbon anodes.",
+        "investment_relevance": "The plan may reduce dependence on the polysilicon cycle and reuse purification, silane and reactor capabilities. It also raises execution and capital-allocation risk because customer qualification, ramp costs, working capital and segment economics remain incompletely disclosed.",
+        "sources": [
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf",
+            "claim_date": "2026-05-17"
+          },
+          {
+            "url": "https://www.gcltech.com/en/goods/produce/78.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Maintain a larger liquidity cushion and use new financing partly for working capital and debt repayment.",
+        "investment_relevance": "The May 2026 convertible-bond plan explicitly cited intense polysilicon competition, higher industry inventory and a potentially longer cash-conversion cycle. Liquidity therefore constrains the pace at which emerging materials businesses can be funded without further balance-sheet or dilution risk.",
+        "sources": [
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0506/2026050600447.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "More capable AI agents and closed-loop systems for materials discovery, experiment design and laboratory automation",
+        "company_exposure": "The perovskite platform has an AI high-throughput research center focused on formulas, processes, applications and industrialization. The direct exposure is the design-test-learning loop for perovskite and tandem modules.",
+        "affected_driver": "R&D iteration time, experiment throughput, full-size module efficiency, stability, reproducibility and manufacturing yield",
+        "financial_consequence": "Successful transfer from laboratory optimization to production could shorten time to qualification, reduce unproductive R&D and ramp costs, increase saleable output and create perovskite revenue and gross margin. Failure to transfer would leave R&D and capital expenditure without material commercial return.",
+        "direction": "upside",
+        "materiality_condition": "AI-guided work must produce reproducible improvements on full-size modules, shorten measured iteration or qualification cycles, and raise saleable manufacturing yield or customer-qualified performance—not merely generate laboratory records.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Experiments completed per month and measured iteration-cycle time",
+          "Certified full-size module and tandem efficiency",
+          "Accelerated and field stability results",
+          "Manufacturing yield, throughput and scrap at the Kunshan line",
+          "Customer qualification, warranties and commercial shipments"
+        ],
+        "sources": [
+          {
+            "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+            "claim_date": "2025-06-25"
+          },
+          {
+            "url": "https://www.gcltech.com/en/about/newsinfo/968.html",
+            "claim_date": "2025-08-30"
+          }
+        ]
+      },
+      {
+        "development": "Industrial multimodal models for process control, predictive maintenance and optimization of continuous manufacturing",
+        "company_exposure": "Analytical hypothesis: large FBR and silane plants generate process, sensor, maintenance and quality data that could support AI-assisted control. The company describes intelligent manufacturing and publishes detailed cost and quality metrics, but has not publicly quantified frontier-AI deployment or attributable benefits in granular-silicon production.",
+        "affected_driver": "Reactor uptime, energy and hydrogen consumption, impurity distribution, turbidity, yield and cash manufacturing cost",
+        "financial_consequence": "Better process control could reduce operating cost, downtime and off-spec output while improving product mix and customer qualification. Benefits may be immaterial if ordinary engineering already captures most gains, if models cannot handle process drift, or if polysilicon prices fall by more than the cost reduction.",
+        "direction": "mixed",
+        "materiality_condition": "Cost, yield or quality improvements must be sustained across multiple production bases, exceed normal engineering and input-price effects, and create a durable ASP-cost spread or measurable product-mix benefit.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Granular-silicon cash cost and comprehensive electricity consumption",
+          "Plant uptime and maintenance intervals",
+          "Share of output meeting the strictest impurity and turbidity thresholds",
+          "Saleable yield and output-to-sales ratio",
+          "Disclosure of AI-controlled production workflows or attributable savings"
+        ],
+        "sources": [
+          {
+            "url": "https://www.gcltech.com/en/goods/produce1/9",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+            "claim_date": "2026-03-30"
+          }
+        ]
+      },
+      {
+        "development": "Continued growth in AI training, inference and agentic workloads increases data-center electricity demand",
+        "company_exposure": "Exposure is indirect through photovoltaic-material demand. The IEA expects renewables, supported by storage and grids, to meet a substantial portion of incremental data-center electricity consumption, but gas, nuclear and other sources also compete to serve firm load.",
+        "affected_driver": "Global photovoltaic installations, polysilicon demand, industry utilization, inventory and selling prices",
+        "financial_consequence": "Incremental solar deployment could support polysilicon volumes and pricing, improving utilization, gross margin and cash flow. The effect could be negligible or negative if data centers are supplied mainly by non-solar resources, grid bottlenecks delay projects, or polysilicon capacity additions exceed demand.",
+        "direction": "mixed",
+        "materiality_condition": "AI-related load must cause incremental, connected solar generation and storage investment large enough to absorb material photovoltaic supply and tighten polysilicon industry utilization rather than merely reallocate existing renewable output.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Data-center renewable power-purchase agreements and onsite generation",
+          "Solar and storage projects explicitly linked to data-center demand",
+          "Grid-connection queues and project completion rates",
+          "Global photovoltaic installations and polysilicon capacity utilization",
+          "Polysilicon inventories, production curtailments and realized selling prices"
+        ],
+        "sources": [
+          {
+            "url": "https://www.iea.org/reports/energy-and-ai/executive-summary",
+            "claim_date": "2025-04-10"
+          },
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "development": "Frontier-model diffusion lowers materials-R&D and manufacturing-optimization barriers for competitors",
+        "company_exposure": "The company's differentiation relies on accumulated FBR process know-how, product qualification and perovskite development. Broad access to capable materials models, coding agents and autonomous laboratories could accelerate rival cost reduction or technology qualification in an already oversupplied industry.",
+        "affected_driver": "Relative cash cost, quality premium, customer share, R&D productivity and the duration of the perovskite lead",
+        "financial_consequence": "Faster competitor convergence could reduce price premiums, market share and gross margin while increasing required R&D expenditure. GCL could still benefit if proprietary plant data, patents and industrial scale make its AI systems more effective than generic tools.",
+        "direction": "downside",
+        "materiality_condition": "Competitors must use AI to achieve qualified, scaled production with cost or quality parity and win meaningful customer adoption; model demonstrations without industrial yield or shipments are not material.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Competitor cash-cost and purity disclosures",
+          "Rival patents and autonomous-laboratory deployments",
+          "New qualified granular-silicon or perovskite capacity",
+          "Customer procurement shares and switching behavior",
+          "Whether GCL's R&D cycle time and quality lead widen or narrow"
+        ],
+        "sources": [
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://wap.miit.gov.cn/gyhxxhb/jgsj/dzxxs/zlgh/art/2024/art_8997116730504e5b85f97f9e63c2da3a.html",
+            "claim_date": "2024-11-20"
+          },
+          {
+            "url": "https://www.samr.gov.cn/xw/mtjj/art/2026/art_68dba84fd76d40278483e7eb264af0a7.html",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "A durable positive spread between realized granular-silicon selling prices and full production costs, accompanied by low inventory and positive operating cash flow through the industry cycle.",
+        "Sustained gains in granular-silicon purity, customer adoption and market share without sacrificing price, receivable quality or working-capital discipline.",
+        "Commercial perovskite, LFP or silicon-carbon shipments with disclosed customer qualification, saleable yield and margins sufficient to earn an acceptable return on incremental capital.",
+        "Liquidity and leverage remaining manageable while the company funds diversification and avoids repeated financing driven by operating cash shortfalls."
+      ],
+      "what_would_challenge_it": [
+        "Prolonged polysilicon oversupply, inventory accumulation or low-price competition that erodes the FBR cost advantage and lengthens cash conversion.",
+        "Competitors matching granular silicon on cost, purity and carbon intensity, weakening product differentiation and customer bargaining position.",
+        "Perovskite or new battery-material capacity failing to achieve bankable durability, production yield, customer qualification or attractive margins.",
+        "Diversification increasing capital expenditure, impairments, leverage or dilution without producing material segment revenue and cash flow."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/",
+          "claim_date": "2026-07-28"
+        },
+        {
+          "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+          "claim_date": "2026-04-29"
+        },
+        {
+          "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf",
+          "claim_date": "2026-05-17"
+        },
+        {
+          "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0506/2026050600447.pdf",
+          "claim_date": "2026-05-06"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The economic contribution of the company's AI high-throughput perovskite system is unquantified.",
+        "why_it_matters": "Public statements say AI accelerates iteration but do not disclose baseline experiment throughput, cycle-time reduction, production yield improvement or resulting commercial qualifications.",
+        "next_research_trigger": "Inspect future technical papers, patent filings, investor materials and qualification announcements for before-and-after iteration metrics and full-size production results attributable to the AI system.",
+        "sources": [
+          {
+            "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+            "claim_date": "2025-06-25"
+          },
+          {
+            "url": "https://www.gcltech.com/en/about/newsinfo/968.html",
+            "claim_date": "2025-08-30"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Perovskite nameplate capacity is not yet evidence of bankable mass production.",
+        "why_it_matters": "The key unknowns are sustained full-size efficiency, degradation, manufacturing yield, throughput, certification, warranties, customer acceptance and actual revenue.",
+        "next_research_trigger": "Review third-party certifications, field-test data, customer contracts, shipment disclosures and any GCL Optoelectronics listing document for plant-level yield and commercial economics.",
+        "sources": [
+          {
+            "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+            "claim_date": "2025-06-25"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The LFP and silicon-carbon expansion lacks complete segment economics and capital requirements.",
+        "why_it_matters": "Commissioned capacity and technology claims do not establish utilization, unit cost, pricing, working capital, customer concentration or return on invested capital.",
+        "next_research_trigger": "Inspect subsequent interim or annual filings for segment revenue, capex, utilization, batch shipments, customer qualification, gross margin and cash consumption from the new materials businesses.",
+        "sources": [
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf",
+            "claim_date": "2026-05-17"
+          },
+          {
+            "url": "https://www.gcltech.com/en/goods/produce/78.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The duration of polysilicon oversupply and the company's liquidity needs remain difficult to forecast.",
+        "why_it_matters": "Even a low-cost producer can suffer if industry inventory remains high and selling prices stay below full cost. The 2026 financing disclosure explicitly linked the desired cash cushion to competition, inventory and a longer cash-conversion cycle.",
+        "next_research_trigger": "Track production curtailments, industry inventories, realized ASP versus full cost, operating cash flow, receivable days, net debt and use of financing proceeds in the next filing.",
+        "sources": [
+          {
+            "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0506/2026050600447.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Customer concentration may obscure both adoption strength and counterparty risk.",
+        "why_it_matters": "More than 70% of granular-silicon shipments were attributed to the five largest customers, but public materials provide limited visibility into contract duration, pricing formulas, receivable terms and customer-specific switching risk.",
+        "next_research_trigger": "Inspect major contract announcements, related-party disclosures, receivable concentrations and changes in top-customer shipment shares or procurement plans.",
+        "sources": [
+          {
+            "url": "https://gcltech.com/en/about/newsinfo/959.html",
+            "claim_date": "2025-11-24"
+          },
+          {
+            "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+        "title": "Annual Report 2025",
+        "publisher": "GCL Technology Holdings Limited / HKEXnews",
+        "published_at": "2026-04-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+        "title": "Announcement of Audited Annual Results for the Year Ended 31 December 2025",
+        "publisher": "GCL Technology Holdings Limited / HKEXnews",
+        "published_at": "2026-03-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.gcltech.com/en/goods/produce1/9",
+        "title": "FBR Granular Silicon",
+        "publisher": "GCL Technology Holdings Limited",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.gcltech.com/en/goods/produce/78.html",
+        "title": "Silane Gas",
+        "publisher": "GCL Technology Holdings Limited",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.gcltech.com/en/about/newsinfo/968.html",
+        "title": "GCL Technology Releases 2025 Semi-Annual Report: Building Resilient Growth Amid Anti-Involution Wave",
+        "publisher": "GCL Technology Holdings Limited",
+        "published_at": "2025-08-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://gcltech.com/en/about/newsinfo/959.html",
+        "title": "FBR Granular Silicon Takes Center Stage at Global BC Summit, Powering Value-Chain Decarbonization",
+        "publisher": "GCL Technology Holdings Limited",
+        "published_at": "2025-11-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+        "title": "The World's First GW-Level Tandem Module Production Base Went into Operation in Kunshan",
+        "publisher": "GCL Group",
+        "published_at": "2025-06-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf",
+        "title": "Voluntary Announcement in Relation to the Overall Strategic Transformation Plan of the Group",
+        "publisher": "GCL Technology Holdings Limited / HKEXnews",
+        "published_at": "2026-05-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0506/2026050600447.pdf",
+        "title": "Supplemental Announcement in Relation to Proposed Issue of Convertible Bonds Due 2027",
+        "publisher": "GCL Technology Holdings Limited / HKEXnews",
+        "published_at": "2026-05-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://wap.miit.gov.cn/gyhxxhb/jgsj/dzxxs/zlgh/art/2024/art_8997116730504e5b85f97f9e63c2da3a.html",
+        "title": "Interpretation of the Photovoltaic Manufacturing Industry Specification Conditions (2024 Edition) and Administrative Measures",
+        "publisher": "Ministry of Industry and Information Technology of the People's Republic of China",
+        "published_at": "2024-11-20",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.samr.gov.cn/xw/mtjj/art/2026/art_68dba84fd76d40278483e7eb264af0a7.html",
+        "title": "SAMR: Preventing Involution-Style Competition in Photovoltaics and Other Key Industries",
+        "publisher": "State Administration for Market Regulation",
+        "published_at": "2026-03-31",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.iea.org/reports/energy-and-ai/executive-summary",
+        "title": "Energy and AI — Executive Summary",
+        "publisher": "International Energy Agency",
+        "published_at": "2025-04-10",
+        "source_type": "high_quality_secondary"
+      },
+      {
+        "url": "https://bitcap.com/",
+        "title": "BIT Capital Public Website",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_OnDmTuGJ7IFUwfsrdmpCR8NjyjfAQKUUqx97Y46eZZO3xA7qe0lnA_-gFpRo2ZWaYLtKRUUfcUXm0SkXDS6YFq6KJNrHFXFGGVNtI8IxiR5toI8ycHh0SZp4HqYi0_SwFOLyPO5DcLgvA_b3OIcIWrWs8QshQRMLi6rwluvcqgRJvymDAGCL7XZ32sU5bbL1omCTy1YP-NOYcqJh1qJxlIfogt9NOE460ce1fMS0_n36jwbsEqZH7ylBz27DmGvxqqZ1O5SfiIN9WMcMbQCa_cTCrSoh-H10mauXGHYtodK9Bw47a2pgVxUB5Ap8AoBB3NIaYnhTaFGtmCS851KWAvA6Z7kMh7sIwK3FicQocke2I72kpaJegrn6SSA3Rsna-nAr4pzgLNDFjffunQCuQxhv90CNMe77o_Uv3-Ucdi_RTM3xV-_E4KuJ3PsAgvhegZQvEawoG8p9DfwGrDRk_e00",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 113952,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 55385,
+    "reasoning_tokens": 10357,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:gcltech.com annual report 2025 GCL Technology Holdings Limited PDF",
+        "type": "search",
+        "queries": [
+          "site:gcltech.com annual report 2025 GCL Technology Holdings Limited PDF",
+          "site:hkexnews.hk 03800 annual report 2025 GCL Technology",
+          "site:gcltech.com GCL Technology 2025 interim results granular silicon perovskite AI",
+          "site:bitcap.com GCL Technology GCL-Poly 03800"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.gcltech.com/en/about/newsinfo/968.html"
+      },
+      {
+        "pattern": "granular silicon",
+        "type": "find_in_page",
+        "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf"
+      },
+      {
+        "query": "site:hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf \"granular silicon\"",
+        "type": "search",
+        "queries": [
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf \"granular silicon\"",
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf \"perovskite\"",
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf \"cash cost\"",
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf \"sales volume\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "GCL Technology 2025 annual results granular silicon sales volume cash cost 2025",
+        "type": "search",
+        "queries": [
+          "GCL Technology 2025 annual results granular silicon sales volume cash cost 2025",
+          "GCL Technology 2025 annual report perovskite capacity 2025 AI R&D system",
+          "GCL Technology 2025 annual report wafer sales capacity quality granular silicon",
+          "GCL Technology 2025 annual results capex debt inventory polysilicon"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://gcltech.com/en/about/newsinfo/1022.html"
+      },
+      {},
+      {
+        "query": "site:bitcap.com/en/news/ \"GCL Technology\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news/ \"GCL Technology\"",
+          "site:bitcap.com/news/ \"GCL Technology\"",
+          "site:bitcap.com \"GCL-Poly\"",
+          "site:bitcap.com \"03800\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.gcltech.com/en/goods/wafer.html"
+      },
+      {
+        "query": "site:gcltech.com/en/goods/innovation.html GCL Technology AI intelligent manufacturing granular silicon",
+        "type": "search",
+        "queries": [
+          "site:gcltech.com/en/goods/innovation.html GCL Technology AI intelligent manufacturing granular silicon",
+          "site:gcltech.com/en/goods/granular.html GCL granular silicon advantages carbon energy consumption",
+          "site:gcltech.com/en/about/about.html GCL Technology company profile polysilicon wafer",
+          "site:gcltech.com/en/goods/wafer.html GCL Technology wafer products"
+        ],
+        "sources": null
+      },
+      {
+        "query": "GCL Technology official intelligent manufacturing AI granular silicon factory",
+        "type": "search",
+        "queries": [
+          "GCL Technology official intelligent manufacturing AI granular silicon factory",
+          "GCL Technology official FBR granular silicon advantages lower electricity carbon footprint",
+          "GCL Technology official photovoltaic wafer business 2025",
+          "GCL Technology official silicon carbon anode 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://gcltech.com/en/about/newsinfo/959.html"
+      },
+      {
+        "query": "site:hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf GCL \"Lithium Iron Phosphate\"",
+        "type": "search",
+        "queries": [
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf GCL \"Lithium Iron Phosphate\"",
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf GCL \"Silicon-Carbon Anode\"",
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf GCL \"international\" granular silicon",
+          "site:hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf GCL \"200,000\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "GCL Technology May 17 2026 strategic transformation LFP 200,000 silicon carbon anode official",
+        "type": "search",
+        "queries": [
+          "GCL Technology May 17 2026 strategic transformation LFP 200,000 silicon carbon anode official",
+          "GCL Technology one body two wings 2026 overseas granular silicon Abu Dhabi strategic transformation",
+          "GCL Technology 2026 silicon carbon anode 600,000 silane gas official announcement",
+          "GCL Technology 2026 Leshan Xinneng LFP commissioning 200,000 tons"
+        ],
+        "sources": null
+      },
+      {
+        "query": "GCL Technology 2025 annual report top five customers percentage revenue largest customer",
+        "type": "search",
+        "queries": [
+          "GCL Technology 2025 annual report top five customers percentage revenue largest customer",
+          "GCL Technology 2025 granular silicon largest customer 59500 tons top five customers",
+          "site:hkexnews.hk 2026 GCL Technology top five customers 70% shipments",
+          "GCL Technology 2025 annual results customer concentration wafer manufacturers"
+        ],
+        "sources": null
+      },
+      {
+        "query": "GCL Technology annual report 2025 raw materials silicon powder electricity suppliers granular silicon",
+        "type": "search",
+        "queries": [
+          "GCL Technology annual report 2025 raw materials silicon powder electricity suppliers granular silicon",
+          "GCL Technology 2025 electricity cost granular silicon 13.8 kWh kg supplier raw materials",
+          "GCL Technology 2025 annual report supply chain industrial silicon silane gas internal production",
+          "GCL Technology FBR granular silicon input silicon powder electricity hydrogen official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:miit.gov.cn photovoltaic manufacturing industry specification conditions 2024 polysilicon official",
+        "type": "search",
+        "queries": [
+          "site:miit.gov.cn photovoltaic manufacturing industry specification conditions 2024 polysilicon official",
+          "site:gov.cn China photovoltaic industry curb disorderly competition polysilicon 2025 official",
+          "site:samr.gov.cn photovoltaic price competition 2025 polysilicon official",
+          "site:gov.cn polysilicon energy consumption standard 2025 China official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:iea.org Energy and AI data centres electricity demand renewables solar 2025",
+        "type": "search",
+        "queries": [
+          "site:iea.org Energy and AI data centres electricity demand renewables solar 2025",
+          "site:iea.org data centres electricity demand 2030 AI renewables solar report",
+          "site:iea.org artificial intelligence electricity demand data centres solar power 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "primary research paper AI autonomous laboratory perovskite solar cells high throughput stability optimization",
+        "type": "search",
+        "queries": [
+          "primary research paper AI autonomous laboratory perovskite solar cells high throughput stability optimization",
+          "site:nature.com perovskite machine learning autonomous experiment stability primary research",
+          "site:science.org autonomous laboratory perovskite materials machine learning research",
+          "site:pubs.acs.org machine learning high throughput perovskite solar cell process optimization primary research"
+        ],
+        "sources": null
+      },
+      {
+        "query": "GCL Technology 2025 annual report capital expenditure 2025 inventory cash flow debt",
+        "type": "search",
+        "queries": [
+          "GCL Technology 2025 annual report capital expenditure 2025 inventory cash flow debt",
+          "GCL Technology 2025 annual report geographical revenue China customers exports",
+          "GCL Technology 2025 annual report operating cash flow capex research development",
+          "GCL Technology 2025 annual report impairment receivables inventory polysilicon"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0429/2026042903515.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0330/2026033003442.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.gcltech.com/en/goods/produce1/9",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.gcltech.com/en/goods/produce/78.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.gcltech.com/en/about/newsinfo/968.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://gcltech.com/en/about/newsinfo/959.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.gcl-power.com/en/about/newdetail/6001.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0517/2026051700023.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0506/2026050600447.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://wap.miit.gov.cn/gyhxxhb/jgsj/dzxxs/zlgh/art/2024/art_8997116730504e5b85f97f9e63c2da3a.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.samr.gov.cn/xw/mtjj/art/2026/art_68dba84fd76d40278483e7eb264af0a7.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.iea.org/reports/energy-and-ai/executive-summary",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:03800.hk",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}
