@@ -15,7 +15,7 @@ DEFAULT_DB = (
     REPO_ROOT / "data" / "derived" / "insights" / "investment-agent.db"
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v1"
-READ_SCHEMA_VERSION = "investment-agent-read-v3"
+READ_SCHEMA_VERSION = "investment-agent-read-v4"
 TRACE_SCHEMA_VERSIONS = {"investment-agent-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
 ASSESSMENT_FIELDS = {

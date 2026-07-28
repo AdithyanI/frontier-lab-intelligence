@@ -194,8 +194,22 @@ def test_investment_api_prefers_company_aware_successor(monkeypatch):
     )
     monkeypatch.setattr(
         web_app,
-        "_investment_agent_source",
-        lambda **_kwargs: {"title": "Primary source", "url": "https://example.com"},
+        "_investment_agent_provenance",
+        lambda **_kwargs: {
+            "primary_event_id": "event-id",
+            "source_event_count": 1,
+            "original_post": {
+                "url": "https://x.com/example/status/1",
+                "author": "Example",
+            },
+            "artifacts": [
+                {
+                    "artifact_id": "artifact-id",
+                    "title": "Source document",
+                    "url": "https://example.com/source",
+                }
+            ],
+        },
     )
     client = TestClient(web_app.app)
 
@@ -206,4 +220,74 @@ def test_investment_api_prefers_company_aware_successor(monkeypatch):
 
     assert dates["dates"][-1]["content_kind"] == "investment_agent"
     assert payload["content_kind"] == "investment_agent"
-    assert payload["items"][0]["source"]["title"] == "Primary source"
+    assert payload["schema_version"] == "investment-agent-read-v4"
+    assert payload["items"][0]["provenance"] == {
+        "primary_event_id": "event-id",
+        "source_event_count": 1,
+        "original_post": {
+            "url": "https://x.com/example/status/1",
+            "author": "Example",
+        },
+        "artifacts": [
+            {
+                "artifact_id": "artifact-id",
+                "title": "Source document",
+                "url": "https://example.com/source",
+            }
+        ],
+    }
+
+
+def test_investment_provenance_keeps_feed_post_and_artifacts_distinct(monkeypatch):
+    monkeypatch.setattr(
+        web_app.development_store,
+        "developments_payload",
+        lambda **_kwargs: {
+            "items": [
+                {
+                    "primary_event_id": "event-id",
+                    "source_event_count": 2,
+                    "root": {
+                        "url": "https://x.com/example/status/1",
+                        "author": {
+                            "entity_name": "Example Author",
+                            "handle": "example",
+                        },
+                    },
+                    "development_artifacts": [
+                        {
+                            "artifact_id": "artifact-id",
+                            "title": "Research paper",
+                            "canonical_url": "https://example.com/paper",
+                        },
+                        {
+                            "artifact_id": "duplicate-root",
+                            "title": "Original post",
+                            "canonical_url": "https://x.com/example/status/1",
+                        },
+                    ],
+                }
+            ]
+        },
+    )
+
+    provenance = web_app._investment_agent_provenance(
+        day=DAY,
+        development_id=DEVELOPMENT_ID,
+    )
+
+    assert provenance == {
+        "primary_event_id": "event-id",
+        "source_event_count": 2,
+        "original_post": {
+            "url": "https://x.com/example/status/1",
+            "author": "Example Author",
+        },
+        "artifacts": [
+            {
+                "artifact_id": "artifact-id",
+                "title": "Research paper",
+                "url": "https://example.com/paper",
+            }
+        ],
+    }

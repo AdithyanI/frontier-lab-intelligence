@@ -253,12 +253,18 @@ export interface InvestmentAgentItem {
   no_match_reason: string | null
   company_names: Record<string, string>
   memo_calls: InvestmentAgentMemoCall[]
-  source: {
-    title: string
-    url: string
-    author: string
+  provenance: {
     primary_event_id: string
     source_event_count: number
+    original_post: {
+      url: string
+      author: string
+    } | null
+    artifacts: Array<{
+      artifact_id: string
+      title: string
+      url: string
+    }>
   } | null
   telemetry: {
     model: string

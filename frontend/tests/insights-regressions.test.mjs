@@ -138,6 +138,16 @@ test('Insights inherits Feed rank and links every decision to its exact Event', 
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)
 })
 
+test('Investment Insights separates Feed evidence, the original post, and source artifacts', () => {
+  assert.match(insightSource, /className="investment-agent-provenance"/)
+  assert.match(insightSource, /Open in Feed ↗/)
+  assert.match(insightSource, /Original post ↗/)
+  assert.match(insightSource, /Source artifact/)
+  assert.doesNotMatch(insightSource, /Primary source ↗/)
+  assert.match(apiSource, /original_post:/)
+  assert.match(apiSource, /artifacts: Array</)
+})
+
 test('Insights shows an explicit rationale for legacy decisions without interpreting source markup', () => {
   assert.match(insightSource, /item\.decision_reason/)
   assert.match(insightSource, /'Why it matters' : 'Why suppressed'/)
@@ -207,7 +217,6 @@ test('Insights renders canonical daily editorial judgments as a ranked, cited br
   assert.match(insightSource, /analysis\.decision_rule/)
   assert.doesNotMatch(insightSource, /Engineering decision/)
   assert.doesNotMatch(insightSource, /Experiment details/)
-  assert.doesNotMatch(insightSource, /Original post ↗/)
   assert.doesNotMatch(insightSource, /Evidence limitations/)
   assert.doesNotMatch(insightSource, /Evidence and full analysis/)
   assert.match(insightSource, /<div className="editorial-source-columns">/)

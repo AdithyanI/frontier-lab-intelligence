@@ -611,7 +611,7 @@ def insight_dates(
     )
 
 
-def _investment_agent_source(
+def _investment_agent_provenance(
     *,
     day: str,
     development_id: str,
@@ -632,36 +632,40 @@ def _investment_agent_source(
     if not items:
         return None
     development = items[0]
-    artifacts = development.get("development_artifacts") or []
-    primary_artifact = next(
-        (
-            artifact
-            for artifact in artifacts
-            if artifact.get("title") and artifact.get("canonical_url")
-        ),
-        None,
-    )
     root = development.get("root") or {}
     author = root.get("author") or {}
+    original_url = str(root.get("url") or "")
+    artifacts: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+    for artifact in development.get("development_artifacts") or []:
+        artifact_url = str(artifact.get("canonical_url") or "")
+        if not artifact_url or artifact_url == original_url or artifact_url in seen_urls:
+            continue
+        seen_urls.add(artifact_url)
+        artifacts.append(
+            {
+                "artifact_id": str(artifact.get("artifact_id") or ""),
+                "title": str(artifact.get("title") or "Source artifact"),
+                "url": artifact_url,
+            }
+        )
     return {
-        "title": (
-            str(primary_artifact["title"])
-            if primary_artifact
-            else str(root.get("text") or "Investment read-through")
-        ),
-        "url": (
-            str(primary_artifact["canonical_url"])
-            if primary_artifact
-            else str(root.get("url") or "")
-        ),
-        "author": str(
-            author.get("entity_name")
-            or author.get("name")
-            or author.get("handle")
-            or ""
-        ),
         "primary_event_id": str(development.get("primary_event_id") or ""),
         "source_event_count": int(development.get("source_event_count") or 0),
+        "original_post": (
+            {
+                "url": original_url,
+                "author": str(
+                    author.get("entity_name")
+                    or author.get("name")
+                    or author.get("handle")
+                    or ""
+                ),
+            }
+            if original_url
+            else None
+        ),
+        "artifacts": artifacts,
     }
 
 
@@ -680,7 +684,7 @@ def insights(
         )
         if investment_agent["available"]:
             for item in investment_agent["items"]:
-                item["source"] = _investment_agent_source(
+                item["provenance"] = _investment_agent_provenance(
                     day=str(item["day"]),
                     development_id=str(item["development_id"]),
                 )
