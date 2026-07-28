@@ -18,6 +18,13 @@ const dayFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'UTC',
 })
 
+const DIRECTION_MARK: Record<string, string> = {
+  upside: '↑',
+  downside: '↓',
+  mixed: '↔',
+  unclear: '?',
+}
+
 const thesisStatusCopy: Record<CompanyResearchMemo['memo']['investment_thesis_and_tests']['public_bit_view_status'], string> = {
   explicit_thesis: 'BIT thesis',
   commentary: 'BIT commentary',
@@ -238,39 +245,28 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         </div>
       </section>
 
-      <section className="company-detail-section">
-        <header className="company-memo-section-head">
-          <h3>How the business earns money</h3>
-          <span>{memo.business_and_economics.revenue_engines.length} revenue engines</span>
-        </header>
-        <div className="company-memo-rows">
-          {memo.business_and_economics.revenue_engines.map((engine) => (
-            <article key={engine.engine}>
-              <h4>{cleanMemoText(engine.engine)}</h4>
-              <p className="company-memo-who">Who pays · {cleanMemoText(engine.who_pays)}</p>
-              <p>{cleanMemoText(engine.economic_logic)}</p>
-              <MemoCitations sources={engine.sources} sourceIndex={sourceIndex} />
-            </article>
-          ))}
+      <section className="company-detail-section company-memo-shape">
+        <div className="company-memo-shape-block">
+          <h3>How it earns money</h3>
+          <ul className="company-memo-inline-list">
+            {memo.business_and_economics.revenue_engines.map((engine) => (
+              <li key={engine.engine}>
+                <strong>{cleanMemoText(engine.engine)}</strong>
+                <span>{cleanMemoText(engine.who_pays)}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </section>
-
-      <section className="company-detail-section">
-        <header className="company-memo-section-head">
+        <div className="company-memo-shape-block">
           <h3>What moves the economics</h3>
-          <span>{memo.operating_and_financial_drivers.length} operating drivers</span>
-        </header>
-        <ol className="company-driver-list">
-          {memo.operating_and_financial_drivers.map((driver) => (
-            <li key={driver.driver}>
-              <div>
-                <h4>{cleanMemoText(driver.driver)}</h4>
-              </div>
-              <p>{cleanMemoText(driver.why_it_matters)}</p>
-              <MemoCitations sources={driver.sources} sourceIndex={sourceIndex} />
-            </li>
-          ))}
-        </ol>
+          <ul className="company-memo-inline-list">
+            {memo.operating_and_financial_drivers.map((driver) => (
+              <li key={driver.driver}>
+                <strong>{cleanMemoText(driver.driver)}</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section className="company-detail-section company-ai-paths">
@@ -278,21 +274,23 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
           <div>
             <h3>Where frontier AI can matter</h3>
           </div>
-          <span>{memo.frontier_ai_transmission_paths.length} testable paths</span>
+          <span>{memo.frontier_ai_transmission_paths.length} standing bets</span>
         </header>
         <div className="company-path-list">
           {memo.frontier_ai_transmission_paths.map((path) => (
-            <article key={path.development}>
-              <header>
+            <details key={path.development}>
+              <summary>
+                <span
+                  className={`company-path-direction is-${path.direction}`}
+                  aria-hidden="true"
+                >
+                  {DIRECTION_MARK[path.direction] ?? '\u2194'}
+                </span>
                 <h4>{cleanMemoText(path.development)}</h4>
-                <div className="company-path-meta">
-                  <span className={`is-${path.direction}`}>{path.direction}</span>
-                  <span>{formatTaxonomy(path.time_horizon)}</span>
-                  {path.thesis_effect !== 'no_public_thesis' && (
-                    <span>Thesis · {formatTaxonomy(path.thesis_effect)}</span>
-                  )}
-                </div>
-              </header>
+                <span className="company-path-horizon mono">
+                  {formatTaxonomy(path.time_horizon)}
+                </span>
+              </summary>
               <dl className="company-causal-chain">
                 <div>
                   <dt>Exposure</dt>
@@ -310,21 +308,15 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
                   <dt>Material when</dt>
                   <dd>{cleanMemoText(path.materiality_condition)}</dd>
                 </div>
+                <div>
+                  <dt>Watch</dt>
+                  <dd>
+                    {path.watchpoints.map((watchpoint) => cleanMemoText(watchpoint)).join(' · ')}
+                    <MemoCitations sources={path.sources} sourceIndex={sourceIndex} />
+                  </dd>
+                </div>
               </dl>
-              <details className="company-path-watch">
-                <summary>
-                  <span className="mono">
-                    {path.watchpoints.length} watchpoints
-                  </span>
-                  <MemoCitations sources={path.sources} sourceIndex={sourceIndex} />
-                </summary>
-                <ul>
-                  {path.watchpoints.map((watchpoint) => (
-                    <li key={watchpoint}>{cleanMemoText(watchpoint)}</li>
-                  ))}
-                </ul>
-              </details>
-            </article>
+            </details>
           ))}
         </div>
       </section>
