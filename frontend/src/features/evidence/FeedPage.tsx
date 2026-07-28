@@ -876,6 +876,7 @@ function DevelopmentRow({
             <Metric label="views" value={root.metrics.views} />
           </div>
           <div className="feed-footer-actions">
+            <CopyEventId eventId={item.development_id} label="Copy ID" />
             <a href={root.url} target="_blank" rel="noreferrer">
               Open display source on X ↗
             </a>

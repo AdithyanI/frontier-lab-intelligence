@@ -1,6 +1,12 @@
 import { useState } from 'react'
 
-export default function CopyEventId({ eventId }: { eventId: string }) {
+export default function CopyEventId({
+  eventId,
+  label = 'Copy Event ID',
+}: {
+  eventId: string
+  label?: string
+}) {
   const [status, setStatus] = useState('')
 
   const copyEventId = async () => {
@@ -15,7 +21,7 @@ export default function CopyEventId({ eventId }: { eventId: string }) {
   return (
     <span className="copy-event-id">
       <button type="button" onClick={copyEventId}>
-        Copy Event ID
+        {label}
       </button>
       <span className="copy-event-status" role="status" aria-live="polite">
         {status}

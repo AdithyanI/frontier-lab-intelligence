@@ -1713,6 +1713,10 @@
   text-decoration: none;
 }
 
+.investment-agent-sources-body .copy-event-id {
+  font-size: 10.5px;
+}
+
 .investment-agent-sources-body a:hover,
 .investment-agent-sources-body a:focus-visible {
   text-decoration: underline;

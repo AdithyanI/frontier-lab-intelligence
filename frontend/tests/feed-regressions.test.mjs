@@ -27,11 +27,13 @@ test('Feed uses semantic classes for optional menu and routing content', () => {
   assert.doesNotMatch(appStyles, /event-routing-heading span:first-child/)
 })
 
-test('Feed keeps routing secondary and exposes the exact Event ID', () => {
+test('Feed keeps routing secondary and exposes stable Development and exact Event IDs', () => {
   assert.ok(feedSource.indexOf('<DevelopmentEvidenceDetails') < feedSource.indexOf('<RoutingNote item={item} />'))
+  assert.match(feedSource, /<CopyEventId eventId=\{item\.development_id\} label="Copy ID" \/>/)
   assert.match(feedSource, /<CopyEventId eventId=\{source\.event_id\} \/>/)
   assert.match(copyEventSource, /navigator\.clipboard\.writeText\(eventId\)/)
-  assert.match(copyEventSource, /Copy Event ID/)
+  assert.match(copyEventSource, /label = 'Copy Event ID'/)
+  assert.match(copyEventSource, /\{label\}/)
   assert.match(copyEventSource, /aria-live="polite"/)
 })
 

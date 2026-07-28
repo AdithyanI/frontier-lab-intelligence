@@ -142,6 +142,7 @@ test('Investment Insights progressively discloses Feed evidence, the original po
   assert.match(insightSource, /<details className="investment-agent-sources">/)
   assert.match(insightSource, /<span>Sources<\/span>/)
   assert.match(insightSource, /View Development in Feed ↗/)
+  assert.match(insightSource, /<CopyEventId eventId=\{item\.development_id\} label="Copy ID" \/>/)
   assert.match(insightSource, /Open original post ↗/)
   assert.match(insightSource, /Read source artifact/)
   assert.doesNotMatch(insightSource, /Primary source ↗/)

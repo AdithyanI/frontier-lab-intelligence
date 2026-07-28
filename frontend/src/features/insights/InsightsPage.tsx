@@ -1225,6 +1225,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
           </summary>
           <nav className="investment-agent-sources-body" aria-label="Evidence links">
             <Link to={feedPath}>View Development in Feed ↗</Link>
+            <CopyEventId eventId={item.development_id} label="Copy ID" />
             {item.provenance?.original_post?.url && (
               <a
                 href={item.provenance.original_post.url}
