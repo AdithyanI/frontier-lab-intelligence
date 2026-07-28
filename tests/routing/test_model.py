@@ -120,11 +120,11 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v14_prompt_explains_the_source_and_router_boundary():
+def test_v15_prompt_explains_the_source_and_router_boundary():
     prompt = routing_model.instructions()
     flat_prompt = " ".join(prompt.split())
 
-    assert routing_model.PROMPT_VERSION == "audience-routing-v14"
+    assert routing_model.PROMPT_VERSION == "audience-routing-v15"
     assert "The current discovery source is X" in prompt
     assert "independently authored original posts" in flat_prompt
     assert "groups same-day Events into one Development" in flat_prompt
@@ -135,9 +135,11 @@ def test_v14_prompt_explains_the_source_and_router_boundary():
     assert "A false negative disappears" in prompt
     assert "usually between 30 and 60 words" in prompt
     assert "Never add filler" in prompt
+    assert "deterministic evidence-readiness gate" in flat_prompt
+    assert "unresolved link or media reference" in flat_prompt
 
 
-def test_v14_prompt_defines_the_two_decision_hooks():
+def test_v15_prompt_defines_the_two_decision_hooks():
     prompt = routing_model.instructions()
     flat_prompt = " ".join(prompt.split())
 
@@ -154,6 +156,90 @@ def test_v14_prompt_defines_the_two_decision_hooks():
     assert "central development or context necessary to understand it" in flat_prompt
     assert "incidental detail elsewhere in the packet" in flat_prompt
     assert "explicitly corrects, retracts, or disproves it" in flat_prompt
+
+
+def test_evidence_gate_filters_one_short_unsupported_post():
+    packet = make_packet()
+    packet = replace(
+        packet,
+        sources=(
+            replace(
+                packet.sources[0],
+                text="GPT-5.6 admitted that it lied to me.",
+            ),
+        ),
+    )
+
+    decision = routing_model.deterministic_evidence_gate(packet)
+
+    assert decision is not None
+    assert decision.code == "short_unsupported_text"
+    assert decision.substantive_word_count == 7
+    assert decision.reason.startswith("Suppressed —")
+    assert "no artifact, author update, or independently authored corroboration" in (
+        decision.reason
+    )
+
+
+def test_evidence_gate_marks_unavailable_link_or_media_evidence():
+    packet = make_packet()
+    packet = replace(
+        packet,
+        sources=(
+            replace(
+                packet.sources[0],
+                text="Watch the complete demonstration https://t.co/example",
+            ),
+        ),
+    )
+
+    decision = routing_model.deterministic_evidence_gate(packet)
+
+    assert decision is not None
+    assert decision.code == "unavailable_linked_or_media_evidence"
+    assert decision.substantive_word_count == 4
+    assert decision.reason.startswith("Not evaluated —")
+    assert "linked or media evidence" in decision.reason
+
+
+@pytest.mark.parametrize(
+    "sources",
+    [
+        (
+            replace(
+                make_packet().sources[0],
+                text=" ".join(f"word{index}" for index in range(31)),
+            ),
+        ),
+        make_packet().sources[:2],
+        (
+            replace(make_packet().sources[0], text="Brief claim."),
+            routing_model.EvidenceSource(
+                source_type="x_post",
+                source_id="author-update",
+                url="https://example.com/author-update",
+                author="Satya Nadella",
+                relation="same_author_continuation",
+                text="Here is the supporting first-party detail.",
+            ),
+        ),
+        (
+            replace(make_packet().sources[0], text="Brief claim."),
+            routing_model.EvidenceSource(
+                source_type="x_post",
+                source_id="independent-original",
+                url="https://example.com/independent-original",
+                author="Independent Researcher",
+                relation="independent_original",
+                text="Here is an independently authored corroborating report.",
+            ),
+        ),
+    ],
+)
+def test_evidence_gate_preserves_substantive_or_supported_packets(sources):
+    packet = replace(make_packet(), sources=tuple(sources))
+
+    assert routing_model.deterministic_evidence_gate(packet) is None
 
 
 def test_render_input_uses_readable_first_party_hierarchy_only():
@@ -362,7 +448,7 @@ def test_request_uses_luna_medium_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v14",
+        "prompt:audience-routing-v15",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True

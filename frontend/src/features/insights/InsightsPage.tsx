@@ -1215,13 +1215,15 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
             <header>
               <h3>How this reaches companies</h3>
             </header>
-            {item.company_assessments.map((assessment) => (
-              <InvestmentAgentMechanism
-                assessment={assessment}
-                companyNames={item.company_names}
-                key={assessment.mechanism_title}
-              />
-            ))}
+            {item.company_assessments
+              .filter((assessment) => Array.isArray(assessment?.exposures))
+              .map((assessment) => (
+                <InvestmentAgentMechanism
+                  assessment={assessment}
+                  companyNames={item.company_names}
+                  key={assessment.mechanism_title}
+                />
+              ))}
           </section>
         ) : (
           <section className="investment-agent-no-match">

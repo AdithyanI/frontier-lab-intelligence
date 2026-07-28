@@ -531,6 +531,9 @@ def refresh_all_days(
         "cache_eligible_requests",
         "cache_hit_requests",
         "reused_exact_count",
+        "deterministic_short_text_filtered",
+        "deterministic_unavailable_evidence_filtered",
+        "deterministic_filtered",
     )
     counts = {
         field: sum(int(result["counts"].get(field) or 0) for result in results.values())
@@ -1078,6 +1081,49 @@ def freeze_run(
                 )
             ],
         )
+        gated_rows = []
+        for packet in packets:
+            decision = routing_model.deterministic_evidence_gate(packet)
+            if decision is None:
+                continue
+            judgment = {
+                audience: {
+                    "relevant": False,
+                    "reason": decision.reason,
+                }
+                for audience in routing_model.AUDIENCES
+            }
+            gated_rows.append(
+                (
+                    decision.reason,
+                    decision.reason,
+                    _canonical_json(judgment),
+                    (
+                        f"{routing_model.EVIDENCE_GATE_VERSION}:"
+                        f"{decision.code}"
+                    ),
+                    now,
+                    now,
+                    packet.event_id,
+                )
+            )
+        if gated_rows:
+            conn.executemany(
+                """UPDATE routing_item
+                   SET status = 'complete', attempts = 0,
+                       ai_engineering_relevant = 0,
+                       ai_engineering_reason = ?,
+                       investment_relevant = 0,
+                       investment_reason = ?,
+                       raw_output_text = ?, response_id = NULL,
+                       response_model = ?, input_tokens = 0,
+                       cached_tokens = 0, cache_write_tokens = 0,
+                       output_tokens = 0, reported_cost_usd = NULL,
+                       request_tags_json = NULL, error_type = NULL,
+                       error_message = NULL, completed_at = ?, updated_at = ?
+                   WHERE event_id = ?""",
+                gated_rows,
+            )
     return len(packets)
 
 
@@ -1085,6 +1131,13 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
     meta = conn.execute("SELECT * FROM run_meta WHERE singleton = 1").fetchone()
     if meta is None:
         raise ValueError("run database has not been prepared")
+    short_gate_model = (
+        f"{routing_model.EVIDENCE_GATE_VERSION}:short_unsupported_text"
+    )
+    unavailable_gate_model = (
+        f"{routing_model.EVIDENCE_GATE_VERSION}:"
+        "unavailable_linked_or_media_evidence"
+    )
     counts = dict(
         conn.execute(
             """SELECT COUNT(*) AS total,
@@ -1107,8 +1160,20 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
                       SUM(reported_cost_usd IS NOT NULL) AS reported_cost_count,
                       SUM(COALESCE(input_tokens, 0) >= 1024) AS cache_eligible_requests,
                       SUM(COALESCE(cached_tokens, 0) > 0) AS cache_hit_requests,
-                      SUM(reused_from_run_id IS NOT NULL) AS reused_exact_count
-               FROM routing_item"""
+                      SUM(reused_from_run_id IS NOT NULL) AS reused_exact_count,
+                      SUM(response_model = ?)
+                          AS deterministic_short_text_filtered,
+                      SUM(response_model = ?)
+                          AS deterministic_unavailable_evidence_filtered,
+                      SUM(response_model IN (?, ?))
+                          AS deterministic_filtered
+               FROM routing_item""",
+            (
+                short_gate_model,
+                unavailable_gate_model,
+                short_gate_model,
+                unavailable_gate_model,
+            ),
         ).fetchone()
     )
     input_tokens = int(counts["input_tokens"] or 0)

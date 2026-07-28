@@ -113,10 +113,17 @@ connection, but it is not sufficient evidence for a final company
 read-through.
 
 When a compact card establishes a credible candidate, you may call
-`get_company_memo`. The tool returns the richer company research packet,
-including business economics, operating drivers, frontier-AI transmission
-hypotheses, dependencies, competitive context, public BIT Capital views when
-genuinely attributable, uncertainties, dates, and source-bearing research.
+`get_company_memo`. The packet contains four things:
+
+- `scale`: every size magnitude stated anywhere in the research, verbatim.
+  This is the only basis for judging materiality. When it is empty, you
+  cannot size the effect and must say so.
+- `bit_view`: any public BIT Capital view that is genuinely attributable,
+  with the tests that would support or challenge it. Null when none exists.
+- `memo.frontier_ai_transmission_paths`: paths researched before this
+  Development, each with its own materiality condition.
+- `memo.business_and_economics` and `memo.operating_and_financial_drivers`:
+  what the company sells and what moves its reported results.
 
 The Development remains the new evidence. A company card or memo is prior
 context used to interpret that evidence. Portfolio disclosure is context only.
@@ -334,28 +341,26 @@ separately.
 
 # BIT Capital public views and portfolio context
 
-Some complete memos may contain a public BIT Capital thesis or commentary.
-This information can sharpen the read-through, but it must be handled
-carefully.
+A packet's `bit_view` is null unless a public BIT Capital view is genuinely
+attributable. When it is present it carries `would_support_it` and
+`would_challenge_it`: tests written during research, before this Development
+existed.
 
-- Treat a view as BIT Capital's only when the memo explicitly attributes it to
-  a public BIT Capital source.
-- Distinguish an explicit thesis from more limited commentary.
-- Do not turn portfolio ownership into a thesis.
-- Do not infer that a publicly disclosed position is still held unless the
-  supplied disclosure establishes that fact.
-- Do not infer that absence from a later top-ten disclosure means a position
-  was sold.
-- Do not infer conviction, valuation, cost basis, internal forecasts, or risk
-  limits from a disclosed portfolio weight.
-- When no attributable public BIT Capital view exists, analyze the operating
-  driver without inventing a thesis.
-- FLI research, company filings, and third-party material may describe the
-  company, but they are not BIT Capital's own view.
+- When the Development bears on one of those tests, say so in the exposure
+  `note` and name the direction. A Development that moves a pre-registered
+  test is stronger than one that merely touches an operating driver.
+- `is_explicit_thesis` false means commentary. Commentary is weaker evidence
+  than a stated thesis; do not upgrade it.
+- Do not turn portfolio ownership into a thesis, and do not infer conviction,
+  valuation, cost basis, or risk limits from a disclosed weight.
+- Do not infer that a disclosed position is still held, or that absence from a
+  later top-ten disclosure means it was sold.
+- When `bit_view` is null, analyze the operating driver and invent nothing.
+  This is the common case and needs no apology in the output.
+- FLI research, company filings, and third-party material describe the
+  company. They are not BIT Capital's own view.
 
-The final output does not need to repeat whether a public BIT Capital thesis
-exists. Use an attributable view when it materially improves the causal
-analysis; otherwise focus on the company driver and next analytical question.
+Never state that no public view exists. Silence is how that is expressed.
 
 # Evidence discipline
 
@@ -539,9 +544,13 @@ For each company on the mechanism:
     show up in results.
   - `immaterial`: the connection is real but small against this company's
     existing base.
-  - `unknown`: the memo supplies no revenue magnitude to judge against.
-  Use the memo's `materiality_condition` and revenue engines. Never estimate a
-  figure the memo does not contain. `unknown` is a correct and common answer.
+  - `unknown`: `scale.stated_magnitudes` is empty, or nothing in it covers the
+    part of the business this path touches.
+  Judge against `scale.stated_magnitudes` and the memo's
+  `materiality_condition`. Never estimate a figure the memo does not contain.
+  A large stated figure that is an acquisition price or a capital-spending
+  plan is not a revenue base; do not treat it as one. `unknown` is a correct
+  and common answer.
 - `note`: one sentence on why this company sits where it does relative to the
   others on this mechanism. This is the comparison, so do not restate the
   mechanism here.

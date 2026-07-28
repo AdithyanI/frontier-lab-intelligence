@@ -89,7 +89,13 @@ composition.
    independently authored source post, current substantive same-author
    continuations, and each retrieved shared artifact once. Third-party reaction text stays out of
    the semantic packet even though trusted authors, quoters, and reposters
-   still shape rank. The Feed exposes the exact rendered packet through a
+   still shape rank. Before any model call, one narrow evidence-readiness gate
+   completes a Development as not relevant when the entire packet is a single
+   X post with no more than 30 substantive words and no artifact, author
+   continuation, or independently authored corroboration. Its stored reason
+   distinguishes unsupported text from unavailable linked or media evidence;
+   the Development remains inspectable and consumes no model tokens. The Feed
+   exposes the exact rendered packet through a
    read-only preview that never calls a model. New routing freezes admit only
    first-party X sources no more than seven days old; a current same-author
    continuation may replace an older root, while old-only packets are excluded. A multi-day

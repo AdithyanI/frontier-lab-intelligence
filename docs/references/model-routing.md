@@ -19,7 +19,7 @@ one-time non-mutating evaluation, not part of the daily path.
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Evidence audience routing | `gpt-5.6-luna` | `medium` | The self-contained v14 router is an upstream recall-oriented candidate gate over one complete Development packet. The July 5–21 top-100 pass completed all 1,647 routable Developments without failure: 612 both, 219 Engineering-only, 96 Investment-only, and 720 neither, for $7.079129. It observed 1,558 cache-hit requests and reused 2,791,936 of 6,990,192 input tokens. The historical mini/high v9 17-day Event cohort remains preserved rather than relabeled. |
+| Evidence audience routing | deterministic evidence gate, then `gpt-5.6-luna` | none, then `medium` | The v15 contract first completes only a single-post Development with at most 30 substantive words and no artifact, author continuation, or independently authored corroboration. It stores the exact reason and spends no model tokens. All other packets reach the self-contained, recall-oriented router. The historical v14 July 5–21 top-100 pass remains immutable: 1,647 completed Developments, 612 both, 219 Engineering-only, 96 Investment-only, and 720 neither, for $7.079129. |
 | Company-aware Investment analysis | `gpt-5.6-sol` | `xhigh` | One Development is screened against the complete compact company universe, then the model opens only the full memos needed to test concrete causal paths. Top-ten passes now cover July 19–21. The current read projection surfaces 15 of 30 Developments, suppresses 15, retains 41 company assessments, and records three after-memo rejections. The July 19–20 production run completed all 20 targets without failure, reused 272,384 cached input tokens, and reported $3.693917. Sol/xhigh is the quality baseline while this new boundary is calibrated. |
 | Per-Event working annotations | `gpt-5.6-terra` | `high` | A completed calibration pass produced separate audience notes with stable cache keys. The daily Codex agent may inspect them but must re-evaluate the frozen evidence; they are not final brief outputs. |
 | FLI daily-intelligence agent | `gpt-5.6-sol` | `xhigh` | The persisted Codex task researches the complete routed cohort, consolidates overlapping Events, selects the final set, and writes both audience briefs. |
@@ -33,16 +33,25 @@ migration baseline, and testing one level lower. That comparison matters here:
 Luna-low agreed with the retired mini-medium keep/drop decisions on 63/64
 envelopes but dropped a post that named a specific Thinking Machines Lab essay.
 That historical comparison remains relevant to the retired keep/drop boundary.
-For the live two-audience router, v14 keeps Luna/medium and expands the stable
-prompt into a self-contained source, audience, and decision contract. It also
-requires the Investment hook to arise from the central Development rather than
-an attractive incidental fact. Across the complete July 5–21 top-100 window,
+For model-eligible packets, v15 keeps Luna/medium and the stable self-contained
+source, audience, and decision contract. It also requires the Investment hook
+to arise from the central Development rather than an attractive incidental
+fact. The pre-model rule is deliberately narrow: it applies only when the
+complete packet is one short root post and no supporting source survived packet
+construction. A remaining link is recorded as unavailable linked or media
+evidence; the rule does not claim to have understood that missing material.
+Across the historical v14 July 5–21 top-100 window,
 927 of 1,647 Developments routed to at least one audience: 708 to Investment
 and 831 to AI Engineering. The 56.3% union pass rate is intentionally
 recall-oriented: a positive route means the Development merits downstream
 investigation, not that it is already publishable intelligence. Company
 mapping and the audience Insight gate remain responsible for rejecting
 speculative or immaterial leads.
+
+A non-mutating v15 dry audit over those frozen packets identified 325
+deterministic candidates: 122 short unsupported text posts and 203 short posts
+with unavailable linked or media evidence. Production v15 runs must be frozen
+separately; the audit does not relabel the v14 judgments.
 
 The model string and reasoning effort are part of every run identity. Existing
 run databases and historical reports remain immutable evidence of the model

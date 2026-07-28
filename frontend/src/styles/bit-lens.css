@@ -681,24 +681,6 @@
 
 .company-driver-list > li > p { margin: 0; }
 
-.company-financial-lines {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-top: 8px;
-}
-
-.company-financial-lines span {
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 9px;
-}
-
-.company-financial-lines span + span::before {
-  margin-right: 10px;
-  content: "·";
-}
-
 .company-path-list {
   border-top: 1px solid var(--border-strong);
 }

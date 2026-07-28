@@ -61,6 +61,14 @@ The packet is the complete evidence available for this routing decision. Judge
 only the supplied X evidence and retrieved artifacts. Do not browse, use outside
 knowledge, or fill in missing facts.
 
+Before this model step, a deterministic evidence-readiness gate completes a
+Development without an LLM call only when its entire packet is one short,
+standalone X post with no artifact, author update, or independently authored
+corroboration. An unresolved link or media reference is recorded as unavailable
+evidence, not treated as proof of irrelevance. Every packet that reaches you has
+passed that narrow structural gate; you still own both semantic audience
+judgments.
+
 # The evidence packet
 
 You receive one Markdown packet describing one development. It uses up to three

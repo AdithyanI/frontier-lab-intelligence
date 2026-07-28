@@ -147,12 +147,81 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     assert "prompt_cache_key" not in item_columns
     assert frozen["event_id"] == "development-1"
     assert frozen["feed_rank"] == 3
+    assert frozen["status"] == "pending"
     assert event_requests[0]["limit"] == 1
     packet = json.loads(frozen["packet_json"])
     assert [source["relation"] for source in packet["sources"]] == [
         "root",
         "same_author_continuation",
     ]
+
+
+def test_freeze_run_completes_short_unsupported_text_without_model(
+    tmp_path, monkeypatch
+):
+    artifact_db = tmp_path / "artifacts.db"
+    artifacts.connect(artifact_db).close()
+    item = {
+        "development_id": "development-short",
+        "source_event_ids": ["event-short"],
+        "daily_rank": 7,
+        "semantic_snapshot_sha256": "snapshot-short",
+        "source_events": [
+            {
+                "event_id": "event-short",
+                "is_primary": True,
+                "post": {
+                    "post_id": "post-short",
+                    "author": {"handle": "alice"},
+                    "text": "GPT-5.6 admitted that it lied to me.",
+                    "published_at": "2026-07-12T08:00:00+00:00",
+                },
+                "evidence": [],
+            },
+        ],
+    }
+
+    monkeypatch.setattr(
+        development_store,
+        "developments_payload",
+        lambda **_kwargs: {
+            "available": True,
+            "run": {"run_id": "event-run-1", "feed_run_id": "feed-run-1"},
+            "rank_contract": {"input_sha256": "a" * 64},
+            "items": [item],
+        },
+    )
+
+    conn = routing_runs.connect_run(tmp_path / "routing.db")
+    routing_runs.freeze_run(
+        conn,
+        run_id="direct-run-short",
+        day="2026-07-12",
+        top_ranked=1,
+        event_id=None,
+        artifact_db=artifact_db,
+        model="gpt-5.6-luna",
+        effort="medium",
+    )
+    frozen = conn.execute("SELECT * FROM routing_item").fetchone()
+    result = routing_runs.summary(conn)
+    conn.close()
+
+    assert frozen["status"] == "complete"
+    assert frozen["attempts"] == 0
+    assert frozen["ai_engineering_relevant"] == 0
+    assert frozen["investment_relevant"] == 0
+    assert frozen["ai_engineering_reason"].startswith("Suppressed —")
+    assert frozen["investment_reason"] == frozen["ai_engineering_reason"]
+    assert frozen["response_id"] is None
+    assert frozen["response_model"] == (
+        "deterministic-evidence-gate-v1:short_unsupported_text"
+    )
+    assert frozen["input_tokens"] == 0
+    assert frozen["output_tokens"] == 0
+    assert result["counts"]["deterministic_short_text_filtered"] == 1
+    assert result["counts"]["deterministic_unavailable_evidence_filtered"] == 0
+    assert result["counts"]["deterministic_filtered"] == 1
 
 
 def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):

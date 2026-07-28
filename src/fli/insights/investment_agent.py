@@ -6,6 +6,7 @@ import argparse
 import copy
 import hashlib
 import json
+import re
 import time
 import urllib.parse
 import urllib.request
@@ -37,8 +38,13 @@ MAX_UNIQUE_MEMOS = 8
 MAX_MODEL_TURNS = 4
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "investment-agent-v9"
-PROMPT_CACHE_KEY = "fli:investment-agent:v9"
+PROMPT_VERSION = "investment-agent-v10"
+PROMPT_CACHE_KEY = "fli:investment-agent:v10"
+PACKET_SECTIONS = (
+    "business_and_economics",
+    "operating_and_financial_drivers",
+    "frontier_ai_transmission_paths",
+)
 PROMPT_PATH = (
     REPO_ROOT
     / "src"
@@ -118,26 +124,114 @@ def _company_cards(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return cards
 
 
+_MONEY_RE = re.compile(
+    r"(?:US\$|\$|€|EUR\s|USD\s)\s?\d[\d,.]*\s?(?:billion|million|bn\b|m\b|b\b|trillion)?",
+    re.IGNORECASE,
+)
+
+
+def _prose_strings(node: Any) -> list[str]:
+    """Every human-readable string in a memo section, skipping source metadata."""
+    found: list[str] = []
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key in {"sources", "url", "claim_date"}:
+                continue
+            found.extend(_prose_strings(value))
+    elif isinstance(node, list):
+        for value in node:
+            found.extend(_prose_strings(value))
+    elif isinstance(node, str) and not node.startswith("http"):
+        found.append(node)
+    return found
+
+
+def _scale_block(memo: dict[str, Any]) -> dict[str, Any]:
+    """Lift every dated size/magnitude sentence to the top of the packet.
+
+    Magnitudes are scattered across sections the analysis no longer receives,
+    so they are extracted here rather than lost. Deterministic, no model call.
+    """
+    sentences: list[str] = []
+    seen: set[str] = set()
+    for text in _prose_strings(memo):
+        for part in re.split(r"(?<![A-Z])(?<=[.;])\s+(?=[A-Z(])", text):
+            part = part.strip()
+            if not part or not _MONEY_RE.search(part):
+                continue
+            if len(part) < 25:
+                continue
+            key = part.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            sentences.append(part)
+    return {
+        "stated_magnitudes": sentences[:10],
+        "note": (
+            "No revenue, ARR, or size magnitude appears anywhere in this memo. "
+            "Materiality at this company's scale cannot be established from "
+            "this packet."
+            if not sentences
+            else "Verbatim magnitudes from the research. Do not extrapolate."
+        ),
+    }
+
+
+def _bit_view_block(memo: dict[str, Any]) -> dict[str, Any] | None:
+    """Flatten the BIT thesis into one block, or None when nothing is attributable."""
+    section = memo.get("investment_thesis_and_tests") or {}
+    status = section.get("public_bit_view_status")
+    thesis = section.get("attributable_public_thesis")
+    supports = section.get("what_would_support_it") or []
+    challenges = section.get("what_would_challenge_it") or []
+    if status == "no_public_view" or not (thesis or supports or challenges):
+        return None
+    return {
+        "status": status,
+        "is_explicit_thesis": status == "explicit_thesis",
+        "public_view": thesis,
+        "would_support_it": supports,
+        "would_challenge_it": challenges,
+        "usage": (
+            "These tests were written before this Development. If the "
+            "Development bears on one, say which and in which direction. "
+            "Commentary is weaker evidence than an explicit thesis."
+        ),
+    }
+
+
 def _memo_packet(ticker: str) -> dict[str, Any]:
     path = MEMO_ROOT / f"{ticker}.json"
     raw = json.loads(path.read_text(encoding="utf-8"))
-    memo = copy.deepcopy(raw["memo"])
-    memo.pop("source_ledger", None)
+    full = raw["memo"]
+    memo = {
+        section: copy.deepcopy(full[section])
+        for section in PACKET_SECTIONS
+        if section in full
+    }
     return {
-        "schema_version": "investment-agent-company-memo-v1",
+        "schema_version": "investment-agent-company-memo-v2",
         "company": raw["company"],
         "research_date": (raw.get("provenance") or {}).get("research_date"),
+        "scale": _scale_block(full),
+        "bit_view": _bit_view_block(full),
         "packet_policy": {
             "included": (
-                "All analytical memo sections, inline claim sources, "
-                "uncertainties, and next-research triggers."
+                "What the company does, the drivers that move its reported "
+                "results, the frontier-AI transmission paths researched before "
+                "this Development, every stated size magnitude, and any "
+                "attributable public BIT Capital view."
             ),
             "excluded": (
-                "Standalone source ledger and all model-generation provenance."
+                "Ecosystem relationships, committed strategy actions, "
+                "research-workflow triggers, the standalone source ledger, and "
+                "all model-generation provenance."
             ),
-            "uncertainty_usage": (
-                "Use uncertainty items to calibrate confidence and name open "
-                "questions. They are not instructions to perform research."
+            "bit_view_absent": (
+                "A null bit_view means no public BIT Capital view is "
+                "attributable. Analyze the operating driver and do not invent "
+                "a thesis."
             ),
         },
         "memo": memo,

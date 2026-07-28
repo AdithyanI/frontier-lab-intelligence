@@ -239,10 +239,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
             <dd>{formatDay(provenance.research_date)}</dd>
           </div>
           <div>
-            <dt>Model</dt>
-            <dd>{provenance.model.replace('gpt-', '')} · {provenance.reasoning_effort}</dd>
-          </div>
-          <div>
             <dt>Evidence</dt>
             <dd>{memo.source_ledger.length} sources</dd>
           </div>
@@ -276,11 +272,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
             <li key={driver.driver}>
               <div>
                 <h4>{cleanMemoText(driver.driver)}</h4>
-                <div className="company-financial-lines">
-                  {driver.financial_lines.map((line) => (
-                    <span key={line}>{formatTaxonomy(line)}</span>
-                  ))}
-                </div>
               </div>
               <p>{cleanMemoText(driver.why_it_matters)}</p>
               <MemoCitations sources={driver.sources} sourceIndex={sourceIndex} />

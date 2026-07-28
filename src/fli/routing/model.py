@@ -21,12 +21,14 @@ import tiktoken
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v14"
+PROMPT_VERSION = "audience-routing-v15"
 SCHEMA_VERSION = "audience-routing-output-v1"
+EVIDENCE_GATE_VERSION = "deterministic-evidence-gate-v1"
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_REASONING_EFFORT = "medium"
 MAX_OUTPUT_TOKENS = 32_768
 MAX_INPUT_TOKENS = 20_000
+SHORT_UNSUPPORTED_TEXT_WORD_LIMIT = 30
 INPUT_ENCODING = "o200k_base"
 TRUNCATION_MARKER = (
     "\n\n---\n"
@@ -40,7 +42,13 @@ PROMPT_CACHE_KEY = f"fli:audience-routing:{PROMPT_VERSION}"
 AUDIENCES = ("ai_engineering", "investment")
 JUDGMENT_FIELDS = ("relevant", "reason")
 _URL_ONLY_RE = re.compile(r"(?:https?://\S+\s*)+", re.IGNORECASE)
+_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 _OPAQUE_X_URL_RE = re.compile(r"https?://t\.co/\S+", re.IGNORECASE)
+_HANDLE_RE = re.compile(r"(?<!\w)@\w+", re.UNICODE)
+_SUBSTANTIVE_WORD_RE = re.compile(
+    r"[^\W_]+(?:['’.-][^\W_]+)*",
+    re.UNICODE,
+)
 _MULTISPACE_RE = re.compile(r"[ \t]{2,}")
 
 _JUDGMENT_SCHEMA: dict[str, Any] = {
@@ -55,7 +63,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v14",
+    "name": "audience_routing_v15",
     "strict": True,
     "schema": {
         "type": "object",
@@ -142,6 +150,15 @@ class RoutingPacket:
         return _sha256(render_input(self))
 
 
+@dataclass(frozen=True)
+class EvidenceGateDecision:
+    """One deterministic pre-model decision for an evidence-poor packet."""
+
+    code: str
+    reason: str
+    substantive_word_count: int
+
+
 def instructions() -> str:
     """Return the stable cacheable prefix shared across routing requests."""
     return PROMPT_PATH.read_text().strip()
@@ -195,6 +212,71 @@ def is_model_visible(source: EvidenceSource) -> bool:
     if source.relation == "same_author_continuation":
         return not _is_transport_only(_display_text(source))
     return False
+
+
+def substantive_word_count(text: str) -> int:
+    """Count words after removing transport URLs and X handles."""
+    normalized = html.unescape(unicodedata.normalize("NFC", text))
+    normalized = _URL_RE.sub(" ", normalized)
+    normalized = _HANDLE_RE.sub(" ", normalized)
+    return len(_SUBSTANTIVE_WORD_RE.findall(normalized))
+
+
+def deterministic_evidence_gate(
+    packet: RoutingPacket,
+) -> EvidenceGateDecision | None:
+    """Complete one narrow evidence-poor packet without an LLM request.
+
+    The gate applies only when the entire model-visible Development is one
+    short root X post with no artifact, author continuation, or independently
+    authored corroborating source. An unresolved link is treated as missing
+    evidence rather than a negative relevance judgment.
+    """
+    visible_sources = [
+        source for source in packet.sources if is_model_visible(source)
+    ]
+    x_sources = [
+        source
+        for source in visible_sources
+        if source.source_type == "x_post"
+    ]
+    artifacts = [
+        source
+        for source in visible_sources
+        if source.source_type == "artifact"
+    ]
+    if (
+        len(visible_sources) != 1
+        or len(x_sources) != 1
+        or artifacts
+        or x_sources[0].relation != "root"
+    ):
+        return None
+
+    root = x_sources[0]
+    word_count = substantive_word_count(root.text)
+    if word_count > SHORT_UNSUPPORTED_TEXT_WORD_LIMIT:
+        return None
+
+    if _URL_RE.search(root.normalized_text()):
+        reason = (
+            "Not evaluated — the complete Development contains only a short "
+            "X post plus linked or media evidence that was not available in "
+            "the routing packet."
+        )
+        code = "unavailable_linked_or_media_evidence"
+    else:
+        reason = (
+            "Suppressed — the complete Development is one short unsupported "
+            f"text post ({word_count} substantive words) with no artifact, "
+            "author update, or independently authored corroboration."
+        )
+        code = "short_unsupported_text"
+    return EvidenceGateDecision(
+        code=code,
+        reason=reason,
+        substantive_word_count=word_count,
+    )
 
 
 def _render_full_input(
