@@ -450,6 +450,9 @@ Examples of the intended form:
 Explain what changed in three to five short sentences.
 
 - Lead with the concrete Development.
+- Begin with what changed, not the date.
+- Omit the date unless it is necessary to understand the sequence or
+  distinguish this Development from another one.
 - Preserve attribution.
 - Distinguish a report, announcement, forecast, anecdote, and measured result.
 - State the most material limitation when needed.
