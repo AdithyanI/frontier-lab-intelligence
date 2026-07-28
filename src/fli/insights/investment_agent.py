@@ -309,11 +309,14 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                     "materiality is 'unknown'. Never invent a figure."
                 ),
             },
-            "note": {
+            "impact": {
                 "type": "string",
                 "description": (
-                    "One sentence on why this company sits where it does "
-                    "within this mechanism, relative to the others on it."
+                    "Two to three sentences on what this Development means "
+                    "for this company specifically. Name the product, segment "
+                    "or contract that carries the effect, and say what would "
+                    "have to happen for it to show up in results. Do not "
+                    "state the company's rank; the ordering already shows it."
                 ),
             },
         },
@@ -323,7 +326,7 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
             "direction",
             "materiality",
             "size_basis",
-            "note",
+            "impact",
         ],
         "additionalProperties": False,
     }
