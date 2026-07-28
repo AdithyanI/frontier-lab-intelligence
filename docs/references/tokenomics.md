@@ -1,12 +1,26 @@
 # Workflow Economics
 
-Last verified: 2026-07-27
+Last verified: 2026-07-28
 
 This is the glanceable cost map for the current Frontier Lab Intelligence
 workflow. It separates measured spend from provider estimates and from local
 work that has no incremental API cost. Exact run telemetry remains
 authoritative; these numbers are a dated operating snapshot, not a price
 guarantee.
+
+## Current Development-Router Calibration
+
+The July 21 `audience-routing-v13` top-10 calibration used
+`gpt-5.6-luna` at medium reasoning, one sequential cache lane, and the saved
+Development evidence. It made no X or artifact-provider requests.
+
+| Requests | Input tokens | Cached tokens | Output tokens | Measured cost |
+| ---: | ---: | ---: | ---: | ---: |
+| 10 | 83,288 | 0 | 2,618 | $0.098996 |
+
+The stable prompt was cache-eligible, but this run observed no reusable-prefix
+reads. Treat the measured value as the current uncached top-10 cost rather than
+projecting an assumed cache discount.
 
 ## Current 17-Day Rank Migration
 

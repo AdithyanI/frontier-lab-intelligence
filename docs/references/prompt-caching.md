@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-07-28
 
-Last live-verified: 2026-07-27
+Last live-verified: 2026-07-28
 
 This is the single source of truth for prompt caching in Frontier Lab
 Intelligence. Read it before changing cache keys, prompt layout, model
@@ -14,21 +14,24 @@ Model selection and reasoning-effort policy remain in
 
 ## Current Conclusion
 
-Prompt caching works for both `gpt-5.6-luna` and `gpt-5.6-terra` through the
-repository's shared Azure-backed LiteLLM Responses route. It is best-effort,
-not guaranteed on every eligible request.
+Prompt caching has produced positive reads for both `gpt-5.6-luna` and
+`gpt-5.6-terra` through the repository's shared Azure-backed LiteLLM Responses
+route. It is best-effort, model-specific, and not guaranteed on every eligible
+request.
 
 The latest different-input canary produced:
 
 | Model | Cached tokens by call | Post-first-request hits |
 | --- | --- | --- |
-| `gpt-5.6-luna` | `1792, 1792, 1792, 0, 1792` | 3 of 4 |
-| `gpt-5.6-terra` | `0, 1792, 1792, 1792, 1792` | 4 of 4 |
+| `gpt-5.6-luna` | `0, 0, 0` | 0 of 2 |
+| `gpt-5.6-terra` | `0, 1280, 1280` | 2 of 2 |
 
 The first request is deliberately excluded from the pass criterion because
-Azure may already hold the same prefix. Luna's hit/miss/hit sequence in one
-run is direct evidence that an isolated zero does not mean Luna lacks caching.
-Use measured hit rates for cost estimates and retain an uncached upper bound.
+Azure may already hold the same prefix. A 27 July canary previously observed
+3/4 Luna and 4/4 Terra warm hits, proving that both routes can cache. The 28
+July result shows that current cache behavior can differ by model even with the
+same request contract. Use measured hit rates for cost estimates and retain an
+uncached upper bound.
 
 ## Production Contract
 
@@ -172,6 +175,13 @@ The only proof of reusable-prefix caching is a positive
 - **2026-07-27:** the current Luna/Terra different-input canary passed with 3/4
   and 4/4 post-first-request hits. This superseded the temporary conclusion
   that Luna should always be treated as uncached.
+- **2026-07-28:** the sequential Luna/medium `audience-routing-v13` July 21
+  top-10 pass reported zero cache reads across ten eligible requests despite a
+  1,700-token stable prompt, one stable key, an unchanged schema, and 24-hour
+  retention. A same-session different-input diagnostic then observed 0/2 Luna
+  warm hits and 2/2 Terra warm hits. This is a model-specific best-effort miss,
+  not a prompt-layout failure; retain the uncached cost bound and do not change
+  model solely to chase caching.
 
 Historical build-log entries remain immutable evidence of what was observed at
 the time. Their earlier zero-hit conclusions are incident history, not the

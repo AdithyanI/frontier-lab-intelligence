@@ -120,35 +120,36 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v11_prompt_uses_soft_reason_word_guidance_without_truncation():
+def test_v13_prompt_explains_the_source_and_router_boundary():
     prompt = routing_model.instructions()
+    flat_prompt = " ".join(prompt.split())
 
-    assert routing_model.PROMPT_VERSION == "audience-routing-v12"
-    assert "Aim for roughly 40 to 50 words" in prompt
-    assert "guidance, not a hard limit" in prompt
-    assert "never truncate, reject, or add filler" in prompt
-    assert "automated page extraction" in prompt
-    assert "Ignore that extraction noise" in prompt
+    assert routing_model.PROMPT_VERSION == "audience-routing-v13"
+    assert "The current discovery source is X" in prompt
+    assert "independently authored original posts" in flat_prompt
+    assert "groups same-day Events into one Development" in flat_prompt
+    assert "retrieves the available artifact content" in prompt
+    assert "Do not browse, use outside knowledge" in flat_prompt
+    assert "You are not writing the final intelligence report" in prompt
+    assert "A false positive can be filtered by the next stage" in prompt
+    assert "A false negative disappears" in prompt
+    assert "usually between 30 and 60 words" in prompt
+    assert "Never add filler" in prompt
 
 
-def test_v11_prompt_defines_the_approved_audience_boundaries():
+def test_v13_prompt_defines_the_two_decision_hooks():
     prompt = routing_model.instructions()
+    flat_prompt = " ".join(prompt.split())
 
-    assert "temporary access extensions or resets" in prompt
-    assert "usage or rate limits are not sufficient by themselves" in prompt
-    assert "persistent operational constraint" in prompt
-    assert "measured effect on cost, reliability, throughput" in prompt
-    assert "promise or announcement that efficiency or behavior will improve" in prompt
-    assert "not a measured effect" in prompt
-    assert "independently verified before marking it relevant" in prompt
-    assert "One concrete material proposition is enough" in prompt
-    assert "do not require a complete financial case" in prompt
-    assert "do not reject an otherwise specific labor" in prompt
-    assert "This rule applies only to AI Engineering" in prompt
-    assert "reason must clearly preserve its epistemic status" in prompt
+    assert "Could a capable AI engineer name a concrete technical question" in flat_prompt
+    assert "Could a capable investor name a concrete diligence question" in flat_prompt
+    assert "A public company or ticker does not need to be named" in prompt
+    assert "Do not perform detailed company mapping" in prompt
+    assert "Do not route model availability, subscription access" in prompt
+    assert "persistent operational" in prompt
+    assert "claim rather than established fact" in prompt
     assert "Relevance is existential across the packet" in prompt
-    assert "must not erase a qualifying source" in prompt
-    assert "explicitly corrects, retracts, or disproves it" in prompt
+    assert "explicitly corrects, retracts, or disproves it" in flat_prompt
 
 
 def test_render_input_uses_readable_first_party_hierarchy_only():
@@ -327,7 +328,7 @@ def test_evidence_hash_binds_hidden_ids_and_urls_without_changing_model_input():
     assert changed_url_packet.input_sha256 == packet.input_sha256
 
 
-def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
+def test_request_uses_luna_medium_cache_tags_and_telemetry():
     client = FakeClient(routing_payload())
 
     result = routing_model.evaluate_one(
@@ -337,10 +338,10 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
     )
 
     request = client.responses.with_raw_response.calls[0]
-    assert request["model"] == "gpt-5.4-mini"
-    assert request["reasoning"] == {"effort": "high"}
+    assert request["model"] == "gpt-5.6-luna"
+    assert request["reasoning"] == {"effort": "medium"}
     assert request["max_output_tokens"] == routing_model.MAX_OUTPUT_TOKENS
-    assert "prompt_cache_retention" not in request
+    assert request["prompt_cache_retention"] == "24h"
     assert request["prompt_cache_key"] == routing_model.PROMPT_CACHE_KEY
     assert request["instructions"] == routing_model.instructions()
     assert len(request["instructions"].split()) >= 1_024
@@ -357,7 +358,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v12",
+        "prompt:audience-routing-v13",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
@@ -409,17 +410,18 @@ def test_output_normalizes_reasons():
 
 def test_prompt_explains_product_evidence_and_independent_audience_job():
     prompt = routing_model.instructions().lower()
+    flat_prompt = " ".join(prompt.split())
 
-    assert "frontier lab intelligence" in prompt
-    assert "current system collects public posts from x" in prompt
-    assert "preserves each post and its connected activity as an exact event" in prompt
-    assert "grouped into one development" in prompt
-    assert "primary source" in prompt
-    assert "full text of an available artifact" in prompt
-    assert "independently authored original posts" in prompt
+    assert "ai intelligence system" in prompt
+    assert "current discovery source is x" in prompt
+    assert "preserves each source post and its connected activity as an exact event" in flat_prompt
+    assert "groups same-day events into one development" in flat_prompt
+    assert "supporting artifact" in prompt
+    assert "available artifact text" in flat_prompt
+    assert "independently authored original posts" in flat_prompt
     assert "ai engineering" in prompt
     assert "investment" in prompt
-    assert "decide independently" in prompt
+    assert "judge the audiences independently" in prompt
     assert "earlier feed stage" not in prompt
     assert "keep/drop" not in prompt
     assert "insight prose" not in prompt

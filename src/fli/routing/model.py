@@ -21,10 +21,10 @@ import tiktoken
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v12"
+PROMPT_VERSION = "audience-routing-v13"
 SCHEMA_VERSION = "audience-routing-output-v1"
-DEFAULT_MODEL = "gpt-5.4-mini"
-DEFAULT_REASONING_EFFORT = "high"
+DEFAULT_MODEL = "gpt-5.6-luna"
+DEFAULT_REASONING_EFFORT = "medium"
 MAX_OUTPUT_TOKENS = 32_768
 MAX_INPUT_TOKENS = 20_000
 INPUT_ENCODING = "o200k_base"
@@ -55,7 +55,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v12",
+    "name": "audience_routing_v13",
     "strict": True,
     "schema": {
         "type": "object",
