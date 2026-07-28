@@ -367,50 +367,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         </div>
       </section>
 
-      <section className="company-detail-section company-memo-secondary">
-        <details>
-          <summary>Strategy, dependencies, and research triggers</summary>
-          <div className="company-memo-secondary-grid">
-            <div>
-              <h4>Committed actions</h4>
-              <ul className="company-memo-rich-list">
-                {memo.strategy_and_committed_actions.map((item) => (
-                  <li key={item.action}>
-                    <strong>{cleanMemoText(item.action)}</strong>
-                    <p>{cleanMemoText(item.investment_relevance)}</p>
-                    <MemoCitations sources={item.sources} sourceIndex={sourceIndex} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4>Customers, suppliers, and dependencies</h4>
-              <ul className="company-memo-rich-list">
-                {memo.ecosystem.map((item) => (
-                  <li key={`${item.relationship}-${item.entities_or_group}`}>
-                    <span className="mono">{formatTaxonomy(item.relationship)}</span>
-                    <strong>{cleanMemoText(item.entities_or_group)}</strong>
-                    <p>{cleanMemoText(item.why_it_matters)}</p>
-                    <MemoCitations sources={item.sources} sourceIndex={sourceIndex} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="company-research-triggers">
-            <h4>Uncertainties and next research</h4>
-            {memo.uncertainties_and_research_triggers.map((item) => (
-              <article key={item.uncertainty}>
-                <h5>{cleanMemoText(item.uncertainty)}</h5>
-                <p>{cleanMemoText(item.why_it_matters)}</p>
-                <p><strong>Next:</strong> {cleanMemoText(item.next_research_trigger)}</p>
-                <MemoCitations sources={item.sources} sourceIndex={sourceIndex} />
-              </article>
-            ))}
-          </div>
-        </details>
-      </section>
-
       <section className="company-detail-section company-memo-sources">
         <details>
           <summary>Source ledger and generation record · {memo.source_ledger.length} sources</summary>
