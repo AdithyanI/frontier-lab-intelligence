@@ -196,6 +196,14 @@ The only proof of reusable-prefix caching is a positive
   confirms that the same stable request layout can obtain substantial reuse
   in a later bounded-parallel production pass even after an earlier run
   observed no reads; cache telemetry remains the authority for each run.
+- **2026-07-28:** the Luna/medium `audience-routing-v15` July 5–21 top-100
+  pass completed 1,647 Developments with zero terminal failures. A
+  deterministic evidence gate handled 325 packets without model spend; 1,322
+  model-eligible requests reported 424 cache hits, 759,808 cached tokens from
+  6,188,937 input tokens, 71,290 cache-write tokens, and $7.762206. Five
+  transient failures on July 20–21 completed on the exact resumable retry.
+  The lower cache-read ratio than v14 is observed provider telemetry, not a
+  request-shape regression.
 - **2026-07-28:** the Sol/xhigh `investment-agent-v8` July 19–20 top-ten
   production run completed one warm request before bounded parallel fan-out.
   All 20 targets completed, with 272,384 cached tokens from 712,663 input
