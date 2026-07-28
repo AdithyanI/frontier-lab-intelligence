@@ -524,7 +524,7 @@ function DevelopmentSource({
     >
       <header>
         <span className="event-relationship-kind mono">
-          {source.is_primary ? 'Display source' : 'Independent source'}
+          {source.is_primary ? 'Display post' : 'Original post'}
         </span>
         <strong>{post.author.entity_name ?? post.author.name}</strong>
         <span className="mono">@{post.author.handle}</span>
@@ -614,12 +614,9 @@ function DevelopmentEvidenceDetails({
       <summary>
         <span>
           {item.source_event_count > 1
-            ? `View ${item.source_event_count} independent sources`
-            : 'View source and activity'}
+            ? `View ${item.source_event_count} original posts`
+            : 'View original post and activity'}
           {relationshipSummary.length > 0 ? ` · ${relationshipSummary.join(' · ')}` : ''}
-        </span>
-        <span className="mono">
-          {item.original_poster_count} {item.original_poster_count === 1 ? 'original poster' : 'original posters'}
         </span>
       </summary>
       {open && (
