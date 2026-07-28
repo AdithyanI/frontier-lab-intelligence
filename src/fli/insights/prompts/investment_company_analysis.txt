@@ -551,6 +551,13 @@ For each company on the mechanism:
   A large stated figure that is an acquisition price or a capital-spending
   plan is not a revenue base; do not treat it as one. `unknown` is a correct
   and common answer.
+- `size_basis`: the one figure from `scale.stated_magnitudes` your materiality
+  judgment rests on, quoted close to the packet's wording and under twelve
+  words. It must contain the magnitude itself, so `ARR was $845 million`
+  works and `disclosed ARR` does not. Null when `materiality` is `unknown`,
+  and only then. A reader must be able to check your verdict against this
+  figure without opening the memo. Never invent or round a figure the packet
+  does not state.
 - `note`: one sentence on why this company sits where it does relative to the
   others on this mechanism. This is the comparison, so do not restate the
   mechanism here.

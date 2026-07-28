@@ -1421,15 +1421,16 @@
 }
 
 .investment-agent-head h2 {
-  max-width: 34ch;
-  font-size: 29px;
-  line-height: 1.2;
+  max-width: 30ch;
+  font-size: 31px;
+  line-height: 1.18;
+  letter-spacing: -0.012em;
 }
 
 .investment-agent-opening {
-  max-width: 78ch;
-  margin-top: 26px;
-  padding-bottom: 22px;
+  max-width: 68ch;
+  margin-top: 30px;
+  padding-bottom: 30px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1456,13 +1457,13 @@
 }
 
 .investment-agent-companies {
-  max-width: 980px;
-  margin-top: 40px;
+  max-width: 880px;
+  margin-top: 48px;
   border-top: 1px solid var(--border-strong);
 }
 
 .investment-agent-companies > header {
-  padding: 18px 0 17px;
+  padding: 20px 0 19px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1747,10 +1748,10 @@
 
 .investment-agent-mechanism > summary {
   display: grid;
-  grid-template-columns: minmax(240px, 0.85fr) minmax(280px, 1.15fr);
+  grid-template-columns: minmax(200px, 0.72fr) minmax(300px, 1.28fr);
   align-items: start;
-  gap: 26px;
-  padding: 16px 34px 16px 0;
+  gap: 32px;
+  padding: 24px 34px 24px 0;
   color: var(--ink);
   cursor: pointer;
   list-style: none;
@@ -1785,9 +1786,9 @@
 }
 
 .investment-agent-mechanism-identity strong {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.32;
   text-wrap: balance;
 }
 
@@ -1805,8 +1806,8 @@
 
 .investment-agent-mechanism-causal {
   color: var(--ink-soft);
-  font-size: 12.5px;
-  line-height: 1.55;
+  font-size: 13.5px;
+  line-height: 1.62;
   text-wrap: pretty;
 }
 
@@ -1822,14 +1823,14 @@
 }
 
 .investment-agent-mechanism-detail {
-  padding: 0 0 18px;
+  padding: 0 0 26px;
 }
 
 .investment-agent-exposures {
   display: grid;
-  gap: 14px;
+  gap: 0;
   margin: 0;
-  padding: 16px 0 0;
+  padding: 0;
   border-top: 1px solid var(--border);
   list-style: none;
   counter-reset: exposure;
@@ -1838,26 +1839,30 @@
 .investment-agent-exposures > li {
   counter-increment: exposure;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 152px;
+  gap: 28px;
   align-items: start;
-  padding-left: 22px;
+  padding: 20px 0 20px 24px;
   position: relative;
+}
+
+.investment-agent-exposures > li + li {
+  border-top: 1px solid var(--border);
 }
 
 .investment-agent-exposure-verdict {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  padding-top: 1px;
+  gap: 5px;
+  padding-top: 2px;
 }
 
 .investment-agent-exposures > li::before {
   content: counter(exposure);
   position: absolute;
   left: 0;
-  top: 2px;
+  top: 22px;
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 10px;
@@ -1867,12 +1872,12 @@
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 5px 10px;
-  margin-bottom: 4px;
+  gap: 5px 9px;
+  margin-bottom: 7px;
 }
 
 .investment-agent-exposure-head strong {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -1898,38 +1903,47 @@
   color: var(--ink);
 }
 
+.investment-agent-size-basis {
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
 .investment-agent-exposures > li > .investment-agent-exposure-main > p {
-  max-width: 74ch;
+  max-width: 62ch;
   margin: 0;
   color: var(--ink-soft);
-  font-size: 12.5px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.6;
   text-wrap: pretty;
 }
 
 .investment-agent-exposure-driver {
   color: var(--ink) !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
 }
 
 .investment-agent-exposure-note {
-  margin-top: 3px !important;
+  margin-top: 6px !important;
   color: var(--muted) !important;
-  font-size: 11.5px !important;
+  font-size: 12.5px !important;
 }
 
 .investment-agent-mechanism-footer {
   display: grid;
-  gap: 7px;
-  margin: 14px 0 0;
-  padding-top: 13px;
+  gap: 12px;
+  max-width: 700px;
+  margin: 0;
+  padding: 20px 0 0 24px;
   border-top: 1px solid var(--border);
 }
 
 .investment-agent-mechanism-footer > div {
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 16px;
   align-items: baseline;
 }
 
@@ -1941,22 +1955,23 @@
 }
 
 .investment-agent-mechanism-footer dd {
-  max-width: 78ch;
+  max-width: 62ch;
   margin: 0;
   color: var(--ink-soft);
-  font-size: 12.5px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.6;
   text-wrap: pretty;
 }
 
 .investment-agent-prior {
-  margin-top: 18px;
-  padding: 12px 0 12px 14px;
+  max-width: 880px;
+  margin-top: 34px;
+  padding: 16px 0 16px 18px;
   border-left: 2px solid var(--ink);
 }
 
 .investment-agent-prior h3 {
-  margin: 0 0 5px;
+  margin: 0 0 7px;
   color: var(--muted);
   font-size: 9px;
   font-weight: 400;
@@ -1965,9 +1980,9 @@
 }
 
 .investment-agent-prior p {
-  max-width: 78ch;
+  max-width: 62ch;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.6;
   text-wrap: pretty;
 }

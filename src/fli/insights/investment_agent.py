@@ -38,8 +38,8 @@ MAX_UNIQUE_MEMOS = 8
 MAX_MODEL_TURNS = 4
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "investment-agent-v10"
-PROMPT_CACHE_KEY = "fli:investment-agent:v10"
+PROMPT_VERSION = "investment-agent-v11"
+PROMPT_CACHE_KEY = "fli:investment-agent:v11"
 PACKET_SECTIONS = (
     "business_and_economics",
     "operating_and_financial_drivers",
@@ -294,10 +294,19 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                 "enum": ["material", "immaterial", "unknown"],
                 "description": (
                     "Whether a plausible outcome could move this company's "
-                    "reported results at its own scale. Use the memo's "
-                    "materiality_condition and revenue scale. Use 'unknown' "
-                    "when the memo supplies no revenue magnitude. Never "
-                    "estimate a figure the memo does not contain."
+                    "reported results at its own scale. Judge against "
+                    "scale.stated_magnitudes in the memo packet. Use "
+                    "'unknown' when the packet supplies no revenue magnitude. "
+                    "Never estimate a figure the packet does not contain."
+                ),
+            },
+            "size_basis": {
+                "type": ["string", "null"],
+                "description": (
+                    "The single figure from scale.stated_magnitudes that the "
+                    "materiality judgment rests on, quoted close to the "
+                    "packet's wording and under 12 words. Null when "
+                    "materiality is 'unknown'. Never invent a figure."
                 ),
             },
             "note": {
@@ -313,6 +322,7 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
             "affected_driver",
             "direction",
             "materiality",
+            "size_basis",
             "note",
         ],
         "additionalProperties": False,
@@ -685,6 +695,24 @@ def _validate_final(
                 "splits must be true exactly when one mechanism holds both a "
                 "positive and a negative company direction."
             )
+        for exposure in path["exposures"]:
+            basis = str(exposure.get("size_basis") or "").strip()
+            sized = exposure["materiality"] in {"material", "immaterial"}
+            if sized and not basis:
+                raise ValueError(
+                    f"{exposure['ticker']} claims a sized materiality without "
+                    "a size_basis figure."
+                )
+            if sized and not _MONEY_RE.search(basis):
+                raise ValueError(
+                    f"{exposure['ticker']} size_basis carries no magnitude: "
+                    f"{basis!r}"
+                )
+            if not sized and basis:
+                raise ValueError(
+                    f"{exposure['ticker']} reports unknown materiality but "
+                    "supplied a size_basis."
+                )
     if result["decision"] == "surface":
         if not assessed or result["no_match_reason"] is not None:
             raise ValueError("A surfaced result needs assessments and no null reason.")

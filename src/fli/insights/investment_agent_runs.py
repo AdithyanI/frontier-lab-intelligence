@@ -31,6 +31,7 @@ EXPOSURE_FIELDS = {
     "affected_driver",
     "direction",
     "materiality",
+    "size_basis",
     "note",
 }
 DIRECTIONS = {"positive", "negative", "mixed", "unclear"}

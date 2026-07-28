@@ -1130,6 +1130,11 @@ function InvestmentAgentMechanism({
                 >
                   {INVESTMENT_AGENT_MATERIALITY[exposure.materiality]}
                 </span>
+                {exposure.size_basis && (
+                  <span className="investment-agent-size-basis">
+                    {decodeTextEntities(exposure.size_basis)}
+                  </span>
+                )}
               </div>
             </li>
           ))}

@@ -224,6 +224,7 @@ export interface InvestmentAgentExposure {
   affected_driver: string
   direction: InvestmentAgentDirection
   materiality: InvestmentAgentMateriality
+  size_basis: string | null
   note: string
 }
 

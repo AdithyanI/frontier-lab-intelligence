@@ -30,6 +30,7 @@ def _trace() -> dict:
                         "affected_driver": "AI security product attachment",
                         "direction": "positive",
                         "materiality": "unknown",
+                        "size_basis": None,
                         "note": "The incident could increase demand for AI controls.",
                     }
                 ],

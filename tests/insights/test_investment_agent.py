@@ -24,6 +24,7 @@ def _result(*, day: str, rank: int) -> dict:
                         "affected_driver": "paid adoption",
                         "direction": "positive",
                         "materiality": "unknown",
+                        "size_basis": None,
                         "note": "A bounded implication.",
                     }
                 ],
@@ -368,4 +369,4 @@ def test_trace_path_is_durable_unique_and_versioned(tmp_path: Path):
 
     assert first.parent == tmp_path / "2026-07-20"
     assert first != second
-    assert "rank-001-5-6-sol-xhigh-investment-agent-v10" in first.name
+    assert "rank-001-5-6-sol-xhigh-investment-agent-v11" in first.name
