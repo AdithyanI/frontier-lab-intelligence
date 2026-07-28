@@ -139,8 +139,11 @@ The current work boundary is the deterministic Development projection and
 `daily-development-rank-v1`. Exact Events remain the provenance unit; shared
 release-specific artifacts merge same-day original posts for inspection and
 ranking. The Feed opens on all grouped Developments and exposes every exact
-source underneath. Downstream routing, Insight, editorial, PDF, and delivery
-replay is intentionally paused until this grouping is reviewed.
+source underneath. It can also assemble and show the exact future routing
+input—source posts, substantive current same-author updates, and retrieved artifacts—while
+keeping reaction text out and making no model call. Downstream routing, Insight,
+editorial, PDF, and delivery replay is intentionally paused until this grouping
+is reviewed.
 
 Repository housekeeping is complete and archived
 under [`docs/projects/archive/repo-housekeeping/`](projects/archive/repo-housekeeping/):

@@ -211,6 +211,12 @@ Rules:
   one `Posts about this Development` section heading and mark only the representative row
   `Shown in Feed`; do not repeat a category label on every row or call the
   count “independent sources,” because it counts posts rather than people.
+  Inside that evidence disclosure, one subordinate
+  `Preview what audience analysis reads` control assembles the exact
+  deterministic routing input on demand without calling a model. Its compact
+  ledger separates source posts, same-author updates, and retrieved artifacts
+  sent for meaning from trusted reaction activity used only for rank. The
+  complete rendered input remains one deeper, default-collapsed audit view.
   Per-Development routing rationale is collapsed by
   default behind a quiet `View reasons` disclosure so evidence remains the
   primary reading surface. A routed Development shows neutral hairline `ENG`

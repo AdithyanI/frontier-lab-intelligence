@@ -10,7 +10,9 @@ import { useSearchParams } from 'react-router-dom'
 import {
   getJSON,
   getCachedJSON,
+  developmentAnalysisPacketUrl,
   developmentPageUrl,
+  type DevelopmentAnalysisPacket,
   type DevelopmentResponse,
   type EventEvidence,
   type FeedDates,
@@ -61,6 +63,8 @@ const eventPageCache = new Map<string, DevelopmentResponse>()
 const eventPageRequests = new Map<string, Promise<DevelopmentResponse>>()
 const developmentDetailCache = new Map<string, FeedDevelopment>()
 const developmentDetailRequests = new Map<string, Promise<FeedDevelopment>>()
+const analysisPacketCache = new Map<string, DevelopmentAnalysisPacket>()
+const analysisPacketRequests = new Map<string, Promise<DevelopmentAnalysisPacket>>()
 
 function eventPageKey({
   date,
@@ -117,6 +121,27 @@ function requestDevelopmentDetail(
     })
     .finally(() => developmentDetailRequests.delete(key))
   developmentDetailRequests.set(key, pending)
+  return pending
+}
+
+function requestAnalysisPacket(
+  date: string,
+  developmentId: string,
+): Promise<DevelopmentAnalysisPacket> {
+  const key = `${date}\u0000${developmentId}`
+  const cached = analysisPacketCache.get(key)
+  if (cached) return Promise.resolve(cached)
+  const inFlight = analysisPacketRequests.get(key)
+  if (inFlight) return inFlight
+  const pending = getJSON<DevelopmentAnalysisPacket>(
+    developmentAnalysisPacketUrl({ date, developmentId }),
+  )
+    .then((value) => {
+      analysisPacketCache.set(key, value)
+      return value
+    })
+    .finally(() => analysisPacketRequests.delete(key))
+  analysisPacketRequests.set(key, pending)
   return pending
 }
 
@@ -555,6 +580,98 @@ function DevelopmentSource({
   )
 }
 
+function AnalysisPacketPreview({
+  date,
+  developmentId,
+}: {
+  date: string
+  developmentId: string
+}) {
+  const [packet, setPacket] = useState<DevelopmentAnalysisPacket | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const loadPacket = () => {
+    if (packet || loading) return
+    setLoading(true)
+    setError('')
+    requestAnalysisPacket(date, developmentId)
+      .then(setPacket)
+      .catch(() => {
+        setError('Couldn’t assemble the analysis packet. Close and retry.')
+      })
+      .finally(() => setLoading(false))
+  }
+
+  const counts = packet?.counts
+  const meaningParts = counts
+    ? [
+        `${counts.source_posts} source ${counts.source_posts === 1 ? 'post' : 'posts'}`,
+        counts.author_updates
+          ? `${counts.author_updates} author ${counts.author_updates === 1 ? 'update' : 'updates'}`
+          : null,
+        counts.artifacts
+          ? `${counts.artifacts} retrieved ${counts.artifacts === 1 ? 'artifact' : 'artifacts'}`
+          : null,
+      ].filter((value): value is string => Boolean(value))
+    : []
+
+  return (
+    <details
+      className="analysis-packet"
+      onToggle={(event) => {
+        if (event.currentTarget.open) loadPacket()
+      }}
+    >
+      <summary>
+        <span>Preview what audience analysis reads</span>
+        <span className="mono">No model call</span>
+      </summary>
+      <div className="analysis-packet-body">
+        {loading && <p className="mono muted">Assembling the exact packet…</p>}
+        {error && <p className="error-note">{error}</p>}
+        {packet && !packet.available && (
+          <p className="error-note">
+            {packet.reason || 'The analysis packet is unavailable.'}
+          </p>
+        )}
+        {packet?.available && counts && (
+          <>
+            <p className="analysis-packet-note">{packet.note}</p>
+            <dl className="analysis-packet-ledger">
+              <div>
+                <dt className="mono">Sent for meaning</dt>
+                <dd>{meaningParts.join(' · ')}</dd>
+              </div>
+              <div>
+                <dt className="mono">Used for rank only</dt>
+                <dd>
+                  {counts.trusted_participants} trusted participants shape the rank.
+                  {' '}
+                  {counts.activity_posts_excluded} other activity
+                  {counts.activity_posts_excluded === 1 ? ' post is' : ' posts are'}
+                  {' '}left out of the meaning packet.
+                </dd>
+              </div>
+            </dl>
+            <details className="analysis-packet-exact">
+              <summary>View the exact model input</summary>
+              <pre>{packet.model_input}</pre>
+            </details>
+            <p className="analysis-packet-meta mono">
+              {packet.input_tokens?.toLocaleString()} input tokens
+              {' · '}
+              {packet.prompt_version}
+              {' · '}
+              opening this preview does not run audience analysis
+            </p>
+          </>
+        )}
+      </div>
+    </details>
+  )
+}
+
 function DevelopmentEvidenceDetails({
   item,
   date,
@@ -635,6 +752,10 @@ function DevelopmentEvidenceDetails({
               />
             ))}
           </div>
+          <AnalysisPacketPreview
+            date={date}
+            developmentId={item.development_id}
+          />
           {narrative.length > 0 && (
             <p className="development-supporting-label mono">
               Connected author activity

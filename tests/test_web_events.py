@@ -6,6 +6,7 @@ import pytest
 
 from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
+from fli.evidence.artifacts import store as artifact_store
 from fli.ingestion.x import content as x_content
 from fli.registry import channels
 from fli.routing import model as routing_model
@@ -653,6 +654,128 @@ def test_developments_api_projects_completed_audience_routing_directly(
         neither["items"][0]["development_id"]
         == all_items["items"][1]["development_id"]
     )
+
+
+def test_analysis_packet_preview_uses_semantic_sources_without_calling_a_model(
+    tmp_path, monkeypatch
+):
+    artifact_db = tmp_path / "artifacts.db"
+    artifact_conn = artifact_store.connect(artifact_db)
+    artifact_conn.close()
+    item = {
+        "development_id": "development-preview",
+        "source_event_ids": ["event-primary", "event-independent"],
+        "source_events": [
+            {
+                "event_id": "event-primary",
+                "is_primary": True,
+                "post": {
+                    "post_id": "primary",
+                    "author": {"handle": "lab"},
+                    "text": "We released the result.",
+                    "published_at": "2026-07-21T10:00:00+00:00",
+                },
+                "evidence": [
+                    {
+                        "post_id": "author-update",
+                        "author": {"handle": "lab"},
+                        "text": "A useful clarification.",
+                        "relationship": "quote",
+                        "published_at": "2026-07-21T11:00:00+00:00",
+                    },
+                    {
+                        "post_id": "outside-reaction",
+                        "author": {"handle": "observer"},
+                        "text": "This reaction must not enter the meaning packet.",
+                        "relationship": "quote",
+                        "published_at": "2026-07-21T12:00:00+00:00",
+                    },
+                ],
+            },
+            {
+                "event_id": "event-independent",
+                "is_primary": False,
+                "post": {
+                    "post_id": "independent",
+                    "author": {"handle": "researcher"},
+                    "text": "Independent explanation of the same result.",
+                    "published_at": "2026-07-21T10:30:00+00:00",
+                },
+                "evidence": [],
+            },
+        ],
+        "evidence": [
+            {
+                "post_id": "author-update",
+                "relationship": "quote",
+            },
+            {
+                "post_id": "outside-reaction",
+                "relationship": "quote",
+            },
+        ],
+        "rank_components": {"trusted_attention": 4},
+    }
+    monkeypatch.setattr(
+        development_store,
+        "developments_payload",
+        lambda **_kwargs: {"available": True, "items": [item]},
+    )
+
+    payload = development_store.analysis_packet_payload(
+        day="2026-07-21",
+        development_id="development-preview",
+        artifact_db=artifact_db,
+    )
+
+    assert payload["available"] is True
+    assert payload["calls_model"] is False
+    assert payload["counts"] == {
+        "source_posts": 2,
+        "author_updates": 1,
+        "artifacts": 0,
+        "trusted_participants": 4,
+        "activity_posts_excluded": 1,
+    }
+    assert {
+        source["relation"] for source in payload["sources"]
+    } == {"root", "independent_original", "same_author_continuation"}
+    assert "We released the result." in payload["model_input"]
+    assert "Independent explanation" in payload["model_input"]
+    assert "A useful clarification." in payload["model_input"]
+    assert "This reaction must not enter" not in payload["model_input"]
+
+
+def test_analysis_packet_endpoint_only_reads_the_requested_development(
+    monkeypatch,
+):
+    requested: dict[str, str] = {}
+
+    def preview(*, day, development_id):
+        requested.update(day=day, development_id=development_id)
+        return {
+            "available": True,
+            "date": day,
+            "development_id": development_id,
+            "calls_model": False,
+        }
+
+    monkeypatch.setattr(development_store, "analysis_packet_payload", preview)
+
+    response = client.get(
+        "/api/developments/analysis-packet",
+        params={
+            "date": "2026-07-21",
+            "development_id": "development-preview",
+        },
+    )
+
+    assert response.status_code == 200
+    assert requested == {
+        "day": "2026-07-21",
+        "development_id": "development-preview",
+    }
+    assert response.json()["calls_model"] is False
 
 
 def test_events_ignore_routing_from_different_full_day_rank_inputs(

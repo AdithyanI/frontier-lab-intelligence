@@ -58,7 +58,7 @@ that may outlive one HTTP request through the LiteLLM proxy:
 ```python
 response = client.responses.create(..., background=True)
 while response.status in {"queued", "in_progress"}:
-    time.sleep(2)
+    time.sleep(30)
     response = client.responses.retrieve(response.id)
 ```
 
@@ -68,6 +68,10 @@ return a different encrypted wrapper on each retrieval; that wrapper remains
 valid and does not mean that a second provider job was created. Do not disable
 the security hook or bypass the shared proxy merely to make the visible ID
 stable.
+
+OpenAI's example uses a two-second interval. FLI's research pilot uses
+30 seconds because completion latency is unimportant for multi-minute Sol
+research and the slower interval avoids needless proxy traffic and log noise.
 
 The deployed LiteLLM v1.93.0 path was verified on 2026-07-28 with the exact
 loop above: a Luna background request moved from `queued` to `completed` and

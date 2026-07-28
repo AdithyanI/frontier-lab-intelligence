@@ -192,6 +192,17 @@ def _is_transport_only(text: str) -> bool:
     return not text or _URL_ONLY_RE.fullmatch(text) is not None
 
 
+def is_model_visible(source: EvidenceSource) -> bool:
+    """Return whether one frozen source contributes a block to the model input."""
+    if source.source_type == "artifact":
+        return True
+    if source.relation in {"root", "independent_original"}:
+        return True
+    if source.relation == "same_author_continuation":
+        return not _is_transport_only(_display_text(source))
+    return False
+
+
 def _render_full_input(
     packet: RoutingPacket, *, include_dates: bool = False
 ) -> str:
@@ -205,6 +216,7 @@ def _render_full_input(
         source
         for source in packet.sources
         if source.relation == "same_author_continuation"
+        and is_model_visible(source)
     ]
     independent_originals = [
         source

@@ -14,6 +14,7 @@ Endpoints:
 - /api/events                    Registry-aware exact structural event groups
 - /api/developments/dates        artifact-linked Development counts by date
 - /api/developments              ranked, routed Development evidence
+- /api/developments/analysis-packet exact read-only audience-analysis preview
 - /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
 - /api/artifacts/{id}/text       normalized readable artifact snapshot
@@ -485,6 +486,21 @@ def developments(
             include_evidence=include_evidence,
             limit=limit,
             offset=offset,
+        ),
+        headers=EVENT_READ_CACHE_HEADERS,
+    )
+
+
+@app.get("/api/developments/analysis-packet")
+def development_analysis_packet(
+    development_date: calendar_date = Query(..., alias="date"),
+    development_id: str = Query(..., min_length=1, max_length=128),
+) -> JSONResponse:
+    """Exact read-only packet the audience router would receive."""
+    return JSONResponse(
+        development_store.analysis_packet_payload(
+            day=development_date.isoformat(),
+            development_id=development_id,
         ),
         headers=EVENT_READ_CACHE_HEADERS,
     )

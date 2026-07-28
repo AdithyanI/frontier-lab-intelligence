@@ -43,7 +43,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
 | Insights | `fli.insights` | Per-Development generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary: strict drafts, frozen workspaces, date-keyed orchestration, persisted Codex handoff, atomic runs, the canonical read model, and `pdf_report` for deterministic cached workbooks. Investment company selection follows `docs/references/investment-company-mapping.md`. |
 | Delivery | `fli.delivery.daily_brief` | Manual Slack all-Insight and email top-five formatting, provider adapters, a same-origin confirmation guard, and reuse of the canonical cached PDF. It does not own editorial data or scheduling. |
-| Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.developments`, `fli.web.artifact_library` | HTTP composition and read projections only. `/api/events` preserves exact Event inspection; `/api/developments` is the ranked Feed read model. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
+| Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.developments`, `fli.web.artifact_library` | HTTP composition and read projections only. `/api/events` preserves exact Event inspection; `/api/developments` is the ranked Feed read model; `/api/developments/analysis-packet` renders the exact read-only routing input without a model call. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
 | Demo release | `demo.command`, `scripts/demo.py`, `scripts/build-demo-release.py` | Verified snapshot restore, read-only launch, and operator-only release construction. The release contract is `data/demo-release.json`. |
 
@@ -110,6 +110,9 @@ removing or archiving local data.
 - Inspect the daily Development rank: `/api/developments` or the Feed. The
   historical `fli daily-rank evaluate` command still evaluates exact-Event
   `daily-rank-v2` lineage.
+- Inspect one exact future routing input without running the model:
+  `/api/developments/analysis-packet?date=YYYY-MM-DD&development_id=...` or
+  `Preview what audience analysis reads` inside the expanded Feed Development.
 - Run the product: `fli web` or the always-on service at
   `http://127.0.0.1:8797`
 - Open the hosted product:

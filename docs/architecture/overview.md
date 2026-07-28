@@ -85,9 +85,14 @@ composition.
    Network positions are tie-aware entity-support percentiles, and the complete
    day's exact inputs are bound into one lineage hash.
 8. Audience routing independently decides whether the packet matters to AI
-   Engineering and Investment. New routing freezes admit only first-party X
-   sources no more than seven days old; a current same-author continuation may
-   replace an older root, while old-only packets are excluded. A multi-day
+   Engineering and Investment. One Development packet contains every current
+   independently authored source post, current substantive same-author
+   continuations, and each retrieved shared artifact once. Third-party reaction text stays out of
+   the semantic packet even though trusted authors, quoters, and reposters
+   still shape rank. The Feed exposes the exact rendered packet through a
+   read-only preview that never calls a model. New routing freezes admit only
+   first-party X sources no more than seven days old; a current same-author
+   continuation may replace an older root, while old-only packets are excluded. A multi-day
    refresh freezes every requested date against one global Event publication,
    then routes days in parallel. New publication-qualified runs automatically
    reuse a predecessor judgment only when the same Event has exact frozen
@@ -162,7 +167,9 @@ composition.
 - **Dynamic curation:** Feed and Event readers overlay current Registry state so
   rejected identities disappear without rewriting raw history.
 - **First-party model evidence:** independent reactions remain auditable in the
-  Feed but cannot silently become primary artifact or Insight evidence.
+  Feed but cannot silently become primary artifact or Insight evidence. The
+  Feed's analysis-packet preview renders the same deterministic input used by
+  routing; opening it does not run routing or Insight generation.
 - **Fresh semantic evidence:** raw Events retain their history, while routing
   and daily authoring use only first-party X posts from the brief day through
   seven days earlier. Current same-author continuations may replace old roots;

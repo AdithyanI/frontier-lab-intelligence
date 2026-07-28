@@ -56,6 +56,15 @@ Run one company:
 .venv/bin/python scripts/company-memo-pilot.py --ticker IREN
 ```
 
+For a cheap end-to-end transport and schema canary before a batch:
+
+```bash
+.venv/bin/python scripts/company-memo-pilot.py \
+  --ticker IREN \
+  --model gpt-5.6-luna \
+  --reasoning-effort low
+```
+
 The script:
 
 1. reads the existing canonical profile as prior context;
@@ -65,7 +74,14 @@ The script:
 4. polls the latest returned response ID until it reaches a terminal state;
 5. validates that every claim URL is HTTPS and present in the source ledger;
 6. writes the memo, usage, request identity, web actions, and provenance to
-   `tmp/company-memo-pilot-<TICKER>.json`.
+   `tmp/company-memo-pilot-<TICKER>-<MODEL>-<EFFORT>.json`.
+
+The model, reasoning effort, and polling interval are explicit CLI controls.
+The defaults are `gpt-5.6-sol`, `xhigh`, and 30 seconds. A Luna/low run proves
+transport, search, schema, validation, and persistence; it does not establish
+the quality bar for the final company packet. Do not start a full Sol/xhigh
+batch until at least one low-cost canary and the two-company quality/cache
+audit have passed.
 
 The pilot never mutates the canonical Investment packet. Its first acceptance
 decision is qualitative: inspect one result for causal usefulness, primary

@@ -35,6 +35,16 @@ test('Feed keeps routing secondary and exposes the exact Event ID', () => {
   assert.match(copyEventSource, /aria-live="polite"/)
 })
 
+test('Feed previews the exact semantic packet without starting audience generation', () => {
+  assert.match(feedSource, /developmentAnalysisPacketUrl/)
+  assert.match(feedSource, /Preview what audience analysis reads/)
+  assert.match(feedSource, /Sent for meaning/)
+  assert.match(feedSource, /Used for rank only/)
+  assert.match(feedSource, /View the exact model input/)
+  assert.match(feedSource, /opening this preview does not run audience analysis/)
+  assert.match(evidenceApiSource, /\/api\/developments\/analysis-packet/)
+})
+
 test('Feed shows audience marks and keeps both routing reasons auditable', () => {
   assert.match(feedSource, /routing\.ai_engineering\.relevant/)
   assert.match(feedSource, /className="event-audience-mark" aria-hidden="true">ENG</)

@@ -376,6 +376,41 @@ export interface DevelopmentResponse
   items?: FeedDevelopment[]
 }
 
+export interface DevelopmentAnalysisPacket {
+  available: boolean
+  reason?: string
+  date?: string
+  development_id?: string
+  prompt_version?: string
+  evidence_sha256?: string
+  input_sha256?: string
+  input_tokens?: number
+  calls_model?: false
+  counts?: {
+    source_posts: number
+    author_updates: number
+    artifacts: number
+    trusted_participants: number
+    activity_posts_excluded: number
+  }
+  sources?: Array<{
+    source_type: 'x_post' | 'artifact'
+    source_id: string
+    relation:
+      | 'root'
+      | 'independent_original'
+      | 'same_author_continuation'
+      | 'self_published_artifact'
+      | 'linked_artifact'
+      | null
+    author: string | null
+    title: string | null
+    url: string
+  }>
+  model_input?: string
+  note?: string
+}
+
 export interface DevelopmentPageQuery extends EventPageQuery {
   developmentId?: string
   includeEvidence?: boolean
@@ -405,4 +440,18 @@ export function developmentPageUrl({
     offset: String(offset),
   })
   return `/api/developments?${params}`
+}
+
+export function developmentAnalysisPacketUrl({
+  date,
+  developmentId,
+}: {
+  date: string
+  developmentId: string
+}) {
+  const params = new URLSearchParams({
+    date,
+    development_id: developmentId,
+  })
+  return `/api/developments/analysis-packet?${params}`
 }

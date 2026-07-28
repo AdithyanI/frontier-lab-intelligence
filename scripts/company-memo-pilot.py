@@ -30,8 +30,9 @@ CONTEXT_PATH = (
     / "references"
     / "bit-investment-context.json"
 )
-MODEL = "gpt-5.6-sol"
-REASONING_EFFORT = "xhigh"
+DEFAULT_MODEL = "gpt-5.6-sol"
+DEFAULT_REASONING_EFFORT = "xhigh"
+DEFAULT_POLL_INTERVAL_SECONDS = 30.0
 PROMPT_VERSION = "company-memo-pilot-v1"
 PROMPT_CACHE_KEY = f"fli:company-memo:{PROMPT_VERSION}"
 
@@ -482,6 +483,17 @@ def _input_detail(usage: Any, field: str) -> int:
     return _usage_value(details, field)
 
 
+def _output_detail(usage: Any, field: str) -> int:
+    if usage is None:
+        return 0
+    details = (
+        usage.get("output_tokens_details")
+        if isinstance(usage, dict)
+        else getattr(usage, "output_tokens_details", None)
+    )
+    return _usage_value(details, field)
+
+
 def _profile(ticker: str) -> dict[str, Any]:
     packet = json.loads(CONTEXT_PATH.read_text())
     normalized = ticker.strip().upper()
@@ -517,7 +529,13 @@ def _validate_urls(memo: dict[str, Any]) -> None:
     visit(memo)
 
 
-def research(ticker: str) -> Path:
+def research(
+    ticker: str,
+    *,
+    model: str,
+    reasoning_effort: str,
+    poll_interval_seconds: float,
+) -> Path:
     profile = _profile(ticker)
     client = entity_kinds.create_litellm_client()
     tags = (
@@ -527,9 +545,11 @@ def research(ticker: str) -> Path:
         "scope:single-company",
         f"prompt:{PROMPT_VERSION}",
         f"company:{profile['ticker'].lower()}",
+        f"model:{model}",
+        f"reasoning:{reasoning_effort}",
     )
     request = {
-        "model": MODEL,
+        "model": model,
         "instructions": INSTRUCTIONS,
         "input": json.dumps(
             {
@@ -549,7 +569,7 @@ def research(ticker: str) -> Path:
             ensure_ascii=False,
         ),
         "prompt_cache_key": PROMPT_CACHE_KEY,
-        **llm_responses.litellm_prompt_cache_kwargs(MODEL),
+        **llm_responses.litellm_prompt_cache_kwargs(model),
         "tools": [
             {
                 "type": "web_search",
@@ -557,9 +577,9 @@ def research(ticker: str) -> Path:
                 "return_token_budget": "unlimited",
             }
         ],
-        "tool_choice": llm_responses.required_web_search_tool_choice(MODEL),
+        "tool_choice": llm_responses.required_web_search_tool_choice(model),
         "include": ["web_search_call.action.sources"],
-        "reasoning": {"effort": REASONING_EFFORT},
+        "reasoning": {"effort": reasoning_effort},
         "text": {"format": OUTPUT_FORMAT},
         "background": True,
         "store": False,
@@ -570,7 +590,7 @@ def research(ticker: str) -> Path:
     response = client.responses.create(**request)
     print(f"background response status={response.status}", file=sys.stderr, flush=True)
     while response.status in {"queued", "in_progress"}:
-        time.sleep(2)
+        time.sleep(poll_interval_seconds)
         response = client.responses.retrieve(response.id)
         print(f"background response status={response.status}", file=sys.stderr, flush=True)
 
@@ -597,8 +617,8 @@ def research(ticker: str) -> Path:
         "memo": memo,
         "provenance": {
             "research_date": dt.date.today().isoformat(),
-            "model": MODEL,
-            "reasoning_effort": REASONING_EFFORT,
+            "model": model,
+            "reasoning_effort": reasoning_effort,
             "prompt_version": PROMPT_VERSION,
             "prompt_cache_key": PROMPT_CACHE_KEY,
             "response_id": getattr(response, "id", None),
@@ -607,13 +627,22 @@ def research(ticker: str) -> Path:
             "cached_tokens": _input_detail(usage, "cached_tokens"),
             "cache_write_tokens": _input_detail(usage, "cache_write_tokens"),
             "output_tokens": _usage_value(usage, "output_tokens"),
+            "reasoning_tokens": _output_detail(usage, "reasoning_tokens"),
             "reported_cost_usd": None,
             "web_actions": actions,
             "consulted_sources": consulted_sources,
             "request_tags": list(tags),
         },
     }
-    output_path = ROOT / "tmp" / f"company-memo-pilot-{profile['ticker']}.json"
+    model_slug = model.replace("/", "-").replace(".", "-")
+    output_path = (
+        ROOT
+        / "tmp"
+        / (
+            f"company-memo-pilot-{profile['ticker']}-"
+            f"{model_slug}-{reasoning_effort}.json"
+        )
+    )
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     return output_path
 
@@ -621,8 +650,23 @@ def research(ticker: str) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ticker", default="IREN")
+    parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
+    parser.add_argument(
+        "--poll-interval",
+        type=float,
+        default=DEFAULT_POLL_INTERVAL_SECONDS,
+        help="seconds between background response retrievals",
+    )
     args = parser.parse_args()
-    output_path = research(args.ticker)
+    if args.poll_interval <= 0:
+        parser.error("--poll-interval must be greater than zero")
+    output_path = research(
+        args.ticker,
+        model=args.model,
+        reasoning_effort=args.reasoning_effort,
+        poll_interval_seconds=args.poll_interval,
+    )
     print(output_path)
     return 0
 

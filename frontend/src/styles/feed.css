@@ -725,6 +725,105 @@
   font-size: 9px;
 }
 
+.analysis-packet {
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.analysis-packet > summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 44px;
+  padding: 12px 0;
+  color: var(--blue-ink);
+  font-size: 11px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.analysis-packet > summary::-webkit-details-marker { display: none; }
+.analysis-packet > summary:hover > span:first-child { text-decoration: underline; }
+.analysis-packet > summary > span:last-child {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.analysis-packet-body {
+  padding: 0 0 16px;
+}
+
+.analysis-packet-note {
+  max-width: 72ch;
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.analysis-packet-ledger {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.analysis-packet-ledger > div {
+  min-width: 0;
+  padding: 14px 18px 14px 0;
+}
+
+.analysis-packet-ledger > div + div {
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+}
+
+.analysis-packet-ledger dt {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.analysis-packet-ledger dd {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.analysis-packet-exact {
+  margin-top: 14px;
+}
+
+.analysis-packet-exact > summary {
+  color: var(--blue-ink);
+  font-size: 10px;
+  list-style-position: inside;
+  cursor: pointer;
+}
+
+.analysis-packet-exact > pre {
+  max-height: 420px;
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font: 10px/1.55 'IBM Plex Mono', monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.analysis-packet-meta {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 8.5px;
+}
+
 .development-supporting-label {
   margin: 0;
   padding: 14px 0 8px;
@@ -896,5 +995,12 @@
     row-gap: 12px;
   }
   .feed-controls { justify-self: start; }
+  .analysis-packet-ledger { grid-template-columns: 1fr; }
+  .analysis-packet-ledger > div { padding: 12px 0; }
+  .analysis-packet-ledger > div + div {
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
   .event-retweet-links { grid-template-columns: 1fr; }
 }

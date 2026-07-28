@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sqlite3
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -229,6 +230,137 @@ def current_rank_identity(*, day: str) -> dict[str, str]:
         "event_run_id": str(run.get("run_id") or ""),
         "feed_run_id": str(run.get("feed_run_id") or ""),
         "development_run_id": str(run.get("development_run_id") or ""),
+    }
+
+
+def analysis_packet_payload(
+    *,
+    day: str,
+    development_id: str,
+    artifact_db: Path | None = None,
+) -> dict[str, Any]:
+    """Preview the exact deterministic evidence packet without calling a model."""
+    from fli.routing import model as routing_model
+    from fli.routing import runs as routing_runs
+
+    if not development_id:
+        return {
+            "available": False,
+            "reason": "A Development ID is required to assemble an analysis packet.",
+        }
+    artifact_db = artifact_db or DEFAULT_ARTIFACT_DB
+    projection = developments_payload(
+        day=day,
+        lane="all",
+        sort="rank",
+        query="",
+        development_id=development_id,
+        routing_filter="all",
+        limit=1,
+        offset=0,
+        include_evidence=True,
+    )
+    if not projection.get("available"):
+        return projection
+    items = list(projection.get("items") or [])
+    if not items:
+        return {
+            "available": False,
+            "reason": "This Development is not available on the selected date.",
+        }
+    if not artifact_db.is_file():
+        return {
+            "available": False,
+            "reason": "The source-artifact store needed to assemble this packet is unavailable.",
+        }
+
+    item = items[0]
+    conn = sqlite3.connect(
+        f"file:{artifact_db.resolve().as_posix()}?mode=ro",
+        uri=True,
+    )
+    conn.row_factory = sqlite3.Row
+    try:
+        packet = routing_runs.packet_from_development(
+            item,
+            day=day,
+            artifact_conn=conn,
+        )
+    finally:
+        conn.close()
+    if packet is None:
+        return {
+            "available": False,
+            "reason": (
+                "This Development has no current source post eligible for "
+                "audience analysis."
+            ),
+        }
+
+    visible_sources = [
+        source for source in packet.sources if routing_model.is_model_visible(source)
+    ]
+    included_x_ids = {
+        source.source_id
+        for source in visible_sources
+        if source.source_type == "x_post"
+    }
+    excluded_activity_ids = {
+        str(evidence["post_id"])
+        for evidence in item.get("evidence") or []
+        if str(evidence["post_id"]) not in included_x_ids
+    }
+    source_posts = [
+        source
+        for source in visible_sources
+        if source.relation in {"root", "independent_original"}
+    ]
+    author_updates = [
+        source
+        for source in visible_sources
+        if source.relation == "same_author_continuation"
+    ]
+    artifacts = [
+        source
+        for source in visible_sources
+        if source.source_type == "artifact"
+    ]
+    model_input = routing_model.render_input(packet)
+    return {
+        "available": True,
+        "date": day,
+        "development_id": development_id,
+        "prompt_version": routing_model.PROMPT_VERSION,
+        "evidence_sha256": packet.evidence_sha256,
+        "input_sha256": packet.input_sha256,
+        "input_tokens": routing_model.input_token_count(model_input),
+        "calls_model": False,
+        "counts": {
+            "source_posts": len(source_posts),
+            "author_updates": len(author_updates),
+            "artifacts": len(artifacts),
+            "trusted_participants": int(
+                item["rank_components"]["trusted_attention"]
+            ),
+            "activity_posts_excluded": len(excluded_activity_ids),
+        },
+        "sources": [
+            {
+                "source_type": source.source_type,
+                "source_id": source.source_id,
+                "relation": source.relation,
+                "author": source.author,
+                "title": source.title,
+                "url": source.url,
+            }
+            for source in visible_sources
+        ],
+        "model_input": model_input,
+        "note": (
+            "Source posts, current same-author updates, and retrieved artifacts "
+            "establish meaning. Trusted reactions help rank the Development, but "
+            "their text is not sent for audience analysis."
+        ),
     }
 
 

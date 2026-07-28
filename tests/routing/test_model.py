@@ -193,14 +193,32 @@ def test_render_input_replaces_link_only_post_and_omits_transport_reaction():
         relation="quote",
         text="https://t.co/another-link",
     )
+    empty_author_update = routing_model.EvidenceSource(
+        source_type="x_post",
+        source_id="empty-author-update",
+        url="https://example.com/empty-author-update",
+        author="Linking Author",
+        relation="same_author_continuation",
+        text="https://t.co/author-link",
+    )
     rendered = routing_model.render_input(
-        replace(packet, sources=(root, *packet.sources[1:], transport_reaction))
+        replace(
+            packet,
+            sources=(
+                root,
+                *packet.sources[1:],
+                transport_reaction,
+                empty_author_update,
+            ),
+        )
     )
 
     assert "      kind: artifact_link" in rendered
     assert "https://t.co/example" not in rendered
     assert "Link Only" not in rendered
     assert "https://t.co/another-link" not in rendered
+    assert "Linking Author" not in rendered
+    assert "https://t.co/author-link" not in rendered
 
 
 def test_render_input_keeps_same_author_updates_and_omits_independent_reactions():
