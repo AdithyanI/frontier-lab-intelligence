@@ -617,6 +617,13 @@
   font-weight: 600;
 }
 
+.company-scope-reason {
+  margin: 18px 0 !important;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
 .company-context-rule {
   margin-top: 18px !important;
   padding-top: 14px;

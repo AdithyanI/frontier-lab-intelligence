@@ -21,6 +21,7 @@ export interface FrontierAIChannel {
 export interface InvestmentCompany {
   name: string
   frontier_lab_relevance: 'in_scope' | 'out_of_scope'
+  frontier_lab_relevance_reason?: string
   ticker: string
   aliases: string[]
   listing_status: 'public'
@@ -51,7 +52,7 @@ export interface InvestmentCompany {
 }
 
 export interface InvestmentCompanyUniverse {
-  schema_version: 'investment-company-universe-v2'
+  schema_version: 'investment-company-universe-v3'
   source_context_schema_version: string
   profiles_reviewed_at: string
   scope: {

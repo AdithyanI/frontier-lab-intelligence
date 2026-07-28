@@ -110,7 +110,7 @@ The authoritative machine shape and enums are returned by:
 ```
 
 The Investment context command returns the structured
-`bit-investment-context-v3` packet; the Engineering context remains markdown in
+`bit-investment-context-v4` packet; the Engineering context remains markdown in
 the same stable response envelope.
 
 The Engineering context encodes BIT's publicly described Aion and data-platform
@@ -134,9 +134,10 @@ frontier-lab scope, disclosure boundaries, and transmission channels lives in
 structured JSON packet remains canonical for runtime use.
 
 Daily agents load the compact Investment projection first. Its binary
-`frontier_lab_relevance` field identifies the default 22-company retrieval
-universe while retaining every sourced holding for audit. Agents then retrieve
-only matching company profiles by exact canonical name, ticker, or alias:
+`frontier_lab_relevance` field identifies the default 26-company retrieval
+universe while retaining every sourced holding for audit. Each excluded profile
+records the reason for that scope decision. Agents then retrieve only matching
+company profiles by exact canonical name, ticker, or alias:
 
 ```bash
 .venv/bin/fli daily-intelligence context \

@@ -34,7 +34,7 @@ DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v3"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v4"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
-INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v3"
+INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v4"
 BIT_PUBLIC_VIEW_GRADES = {"explicit_thesis", "commentary", "none"}
 BIT_PUBLIC_VIEW_SOURCE_SCOPES = {"firm", "flagship", "other_product", "mixed", "none"}
 FRONTIER_LAB_RELEVANCE_VALUES = {"in_scope", "out_of_scope"}
@@ -834,6 +834,8 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
             "analyst_context",
             "identity_sources",
         }
+        if profile.get("frontier_lab_relevance") == "out_of_scope":
+            required.add("frontier_lab_relevance_reason")
         if set(profile) != required:
             raise ValueError(f"{path} must contain exactly {sorted(required)}")
         ticker = profile["ticker"]
@@ -849,6 +851,12 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
                 f"{path}.frontier_lab_relevance must be one of "
                 f"{sorted(FRONTIER_LAB_RELEVANCE_VALUES)}"
             )
+        if profile["frontier_lab_relevance"] == "out_of_scope":
+            reason = profile["frontier_lab_relevance_reason"]
+            if not isinstance(reason, str) or not reason.strip():
+                raise ValueError(
+                    f"{path}.frontier_lab_relevance_reason must be non-empty"
+                )
         _validate_string_list(profile["aliases"], f"{path}.aliases", allow_empty=True)
         for lookup_value in (profile["name"], profile["ticker"], *profile["aliases"]):
             lookup_key = " ".join(lookup_value.split()).casefold()
@@ -1061,7 +1069,7 @@ def investment_company_universe_payload() -> dict[str, Any]:
     )
 
     return {
-        "schema_version": "investment-company-universe-v2",
+        "schema_version": "investment-company-universe-v3",
         "source_context_schema_version": context["schema_version"],
         "profiles_reviewed_at": context["company_profiles_reviewed_at"],
         "scope": {

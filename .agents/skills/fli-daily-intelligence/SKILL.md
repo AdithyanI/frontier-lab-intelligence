@@ -24,10 +24,11 @@ your own judgment for research, retrieval, grouping, and synthesis.
    portfolio baseline, reusable company profiles, and the boundary for companies
    outside that portfolio. Each company profile separates BIT's attributable
    public view from FLI analyst context; never present the latter as BIT's thesis.
-   The compact profile index marks the focused 22-company frontier-lab universe
+   The compact profile index marks the focused 26-company frontier-lab universe
    with `frontier_lab_relevance: in_scope`. Treat that flag as the default
    retrieval boundary, not proof that a specific Event affects the company.
-   Profiles outside the current scope remain available for portfolio audit.
+   Profiles outside the current scope remain available for portfolio audit and
+   carry the explicit reason for their exclusion.
    `source_scope` distinguishes firm-wide research, this flagship strategy,
    another BIT product, or mixed commentary.
 

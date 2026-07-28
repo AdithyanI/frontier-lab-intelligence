@@ -149,6 +149,7 @@ function companySearchText(company: InvestmentCompany) {
     company.name,
     company.ticker,
     ...company.aliases,
+    company.frontier_lab_relevance_reason ?? '',
     analyst.business_summary,
     ...analyst.operating_drivers,
     ...analyst.frontier_ai_channels.flatMap((channel) => [
@@ -212,6 +213,12 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         </div>
         <div className="company-context-copy">
           <p>{analyst.business_summary}</p>
+          {!isInScope && company.frontier_lab_relevance_reason && (
+            <p className="company-scope-reason">
+              <strong>Why it is outside the focused universe.</strong>{' '}
+              {company.frontier_lab_relevance_reason}
+            </p>
+          )}
           <p>
             <strong>What moves the economics.</strong>{' '}
             {joinContextItems(analyst.operating_drivers)}.

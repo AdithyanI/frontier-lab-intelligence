@@ -321,10 +321,13 @@ Rules:
   universe** is a searchable, filterable, expandable ledger derived from the
   canonical Investment context packet. It defaults to the explicit, binary
   frontier-lab scope while retaining every sourced profile behind the scope
-  filter for portfolio audit. Each expanded row leads with one compact **Context used by the
-  agent** block: the business model, operating drivers, and known AI exposures
-  that cold-start Event analysis. These exposures are starting hypotheses, not
-  a closed taxonomy or relevance score. Detailed opportunity, risk, and
+  filter for portfolio audit. Every excluded profile records and displays one
+  plain-language reason inside its expanded context; the collapsed ledger keeps
+  only the quiet scope mark so the default scan remains calm. Each expanded row
+  leads with one compact **Context used by the agent** block: the business
+  model, operating drivers, and known AI exposures that cold-start Event
+  analysis. These exposures are starting hypotheses, not a closed taxonomy or
+  relevance score. Detailed opportunity, risk, and
   watchpoint research remains available through one subordinate disclosure,
   while source-graded BIT views, research limits, company sources, and
   disclosure history stay visibly separate. The UI never shows or ranks by an

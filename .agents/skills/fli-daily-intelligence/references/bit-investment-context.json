@@ -1,5 +1,5 @@
 {
-  "schema_version": "bit-investment-context-v3",
+  "schema_version": "bit-investment-context-v4",
   "company_profiles_reviewed_at": "2026-07-28",
   "frontier_lab_company_scope": {
     "definition": "Public companies with a clear, recurring transmission path from frontier-model capability, compute demand, AI infrastructure, data, or AI-system security into a material operating driver.",
@@ -382,6 +382,7 @@
     {
       "name": "AUTO1",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "Its AI use is applied pricing and logistics optimization; frontier-lab developments are unlikely to change the investment thesis directly.",
       "ticker": "AG1",
       "aliases": [
         "AUTO1 Group",
@@ -448,6 +449,7 @@
     {
       "name": "Hinge Health",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "Frontier models could improve motion analysis and personalization, but clinical validation and care delivery—not general model capability—currently determine the investment thesis.",
       "ticker": "HNGE",
       "aliases": [
         "Hinge Health, Inc."
@@ -851,6 +853,7 @@
     {
       "name": "Lemonade",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "Its economics are dominated by underwriting quality, loss ratios, and regulation; most frontier-model developments do not directly change those drivers.",
       "ticker": "LMND",
       "aliases": [
         "Lemonade, Inc."
@@ -906,7 +909,7 @@
     },
     {
       "name": "Robinhood",
-      "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "HOOD",
       "aliases": [
         "Robinhood Markets",
@@ -969,6 +972,7 @@
     {
       "name": "Oscar Health",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "AI can improve member support, but medical-cost control, risk adjustment, and insurance execution remain the primary investment drivers.",
       "ticker": "OSCR",
       "aliases": [
         "Oscar",
@@ -1161,6 +1165,7 @@
     {
       "name": "Kaspi",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "Its AI exposure is routine personalization, credit, and fraud tooling inside a super app, without a recurring direct link to frontier-lab developments.",
       "ticker": "KSPI",
       "aliases": [
         "Kaspi.kz",
@@ -1446,7 +1451,7 @@
     },
     {
       "name": "Duolingo",
-      "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "DUOL",
       "aliases": [
         "Duolingo, Inc."
@@ -1646,6 +1651,7 @@
     {
       "name": "Luckin Coffee",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "AI supports retail forecasting and personalization, but store growth, pricing, and unit economics—not frontier-model progress—drive the investment thesis.",
       "ticker": "LKNCY",
       "aliases": [
         "Luckin Coffee Inc.",
@@ -1764,6 +1770,7 @@
     {
       "name": "InPost",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "Optimization improves locker and route efficiency, but parcel volumes, network utilization, and logistics execution dominate the investment thesis.",
       "ticker": "INPST",
       "aliases": [
         "InPost S.A.",
@@ -1821,6 +1828,7 @@
     {
       "name": "Grindr",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "AI features may improve discovery and safety, but user growth, monetization, trust, and moderation—not frontier-model progress—drive the investment thesis.",
       "ticker": "GRND",
       "aliases": [
         "Grindr Inc.",
@@ -2070,7 +2078,7 @@
     },
     {
       "name": "Axon",
-      "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "AXON",
       "aliases": [
         "Axon Enterprise",
@@ -2327,6 +2335,7 @@
     {
       "name": "Xometry",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "Its core models are specialized pricing and sourcing systems; frontier-lab developments have no regular direct transmission to marketplace economics.",
       "ticker": "XMTR",
       "aliases": [
         "Xometry, Inc."
@@ -2391,6 +2400,7 @@
     {
       "name": "Omada Health",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "AI assistants may help care delivery, but clinical outcomes, employer ROI, and regulated human oversight—not general frontier-model advances—drive the investment thesis.",
       "ticker": "OMDA",
       "aliases": [
         "Omada",
@@ -2444,6 +2454,7 @@
     {
       "name": "GCL-Poly",
       "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance_reason": "AI electricity demand reaches the company only through a long, indirect chain; polysilicon prices, manufacturing costs, and solar capacity dominate its economics.",
       "ticker": "03800.HK",
       "aliases": [
         "GCL-Poly Energy Holdings Limited",
@@ -2649,7 +2660,7 @@
     },
     {
       "name": "Infineon",
-      "frontier_lab_relevance": "out_of_scope",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "IFX",
       "aliases": [
         "Infineon Technologies",

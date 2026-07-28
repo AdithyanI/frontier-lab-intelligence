@@ -89,10 +89,11 @@ composition.
 8. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. The compact index carries a binary
-   `frontier_lab_relevance` field: 22 companies with recurring frontier-model,
+   `frontier_lab_relevance` field: 26 companies with recurring frontier-model,
    compute, data, infrastructure, or AI-security transmission paths form the
    default retrieval universe, while the remaining disclosed profiles stay
-   available for portfolio audit. The agent retrieves complete matching
+   available for portfolio audit with explicit exclusion reasons. The agent
+   retrieves complete matching
    profiles by canonical name, ticker, or alias; the scope flag is prior context,
    not evidence that an Event affects a company. It may use
    per-Event notes as annotations, researches missing transmission paths, and
