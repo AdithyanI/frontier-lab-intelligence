@@ -81,6 +81,14 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
     db_path = tmp_path / "investment-agent.db"
 
     imported = investment_agent_runs.import_trace(trace_path, db_path=db_path)
+    investment_agent_runs.publish_day(
+        day=DAY,
+        candidates=[
+            {"development_id": DEVELOPMENT_ID, "daily_rank": 1}
+        ],
+        selection_limit=1,
+        db_path=db_path,
+    )
     dates = investment_agent_runs.dates_payload(db_path=db_path)
     payload = investment_agent_runs.insights_payload(
         day=DAY,
@@ -103,6 +111,9 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
     assert payload["content_kind"] == "investment_agent"
     assert payload["run"]["cached_tokens"] == 8_000
     assert payload["run"]["reported_cost_usd"] == 0.12
+    assert payload["run"]["audience"] == "investment"
+    assert payload["run"]["selection_kind"] == "top_investment_routed"
+    assert payload["run"]["selection_limit"] == 1
     assert payload["items"][0]["investment_headline"] == (
         "Agent risk strengthens demand for independent controls"
     )
@@ -110,6 +121,42 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
     assert payload["items"][0]["company_assessments"][0]["direction"] == "positive"
     assert payload["items"][0]["rejected_after_memo"] == [
         {"ticker": "DDOG", "reason": "The link remained generic after review."}
+    ]
+
+
+def test_publication_hides_completed_rows_outside_the_selected_cohort(
+    tmp_path: Path,
+):
+    db_path = tmp_path / "investment-agent.db"
+    selected = _trace()
+    excluded = _trace()
+    excluded["development_id"] = "e" * 64
+    excluded["daily_rank"] = 3
+    excluded["final_result"]["investment_headline"] = (
+        "Excluded engineering-only Development must stay hidden"
+    )
+    for name, trace in [("selected", selected), ("excluded", excluded)]:
+        path = tmp_path / f"{name}.json"
+        path.write_text(json.dumps(trace), encoding="utf-8")
+        investment_agent_runs.import_trace(path, db_path=db_path)
+
+    investment_agent_runs.publish_day(
+        day=DAY,
+        candidates=[
+            {"development_id": DEVELOPMENT_ID, "daily_rank": 1}
+        ],
+        selection_limit=1,
+        db_path=db_path,
+    )
+    payload = investment_agent_runs.insights_payload(
+        day=DAY,
+        status="all",
+        db_path=db_path,
+    )
+
+    assert payload["run"]["development_count"] == 1
+    assert [item["development_id"] for item in payload["items"]] == [
+        DEVELOPMENT_ID
     ]
 
 
@@ -220,7 +267,7 @@ def test_investment_api_prefers_company_aware_successor(monkeypatch):
 
     assert dates["dates"][-1]["content_kind"] == "investment_agent"
     assert payload["content_kind"] == "investment_agent"
-    assert payload["schema_version"] == "investment-agent-read-v4"
+    assert payload["schema_version"] == "investment-agent-read-v5"
     assert payload["items"][0]["provenance"] == {
         "primary_event_id": "event-id",
         "source_event_count": 1,

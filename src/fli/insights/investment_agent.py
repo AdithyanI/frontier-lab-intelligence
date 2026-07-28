@@ -12,7 +12,9 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
+
+import openai
 
 from fli import llm_responses
 from fli.insights import investment_agent_runs
@@ -33,6 +35,8 @@ DEFAULT_TOP_RANKED = 10
 DEFAULT_WORKERS = 9
 MAX_UNIQUE_MEMOS = 8
 MAX_MODEL_TURNS = 4
+MAX_RESPONSE_ATTEMPTS = 3
+RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
 PROMPT_VERSION = "investment-agent-v8"
 PROMPT_CACHE_KEY = "fli:investment-agent:v8"
 PROMPT_PATH = (
@@ -48,6 +52,46 @@ PROMPT_PATH = (
 def _get_json(url: str) -> dict[str, Any]:
     with urllib.request.urlopen(url, timeout=30) as response:
         return json.load(response)
+
+
+def _investment_candidates(
+    *,
+    day: str,
+    limit: int,
+    api_base: str,
+) -> list[dict[str, Any]]:
+    """Return the highest-ranked current Investment-routed Developments."""
+    url = (
+        f"{api_base}/api/developments?"
+        + urllib.parse.urlencode(
+            {
+                "date": day,
+                "routing": "investment",
+                "sort": "rank",
+                "limit": limit,
+                "include_evidence": "false",
+            }
+        )
+    )
+    payload = _get_json(url)
+    if not payload.get("available"):
+        raise RuntimeError(
+            payload.get("reason")
+            or f"The Development projection for {day} is unavailable."
+        )
+    items = list(payload.get("items") or [])
+    for item in items:
+        route = item.get("audience_routing") or {}
+        investment = route.get("investment") or {}
+        if (
+            item.get("routing_state") != "evaluated"
+            or investment.get("relevant") is not True
+        ):
+            raise RuntimeError(
+                "The Investment candidate endpoint returned a Development "
+                "without a current positive Investment route."
+            )
+    return items
 
 
 def _company_cards(payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -252,8 +296,7 @@ def _input_detail(usage: Any, field: str) -> int:
     return _usage_value(details, field)
 
 
-def _create_response(
-    client: Any,
+def _response_request(
     *,
     model: str,
     effort: str,
@@ -263,7 +306,7 @@ def _create_response(
     input_value: Any,
     previous_response_id: str | None,
     tags: tuple[str, ...],
-) -> tuple[Any, dict[str, Any], dict[str, Any], float | None, float]:
+) -> dict[str, Any]:
     request: dict[str, Any] = {
         "model": model,
         "reasoning": {"effort": effort},
@@ -280,7 +323,13 @@ def _create_response(
     }
     if previous_response_id is not None:
         request["previous_response_id"] = previous_response_id
-    started = time.monotonic()
+    return request
+
+
+def _create_response(
+    client: Any,
+    request: dict[str, Any],
+) -> tuple[Any, dict[str, Any], float | None]:
     raw_api = getattr(client.responses, "with_raw_response", None)
     if raw_api is None:
         response = client.responses.create(**request)
@@ -289,8 +338,107 @@ def _create_response(
         raw_response = raw_api.create(**request)
         response = raw_response.parse()
         cost = llm_responses.reported_cost(raw_response.headers)
-    duration = time.monotonic() - started
-    return response, llm_responses.as_dict(response), request, cost, duration
+    return response, llm_responses.as_dict(response), cost
+
+
+def _is_retryable_response_error(exc: Exception) -> bool:
+    if isinstance(exc, (openai.APIConnectionError, openai.APITimeoutError)):
+        return True
+    if isinstance(exc, openai.APIStatusError):
+        return (
+            exc.status_code in RETRYABLE_RESPONSE_STATUS_CODES
+            or exc.status_code >= 500
+        )
+    return isinstance(exc, (ConnectionError, TimeoutError))
+
+
+def _retry_delay_seconds(exc: Exception, attempt: int) -> float:
+    response = getattr(exc, "response", None)
+    headers = getattr(response, "headers", {}) or {}
+    retry_after_ms = headers.get("retry-after-ms")
+    retry_after = headers.get("retry-after")
+    try:
+        if retry_after_ms is not None:
+            return min(max(float(retry_after_ms) / 1000.0, 0.0), 30.0)
+        if retry_after is not None:
+            return min(max(float(retry_after), 0.0), 30.0)
+    except (TypeError, ValueError):
+        pass
+    return min(2.0 ** (attempt - 1), 8.0)
+
+
+def _error_attempt_trace(
+    exc: Exception,
+    *,
+    turn: int,
+    attempt: int,
+    duration: float,
+    request: dict[str, Any],
+    retryable: bool,
+    retry_delay_seconds: float | None,
+) -> dict[str, Any]:
+    response = getattr(exc, "response", None)
+    headers = getattr(response, "headers", {}) or {}
+    return {
+        "turn": turn,
+        "attempt": attempt,
+        "error_type": type(exc).__name__,
+        "status_code": getattr(exc, "status_code", None),
+        "message": str(exc),
+        "response_body": getattr(exc, "body", None),
+        "request_id": getattr(exc, "request_id", None),
+        "duration_ms": round(duration * 1000),
+        "retryable": retryable,
+        "retry_delay_seconds": retry_delay_seconds,
+        "response_headers": {
+            key: headers[key]
+            for key in (
+                "retry-after",
+                "retry-after-ms",
+                "x-request-id",
+                "x-litellm-call-id",
+            )
+            if key in headers
+        },
+        "request": request,
+    }
+
+
+def _create_response_with_retry(
+    client: Any,
+    *,
+    request: dict[str, Any],
+    trace: dict[str, Any],
+    trace_path: Path,
+    turn: int,
+    sleep: Callable[[float], None] = time.sleep,
+) -> tuple[Any, dict[str, Any], float | None, float]:
+    for attempt in range(1, MAX_RESPONSE_ATTEMPTS + 1):
+        started = time.monotonic()
+        try:
+            response, response_data, cost = _create_response(client, request)
+            return response, response_data, cost, time.monotonic() - started
+        except Exception as exc:
+            duration = time.monotonic() - started
+            retryable = _is_retryable_response_error(exc)
+            will_retry = retryable and attempt < MAX_RESPONSE_ATTEMPTS
+            delay = _retry_delay_seconds(exc, attempt) if will_retry else None
+            trace["request_failures"].append(
+                _error_attempt_trace(
+                    exc,
+                    turn=turn,
+                    attempt=attempt,
+                    duration=duration,
+                    request=request,
+                    retryable=retryable,
+                    retry_delay_seconds=delay,
+                )
+            )
+            _write_trace(trace_path, trace)
+            if not will_retry:
+                raise
+            sleep(delay)
+    raise AssertionError("Response retry loop exhausted without returning or raising.")
 
 
 def _call_trace(
@@ -397,6 +545,7 @@ def run_one(
     *,
     day: str,
     rank: int,
+    development_id: str | None = None,
     model: str = DEFAULT_MODEL,
     effort: str = DEFAULT_EFFORT,
     api_base: str = DEFAULT_API_BASE,
@@ -407,24 +556,48 @@ def run_one(
     if rank < 1:
         raise ValueError("rank must be positive")
     date.fromisoformat(day)
+    candidates = _investment_candidates(day=day, limit=200, api_base=api_base)
+    development = next(
+        (
+            item
+            for item in candidates
+            if int(item["daily_rank"]) == rank
+            and (
+                development_id is None
+                or str(item["development_id"]) == development_id
+            )
+        ),
+        None,
+    )
+    if development is None:
+        raise ValueError(
+            f"{day} daily rank {rank} is not a current Investment-routed "
+            "Development."
+        )
+    development_id = str(development["development_id"])
     developments_url = (
         f"{api_base}/api/developments?"
         + urllib.parse.urlencode(
             {
                 "date": day,
-                "limit": max(rank, 10),
+                "development_id": development_id,
+                "routing": "investment",
+                "limit": 1,
                 "include_evidence": "false",
             }
         )
     )
-    development_items = _get_json(developments_url)["items"]
-    if len(development_items) < rank:
-        raise ValueError(
-            f"{day} has {len(development_items)} ranked Developments; "
-            f"rank {rank} is unavailable."
+    exact_items = _get_json(developments_url).get("items") or []
+    if (
+        len(exact_items) != 1
+        or str(exact_items[0]["development_id"]) != development_id
+        or int(exact_items[0]["daily_rank"]) != rank
+    ):
+        raise RuntimeError(
+            "The exact Investment candidate no longer matches the selected "
+            "Development and daily rank."
         )
-    development = development_items[rank - 1]
-    development_id = development["development_id"]
+    development = exact_items[0]
     packet_url = (
         f"{api_base}/api/developments/analysis-packet?"
         + urllib.parse.urlencode(
@@ -501,6 +674,7 @@ def run_one(
             "store": True,
         },
         "turns": [],
+        "request_failures": [],
         "memo_calls": [],
         "memo_packets": {},
         "citation_repairs": [],
@@ -509,13 +683,14 @@ def run_one(
     _write_trace(trace_path, trace)
 
     client = client_factory()
+    if hasattr(client, "with_options"):
+        client = client.with_options(max_retries=0)
     previous_response_id: str | None = None
     input_value: Any = model_input
     fetched_tickers: set[str] = set()
 
     for turn in range(1, MAX_MODEL_TURNS + 1):
-        response, response_data, request, cost, duration = _create_response(
-            client,
+        request = _response_request(
             model=model,
             effort=effort,
             instructions=instructions,
@@ -524,6 +699,13 @@ def run_one(
             input_value=input_value,
             previous_response_id=previous_response_id,
             tags=tags,
+        )
+        response, response_data, cost, duration = _create_response_with_retry(
+            client,
+            request=request,
+            trace=trace,
+            trace_path=trace_path,
+            turn=turn,
         )
         trace["turns"].append(
             _call_trace(
@@ -628,6 +810,7 @@ def run_one(
             }
             for turn in trace["turns"]
         ],
+        "request_failures": trace["request_failures"],
         "final_result": trace["final_result"],
         "imported": imported,
     }
@@ -647,6 +830,7 @@ def _compact_result(result: dict[str, Any]) -> dict[str, Any]:
         "company_assessments": len(final["company_assessments"]),
         "rejected_after_memo": len(final["rejected_after_memo"]),
         "turns": len(turns),
+        "request_retries": len(result.get("request_failures") or []),
         "input_tokens": sum(int(turn["input_tokens"]) for turn in turns),
         "cached_tokens": sum(int(turn["cached_tokens"]) for turn in turns),
         "output_tokens": sum(int(turn["output_tokens"]) for turn in turns),
@@ -685,21 +869,44 @@ def run_range(
         (through_day - timedelta(days=offset)).isoformat()
         for offset in reversed(range(days))
     ]
-    ranks = [rank] if rank is not None else list(range(1, top_ranked + 1))
-    if any(value is None or value < 1 for value in ranks):
-        raise ValueError("rank must be positive")
-    targets = [(day, int(value)) for day in requested_days for value in ranks]
+    targets: list[tuple[str, int, str]] = []
+    for day in requested_days:
+        candidates = _investment_candidates(
+            day=day,
+            limit=max(top_ranked, 200 if rank is not None else top_ranked),
+            api_base=api_base,
+        )
+        if rank is not None:
+            if rank < 1:
+                raise ValueError("rank must be positive")
+            candidates = [
+                item for item in candidates if int(item["daily_rank"]) == rank
+            ]
+            if not candidates:
+                raise ValueError(
+                    f"{day} daily rank {rank} is not a current "
+                    "Investment-routed Development."
+                )
+        for item in candidates[:top_ranked]:
+            targets.append(
+                (
+                    day,
+                    int(item["daily_rank"]),
+                    str(item["development_id"]),
+                )
+            )
     if not targets:
         raise ValueError("No Investment analysis targets were selected.")
 
     results: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
 
-    def execute(target: tuple[str, int]) -> dict[str, Any]:
-        day, daily_rank = target
+    def execute(target: tuple[str, int, str]) -> dict[str, Any]:
+        day, daily_rank, development_id = target
         return run_one(
             day=day,
             rank=daily_rank,
+            development_id=development_id,
             model=model,
             effort=effort,
             api_base=api_base,
@@ -746,8 +953,54 @@ def run_range(
         (_compact_result(result) for result in results),
         key=lambda item: (item["day"], item["daily_rank"]),
     )
+    publications = []
+    if rank is None:
+        failed_days = {item["day"] for item in failures}
+        compact_by_day = {
+            day: [item for item in compact if item["day"] == day]
+            for day in requested_days
+        }
+        targets_by_day = {
+            day: [
+                {
+                    "development_id": development_id,
+                    "daily_rank": daily_rank,
+                }
+                for target_day, daily_rank, development_id in targets
+                if target_day == day
+            ]
+            for day in requested_days
+        }
+        for day in requested_days:
+            if (
+                day in failed_days
+                or len(compact_by_day[day]) != len(targets_by_day[day])
+            ):
+                continue
+            publications.append(
+                investment_agent_runs.publish_day(
+                    day=day,
+                    candidates=targets_by_day[day],
+                    selection_limit=top_ranked,
+                    db_path=db_path,
+                )
+            )
     return {
-        "schema_version": "investment-agent-batch-v1",
+        "schema_version": "investment-agent-batch-v2",
+        "selection": {
+            "audience": "investment",
+            "routing_state": "evaluated",
+            "relevant": True,
+            "order": "daily_rank",
+        },
+        "targets": [
+            {
+                "day": day,
+                "daily_rank": daily_rank,
+                "development_id": development_id,
+            }
+            for day, daily_rank, development_id in targets
+        ],
         "through": through,
         "days": requested_days,
         "top_ranked": None if rank is not None else top_ranked,
@@ -779,12 +1032,16 @@ def run_range(
             "reasoning_tokens": sum(
                 int(item["reasoning_tokens"]) for item in compact
             ),
+            "request_retries": sum(
+                int(item["request_retries"]) for item in compact
+            ),
             "reported_cost_usd": round(
                 sum(float(item["reported_cost_usd"]) for item in compact),
                 9,
             ),
         },
         "items": compact,
+        "publications": publications,
         "failures": sorted(
             failures,
             key=lambda item: (item["day"], item["daily_rank"]),

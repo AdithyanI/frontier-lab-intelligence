@@ -196,6 +196,14 @@ The only proof of reusable-prefix caching is a positive
   Sol route can reuse the stable Investment prefix. The parallel Luna routing
   refresh for those dates still reported zero cache reads, reinforcing that a
   warm layout enables reuse but cannot guarantee it for every model or batch.
+- **2026-07-28:** the corrected Sol/xhigh Investment cohorts for July 19–21
+  completed 30 audience-routed targets with 472,576 cached tokens from
+  1,386,679 input tokens and $7.740683 reported cost. One parallel request
+  returned HTTP 499 before a Response ID was available; an exact single-target
+  rerun succeeded. The runner now disables opaque SDK retries for this path,
+  retries transient Responses failures at most three times, and records the
+  failed request, status, headers, body, delay, and attempt in the durable
+  trace. This retry policy is transport recovery, not prompt-cache behavior.
 
 Historical build-log entries remain immutable evidence of what was observed at
 the time. Their earlier zero-hit conclusions are incident history, not the

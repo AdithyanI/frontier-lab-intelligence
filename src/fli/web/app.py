@@ -468,7 +468,10 @@ def developments(
     event_id: str = Query("", max_length=128),
     routing: str = Query(
         "all",
-        pattern="^(all|relevant|not_relevant|not_evaluated)$",
+        pattern=(
+            "^(all|relevant|ai_engineering|investment|"
+            "not_relevant|not_evaluated)$"
+        ),
     ),
     include_evidence: bool = Query(True),
     limit: int = Query(40, ge=1, le=200),

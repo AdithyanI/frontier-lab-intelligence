@@ -1,5 +1,11 @@
+import json
 from pathlib import Path
 from threading import Lock
+from types import SimpleNamespace
+
+import httpx
+import openai
+import pytest
 
 from fli.insights import investment_agent
 
@@ -54,6 +60,118 @@ def _result(*, day: str, rank: int) -> dict:
     }
 
 
+def _status_error(status_code: int, *, retry_after: str | None = None):
+    request = httpx.Request("POST", "http://litellm.test/v1/responses")
+    headers = {"retry-after": retry_after} if retry_after is not None else {}
+    response = httpx.Response(
+        status_code,
+        request=request,
+        headers=headers,
+        json={"error": {"message": "provider failed"}},
+    )
+    return openai.APIStatusError(
+        "provider failed",
+        response=response,
+        body={"error": {"message": "provider failed"}},
+    )
+
+
+def test_response_retry_recovers_499_and_preserves_failed_attempt(
+    monkeypatch, tmp_path: Path
+):
+    calls = 0
+    sleeps: list[float] = []
+
+    def fake_create_response(_client, _request):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise _status_error(499, retry_after="0.25")
+        return (
+            SimpleNamespace(id="resp-ok"),
+            {"id": "resp-ok", "status": "completed"},
+            0.01,
+        )
+
+    monkeypatch.setattr(
+        investment_agent,
+        "_create_response",
+        fake_create_response,
+    )
+    trace_path = tmp_path / "trace.json"
+    trace = {"request_failures": []}
+
+    response, response_data, cost, _duration = (
+        investment_agent._create_response_with_retry(
+            object(),
+            request={"model": "gpt-5.6-sol", "input": "same logical turn"},
+            trace=trace,
+            trace_path=trace_path,
+            turn=1,
+            sleep=sleeps.append,
+        )
+    )
+
+    assert response.id == "resp-ok"
+    assert response_data["status"] == "completed"
+    assert cost == 0.01
+    assert calls == 2
+    assert sleeps == [0.25]
+    assert trace["request_failures"] == [
+        {
+            "turn": 1,
+            "attempt": 1,
+            "error_type": "APIStatusError",
+            "status_code": 499,
+            "message": "provider failed",
+            "response_body": {"error": {"message": "provider failed"}},
+            "request_id": None,
+            "duration_ms": trace["request_failures"][0]["duration_ms"],
+            "retryable": True,
+            "retry_delay_seconds": 0.25,
+            "response_headers": {"retry-after": "0.25"},
+            "request": {
+                "model": "gpt-5.6-sol",
+                "input": "same logical turn",
+            },
+        }
+    ]
+    assert json.loads(trace_path.read_text())["request_failures"][0][
+        "status_code"
+    ] == 499
+
+
+def test_response_retry_does_not_retry_permanent_400(monkeypatch, tmp_path: Path):
+    calls = 0
+
+    def fake_create_response(_client, _request):
+        nonlocal calls
+        calls += 1
+        raise _status_error(400)
+
+    monkeypatch.setattr(
+        investment_agent,
+        "_create_response",
+        fake_create_response,
+    )
+    trace_path = tmp_path / "trace.json"
+    trace = {"request_failures": []}
+
+    with pytest.raises(openai.APIStatusError):
+        investment_agent._create_response_with_retry(
+            object(),
+            request={"model": "gpt-5.6-sol"},
+            trace=trace,
+            trace_path=trace_path,
+            turn=2,
+            sleep=lambda _seconds: None,
+        )
+
+    assert calls == 1
+    assert trace["request_failures"][0]["retryable"] is False
+    assert trace["request_failures"][0]["retry_delay_seconds"] is None
+
+
 def test_run_range_warms_one_target_then_fans_out(monkeypatch, tmp_path: Path):
     calls: list[tuple[str, int]] = []
     lock = Lock()
@@ -64,6 +182,25 @@ def test_run_range_warms_one_target_then_fans_out(monkeypatch, tmp_path: Path):
         return _result(day=kwargs["day"], rank=kwargs["rank"])
 
     monkeypatch.setattr(investment_agent, "run_one", fake_run_one)
+    monkeypatch.setattr(
+        investment_agent,
+        "_investment_candidates",
+        lambda **kwargs: [
+            {
+                "daily_rank": rank,
+                "development_id": f"{rank:064d}",
+            }
+            for rank in range(1, kwargs["limit"] + 1)
+        ],
+    )
+    monkeypatch.setattr(
+        investment_agent.investment_agent_runs,
+        "publish_day",
+        lambda **kwargs: {
+            "day": kwargs["day"],
+            "candidate_count": len(kwargs["candidates"]),
+        },
+    )
 
     result = investment_agent.run_range(
         through="2026-07-20",
@@ -96,6 +233,13 @@ def test_run_range_warms_one_target_then_fans_out(monkeypatch, tmp_path: Path):
     }
     assert result["telemetry"]["cached_tokens"] == 5_400
     assert result["telemetry"]["reported_cost_usd"] == 0.06
+    assert result["telemetry"]["request_retries"] == 0
+    assert result["selection"]["audience"] == "investment"
+    assert result["schema_version"] == "investment-agent-batch-v2"
+    assert result["publications"] == [
+        {"day": "2026-07-19", "candidate_count": 3},
+        {"day": "2026-07-20", "candidate_count": 3},
+    ]
 
 
 def test_run_range_preserves_individual_failures(monkeypatch, tmp_path: Path):
@@ -105,6 +249,25 @@ def test_run_range_preserves_individual_failures(monkeypatch, tmp_path: Path):
         return _result(day=kwargs["day"], rank=kwargs["rank"])
 
     monkeypatch.setattr(investment_agent, "run_one", fake_run_one)
+    monkeypatch.setattr(
+        investment_agent,
+        "_investment_candidates",
+        lambda **kwargs: [
+            {
+                "daily_rank": rank,
+                "development_id": f"{rank:064d}",
+            }
+            for rank in range(1, kwargs["limit"] + 1)
+        ],
+    )
+    monkeypatch.setattr(
+        investment_agent.investment_agent_runs,
+        "publish_day",
+        lambda **kwargs: {
+            "day": kwargs["day"],
+            "candidate_count": len(kwargs["candidates"]),
+        },
+    )
 
     result = investment_agent.run_range(
         through="2026-07-20",
@@ -125,6 +288,54 @@ def test_run_range_preserves_individual_failures(monkeypatch, tmp_path: Path):
             "message": "provider failed",
         }
     ]
+    assert result["publications"] == []
+
+
+def test_run_range_selects_top_investment_routes_not_raw_daily_ranks(
+    monkeypatch, tmp_path: Path
+):
+    calls: list[tuple[str, int, str]] = []
+    candidates = [
+        {"daily_rank": 1, "development_id": "a" * 64},
+        {"daily_rank": 4, "development_id": "b" * 64},
+        {"daily_rank": 9, "development_id": "c" * 64},
+    ]
+
+    monkeypatch.setattr(
+        investment_agent,
+        "_investment_candidates",
+        lambda **_kwargs: candidates,
+    )
+
+    def fake_run_one(**kwargs):
+        calls.append(
+            (kwargs["day"], kwargs["rank"], kwargs["development_id"])
+        )
+        return _result(day=kwargs["day"], rank=kwargs["rank"])
+
+    monkeypatch.setattr(investment_agent, "run_one", fake_run_one)
+    monkeypatch.setattr(
+        investment_agent.investment_agent_runs,
+        "publish_day",
+        lambda **kwargs: {
+            "day": kwargs["day"],
+            "candidates": kwargs["candidates"],
+        },
+    )
+
+    result = investment_agent.run_range(
+        through="2026-07-19",
+        top_ranked=2,
+        workers=2,
+        trace_root=tmp_path / "traces",
+        db_path=tmp_path / "investment-agent.db",
+    )
+
+    assert calls == [
+        ("2026-07-19", 1, "a" * 64),
+        ("2026-07-19", 4, "b" * 64),
+    ]
+    assert [item["daily_rank"] for item in result["targets"]] == [1, 4]
 
 
 def test_trace_path_is_durable_unique_and_versioned(tmp_path: Path):

@@ -180,6 +180,7 @@ def _write_audience_routing_run(
     source_rank_input_sha256,
     source_event_run_id,
     source_feed_run_id,
+    audience_relevance=None,
 ):
     path = root / "audience-run-1" / "routing.db"
     conn = routing_runs.connect_run(path)
@@ -212,6 +213,11 @@ def _write_audience_routing_run(
         ),
     )
     for rank, item in enumerate(items, start=1):
+        ai_relevant, investment_relevant = (
+            audience_relevance[rank - 1]
+            if audience_relevance is not None
+            else (rank == 1, rank == 1)
+        )
         conn.execute(
             """INSERT INTO routing_item
                (event_id, feed_rank, root_url, semantic_snapshot_sha256,
@@ -227,10 +233,10 @@ def _write_audience_routing_run(
                 item.get("development_id", item.get("event_id")),
                 rank,
                 item["semantic_snapshot_sha256"],
-                int(rank == 1),
-                "Concrete engineering relevance." if rank == 1 else "Not useful for engineering.",
-                int(rank == 1),
-                "Concrete investment relevance." if rank == 1 else "Not material for investment.",
+                int(ai_relevant),
+                "Concrete engineering relevance." if ai_relevant else "Not useful for engineering.",
+                int(investment_relevant),
+                "Concrete investment relevance." if investment_relevant else "Not material for investment.",
                 now,
                 now,
             ),
@@ -592,6 +598,8 @@ def test_developments_api_projects_completed_audience_routing_directly(
     assert all_items["routing_counts"] == {
         "all": 2,
         "relevant": 1,
+        "ai_engineering": 1,
+        "investment": 1,
         "not_relevant": 1,
         "not_evaluated": 0,
     }
@@ -653,6 +661,52 @@ def test_developments_api_projects_completed_audience_routing_directly(
     assert (
         neither["items"][0]["development_id"]
         == all_items["items"][1]["development_id"]
+    )
+
+
+def test_developments_api_filters_each_audience_independently(
+    tmp_path, monkeypatch
+):
+    _event_fixture(tmp_path, monkeypatch)
+    baseline = client.get("/api/developments?date=2026-07-11&limit=20").json()
+    _write_audience_routing_run(
+        audience_routing_store.DEFAULT_ROUTING_ROOT,
+        items=baseline["items"],
+        source_rank_input_sha256=baseline["rank_contract"]["input_sha256"],
+        source_event_run_id=baseline["run"]["run_id"],
+        source_feed_run_id=baseline["run"]["feed_run_id"],
+        audience_relevance=[(True, False), (False, True)],
+    )
+    development_store._developments_day_cached.cache_clear()
+
+    engineering = client.get(
+        "/api/developments?date=2026-07-11&routing=ai_engineering&limit=20"
+    ).json()
+    investment = client.get(
+        "/api/developments?date=2026-07-11&routing=investment&limit=20"
+    ).json()
+
+    assert engineering["total"] == 1
+    assert investment["total"] == 1
+    assert (
+        engineering["items"][0]["audience_routing"]["ai_engineering"][
+            "relevant"
+        ]
+        is True
+    )
+    assert (
+        engineering["items"][0]["audience_routing"]["investment"]["relevant"]
+        is False
+    )
+    assert (
+        investment["items"][0]["audience_routing"]["investment"]["relevant"]
+        is True
+    )
+    assert (
+        investment["items"][0]["audience_routing"]["ai_engineering"][
+            "relevant"
+        ]
+        is False
     )
 
 

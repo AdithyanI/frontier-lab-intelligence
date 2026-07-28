@@ -209,10 +209,10 @@ negative decisions, rather than hiding it inside one opaque editorial call.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | Audit current Investment v10 / Engineering v7 requests, schemas, stores, and UI against Development lineage | parent | `resources/contract-audit.md` |
-| todo | Freeze a 5–10 Development calibration cohort spanning clear and borderline routes | parent | `resources/calibration-cohort.md` |
-| todo | Draft the smallest Investment mapping + Insight contract and compare one-call versus two-stage execution | parent | `resources/investment-contract.md` |
-| todo | Audit the current Insight CLI/run tooling and specify the minimal render, pilot, resume, audit, and telemetry commands | parent | `resources/tooling-contract.md` |
+| done | Implement and validate the current-lineage Investment contract, store, CLI, API, and UI | parent | `src/fli/insights/investment_agent.py` |
+| done | Publish the ten highest positive Investment routes for July 19–21 and reconcile lineage, labels, cache, cost, and failures | parent | `data/derived/insights/investment-agent.db` |
+| in progress | Qualitatively audit the 30 Investment decisions and choose the next calibration changes | parent | live Insights UI |
+| todo | Define the symmetric current-lineage AI Engineering contract and build-surface roster | parent | `resources/engineering-contract.md` |
 
 ## Backlog / Remaining Work
 
@@ -247,3 +247,13 @@ negative decisions, rather than hiding it inside one opaque editorial call.
   Added a regression that preserves older archives while atomically moving the
   requested project; the skill validator, five focused tests, and the agents
   control-plane `scripts/check-fast.sh` pass.
+- 2026-07-28: [DONE] Fixed the Investment lane boundary end to end. The runner
+  now selects only current positive Investment routes; complete daily cohorts
+  publish atomically; old, partial, and out-of-lane rows cannot leak into the
+  read projection. Published the July 19–21 top tens: 30/30 complete, 19
+  surfaced, 11 suppressed, 52 retained company assessments, five after-memo
+  rejections, 472,576 cached input tokens, and $7.740683 reported Sol/xhigh
+  cost. One transient HTTP 499 had no Response ID, succeeded on an exact rerun,
+  and led to bounded, trace-preserving transport retries in the production
+  runner. API reconciliation proved every published Development is a current
+  positive Investment route and exactly matches its daily publication.

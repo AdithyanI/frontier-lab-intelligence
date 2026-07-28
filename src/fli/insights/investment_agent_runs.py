@@ -14,8 +14,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DB = (
     REPO_ROOT / "data" / "derived" / "insights" / "investment-agent.db"
 )
-STORE_SCHEMA_VERSION = "investment-agent-store-v1"
-READ_SCHEMA_VERSION = "investment-agent-read-v4"
+STORE_SCHEMA_VERSION = "investment-agent-store-v2"
+READ_SCHEMA_VERSION = "investment-agent-read-v5"
 TRACE_SCHEMA_VERSIONS = {"investment-agent-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
 ASSESSMENT_FIELDS = {
@@ -72,6 +72,26 @@ CREATE TABLE IF NOT EXISTS investment_agent_run (
 
 CREATE INDEX IF NOT EXISTS idx_investment_agent_run_day_rank
     ON investment_agent_run(day, daily_rank, development_id);
+
+CREATE TABLE IF NOT EXISTS investment_agent_day_publication (
+    day TEXT PRIMARY KEY,
+    audience TEXT NOT NULL CHECK (audience = 'investment'),
+    selection_kind TEXT NOT NULL,
+    selection_limit INTEGER NOT NULL,
+    selection_sha256 TEXT NOT NULL,
+    candidate_count INTEGER NOT NULL,
+    published_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS investment_agent_day_publication_item (
+    day TEXT NOT NULL,
+    development_id TEXT NOT NULL,
+    daily_rank INTEGER NOT NULL,
+    PRIMARY KEY (day, development_id),
+    UNIQUE (day, daily_rank),
+    FOREIGN KEY (day) REFERENCES investment_agent_day_publication(day)
+        ON DELETE CASCADE
+);
 """
 
 
@@ -106,6 +126,13 @@ def connect(path: Path = DEFAULT_DB) -> sqlite3.Connection:
         conn.execute(
             """INSERT INTO investment_agent_meta(singleton, schema_version)
                VALUES (1, ?)""",
+            (STORE_SCHEMA_VERSION,),
+        )
+    elif str(row["schema_version"]) == "investment-agent-store-v1":
+        conn.execute(
+            """UPDATE investment_agent_meta
+               SET schema_version = ?
+               WHERE singleton = 1""",
             (STORE_SCHEMA_VERSION,),
         )
     elif str(row["schema_version"]) != STORE_SCHEMA_VERSION:
@@ -269,6 +296,97 @@ def import_trace(
     }
 
 
+def publish_day(
+    *,
+    day: str,
+    candidates: list[dict[str, Any]],
+    selection_limit: int,
+    db_path: Path = DEFAULT_DB,
+) -> dict[str, Any]:
+    """Atomically publish one complete Investment-routed daily cohort."""
+    if not candidates:
+        raise ValueError("cannot publish an empty Investment cohort")
+    normalized = [
+        {
+            "development_id": str(item["development_id"]),
+            "daily_rank": int(item["daily_rank"]),
+        }
+        for item in candidates
+    ]
+    if len({item["development_id"] for item in normalized}) != len(normalized):
+        raise ValueError("Investment publication repeats a Development")
+    if len({item["daily_rank"] for item in normalized}) != len(normalized):
+        raise ValueError("Investment publication repeats a daily rank")
+    normalized.sort(key=lambda item: (item["daily_rank"], item["development_id"]))
+    selection_sha256 = _sha256(
+        {
+            "audience": "investment",
+            "selection_kind": "top_investment_routed",
+            "selection_limit": selection_limit,
+            "candidates": normalized,
+        }
+    )
+    conn = connect(db_path)
+    try:
+        for item in normalized:
+            row = conn.execute(
+                """SELECT 1
+                   FROM investment_agent_run
+                   WHERE day = ? AND development_id = ? AND daily_rank = ?
+                   LIMIT 1""",
+                (day, item["development_id"], item["daily_rank"]),
+            ).fetchone()
+            if row is None:
+                raise ValueError(
+                    "cannot publish an Investment candidate without a "
+                    "completed imported run"
+                )
+        now = _now()
+        with conn:
+            conn.execute(
+                "DELETE FROM investment_agent_day_publication_item WHERE day = ?",
+                (day,),
+            )
+            conn.execute(
+                "DELETE FROM investment_agent_day_publication WHERE day = ?",
+                (day,),
+            )
+            conn.execute(
+                """INSERT INTO investment_agent_day_publication (
+                       day, audience, selection_kind, selection_limit,
+                       selection_sha256, candidate_count, published_at
+                   ) VALUES (?, 'investment', 'top_investment_routed', ?, ?, ?, ?)""",
+                (
+                    day,
+                    selection_limit,
+                    selection_sha256,
+                    len(normalized),
+                    now,
+                ),
+            )
+            conn.executemany(
+                """INSERT INTO investment_agent_day_publication_item (
+                       day, development_id, daily_rank
+                   ) VALUES (?, ?, ?)""",
+                [
+                    (day, item["development_id"], item["daily_rank"])
+                    for item in normalized
+                ],
+            )
+    finally:
+        conn.close()
+    return {
+        "schema_version": STORE_SCHEMA_VERSION,
+        "day": day,
+        "audience": "investment",
+        "selection_kind": "top_investment_routed",
+        "selection_limit": selection_limit,
+        "selection_sha256": selection_sha256,
+        "candidate_count": len(normalized),
+        "published_at": now,
+    }
+
+
 def _open_readonly(path: Path) -> sqlite3.Connection | None:
     if not path.is_file():
         return None
@@ -287,9 +405,14 @@ def _latest_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
                       ) AS recency_order
                FROM investment_agent_run AS run
            )
-           SELECT * FROM current
-           WHERE recency_order = 1
-           ORDER BY day, daily_rank, development_id"""
+           SELECT current.*
+           FROM current
+           JOIN investment_agent_day_publication_item AS publication
+             ON publication.day = current.day
+            AND publication.development_id = current.development_id
+            AND publication.daily_rank = current.daily_rank
+           WHERE current.recency_order = 1
+           ORDER BY current.day, current.daily_rank, current.development_id"""
     ).fetchall()
 
 
@@ -364,6 +487,12 @@ def insights_payload(
         }
     try:
         current = _latest_rows(conn)
+        publications = {
+            str(row["day"]): dict(row)
+            for row in conn.execute(
+                "SELECT * FROM investment_agent_day_publication"
+            ).fetchall()
+        }
     finally:
         conn.close()
     selected_day = day or max((str(row["day"]) for row in current), default=None)
@@ -392,6 +521,16 @@ def insights_payload(
         }
     run = {
         "date": selected_day,
+        "audience": "investment",
+        "selection_kind": str(
+            publications[selected_day]["selection_kind"]
+        ),
+        "selection_limit": int(
+            publications[selected_day]["selection_limit"]
+        ),
+        "selection_sha256": str(
+            publications[selected_day]["selection_sha256"]
+        ),
         "development_count": len(day_rows),
         "surfaced_development_count": sum(
             str(row["decision"]) == "surface" for row in day_rows

@@ -100,8 +100,12 @@ composition.
    or newly ranked Events alone require model work. Every new run records the
    current source Feed/Event IDs and full-day rank-input hash, and readers reject
    stale rank lineage.
-9. The company-aware Investment agent first reads the complete Development and
-   a compact, stable card for every company in the 37-name universe. It rejects
+9. The company-aware Investment agent first selects only Developments with a
+   current, positive Investment route. “Top ten” means the ten highest daily
+   ranks inside that Investment lane, not the first ten Developments in the
+   union-positive Feed. A direct single-rank run fails closed when that rank is
+   not Investment-routed. The agent then reads the complete Development and a
+   compact, stable card for every company in the 37-name universe. It rejects
    uncertain matches at this screening stage. Only when the Development supplies
    a concrete causal path may it call the local memo tool for a company. It then
    either rejects that candidate after inspection or emits one minimal
@@ -112,12 +116,19 @@ composition.
    Feed Development and company-memo links; the model does not generate URLs or
    restate the source ledger. The durable run binds evidence and universe
    hashes, exact memo calls, prompt/model identity, and token/cache/cost
-   telemetry. `fli insights run-investment-agent` owns the production loop: it
+   telemetry. A complete run atomically publishes its exact daily candidate
+   cohort; readers project only those members, so partial reruns and older
+   out-of-lane results cannot leak into the current day. `fli insights
+   run-investment-agent` owns the production loop: it
    completes one warm request for the stable prompt key, runs the remaining
    requested ranks with bounded parallelism, writes the exact request and
    response for every turn under
    `data/derived/insights/investment-agent-traces/<day>/`, and imports each
-   successful result into the read database. Sol/xhigh top-ten passes now cover
+   successful result into the read database. Transient connection, timeout,
+   408, 409, 429, 499, and 5xx failures receive at most three
+   application-owned attempts. Every failed attempt and exact request is
+   written to the trace before retry; permanent request errors fail
+   immediately. Sol/xhigh top-ten passes now cover
    July 19–21 as the persisted calibration proof of this successor boundary;
    full-day replay remains future work.
 10. A daily editorial agent reviews the complete routed-positive cohort, reads

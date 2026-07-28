@@ -1029,8 +1029,9 @@ def _parser() -> argparse.ArgumentParser:
     investment_run = sub.add_parser(
         "run-investment-agent",
         help=(
-            "Analyze ranked Developments with the company-aware Investment "
-            "agent, persist full audit traces, and import successful results."
+            "Analyze the highest-ranked current Investment-routed Developments "
+            "with the company-aware agent, persist full audit traces, and "
+            "import successful results."
         ),
     )
     investment_run.add_argument("--through", required=True)
@@ -1039,11 +1040,15 @@ def _parser() -> argparse.ArgumentParser:
         "--top-ranked",
         type=int,
         default=investment_agent.DEFAULT_TOP_RANKED,
+        help="Number of Investment-routed Developments to analyze per day.",
     )
     investment_run.add_argument(
         "--rank",
         type=int,
-        help="Run only this rank on every requested day.",
+        help=(
+            "Run only this absolute daily rank on every requested day; the "
+            "Development must have a current positive Investment route."
+        ),
     )
     investment_run.add_argument("--model", default=investment_agent.DEFAULT_MODEL)
     investment_run.add_argument(

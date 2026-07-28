@@ -180,11 +180,15 @@ export interface EventResponse {
   routing_filter?:
     | 'all'
     | 'relevant'
+    | 'ai_engineering'
+    | 'investment'
     | 'not_relevant'
     | 'not_evaluated'
   routing_counts?: {
     all: number
     relevant: number
+    ai_engineering: number
+    investment: number
     not_relevant: number
     not_evaluated: number
   }

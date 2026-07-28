@@ -451,6 +451,14 @@ def developments_payload(
             result is not None and (result[0] or result[1])
             for result in map(audiences, items)
         ),
+        "ai_engineering": sum(
+            result is not None and result[0]
+            for result in map(audiences, items)
+        ),
+        "investment": sum(
+            result is not None and result[1]
+            for result in map(audiences, items)
+        ),
         "not_relevant": sum(
             result == (False, False) for result in map(audiences, items)
         ),
@@ -464,6 +472,18 @@ def developments_payload(
             for item in items
             if (result := audiences(item)) is not None
             and (result[0] or result[1])
+        ]
+    elif routing_filter == "ai_engineering":
+        items = [
+            item
+            for item in items
+            if (result := audiences(item)) is not None and result[0]
+        ]
+    elif routing_filter == "investment":
+        items = [
+            item
+            for item in items
+            if (result := audiences(item)) is not None and result[1]
         ]
     elif routing_filter == "not_relevant":
         items = [item for item in items if audiences(item) == (False, False)]
