@@ -1,0 +1,672 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "HUT 8",
+    "ticker": "HUT"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Hut 8 is a power-first energy and digital-infrastructure developer with three economic layers: long-duration AI data-center leasing, recurring infrastructure and managed-service fees, and owned compute exposure through AI Cloud, traditional cloud, and majority-owned American Bitcoin. The central transition is from comparatively volatile compute and Bitcoin economics toward project-financed, triple-net AI-campus cash flows, but the contracted campuses do not contribute stabilized lease economics until construction, commissioning, and tenant acceptance.",
+      "revenue_engines": [
+        {
+          "engine": "Hyperscale AI data-center development and leasing",
+          "who_pays": "AI infrastructure operators and large technology counterparties that lease purpose-built IT capacity; payment obligations may be supported by an investment-grade backstop.",
+          "economic_logic": "Hut 8 originates powered sites, secures interconnection, develops and finances campuses, and earns long-duration triple-net lease revenue once capacity is delivered and accepted. As of 2026-07-20, it reported 949 MW of contracted IT capacity across River Bend and Beacon Point, $26.6 billion of aggregate base-term contract value, and expected average annual NOI above $1.75 billion; these are contractual and forward-looking economics rather than current-period revenue.",
+          "sources": [
+            {
+              "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+              "claim_date": "2026-07-20"
+            },
+            {
+              "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+              "claim_date": "2025-12-17"
+            }
+          ]
+        },
+        {
+          "engine": "Managed services, colocation, and traditional cloud",
+          "who_pays": "Infrastructure owners, hosted-compute customers, and Canadian enterprise customers that buy managed operations, colocation, storage, continuity, and cloud capacity.",
+          "economic_logic": "Managed-services cash flows are generally fixed against power capacity under management, with pass-through reimbursements and possible incentives. CPU infrastructure customers pay recurring fixed fees for assigned resources, with consumption-based fees for usage above committed baselines. These activities provide operating experience and recurring revenue but are currently much smaller than the announced AI-campus opportunity.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+              "claim_date": "2026-05-06"
+            }
+          ]
+        },
+        {
+          "engine": "Owned compute: ASIC mining and AI Cloud",
+          "who_pays": "Bitcoin mining pools indirectly distribute block rewards and transaction fees; AI Cloud customers pay for on-demand or committed access to GPU resources; traditional-cloud customers pay for compute, storage, network, or power usage.",
+          "economic_logic": "Compute revenue depends on deployed hardware, utilization, uptime, energy cost, Bitcoin price and network difficulty for ASIC mining, and GPU demand and contracted usage for AI Cloud. American Bitcoin supplies most ASIC Compute revenue and remains consolidated while Hut 8 holds control; Highrise AI operates Hut 8's GPU resources at a third-party colocation site.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+              "claim_date": "2026-05-06"
+            },
+            {
+              "url": "https://www.hut8.com/news-insights/press-releases/hut-8-gpu-as-a-service-vertical-goes-live-with-inaugural-deployment",
+              "claim_date": "2024-09-26"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+          "claim_date": "2026-02-25"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+          "claim_date": "2026-05-06"
+        },
+        {
+          "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+          "claim_date": "2026-07-20"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Conversion of powered-land pipeline into commissioned, accepted IT capacity",
+        "why_it_matters": "Power under diligence or exclusivity does not produce lease revenue. Value depends on securing land and interconnection, completing design and permitting, procuring long-lead equipment, constructing data halls, energizing them, and satisfying tenant acceptance. Schedule slippage defers rent and can increase cost.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "driver": "Lease economics, tenant credit, concentration, and renewal behavior",
+        "why_it_matters": "Long-duration triple-net, take-or-pay leases can create predictable rent and transfer operating costs, while investment-grade tenants or backstops reduce credit risk. The same structure creates concentrated exposure to a small number of campuses and counterparties; contract value is not equivalent to current revenue, cash receipts, or lifetime return.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "gross_margin",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "driver": "Project construction cost and project-level financing",
+        "why_it_matters": "AI campuses require billions of dollars before rent stabilizes. Non-recourse, fully amortizing construction bonds can reduce parent equity needs and isolate project risk, but interest cost, fixed completion obligations, cost overruns, and delivery failures still determine equity returns and residual risk.",
+        "financial_lines": [
+          "capital_expenditure",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-closes-usd4-25-billion-of-investment-grade-senior-secured-notes-for-beacon-point-data",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "driver": "Power availability, interconnection, equipment density, and campus design",
+        "why_it_matters": "The company competes on the ability to secure and deliver scarce utility capacity at the power density and schedule AI tenants require. Grid delays, redesigns, water or cooling constraints, and long-lead equipment availability can reduce deliverable IT load or postpone monetization; better architectures can raise IT capacity within the same footprint.",
+        "financial_lines": [
+          "volume",
+          "pricing",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-announces-ai-infrastructure-partnership-with-anthropic-and-fluidstack",
+            "claim_date": "2025-12-17"
+          }
+        ]
+      },
+      {
+        "driver": "Compute utilization, Bitcoin economics, and capital allocation between uses",
+        "why_it_matters": "Until contracted AI campuses are operational, consolidated results remain materially exposed to ASIC Compute and Bitcoin fair-value movements. Management must choose whether scarce power and capital earn better risk-adjusted returns in leased AI infrastructure, owned GPU services, ASIC infrastructure, or financial Bitcoin exposure.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Fluidstack, Anthropic, Google-backed River Bend obligations, and the investment-grade Beacon Point tenant",
+        "why_it_matters": "These counterparties connect Hut 8's powered sites to frontier-AI demand and long-duration lease economics. Their credit quality, technical requirements, acceptance milestones, and capacity decisions govern utilization and concentration risk.",
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-announces-ai-infrastructure-partnership-with-anthropic-and-fluidstack",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "AEP Texas, Entergy, regional grid and transmission operators, and local permitting authorities",
+        "why_it_matters": "Hut 8 cannot monetize a campus without contracted utility capacity, completed interconnection, energized substations, transmission availability, and permits. The power-first thesis is only realized when utility capacity converts into commissioned IT capacity on schedule.",
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Fluidstack and Anthropic",
+        "why_it_matters": "The partnership gives Hut 8 a route from powered-land development to large frontier-model clusters, initially at River Bend and potentially across additional pipeline sites. Optional capacity beyond the first tranche remains subject to future diligence, power expansion, and definitive commitments.",
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-announces-ai-infrastructure-partnership-with-anthropic-and-fluidstack",
+            "claim_date": "2025-12-17"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Vertiv, Jacobs, HPE, AdvizeX, NVIDIA architecture, and long-lead electrical and cooling equipment suppliers",
+        "why_it_matters": "Engineering, construction, server, network, power, and cooling suppliers affect campus cost, delivery dates, density, reliability, and GPU-service performance. Architectural change between accelerator generations can force redesign but may also increase sellable IT capacity.",
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-gpu-as-a-service-vertical-goes-live-with-inaugural-deployment",
+            "claim_date": "2024-09-26"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Hyperscale data-center developers, powered-land aggregators, neoclouds, and former crypto miners converting power portfolios to AI",
+        "why_it_matters": "Competitors bid for the same interconnections, equipment, financing, customers, and construction talent. More capacity can compress lease rates or weaken tenant terms, while faster competitors can capture scarce near-term demand.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+            "claim_date": "2026-01-09"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Federal, state, provincial, utility, environmental, water, zoning, and securities regulators",
+        "why_it_matters": "Large campuses need approvals for land use, utility service, transmission, construction, water and environmental impacts. Bitcoin and digital-asset regulation also affects the consolidated compute and treasury exposure.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Deliver 245 MW of IT capacity at River Bend under a 15-year Fluidstack lease for Anthropic workloads, with initial data halls scheduled for 2027.",
+        "investment_relevance": "This is the first large conversion of Hut 8's power-first pipeline into contracted AI-infrastructure economics. Construction delivery, commissioning, and tenant acceptance determine whether announced contract value becomes rent and NOI.",
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-announces-ai-infrastructure-partnership-with-anthropic-and-fluidstack",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          }
+        ]
+      },
+      {
+        "action": "Build two 352 MW IT phases at Beacon Point against 1,000 MW of secured utility capacity under two 15-year leases with the same investment-grade tenant.",
+        "investment_relevance": "Full campus commercialization tests whether the company can repeat its development model at larger scale. The two phases carry different delivery schedules, so booked economics must be matched to actual commissioning and stabilization.",
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "action": "Use fully amortizing, non-recourse project debt to fund River Bend and Beacon Point while limiting incremental parent equity.",
+        "investment_relevance": "Project-level financing can preserve parent liquidity and improve equity returns, but it places a premium on construction completion, lease performance, and accurate capital budgets.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-closes-usd4-25-billion-of-investment-grade-senior-secured-notes-for-beacon-point-data",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Retain a vertically integrated platform spanning site origination, energy, digital infrastructure, managed services, and owned compute while separating the American Bitcoin operating platform.",
+        "investment_relevance": "Vertical integration may improve site selection, speed, and operational insight, but it also mixes businesses with different duration, capital intensity, commodity sensitivity, and valuation logic. Segment economics and intercompany eliminations must remain explicit.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models require materially larger training and inference clusters, raising near-term demand for power-dense AI campuses.",
+        "company_exposure": "Hut 8 controls a development pipeline and has contracted River Bend and Beacon Point for 949 MW of IT capacity linked to frontier-AI workloads.",
+        "affected_driver": "Lease pricing, contracted IT megawatts, pipeline conversion, and campus utilization.",
+        "financial_consequence": "More scarcity can support additional contracts, better lease terms, and higher long-duration rent and NOI; slower demand can strand development spend or reduce future pricing.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material only if demand produces executable leases with creditworthy counterparties at returns above the all-in cost of land, power, construction, financing, and residual risk.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "New contracted IT megawatts and lease escalators",
+          "Tenant or guarantor credit quality",
+          "Uncontracted pipeline moving from diligence to construction",
+          "Lease rates and available capacity for 2027-2029"
+        ],
+        "sources": [
+          {
+            "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+            "claim_date": "2026-01-09"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-announces-ai-infrastructure-partnership-with-anthropic-and-fluidstack",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "development": "New accelerator generations increase rack density and change power, cooling, networking, and building requirements.",
+        "company_exposure": "Hut 8 must design and build campuses around evolving tenant architectures; its Beacon Point redesign uses NVIDIA's DSX reference architecture and increased IT capacity within the existing utility and land footprint.",
+        "affected_driver": "Sellable IT capacity per site, construction scope, equipment procurement, commissioning schedule, and capital cost per megawatt.",
+        "financial_consequence": "A compatible redesign can increase capacity and rent from a fixed power footprint; late architectural change can cause rework, cost overruns, and deferred delivery.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material when the density gain or improved tenant demand exceeds redesign, cooling, electrical, equipment, and schedule costs.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Tenant design changes after construction starts",
+          "IT load delivered per utility megawatt",
+          "Long-lead electrical and cooling procurement",
+          "Budget and commissioning milestones"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          }
+        ]
+      },
+      {
+        "development": "Training efficiency or inference optimization reduces compute required per unit of model capability or customer workload.",
+        "company_exposure": "Hut 8's AI campuses are leased for long terms, but future expansion and renewal demand ultimately depend on customer compute requirements and alternative capacity.",
+        "affected_driver": "Forward lease demand, expansion take-up, renewal pricing, and utilization of owned GPU services.",
+        "financial_consequence": "Efficiency can improve tenant economics and broaden AI use, but if it reduces aggregate infrastructure demand faster than workloads expand it can weaken new leasing, renewal terms, or GPU utilization.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if efficiency-driven reductions in required compute exceed workload growth and are not offset by new applications or larger models.",
+        "time_horizon": "long_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Tenant expansion or contraction decisions",
+          "Renewal and new-lease pricing",
+          "Industry utilization and vacancy",
+          "Highrise AI GPU utilization and committed-use mix"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "development": "Frontier-model developers concentrate procurement among a small number of infrastructure partners and demand increasingly customized campuses.",
+        "company_exposure": "River Bend links Hut 8 to Anthropic through Fluidstack, while Beacon Point concentrates 704 MW with one undisclosed investment-grade tenant.",
+        "affected_driver": "Customer concentration, bargaining power, project specificity, counterparty credit, and repeat business.",
+        "financial_consequence": "Successful delivery can produce follow-on campuses and lower customer-acquisition cost; a tenant strategy change, dispute, or technical failure can impair a large share of contracted economics.",
+        "direction": "mixed",
+        "materiality_condition": "The exposure is material because a small number of counterparties represent most contracted AI capacity; the net effect depends on enforceable payment support and the reusability of the sites for alternative tenants.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Counterparty concentration by contracted megawatt and NOI",
+          "Payment-backstop and termination disclosures",
+          "Tenant acceptance and change-order history",
+          "Evidence of repeat leasing across independent tenants"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "BIT Capital publicly argues that AI data-center capacity and secured power are structurally scarce, that large technology companies must reserve resources years ahead, and that Hut 8 is among the companies well positioned in that environment. BIT says direct dialogue with data-center management teams reveals demand signals not always visible in traditional media. This is attributable sector-and-company commentary, not a complete valuation framework or investment recommendation.",
+      "what_would_support_it": [
+        "Hut 8 delivers River Bend and Beacon Point on schedule and within the project-financed capital budgets.",
+        "Contracted AI capacity converts into recognized rent, cash NOI, and distributable project cash flow near stated economics.",
+        "Additional pipeline sites win long-duration leases with creditworthy tenants before major at-risk capital is committed.",
+        "Market lease rates and forward capacity availability remain tight through 2028-2029.",
+        "Power and interconnection rights retain value as accelerator density and AI workloads expand."
+      ],
+      "what_would_challenge_it": [
+        "Construction delays, redesigns, or cost overruns materially reduce returns despite headline contract value.",
+        "Tenant concentration, termination rights, or weak payment support make contracted economics less durable than presented.",
+        "New supply or slower AI compute demand reduces forward lease rates, renewals, or expansion demand.",
+        "Secured power fails to convert into permitted, commissioned, billable IT capacity.",
+        "Parent equity issuance, recourse obligations, or refinancing needs absorb more of the project value than expected."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+          "claim_date": "2026-01-09"
+        },
+        {
+          "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+          "claim_date": "2026-07-20"
+        },
+        {
+          "url": "https://www.hut8.com/news-insights/press-releases/hut-8-closes-usd4-25-billion-of-investment-grade-senior-secured-notes-for-beacon-point-data",
+          "claim_date": "2026-06-09"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The development-pipeline labels under diligence, exclusivity, development, construction, contracted, commissioned, and stabilized describe materially different economic states.",
+        "why_it_matters": "Adding these categories can overstate near-term billable capacity and understate the capital, approvals, and execution still required.",
+        "next_research_trigger": "At each results release, reconcile every named site from utility capacity through contracted IT load, construction, initial energization, tenant acceptance, and first recognized rent.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Headline base-term contract value and expected NOI depend on delivery schedules, lease definitions, escalators, operating-cost allocation, acceptance, and payment support that are not fully visible in press releases.",
+        "why_it_matters": "Contract value is not current revenue, cash receipts, project equity value, or guaranteed return; small differences in completion timing and residual obligations can materially change economics.",
+        "next_research_trigger": "Review lease summaries, debt offering documents, guarantees, and future segment reporting for commencement tests, termination rights, change orders, pass-through costs, debt service, equity contribution, and distributions.",
+        "sources": [
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+            "claim_date": "2025-12-17"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.hut8.com/news-insights/press-releases/hut-8-closes-usd4-25-billion-of-investment-grade-senior-secured-notes-for-beacon-point-data",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The economic separation among Hut 8 parent, project subsidiaries, American Bitcoin, King Mountain, Highrise AI, and Canadian cloud operations is complex.",
+        "why_it_matters": "Consolidation, non-controlling interests, equity-method accounting, intercompany eliminations, and non-recourse debt can make segment revenue a poor proxy for cash attributable to Hut 8 shareholders.",
+        "next_research_trigger": "Build a legal-entity and cash-flow bridge after each filing, separating parent cash, project debt, project distributions, American Bitcoin ownership, unconsolidated joint ventures, and intercompany eliminations.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The durability of power scarcity and AI lease pricing beyond the currently tight delivery window is not established by current contracts.",
+        "why_it_matters": "Long-lived project returns and future pipeline value depend on supply growth, grid buildout, workload growth, accelerator efficiency, and the cost of alternative capacity.",
+        "next_research_trigger": "Track independent market vacancy, delivered and announced megawatts, utility interconnection queues, lease rates by delivery year, tenant cancellations, and Hut 8 renewal or expansion terms.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+            "claim_date": "2026-01-09"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      },
+      {
+        "uncertainty": "BIT Capital's public commentary establishes a scarcity thesis but does not disclose a Hut 8 valuation model, downside case, or explicit operating thresholds.",
+        "why_it_matters": "A future Event can support or challenge the stated power-and-capacity thesis, but portfolio ownership and general optimism cannot substitute for a full attributable investment case.",
+        "next_research_trigger": "Search future BIT letters, podcasts, presentations, or analyst commentary for Hut 8-specific assumptions on commissioning, lease economics, capital cost, project equity value, and falsifiable downside milestones.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+            "claim_date": "2026-01-09"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+        "title": "Hut 8 Corp. 2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-25",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+        "title": "Hut 8 Corp. Form 10-Q for the quarter ended March 31, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-06",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+        "title": "Hut 8 Signs 15-Year, 245 MW AI Data Center Lease at River Bend Campus with Total Contract Value of $7.0 Billion",
+        "publisher": "Hut 8",
+        "published_at": "2025-12-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-announces-ai-infrastructure-partnership-with-anthropic-and-fluidstack",
+        "title": "Hut 8 Announces AI Infrastructure Partnership with Anthropic and Fluidstack",
+        "publisher": "Hut 8",
+        "published_at": "2025-12-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+        "title": "Hut 8 Fully Commercializes 1 GW Beacon Point AI Data Center Campus with Second 352 MW IT Lease",
+        "publisher": "Hut 8",
+        "published_at": "2026-07-20",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-closes-usd4-25-billion-of-investment-grade-senior-secured-notes-for-beacon-point-data",
+        "title": "Hut 8 Closes $4.25 Billion of Investment-Grade Senior Secured Notes for Beacon Point Data Center Project",
+        "publisher": "Hut 8",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-gpu-as-a-service-vertical-goes-live-with-inaugural-deployment",
+        "title": "Hut 8 GPU-as-a-Service Vertical Goes Live with Inaugural Deployment",
+        "publisher": "Hut 8",
+        "published_at": "2024-09-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+        "title": "Fondsmanager Beckers: 2026 wird das Jahr der Auslese",
+        "publisher": "BIT Capital",
+        "published_at": "2026-01-09",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "codex-manual-primary-source-research",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1-manual-fallback",
+    "prompt_cache_key": null,
+    "response_id": null,
+    "response_model": null,
+    "input_tokens": 0,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 0,
+    "reasoning_tokens": 0,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "manual_primary_source_research",
+        "queries": [
+          "Hut 8 2025 Form 10-K",
+          "Hut 8 Q1 2026 Form 10-Q and results",
+          "Hut 8 River Bend and Beacon Point AI data center leases",
+          "Hut 8 AI infrastructure partnership and project financing",
+          "BIT Capital Hut 8 public thesis"
+        ]
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926019392/hut-20251231x10k.htm",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1964789/000110465926055891/hut-20260331x10q.htm",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-signs-15-year-245-mw-ai-data-center-lease-at-river-bend-campus-with-total-contract-value",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-announces-ai-infrastructure-partnership-with-anthropic-and-fluidstack",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-fully-commercializes-1-gw-beacon-point-ai-data-center-campus-with-second-352-mw-it-lease",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-closes-usd4-25-billion-of-investment-grade-senior-secured-notes-for-beacon-point-data",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://www.hut8.com/news-insights/press-releases/hut-8-gpu-as-a-service-vertical-goes-live-with-inaugural-deployment",
+        "type": "manual_citation"
+      },
+      {
+        "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast",
+        "type": "manual_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-manual-fallback",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:hut",
+      "model:codex-manual-primary-source-research",
+      "reasoning:xhigh"
+    ]
+  }
+}

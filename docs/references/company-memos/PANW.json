@@ -1,0 +1,725 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Palo Alto Networks",
+    "ticker": "PANW"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Palo Alto Networks sells integrated cybersecurity platforms spanning network security, cloud security, security operations, AI security, observability, and identity. The economic model combines upfront hardware and software-license revenue with a much larger recurring base of subscriptions and support. Its platformization strategy seeks to replace fragmented point products with shared data, policy, and workflow layers, increasing product attachment and contract breadth while making execution, integration, and customer trust central to renewal and margin outcomes.",
+      "revenue_engines": [
+        {
+          "engine": "Security subscriptions and support",
+          "who_pays": "Enterprises, public-sector organizations, service providers, and other institutions securing users, networks, clouds, endpoints, applications, identities, and AI systems.",
+          "economic_logic": "Customers typically buy multi-year subscriptions and support priced per user, endpoint, capacity, workload, or protected environment. Revenue is recognized over the service period, so new sales, expansion, renewal, contract duration, and product attachment build a recurring revenue base but flow into reported revenue over time.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+              "claim_date": "2026-06-03"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+              "claim_date": "2025-08-29"
+            }
+          ]
+        },
+        {
+          "engine": "Network-security products and software licenses",
+          "who_pays": "Large enterprises, governments, service providers, and distributed organizations deploying physical, virtual, containerized, and cloud-delivered enforcement points.",
+          "economic_logic": "Palo Alto Networks earns product revenue from ML-powered firewalls, software licenses, SD-WAN, VM-Series, Panorama, and acquired identity-security licenses. Product deployments can establish the installed base for attached subscriptions and support, while hardware generation, pricing, mix, manufacturing cost, and inventory affect product margin.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+              "claim_date": "2026-06-03"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+              "claim_date": "2025-08-29"
+            }
+          ]
+        },
+        {
+          "engine": "AI, identity, security-operations, and managed-security platforms",
+          "who_pays": "Security, infrastructure, cloud, application, identity, and AI-platform teams consolidating security operations or deploying AI applications and autonomous agents.",
+          "economic_logic": "Prisma AIRS, Cortex XSIAM, Idira, and Unit 42-managed offerings monetize specialized control planes, telemetry, automation, threat intelligence, and expert services. Economics depend on converting technical coverage into production adoption, measurable security outcomes, cross-platform attachment, and expansion rather than merely adding acquired products to the portfolio.",
+          "sources": [
+            {
+              "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+              "claim_date": "2026-03-23"
+            },
+            {
+              "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-introduces-msiam-2-0-with-the-industry-s-most-comprehensive-breach-response-guarantee",
+              "claim_date": "2026-02-17"
+            },
+            {
+              "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity",
+              "claim_date": "2026-05-12"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+          "claim_date": "2026-06-03"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+          "claim_date": "2025-08-29"
+        },
+        {
+          "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial",
+          "claim_date": "2026-06-02"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Platformization adoption, expansion, and renewal",
+        "why_it_matters": "The strategy depends on customers consolidating multiple security domains onto Palo Alto Networks platforms. Broader deployments can raise annual recurring revenue, contract value, switching costs, and sales efficiency, but transition incentives, migration complexity, or perceived product compromise can delay revenue or weaken renewal economics. NGS ARR is useful for trajectory but is not GAAP revenue and its scope expands as products are introduced or acquired.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "driver": "AI-security, identity, and security-operations product attachment",
+        "why_it_matters": "Prisma AIRS, Idira, and Cortex XSIAM create routes to incremental subscription revenue as AI applications, agents, machine identities, and automated attacks expand. Materiality depends on production adoption, paid attachment, customer consolidation, efficacy, and retention rather than feature releases alone.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin"
+        ],
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity",
+            "claim_date": "2026-05-12"
+          },
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-introduces-msiam-2-0-with-the-industry-s-most-comprehensive-breach-response-guarantee",
+            "claim_date": "2026-02-17"
+          }
+        ]
+      },
+      {
+        "driver": "Recurring revenue mix, cloud-delivery cost, and security-data scale",
+        "why_it_matters": "Subscription and support represented 80.2% of fiscal Q3 2026 revenue. Recurring scale supports visibility and customer lifetime value, while cloud hosting, telemetry retention, model inference, support, and acquired-intangible amortization affect gross margin and cash conversion as cloud-delivered security usage grows.",
+        "financial_lines": [
+          "revenue",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          }
+        ]
+      },
+      {
+        "driver": "Acquisition integration, product coherence, and capital discipline",
+        "why_it_matters": "CyberArk, Chronosphere, Koi, and Portkey broaden the platform but add integration, retention, accounting, execution, and management-attention risk. CyberArk alone carried $21.1 billion of purchase consideration. The investment case depends on converting acquired capabilities into coherent products, cross-sell, renewal, and durable cash generation without customer disruption or excessive dilution and cost.",
+        "financial_lines": [
+          "revenue",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-cyberark-secure--ai-era",
+            "claim_date": "2026-02-11"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+            "claim_date": "2026-05-29"
+          }
+        ]
+      },
+      {
+        "driver": "Channel productivity, customer trust, and competitive displacement",
+        "why_it_matters": "Substantially all revenue is generated through channel partners, and three distributors represented 44.2% of fiscal 2025 revenue. Platform sales require partners and customers to accept broader vendor concentration. Product defects, breaches, false positives, weak support, aggressive competition, or native cloud controls can impair adoption, renewal, pricing, and reputation.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "operating_cost",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Large enterprises, governments, service providers, and regulated organizations",
+        "why_it_matters": "These customers buy multi-domain security and support, often through long and technically complex sales, deployment, and renewal cycles. Their willingness to consolidate control planes and automate response determines platform breadth, recurring revenue, and retention.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Distributors, resellers, systems integrators, managed-security providers, and cloud-hosting partners",
+        "why_it_matters": "Palo Alto Networks relies on partners for substantially all sales and much customer support. Partner enablement and incentives influence reach, implementation quality, working capital, and competitive positioning; distributor concentration creates an additional operating dependency.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Public-cloud, SaaS, AI-model, agent-framework, endpoint, and identity ecosystems",
+        "why_it_matters": "AIRS, Cortex, cloud security, and identity products must observe and enforce policy across rapidly changing third-party environments. Coverage, APIs, telemetry access, latency, interoperability, and platform-provider policy determine efficacy and deployment friction.",
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+            "claim_date": "2026-05-29"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Integrated cybersecurity vendors, cloud and software platforms, identity vendors, observability providers, and specialist point products",
+        "why_it_matters": "The company competes both with broad platforms and best-of-breed tools across every domain it enters. Cloud and model providers can bundle native controls, while specialists can innovate faster in narrow attack surfaces; either can pressure pricing, attachment, and consolidation wins.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "CyberArk, Portkey, Chronosphere, Koi, and their customers and employees",
+        "why_it_matters": "These acquired capabilities provide identity, AI-gateway, observability, and agentic-endpoint building blocks. Retaining people and customers while integrating telemetry, policy, workflows, and commercial execution determines whether acquisition spending strengthens one platform or leaves a costly collection of products.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-cyberark-secure--ai-era",
+            "claim_date": "2026-02-11"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+            "claim_date": "2026-05-29"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Cybersecurity, privacy, data-residency, AI-governance, public-procurement, and export-control regimes",
+        "why_it_matters": "Security platforms process sensitive telemetry across jurisdictions and can become critical infrastructure. Changes in data handling, AI accountability, breach disclosure, encryption, procurement, or cross-border controls can change product design, hosting cost, sales eligibility, and liability.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Consolidate network, cloud, security operations, AI security, observability, and identity through platformization.",
+        "investment_relevance": "The strategy can increase wallet share, recurring revenue, and retention if shared telemetry and workflows deliver better outcomes than fragmented tools. It can also increase transition cost, vendor-concentration concerns, and the consequence of integration or product failures.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "action": "Build Prisma AIRS into an end-to-end control plane for models, applications, data, and autonomous agents.",
+        "investment_relevance": "AIRS gives Palo Alto Networks a direct monetization route from frontier-AI deployment through discovery, testing, identity, gateway, and runtime controls. Commercial value depends on production traffic, measurable risk reduction, platform coverage, latency, and paid adoption.",
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+            "claim_date": "2026-05-29"
+          }
+        ]
+      },
+      {
+        "action": "Make identity security a core platform through CyberArk and launch Idira for human, machine, and agentic identities.",
+        "investment_relevance": "Autonomous agents expand privileged identity and access demand, but the $21.1 billion CyberArk acquisition raises the required scale of integration, cross-sell, retention, and financial return. Idira is the product expression of that strategic bet.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-cyberark-secure--ai-era",
+            "claim_date": "2026-02-11"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity",
+            "claim_date": "2026-05-12"
+          }
+        ]
+      },
+      {
+        "action": "Automate detection, investigation, and response through Cortex XSIAM and managed XSIAM services.",
+        "investment_relevance": "If consolidated telemetry and automation reduce analyst workload and breach impact, XSIAM can displace legacy SIEM and point tools. The outcome must be judged through migrations, retention, response quality, false positives, and customer willingness to delegate remediation.",
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-introduces-msiam-2-0-with-the-industry-s-most-comprehensive-breach-response-guarantee",
+            "claim_date": "2026-02-17"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Autonomous agents gain broader tool use, memory, machine-to-machine communication, and privileged access.",
+        "company_exposure": "Prisma AIRS, Portkey's AI Gateway, and Idira are designed to discover agents, mediate AI traffic, enforce runtime policy, and govern human, machine, and agentic identities.",
+        "affected_driver": "AI-security and identity product attachment within platformized customers",
+        "financial_consequence": "Production adoption could expand subscription revenue, contract breadth, and retention; weak coverage or bundled native alternatives could instead increase product cost without material revenue.",
+        "direction": "mixed",
+        "materiality_condition": "Agentic workloads must move into material production use, customers must assign security and identity budgets to an independent control plane, and Palo Alto Networks must prove cross-environment coverage and acceptable latency.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Paid Prisma AIRS and Idira adoption rather than previews or feature launches",
+          "Agent and AI-gateway traffic volume under management",
+          "Cross-sell into existing platformized customers",
+          "Documented agent-security incidents, efficacy, and response outcomes"
+        ],
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+            "claim_date": "2026-05-29"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity",
+            "claim_date": "2026-05-12"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models increase attacker speed, phishing quality, malware adaptation, vulnerability discovery, and automated campaign scale.",
+        "company_exposure": "Cortex XSIAM and Unit 42-managed services use shared telemetry, analytics, and automation to detect, investigate, and respond across attack surfaces.",
+        "affected_driver": "XSIAM displacement wins, managed-service demand, and security-operations automation",
+        "financial_consequence": "Higher threat intensity can increase demand and platform consolidation, but missed detections, unsafe automated containment, or false positives can create liability, remediation cost, churn, and reputational damage.",
+        "direction": "mixed",
+        "materiality_condition": "AI-enabled attacks must materially exceed legacy workflows while XSIAM demonstrates better detection and response outcomes at lower total operating cost than incumbent or cloud-native alternatives.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Legacy SIEM displacement and XSIAM platformization wins",
+          "Detection, investigation, containment, and false-positive measures",
+          "Managed XSIAM renewal and service gross margin",
+          "Material incidents involving automated or AI-enabled attacks"
+        ],
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-introduces-msiam-2-0-with-the-industry-s-most-comprehensive-breach-response-guarantee",
+            "claim_date": "2026-02-17"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          }
+        ]
+      },
+      {
+        "development": "Open and proprietary model ecosystems proliferate, with new model artifacts, prompt interfaces, agent protocols, and deployment environments.",
+        "company_exposure": "Prisma AIRS must discover and evaluate models and applications across heterogeneous environments and adapt runtime and red-team defenses to changing attack surfaces.",
+        "affected_driver": "Coverage breadth, detection efficacy, engineering cadence, and cost to serve",
+        "financial_consequence": "Broad, reliable coverage can support differentiation and pricing; rapid ecosystem fragmentation can raise R&D, inference, telemetry, and support cost or leave security gaps that impair adoption.",
+        "direction": "mixed",
+        "materiality_condition": "Customers must operate heterogeneous AI stacks at scale and value consistent third-party controls more than native model or cloud-provider security.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Time required to support new models, protocols, and agent frameworks",
+          "Runtime latency and infrastructure cost per protected AI transaction",
+          "Independent evidence of threat-detection and red-team efficacy",
+          "Competitive bundling by cloud, model, and developer-platform providers"
+        ],
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+            "claim_date": "2026-05-29"
+          }
+        ]
+      },
+      {
+        "development": "AI coding agents and autonomous infrastructure tools become common on employee endpoints and inside software-delivery workflows.",
+        "company_exposure": "Agentic endpoint activity creates new process, credential, software-supply-chain, and data-exfiltration surfaces across Cortex, Prisma AIRS, and Idira.",
+        "affected_driver": "Endpoint, cloud, identity, and AI-security cross-platform attachment",
+        "financial_consequence": "A new control requirement could expand addressable subscription spend and deepen platform adoption; endpoint-native controls or incomplete visibility could limit differentiation.",
+        "direction": "mixed",
+        "materiality_condition": "Enterprises must permit agents to take consequential actions and require enforceable identity, endpoint, and runtime policy beyond controls embedded in operating systems, coding tools, and cloud platforms.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Production use of coding and operations agents under Palo Alto Networks policy",
+          "Identity and endpoint integration milestones",
+          "Agentic software-supply-chain incidents",
+          "Customer consolidation across Cortex, Idira, and AIRS"
+        ],
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity",
+            "claim_date": "2026-05-12"
+          }
+        ]
+      },
+      {
+        "development": "Cloud and frontier-model providers make native AI-security, observability, identity, and policy controls sufficiently comprehensive for enterprise use.",
+        "company_exposure": "Native controls can substitute for parts of Prisma AIRS, cloud security, observability, or identity, while Palo Alto Networks depends on access to provider APIs and telemetry.",
+        "affected_driver": "Platform pricing, competitive displacement, attachment, and renewal",
+        "financial_consequence": "Bundling could compress price or reduce addressable product scope; conversely, multi-cloud fragmentation can strengthen demand for a neutral cross-provider control plane.",
+        "direction": "mixed",
+        "materiality_condition": "Native controls must reach comparable cross-domain efficacy and governance, or heterogeneous customer estates must remain complex enough to sustain demand for an independent platform.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Security features bundled by cloud, model, and developer platforms",
+          "AIRS win-loss evidence against native controls",
+          "Price realization and renewal for AI-security products",
+          "Depth and durability of third-party telemetry and API access"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          },
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "A dated BIT Capital publication or interview explicitly naming Palo Alto Networks and connecting platformization, AI security, identity, XSIAM, or acquisition integration to a company-specific investment thesis.",
+        "Attributable BIT commentary defining measurable conditions such as organic NGS ARR, AI-security attachment, platform consolidation, renewal, margin, and acquisition returns.",
+        "A BIT-authored update maintaining that view after considering native cloud competition, execution risk, customer concentration, and the CyberArk purchase price."
+      ],
+      "what_would_challenge_it": [
+        "A company-specific BIT statement that platformization sacrifices product quality, delays revenue, or weakens customer choice and renewal.",
+        "An attributable BIT countercase concluding that AI-security economics accrue mainly to cloud or model providers, specialist vendors, or internal enterprise tooling.",
+        "Portfolio ownership, fund weight, or generic cybersecurity and AI commentary would not by itself establish or challenge a public company thesis."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news",
+          "claim_date": "2026-07-28"
+        },
+        {
+          "url": "https://bitcap.com/fonds/bit-global-technology-leaders",
+          "claim_date": "2026-07-28"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Reported NGS ARR growth combines organic performance with acquired CyberArk and Chronosphere ARR, while the metric's product scope can expand over time.",
+        "why_it_matters": "Headline growth can overstate underlying platform momentum or obscure which domains generate durable expansion. NGS ARR is not GAAP revenue and can be affected by contract timing, renewal, and allocation.",
+        "next_research_trigger": "Reconcile each quarterly NGS ARR bridge into organic growth, acquired contribution, renewal, new platformizations, and product-scope changes; compare it with RPO, deferred revenue, and recognized revenue.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The company does not separately disclose enough revenue, ARR, customer, or margin data for Prisma AIRS and its AI-security components to establish current materiality.",
+        "why_it_matters": "A broad product launch and expanding capability set do not prove paid production adoption, durable pricing, retention, or contribution after cloud, inference, telemetry, and support costs.",
+        "next_research_trigger": "Look for separately disclosed AIRS customers, paid workload or traffic measures, ARR, pricing, gross-margin implications, renewal, and independent efficacy evidence in future filings, earnings materials, and customer references.",
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Platformization contracts, transition incentives, and revenue allocation can make bookings, ARR, RPO, and recognized revenue move on different schedules.",
+        "why_it_matters": "A consolidation win can be strategically valuable while near-term economics are deferred, or a large contract can create headline metrics without equivalent cash or current-period revenue. Contract duration and renewal quality matter.",
+        "next_research_trigger": "Trace disclosed platformization deals through contract structure, free-product periods, RPO, deferred revenue, cash collection, recognized revenue, renewal, and product utilization.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The financial return from CyberArk and the wider acquisition program remains dependent on integration, customer retention, cross-sell, operating cost, share issuance, and product coherence.",
+        "why_it_matters": "The acquired capabilities strengthen the strategic narrative, but a large purchase price and multiple integrations raise the threshold for value creation and can obscure organic economics.",
+        "next_research_trigger": "Track retention, product integration, cross-platform attachment, acquisition-related revenue and ARR, operating expense, intangible amortization, share count, cash flow, and management's measurable synergy milestones.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+            "claim_date": "2026-06-03"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-cyberark-secure--ai-era",
+            "claim_date": "2026-02-11"
+          },
+          {
+            "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+            "claim_date": "2026-05-29"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public product materials describe broad agentic-security coverage, but independent evidence on detection quality, false positives, bypass resistance, latency, automated-response safety, and cross-model durability is limited.",
+        "why_it_matters": "Cybersecurity products can destroy trust if they miss attacks, block legitimate activity, or take incorrect automated action. Rapidly changing model and agent architectures can invalidate static claims.",
+        "next_research_trigger": "Seek reproducible third-party evaluations, disclosed incidents, customer production evidence, and versioned tests covering prompt injection, data leakage, tool misuse, identity abuse, agent-to-agent traffic, and runtime latency.",
+        "sources": [
+          {
+            "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+            "claim_date": "2026-03-23"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+            "claim_date": "2025-08-29"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+        "title": "Palo Alto Networks Quarterly Report on Form 10-Q for the quarter ended April 30, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-06-03",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+        "title": "Palo Alto Networks Annual Report on Form 10-K for fiscal 2025",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2025-08-29",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial",
+        "title": "Palo Alto Networks Reports Fiscal Third Quarter 2026 Financial Results",
+        "publisher": "Palo Alto Networks",
+        "published_at": "2026-06-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+        "title": "Palo Alto Networks Secures Agentic AI with Prisma AIRS 3.0",
+        "publisher": "Palo Alto Networks",
+        "published_at": "2026-03-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+        "title": "Palo Alto Networks Completes Acquisition of Portkey to Secure AI Agents",
+        "publisher": "Palo Alto Networks",
+        "published_at": "2026-05-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity",
+        "title": "Palo Alto Networks Introduces Idira: the Next-Generation Identity Security Platform Built for the AI Enterprise",
+        "publisher": "Palo Alto Networks",
+        "published_at": "2026-05-12",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-cyberark-secure--ai-era",
+        "title": "Palo Alto Networks Completes Acquisition of CyberArk to Secure the AI Era",
+        "publisher": "Palo Alto Networks",
+        "published_at": "2026-02-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-introduces-msiam-2-0-with-the-industry-s-most-comprehensive-breach-response-guarantee",
+        "title": "Palo Alto Networks Introduces Managed XSIAM 2.0",
+        "publisher": "Palo Alto Networks",
+        "published_at": "2026-02-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "title": "BIT Capital News",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/fonds/bit-global-technology-leaders",
+        "title": "BIT Global Technology Leaders",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "codex-manual-primary-source-research",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "manual-PANW-2026-07-28",
+    "response_model": "codex-manual-primary-source-research",
+    "input_tokens": 0,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 0,
+    "reasoning_tokens": 0,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "manual_primary_source_review",
+        "query": "Palo Alto Networks fiscal 2025 Form 10-K, fiscal Q3 2026 Form 10-Q and results, Prisma AIRS 3.0, Portkey, CyberArk, Idira, XSIAM, and attributable BIT Capital company thesis"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000027/panw-20250731.htm",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-reports-fiscal-third-quarter-2026-financial",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-secures-agentic-ai-with-prisma-airs-3-0",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-portkey-secure-ai",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-introduces-idira-next-generation-identity",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-acquisition-cyberark-secure--ai-era",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-introduces-msiam-2-0-with-the-industry-s-most-comprehensive-breach-response-guarantee",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "type": "manual_review"
+      },
+      {
+        "url": "https://bitcap.com/fonds/bit-global-technology-leaders",
+        "type": "manual_review"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-manual-repair",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:panw",
+      "model:codex-manual-primary-source-research",
+      "reasoning:xhigh"
+    ]
+  }
+}
