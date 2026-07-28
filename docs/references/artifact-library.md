@@ -182,6 +182,7 @@ fli artifacts audit-lineage --no-input
 fli artifacts fetch --limit 30 --no-input
 fli artifacts fetch --artifact-id <artifact-sha256> --no-input
 fli artifacts reader-fallback --no-input
+fli artifacts reader-fallback --artifact-id <artifact-sha256> --no-input
 fli artifacts revalidate-content --no-input
 fli artifacts inspect-fetches --no-input
 ```

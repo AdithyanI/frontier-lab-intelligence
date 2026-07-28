@@ -36,6 +36,7 @@ FETCH_POLICY = "bounded-public-v1"
 EXPLICIT_SELECTION_POLICY = "explicit-artifact-ids-v1"
 JINA_READER_POLICY = "jina-reader-v1"
 JINA_READER_SELECTION = "native-public-failure-v1"
+JINA_READER_EXPLICIT_SELECTION = "explicit-native-public-failure-v1"
 JINA_READER_URL = "https://r.jina.ai/"
 JINA_READER_EXTRACTOR = "jina-reader-markdown-v1"
 JINA_API_KEY_ENV = "JINA_API_KEY"
@@ -1725,7 +1726,10 @@ def _jina_candidates(conn: Any) -> list[dict[str, Any]]:
 
 
 def _create_jina_run(
-    conn: Any, selection: list[dict[str, Any]]
+    conn: Any,
+    selection: list[dict[str, Any]],
+    *,
+    selection_policy: str = JINA_READER_SELECTION,
 ) -> tuple[str | None, bool]:
     if not selection:
         return None, True
@@ -1736,7 +1740,7 @@ def _create_jina_run(
     fingerprint = hashlib.sha256(_canonical_json(payload).encode()).hexdigest()
     fetch_run_id = hashlib.sha256(
         _canonical_json(
-            [JINA_READER_POLICY, JINA_READER_SELECTION, fingerprint]
+            [JINA_READER_POLICY, selection_policy, fingerprint]
         ).encode()
     ).hexdigest()
     run_items = [
@@ -1778,7 +1782,7 @@ def _create_jina_run(
                 fetch_run_id,
                 artifacts.SCHEMA_VERSION,
                 JINA_READER_POLICY,
-                JINA_READER_SELECTION,
+                selection_policy,
                 fingerprint,
                 len(selection),
                 now,
@@ -1950,6 +1954,7 @@ def _jina_read(
 def recover_with_jina_reader(
     *,
     db_path: Path | str = artifacts.DEFAULT_DB,
+    artifact_ids: Iterable[str] | None = None,
     api_key: str | None = None,
     env_path: Path = DEFAULT_REPO_ENV,
     transport: httpx.BaseTransport | None = None,
@@ -1964,13 +1969,40 @@ def recover_with_jina_reader(
     if workers < 1 or workers > 32:
         raise ValueError("workers must be between 1 and 32")
     conn = artifacts.connect(db_path)
-    resumable = _resume_jina_run(conn)
-    if resumable is not None:
-        fetch_run_id, selection = resumable
-        already_complete = False
+    requested_ids = (
+        list(dict.fromkeys(str(value) for value in artifact_ids))
+        if artifact_ids is not None
+        else None
+    )
+    if requested_ids is not None:
+        candidates = {
+            str(item["artifact_id"]): item for item in _jina_candidates(conn)
+        }
+        ineligible = [
+            artifact_id
+            for artifact_id in requested_ids
+            if artifact_id not in candidates
+        ]
+        if ineligible:
+            conn.close()
+            raise ValueError(
+                "Artifacts are not eligible native-fetch failures for Jina Reader: "
+                + ", ".join(ineligible)
+            )
+        selection = [candidates[artifact_id] for artifact_id in requested_ids]
+        fetch_run_id, already_complete = _create_jina_run(
+            conn,
+            selection,
+            selection_policy=JINA_READER_EXPLICIT_SELECTION,
+        )
     else:
-        selection = _jina_candidates(conn)
-        fetch_run_id, already_complete = _create_jina_run(conn, selection)
+        resumable = _resume_jina_run(conn)
+        if resumable is not None:
+            fetch_run_id, selection = resumable
+            already_complete = False
+        else:
+            selection = _jina_candidates(conn)
+            fetch_run_id, already_complete = _create_jina_run(conn, selection)
     if fetch_run_id is None:
         conn.close()
         return {

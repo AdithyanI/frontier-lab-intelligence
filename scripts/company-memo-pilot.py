@@ -588,10 +588,11 @@ def research(
     }
 
     response = client.responses.create(**request)
+    creation_response_id = response.id
     print(f"background response status={response.status}", file=sys.stderr, flush=True)
     while response.status in {"queued", "in_progress"}:
         time.sleep(poll_interval_seconds)
-        response = client.responses.retrieve(response.id)
+        response = client.responses.retrieve(creation_response_id)
         print(f"background response status={response.status}", file=sys.stderr, flush=True)
 
     response_data = llm_responses.as_dict(response)
@@ -621,7 +622,7 @@ def research(
             "reasoning_effort": reasoning_effort,
             "prompt_version": PROMPT_VERSION,
             "prompt_cache_key": PROMPT_CACHE_KEY,
-            "response_id": getattr(response, "id", None),
+            "response_id": creation_response_id,
             "response_model": getattr(response, "model", None),
             "input_tokens": _usage_value(usage, "input_tokens"),
             "cached_tokens": _input_detail(usage, "cached_tokens"),

@@ -6,113 +6,138 @@
   },
   "memo": {
     "business_and_economics": {
-      "summary": "IREN operates power-dense data centers and monetizes them through AI Cloud GPU services, contracted AI infrastructure, colocation/build-to-suit capacity, and Bitcoin mining. The durable investment question is whether secured power and sites can be converted into commissioned, utilized, cash-generating AI capacity without excessive financing, execution, customer-concentration, or technology risk.",
+      "summary": "Vertically integrated owner-operator of power-dense data centers, controlling grid-connected land, power infrastructure, facility development, GPU deployment and cloud operations. Monetization is shifting from Bitcoin mining toward contracted and on-demand AI compute, with colocation and build-to-suit offered as additional infrastructure products.",
       "revenue_engines": [
         {
-          "engine": "AI Cloud GPU services",
-          "who_pays": "AI developers, enterprises, and other customers renting GPU compute for training and inference.",
-          "economic_logic": "IREN purchases and deploys NVIDIA GPU systems in its data centers, then earns usage-based or contracted revenue from compute, storage, networking, and ancillary services. Revenue depends on commissioned GPU capacity, pricing, utilization, uptime, and customer contracts.",
+          "engine": "AI Cloud and managed GPU services",
+          "who_pays": "Frontier AI developers, hyperscalers, enterprises and other buyers of accelerated compute.",
+          "economic_logic": "Customers pay for reserved or on-demand access to GPU clusters used for training and inference. Larger contracts can include orchestration, cluster management and multiyear capacity commitments. Revenue depends on deployed GPUs, utilization, contracted pricing, uptime and service scope.",
           "sources": [
             {
               "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
               "claim_date": null
             },
             {
-              "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-              "claim_date": "2026-05-07"
-            }
-          ]
-        },
-        {
-          "engine": "Contracted AI infrastructure and build-to-suit capacity",
-          "who_pays": "Large technology companies and AI developers requiring dedicated data-center capacity and GPU deployments.",
-          "economic_logic": "Multi-year contracts can provide contracted revenue visibility, but economic realization depends on delivery of power, buildings, cooling, GPUs, networking, and customer acceptance. Financing and construction costs determine the conversion of contracted revenue into cash flow and returns on capital.",
-          "sources": [
+              "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+              "claim_date": "2025-08-28"
+            },
             {
               "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
               "claim_date": "2025-11-03"
             },
             {
-              "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+              "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
               "claim_date": "2026-05-07"
             }
           ]
         },
         {
-          "engine": "Bitcoin mining",
-          "who_pays": "The Bitcoin network indirectly pays miners through block rewards and transaction fees, with revenue realized through Bitcoin production and sales.",
-          "economic_logic": "Mining monetizes available power and data-center capacity using specialized ASIC hardware. Revenue and cash generation are highly sensitive to Bitcoin price, network difficulty, block rewards, machine efficiency, power cost, curtailment, and fleet availability. Mining can serve as an alternate use of power but does not automatically transfer into AI Cloud economics.",
+          "engine": "AI data-center infrastructure services",
+          "who_pays": "Customers that own or procure compute hardware but require powered colocation, turnkey data centers or build-to-suit facilities.",
+          "economic_logic": "The commercial offering monetizes powered capacity, facility design and construction, fit-out and ongoing operations. Public reporting has not consistently separated this activity from AI Cloud, so its actual contribution should be verified in future segment disclosures.",
           "sources": [
             {
-              "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-              "claim_date": "2026-02-05"
+              "url": "https://www.iren.com/",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Bitcoin mining",
+          "who_pays": "Economic value is received through Bitcoin block rewards and transaction fees, with mined Bitcoin generally converted to fiat currency.",
+          "economic_logic": "Revenue is driven by realized Bitcoin price, network difficulty, operating hashrate and machine uptime. Gross profit depends primarily on electricity cost and mining-fleet efficiency. The operation remains a source of cash flow during the AI transition but is being displaced at selected sites by GPU infrastructure.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+              "claim_date": "2025-08-28"
             },
             {
-              "url": "https://iren.com/resources/news/iren-pausing-bitcoin-expansion-to-focus-on-ai-data-center-build-out",
-              "claim_date": null
+              "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+              "claim_date": "2026-05-07"
             }
           ]
         }
       ],
       "sources": [
         {
-          "url": "https://iren.com/",
+          "url": "https://www.iren.com/",
           "claim_date": null
         },
         {
-          "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-          "claim_date": "2026-02-05"
+          "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+          "claim_date": "2025-08-28"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+          "claim_date": "2026-05-07"
         }
       ]
     },
     "operating_and_financial_drivers": [
       {
-        "driver": "Secured, energized, and commissioned power capacity",
-        "why_it_matters": "Secured megawatts create strategic option value, but only energized and commissioned capacity can support revenue. Interconnection, substations, permitting, construction, cooling, and transmission readiness determine the timing and capital required to monetize the pipeline.",
+        "driver": "Conversion of secured power into commissioned AI capacity",
+        "why_it_matters": "Secured megawatts create value only after interconnection, substations, buildings, cooling, fiber, compute installation and customer acceptance are complete. Delays defer billable capacity and cash flow; successful conversion expands the volume of compute or powered space available for sale.",
         "financial_lines": [
           "revenue",
+          "volume",
           "capital_expenditure",
           "cash_flow",
           "risk"
         ],
         "sources": [
           {
-            "url": "https://iren.com/",
+            "url": "https://www.iren.com/",
             "claim_date": null
           },
           {
             "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
             "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://iren.com/data-centers/childress",
+            "claim_date": null
+          },
+          {
+            "url": "https://iren.com/resources/news/nostrum-announcement",
+            "claim_date": "2026-05-07"
           }
         ]
       },
       {
-        "driver": "GPU deployment, utilization, pricing, and customer contracts",
-        "why_it_matters": "AI Cloud revenue scales with deployed GPU capacity, effective hourly pricing, utilization, uptime, contract terms, and customer concentration. Underutilized or delayed GPUs can leave IREN carrying depreciation, financing costs, and power or hosting expenses without matching revenue.",
+        "driver": "Contract coverage, GPU utilization, pricing and customer concentration",
+        "why_it_matters": "As of 2026-07-20, management targeted more than $4 billion of year-end AI Cloud annualized run-rate revenue and said approximately 85% was contracted. Conversion into reported revenue still depends on deployment, acceptance and utilization, while several large contracts create concentration and counterparty exposure.",
         "financial_lines": [
           "revenue",
           "volume",
           "pricing",
+          "product_mix",
           "gross_margin",
+          "working_capital",
           "cash_flow",
           "risk"
         ],
         "sources": [
           {
-            "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
-            "claim_date": null
+            "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
+            "claim_date": "2026-07-20"
           },
           {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+            "claim_date": "2025-11-03"
+          },
+          {
+            "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
             "claim_date": "2026-05-07"
           }
         ]
       },
       {
-        "driver": "GPU and data-center financing",
-        "why_it_matters": "AI infrastructure requires substantial upfront capital. Financing availability, interest expense, collateral terms, dilution, GPU residual values, and the timing of customer cash receipts determine returns on deployed capital and liquidity risk.",
+        "driver": "GPU procurement, generation mix and financing",
+        "why_it_matters": "The company announced a 150,000-GPU fleet target on 2026-03-04. Early procurement can secure scarce systems and shorten time-to-compute, but it commits substantial capital before deployment and exposes the balance sheet to delivery delays, hardware obsolescence and weaker-than-planned utilization.",
         "financial_lines": [
-          "operating_cost",
+          "volume",
+          "product_mix",
+          "gross_margin",
           "capital_expenditure",
           "working_capital",
           "cash_flow",
@@ -121,32 +146,61 @@
         ],
         "sources": [
           {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-            "claim_date": "2026-05-07"
+            "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+            "claim_date": "2026-03-04"
           },
           {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-            "claim_date": "2026-02-05"
+            "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
+            "claim_date": null
           }
         ]
       },
       {
-        "driver": "Power cost, cooling efficiency, and infrastructure uptime",
-        "why_it_matters": "Electricity and facility operating costs directly affect gross margin for both mining and AI Cloud. Liquid cooling, networking, reliability, curtailment, renewable-energy claims, and site-level power economics influence customer performance and achievable pricing.",
+        "driver": "Data-center construction, cooling, networking and operating reliability",
+        "why_it_matters": "Large AI clusters require high-density power delivery, liquid or air cooling, low-latency networking and sustained uptime. Construction cost or schedule overruns delay revenue; poor cluster performance or downtime can reduce utilization, trigger service credits and impair customer retention.",
         "financial_lines": [
-          "product_mix",
+          "volume",
           "gross_margin",
           "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
           "risk"
         ],
         "sources": [
           {
-            "url": "https://iren.com/resources/blog/iren-ai-cloudstrengthens-leadership-with-nvidiablackwell-deployment",
-            "claim_date": "2025-09-30"
+            "url": "https://iren.com/data-centers/childress",
+            "claim_date": null
           },
           {
-            "url": "https://iren.com/",
-            "claim_date": null
+            "url": "https://iren.com/resources/news/nvidia-exemplar-cloud-nvidia-hgx-b300-status",
+            "claim_date": "2026-06-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "driver": "Power economics and allocation between mining and AI",
+        "why_it_matters": "Electricity cost remains central to mining margins and AI data-center competitiveness. Moving a site from mining to AI can improve revenue durability, but decommissioning ASICs removes near-term mining cash flow before GPU billing begins and can cause equipment impairments.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
           }
         ]
       }
@@ -154,84 +208,426 @@
     "ecosystem": [
       {
         "relationship": "customer_or_end_market",
-        "entities_or_group": "Microsoft and other AI developers",
-        "why_it_matters": "Large customers can validate IREN's infrastructure and provide contracted demand, but customer concentration and delivery obligations create execution and counterparty risk. IREN announced a multi-year Microsoft agreement in November 2025 and additional AI customer contracts in later materials.",
+        "entities_or_group": "Microsoft, NVIDIA, other leading AI developers, enterprises and hyperscalers",
+        "why_it_matters": "Multiyear contracts validate demand and can provide prepayments or revenue visibility, but large anchor customers may account for a substantial portion of capacity and create renewal, credit and negotiating-power risk.",
         "sources": [
           {
             "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
             "claim_date": "2025-11-03"
           },
           {
-            "url": "https://iren.com/investors/news",
+            "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
             "claim_date": "2026-07-20"
           }
         ]
       },
       {
         "relationship": "supplier",
-        "entities_or_group": "NVIDIA and GPU, networking, and data-center equipment suppliers",
-        "why_it_matters": "GPU availability, product cycles, pricing, delivery schedules, technical support, and financing structures govern the speed and economics of AI Cloud expansion. IREN's disclosed strategy is closely tied to NVIDIA GPU architectures.",
+        "entities_or_group": "NVIDIA accelerators and networking; Dell servers and ancillary equipment",
+        "why_it_matters": "GPU availability, delivery timing, system quality and vendor payment terms determine deployment speed and capital needs. Dependence on premium accelerator generations also creates supplier concentration and technology-refresh exposure.",
         "sources": [
           {
-            "url": "https://iren.com/resources/blog/iren-ai-cloudstrengthens-leadership-with-nvidiablackwell-deployment",
-            "claim_date": "2025-09-30"
+            "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+            "claim_date": "2025-11-03"
           },
           {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-            "claim_date": "2026-05-07"
+            "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+            "claim_date": "2026-03-04"
           }
         ]
       },
       {
-        "relationship": "competitor",
-        "entities_or_group": "Hyperscalers, specialized GPU-cloud providers, colocation operators, and other power-rich data-center developers",
-        "why_it_matters": "These alternatives compete for GPUs, power, customers, financing, and engineering talent. Competition can pressure GPU pricing and utilization or limit IREN's ability to convert secured power into attractive contracts.",
+        "relationship": "partner",
+        "entities_or_group": "NVIDIA",
+        "why_it_matters": "The relationship includes reference architectures, performance validation, a managed-cloud customer contract and a proposed pathway for deployments across up to 5GW. It can improve customer credibility and hardware access, but also deepens ecosystem dependence on one accelerator platform.",
         "sources": [
           {
-            "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
-            "claim_date": null
+            "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-and-IREN-Announce-Strategic-Partnership-to-Accelerate-Deployment-of-up-to-5-Gigawatts-of-AI-Infrastructure/default.aspx",
+            "claim_date": "2026-05-07"
           },
           {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-            "claim_date": "2026-02-05"
+            "url": "https://iren.com/resources/news/nvidia-exemplar-cloud-nvidia-hgx-b300-status",
+            "claim_date": "2026-06-29"
           }
         ]
       },
       {
         "relationship": "infrastructure_dependency",
-        "entities_or_group": "Regional utilities, transmission and grid-interconnection counterparties, construction contractors, and site-level infrastructure providers",
-        "why_it_matters": "Grid access and construction execution determine whether IREN's land and power pipeline becomes operational AI capacity. Delays or curtailment can defer revenue while increasing capitalized and operating costs.",
+        "entities_or_group": "Power utilities and grid operators including ERCOT and BC Hydro; substations, transmission, fiber networks and cooling supply chains",
+        "why_it_matters": "Grid connection and reliable power are prerequisites for monetization. Interconnection delays, curtailment, transmission constraints, fiber limitations or cooling-equipment shortages can strand capital or postpone customer acceptance.",
         "sources": [
           {
-            "url": "https://iren.com/",
+            "url": "https://iren.com/data-centers/childress",
             "claim_date": null
           },
           {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-            "claim_date": "2026-05-07"
+            "url": "https://iren.com/data-centers/prince-george",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Hyperscale cloud platforms, specialized GPU-cloud providers, powered-data-center developers and customers building their own infrastructure",
+        "why_it_matters": "Competitors can bid up GPUs and power, compress compute pricing or bundle broader software ecosystems. Customer-owned and hybrid infrastructure are substitutes when external cloud economics or service quality are unattractive.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
+            "claim_date": null
           }
         ]
       }
     ],
     "strategy_and_committed_actions": [
       {
-        "action": "Shift capital allocation and corporate positioning from Bitcoin mining toward AI Cloud and high-density data-center infrastructure.",
-        "investment_relevance": "This increases exposure to AI infrastructure demand and potentially improves the value of IREN's power portfolio, but it also increases execution complexity, capital requirements, GPU technology risk, and dependence on enterprise customers.",
+        "action": "Reallocate selected mining power and facilities to AI Cloud infrastructure.",
+        "investment_relevance": "This changes product mix from volatile Bitcoin-linked revenue toward contracted compute, but creates a transition gap when mining hardware is removed before GPU clusters are commissioned and billed.",
         "sources": [
           {
-            "url": "https://iren.com/resources/news/iren-pausing-bitcoin-expansion-to-focus-on-ai-data-center-build-out",
-            "claim_date": null
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
           },
           {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-            "claim_date": "2026-02-05"
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+            "claim_date": "2025-08-28"
           }
         ]
       },
       {
-        "action": "Build and deploy large GPU clusters, including Blackwell systems, at the Childress campus and other data-center locations.",
-        "investment_relevance": "The strategy seeks to convert power and facility control into AI Cloud revenue. The key test is whether construction, GPU deployment, networking, customer acceptance, and utilization progress together within the stated timetable and budget.",
+        "action": "Deploy a 150,000-GPU fleet and convert signed demand into more than $4 billion of targeted year-end 2026 AI Cloud annualized run-rate revenue.",
+        "investment_relevance": "The commitments create a measurable test of procurement, construction, commissioning and customer onboarding. As of 2026-07-20, approximately 85% of the revenue target was described as contracted, but targets are not equivalent to recognized revenue.",
         "sources": [
+          {
+            "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+            "claim_date": "2026-03-04"
+          },
+          {
+            "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
+            "claim_date": "2026-07-20"
+          }
+        ]
+      },
+      {
+        "action": "Execute large anchor deployments for Microsoft and NVIDIA.",
+        "investment_relevance": "The Microsoft contract calls for 200MW of critical IT load through four 2026 phases at Childress; the NVIDIA contract uses approximately 60MW and targets a ramp from early 2027. Delivery and acceptance are direct tests of the platform's ability to serve hyperscale and frontier workloads.",
+        "sources": [
+          {
+            "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+            "claim_date": "2025-11-03"
+          },
+          {
+            "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "action": "Develop a 5GW global power and data-center pipeline, including expansion into Europe.",
+        "investment_relevance": "Geographic and power diversification can expand the addressable customer base and reduce dependence on any single grid. The 2026-05-07 agreement to acquire a Spanish developer added approximately 490MW of secured grid-connected power plus a development pipeline, but development-stage megawatts still require permitting, construction and customers.",
+        "sources": [
+          {
+            "url": "https://www.iren.com/",
+            "claim_date": null
+          },
+          {
+            "url": "https://iren.com/resources/news/nostrum-announcement",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-and-IREN-Announce-Strategic-Partnership-to-Accelerate-Deployment-of-up-to-5-Gigawatts-of-AI-Infrastructure/default.aspx",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "action": "Fund expansion through customer prepayments, operating cash flow, GPU financing and leasing, convertible debt and equity capacity.",
+        "investment_relevance": "Matching financing to contracted deployments can reduce upfront equity requirements, while leverage, collateral, refinancing obligations and dilution can still absorb project economics. On 2026-03-04, management reported $9.3 billion of funding secured during the preceding eight months and approximately $3.5 billion of additional expected second-half 2026 capital expenditure for announced orders.",
+        "sources": [
+          {
+            "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+            "claim_date": "2026-03-04"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+            "claim_date": "2025-11-03"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier-model training, agentic systems and high-volume inference continue to increase aggregate compute demand.",
+        "company_exposure": "Direct seller of GPU compute and owner of power-dense sites, with multiyear contracts already signed with hyperscale and AI customers.",
+        "affected_driver": "Contracted capacity, GPU utilization, compute pricing and deployment pace.",
+        "financial_consequence": "Higher AI Cloud revenue and operating leverage; customer prepayments can reduce the external funding required for deployments.",
+        "direction": "upside",
+        "materiality_condition": "Signed demand must cover commissioned capacity at attractive pricing, and utilization must remain high after initial training deployments rather than falling once models become operational.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Contracted ARR or backlog versus commissioned capacity",
+          "GPU utilization and revenue per deployed GPU",
+          "AI Cloud gross margin and operating cash flow",
+          "Customer prepayments and contract duration",
+          "Training versus inference workload mix"
+        ],
+        "sources": [
+          {
+            "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+            "claim_date": "2025-11-03"
+          },
+          {
+            "url": "https://bitcap.com/news/fondsmanager-beckers-der-ki-bullenmarkt-geht-weiter",
+            "claim_date": "2025-10-02"
+          }
+        ]
+      },
+      {
+        "development": "Algorithmic efficiency or adoption of custom accelerators reduces the GPU-hours required per unit of model capability.",
+        "company_exposure": "A large fleet is concentrated in NVIDIA accelerator generations and competes with hyperscaler-owned infrastructure and alternative silicon.",
+        "affected_driver": "GPU utilization, compute pricing, customer mix and hardware residual value.",
+        "financial_consequence": "Potential pricing pressure, underutilization or equipment impairment, reducing revenue and gross margin while leaving financing obligations in place.",
+        "direction": "downside",
+        "materiality_condition": "Efficiency gains or custom-silicon adoption must outpace growth in total tokens, users and AI workloads, causing contracted or spot demand for external GPU capacity to weaken.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Contract renewals and GPU-hour pricing",
+          "Utilization by hardware generation",
+          "Customer adoption of TPUs or custom ASICs",
+          "Equipment impairment and useful-life assumptions",
+          "External AI workload and token growth"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://bitcap.com/en/news/fondsmanager-beckers-das-nvidia-monopol-beginnt-zu-brockeln",
+            "claim_date": "2025-12-04"
+          }
+        ]
+      },
+      {
+        "development": "Next-generation frontier systems increase rack density, power delivery, cooling and networking requirements.",
+        "company_exposure": "The company owns substations and develops both air- and liquid-cooled facilities, but must deliver designs that meet rapidly changing customer and hardware specifications.",
+        "affected_driver": "Commissioning schedule, capital expenditure per megawatt, sellable compute density and facility utilization.",
+        "financial_consequence": "Successful high-density deployments can increase revenue per megawatt; redesigns, cooling bottlenecks or commissioning failures can raise capital cost and delay revenue.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if new system requirements exceed existing designs or if cooling, networking or electrical equipment becomes the critical path for contracted deployments.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Commissioned megawatts by cooling architecture",
+          "Capital expenditure per delivered megawatt",
+          "Construction and customer-acceptance milestones",
+          "Power usage effectiveness and rack density",
+          "Cooling and networking delivery schedules"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-and-IREN-Announce-Strategic-Partnership-to-Accelerate-Deployment-of-up-to-5-Gigawatts-of-AI-Infrastructure/default.aspx",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://iren.com/data-centers/childress",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "development": "Frontier workloads increasingly require cluster-scale reliability, orchestration and managed services rather than bare-metal GPU access alone.",
+        "company_exposure": "The NVIDIA customer contract includes orchestration and cluster management, while the platform has received NVIDIA performance validation for B300 training workloads.",
+        "affected_driver": "Service mix, customer retention, realized pricing, utilization and software-support cost.",
+        "financial_consequence": "A credible managed service can expand the customer set and support premium pricing; operational complexity, downtime or service credits could offset those gains.",
+        "direction": "upside",
+        "materiality_condition": "Customers must pay for managed functionality and the platform must sustain reference-level performance and contractual uptime as clusters scale.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Managed-service versus bare-metal revenue mix",
+          "Cluster performance and uptime disclosures",
+          "Service-level credits or outages",
+          "Customer renewals and expansion orders",
+          "Cloud software and support operating costs"
+        ],
+        "sources": [
+          {
+            "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://iren.com/resources/news/nvidia-exemplar-cloud-nvidia-hgx-b300-status",
+            "claim_date": "2026-06-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "development": "Accelerator release cycles shorten as frontier labs demand the newest performance-per-dollar systems.",
+        "company_exposure": "The company has committed to a large forward GPU procurement program while signing multiyear customer contracts and constructing long-lived data-center assets.",
+        "affected_driver": "Capital-expenditure timing, depreciation, impairment risk, revenue per GPU and refresh requirements.",
+        "financial_consequence": "Early access to new systems can win contracts and pricing premiums, but older fleets may lose utilization or residual value before their financing and depreciation are fully absorbed.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if a new generation delivers a large performance-per-dollar improvement before contracted revenue has amortized the existing fleet.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "GPU orders and deployments by generation",
+          "Contract tenor versus equipment useful life",
+          "Depreciation and impairment charges",
+          "Revenue and utilization by GPU generation",
+          "Refresh capital expenditure and secondary-market values"
+        ],
+        "sources": [
+          {
+            "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+            "claim_date": "2026-03-04"
+          },
+          {
+            "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+            "claim_date": "2025-11-03"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+            "claim_date": "2025-08-28"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "explicit_thesis",
+      "attributable_public_thesis": "Secured large-scale power and data-center capacity can become scarce, valuable AI infrastructure even when the owner began as a Bitcoin miner.",
+      "what_would_support_it": [
+        "Secured power is repeatedly converted into commissioned, customer-accepted AI capacity on schedule and within budget.",
+        "Contracted AI revenue becomes recognized revenue with high utilization, durable pricing and acceptable gross margins.",
+        "Large-customer contracts are supplemented by additional AI developers and enterprises, reducing concentration while preserving contract quality.",
+        "Power and interconnection scarcity persists, and customers continue to value faster external deployment over building equivalent capacity themselves."
+      ],
+      "what_would_challenge_it": [
+        "A large share of secured power remains unenergized, unpermitted, under construction or commercially uncommitted.",
+        "GPU and data-center capital costs, leverage, refinancing or dilution consume most of the economics created by contracted revenue.",
+        "Customer concentration, cancellations, weak renewals or pricing compression lead to underutilized clusters.",
+        "Model efficiency, custom silicon or excess industry capacity materially reduces demand for externally supplied NVIDIA GPU compute."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
+          "claim_date": "2024-07-04"
+        },
+        {
+          "url": "https://bitcap.com/news/ki-krypto-gezieltes-stockpicking-so-will-jan-beckers-2025-den-markt-schlagen-podcast",
+          "claim_date": "2025-01-09"
+        },
+        {
+          "url": "https://bitcap.com/news/fondsmanager-beckers-der-ki-bullenmarkt-geht-weiter",
+          "claim_date": "2025-10-02"
+        },
+        {
+          "url": "https://bitcap.com/en/news/fondsmanager-beckers-das-nvidia-monopol-beginnt-zu-brockeln",
+          "claim_date": "2025-12-04"
+        },
+        {
+          "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
+          "claim_date": "2026-07-20"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "How much of the power portfolio is operational, energized, under construction, merely secured or still dependent on permits and interconnection work?",
+        "why_it_matters": "Headline megawatts are not economically equivalent. Misclassifying development-stage power as billable AI capacity can materially overstate near-term volume and cash generation.",
+        "next_research_trigger": "At the next annual or quarterly filing, reconcile site-by-site power status, critical IT load, commissioning dates, remaining capital expenditure, customer allocation and interconnection conditions.",
+        "sources": [
+          {
+            "url": "https://www.iren.com/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://iren.com/resources/news/nostrum-announcement",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://iren.com/data-centers/childress",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The economic quality, termination rights and concentration of the AI contract portfolio are not fully visible.",
+        "why_it_matters": "Total contract value and annualized run-rate targets can differ materially from enforceable backlog, recognized revenue and cash collections. A small number of anchor customers may dominate capacity.",
+        "next_research_trigger": "Inspect the next Form 10-K for remaining performance obligations, customer concentration, contract duration, prepayments, termination provisions, service-level obligations, credit support and revenue-recognition policy.",
+        "sources": [
+          {
+            "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+            "claim_date": "2025-11-03"
+          },
+          {
+            "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Normalized AI Cloud unit economics are obscured by rapid deployment growth and the mining-to-AI transition.",
+        "why_it_matters": "Revenue growth alone does not establish attractive returns after electricity, networking, support, depreciation, financing and data-center capital costs.",
+        "next_research_trigger": "Track segment revenue, gross margin, electricity and support expense, utilization, revenue per GPU or megawatt, depreciation, maintenance capital expenditure and cash conversion as the 2026 fleet ramps.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+            "claim_date": "2025-08-28"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The final funding mix, collateral structure and recourse associated with the expansion program remain evolving.",
+        "why_it_matters": "Customer prepayments and asset-backed financing can improve equity returns, but debt service, restrictive covenants, collateral calls, refinancing risk or equity issuance can transfer project economics away from common shareholders.",
+        "next_research_trigger": "Review new financing agreements for interest cost, amortization, collateral, customer-contract linkage, recourse, covenants and maturity matching; reconcile committed funding with remaining GPU and construction capital expenditure.",
+        "sources": [
+          {
+            "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+            "claim_date": "2026-03-04"
+          },
           {
             "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
             "claim_date": "2025-11-03"
@@ -243,345 +639,361 @@
         ]
       },
       {
-        "action": "Expand the AI Cloud platform through software, engineering, customer-support capabilities, strategic partnerships, acquisitions, and dedicated financing.",
-        "investment_relevance": "Additional software and delivery capability may improve customer retention and broaden the addressable workload base beyond raw data-center capacity. Financing and acquisitions can accelerate scale but increase integration, leverage, dilution, and execution risk.",
+        "uncertainty": "The durability of NVIDIA-centric demand and the residual role of Bitcoin mining are unclear.",
+        "why_it_matters": "A rapid hardware cycle or shift to custom accelerators could weaken GPU economics. Conversely, mining can monetize power before AI deployment, but ASICs do not directly transfer into enterprise-grade AI infrastructure and may compete for capital or power.",
+        "next_research_trigger": "Inspect utilization and pricing by GPU generation, impairment assumptions, accelerator-mix disclosures, retained hashrate, mining fleet efficiency and explicit capital-allocation rules between mining and AI projects.",
         "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+            "claim_date": "2025-08-28"
+          },
           {
             "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
             "claim_date": "2026-05-07"
           },
           {
-            "url": "https://iren.com/investors/news",
-            "claim_date": "2026-06-15"
-          }
-        ]
-      }
-    ],
-    "frontier_ai_transmission_paths": [
-      {
-        "development": "Frontier-model training and inference continue to require larger GPU clusters, higher memory bandwidth, faster networking, and greater power density.",
-        "company_exposure": "IREN owns or controls grid-connected land, power, data centers, cooling systems, and GPU infrastructure intended for AI Cloud and contracted deployments.",
-        "affected_driver": "Demand for commissioned GPU capacity, contracted capacity, pricing, utilization, and the speed at which secured power becomes revenue-generating capacity.",
-        "financial_consequence": "Upside could include higher AI Cloud revenue, improved asset utilization, stronger gross profit, and greater returns on invested infrastructure. The same development can increase capex and financing needs before revenue is realized.",
-        "direction": "upside",
-        "materiality_condition": "The benefit becomes material only if IREN converts power and construction capacity into operational GPU clusters, secures customers at profitable pricing, and maintains high utilization and uptime.",
-        "time_horizon": "medium_term",
-        "thesis_effect": "supports",
-        "watchpoints": [
-          "Commissioned and billable MW versus secured or planned MW",
-          "GPU deployments and customer acceptance by site",
-          "AI Cloud utilization, pricing, ARR, and gross margin",
-          "Construction capex, financing cost, and delivery milestones"
-        ],
-        "sources": [
-          {
-            "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
-            "claim_date": null
-          },
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-            "claim_date": "2026-05-07"
-          }
-        ]
-      },
-      {
-        "development": "Frontier AI workloads become more efficient through algorithmic advances, model compression, specialized chips, or improved utilization of existing compute.",
-        "company_exposure": "IREN's AI Cloud economics depend partly on renting high-value GPU capacity and recovering large upfront GPU and facility investments.",
-        "affected_driver": "GPU pricing, utilization, useful life, residual value, customer demand, and product mix between AI Cloud and Bitcoin mining.",
-        "financial_consequence": "More efficient compute could reduce customer willingness to pay for raw GPU hours, shorten the economic advantage of current GPU systems, or increase replacement and impairment risk. It could also increase total AI demand by lowering the cost of experimentation and inference.",
-        "direction": "mixed",
-        "materiality_condition": "The downside becomes material if efficiency gains reduce GPU-hour pricing or utilization faster than total workload demand grows, or if existing GPUs require accelerated replacement or impairment.",
-        "time_horizon": "medium_term",
-        "thesis_effect": "mixed",
-        "watchpoints": [
-          "GPU-hour pricing and utilization trends",
-          "Customer workload mix between training and inference",
-          "GPU depreciation, impairment, and replacement cycle",
-          "AI Cloud gross margin after power, hosting, and financing costs"
-        ],
-        "sources": [
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-            "claim_date": "2026-02-05"
-          },
-          {
-            "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
-            "claim_date": null
-          }
-        ]
-      },
-      {
-        "development": "Frontier labs and hyperscalers secure power and data-center capacity directly, increasing competition for sites, GPUs, construction capacity, and financing.",
-        "company_exposure": "IREN competes in the market for AI Cloud customers and infrastructure while relying on external suppliers and regional grid infrastructure.",
-        "affected_driver": "Contract wins, pricing, customer concentration, capital costs, deployment timing, and utilization.",
-        "financial_consequence": "Competition could reduce pricing or delay contract conversion, lowering revenue and margins while leaving IREN with underutilized facilities or excess GPU financing obligations. Conversely, scarcity may improve contract terms for operators with ready power and delivery capability.",
-        "direction": "mixed",
-        "materiality_condition": "The effect becomes material if competitors deliver comparable capacity sooner, at lower cost, or with stronger reliability, or if market scarcity enables IREN to sign profitable long-term contracts.",
-        "time_horizon": "near_term",
-        "thesis_effect": "mixed",
-        "watchpoints": [
-          "New customer awards and cancellations",
-          "Contracted versus uncontracted capacity",
-          "Competitor delivery timelines and GPU availability",
-          "Pricing, take-or-pay terms, and customer concentration"
-        ],
-        "sources": [
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-            "claim_date": "2026-02-05"
-          },
-          {
-            "url": "https://iren.com/investors/news",
-            "claim_date": "2026-07-20"
-          }
-        ]
-      },
-      {
-        "development": "Frontier AI demand grows faster than available power and data-center supply.",
-        "company_exposure": "IREN's investment case is explicitly tied to its portfolio of secured power, grid-connected sites, and ability to develop high-density AI facilities.",
-        "affected_driver": "Value and monetization speed of the power pipeline, contracted capacity, customer pricing, capital returns, and strategic financing access.",
-        "financial_consequence": "Scarcity could support higher pricing, longer contracts, strategic partnerships, and improved returns on existing sites. However, rapid demand growth may also intensify capex inflation, equipment shortages, construction bottlenecks, and dependence on a small number of customers.",
-        "direction": "mixed",
-        "materiality_condition": "The upside is material if IREN's sites are energized and delivered ahead of competing capacity while customers commit to terms that exceed the all-in cost of GPUs, facilities, power, financing, and operations.",
-        "time_horizon": "medium_term",
-        "thesis_effect": "supports",
-        "watchpoints": [
-          "Power that is energized and usable for AI workloads",
-          "Customer contract value, duration, and payment security",
-          "All-in cost per MW and per GPU cluster",
-          "Return on invested capital and operating cash conversion"
-        ],
-        "sources": [
-          {
-            "url": "https://bitcap.com/en",
-            "claim_date": null
-          },
-          {
-            "url": "https://iren.com/resources/blog/three-layers-one-compounding-advantage-the-iren-thesis",
-            "claim_date": null
-          },
-          {
-            "url": "https://iren.com/",
-            "claim_date": null
-          }
-        ]
-      }
-    ],
-    "investment_thesis_and_tests": {
-      "public_bit_view_status": "explicit_thesis",
-      "attributable_public_thesis": "BIT Capital states that IREN is positioned at the intersection of two AI infrastructure bottlenecks—power scarcity and data-center capacity—and that secured large-scale power and data-center capacity can become scarce, valuable AI infrastructure even though the company originated as a Bitcoin miner. This memo preserves the supplied BIT view; the public firm material identified supports the broad positioning but does not by itself establish realized financial outcomes.",
-      "what_would_support_it": [
-        "IREN converts secured power into energized, commissioned AI capacity on schedule.",
-        "Large AI customers sign durable contracts with economically attractive pricing and payment terms.",
-        "GPU utilization, AI Cloud revenue, gross margin, and operating cash flow scale faster than capex and financing costs.",
-        "The company demonstrates that owned power and facilities produce better deployment speed, reliability, or returns than competing infrastructure."
-      ],
-      "what_would_challenge_it": [
-        "Secured power remains unenergized, delayed, or unsuitable for high-density AI workloads.",
-        "AI Cloud contracts are delayed, renegotiated, concentrated, or unprofitable after GPU, power, hosting, financing, and support costs.",
-        "GPU efficiency improvements or oversupply compress pricing and utilization before IREN recovers its capital.",
-        "Leverage, dilution, construction overruns, technology transitions, or customer concentration weaken returns on the infrastructure portfolio."
-      ],
-      "sources": [
-        {
-          "url": "https://bitcap.com/en",
-          "claim_date": null
-        },
-        {
-          "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
-          "claim_date": null
-        },
-        {
-          "url": "https://iren.com/resources/blog/three-layers-one-compounding-advantage-the-iren-thesis",
-          "claim_date": null
-        }
-      ]
-    },
-    "uncertainties_and_research_triggers": [
-      {
-        "uncertainty": "The distinction between secured, grid-connected, energized, construction-stage, commissioned, and billable AI capacity may not be consistent across company communications.",
-        "why_it_matters": "Conflating these categories can materially overstate near-term revenue capacity and understate the capital and execution required.",
-        "next_research_trigger": "Reconcile the latest 10-Q, 8-K, investor presentation, and site-level disclosures into a power and GPU capacity bridge using only commissioned and billable capacity for current economics.",
-        "sources": [
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-            "claim_date": "2026-05-07"
-          },
-          {
-            "url": "https://iren.com/investors/reports",
-            "claim_date": null
-          }
-        ]
-      },
-      {
-        "uncertainty": "Large AI customer announcements may describe headline contract value, capacity, and timing differently across press releases, filings, and investor materials.",
-        "why_it_matters": "Contract value is not equivalent to recognized revenue, cash receipts, or returns on capital; differences may reflect conditions, deployment phases, or pricing assumptions.",
-        "next_research_trigger": "Use the relevant SEC filing and contract exhibits to verify term, committed capacity, customer obligations, termination rights, financing dependencies, and revenue-recognition treatment.",
-        "sources": [
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000079.txt",
-            "claim_date": "2025-11-06"
-          },
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-            "claim_date": "2026-05-07"
-          }
-        ]
-      },
-      {
-        "uncertainty": "The sustainable profitability of AI Cloud relative to Bitcoin mining remains dependent on GPU utilization, pricing, power costs, financing, and depreciation.",
-        "why_it_matters": "A transition from mining to AI Cloud can increase revenue scale while reducing returns if the cost base and capital intensity rise faster than utilization and pricing.",
-        "next_research_trigger": "Track site-level AI Cloud gross margin, GPU utilization, revenue per deployed GPU, power cost, depreciation, financing expense, and operating cash conversion in subsequent filings.",
-        "sources": [
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-            "claim_date": "2026-02-05"
-          },
-          {
-            "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-            "claim_date": "2026-05-07"
-          }
-        ]
-      },
-      {
-        "uncertainty": "BIT Capital's attributable public thesis is directionally clear but its public materials may not provide a complete valuation framework, downside case, or explicit financial thresholds.",
-        "why_it_matters": "The Event agent should classify future developments against the stated power-and-data-center thesis without treating portfolio ownership or marketing language as a full investment recommendation.",
-        "next_research_trigger": "Search for a dated BIT Capital letter, podcast, fund commentary, or analyst publication that states explicit assumptions, valuation logic, or falsifiable operating milestones for IREN.",
-        "sources": [
-          {
-            "url": "https://bitcap.com/en",
-            "claim_date": null
-          },
-          {
-            "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
-            "claim_date": null
+            "url": "https://bitcap.com/en/news/fondsmanager-beckers-das-nvidia-monopol-beginnt-zu-brockeln",
+            "claim_date": "2025-12-04"
           }
         ]
       }
     ],
     "source_ledger": [
       {
-        "url": "https://iren.com/",
-        "title": "IREN corporate and data-center overview",
-        "publisher": "IREN",
+        "url": "https://www.iren.com/",
+        "title": "Corporate website and operating footprint",
+        "publisher": "Company",
         "published_at": null,
         "source_type": "company_primary"
       },
       {
         "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
-        "title": "IREN AI Cloud product overview",
-        "publisher": "IREN",
+        "title": "AI Cloud product page",
+        "publisher": "Company",
         "published_at": null,
         "source_type": "company_primary"
       },
       {
-        "url": "https://iren.com/investors/reports",
-        "title": "IREN financial reports and investor updates",
-        "publisher": "IREN",
-        "published_at": null,
+        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
+        "title": "FY2025 Form 10-K",
+        "publisher": "SEC-hosted company filing",
+        "published_at": "2025-08-28",
         "source_type": "company_primary"
       },
       {
-        "url": "https://iren.com/investors/news",
-        "title": "IREN investor news and announcements",
-        "publisher": "IREN",
-        "published_at": null,
+        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
+        "title": "Q3 FY2026 business update and results",
+        "publisher": "SEC-hosted company filing",
+        "published_at": "2026-05-07",
         "source_type": "company_primary"
       },
       {
-        "url": "https://iren.com/resources/news/iren-pausing-bitcoin-expansion-to-focus-on-ai-data-center-build-out",
-        "title": "IREN pausing Bitcoin expansion to focus on AI data-center build-out",
-        "publisher": "IREN",
-        "published_at": null,
+        "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
+        "title": "New AI developer contracts and 2026 ARR update",
+        "publisher": "Company",
+        "published_at": "2026-07-20",
         "source_type": "company_primary"
       },
       {
         "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
-        "title": "IREN signs $9.7 billion agreement with Microsoft to deploy AI Cloud infrastructure",
-        "publisher": "IREN",
+        "title": "Microsoft AI Cloud contract",
+        "publisher": "Company",
         "published_at": "2025-11-03",
         "source_type": "company_primary"
       },
       {
-        "url": "https://iren.com/resources/blog/iren-ai-cloudstrengthens-leadership-with-nvidiablackwell-deployment",
-        "title": "IREN AI Cloud strengthens leadership with NVIDIA Blackwell deployment",
-        "publisher": "IREN",
-        "published_at": null,
-        "source_type": "company_primary"
-      },
-      {
-        "url": "https://iren.com/resources/blog/three-layers-one-compounding-advantage-the-iren-thesis",
-        "title": "Three Layers. One Compounding Advantage. The IREN Thesis.",
-        "publisher": "IREN",
-        "published_at": null,
-        "source_type": "company_primary"
-      },
-      {
-        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-        "title": "IREN Form 20-F / annual filing for period ended December 31, 2025",
-        "publisher": "U.S. Securities and Exchange Commission",
-        "published_at": "2026-02-05",
-        "source_type": "regulator_primary"
-      },
-      {
-        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000079.txt",
-        "title": "IREN Q1 FY26 results and Microsoft AI Cloud contract filing",
-        "publisher": "U.S. Securities and Exchange Commission",
-        "published_at": "2025-11-06",
-        "source_type": "regulator_primary"
-      },
-      {
-        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000025/irenreportsq3fy26results.htm",
-        "title": "IREN Q3 FY26 results and business update",
-        "publisher": "U.S. Securities and Exchange Commission",
+        "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
+        "title": "NVIDIA managed AI Cloud contract",
+        "publisher": "Company",
         "published_at": "2026-05-07",
-        "source_type": "regulator_primary"
+        "source_type": "company_primary"
       },
       {
-        "url": "https://bitcap.com/en",
-        "title": "BIT Capital public firm material",
-        "publisher": "BIT Capital",
+        "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-and-IREN-Announce-Strategic-Partnership-to-Accelerate-Deployment-of-up-to-5-Gigawatts-of-AI-Infrastructure/default.aspx",
+        "title": "Strategic partnership for up to 5GW of AI infrastructure",
+        "publisher": "NVIDIA",
+        "published_at": "2026-05-07",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+        "title": "150,000-GPU expansion and funding plan",
+        "publisher": "Company",
+        "published_at": "2026-03-04",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://iren.com/resources/news/nostrum-announcement",
+        "title": "Spanish data-center acquisition announcement",
+        "publisher": "Company",
+        "published_at": "2026-05-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://iren.com/data-centers/childress",
+        "title": "Childress campus page",
+        "publisher": "Company",
         "published_at": null,
-        "source_type": "bit_primary"
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://iren.com/data-centers/prince-george",
+        "title": "Prince George campus page",
+        "publisher": "Company",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://iren.com/resources/news/nvidia-exemplar-cloud-nvidia-hgx-b300-status",
+        "title": "NVIDIA Exemplar Cloud status announcement",
+        "publisher": "Company",
+        "published_at": "2026-06-29",
+        "source_type": "company_primary"
       },
       {
         "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
-        "title": "BIT Capital podcast and investment commentary",
+        "title": "Beckers Bets discussion of mining capacity and AI optionality",
         "publisher": "BIT Capital",
-        "published_at": null,
+        "published_at": "2024-07-04",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/news/ki-krypto-gezieltes-stockpicking-so-will-jan-beckers-2025-den-markt-schlagen-podcast",
+        "title": "Beckers Bets discussion of energy contracts and AI data centers",
+        "publisher": "BIT Capital",
+        "published_at": "2025-01-09",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/news/fondsmanager-beckers-der-ki-bullenmarkt-geht-weiter",
+        "title": "Beckers Bets discussion of power conversion and market recognition",
+        "publisher": "BIT Capital",
+        "published_at": "2025-10-02",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/fondsmanager-beckers-das-nvidia-monopol-beginnt-zu-brockeln",
+        "title": "Beckers Bets discussion of energy scarcity and accelerator competition",
+        "publisher": "BIT Capital",
+        "published_at": "2025-12-04",
         "source_type": "bit_primary"
       }
     ]
   },
   "provenance": {
     "research_date": "2026-07-28",
-    "model": "gpt-5.6-luna",
-    "reasoning_effort": "low",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
     "prompt_version": "company-memo-pilot-v1",
     "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
-    "response_id": "resp_PsCuK48C08iVI4n6Cm7uRbr1iBUcdN6A_qpStmj1cZKoQnMvanOn4nwtcZEvhAa297vCTKyJzlYxGGKMQPX5Fxh9wUd-IdcHJSW9-BtNwIdB-x0N7PEKPqxtqjW5ohmVfLZ-3ibIsyaIeNXpd0AEPeUMX6RPPhDlbqy45y3hyH2QyhOFVKrd5-0f0a06ZLDftPE7M9iRJZ5XcJHiNitOp02UBgf0B8dLi3WaehzH_252h_ED0wbu-hJ43n0z3wVhL9o5p6MKBzAREB3WbHvFilJzfQdXCKBUyhIYChqemDQr8NBDYfbP27TWiLCZSFbO2X8bUEb-mc6X5vW6ueSZACPW6pahE8G5bORvU3vSbRRqYYKSFR9QcaRW6PLYQMpeFRR8FW4qpUlcVAHNtFD1y5DzCXL7RS2XyzM4fZMdIu1PEJ7WRbB-ve8BTBAw3GUVDo0HCfidznq9j8xGmDSBZh2J",
-    "response_model": "gpt-5.6-luna",
-    "input_tokens": 15119,
+    "response_id": "resp_EucX2NBs2eJLRdn-fT1WWhqW_zQWyay0Pfhx7pPSo_IKimGb_xEzVJPE8jJOGPby38g8alAmek1qRkUQbg_CJOYSYhmZFKJNjnHjgwFpU9Zt_bhfy1HB7sMupnzQrFpCDWWE6txEAz8ToR0G66ADKKaiweK2r2bGagMfbwETDJxilgVm3R3FXtP_0Aarj9x2Hq8Trw-ZoOG3LHYVm2FYgM6Bw2AreAAhkzWaA5cEiHX9dGWXOd1M3bSU6FbOvmuKY0CXxz1snxvTiod74dpiPsy1wvDPy3nmvRgFUTlM4SRjQEF5bSib2b7ijc9tOjOi-zn7wfFBR92gCwdFNfbF-Mtz-8dFYlmkiSgeAp5lJMhGBGeuRplNr4Nh3dEQOOgDcDzCcG_O8XggC3r03-zn07KKWthxrGfQuO6kInCT9hF3Q1HQoCHoY2mPgHY1HAldH3qn_514gNy8IlQTNT1ph9Bz",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 113852,
     "cached_tokens": 0,
     "cache_write_tokens": 0,
-    "output_tokens": 5485,
+    "output_tokens": 109308,
+    "reasoning_tokens": 12452,
     "reported_cost_usd": null,
     "web_actions": [
       {
+        "query": "site:iren.com/investors annual report 2025 IREN AI Cloud data centers SEC",
         "type": "search",
         "queries": [
-          "site:iren.com investors annual report 2025 IREN AI cloud data centers bitcoin mining",
-          "site:sec.gov IREN Limited 20-F 2025 AI cloud data centers",
-          "site:bitcap.com IREN thesis AI infrastructure power data center",
-          "site:iren.com AI Cloud GPU customer contract IREN"
+          "site:iren.com/investors annual report 2025 IREN AI Cloud data centers SEC",
+          "site:iren.com/newsroom IREN AI Cloud GPU colocation data centers Microsoft 2025",
+          "site:sec.gov/Archives/edgar/data IREN Limited 20-F 2025",
+          "site:bitcap.com IREN thesis BIT Capital Jan Beckers IREN"
         ],
-        "query": "site:iren.com investors annual report 2025 IREN AI cloud data centers bitcoin mining",
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast"
+      },
+      {
+        "query": "IREN \"Signs $2.8bn in New Customer Contracts\"",
+        "type": "search",
+        "queries": [
+          "IREN \"Signs $2.8bn in New Customer Contracts\"",
+          "IREN \"NVIDIA and IREN Press Release\" May 7 2026",
+          "IREN \"Q3 FY26 Results Presentation\" PDF",
+          "IREN \"Microsoft AI Cloud Contract\" 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://iren.com/api/media/file/Q3%20FY26%20Results%20Presentation_compressed%20%281%29.pdf"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1878848 2026 10-Q IREN May 8 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1878848 2026 10-Q IREN May 8 2026",
+          "site:sec.gov/Archives/edgar/data/1878848 2026 \"Quarterly Report\" \"March 31, 2026\" IREN",
+          "site:sec.gov/Archives/edgar/data/1878848 2026 8-K July 20 IREN contracts",
+          "site:sec.gov/Archives/edgar/data/1878848 2025 10-K IREN annual report"
+        ],
+        "sources": null
+      },
+      {
+        "query": "SEC IREN Limited 10-Q 2026 1878848",
+        "type": "search",
+        "queries": [
+          "SEC IREN Limited 10-Q 2026 1878848",
+          "SEC IREN Limited 10-K 2025 1878848",
+          "IREN 10-Q May 8 2026 filing",
+          "IREN annual report 2025 10-K"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000026/iren-20260331.htm?output=1"
+      },
+      {
+        "pattern": "Our business",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1878848/000187884825000063 \"AI Cloud Services\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1878848/000187884825000063 \"AI Cloud Services\"",
+          "site:sec.gov/Archives/edgar/data/1878848/000187884825000063 \"Bitcoin Mining\"",
+          "site:sec.gov/Archives/edgar/data/1878848/000187884825000063 \"electricity\" \"IREN\"",
+          "site:sec.gov/Archives/edgar/data/1878848/000187884825000063 \"customers\" \"IREN\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:iren.com/api/media/file FY25 annual report IREN pdf",
+        "type": "search",
+        "queries": [
+          "site:iren.com/api/media/file FY25 annual report IREN pdf",
+          "site:iren.com/api/media/file \"FY25 Results Presentation\" IREN",
+          "site:iren.com/api/media/file \"Annual Report\" \"2025\" IREN Limited",
+          "site:iren.com/api/media/file \"Q3 FY26 Results Presentation\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "IREN FY25 results presentation pdf August 28 2025",
+        "type": "search",
+        "queries": [
+          "IREN FY25 results presentation pdf August 28 2025",
+          "IREN annual report 2025 pdf AI cloud bitcoin mining customers",
+          "IREN Q3 FY26 10-Q revenue AI Cloud Bitcoin Mining electricity cost",
+          "IREN 2025 10-K customer concentration AI cloud"
+        ],
+        "sources": null
+      },
+      {
+        "query": "IREN 2025 10-K \"Bitcoin Mining revenue\" \"AI Cloud Services revenue\"",
+        "type": "search",
+        "queries": [
+          "IREN 2025 10-K \"Bitcoin Mining revenue\" \"AI Cloud Services revenue\"",
+          "IREN 2025 10-K \"principal customers\" AI Cloud Services",
+          "IREN 2025 10-K \"electricity costs\" Bitcoin mining",
+          "IREN 2025 10-K \"compete\" AI Cloud Services CoreWeave"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:iren.com \"colocation\" IREN data center 2026",
+        "type": "search",
+        "queries": [
+          "site:iren.com \"colocation\" IREN data center 2026",
+          "site:iren.com \"build-to-suit\" IREN 2026",
+          "site:iren.com \"Bitcoin mining\" IREN 2026 strategy",
+          "site:iren.com/resources IREN AI Cloud Services managed GPU cloud"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en/news IREN Jan Beckers power data center thesis",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news IREN Jan Beckers power data center thesis",
+          "site:bitcap.com/news IREN Jan Beckers Rechenzentren Strom Bitcoin Miner",
+          "site:bitcap.com IREN \"Texas\" \"Jan Beckers\"",
+          "site:bitcap.com IREN \"Ahead of the Curve\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/news/fondsmanager-beckers-wir-stehen-am-anfang-eines-echten-ki-bullenmarkts-podcast"
+      },
+      {
+        "pattern": "Iris Energy",
+        "type": "find_in_page",
+        "url": "https://bitcap.com/news/fondsmanager-beckers-wir-stehen-am-anfang-eines-echten-ki-bullenmarkts-podcast"
+      },
+      {
+        "query": "site:bitcap.com/news \"Iris Energy\" \"Rechenzentren\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/news \"Iris Energy\" \"Rechenzentren\"",
+          "site:bitcap.com/news \"Iris Energy\" \"Strom\"",
+          "site:bitcap.com/news \"Iris Energy\" \"CEO\" \"Texas\"",
+          "site:bitcap.com/news \"IREN\" \"Besuche\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Ahead of the Curve\" \"IREN\" BIT Capital",
+        "type": "search",
+        "queries": [
+          "\"Ahead of the Curve\" \"IREN\" BIT Capital",
+          "site:bitcap.com/en IREN \"power\" \"data center\"",
+          "site:bitcap.com IREN \"large-scale power\"",
+          "site:bitcap.com IREN \"CEO\" \"site visits\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/news \"Iris Energy\" \"besucht\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/news \"Iris Energy\" \"besucht\"",
+          "site:bitcap.com/news \"Iris Energy\" \"CEO\"",
+          "site:bitcap.com/news \"Iris Energy\" \"vor Ort\"",
+          "site:bitcap.com/news \"Iris Energy\" \"Management\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:iren.com/resources/news \"Closes $3.65bn Investment-Grade GPU Financing\"",
+        "type": "search",
+        "queries": [
+          "site:iren.com/resources/news \"Closes $3.65bn Investment-Grade GPU Financing\"",
+          "site:iren.com/resources/news \"Nostrum Group\" IREN acquisition June 2026",
+          "site:iren.com/resources/news \"800MW\" \"South Australia\" IREN",
+          "site:iren.com/resources/news \"Golden State\" IREN partnership"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:iren.com \"Investment-Grade GPU Financing\" IREN June 1 2026",
+        "type": "search",
+        "queries": [
+          "site:iren.com \"Investment-Grade GPU Financing\" IREN June 1 2026",
+          "site:iren.com \"First Australian Data Center Campus\" IREN June 3 2026",
+          "site:iren.com \"Raises 2026 ARR Target to over $4bn\" IREN July 20 2026",
+          "site:iren.com \"Golden State\" IREN June 25 2026"
+        ],
         "sources": null
       }
     ],
     "consulted_sources": [
       {
-        "url": "https://iren.com/",
+        "url": "https://www.iren.com/",
         "type": "model_citation"
       },
       {
@@ -589,35 +1001,7 @@
         "type": "model_citation"
       },
       {
-        "url": "https://iren.com/investors/reports",
-        "type": "model_citation"
-      },
-      {
-        "url": "https://iren.com/investors/news",
-        "type": "model_citation"
-      },
-      {
-        "url": "https://iren.com/resources/news/iren-pausing-bitcoin-expansion-to-focus-on-ai-data-center-build-out",
-        "type": "model_citation"
-      },
-      {
-        "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
-        "type": "model_citation"
-      },
-      {
-        "url": "https://iren.com/resources/blog/iren-ai-cloudstrengthens-leadership-with-nvidiablackwell-deployment",
-        "type": "model_citation"
-      },
-      {
-        "url": "https://iren.com/resources/blog/three-layers-one-compounding-advantage-the-iren-thesis",
-        "type": "model_citation"
-      },
-      {
-        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884826000015/iren-20251231.htm",
-        "type": "model_citation"
-      },
-      {
-        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000079.txt",
+        "url": "https://www.sec.gov/Archives/edgar/data/1878848/000187884825000063/iren-20250630.htm",
         "type": "model_citation"
       },
       {
@@ -625,11 +1009,55 @@
         "type": "model_citation"
       },
       {
-        "url": "https://bitcap.com/en",
+        "url": "https://iren.gcs-web.com/news-releases/news-release-details/iren-signs-28bn-new-customer-contracts-leading-ai-developers",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://iren.com/resources/blog/iren-signs97-billion-agreement-with-microsoft-to-deploy-ai-cloud-infrastructure",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://irisenergy.gcs-web.com/news-releases/news-release-details/iren-secures-34bn-ai-cloud-contract-nvidia",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-and-IREN-Announce-Strategic-Partnership-to-Accelerate-Deployment-of-up-to-5-Gigawatts-of-AI-Infrastructure/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://iren.com/resources/news/iren-expands-ai-cloud-capacity-to-150000-gpus",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://iren.com/resources/news/nostrum-announcement",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://iren.com/data-centers/childress",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://iren.com/data-centers/prince-george",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://iren.com/resources/news/nvidia-exemplar-cloud-nvidia-hgx-b300-status",
         "type": "model_citation"
       },
       {
         "url": "https://bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/news/ki-krypto-gezieltes-stockpicking-so-will-jan-beckers-2025-den-markt-schlagen-podcast",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/news/fondsmanager-beckers-der-ki-bullenmarkt-geht-weiter",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/fondsmanager-beckers-das-nvidia-monopol-beginnt-zu-brockeln",
         "type": "model_citation"
       }
     ],
@@ -640,8 +1068,8 @@
       "scope:single-company",
       "prompt:company-memo-pilot-v1",
       "company:iren",
-      "model:gpt-5.6-luna",
-      "reasoning:low"
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
     ]
   }
 }

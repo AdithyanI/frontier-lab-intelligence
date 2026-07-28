@@ -1020,6 +1020,111 @@ def test_jina_reader_recovers_eligible_native_failure_with_provenance(
     conn.close()
 
 
+def test_jina_reader_exact_artifact_id_does_not_widen_scope(
+    tmp_path, monkeypatch
+):
+    db = tmp_path / "artifacts.db"
+    selected_id = _seed_artifact(db)
+    other_url = "https://example.com/other"
+    other_id = artifact_urls.artifact_id(other_url)
+    now = "2026-07-14T00:00:00+00:00"
+    conn = artifacts.connect(db)
+    with conn:
+        conn.execute(
+            """INSERT INTO artifact
+               (artifact_id, canonical_url, canonicalization_contract, host,
+                artifact_kind, first_seen_at, last_seen_at, created_at, updated_at)
+               VALUES (?, ?, ?, 'example.com', 'article', ?, ?, ?, ?)""",
+            (
+                other_id,
+                other_url,
+                artifact_urls.CANONICALIZATION_CONTRACT,
+                now,
+                now,
+                now,
+                now,
+            ),
+        )
+        conn.execute(
+            """INSERT INTO artifact_event_supplement
+               (supplement_id, contract, manifest_sha256, artifact_id,
+                event_id, event_day, source_rank, day_candidate_count,
+                source_triage_run_id, source_input_sha256,
+                source_semantic_snapshot_sha256, evidence_role,
+                source_published_at, rationale, reviewed_by, reviewed_at,
+                created_at)
+               VALUES ('other-supplement', ?, 'manifest-sha', ?,
+                       'event-other', '2026-07-06', 2, 10, 'triage-run',
+                       'input-sha', 'snapshot-sha', 'official_primary_source',
+                       '2026-07-06', 'Official source.', 'human-review', ?, ?)""",
+            (
+                artifacts.REVIEWED_SUPPLEMENT_CONTRACT,
+                other_id,
+                now,
+                now,
+            ),
+        )
+    conn.close()
+    monkeypatch.setattr(artifact_fetch, "RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(artifact_fetch, "TEXT_ROOT", tmp_path / "text")
+
+    def native_handler(request: httpx.Request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        return httpx.Response(403)
+
+    native = artifact_fetch.fetch_cohort(
+        db_path=db,
+        artifact_ids=[selected_id, other_id],
+        resolver=_global_resolver,
+        transport=httpx.MockTransport(native_handler),
+    )
+    assert native["failed_terminal"] == 2
+    seen_urls: list[str] = []
+
+    def reader_handler(request: httpx.Request):
+        target_url = json.loads(request.content)["url"]
+        seen_urls.append(target_url)
+        return httpx.Response(
+            200,
+            json={
+                "data": {
+                    "title": "Selected recovery",
+                    "url": target_url,
+                    "content": (
+                        "# Selected recovery\n\nThis exact Reader recovery contains "
+                        "enough substantive evidence to prove the explicit fallback "
+                        "does not make requests for unrelated failed artifacts."
+                    ),
+                }
+            },
+        )
+
+    result = artifact_fetch.recover_with_jina_reader(
+        db_path=db,
+        artifact_ids=[selected_id],
+        api_key="test-reader-key",
+        transport=httpx.MockTransport(reader_handler),
+    )
+
+    assert result["success"] == 1
+    assert seen_urls == ["https://example.com/article"]
+    conn = artifacts.connect(db)
+    run = conn.execute(
+        """SELECT selection_policy, expected_count
+           FROM artifact_fetch_run WHERE fetch_policy = ?""",
+        (artifact_fetch.JINA_READER_POLICY,),
+    ).fetchone()
+    assert run["selection_policy"] == artifact_fetch.JINA_READER_EXPLICIT_SELECTION
+    assert run["expected_count"] == 1
+    assert conn.execute(
+        """SELECT COUNT(*) FROM artifact_fetch
+           WHERE artifact_id = ? AND fetch_policy = ?""",
+        (other_id, artifact_fetch.JINA_READER_POLICY),
+    ).fetchone()[0] == 0
+    conn.close()
+
+
 def test_jina_reader_excludes_deferred_provider_adapters(tmp_path):
     db = tmp_path / "artifacts.db"
     _seed_artifact(

@@ -150,6 +150,14 @@ def main(argv: list[str] | None = None) -> int:
         help="Recover eligible native-fetch failures through Jina Reader.",
     )
     reader_parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    reader_parser.add_argument(
+        "--artifact-id",
+        action="append",
+        help=(
+            "Recover exactly this eligible native-fetch failure; repeat for a "
+            "frozen cohort."
+        ),
+    )
     _add_output_arguments(reader_parser)
     revalidate_parser = sub.add_parser(
         "revalidate-content",
@@ -215,7 +223,10 @@ def main(argv: list[str] | None = None) -> int:
         elif args.action == "reader-fallback":
             from fli.evidence.artifacts import fetch as artifact_fetch
 
-            data = artifact_fetch.recover_with_jina_reader(db_path=args.db)
+            data = artifact_fetch.recover_with_jina_reader(
+                db_path=args.db,
+                artifact_ids=args.artifact_id,
+            )
         elif args.action == "revalidate-content":
             from fli.evidence.artifacts import fetch as artifact_fetch
 
