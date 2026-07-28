@@ -166,14 +166,20 @@ def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):
             "is_primary": True,
             "post": {
                 "post_id": "old-root",
-                "author": {"handle": "alice"},
+                "author": {
+                    "handle": "alice",
+                    "entity_name": "Alice Example",
+                },
                 "text": "A year-old announcement.",
                 "published_at": "2025-07-15T12:00:00+00:00",
             },
             "evidence": [
             {
                 "post_id": "current-update",
-                "author": {"handle": "alice"},
+                "author": {
+                    "handle": "alice",
+                    "entity_name": "Alice Example",
+                },
                 "text": "Here is what changed today.",
                 "relationship": "quote",
                 "same_author_as_root": True,
@@ -201,6 +207,8 @@ def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):
     assert packet is not None
     assert [source.source_id for source in packet.sources] == ["current-update"]
     assert packet.sources[0].relation == "root"
+    assert packet.sources[0].author == "Alice Example"
+    assert packet.sources[0].url == "https://x.com/alice/status/current-update"
 
 
 def test_packet_excludes_an_event_with_only_an_old_first_party_source(tmp_path):

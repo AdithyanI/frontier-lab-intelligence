@@ -531,8 +531,9 @@ export default function CompanyUniversePage() {
           <strong>{payload.counts.companies} sourced company profiles.</strong>{' '}
           Every Event starts with this candidate universe, then retrieves complete
           context only for credible matches.{' '}
-          {payload.counts.research_memos} companies now use the new source-bearing
-          research memo; the remaining rows stay visible while their memos are generated.{' '}
+          {payload.counts.research_memos === payload.counts.companies
+            ? `All ${payload.counts.companies} companies have a source-bearing research memo. `
+            : `${payload.counts.research_memos} companies have a source-bearing research memo; the remaining rows stay visible while their memos are generated. `}
           June shows only the current top ten; December 2025 is the latest complete
           audited portfolio, and absence from June does not prove a sale.
         </p>

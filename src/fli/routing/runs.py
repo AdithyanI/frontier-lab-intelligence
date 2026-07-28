@@ -648,6 +648,14 @@ def _x_url(author: str | None, post_id: str) -> str:
     return f"https://x.com/{handle}/status/{post_id}"
 
 
+def _author_label(author: dict[str, Any]) -> str:
+    name = str(author.get("entity_name") or author.get("name") or "").strip()
+    if name:
+        return name
+    handle = str(author.get("handle") or "").strip()
+    return f"@{handle}" if handle else "Unknown author"
+
+
 def _source_payload(source: routing_model.EvidenceSource) -> dict[str, Any]:
     return {
         "source_type": source.source_type,
@@ -689,10 +697,11 @@ def _packet_from_payload(payload: dict[str, Any]) -> routing_model.RoutingPacket
 def _x_source(post: dict[str, Any], *, relation: str) -> routing_model.EvidenceSource:
     post_id = str(post["post_id"])
     author = str(post.get("author") or "") or None
+    handle = str(post.get("handle") or "") or None
     return routing_model.EvidenceSource(
         source_type="x_post",
         source_id=post_id,
-        url=_x_url(author, post_id),
+        url=_x_url(handle, post_id),
         text=str(post.get("text") or ""),
         author=author,
         relation=relation,
@@ -800,9 +809,11 @@ def packet_from_development(
     seen_post_ids: set[str] = set()
     for source_event in source_events:
         root_item = dict(source_event["post"])
+        root_author = dict(root_item["author"])
         root = {
             "post_id": str(root_item["post_id"]),
-            "author": "@" + str(root_item["author"]["handle"]),
+            "author": _author_label(root_author),
+            "handle": str(root_author.get("handle") or ""),
             "text": str(root_item.get("text") or ""),
             "published_at": str(root_item.get("published_at") or ""),
         }
@@ -824,16 +835,18 @@ def packet_from_development(
                 }
             )
             seen_post_ids.add(root["post_id"])
-        root_handle = str(root_item["author"]["handle"]).lower()
+        root_handle = str(root_author["handle"]).lower()
         for evidence in source_event.get("evidence") or []:
             if (
                 str(evidence.get("relationship") or "related") == "retweet"
                 or str(evidence["author"]["handle"]).lower() != root_handle
             ):
                 continue
+            evidence_author = dict(evidence["author"])
             post = {
                 "post_id": str(evidence["post_id"]),
-                "author": "@" + str(evidence["author"]["handle"]),
+                "author": _author_label(evidence_author),
+                "handle": str(evidence_author.get("handle") or ""),
                 "text": str(evidence.get("text") or ""),
                 "published_at": str(evidence.get("published_at") or ""),
             }

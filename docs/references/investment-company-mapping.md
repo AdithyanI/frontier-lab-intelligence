@@ -39,15 +39,16 @@ The agent needs only:
 7. **Portfolio context:** the newest disclosed weight plus its exact date and
    basis. Weight may order comparable findings; it cannot create relevance.
 
-The current 37 profiles remain the complete candidate index. Richer
-source-bearing memos can now replace the older hypothesis view one company at a
-time without removing unresearched companies from consideration.
+The 37 profiles remain the complete candidate index. Every profile now has a
+promoted source-bearing memo. The compact index is used for shortlisting; the
+complete memo is retrieved only after an Event establishes a credible match.
 
-## One-company research pilot
+## Company research runner
 
 [`scripts/company-memo-pilot.py`](../../scripts/company-memo-pilot.py) is the
-durable experiment for testing whether a richer web-grounded company memo
-improves this packet. It is deliberately not an `fli` command yet.
+durable research runner for producing a richer web-grounded company memo. It
+remains a focused script rather than an `fli` command until the downstream
+Event-to-company contract is settled.
 
 Run one company:
 
@@ -70,7 +71,8 @@ The script:
 2. starts one `gpt-5.6-sol` / `xhigh` LiteLLM Responses background request;
 3. uses hosted web search, required primary-source guidance, prompt caching,
    and a strict structured-output schema;
-4. polls the latest returned response ID until it reaches a terminal state;
+4. polls the original background-response creation ID until it reaches a
+   terminal state;
 5. validates that every claim URL is HTTPS and present in the source ledger;
 6. writes the memo, usage, request identity, web actions, and provenance to
    `tmp/company-memo-pilot-<TICKER>-<MODEL>-<EFFORT>.json`.
@@ -89,21 +91,25 @@ projection:
 
 ```bash
 .venv/bin/python scripts/promote-company-memo.py \
-  tmp/company-memo-pilot-IREN-gpt-5-6-luna-low.json
+  tmp/company-memo-pilot-IREN-gpt-5-6-sol-xhigh.json
 ```
 
 Promoted results live in `docs/references/company-memos/`. The BIT Lens API
 joins them by ticker into `investment-company-universe-v5`. The expanded UI
-shows the new memo structure and its source ledger; a company without a
-promoted memo is labeled `Memo pending` and never presents the legacy
-hypothesis profile as if it were the final research packet.
+shows the memo, exact source ledger, research date, model, and provenance. The
+read path retains an explicit `Memo pending` state so a missing file can never
+silently fall back to the legacy hypothesis view.
 
-The two-company Luna/low canary completed for IREN and Microsoft on 28 July
-2026. Both results passed transport, schema, URL-ledger validation, and a
-primary-source spot check. Their shared prompt cache did not hit
-(`cached_tokens = 0` for both), so caching remains a cost issue rather than a
-quality proof. The promoted memos are suitable for UI and downstream contract
-design, but the remaining universe has not yet been batch-generated.
+The full 37-company universe was completed on 28 July 2026. A Luna/low canary
+first proved transport, schema, URL-ledger validation, and persistence. The
+quality run then produced 29 promoted Sol/xhigh memos and one Terra/xhigh memo.
+Seven provider exceptions were completed from primary sources in the same
+schema through manual Codex research. Across the finished set, every memo has
+at least seven sources and the 37 ledgers contain 482 entries.
+
+The IREN and Microsoft Sol/xhigh quality canaries both reported
+`cached_tokens = 0`. Prompt caching therefore remains measured best-effort
+transport telemetry, not a claimed property of this batch or a quality signal.
 
 ## Two-stage retrieval
 

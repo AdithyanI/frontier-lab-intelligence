@@ -1318,6 +1318,7 @@ def test_investment_company_universe_payload_is_complete_and_dated():
     research_memos = sum(
         company["research_memo"] is not None for company in payload["companies"]
     )
+    assert research_memos == 37
 
     assert payload["schema_version"] == "investment-company-universe-v5"
     assert payload["mapping_policy"]["candidate_universe"] == "all_profiles"

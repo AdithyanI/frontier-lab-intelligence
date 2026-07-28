@@ -182,6 +182,7 @@ def test_bit_lens_company_universe_is_a_complete_read_only_projection():
     assert data["counts"]["research_memos"] == sum(
         company["research_memo"] is not None for company in data["companies"]
     )
+    assert data["counts"]["research_memos"] == 37
     assert data["mapping_policy"]["candidate_universe"] == "all_profiles"
     assert len(data["companies"]) == 37
     assert all("frontier_lab_relevance" not in company for company in data["companies"])
