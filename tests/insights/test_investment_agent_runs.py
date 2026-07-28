@@ -18,15 +18,23 @@ def _trace() -> dict:
         "development_summary": "The Development establishes a new control risk.",
         "decision": "surface",
         "portfolio_readthrough": "Security demand may move before revenue does.",
+        "prior_assumption": "Independent controls matter more after this incident.",
         "company_assessments": [
             {
-                "ticker": "PANW",
-                "bottom_line": "The incident could increase demand for AI controls.",
+                "mechanism_title": "Independent agent controls",
                 "mechanism": "Agent activity needs an independent control layer.",
-                "affected_driver": "AI security product attachment",
-                "direction": "positive",
+                "splits": False,
+                "exposures": [
+                    {
+                        "ticker": "PANW",
+                        "affected_driver": "AI security product attachment",
+                        "direction": "positive",
+                        "materiality": "unknown",
+                        "note": "The incident could increase demand for AI controls.",
+                    }
+                ],
                 "main_uncertainty": "No disclosed revenue contribution.",
-                "next_check": "Track attach and customer references.",
+                "next_check": "Track PANW attach and customer references.",
             }
         ],
         "rejected_after_memo": [
@@ -36,8 +44,8 @@ def _trace() -> dict:
     }
     return {
         "schema_version": "investment-agent-trace-v1",
-        "prompt_version": "investment-agent-v8",
-        "prompt_cache_key": "fli:investment-agent:v8",
+        "prompt_version": "investment-agent-v9",
+        "prompt_cache_key": "fli:investment-agent:v9",
         "date": DAY,
         "daily_rank": 1,
         "development_id": DEVELOPMENT_ID,
@@ -117,8 +125,13 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
     assert payload["items"][0]["investment_headline"] == (
         "Agent risk strengthens demand for independent controls"
     )
-    assert payload["items"][0]["company_assessments"][0]["ticker"] == "PANW"
-    assert payload["items"][0]["company_assessments"][0]["direction"] == "positive"
+    assessment = payload["items"][0]["company_assessments"][0]
+    assert assessment["mechanism_title"] == "Independent agent controls"
+    assert assessment["exposures"][0]["ticker"] == "PANW"
+    assert assessment["exposures"][0]["direction"] == "positive"
+    assert payload["items"][0]["prior_assumption"] == (
+        "Independent controls matter more after this incident."
+    )
     assert payload["items"][0]["rejected_after_memo"] == [
         {"ticker": "DDOG", "reason": "The link remained generic after review."}
     ]
@@ -267,7 +280,7 @@ def test_investment_api_prefers_company_aware_successor(monkeypatch):
 
     assert dates["dates"][-1]["content_kind"] == "investment_agent"
     assert payload["content_kind"] == "investment_agent"
-    assert payload["schema_version"] == "investment-agent-read-v5"
+    assert payload["schema_version"] == "investment-agent-read-v6"
     assert payload["items"][0]["provenance"] == {
         "primary_event_id": "event-id",
         "source_event_count": 1,

@@ -15,13 +15,20 @@ def _result(*, day: str, rank: int) -> dict:
     assessments = (
         [
             {
-                "ticker": "PANW",
-                "bottom_line": "A bounded implication.",
+                "mechanism_title": "Independent agent controls",
                 "mechanism": "A direct mechanism.",
-                "affected_driver": "paid adoption",
-                "direction": "positive",
+                "splits": False,
+                "exposures": [
+                    {
+                        "ticker": "PANW",
+                        "affected_driver": "paid adoption",
+                        "direction": "positive",
+                        "materiality": "unknown",
+                        "note": "A bounded implication.",
+                    }
+                ],
                 "main_uncertainty": "Demand is not measured.",
-                "next_check": "Paid production customers.",
+                "next_check": "PANW paid production customers.",
             }
         ]
         if decision == "surface"
@@ -49,6 +56,11 @@ def _result(*, day: str, rank: int) -> dict:
             "development_summary": "What changed.",
             "decision": decision,
             "portfolio_readthrough": "A bounded read-through.",
+            "prior_assumption": (
+                "Independent controls matter more after this Development."
+                if assessments
+                else None
+            ),
             "company_assessments": assessments,
             "rejected_after_memo": [],
             "no_match_reason": None if assessments else "No company connection.",
@@ -356,4 +368,4 @@ def test_trace_path_is_durable_unique_and_versioned(tmp_path: Path):
 
     assert first.parent == tmp_path / "2026-07-20"
     assert first != second
-    assert "rank-001-5-6-sol-xhigh-investment-agent-v8" in first.name
+    assert "rank-001-5-6-sol-xhigh-investment-agent-v9" in first.name

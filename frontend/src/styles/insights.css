@@ -1871,3 +1871,102 @@
     gap: 8px;
   }
 }
+
+.investment-agent-mechanism-tickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.investment-agent-splits {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.investment-agent-exposures {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  counter-reset: exposure;
+}
+
+.investment-agent-exposures > li {
+  counter-increment: exposure;
+  padding-left: 20px;
+  position: relative;
+}
+
+.investment-agent-exposures > li::before {
+  content: counter(exposure);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.55;
+}
+
+.investment-agent-exposure-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.investment-agent-materiality {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.investment-agent-materiality[data-materiality='material'] {
+  border-color: var(--blue-ink);
+  color: var(--blue-ink);
+}
+
+.investment-agent-materiality[data-materiality='unknown'],
+.investment-agent-materiality[data-materiality='immaterial'] {
+  opacity: 0.6;
+}
+
+.investment-agent-exposure-driver {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.investment-agent-exposure-driver .mono {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+  margin-right: 5px;
+}
+
+.investment-agent-prior {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--blue-ink);
+  background: var(--surface-2, transparent);
+}
+
+.investment-agent-prior h3 {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin: 0 0 4px;
+}

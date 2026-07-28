@@ -323,6 +323,10 @@ named company driver. It does not describe confidence.
 - `unclear`: a real causal connection exists, but the available evidence does
   not support a directional conclusion.
 
+`unclear` is under-used. Product fit is not evidence of demand. A company with
+real product exposure, where the evidence does not show this Development
+reaching its customers, is `unclear` and not `positive`.
+
 Do not use `mixed` merely because the magnitude, timing, adoption, or winner is
 uncertain. Put those issues in `main_uncertainty`. When one plausible economic
 direction is clear, use `positive` or `negative` and state the limitation
@@ -467,38 +471,80 @@ Use:
 
 ## `portfolio_readthrough`
 
-Give the cross-company conclusion.
+Give the cross-company conclusion in the reader's terms.
 
 - Lead with what an analyst should take from the Development.
-- Name the relevant companies and explain the important differences between
-  them.
-- State what the evidence does not yet prove.
+- Say which company this most changes the picture for, and why the others sit
+  below it.
+- Attach each limitation to the company it constrains rather than closing with
+  one generic disclaimer.
+- Do not open with the word "Treat".
 - Do not imply that every named company is a current holding.
 - Do not provide buy or sell advice.
 
+If every company ends in the same place with the same direction and the same
+materiality, say plainly what distinguishes the strongest case from the
+weakest. If nothing distinguishes them, state that. An honest "these move
+together for one reason" is a better result than four parallel paragraphs
+implying four separate findings.
+
+## `prior_assumption`
+
+One sentence naming a reasonable prior a BIT analyst might already hold, and
+which way this Development moves it. Write the belief, then the movement.
+Use `null` when suppressed, or when the Development genuinely moves no prior
+worth naming. Do not manufacture a contrarian angle.
+
 ## `company_assessments`
 
-For every published company, provide:
+This field holds causal mechanisms, not companies. A mechanism is one path from
+the Development to a company driver. Group every company that moves for the
+same reason onto the same mechanism, and write the causal explanation once for
+that group.
+
+Order mechanisms from most to least decision-relevant. Within a mechanism,
+order companies from most to least exposed.
+
+Judge how many mechanisms you actually have. Several companies reached by one
+shared cause is one mechanism and usually the stronger insight. Several
+companies each reached by a different cause is several mechanisms, and that
+often means the Development supports several thin claims rather than one
+finding. When that happens, keep the mechanisms that survive scrutiny and
+reject the rest.
+
+For each mechanism:
+
+- `mechanism_title`: 4 to 10 words naming the causal path. Name the path, not a
+  company.
+- `mechanism`: no more than two sentences tracing the complete link from the
+  Development to the companies on this path.
+- `splits`: `true` only when this mechanism moves at least one company
+  favorably and another adversely. It must be `false` when every company on the
+  path moves the same way. A mechanism that splits is usually more valuable
+  than one that does not, because it identifies a winner at someone's expense.
+- `main_uncertainty`: the single most important unproven fact limiting this
+  mechanism.
+- `next_check`: exactly one primary observable, naming the company it applies
+  to.
+
+For each company on the mechanism:
 
 - `ticker`: the canonical ticker from the supplied universe.
-- `bottom_line`: one or two short sentences stating the company-specific
-  implication and its most important limitation.
-- `mechanism`: no more than two short sentences explaining the complete causal
-  link from the Development to the company.
 - `affected_driver`: one concise phrase naming the company business variable
-  that could move. Use plain business language, such as paid adoption,
-  customer expansion, pricing, unit cost, utilization, or product demand.
-- `direction`: `positive`, `negative`, `mixed`, or `unclear`, using the
-  definitions above.
-- `main_uncertainty`: the single most important unproven fact that limits the
-  conclusion.
-- `next_check`: exactly one primary observable that an analyst should
-  investigate next. Do not combine several metrics, disclosures, or tests into
-  a monitoring list.
-
-Do not repeat the same sentence across several fields. The fields should
-progress from conclusion, to mechanism, to business variable, to limitation,
-to next evidence.
+  that could move, in plain business language.
+- `direction`: `positive`, `negative`, `mixed`, or `unclear`.
+- `materiality`: whether a plausible outcome could move this company's reported
+  results at its own scale.
+  - `material`: the memo supports a revenue or driver scale where this could
+    show up in results.
+  - `immaterial`: the connection is real but small against this company's
+    existing base.
+  - `unknown`: the memo supplies no revenue magnitude to judge against.
+  Use the memo's `materiality_condition` and revenue engines. Never estimate a
+  figure the memo does not contain. `unknown` is a correct and common answer.
+- `note`: one sentence on why this company sits where it does relative to the
+  others on this mechanism. This is the comparison, so do not restate the
+  mechanism here.
 
 ## `rejected_after_memo`
 

@@ -189,6 +189,13 @@ The only proof of reusable-prefix caching is a positive
   not a prompt-layout failure. The subsequent sequential top-100 pass also
   reported zero reads across 97 eligible requests. Retain the uncached cost
   bound and do not change model solely to chase caching.
+- **2026-07-28:** the successor Luna/medium `audience-routing-v14` July 5–21
+  top-100 pass completed 1,647 requests with zero failures. The Azure-backed
+  route reported 1,558 cache-hit requests, 2,791,936 cached tokens from
+  6,990,192 input tokens, 46,924 cache-write tokens, and $7.079129. This
+  confirms that the same stable request layout can obtain substantial reuse
+  in a later bounded-parallel production pass even after an earlier run
+  observed no reads; cache telemetry remains the authority for each run.
 - **2026-07-28:** the Sol/xhigh `investment-agent-v8` July 19–20 top-ten
   production run completed one warm request before bounded parallel fan-out.
   All 20 targets completed, with 272,384 cached tokens from 712,663 input

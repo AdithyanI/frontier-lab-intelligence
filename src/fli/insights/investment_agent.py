@@ -37,8 +37,8 @@ MAX_UNIQUE_MEMOS = 8
 MAX_MODEL_TURNS = 4
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "investment-agent-v8"
-PROMPT_CACHE_KEY = "fli:investment-agent:v8"
+PROMPT_VERSION = "investment-agent-v9"
+PROMPT_CACHE_KEY = "fli:investment-agent:v9"
 PROMPT_PATH = (
     REPO_ROOT
     / "src"
@@ -180,12 +180,10 @@ def _memo_tool(tickers: list[str]) -> dict[str, Any]:
 
 
 def _final_format(tickers: list[str]) -> dict[str, Any]:
-    assessment = {
+    exposure = {
         "type": "object",
         "properties": {
             "ticker": {"type": "string", "enum": tickers},
-            "bottom_line": {"type": "string"},
-            "mechanism": {"type": "string"},
             "affected_driver": {
                 "type": "string",
                 "description": (
@@ -197,21 +195,83 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                 "type": "string",
                 "enum": ["positive", "negative", "mixed", "unclear"],
             },
-            "main_uncertainty": {"type": "string"},
-            "next_check": {
+            "materiality": {
+                "type": "string",
+                "enum": ["material", "immaterial", "unknown"],
+                "description": (
+                    "Whether a plausible outcome could move this company's "
+                    "reported results at its own scale. Use the memo's "
+                    "materiality_condition and revenue scale. Use 'unknown' "
+                    "when the memo supplies no revenue magnitude. Never "
+                    "estimate a figure the memo does not contain."
+                ),
+            },
+            "note": {
                 "type": "string",
                 "description": (
-                    "Exactly one primary observable for an analyst to check. "
-                    "Do not provide a list of metrics."
+                    "One sentence on why this company sits where it does "
+                    "within this mechanism, relative to the others on it."
                 ),
             },
         },
         "required": [
             "ticker",
-            "bottom_line",
-            "mechanism",
             "affected_driver",
             "direction",
+            "materiality",
+            "note",
+        ],
+        "additionalProperties": False,
+    }
+    assessment = {
+        "type": "object",
+        "properties": {
+            "mechanism_title": {
+                "type": "string",
+                "description": (
+                    "A 4-10 word name for the causal path, not a company name."
+                ),
+            },
+            "mechanism": {
+                "type": "string",
+                "description": (
+                    "No more than two sentences tracing the complete causal "
+                    "link from the Development to the companies below. Written "
+                    "once for the whole path, not per company."
+                ),
+            },
+            "splits": {
+                "type": "boolean",
+                "description": (
+                    "True when this path moves at least one company favorably "
+                    "and another adversely. False when every company on it "
+                    "moves the same way."
+                ),
+            },
+            "exposures": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": MAX_UNIQUE_MEMOS,
+                "items": exposure,
+                "description": (
+                    "Every company on this mechanism, ordered most to least "
+                    "exposed."
+                ),
+            },
+            "main_uncertainty": {"type": "string"},
+            "next_check": {
+                "type": "string",
+                "description": (
+                    "Exactly one primary observable for an analyst to check, "
+                    "naming the company it applies to. Not a list of metrics."
+                ),
+            },
+        },
+        "required": [
+            "mechanism_title",
+            "mechanism",
+            "splits",
+            "exposures",
             "main_uncertainty",
             "next_check",
         ],
@@ -237,10 +297,22 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                     "enum": ["surface", "suppress"],
                 },
                 "portfolio_readthrough": {"type": "string"},
+                "prior_assumption": {
+                    "type": ["string", "null"],
+                    "description": (
+                        "One sentence naming a reasonable prior a BIT analyst "
+                        "might hold and which way this Development moves it. "
+                        "Null when suppressed or when nothing moves a prior."
+                    ),
+                },
                 "company_assessments": {
                     "type": "array",
                     "maxItems": MAX_UNIQUE_MEMOS,
                     "items": assessment,
+                    "description": (
+                        "Causal mechanisms, ordered most to least "
+                        "decision-relevant."
+                    ),
                 },
                 "rejected_after_memo": {
                     "type": "array",
@@ -262,6 +334,7 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                 "development_summary",
                 "decision",
                 "portfolio_readthrough",
+                "prior_assumption",
                 "company_assessments",
                 "rejected_after_memo",
                 "no_match_reason",
@@ -496,7 +569,11 @@ def _validate_final(
         raise ValueError(
             "Investment headline must be one concise non-empty line."
         )
-    assessed = [item["ticker"] for item in result["company_assessments"]]
+    assessed = [
+        exposure["ticker"]
+        for path in result["company_assessments"]
+        for exposure in path["exposures"]
+    ]
     rejected = [item["ticker"] for item in result["rejected_after_memo"]]
     represented = assessed + rejected
     if len(represented) != len(set(represented)):
@@ -505,6 +582,15 @@ def _validate_final(
         raise ValueError(
             "Every fetched memo must appear exactly once in the final result."
         )
+    for path in result["company_assessments"]:
+        directions = {item["direction"] for item in path["exposures"]}
+        splits = bool(path["splits"])
+        opposed = "positive" in directions and "negative" in directions
+        if splits != opposed:
+            raise ValueError(
+                "splits must be true exactly when one mechanism holds both a "
+                "positive and a negative company direction."
+            )
     if result["decision"] == "surface":
         if not assessed or result["no_match_reason"] is not None:
             raise ValueError("A surfaced result needs assessments and no null reason.")
@@ -827,7 +913,10 @@ def _compact_result(result: dict[str, Any]) -> dict[str, Any]:
         "decision": final["decision"],
         "investment_headline": final["investment_headline"],
         "memo_tickers": result["memo_tickers"],
-        "company_assessments": len(final["company_assessments"]),
+        "company_assessments": sum(
+            len(path["exposures"]) for path in final["company_assessments"]
+        ),
+        "mechanisms": len(final["company_assessments"]),
         "rejected_after_memo": len(final["rejected_after_memo"]),
         "turns": len(turns),
         "request_retries": len(result.get("request_failures") or []),

@@ -15,19 +15,26 @@ DEFAULT_DB = (
     REPO_ROOT / "data" / "derived" / "insights" / "investment-agent.db"
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v2"
-READ_SCHEMA_VERSION = "investment-agent-read-v5"
+READ_SCHEMA_VERSION = "investment-agent-read-v6"
 TRACE_SCHEMA_VERSIONS = {"investment-agent-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
-ASSESSMENT_FIELDS = {
-    "ticker",
-    "bottom_line",
+MECHANISM_FIELDS = {
+    "mechanism_title",
     "mechanism",
-    "affected_driver",
-    "direction",
+    "splits",
+    "exposures",
     "main_uncertainty",
     "next_check",
 }
+EXPOSURE_FIELDS = {
+    "ticker",
+    "affected_driver",
+    "direction",
+    "materiality",
+    "note",
+}
 DIRECTIONS = {"positive", "negative", "mixed", "unclear"}
+MATERIALITIES = {"material", "immaterial", "unknown"}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS investment_agent_meta (
@@ -160,7 +167,12 @@ def _validate_trace(trace: dict[str, Any]) -> None:
     rejections = final.get("rejected_after_memo")
     if not isinstance(assessments, list) or not isinstance(rejections, list):
         raise ValueError("Investment agent result has invalid company decisions")
-    assessed = [str(item.get("ticker") or "") for item in assessments]
+    assessed = [
+        str(exposure.get("ticker") or "")
+        for item in assessments
+        if isinstance(item, dict)
+        for exposure in (item.get("exposures") or [])
+    ]
     rejected = [str(item.get("ticker") or "") for item in rejections]
     represented = assessed + rejected
     if not represented and decision == "surface":
@@ -168,17 +180,34 @@ def _validate_trace(trace: dict[str, Any]) -> None:
     if len(represented) != len(set(represented)) or "" in represented:
         raise ValueError("Investment result repeats or omits a company ticker")
     for assessment in assessments:
-        if set(assessment) != ASSESSMENT_FIELDS:
+        if set(assessment) != MECHANISM_FIELDS:
             raise ValueError(
-                "Investment company assessment does not match the minimal schema"
+                "Investment mechanism does not match the minimal schema"
             )
-        if str(assessment["direction"]) not in DIRECTIONS:
-            raise ValueError("Investment company assessment has invalid direction")
-        for field in ASSESSMENT_FIELDS - {"direction"}:
+        exposures = assessment["exposures"]
+        if not isinstance(exposures, list) or not exposures:
+            raise ValueError("Investment mechanism has no company exposure")
+        for field in ("mechanism_title", "mechanism", "main_uncertainty", "next_check"):
             if not str(assessment[field]).strip():
+                raise ValueError(f"Investment mechanism has empty {field}")
+        directions = {str(item.get("direction")) for item in exposures}
+        opposed = "positive" in directions and "negative" in directions
+        if bool(assessment["splits"]) != opposed:
+            raise ValueError("Investment mechanism splits flag is inconsistent")
+        for exposure in exposures:
+            if set(exposure) != EXPOSURE_FIELDS:
                 raise ValueError(
-                    f"Investment company assessment has empty {field}"
+                    "Investment company exposure does not match the minimal schema"
                 )
+            if str(exposure["direction"]) not in DIRECTIONS:
+                raise ValueError("Investment company exposure has invalid direction")
+            if str(exposure["materiality"]) not in MATERIALITIES:
+                raise ValueError("Investment company exposure has invalid materiality")
+            for field in EXPOSURE_FIELDS - {"direction", "materiality"}:
+                if not str(exposure[field]).strip():
+                    raise ValueError(
+                        f"Investment company exposure has empty {field}"
+                    )
     memo_calls = trace.get("memo_calls")
     if not isinstance(memo_calls, list):
         raise ValueError("Investment agent trace has no memo-call audit")
@@ -229,7 +258,9 @@ def import_trace(
         "evidence_sha256": str(trace["evidence_sha256"]),
         "input_sha256": str(trace["input_sha256"]),
         "memo_count": len(trace["memo_calls"]),
-        "assessed_company_count": len(final["company_assessments"]),
+        "assessed_company_count": sum(
+            len(item["exposures"]) for item in final["company_assessments"]
+        ),
         "rejected_company_count": len(final["rejected_after_memo"]),
         "turn_count": len(turns),
         "input_tokens": sum(int(item.get("input_tokens") or 0) for item in turns),
@@ -579,6 +610,7 @@ def insights_payload(
                 "investment_headline": str(final["investment_headline"]),
                 "development_summary": str(final["development_summary"]),
                 "portfolio_readthrough": str(final["portfolio_readthrough"]),
+                "prior_assumption": final.get("prior_assumption"),
                 "company_assessments": final["company_assessments"],
                 "rejected_after_memo": final["rejected_after_memo"],
                 "no_match_reason": final["no_match_reason"],

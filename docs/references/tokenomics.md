@@ -8,22 +8,20 @@ work that has no incremental API cost. Exact run telemetry remains
 authoritative; these numbers are a dated operating snapshot, not a price
 guarantee.
 
-## Current Development-Router Calibration
+## Current Development-Router Pass
 
-The July 21 `audience-routing-v13` calibration and top-100 pass used
-`gpt-5.6-luna` at medium reasoning, one sequential cache lane, and the saved
-Development evidence. It made no X or artifact-provider requests.
+The July 5–21 `audience-routing-v14` top-100 pass used `gpt-5.6-luna` at
+medium reasoning and saved Development evidence. It made no X or
+artifact-provider requests.
 
 | Scope | Requests | Input tokens | Cached tokens | Output tokens | Measured cost |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Initial top-10 calibration | 10 | 83,288 | 0 | 2,618 | $0.098996 |
-| Clean top-100 pass | 97 | 429,003 | 0 | 26,659 | $0.588957 |
+| Seventeen complete days | 1,647 | 6,990,192 | 2,791,936 | 432,579 | $7.079129 |
 
-The top-100 selector displayed 100 ranks but froze 97 packets because three
-Developments had no current first-party X source. The stable prompt was
-cache-eligible, but both runs observed no reusable-prefix reads. Treat the
-measured values as the current uncached operating cost rather than projecting
-an assumed cache discount.
+The pass completed with zero failures. The provider reported a cache read on
+1,558 requests and a 39.94% aggregate token read ratio. This is measured
+production telemetry, not an assumed cache discount; future refreshes can
+observe different reuse even with the same request layout.
 
 ## Current 17-Day Rank Migration
 

@@ -217,12 +217,21 @@ export interface EditorialInsightsResponse {
 export type InvestmentAgentRelevance = 'direct' | 'indirect'
 export type InvestmentAgentDirection = 'positive' | 'negative' | 'mixed' | 'unclear'
 
-export interface InvestmentAgentCompanyAssessment {
+export type InvestmentAgentMateriality = 'material' | 'immaterial' | 'unknown'
+
+export interface InvestmentAgentExposure {
   ticker: string
-  bottom_line: string
-  mechanism: string
   affected_driver: string
   direction: InvestmentAgentDirection
+  materiality: InvestmentAgentMateriality
+  note: string
+}
+
+export interface InvestmentAgentCompanyAssessment {
+  mechanism_title: string
+  mechanism: string
+  splits: boolean
+  exposures: InvestmentAgentExposure[]
   main_uncertainty: string
   next_check: string
 }
@@ -248,6 +257,7 @@ export interface InvestmentAgentItem {
   investment_headline: string
   development_summary: string
   portfolio_readthrough: string
+  prior_assumption: string | null
   company_assessments: InvestmentAgentCompanyAssessment[]
   rejected_after_memo: Array<{ ticker: string; reason: string }>
   no_match_reason: string | null

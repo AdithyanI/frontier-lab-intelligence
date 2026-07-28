@@ -1056,43 +1056,74 @@ const INVESTMENT_AGENT_DIRECTION = {
   unclear: { icon: '?', label: 'Direction unclear' },
 } as const
 
-function InvestmentAgentCompany({
+function InvestmentAgentMechanism({
   assessment,
-  companyName,
+  companyNames,
   feedPath,
 }: {
   assessment: InvestmentAgentCompanyAssessment
-  companyName: string
+  companyNames: Record<string, string>
   feedPath: string
 }) {
-  const direction = INVESTMENT_AGENT_DIRECTION[assessment.direction]
   return (
-    <details className="investment-agent-company">
+    <details className="investment-agent-company" open>
       <summary>
         <span className="investment-agent-company-identity">
-          <strong>{companyName}</strong>
-          <span className="mono">{assessment.ticker}</span>
+          <strong>{decodeTextEntities(assessment.mechanism_title)}</strong>
+          {assessment.splits && (
+            <span className="investment-agent-splits" title="One company gains at another's expense">
+              splits
+            </span>
+          )}
         </span>
-        <span
-          className="investment-agent-direction"
-          data-direction={assessment.direction}
-        >
-          <span aria-hidden="true">{direction.icon}</span>
-          {direction.label}
+        <span className="investment-agent-mechanism-tickers">
+          {assessment.exposures.map((exposure) => (
+            <span
+              className="investment-agent-direction"
+              data-direction={exposure.direction}
+              key={exposure.ticker}
+            >
+              <span aria-hidden="true">{INVESTMENT_AGENT_DIRECTION[exposure.direction].icon}</span>
+              {exposure.ticker}
+            </span>
+          ))}
         </span>
         <span className="investment-agent-company-summary">
-          {decodeTextEntities(assessment.bottom_line)}
+          {decodeTextEntities(assessment.mechanism)}
         </span>
       </summary>
       <div className="investment-agent-company-detail">
-        <section>
-          <h4 className="mono">Why this company</h4>
-          <p>{decodeTextEntities(assessment.mechanism)}</p>
-        </section>
-        <section>
-          <h4 className="mono">What could move</h4>
-          <p>{decodeTextEntities(assessment.affected_driver)}</p>
-        </section>
+        <ol className="investment-agent-exposures">
+          {assessment.exposures.map((exposure) => (
+            <li key={exposure.ticker}>
+              <div className="investment-agent-exposure-head">
+                <strong>{companyNames[exposure.ticker] ?? exposure.ticker}</strong>
+                <Link to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}>
+                  {exposure.ticker} ↗
+                </Link>
+                <span
+                  className="investment-agent-direction"
+                  data-direction={exposure.direction}
+                >
+                  <span aria-hidden="true">{INVESTMENT_AGENT_DIRECTION[exposure.direction].icon}</span>
+                  {INVESTMENT_AGENT_DIRECTION[exposure.direction].label}
+                </span>
+                <span
+                  className="investment-agent-materiality"
+                  data-materiality={exposure.materiality}
+                  title="Could this move the company's reported results at its own scale?"
+                >
+                  {exposure.materiality}
+                </span>
+              </div>
+              <p>{decodeTextEntities(exposure.note)}</p>
+              <p className="investment-agent-exposure-driver">
+                <span className="mono">Driver</span>
+                {' '}{decodeTextEntities(exposure.affected_driver)}
+              </p>
+            </li>
+          ))}
+        </ol>
         <section>
           <h4 className="mono">What remains unproven</h4>
           <p>{decodeTextEntities(assessment.main_uncertainty)}</p>
@@ -1105,9 +1136,6 @@ function InvestmentAgentCompany({
       <div className="investment-agent-source-material">
         <span className="mono">Source material reviewed</span>
         <Link to={feedPath}>Development evidence ↗</Link>
-        <Link to={`/bit-lens/companies?company=${encodeURIComponent(assessment.ticker)}`}>
-          Company memo ↗
-        </Link>
       </div>
     </details>
   )
@@ -1181,14 +1209,14 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
         {item.company_assessments.length > 0 ? (
           <section className="investment-agent-companies" aria-label="Company read-throughs">
             <header>
-              <h3>Company read-throughs</h3>
+              <h3>How this reaches companies</h3>
             </header>
             {item.company_assessments.map((assessment) => (
-              <InvestmentAgentCompany
+              <InvestmentAgentMechanism
                 assessment={assessment}
-                companyName={item.company_names[assessment.ticker] ?? assessment.ticker}
+                companyNames={item.company_names}
                 feedPath={feedPath}
-                key={assessment.ticker}
+                key={assessment.mechanism_title}
               />
             ))}
           </section>
@@ -1196,6 +1224,13 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
           <section className="investment-agent-no-match">
             <h3>No company connection cleared the bar</h3>
             <p>{decodeTextEntities(item.no_match_reason || 'No decision-useful connection was established.')}</p>
+          </section>
+        )}
+
+        {item.prior_assumption && (
+          <section className="investment-agent-prior">
+            <h3 className="mono">If you assumed</h3>
+            <p>{decodeTextEntities(item.prior_assumption)}</p>
           </section>
         )}
 
