@@ -1714,6 +1714,17 @@
 }
 
 @media (max-width: 820px) {
+  .investment-agent-exposures > li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .investment-agent-exposure-verdict {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+  }
+
   .investment-agent-head {
     align-items: flex-start;
     flex-direction: column;
@@ -1826,8 +1837,20 @@
 
 .investment-agent-exposures > li {
   counter-increment: exposure;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 24px;
+  align-items: start;
   padding-left: 22px;
   position: relative;
+}
+
+.investment-agent-exposure-verdict {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-top: 1px;
 }
 
 .investment-agent-exposures > li::before {
@@ -1864,22 +1887,18 @@
 }
 
 .investment-agent-materiality {
-  padding: 1px 5px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 9px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.055em;
   text-transform: uppercase;
 }
 
 .investment-agent-materiality[data-materiality='material'] {
-  border-color: var(--ink);
   color: var(--ink);
 }
 
-.investment-agent-exposures > li > p {
+.investment-agent-exposures > li > .investment-agent-exposure-main > p {
   max-width: 74ch;
   margin: 0;
   color: var(--ink-soft);

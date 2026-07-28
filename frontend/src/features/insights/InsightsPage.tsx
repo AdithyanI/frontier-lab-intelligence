@@ -1101,14 +1101,22 @@ function InvestmentAgentMechanism({
         <ol className="investment-agent-exposures">
           {assessment.exposures.map((exposure) => (
             <li key={exposure.ticker}>
-              <div className="investment-agent-exposure-head">
-                <strong>{companyNames[exposure.ticker] ?? exposure.ticker}</strong>
-                <Link
-                  className="mono"
-                  to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}
-                >
-                  {exposure.ticker}
-                </Link>
+              <div className="investment-agent-exposure-main">
+                <div className="investment-agent-exposure-head">
+                  <strong>{companyNames[exposure.ticker] ?? exposure.ticker}</strong>
+                  <Link
+                    className="mono"
+                    to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}
+                  >
+                    {exposure.ticker}
+                  </Link>
+                </div>
+                <p className="investment-agent-exposure-driver">
+                  {decodeTextEntities(exposure.affected_driver)}
+                </p>
+                {ranked && <p className="investment-agent-exposure-note">{decodeTextEntities(exposure.note)}</p>}
+              </div>
+              <div className="investment-agent-exposure-verdict">
                 <span
                   className="investment-agent-direction"
                   data-direction={exposure.direction}
@@ -1123,10 +1131,6 @@ function InvestmentAgentMechanism({
                   {INVESTMENT_AGENT_MATERIALITY[exposure.materiality]}
                 </span>
               </div>
-              <p className="investment-agent-exposure-driver">
-                {decodeTextEntities(exposure.affected_driver)}
-              </p>
-              {ranked && <p className="investment-agent-exposure-note">{decodeTextEntities(exposure.note)}</p>}
             </li>
           ))}
         </ol>
