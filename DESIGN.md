@@ -206,10 +206,12 @@ Rules:
   Not relevant, and Not evaluated. Search shares their 44px square hairline treatment
   but remains a separate left-aligned input; the Status/Sort controls
   anchor the right edge. They stack only on narrow screens. Each Development
-  row names its display post, reports the number of original posts and
+  row names its display post, reports the number of source posts and
   amplifiers, and keeps every exact source post under one disclosure. Use
-  `Display post` and `Original post`; do not call the count “independent
-  sources,” because it counts posts rather than people. Per-Development routing rationale is collapsed by
+  one `Posts about this Development` section heading and mark only the representative row
+  `Shown in Feed`; do not repeat a category label on every row or call the
+  count “independent sources,” because it counts posts rather than people.
+  Per-Development routing rationale is collapsed by
   default behind a quiet `View reasons` disclosure so evidence remains the
   primary reading surface. A routed Development shows neutral hairline `ENG`
   and/or `INV` marks, or the quiet `Neither audience`

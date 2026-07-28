@@ -259,9 +259,9 @@ export function EvidenceInputMap({
   const stages = [
     { x: 28, kicker: 'WHO', title: 'Registry', glyph: 'roster', dark: true },
     { x: 202, kicker: 'SOURCE', title: 'X output', glyph: 'days', dark: false },
-    { x: 376, kicker: 'STRUCTURE', title: 'Exact Events', glyph: 'event', dark: false },
-    { x: 550, kicker: 'ORDER', title: 'Daily rank', glyph: 'rank', dark: false },
-    { x: 724, kicker: 'ENRICH', title: 'Artifacts', glyph: 'artifact', dark: false },
+    { x: 376, kicker: 'STRUCTURE', title: 'Events + artifacts', glyph: 'event', dark: false },
+    { x: 550, kicker: 'GROUP', title: 'Developments', glyph: 'artifact', dark: false },
+    { x: 724, kicker: 'ORDER', title: 'Daily rank', glyph: 'rank', dark: false },
     { x: 898, kicker: 'JUDGE', title: 'Audience routing', glyph: 'audience', dark: true },
   ]
   const stageWidth = 154

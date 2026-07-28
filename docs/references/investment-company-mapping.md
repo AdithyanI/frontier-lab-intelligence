@@ -44,6 +44,42 @@ is needed only when an Event exposes a missing mechanism or a dated fact has
 materially changed. Regenerating all profiles on every run would add cost and
 variance without improving the decision boundary.
 
+## One-company research pilot
+
+[`scripts/company-memo-pilot.py`](../../scripts/company-memo-pilot.py) is the
+durable experiment for testing whether a richer web-grounded company memo
+improves this packet. It is deliberately not an `fli` command yet.
+
+Run one company:
+
+```bash
+.venv/bin/python scripts/company-memo-pilot.py --ticker IREN
+```
+
+The script:
+
+1. reads the existing canonical profile as prior context;
+2. starts one `gpt-5.6-sol` / `xhigh` LiteLLM Responses background request;
+3. uses hosted web search, required primary-source guidance, prompt caching,
+   and a strict structured-output schema;
+4. polls the latest returned response ID until it reaches a terminal state;
+5. validates that every claim URL is HTTPS and present in the source ledger;
+6. writes the memo, usage, request identity, web actions, and provenance to
+   `tmp/company-memo-pilot-<TICKER>.json`.
+
+The pilot never mutates the canonical Investment packet. Its first acceptance
+decision is qualitative: inspect one result for causal usefulness, primary
+source coverage, BIT-attribution discipline, duplication, and excess
+structure. If the result materially improves on the current profile, extract
+the smallest useful schema change and add an evaluation before running the
+full company universe. If it does not, keep the existing packet and move
+directly to Event-to-company calibration.
+
+The background transport itself is already proven through the deployed
+LiteLLM v1.93.0 proxy. The remaining next step is the paid Sol research run for
+one company and review of its memo; it has not been run as part of documenting
+this pilot.
+
 ## Two-stage retrieval
 
 1. Give the model the Event and the compact index of all 37 companies.

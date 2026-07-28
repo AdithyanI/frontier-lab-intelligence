@@ -96,8 +96,8 @@ const PLANES: Plane[] = [
     dots: 62,
     step: '2',
     name: 'Collect',
-    concept: 'output grouped into exact Events',
-    detail: 'and the sources they cite',
+    concept: 'exact Events grouped by shared artifacts',
+    detail: 'every original post stays visible',
   },
   {
     id: 'rank',
@@ -118,7 +118,7 @@ const PLANES: Plane[] = [
     dots: 16,
     step: '4',
     name: 'Judge',
-    concept: 'two questions for every Event',
+    concept: 'two questions for every Development',
     detail: 'for investors? for engineers?',
   },
   {

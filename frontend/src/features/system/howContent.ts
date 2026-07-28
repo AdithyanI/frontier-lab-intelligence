@@ -35,13 +35,13 @@ export const HOW_BEATS: HowBeat[] = [
     id: 'rank',
     step: '3',
     title: 'Rank',
-    text: 'A transparent Event rank orders each day. Distinct trusted Registry entities that quote or repost any member of the complete Event come first; voter position, source-author position, and same-day public interaction only break ties. It decides where to look first; the judging comes later.',
+    text: 'Same-day original posts that share one specific artifact become a Development. A transparent rank then asks how many trusted Registry entities authored, quoted, or reposted it; participant position and one-post public interaction only break ties. It decides where to look first; judging comes later.',
   },
   {
     id: 'judge',
     step: '4',
     title: 'Judge',
-    text: 'Every Event is asked two independent questions. Does this change an investment position? Should an engineering team act on it? Each answer keeps its reasons attached.',
+    text: 'Every Development can later be asked two independent questions. Does this change an investment position? Should an engineering team act on it? Each answer keeps its reasons attached.',
   },
   {
     id: 'publish',

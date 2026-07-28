@@ -50,6 +50,39 @@ interpretation, current Luna/Terra proof, incident history, and the repeatable
 canary are owned by [`prompt-caching.md`](prompt-caching.md). That page is the
 single source of truth; do not duplicate its operational rules here.
 
+## Long-running Responses calls
+
+Use OpenAI Responses background mode for a web-grounded or high-reasoning call
+that may outlive one HTTP request through the LiteLLM proxy:
+
+```python
+response = client.responses.create(..., background=True)
+while response.status in {"queued", "in_progress"}:
+    time.sleep(2)
+    response = client.responses.retrieve(response.id)
+```
+
+This is the official OpenAI polling contract. Always poll the ID on the latest
+returned response object. LiteLLM's default response-ID security hook may
+return a different encrypted wrapper on each retrieval; that wrapper remains
+valid and does not mean that a second provider job was created. Do not disable
+the security hook or bypass the shared proxy merely to make the visible ID
+stable.
+
+The deployed LiteLLM v1.93.0 path was verified on 2026-07-28 with the exact
+loop above: a Luna background request moved from `queued` to `completed` and
+returned the expected output while its visible encrypted ID changed. The
+v1.93.0 response-ID fix concerns nested hosted-MCP double encoding, not visual
+ID stability between polling responses.
+
+Background calls may set `store=False`; OpenAI temporarily retains enough
+state to execute and poll them. Persist the returned result and provenance in
+the owning workflow once the response reaches a terminal state.
+
+- [OpenAI background-mode guide](https://developers.openai.com/api/docs/guides/background)
+- [LiteLLM v1.93.0 MCP response-ID fix](https://github.com/BerriAI/litellm/pull/32034)
+- [LiteLLM response-ID security hook](https://github.com/BerriAI/litellm/blob/v1.93.0/litellm/proxy/hooks/responses_id_security.py)
+
 ## Source Guidance
 
 - [OpenAI GPT-5.6 migration guidance](https://developers.openai.com/api/docs/guides/latest-model#update-api-and-model-parameters)

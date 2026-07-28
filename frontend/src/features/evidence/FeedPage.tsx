@@ -523,9 +523,9 @@ function DevelopmentSource({
       className={`development-source${source.event_id === focusedEventId ? ' development-source--focused' : ''}`}
     >
       <header>
-        <span className="event-relationship-kind mono">
-          {source.is_primary ? 'Display post' : 'Original post'}
-        </span>
+        {source.is_primary && (
+          <span className="event-relationship-kind mono">Shown in Feed</span>
+        )}
         <strong>{post.author.entity_name ?? post.author.name}</strong>
         <span className="mono">@{post.author.handle}</span>
         <time className="mono" dateTime={post.published_at}>
@@ -614,8 +614,8 @@ function DevelopmentEvidenceDetails({
       <summary>
         <span>
           {item.source_event_count > 1
-            ? `View ${item.source_event_count} original posts`
-            : 'View original post and activity'}
+            ? `View ${item.source_event_count} posts about this Development`
+            : 'View post and activity'}
           {relationshipSummary.length > 0 ? ` · ${relationshipSummary.join(' · ')}` : ''}
         </span>
       </summary>
@@ -623,6 +623,9 @@ function DevelopmentEvidenceDetails({
         <div className="event-thread">
           {evidenceLoading && <p className="mono muted">Loading evidence…</p>}
           {evidenceError && <p className="error-note">{evidenceError}</p>}
+          <p className="development-supporting-label mono">
+            Posts about this Development
+          </p>
           <div className="development-sources">
             {detail.source_events.map((source) => (
               <DevelopmentSource
@@ -717,7 +720,7 @@ function DevelopmentRow({
           <div className="feed-meta mono">
             {item.is_grouped && (
               <span>
-                {item.source_event_count} original {item.source_event_count === 1 ? 'post' : 'posts'}
+                {item.source_event_count} {item.source_event_count === 1 ? 'post' : 'posts'}
                 {' · '}
                 {item.amplifier_count} {item.amplifier_count === 1 ? 'amplifier' : 'amplifiers'}
               </span>
