@@ -1426,29 +1426,6 @@
   line-height: 1.2;
 }
 
-.investment-agent-provenance {
-  display: flex;
-  flex: none;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 7px 16px;
-  margin-top: 7px;
-}
-
-.investment-agent-provenance a {
-  color: var(--blue-ink);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.investment-agent-provenance a:hover,
-.investment-agent-provenance a:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .investment-agent-opening {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1527,11 +1504,13 @@
 }
 
 .investment-agent-company > summary::-webkit-details-marker,
+.investment-agent-sources > summary::-webkit-details-marker,
 .investment-agent-process > summary::-webkit-details-marker {
   display: none;
 }
 
 .investment-agent-company > summary::after,
+.investment-agent-sources > summary::after,
 .investment-agent-process > summary::after {
   width: 6px;
   height: 6px;
@@ -1545,11 +1524,13 @@
 }
 
 .investment-agent-company[open] > summary::after,
+.investment-agent-sources[open] > summary::after,
 .investment-agent-process[open] > summary::after {
   transform: rotate(225deg);
 }
 
 .investment-agent-company > summary:focus-visible,
+.investment-agent-sources > summary:focus-visible,
 .investment-agent-process > summary:focus-visible {
   outline: 2px solid var(--blue-mid);
   outline-offset: 2px;
@@ -1689,6 +1670,7 @@
   text-underline-offset: 3px;
 }
 
+.investment-agent-sources > summary,
 .investment-agent-process > summary {
   display: flex;
   min-height: 47px;
@@ -1702,6 +1684,39 @@
   font-weight: 500;
   list-style: none;
   position: relative;
+}
+
+.investment-agent-sources {
+  max-width: 980px;
+  margin-top: 32px;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+}
+
+.investment-agent-sources > summary .mono {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.investment-agent-sources-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 24px;
+  padding: 15px 0 18px;
+  border-top: 1px solid var(--border);
+}
+
+.investment-agent-sources-body a {
+  color: var(--blue-ink);
+  font-size: 10.5px;
+  text-decoration: none;
+}
+
+.investment-agent-sources-body a:hover,
+.investment-agent-sources-body a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .investment-agent-rejections,
@@ -1758,8 +1773,7 @@
 
 .investment-agent-process {
   max-width: 980px;
-  margin-top: 32px;
-  border-top: 1px solid var(--border-strong);
+  margin-top: 0;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1828,11 +1842,6 @@
   .investment-agent-head {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .investment-agent-provenance {
-    justify-content: flex-start;
-    margin-top: 0;
   }
 
   .investment-agent-company > summary {

@@ -138,12 +138,14 @@ test('Insights inherits Feed rank and links every decision to its exact Event', 
   assert.match(appStyles, /\.insight-rank strong \{[\s\S]*?font-size: 30px;/)
 })
 
-test('Investment Insights separates Feed evidence, the original post, and source artifacts', () => {
-  assert.match(insightSource, /className="investment-agent-provenance"/)
-  assert.match(insightSource, /Open in Feed ↗/)
-  assert.match(insightSource, /Original post ↗/)
-  assert.match(insightSource, /Source artifact/)
+test('Investment Insights progressively discloses Feed evidence, the original post, and source artifacts', () => {
+  assert.match(insightSource, /<details className="investment-agent-sources">/)
+  assert.match(insightSource, /<span>Sources<\/span>/)
+  assert.match(insightSource, /View Development in Feed ↗/)
+  assert.match(insightSource, /Open original post ↗/)
+  assert.match(insightSource, /Read source artifact/)
   assert.doesNotMatch(insightSource, /Primary source ↗/)
+  assert.doesNotMatch(insightSource, /className="investment-agent-provenance"/)
   assert.match(apiSource, /original_post:/)
   assert.match(apiSource, /artifacts: Array</)
 })

@@ -1149,6 +1149,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
   const titleId = `investment-agent-${item.development_id}-title`
   const feedPath = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(item.development_id)}`
   const artifacts = item.provenance?.artifacts ?? []
+  const sourceLinkCount = 1 + (item.provenance?.original_post?.url ? 1 : 0) + artifacts.length
   return (
     <article
       className="insight-row investment-agent-row"
@@ -1164,34 +1165,6 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
       <div className="insight-body investment-agent-body">
         <header className="insight-head investment-agent-head">
           <h2 id={titleId}>{decodeTextEntities(item.investment_headline)}</h2>
-          <nav className="investment-agent-provenance" aria-label="Evidence links">
-            <Link to={feedPath}>Open in Feed ↗</Link>
-            {item.provenance?.original_post?.url && (
-              <a
-                href={item.provenance.original_post.url}
-                target="_blank"
-                rel="noreferrer"
-                title={
-                  item.provenance.original_post.author
-                    ? `Original post by ${item.provenance.original_post.author}`
-                    : 'Original post'
-                }
-              >
-                Original post ↗
-              </a>
-            )}
-            {artifacts.map((artifact, index) => (
-              <a
-                href={artifact.url}
-                key={artifact.artifact_id || artifact.url}
-                target="_blank"
-                rel="noreferrer"
-                title={artifact.title}
-              >
-                {artifacts.length === 1 ? 'Source artifact ↗' : `Source artifact ${index + 1} ↗`}
-              </a>
-            ))}
-          </nav>
         </header>
 
         <div className="investment-agent-opening">
@@ -1242,6 +1215,43 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
             </ul>
           </section>
         )}
+
+        <details className="investment-agent-sources">
+          <summary>
+            <span>Sources</span>
+            <span className="mono">
+              {sourceLinkCount} {sourceLinkCount === 1 ? 'link' : 'links'}
+            </span>
+          </summary>
+          <nav className="investment-agent-sources-body" aria-label="Evidence links">
+            <Link to={feedPath}>View Development in Feed ↗</Link>
+            {item.provenance?.original_post?.url && (
+              <a
+                href={item.provenance.original_post.url}
+                target="_blank"
+                rel="noreferrer"
+                title={
+                  item.provenance.original_post.author
+                    ? `Original post by ${item.provenance.original_post.author}`
+                    : 'Original post'
+                }
+              >
+                Open original post ↗
+              </a>
+            )}
+            {artifacts.map((artifact, index) => (
+              <a
+                href={artifact.url}
+                key={artifact.artifact_id || artifact.url}
+                target="_blank"
+                rel="noreferrer"
+                title={artifact.title}
+              >
+                {artifacts.length === 1 ? 'Read source artifact ↗' : `Read source artifact ${index + 1} ↗`}
+              </a>
+            ))}
+          </nav>
+        </details>
 
         <InvestmentAgentProcess item={item} />
       </div>
