@@ -126,7 +126,9 @@ from translated responses, owns stable prompt-cache sharding and LiteLLM cost
 header parsing, supplies the Azure-compatible GPT-5.6 cache-retention adapter,
 and normalizes hosted-search actions and cited URLs. Current model and reasoning
 defaults are accuracy-first and boundary-specific; the durable routing and
-evaluation policy lives in `docs/references/model-routing.md`.
+evaluation policy lives in `docs/references/model-routing.md`. The authoritative
+cache layout, scheduling, telemetry, live proof, and troubleshooting contract
+lives in `docs/references/prompt-caching.md`.
 Claude-native web search uses `tool_choice=auto` so the model can finish after
 searching; the audit still rejects any response with no observed search action.
 

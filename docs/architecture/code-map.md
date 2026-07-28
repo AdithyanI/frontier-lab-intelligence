@@ -135,5 +135,6 @@ All repeated LLM work uses the shared LiteLLM path and the exact contracts in
 - Artifact contract: [`artifact-library.md`](../references/artifact-library.md)
 - Insight refresh/client: [`insight-refresh.md`](../references/insight-refresh.md)
 - Daily agent/editorial contract: [`daily-intelligence.md`](../references/daily-intelligence.md)
-- Model routing/cache contract: [`model-routing.md`](../references/model-routing.md)
+- Model routing contract: [`model-routing.md`](../references/model-routing.md)
+- Prompt-cache contract and live proof: [`prompt-caching.md`](../references/prompt-caching.md)
 - Measured workflow and provider economics: [`tokenomics.md`](../references/tokenomics.md)

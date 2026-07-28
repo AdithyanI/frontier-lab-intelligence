@@ -132,11 +132,12 @@ packets or calling the model. Do not use `--replace` in parallel or overlapping
 refreshes: immutable predecessor runs are the reuse and audit source, and one
 process must never prune another process's outputs.
 
-LiteLLM/OpenAI prompt caching still applies to the stable instruction prefix;
-the run databases provide the stronger exact-response reuse even when the
-global publication changes. A changed Event, evidence packet, rendered input,
-model, reasoning effort, prompt, or schema correctly produces a new request
-rather than reusing a stale judgment.
+Provider prompt caching still applies to the stable instruction prefix under
+the shared [`prompt-caching.md`](prompt-caching.md) contract; the run databases
+provide the stronger exact-response reuse even when the global publication
+changes. A changed Event, evidence packet, rendered input, model, reasoning
+effort, prompt, or schema correctly produces a new request rather than reusing
+a stale judgment.
 
 For an artifact-only correction to an already complete day, use
 `fli audience-routing refresh-run` with the prior run database and a fresh run

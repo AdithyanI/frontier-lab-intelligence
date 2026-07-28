@@ -42,9 +42,10 @@ case study that earns the next interview. Prefer a narrow end-to-end proof and
   schema and provenance invariants documented for the owning stage.
 - Follow `docs/architecture/code-map.md` for ownership and
   `docs/references/data-lifecycle.md` before moving or deleting data.
-- Route every LLM call through the shared LiteLLM endpoint. The exact model,
-  metadata, cost, reasoning, and prompt-cache rules live in
-  `docs/references/model-routing.md`.
+- Route every LLM call through the shared LiteLLM endpoint. Exact model,
+  metadata, cost, and reasoning rules live in
+  `docs/references/model-routing.md`; prompt-cache rules, live proof, and
+  troubleshooting live in `docs/references/prompt-caching.md`.
 - Use the build log only for the material decisions and milestones defined in
   `docs/references/build-log.md`. Routine work does not get an entry.
 - Update `docs/architecture/overview.md` when a pipeline, schema, source class,

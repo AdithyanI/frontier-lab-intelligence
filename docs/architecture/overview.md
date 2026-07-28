@@ -212,6 +212,7 @@ builds the production SPA.
 - [Feed and Event contract](../references/signal-feed.md)
 - [Evidence refresh workflow](../references/evidence-refresh.md)
 - [Artifact library contract](../references/artifact-library.md)
-- [Model routing and cache policy](../references/model-routing.md)
+- [Model routing policy](../references/model-routing.md)
+- [Prompt-cache contract and live proof](../references/prompt-caching.md)
 - [Insight refresh/client](../references/insight-refresh.md)
 - [Daily agent/editorial contract](../references/daily-intelligence.md)
