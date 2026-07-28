@@ -9,6 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
 from fli.network import rankings as following_rankings
 from fli.scoring import attention
@@ -51,6 +52,27 @@ def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
         """SELECT * FROM feed_run
            ORDER BY created_at DESC, run_id DESC LIMIT 1"""
     ).fetchone()
+
+
+def _published_run_for_day(
+    conn: sqlite3.Connection,
+    day: str,
+) -> sqlite3.Row | None:
+    """Resolve the Feed run pinned to one published Event day."""
+    if signal_events.DEFAULT_EVENTS_DB.is_file():
+        events = _open_readonly(signal_events.DEFAULT_EVENTS_DB)
+        try:
+            event_run = signal_events.published_run(events, day=day)
+        finally:
+            events.close()
+        if event_run is not None:
+            published_feed = conn.execute(
+                "SELECT * FROM feed_run WHERE run_id = ?",
+                (event_run["feed_run_id"],),
+            ).fetchone()
+            if published_feed is not None:
+                return published_feed
+    return _latest_run(conn)
 
 
 @lru_cache(maxsize=8)
@@ -227,31 +249,79 @@ def dates_payload(*, run_id: str | None = None) -> dict[str, Any]:
             "reason": "No Feed store found. Run `fli signal-feed refresh` first.",
         }
     conn = _open_readonly(DEFAULT_FEED_DB)
-    run = (
-        conn.execute("SELECT * FROM feed_run WHERE run_id = ?", (run_id,)).fetchone()
-        if run_id
-        else _latest_run(conn)
-    )
-    if run is None:
+    day_runs: list[tuple[str, sqlite3.Row]] = []
+    if run_id:
+        run = conn.execute(
+            "SELECT * FROM feed_run WHERE run_id = ?", (run_id,)
+        ).fetchone()
+        if run is not None:
+            days = [
+                row[0]
+                for row in conn.execute(
+                    """SELECT DISTINCT post.day
+                       FROM feed_run_post rp
+                       JOIN feed_post post
+                         ON post.run_id = rp.run_id
+                        AND post.provider = rp.provider
+                        AND post.post_id = rp.post_id
+                       WHERE rp.run_id = ? AND rp.role = 'direct'
+                         AND post.day BETWEEN ? AND ?
+                       ORDER BY post.day""",
+                    (run["run_id"], run["date_from"], run["date_to"]),
+                )
+            ]
+            day_runs = [(str(day), run) for day in days]
+    elif signal_events.DEFAULT_EVENTS_DB.is_file():
+        events = _open_readonly(signal_events.DEFAULT_EVENTS_DB)
+        try:
+            publications = signal_events.published_days(events)
+        finally:
+            events.close()
+        feed_runs: dict[str, sqlite3.Row] = {}
+        for publication in publications:
+            feed_run_id = str(publication["feed_run_id"])
+            feed_run = feed_runs.get(feed_run_id)
+            if feed_run is None:
+                feed_run = conn.execute(
+                    "SELECT * FROM feed_run WHERE run_id = ?", (feed_run_id,)
+                ).fetchone()
+                if feed_run is None:
+                    continue
+                feed_runs[feed_run_id] = feed_run
+            publication_day = str(publication["day"])
+            if (
+                str(feed_run["date_from"])
+                <= publication_day
+                <= str(feed_run["date_to"])
+            ):
+                day_runs.append((publication_day, feed_run))
+    if not day_runs:
+        run = _latest_run(conn)
+        if run is not None:
+            days = [
+                row[0]
+                for row in conn.execute(
+                    """SELECT DISTINCT post.day
+                       FROM feed_run_post rp
+                       JOIN feed_post post
+                         ON post.run_id = rp.run_id
+                        AND post.provider = rp.provider
+                        AND post.post_id = rp.post_id
+                       WHERE rp.run_id = ? AND rp.role = 'direct'
+                         AND post.day BETWEEN ? AND ?
+                       ORDER BY post.day""",
+                    (run["run_id"], run["date_from"], run["date_to"]),
+                )
+            ]
+            day_runs = [(str(day), run) for day in days]
+    if not day_runs:
         conn.close()
         return {"available": False, "reason": "Feed store has no materialized run."}
-    days = [
-        row[0]
-        for row in conn.execute(
-            """SELECT DISTINCT post.day
-               FROM feed_run_post rp
-               JOIN feed_post post
-                 ON post.run_id = rp.run_id AND post.provider = rp.provider
-                AND post.post_id = rp.post_id
-               WHERE rp.run_id = ? AND rp.role = 'direct'
-               ORDER BY post.day""",
-            (run["run_id"],),
-        )
-    ]
+    day_runs.sort(key=lambda item: item[0])
     by_handle, by_x_id = _registry_maps()
     rows = []
-    for day in days:
-        relations = _relation_rows(conn, run["run_id"], day)
+    for day, day_run in day_runs:
+        relations = _relation_rows(conn, day_run["run_id"], day)
         amplifier_entities: dict[tuple[str, str], set[int]] = defaultdict(set)
         for relation in relations:
             account = _registry_account(
@@ -267,7 +337,7 @@ def dates_payload(*, run_id: str | None = None) -> dict[str, Any]:
                     int(account["entity_id"])
                 )
         item_count = 0
-        for candidate in _candidate_rows(conn, run["run_id"], day):
+        for candidate in _candidate_rows(conn, day_run["run_id"], day):
             author = _registry_account(
                 candidate["author_x_id"],
                 candidate["author_handle"],
@@ -292,13 +362,14 @@ def dates_payload(*, run_id: str | None = None) -> dict[str, Any]:
             if direct_active or active_amplifiers:
                 item_count += 1
         rows.append({"day": day, "item_count": item_count})
+    latest_day, latest_run = day_runs[-1]
     conn.close()
     return {
         "available": True,
-        "latest_complete_date": run["date_to"],
-        "date_from": run["date_from"],
-        "date_to": run["date_to"],
-        "run_id": run["run_id"],
+        "latest_complete_date": latest_day,
+        "date_from": day_runs[0][0],
+        "date_to": latest_day,
+        "run_id": latest_run["run_id"],
         "dates": rows,
     }
 
@@ -322,11 +393,20 @@ def feed_payload(
     run = (
         conn.execute("SELECT * FROM feed_run WHERE run_id = ?", (run_id,)).fetchone()
         if run_id
-        else _latest_run(conn)
+        else _published_run_for_day(conn, requested_day)
     )
     if run is None:
         conn.close()
         return {"available": False, "reason": "Feed store has no materialized run."}
+    if not str(run["date_from"]) <= requested_day <= str(run["date_to"]):
+        conn.close()
+        return {
+            "available": False,
+            "reason": (
+                f"{requested_day} is outside the published Feed window "
+                f"{run['date_from']} through {run['date_to']}."
+            ),
+        }
     candidates = _candidate_rows(conn, run["run_id"], requested_day)
     relations = _relation_rows(conn, run["run_id"], requested_day)
 

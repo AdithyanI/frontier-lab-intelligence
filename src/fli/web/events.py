@@ -42,10 +42,10 @@ def _latest_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
 
 
 def _selected_run(
-    conn: sqlite3.Connection, event_run_id: str
+    conn: sqlite3.Connection, event_run_id: str, *, day: str
 ) -> sqlite3.Row | None:
     if not event_run_id:
-        return _latest_run(conn)
+        return signal_events.published_run(conn, day=day)
     return conn.execute(
         "SELECT * FROM event_run WHERE run_id = ?",
         (event_run_id,),
@@ -942,7 +942,7 @@ def _events_day_cached(
         return persisted
 
     events = _open_readonly(DEFAULT_EVENTS_DB)
-    run = _selected_run(events, event_run_id)
+    run = _selected_run(events, event_run_id, day=day)
     if run is None:
         events.close()
         return {
@@ -1653,9 +1653,9 @@ def _dates_payload_cached(
             "reason": "No Event store found. Run `fli signal-events refresh` first.",
         }
     events = _open_readonly(DEFAULT_EVENTS_DB)
-    run = _latest_run(events)
+    publications = signal_events.published_days(events)
     events.close()
-    if run is None:
+    if not publications:
         return {
             "available": False,
             "reason": "Event store has no published Feed/Event pair.",
@@ -1664,12 +1664,21 @@ def _dates_payload_cached(
     persisted = _read_persisted_payload(name="dates.json.gz", cache_key=cache_key)
     if persisted is not None:
         return persisted
-    feed_dates = feed_store.dates_payload(run_id=run["feed_run_id"])
+    publication_feed_runs = {
+        str(publication["feed_run_id"]) for publication in publications
+    }
+    feed_dates = feed_store.dates_payload(
+        run_id=(
+            next(iter(publication_feed_runs))
+            if len(publication_feed_runs) == 1
+            else None
+        )
+    )
     if not feed_dates.get("available"):
         return feed_dates
     dates = []
     for row in feed_dates["dates"]:
-        day = row["day"]
+        day = str(row["day"])
         projection = _events_day_cached(day=day, cache_token=_cache_token(day))
         dates.append(
             {
@@ -1681,7 +1690,13 @@ def _dates_payload_cached(
                 ),
             }
         )
-    payload = {**feed_dates, "dates": dates, "run_id": run["run_id"]}
+    latest = publications[-1]
+    payload = {
+        **feed_dates,
+        "run_id": str(latest["run_id"]),
+        "feed_run_id": str(latest["feed_run_id"]),
+        "dates": dates,
+    }
     _write_persisted_payload(
         name="dates.json.gz",
         cache_key=cache_key,

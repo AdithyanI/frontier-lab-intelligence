@@ -558,10 +558,20 @@ def _open_readonly(path: Path) -> sqlite3.Connection:
 
 
 def _published_context(
-    events_db: Path, feed_db: Path
+    events_db: Path,
+    feed_db: Path,
+    *,
+    event_run_id: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     events = _open_readonly(events_db)
-    event_run = signal_events.published_run(events)
+    event_run = (
+        events.execute(
+            "SELECT * FROM event_run WHERE run_id = ?",
+            (event_run_id,),
+        ).fetchone()
+        if event_run_id is not None
+        else signal_events.published_run(events)
+    )
     events.close()
     if event_run is None:
         raise RuntimeError("Event store has no published run")
@@ -659,6 +669,7 @@ def _iter_feed_candidates(
             routing_filter="all",
             limit=2**31 - 1,
             offset=0,
+            event_run_id=event_run_id,
         )
         day_counts[day] = int(payload.get("daily_rank_total") or 0)
         for item in payload.get("items") or []:
@@ -857,10 +868,16 @@ def import_feed_events(
     db_path: Path | str = DEFAULT_DB,
     feed_db: Path | str = signal_feed.DEFAULT_FEED_DB,
     events_db: Path | str = signal_events.DEFAULT_EVENTS_DB,
+    event_run_id: str | None = None,
+    replace_catalog: bool = True,
 ) -> dict[str, Any]:
     feed_path = Path(feed_db)
     events_path = Path(events_db)
-    event_run, feed_run = _published_context(events_path, feed_path)
+    event_run, feed_run = _published_context(
+        events_path,
+        feed_path,
+        event_run_id=event_run_id,
+    )
     candidates, manifest = _iter_feed_candidates(
         feed_db=feed_path,
         feed_run_id=str(feed_run["run_id"]),
@@ -896,6 +913,18 @@ def import_feed_events(
     if existing is not None:
         result = dict(existing)
         result.pop("triage_runs_json", None)
+        result["accepted_artifact_ids"] = [
+            str(row["artifact_id"])
+            for row in conn.execute(
+                """SELECT DISTINCT artifact_id
+                   FROM artifact_import_candidate
+                   WHERE import_run_id = ?
+                     AND decision = 'accepted'
+                     AND artifact_id IS NOT NULL
+                   ORDER BY artifact_id""",
+                (import_run_id,),
+            ).fetchall()
+        ]
         result["reused"] = True
         conn.close()
         return result
@@ -1120,38 +1149,39 @@ def import_feed_events(
                WHERE import_run_id = ?""",
             (counts["accepted"], counts["excluded"], counts["failed"], import_run_id),
         )
-        conn.execute(
-            """DELETE FROM artifact_observation AS observation
-               WHERE NOT EXISTS (
-                   SELECT 1
-                   FROM artifact_import_candidate AS candidate
-                   WHERE candidate.import_run_id = ?
-                     AND candidate.decision = 'accepted'
-                     AND candidate.artifact_id = observation.artifact_id
-                     AND candidate.source_kind = observation.source_kind
-                     AND candidate.source_provider = observation.source_provider
-                     AND candidate.source_external_id = observation.source_external_id
-                     AND candidate.source_snapshot_sha256 = observation.source_snapshot_sha256
-                     AND candidate.observed_url = observation.observed_url
-                     AND candidate.relation = observation.relation
-               )""",
-            (import_run_id,),
-        )
-        conn.execute(
-            "DELETE FROM artifact_import_run WHERE import_run_id != ?",
-            (import_run_id,),
-        )
-        conn.execute(
-            """DELETE FROM artifact
-               WHERE NOT EXISTS (
-                   SELECT 1 FROM artifact_observation
-                   WHERE artifact_observation.artifact_id = artifact.artifact_id
-               )
-                 AND NOT EXISTS (
-                   SELECT 1 FROM artifact_event_supplement
-                   WHERE artifact_event_supplement.artifact_id = artifact.artifact_id
-               )"""
-        )
+        if replace_catalog:
+            conn.execute(
+                """DELETE FROM artifact_observation AS observation
+                   WHERE NOT EXISTS (
+                       SELECT 1
+                       FROM artifact_import_candidate AS candidate
+                       WHERE candidate.import_run_id = ?
+                         AND candidate.decision = 'accepted'
+                         AND candidate.artifact_id = observation.artifact_id
+                         AND candidate.source_kind = observation.source_kind
+                         AND candidate.source_provider = observation.source_provider
+                         AND candidate.source_external_id = observation.source_external_id
+                         AND candidate.source_snapshot_sha256 = observation.source_snapshot_sha256
+                         AND candidate.observed_url = observation.observed_url
+                         AND candidate.relation = observation.relation
+                   )""",
+                (import_run_id,),
+            )
+            conn.execute(
+                "DELETE FROM artifact_import_run WHERE import_run_id != ?",
+                (import_run_id,),
+            )
+            conn.execute(
+                """DELETE FROM artifact
+                   WHERE NOT EXISTS (
+                       SELECT 1 FROM artifact_observation
+                       WHERE artifact_observation.artifact_id = artifact.artifact_id
+                   )
+                     AND NOT EXISTS (
+                       SELECT 1 FROM artifact_event_supplement
+                       WHERE artifact_event_supplement.artifact_id = artifact.artifact_id
+                   )"""
+            )
     result = dict(
         conn.execute(
             "SELECT * FROM artifact_import_run WHERE import_run_id = ?",
@@ -1171,6 +1201,18 @@ def import_feed_events(
             "disclosure_count": int(
                 conn.execute("SELECT COUNT(*) FROM artifact_disclosure").fetchone()[0]
             ),
+            "accepted_artifact_ids": [
+                str(row["artifact_id"])
+                for row in conn.execute(
+                    """SELECT DISTINCT artifact_id
+                       FROM artifact_import_candidate
+                       WHERE import_run_id = ?
+                         AND decision = 'accepted'
+                         AND artifact_id IS NOT NULL
+                       ORDER BY artifact_id""",
+                    (import_run_id,),
+                ).fetchall()
+            ],
         }
     )
     conn.close()
@@ -1580,19 +1622,22 @@ def audit_primary_author_lineage(
     """Verify that the live catalog is derivable from primary-account posts."""
 
     catalog = _open_readonly(Path(db_path))
-    import_run = catalog.execute(
+    import_runs = catalog.execute(
         """SELECT * FROM artifact_import_run
-           ORDER BY completed_at DESC, import_run_id DESC LIMIT 1"""
-    ).fetchone()
-    if import_run is None:
+           ORDER BY completed_at, import_run_id"""
+    ).fetchall()
+    if not import_runs:
         catalog.close()
         raise ValueError("artifact catalog has no import run to audit")
+    import_run = import_runs[-1]
 
     candidates = catalog.execute(
-        """SELECT * FROM artifact_import_candidate
-           WHERE import_run_id = ? AND decision = 'accepted'
-           ORDER BY candidate_id""",
-        (import_run["import_run_id"],),
+        """SELECT candidate.*, run.source_feed_run_id
+           FROM artifact_import_candidate candidate
+           JOIN artifact_import_run run
+             ON run.import_run_id = candidate.import_run_id
+           WHERE candidate.decision = 'accepted'
+           ORDER BY candidate.candidate_id"""
     ).fetchall()
     observations = catalog.execute(
         """SELECT observation_id, artifact_id, source_external_id,
@@ -1646,22 +1691,31 @@ def audit_primary_author_lineage(
             }
         )
 
+    selection_policies = {
+        str(row["selection_policy"]) for row in import_runs
+    }
     selection_policy = str(import_run["selection_policy"])
-    if selection_policy != PRIMARY_AUTHOR_SELECTION_POLICY:
+    if selection_policies != {PRIMARY_AUTHOR_SELECTION_POLICY}:
         add_violation("unexpected_selection_policy")
 
     feed = _open_readonly(Path(feed_db))
-    feed_rows = {
-        str(row["post_id"]): row
-        for row in feed.execute(
-            """SELECT post_id, author_x_id, conversation_id, post_type,
-                      raw_sha256, raw_json
-               FROM feed_post
-               WHERE run_id = ? AND provider = 'twitterapi_io'
-               ORDER BY post_id""",
-            (import_run["source_feed_run_id"],),
-        ).fetchall()
-    }
+    feed_rows: dict[tuple[str, str], sqlite3.Row] = {}
+    for source_feed_run_id in sorted(
+        {str(row["source_feed_run_id"]) for row in import_runs}
+    ):
+        feed_rows.update(
+            {
+                (source_feed_run_id, str(row["post_id"])): row
+                for row in feed.execute(
+                    """SELECT post_id, author_x_id, conversation_id, post_type,
+                              raw_sha256, raw_json
+                       FROM feed_post
+                       WHERE run_id = ? AND provider = 'twitterapi_io'
+                       ORDER BY post_id""",
+                    (source_feed_run_id,),
+                ).fetchall()
+            }
+        )
     feed.close()
 
     accepted_observation_keys: set[tuple[str, str, str, str]] = set()
@@ -1670,7 +1724,8 @@ def audit_primary_author_lineage(
         candidate_id = str(candidate["candidate_id"])
         event_id = str(candidate["event_id"])
         source_id = str(candidate["source_external_id"])
-        source = feed_rows.get(source_id)
+        source_feed_run_id = str(candidate["source_feed_run_id"])
+        source = feed_rows.get((source_feed_run_id, source_id))
         root_id = (
             str(source["conversation_id"] or source_id) if source is not None else ""
         )
@@ -1689,7 +1744,7 @@ def audit_primary_author_lineage(
         if source is None:
             add_violation("missing_source_post", **common)
             continue
-        root = feed_rows.get(root_id)
+        root = feed_rows.get((source_feed_run_id, root_id))
         if root is None:
             # Some same-author thread replies were frozen without retaining the
             # conversation root in this Feed run. Their immutable import
@@ -1759,6 +1814,7 @@ def audit_primary_author_lineage(
     return {
         "passed": not violations,
         "import_run_id": str(import_run["import_run_id"]),
+        "import_run_ids": [str(row["import_run_id"]) for row in import_runs],
         "source_feed_run_id": str(import_run["source_feed_run_id"]),
         "selection_policy": selection_policy,
         "coverage": {

@@ -82,8 +82,8 @@ do not recreate generic `pages/` or `components/` buckets.
 | `data/raw/following/<snapshot>/snapshot.db` | Following snapshot client | Following ranking | Immutable ignored crawl snapshot; manifests under `data/following/` bind checksums and lineage. |
 | `data/derived/following/<snapshot>/analysis.db` | Following ranking | Feed and Network UI | Rebuildable analysis for one frozen snapshot. |
 | `data/derived/signal-feed/feed.db` | `fli signal-feed` / `fli evidence-refresh` | Events, routing, Feed UI | Rebuildable current Feed projection. |
-| `data/derived/signal-events/events.db` | `fli signal-events` / `fli evidence-refresh` | Artifacts, routing, Event UI | Rebuildable exact Event projection and live publication pointer. |
-| `data/derived/artifacts/artifacts.db` | Artifact catalog/fetch commands | Routing and artifact UI | Durable local catalog; raw bodies and clean text are content-addressed beside it. |
+| `data/derived/signal-events/events.db` | `fli signal-events` / `fli evidence-refresh` | Artifacts, routing, Event UI | Rebuildable exact Event projection with an explicit date-to-run publication map. |
+| `data/derived/artifacts/artifacts.db` | Artifact catalog/fetch commands | Routing and artifact UI | Durable local catalog; daily imports append dated lineage, while raw bodies and clean text are content-addressed beside it. |
 | Development read model | No independent writer | Feed, routing, artifact UI | Deterministic projection over exact Events plus accepted canonical artifacts. It is cached in process and rebuilt when either source store changes; there is deliberately no separate Development database yet. |
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, rank evaluation | Immutable per-day runs. Current-compatible runs bind their source Feed/Event publication and full-day Development rank-input SHA. |
 | `data/derived/insights/insights.db` | `fli insights` | Insight read model/UI | Current audience Insight run store. |
@@ -102,7 +102,10 @@ removing or archiving local data.
 
 ## Commands
 
-- Refresh current Evidence and supported artifacts: `fli evidence-refresh`
+- Refresh one new UTC day without moving older publications:
+  `fli evidence-refresh --day YYYY-MM-DD`
+- Rebuild an intentional historical Evidence window:
+  `fli evidence-refresh --through YYYY-MM-DD --days N`
 - Materialize individual boundaries: `fli signal-feed`, `fli signal-events`,
   `fli artifacts`
 - Route Evidence: `fli audience-routing`

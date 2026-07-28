@@ -10,7 +10,30 @@ X timelines → Feed posts/relations → publish Events
             → optimize SQLite indexes → warm every visible Feed day
 ```
 
-## Normal run
+## Normal daily run
+
+Use the date-pinned mode after one UTC day is complete:
+
+```bash
+fli evidence-refresh \
+  --day 2026-07-29 \
+  --workers 32 \
+  --no-input --json
+```
+
+This is the default forward workflow. It freezes the active Registry X cohort,
+queries only the requested UTC day, builds one one-day Feed/Event run, and
+publishes only that date. Earlier dates keep their existing Feed/Event run
+identities. Artifact discovery is append-only in this mode, and retrieval is
+limited to artifacts accepted from that one Event run. The command is
+resumable: repeating the same date reuses complete collection, materialization,
+import, and fetch work.
+
+Audience routing and Insights remain explicit downstream commands. For a newly
+published day, run their one-day forms after this command succeeds; the daily
+Evidence command does not rerun historical routing or Insights.
+
+## Historical window rebuild
 
 ```bash
 fli evidence-refresh \
@@ -21,13 +44,16 @@ fli evidence-refresh \
   --no-input --json
 ```
 
-In plain language, that command verifies or downloads only July 19–21, then
+In plain language, this maintenance command verifies or downloads only July
+19–21, then
 rebuilds the July 5–21 app pages from the complete local cache. Repeating it
 against complete cached coverage makes no X provider request. `--days`
 controls what remains visible; `--collection-days` controls what is fetched
 now.
 
-`--through` is the latest complete UTC day. `--days` defines the inclusive
+Use `--through` for an intentional backfill, migration, or historical-window
+repair, not for the normal next-day update. `--through` is the latest complete
+UTC day. `--days` defines the inclusive
 published Feed/Event window. `--collection-days` can collect only the newest
 overlapping slice when completed collection runs already cover the earlier
 retained dates. The command proves that those completed run ranges compose
@@ -72,21 +98,25 @@ value through a flag or environment variable.
   contract; the retained publication is blocked if those ranges leave a gap.
 - **Feed:** the run ID hashes the date window, schema contract, and immutable raw
   post snapshots. An unchanged input reuses the existing run.
-- **Events:** the run ID hashes the Feed run and exact structural links. The
-  validated run is published through one explicit pointer.
+- **Events:** the run ID hashes the Feed run and exact structural links.
+  Readers resolve an explicit date-to-run publication. Daily refresh updates
+  only its requested date; the legacy singleton remains only a latest-run
+  inspection path.
 - **Artifact catalog:** every current Event root and verified same-author
   reply is scanned for owned URLs. Canonical URLs deduplicate observations.
-  A new import prunes observations absent from the current Feed/Event snapshot
-  while retaining successful content snapshots for artifacts that still exist.
+  Daily imports append their lineage and retain prior dates. An intentional
+  historical-window rebuild may replace the catalog projection and prune
+  observations absent from that complete Feed/Event snapshot.
 - **Artifact text:** successful and terminal fetch attempts are reused. Only
   missing or retryable items perform network work. Direct retrieval is
   sequential per origin but parallel across origins. arXiv abstracts, X
   Articles, and the public-HTML fallback keep separate fetch policies and
   caches. Videos remain explicitly deferred.
 - **Read performance:** every successful refresh runs `PRAGMA optimize` on the
-  Feed, Event, and artifact stores, then requests the date index and compact
-  first page for every visible Feed and artifact day. This primes the server's
-  state-aware projections after the database-version cache key changes. Index
+  Feed, Event, and artifact stores. Daily mode warms only its requested Event
+  date plus the artifact date index; historical-window mode warms every visible
+  Feed day. This primes the server's state-aware projections after the
+  database-version cache key changes. Index
   definitions are part of the schemas; they are not recreated on each browser
   visit. Use `--no-view-warmup` only for isolated diagnostics.
 

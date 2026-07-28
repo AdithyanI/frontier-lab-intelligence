@@ -99,7 +99,7 @@ composition.
    read-only preview that never calls a model. New routing freezes admit only
    first-party X sources no more than seven days old; a current same-author
    continuation may replace an older root, while old-only packets are excluded. A multi-day
-   refresh freezes every requested date against one global Event publication,
+   routing refresh freezes every requested date against one global Event publication,
    then routes days in parallel. New publication-qualified runs automatically
    reuse a predecessor judgment only when the same Event has exact frozen
    evidence and rendered model input under the same routing contract; changed
@@ -198,12 +198,17 @@ composition.
 - **Current versus historical state:** current readers use only canonical paths
   documented in the code map. Historical run identity remains in manifests,
   prompt/schema versions, hashes, and archived project records.
-- **Parallel historical authoring:** publish Feed and Events once through the
-  maximum requested date, route the complete date range against that one
-  snapshot, then fan out immutable per-day workspaces and Codex tasks.
+- **Daily Evidence publication:** normal forward collection builds one complete
+  UTC day and updates only that date's Feed/Event publication. Earlier dates
+  retain their source run identities, and daily artifact imports append rather
+  than replace prior observations.
+- **Parallel historical authoring:** for an intentional historical-window
+  rebuild, publish Feed and Events once through the maximum requested date,
+  route the complete date range against that one snapshot, then fan out
+  immutable per-day workspaces and Codex tasks.
   `daily-orchestration-v3` freezes the Event, Feed, routing, cohort, and
   rank-input identities for each day. Several full `run-day` Evidence
-  publishers must not compete for the global pointer.
+  publishers must not compete for the same date publication.
 - **Exact Event identity:** quote, retweet, reply-parent, and first-party thread
   relationships may group evidence; shared topic or conversation text may not.
 - **Dynamic curation:** Feed and Event readers overlay current Registry state so

@@ -2082,6 +2082,26 @@ def recover_with_jina_reader(
     return result
 
 
+def jina_eligible_artifact_ids(
+    *,
+    db_path: Path | str = artifacts.DEFAULT_DB,
+    artifact_ids: Iterable[str],
+) -> list[str]:
+    """Return the requested artifacts currently eligible for Reader fallback."""
+    requested = set(dict.fromkeys(str(value) for value in artifact_ids))
+    if not requested:
+        return []
+    conn = artifacts.connect(db_path)
+    try:
+        return sorted(
+            str(item["artifact_id"])
+            for item in _jina_candidates(conn)
+            if str(item["artifact_id"]) in requested
+        )
+    finally:
+        conn.close()
+
+
 def fetch_cohort(
     *,
     db_path: Path | str = artifacts.DEFAULT_DB,
@@ -2268,6 +2288,7 @@ def fetch_all_supported(
     *,
     db_path: Path | str = artifacts.DEFAULT_DB,
     workers: int = 16,
+    artifact_ids: Iterable[str] | None = None,
     resolver: Resolver = _default_resolver,
 ) -> dict[str, Any]:
     """Fetch every directly supported catalog artifact, sharded by host.
@@ -2283,6 +2304,11 @@ def fetch_all_supported(
     # skip schema DDL, which otherwise serializes every host batch.
     conn = artifacts.connect(db_path)
     try:
+        requested_ids = (
+            set(dict.fromkeys(str(value) for value in artifact_ids))
+            if artifact_ids is not None
+            else None
+        )
         rows = conn.execute(
             """SELECT artifact_id, host
                FROM artifact
@@ -2297,6 +2323,8 @@ def fetch_all_supported(
 
     by_host: dict[str, list[str]] = defaultdict(list)
     for row in rows:
+        if requested_ids is not None and str(row["artifact_id"]) not in requested_ids:
+            continue
         by_host[str(row["host"])].append(str(row["artifact_id"]))
     if not by_host:
         return {

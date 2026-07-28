@@ -7,7 +7,7 @@ import json
 import re
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
@@ -156,11 +156,17 @@ def _create_run(
 def fetch_arxiv_metadata(
     *,
     db_path: Path | str = artifacts.DEFAULT_DB,
+    artifact_ids: Iterable[str] | None = None,
     transport: httpx.BaseTransport | None = None,
     batch_sleep_seconds: float = 3.0,
 ) -> dict[str, Any]:
     """Fetch title, authors, categories, dates, and abstract in API batches."""
     conn = artifacts.connect(db_path)
+    requested_ids = (
+        set(dict.fromkeys(str(value) for value in artifact_ids))
+        if artifact_ids is not None
+        else None
+    )
     candidate_ids = [
         str(row["artifact_id"])
         for row in conn.execute(
@@ -174,6 +180,7 @@ def fetch_arxiv_metadata(
                  )
                ORDER BY artifact_id"""
         )
+        if requested_ids is None or str(row["artifact_id"]) in requested_ids
     ]
     if not candidate_ids:
         conn.close()

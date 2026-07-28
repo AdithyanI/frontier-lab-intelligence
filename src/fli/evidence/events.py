@@ -14,9 +14,9 @@ import hashlib
 import json
 import sqlite3
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from fli.evidence import feed as signal_feed
 
@@ -134,6 +134,14 @@ CREATE TABLE IF NOT EXISTS signal_publication (
     event_run_id TEXT NOT NULL REFERENCES event_run(run_id),
     published_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS signal_day_publication (
+    day TEXT PRIMARY KEY,
+    event_run_id TEXT NOT NULL REFERENCES event_run(run_id),
+    published_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_signal_day_publication_run
+    ON signal_day_publication(event_run_id, day);
 """
 
 
@@ -176,6 +184,20 @@ def connect(path: Path | str = DEFAULT_EVENTS_DB) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     conn.executescript(SCHEMA)
+    # Existing stores published one multi-day run through a singleton pointer.
+    # Seed an immutable per-day map from that live run once, then let future
+    # one-day refreshes replace only their requested date.
+    with conn:
+        conn.execute(
+            """INSERT OR IGNORE INTO signal_day_publication
+               (day, event_run_id, published_at)
+               SELECT DISTINCT event_day.day, publication.event_run_id,
+                               publication.published_at
+               FROM signal_publication AS publication
+               JOIN event_day
+                 ON event_day.run_id = publication.event_run_id
+               WHERE publication.singleton = 1"""
+        )
     return conn
 
 
@@ -276,8 +298,47 @@ def _latest_feed_run(conn: sqlite3.Connection) -> sqlite3.Row:
     return row
 
 
-def published_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
-    """Return the one Event run explicitly published to readers."""
+def published_run(
+    conn: sqlite3.Connection,
+    *,
+    day: str | None = None,
+) -> sqlite3.Row | None:
+    """Return the Event run explicitly published for one day.
+
+    ``day=None`` preserves the legacy latest-publication inspection path. New
+    readers should always provide a day so a later refresh cannot rewrite the
+    source identity of an already published date.
+    """
+    if day is not None:
+        has_day_publication = conn.execute(
+            """SELECT 1 FROM sqlite_master
+               WHERE type = 'table' AND name = 'signal_day_publication'"""
+        ).fetchone()
+        if has_day_publication is not None:
+            row = conn.execute(
+                """SELECT run.*
+                   FROM signal_day_publication publication
+                   JOIN event_run run ON run.run_id = publication.event_run_id
+                   WHERE publication.day = ?""",
+                (date.fromisoformat(day).isoformat(),),
+            ).fetchone()
+            if row is not None:
+                return row
+        # Read-only callers may open a pre-migration database before a writer
+        # has seeded the day table. Fall back only when the singleton run
+        # actually contains the requested day.
+        return conn.execute(
+            """SELECT run.*
+               FROM signal_publication publication
+               JOIN event_run run ON run.run_id = publication.event_run_id
+               WHERE publication.singleton = 1
+                 AND EXISTS (
+                     SELECT 1 FROM event_day
+                     WHERE event_day.run_id = run.run_id
+                       AND event_day.day = ?
+                 )""",
+            (day,),
+        ).fetchone()
     return conn.execute(
         """SELECT run.*
            FROM signal_publication publication
@@ -286,13 +347,42 @@ def published_run(conn: sqlite3.Connection) -> sqlite3.Row | None:
     ).fetchone()
 
 
+def published_days(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Return every date-pinned publication in chronological order."""
+    has_day_publication = conn.execute(
+        """SELECT 1 FROM sqlite_master
+           WHERE type = 'table' AND name = 'signal_day_publication'"""
+    ).fetchone()
+    if has_day_publication is None:
+        current = published_run(conn)
+        if current is None:
+            return []
+        return conn.execute(
+            """SELECT DISTINCT event_day.day, publication.published_at,
+                              run.*
+               FROM signal_publication publication
+               JOIN event_run run ON run.run_id = publication.event_run_id
+               JOIN event_day ON event_day.run_id = run.run_id
+               WHERE publication.singleton = 1
+               ORDER BY event_day.day"""
+        ).fetchall()
+    return conn.execute(
+        """SELECT publication.day, publication.published_at,
+                  run.*
+           FROM signal_day_publication publication
+           JOIN event_run run ON run.run_id = publication.event_run_id
+           ORDER BY publication.day"""
+    ).fetchall()
+
+
 def publish(
     *,
     events_db: Path | str = DEFAULT_EVENTS_DB,
     feed_db: Path | str = DEFAULT_FEED_DB,
     event_run_id: str,
+    days: Iterable[str] | None = None,
 ) -> dict[str, Any]:
-    """Atomically move the live pointer to one validated Feed/Event pair."""
+    """Publish a validated Feed/Event pair for only its requested dates."""
     conn = connect(events_db)
     run = conn.execute(
         "SELECT * FROM event_run WHERE run_id = ?", (event_run_id,)
@@ -306,17 +396,63 @@ def publish(
         raise FileNotFoundError(feed_path)
     feed = sqlite3.connect(f"file:{feed_path.as_posix()}?mode=ro", uri=True)
     matching_feed = feed.execute(
-        "SELECT 1 FROM feed_run WHERE run_id = ?", (run["feed_run_id"],)
+        "SELECT date_from, date_to FROM feed_run WHERE run_id = ?",
+        (run["feed_run_id"],),
     ).fetchone()
-    feed.close()
     if matching_feed is None:
+        feed.close()
         conn.close()
         raise RuntimeError(
             f"Event run {event_run_id} references missing Feed run "
             f"{run['feed_run_id']}."
         )
+    previous_run = published_run(conn)
+    previous_days: list[str] = []
+    if previous_run is not None:
+        previous_feed = feed.execute(
+            "SELECT date_from, date_to FROM feed_run WHERE run_id = ?",
+            (previous_run["feed_run_id"],),
+        ).fetchone()
+        if previous_feed is not None:
+            previous_first = date.fromisoformat(str(previous_feed[0]))
+            previous_last = date.fromisoformat(str(previous_feed[1]))
+            previous_days = [
+                (previous_first + timedelta(days=offset)).isoformat()
+                for offset in range((previous_last - previous_first).days + 1)
+            ]
+    feed.close()
+    first_day = date.fromisoformat(str(matching_feed[0]))
+    last_day = date.fromisoformat(str(matching_feed[1]))
+    available_days = {
+        (first_day + timedelta(days=offset)).isoformat()
+        for offset in range((last_day - first_day).days + 1)
+    }
+    requested_days = (
+        sorted({date.fromisoformat(value).isoformat() for value in days})
+        if days is not None
+        else sorted(available_days)
+    )
+    missing_days = sorted(set(requested_days) - available_days)
+    if missing_days:
+        conn.close()
+        raise ValueError(
+            f"Event run {event_run_id} does not contain: {', '.join(missing_days)}"
+        )
+    if not requested_days:
+        conn.close()
+        raise ValueError(f"Event run {event_run_id} contains no publishable days")
     published_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     with conn:
+        if previous_run is not None:
+            conn.executemany(
+                """INSERT OR IGNORE INTO signal_day_publication
+                   (day, event_run_id, published_at)
+                   VALUES (?, ?, ?)""",
+                [
+                    (previous_day, previous_run["run_id"], published_at)
+                    for previous_day in previous_days
+                ],
+            )
         conn.execute(
             """INSERT INTO signal_publication
                (singleton, event_run_id, published_at)
@@ -326,8 +462,21 @@ def publish(
                    published_at = excluded.published_at""",
             (event_run_id, published_at),
         )
+        conn.executemany(
+            """INSERT INTO signal_day_publication
+               (day, event_run_id, published_at)
+               VALUES (?, ?, ?)
+               ON CONFLICT(day) DO UPDATE SET
+                   event_run_id = excluded.event_run_id,
+                   published_at = excluded.published_at""",
+            [
+                (published_day, event_run_id, published_at)
+                for published_day in requested_days
+            ],
+        )
     result = dict(run)
     result["published_at"] = published_at
+    result["published_days"] = requested_days
     conn.close()
     return result
 

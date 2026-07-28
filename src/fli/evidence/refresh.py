@@ -10,7 +10,7 @@ import time
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Iterable
 
 import httpx
 
@@ -132,6 +132,7 @@ def _warm_evidence_views(
     *,
     base_url: str = DEFAULT_VIEW_BASE_URL,
     transport: httpx.BaseTransport | None = None,
+    days: Iterable[str] | None = None,
 ) -> dict[str, Any]:
     """Warm the always-on app after a new publication invalidates its caches."""
     normalized = base_url.rstrip("/")
@@ -158,10 +159,19 @@ def _warm_evidence_views(
             )
             date_from = str(dates_payload.get("date_from") or "")
             date_to = str(dates_payload.get("date_to") or "")
+            requested_days = (
+                set(dict.fromkeys(str(value) for value in days))
+                if days is not None
+                else None
+            )
             current_days = [
                 str(item["day"])
                 for item in dates_payload.get("dates") or []
                 if date_from <= str(item.get("day") or "") <= date_to
+                and (
+                    requested_days is None
+                    or str(item.get("day") or "") in requested_days
+                )
             ]
             for day in current_days:
                 request_started = time.monotonic()
@@ -425,6 +435,243 @@ def refresh_evidence(
     }
 
 
+def _artifact_adapter_ids(
+    *,
+    db_path: Path | str,
+    artifact_ids: Iterable[str],
+) -> dict[str, list[str]]:
+    """Partition one import's artifacts by the adapter allowed to fetch them."""
+    requested = sorted(set(str(value) for value in artifact_ids))
+    groups = {
+        "ordinary": [],
+        "arxiv": [],
+        "x_articles": [],
+        "videos": [],
+    }
+    if not requested:
+        return groups
+    conn = artifacts.connect(db_path)
+    try:
+        placeholders = ",".join("?" for _ in requested)
+        rows = conn.execute(
+            f"""SELECT artifact_id, host, artifact_kind, canonical_url
+                FROM artifact
+                WHERE artifact_id IN ({placeholders})
+                ORDER BY artifact_id""",
+            requested,
+        ).fetchall()
+    finally:
+        conn.close()
+    for row in rows:
+        artifact_id = str(row["artifact_id"])
+        canonical_url = str(row["canonical_url"])
+        if str(row["artifact_kind"]) == "video":
+            groups["videos"].append(artifact_id)
+        elif str(row["host"]) == "arxiv.org":
+            groups["arxiv"].append(artifact_id)
+        elif canonical_url.startswith(
+            ("http://x.com/i/article/", "https://x.com/i/article/")
+        ):
+            groups["x_articles"].append(artifact_id)
+        else:
+            groups["ordinary"].append(artifact_id)
+    return groups
+
+
+def refresh_day(
+    *,
+    day: str | date,
+    workers: int = 32,
+    timeout_seconds: float = 30.0,
+    artifact_limit: int | None = None,
+    x_article_limit: int | None = None,
+    reader_fallback: bool = True,
+    collect: bool = True,
+    registry_db: Path | str = store.DEFAULT_DB_PATH,
+    raw_db: Path | str = x_content.DEFAULT_DB_PATH,
+    collection_db: Path | str = x_daily_collection.DEFAULT_MANIFEST_PATH,
+    feed_db: Path | str = signal_feed.DEFAULT_FEED_DB,
+    events_db: Path | str = signal_events.DEFAULT_EVENTS_DB,
+    artifact_db: Path | str = artifacts.DEFAULT_DB,
+    key_file: Path = sources.DEFAULT_TWITTERAPI_IO_KEY_FILE,
+    view_warmup: bool = True,
+    view_base_url: str = DEFAULT_VIEW_BASE_URL,
+    progress: Callable[[str, str], None] | None = None,
+) -> dict[str, Any]:
+    """Collect, materialize, publish, and enrich exactly one complete UTC day."""
+    target = _day(day)
+    target_day = target.isoformat()
+    if workers < 1 or workers > 64:
+        raise ValueError("workers must be between 1 and 64")
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be greater than zero")
+    if (artifact_limit is not None and artifact_limit < 0) or (
+        x_article_limit is not None and x_article_limit < 0
+    ):
+        raise ValueError("artifact limits cannot be negative")
+
+    if collect:
+        if progress:
+            progress("collection", "running")
+        client = x_content.create_client(
+            db_path=raw_db,
+            key_file=key_file.expanduser(),
+            timeout=timeout_seconds,
+            page_sleep_seconds=0.0,
+        )
+        try:
+            collection = x_daily_collection.execute_collection(
+                client=client,
+                registry_path=registry_db,
+                raw_path=raw_db,
+                manifest_path=collection_db,
+                start_day=target,
+                end_day=target,
+                workers=workers,
+            )
+        finally:
+            client.close()
+        if int(collection.get("failures", 0)) or int(
+            collection.get("unfinished_accounts", 0)
+        ):
+            raise sources.SourceCliError(
+                code="E_COLLECTION_INCOMPLETE",
+                message=f"X collection is incomplete for {target_day}.",
+                hint="Resume the same --day command after fixing the reported failures.",
+                exit_code=4,
+                retryable=True,
+            )
+        if progress:
+            progress("collection", "complete")
+    else:
+        collection = {
+            "status": "skipped",
+            "start_day": target_day,
+            "end_day": target_day,
+        }
+
+    if progress:
+        progress("feed", "running")
+    feed = signal_feed.materialize(
+        source_db=raw_db,
+        feed_db=feed_db,
+        through=target,
+        days=1,
+    )
+    events = signal_events.materialize(
+        feed_db=feed_db,
+        events_db=events_db,
+        feed_run_id=str(feed["run_id"]),
+    )
+    publication = signal_events.publish(
+        events_db=events_db,
+        feed_db=feed_db,
+        event_run_id=str(events["run_id"]),
+        days=[target_day],
+    )
+    if progress:
+        progress("feed", "complete")
+        progress("artifacts", "running")
+
+    catalog = artifacts.import_feed_events(
+        db_path=artifact_db,
+        feed_db=feed_db,
+        events_db=events_db,
+        event_run_id=str(events["run_id"]),
+        replace_catalog=False,
+    )
+    adapter_ids = _artifact_adapter_ids(
+        db_path=artifact_db,
+        artifact_ids=catalog.get("accepted_artifact_ids") or [],
+    )
+    ordinary_ids = adapter_ids["ordinary"]
+    if artifact_limit is not None:
+        ordinary_ids = ordinary_ids[:artifact_limit]
+    content = (
+        artifact_fetch.fetch_all_supported(
+            db_path=artifact_db,
+            workers=workers,
+            artifact_ids=ordinary_ids,
+        )
+        if artifact_limit != 0
+        else None
+    )
+    arxiv = (
+        artifact_arxiv.fetch_arxiv_metadata(
+            db_path=artifact_db,
+            artifact_ids=adapter_ids["arxiv"],
+        )
+        if artifact_limit != 0
+        else None
+    )
+    x_article_ids = adapter_ids["x_articles"]
+    if x_article_limit is not None:
+        x_article_ids = x_article_ids[:x_article_limit]
+    x_articles = (
+        artifact_x_articles.fetch_x_articles(
+            db_path=artifact_db,
+            artifact_ids=x_article_ids,
+            key_file=key_file.expanduser(),
+        )
+        if x_article_limit != 0 and x_article_ids
+        else None
+    )
+    fallback: dict[str, Any] | None = None
+    if reader_fallback and artifact_limit != 0:
+        eligible_ids = artifact_fetch.jina_eligible_artifact_ids(
+            db_path=artifact_db,
+            artifact_ids=ordinary_ids,
+        )
+        if eligible_ids:
+            fallback = artifact_fetch.recover_with_jina_reader(
+                db_path=artifact_db,
+                artifact_ids=eligible_ids,
+                workers=min(workers, 16),
+            )
+        else:
+            fallback = {
+                "fetch_run_id": None,
+                "expected_count": 0,
+                "success": 0,
+                "failed_retryable": 0,
+                "failed_terminal": 0,
+                "reused": True,
+            }
+    if progress:
+        progress("artifacts", "complete")
+        progress("maintenance", "running")
+    index_maintenance = _optimize_stores(
+        {"feed": feed_db, "events": events_db, "artifacts": artifact_db}
+    )
+    view_cache = (
+        _warm_evidence_views(base_url=view_base_url, days=[target_day])
+        if view_warmup
+        else {"status": "skipped", "base_url": view_base_url}
+    )
+    if progress:
+        progress("maintenance", "complete")
+    return {
+        "mode": "day",
+        "day": target_day,
+        "range": {"start_day": target_day, "end_day": target_day},
+        "collection": collection,
+        "feed": feed,
+        "events": events,
+        "publication": publication,
+        "artifacts": catalog,
+        "artifact_scope": {
+            **adapter_ids,
+            "accepted_count": len(catalog.get("accepted_artifact_ids") or []),
+        },
+        "content_fetch": content,
+        "arxiv_fetch": arxiv,
+        "x_article_fetch": x_articles,
+        "reader_fallback": fallback,
+        "index_maintenance": index_maintenance,
+        "view_cache": view_cache,
+    }
+
+
 def _result(
     *,
     status: str,
@@ -490,13 +737,23 @@ def main(argv: list[str] | None = None) -> int:
         ),
         epilog=(
             "Example:\n"
+            "  fli evidence-refresh --day 2026-07-29 "
+            "--workers 32 --no-input --json\n"
             "  fli evidence-refresh --through 2026-07-15 --days 11 "
             "--collection-days 3 --workers 32 --no-input --json"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--through", required=True, help="Latest complete UTC day.")
-    parser.add_argument("--days", type=int, default=9)
+    date_mode = parser.add_mutually_exclusive_group(required=True)
+    date_mode.add_argument(
+        "--day",
+        help=(
+            "Refresh and publish exactly one complete UTC day without changing "
+            "any other published date."
+        ),
+    )
+    date_mode.add_argument("--through", help="Latest complete UTC day.")
+    parser.add_argument("--days", type=int)
     parser.add_argument(
         "--collection-days",
         type=int,
@@ -538,21 +795,40 @@ def main(argv: list[str] | None = None) -> int:
             progress = lambda stage, status: print(
                 f"stage={stage} status={status}", file=sys.stderr, flush=True
             )
-        result = refresh_evidence(
-            through=args.through,
-            days=args.days,
-            collection_days=args.collection_days,
-            workers=args.workers,
-            timeout_seconds=args.timeout_seconds,
-            artifact_limit=args.artifact_limit,
-            x_article_limit=args.x_article_limit,
-            reader_fallback=not args.no_reader_fallback,
-            collect=not args.skip_collection,
-            key_file=args.key_file,
-            view_warmup=not args.no_view_warmup,
-            view_base_url=args.view_base_url,
-            progress=progress,
-        )
+        if args.day:
+            if args.collection_days is not None:
+                raise ValueError("--collection-days cannot be used with --day")
+            if args.days is not None:
+                raise ValueError("--days cannot be used with --day")
+            result = refresh_day(
+                day=args.day,
+                workers=args.workers,
+                timeout_seconds=args.timeout_seconds,
+                artifact_limit=args.artifact_limit,
+                x_article_limit=args.x_article_limit,
+                reader_fallback=not args.no_reader_fallback,
+                collect=not args.skip_collection,
+                key_file=args.key_file,
+                view_warmup=not args.no_view_warmup,
+                view_base_url=args.view_base_url,
+                progress=progress,
+            )
+        else:
+            result = refresh_evidence(
+                through=args.through,
+                days=args.days if args.days is not None else 9,
+                collection_days=args.collection_days,
+                workers=args.workers,
+                timeout_seconds=args.timeout_seconds,
+                artifact_limit=args.artifact_limit,
+                x_article_limit=args.x_article_limit,
+                reader_fallback=not args.no_reader_fallback,
+                collect=not args.skip_collection,
+                key_file=args.key_file,
+                view_warmup=not args.no_view_warmup,
+                view_base_url=args.view_base_url,
+                progress=progress,
+            )
     except KeyboardInterrupt:
         payload = _result(
             status="error",

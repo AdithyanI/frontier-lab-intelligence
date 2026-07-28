@@ -19,9 +19,11 @@ provider without changing Registry identity.
   whose conversation root is captured in the same run.
 - `data/derived/signal-events/events.db`: rebuildable `signal-events-v6` runs
   under `exact-structural-v10-root-owned-reactions`. It stores rooted
-  multi-post Events, member/link/anchor facts, per-day membership, and the one-row
-  `signal_publication` pointer that names the validated live run. Singleton
-  Events are added by the read model without duplicating post storage.
+  multi-post Events, member/link/anchor facts, per-day membership, and an
+  explicit `signal_day_publication` map from each visible date to its validated
+  run. The one-row `signal_publication` pointer remains a latest-run inspection
+  path. Singleton Events are added by the read model without duplicating post
+  storage.
 - `data/fli.db`: current Registry identity and rejection state. It is read at
   API request time and is never copied into a Feed run.
 - `data/derived/following/*/analysis.db`: accepted entity-overlap network
@@ -80,6 +82,18 @@ bridge rather than rewriting provider metadata.
 
 ## Rebuild and Publish
 
+The normal next-day workflow is:
+
+```bash
+.venv/bin/fli evidence-refresh --day 2026-07-29 --no-input --json
+```
+
+It queries and materializes only that complete UTC day, then replaces only that
+date's publication. Previously published dates continue to resolve to their
+original Feed/Event runs.
+
+The lower-level multi-day rebuild remains available for intentional backfills:
+
 ```bash
 .venv/bin/fli signal-feed refresh --days 7 --through 2026-07-11
 .venv/bin/fli signal-events refresh --publish
@@ -96,11 +110,11 @@ The Event refresh materializes root-owned Events for that Feed run. Every
 member has at most one structural parent. Quote posts and retweets may point to
 one source root, while only that source author's replies may extend its thread;
 reaction replies cannot import their own branches or bridge two roots.
-`--publish` updates `signal_publication` only after verifying that the referenced
-Feed run exists in the selected Feed database. API readers follow this explicit
-pointer; they do not pick the newest row by timestamp. Build into candidate
-databases and run the temporal audit before publishing when repairing or
-extending a production range.
+`--publish` updates the date publication map only after verifying that the
+referenced Feed run exists in the selected Feed database. API readers resolve
+the requested date from that explicit map; they do not pick the newest row by
+timestamp. Build into candidate databases and run the temporal audit before
+publishing when repairing a historical range.
 
 Neither rebuild command makes a provider or LLM call.
 

@@ -162,6 +162,130 @@ def test_refresh_evidence_can_rebuild_without_collection_or_content(monkeypatch)
     assert result["reader_fallback"] is None
 
 
+def test_refresh_day_collects_builds_publishes_and_fetches_only_one_day(monkeypatch):
+    calls: list[tuple[str, object]] = []
+    client = _Client()
+    monkeypatch.setattr(
+        evidence_refresh.x_content,
+        "create_client",
+        lambda **kwargs: (calls.append(("client", kwargs)), client)[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.x_daily_collection,
+        "execute_collection",
+        lambda **kwargs: (
+            calls.append(("collection", kwargs)),
+            {"status": "complete", "failures": 0, "unfinished_accounts": 0},
+        )[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_feed,
+        "materialize",
+        lambda **kwargs: (calls.append(("feed", kwargs)), {"run_id": "feed-day"})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_events,
+        "materialize",
+        lambda **kwargs: (
+            calls.append(("events", kwargs)),
+            {"run_id": "event-day"},
+        )[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.signal_events,
+        "publish",
+        lambda **kwargs: (
+            calls.append(("publish", kwargs)),
+            {"run_id": "event-day"},
+        )[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifacts,
+        "import_feed_events",
+        lambda **kwargs: (
+            calls.append(("catalog", kwargs)),
+            {
+                "accepted_artifact_ids": [
+                    "ordinary-id",
+                    "arxiv-id",
+                    "x-article-id",
+                ]
+            },
+        )[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh,
+        "_artifact_adapter_ids",
+        lambda **kwargs: {
+            "ordinary": ["ordinary-id"],
+            "arxiv": ["arxiv-id"],
+            "x_articles": ["x-article-id"],
+            "videos": [],
+        },
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_fetch,
+        "fetch_all_supported",
+        lambda **kwargs: (calls.append(("content", kwargs)), {"success": 1})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_arxiv,
+        "fetch_arxiv_metadata",
+        lambda **kwargs: (calls.append(("arxiv", kwargs)), {"success": 1})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_x_articles,
+        "fetch_x_articles",
+        lambda **kwargs: (calls.append(("x_articles", kwargs)), {"success": 1})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_fetch,
+        "jina_eligible_artifact_ids",
+        lambda **kwargs: (
+            calls.append(("jina_ids", kwargs)),
+            ["ordinary-id"],
+        )[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh.artifact_fetch,
+        "recover_with_jina_reader",
+        lambda **kwargs: (calls.append(("fallback", kwargs)), {"success": 1})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh,
+        "_optimize_stores",
+        lambda stores: (calls.append(("optimize", stores)), {"status": "ok"})[1],
+    )
+    monkeypatch.setattr(
+        evidence_refresh,
+        "_warm_evidence_views",
+        lambda **kwargs: (calls.append(("warm", kwargs)), {"status": "ready"})[1],
+    )
+
+    result = evidence_refresh.refresh_day(
+        day="2026-07-30",
+        workers=12,
+        key_file=Path("key.txt"),
+    )
+
+    assert calls[1][1]["start_day"].isoformat() == "2026-07-30"
+    assert calls[1][1]["end_day"].isoformat() == "2026-07-30"
+    assert calls[2][1]["days"] == 1
+    assert calls[4][1]["days"] == ["2026-07-30"]
+    assert calls[5][1]["event_run_id"] == "event-day"
+    assert calls[5][1]["replace_catalog"] is False
+    assert calls[6][1]["artifact_ids"] == ["ordinary-id"]
+    assert calls[7][1]["artifact_ids"] == ["arxiv-id"]
+    assert calls[8][1]["artifact_ids"] == ["x-article-id"]
+    assert calls[-1][1]["days"] == ["2026-07-30"]
+    assert result["mode"] == "day"
+    assert result["range"] == {
+        "start_day": "2026-07-30",
+        "end_day": "2026-07-30",
+    }
+    assert client.closed is True
+
+
 def test_refresh_evidence_proves_incremental_collection_covers_publication(
     monkeypatch, tmp_path
 ):
@@ -291,6 +415,38 @@ def test_cli_returns_stable_json_contract(monkeypatch, capsys):
     assert set(payload["meta"]) == {"request_id", "duration_ms", "timestamp_utc"}
     assert received["days"] == 11
     assert received["collection_days"] == 3
+
+
+def test_cli_day_mode_uses_the_same_stable_json_contract(monkeypatch, capsys):
+    received = {}
+
+    def fake_refresh_day(**kwargs):
+        received.update(kwargs)
+        return {
+            "mode": "day",
+            "day": "2026-07-30",
+            "publication": {"event_run_id": "event-day"},
+        }
+
+    monkeypatch.setattr(evidence_refresh, "refresh_day", fake_refresh_day)
+
+    code = evidence_refresh.main(
+        [
+            "--day",
+            "2026-07-30",
+            "--progress",
+            "off",
+            "--no-input",
+            "--json",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert code == 0
+    assert payload["schema_version"] == "1.0"
+    assert payload["status"] == "ok"
+    assert payload["data"]["mode"] == "day"
+    assert received["day"] == "2026-07-30"
 
 
 def test_cli_validation_error_is_structured(capsys):
