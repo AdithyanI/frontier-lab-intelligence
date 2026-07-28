@@ -1059,53 +1059,53 @@ const INVESTMENT_AGENT_DIRECTION = {
 function InvestmentAgentMechanism({
   assessment,
   companyNames,
-  feedPath,
 }: {
   assessment: InvestmentAgentCompanyAssessment
   companyNames: Record<string, string>
-  feedPath: string
 }) {
   return (
-    <details className="investment-agent-company" open>
+    <details className="investment-agent-mechanism" open>
       <summary>
-        <span className="investment-agent-company-identity">
+        <span className="investment-agent-mechanism-identity">
           <strong>{decodeTextEntities(assessment.mechanism_title)}</strong>
-          {assessment.splits && (
-            <span className="investment-agent-splits" title="One company gains at another's expense">
-              splits
-            </span>
-          )}
+          <span className="investment-agent-mechanism-tickers">
+            {assessment.exposures.map((exposure) => (
+              <span
+                className="investment-agent-direction"
+                data-direction={exposure.direction}
+                key={exposure.ticker}
+              >
+                <span aria-hidden="true">{INVESTMENT_AGENT_DIRECTION[exposure.direction].icon}</span>
+                {exposure.ticker}
+              </span>
+            ))}
+            {assessment.splits && (
+              <span className="investment-agent-splits" title="One company gains at another's expense">
+                splits
+              </span>
+            )}
+          </span>
         </span>
-        <span className="investment-agent-mechanism-tickers">
-          {assessment.exposures.map((exposure) => (
-            <span
-              className="investment-agent-direction"
-              data-direction={exposure.direction}
-              key={exposure.ticker}
-            >
-              <span aria-hidden="true">{INVESTMENT_AGENT_DIRECTION[exposure.direction].icon}</span>
-              {exposure.ticker}
-            </span>
-          ))}
-        </span>
-        <span className="investment-agent-company-summary">
+        <span className="investment-agent-mechanism-causal">
           {decodeTextEntities(assessment.mechanism)}
         </span>
       </summary>
-      <div className="investment-agent-company-detail">
+      <div className="investment-agent-mechanism-detail">
         <ol className="investment-agent-exposures">
           {assessment.exposures.map((exposure) => (
             <li key={exposure.ticker}>
               <div className="investment-agent-exposure-head">
                 <strong>{companyNames[exposure.ticker] ?? exposure.ticker}</strong>
-                <Link to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}>
-                  {exposure.ticker} ↗
+                <Link
+                  className="mono"
+                  to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}
+                >
+                  {exposure.ticker}
                 </Link>
                 <span
                   className="investment-agent-direction"
                   data-direction={exposure.direction}
                 >
-                  <span aria-hidden="true">{INVESTMENT_AGENT_DIRECTION[exposure.direction].icon}</span>
                   {INVESTMENT_AGENT_DIRECTION[exposure.direction].label}
                 </span>
                 <span
@@ -1124,18 +1124,16 @@ function InvestmentAgentMechanism({
             </li>
           ))}
         </ol>
-        <section>
-          <h4 className="mono">What remains unproven</h4>
-          <p>{decodeTextEntities(assessment.main_uncertainty)}</p>
-        </section>
-        <section>
-          <h4 className="mono">What to check next</h4>
-          <p>{decodeTextEntities(assessment.next_check)}</p>
-        </section>
-      </div>
-      <div className="investment-agent-source-material">
-        <span className="mono">Source material reviewed</span>
-        <Link to={feedPath}>Development evidence ↗</Link>
+        <div className="investment-agent-mechanism-footer">
+          <section>
+            <h4 className="mono">What remains unproven</h4>
+            <p>{decodeTextEntities(assessment.main_uncertainty)}</p>
+          </section>
+          <section>
+            <h4 className="mono">What to check next</h4>
+            <p>{decodeTextEntities(assessment.next_check)}</p>
+          </section>
+        </div>
       </div>
     </details>
   )
@@ -1215,7 +1213,6 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
               <InvestmentAgentMechanism
                 assessment={assessment}
                 companyNames={item.company_names}
-                feedPath={feedPath}
                 key={assessment.mechanism_title}
               />
             ))}
@@ -1229,7 +1226,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
 
         {item.prior_assumption && (
           <section className="investment-agent-prior">
-            <h3 className="mono">If you assumed</h3>
+            <h3 className="mono">What this changes</h3>
             <p>{decodeTextEntities(item.prior_assumption)}</p>
           </section>
         )}
