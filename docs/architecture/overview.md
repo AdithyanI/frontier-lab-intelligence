@@ -112,9 +112,14 @@ composition.
    Feed Development and company-memo links; the model does not generate URLs or
    restate the source ledger. The durable run binds evidence and universe
    hashes, exact memo calls, prompt/model identity, and token/cache/cost
-   telemetry. A July 21 Sol/xhigh pass across the top ten is the current
-   persisted calibration proof of this successor boundary; full-day replay
-   remains future work.
+   telemetry. `fli insights run-investment-agent` owns the production loop: it
+   completes one warm request for the stable prompt key, runs the remaining
+   requested ranks with bounded parallelism, writes the exact request and
+   response for every turn under
+   `data/derived/insights/investment-agent-traces/<day>/`, and imports each
+   successful result into the read database. Sol/xhigh top-ten passes now cover
+   July 19–21 as the persisted calibration proof of this successor boundary;
+   full-day replay remains future work.
 10. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. Its compact index keeps all 37 profiles eligible.

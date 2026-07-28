@@ -16,7 +16,7 @@ DEFAULT_DB = (
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v1"
 READ_SCHEMA_VERSION = "investment-agent-read-v3"
-TRACE_SCHEMA_VERSIONS = {"investment-insight-loop-pilot-trace-v1"}
+TRACE_SCHEMA_VERSIONS = {"investment-agent-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
 ASSESSMENT_FIELDS = {
     "ticker",
@@ -175,9 +175,17 @@ def import_trace(
     final = trace["final_result"]
     turns = trace.get("turns") or []
     result_sha256 = _sha256(final)
+    run_identity_sha256 = _sha256(
+        {
+            "prompt_version": trace["prompt_version"],
+            "model": trace["model"],
+            "reasoning_effort": trace["reasoning_effort"],
+            "result_sha256": result_sha256,
+        }
+    )
     run_id = (
         f"investment-agent-{trace['date']}-"
-        f"{str(trace['development_id'])[:12]}-{result_sha256[:12]}"
+        f"{str(trace['development_id'])[:12]}-{run_identity_sha256[:12]}"
     )
     values = {
         "run_id": run_id,

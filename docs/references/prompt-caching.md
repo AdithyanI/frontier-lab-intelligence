@@ -14,10 +14,10 @@ Model selection and reasoning-effort policy remain in
 
 ## Current Conclusion
 
-Prompt caching has produced positive reads for both `gpt-5.6-luna` and
-`gpt-5.6-terra` through the repository's shared Azure-backed LiteLLM Responses
-route. It is best-effort, model-specific, and not guaranteed on every eligible
-request.
+Prompt caching has produced positive reads for `gpt-5.6-luna`,
+`gpt-5.6-terra`, and `gpt-5.6-sol` through the repository's shared
+Azure-backed LiteLLM Responses route. It is best-effort, model-specific, and
+not guaranteed on every eligible request.
 
 The latest different-input canary produced:
 
@@ -46,8 +46,11 @@ Every cacheable workflow must:
    `fli.llm_responses.sharded_prompt_cache_key`.
 5. Partition a high-volume prefix only when traffic approaches Azure's roughly
    15-request-per-minute guidance for a prefix/key combination.
-6. Execute one request at a time inside each cache-key lane. Distinct lanes may
-   execute concurrently.
+6. For a bounded cache-first batch, complete one request before parallel
+   fan-out on the same stable prefix. Keep the fan-out bounded and use
+   deterministic key partitions if measured traffic approaches the provider's
+   per-key guidance. Workloads that do not need burst throughput may remain
+   serial.
 7. Record Responses `usage.input_tokens_details.cached_tokens`,
    `cache_write_tokens` when reported, total input/output tokens, and LiteLLM's
    response-cost header.
@@ -84,7 +87,8 @@ contract is both documented and live-proven.
 
 | Workload | Stable prefix/key strategy | Execution |
 | --- | --- | --- |
-| Audience routing | One prompt-version key | Cache-first defaults: one item and one day at a time |
+| Audience routing | One prompt-version key | One day per worker; item calls remain cache-first inside a day |
+| Company-aware Investment analysis | One prompt-version key | Complete one warm Development, then bounded parallel fan-out; each memo continuation chains from its own response ID |
 | Per-Event Insights | One key per audience prompt | One serial lane per audience; the two audience lanes may run concurrently |
 | Registry evaluation | Eight deterministic entity partitions for new freezes | Serial within each partition; parallel across partitions |
 | Missing-bio identity context | Eight deterministic entity partitions | Serial within each partition; parallel across partitions |
@@ -106,6 +110,8 @@ Implementation ownership:
   and [`src/fli/registry/relevance.py`](../../src/fli/registry/relevance.py);
 - audience-routing cache-first defaults:
   [`src/fli/routing/runs.py`](../../src/fli/routing/runs.py);
+- company-aware Investment warm/fan-out loop:
+  [`src/fli/insights/investment_agent.py`](../../src/fli/insights/investment_agent.py);
 - per-audience Insight lanes:
   [`src/fli/insights/cli.py`](../../src/fli/insights/cli.py).
 
@@ -183,6 +189,13 @@ The only proof of reusable-prefix caching is a positive
   not a prompt-layout failure. The subsequent sequential top-100 pass also
   reported zero reads across 97 eligible requests. Retain the uncached cost
   bound and do not change model solely to chase caching.
+- **2026-07-28:** the Sol/xhigh `investment-agent-v8` July 19–20 top-ten
+  production run completed one warm request before bounded parallel fan-out.
+  All 20 targets completed, with 272,384 cached tokens from 712,663 input
+  tokens and $3.693917 reported cost. This is direct production proof that the
+  Sol route can reuse the stable Investment prefix. The parallel Luna routing
+  refresh for those dates still reported zero cache reads, reinforcing that a
+  warm layout enables reuse but cannot guarantee it for every model or batch.
 
 Historical build-log entries remain immutable evidence of what was observed at
 the time. Their earlier zero-hit conclusions are incident history, not the

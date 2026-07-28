@@ -21,6 +21,7 @@ from openai import APIConnectionError, APITimeoutError, AuthenticationError
 from fli import llm_responses
 from fli.evidence import feed as signal_feed
 from fli.insights import generation as insight_generation
+from fli.insights import investment_agent
 from fli.insights import investment_agent_runs
 from fli.insights import runs as insight_runs
 from fli.registry import classification as entity_kinds
@@ -118,6 +119,14 @@ class InsightRefreshIncomplete(RuntimeError):
 
     def __init__(self, result: dict[str, Any]):
         super().__init__("Insight refresh completed with failed requests.")
+        self.result = result
+
+
+class InvestmentAgentBatchIncomplete(RuntimeError):
+    """A company-aware batch preserved its successes but some targets failed."""
+
+    def __init__(self, result: dict[str, Any]):
+        super().__init__("Investment agent batch completed with failed targets.")
         self.result = result
 
 
@@ -1017,6 +1026,50 @@ def _parser() -> argparse.ArgumentParser:
         default=investment_agent_runs.DEFAULT_DB,
     )
     _add_output_flags(investment_import)
+    investment_run = sub.add_parser(
+        "run-investment-agent",
+        help=(
+            "Analyze ranked Developments with the company-aware Investment "
+            "agent, persist full audit traces, and import successful results."
+        ),
+    )
+    investment_run.add_argument("--through", required=True)
+    investment_run.add_argument("--days", type=int, default=1)
+    investment_run.add_argument(
+        "--top-ranked",
+        type=int,
+        default=investment_agent.DEFAULT_TOP_RANKED,
+    )
+    investment_run.add_argument(
+        "--rank",
+        type=int,
+        help="Run only this rank on every requested day.",
+    )
+    investment_run.add_argument("--model", default=investment_agent.DEFAULT_MODEL)
+    investment_run.add_argument(
+        "--reasoning-effort",
+        default=investment_agent.DEFAULT_EFFORT,
+    )
+    investment_run.add_argument(
+        "--workers",
+        type=int,
+        default=investment_agent.DEFAULT_WORKERS,
+    )
+    investment_run.add_argument(
+        "--api-base",
+        default=investment_agent.DEFAULT_API_BASE,
+    )
+    investment_run.add_argument(
+        "--trace-root",
+        type=Path,
+        default=investment_agent.DEFAULT_TRACE_ROOT,
+    )
+    investment_run.add_argument(
+        "--db",
+        type=Path,
+        default=investment_agent_runs.DEFAULT_DB,
+    )
+    _add_output_flags(investment_run)
     summary = sub.add_parser("summary", help="Inspect aggregate durable run state.")
     summary.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
     _add_output_flags(summary)
@@ -1038,6 +1091,7 @@ def _plain(payload: dict[str, Any]) -> str:
         "insights.inspect",
         "insights.import-result",
         "insights.import-investment-trace",
+        "insights.run-investment-agent",
     }:
         return _canonical_json(data, pretty=True)
     if payload["command"] == "insights.refresh":
@@ -1080,6 +1134,22 @@ def main(
     try:
         if args.action == "contract":
             data = contract_payload(args.audience)
+        elif args.action == "run-investment-agent":
+            data = investment_agent.run_range(
+                through=args.through,
+                days=args.days,
+                top_ranked=args.top_ranked,
+                rank=args.rank,
+                model=args.model,
+                effort=args.reasoning_effort,
+                workers=args.workers,
+                api_base=args.api_base,
+                trace_root=args.trace_root,
+                db_path=args.db,
+                client_factory=client_factory,
+            )
+            if not data["complete"]:
+                raise InvestmentAgentBatchIncomplete(data)
         elif args.action == "import-investment-trace":
             data = investment_agent_runs.import_trace(
                 args.trace,
@@ -1147,6 +1217,21 @@ def main(
             )
         payload = _success(
             command, data, request_id=request_id, started=started
+        )
+    except InvestmentAgentBatchIncomplete as exc:
+        exit_code = 1
+        payload = _error(
+            command,
+            code="E_PARTIAL_FAILURE",
+            message=str(exc),
+            retryable=True,
+            hint=(
+                "Rerun only the failed day and rank targets; completed traces "
+                "are already stored and imported."
+            ),
+            request_id=request_id,
+            started=started,
+            data=exc.result,
         )
     except InsightRefreshIncomplete as exc:
         exit_code = 1

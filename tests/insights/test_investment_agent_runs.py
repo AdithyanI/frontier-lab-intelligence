@@ -35,9 +35,9 @@ def _trace() -> dict:
         "no_match_reason": None,
     }
     return {
-        "schema_version": "investment-insight-loop-pilot-trace-v1",
-        "prompt_version": "investment-insight-loop-pilot-v1",
-        "prompt_cache_key": "fli:investment-insight-loop:pilot-v1",
+        "schema_version": "investment-agent-trace-v1",
+        "prompt_version": "investment-agent-v8",
+        "prompt_cache_key": "fli:investment-agent:v8",
         "date": DAY,
         "daily_rank": 1,
         "development_id": DEVELOPMENT_ID,
