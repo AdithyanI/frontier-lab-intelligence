@@ -497,6 +497,14 @@ implying four separate findings.
 
 One sentence naming a reasonable prior a BIT analyst might already hold, and
 which way this Development moves it. Write the belief, then the movement.
+
+Anchor it to the work above. Name a company or an `affected_driver` that
+appears in your `company_assessments`, so the sentence lands on a position
+rather than on the industry. "A reasonable prior is that agent escapes stay
+inside test systems" is an observation about the world and is too loose.
+"Netskope's AI-security modules looked like an option on future budgets; this
+argues the budget already exists" is anchored, because a reader can act on it.
+
 Use `null` when suppressed, or when the Development genuinely moves no prior
 worth naming. Do not manufacture a contrarian angle.
 

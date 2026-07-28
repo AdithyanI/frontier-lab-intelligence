@@ -1210,7 +1210,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
 
         <div className="investment-agent-opening">
           <section>
-            <h3 className="mono">What changed</h3>
+            <h3 className="mono">What happened</h3>
             <p>{decodeTextEntities(item.development_summary)}</p>
           </section>
         </div>
@@ -1239,7 +1239,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
 
         {item.prior_assumption && (
           <section className="investment-agent-prior">
-            <h3 className="mono">What this changes</h3>
+            <h3 className="mono">The belief this moves</h3>
             <p>{decodeTextEntities(item.prior_assumption)}</p>
           </section>
         )}
