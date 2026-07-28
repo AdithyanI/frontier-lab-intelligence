@@ -1056,6 +1056,12 @@ const INVESTMENT_AGENT_DIRECTION = {
   unclear: { icon: '?', label: 'Direction unclear' },
 } as const
 
+const INVESTMENT_AGENT_MATERIALITY = {
+  material: 'Big enough to matter',
+  immaterial: 'Too small to matter',
+  unknown: 'Cannot size it',
+} as const
+
 function InvestmentAgentMechanism({
   assessment,
   companyNames,
@@ -1113,7 +1119,7 @@ function InvestmentAgentMechanism({
                   data-materiality={exposure.materiality}
                   title="Could this move the company's reported results at its own scale?"
                 >
-                  {exposure.materiality}
+                  {INVESTMENT_AGENT_MATERIALITY[exposure.materiality]}
                 </span>
               </div>
               <p>{decodeTextEntities(exposure.note)}</p>
