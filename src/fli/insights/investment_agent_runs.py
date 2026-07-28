@@ -32,7 +32,7 @@ EXPOSURE_FIELDS = {
     "direction",
     "materiality",
     "size_basis",
-    "note",
+    "impact",
 }
 DIRECTIONS = {"positive", "negative", "mixed", "unclear"}
 MATERIALITIES = {"material", "immaterial", "unknown"}

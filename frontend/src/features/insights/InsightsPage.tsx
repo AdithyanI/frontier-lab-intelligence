@@ -1063,7 +1063,6 @@ function InvestmentAgentMechanism({
   assessment: InvestmentAgentCompanyAssessment
   companyNames: Record<string, string>
 }) {
-  const ranked = assessment.exposures.length > 1
   return (
     <details className="investment-agent-mechanism" open>
       <summary>
@@ -1103,7 +1102,7 @@ function InvestmentAgentMechanism({
                 <p className="investment-agent-exposure-driver">
                   {decodeTextEntities(exposure.affected_driver)}
                 </p>
-                {ranked && <p className="investment-agent-exposure-note">{decodeTextEntities(exposure.note)}</p>}
+                <p className="investment-agent-exposure-impact">{decodeTextEntities(exposure.impact)}</p>
               </div>
               <div className="investment-agent-exposure-verdict">
                 <span

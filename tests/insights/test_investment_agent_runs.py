@@ -31,7 +31,7 @@ def _trace() -> dict:
                         "direction": "positive",
                         "materiality": "unknown",
                         "size_basis": None,
-                        "note": "The incident could increase demand for AI controls.",
+                        "impact": "Placeholder impact sentence for the exposure.",
                     }
                 ],
                 "main_uncertainty": "No disclosed revenue contribution.",

@@ -365,7 +365,16 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                     "exposed."
                 ),
             },
-            "main_uncertainty": {"type": "string"},
+            "main_uncertainty": {
+                "type": "string",
+                "description": (
+                    "One short sentence naming the single thing that could "
+                    "make this wrong. Start with 'We do not know whether' or "
+                    "'Nobody has shown yet that'. Keep it under 25 words and "
+                    "carry only one idea, so an analyst can grasp it in one "
+                    "read."
+                ),
+            },
             "next_check": {
                 "type": "string",
                 "description": (

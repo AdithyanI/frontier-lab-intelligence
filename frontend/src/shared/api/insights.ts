@@ -225,7 +225,7 @@ export interface InvestmentAgentExposure {
   direction: InvestmentAgentDirection
   materiality: InvestmentAgentMateriality
   size_basis: string | null
-  note: string
+  impact: string
 }
 
 export interface InvestmentAgentCompanyAssessment {

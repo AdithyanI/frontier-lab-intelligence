@@ -347,7 +347,7 @@ attributable. When it is present it carries `would_support_it` and
 existed.
 
 - When the Development bears on one of those tests, say so in the exposure
-  `note` and name the direction. A Development that moves a pre-registered
+  `impact` and name the direction. A Development that moves a pre-registered
   test is stronger than one that merely touches an operating driver.
 - `is_explicit_thesis` false means commentary. Commentary is weaker evidence
   than a stated thesis; do not upgrade it.
@@ -535,8 +535,9 @@ For each mechanism:
   favorably and another adversely. It must be `false` when every company on the
   path moves the same way. A mechanism that splits is usually more valuable
   than one that does not, because it identifies a winner at someone's expense.
-- `main_uncertainty`: the single most important unproven fact limiting this
-  mechanism.
+- `main_uncertainty`: the single thing that could make this mechanism wrong.
+  One short sentence, under 25 words, carrying one idea. Open with "We do not
+  know whether" or "Nobody has shown yet that" so the limit is unmistakable.
 - `next_check`: exactly one primary observable, naming the company it applies
   to.
 
@@ -566,9 +567,12 @@ For each company on the mechanism:
   and only then. A reader must be able to check your verdict against this
   figure without opening the memo. Never invent or round a figure the packet
   does not state.
-- `note`: one sentence on why this company sits where it does relative to the
-  others on this mechanism. This is the comparison, so do not restate the
-  mechanism here.
+- `impact`: two or three short sentences on what this Development means for
+  this company. Name the product, segment, or contract that carries the
+  effect, then say what would have to happen for it to reach reported
+  results. Do not say the company "ranks first" or "ranks second"; the order
+  already shows that. Do not restate the mechanism sentence. Write it so an
+  analyst who reads only this paragraph still knows what is at stake.
 
 ## `rejected_after_memo`
 
@@ -592,8 +596,15 @@ understand each sentence on the first read.
 
 - Put the conclusion first.
 - Give each sentence one main idea.
-- Aim for 15 to 20 words per sentence and rewrite most sentences over 25
-  words.
+- Write so a smart analyst understands each sentence on the first read.
+- Carry one idea per sentence. When a sentence stacks two conditions and a
+  consequence, split it into two sentences.
+- Rewrite any sentence you would have to read twice. For example, "whether an
+  exceptional evaluation with disabled production classifiers causes
+  enterprises to buy independent controls for ordinary production agents"
+  stacks three abstractions. Write instead: "This test ran with the safety
+  filters switched off. We do not know whether normal deployments face the
+  same risk."
 - Prefer active voice, concrete nouns, and everyday verbs.
 - Use short paragraphs.
 - Keep a technical or financial term only when it adds precision.

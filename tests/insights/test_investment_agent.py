@@ -25,7 +25,7 @@ def _result(*, day: str, rank: int) -> dict:
                         "direction": "positive",
                         "materiality": "unknown",
                         "size_basis": None,
-                        "note": "A bounded implication.",
+                        "impact": "Placeholder impact sentence for the exposure.",
                     }
                 ],
                 "main_uncertainty": "Demand is not measured.",
