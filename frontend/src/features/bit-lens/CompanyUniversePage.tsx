@@ -224,7 +224,10 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
     <div className="company-detail company-research-memo">
       <section className="company-memo-intro">
         <div>
-          <p className="mono">Investment context memo</p>
+          <p className="mono">
+            Investment context memo · researched {formatDay(provenance.research_date)} ·{' '}
+            {memo.source_ledger.length} sources
+          </p>
           <p className="company-memo-summary">
             {cleanMemoText(memo.business_and_economics.summary)}
             <MemoCitations
@@ -233,16 +236,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
             />
           </p>
         </div>
-        <dl className="company-memo-provenance">
-          <div>
-            <dt>Researched</dt>
-            <dd>{formatDay(provenance.research_date)}</dd>
-          </div>
-          <div>
-            <dt>Evidence</dt>
-            <dd>{memo.source_ledger.length} sources</dd>
-          </div>
-        </dl>
       </section>
 
       <section className="company-detail-section">
@@ -284,7 +277,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         <header className="company-memo-section-head">
           <div>
             <h3>Where frontier AI can matter</h3>
-            <p>Each path must reach an operating driver and a possible financial consequence.</p>
           </div>
           <span>{memo.frontier_ai_transmission_paths.length} testable paths</span>
         </header>
@@ -296,7 +288,9 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
                 <div className="company-path-meta">
                   <span className={`is-${path.direction}`}>{path.direction}</span>
                   <span>{formatTaxonomy(path.time_horizon)}</span>
-                  <span>Thesis · {formatTaxonomy(path.thesis_effect)}</span>
+                  {path.thesis_effect !== 'no_public_thesis' && (
+                    <span>Thesis · {formatTaxonomy(path.thesis_effect)}</span>
+                  )}
                 </div>
               </header>
               <dl className="company-causal-chain">

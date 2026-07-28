@@ -545,9 +545,6 @@
 .company-memo-pending > p:last-child { max-width: 68ch; }
 
 .company-memo-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.75fr);
-  gap: 48px;
   padding: 32px 0;
   border-top: 1px solid var(--border-strong);
 }
@@ -568,32 +565,6 @@
   line-height: 1.65 !important;
 }
 
-.company-memo-provenance {
-  margin: 0;
-  border-top: 1px solid var(--border-strong);
-}
-
-.company-memo-provenance > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.company-memo-provenance dt,
-.company-memo-provenance dd {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-}
-
-.company-memo-provenance dt { color: var(--muted); }
-
-.company-memo-provenance dd {
-  margin: 0;
-  color: var(--ink);
-  text-align: right;
-}
 
 .company-memo-section-head {
   display: flex;
