@@ -1,5 +1,14 @@
 # Interview Readiness Audit
 
+## Closure Status
+
+Archived as superseded on 2026-07-28 at Adi's request. This is not a claim
+that every original interview-preparation task was completed. The audit's
+measurements, defenses, and unfinished ideas remain preserved here as
+historical reference, while active implementation moves to the narrower
+`auditable-development-insights` project against the current Development and
+Luna-routing lineage.
+
 ## Goal
 
 Give Adi a defensible, evidence-backed account of what the system does well,
@@ -66,6 +75,10 @@ So this audit is not optional polish. It is the requested preparation.
 - [ ] Quant-session defenses prepared for scoring, validation, and recall.
 - [ ] Any shipped change verified in the browser and `scripts/check-fast.sh`.
 
+The unchecked conditions above are deliberately preserved as the original
+acceptance criteria. They were explicitly descoped from this tracker rather
+than silently marked complete.
+
 ## Milestones
 
 - [x] Milestone 1 — Investment lane audited against the prompt and BIT context.
@@ -80,10 +93,13 @@ So this audit is not optional polish. It is the requested preparation.
       measured across all 17 days. **Result: the stronger lane. 124/124
       Insights carry a falsifiable `decision_rule`; house style visible in
       the titles. Findings 7–8 recorded.**
-- [ ] Milestone 4 — Quant-session defense pack.
+- [ ] Milestone 4 — Quant-session defense pack. **Descoped at closeout; the
+      measured findings remain available for interview preparation.**
       Acceptance: written answers for selection bias, recall below the gate,
       the layer-attribution table, and the Digg comparison's limits.
 - [ ] Milestone 5 — Ranked improvement list for the Carlos/Vlad session.
+      **Superseded by the current Development-to-Insight implementation
+      project and preserved below as historical recommendations.**
       Acceptance: each item states the gap, the evidence, and the fix.
 
 ## Execution Rules
@@ -116,38 +132,14 @@ So this audit is not optional polish. It is the requested preparation.
 
 ## Open Questions / Blockers
 
-- **Why 17 days rather than the suggested ~3 months, with 68% of the €100
-  budget unspent?** (finding 15) The inferred answer is X's first-party
-  retrieval window, not budget or effort — but this audit did not confirm it
-  from provider docs or ingestion code. Adi needs this as one sentence.
-- **Does Adi want B3 (cross-day novelty) built before Thursday?** It is the
-  highest-value pipeline improvement and the only build that can break the
-  demo. Decision not yet made.
-- Confirm the budget for B2 (~$2) and B4 (~$10). Adi has said cost is not the
-  constraint if the result is good.
-- Unclear who Carlos is. Vlad Gheorghe appears in the original interview
-  thread subject. Marc handles welcome. Worth a public check before Thursday.
-- Is the "Aion" reference in Investment rejection reasons intended
-  cross-audience reasoning or prompt bleed? (finding 6)
+- None for closeout. The former questions remain recorded in the findings and
+  backlog below, but no longer block this archived audit.
 
 ## Current Batch
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| done | Audit Investment lane against prompt + BIT context | parent | `resources/findings.md` |
-| done | Ship funnel yield line and merge/role labels | parent | — |
-| done | Audit AI Engineering lane to the same depth | parent | findings 7–8 |
-| done | Diagnose the concentration finding with a free measurement | parent | finding 1 |
-| done | Anchor editorial rank against deterministic rank | parent | finding 9 |
-| done | Second sweep: citations, deliverables, rubric coverage | parent | findings 13–15 |
-| todo | **B0 — The 3–5 most interesting insights showcase** | handoff | finding 14 |
-| todo | **B1 — Surface evidence rank on each Insight** | handoff | finding 9 |
-| todo | **B2 — Run the ranks 101–200 recall probe** | handoff | finding 4 |
-| todo | **B3 — Cross-day novelty delta** | handoff | finding 10 |
-| todo | **B4 — Stability re-run** | handoff | finding 11 |
-| todo | **B5 — Extend verification to `web` citations** (post-Thursday) | handoff | finding 13 |
-| todo | Build quant-session defense pack | parent | — |
-| todo | Rank the improvement list for Carlos/Vlad | parent | — |
+| done | Close this superseded audit with unfinished work preserved | parent | `resources/findings.md` |
 
 ## Recommended Work Order
 
@@ -418,26 +410,12 @@ corpus, so the demo is unaffected.**
 
 ## Backlog / Remaining Work
 
-- [ ] Prepare the answer for mega-cap concentration (finding 1 — now diagnosed,
-      needs rehearsing rather than fixing).
-- [ ] Decide whether to re-run one day against the merged roster before
-      Thursday, to show Marvell/SanDisk/Infineon actually landing.
-- [ ] Run `resources/fanout-probe.py` (start `--limit 5`) and compare the
-      matrix against what was published on 21 July. Unrun as of 2026-07-27.
-- [ ] Connect the person registry to the Investment lane — the prompt's first
-      example (talent movement) is the weakest archetype at 3.6% (finding 20).
-- [ ] Prepare the answer for insight scoring absence (findings 3 and 9).
-- [ ] Prepare the answer for cross-platform entity resolution (finding 2).
-- [ ] Consider aligning the Insights page subtitle to BIT's own wording
-      (finding 5).
-- [ ] Check whether "Aion" leaks into Investment rejection reasons by design
-      (finding 6).
-- [ ] Run finding 9's Spearman measurement on the AI Engineering lane too.
-- [ ] Consider follow-up 4 from the batch audit — exact source-text windows and
-      historical-availability metadata. This is the missing half of the
-      entailment gap (finding 12) and is a stronger fix than a prompt change.
-- [ ] Validation pass: `scripts/check-fast.sh` plus browser verification.
-- [ ] Closeout: finalize `learnings.md`, then archive the project directory.
+- All remaining work in this audit is explicitly descoped here. Relevant
+  Development-to-company and Insight-contract work moves to
+  `docs/projects/auditable-development-insights/`; interview rehearsal,
+  source-expansion, recall-below-rank-100, cross-day novelty, stability, and
+  broader citation verification remain historical follow-ups in
+  `resources/findings.md`.
 
 ## Validation / Test Plan
 
@@ -522,3 +500,9 @@ corpus, so the demo is unaffected.**
   fan-out probe at `resources/fanout-probe.py`; verified it assembles a
   37-company × 66-development matrix with a ~15K-char cacheable prefix, and
   left it unrun pending Adi's decision.
+- 2026-07-28: [DONE] Closed the tracker as superseded at Adi's request. The
+  current system now groups exact Events into ranked Developments, routes the
+  July 21 top 100 with Luna/medium, and holds complete research memos for all
+  37 Investment candidates. Active work moves to a fresh, narrower project
+  that proves auditable Development-lineage Insights before any further
+  ranking or routing tuning.

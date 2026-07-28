@@ -3,6 +3,21 @@
 Operational notes for anyone picking this up. Saves re-discovering the same
 things.
 
+## Closeout Summary
+
+This project combined a read-heavy interview audit with a small amount of UI
+work. Its strongest contribution was measurement: it separated upstream
+coverage limits from downstream selection quality and showed where model
+judgment overrode deterministic evidence rank for legible reasons.
+
+The tracker was archived as superseded on 2026-07-28, not because every
+original preparation task was complete. The pipeline changed materially after
+the audit: exact Events now project into shared-artifact Developments, daily
+Development rank is deterministic, the top 100 are routed by the
+self-contained Luna v13 contract, and all 37 Investment companies have
+source-bearing memos. Future implementation should start from those current
+contracts instead of executing the old B0–B10 list literally.
+
 ## How to query the live data
 
 The service runs at `http://127.0.0.1:8797`. Everything in `findings.md` came
@@ -97,3 +112,15 @@ deferred (items 2, 4, 5).
   Say so plainly when it happens.
 - Audit-only unless he explicitly asks for implementation. The frozen 17-day
   corpus is the demo and must not break.
+
+## Recommended Follow-Up
+
+- Evaluate downstream judgment with the upstream router held stable. Tuning
+  routing before observing company mapping and Insight suppression optimizes
+  one stage in isolation.
+- Preserve negative verdicts. An auditable "no affected company" or
+  "insufficient technical consequence" is part of the product, not discarded
+  model exhaust.
+- Keep one narrow project tracker for the current pipeline boundary. Large
+  interview-readiness lists become stale quickly when the underlying lineage
+  changes.
