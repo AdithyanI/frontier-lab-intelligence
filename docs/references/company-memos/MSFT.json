@@ -1,0 +1,575 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Microsoft",
+    "ticker": "MSFT"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Microsoft operates a diversified platform spanning productivity and business applications, Azure cloud and AI services, developer tools, Windows, search, gaming, LinkedIn, and enterprise support. Its economics combine recurring per-user subscriptions with consumption-based cloud revenue, advertising, gaming content, and enterprise services. In fiscal 2025, Microsoft generated $281.7 billion of revenue, including $217.8 billion from services and other products. ([microsoft.com](https://www.microsoft.com/investor/reports/ar25/index.html))",
+      "revenue_engines": [
+        {
+          "engine": "Azure, server products, and AI/cloud consumption",
+          "who_pays": "Enterprises, developers, governments, and software vendors pay for compute, storage, databases, networking, security, AI models, and related services.",
+          "economic_logic": "Revenue scales with workloads, usage, model inference, capacity utilization, service mix, and customer retention. AI can increase consumption but may initially carry lower margins because of accelerated infrastructure investment.",
+          "sources": [
+            {
+              "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+              "claim_date": "2025-06-30"
+            },
+            {
+              "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/intelligent-cloud-performance",
+              "claim_date": "2025-07-30"
+            }
+          ]
+        },
+        {
+          "engine": "Microsoft 365, Dynamics, LinkedIn, security, and Copilot subscriptions",
+          "who_pays": "Commercial and public-sector organizations, small businesses, professionals, and consumers pay per user, seat, subscription, or product module.",
+          "economic_logic": "Revenue depends on installed seats, renewal and retention, pricing, product mix, premium-feature attach rates, and incremental adoption of Copilot and agents.",
+          "sources": [
+            {
+              "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+              "claim_date": "2025-06-30"
+            },
+            {
+              "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/productivity-and-business-processes-performance",
+              "claim_date": "2025-07-30"
+            }
+          ]
+        },
+        {
+          "engine": "Windows, search advertising, gaming, and devices",
+          "who_pays": "OEMs, advertisers, consumers, gamers, and enterprise or consumer device buyers.",
+          "economic_logic": "Revenue depends on PC shipments, search queries and advertising yield, gaming engagement and content sales, subscriptions such as Game Pass, and hardware volume and mix.",
+          "sources": [
+            {
+              "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/more-personal-computing-performance",
+              "claim_date": "2025-07-30"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+          "claim_date": "2025-06-30"
+        },
+        {
+          "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/press-release-webcast",
+          "claim_date": "2025-07-30"
+        },
+        {
+          "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/intelligent-cloud-performance",
+          "claim_date": "2025-07-30"
+        },
+        {
+          "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/productivity-and-business-processes-performance",
+          "claim_date": "2025-07-30"
+        },
+        {
+          "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/more-personal-computing-performance",
+          "claim_date": "2025-07-30"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Azure workload growth, AI consumption, utilization, and pricing",
+        "why_it_matters": "Azure is the clearest operating transmission point from frontier AI adoption to Microsoft revenue. Growth can be offset by lower pricing, workload migration to competitors, or constrained capacity.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/press-release-webcast",
+            "claim_date": "2025-07-30"
+          },
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "driver": "AI infrastructure scale, hardware supply, and cloud gross margin",
+        "why_it_matters": "Microsoft has stated that scaling AI infrastructure reduced Microsoft Cloud gross margin. The key issue is whether utilization and pricing catch up with depreciation, power, networking, and model-serving costs.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          },
+          {
+            "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      },
+      {
+        "driver": "Paid Copilot, agent, and AI-feature adoption across the installed base",
+        "why_it_matters": "The installed base gives Microsoft a distribution advantage, but materiality requires evidence of incremental paid seats, higher prices, usage-based revenue, or improved retention rather than merely higher engagement.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          },
+          {
+            "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/productivity-and-business-processes-performance",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      },
+      {
+        "driver": "Capital allocation and operating expenditure for cloud and AI engineering",
+        "why_it_matters": "Sustained AI investment can strengthen platform position while reducing near-term free cash flow and operating leverage if demand or monetization disappoints.",
+        "financial_lines": [
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "balance_sheet"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/intelligent-cloud-performance",
+            "claim_date": "2025-07-30"
+          },
+          {
+            "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Large enterprises, governments, developers, and regulated industries",
+        "why_it_matters": "These customers value integrated identity, security, compliance, data, productivity, and cloud tooling, supporting cross-product distribution of AI services.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "OpenAI and other model developers",
+        "why_it_matters": "Model partnerships expand Azure's AI offering and support Copilot products, but also create dependence on partner economics, availability, model performance, and strategic alignment.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Semiconductor, networking, memory, data-center, power, and infrastructure suppliers",
+        "why_it_matters": "AI capacity depends on access to specialized hardware and data-center inputs. Supply constraints can limit Azure growth; high input costs can pressure margins and cash flow.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Amazon Web Services, Alphabet Google Cloud, Apple, Salesforce, Oracle, Nvidia ecosystem, and open-source or self-hosted AI stacks",
+        "why_it_matters": "Competition affects cloud pricing, model access, developer preference, enterprise workload allocation, and the defensibility of Microsoft's integrated platform.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Competition, privacy, data-governance, cybersecurity, copyright, and AI regulators",
+        "why_it_matters": "Regulatory restrictions or security failures could slow enterprise adoption, increase compliance costs, constrain distribution, or alter partnership and bundling practices.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Continue investing heavily across the AI stack, including infrastructure, Azure AI services, Copilots, agents, and AI engineering.",
+        "investment_relevance": "This supports the upside case that Microsoft can monetize frontier AI through both Azure consumption and its broad enterprise software distribution, while creating a testable near-term margin and capital-intensity risk.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          },
+          {
+            "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      },
+      {
+        "action": "Use Microsoft 365, Dynamics, GitHub, security, Windows, and Azure as distribution channels for Copilots and agents.",
+        "investment_relevance": "The strategy seeks to convert existing customer relationships into incremental AI revenue and stronger platform retention rather than relying on a standalone AI product.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "action": "Maintain an integrated commercial-cloud platform spanning data, identity, security, productivity, developer tools, and AI.",
+        "investment_relevance": "Integration can support cross-product synergies and switching costs, consistent with the supplied BIT Capital commentary, but the thesis requires evidence that integration produces superior monetization or retention.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          },
+          {
+            "url": "https://bitcap.com/news/elon-musk-hat-sich-mit-seinen-unternehmen-verzettelt-jan-beckers-im-beckers-bets-podcast",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models become substantially more capable, cheaper to run, or better suited to tool use and autonomous agents.",
+        "company_exposure": "Azure hosts model training and inference workloads, while Microsoft distributes AI through Copilot, GitHub, Dynamics, security, and enterprise data services.",
+        "affected_driver": "Azure consumption, AI service volume, Copilot and agent adoption, premium pricing, and enterprise retention.",
+        "financial_consequence": "Potential upside to cloud and subscription revenue, product mix, and platform economics; potentially higher gross-margin pressure during the capacity ramp.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if AI workloads generate sustained incremental Azure consumption or paid software seats faster than serving, infrastructure, and support costs rise.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Azure growth and disclosed AI contribution",
+          "Paid Copilot, agent, or AI-seat metrics",
+          "AI-related pricing and usage monetization",
+          "Microsoft Cloud gross margin",
+          "Enterprise renewal and retention commentary"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          },
+          {
+            "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/press-release-webcast",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      },
+      {
+        "development": "Frontier AI inference becomes more efficient through improved algorithms, specialized chips, or smaller capable models.",
+        "company_exposure": "Microsoft operates large-scale Azure infrastructure and bears the cost of serving first-party and partner AI products.",
+        "affected_driver": "Cost per inference, utilization, cloud gross margin, pricing flexibility, and capital intensity.",
+        "financial_consequence": "Potential upside to gross margin and free cash flow if efficiency lowers unit costs faster than prices decline; downside if efficiency causes customers to consume fewer compute dollars or intensifies cloud price competition.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material when unit-cost reductions are visible in Microsoft Cloud margins or allow Microsoft to increase workload volume without proportional capital spending.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Microsoft Cloud gross-margin trend",
+          "AI workload volumes relative to capital expenditure",
+          "Azure pricing and model-service pricing",
+          "Data-center utilization and capacity commentary"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          },
+          {
+            "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      },
+      {
+        "development": "Open-source, commodity, or rival frontier models narrow the performance gap with Microsoft's preferred models.",
+        "company_exposure": "Azure can still monetize model hosting and orchestration, but model differentiation and OpenAI-related advantages may weaken.",
+        "affected_driver": "Cloud pricing, model-platform mix, customer switching, Copilot willingness to pay, and partner economics.",
+        "financial_consequence": "Azure may gain from broader workload choice, but lower differentiation could increase price competition and reduce premium software attach or bargaining power.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if customers shift from differentiated Microsoft AI services toward lower-priced multi-cloud, open-source, or self-hosted alternatives and Microsoft cannot offset the shift through higher workload volume.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Azure AI pricing and workload mix",
+          "Customer use of third-party or open models on Azure",
+          "Copilot retention and willingness to pay",
+          "Model-partner contract and economics disclosures"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "development": "Frontier AI capabilities increase enterprise automation and software-development productivity.",
+        "company_exposure": "Microsoft can embed agents in Microsoft 365, GitHub, Dynamics, security, and internal enterprise workflows.",
+        "affected_driver": "Premium seat adoption, usage-based services, product retention, sales productivity, and support costs.",
+        "financial_consequence": "Potential upside to pricing, product mix, recurring revenue, and customer retention; downside if automation reduces seat counts or customers demand lower prices for software that becomes less labor-intensive.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if customers pay for AI functionality as a distinct premium or if measurable productivity and retention gains improve renewal economics without causing meaningful seat compression.",
+        "time_horizon": "long_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Premium AI attach and paid-seat growth",
+          "Net retention and renewal commentary",
+          "Customer evidence of production deployment",
+          "Seat counts versus revenue growth",
+          "Support and reliability costs"
+        ],
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          },
+          {
+            "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/productivity-and-business-processes-performance",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "The supplied BIT Capital commentary characterizes Microsoft as diversified and stable, with reinforcing enterprise, productivity, developer, and cloud businesses and few obvious operating weaknesses, while noting that these strengths were reflected in a premium valuation and that the company was stable but not cheap. This memo preserves that view and does not infer a stronger formal BIT thesis from portfolio ownership or generic AI commentary.",
+      "what_would_support_it": [
+        "Azure AI consumption and paid Copilot or agent adoption grow without sustained deterioration in Microsoft Cloud gross margin.",
+        "Cross-product distribution produces measurable incremental revenue, retention, or pricing power across Microsoft 365, GitHub, Dynamics, security, and Azure.",
+        "Frontier-model progress expands total enterprise AI workloads rather than shifting value away from Microsoft's platform.",
+        "Microsoft maintains sufficient AI capacity and supply access while converting investment into durable recurring revenue and cash flow."
+      ],
+      "what_would_challenge_it": [
+        "AI infrastructure spending and serving costs remain ahead of monetization, producing sustained margin and free-cash-flow pressure.",
+        "Open or rival models commoditize Azure AI and reduce pricing power, differentiation, or partner leverage.",
+        "Copilot and agent adoption remains high in usage but weak in paid conversion, renewal, or incremental revenue.",
+        "Regulatory, security, copyright, or data-governance issues materially slow enterprise deployment or increase operating costs."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/news/elon-musk-hat-sich-mit-seinen-unternehmen-verzettelt-jan-beckers-im-beckers-bets-podcast",
+          "claim_date": null
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+          "claim_date": "2025-06-30"
+        },
+        {
+          "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+          "claim_date": "2025-07-30"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Microsoft does not disclose enough detail to isolate AI revenue, paid Copilot economics, or AI-specific gross margin.",
+        "why_it_matters": "Without product-level monetization and cost data, reported Azure growth may not reveal whether frontier AI is creating attractive incremental returns.",
+        "next_research_trigger": "Inspect future earnings releases, investor presentations, and management commentary for paid-seat counts, AI revenue contribution, usage growth, and unit-economics indicators.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/metrics",
+            "claim_date": "2025-07-30"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The balance between AI workload growth and infrastructure cost remains uncertain.",
+        "why_it_matters": "This determines whether frontier AI is primarily an operating leverage opportunity or a capital-intensive growth investment with delayed returns.",
+        "next_research_trigger": "Track Microsoft Cloud gross margin, capital expenditure, depreciation, capacity constraints, and Azure growth together over multiple quarters.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+            "claim_date": "2025-07-30"
+          },
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Microsoft's dependence on external model, chip, networking, power, and data-center ecosystems may limit execution.",
+        "why_it_matters": "Supply shortages, partner renegotiation, model underperformance, or geopolitical and regulatory constraints could restrict Azure capacity or reduce product differentiation.",
+        "next_research_trigger": "Review annual-report risk factors, supplier disclosures, model-partner announcements, data-center capacity updates, and changes in Azure AI service availability.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The long-term effect of agents on software seat counts and pricing is unresolved.",
+        "why_it_matters": "Agents could support premium monetization and retention, but they could also reduce human-seat demand or increase customer pressure for outcome-based pricing.",
+        "next_research_trigger": "Look for customer renewal data, seat trends, agent deployment scale, pricing changes, and evidence of workload or headcount substitution in Microsoft disclosures.",
+        "sources": [
+          {
+            "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+            "claim_date": "2025-06-30"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+        "title": "Microsoft 2025 Annual Report",
+        "publisher": "Microsoft",
+        "published_at": "2025-06-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/press-release-webcast",
+        "title": "FY25 Q4 Press Release and Webcast",
+        "publisher": "Microsoft",
+        "published_at": "2025-07-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/intelligent-cloud-performance",
+        "title": "FY25 Q4 Intelligent Cloud Performance",
+        "publisher": "Microsoft",
+        "published_at": "2025-07-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/productivity-and-business-processes-performance",
+        "title": "FY25 Q4 Productivity and Business Processes Performance",
+        "publisher": "Microsoft",
+        "published_at": "2025-07-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/more-personal-computing-performance",
+        "title": "FY25 Q4 More Personal Computing Performance",
+        "publisher": "Microsoft",
+        "published_at": "2025-07-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+        "title": "FY25 Q4 Earnings Conference Call",
+        "publisher": "Microsoft",
+        "published_at": "2025-07-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/metrics",
+        "title": "FY25 Q4 Earnings Metrics and Related Files",
+        "publisher": "Microsoft",
+        "published_at": "2025-07-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/news/elon-musk-hat-sich-mit-seinen-unternehmen-verzettelt-jan-beckers-im-beckers-bets-podcast",
+        "title": "Beckers Bets: Microsoft diversification and valuation commentary",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "low",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_wkaJ8k2zA7MAtQX-q3BFYL2mL7Y6cx8Yxx8i0hcQXFnoEgzKQ_aLTaWSAR4LzeWJAqjYQOQW_pCU77qi0W_cZsVkcfcXlr8LlQQCakTrvBmY6VjgfzZufJK-6yrNKQoSHoGEu9kyuzs1CmSnVwRbJd_Fx1dXh7wUse5H5m7FLHEHezLTbSK2s-LytuLQqcOKH-rfDIaevA97PYgRXMFYO7BRRpwu-_2TxTPmWpNmKCpiq3JKGDHJqC0bNcQmw-vF5fUVF1pcqsQymF3AhZcig3qU2NdR48YQ3_GSOz5kkGjJDIthypBdj9fMp9YlAC-xwkonRHkNF-T2HQ7bQg8N8nlpR2LSywLCeey8_y1msjfqmQoEMbGgHk1tBwCwEkwFfz-rxnUs3YkwSi1mTiQZ9ezf7o2ikiNqqgBhRELiyira3f_-FFLi0doeRKAyT7FON2iLoTFsL5BeyYZW2kxwST48",
+    "response_model": "gpt-5.6-luna",
+    "input_tokens": 15138,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 4709,
+    "reasoning_tokens": 124,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "type": "search",
+        "queries": [
+          "site:microsoft.com/investor Microsoft 2025 annual report Azure AI Copilot capital expenditures gross margin",
+          "site:microsoft.com Microsoft Q4 FY2025 earnings Azure AI contribution gross margin capital expenditures",
+          "site:bitcap.com Microsoft diversification stable business model valuation Beckers Bets"
+        ],
+        "query": "site:microsoft.com/investor Microsoft 2025 annual report Azure AI Copilot capital expenditures gross margin",
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/press-release-webcast",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/intelligent-cloud-performance",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/productivity-and-business-processes-performance",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/more-personal-computing-performance",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/metrics",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/news/elon-musk-hat-sich-mit-seinen-unternehmen-verzettelt-jan-beckers-im-beckers-bets-podcast",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:msft",
+      "model:gpt-5.6-luna",
+      "reasoning:low"
+    ]
+  }
+}

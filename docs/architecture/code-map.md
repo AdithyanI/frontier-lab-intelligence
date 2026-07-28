@@ -64,7 +64,7 @@ routes in a generic `pages/` directory:
 | Architecture | `frontend/src/features/architecture/` | The deeper technical diagrams and their local presentation logic. |
 | Evidence | `frontend/src/features/evidence/` | Feed, Artifact index, their workspace layout, and Evidence-only view state. |
 | Insights | `frontend/src/features/insights/` | Audience Insight inspection, decision-state UI, selected daily brief PDF download, and the explicit Slack/email delivery confirmation. |
-| BIT Lens | `frontend/src/features/bit-lens/` | Public BIT research brief plus the auditable company-context ledger read from the canonical Investment packet. |
+| BIT Lens | `frontend/src/features/bit-lens/` | Public BIT research brief plus the auditable company-context ledger. The index comes from the canonical Investment packet; promoted web-grounded memos come from `docs/references/company-memos/`. |
 | Network | `frontend/src/features/network/` | Registry, Ranking, Add Profile, their workspace layout, and the shared entity detail surface. |
 | Shared UI | `frontend/src/shared/` | Cross-feature API contracts, date state, text normalization, and genuinely reused components. |
 | Styles | `frontend/src/styles/` | Domain styles in cascade order; `app.css` is imports only and remains the single entrypoint. |

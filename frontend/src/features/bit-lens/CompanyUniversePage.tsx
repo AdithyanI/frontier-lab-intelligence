@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   getCachedJSON,
-  type BitPublicViewGrade,
-  type CompanySource,
+  type CompanyMemoSourceRef,
+  type CompanyResearchMemo,
   type InvestmentCompany,
   type InvestmentCompanyUniverse,
 } from '../../shared/api'
@@ -17,18 +17,18 @@ const dayFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'UTC',
 })
 
-const gradeCopy: Record<BitPublicViewGrade, string> = {
+const thesisStatusCopy: Record<CompanyResearchMemo['memo']['investment_thesis_and_tests']['public_bit_view_status'], string> = {
   explicit_thesis: 'BIT thesis',
   commentary: 'BIT commentary',
-  none: 'Analyst context only',
+  no_public_view: 'No public BIT view',
 }
 
-const sourceScopeCopy = {
-  firm: 'Firm-level public view',
-  flagship: 'Flagship-fund public view',
-  other_product: 'Other BIT product',
-  mixed: 'Mixed public BIT sources',
-  none: 'No public BIT view',
+const sourceTypeCopy: Record<CompanyResearchMemo['memo']['source_ledger'][number]['source_type'], string> = {
+  company_primary: 'Company',
+  bit_primary: 'BIT Capital',
+  counterparty_primary: 'Counterparty',
+  regulator_primary: 'Regulator',
+  high_quality_secondary: 'Secondary',
 }
 
 interface CompanyMenuOption<T extends string> {
@@ -57,10 +57,14 @@ function formatWeight(weight: number) {
   return `${weight.toFixed(2).replace(/\.?0+$/, '')}%`
 }
 
-function joinContextItems(items: string[]) {
-  if (items.length < 2) return items[0] ?? ''
-  if (items.length === 2) return `${items[0]} and ${items[1]}`
-  return `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`
+function formatTaxonomy(value: string) {
+  return value.replaceAll('_', ' ')
+}
+
+function cleanMemoText(value: string) {
+  return value
+    .replace(/\s*\(\[[^\]]+\]\(https:\/\/[^)]+\)\)/g, '')
+    .trim()
 }
 
 function CompanyMenuSelect<T extends string>({
@@ -122,17 +126,28 @@ function CompanyMenuSelect<T extends string>({
   )
 }
 
-function SourceList({ sources }: { sources: CompanySource[] }) {
+function MemoCitations({
+  sources,
+  sourceIndex,
+}: {
+  sources: CompanyMemoSourceRef[]
+  sourceIndex: Map<string, number>
+}) {
+  if (sources.length === 0) return null
   return (
-    <ul className="company-source-list">
+    <span className="company-memo-citations" aria-label="Sources">
       {sources.map((source) => (
-        <li key={`${source.label}-${source.url}`}>
-          <a href={source.url} target="_blank" rel="noreferrer">
-            {source.label} <span aria-hidden="true">↗</span>
-          </a>
-        </li>
+        <a
+          href={source.url}
+          key={source.url}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Open source ${sourceIndex.get(source.url)}`}
+        >
+          [{sourceIndex.get(source.url)}]
+        </a>
       ))}
-    </ul>
+    </span>
   )
 }
 
@@ -150,6 +165,7 @@ function companySearchText(company: InvestmentCompany) {
       channel.potential_downside,
       ...channel.watchpoints,
     ]),
+    company.research_memo ? JSON.stringify(company.research_memo.memo) : '',
   ].join(' ').toLocaleLowerCase()
 }
 
@@ -182,134 +198,252 @@ function PortfolioContext({ company }: { company: InvestmentCompany }) {
 }
 
 function CompanyDetail({ company }: { company: InvestmentCompany }) {
-  const analyst = company.analyst_context
-  const publicView = company.bit_public_view
-  const knownExposureNames = analyst.frontier_ai_channels.map((channel) => channel.channel)
+  const researchMemo = company.research_memo
+
+  if (!researchMemo) {
+    return (
+      <div className="company-detail company-memo-pending">
+        <p className="mono">Research memo pending</p>
+        <h3>The new company memo has not been generated yet.</h3>
+        <p>
+          This row remains in the candidate universe, but the older hypothesis
+          profile is no longer presented as the final agent context.
+        </p>
+      </div>
+    )
+  }
+
+  const { memo, provenance } = researchMemo
+  const sourceIndex = new Map(
+    memo.source_ledger.map((source, index) => [source.url, index + 1]),
+  )
+  const thesis = memo.investment_thesis_and_tests
 
   return (
-    <div className="company-detail">
-      <section className="company-detail-section company-agent-context">
-        <div className="company-context-heading">
+    <div className="company-detail company-research-memo">
+      <section className="company-memo-intro">
+        <div>
+          <p className="mono">Investment context memo</p>
+          <p className="company-memo-summary">
+            {cleanMemoText(memo.business_and_economics.summary)}
+            <MemoCitations
+              sources={memo.business_and_economics.sources}
+              sourceIndex={sourceIndex}
+            />
+          </p>
+        </div>
+        <dl className="company-memo-provenance">
           <div>
-            <h3>Context used by the agent</h3>
-            <p>The company mental model available when the agent reads a new Event.</p>
+            <dt>Researched</dt>
+            <dd>{formatDay(provenance.research_date)}</dd>
           </div>
-          <span className="mono">Candidate context</span>
+          <div>
+            <dt>Model</dt>
+            <dd>{provenance.model.replace('gpt-', '')} · {provenance.reasoning_effort}</dd>
+          </div>
+          <div>
+            <dt>Evidence</dt>
+            <dd>{memo.source_ledger.length} sources</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="company-detail-section">
+        <header className="company-memo-section-head">
+          <h3>How the business earns money</h3>
+          <span>{memo.business_and_economics.revenue_engines.length} revenue engines</span>
+        </header>
+        <div className="company-memo-rows">
+          {memo.business_and_economics.revenue_engines.map((engine) => (
+            <article key={engine.engine}>
+              <h4>{cleanMemoText(engine.engine)}</h4>
+              <p className="company-memo-who">Who pays · {cleanMemoText(engine.who_pays)}</p>
+              <p>{cleanMemoText(engine.economic_logic)}</p>
+              <MemoCitations sources={engine.sources} sourceIndex={sourceIndex} />
+            </article>
+          ))}
         </div>
-        <div className="company-context-copy">
-          <p>{analyst.business_summary}</p>
-          <p>
-            <strong>What moves the economics.</strong>{' '}
-            {joinContextItems(analyst.operating_drivers)}.
-          </p>
-          <p>
-            <strong>Known AI exposure.</strong>{' '}
-            {joinContextItems(knownExposureNames)}.
-          </p>
-          <p className="company-context-rule">
-            These are starting hypotheses, not a closed list. The Event must
-            establish a defensible connection to an operating driver, or support
-            another mechanism.
-          </p>
+      </section>
+
+      <section className="company-detail-section">
+        <header className="company-memo-section-head">
+          <h3>What moves the economics</h3>
+          <span>{memo.operating_and_financial_drivers.length} operating drivers</span>
+        </header>
+        <ol className="company-driver-list">
+          {memo.operating_and_financial_drivers.map((driver) => (
+            <li key={driver.driver}>
+              <div>
+                <h4>{cleanMemoText(driver.driver)}</h4>
+                <div className="company-financial-lines">
+                  {driver.financial_lines.map((line) => (
+                    <span key={line}>{formatTaxonomy(line)}</span>
+                  ))}
+                </div>
+              </div>
+              <p>{cleanMemoText(driver.why_it_matters)}</p>
+              <MemoCitations sources={driver.sources} sourceIndex={sourceIndex} />
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="company-detail-section company-ai-paths">
+        <header className="company-memo-section-head">
+          <div>
+            <h3>Where frontier AI can matter</h3>
+            <p>Each path must reach an operating driver and a possible financial consequence.</p>
+          </div>
+          <span>{memo.frontier_ai_transmission_paths.length} testable paths</span>
+        </header>
+        <div className="company-path-list">
+          {memo.frontier_ai_transmission_paths.map((path) => (
+            <article key={path.development}>
+              <header>
+                <h4>{cleanMemoText(path.development)}</h4>
+                <div className="company-path-meta">
+                  <span className={`is-${path.direction}`}>{path.direction}</span>
+                  <span>{formatTaxonomy(path.time_horizon)}</span>
+                  <span>Thesis · {formatTaxonomy(path.thesis_effect)}</span>
+                </div>
+              </header>
+              <dl className="company-causal-chain">
+                <div>
+                  <dt>Company exposure</dt>
+                  <dd>{cleanMemoText(path.company_exposure)}</dd>
+                </div>
+                <div>
+                  <dt>Operating driver</dt>
+                  <dd>{cleanMemoText(path.affected_driver)}</dd>
+                </div>
+                <div>
+                  <dt>Financial consequence</dt>
+                  <dd>{cleanMemoText(path.financial_consequence)}</dd>
+                </div>
+                <div>
+                  <dt>Becomes material when</dt>
+                  <dd>{cleanMemoText(path.materiality_condition)}</dd>
+                </div>
+              </dl>
+              <div className="company-path-watch">
+                <span className="mono">Watch</span>
+                <ul>
+                  {path.watchpoints.map((watchpoint) => (
+                    <li key={watchpoint}>{cleanMemoText(watchpoint)}</li>
+                  ))}
+                </ul>
+                <MemoCitations sources={path.sources} sourceIndex={sourceIndex} />
+              </div>
+            </article>
+          ))}
         </div>
-        <details className="company-supporting-context">
-          <summary>Inspect supporting hypotheses and watchpoints</summary>
-          <div className="company-channel-list">
-            {analyst.frontier_ai_channels.map((channel) => (
-              <article className="company-channel" key={channel.channel}>
-                <h4>{channel.channel}</h4>
-                <div className="company-channel-directions">
-                  <div>
-                    <span>Opportunity</span>
-                    <p>{channel.potential_upside}</p>
-                  </div>
-                  <div>
-                    <span>Risk</span>
-                    <p>{channel.potential_downside}</p>
-                  </div>
-                </div>
-                <div className="company-watchpoints">
-                  <span>Watch</span>
-                  <ul>
-                    {channel.watchpoints.map((watchpoint) => (
-                      <li key={watchpoint}>{watchpoint}</li>
-                    ))}
-                  </ul>
-                </div>
+      </section>
+
+      <section className="company-detail-section company-thesis-tests">
+        <header className="company-memo-section-head">
+          <h3>BIT view and the tests that matter</h3>
+          <span className="company-thesis-status">
+            {thesisStatusCopy[thesis.public_bit_view_status]}
+          </span>
+        </header>
+        {thesis.attributable_public_thesis ? (
+          <p className="company-thesis-copy">
+            {cleanMemoText(thesis.attributable_public_thesis)}
+            <MemoCitations sources={thesis.sources} sourceIndex={sourceIndex} />
+          </p>
+        ) : (
+          <p className="company-thesis-copy">
+            No attributable public BIT thesis was found. Portfolio ownership is
+            not treated as thesis evidence.
+          </p>
+        )}
+        <div className="company-thesis-columns">
+          <div>
+            <h4>What would support it</h4>
+            <ul>
+              {thesis.what_would_support_it.map((item) => (
+                <li key={item}>{cleanMemoText(item)}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4>What would challenge it</h4>
+            <ul>
+              {thesis.what_would_challenge_it.map((item) => (
+                <li key={item}>{cleanMemoText(item)}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="company-detail-section company-memo-secondary">
+        <details>
+          <summary>Strategy, dependencies, and research triggers</summary>
+          <div className="company-memo-secondary-grid">
+            <div>
+              <h4>Committed actions</h4>
+              <ul className="company-memo-rich-list">
+                {memo.strategy_and_committed_actions.map((item) => (
+                  <li key={item.action}>
+                    <strong>{cleanMemoText(item.action)}</strong>
+                    <p>{cleanMemoText(item.investment_relevance)}</p>
+                    <MemoCitations sources={item.sources} sourceIndex={sourceIndex} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4>Customers, suppliers, and dependencies</h4>
+              <ul className="company-memo-rich-list">
+                {memo.ecosystem.map((item) => (
+                  <li key={`${item.relationship}-${item.entities_or_group}`}>
+                    <span className="mono">{formatTaxonomy(item.relationship)}</span>
+                    <strong>{cleanMemoText(item.entities_or_group)}</strong>
+                    <p>{cleanMemoText(item.why_it_matters)}</p>
+                    <MemoCitations sources={item.sources} sourceIndex={sourceIndex} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="company-research-triggers">
+            <h4>Uncertainties and next research</h4>
+            {memo.uncertainties_and_research_triggers.map((item) => (
+              <article key={item.uncertainty}>
+                <h5>{cleanMemoText(item.uncertainty)}</h5>
+                <p>{cleanMemoText(item.why_it_matters)}</p>
+                <p><strong>Next:</strong> {cleanMemoText(item.next_research_trigger)}</p>
+                <MemoCitations sources={item.sources} sourceIndex={sourceIndex} />
               </article>
             ))}
           </div>
         </details>
       </section>
 
-      <section className="company-detail-section company-public-view">
-        <div className="company-section-heading">
-          <div>
-            <h3>BIT’s public view</h3>
-            <p>{sourceScopeCopy[publicView.source_scope]}</p>
-          </div>
-          <span className={`company-evidence-grade is-${publicView.grade}`}>
-            {gradeCopy[publicView.grade]}
-          </span>
-        </div>
-        {publicView.grade === 'none' ? (
-          <p className="company-missing-view">
-            No company-specific BIT thesis or commentary is represented in the
-            source packet. The context above is FLI analyst research, not BIT’s view.
+      <section className="company-detail-section company-memo-sources">
+        <details>
+          <summary>Source ledger and generation record · {memo.source_ledger.length} sources</summary>
+          <ol>
+            {memo.source_ledger.map((source, index) => (
+              <li key={source.url} id={`${company.ticker}-source-${index + 1}`}>
+                <span className="mono">[{index + 1}] {sourceTypeCopy[source.source_type]}</span>
+                <a href={source.url} target="_blank" rel="noreferrer">
+                  {source.title} ↗
+                </a>
+                <span>
+                  {source.publisher}
+                  {source.published_at ? ` · ${formatDay(source.published_at)}` : ''}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="company-generation-record mono">
+            {provenance.prompt_version} · {provenance.input_tokens.toLocaleString()} input ·{' '}
+            {provenance.output_tokens.toLocaleString()} output ·{' '}
+            {provenance.cached_tokens.toLocaleString()} cached tokens
           </p>
-        ) : (
-          <dl className="company-view-grid">
-            {publicView.thesis && <div><dt>Thesis</dt><dd>{publicView.thesis}</dd></div>}
-            {publicView.edge && <div><dt>Edge</dt><dd>{publicView.edge}</dd></div>}
-            {publicView.signals.length > 0 && (
-              <div>
-                <dt>Signals</dt>
-                <dd>{publicView.signals.join('; ')}</dd>
-              </div>
-            )}
-            {publicView.countercase && (
-              <div><dt>Countercase</dt><dd>{publicView.countercase}</dd></div>
-            )}
-          </dl>
-        )}
-        {publicView.sources.length > 0 && <SourceList sources={publicView.sources} />}
-      </section>
-
-      <section className="company-detail-section company-support-grid">
-        <div>
-          <h3>Research limits</h3>
-          {analyst.cautions.length > 0 ? (
-            <ul className="company-text-list">
-              {analyst.cautions.map((caution) => (
-                <li key={caution}>{caution}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No company-specific caution is recorded.</p>
-          )}
-        </div>
-        <div>
-          <h3>Company sources</h3>
-          <SourceList sources={company.identity_sources} />
-        </div>
-        <div className="company-disclosure-history">
-          <h3>Disclosure history</h3>
-          <dl>
-            {company.portfolio_context.current_top_ten && (
-              <div>
-                <dt>Top ten · {formatDay(company.portfolio_context.current_top_ten.as_of)}</dt>
-                <dd>{formatWeight(company.portfolio_context.current_top_ten.weight_pct)}</dd>
-              </div>
-            )}
-            {company.portfolio_context.audited_baseline && (
-              <div>
-                <dt>Audited · {formatDay(company.portfolio_context.audited_baseline.as_of)}</dt>
-                <dd>{formatWeight(company.portfolio_context.audited_baseline.weight_pct)}</dd>
-              </div>
-            )}
-          </dl>
-          <p>The row shows the newest available reference weight. Values are never blended.</p>
-        </div>
+        </details>
       </section>
     </div>
   )
@@ -322,7 +456,7 @@ export default function CompanyUniversePage() {
   const [query, setQuery] = useState('')
   const [disclosure, setDisclosure] = useState<DisclosureFilter>('all')
   const [sort, setSort] = useState<CompanySort>('portfolio')
-  const [openCompanies, setOpenCompanies] = useState<Set<string>>(new Set())
+  const [openCompanies, setOpenCompanies] = useState<Set<string>>(new Set(['IREN']))
 
   useEffect(() => {
     let active = true
@@ -397,6 +531,8 @@ export default function CompanyUniversePage() {
           <strong>{payload.counts.companies} sourced company profiles.</strong>{' '}
           Every Event starts with this candidate universe, then retrieves complete
           context only for credible matches.{' '}
+          {payload.counts.research_memos} companies now use the new source-bearing
+          research memo; the remaining rows stay visible while their memos are generated.{' '}
           June shows only the current top ten; December 2025 is the latest complete
           audited portfolio, and absence from June does not prove a sale.
         </p>
@@ -480,8 +616,10 @@ export default function CompanyUniversePage() {
                 <PortfolioContext company={company} />
                 <p>{company.analyst_context.business_summary}</p>
                 <div className="company-row-evidence">
-                  <span className={`company-evidence-grade is-${company.bit_public_view.grade}`}>
-                    {gradeCopy[company.bit_public_view.grade]}
+                  <span className={`company-memo-state ${company.research_memo ? 'is-ready' : ''}`}>
+                    {company.research_memo
+                      ? `Research memo · ${formatDay(company.research_memo.provenance.research_date)}`
+                      : 'Memo pending'}
                   </span>
                 </div>
               </summary>

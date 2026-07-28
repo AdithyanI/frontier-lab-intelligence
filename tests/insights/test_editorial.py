@@ -1316,13 +1316,14 @@ def test_company_context_lookup_is_exact_and_machine_readable(capsys):
 def test_investment_company_universe_payload_is_complete_and_dated():
     payload = editorial_runs.investment_company_universe_payload()
 
-    assert payload["schema_version"] == "investment-company-universe-v4"
+    assert payload["schema_version"] == "investment-company-universe-v5"
     assert payload["mapping_policy"]["candidate_universe"] == "all_profiles"
     assert payload["counts"] == {
         "companies": 37,
         "current_top_ten": 10,
         "audited_baseline": 34,
         "later_top_ten_additions": 3,
+        "research_memos": 2,
         "frontier_ai_channels": 63,
         "bit_public_views": 14,
         "bit_public_view_grades": {
@@ -1358,6 +1359,11 @@ def test_investment_company_universe_payload_is_complete_and_dated():
         "currently_confirmed": False,
     }
     assert companies["Microsoft"]["bit_public_view"]["grade"] == "commentary"
+    assert companies["Microsoft"]["research_memo"]["memo"][
+        "business_and_economics"
+    ]["summary"]
+    assert companies["IREN"]["research_memo"]["provenance"]["model"] == "gpt-5.6-luna"
+    assert companies["Amazon"]["research_memo"] is None
     assert companies["Microsoft"]["analyst_context"]["frontier_ai_channels"]
     assert companies["Microsoft"]["identity_sources"]
     assert "frontier_lab_relevance" not in companies["GCL-Poly"]

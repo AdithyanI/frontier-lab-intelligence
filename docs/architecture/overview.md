@@ -103,6 +103,11 @@ composition.
 9. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. Its compact index keeps all 37 profiles eligible.
+   Web-grounded company research can be promoted independently into
+   `docs/references/company-memos/`; BIT Lens projects those richer memos with
+   their exact source ledger and generation provenance while unresearched
+   companies remain visibly pending rather than silently using the legacy
+   hypothesis view.
    The agent shortlists zero or a few credible matches for the particular Event,
    then retrieves complete profiles by canonical name, ticker, or alias. The
    Event must establish a direct or well-evidenced material indirect

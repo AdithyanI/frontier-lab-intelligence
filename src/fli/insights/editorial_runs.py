@@ -35,6 +35,8 @@ WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v3"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v4"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
 INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v5"
+COMPANY_MEMO_SCHEMA_VERSION = "company-memo-pilot-result-v1"
+COMPANY_MEMO_ROOT = REPO_ROOT / "docs" / "references" / "company-memos"
 BIT_PUBLIC_VIEW_GRADES = {"explicit_thesis", "commentary", "none"}
 BIT_PUBLIC_VIEW_SOURCE_SCOPES = {"firm", "flagship", "other_product", "mixed", "none"}
 EVENT_COMPANY_CONNECTION_TYPES = {"direct", "indirect", "none"}
@@ -1032,9 +1034,41 @@ def portfolio_reference_payload() -> dict[str, Any]:
     }
 
 
+def _investment_company_memos() -> dict[str, dict[str, Any]]:
+    """Load promoted, source-bearing company memos keyed by ticker."""
+    if not COMPANY_MEMO_ROOT.exists():
+        return {}
+
+    memos: dict[str, dict[str, Any]] = {}
+    for path in sorted(COMPANY_MEMO_ROOT.glob("*.json")):
+        payload = _read_json(path)
+        if not isinstance(payload, dict):
+            raise ValueError(f"Company memo {path} must be an object")
+        if payload.get("schema_version") != COMPANY_MEMO_SCHEMA_VERSION:
+            raise ValueError(f"Company memo {path} uses an unsupported schema version")
+        company = payload.get("company")
+        memo = payload.get("memo")
+        provenance = payload.get("provenance")
+        if not isinstance(company, dict) or not isinstance(memo, dict):
+            raise ValueError(f"Company memo {path} is missing company or memo")
+        if not isinstance(provenance, dict):
+            raise ValueError(f"Company memo {path} is missing provenance")
+        ticker = company.get("ticker")
+        if not isinstance(ticker, str) or not ticker.strip():
+            raise ValueError(f"Company memo {path} is missing its ticker")
+        if ticker in memos:
+            raise ValueError(f"Duplicate promoted company memo for {ticker}")
+        source_ledger = memo.get("source_ledger")
+        if not isinstance(source_ledger, list) or not source_ledger:
+            raise ValueError(f"Company memo {path} has no source ledger")
+        memos[ticker] = payload
+    return memos
+
+
 def investment_company_universe_payload() -> dict[str, Any]:
     """Return the complete, dated company-context read model for BIT Lens."""
     context = investment_context()
+    promoted_memos = _investment_company_memos()
     audited = context["portfolio"]
     current = context["portfolio_current_top_ten"]
     audited_by_name = {
@@ -1060,6 +1094,7 @@ def investment_company_universe_payload() -> dict[str, Any]:
         companies.append(
             {
                 **profile,
+                "research_memo": promoted_memos.get(profile["ticker"]),
                 "portfolio_context": {
                     "reference_holding": {
                         "as_of": (
@@ -1109,7 +1144,7 @@ def investment_company_universe_payload() -> dict[str, Any]:
         for company in companies
     )
     return {
-        "schema_version": "investment-company-universe-v4",
+        "schema_version": "investment-company-universe-v5",
         "source_context_schema_version": context["schema_version"],
         "profiles_reviewed_at": context["company_profiles_reviewed_at"],
         "mapping_policy": context["event_company_mapping"],
@@ -1137,6 +1172,7 @@ def investment_company_universe_payload() -> dict[str, Any]:
             "current_top_ten": len(current["holdings"]),
             "audited_baseline": len(audited["holdings"]),
             "later_top_ten_additions": later_additions,
+            "research_memos": len(promoted_memos),
             "frontier_ai_channels": channel_count,
             "bit_public_views": grade_counts["explicit_thesis"]
             + grade_counts["commentary"],
