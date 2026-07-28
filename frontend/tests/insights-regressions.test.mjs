@@ -72,7 +72,11 @@ test('Investment Insights expose a minimal company judgment and memo audit', () 
   assert.match(insightSource, /decodeTextEntities\(item\.investment_headline\)/)
   assert.match(
     insightSource,
-    /<header className="insight-head investment-agent-head">[\s\S]*?<CopyEventId eventId=\{item\.development_id\} label="Copy ID" \/>/,
+    /<nav className="investment-agent-sources-body" aria-label="Evidence links">[\s\S]*?<CopyEventId eventId=\{item\.development_id\} label="Copy ID" \/>/,
+  )
+  assert.doesNotMatch(
+    insightSource,
+    /<header className="insight-head investment-agent-head">(?:(?!<\/header>)[\s\S])*?<CopyEventId eventId=\{item\.development_id\} label="Copy ID" \/>/,
   )
   assert.doesNotMatch(insightSource, /item\.source\?\.title \|\|/)
   assert.match(insightSource, /Company read-throughs/)

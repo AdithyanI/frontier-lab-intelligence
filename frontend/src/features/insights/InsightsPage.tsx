@@ -1165,7 +1165,6 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
       <div className="insight-body investment-agent-body">
         <header className="insight-head investment-agent-head">
           <h2 id={titleId}>{decodeTextEntities(item.investment_headline)}</h2>
-          <CopyEventId eventId={item.development_id} label="Copy ID" />
         </header>
 
         <div className="investment-agent-opening">
@@ -1251,6 +1250,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
                 {artifacts.length === 1 ? 'Read source artifact ↗' : `Read source artifact ${index + 1} ↗`}
               </a>
             ))}
+            <CopyEventId eventId={item.development_id} label="Copy ID" />
           </nav>
         </details>
 

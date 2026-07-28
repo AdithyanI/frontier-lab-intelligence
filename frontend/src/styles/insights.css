@@ -1426,13 +1426,6 @@
   line-height: 1.2;
 }
 
-.investment-agent-head > .copy-event-id {
-  flex: none;
-  margin-top: 8px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-
 .investment-agent-opening {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1714,7 +1707,8 @@
   border-top: 1px solid var(--border);
 }
 
-.investment-agent-sources-body a {
+.investment-agent-sources-body a,
+.investment-agent-sources-body .copy-event-id {
   color: var(--blue-ink);
   font-size: 10.5px;
   text-decoration: none;
