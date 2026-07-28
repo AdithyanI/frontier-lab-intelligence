@@ -1087,8 +1087,11 @@ function InvestmentAgentMechanism({
               </span>
             ))}
             {assessment.splits && (
-              <span className="investment-agent-splits" title="One company gains at another's expense">
-                splits
+              <span
+                className="investment-agent-splits"
+                title="This route pushes companies in opposite directions"
+              >
+                One gains, one loses
               </span>
             )}
           </span>
