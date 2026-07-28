@@ -15,9 +15,19 @@ DEFAULT_DB = (
     REPO_ROOT / "data" / "derived" / "insights" / "investment-agent.db"
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v1"
-READ_SCHEMA_VERSION = "investment-agent-read-v1"
+READ_SCHEMA_VERSION = "investment-agent-read-v2"
 TRACE_SCHEMA_VERSIONS = {"investment-insight-loop-pilot-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
+ASSESSMENT_FIELDS = {
+    "ticker",
+    "bottom_line",
+    "mechanism",
+    "affected_driver",
+    "direction",
+    "main_uncertainty",
+    "next_check",
+}
+DIRECTIONS = {"positive", "negative", "mixed", "unclear"}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS investment_agent_meta (
@@ -127,6 +137,18 @@ def _validate_trace(trace: dict[str, Any]) -> None:
         raise ValueError("surfaced Investment result has no company assessment")
     if len(represented) != len(set(represented)) or "" in represented:
         raise ValueError("Investment result repeats or omits a company ticker")
+    for assessment in assessments:
+        if set(assessment) != ASSESSMENT_FIELDS:
+            raise ValueError(
+                "Investment company assessment does not match the minimal schema"
+            )
+        if str(assessment["direction"]) not in DIRECTIONS:
+            raise ValueError("Investment company assessment has invalid direction")
+        for field in ASSESSMENT_FIELDS - {"direction"}:
+            if not str(assessment[field]).strip():
+                raise ValueError(
+                    f"Investment company assessment has empty {field}"
+                )
     memo_calls = trace.get("memo_calls")
     if not isinstance(memo_calls, list):
         raise ValueError("Investment agent trace has no memo-call audit")

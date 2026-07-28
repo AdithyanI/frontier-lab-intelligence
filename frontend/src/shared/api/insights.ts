@@ -216,33 +216,15 @@ export interface EditorialInsightsResponse {
 
 export type InvestmentAgentRelevance = 'direct' | 'indirect'
 export type InvestmentAgentDirection = 'positive' | 'negative' | 'mixed' | 'unclear'
-export type InvestmentAgentHorizon = 'near_term' | 'medium_term' | 'long_term' | 'unclear'
-export type InvestmentAgentThesisEffect =
-  | 'supports'
-  | 'challenges'
-  | 'mixed'
-  | 'no_public_thesis'
-  | 'insufficient_evidence'
-export type InvestmentAgentConfidence = 'high' | 'medium' | 'low'
-
-export interface InvestmentAgentEvidence {
-  claim: string
-  source_urls: string[]
-}
 
 export interface InvestmentAgentCompanyAssessment {
   ticker: string
-  relevance: InvestmentAgentRelevance
+  bottom_line: string
   mechanism: string
-  affected_operating_driver: string
-  economic_direction: InvestmentAgentDirection
-  time_horizon: InvestmentAgentHorizon
-  thesis_effect: InvestmentAgentThesisEffect
-  analyst_takeaway: string
-  confidence: InvestmentAgentConfidence
-  evidence: InvestmentAgentEvidence[]
-  uncertainties: string[]
-  next_checks: string[]
+  affected_driver: string
+  direction: InvestmentAgentDirection
+  main_uncertainty: string
+  next_check: string
 }
 
 export interface InvestmentAgentMemoCall {
@@ -270,12 +252,6 @@ export interface InvestmentAgentItem {
   no_match_reason: string | null
   company_names: Record<string, string>
   memo_calls: InvestmentAgentMemoCall[]
-  citation_repairs: Array<{
-    ticker: string
-    from: string
-    to: string
-    reason: string
-  }>
   source: {
     title: string
     url: string

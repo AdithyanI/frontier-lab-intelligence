@@ -1056,135 +1056,60 @@ const INVESTMENT_AGENT_DIRECTION = {
   unclear: { icon: '?', label: 'Direction unclear' },
 } as const
 
-const INVESTMENT_AGENT_THESIS = {
-  supports: 'Supports the public thesis',
-  challenges: 'Challenges the public thesis',
-  mixed: 'Mixed thesis effect',
-  no_public_thesis: 'No attributable public thesis',
-  insufficient_evidence: 'Insufficient thesis evidence',
-} as const
-
-function humanizeAgentValue(value: string) {
-  return value.replaceAll('_', ' ')
-}
-
-function InvestmentAgentEvidenceAudit({
-  assessment,
-}: {
-  assessment: InvestmentAgentCompanyAssessment
-}) {
-  const evidenceCount = assessment.evidence.reduce(
-    (count, evidence) => count + evidence.source_urls.length,
-    0,
-  )
-  return (
-    <details className="investment-agent-evidence">
-      <summary>
-        <span>Inspect evidence and open questions</span>
-        <span className="mono">
-          {assessment.evidence.length} claims · {evidenceCount} source links
-        </span>
-      </summary>
-      <div className="investment-agent-evidence-grid">
-        <section>
-          <h4 className="mono">Evidence used</h4>
-          <ol>
-            {assessment.evidence.map((evidence, index) => (
-              <li key={`${assessment.ticker}-evidence-${index}`}>
-                <p>{decodeTextEntities(evidence.claim)}</p>
-                <div className="investment-agent-source-links mono">
-                  {evidence.source_urls.map((url, sourceIndex) => (
-                    <a href={url} target="_blank" rel="noreferrer" key={url}>
-                      Source {sourceIndex + 1} ↗
-                    </a>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-        <section>
-          <h4 className="mono">Still uncertain</h4>
-          {assessment.uncertainties.length > 0 ? (
-            <ul>
-              {assessment.uncertainties.map((uncertainty) => (
-                <li key={uncertainty}>{decodeTextEntities(uncertainty)}</li>
-              ))}
-            </ul>
-          ) : <p>No additional uncertainty was recorded.</p>}
-        </section>
-        <section>
-          <h4 className="mono">Check next</h4>
-          {assessment.next_checks.length > 0 ? (
-            <ul>
-              {assessment.next_checks.map((check) => (
-                <li key={check}>{decodeTextEntities(check)}</li>
-              ))}
-            </ul>
-          ) : <p>No follow-up check was recorded.</p>}
-        </section>
-      </div>
-    </details>
-  )
-}
-
 function InvestmentAgentCompany({
   assessment,
   companyName,
+  feedPath,
 }: {
   assessment: InvestmentAgentCompanyAssessment
   companyName: string
+  feedPath: string
 }) {
-  const direction = INVESTMENT_AGENT_DIRECTION[assessment.economic_direction]
-  const thesis = INVESTMENT_AGENT_THESIS[assessment.thesis_effect]
+  const direction = INVESTMENT_AGENT_DIRECTION[assessment.direction]
   return (
-    <article className="investment-agent-company">
-      <header>
-        <div>
-          <h3>{companyName}</h3>
+    <details className="investment-agent-company">
+      <summary>
+        <span className="investment-agent-company-identity">
+          <strong>{companyName}</strong>
           <span className="mono">{assessment.ticker}</span>
-        </div>
-        <div className="investment-agent-company-flags mono">
-          <span>{assessment.relevance} connection</span>
-          <span>{assessment.confidence} confidence</span>
-        </div>
-      </header>
-
-      <p className="investment-agent-takeaway">
-        {decodeTextEntities(assessment.analyst_takeaway)}
-      </p>
-
-      <dl className="investment-agent-result-strip">
-        <div>
-          <dt>Direction</dt>
-          <dd>
-            <span aria-hidden="true">{direction.icon}</span>
-            {direction.label}
-          </dd>
-        </div>
-        <div>
-          <dt>Horizon</dt>
-          <dd>{humanizeAgentValue(assessment.time_horizon)}</dd>
-        </div>
-        <div>
-          <dt>Thesis</dt>
-          <dd>{thesis}</dd>
-        </div>
-      </dl>
-
-      <div className="investment-agent-causal">
+        </span>
+        <span
+          className="investment-agent-direction"
+          data-direction={assessment.direction}
+        >
+          <span aria-hidden="true">{direction.icon}</span>
+          {direction.label}
+        </span>
+        <span className="investment-agent-company-summary">
+          {decodeTextEntities(assessment.bottom_line)}
+        </span>
+      </summary>
+      <div className="investment-agent-company-detail">
         <section>
           <h4 className="mono">Why this company</h4>
           <p>{decodeTextEntities(assessment.mechanism)}</p>
         </section>
         <section>
-          <h4 className="mono">Operating driver</h4>
-          <p>{decodeTextEntities(assessment.affected_operating_driver)}</p>
+          <h4 className="mono">What could move</h4>
+          <p>{decodeTextEntities(assessment.affected_driver)}</p>
+        </section>
+        <section>
+          <h4 className="mono">What remains unproven</h4>
+          <p>{decodeTextEntities(assessment.main_uncertainty)}</p>
+        </section>
+        <section>
+          <h4 className="mono">What to check next</h4>
+          <p>{decodeTextEntities(assessment.next_check)}</p>
         </section>
       </div>
-
-      <InvestmentAgentEvidenceAudit assessment={assessment} />
-    </article>
+      <div className="investment-agent-source-material">
+        <span className="mono">Source material reviewed</span>
+        <Link to={feedPath}>Development evidence ↗</Link>
+        <Link to={`/bit-lens/companies?company=${encodeURIComponent(assessment.ticker)}`}>
+          Company memo ↗
+        </Link>
+      </div>
+    </details>
   )
 }
 
@@ -1221,12 +1146,6 @@ function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
           <div><dt>Input cache</dt><dd>{item.telemetry.cached_tokens.toLocaleString()} tokens reused</dd></div>
           <div><dt>Run cost</dt><dd>${item.telemetry.reported_cost_usd.toFixed(3)}</dd></div>
         </dl>
-        {item.citation_repairs.length > 0 && (
-          <p className="investment-agent-repair-note">
-            {item.citation_repairs.length} model citation path was matched to the exact stored source
-            before publication. The replacement remains recorded in the run audit.
-          </p>
-        )}
       </div>
     </details>
   )
@@ -1291,6 +1210,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
               <InvestmentAgentCompany
                 assessment={assessment}
                 companyName={item.company_names[assessment.ticker] ?? assessment.ticker}
+                feedPath={feedPath}
                 key={assessment.ticker}
               />
             ))}

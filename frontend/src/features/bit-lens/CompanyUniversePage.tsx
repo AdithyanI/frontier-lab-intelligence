@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
   type CompanyMemoSourceRef,
@@ -450,13 +451,17 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
 }
 
 export default function CompanyUniversePage() {
+  const [searchParams] = useSearchParams()
+  const requestedCompany = (searchParams.get('company') || '').trim().toUpperCase()
   const [payload, setPayload] = useState<InvestmentCompanyUniverse | null>(null)
   const [error, setError] = useState(false)
   const [requestVersion, setRequestVersion] = useState(0)
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(requestedCompany)
   const [disclosure, setDisclosure] = useState<DisclosureFilter>('all')
   const [sort, setSort] = useState<CompanySort>('portfolio')
-  const [openCompanies, setOpenCompanies] = useState<Set<string>>(new Set(['IREN']))
+  const [openCompanies, setOpenCompanies] = useState<Set<string>>(
+    new Set([requestedCompany || 'IREN']),
+  )
 
   useEffect(() => {
     let active = true

@@ -20,22 +20,12 @@ def _trace() -> dict:
         "company_assessments": [
             {
                 "ticker": "PANW",
-                "relevance": "direct",
+                "bottom_line": "The incident could increase demand for AI controls.",
                 "mechanism": "Agent activity needs an independent control layer.",
-                "affected_operating_driver": "AI security attach",
-                "economic_direction": "positive",
-                "time_horizon": "medium_term",
-                "thesis_effect": "supports",
-                "analyst_takeaway": "Watch adoption rather than treating the event as revenue.",
-                "confidence": "medium",
-                "evidence": [
-                    {
-                        "claim": "The product mediates agent traffic.",
-                        "source_urls": ["https://example.com/panw"],
-                    }
-                ],
-                "uncertainties": ["No disclosed revenue contribution."],
-                "next_checks": ["Track attach and customer references."],
+                "affected_driver": "AI security product attachment",
+                "direction": "positive",
+                "main_uncertainty": "No disclosed revenue contribution.",
+                "next_check": "Track attach and customer references.",
             }
         ],
         "rejected_after_memo": [
@@ -113,6 +103,7 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
     assert payload["run"]["cached_tokens"] == 8_000
     assert payload["run"]["reported_cost_usd"] == 0.12
     assert payload["items"][0]["company_assessments"][0]["ticker"] == "PANW"
+    assert payload["items"][0]["company_assessments"][0]["direction"] == "positive"
     assert payload["items"][0]["rejected_after_memo"] == [
         {"ticker": "DDOG", "reason": "The link remained generic after review."}
     ]
@@ -125,6 +116,19 @@ def test_import_trace_requires_every_opened_memo_to_be_resolved(tmp_path: Path):
     trace_path.write_text(json.dumps(trace), encoding="utf-8")
 
     with pytest.raises(ValueError, match="every opened memo"):
+        investment_agent_runs.import_trace(
+            trace_path,
+            db_path=tmp_path / "investment-agent.db",
+        )
+
+
+def test_import_trace_rejects_the_superseded_dense_company_schema(tmp_path: Path):
+    trace = _trace()
+    trace["final_result"]["company_assessments"][0]["confidence"] = "medium"
+    trace_path = tmp_path / "trace.json"
+    trace_path.write_text(json.dumps(trace), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="minimal schema"):
         investment_agent_runs.import_trace(
             trace_path,
             db_path=tmp_path / "investment-agent.db",
