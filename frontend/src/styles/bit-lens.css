@@ -602,16 +602,6 @@
 
 .company-memo-citations a:hover { text-decoration: underline; }
 
-.company-memo-shape {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 48px;
-}
-
-.company-memo-shape-block h3 {
-  margin: 0 0 12px;
-}
-
 .company-memo-inline-list {
   margin: 0;
   padding: 0;
@@ -619,12 +609,19 @@
   list-style: none;
 }
 
+.company-memo-inline-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 48px;
+  border-top: 0;
+}
+
 .company-memo-inline-list > li {
   display: flex;
   gap: 16px;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
 }
 
 .company-memo-inline-list strong {

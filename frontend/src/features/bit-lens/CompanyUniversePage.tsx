@@ -246,27 +246,22 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
       </section>
 
       <section className="company-detail-section company-memo-shape">
-        <div className="company-memo-shape-block">
-          <h3>How it earns money</h3>
-          <ul className="company-memo-inline-list">
-            {memo.business_and_economics.revenue_engines.map((engine) => (
-              <li key={engine.engine}>
-                <strong>{cleanMemoText(engine.engine)}</strong>
-                <span>{cleanMemoText(engine.who_pays)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="company-memo-shape-block">
-          <h3>What moves the economics</h3>
-          <ul className="company-memo-inline-list">
-            {memo.operating_and_financial_drivers.map((driver) => (
-              <li key={driver.driver}>
-                <strong>{cleanMemoText(driver.driver)}</strong>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <header className="company-memo-section-head">
+          <h3>What drives the numbers</h3>
+        </header>
+        <ul className="company-memo-inline-list">
+          {memo.business_and_economics.revenue_engines.map((engine) => (
+            <li key={engine.engine}>
+              <strong>{cleanMemoText(engine.engine)}</strong>
+              <span>{cleanMemoText(engine.who_pays)}</span>
+            </li>
+          ))}
+          {memo.operating_and_financial_drivers.map((driver) => (
+            <li key={driver.driver}>
+              <strong>{cleanMemoText(driver.driver)}</strong>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="company-detail-section company-ai-paths">
@@ -277,8 +272,8 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
           <span>{memo.frontier_ai_transmission_paths.length} standing bets</span>
         </header>
         <div className="company-path-list">
-          {memo.frontier_ai_transmission_paths.map((path) => (
-            <details key={path.development}>
+          {memo.frontier_ai_transmission_paths.map((path, index) => (
+            <details key={path.development} open={index === 0}>
               <summary>
                 <span
                   className={`company-path-direction is-${path.direction}`}
@@ -558,13 +553,11 @@ export default function CompanyUniversePage() {
                 </div>
                 <PortfolioContext company={company} />
                 <p>{company.analyst_context.business_summary}</p>
-                <div className="company-row-evidence">
-                  <span className={`company-memo-state ${company.research_memo ? 'is-ready' : ''}`}>
-                    {company.research_memo
-                      ? `Research memo · ${formatDay(company.research_memo.provenance.research_date)}`
-                      : 'Memo pending'}
-                  </span>
-                </div>
+                {!company.research_memo && (
+                  <div className="company-row-evidence">
+                    <span className="company-memo-state">Memo pending</span>
+                  </div>
+                )}
               </summary>
               <CompanyDetail company={company} />
             </details>
