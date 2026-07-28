@@ -1,0 +1,981 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Micron",
+    "ticker": "MU"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A vertically integrated producer of DRAM and NAND technologies and products. Revenue is driven by bits shipped, average selling prices, and product mix; profitability also depends on manufacturing cost per bit, yields, utilization, packaging costs, and inventory conditions. Differentiated products such as HBM, high-capacity server memory, managed NAND, and enterprise SSDs can earn premiums over commodity components, but the business remains capital-intensive and exposed to memory supply cycles.",
+      "revenue_engines": [
+        {
+          "engine": "Cloud and AI memory",
+          "who_pays": "Hyperscale and cloud customers, AI-platform providers, and server-system manufacturers, directly or through supply-chain intermediaries.",
+          "economic_logic": "Sells HBM, high-capacity DIMMs, and low-power server DRAM. Revenue scales with accelerator and server deployments, memory content per system, qualified market share, contracted volume, and pricing. HBM can improve mix and margins but requires demanding yields and advanced packaging capacity.",
+          "sources": [
+            {
+              "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+              "claim_date": "2025-08-28"
+            },
+            {
+              "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+              "claim_date": "2026-03-16"
+            }
+          ]
+        },
+        {
+          "engine": "Core data-center memory and storage",
+          "who_pays": "Cloud, enterprise, and original-equipment-manufacturer data-center customers.",
+          "economic_logic": "Sells server DRAM, data-center SSDs, and NAND components. Economics reflect server and storage capacity additions, SSD qualifications, DRAM and NAND pricing, product density and performance, and NAND cost per bit.",
+          "sources": [
+            {
+              "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+              "claim_date": "2025-08-28"
+            },
+            {
+              "url": "https://www.micron.com/about/blog/storage/ssd/micron-9650-ssd-the-worlds-first-pcie-gen6-ssd-reaches-a-new-shipping-milestone",
+              "claim_date": "2026-02-11"
+            }
+          ]
+        },
+        {
+          "engine": "Mobile, client, and consumer memory and storage",
+          "who_pays": "Smartphone and PC manufacturers, consumer-device OEMs, distributors, retailers, and end users through branded products.",
+          "economic_logic": "Sells LPDRAM, managed NAND, client SSDs, and consumer storage. Revenue is governed by device units, memory and storage content per device, customer inventories, product transitions, and industry DRAM and NAND pricing.",
+          "sources": [
+            {
+              "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+              "claim_date": "2025-08-28"
+            },
+            {
+              "url": "https://investors.micron.com/news-releases/news-release-details/micron-announces-business-unit-reorganization-capitalize-ai",
+              "claim_date": "2025-04-17"
+            }
+          ]
+        },
+        {
+          "engine": "Automotive and embedded memory and storage",
+          "who_pays": "Automakers, Tier 1 suppliers, industrial-equipment makers, networking customers, and aerospace, defense, and medical-device manufacturers.",
+          "economic_logic": "Sells qualified DRAM, LPDRAM, NOR, NAND, managed storage, and SSD products. Long qualification cycles, product longevity, reliability requirements, and committed supply can support durable relationships and differentiated economics.",
+          "sources": [
+            {
+              "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+              "claim_date": "2025-08-28"
+            },
+            {
+              "url": "https://investors.micron.com/news-releases/news-release-details/micron-and-general-motors-sign-strategic-agreement-secure-supply",
+              "claim_date": "2026-07-01"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+          "claim_date": "2025-08-28"
+        },
+        {
+          "url": "https://investors.micron.com/news-releases/news-release-details/micron-announces-business-unit-reorganization-capitalize-ai",
+          "claim_date": "2025-04-17"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "DRAM and NAND industry supply, inventory, and average selling prices",
+        "why_it_matters": "Memory has historically experienced sharp pricing cycles. Small supply-demand imbalances can materially move revenue and gross margin, while excess inventory consumes working capital and can require write-downs.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/631b1a32-5537-46ae-8f40-82e42fc79dfe",
+            "claim_date": "2026-06-24"
+          }
+        ]
+      },
+      {
+        "driver": "HBM qualifications, yields, packaging throughput, and capacity allocation",
+        "why_it_matters": "HBM participation requires customer qualification and complex stacking and packaging. Yield shortfalls constrain saleable volume and raise cost, while allocating wafers to HBM can reduce conventional DRAM output and alter pricing and product mix across the portfolio.",
+        "financial_lines": [
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/2354ecda-77a0-4ddd-8462-a631eb491356",
+            "claim_date": "2026-06-24"
+          }
+        ]
+      },
+      {
+        "driver": "Process-node transitions, manufacturing yields, and cost per bit",
+        "why_it_matters": "Successful DRAM and NAND node ramps increase bit output and lower unit cost without proportionate wafer additions. Delays, poor yields, or product-quality issues can limit shipments, weaken margins, and require additional capital.",
+        "financial_lines": [
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/2354ecda-77a0-4ddd-8462-a631eb491356",
+            "claim_date": "2026-06-24"
+          }
+        ]
+      },
+      {
+        "driver": "Customer platform ramps and multi-year supply commitments",
+        "why_it_matters": "Platform qualifications determine addressable volume, particularly in HBM, servers, SSDs, and automotive. Strategic customer agreements with binding multi-year volume commitments can improve demand visibility and cash funding, but also create delivery obligations and customer-concentration exposure.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm",
+            "claim_date": "2026-05-28"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/2354ecda-77a0-4ddd-8462-a631eb491356",
+            "claim_date": "2026-06-24"
+          }
+        ]
+      },
+      {
+        "driver": "Fab, packaging, utility, and supply-chain capacity",
+        "why_it_matters": "Leading-edge memory capacity requires long construction timelines, advanced equipment, silicon wafers, packaging, electricity, water, and government approvals. Expansion supports long-run bit growth but raises capital intensity and the risk of underutilized assets if demand weakens.",
+        "financial_lines": [
+          "volume",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-accelerates-us-investments-pours-first-concrete-new-york",
+            "claim_date": "2026-07-09"
+          },
+          {
+            "url": "https://www.nist.gov/news-events/news/2024/12/department-commerce-awards-chips-incentives-micron-idaho-and-new-york",
+            "claim_date": "2024-12-10"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Hyperscalers, AI-platform operators, server OEMs, enterprise data centers, device manufacturers, and automotive customers",
+        "why_it_matters": "Their infrastructure and product roadmaps determine accelerator and server volumes, memory capacity per system, SSD demand, qualification timing, and customer inventories. A small number of large platform customers can materially influence product mix and capacity allocation.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-and-general-motors-sign-strategic-agreement-secure-supply",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "NVIDIA and the broader CPU, accelerator, server, and storage-platform ecosystem",
+        "why_it_matters": "Joint engineering and qualification embed memory and storage into platform reference designs. The HBM4, SOCAMM2, and PCIe Gen6 products announced for NVIDIA Vera Rubin illustrate how platform timing and technical compatibility govern access to AI-system demand.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/",
+            "claim_date": "2026-07-21"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Samsung Electronics, SK hynix and Solidigm, Kioxia, Sandisk, CXMT, and YMTC",
+        "why_it_matters": "Competitor wafer additions, technology transitions, HBM qualifications, yields, and pricing determine industry supply, market share, and the duration of favorable DRAM and NAND economics.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Semiconductor-equipment, silicon-wafer, materials, assembly, packaging, and construction suppliers, including GlobalWafers",
+        "why_it_matters": "Advanced memory output depends on timely access to specialized equipment, wafers, materials, and packaging. Supply interruptions or construction delays can constrain volume; strategic supplier investment can improve long-term assurance but commits capital.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/node/50766/pdf",
+            "claim_date": "2026-07-09"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "U.S. CHIPS incentives and investment-tax credits; export-control, sanctions, customs, and Chinese cybersecurity authorities",
+        "why_it_matters": "Government incentives can change fab economics and are disbursed against project milestones. Trade controls and the Chinese cybersecurity decision can restrict technology transfer, customer access, or sales in important markets.",
+        "sources": [
+          {
+            "url": "https://www.nist.gov/news-events/news/2024/12/department-commerce-awards-chips-incentives-micron-idaho-and-new-york",
+            "claim_date": "2024-12-10"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/statement-data-center-business-china",
+            "claim_date": "2025-10-17"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Ramp a broad AI product portfolio spanning HBM4, high-capacity and low-power server memory, SOCAMM2, and PCIe Gen6 data-center SSDs.",
+        "investment_relevance": "A broader qualified portfolio expands exposure beyond accelerator HBM into CPU memory and storage. Execution depends on customer qualifications, yield, packaging throughput, platform timing, and maintaining performance and power advantages.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://www.micron.com/about/blog/storage/ssd/micron-9650-ssd-the-worlds-first-pcie-gen6-ssd-reaches-a-new-shipping-milestone",
+            "claim_date": "2026-02-11"
+          }
+        ]
+      },
+      {
+        "action": "Use strategic customer agreements to secure multi-year committed volumes and improve pricing, funding, and demand visibility.",
+        "investment_relevance": "As of June 24, 2026, management reported 16 agreements, while the Form 10-Q states that certain agreements contain binding commitments for specific multi-year volumes. If enforceable and economically favorable, these contracts could reduce—but not eliminate—memory-cycle volatility.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/2354ecda-77a0-4ddd-8462-a631eb491356",
+            "claim_date": "2026-06-24"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm",
+            "claim_date": "2026-05-28"
+          }
+        ]
+      },
+      {
+        "action": "Expand leading-edge fabrication, advanced HBM packaging, and domestic supply-chain capacity.",
+        "investment_relevance": "On July 9, 2026, the company raised planned U.S. fab and technology investment to more than $250 billion through 2035 and reiterated a long-term goal of producing 40% of its DRAM in the United States. The plan adds strategic capacity and geographic resilience but creates substantial execution, utilization, and free-cash-flow risk.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-accelerates-us-investments-pours-first-concrete-new-york",
+            "claim_date": "2026-07-09"
+          },
+          {
+            "url": "https://investors.micron.com/node/50766/pdf",
+            "claim_date": "2026-07-09"
+          },
+          {
+            "url": "https://www.nist.gov/news-events/news/2024/12/department-commerce-awards-chips-incentives-micron-idaho-and-new-york",
+            "claim_date": "2024-12-10"
+          }
+        ]
+      },
+      {
+        "action": "Organize commercial accountability around cloud memory, core data center, mobile and client, and automotive and embedded end markets.",
+        "investment_relevance": "The market-segment structure is intended to focus product roadmaps and customer engagement on distinct AI opportunities from data centers to edge devices. Analysts can evaluate whether each unit earns differentiated margins rather than relying only on consolidated memory-cycle results.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-announces-business-unit-reorganization-capitalize-ai",
+            "claim_date": "2025-04-17"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models use more parameters, mixture-of-experts routing, longer contexts, multimodal inputs, and greater test-time reasoning.",
+        "company_exposure": "AI accelerators require HBM stacks to hold model state and move data at high bandwidth; the company supplies HBM3E and HBM4 for accelerator platforms.",
+        "affected_driver": "HBM content per accelerator, accelerator shipments, qualified share, pricing, yield, and advanced-packaging throughput.",
+        "financial_consequence": "Potentially higher HBM volume and a richer DRAM mix, supporting revenue and gross margin; poor yields or qualification losses could instead raise cost and strand allocated capacity.",
+        "direction": "upside",
+        "materiality_condition": "Material if growth in accelerator units and HBM capacity per accelerator outpaces industry HBM supply while the company remains qualified on high-volume platforms.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "HBM capacity and stack count in new accelerator platforms",
+          "Customer qualifications and volume-shipment milestones",
+          "HBM yields and advanced-packaging output",
+          "HBM share and pricing versus competing suppliers",
+          "Accelerator deployment schedules"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/",
+            "claim_date": "2026-07-21"
+          }
+        ]
+      },
+      {
+        "development": "AI accelerator growth increases demand for HBM, whose production consumes leading-edge DRAM wafers and advanced-packaging capacity.",
+        "company_exposure": "The same manufacturing network supplies HBM and conventional DRAM, so HBM allocation and its effective wafer trade ratio can restrict output available for server, mobile, and client DRAM.",
+        "affected_driver": "Leading-edge DRAM supply growth, conventional DRAM inventories, average selling prices, and portfolio mix.",
+        "financial_consequence": "Constrained conventional DRAM supply could raise pricing and gross margin across the DRAM portfolio; better yields, rapid node gains, or excessive new capacity would weaken the effect.",
+        "direction": "upside",
+        "materiality_condition": "Material if HBM's capacity consumption removes conventional DRAM bits faster than node transitions and new wafer capacity replace them.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "HBM wafer allocation and effective trade ratio",
+          "HBM yields by generation",
+          "Conventional DRAM inventories and lead times",
+          "DRAM spot and contract pricing",
+          "Competitor HBM and DRAM capacity additions"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/631b1a32-5537-46ae-8f40-82e42fc79dfe",
+            "claim_date": "2026-06-24"
+          },
+          {
+            "url": "https://bitcap.com/en",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Agentic AI shifts part of inference orchestration, tool execution, retrieval, and application logic onto CPU-based servers.",
+        "company_exposure": "Those application servers use conventional server DRAM, high-capacity DIMMs, low-power server memory, and NVMe storage in addition to accelerator memory.",
+        "affected_driver": "Server DRAM bits, memory capacity per CPU server, server-unit demand, and high-value server-memory mix.",
+        "financial_consequence": "Higher server-memory volume and mix could broaden AI revenue beyond HBM and tighten conventional DRAM supply; software efficiency or consolidation could offset the demand.",
+        "direction": "upside",
+        "materiality_condition": "Material if deployed agents increase application-server count or DRAM capacity per server faster than virtualization, caching, and model-efficiency improvements reduce infrastructure needs.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Server DIMM and low-power server DRAM revenue",
+          "Memory capacity supported by new CPU platforms",
+          "Agentic workload benchmark requirements",
+          "General-purpose server shipment growth",
+          "Cloud customer infrastructure commentary"
+        ],
+        "sources": [
+          {
+            "url": "https://my.micron.com/about/blog/memory/dram/why-agentic-ai-is-rewriting-the-rules-for-cpu-and-memory-infrastructure",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          }
+        ]
+      },
+      {
+        "development": "Training, retrieval-augmented generation, checkpoints, vector databases, KV-cache handling, and AI data retention increase high-performance and high-density storage requirements.",
+        "company_exposure": "The company sells TLC and QLC NAND and data-center SSDs designed for high-throughput, low-latency, and dense AI storage deployments.",
+        "affected_driver": "Data-center SSD qualifications and shipments, premium SSD mix, NAND bit demand, NAND pricing, and manufacturing cost per bit.",
+        "financial_consequence": "AI storage adoption could increase SSD revenue and improve NAND mix, but broad NAND oversupply or workload-level storage optimization could compress pricing and margins.",
+        "direction": "mixed",
+        "materiality_condition": "Material if incremental AI-related NAND consumption and premium SSD adoption exceed NAND industry bit-supply growth and reductions in bytes stored per workload.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Data-center SSD revenue, share, and qualifications",
+          "PCIe Gen6 and high-capacity QLC adoption",
+          "NAND contract pricing and channel inventories",
+          "Storage capacity and checkpointing per AI cluster",
+          "Evidence of compression, deduplication, and cache optimization"
+        ],
+        "sources": [
+          {
+            "url": "https://www.micron.com/about/blog/storage/ssd/micron-9650-ssd-the-worlds-first-pcie-gen6-ssd-reaches-a-new-shipping-milestone",
+            "claim_date": "2026-02-11"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/631b1a32-5537-46ae-8f40-82e42fc79dfe",
+            "claim_date": "2026-06-24"
+          }
+        ]
+      },
+      {
+        "development": "Model compression, quantization, sparse architectures, memory-efficient attention, or custom accelerators reduce memory required per unit of useful AI work.",
+        "company_exposure": "A growing share of capacity and product strategy is directed toward AI memory and storage, particularly HBM and advanced data-center products.",
+        "affected_driver": "HBM content per accelerator, memory demand per token, cluster deployment requirements, capacity utilization, and AI-product pricing.",
+        "financial_consequence": "If efficiency gains exceed workload and deployment growth, HBM and server-memory demand could undershoot committed capacity, weaken pricing, and revive conventional memory cyclicality.",
+        "direction": "downside",
+        "materiality_condition": "Material if bytes of memory or bandwidth required per unit of AI output decline faster than total AI workloads and deployed accelerator capacity grow.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "HBM capacity per accelerator generation",
+          "Memory bandwidth required per token or inference task",
+          "Adoption of quantization and memory-efficient attention",
+          "Custom-accelerator memory architectures",
+          "Capacity deferrals, customer inventory, or contract renegotiations"
+        ],
+        "sources": [
+          {
+            "url": "https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/",
+            "claim_date": "2026-07-21"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "explicit_thesis",
+      "attributable_public_thesis": "BIT Capital's public thesis is that AI systems require unusually large amounts of memory and that HBM production consumes capacity that would otherwise serve conventional memory, tightening pricing across the memory complex. BIT says its early view was that the AI-driven memory cycle would exceed prior mobile and cloud cycles, and it highlights DRAM spot prices, HBM production yields, supply-chain information, and proprietary business-momentum data as leading signals.",
+      "what_would_support_it": [
+        "HBM capacity per accelerator and accelerator deployments continue rising while industry HBM supply remains constrained.",
+        "HBM wafer allocation and yield losses measurably restrict conventional DRAM bit supply, with low inventories and sustained DRAM pricing.",
+        "The company maintains major-platform qualifications and converts HBM demand into shipment growth and favorable mix without disproportionate yield costs.",
+        "Strategic customer agreements, deposits, and remaining performance obligations extend demand visibility and reduce reliance on short-term spot conditions.",
+        "AI-linked server DRAM and data-center SSD demand broadens beyond HBM."
+      ],
+      "what_would_challenge_it": [
+        "HBM yields and competitor capacity improve quickly enough to remove scarcity and compress premiums.",
+        "Model or accelerator efficiency reduces memory content per workload faster than AI deployments grow.",
+        "Hyperscaler capital spending, accelerator shipments, or AI-service utilization slows materially and customer inventories rise.",
+        "The company loses major platform qualifications or share to competing HBM suppliers.",
+        "Conventional DRAM or NAND supply growth exceeds demand despite HBM allocation, restoring severe pricing cyclicality."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en",
+          "claim_date": null
+        },
+        {
+          "url": "https://bitcap.com/en/news/85-fondsmanager-beckers-wie-der-memory-supercycle-weitergeht",
+          "claim_date": "2026-07-02"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "How much strategic customer agreements structurally reduce memory-cycle volatility",
+        "why_it_matters": "Binding volume commitments and customer funding can improve visibility, but the public record does not fully disclose each agreement's pricing bands, duration, remedies, credit risk, or product mix.",
+        "next_research_trigger": "Inspect subsequent 10-Q and 10-K disclosures for remaining performance obligations, deposits and contract liabilities, recognized revenue, pricing terms, cancellations, amendments, and concentration by customer.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm",
+            "claim_date": "2026-05-28"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/2354ecda-77a0-4ddd-8462-a631eb491356",
+            "claim_date": "2026-06-24"
+          }
+        ]
+      },
+      {
+        "uncertainty": "HBM yield, cost, trade ratio, and packaging economics by generation",
+        "why_it_matters": "Strong demand does not guarantee attractive returns if stack yields, base-die costs, testing, or packaging bottlenecks absorb the HBM premium. These factors also determine how much conventional DRAM capacity is displaced.",
+        "next_research_trigger": "Track management's yield and mature-yield commentary, HBM gross-margin indicators, packaging expansions, capacity allocation, customer qualifications, and third-party supply and pricing data.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://investors.micron.com/static-files/631b1a32-5537-46ae-8f40-82e42fc79dfe",
+            "claim_date": "2026-06-24"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Incremental AI demand for conventional server DRAM and NAND storage",
+        "why_it_matters": "AI workloads clearly use memory and storage, but the net demand after compression, caching, deduplication, architecture changes, and reuse of existing infrastructure is difficult to isolate.",
+        "next_research_trigger": "Inspect server DRAM bits per system, high-capacity DIMM and low-power server-memory mix, data-center SSD revenue and qualifications, NAND bit shipments, and disclosed storage capacity per AI cluster.",
+        "sources": [
+          {
+            "url": "https://my.micron.com/about/blog/memory/dram/why-agentic-ai-is-rewriting-the-rules-for-cpu-and-memory-infrastructure",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://www.micron.com/about/blog/storage/ssd/micron-9650-ssd-the-worlds-first-pcie-gen6-ssd-reaches-a-new-shipping-milestone",
+            "claim_date": "2026-02-11"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Returns and timing on the expanded fabrication and packaging program",
+        "why_it_matters": "New fabs take years to build and require demand, skilled labor, equipment, utilities, permits, and incentive milestones to align. Delays or demand normalization could depress free cash flow and asset utilization.",
+        "next_research_trigger": "Track construction milestones, first-wafer and volume-production dates, annual capital expenditure, incentive receipts, supplier commitments, power and water readiness, and changes to planned capacity.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/micron-accelerates-us-investments-pours-first-concrete-new-york",
+            "claim_date": "2026-07-09"
+          },
+          {
+            "url": "https://www.nist.gov/news-events/news/2024/12/department-commerce-awards-chips-incentives-micron-idaho-and-new-york",
+            "claim_date": "2024-12-10"
+          },
+          {
+            "url": "https://investors.micron.com/node/50766/pdf",
+            "claim_date": "2026-07-09"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Geopolitical and regulatory access to customers, technology, and manufacturing inputs",
+        "why_it_matters": "Export controls, sanctions, tariffs, and China's cybersecurity restrictions can change addressable demand, supply-chain configuration, or the ability to transfer technology and support customers.",
+        "next_research_trigger": "Review geographic revenue, China data-center exposure, new export-control rules, customer substitutions, licensing decisions, and changes to risk-factor language in each filing.",
+        "sources": [
+          {
+            "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+            "claim_date": "2025-08-28"
+          },
+          {
+            "url": "https://investors.micron.com/news-releases/news-release-details/statement-data-center-business-china",
+            "claim_date": "2025-10-17"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+        "title": "2025 Form 10-K",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2025-10-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-announces-business-unit-reorganization-capitalize-ai",
+        "title": "Micron Announces Business Unit Reorganization to Capitalize on AI Growth Opportunity",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2025-04-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.micron.com/static-files/2354ecda-77a0-4ddd-8462-a631eb491356",
+        "title": "Fiscal Third Quarter 2026 Financial Results Presentation",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-06-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.micron.com/static-files/631b1a32-5537-46ae-8f40-82e42fc79dfe",
+        "title": "Fiscal Third Quarter 2026 Prepared Remarks",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-06-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm",
+        "title": "Form 10-Q for the Quarter Ended May 28, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-06-25",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+        "title": "Micron in High-Volume Production of HBM4 Designed for NVIDIA Vera Rubin, PCIe Gen6 SSD and SOCAMM2",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-03-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/",
+        "title": "Inside NVIDIA Rubin GPU Architecture: Powering the Era of Agentic AI",
+        "publisher": "NVIDIA",
+        "published_at": "2026-07-21",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://my.micron.com/about/blog/memory/dram/why-agentic-ai-is-rewriting-the-rules-for-cpu-and-memory-infrastructure",
+        "title": "Why Agentic AI Is Rewriting the Rules for CPU and Memory Infrastructure",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-07-01",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.micron.com/about/blog/storage/ssd/micron-9650-ssd-the-worlds-first-pcie-gen6-ssd-reaches-a-new-shipping-milestone",
+        "title": "Micron 9650 SSD, the World's First PCIe Gen6 SSD, Reaches a New Shipping Milestone",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-02-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-and-general-motors-sign-strategic-agreement-secure-supply",
+        "title": "Micron and General Motors Sign Strategic Agreement to Secure Supply and Accelerate Innovation",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-07-01",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-accelerates-us-investments-pours-first-concrete-new-york",
+        "title": "Micron Accelerates U.S. Investments, Pours First Concrete at New York Fab",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-07-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.micron.com/node/50766/pdf",
+        "title": "Micron Announces Up to $3 Billion Strategic Investment to Strengthen U.S. Semiconductor Ecosystem",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2026-07-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.nist.gov/news-events/news/2024/12/department-commerce-awards-chips-incentives-micron-idaho-and-new-york",
+        "title": "Department of Commerce Awards CHIPS Incentives to Micron for Idaho and New York Projects",
+        "publisher": "National Institute of Standards and Technology",
+        "published_at": "2024-12-10",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/statement-data-center-business-china",
+        "title": "Statement on Data Center Business in China",
+        "publisher": "Micron Technology, Inc.",
+        "published_at": "2025-10-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en",
+        "title": "BIT Capital — Investment Excellence in the Age of AI",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/85-fondsmanager-beckers-wie-der-memory-supercycle-weitergeht",
+        "title": "Fondsmanager Beckers: Wie der Memory-Supercycle weitergeht",
+        "publisher": "BIT Capital",
+        "published_at": "2026-07-02",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_vWY80__B8xlO7V_9FfmC6eWctNDI_4-2ln9IPZTz_fd9sfIF3T_l1asKAXUUXkIRKcNmYQ4FyzgYVzDPrhQjtrE6L4aOOrGrgzJ5tMl_xapTQSjsDjjrGuXn_9I1RiCfpjrEMljXI_mdRMC1gmy2hq63K43WA_IkDcDKq0LhMPQ0AxmF3eboA5YgVmwiwd50zCr5pAaDE7WCWXTQHviYie3gWl5lkZ0rqS8ahKYWpbnd8xuRHuKWzYp-i8RNJC1TLUpjbpzLGYOThPQdR8kfr5TT78Z1fGoXGFjQTimQC4Sp7sSq3WQf8RZFhc0wRzyWZCHZoNUgxuYO2t5M0SUI9-E2Rd9UEvUEor1p9PJs0tRvX4gdSXOFvo1rQDbnvVkleYJcwnytrK1VFG1EwHLpguzu_0l_5CHUwk0x-Cwgx3tNuSLAvwP6tZV1wtwtyPrdxG980udqr3LGbWPfhXdXlkK0",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 116103,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 42686,
+    "reasoning_tokens": 9124,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investors.micron.com static-files 2025 annual report Micron Form 10-K HBM revenue 2025",
+        "type": "search",
+        "queries": [
+          "site:investors.micron.com static-files 2025 annual report Micron Form 10-K HBM revenue 2025",
+          "site:investors.micron.com Micron fiscal 2026 earnings HBM sold out 2026 official",
+          "site:micron.com HBM4 2026 official Micron",
+          "site:bitcap.com Micron memory supercycle BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/723125 2025 Micron 10-K DRAM NAND customer concentration",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/723125 2025 Micron 10-K DRAM NAND customer concentration",
+          "site:sec.gov/Archives/edgar/data/723125 2026 Micron 10-Q May 28 2026 strategic customer agreements",
+          "site:investors.micron.com/static-files Micron FQ3 2026 presentation strategic customer agreements HBM capacity",
+          "site:micron.com/about/blog storage agentic AI data center SSD Micron official 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.micron.com/static-files/631b1a32-5537-46ae-8f40-82e42fc79dfe"
+      },
+      {
+        "query": "Micron 2026 Q3 10-Q accession number June 24 2026",
+        "type": "search",
+        "queries": [
+          "Micron 2026 Q3 10-Q accession number June 24 2026",
+          "site:investors.micron.com/sec-filings/sec-filing/10-q 2026 May 28 Micron",
+          "site:sec.gov/Archives/edgar/data/723125/ 2026-06-24 micron 10-q"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/723125/000072312525000028 mu 2025 10-k",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/723125/000072312525000028 mu 2025 10-k",
+          "site:sec.gov/Archives/edgar/data/723125/000072312525000028 \"DRAM products\" \"NAND products\"",
+          "site:sec.gov/Archives/edgar/data/723125/000072312525000028 \"Samsung\" \"SK hynix\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm"
+      },
+      {
+        "pattern": "strategic customer agreements",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.micron.com/sec-filings/sec-filing/10-k/0000723125-25-000028"
+      },
+      {
+        "pattern": "Business Overview",
+        "type": "find_in_page",
+        "url": "https://investors.micron.com/node/49436/xbrl-viewer"
+      },
+      {},
+      {
+        "query": "site:investors.micron.com/static-files/8791eb80 \"Cloud Memory Business Unit\"",
+        "type": "search",
+        "queries": [
+          "site:investors.micron.com/static-files/8791eb80 \"Cloud Memory Business Unit\"",
+          "site:investors.micron.com/static-files/8791eb80 \"Core Data Center Business Unit\"",
+          "site:investors.micron.com/static-files/8791eb80 \"DRAM\" \"NAND\" \"revenue\"",
+          "site:investors.micron.com/static-files/8791eb80 \"Samsung\" \"SK hynix\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Micron 2025 annual report Cloud Memory Business Unit products HBM LPDDR server DRAM",
+        "type": "search",
+        "queries": [
+          "Micron 2025 annual report Cloud Memory Business Unit products HBM LPDDR server DRAM",
+          "Micron 2025 annual report Core Data Center Business Unit SSD revenue engine",
+          "Micron 2025 10-k competitors Samsung SK hynix Kioxia Western Digital",
+          "Micron 2025 10-k DRAM revenue percentage NAND revenue percentage"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-technology-inc-reports-results-fourth-quarter-and-full-8"
+      },
+      {
+        "query": "site:nvidianews.nvidia.com Micron HBM4 Vera Rubin 2026",
+        "type": "search",
+        "queries": [
+          "site:nvidianews.nvidia.com Micron HBM4 Vera Rubin 2026",
+          "site:nvidia.com Micron HBM4 Vera Rubin 2026",
+          "site:amd.com Micron DDR5 Gen6 SSD agentic AI 2026",
+          "site:weka.io Micron 6600 ION WEKApod 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:commerce.gov Micron CHIPS award 2024 2025 official",
+        "type": "search",
+        "queries": [
+          "site:commerce.gov Micron CHIPS award 2024 2025 official",
+          "site:micron.com Micron up to 200 billion US investment 2025 official",
+          "site:investors.micron.com Micron first concrete New York fab July 2026",
+          "site:micron.com Micron strategic investment semiconductor ecosystem July 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Micron final CHIPS award $6.165 billion commerce.gov December 2024",
+        "type": "search",
+        "queries": [
+          "Micron final CHIPS award $6.165 billion commerce.gov December 2024",
+          "site:chips.gov Micron final award direct funding Idaho New York Virginia",
+          "site:commerce.gov/news/press-releases Micron CHIPS Incentives award"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investors.micron.com Micron China CAC 2025 annual report revenue risk",
+        "type": "search",
+        "queries": [
+          "site:investors.micron.com Micron China CAC 2025 annual report revenue risk",
+          "site:sec.gov/Archives/edgar/data/723125 Micron CAC China 2025 10-K",
+          "site:investors.micron.com Micron export controls 2025 10-K China",
+          "site:micron.com China CAC Micron official 2023"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:micron.com/about/company business units cloud memory core data center mobile client automotive embedded Micron",
+        "type": "search",
+        "queries": [
+          "site:micron.com/about/company business units cloud memory core data center mobile client automotive embedded Micron",
+          "site:investors.micron.com 2025 annual report Automotive and Embedded Business Unit Micron",
+          "site:investors.micron.com 2025 annual report Mobile and Client Business Unit Micron",
+          "site:micron.com markets industries automotive memory storage Micron"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investors.micron.com/static-files/2354ecda \"16 strategic customer agreements\" deposits commitments",
+        "type": "search",
+        "queries": [
+          "site:investors.micron.com/static-files/2354ecda \"16 strategic customer agreements\" deposits commitments",
+          "site:investors.micron.com/static-files/2354ecda \"20%\" DRAM volume \"one-third\" NAND",
+          "site:investors.micron.com/static-files/2354ecda \"price\" \"volume\" strategic customer agreements",
+          "site:investors.micron.com/static-files/2354ecda \"financial commitments\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Micron Q3 2026 presentation 16 strategic customer agreements 20% DRAM one-third NAND $22 billion deposits",
+        "type": "search",
+        "queries": [
+          "Micron Q3 2026 presentation 16 strategic customer agreements 20% DRAM one-third NAND $22 billion deposits",
+          "Micron strategic customer agreements deposits commitments 2026 official 16",
+          "Micron Q3 2026 prepared remarks SCA DRAM NAND volume deposits"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en Micron \"Ahead of the Curve\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en Micron \"Ahead of the Curve\"",
+          "site:bitcap.com Micron DRAM spot prices HBM yields BIT Capital",
+          "site:bitcap.com Micron AI memory cycle mobile cloud demand Jan Beckers",
+          "site:bitcap.com/en/news Micron memory supercycle Jan Beckers 2026"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://investors.micron.com/static-files/8791eb80-8263-4c6f-aa74-fdd03fbbb027",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-announces-business-unit-reorganization-capitalize-ai",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/static-files/2354ecda-77a0-4ddd-8462-a631eb491356",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/static-files/631b1a32-5537-46ae-8f40-82e42fc79dfe",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000015/mu-20260528.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://developer.nvidia.com/blog/inside-nvidia-rubin-gpu-architecture-powering-the-era-of-agentic-ai/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://my.micron.com/about/blog/memory/dram/why-agentic-ai-is-rewriting-the-rules-for-cpu-and-memory-infrastructure",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.micron.com/about/blog/storage/ssd/micron-9650-ssd-the-worlds-first-pcie-gen6-ssd-reaches-a-new-shipping-milestone",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-and-general-motors-sign-strategic-agreement-secure-supply",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/micron-accelerates-us-investments-pours-first-concrete-new-york",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/node/50766/pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.nist.gov/news-events/news/2024/12/department-commerce-awards-chips-incentives-micron-idaho-and-new-york",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.micron.com/news-releases/news-release-details/statement-data-center-business-china",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/85-fondsmanager-beckers-wie-der-memory-supercycle-weitergeht",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:mu",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

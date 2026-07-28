@@ -1,0 +1,962 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Infineon",
+    "ticker": "IFX"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The group is a diversified integrated device manufacturer: it designs, manufactures and sells power semiconductors, analog/mixed-signal and sensor products, microcontrollers, connectivity and security chips, plus enabling software. FY2025 revenue was €14.662 billion: Automotive contributed 50%, legacy Green Industrial Power 11%, Power & Sensor Systems 29% and Connected Secure Systems 10%. From Q4 FY2026, reporting is being reorganized into Automotive, Power Systems and Edge Systems. Durable frontier-AI exposure is concentrated in power conversion and distribution; edge and physical AI are smaller, earlier-stage channels.",
+      "revenue_engines": [
+        {
+          "engine": "Automotive semiconductors",
+          "who_pays": "Automotive OEMs and Tier-1 suppliers buying power devices, microcontrollers, sensors, memory and in-vehicle connectivity.",
+          "economic_logic": "Revenue follows vehicle production, semiconductor content per vehicle and long-cycle platform design wins. Electrification, software-defined vehicles, ADAS and zonal architectures raise content, while inventory corrections, price adjustments and weaker high-voltage EV demand can offset structural growth. The business generated €7.402 billion, or 50% of FY2025 revenue.",
+          "sources": [
+            {
+              "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/annual-reports/2025/2025-infineon-financial-data-2021-2025-v01-00-en.pdf",
+              "claim_date": "2025-11-28"
+            },
+            {
+              "url": "https://www.infineon.com/press-release/2025/INFXX202508-133",
+              "claim_date": "2025-08-14"
+            }
+          ]
+        },
+        {
+          "engine": "AI data-center power delivery",
+          "who_pays": "Server and power-supply manufacturers, power-shelf and rack-system vendors, and data-center infrastructure suppliers; hyperscalers and accelerator vendors strongly influence specifications and design selection.",
+          "economic_logic": "Semiconductor revenue scales with deployed electrical capacity, content per kilowatt and the number and sophistication of conversion, protection and control stages. The portfolio spans silicon, SiC and GaN switches, drivers, controllers and protection. In May 2026, management maintained AI-power revenue targets of about €1.5 billion in FY2026 and €2.5 billion in FY2027 and indicated content of roughly $100–250 per kilowatt across platforms.",
+          "sources": [
+            {
+              "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+              "claim_date": "2026-05-06"
+            },
+            {
+              "url": "https://www.infineon.com/press-release/2025/INFXX202505-107",
+              "claim_date": "2025-05-20"
+            }
+          ]
+        },
+        {
+          "engine": "Industrial, grid and energy power electronics",
+          "who_pays": "Manufacturers of industrial drives, HVAC and appliances, renewable inverters, energy-storage systems, UPS equipment, grid infrastructure, traction and industrial vehicles.",
+          "economic_logic": "Revenue is driven by equipment volumes, power rating, semiconductor content per megawatt and adoption of more efficient SiC or GaN architectures. The legacy Green Industrial Power segment generated €1.631 billion in FY2025; power-infrastructure products are moving into the Power Systems organization.",
+          "sources": [
+            {
+              "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/annual-reports/2025/2025-infineon-financial-data-2021-2025-v01-00-en.pdf",
+              "claim_date": "2025-11-28"
+            },
+            {
+              "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2025/2025-11-26-power-roadshow-v01-00-en.pdf",
+              "claim_date": "2025-11-26"
+            },
+            {
+              "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+              "claim_date": "2026-05-06"
+            }
+          ]
+        },
+        {
+          "engine": "Edge computing, connectivity, sensing and security",
+          "who_pays": "Industrial, consumer and IoT device makers; payment and identity-system providers; medical-device companies; and automotive customers requiring MCUs, sensors, wireless connectivity or security.",
+          "economic_logic": "Revenue combines unit volumes with content per connected device. Hardware differentiation is reinforced by development tools, reference designs and software that reduce customer integration time. The new Edge Systems organization is intended to align MCUs, connectivity, security and sensor capabilities around robotics, edge AI and smart-device applications.",
+          "sources": [
+            {
+              "url": "https://www.infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf",
+              "claim_date": "2025-11-28"
+            },
+            {
+              "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+              "claim_date": "2026-05-06"
+            },
+            {
+              "url": "https://www.infineon.com/technology-news/2025/INFCSS202510-008",
+              "claim_date": "2025-10-16"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf",
+          "claim_date": "2025-11-28"
+        },
+        {
+          "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/annual-reports/2025/2025-infineon-financial-data-2021-2025-v01-00-en.pdf",
+          "claim_date": "2025-11-28"
+        },
+        {
+          "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+          "claim_date": "2026-05-06"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "End-market volumes and semiconductor content per system",
+        "why_it_matters": "Automotive remains the largest revenue pool, while industrial, consumer and energy markets are cyclical. Structural content gains from software-defined vehicles, electrification, power infrastructure and AI must exceed unit-volume weakness, inventory corrections and price declines for group revenue to grow.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf",
+            "claim_date": "2025-11-28"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "AI data-center design wins, deployed kilowatts and content per kilowatt",
+        "why_it_matters": "AI-power revenue depends on qualifying across accelerator and rack platforms and retaining semiconductor content as architectures evolve from conventional power supplies toward centralized high-voltage DC distribution. Higher rack density can raise content, but platform concentration or conversion-stage elimination can reduce it.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202505-107",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/",
+            "claim_date": "2025-05-20"
+          }
+        ]
+      },
+      {
+        "driver": "Fab utilization, yield, pricing and product mix",
+        "why_it_matters": "The IDM model carries high fixed manufacturing costs. Volume fall-through and reduced idle costs can expand margins quickly, while weak loading, price adjustments or unfavorable mix depress gross and segment margins. The hybrid manufacturing model keeps differentiating power and analog processes mainly in-house while outsourcing more control and connectivity production.",
+        "financial_lines": [
+          "gross_margin",
+          "pricing",
+          "product_mix",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      },
+      {
+        "driver": "Wide-bandgap and smart-power capacity ramp",
+        "why_it_matters": "SiC, GaN and 300-millimeter smart-power capacity determine the ability to serve high-efficiency power applications at competitive cost. FY2026 investment plans of about €2.7 billion included €500 million pulled forward for AI-related capacity. Returns depend on qualification speed, yield, utilization and demand arriving close to the capacity ramp.",
+        "financial_lines": [
+          "volume",
+          "gross_margin",
+          "capital_expenditure",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202507-122",
+            "claim_date": "2025-07-02"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Automotive OEMs and Tier-1s; industrial and energy-equipment makers; server power and rack vendors; hyperscalers; consumer, medical and IoT device makers",
+        "why_it_matters": "The customer base spans several cycles, but automotive is the largest exposure. In AI data centers, accelerator vendors and hyperscalers influence architecture while power-equipment vendors typically integrate the components. Customer qualification, design-win conversion and inventory behavior determine reported revenue timing.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf",
+            "claim_date": "2025-11-28"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "SiC substrate suppliers including Wolfspeed, plus strategic foundry and manufacturing partners including the TSMC-led ESMC venture",
+        "why_it_matters": "Wide-bandgap growth requires reliable, qualified substrates, while the hybrid manufacturing model uses partners for capacity and processes where internal manufacturing is less differentiating. Multi-sourcing and European foundry capacity reduce disruption risk but do not eliminate qualification, ramp or partner-execution dependencies.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/press-release/2024/infxx202401-049",
+            "claim_date": "2024-01-23"
+          },
+          {
+            "url": "https://pr.tsmc.com/english/news/3049",
+            "claim_date": "2023-08-08"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "NVIDIA and the wider 800 VDC and physical-AI ecosystems",
+        "why_it_matters": "Collaboration provides early access to next-generation rack and robotics architectures and can improve design-win probability. It does not guarantee production share: platform schedules, final bills of materials and OEM sourcing decisions remain decisive.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202505-107",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2026/infxx202603-073",
+            "claim_date": "2026-03-16"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "onsemi, STMicroelectronics, Mitsubishi Electric, Fuji Electric and Chinese suppliers in power; NXP, Renesas, STMicroelectronics and Microchip in automotive and embedded control",
+        "why_it_matters": "Competition affects pricing, design-win retention and the pace at which SiC and GaN advantages become commoditized. Integrated system portfolios and manufacturing scale are intended to differentiate the group, but customers commonly multi-source components.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "European Commission, German federal and regional authorities, and EU semiconductor-support programs",
+        "why_it_matters": "Public funding and approvals influence the capital economics and pace of European fab expansion. The Dresden Smart Power Fab received EU Chips Act approval, making subsidy disbursement and compliance relevant to capital intensity and cash flow.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/press-release/2025/infxx202502-058",
+            "claim_date": "2025-02-20"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Reorganize from four divisions into Automotive, Power Systems and Edge Systems beginning Q4 FY2026.",
+        "investment_relevance": "The structure gives explicit organizational ownership to AI data centers and power infrastructure within Power Systems and to robotics and edge AI within Edge Systems. It should improve accountability, but historical segment comparisons will require bridges and restatements.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "action": "Pull forward €500 million of AI-related capacity investment within an approximately €2.7 billion FY2026 investment plan and accelerate the Dresden Smart Power Fab ramp.",
+        "investment_relevance": "Management is committing capital against expected AI-power demand. Successful qualification and loading can support revenue and margin growth; demand slippage would increase depreciation, underutilization and free-cash-flow risk.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      },
+      {
+        "action": "Scale differentiated silicon, 200-millimeter SiC and 300-millimeter GaN manufacturing.",
+        "investment_relevance": "Larger wafers, internal process control and a broad Si/SiC/GaN portfolio are intended to lower unit costs, improve supply assurance and match each power-conversion stage to the appropriate material. The advantage is conditional on yields, customer qualification and capacity utilization.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202507-122",
+            "claim_date": "2025-07-02"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2024/infxx202401-049",
+            "claim_date": "2024-01-23"
+          }
+        ]
+      },
+      {
+        "action": "Build edge- and physical-AI system offerings through DEEPCRAFT software, PSOC Edge hardware and NVIDIA robotics collaboration.",
+        "investment_relevance": "Software tools and reference architectures can shorten customer development cycles and increase attachment of MCUs, sensors, motor control, connectivity, security and power components. Monetization remains dependent on commercial device and robot shipments.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/technology-news/2025/INFCSS202510-008",
+            "claim_date": "2025-10-16"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2026/infxx202603-073",
+            "claim_date": "2026-03-16"
+          }
+        ]
+      },
+      {
+        "action": "Expand system content through the completed Automotive Ethernet and non-optical analog/mixed-signal sensor acquisitions.",
+        "investment_relevance": "The August 2025 Ethernet acquisition adds high-bandwidth networking for software-defined vehicles and potential physical-AI applications. The sensor portfolio transaction closed on 1 July 2026, broadening automotive, industrial, medical and robotics sensing exposure. Integration, cross-selling and design-win conversion are the key value tests.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202508-133",
+            "claim_date": "2025-08-14"
+          },
+          {
+            "url": "https://ams-osram.com/news/press-releases/infineon-closing",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier-model scaling increases accelerator power, transient loads and rack density, accelerating adoption of high-voltage DC and more sophisticated grid-to-core power delivery.",
+        "company_exposure": "The group supplies silicon, SiC and GaN switches, drivers, controllers, protection devices and reference architectures across the power chain and is collaborating with NVIDIA on 800 VDC systems.",
+        "affected_driver": "AI-platform design wins, deployed megawatts, semiconductor content per kilowatt, product mix and loading of new smart-power capacity.",
+        "financial_consequence": "Potentially higher Power Systems revenue and gross margin as AI-power products scale, with near-term capital expenditure and depreciation preceding some revenue.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if next-generation platforms ship at scale, deployed data-center megawatts continue rising, the group retains content within its disclosed $100–250 per-kilowatt range, and Dresden capacity qualifies and ramps without material delay.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AI-power revenue versus the approximately €1.5 billion FY2026 and €2.5 billion FY2027 targets",
+          "800 VDC platform and power-shelf production schedules",
+          "Disclosed content per kilowatt and conversion-stage share",
+          "Dresden utilization, yields and product qualification",
+          "AI-related order intake and customer concentration"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202505-107",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      },
+      {
+        "development": "Large algorithmic-efficiency gains, weaker frontier-model monetization or a pause in hyperscaler construction reduces physical AI-cluster deployment relative to current capacity plans.",
+        "company_exposure": "AI-power revenue is linked to deployed electrical capacity and hardware platforms, while €500 million of AI-related investment has been pulled forward.",
+        "affected_driver": "AI-power volumes, pricing, fab utilization, inventory and return on committed capacity.",
+        "financial_consequence": "Revenue-target misses, lower gross margin from underutilization, higher working capital and weaker free cash flow could result if capacity arrives ahead of demand.",
+        "direction": "downside",
+        "materiality_condition": "The downside becomes material if efficiency improvements or spending restraint cause deployed data-center megawatts and component orders to decline for several quarters while the planned manufacturing ramp continues.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Changes to FY2026–FY2027 AI-revenue targets",
+          "Capacity or investment-plan deferrals",
+          "AI-power inventories and order cancellations",
+          "Idle-cost and utilization commentary",
+          "Whether workload growth offsets lower compute or energy per task"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/",
+            "claim_date": "2025-05-20"
+          }
+        ]
+      },
+      {
+        "development": "Sustained AI electricity demand drives grid expansion, energy storage, UPS systems, DC microgrids, solid-state transformers and solid-state circuit breakers.",
+        "company_exposure": "The power portfolio addresses grid conversion, storage inverters, protection, industrial power supplies and data-center power infrastructure through the emerging Power Systems organization.",
+        "affected_driver": "Power-infrastructure design wins, equipment volumes, semiconductor content per megawatt and industrial-capacity utilization.",
+        "financial_consequence": "Potential medium-term revenue and margin growth in industrial power, with project lead times increasing backlog and working-capital requirements before revenue recognition.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if announced power projects obtain permits and interconnections, proceed to equipment procurement and include the group's modules, discretes, drivers, sensors or controllers.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Power-infrastructure orders and book-to-bill",
+          "Energy-storage, UPS, solid-state transformer and circuit-breaker design wins",
+          "Utility and data-center interconnection milestones",
+          "Industrial fab utilization and mix",
+          "Evidence that AI-related grid projects convert from announcements to equipment shipments"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2025/2025-11-26-power-roadshow-v01-00-en.pdf",
+            "claim_date": "2025-11-26"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "development": "Distillation, quantization and smaller multimodal models make useful voice, vision and time-series inference practical on low-power microcontrollers.",
+        "company_exposure": "PSOC Edge devices, DEEPCRAFT tools and the broader sensor, connectivity and security portfolio are intended to help OEMs deploy models directly on devices.",
+        "affected_driver": "Edge-MCU and sensor design wins, developer adoption, time-to-market and semiconductor content per connected device.",
+        "financial_consequence": "Potential Edge Systems revenue and mix improvement if software adoption converts into high-volume hardware shipments; continued ecosystem spending without design wins would instead raise operating costs.",
+        "direction": "upside",
+        "materiality_condition": "The route becomes material if relevant models fit the memory, latency and power envelope of the group's MCUs and multiple OEMs move from evaluation kits to serial production.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Production benchmarks of frontier-derived models on PSOC Edge",
+          "DEEPCRAFT integrations, active developers and production references",
+          "Edge-AI design wins and customer launches",
+          "Edge Systems growth and product mix",
+          "Software and ecosystem spending relative to hardware revenue"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/technology-news/2025/INFCSS202510-008",
+            "claim_date": "2025-10-16"
+          },
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "development": "Frontier robotics models and simulation platforms improve perception, planning and control enough to move humanoid and industrial robots from pilots toward serial deployment.",
+        "company_exposure": "The portfolio covers sensing, motor control, microcontrollers, power management, Ethernet and security. NVIDIA collaboration includes actuator and sensor digital twins, and management estimates roughly $500 of addressable semiconductor content per humanoid robot.",
+        "affected_driver": "Robot design wins, semiconductor content per unit, cross-selling of acquired sensors and Ethernet, and production volumes.",
+        "financial_consequence": "Potential long-term revenue and product-mix uplift across Edge Systems, Automotive and Power Systems, offset initially by integration and ecosystem-development costs.",
+        "direction": "upside",
+        "materiality_condition": "The path becomes material when several robot manufacturers enter serial production and the group secures multi-function bill-of-material positions rather than isolated reference-design participation.",
+        "time_horizon": "long_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Named robot-OEM design wins and serial-production dates",
+          "Conversion of NVIDIA reference designs into customer platforms",
+          "Sensor and Automotive Ethernet cross-selling",
+          "Safety and security qualification milestones",
+          "Robot shipments and realized semiconductor content per unit"
+        ],
+        "sources": [
+          {
+            "url": "https://www.infineon.com/press-release/2026/infxx202603-073",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202508-133",
+            "claim_date": "2025-08-14"
+          },
+          {
+            "url": "https://ams-osram.com/news/press-releases/infineon-closing",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "A future BIT Capital publication explicitly naming the company and linking its AI-power content, design wins, manufacturing capacity and financial outcomes to an investment thesis.",
+        "An attributable company-specific discussion distinguishing direct AI-power exposure from the larger automotive and industrial cycles."
+      ],
+      "what_would_challenge_it": [
+        "No company-specific BIT thesis can currently be challenged; generic BIT Capital views on AI-infrastructure demand must not be treated as an attributable view on this issuer.",
+        "Any future thesis would require reassessment if it relied on portfolio ownership, broad sector exposure or generic AI-capex commentary rather than a stated company mechanism."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news",
+          "claim_date": null
+        },
+        {
+          "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+          "claim_date": "2023-09-15"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "AI-power revenue composition and customer concentration are not sufficiently disclosed.",
+        "why_it_matters": "The disclosed revenue targets are material, but the split by customer, accelerator platform, power-conversion stage, semiconductor material and recurring versus launch demand is unclear. Concentration could create abrupt revenue and pricing risk.",
+        "next_research_trigger": "Inspect each results release for AI revenue, backlog, customer concentration, material mix, content-per-kilowatt changes and target revisions.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The timing and bill-of-material impact of 800 VDC architecture remain unsettled.",
+        "why_it_matters": "Higher voltage can increase demand for specialized conversion, protection and serviceability components, but architectural simplification may remove conversion stages. Collaboration does not establish final production share.",
+        "next_research_trigger": "Track platform production dates, reference designs, power-shelf suppliers, qualified component lists and disclosed content per rack as 2027 platforms approach.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202505-107",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/",
+            "claim_date": "2025-05-20"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The economics of accelerated Dresden, SiC and GaN capacity are not yet proven at mature utilization.",
+        "why_it_matters": "Yield, qualification, depreciation and loading determine whether manufacturing scale raises margins or creates underutilization and free-cash-flow pressure.",
+        "next_research_trigger": "Inspect utilization, idle costs, yields, qualification milestones, depreciation, capital-intensity guidance and any changes to the €2.7 billion FY2026 investment plan.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202507-122",
+            "claim_date": "2025-07-02"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The new segment structure may obscure historical comparisons, while automotive can offset AI growth at group level.",
+        "why_it_matters": "Automotive represented half of FY2025 revenue. A strong AI-power cycle can coexist with weaker EV power, vehicle production or automotive pricing, limiting group-level earnings impact.",
+        "next_research_trigger": "Obtain the full historical segment bridge and compare Power Systems growth and margin with Automotive revenue, high-voltage EV exposure, pricing and inventory commentary.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/annual-reports/2025/2025-infineon-financial-data-2021-2025-v01-00-en.pdf",
+            "claim_date": "2025-11-28"
+          },
+          {
+            "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Edge and physical-AI initiatives have limited disclosed production revenue.",
+        "why_it_matters": "Developer tools, reference designs, acquisitions and partnerships establish technical exposure, but do not show customer production volumes or incremental margins. The commercialization horizon may be long.",
+        "next_research_trigger": "Look for named production customers, serial-launch dates, Edge Systems revenue disclosure, acquired-portfolio performance and realized semiconductor content in robots or edge devices.",
+        "sources": [
+          {
+            "url": "https://www.infineon.com/technology-news/2025/INFCSS202510-008",
+            "claim_date": "2025-10-16"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2026/infxx202603-073",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://www.infineon.com/press-release/2025/INFXX202508-133",
+            "claim_date": "2025-08-14"
+          },
+          {
+            "url": "https://ams-osram.com/news/press-releases/infineon-closing",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf",
+        "title": "Annual Report 2025",
+        "publisher": "Company",
+        "published_at": "2025-11-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/annual-reports/2025/2025-infineon-financial-data-2021-2025-v01-00-en.pdf",
+        "title": "Financial Data 2021–2025",
+        "publisher": "Company",
+        "published_at": "2025-11-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+        "title": "Second Quarter FY2026 Quarterly Update",
+        "publisher": "Company",
+        "published_at": "2026-05-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+        "title": "Second Quarter FY2026 Analyst Call",
+        "publisher": "Company",
+        "published_at": "2026-05-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+        "title": "Smart Power Fab Opening Analyst Presentation",
+        "publisher": "Company",
+        "published_at": "2026-07-01",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/INFXX202505-107",
+        "title": "Power Delivery Architecture for Future AI Server Racks with NVIDIA",
+        "publisher": "Company",
+        "published_at": "2025-05-20",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/",
+        "title": "800 VDC Architecture for the Next Generation of AI Factories",
+        "publisher": "NVIDIA",
+        "published_at": "2025-05-20",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2025/2025-11-26-power-roadshow-v01-00-en.pdf",
+        "title": "Powering AI from the Panel to the Token",
+        "publisher": "Company",
+        "published_at": "2025-11-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/INFXX202507-122",
+        "title": "300-Millimeter GaN Manufacturing Roadmap",
+        "publisher": "Company",
+        "published_at": "2025-07-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2024/infxx202401-049",
+        "title": "Extended Multi-Year Silicon-Carbide Wafer Supply Agreement",
+        "publisher": "Company",
+        "published_at": "2024-01-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://pr.tsmc.com/english/news/3049",
+        "title": "ESMC Joint Venture Announcement",
+        "publisher": "TSMC",
+        "published_at": "2023-08-08",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/infxx202502-058",
+        "title": "EU Chips Act Funding Approval for Smart Power Fab",
+        "publisher": "Company",
+        "published_at": "2025-02-20",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/technology-news/2025/INFCSS202510-008",
+        "title": "DEEPCRAFT AI Suite for PSOC Edge Microcontrollers",
+        "publisher": "Company",
+        "published_at": "2025-10-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2026/infxx202603-073",
+        "title": "Physical-AI and Humanoid-Robotics Collaboration with NVIDIA",
+        "publisher": "Company",
+        "published_at": "2026-03-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/INFXX202508-133",
+        "title": "Completion of Automotive Ethernet Business Acquisition",
+        "publisher": "Company",
+        "published_at": "2025-08-14",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ams-osram.com/news/press-releases/infineon-closing",
+        "title": "Closing of Non-Optical Analog/Mixed-Signal Sensor Business Sale",
+        "publisher": "ams OSRAM",
+        "published_at": "2026-07-01",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "title": "News and Publications",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "title": "AI Whitepaper: Infrastructure of the AI Era",
+        "publisher": "BIT Capital",
+        "published_at": "2023-09-15",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_oD4zdJzAJjVRZdVd9bDYRUDYQF6KpYwqHCXupKa5rn1VRe3uQlkTi_7xGYJYub4LPXepzKqy3OdkH_mEKhvLYfJwa9FrSeIYKMuQQox51wlshoHBdNu5WzTW7cNrGxOZPzsnn4w_c2uHwkBw7mZBesAGAuN84dXjv0Iw4IvR26x4_QfhneUZxA_1PL05TFS21UrAdb0ke5KWbZXoCPRA7JV0t6YyY69-vh8vn7reE835vkA-DkjUx3VpT3LWQE5-wZ5RZLZKHXNjiL6fAaJ1PtvzjNJgWVG9ev594L24GoA4Zua5QkytQqqqVy98CK3Lm6TFWIpCo8FnbossUwEblb7P53OHtRB4vr4wkoJlu9qfKTsQmQ1LxBIP4Qw0VlB_4EmbmyVx0FjH5ejXjs_nh51Tf5OiX0XU1YynW8hzxndVuzj-bGizw4ZZVLLaZ7jfRLou71cDqBWSSUwHNbJ-Ujhk",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 114886,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 52219,
+    "reasoning_tokens": 9970,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:infineon.com Infineon annual report 2025 revenue segments AI data center power official",
+        "type": "search",
+        "queries": [
+          "site:infineon.com Infineon annual report 2025 revenue segments AI data center power official",
+          "site:infineon.com Infineon AI data centers 800V HVDC official",
+          "site:infineon.com Infineon investor presentation data center AI power revenue target official",
+          "site:bitcap.com Infineon BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:infineon.com/row/public/documents/corporate/investors/presentations/2026 Infineon Q2 FY 2026 investor presentation AI revenue capex Dresden Kulim",
+        "type": "search",
+        "queries": [
+          "site:infineon.com/row/public/documents/corporate/investors/presentations/2026 Infineon Q2 FY 2026 investor presentation AI revenue capex Dresden Kulim",
+          "site:infineon.com Infineon 2025 annual report top customers distributors manufacturing foundries raw materials",
+          "site:infineon.com Infineon strategy 2025 power systems automotive IoT security official",
+          "site:infineon.com Infineon GaN Systems acquisition 300mm GaN Dresden Kulim SiC official"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news"
+      },
+      {
+        "query": "site:infineon.com/row/public/documents/corporate/investors/presentations/2026/ \"Second Quarter FY 2026 Analyst Call\" Infineon",
+        "type": "search",
+        "queries": [
+          "site:infineon.com/row/public/documents/corporate/investors/presentations/2026/ \"Second Quarter FY 2026 Analyst Call\" Infineon",
+          "site:infineon.com/assets/row/public/documents/corporate/investors/presentations/2026 Infineon 2026-05-06 Q2 FY26 analyst call PDF",
+          "site:infineon.com \"€2.5bn\" FY27 AI revenue Infineon power roadshow",
+          "site:infineon.com \"AI revenue\" \"FY27\" Infineon"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:nvidia.com 800 V HVDC Infineon AI data center power partners official",
+        "type": "search",
+        "queries": [
+          "site:nvidia.com 800 V HVDC Infineon AI data center power partners official",
+          "site:infineon.com NVIDIA Infineon 800 V HVDC AI data center power official 2025",
+          "site:infineon.com hyperscalers leading electronics companies AI data center power design wins Infineon official",
+          "site:infineon.com Infineon AI data center customer broad platform representation official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:infineon.com ESMC TSMC Bosch NXP Infineon joint venture Dresden official",
+        "type": "search",
+        "queries": [
+          "site:infineon.com ESMC TSMC Bosch NXP Infineon joint venture Dresden official",
+          "site:infineon.com Infineon foundry outsourcing TSMC strategic partners annual report official",
+          "site:infineon.com Infineon raw materials silicon carbide wafers supply agreement official 2025",
+          "site:infineon.com Infineon semiconductor manufacturing supply chain risk annual report 2025 official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Infineon's customers include\" annual report 2025",
+        "type": "search",
+        "queries": [
+          "\"Infineon's customers include\" annual report 2025",
+          "\"Our customers\" \"Infineon\" automotive industrial distributors annual report 2025",
+          "site:infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf \"distributors\"",
+          "site:infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf \"ten largest customers\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:infineon.com Marvell Automotive Ethernet acquisition completed 2025 official Infineon",
+        "type": "search",
+        "queries": [
+          "site:infineon.com Marvell Automotive Ethernet acquisition completed 2025 official Infineon",
+          "site:infineon.com ams OSRAM analog mixed signal sensor portfolio acquisition 2026 official Infineon",
+          "site:infineon.com Infineon Edge AI strategy microcontrollers ModusToolbox official 2025",
+          "site:infineon.com Infineon robotics edge AI 2026 official"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.infineon.com/press-release/2025/INFXX202507-122"
+      },
+      {
+        "query": "site:tsmc.com ESMC Infineon Bosch NXP Dresden 2023 official press release",
+        "type": "search",
+        "queries": [
+          "site:tsmc.com ESMC Infineon Bosch NXP Dresden 2023 official press release",
+          "site:esmc.eu Infineon TSMC Bosch NXP official joint venture Dresden",
+          "site:infineon.com \"European Semiconductor Manufacturing Company\" Infineon 2024 official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:infineon.com 2025 revenue by region China Americas Europe Infineon annual report",
+        "type": "search",
+        "queries": [
+          "site:infineon.com 2025 revenue by region China Americas Europe Infineon annual report",
+          "site:infineon.com Infineon FY25 revenue China percentage official investor presentation",
+          "site:infineon.com Infineon export control China risk annual report 2025",
+          "site:infineon.com Infineon EU Chips Act Smart Power Fab 5 billion subsidy official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:infineon.com 2026 \"ams OSRAM\" sensor portfolio acquisition completed Infineon",
+        "type": "search",
+        "queries": [
+          "site:infineon.com 2026 \"ams OSRAM\" sensor portfolio acquisition completed Infineon",
+          "site:ams-osram.com Infineon sensor portfolio transaction closed 2026",
+          "site:infineon.com/press-release/2026 ams OSRAM transaction completed sensor Infineon June 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en Infineon",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en Infineon",
+          "site:bitcap.com Infineon Technologies",
+          "site:bitcap.com \"IFX\" semiconductor"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.infineon.com/row/public/documents/corporate/investors/annual-reports/2025/2025-annual-report-v01-00-en.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/annual-reports/2025/2025-infineon-financial-data-2021-2025-v01-00-en.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/row/public/documents/corporate/investors/presentations/2026/2026-05-06-q2-fy26-investor-presentation-v01-00-en.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-05-05-q2-fy26-analyst-call-v01-00-en.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2026/2026-07-01-infineon-dresden-m4-analyst-presentation-v01-00-en.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/INFXX202505-107",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/assets/row/public/documents/corporate/investors/presentations/2025/2025-11-26-power-roadshow-v01-00-en.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/INFXX202507-122",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2024/infxx202401-049",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://pr.tsmc.com/english/news/3049",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/infxx202502-058",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/technology-news/2025/INFCSS202510-008",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2026/infxx202603-073",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.infineon.com/press-release/2025/INFXX202508-133",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ams-osram.com/news/press-releases/infineon-closing",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:ifx",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

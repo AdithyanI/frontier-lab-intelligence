@@ -1,0 +1,978 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Lumentum",
+    "ticker": "LITE"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The business sells optical and photonic components, modules, subsystems and laser systems into two broad pools: Cloud and Networking, spanning AI data-center connectivity, data-center interconnect and telecom networks; and Industrial Tech, spanning precision manufacturing and 3D sensing. Economics are governed by customer qualifications, optical port and wavelength volumes, speed and architecture transitions, product mix, manufacturing yield and utilization, and concentrated customer ordering.",
+      "revenue_engines": [
+        {
+          "engine": "AI and cloud data-center connectivity",
+          "who_pays": "Hyperscale cloud operators, AI infrastructure vendors, optical-module manufacturers and network-equipment OEMs.",
+          "economic_logic": "Revenue is generated from EML and CW laser components, photodetectors, 800G and 1.6T transceivers, external laser sources and optical switching systems. The opportunity grows with optical port counts, bandwidth per port and photonic content per accelerator or switch; margins depend on the mix between chips, assemblies, modules and systems, plus manufacturing yield.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+              "claim_date": "2025-08-19"
+            },
+            {
+              "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.lumentum.com/en/products/16t-2dr4-osfp-transceiver-module",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Data-center interconnect and telecom networking",
+          "who_pays": "Cloud operators, telecom equipment manufacturers, network operators and optical-system integrators.",
+          "economic_logic": "Coherent components and pluggables, pump lasers, narrow-linewidth lasers and related subsystems enable metro, long-haul, submarine and campus-to-campus links. Revenue follows network-capacity additions and technology refreshes, while profitability is sensitive to telecom cycles, customer inventories and component-versus-system mix.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+              "claim_date": "2025-08-19"
+            },
+            {
+              "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Third-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+              "claim_date": "2026-05-05"
+            }
+          ]
+        },
+        {
+          "engine": "Industrial lasers and sensing photonics",
+          "who_pays": "Industrial-equipment OEMs, electronics and battery manufacturers, consumer-device customers, automotive suppliers and sensing-system integrators.",
+          "economic_logic": "Industrial laser systems and modules are sold for cutting, welding and precision micromachining; VCSEL arrays are sold for biometric, time-of-flight, LiDAR and machine-vision applications. Demand follows equipment investment, production volumes and customer design wins, with long qualification cycles and exposure to consumer and industrial cyclicality.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+              "claim_date": "2025-08-19"
+            },
+            {
+              "url": "https://www.lumentum.com/en/products/industrial-laser",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.lumentum.com/en/products/sensing-vcsel",
+              "claim_date": null
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+          "claim_date": "2025-08-19"
+        },
+        {
+          "url": "https://investor.lumentum.com/overview/default.aspx",
+          "claim_date": null
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "AI-cluster optical intensity and hyperscaler deployment volume",
+        "why_it_matters": "More accelerators, larger clusters and higher bandwidth per accelerator can increase optical link counts and demand for EMLs, CW lasers and transceiver modules. The transmission is not automatic: cluster topology, link reach and customer sourcing determine photonic content.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/16t-2dr4-osfp-transceiver-module",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Third-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-05-05"
+          }
+        ]
+      },
+      {
+        "driver": "Customer qualifications and speed or architecture transitions",
+        "why_it_matters": "Transitions to 200G-per-lane, 1.6T, co-packaged optics and optical circuit switching create design-win opportunities but also expose revenue to qualification timing, standards, product obsolescence and changes in where value sits between components and modules.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lumentum.com/en/products/16t-2dr4-osfp-transceiver-module",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/external-laser-source-els-module-ultra-high-power-laser",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2025/Lumentum-Optical-Circuit-Switch-to-Improve-Next-Generation-AI-Data-Center-Scalability/",
+            "claim_date": "2025-03-26"
+          }
+        ]
+      },
+      {
+        "driver": "InP fabrication capacity, assembly capacity and manufacturing yield",
+        "why_it_matters": "Supply-constrained laser and module ramps can cap shipment volume. Yield, utilization and internal component content determine unit cost and gross margin, while new fabrication capacity raises capital expenditure and execution risk before revenue arrives.",
+        "financial_lines": [
+          "volume",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+            "claim_date": "2026-03-26"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Third-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Pricing, product mix and customer concentration",
+        "why_it_matters": "A small number of large customers can move period revenue, inventory and negotiating leverage. Management attributed fiscal Q3 2026 margin improvement partly to pricing discipline and stronger laser-chip and scale-across component mix, illustrating the earnings sensitivity to what ships, not only total volume.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Third-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "driver": "Telecom, industrial and sensing cycle mix",
+        "why_it_matters": "Long-haul networking, industrial manufacturing and consumer or automotive sensing can either diversify or obscure AI data-center performance. Their differing cycle timing changes consolidated growth, utilization and margin mix.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/industrial-laser",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/sensing-vcsel",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Hyperscale cloud operators, AI infrastructure vendors, optical-module manufacturers, telecom-equipment OEMs and industrial or sensing integrators",
+        "why_it_matters": "Product roadmaps and purchases are concentrated among sophisticated buyers with long qualifications and substantial bargaining power. Their accelerator, network and manufacturing investments ultimately set shipment volumes.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2023/Lumentum-Announces-Completion-of-Cloud-Light-Acquisition/default.aspx",
+            "claim_date": "2023-11-07"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "NVIDIA",
+        "why_it_matters": "A nonexclusive multiyear agreement announced in March 2026 includes advanced-optics R&D collaboration, an NVIDIA multibillion-dollar purchase commitment, future capacity-access rights and a $2 billion investment supporting capacity and U.S. manufacturing. It improves demand visibility but creates strategic-account and execution concentration.",
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+            "claim_date": "2026-03-26"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Compound-semiconductor material, semiconductor IC, packaging, test and optical-assembly supply chains",
+        "why_it_matters": "Laser and module production depends on specialized inputs and process capacity. Internal InP fabrication and Cloud Light assembly capabilities reduce some dependencies, but shortages or quality problems in remaining external inputs can limit shipments and raise costs.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2023/Lumentum-Announces-Completion-of-Cloud-Light-Acquisition/default.aspx",
+            "claim_date": "2023-11-07"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+            "claim_date": "2026-03-26"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Integrated optical-component, transceiver and laser vendors, plus competing silicon-photonics and electrical-switching architectures",
+        "why_it_matters": "Competition occurs both at the supplier level and between network architectures. Customers can multisource lasers or modules, vertically integrate, or choose architectures that shift value away from pluggables, EMLs or packet switches. The portfolio spans several alternatives, making the net effect architecture-specific.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/external-laser-source-els-module-ultra-high-power-laser",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2025/Lumentum-Optical-Circuit-Switch-to-Improve-Next-Generation-AI-Data-Center-Scalability/",
+            "claim_date": "2025-03-26"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "U.S. and foreign export-control, trade, sanctions and technology-transfer regimes",
+        "why_it_matters": "The company ships globally and sells communications and semiconductor-related products. Changes in export eligibility, tariffs or technology-transfer rules can remove customers, interrupt supply chains or require costly compliance changes.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Execute the multiyear NVIDIA optics partnership and associated purchase and capacity commitments.",
+        "investment_relevance": "The agreement provides an unusually explicit bridge from an AI-platform vendor's roadmap to laser demand and R&D investment. Materiality depends on order conversion, pricing, product scope and whether the nonexclusive relationship produces attractive returns after capacity spending.",
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "action": "Retrofit the acquired 240,000-square-foot Greensboro facility for 6-inch InP production, with production expected to ramp in mid-2028.",
+        "investment_relevance": "Management plans to invest hundreds of millions of dollars to expand U.S. CW and ultra-high-power laser capacity. This can relieve a strategic bottleneck and improve supply resilience, but introduces multiyear capital, yield and utilization risk before full revenue contribution.",
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+            "claim_date": "2026-03-26"
+          }
+        ]
+      },
+      {
+        "action": "Commercialize optical circuit switches and co-packaged-optics laser systems as additional growth engines.",
+        "investment_relevance": "At fiscal Q2 2026, management reported OCS backlog above $400 million and an incremental multi-hundred-million-dollar CPO order scheduled for delivery in the first half of calendar 2027. Conversion would diversify growth beyond conventional transceivers, but revenue timing and margins remain unproven at scale.",
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Second-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-02-03"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2025/Lumentum-Optical-Circuit-Switch-to-Improve-Next-Generation-AI-Data-Center-Scalability/",
+            "claim_date": "2025-03-26"
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/external-laser-source-els-module-ultra-high-power-laser",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Use the acquired Cloud Light platform to combine internally produced photonic components with high-speed transceiver design, assembly and packaging.",
+        "investment_relevance": "The strategy increases served content in AI data centers and permits component-to-module vertical integration. It can improve supply control and customer reach, but creates module pricing, inventory, execution and potential channel-conflict exposure.",
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2023/Lumentum-Announces-Completion-of-Cloud-Light-Acquisition/default.aspx",
+            "claim_date": "2023-11-07"
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/16t-2dr4-osfp-transceiver-module",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier training and inference systems expand accelerator counts and bandwidth requirements in scale-out networks.",
+        "company_exposure": "The portfolio includes 100G and 200G EMLs, CW lasers and 800G or 1.6T transceiver modules used in short- and medium-reach AI data-center links.",
+        "affected_driver": "Qualified optical port volume, 200G-per-lane adoption, photonic content per accelerator and manufacturing yield.",
+        "financial_consequence": "Higher component and module shipments and a richer high-speed product mix could increase revenue and gross margin; yield problems or customer concentration could limit conversion.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if multiple major customers move 1.6T and 200G-per-lane designs into sustained volume production and orders remain above inventory replacement while capacity and yields support shipment growth.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "200G EML shipment and order trends",
+          "1.6T qualification and production revenue",
+          "Cloud and AI customer diversification",
+          "InP and module yield or capacity commentary",
+          "Inventory and lead-time normalization"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/16t-2dr4-osfp-transceiver-module",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Third-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-05-05"
+          }
+        ]
+      },
+      {
+        "development": "Co-packaged optics moves optical engines closer to switch ASICs to reduce power and improve bandwidth density.",
+        "company_exposure": "The company supplies CW and ultra-high-power lasers and ELSFP external laser modules for CPO and is collaborating with NVIDIA on advanced optics. It also sells pluggable modules that CPO could partially displace.",
+        "affected_driver": "External-laser content per switch, CPO order conversion, laser reliability and the mix between component revenue and pluggable-module revenue.",
+        "financial_consequence": "Laser and external-source revenue could rise with attractive mix, but the net effect is mixed if CPO reduces demand for higher-content pluggable transceivers or customers vertically integrate optical engines.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if the disclosed first-half-2027 CPO order ships on schedule, production deployments expand beyond one customer and retained laser content exceeds any lost pluggable-module contribution.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "CPO shipment milestones and repeat orders",
+          "ELSFP and UHP laser qualifications",
+          "Lasers or external sources required per switch",
+          "CPO versus pluggable deployment mix",
+          "Customer multisourcing and internal optical-engine plans"
+        ],
+        "sources": [
+          {
+            "url": "https://www.lumentum.com/en/products/external-laser-source-els-module-ultra-high-power-laser",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Second-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-02-03"
+          },
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "development": "AI operators adopt optical circuit switching to reconfigure large fabrics with lower network power and fewer electrical packet-switch stages.",
+        "company_exposure": "The R300 OCS applies the company's MEMS optical-switching technology to AI clusters, and management reported substantial OCS backlog before large-scale revenue contribution.",
+        "affected_driver": "Number and size of hyperscale OCS deployments, backlog conversion, system pricing and manufacturing scale.",
+        "financial_consequence": "Successful deployment could create a new systems revenue stream and improve product mix; failed qualification, architecture changes or delayed installations would make backlog lumpy and increase working-capital risk.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if backlog converts into recognized revenue across several customers, deployments produce repeat orders and field reliability and power savings meet customer targets.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "OCS backlog, shipments and recognized revenue",
+          "Number of production customers",
+          "Repeat or expansion orders",
+          "Port-count roadmap and system pricing",
+          "Field reliability, utilization and measured power savings"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2025/Lumentum-Optical-Circuit-Switch-to-Improve-Next-Generation-AI-Data-Center-Scalability/",
+            "claim_date": "2025-03-26"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Second-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-02-03"
+          }
+        ]
+      },
+      {
+        "development": "Electrical scale-up links inside racks and systems encounter bandwidth-density, reach and thermal limits, encouraging optical I/O near accelerator or ASIC packages.",
+        "company_exposure": "A demonstrated 1060-nanometer VCSEL array is co-packaged with a host ASIC for scale-up protocols and leverages the high-volume manufacturing base previously developed for sensing emitters.",
+        "affected_driver": "Scale-up optical design wins, VCSEL channel count, package yield, thermal reliability and reuse of existing manufacturing assets.",
+        "financial_consequence": "Production adoption could open a large new component market and improve utilization of VCSEL assets; unsuccessful architecture selection would leave the opportunity at the demonstration stage.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if a major accelerator, switch or hyperscale platform qualifies the VCSEL architecture for production and committed volumes justify incremental packaging and test investment.",
+        "time_horizon": "long_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Named scale-up design wins",
+          "Production qualification and launch dates",
+          "Bandwidth density and energy per bit",
+          "High-temperature reliability results",
+          "Packaging partners, yields and committed volume"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Showcases-Breakthrough-Optical-Scale-Up-Demonstration-at-OFC-2026-Using-VCSEL-Technology/default.aspx",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/sensing-vcsel",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Frontier-model efficiency gains, slower hyperscaler capital spending, inventory corrections or topology changes reduce optical links required per unit of compute.",
+        "company_exposure": "AI and cloud growth is increasingly important, customers are concentrated, and substantial laser and module capacity is being committed against expected future demand.",
+        "affected_driver": "Orders, pricing, backlog quality, inventory, capacity utilization and the optical-content-per-accelerator assumption.",
+        "financial_consequence": "A demand reset could reduce revenue, pressure pricing and gross margin, increase inventory or cancellation risk and leave new fabrication assets underutilized while capital spending continues.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if customer infrastructure spending or deployed accelerator volume decelerates for several quarters while optical orders fall faster, pricing weakens and capacity commitments remain unchanged.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Hyperscaler and AI-platform infrastructure deployments",
+          "Order growth versus end-demand growth",
+          "Backlog cancellations or pushouts",
+          "Transceiver and laser pricing",
+          "Inventory, utilization and capital-expenditure revisions"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+            "claim_date": "2026-03-26"
+          },
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+          "claim_date": "2026-05-06"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "No attributable public BIT Capital company thesis was found.",
+        "why_it_matters": "BIT-hosted press material publicly mentions the company as a fund position and specialist in optical data transmission, but it does not state a company-specific operating mechanism, valuation case or falsifiable thesis. Portfolio ownership must not be treated as a thesis.",
+        "next_research_trigger": "Inspect future BIT quarterly reports, research papers, podcasts or manager interviews for a direct discussion of company-specific demand, margins, capacity or competitive advantage.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The economics and concentration of the NVIDIA agreements are not fully disclosed.",
+        "why_it_matters": "Headline purchase commitments and capacity rights do not reveal product scope, pricing, take-or-pay protection, gross margin, cancellation provisions or how much demand is incremental rather than replacing existing orders.",
+        "next_research_trigger": "Review subsequent 10-Q and 10-K disclosures, contract exhibits, backlog commentary, preferred-investment terms and recognized revenue linked to the agreement.",
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+            "claim_date": "2025-08-19"
+          }
+        ]
+      },
+      {
+        "uncertainty": "OCS and CPO backlog may not translate into recurring, high-margin revenue on the stated schedule.",
+        "why_it_matters": "These products are central to the next leg of growth but remain earlier in commercial maturity than established laser components. Large orders can be delayed by customer system readiness, qualification or architecture changes.",
+        "next_research_trigger": "Track recognized OCS and CPO revenue, shipment timing, customer count, repeat orders, backlog cancellations and disclosed gross-margin impact in fiscal 2027 reporting.",
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Second-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+            "claim_date": "2026-02-03"
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2025/Lumentum-Optical-Circuit-Switch-to-Improve-Next-Generation-AI-Data-Center-Scalability/",
+            "claim_date": "2025-03-26"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The cost, timing and yield curve of the Greensboro InP expansion are not yet established.",
+        "why_it_matters": "The facility is expected to ramp only in mid-2028. Delays, low initial yield or weaker demand could reduce returns on hundreds of millions of dollars of planned investment; a successful ramp could remove a major supply bottleneck.",
+        "next_research_trigger": "Inspect annual capital-expenditure guidance, construction and tool-installation milestones, wafer starts, qualification status, initial yields and customer capacity reservations.",
+        "sources": [
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+            "claim_date": "2026-03-26"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The winning AI interconnect architecture and resulting supplier value split remain unsettled.",
+        "why_it_matters": "EML pluggables, silicon-photonics modules, external-laser CPO, optical circuit switching and VCSEL scale-up can all expand photonics while allocating revenue differently across chips, modules and systems.",
+        "next_research_trigger": "Map named customer reference designs and bill-of-material content by architecture; compare Lumentum content, pricing and margin per switch or accelerator generation rather than relying only on aggregate optical demand.",
+        "sources": [
+          {
+            "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.lumentum.com/en/products/external-laser-source-els-module-ultra-high-power-laser",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Showcases-Breakthrough-Optical-Scale-Up-Demonstration-at-OFC-2026-Using-VCSEL-Technology/default.aspx",
+            "claim_date": "2026-03-17"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+        "title": "Fiscal 2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2025-08-19",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investor.lumentum.com/overview/default.aspx",
+        "title": "Investor Relations Corporate Overview",
+        "publisher": "Lumentum",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Third-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+        "title": "Fiscal Third Quarter 2026 Financial Results",
+        "publisher": "Lumentum",
+        "published_at": "2026-05-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Second-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+        "title": "Fiscal Second Quarter 2026 Financial Results",
+        "publisher": "Lumentum",
+        "published_at": "2026-02-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+        "title": "Strategic Partnership to Develop Advanced Optics Technology",
+        "publisher": "NVIDIA",
+        "published_at": "2026-03-02",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+        "title": "New U.S. InP Manufacturing Facility",
+        "publisher": "Lumentum",
+        "published_at": "2026-03-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2023/Lumentum-Announces-Completion-of-Cloud-Light-Acquisition/default.aspx",
+        "title": "Completion of Cloud Light Acquisition",
+        "publisher": "Lumentum",
+        "published_at": "2023-11-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+        "title": "Data Center EML Products",
+        "publisher": "Lumentum",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/16t-2dr4-osfp-transceiver-module",
+        "title": "1.6T 2xDR4 OSFP Transceiver Module",
+        "publisher": "Lumentum",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/external-laser-source-els-module-ultra-high-power-laser",
+        "title": "External Laser Source Module with Ultra-High-Power Laser",
+        "publisher": "Lumentum",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2025/Lumentum-Optical-Circuit-Switch-to-Improve-Next-Generation-AI-Data-Center-Scalability/",
+        "title": "R300 Optical Circuit Switch for AI Data Centers",
+        "publisher": "Lumentum",
+        "published_at": "2025-03-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Showcases-Breakthrough-Optical-Scale-Up-Demonstration-at-OFC-2026-Using-VCSEL-Technology/default.aspx",
+        "title": "VCSEL-Based Optical Scale-Up Demonstration",
+        "publisher": "Lumentum",
+        "published_at": "2026-03-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/industrial-laser",
+        "title": "Industrial Laser Portfolio",
+        "publisher": "Lumentum",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/sensing-vcsel",
+        "title": "Sensing VCSEL Portfolio",
+        "publisher": "Lumentum",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+        "title": "F.A.Z. AI Bubble Commentary Hosted by BIT Capital",
+        "publisher": "BIT Capital",
+        "published_at": "2026-05-06",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_uo7tiFkopk6mwKGofihNh5uRysv-JONnJDN6SiZcAGhmtzOE_TNmZnfW2M_J5RhQUACAob0ufd4YGl4B1_WSYiKxDxECedRfKekhXpnPFAKlShHyIwPHdh3xeTKcIqoMXmtj7v4ubrPpLQHj-MnkLpvfLp9yIAs6COhI-sWwrElFEY7CUAO9fjksSzJm9asqdafvwvpdlIaTqrcDxbl38NasrXU0QnGcRWh8dzcPA5c5VtoKaCAXrgNobU5Um7MqSQkPM5yUMtPnxi0tJ6eMPCEHp3EZ-dunHJ3-4hiNJL0XJEvysQVPwTQLMOEmrY0Xr2np7TJaT-UHciIhVOlafixUa182oRrHkyMlNbu7S8fOglbd9QNUQXJz9xEO_NaGWaQYuZROKIircqqK9UAQ4VYxUK6QbrPMbSUoejibMoOYTAHWsz3iFPvblY52-yBEycPKfj7p1-mpyLzTT4VvUDRZ",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 115521,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 58795,
+    "reasoning_tokens": 9927,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investor.lumentum.com Lumentum annual report 2025 10-K cloud light AI data center revenue customer concentration",
+        "type": "search",
+        "queries": [
+          "site:investor.lumentum.com Lumentum annual report 2025 10-K cloud light AI data center revenue customer concentration",
+          "site:investor.lumentum.com Lumentum quarterly results 2026 10-Q cloud AI data center 1.6T CPO",
+          "site:lumentum.com Lumentum co-packaged optics EML 1.6T cloud data center official",
+          "site:bitcap.com Lumentum LITE BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data Lumentum 2025 10-K 2026 10-Q March 28 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data Lumentum 2025 10-K 2026 10-Q March 28 2026",
+          "site:investor.lumentum.com/static-files Lumentum 2025 annual report pdf",
+          "site:investor.lumentum.com 2026 investor presentation Lumentum optical circuit switch CPO NVIDIA",
+          "site:nvidianews.nvidia.com Lumentum strategic partnership optics 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.lumentum.com/quarterly-results/default.aspx"
+      },
+      {
+        "query": "\"18710345\" Lumentum 10-K",
+        "type": "search",
+        "queries": [
+          "\"18710345\" Lumentum 10-K",
+          "Lumentum 2025 10-K annual report June 28 2025 customer percentage Cloud Light",
+          "site:sec.gov/Archives/edgar/data/1633978/ 2025 lumentum 10-k",
+          "site:sec.gov/Archives/edgar/data/1633978/ 2026 lumentum 10-q March 28 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1633978 \"March 28, 2026\" \"10-Q\" Lumentum",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1633978 \"March 28, 2026\" \"10-Q\" Lumentum",
+          "site:sec.gov/Archives/edgar/data/1633978 \"lite-20260328\"",
+          "site:sec.gov/Archives/edgar/data/1633978 2026-05-05 Lumentum 10-Q",
+          "site:sec.gov/Archives/edgar/data/1633978 \"Series A Convertible Preferred Stock\" Lumentum"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://data.sec.gov/submissions/CIK0001633978.json"
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.lumentum.com/sec-filings/default.aspx"
+      },
+      {
+        "query": "site:investor.lumentum.com/financial-news-releases/news-details/2026 Lumentum new U.S. manufacturing facility advanced lasers March 17 2026",
+        "type": "search",
+        "queries": [
+          "site:investor.lumentum.com/financial-news-releases/news-details/2026 Lumentum new U.S. manufacturing facility advanced lasers March 17 2026",
+          "site:investor.lumentum.com/financial-news-releases/news-details/2026 Lumentum OFC 2026 optical scale-up VCSEL OCS",
+          "site:lumentum.com/en/newsroom 2026 Lumentum optical circuit switch AI data center",
+          "site:investor.lumentum.com 2026 Lumentum CPO multi-hundred-million order OCS order"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Lumentum Announces New U.S. Manufacturing Facility\"",
+        "type": "search",
+        "queries": [
+          "\"Lumentum Announces New U.S. Manufacturing Facility\"",
+          "site:investor.lumentum.com/financial-news-releases/news-details/2026 \"Greensboro\" Lumentum",
+          "site:lumentum.com/en/newsroom/news-releases \"New U.S. Manufacturing Facility\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": null
+      },
+      {
+        "query": "\"Lumentum Investor Briefing at OFC 2026\" PDF",
+        "type": "search",
+        "queries": [
+          "\"Lumentum Investor Briefing at OFC 2026\" PDF",
+          "site:s21.q4cdn.com/377324469/files/doc_presentations/2026 Lumentum OFC 2026 PDF",
+          "site:s21.q4cdn.com/377324469/files/doc_financials/2026/q3 \"Lumentum\" PDF"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "reportable segments",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm \"Cloud and Networking\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm \"Cloud and Networking\"",
+          "site:sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm \"customer\" \"revenue\" 10%",
+          "site:sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm \"manufacturing\" \"Thailand\"",
+          "site:sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm \"competitors\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/0001628280-25-040830.txt"
+      },
+      {
+        "type": "open_page",
+        "url": "https://s21.q4cdn.com/377324469/files/doc_presentations/2025/08/1/Q4-FY25-Earnings-Presentation_final_.pdf"
+      },
+      {},
+      {
+        "type": "open_page",
+        "url": "https://investor.lumentum.com/events-and-presentations/2025/Q4FY25-Earnings-Presentation/default.aspx"
+      },
+      {
+        "query": "\"Q3-FY26-Earnings-Presentation_final.pdf\" Lumentum",
+        "type": "search",
+        "queries": [
+          "\"Q3-FY26-Earnings-Presentation_final.pdf\" Lumentum",
+          "\"Q2-FY26-Earnings-Presentation-final_2.pdf\" Lumentum",
+          "\"Q4-FY25-Earnings-Presentation_final_.pdf\" Lumentum"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.lumentum.com OR site:lumentum.com Lumentum customers network equipment manufacturers cloud operators module manufacturers",
+        "type": "search",
+        "queries": [
+          "site:investor.lumentum.com OR site:lumentum.com Lumentum customers network equipment manufacturers cloud operators module manufacturers",
+          "site:sec.gov/Archives/edgar/data/1633978 Lumentum \"network equipment manufacturers\" customers",
+          "site:sec.gov/Archives/edgar/data/1633978 Lumentum \"industrial and consumer\" segment products customers",
+          "site:sec.gov/Archives/edgar/data/1633978 Lumentum \"two operating segments\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Lumentum\" \"customers include\" \"cloud\" optical",
+        "type": "search",
+        "queries": [
+          "\"Lumentum\" \"customers include\" \"cloud\" optical",
+          "\"Lumentum\" \"original equipment manufacturers\" customers 2025",
+          "\"Lumentum\" \"one customer\" \"2025\" revenue 10-K",
+          "\"Lumentum\" \"two customers\" \"revenue\" 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:lumentum.com/en/products industrial lasers sensing Lumentum 3D sensing official",
+        "type": "search",
+        "queries": [
+          "site:lumentum.com/en/products industrial lasers sensing Lumentum 3D sensing official",
+          "site:lumentum.com/en/products \"Industrial Laser\" Lumentum official",
+          "site:lumentum.com/en/products \"VCSEL\" sensing Lumentum official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1633978 Lumentum \"sole source\" suppliers manufacturing 2025",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1633978 Lumentum \"sole source\" suppliers manufacturing 2025",
+          "site:sec.gov/Archives/edgar/data/1633978 Lumentum \"contract manufacturers\" Thailand 2025",
+          "site:investor.lumentum.com Lumentum \"contract manufacturers\"",
+          "site:investor.lumentum.com Lumentum \"wafer fabrication\" InP internal foundry"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1633978 Lumentum competitors Coherent Broadcom 2025 10-K",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1633978 Lumentum competitors Coherent Broadcom 2025 10-K",
+          "site:investor.lumentum.com Lumentum competitors Coherent 10-K",
+          "Lumentum 2025 10-K competition Coherent Innolight Broadcom"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en Lumentum",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en Lumentum",
+          "site:bitcap.com Lumentum",
+          "site:bitcap.com \"LITE\" photonics",
+          "site:bitcap.com Lumentum AI infrastructure"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828025040830/lite-20250628.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.lumentum.com/overview/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Third-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Second-Quarter-of-Fiscal-Year-2026-Financial-Results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-New-U-S--Manufacturing-Facility-to-Produce-Advanced-Lasers-for-the-Worlds-Largest-AI-Data-Centers/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2023/Lumentum-Announces-Completion-of-Cloud-Light-Acquisition/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/data-center/modulated-lasers/emls",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/16t-2dr4-osfp-transceiver-module",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/external-laser-source-els-module-ultra-high-power-laser",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2025/Lumentum-Optical-Circuit-Switch-to-Improve-Next-Generation-AI-Data-Center-Scalability/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Showcases-Breakthrough-Optical-Scale-Up-Demonstration-at-OFC-2026-Using-VCSEL-Technology/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/industrial-laser",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.lumentum.com/en/products/sensing-vcsel",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:lite",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

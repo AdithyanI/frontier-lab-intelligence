@@ -1,0 +1,875 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Omada Health",
+    "ticker": "OMDA"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A virtual-first, between-visit care platform sold principally through employers, health plans, pharmacy benefit managers, and health systems. Human care teams combine with software, connected devices, and AI-enabled tools across cardiometabolic, GLP-1, and musculoskeletal programs. Economics are dominated by service revenue associated with billed enrolled members; hardware is ancillary. Growth depends on distribution reach, enrollment, persistence, multi-program adoption, clinical outcomes, and customer retention, while margins depend heavily on care-team productivity and technology-enabled operating leverage.",
+      "revenue_engines": [
+        {
+          "engine": "Virtual-care program services",
+          "who_pays": "Employers, health plans, PBMs, health systems, and other benefit sponsors or channel partners covering eligible members.",
+          "economic_logic": "Customers contract for access to one or more programs, and services are generally billed monthly based on member participation and access. More enrolled and persistent members, additional programs per customer, and favorable program mix increase recurring service revenue. Services represented more than 90% of 2025 revenue.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+              "claim_date": "2025-12-31"
+            }
+          ]
+        },
+        {
+          "engine": "Connected-device hardware and onboarding",
+          "who_pays": "Benefit buyers through program contracts that include condition-specific devices, initial consultations, or onboarding.",
+          "economic_logic": "Scales with new member starts and program mix. Devices such as scales, blood-pressure monitors, and glucose-related equipment supply data to care workflows and support the higher-value services relationship; procurement, fulfillment, and replacement costs constrain hardware economics.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+              "claim_date": "2025-12-31"
+            }
+          ]
+        },
+        {
+          "engine": "GLP-1 prescribing and medication-management extensions",
+          "who_pays": "Employers and benefit partners through covered offerings, with additional access through PBMs, direct-to-employer programs, and cash-pay pathways.",
+          "economic_logic": "An emerging extension of service revenue that can increase wallet share by adding clinical evaluation, prescribing, medication management, and coordinated lifestyle support. Its value proposition is improved medication utilization, outcomes, and employer cost control rather than drug distribution margin.",
+          "sources": [
+            {
+              "url": "https://www.omadahealth.com/resource-center/omada-health-announces-glp-1-prescribing-capability-to-support-growing-member-population",
+              "claim_date": "2025-11-06"
+            },
+            {
+              "url": "https://www.omadahealth.com/resource-center/omada-health-joins-lilly-employer-connect-expanding-its-access-pathways-for-glp-1-care-as-patients-seek-more-lifestyle-support",
+              "claim_date": "2026-05-07"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+          "claim_date": "2025-12-31"
+        },
+        {
+          "url": "https://investors.omadahealth.com/",
+          "claim_date": "2026-03-31"
+        },
+        {
+          "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+          "claim_date": "2026-03-31"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Covered lives, channel reach, customer wins, and member enrollment",
+        "why_it_matters": "Revenue begins with benefit eligibility and conversion into billed enrollment. As of March 31, 2026, total members were 1.02 million; the platform also reported more than 2,000 customers and over 25 million individuals with benefits coverage at December 31, 2025. PBM and health-plan distribution can add volume quickly but also increases channel dependence.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.omadahealth.com/",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      },
+      {
+        "driver": "Member engagement, persistence, and multi-program adoption",
+        "why_it_matters": "Services revenue depends on members remaining eligible, participating, and billable. Sustained engagement also generates data for personalization and creates opportunities to serve coexisting conditions. Feature usage alone is insufficient unless it improves persistence, clinical behavior, or program completion.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-introduces-nutritional-intelligence-transform-food",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-launches-meal-map-an-ai-powered-nutrition-experience-focused-on-nutrient-quality-not-calorie-counting",
+            "claim_date": "2025-10-01"
+          }
+        ]
+      },
+      {
+        "driver": "Clinical outcomes, buyer ROI, customer satisfaction, and retention",
+        "why_it_matters": "Employers and plans purchase the programs to improve health and reduce avoidable medical spending. Credible outcomes and savings support renewals, expansion, pricing, and sales references; weak or non-replicable results can lengthen sales cycles and impair retention. The company reported a greater-than-90% three-year average customer-retention rate as of December 31, 2025.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.omadahealth.com/",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "driver": "Care-team productivity and technology-enabled operating leverage",
+        "why_it_matters": "Human coaches, specialists, therapists, and licensed providers are central to delivery. Workflow automation, member prioritization, summaries, and immediate AI education can increase the number of members supported per care-team employee or reserve human time for higher-value interventions. Margin benefits require maintained clinical quality and cannot be inferred from AI adoption alone.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          },
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-introduces-nutritional-intelligence-transform-food",
+            "claim_date": "2025-05-20"
+          }
+        ]
+      },
+      {
+        "driver": "Health-plan and PBM partner concentration",
+        "why_it_matters": "The top five health-plan and PBM partners accounted for 77% of 2025 revenue. Large partners accelerate distribution but can exert bargaining power, change formularies or benefit design, promote competing programs, internalize capabilities, or terminate arrangements, creating disproportionate revenue and working-capital risk.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Self-insured employers, commercial health plans, PBMs, health systems, benefit consultants, and their eligible members",
+        "why_it_matters": "Institutional buyers control benefit design, covered populations, enrollment pathways, and renewal decisions. Their assessment of clinical outcomes, employee experience, implementation quality, and medical-cost ROI ultimately governs revenue scale.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.omadahealth.com/",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Leading U.S. PBMs and Eli Lilly Employer Connect",
+        "why_it_matters": "Omada reported relationships with all three leading PBMs by May 2026 and serves as an independent program administrator for Lilly Employer Connect. These relationships broaden GLP-1 access and employer distribution, but partner-controlled channels can concentrate economics and member access outside Omada's direct control.",
+        "sources": [
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-joins-lilly-employer-connect-expanding-its-access-pathways-for-glp-1-care-as-patients-seek-more-lifestyle-support",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Amazon Web Services, Amazon SageMaker AI, and Meta's Llama model ecosystem",
+        "why_it_matters": "OmadaSpark was developed using Llama models on SageMaker AI. Cloud reliability, model availability, licensing, inference economics, security controls, and vendor roadmaps therefore affect AI feature cost, performance, and continuity.",
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Cardiometabolic platforms including Hello Heart, Lark, Teladoc/Livongo, Onduo, Vida, and Virta; digital MSK vendors; traditional and internally developed care programs",
+        "why_it_matters": "Buyers may select integrated platforms, condition-specific point solutions, incumbent health-plan programs, or conventional in-person care. Competition affects pricing, sales cycles, customer acquisition costs, program breadth, and the evidence threshold required for renewals.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "HIPAA and health-data privacy rules, FTC and state consumer-protection requirements, state professional licensure, corporate-practice, and fee-splitting laws",
+        "why_it_matters": "The platform handles sensitive health information and increasingly supports prescribing and personalized AI interactions. Compliance failures, unlicensed practice, misleading claims, inadequate consent, or security incidents could trigger remediation costs, penalties, customer restrictions, litigation, or program suspension.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Embed clinically constrained AI into human-led between-visit care through OmadaSpark, Nutritional Intelligence, and Meal Map.",
+        "investment_relevance": "Management is using AI for immediate nutrition education, motivational interviewing, meal analysis, and care-team context rather than positioning it as a replacement for clinicians. The investment case depends on these tools producing durable engagement, outcome, or productivity gains while preserving safety and trust.",
+        "sources": [
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-introduces-nutritional-intelligence-transform-food",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-launches-meal-map-an-ai-powered-nutrition-experience-focused-on-nutrient-quality-not-calorie-counting",
+            "claim_date": "2025-10-01"
+          },
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          }
+        ]
+      },
+      {
+        "action": "Build a fuller GLP-1 care stack spanning behavior change, clinical evaluation, prescribing, medication management, and multiple access pathways.",
+        "investment_relevance": "This expands the addressable buyer need and potential revenue per member while differentiating Omada from basic lifestyle companions. It also adds clinical-delivery costs, partner dependencies, prescribing risk, and a need to prove superior medication outcomes and employer economics.",
+        "sources": [
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-announces-glp-1-prescribing-capability-to-support-growing-member-population",
+            "claim_date": "2025-11-06"
+          },
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-joins-lilly-employer-connect-expanding-its-access-pathways-for-glp-1-care-as-patients-seek-more-lifestyle-support",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "action": "Scale an integrated multi-condition platform and proprietary Care Team Platform rather than operate as a collection of isolated point solutions.",
+        "investment_relevance": "Serving coexisting cardiometabolic and MSK needs can improve customer wallet share, enrollment, data density, and retention. A shared platform can also spread product, clinical, and administrative costs, but complexity may weaken execution or condition-specific outcomes.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.omadahealth.com/",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "More capable, lower-cost language models and healthcare-aligned agents improve conversational guidance, summarization, and care-workflow orchestration.",
+        "company_exposure": "OmadaSpark already provides real-time nutrition and motivational support, shares conversation context with care teams, and runs on a fine-tuned Llama/SageMaker stack. The broader Care Team Platform is designed to magnify human-care capacity.",
+        "affected_driver": "Member engagement and persistence; response latency; care-team workload and members supported per care-team employee.",
+        "financial_consequence": "Potentially higher billed-member persistence and services revenue, together with lower care delivery cost per member and higher gross margin.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if AI users show sustained incremental retention or clinical improvement and care-team hours per member decline without more safety events, escalations, or customer complaints.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AI-feature adoption, repeat usage, and member persistence versus matched non-users",
+          "Care-team response times, panel sizes, and labor cost per member",
+          "Escalation rates, answer-quality feedback, and clinical outcomes",
+          "Services gross margin and management attribution of productivity gains"
+        ],
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          },
+          {
+            "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "development": "Advances in multimodal vision and personalized recommendation systems improve food recognition and nutrition feedback.",
+        "company_exposure": "Meal Map uses AI-powered instant feedback and photo-recognition capabilities, while OmadaSpark can use member condition, program, dietary preference, allergy, and age-range context.",
+        "affected_driver": "Meal-logging frequency and accuracy, behavioral adherence, personalization quality, and the evidence generated for care teams.",
+        "financial_consequence": "If better tracking changes behavior and outcomes, it could improve buyer ROI, renewals, multi-program adoption, and revenue; inference and quality-assurance costs may offset part of the benefit.",
+        "direction": "upside",
+        "materiality_condition": "Engagement gains must persist across diverse cohorts and translate into measurable weight, metabolic, medication-adherence, or medical-cost outcomes rather than merely more app interactions.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Food-recognition error rates and correction frequency",
+          "Sustained meal tracking after the initial adoption period",
+          "Clinical outcomes for users versus comparable non-users",
+          "Buyer renewal, expansion, and ROI evidence tied to the feature"
+        ],
+        "sources": [
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-launches-meal-map-an-ai-powered-nutrition-experience-focused-on-nutrient-quality-not-calorie-counting",
+            "claim_date": "2025-10-01"
+          },
+          {
+            "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Patient-facing health agents become more autonomous or expand faster than clinical evaluation, privacy controls, and escalation systems mature.",
+        "company_exposure": "OmadaSpark uses sensitive context including health program, allergies, preferences, age range, and member conversations; care-team access to transcripts creates clinical utility but also expands protected-data and automation-risk surfaces.",
+        "affected_driver": "Clinical safety, member trust, customer retention, regulatory compliance, insurance expense, and support workload.",
+        "financial_consequence": "Incorrect guidance, missed escalation, automation bias, or a health-data incident could increase remediation and legal costs, restrict product deployment, impair retention, and reduce revenue growth.",
+        "direction": "downside",
+        "materiality_condition": "Materiality would require a systematic error pattern, significant adverse event, reportable privacy or security incident, regulator action, or customer-imposed restriction rather than isolated low-severity feedback.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Safety incidents, clinical escalations, and answer-quality rejection rates",
+          "Privacy complaints, reportable breaches, and audit findings",
+          "Customer contract limits on AI functionality or data use",
+          "Changes to human review, model evaluations, and disclosure practices"
+        ],
+        "sources": [
+          {
+            "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          }
+        ]
+      },
+      {
+        "development": "General-purpose models make baseline coaching, food logging, and personalized education inexpensive for competitors, health plans, PBMs, and employers to build or bundle.",
+        "company_exposure": "Some visible AI features can be replicated, while Omada relies heavily on large channel partners that could promote competing products or internal capabilities. Omada's proprietary care workflows, clinical evidence, longitudinal data, and human teams may provide an offsetting advantage.",
+        "affected_driver": "Pricing, competitive win rates, customer retention, sales efficiency, and channel bargaining power.",
+        "financial_consequence": "Commoditization could pressure pricing, increase sales and product-development costs, or enable partner disintermediation; alternatively, cheaper models could reduce Omada's own technology costs.",
+        "direction": "mixed",
+        "materiality_condition": "Downside becomes material if buyer-built or competing AI products achieve acceptable clinical governance and ROI, leading to weaker renewal, lower prices, or channel insourcing. Upside requires Omada to adopt cost declines faster than differentiation erodes.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Competitive win rates and RFP pricing",
+          "Customer-retention and expansion trends",
+          "PBM or health-plan launches of internally controlled alternatives",
+          "Model and inference costs relative to product and care-team savings"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "A future BIT Capital publication that explicitly names the company and states a causal investment thesis rather than implying one through portfolio ownership or generic sector commentary.",
+        "Independent or buyer-validated evidence that AI-enabled features improve clinical outcomes, retention, medical-cost ROI, or care-team productivity at scale.",
+        "Sustained member and customer growth accompanied by lower channel concentration and improving service-delivery economics."
+      ],
+      "what_would_challenge_it": [
+        "Continued absence of an attributable company-specific BIT statement means Event-level thesis impact should remain classified as no_public_thesis.",
+        "Evidence that AI engagement fails to translate into durable behavior change, outcomes, customer renewal, or operating leverage.",
+        "Safety, privacy, channel-concentration, or commoditization evidence that materially weakens customer trust or economics."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news",
+          "claim_date": "2026-07-28"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The incremental economics of OmadaSpark, Meal Map, and other AI-enabled workflows are not publicly separated from broader program performance.",
+        "why_it_matters": "Without feature-level usage, persistence, labor, and inference-cost data, analysts cannot determine whether AI is improving revenue retention, gross margin, both, or neither.",
+        "next_research_trigger": "Inspect future filings, investor presentations, and management commentary for AI-user cohorts, care-team hours per member, response times, model costs, and quantified gross-margin attribution.",
+        "sources": [
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-introduces-nutritional-intelligence-transform-food",
+            "claim_date": "2025-05-20"
+          },
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Reported AI-feature engagement may not cause durable clinical outcomes or buyer savings.",
+        "why_it_matters": "Customers ultimately renew for outcomes, experience, and economics. Selection effects could make enthusiastic or healthier members appear to benefit more from AI features without a causal impact.",
+        "next_research_trigger": "Look for controlled or matched-cohort studies linking feature exposure to sustained clinical outcomes, medication adherence, healthcare utilization, and customer renewal.",
+        "sources": [
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-launches-meal-map-an-ai-powered-nutrition-experience-focused-on-nutrient-quality-not-calorie-counting",
+            "claim_date": "2025-10-01"
+          },
+          {
+            "url": "https://investors.omadahealth.com/",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The durability and economics of concentrated PBM and health-plan channels remain unclear.",
+        "why_it_matters": "Partners provide rapid distribution, but a small number account for most revenue and may control pricing, customer relationships, and competing-product placement.",
+        "next_research_trigger": "Track top-partner revenue concentration, accounts receivable concentration, contract amendments, direct-employer mix, renewal terms, and disclosures about partner-led alternatives.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The unit economics, utilization, and clinical-liability profile of integrated GLP-1 prescribing are not yet established publicly.",
+        "why_it_matters": "Prescribing can increase revenue per member and strategic relevance but adds licensed-provider costs, medication-management workload, partner economics, and clinical risk.",
+        "next_research_trigger": "Inspect disclosures for prescribing enrollment, revenue contribution, provider cost, medication persistence, adverse events, employer savings, and pathway mix across PBM, direct-employer, and cash-pay channels.",
+        "sources": [
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-announces-glp-1-prescribing-capability-to-support-growing-member-population",
+            "claim_date": "2025-11-06"
+          },
+          {
+            "url": "https://www.omadahealth.com/resource-center/omada-health-joins-lilly-employer-connect-expanding-its-access-pathways-for-glp-1-care-as-patients-seek-more-lifestyle-support",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public information does not provide a complete model-evaluation, escalation, or incident-rate record for patient-facing AI.",
+        "why_it_matters": "Nutrition and GLP-1 contexts can involve allergies, comorbidities, side effects, and sensitive health data. A later Event is material only if it changes the probability or consequence of failure in these workflows.",
+        "next_research_trigger": "Seek model cards, clinical-evaluation protocols, hallucination and refusal rates, escalation criteria, safety-event disclosures, privacy audits, and customer contractual requirements.",
+        "sources": [
+          {
+            "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark",
+            "claim_date": null
+          },
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+            "claim_date": "2026-01-12"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+        "title": "2025 Form 10-K",
+        "publisher": "Omada Health via U.S. Securities and Exchange Commission",
+        "published_at": "2026-03-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+        "title": "Omada Health Reports First Quarter 2026 Results",
+        "publisher": "Omada Health",
+        "published_at": "2026-05-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.omadahealth.com/",
+        "title": "Investor Relations Overview",
+        "publisher": "Omada Health",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-introduces-nutritional-intelligence-transform-food",
+        "title": "Omada Introduces Nutritional Intelligence to Transform Food Relationships with AI-Driven Tools and Human Care",
+        "publisher": "Omada Health",
+        "published_at": "2025-05-20",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.omadahealth.com/resource-center/omada-health-launches-meal-map-an-ai-powered-nutrition-experience-focused-on-nutrient-quality-not-calorie-counting",
+        "title": "Omada Health Launches Meal Map, an AI-Powered Nutrition Experience",
+        "publisher": "Omada Health",
+        "published_at": "2025-10-01",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+        "title": "How Omada Health Scaled Patient Care by Fine-Tuning Llama Models on Amazon SageMaker AI",
+        "publisher": "Amazon Web Services, co-written with Omada Health",
+        "published_at": "2026-01-12",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark",
+        "title": "What Is OmadaSpark?",
+        "publisher": "Omada Health Support",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.omadahealth.com/resource-center/omada-health-announces-glp-1-prescribing-capability-to-support-growing-member-population",
+        "title": "Omada Health Announces GLP-1 Prescribing Capability to Support Growing Member Population",
+        "publisher": "Omada Health",
+        "published_at": "2025-11-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.omadahealth.com/resource-center/omada-health-joins-lilly-employer-connect-expanding-its-access-pathways-for-glp-1-care-as-patients-seek-more-lifestyle-support",
+        "title": "Omada Health Joins Lilly Employer Connect",
+        "publisher": "Omada Health",
+        "published_at": "2026-05-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "title": "BIT Capital News and Publications",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_idPMXxukW9okinuHy6oCeiSKl4odDi1NfTBBVukLFiDrR7jBV5fA7g1e0OfwB5eFSSDNU7j-eu6QMDsYNBDK2ZeWOasAfKHWYZPDOjB_O5Ozi72TRMDZCsY_S1MPdAsBnW7KHNIrgAFGwmgaYhqZ4GnFGqB7H0umeyTh6bfMgPtKOgb4woaL7BIP6vPX8Rgzxqw-PAmrHuxCqxZIFY8aKl4bPpbEVKssvI8A6xrx1iYrBmaJqDATSWzRLuRzfylHTnnOUiZWy4UOKSJfdEmgDDUJM-SgXujp_61hjjWM-vn3o5n8YsQEF3d2bU0FmTm-AApCkBkgN5I_8TwaH5Ue9g1FxujV8tnAw_ANho8DJGk1-svZ3qJeyaseXVj6zDtrZnICFs7GS-Um2Pa8WNFBft6qusQrjMnkb3_kvsbJccpaZSwScNMb3QX8rKrjVJTkZKKKYzShkag42uYwOFBv0Kvr",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 111548,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 58208,
+    "reasoning_tokens": 15852,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investors.omadahealth.com Omada Health annual report 10-K 2025",
+        "type": "search",
+        "queries": [
+          "site:investors.omadahealth.com Omada Health annual report 10-K 2025",
+          "site:sec.gov/Archives/edgar/data Omada Health OMDA 10-K S-1",
+          "site:omadahealth.com OmadaSpark Meal Map AI GLP-1 musculoskeletal employer health plans",
+          "site:bitcap.com Omada Health OR OMDA"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.omadahealth.com/resource-center/omada-health-announces-glp-1-prescribing-capability-to-support-growing-member-population"
+      },
+      {
+        "query": "Omada Health 2025 10-K revenue customers covered lives gross margin member S-1",
+        "type": "search",
+        "queries": [
+          "Omada Health 2025 10-K revenue customers covered lives gross margin member S-1",
+          "site:sec.gov/Archives/edgar/data/2060075 2026 10-k Omada Health",
+          "site:sec.gov/Archives/edgar/data \"Omada Health, Inc.\" \"2025\" \"10-K\"",
+          "site:investors.omadahealth.com Q1 2026 Omada Health 10-Q results"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/edgar/browse/index.html?cik=1611115"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm?output=1"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm \"We generate revenue\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm \"We generate revenue\"",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm \"health plan and PBM\"",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm \"gross margin\" \"Care Team\"",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm \"customer retention\""
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Revenue Models",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770ds1.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770ds1.htm"
+      },
+      {
+        "query": "Omada Health S-1 revenue model PEPM performance-based fees covered lives customers retention member enrollment",
+        "type": "search",
+        "queries": [
+          "Omada Health S-1 revenue model PEPM performance-based fees covered lives customers retention member enrollment",
+          "Omada Health S-1 top five health plan PBM partners revenue concentration 2024",
+          "Omada Health S-1 competition Teladoc Virta Hinge Health Sword Health DarioHealth",
+          "Omada Health S-1 AI OmadaSpark Microsoft Azure AWS cloud infrastructure data privacy"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.omadahealth.com/sec-filings/sec-filing/10-k/0001628280-26-015637"
+      },
+      {
+        "query": "\"0001628280-26-015637\" SEC filing documents",
+        "type": "search",
+        "queries": [
+          "\"0001628280-26-015637\" SEC filing documents",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637 \"Omada Health\"",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637 \"top five\" \"revenue\"",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637 \"Amazon Web Services\""
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "top five",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm"
+      },
+      {
+        "query": "\"Omada Health\" \"PMPM\" services revenue hardware revenue",
+        "type": "search",
+        "queries": [
+          "\"Omada Health\" \"PMPM\" services revenue hardware revenue",
+          "\"Omada Health\" \"77%\" revenue 2025 top five",
+          "\"Omada Health\" \"Care Team efficiency\" 2025 gross margin",
+          "\"Omada Health\" \"Amazon Web Services\" 10-K 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/0001628280-26-015637.txt"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm Omada members customers revenue contracts care team devices",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm Omada members customers revenue contracts care team devices",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm Omada \"77%\"",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm Omada \"65.7%\"",
+          "site:sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm Omada AI AWS Llama"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Omada Health \"typically bill for our services monthly\" revenue arrangements customers",
+        "type": "search",
+        "queries": [
+          "Omada Health \"typically bill for our services monthly\" revenue arrangements customers",
+          "Omada Health \"outcomes-based\" contracts revenue 2025 10-K",
+          "Omada Health \"performance-based\" fees customer contracts revenue",
+          "Omada Health \"per-participant\" revenue model employers health plans"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026027947/fy25omadahealthinc10-kars.pdf"
+      },
+      {
+        "pattern": "Revenue Model",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026027947/fy25omadahealthinc10-kars.pdf"
+      },
+      {},
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1611115 2026 Omada Health 10-Q March 31 2026 accession",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1611115 2026 Omada Health 10-Q March 31 2026 accession",
+          "site:sec.gov/Archives/edgar/data/1611115 \"March 31, 2026\" \"Omada Health\" 10-Q",
+          "site:investors.omadahealth.com \"Omada Health Investor Presentation\" \"May 7, 2026\" PDF",
+          "site:investors.omadahealth.com \"Q1'FY26\" Omada presentation"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.omadahealth.com/resource-center/omadas-new-food-experience-a-powerful-example-of-tech-and-human-care-working-in-tandem"
+      },
+      {
+        "query": "site:aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care \"Llama 3.1 8B\"",
+        "type": "search",
+        "queries": [
+          "site:aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care \"Llama 3.1 8B\"",
+          "site:aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care \"QLoRA\"",
+          "site:aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care \"evaluation\" \"OmadaSpark\"",
+          "site:aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care \"guardrails\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"OmadaSpark\" \"Llama 3.1 8B\" SageMaker",
+        "type": "search",
+        "queries": [
+          "\"OmadaSpark\" \"Llama 3.1 8B\" SageMaker",
+          "\"OmadaSpark\" QLoRA 1000 question answer pairs",
+          "\"Omada Health\" \"SageMaker\" \"HIPAA\" OmadaSpark",
+          "\"OmadaSpark\" evaluation clinical safety hallucination"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1611115 Omada Health HIPAA state licensure corporate practice medicine FDA 10-K",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1611115 Omada Health HIPAA state licensure corporate practice medicine FDA 10-K",
+          "Omada Health 10-K HIPAA FDA state laws licensed providers corporate practice medicine",
+          "Omada Health S-1 regulatory risk HIPAA FDA virtual care licensed providers",
+          "Omada Health 2025 annual report regulation healthcare AI privacy cybersecurity"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Omada Health 10-K competitors virtual care chronic condition management competitors 2025",
+        "type": "search",
+        "queries": [
+          "Omada Health 10-K competitors virtual care chronic condition management competitors 2025",
+          "site:sec.gov/Archives/edgar/data/1611115 Omada Health \"We compete\" virtual care",
+          "Omada Health S-1 \"competitors\" \"Hinge\" \"Teladoc\"",
+          "Omada Health annual report competition traditional healthcare point solutions platform"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"competitors offering only MSK programs\" Omada",
+        "type": "search",
+        "queries": [
+          "\"competitors offering only MSK programs\" Omada",
+          "\"Hello Heart Inc.\" \"Omada\" \"MSK programs\"",
+          "\"Omada Health\" \"Sword Health\" \"Hinge Health\" competitors S-1",
+          "\"Omada Health\" \"direct competition\" cardiometabolic programs MSK programs"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en Omada Health OMDA",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en Omada Health OMDA",
+          "site:bitcap.com Omada Health",
+          "site:bitcap.com OMDA health",
+          "site:bitcap.com \"Omada\""
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015637/omda-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-health-reports-first-quarter-2026-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.omadahealth.com/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.omadahealth.com/news-releases/news-release-details/omada-introduces-nutritional-intelligence-transform-food",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.omadahealth.com/resource-center/omada-health-launches-meal-map-an-ai-powered-nutrition-experience-focused-on-nutrient-quality-not-calorie-counting",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://aws.amazon.com/blogs/machine-learning/how-omada-health-scaled-patient-care-by-fine-tuning-llama-models-on-amazon-sagemaker-ai/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://support.omadahealth.com/hc/en-us/articles/41304416674707-What-is-OmadaSpark",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.omadahealth.com/resource-center/omada-health-announces-glp-1-prescribing-capability-to-support-growing-member-population",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.omadahealth.com/resource-center/omada-health-joins-lilly-employer-connect-expanding-its-access-pathways-for-glp-1-care-as-patients-seek-more-lifestyle-support",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:omda",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

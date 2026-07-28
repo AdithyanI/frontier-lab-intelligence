@@ -1,0 +1,968 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Duolingo",
+    "ticker": "DUOL"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A freemium mobile learning platform monetized primarily through recurring Super and Max subscriptions, with advertising, in-app purchases and a high-stakes English proficiency test as smaller revenue streams. Free access creates the acquisition and engagement funnel; paid conversion, tier mix and retention drive subscription economics. Frontier AI is unusually direct to the model because it powers premium conversational features, accelerates course production and contributes to cost of revenue.",
+      "revenue_engines": [
+        {
+          "engine": "Premium subscriptions: Super and Max",
+          "who_pays": "Individual learners and household or family-plan purchasers.",
+          "economic_logic": "Learners pay recurring fees for an ad-free experience and additional practice features. Max sits above Super and adds generative-AI conversation and feedback features, making paid conversion, retention and Super-to-Max mix the principal monetization levers. Subscription revenue was the dominant revenue source in 2025.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+              "claim_date": "2026-02-27"
+            },
+            {
+              "url": "https://blog.duolingo.com/duolingo-max/",
+              "claim_date": "2023-03-14"
+            }
+          ]
+        },
+        {
+          "engine": "Advertising and in-app purchases",
+          "who_pays": "Advertising networks and advertisers pay for impressions served to free users; learners pay for optional virtual goods.",
+          "economic_logic": "The large free audience can be monetized without placing the core curriculum behind a paywall. Advertising expands revenue per free user but carries lower gross margin than subscriptions, while in-app purchases provide incremental transactional revenue.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+              "claim_date": "2026-02-27"
+            },
+            {
+              "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+              "claim_date": "2026-05-04"
+            }
+          ]
+        },
+        {
+          "engine": "English proficiency testing",
+          "who_pays": "Test takers seeking an English-language credential for university or other institutional applications.",
+          "economic_logic": "Test takers pay a one-time fee. Revenue depends on test volume, pricing, security and continued recognition by schools, governments and other institutions. The test represented approximately 4% of 2025 revenue, while acceptance breadth remains the key demand-side asset.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+              "claim_date": "2026-02-27"
+            },
+            {
+              "url": "https://blog.englishtest.duolingo.com/duolingo-english-test-accepting-universities/",
+              "claim_date": "2025-08-26"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+          "claim_date": "2026-02-27"
+        },
+        {
+          "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+          "claim_date": "2026-05-04"
+        },
+        {
+          "url": "https://duolingo.gcs-web.com/",
+          "claim_date": null
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Active-user growth, retention and organic acquisition",
+        "why_it_matters": "The free user base supplies prospective subscribers, advertising inventory and word-of-mouth acquisition. DAU growth, DAU-to-MAU engagement and cohort retention therefore precede subscription bookings, while organic growth limits marketing expense. Management is prioritizing user growth after concluding that prior monetization emphasis contributed to deceleration.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm",
+            "claim_date": "2026-02-26"
+          }
+        ]
+      },
+      {
+        "driver": "Paid conversion, subscriber retention and Super-to-Max mix",
+        "why_it_matters": "Subscription growth depends on converting a small portion of a much larger free base and retaining those users. Max can raise revenue per subscriber through premium AI features, but wider distribution of those features to Super users could trade Max mix for broader retention and conversion.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://blog.duolingo.com/duolingo-max/",
+            "claim_date": "2023-03-14"
+          },
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          }
+        ]
+      },
+      {
+        "driver": "Learning efficacy, speaking engagement and course depth",
+        "why_it_matters": "Learners must perceive measurable progress for usage and subscriptions to persist. In Q1 2026, management reported more than twice as many words spoken per Video Call user over the preceding year and expanded its nine most-learned language courses through CEFR B2, creating a testable link between product depth, retention and willingness to pay.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "driver": "AI-assisted content velocity and human-review productivity",
+        "why_it_matters": "AI tools can increase the number of courses, levels and exercise types produced per curriculum expert, accelerating localization and expansion into new subjects. The economic benefit depends on output after human review rather than raw generation volume; weak quality would raise rework and damage learning outcomes.",
+        "financial_lines": [
+          "volume",
+          "product_mix",
+          "operating_cost",
+          "gross_margin",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://blog.duolingo.com/large-language-model-duolingo-lessons/",
+            "claim_date": "2023-06-22"
+          }
+        ]
+      },
+      {
+        "driver": "AI inference, app-store and payment-processing unit costs",
+        "why_it_matters": "Generative-AI usage adds variable cost to features such as Video Call, while Apple and Google generally retain 15%-30% of transactions processed through their in-app systems. Apple, Google and Stripe together processed about 95% of Q1 2026 revenue. Lower per-unit AI costs contributed to Q1 2026 gross-margin expansion, demonstrating that model economics can materially change margins.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Global individual learners, including free users, Super subscribers and Max subscribers",
+        "why_it_matters": "Free learners provide scale, product data, advertising inventory and the conversion pool for subscriptions. Paid users fund the platform, while differences in geography, language pair and learning objective affect conversion and pricing.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://duolingo.gcs-web.com/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Apple, Google and Stripe",
+        "why_it_matters": "These companies control most payment processing, while Apple and Google also control primary mobile distribution, product discovery and app-store policies. Fee, ranking, privacy or payment-rule changes can alter acquisition, gross margin and cash collection.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+            "claim_date": "2026-05-05"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Frontier-model providers, including OpenAI as the launch partner for GPT-4-powered Max features",
+        "why_it_matters": "Model capability, latency, reliability, safety and token pricing influence conversational quality and unit economics. The current provider mix and contractual concentration are not publicly disclosed, making portability and supplier leverage important research questions.",
+        "sources": [
+          {
+            "url": "https://openai.com/index/duolingo/",
+            "claim_date": "2023-03-14"
+          },
+          {
+            "url": "https://blog.duolingo.com/duolingo-max/",
+            "claim_date": "2023-03-14"
+          },
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "relationship": "substitute",
+        "entities_or_group": "General-purpose AI assistants, specialist language-learning applications, human tutors and classroom courses",
+        "why_it_matters": "General assistants can already provide multilingual conversation and explanations. The platform must preserve differentiation through structured progression, level control, gamification, characters, habit formation, efficacy evidence and integrated curriculum rather than raw access to an LLM.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Privacy, child-protection, content, AI, accessibility and payment regulators; schools and governments recognizing the English test",
+        "why_it_matters": "The consumer app processes learner data across jurisdictions and serves minors, while the English test is a high-stakes AI-enabled assessment. New restrictions, security failures or loss of institutional recognition could raise compliance costs, constrain personalization or reduce testing volume.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://blog.englishtest.duolingo.com/duolingo-english-test-accepting-universities/",
+            "claim_date": "2025-08-26"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Prioritize teaching quality and user growth, targeting 100 million DAUs in 2028 even at the expense of near-term financial growth.",
+        "investment_relevance": "This deliberately shifts optimization from near-term conversion and margin toward audience scale. The key test is whether improved free-product value restores organic growth and creates a larger future subscription funnel without permanently weakening monetization.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm",
+            "claim_date": "2026-02-26"
+          },
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          }
+        ]
+      },
+      {
+        "action": "Make speaking a core workflow through improved Video Call, spoken-response exercises, flashcards and scenario-based speaking practice, while beginning to extend Video Call beyond Max to Super.",
+        "investment_relevance": "Speaking addresses a historical product gap and can improve efficacy, retention and paid conversion. Extending access broadens engagement but creates a measurable risk of Max-tier cannibalization.",
+        "sources": [
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "action": "Use AI-assisted production with expert prompting and review to extend major language courses through intermediate and professional proficiency levels.",
+        "investment_relevance": "Greater content depth can lengthen learner lifetimes and address intermediate users, while faster production can improve R&D productivity. Materiality depends on review-adjusted output and demonstrated learning quality rather than generated lesson counts.",
+        "sources": [
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://blog.duolingo.com/large-language-model-duolingo-lessons/",
+            "claim_date": "2023-06-22"
+          }
+        ]
+      },
+      {
+        "action": "Build additional growth engines in chess, math and music and develop the Duolingo Score as a broader proficiency standard.",
+        "investment_relevance": "New subjects can expand the addressable audience and deepen multi-subject engagement, while a recognized score could strengthen credentials and switching costs. These initiatives must eventually demonstrate independent retention and monetization rather than merely inflating aggregate activity.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm",
+            "claim_date": "2026-02-26"
+          },
+          {
+            "url": "https://duolingo.gcs-web.com/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Real-time voice models improve in naturalness, latency, memory, multilingual accuracy and instruction following.",
+        "company_exposure": "Video Call relies on model-generated dialogue constrained by prompts for learner level, conversational structure and character personality; access is expanding from the premium Max experience toward Super users.",
+        "affected_driver": "Video Call engagement, speaking efficacy, paid conversion, retention and Super-to-Max product mix.",
+        "financial_consequence": "More effective conversation practice could increase subscription bookings and reduce churn, but wider bundling could cannibalize Max upgrades and increase variable inference expense.",
+        "direction": "upside",
+        "materiality_condition": "Incremental conversion, retention and pricing benefits must exceed model cost and any loss of Max-tier differentiation across meaningful subscriber cohorts.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Max penetration and Super-to-Max upgrade rates",
+          "Video Call frequency, words spoken and repeat use",
+          "Paid-subscriber retention by feature usage",
+          "Scope and pricing of the Super rollout",
+          "Subscription gross margin"
+        ],
+        "sources": [
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          },
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://openai.com/index/duolingo/",
+            "claim_date": "2023-03-14"
+          }
+        ]
+      },
+      {
+        "development": "Frontier-model inference becomes cheaper through more efficient architectures, competition and model optimization.",
+        "company_exposure": "Learner-facing AI features produce variable model costs; management reported that lower per-unit AI costs were a primary reason Q1 2026 gross margin expanded.",
+        "affected_driver": "Cost per conversation, feature availability, subscription gross margin and premium-tier pricing flexibility.",
+        "financial_consequence": "Lower unit costs could expand gross margin or allow conversational features to reach more Super and free users without equivalent margin dilution.",
+        "direction": "upside",
+        "materiality_condition": "Cost per successful learner interaction must fall faster than AI-feature usage grows, without a decline in response quality or reliability.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Reported subscription and total gross margin",
+          "Management commentary on per-unit AI cost",
+          "Video Call access limits and bundling",
+          "Model latency and outage frequency",
+          "Usage growth relative to cost-of-revenue growth"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          }
+        ]
+      },
+      {
+        "development": "Models and AI agents become better at generating, localizing, sequencing and checking educational content.",
+        "company_exposure": "Curriculum teams already use LLMs with detailed prompts and human review, and management attributes rapid expansion to B2 coverage in major courses to AI-enabled content tooling.",
+        "affected_driver": "Review-adjusted content velocity, course depth, localization, curriculum-expert productivity and speed of new-subject launches.",
+        "financial_consequence": "Successful deployment could extend learner lifetimes, open new markets and reduce content cost per course; weak outputs could increase rework and damage retention or trust.",
+        "direction": "mixed",
+        "materiality_condition": "The number of approved, effective course units per expert-hour must rise while error rates, learner complaints and efficacy outcomes remain at least stable.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Course coverage by language and CEFR level",
+          "Approved content output relative to curriculum headcount",
+          "Human-review and rework burden",
+          "Learning-efficacy studies and completion rates",
+          "Quality complaints following major course launches"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://blog.duolingo.com/large-language-model-duolingo-lessons/",
+            "claim_date": "2023-06-22"
+          }
+        ]
+      },
+      {
+        "development": "General-purpose AI assistants become persistent, low-cost tutors with voice, memory, personalized lesson planning and multimodal feedback.",
+        "company_exposure": "Language conversation and explanation are native use cases for general assistants, overlapping with Max features and parts of the core curriculum.",
+        "affected_driver": "Organic acquisition, DAU and MAU growth, retention, paid conversion, pricing power and marketing intensity.",
+        "financial_consequence": "If assistants match structured teaching and habit formation, user and subscription growth could slow, prices could face pressure and acquisition spending could rise.",
+        "direction": "downside",
+        "materiality_condition": "Substitution becomes material if general assistants demonstrate sustained learner retention, safe level-appropriate progression and comparable efficacy at a lower effective price.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Relative app-usage and search trends",
+          "New-user and reactivated-user cohorts",
+          "Cancellation reasons and paid conversion",
+          "Pricing or free-feature responses",
+          "Evidence that learners use general assistants as primary rather than supplemental tools"
+        ],
+        "sources": [
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          }
+        ]
+      },
+      {
+        "development": "Learner-facing models produce inaccurate, culturally weak or unsafe outputs, or regulators impose tighter rules on AI, minors and educational assessment.",
+        "company_exposure": "LLMs generate conversations and course material, while AI also supports a high-stakes English test; both activities depend on trust, data handling, review and institutional acceptance.",
+        "affected_driver": "Learning efficacy, brand trust, content-review workload, compliance expense, feature rollout speed and English-test acceptance.",
+        "financial_consequence": "Material failures could cause churn, refunds, slower launches, higher moderation and compliance costs, lost testing volume or legal liabilities.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if errors occur at scale, trigger measurable retention damage or lead institutions or regulators to restrict product use or test recognition.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "AI-output error and safety audits",
+          "App-store reviews and learner complaints",
+          "Privacy or child-safety enforcement",
+          "English-test security incidents and institutional acceptance",
+          "Compliance and content-review spending"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://blog.duolingo.com/large-language-model-duolingo-lessons/",
+            "claim_date": "2023-06-22"
+          },
+          {
+            "url": "https://blog.englishtest.duolingo.com/duolingo-english-test-accepting-universities/",
+            "claim_date": "2025-08-26"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "BIT has publicly framed the opportunity as an AI-enabled growth and execution case: generative-AI conversation features in Max and deeper intermediate-English content can strengthen the product and growth profile. Its public commentary also makes clear that the view is continuously conditioned on app-usage data, proprietary operating-momentum models, expectations and valuation; weakening momentum can justify selling even when reported results remain solid.",
+      "what_would_support_it": [
+        "Sustained engagement with Video Call accompanied by higher paid conversion, retention or Max adoption.",
+        "Deeper intermediate and B2 content lengthens learner lifetimes and improves cohort retention.",
+        "App-usage and model-implied operating momentum reaccelerate or continue to exceed market expectations.",
+        "AI unit costs fall sufficiently to preserve or expand subscription gross margin as usage scales.",
+        "Operating improvement remains attractive relative to contemporaneous valuation and embedded expectations."
+      ],
+      "what_would_challenge_it": [
+        "Usage momentum fades or the company repeatedly fails to exceed elevated expectations.",
+        "Max adoption is weak, churn rises or Video Call distribution to Super erodes premium-tier differentiation.",
+        "AI-generated content expands rapidly but learning quality, cultural fit or efficacy deteriorates.",
+        "General-purpose AI tutors reduce organic acquisition, engagement or willingness to pay.",
+        "Higher inference and review costs outweigh AI-related pricing and retention benefits."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
+          "claim_date": "2024-07-04"
+        },
+        {
+          "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595",
+          "claim_date": "2024-09-30"
+        },
+        {
+          "url": "https://bitcap.com/en/news/erfreuliche-earnings-geht-die-ki-wette-von-duolingo-auf",
+          "claim_date": "2023-03-09"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Standalone Max adoption, pricing, retention and unit economics are not fully disclosed.",
+        "why_it_matters": "Without tier-level metrics, an analyst cannot distinguish Max-led monetization from broader subscriber growth or measure whether AI revenue covers incremental model costs.",
+        "next_research_trigger": "Inspect quarterly commentary for Max penetration, upgrade rates, geographic availability, Video Call engagement, pricing tests and subscription gross-margin attribution.",
+        "sources": [
+          {
+            "url": "https://blog.duolingo.com/duolingo-max/",
+            "claim_date": "2023-03-14"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Reported engagement gains do not establish causal improvement in language proficiency or long-term retention.",
+        "why_it_matters": "More conversations, words spoken or generated exercises may increase activity without improving outcomes, brand durability or willingness to pay.",
+        "next_research_trigger": "Look for controlled efficacy studies, proficiency gains, retention by feature use and evidence that B2 learners continue beyond initial content launches.",
+        "sources": [
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          },
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The review burden and error rate of AI-generated course content are undisclosed.",
+        "why_it_matters": "Gross content output may overstate productivity if expert review, localization corrections and post-launch remediation grow proportionally.",
+        "next_research_trigger": "Compare course launches with curriculum headcount, R&D expense, learner complaints, correction frequency and efficacy results.",
+        "sources": [
+          {
+            "url": "https://blog.duolingo.com/large-language-model-duolingo-lessons/",
+            "claim_date": "2023-06-22"
+          },
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The current frontier-model vendor mix, contract duration, portability and cost curve are not public.",
+        "why_it_matters": "Provider concentration or weak portability could affect uptime, negotiating leverage, product quality and gross margin as conversational usage expands.",
+        "next_research_trigger": "Inspect filings and earnings commentary for vendor concentration, model migrations, outages, commitments, cost-per-interaction and changes in AI-related gross-margin attribution.",
+        "sources": [
+          {
+            "url": "https://openai.com/index/duolingo/",
+            "claim_date": "2023-03-14"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+            "claim_date": "2026-05-04"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The magnitude of substitution from general AI tutors and the resilience of English-test institutional acceptance remain unclear.",
+        "why_it_matters": "These are separate but material demand risks: one can pressure the consumer funnel, while the other can impair a credential whose value depends on external recognition and trust.",
+        "next_research_trigger": "Track relative app usage, search and cohort data alongside English-test volumes, institutional acceptance, security incidents and regulatory or admissions-policy changes.",
+        "sources": [
+          {
+            "url": "https://blog.duolingo.com/ai-and-video-call/",
+            "claim_date": "2025-04-22"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+            "claim_date": "2026-02-27"
+          },
+          {
+            "url": "https://blog.englishtest.duolingo.com/duolingo-english-test-accepting-universities/",
+            "claim_date": "2025-08-26"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+        "title": "Annual Report on Form 10-K for the year ended December 31, 2025",
+        "publisher": "U.S. Securities and Exchange Commission / Duolingo, Inc.",
+        "published_at": "2026-02-27",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+        "title": "Quarterly Report on Form 10-Q for the quarter ended March 31, 2026",
+        "publisher": "U.S. Securities and Exchange Commission / Duolingo, Inc.",
+        "published_at": "2026-05-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm",
+        "title": "Q4 and Full-Year 2025 Shareholder Letter",
+        "publisher": "Duolingo, Inc.",
+        "published_at": "2026-02-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+        "title": "Q1 2026 Shareholder Letter",
+        "publisher": "Duolingo, Inc.",
+        "published_at": "2026-05-04",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://duolingo.gcs-web.com/",
+        "title": "Investor Relations and Company Strategy Overview",
+        "publisher": "Duolingo, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://openai.com/index/duolingo/",
+        "title": "Filling Crucial Language Learning Gaps",
+        "publisher": "OpenAI",
+        "published_at": "2023-03-14",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://blog.duolingo.com/duolingo-max/",
+        "title": "Duolingo Max Uses OpenAI's GPT-4 for New Learning Features",
+        "publisher": "Duolingo, Inc.",
+        "published_at": "2023-03-14",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://blog.duolingo.com/ai-and-video-call/",
+        "title": "How Duolingo Uses AI to Create the Perfect Speaking Practice",
+        "publisher": "Duolingo, Inc.",
+        "published_at": "2025-04-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://blog.duolingo.com/large-language-model-duolingo-lessons/",
+        "title": "How Duolingo Uses AI to Create Lessons Faster",
+        "publisher": "Duolingo, Inc.",
+        "published_at": "2023-06-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://blog.englishtest.duolingo.com/duolingo-english-test-accepting-universities/",
+        "title": "Why More Colleges and Universities Are Accepting the Duolingo English Test",
+        "publisher": "Duolingo English Test",
+        "published_at": "2025-08-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
+        "title": "Fund Manager Jan Beckers: Our Duolingo Data Showed Us We Should Sell",
+        "publisher": "BIT Capital",
+        "published_at": "2024-07-04",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595",
+        "title": "BIT Global Technology Opportunities September 2024 Factsheet",
+        "publisher": "BIT Capital",
+        "published_at": "2024-09-30",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/erfreuliche-earnings-geht-die-ki-wette-von-duolingo-auf",
+        "title": "Encouraging Earnings: Is the AI Bet Paying Off?",
+        "publisher": "BIT Capital",
+        "published_at": "2023-03-09",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_f3A9O09FLs4BUzQybC6G5h4idPvalVQFNkFH_NyqkDdNx6HWEO3ZCjy_pyafVHA9lhWW6_z79nHPIUM4cfWQFIfsGOffdkWoMkw_WW6fFXdNfK8HkknWgDJEvQa9f9s6SOCMyu7hwBoFq8nV0K-oAx4o6ptyDKmwVf0tD53TDePpl3k8Rbe9u8kBqn-lwHr9Hxy4nQL2WdoANqVqXF1UWGXZjIViLuFKBar_iZOfO5Tx2oT51agwcG7Lb7y6sCIDAPylhW2pVP2vnJXo_A4T2OyfSTN1lBCmUdlWY5wKWpSfXvlVJe-m7keEHeQT5hxIkxKL2HsDwOd7tZCzTjSadIvg-Ts9LJBotx4SPTb3uljO_LouQqwZeXSSlJ1RNpC4rj_spMWf7zEJpUEAoRn3au02kRDXJLmNWpBgws9QbkfE026l4gGTxVgV1Ef2VL7RrqwCnAT9UIqTVCIJDqgWOXOa",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 119670,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 44595,
+    "reasoning_tokens": 10431,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investors.duolingo.com annual report 2025 Duolingo 10-K AI Max subscriptions revenue",
+        "type": "search",
+        "queries": [
+          "site:investors.duolingo.com annual report 2025 Duolingo 10-K AI Max subscriptions revenue",
+          "site:investors.duolingo.com quarterly results 2026 Duolingo shareholder letter Max AI",
+          "site:investors.duolingo.com company strategy overview AI Duolingo Max Video Call Lily",
+          "site:bitcap.com Duolingo BIT Capital podcast Max generative AI"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data Duolingo 2025 10-K 2026 annual report revenue subscriptions advertising English Test",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data Duolingo 2025 10-K 2026 annual report revenue subscriptions advertising English Test",
+          "site:investors.duolingo.com/static-files 2025 annual report Duolingo 2026 10-k",
+          "site:investors.duolingo.com/static-files Q4FY25 Duolingo shareholder letter 2025 Max Video Call AI-first",
+          "site:investors.duolingo.com/static-files Q1FY26 Duolingo shareholder letter strategy 100 million DAU learning outcomes Video Call"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Duolingo 2025 annual report 10-K filed 2026 pdf",
+        "type": "search",
+        "queries": [
+          "Duolingo 2025 annual report 10-K filed 2026 pdf",
+          "Duolingo Inc 2025 form 10-k SEC February 2026",
+          "Duolingo 2025 annual report revenue subscriptions advertising Duolingo English Test AI costs",
+          "Duolingo Q4 2025 shareholder letter February 2026 AI-first content Max"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://duolingo.gcs-web.com/"
+      },
+      {
+        "pattern": "Our revenue is primarily derived",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://duolingo.gcs-web.com/sec-filings/sec-filing/10-k/0001628280-26-012494"
+      },
+      {
+        "type": "open_page",
+        "url": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/0001628280-26-012494-index.htm"
+      },
+      {
+        "query": "\"0001628280-26-012494\" PDF Duolingo",
+        "type": "search",
+        "queries": [
+          "\"0001628280-26-012494\" PDF Duolingo",
+          "site:duolingo.gcs-web.com/static-files Duolingo 2025 annual report pdf 2026",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494 \"revenue\" \"Duolingo English Test\"",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494 \"artificial intelligence\""
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Subscription revenue",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/0001628280-26-012494.txt"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm Duolingo \"Subscription\" \"Advertising\" \"Duolingo English Test\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm Duolingo \"Subscription\" \"Advertising\" \"Duolingo English Test\"",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm Duolingo \"Apple\" \"Google\" payments",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm Duolingo \"generative AI\" \"OpenAI\"",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm Duolingo \"gross margin\" \"compute\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://companiesmarketcap.com/duolingo/sec-reports-10k/0001628280-26-012494/"
+      },
+      {
+        "pattern": "Subscriptions",
+        "type": "find_in_page",
+        "url": "https://companiesmarketcap.com/duolingo/sec-reports-10k/0001628280-26-012494/"
+      },
+      {
+        "query": "Duolingo 2025 10-K subscription revenue 2025 advertising revenue English Test revenue",
+        "type": "search",
+        "queries": [
+          "Duolingo 2025 10-K subscription revenue 2025 advertising revenue English Test revenue",
+          "Duolingo 2025 annual report Apple Google app stores 30% fees subscriptions",
+          "Duolingo 2025 10-K generative AI risks compute costs OpenAI",
+          "Duolingo 2025 10-K 130 million MAU 9% paid subscribers 6100 programs"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1562088 Duolingo 2026 10-Q March 31 2026 generative AI compute gross margin",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1562088 Duolingo 2026 10-Q March 31 2026 generative AI compute gross margin",
+          "Duolingo Q1 2026 10-Q Apple Google revenue processed 2026",
+          "Duolingo Q1 2026 shareholder letter Video Call Super AI tools B2 content 9 languages",
+          "Duolingo Q1 2026 earnings call AI inference costs content quality transcript"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:openai.com Duolingo Max GPT-4 video call Lily official",
+        "type": "search",
+        "queries": [
+          "site:openai.com Duolingo Max GPT-4 video call Lily official",
+          "site:blog.duolingo.com Duolingo Max GPT-4 official Explain My Answer Roleplay Video Call Lily",
+          "site:duolingo.com/info AI Max Video Call Lily official 2025 2026",
+          "site:investors.duolingo.com Duolingo OpenAI Max GPT-4 model provider"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm \"More Video Call\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm \"More Video Call\"",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm \"100 million DAUs\"",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm \"Super subscribers\"",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm \"math\" \"music\" \"chess\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Duolingo Q4 2025 shareholder letter \"More Video Call\"",
+        "type": "search",
+        "queries": [
+          "Duolingo Q4 2025 shareholder letter \"More Video Call\"",
+          "Duolingo Q4 2025 shareholder letter \"Super subscribers\" Video Call",
+          "Duolingo Q4 2025 shareholder letter \"100 million DAUs\" 2028",
+          "Duolingo Q4 2025 shareholder letter math music chess growth engines"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595"
+      },
+      {},
+      {
+        "query": "\"BIT Global Technology Opportunities\" September 2024 Duolingo Max",
+        "type": "search",
+        "queries": [
+          "\"BIT Global Technology Opportunities\" September 2024 Duolingo Max",
+          "site:bitcap.com Duolingo Max Video Call intermediate English content BIT Capital",
+          "site:bitcap.com/en/news Duolingo Max intermediate English",
+          "BIT Capital Duolingo Max video call intermediate English valuation"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast Duolingo usage data expectations valuation",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast Duolingo usage data expectations valuation",
+          "site:bitcap.com/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast Duolingo App Nutzungsdaten Bewertung",
+          "site:bitcap.com Duolingo \"Video Call\" Jan Beckers",
+          "site:bitcap.com Duolingo \"intermediate\" English content"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Duolingo",
+        "type": "find_in_page",
+        "url": "https://bitcap.com/en/news/erfreuliche-earnings-geht-die-ki-wette-von-duolingo-auf"
+      },
+      {
+        "query": "Duolingo 2025 10-K competition language learning apps traditional education AI chatbots",
+        "type": "search",
+        "queries": [
+          "Duolingo 2025 10-K competition language learning apps traditional education AI chatbots",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm competitors language learning",
+          "site:sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm \"competition\" \"artificial intelligence\"",
+          "site:blog.duolingo.com ChatGPT Claude Gemini language learning tutor competition"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Duolingo 2025 10-K data privacy artificial intelligence regulation risk children",
+        "type": "search",
+        "queries": [
+          "Duolingo 2025 10-K data privacy artificial intelligence regulation risk children",
+          "Duolingo 2025 10-K generative AI cost gross margin 2025",
+          "Duolingo 2025 10-K Duolingo English Test 6100 institutions governments acceptance",
+          "Duolingo 2025 10-K Apple Google Stripe processed revenue percentages 2025"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012494/duol-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026029976/duol-20260331.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1562088/000162828026012246/q4fy25duolingo12-31x25shar.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.duolingo.com/static-files/aab30d54-eb91-422e-b365-c03859fea85c",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://duolingo.gcs-web.com/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://openai.com/index/duolingo/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://blog.duolingo.com/duolingo-max/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://blog.duolingo.com/ai-and-video-call/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://blog.duolingo.com/large-language-model-duolingo-lessons/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://blog.englishtest.duolingo.com/duolingo-english-test-accepting-universities/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/fondsmanager-jan-beckers-unsere-daten-bei-duolingo-haben-gezeigt-dass-wir-verkaufen-sollten-podcast",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/erfreuliche-earnings-geht-die-ki-wette-von-duolingo-auf",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:duol",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

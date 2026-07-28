@@ -1,0 +1,1060 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Robinhood",
+    "ticker": "HOOD"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A mobile-first financial-services platform serving self-directed retail investors and, increasingly, advised clients and institutions. Its economics combine transaction monetization, spreads on customer cash, margin and securities lending, and recurring subscription, advisory and card-related fees. The strategy is to increase wallet share by pairing brokerage and crypto with Gold, Strategies, Banking, Cortex, private-market access and agent-enabled interfaces; this diversifies revenue while adding advice, credit, model, cyber and multi-regulator risk.",
+      "revenue_engines": [
+        {
+          "engine": "Trading and execution economics",
+          "who_pays": "Market makers and execution venues provide order-flow payments or rebates on eligible products; customers or venues fund fees, spreads and rebates associated with crypto, futures and event contracts, depending on the product.",
+          "economic_logic": "Revenue is driven by funded and active customers, trading volumes, asset-class mix and per-unit monetization. Options, crypto and event contracts generally monetize differently, so mix can matter as much as aggregate activity.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+              "claim_date": "2026-02-18"
+            },
+            {
+              "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+              "claim_date": "2026-04-28"
+            }
+          ]
+        },
+        {
+          "engine": "Net interest and securities-lending spread",
+          "who_pays": "Margin borrowers, securities borrowers, partner banks and issuers of instruments holding customer or corporate cash effectively fund the interest spread.",
+          "economic_logic": "Interest revenue depends on margin balances, customer cash and sweep balances, securities-lending activity, prevailing rates, funding costs and the amount passed through to customers.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+              "claim_date": "2026-02-18"
+            },
+            {
+              "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+              "claim_date": "2026-04-28"
+            }
+          ]
+        },
+        {
+          "engine": "Subscriptions, managed advice and consumer financial services",
+          "who_pays": "Gold members pay subscription fees; managed-account clients pay advisory fees subject to product pricing; merchants, card networks and banking partners support card and banking economics.",
+          "economic_logic": "Recurring revenue grows with Gold subscribers, retention and adoption of Strategies, Banking, cards and premium tools such as Cortex. Cross-product adoption can also deepen deposits and transaction activity.",
+          "sources": [
+            {
+              "url": "https://robinhood.com/us/en/gold/",
+              "claim_date": null
+            },
+            {
+              "url": "https://robinhood.com/us/en/strategies/",
+              "claim_date": null
+            },
+            {
+              "url": "https://robinhood.com/us/en/newsroom/introducing-strategies-banking-and-cortex/",
+              "claim_date": "2025-03-27"
+            },
+            {
+              "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+              "claim_date": "2026-04-28"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+          "claim_date": "2026-02-18"
+        },
+        {
+          "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-fourth-quarter-and-full-year-2025-results",
+          "claim_date": "2026-02-10"
+        },
+        {
+          "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+          "claim_date": "2026-04-28"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Funded customers, net deposits and Total Platform Assets",
+        "why_it_matters": "These metrics govern the asset base available for trading, interest, lending, advice and cross-sell. Total Platform Assets must be decomposed into net deposits, market appreciation and acquired assets; market-driven asset growth is economically weaker than persistent organic deposits.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "cash_flow",
+          "balance_sheet"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/",
+            "claim_date": "2026-05-31"
+          },
+          {
+            "url": "https://investors.robinhood.com/static-files/6840cc36-4a2d-46d8-a9c3-0b334da724f8",
+            "claim_date": "2026-04-28"
+          }
+        ]
+      },
+      {
+        "driver": "Trading activity and asset-class mix",
+        "why_it_matters": "Equity, options, crypto, futures and event-contract volumes have different monetization, volatility and regulatory profiles. Product launches can increase activity, but revenue remains exposed to market sentiment and crypto cycles.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          }
+        ]
+      },
+      {
+        "driver": "Interest-earning assets, securities lending and rate spreads",
+        "why_it_matters": "Margin, customer cash, sweeps and securities lending can produce substantial recurring revenue, but results vary with asset balances, customer yield-sharing, short-term rates, utilization and counterparty demand.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "gross_margin",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          }
+        ]
+      },
+      {
+        "driver": "Gold subscribers and adoption of additional financial products",
+        "why_it_matters": "Gold is the paid distribution layer for premium research, Cortex and financial products. Subscriber growth, retention and migration into Strategies, Banking, cards and higher balances indicate whether the platform is becoming a broader wealth relationship rather than remaining a trading app.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin"
+        ],
+        "sources": [
+          {
+            "url": "https://robinhood.com/us/en/gold/",
+            "claim_date": null
+          },
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          },
+          {
+            "url": "https://robinhood.com/us/en/newsroom/introducing-strategies-banking-and-cortex/",
+            "claim_date": "2025-03-27"
+          }
+        ]
+      },
+      {
+        "driver": "Control quality and scalable operating expense",
+        "why_it_matters": "Marketing, acquisitions, product development, support, fraud prevention and compliance determine operating leverage. AI can reduce labor per account or investigation, but control failures can create customer losses, remediation, enforcement and product restrictions.",
+        "financial_lines": [
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          },
+          {
+            "url": "https://aws.amazon.com/solutions/case-studies/robinhood-case-study/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Digitally native self-directed investors, active traders and Gold households; expanding end markets include managed-account clients, independent advisers and institutional crypto customers.",
+        "why_it_matters": "The thesis depends on retaining younger customers as their assets and financial needs grow, while successfully extending distribution into advice and institutional services.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          },
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Market makers, exchanges, clearing organizations, securities borrowers, card networks and partner banks, including Coastal Community Bank for specified banking and card services.",
+        "why_it_matters": "These rails determine execution quality, order-flow and rebate economics, settlement, cash yields and the continuity of banking and card products. Concentration, commercial changes or outages can affect revenue and customer trust.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          },
+          {
+            "url": "https://robinhood.com/us/en/gold/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Amazon Web Services, including cloud infrastructure, Amazon Bedrock and exploration of Amazon Nova models.",
+        "why_it_matters": "The online platform and disclosed internal generative-AI workflows depend on secure, scalable cloud and model infrastructure. Model quality, availability, privacy controls and inference economics can affect product reliability and operating cost.",
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/an-innovative-financial-services-leader-finds-the-right-ai-solution-robinhood-and-amazon-nova/",
+            "claim_date": "2025-06-17"
+          },
+          {
+            "url": "https://aws.amazon.com/solutions/case-studies/robinhood-case-study/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Retail brokers, crypto exchanges, banks, card issuers, robo-advisers, RIAs, active-trading platforms and AI-enabled financial interfaces.",
+        "why_it_matters": "Competition affects deposit incentives, customer acquisition, subscription pricing, execution economics and product velocity. General-purpose agents may also commoditize the front end and route customers among providers.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          },
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+            "claim_date": "2026-07-01"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "SEC, FINRA, CFTC, NFA, banking and card regulators, state securities and crypto authorities, and relevant foreign financial-services regimes.",
+        "why_it_matters": "Brokerage, advice, crypto, derivatives, prediction markets, banking, cards and AI-assisted interactions sit under overlapping regimes. Product scope and economics depend on licenses, disclosures, supervision and the boundary between information, recommendations and advice.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          },
+          {
+            "url": "https://robinhood.com/us/en/about/legal/",
+            "claim_date": "2026-07-02"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Build a Financial SuperApp that captures more of each customer's financial life.",
+        "investment_relevance": "The durable objective is to grow wallet share beyond trading through retirement, advice, banking, cards, crypto, private markets and additional asset classes. Success should appear in deposits, Total Platform Assets, Gold adoption and revenue diversification.",
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-fourth-quarter-and-full-year-2025-results",
+            "claim_date": "2026-02-10"
+          },
+          {
+            "url": "https://robinhood.com/us/en/newsroom/introducing-strategies-banking-and-cortex/",
+            "claim_date": "2025-03-27"
+          }
+        ]
+      },
+      {
+        "action": "Use Gold as the bundle for Cortex, premium tools and higher-value financial products.",
+        "investment_relevance": "This creates a direct subscription monetization path and a distribution surface for Strategies, Banking and other products. It also makes Cortex adoption and Gold retention investable indicators rather than merely technology engagement statistics.",
+        "sources": [
+          {
+            "url": "https://robinhood.com/us/en/gold/",
+            "claim_date": null
+          },
+          {
+            "url": "https://robinhood.com/us/en/newsroom/introducing-strategies-banking-and-cortex/",
+            "claim_date": "2025-03-27"
+          },
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          }
+        ]
+      },
+      {
+        "action": "Embed generative AI in customer research and active-trading workflows.",
+        "investment_relevance": "Cortex Digests had been used by nearly one million customers by April 28, 2026, while Cortex Assistant, portfolio Digests and natural-language custom indicators and scans were rolling out. The commercial test is whether these features improve paid retention, deposits or activity without increasing harm and compliance costs.",
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          },
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-presents-yes-no-event/",
+            "claim_date": "2025-12-16"
+          },
+          {
+            "url": "https://robinhood.com/newsroom/hood-summit-2025-news/",
+            "claim_date": "2025-09-10"
+          }
+        ]
+      },
+      {
+        "action": "Open financial accounts and payment tools to third-party AI agents while building AI-native market infrastructure.",
+        "investment_relevance": "Agentic trading uses a dedicated account, while agentic cards support MCP-connected agents with user controls. This could create new distribution, transaction and card volume, but it may transfer customer-interface power to frontier-model providers and increase execution, privacy and fraud risk.",
+        "sources": [
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://robinhood.com/",
+            "claim_date": null
+          },
+          {
+            "url": "https://robinhood.com/us/en/agentic-credit-card/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Deploy internal generative-AI agents in regulated operations.",
+        "investment_relevance": "The disclosed FinCrimes Agent uses Amazon Bedrock to synthesize customer and transaction data for investigators. If quality controls hold, the mechanism can reduce investigation effort and support growth without proportional compliance headcount.",
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/solutions/case-studies/robinhood-case-study/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models improve grounded financial reasoning, real-time synthesis and portfolio personalization.",
+        "company_exposure": "Cortex is embedded in the Gold distribution surface and combines market information with portfolio context; the Assistant can analyze accounts and initiate supported transactions subject to user confirmation.",
+        "affected_driver": "Gold conversion and retention, product engagement, trading activity, net deposits and customer support load.",
+        "financial_consequence": "Higher subscription revenue and potentially higher transaction and net-interest revenue, partly offset by inference, data, support and compliance costs.",
+        "direction": "upside",
+        "materiality_condition": "Cortex users must show a sustained, cohort-adjusted increase in paid retention, deposits or ARPU, and the resulting gross-profit uplift must exceed model, data, support and compliance costs.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Monthly or quarterly active Cortex users and query frequency",
+          "Gold conversion, retention and pricing",
+          "Net deposits and Total Platform Assets for Cortex-user cohorts",
+          "Correction, complaint and human-escalation rates",
+          "Inference and premium-data cost per active user"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          },
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-presents-yes-no-event/",
+            "claim_date": "2025-12-16"
+          },
+          {
+            "url": "https://cdn.robinhood.com/assets/robinhood/legal/cortex_agreement.pdf",
+            "claim_date": "2026-07-02"
+          }
+        ]
+      },
+      {
+        "development": "Third-party AI agents and MCP become common interfaces for investing and spending.",
+        "company_exposure": "The company offers dedicated agentic trading accounts and agent-assigned virtual cards; the card product explicitly supports MCP and major agent clients with spending limits, approvals and revocation controls.",
+        "affected_driver": "Funded-customer growth, net deposits, trade volume, Gold and card adoption, interchange, fraud and support incidents.",
+        "financial_consequence": "Incremental transaction, subscription and card revenue is possible, but execution errors, fraud, chargebacks, privacy issues and support costs could offset it.",
+        "direction": "mixed",
+        "materiality_condition": "Agentic accounts must become a visible contributor to funded-customer growth, deposits, trades or card spend while fraud, execution, support and chargeback costs remain below associated monetization.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Number of funded agentic accounts and associated net deposits",
+          "Trades and assets initiated through third-party agents",
+          "Agentic-card spend, interchange and Gold attachment",
+          "Approval, rejection, revocation and kill-switch usage",
+          "Fraud, chargebacks, execution errors and customer complaints"
+        ],
+        "sources": [
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://robinhood.com/",
+            "claim_date": null
+          },
+          {
+            "url": "https://robinhood.com/us/en/agentic-credit-card/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Highly persuasive models produce incorrect, unsuitable or engagement-optimized financial outputs.",
+        "company_exposure": "Cortex provides portfolio analysis and informational market summaries, while Assistant supports transaction initiation. Current disclosures keep Digests informational and require explicit confirmation before an Assistant transaction is submitted.",
+        "affected_driver": "Customer trust, Gold retention, complaint volume, regulatory supervision, product availability and compliance workload.",
+        "financial_consequence": "Potential restitution, enforcement, legal expense, added supervision cost, product restrictions and lower subscription or asset retention.",
+        "direction": "downside",
+        "materiality_condition": "The path becomes material if repeated model errors or unsuitable interactions cause measurable customer losses, elevated complaints, regulatory action, mandatory product redesign or Gold churn.",
+        "time_horizon": "near_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Disclosed corrections and model-error rates",
+          "Customer complaints, trade disputes and reversals",
+          "Human escalations and review requirements",
+          "Changes to Cortex agreements, Form CRS or advice disclosures",
+          "SEC, FINRA or state-regulator inquiries and enforcement"
+        ],
+        "sources": [
+          {
+            "url": "https://cdn.robinhood.com/assets/robinhood/legal/cortex_agreement.pdf",
+            "claim_date": "2026-07-02"
+          },
+          {
+            "url": "https://robinhood.com/us/en/support/articles/cortex-digests/",
+            "claim_date": null
+          },
+          {
+            "url": "https://robinhood.com/us/en/about/legal/",
+            "claim_date": "2026-07-02"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models become more reliable at long-context data synthesis and regulated workflow assistance.",
+        "company_exposure": "The FinCrimes Agent uses Amazon Bedrock to synthesize customer and transaction data into investigative summaries for human analysts.",
+        "affected_driver": "Investigator throughput, alert backlog, compliance headcount, investigation quality and financial-crime loss risk.",
+        "financial_consequence": "Lower operating cost per investigation and better scalability are possible; false negatives or poor summaries could instead increase losses and regulatory exposure.",
+        "direction": "mixed",
+        "materiality_condition": "Investigation time, backlog or staffing per alert must decline without deterioration in quality assurance, suspicious-activity reporting timeliness, fraud losses or regulatory findings.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Average investigation handling time",
+          "Alerts completed per analyst and backlog age",
+          "Quality-assurance error and rework rates",
+          "Suspicious-activity filing timeliness",
+          "Fraud losses and financial-crime control findings"
+        ],
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/solutions/case-studies/robinhood-case-study/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          }
+        ]
+      },
+      {
+        "development": "General-purpose assistants become the primary consumer interface and compare or route orders across financial providers.",
+        "company_exposure": "Agentic access lets the platform receive orders from external assistants, but the broader wealth thesis still benefits from owning customer attention, data, Gold engagement and cross-product discovery.",
+        "affected_driver": "Customer-acquisition cost, app engagement, Gold attachment, order-routing economics, pricing power and net deposits.",
+        "financial_consequence": "The platform could gain low-cost volume if agents prefer its execution and product breadth, or suffer margin compression and weaker loyalty if model providers control discovery and route customers elsewhere.",
+        "direction": "mixed",
+        "materiality_condition": "A meaningful share of account openings, asset flows or orders must originate off-app through external agents, with observable changes in acquisition costs, Gold attachment or per-trade economics.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Share of accounts and orders sourced by external agents",
+          "Customer-acquisition cost by distribution channel",
+          "Gold adoption among agentic-account customers",
+          "API, MCP and model-provider partnerships",
+          "Execution economics and routing behavior for agent-originated orders"
+        ],
+        "sources": [
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://robinhood.com/us/en/agentic-credit-card/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "explicit_thesis",
+      "attributable_public_thesis": "BIT Capital's public view is that the company brought a new generation into capital markets and is evolving from a trading app into a full-stack wealth-management platform for younger households. BIT also identifies relatively low balance-sheet leverage versus established brokers and proprietary forecasts of quarterly operating metrics as an underappreciated analytical edge.",
+      "what_would_support_it": [
+        "Sustained organic net deposits and Total Platform Asset growth after separating market appreciation and acquired assets.",
+        "Continued growth in paying subscribers and measurable adoption of Strategies, Banking, Cortex, agentic products and other launches.",
+        "Revenue diversification beyond episodic trading without sacrificing product velocity or operating discipline.",
+        "Regulatory capital, credit exposure, liquidity and leverage remaining controlled as the product set broadens.",
+        "AI features increasing retention, deposits or paid adoption without a corresponding increase in customer harm or compliance cost."
+      ],
+      "what_would_challenge_it": [
+        "Asset growth being explained mainly by equity and crypto appreciation, acquisitions or temporary promotional incentives rather than organic deposits.",
+        "Gold growth or cross-product adoption stalling before the platform establishes a broader household financial relationship.",
+        "Cortex or agentic products causing material complaints, unsuitable activity, enforcement or restrictions.",
+        "Banking, cards, margin, acquisitions or crypto infrastructure materially increasing leverage, credit losses or capital intensity.",
+        "Product proliferation raising operating cost faster than durable recurring revenue and wallet share."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en",
+          "claim_date": null
+        },
+        {
+          "url": "https://investors.robinhood.com/",
+          "claim_date": "2026-05-31"
+        },
+        {
+          "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+          "claim_date": "2026-04-28"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+          "claim_date": "2026-02-18"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Cortex usage is disclosed, but its incremental effect on Gold conversion, retention, deposits and trading is not.",
+        "why_it_matters": "High usage alone does not establish revenue or profit contribution; existing Gold users may consume Cortex without changing behavior.",
+        "next_research_trigger": "Inspect future earnings materials for active-user cohorts, Gold retention, pricing, usage frequency, net deposits and explicit AI-related cost or monetization disclosures.",
+        "sources": [
+          {
+            "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+            "claim_date": "2026-04-28"
+          },
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-presents-yes-no-event/",
+            "claim_date": "2025-12-16"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Agentic trading and cards are too new for public adoption, economics or loss-rate evidence.",
+        "why_it_matters": "The products could be a new distribution channel or a costly risk surface. Dedicated accounts and user controls do not establish demand, profitable monetization or low incident rates.",
+        "next_research_trigger": "Look for the first disclosed agentic-account, deposit, trading, card-spend, fraud, chargeback or complaint metrics, plus changes to privacy, customer and execution agreements.",
+        "sources": [
+          {
+            "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+            "claim_date": "2026-07-01"
+          },
+          {
+            "url": "https://robinhood.com/",
+            "claim_date": null
+          },
+          {
+            "url": "https://robinhood.com/us/en/agentic-credit-card/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The regulatory boundary between self-directed information, transaction assistance and individualized advice may shift as Cortex becomes more personalized and capable.",
+        "why_it_matters": "A change in classification could require additional suitability, fiduciary, disclosure, supervision and recordkeeping controls, altering product economics and rollout speed.",
+        "next_research_trigger": "Monitor revisions to the Cortex agreement, Form CRS and advisory brochures, together with SEC and FINRA guidance, examinations, complaints and enforcement involving generative-AI investment interactions.",
+        "sources": [
+          {
+            "url": "https://cdn.robinhood.com/assets/robinhood/legal/cortex_agreement.pdf",
+            "claim_date": "2026-07-02"
+          },
+          {
+            "url": "https://robinhood.com/us/en/about/legal/",
+            "claim_date": "2026-07-02"
+          },
+          {
+            "url": "https://robinhood.com/us/en/support/articles/cortex-digests/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public evidence does not identify the complete production model stack, vendor concentration, inference cost or evaluation thresholds for Cortex and other AI workflows.",
+        "why_it_matters": "Model quality, cost, outages, data rights and migration flexibility determine whether AI products scale economically and safely.",
+        "next_research_trigger": "Inspect engineering disclosures, vendor case studies, procurement or outage disclosures, model migrations, evaluation metrics and any quantified AI infrastructure spending.",
+        "sources": [
+          {
+            "url": "https://aws.amazon.com/blogs/machine-learning/an-innovative-financial-services-leader-finds-the-right-ai-solution-robinhood-and-amazon-nova/",
+            "claim_date": "2025-06-17"
+          },
+          {
+            "url": "https://aws.amazon.com/solutions/case-studies/robinhood-case-study/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The expanding product set may alter the low-leverage and low-capital-intensity characteristics cited in the public BIT thesis.",
+        "why_it_matters": "Margin, cards, banking partnerships, acquisitions, tokenized assets and global infrastructure can add credit, liquidity, regulatory-capital and funding requirements.",
+        "next_research_trigger": "Review each 10-Q for margin and credit balances, provisions, regulatory capital, corporate debt, acquisition funding and liquidity; reconcile Total Platform Asset growth among deposits, markets and acquired assets.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/en",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+            "claim_date": "2026-02-18"
+          },
+          {
+            "url": "https://investors.robinhood.com/",
+            "claim_date": "2026-05-31"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://bitcap.com/en",
+        "title": "BIT Capital public company thesis and investment approach",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+        "title": "2025 Annual Report on Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-18",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-fourth-quarter-and-full-year-2025-results",
+        "title": "Fourth Quarter and Full Year 2025 Results",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2026-02-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+        "title": "First Quarter 2026 Results",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2026-04-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.robinhood.com/static-files/6840cc36-4a2d-46d8-a9c3-0b334da724f8",
+        "title": "Q1 2026 Earnings Presentation",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2026-04-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.robinhood.com/",
+        "title": "Investor Relations Overview and KPI Definitions",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/gold/",
+        "title": "Gold Membership Product Page",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/strategies/",
+        "title": "Strategies Managed Investing Product Page",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/newsroom/introducing-strategies-banking-and-cortex/",
+        "title": "Introducing Strategies, Banking, and Cortex",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2025-03-27",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/newsroom/robinhood-presents-yes-no-event/",
+        "title": "Cortex and Prediction Markets Announcements at YES/NO",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2025-12-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/newsroom/hood-summit-2025-news/",
+        "title": "HOOD Summit 2025 Product Announcements",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2025-09-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://cdn.robinhood.com/assets/robinhood/legal/cortex_agreement.pdf",
+        "title": "Cortex Assistant Agreement",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2026-07-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/about/legal/",
+        "title": "Disclosure Library",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/support/articles/cortex-digests/",
+        "title": "Cortex Digests Disclosures and Support",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://aws.amazon.com/blogs/machine-learning/an-innovative-financial-services-leader-finds-the-right-ai-solution-robinhood-and-amazon-nova/",
+        "title": "An Innovative Financial Services Leader Finds the Right AI Solution: Robinhood and Amazon Nova",
+        "publisher": "Amazon Web Services",
+        "published_at": "2025-06-17",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://aws.amazon.com/solutions/case-studies/robinhood-case-study/",
+        "title": "Robinhood Transforms Financial Crimes Investigations Using Amazon Bedrock",
+        "publisher": "Amazon Web Services",
+        "published_at": null,
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+        "title": "Chain Mainnet, Stock Tokens, Agentic Trading and DeFi Product Announcements",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": "2026-07-01",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/",
+        "title": "Consumer Platform and Agentic Trading Overview",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://robinhood.com/us/en/agentic-credit-card/",
+        "title": "Agentic Credit Card Product Page",
+        "publisher": "Robinhood Markets, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_OobB3nHqfoEQl5cdZIhQm0w7HCVssVsm-cOfgRL8cyFGA3hhhYM2lZGeyiR-U9iBHxDOX1sJ8lQ3z3eSekt_tJ1MC3_78Z7_ExlFJQAfeB-vTe0KeWXQe8ppzQb97QgUiwXJe3ZlYy4LYg2ycd58_8IZlj_pJ8ylRvi6xMFllCkViGT0aPgRTlnNjVgeTE6DAw5VLzZFzViAXGBLjZsNTf8Gx9vkag26JqHLRb31m1L4C76i7CCxN6DIFnYqT7tCViz94cRVdr7M6vC-d03ALhwUCzIUiZIINT42sy6el-B7OzV30zqwzGst-MNqF1vwgZyRyF2I8v78CTakHz7VoIWYORHkZ_Gkpi3RNTcAa7j3BqJ-ByGPwOWH8wohuKcWJ0w0WlpbLtLbfEdtrIvFBFDBNKreL2ySomsZtM9NUqs5x3YCLa-szudpS_50qfW_23CtNbQgXdpvhjunQDP116JG",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 112749,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 85745,
+    "reasoning_tokens": 12922,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investors.robinhood.com Robinhood annual report 2025 10-K",
+        "type": "search",
+        "queries": [
+          "site:investors.robinhood.com Robinhood annual report 2025 10-K",
+          "site:investors.robinhood.com \"first quarter 2026\" Robinhood results Cortex",
+          "site:bitcap.com Robinhood \"Ahead of the Curve\"",
+          "site:sec.gov/Archives/edgar/data Robinhood Markets 10-K 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Robinhood 2025 10-K 0001783879-26-000023 html",
+        "type": "search",
+        "queries": [
+          "Robinhood 2025 10-K 0001783879-26-000023 html",
+          "Robinhood 2026 10-Q 0001783879-26-000062 html",
+          "site:robinhood.com/us/en/about/newsroom Cortex Assistant Robinhood 2026",
+          "site:robinhood.com Robinhood Gold Cortex advisory Strategies Banking 2026"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Transaction-based revenues",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en"
+      },
+      {
+        "pattern": "Robinhood",
+        "type": "find_in_page",
+        "url": "https://bitcap.com/en"
+      },
+      {
+        "query": "\"Robinhood brought a new generation of retail investors\"",
+        "type": "search",
+        "queries": [
+          "\"Robinhood brought a new generation of retail investors\"",
+          "site:bitcap.com/en Robinhood thesis balance sheet leverage forecasts quarterly operating metrics",
+          "site:bitcap.com Robinhood \"Total platform assets\"",
+          "site:bitcap.com Robinhood \"Paying subscribers\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en \"Robinhood\" \"Thesis\" \"Edge\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en \"Robinhood\" \"Thesis\" \"Edge\"",
+          "site:bitcap.com/en \"Robinhood\" \"low balance-sheet leverage\"",
+          "site:bitcap.com/en \"Robinhood\" \"quarterly operating metrics\"",
+          "site:bitcap.com/en \"Robinhood\" \"full-stack wealth-management\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investors.robinhood.com/static-files 2025 annual report Robinhood PDF transaction-based revenues net interest revenues",
+        "type": "search",
+        "queries": [
+          "site:investors.robinhood.com/static-files 2025 annual report Robinhood PDF transaction-based revenues net interest revenues",
+          "site:investors.robinhood.com \"2025 Annual Report\" \"Transaction-based revenues\" Robinhood",
+          "site:investors.robinhood.com \"2025\" \"net interest revenues\" \"Gold subscription\" Robinhood",
+          "site:investors.robinhood.com \"nine businesses\" \"$100 million\" Robinhood 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/0001783879-26-000023-index.html"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/0001783879-26-000023.txt"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm?output=1"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm \"market makers\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm \"market makers\"",
+          "site:sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm \"Amazon Web Services\"",
+          "site:sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm \"Our competitors\"",
+          "site:sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm \"artificial intelligence\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Robinhood 2025 annual report market makers AWS competition regulatory artificial intelligence",
+        "type": "search",
+        "queries": [
+          "Robinhood 2025 annual report market makers AWS competition regulatory artificial intelligence",
+          "Robinhood 2025 10-K customer trading activity PFOF net interest competitors",
+          "Robinhood 2025 annual report cloud service provider third parties",
+          "Robinhood 2025 annual report regulatory authorities FINRA SEC FCA MiCA"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.robinhood.com/financials/annual-reports"
+      },
+      {
+        "query": "\"Robinhood Markets, Inc. 2025 Annual Report\" pdf",
+        "type": "search",
+        "queries": [
+          "\"Robinhood Markets, Inc. 2025 Annual Report\" pdf",
+          "site:investors.robinhood.com/static-files \"2025 Annual Report\" \"Robinhood Markets\"",
+          "site:investors.robinhood.com/static-files \"For the fiscal year ended December 31, 2025\" Robinhood PDF",
+          "site:investors.robinhood.com/static-files 2025 annual report robinhood markets inc 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:robinhood.com/us/en/newsroom Robinhood Cortex Assistant model Amazon Nova 2026",
+        "type": "search",
+        "queries": [
+          "site:robinhood.com/us/en/newsroom Robinhood Cortex Assistant model Amazon Nova 2026",
+          "site:robinhood.com/us/en/newsroom Robinhood AI engineering Amazon Nova Cortex",
+          "site:robinhood.com/us/en/support/articles \"Cortex Assistant\" Robinhood",
+          "site:aws.amazon.com Robinhood Cortex Amazon Nova 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Robinhood Cortex Assistant rolling out 2026 official",
+        "type": "search",
+        "queries": [
+          "Robinhood Cortex Assistant rolling out 2026 official",
+          "site:robinhood.com/us/en \"Cortex Assistant\"",
+          "site:robinhood.com \"Portfolio Digests\" \"Cortex Assistant\"",
+          "site:investors.robinhood.com \"Cortex Assistant\""
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "not provide investment advice",
+        "type": "find_in_page",
+        "url": "https://cdn.robinhood.com/assets/robinhood/legal/cortex_agreement.pdf"
+      },
+      {
+        "type": "open_page",
+        "url": "https://cdn.robinhood.com/assets/robinhood/legal/cortex_agreement.pdf"
+      },
+      {},
+      {
+        "query": "\"ROBINHOOD CORTEX ASSISTANT AGREEMENT\" inaccurate advice transactions",
+        "type": "search",
+        "queries": [
+          "\"ROBINHOOD CORTEX ASSISTANT AGREEMENT\" inaccurate advice transactions",
+          "\"Cortex Assistant\" \"investment advice\" Robinhood agreement",
+          "\"Cortex Assistant\" Robinhood \"may make mistakes\"",
+          "\"Cortex Assistant\" Robinhood confirm transaction agreement"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:robinhood.com/us/en/newsroom \"Agentic Trading\" Robinhood 2026",
+        "type": "search",
+        "queries": [
+          "site:robinhood.com/us/en/newsroom \"Agentic Trading\" Robinhood 2026",
+          "site:investors.robinhood.com \"Agentic Trading\" Robinhood",
+          "site:robinhood.com \"Model Context Protocol\" Robinhood trading 2026",
+          "site:cdn.robinhood.com Robinhood agentic trading agreement"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:robinhood.com/us/en/support/articles \"Agentic Trading\"",
+        "type": "search",
+        "queries": [
+          "site:robinhood.com/us/en/support/articles \"Agentic Trading\"",
+          "site:robinhood.com/us/en \"Agentic account\" Robinhood",
+          "site:robinhood.com \"Send your agent to the market\"",
+          "site:cdn.robinhood.com/assets/robinhood/legal \"Agentic Trading\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://bitcap.com/en",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-fourth-quarter-and-full-year-2025-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.robinhood.com/static-files/6840cc36-4a2d-46d8-a9c3-0b334da724f8",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.robinhood.com/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/gold/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/strategies/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/newsroom/introducing-strategies-banking-and-cortex/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/newsroom/robinhood-presents-yes-no-event/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/newsroom/hood-summit-2025-news/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://cdn.robinhood.com/assets/robinhood/legal/cortex_agreement.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/about/legal/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/support/articles/cortex-digests/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://aws.amazon.com/blogs/machine-learning/an-innovative-financial-services-leader-finds-the-right-ai-solution-robinhood-and-amazon-nova/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://aws.amazon.com/solutions/case-studies/robinhood-case-study/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://robinhood.com/us/en/agentic-credit-card/",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:hood",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

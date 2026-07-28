@@ -1,0 +1,1003 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Kaspi",
+    "ticker": "KSPI"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A two-sided consumer and merchant Super App ecosystem in Kazakhstan integrates payments, commerce and financial services, allowing engagement and transaction data from one service to reinforce the others. The company also controls the Hepsiburada e-commerce platform in Türkiye and, on 2026-07-15, completed the acquisition of a fully licensed Turkish bank. Türkiye represented half of e-commerce GMV in 1Q 2026, making international execution a material operating condition rather than an optional adjacency. The core Kazakhstan platforms remain transaction- and data-driven, while Turkish banking and lending will increase funding, balance-sheet and regulatory exposure.",
+      "revenue_engines": [
+        {
+          "engine": "Payments platform",
+          "who_pays": "Merchants and consumers pay transaction, acquiring and membership-related fees; interest is also earned on certain current-account balances.",
+          "economic_logic": "Revenue is primarily transaction volume multiplied by the effective payments take rate, plus interest on balances. Profitability depends on TPV, transaction frequency, merchant acceptance, B2B mix and operating leverage.",
+          "sources": [
+            {
+              "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+              "claim_date": "2026-03-16"
+            },
+            {
+              "url": "https://ir.kaspi.kz/platforms/payments/",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Marketplace and commerce services",
+          "who_pays": "Third-party merchants pay commissions and fees for advertising, delivery and related services; consumers generate merchandise revenue in selected first-party formats.",
+          "economic_logic": "GMV and order frequency create commission revenue, while advertising, delivery, classifieds and other value-added services can lift the take rate. First-party commerce adds merchandise margin but also inventory, fulfilment and working-capital exposure.",
+          "sources": [
+            {
+              "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+              "claim_date": "2026-03-16"
+            },
+            {
+              "url": "https://ir.kaspi.kz/platforms/marketplace/",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+              "claim_date": "2026-05-11"
+            }
+          ]
+        },
+        {
+          "engine": "Fintech platform",
+          "who_pays": "Consumers and merchants using BNPL, consumer finance, vehicle finance and business lending pay interest or finance charges; depositors and wholesale creditors provide funding.",
+          "economic_logic": "Economics are governed by the average loan portfolio and asset yield less deposit and wholesale funding costs, credit losses and servicing expenses. Real-time underwriting and ecosystem data can support approval speed and cross-selling, but errors flow directly into cost of risk.",
+          "sources": [
+            {
+              "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+              "claim_date": "2026-03-16"
+            },
+            {
+              "url": "https://ir.kaspi.kz/platforms/e-finance/",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+              "claim_date": "2026-05-11"
+            }
+          ]
+        },
+        {
+          "engine": "Türkiye e-commerce and emerging financial-services ecosystem",
+          "who_pays": "Hepsiburada merchants and consumers generate marketplace, first-party retail, advertising, delivery and related revenue. The acquired bank creates a route to Turkish deposits, payments and credit products.",
+          "economic_logic": "Near-term economics depend on orders, consumer engagement, take rate, delivery and marketing efficiency, with Hepsiburada intentionally managed around adjusted EBITDA breakeven. Longer-term value requires converting commerce engagement into profitable payments and deposit-funded fintech without excessive credit or capital costs.",
+          "sources": [
+            {
+              "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+              "claim_date": "2026-03-02"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+              "claim_date": "2026-05-11"
+            },
+            {
+              "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+              "claim_date": "2026-07-15"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+          "claim_date": "2026-03-16"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+          "claim_date": "2026-05-11"
+        },
+        {
+          "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+          "claim_date": "2026-07-15"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Consumer and merchant engagement across the ecosystem",
+        "why_it_matters": "Active users, merchants, transaction frequency and cross-platform adoption determine network density and the number of opportunities to monetize payments, commerce, advertising and finance. Engagement is more informative than stand-alone app downloads.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/about/mission/",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          }
+        ]
+      },
+      {
+        "driver": "Payments TPV, transaction count, merchant acceptance and take rate",
+        "why_it_matters": "Higher merchant penetration and frequency expand fee revenue, while B2B and other monetized transactions can improve mix. Profit growth can exceed revenue growth when transaction volumes scale over a largely digital cost base.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/platforms/payments/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000119312525273215/kspi-ex99_1.htm",
+            "claim_date": "2025-11-10"
+          }
+        ]
+      },
+      {
+        "driver": "Commerce GMV, orders, purchase frequency and value-added-service penetration",
+        "why_it_matters": "GMV supplies the base commission pool, but advertising and delivery adoption can make revenue grow faster than GMV. Product selection, search relevance, delivery speed and purchase frequency drive conversion and repeat use.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "working_capital"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/platforms/marketplace/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+            "claim_date": "2026-05-11"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "driver": "Loan growth, portfolio yield, funding cost and credit performance",
+        "why_it_matters": "Fintech earnings can be compressed even with strong loan growth if deposit costs, wholesale funding or provisions rise. Approval quality, portfolio duration, cost of risk, NPLs and fraud losses must therefore be assessed together.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/platforms/e-finance/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+            "claim_date": "2026-05-11"
+          }
+        ]
+      },
+      {
+        "driver": "Türkiye engagement, monetization and financial-services execution",
+        "why_it_matters": "Hepsiburada order growth, engaged consumers, delivery performance, take rate and marketing efficiency determine whether international expansion can move from breakeven investment to durable profit. The Turkish bank adds deposit, credit, integration and regulatory variables.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+            "claim_date": "2026-07-15"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Consumers, merchants and small businesses in Kazakhstan; consumers, merchants and entrepreneurs in Türkiye",
+        "why_it_matters": "Consumer frequency and merchant participation create the two-sided network effects that support payments, commerce, advertising and credit cross-selling. Türkiye materially enlarges the addressable market but has different competitive, currency and regulatory conditions.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Controlling_Interest_in_Hepsiburada.pdf",
+            "claim_date": "2025-01-29"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Local banks, global card networks, Alipay+ and logistics or delivery partners",
+        "why_it_matters": "Interoperability and delivery partnerships expand acceptance, cross-border usability and service coverage. Changes in partner access, economics or technical reliability can alter transaction volume and customer experience.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/platforms/payments/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000119312525273215/kspi-ex99_1.htm",
+            "claim_date": "2025-11-10"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Mobile applications, proprietary data and decision systems, payments infrastructure, delivery networks, software and hardware providers, credit bureaus and collection services",
+        "why_it_matters": "The ecosystem depends on high availability, low-latency decisions and trustworthy identity, payments and fulfilment. Outages, data loss, vendor failures or cyber incidents can affect several interconnected services simultaneously.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Banks and digital wallets, domestic and international marketplaces, classifieds, travel, grocery and delivery platforms",
+        "why_it_matters": "Competitors can contest users, merchants, payment acceptance, deposits, credit customers and advertising budgets. Competition can increase incentives and marketing costs or pressure lending yields and marketplace take rates.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Kazakhstan financial, payments, competition and data authorities; Türkiye's banking, central-bank, competition and communications authorities",
+        "why_it_matters": "Banking, payments, lending, biometrics, data processing and acquisitions require licenses or approvals. Regulatory changes can affect credit growth, funding, product design, merchant economics and the ability to combine commerce with finance.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Controlling_Interest_in_Hepsiburada.pdf",
+            "claim_date": "2025-01-29"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+            "claim_date": "2026-07-15"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Build toward a 100 million-user business by transferring commerce, payments and fintech expertise to Türkiye while maintaining Hepsiburada as a distinct operating brand.",
+        "investment_relevance": "This is the principal international-expansion test. Success would diversify the profit pool; failure could create prolonged marketing, integration and funding requirements that dilute Kazakhstan's profit compounding.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Controlling_Interest_in_Hepsiburada.pdf",
+            "claim_date": "2025-01-29"
+          }
+        ]
+      },
+      {
+        "action": "Use the Turkish bank acquired on 2026-07-15 to develop local deposits, payments and other financial services.",
+        "investment_relevance": "A local funding base can strengthen commerce-finance economics, but it introduces deposit pricing, underwriting, capital, compliance and credit-cycle risk. Product launches and segment disclosures are necessary before assigning material value.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+            "claim_date": "2026-07-15"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "action": "Scale e-commerce monetization through advertising, delivery, personalization, relevant search and improved marketing efficiency.",
+        "investment_relevance": "These services can lift take rate and conversion without requiring proportionate GMV growth. The key test is whether incremental revenue exceeds delivery, marketing and technology costs and leads to durable margin progression.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+            "claim_date": "2026-05-11"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "action": "Deploy generative-AI tools for merchants and product presentation; by 2025-11-10, proprietary tools had enriched roughly 500,000 popular marketplace products, with broader merchant rollout planned from January 2026.",
+        "investment_relevance": "This is a concrete AI workflow tied to catalog quality, consumer conversion and merchant productivity. Public reporting has not yet isolated adoption, model cost or incremental GMV attributable to the tools.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000119312525273215/kspi-ex99_1.htm",
+            "claim_date": "2025-11-10"
+          }
+        ]
+      },
+      {
+        "action": "Unveil Kasper, a personal AI assistant intended to make AI useful in customers' everyday activities.",
+        "investment_relevance": "Kasper creates a potential conversational interface across shopping, payments and finance. Materiality depends on rollout, active use, transaction conversion, trust, inference cost and the boundaries placed around financial recommendations and execution.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/news/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.manilatimes.net/2026/07/14/tmt-newswire/globenewswire/watch-the-kaspi-event-mikheil-lomtadze-unveils-kasper/2384383",
+            "claim_date": "2026-07-14"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "More capable multimodal and agentic models improve the usefulness of the Kasper personal assistant.",
+        "company_exposure": "The assistant can sit inside a high-frequency Super App with access to commerce, payments and financial-service workflows, subject to consent and product controls.",
+        "affected_driver": "Search-to-purchase conversion, purchase frequency, cross-platform adoption, retention and service-contact volume.",
+        "financial_consequence": "Potentially higher GMV, TPV, advertising and delivery revenue, partially offset by inference, safety, support and remediation costs.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if a significant user cohort adopts the assistant and demonstrates sustained incremental transaction or retention uplift after model-serving costs, without higher complaints, refunds or harmful financial outcomes.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Kasper rollout coverage and active usage",
+          "Conversion and transaction frequency for exposed versus control cohorts",
+          "Advertising and delivery revenue per active user",
+          "Inference and customer-support cost per interaction",
+          "Complaint, refund and safety-incident rates"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/news/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.manilatimes.net/2026/07/14/tmt-newswire/globenewswire/watch-the-kaspi-event-mikheil-lomtadze-unveils-kasper/2384383",
+            "claim_date": "2026-07-14"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          }
+        ]
+      },
+      {
+        "development": "Generative models improve catalog creation, product-data enrichment and advertising creative for merchants.",
+        "company_exposure": "Proprietary AI tools have already been used to enrich product presentation, and the marketplace monetizes both transaction conversion and merchant advertising.",
+        "affected_driver": "SKU quality and selection, merchant onboarding effort, search relevance, conversion, advertising adoption and marketplace take rate.",
+        "financial_consequence": "Higher GMV and advertising revenue with potentially lower content-production costs; poor output could instead increase catalog errors, misleading listings, returns or moderation expense.",
+        "direction": "upside",
+        "materiality_condition": "Merchant adoption must become broad enough to improve conversion or advertising spend at scale, with incremental revenue exceeding model, moderation and remediation costs.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Number and share of AI-enriched listings",
+          "Merchant adoption and repeat use",
+          "Advertising revenue and marketplace take rate",
+          "Conversion and return rates by enriched-listing cohort",
+          "Catalog-quality complaints and moderation expense"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000119312525273215/kspi-ex99_1.htm",
+            "claim_date": "2025-11-10"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+            "claim_date": "2026-05-11"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models improve or disrupt underwriting, fraud detection, identity verification and collections.",
+        "company_exposure": "The platform makes real-time credit decisions and links payments, commerce and lending data; errors or adversarial attacks can propagate across multiple services.",
+        "affected_driver": "Approval rates, loan growth, fraud losses, cost of risk, manual-review rates, collections efficiency and customer inclusion.",
+        "financial_consequence": "Better decisions could increase risk-adjusted lending revenue and reduce fraud and operating expense. Model drift, bias or manipulation could raise provisions, regulatory costs and reputational damage.",
+        "direction": "mixed",
+        "materiality_condition": "The models must be deployed across a material share of loans or transactions and demonstrate superior out-of-sample loss and fraud performance through macroeconomic and adversarial changes.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Approval rates and average loan size",
+          "Cost of risk, NPLs and vintage loss curves",
+          "Fraud losses and false-positive rates",
+          "Manual-review and collections costs",
+          "Fair-lending, privacy and regulatory findings"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/platforms/e-finance/",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+            "claim_date": "2026-05-11"
+          }
+        ]
+      },
+      {
+        "development": "AI-driven search, personalization, marketing and service automation are localized for Hepsiburada and the Turkish financial-services build-out.",
+        "company_exposure": "Management is already prioritizing personalization, relevant search and marketing efficiency in Türkiye, while the newly acquired bank provides a route to commerce-finance cross-selling.",
+        "affected_driver": "Engaged consumers, order frequency, customer-acquisition cost, service cost, take rate and financial-product adoption in Türkiye.",
+        "financial_consequence": "Successful localization could accelerate revenue and move the Turkish segment above breakeven; weak local-language performance or unsuitable recommendations could increase marketing, service, compliance and credit costs.",
+        "direction": "upside",
+        "materiality_condition": "The effect is material if AI-enabled cohorts produce sustained improvements in engagement and contribution profit and the Turkish operation achieves durable positive adjusted EBITDA without disproportionate funding or credit risk.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Engaged consumers and order growth in Türkiye",
+          "Search conversion and purchases per consumer",
+          "Marketing and customer-service cost per order",
+          "Turkish take rate and adjusted EBITDA",
+          "Launch, adoption and credit performance of Turkish financial products"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+            "claim_date": "2026-07-15"
+          }
+        ]
+      },
+      {
+        "development": "Third-party AI shopping or financial agents become the primary customer interface and route transactions across competing providers.",
+        "company_exposure": "Direct Super App engagement and on-platform discovery support advertising, merchant conversion and cross-selling. External agents could bypass those surfaces, although integration could also deliver incremental transactions.",
+        "affected_driver": "Direct engagement, advertising inventory, merchant pricing power, product comparison intensity and customer acquisition.",
+        "financial_consequence": "Disintermediation could reduce advertising revenue, take rate and retention; successful agent integrations could increase TPV or GMV but make customer ownership and pricing less defensible.",
+        "direction": "mixed",
+        "materiality_condition": "The pathway becomes material if a meaningful share of commerce or financial-product selection in Kazakhstan or Türkiye shifts to agents not controlled by, or economically integrated with, the ecosystem.",
+        "time_horizon": "long_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Share of orders or applications initiated outside owned apps",
+          "Direct-app engagement and transaction frequency",
+          "Advertising yield and merchant retention",
+          "Agent or API partnerships",
+          "Evidence of intensified price comparison or take-rate pressure"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://ir.kaspi.kz/about/mission/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+            "claim_date": "2026-05-11"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "BIT's September 2024 commentary focused on continued profit compounding in Kazakhstan alongside international expansion. BIT also said the 2024 short-seller report lacked merit, citing subsequent company and Kazakhstan central-bank statements and facts.",
+      "what_would_support_it": [
+        "Sustained Kazakhstan engagement, transaction growth and monetization translate into continued profit growth rather than merely higher gross volumes.",
+        "Hepsiburada engagement and order growth mature into durable positive profitability, with Turkish payments and fintech adding returns rather than prolonged capital requirements.",
+        "AI initiatives produce measurable conversion, advertising, service-cost or risk improvements without offsetting credit, regulatory or customer-trust damage.",
+        "International expansion remains disciplined and does not weaken the funding or cash-generation capacity of the Kazakhstan business."
+      ],
+      "what_would_challenge_it": [
+        "Domestic transaction frequency, marketplace monetization or profit growth structurally slows.",
+        "Türkiye remains around breakeven or loss-making despite sustained marketing, delivery and banking investment.",
+        "Funding costs, credit losses, currency exposure or regulatory changes overwhelm product-level gains.",
+        "AI-related errors, bias, fraud, privacy failures or external-agent disintermediation weaken trust, engagement or take rates."
+      ],
+      "sources": [
+        {
+          "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595",
+          "claim_date": "2024-09-30"
+        },
+        {
+          "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+          "claim_date": "2026-03-02"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+          "claim_date": "2026-05-11"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Kasper's architecture, model suppliers, rollout timetable, tool permissions, safety controls and unit economics have not been quantified publicly.",
+        "why_it_matters": "The assistant's financial relevance depends on transaction conversion and retention net of inference, support, compliance and remediation costs.",
+        "next_research_trigger": "Inspect subsequent earnings materials and product documentation for rollout coverage, active-user metrics, controlled-cohort outcomes, model costs and limits on payment or financial actions.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/news/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.manilatimes.net/2026/07/14/tmt-newswire/globenewswire/watch-the-kaspi-event-mikheil-lomtadze-unveils-kasper/2384383",
+            "claim_date": "2026-07-14"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The status and causal financial contribution of the planned broad merchant AI-tool rollout are not disclosed.",
+        "why_it_matters": "Marketplace growth and advertising revenue can move for many reasons, so aggregate GMV does not establish that AI improved conversion or merchant productivity.",
+        "next_research_trigger": "Look for merchant adoption, AI-enriched SKU counts, A/B conversion results, advertising-spend uplift, return rates and model or moderation costs.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1985487/000119312525273215/kspi-ex99_1.htm",
+            "claim_date": "2025-11-10"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The post-acquisition Turkish banking roadmap, funding mix, product sequencing and risk appetite remain under-specified.",
+        "why_it_matters": "A bank license can improve fintech economics, but deposit competition, capital requirements and immature underwriting could delay or reverse the expected profit contribution.",
+        "next_research_trigger": "Review the first Turkish deposit, payments or lending launches and seek separate disclosures for deposits, loan vintages, funding cost, cost of risk and regulatory capital.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+            "claim_date": "2026-07-15"
+          },
+          {
+            "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Model governance across biometrics, credit, fraud and personal assistance is not described at the level needed to assess frontier-model risk.",
+        "why_it_matters": "The integrated ecosystem can amplify a model failure across payments, commerce and lending, creating simultaneous financial, regulatory and reputational consequences.",
+        "next_research_trigger": "Monitor privacy and AI regulation, model-risk disclosures, external audits, customer-remediation events, cyber incidents and regulator findings in Kazakhstan and Türkiye.",
+        "sources": [
+          {
+            "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+            "claim_date": "2026-03-16"
+          },
+          {
+            "url": "https://ir.kaspi.kz/platforms/e-finance/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "BIT's attributable public view is limited to brief September 2024 commentary and may not reflect the expanded Türkiye and AI strategy.",
+        "why_it_matters": "Later Events should not be classified against an inferred or updated BIT thesis without new attributable evidence.",
+        "next_research_trigger": "Search future BIT factsheets, investor letters, interviews or presentations for explicit discussion of domestic profit compounding, Türkiye execution or AI initiatives.",
+        "sources": [
+          {
+            "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595",
+            "claim_date": "2024-09-30"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+        "title": "Annual Report on Form 20-F for the Year Ended December 31, 2025",
+        "publisher": "Kaspi.kz",
+        "published_at": "2026-03-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+        "title": "1Q 2026 Financial Results, Exhibit 99.1",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+        "title": "4Q and FY 2025 Financial Results",
+        "publisher": "Kaspi.kz",
+        "published_at": "2026-03-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1985487/000119312525273215/kspi-ex99_1.htm",
+        "title": "3Q and 9M 2025 Financial Results, Exhibit 99.1",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2025-11-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/about/mission/",
+        "title": "Mission and Ecosystem Overview",
+        "publisher": "Kaspi.kz",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/platforms/payments/",
+        "title": "Payments Platform Overview",
+        "publisher": "Kaspi.kz",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/platforms/marketplace/",
+        "title": "Marketplace Platform Overview",
+        "publisher": "Kaspi.kz",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/platforms/e-finance/",
+        "title": "Fintech Platform Overview",
+        "publisher": "Kaspi.kz",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Controlling_Interest_in_Hepsiburada.pdf",
+        "title": "Completion of Acquisition of Controlling Interest in Hepsiburada",
+        "publisher": "Kaspi.kz",
+        "published_at": "2025-01-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+        "title": "Completion of Acquisition of Rabobank A.Ş. in Türkiye",
+        "publisher": "Kaspi.kz",
+        "published_at": "2026-07-15",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.kaspi.kz/news/",
+        "title": "News and Events",
+        "publisher": "Kaspi.kz",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.manilatimes.net/2026/07/14/tmt-newswire/globenewswire/watch-the-kaspi-event-mikheil-lomtadze-unveils-kasper/2384383",
+        "title": "Watch the Kaspi Event: Mikheil Lomtadze Unveils Kasper",
+        "publisher": "The Manila Times / GlobeNewswire",
+        "published_at": "2026-07-14",
+        "source_type": "high_quality_secondary"
+      },
+      {
+        "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595",
+        "title": "BIT Global Technology Opportunities September 2024 Factsheet",
+        "publisher": "BIT Capital",
+        "published_at": "2024-09-30",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp__cqQolqG4l8AgUvYwwH94y2U3MUhFx3-axho5e1Zi1EyFqwk84BeGxxz96iN9I38_-hLxzmHolJHWFP0WYe5NgZjlfqLyQc2nHl2lu0uBG4b1JaceUx2Kac8ieY3Y7r3egIQz5iF6Mi9MFQ3GVnBLa8kyHKkr0rii8E3zcHuconwTDRTTDxiW7p0ihzBiYYC2WuBapRrcLxTzY8tPT4xKN3Q_1PCWda9Z3FefbuLsN8cQQpl5RozCrqWuNxtSOcJEZvM9Gx8-w9uNv1NlByh7Fm2GWLN-7YpEIKfW5xsHMxrFFZs66bXtg5JoNUqpK3HwifyBVWDK-BZoDa62eFN8Q-Yp5R9tbmPBNOn7yZdfbYNkRsgchzsWNEaSwArnorJdTAYuTb8hi-DHrPIQV04HvhQiRn3jXnGrwELCK3fnYSgHqZTq0AxvYsT1FsSLMJhYRVjbLtM8D-tmiJabtf_CxGz",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 111358,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 65578,
+    "reasoning_tokens": 10381,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:ir.kaspi.kz 2025 annual report 20-F Kaspi PDF",
+        "type": "search",
+        "queries": [
+          "site:ir.kaspi.kz 2025 annual report 20-F Kaspi PDF",
+          "site:ir.kaspi.kz 2026 Kaspi quarterly results Hepsiburada investor presentation",
+          "site:ir.kaspi.kz Kaspi artificial intelligence AI machine learning annual report",
+          "site:info.bitcap.com Kaspi September 2024 factsheet PDF BIT"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Controlling_Interest_in_Hepsiburada.pdf"
+      },
+      {
+        "pattern": "artificial intelligence",
+        "type": "find_in_page",
+        "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf"
+      },
+      {
+        "query": "Kaspi 2025 20-F SEC 2026 accession artificial intelligence machine learning",
+        "type": "search",
+        "queries": [
+          "Kaspi 2025 20-F SEC 2026 accession artificial intelligence machine learning",
+          "site:sec.gov/Archives/edgar/data Kaspi 20-F 2025",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf \"Technology\" Kaspi",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf \"Hepsiburada\" \"Revenue\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/edgar/browse/?CIK=0001985487"
+      },
+      {
+        "type": "open_page",
+        "url": "https://data.sec.gov/submissions/CIK0001985487.json"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1985487/ 2026 20-F Kaspi 2025",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1985487/ 2026 20-F Kaspi 2025",
+          "site:sec.gov/Archives/edgar/data/1985487 \"2025\" \"20-F\" \"Kaspi.kz\"",
+          "site:sec.gov/Archives/edgar/data/1985487 \"Artificial intelligence\" Kaspi",
+          "site:sec.gov/Archives/edgar/data/1985487 \"March 16, 2026\" Kaspi"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.kaspi.kz/governance/sec_filings/"
+      },
+      {},
+      {
+        "query": "site:ir.kaspi.kz/platforms/payments Kaspi Payments Platform merchants fees",
+        "type": "search",
+        "queries": [
+          "site:ir.kaspi.kz/platforms/payments Kaspi Payments Platform merchants fees",
+          "site:ir.kaspi.kz/platforms/marketplace Kaspi Marketplace revenue take rate",
+          "site:ir.kaspi.kz/platforms/e-finance Kaspi Fintech platform revenue loans deposits",
+          "site:ir.kaspi.kz/about/mission Kaspi Super App network effects"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.kaspi.kz/about/mission/"
+      },
+      {
+        "query": "site:ir.kaspi.kz/media/Form_20-F_2025.pdf Kaspi Payments revenue transaction fees membership fees merchant acquiring",
+        "type": "search",
+        "queries": [
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf Kaspi Payments revenue transaction fees membership fees merchant acquiring",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf Kaspi Marketplace revenue commissions delivery advertising",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf Kaspi Fintech revenue interest income fees",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf Hepsiburada revenue marketplace delivery advertising fintech"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Kaspi 20-F Payments Platform revenue transaction fees Marketplace commissions Fintech interest income",
+        "type": "search",
+        "queries": [
+          "Kaspi 20-F Payments Platform revenue transaction fees Marketplace commissions Fintech interest income",
+          "Kaspi annual report payment membership fee marketplace seller commission fintech interest revenue",
+          "Kaspi investor presentation Payments Marketplace Fintech revenue take rate 2025",
+          "Kaspi Hepsiburada revenue sources marketplace direct sales advertising delivery fintech annual report"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.publicnow.com/view/DDAFB3D89E3CDA1C99B00EA8FE31BB31949089E2"
+      },
+      {
+        "query": "site:ir.kaspi.kz/media/1Q_2026_Results.pdf \"Kaspi AI\"",
+        "type": "search",
+        "queries": [
+          "site:ir.kaspi.kz/media/1Q_2026_Results.pdf \"Kaspi AI\"",
+          "site:ir.kaspi.kz/media/1Q_2026_Results.pdf \"artificial intelligence\"",
+          "site:ir.kaspi.kz/media/1Q_2026_Results.pdf personalisation search advertising delivery",
+          "site:ir.kaspi.kz/media/1Q_2026_Results.pdf credit quality Cost of Risk deposits"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Kaspi 1Q 2026 Kaspi AI assistant personalization search results",
+        "type": "search",
+        "queries": [
+          "Kaspi 1Q 2026 Kaspi AI assistant personalization search results",
+          "Kaspi 1Q 2026 AI merchant tools advertising delivery Hepsiburada",
+          "Kaspi 1Q 2026 credit quality cost of risk deposit costs results",
+          "Kaspi 1Q 2026 Rabobank Hepsiburada payments fintech strategy"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1985487/ \"20-F\" \"December 31, 2025\" \"Kaspi.kz\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1985487/ \"20-F\" \"December 31, 2025\" \"Kaspi.kz\"",
+          "site:sec.gov/Archives/edgar/data/1985487/ 2026 \"kspi-20251231\"",
+          "site:sec.gov/Archives/edgar/data/1985487/ \"Monthly Transactions per Active Consumer was 77\"",
+          "site:sec.gov/Archives/edgar/data/1985487/ \"Payments revenue is mainly generated\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.kaspi.kz/media \"Kaspi Ai assistant\"",
+        "type": "search",
+        "queries": [
+          "site:ir.kaspi.kz/media \"Kaspi Ai assistant\"",
+          "site:ir.kaspi.kz/media \"500K\" \"AI\" \"Marketplace products\" Kaspi",
+          "site:ir.kaspi.kz/media \"AI tools\" \"merchants\" Kaspi",
+          "site:ir.kaspi.kz/media \"Kaspi AI\" \"1Q 2026\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"We believe Kaspi Ai leads\"",
+        "type": "search",
+        "queries": [
+          "\"We believe Kaspi Ai leads\"",
+          "\"Kaspi Ai\" \"higher quality shopping experience\"",
+          "\"Kaspi Ai\" \"superior conversion\" merchants",
+          "\"Kaspi AI assistant\" 18 months 500K products"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1985487 Kaspi credit scoring proprietary data real time fraud 2025",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1985487 Kaspi credit scoring proprietary data real time fraud 2025",
+          "site:ir.kaspi.kz Kaspi fraud detection machine learning credit scoring",
+          "site:ir.kaspi.kz/media/3Q_2025_Presentation.pdf Kaspi AI credit",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf credit scoring fraud data analytics"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1985487 \"Fintech revenue\" \"interest income\" Kaspi 2025",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1985487 \"Fintech revenue\" \"interest income\" Kaspi 2025",
+          "site:sec.gov/Archives/edgar/data/1985487 \"Marketplace revenue\" Kaspi commissions advertising delivery 2025",
+          "site:sec.gov/Archives/edgar/data/1985487 \"Payments revenue\" Kaspi fees merchants consumers 2025",
+          "site:sec.gov/Archives/edgar/data/1985487 \"Hepsiburada\" \"revenue\" \"2025\" \"Kaspi\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Fintech revenue is\" \"Kaspi\"",
+        "type": "search",
+        "queries": [
+          "\"Fintech revenue is\" \"Kaspi\"",
+          "\"Marketplace revenue is\" \"Kaspi\"",
+          "\"Payments revenue is mainly generated\" \"Kaspi\"",
+          "\"interest income\" \"Fintech Platform\" \"Kaspi\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Kaspi 2025 annual report competitors Halyk Freedom Wildberries Ozon Trendyol Amazon Hepsiburada",
+        "type": "search",
+        "queries": [
+          "Kaspi 2025 annual report competitors Halyk Freedom Wildberries Ozon Trendyol Amazon Hepsiburada",
+          "site:sec.gov/Archives/edgar/data/1985487 Kaspi competitors Kazakhstan Türkiye Hepsiburada Trendyol",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf competition Halyk Trendyol",
+          "site:ir.kaspi.kz/media/Form_20-F_2025.pdf Visa Mastercard cloud data center suppliers"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.kaspi.kz Rabobank acquisition completed July 2026 Kaspi official",
+        "type": "search",
+        "queries": [
+          "site:ir.kaspi.kz Rabobank acquisition completed July 2026 Kaspi official",
+          "site:ir.kaspi.kz Kaspi receives Turkish regulatory approval Rabobank June 2026",
+          "site:ir.kaspi.kz Tencent invests Kaspi 2026 official",
+          "site:ir.kaspi.kz Kaspi 85.17% Hepsiburada 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.kaspi.kz Kasper Mikheil Lomtadze unveils Kasper AI July 2026",
+        "type": "search",
+        "queries": [
+          "site:ir.kaspi.kz Kasper Mikheil Lomtadze unveils Kasper AI July 2026",
+          "Kaspi Kasper AI assistant official July 2026",
+          "site:ir.kaspi.kz/news \"Kasper\" Kaspi",
+          "site:ir.kaspi.kz/media \"Kasper\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.kaspi.kz/news/"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://ir.kaspi.kz/media/Form_20-F_2025.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1985487/000198548726000015/kspi-ex99_1.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/media/4Q__FY_2025_Financial_Results_.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1985487/000119312525273215/kspi-ex99_1.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/about/mission/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/platforms/payments/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/platforms/marketplace/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/platforms/e-finance/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Controlling_Interest_in_Hepsiburada.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/media/Kaspi.kz_Completes_Acquisition_of_Rabobank_A.%C5%9E._in_T%C3%BCrkiye.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.kaspi.kz/news/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.manilatimes.net/2026/07/14/tmt-newswire/globenewswire/watch-the-kaspi-event-mikheil-lomtadze-unveils-kasper/2384383",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:kspi",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}
