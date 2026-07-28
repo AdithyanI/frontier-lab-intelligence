@@ -1056,12 +1056,6 @@ const INVESTMENT_AGENT_DIRECTION = {
   unclear: { icon: '?', label: 'Direction unclear' },
 } as const
 
-const INVESTMENT_AGENT_MATERIALITY = {
-  material: 'Big enough to matter',
-  immaterial: 'Too small to matter',
-  unknown: 'Cannot size it',
-} as const
-
 function InvestmentAgentMechanism({
   assessment,
   companyNames,
@@ -1086,14 +1080,6 @@ function InvestmentAgentMechanism({
                 {exposure.ticker}
               </span>
             ))}
-            {assessment.splits && (
-              <span
-                className="investment-agent-splits"
-                title="This route pushes companies in opposite directions"
-              >
-                One gains, one loses
-              </span>
-            )}
           </span>
         </span>
         <span className="investment-agent-mechanism-causal">
@@ -1125,13 +1111,6 @@ function InvestmentAgentMechanism({
                   data-direction={exposure.direction}
                 >
                   {INVESTMENT_AGENT_DIRECTION[exposure.direction].label}
-                </span>
-                <span
-                  className="investment-agent-materiality"
-                  data-materiality={exposure.materiality}
-                  title="Could this move the company's reported results at its own scale?"
-                >
-                  {INVESTMENT_AGENT_MATERIALITY[exposure.materiality]}
                 </span>
                 {exposure.size_basis && (
                   <span className="investment-agent-size-basis">

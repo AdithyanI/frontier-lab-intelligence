@@ -1811,17 +1811,6 @@
   text-wrap: pretty;
 }
 
-.investment-agent-splits {
-  padding: 1px 5px;
-  border: 1px solid var(--blue-ink);
-  border-radius: 3px;
-  color: var(--blue-ink);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
 .investment-agent-mechanism-detail {
   padding: 0 0 26px;
 }
@@ -1889,18 +1878,6 @@
 
 .investment-agent-exposure-head .mono:hover {
   text-decoration: underline;
-}
-
-.investment-agent-materiality {
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-}
-
-.investment-agent-materiality[data-materiality='material'] {
-  color: var(--ink);
 }
 
 .investment-agent-size-basis {
