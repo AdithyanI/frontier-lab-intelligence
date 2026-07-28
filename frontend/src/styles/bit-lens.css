@@ -477,6 +477,13 @@
   gap: 9px;
 }
 
+.company-scope-mark {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+}
+
 .company-evidence-grade {
   display: inline-flex;
   width: max-content;

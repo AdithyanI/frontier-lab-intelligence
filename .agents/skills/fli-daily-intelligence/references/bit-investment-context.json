@@ -1,6 +1,11 @@
 {
-  "schema_version": "bit-investment-context-v2",
-  "company_profiles_reviewed_at": "2026-07-27",
+  "schema_version": "bit-investment-context-v3",
+  "company_profiles_reviewed_at": "2026-07-28",
+  "frontier_lab_company_scope": {
+    "definition": "Public companies with a clear, recurring transmission path from frontier-model capability, compute demand, AI infrastructure, data, or AI-system security into a material operating driver.",
+    "default_relevance": "in_scope",
+    "outside_scope_policy": "Retain other disclosed holdings for portfolio audit, but do not place them in the default Frontier Lab Intelligence company universe. Add one only when a future Event establishes a direct, material transmission path."
+  },
   "fund": {
     "name": "BIT Global Technology Leaders",
     "manager": "BIT Capital GmbH",
@@ -299,6 +304,7 @@
   "company_profiles": [
     {
       "name": "IREN",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "IREN",
       "aliases": [
         "IREN Limited",
@@ -375,6 +381,7 @@
     },
     {
       "name": "AUTO1",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "AG1",
       "aliases": [
         "AUTO1 Group",
@@ -440,6 +447,7 @@
     },
     {
       "name": "Hinge Health",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "HNGE",
       "aliases": [
         "Hinge Health, Inc."
@@ -491,6 +499,7 @@
     },
     {
       "name": "TSMC",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "TSM",
       "aliases": [
         "Taiwan Semiconductor Manufacturing Company",
@@ -552,6 +561,7 @@
     },
     {
       "name": "Micron",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "MU",
       "aliases": [
         "Micron Technology",
@@ -628,6 +638,7 @@
     },
     {
       "name": "Reddit",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "RDDT",
       "aliases": [
         "Reddit, Inc."
@@ -700,6 +711,7 @@
     },
     {
       "name": "Alphabet",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "GOOGL",
       "aliases": [
         "Alphabet Inc.",
@@ -774,6 +786,7 @@
     },
     {
       "name": "Datadog",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "DDOG",
       "aliases": [
         "Datadog, Inc."
@@ -837,6 +850,7 @@
     },
     {
       "name": "Lemonade",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "LMND",
       "aliases": [
         "Lemonade, Inc."
@@ -892,6 +906,7 @@
     },
     {
       "name": "Robinhood",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "HOOD",
       "aliases": [
         "Robinhood Markets",
@@ -953,6 +968,7 @@
     },
     {
       "name": "Oscar Health",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "OSCR",
       "aliases": [
         "Oscar",
@@ -1005,6 +1021,7 @@
     },
     {
       "name": "Meta",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "META",
       "aliases": [
         "Meta Platforms",
@@ -1079,6 +1096,7 @@
     },
     {
       "name": "Rubrik",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "RBRK",
       "aliases": [
         "Rubrik, Inc."
@@ -1142,6 +1160,7 @@
     },
     {
       "name": "Kaspi",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "KSPI",
       "aliases": [
         "Kaspi.kz",
@@ -1206,6 +1225,7 @@
     },
     {
       "name": "NVIDIA",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "NVDA",
       "aliases": [
         "NVIDIA Corporation",
@@ -1279,6 +1299,7 @@
     },
     {
       "name": "Microsoft",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "MSFT",
       "aliases": [
         "Microsoft Corporation"
@@ -1350,6 +1371,7 @@
     },
     {
       "name": "HUT 8",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "HUT",
       "aliases": [
         "Hut 8",
@@ -1424,6 +1446,7 @@
     },
     {
       "name": "Duolingo",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "DUOL",
       "aliases": [
         "Duolingo, Inc."
@@ -1494,6 +1517,7 @@
     },
     {
       "name": "Amazon",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "AMZN",
       "aliases": [
         "Amazon.com",
@@ -1557,6 +1581,7 @@
     },
     {
       "name": "Netskope",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "NTSK",
       "aliases": [
         "Netskope, Inc."
@@ -1620,6 +1645,7 @@
     },
     {
       "name": "Luckin Coffee",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "LKNCY",
       "aliases": [
         "Luckin Coffee Inc.",
@@ -1672,6 +1698,7 @@
     },
     {
       "name": "Palo Alto Networks",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "PANW",
       "aliases": [
         "Palo Alto Networks, Inc.",
@@ -1736,6 +1763,7 @@
     },
     {
       "name": "InPost",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "INPST",
       "aliases": [
         "InPost S.A.",
@@ -1792,6 +1820,7 @@
     },
     {
       "name": "Grindr",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "GRND",
       "aliases": [
         "Grindr Inc.",
@@ -1858,6 +1887,7 @@
     },
     {
       "name": "Coherent",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "COHR",
       "aliases": [
         "Coherent Corp.",
@@ -1921,6 +1951,7 @@
     },
     {
       "name": "AMD",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "AMD",
       "aliases": [
         "Advanced Micro Devices",
@@ -1980,6 +2011,7 @@
     },
     {
       "name": "Intel",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "INTC",
       "aliases": [
         "Intel Corporation"
@@ -2038,6 +2070,7 @@
     },
     {
       "name": "Axon",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "AXON",
       "aliases": [
         "Axon Enterprise",
@@ -2103,6 +2136,7 @@
     },
     {
       "name": "Broadcom",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "AVGO",
       "aliases": [
         "Broadcom Inc."
@@ -2165,6 +2199,7 @@
     },
     {
       "name": "Pure Storage",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "PSTG",
       "aliases": [
         "Pure Storage, Inc."
@@ -2227,6 +2262,7 @@
     },
     {
       "name": "Lumentum",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "LITE",
       "aliases": [
         "Lumentum Holdings",
@@ -2290,6 +2326,7 @@
     },
     {
       "name": "Xometry",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "XMTR",
       "aliases": [
         "Xometry, Inc."
@@ -2353,6 +2390,7 @@
     },
     {
       "name": "Omada Health",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "OMDA",
       "aliases": [
         "Omada",
@@ -2405,6 +2443,7 @@
     },
     {
       "name": "GCL-Poly",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "03800.HK",
       "aliases": [
         "GCL-Poly Energy Holdings Limited",
@@ -2471,6 +2510,7 @@
     },
     {
       "name": "SanDisk",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "SNDK",
       "aliases": [
         "SanDisk Corporation",
@@ -2535,6 +2575,7 @@
     },
     {
       "name": "Marvell",
+      "frontier_lab_relevance": "in_scope",
       "ticker": "MRVL",
       "aliases": [
         "Marvell Technology",
@@ -2608,6 +2649,7 @@
     },
     {
       "name": "Infineon",
+      "frontier_lab_relevance": "out_of_scope",
       "ticker": "IFX",
       "aliases": [
         "Infineon Technologies",

@@ -20,6 +20,7 @@ export interface FrontierAIChannel {
 
 export interface InvestmentCompany {
   name: string
+  frontier_lab_relevance: 'in_scope' | 'out_of_scope'
   ticker: string
   aliases: string[]
   listing_status: 'public'
@@ -50,11 +51,11 @@ export interface InvestmentCompany {
 }
 
 export interface InvestmentCompanyUniverse {
-  schema_version: 'investment-company-universe-v1'
+  schema_version: 'investment-company-universe-v2'
   source_context_schema_version: string
   profiles_reviewed_at: string
   scope: {
-    status: 'unfiltered'
+    status: 'curated'
     label: string
     note: string
   }
@@ -73,6 +74,8 @@ export interface InvestmentCompanyUniverse {
   }
   counts: {
     companies: number
+    in_scope_companies: number
+    out_of_scope_companies: number
     current_top_ten: number
     audited_baseline: number
     later_top_ten_additions: number

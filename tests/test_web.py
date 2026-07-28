@@ -177,8 +177,13 @@ def test_bit_lens_company_universe_is_a_complete_read_only_projection():
 
     assert r.status_code == 200
     data = r.json()
-    assert data["schema_version"] == "investment-company-universe-v1"
+    assert data["schema_version"] == "investment-company-universe-v2"
     assert data["counts"]["companies"] == 37
-    assert data["scope"]["status"] == "unfiltered"
+    assert data["counts"]["in_scope_companies"] == 22
+    assert data["counts"]["out_of_scope_companies"] == 15
+    assert data["scope"]["status"] == "curated"
     assert len(data["companies"]) == 37
+    assert {
+        company["frontier_lab_relevance"] for company in data["companies"]
+    } == {"in_scope", "out_of_scope"}
     assert all(company["analyst_context"]["frontier_ai_channels"] for company in data["companies"])

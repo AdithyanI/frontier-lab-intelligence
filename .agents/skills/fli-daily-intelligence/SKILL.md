@@ -24,6 +24,10 @@ your own judgment for research, retrieval, grouping, and synthesis.
    portfolio baseline, reusable company profiles, and the boundary for companies
    outside that portfolio. Each company profile separates BIT's attributable
    public view from FLI analyst context; never present the latter as BIT's thesis.
+   The compact profile index marks the focused 22-company frontier-lab universe
+   with `frontier_lab_relevance: in_scope`. Treat that flag as the default
+   retrieval boundary, not proof that a specific Event affects the company.
+   Profiles outside the current scope remain available for portfolio audit.
    `source_scope` distinguishes firm-wide research, this flagship strategy,
    another BIT product, or mixed commentary.
 
@@ -56,9 +60,11 @@ your own judgment for research, retrieval, grouping, and synthesis.
    per-Event annotations; judge it from the retained evidence.
 4. Investigate across the whole cohort. Start with deterministic retrieval,
    then broaden only where it improves the judgment:
-   - for an Investment candidate, fetch every matching profile before web
-     research and use its identity, operating drivers, AI exposure channels,
-     and watchpoints as a starting lens rather than a daily conclusion:
+   - for an Investment candidate, begin with the in-scope compact company index,
+     shortlist only companies with a plausible Event-specific mechanism, then
+     fetch each matching profile before web research. Use its identity,
+     operating drivers, AI exposure channels, and watchpoints as a starting lens
+     rather than a daily conclusion:
 
      ```bash
      .venv/bin/fli daily-intelligence company-context \

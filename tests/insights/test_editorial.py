@@ -1129,7 +1129,7 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     context = editorial_runs.investment_context()
     portfolio = context["portfolio"]
 
-    assert context["schema_version"] == "bit-investment-context-v2"
+    assert context["schema_version"] == "bit-investment-context-v3"
     assert len(portfolio["holdings"]) == 34
     assert round(sum(item["weight_pct"] for item in portfolio["holdings"]), 2) == 97.43
     assert {item["name"] for item in portfolio["holdings"]} >= {
@@ -1140,12 +1140,16 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     assert context["research_process"]["challenge_process"]["principle"]
     assert context["outside_portfolio_policy"]["label"] == "Outside the disclosed portfolio"
     profiles = context["company_profiles"]
-    assert context["company_profiles_reviewed_at"] == "2026-07-27"
+    assert context["company_profiles_reviewed_at"] == "2026-07-28"
     assert len(profiles) == 37
     assert [profile["name"] for profile in profiles] == [
         holding["name"] for holding in editorial_runs._covered_holdings(context)
     ]
     assert len({profile["ticker"] for profile in profiles}) == 37
+    assert sum(
+        profile["frontier_lab_relevance"] == "in_scope"
+        for profile in profiles
+    ) == 22
     assert {profile["bit_public_view"]["grade"] for profile in profiles} <= {
         "explicit_thesis",
         "commentary",
@@ -1160,6 +1164,8 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     }
     assert all(profile["analyst_context"]["frontier_ai_channels"] for profile in profiles)
     by_name = {profile["name"]: profile for profile in profiles}
+    assert by_name["NVIDIA"]["frontier_lab_relevance"] == "in_scope"
+    assert by_name["Grindr"]["frontier_lab_relevance"] == "out_of_scope"
     assert by_name["IREN"]["bit_public_view"]["grade"] == "explicit_thesis"
     assert by_name["Amazon"]["bit_public_view"] == {
         "grade": "none",
@@ -1191,7 +1197,7 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["data"]["format"] == "json"
     assert payload["data"]["projection"] == "full"
-    assert payload["data"]["context"]["schema_version"] == "bit-investment-context-v2"
+    assert payload["data"]["context"]["schema_version"] == "bit-investment-context-v3"
     assert payload["data"]["path"].endswith("references/bit-investment-context.json")
 
     assert editorial_cli.main(
@@ -1208,6 +1214,10 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     assert compact["data"]["projection"] == "compact"
     assert "company_profiles" not in compact["data"]["context"]
     assert len(compact["data"]["context"]["company_profile_index"]) == 37
+    assert sum(
+        item["frontier_lab_relevance"] == "in_scope"
+        for item in compact["data"]["context"]["company_profile_index"]
+    ) == 22
 
 
 def test_ai_engineering_context_encodes_bit_operating_and_relevance_boundary(capsys):
@@ -1256,10 +1266,12 @@ def test_company_context_lookup_is_exact_and_machine_readable(capsys):
 def test_investment_company_universe_payload_is_complete_and_dated():
     payload = editorial_runs.investment_company_universe_payload()
 
-    assert payload["schema_version"] == "investment-company-universe-v1"
-    assert payload["scope"]["status"] == "unfiltered"
+    assert payload["schema_version"] == "investment-company-universe-v2"
+    assert payload["scope"]["status"] == "curated"
     assert payload["counts"] == {
         "companies": 37,
+        "in_scope_companies": 22,
+        "out_of_scope_companies": 15,
         "current_top_ten": 10,
         "audited_baseline": 34,
         "later_top_ten_additions": 3,
@@ -1314,7 +1326,7 @@ def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, cap
     assert success["error"] is None
     assert (
         success["data"]["investment_context_schema_version"]
-        == "bit-investment-context-v2"
+        == "bit-investment-context-v3"
     )
     contract = success["data"]["draft"]
     assert contract["max_insights_per_audience"] is None

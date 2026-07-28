@@ -10,8 +10,8 @@ export default function BitLensLayout() {
           company-specific investment questions.
         </p>
         <nav className="ruled-nav bit-lens-tabs" aria-label="BIT Lens views">
-          <NavLink to="/bit-lens" end>Research brief</NavLink>
           <NavLink to="/bit-lens/companies">Company universe</NavLink>
+          <NavLink to="/bit-lens/research">Research brief</NavLink>
         </nav>
       </header>
       <Outlet />

@@ -34,9 +34,10 @@ DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v3"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v4"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
-INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v2"
+INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v3"
 BIT_PUBLIC_VIEW_GRADES = {"explicit_thesis", "commentary", "none"}
 BIT_PUBLIC_VIEW_SOURCE_SCOPES = {"firm", "flagship", "other_product", "mixed", "none"}
+FRONTIER_LAB_RELEVANCE_VALUES = {"in_scope", "out_of_scope"}
 
 CONTEXT_PATHS = {
     "investment": (
@@ -782,6 +783,20 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
     portfolio = context.get("portfolio")
     if not isinstance(portfolio, dict) or not isinstance(portfolio.get("holdings"), list):
         raise ValueError("Investment context packet is missing portfolio holdings")
+    company_scope = context.get("frontier_lab_company_scope")
+    if not isinstance(company_scope, dict) or set(company_scope) != {
+        "definition",
+        "default_relevance",
+        "outside_scope_policy",
+    }:
+        raise ValueError(
+            "Investment context packet is missing frontier_lab_company_scope"
+        )
+    if company_scope["default_relevance"] != "in_scope":
+        raise ValueError("frontier_lab_company_scope.default_relevance must be in_scope")
+    for key in ("definition", "outside_scope_policy"):
+        if not isinstance(company_scope[key], str) or not company_scope[key].strip():
+            raise ValueError(f"frontier_lab_company_scope.{key} must be non-empty")
     profiles = context.get("company_profiles")
     if not isinstance(profiles, list):
         raise ValueError("Investment context packet is missing company_profiles")
@@ -811,6 +826,7 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
             raise ValueError(f"{path} must be an object")
         required = {
             "name",
+            "frontier_lab_relevance",
             "ticker",
             "aliases",
             "listing_status",
@@ -828,6 +844,11 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
         tickers.add(ticker)
         if profile["listing_status"] != "public":
             raise ValueError(f"{path}.listing_status must be public")
+        if profile["frontier_lab_relevance"] not in FRONTIER_LAB_RELEVANCE_VALUES:
+            raise ValueError(
+                f"{path}.frontier_lab_relevance must be one of "
+                f"{sorted(FRONTIER_LAB_RELEVANCE_VALUES)}"
+            )
         _validate_string_list(profile["aliases"], f"{path}.aliases", allow_empty=True)
         for lookup_value in (profile["name"], profile["ticker"], *profile["aliases"]):
             lookup_key = " ".join(lookup_value.split()).casefold()
@@ -1034,18 +1055,19 @@ def investment_company_universe_payload() -> dict[str, Any]:
         and company["portfolio_context"]["audited_baseline"] is None
         for company in companies
     )
+    in_scope_count = sum(
+        company["frontier_lab_relevance"] == "in_scope"
+        for company in companies
+    )
 
     return {
-        "schema_version": "investment-company-universe-v1",
+        "schema_version": "investment-company-universe-v2",
         "source_context_schema_version": context["schema_version"],
         "profiles_reviewed_at": context["company_profiles_reviewed_at"],
         "scope": {
-            "status": "unfiltered",
-            "label": "Working portfolio universe",
-            "note": (
-                "Every sourced company profile remains visible for review. "
-                "Presence here does not mean every frontier-AI Event affects the company."
-            ),
+            "status": "curated",
+            "label": "Frontier-linked company universe",
+            "note": context["frontier_lab_company_scope"]["definition"],
         },
         "disclosures": {
             "current_top_ten": {
@@ -1068,6 +1090,8 @@ def investment_company_universe_payload() -> dict[str, Any]:
         },
         "counts": {
             "companies": len(companies),
+            "in_scope_companies": in_scope_count,
+            "out_of_scope_companies": len(companies) - in_scope_count,
             "current_top_ten": len(current["holdings"]),
             "audited_baseline": len(audited["holdings"]),
             "later_top_ten_additions": later_additions,

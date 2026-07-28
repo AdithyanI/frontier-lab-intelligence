@@ -53,8 +53,9 @@ export default function App() {
           <Route path="/insights" element={<Insights />} />
           <Route path="/how" element={<HowItWorks />} />
           <Route path="/bit-lens" element={<BitLensLayout />}>
-            <Route index element={<BitLensPage />} />
+            <Route index element={<Navigate to="companies" replace />} />
             <Route path="companies" element={<CompanyUniversePage />} />
+            <Route path="research" element={<BitLensPage />} />
           </Route>
           <Route path="/system" element={<System />}>
             <Route index element={<Navigate to="architecture" replace />} />

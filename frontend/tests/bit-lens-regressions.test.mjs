@@ -13,11 +13,13 @@ test('BIT Lens keeps research and company context in one ruled workspace', () =>
   assert.ok(app.indexOf('>Insights</NavLink>') < app.indexOf('>BIT Lens</NavLink>'))
   assert.ok(app.indexOf('>BIT Lens</NavLink>') < app.indexOf('>System</NavLink>'))
   assert.match(app, /path="\/bit-lens" element=\{<BitLensLayout \/>\}/)
-  assert.match(app, /<Route index element=\{<BitLensPage \/>\} \/>/)
+  assert.match(app, /<Route index element=\{<Navigate to="companies" replace \/>\} \/>/)
   assert.match(app, /<Route path="companies" element=\{<CompanyUniversePage \/>\} \/>/)
+  assert.match(app, /<Route path="research" element=\{<BitLensPage \/>\} \/>/)
   assert.match(layout, /className="ruled-nav bit-lens-tabs"/)
   assert.match(layout, />Research brief<\/NavLink>/)
   assert.match(layout, />Company universe<\/NavLink>/)
+  assert.ok(layout.indexOf('>Company universe</NavLink>') < layout.indexOf('>Research brief</NavLink>'))
   assert.match(lens, /<article className="lens-reading">/)
 })
 
@@ -87,9 +89,13 @@ test('The redesign is text-first and removes the diagram-heavy UI', () => {
   assert.doesNotMatch(styles, /\.lens-canvas|\.lens-svg-|\.lens-theme-bar/)
 })
 
-test('Company universe exposes the canonical context without implying automatic scope', () => {
+test('Company universe defaults to the curated frontier-lab scope', () => {
   assert.match(universe, /getCachedJSON<InvestmentCompanyUniverse>\('\/api\/bit-lens\/companies'\)/)
-  assert.match(universe, /not automatic inclusion in an Investment output/)
+  assert.match(universe, /useState<ScopeFilter>\('in_scope'\)/)
+  assert.match(universe, /label="FLI scope"/)
+  assert.match(universe, /FLI universe/)
+  assert.match(universe, /Outside current scope/)
+  assert.match(universe, /frontier_lab_relevance/)
   assert.doesNotMatch(universe, /The context behind each company/)
   assert.doesNotMatch(universe, /company-universe-facts/)
   assert.match(universe, /Context used by the agent/)
@@ -102,7 +108,7 @@ test('Company universe exposes the canonical context without implying automatic 
   assert.match(universe, /Open visible/)
   assert.doesNotMatch(universe, /AI channel count/)
   assert.doesNotMatch(universe, /AI \{company\.analyst_context\.frontier_ai_channels\.length/)
-  assert.match(universe, /Public evidence/)
+  assert.doesNotMatch(universe, /Public evidence/)
   assert.doesNotMatch(universe, /const companies = \[/)
 })
 

@@ -225,6 +225,7 @@ def _context_payload(audience: str, *, compact: bool = False) -> dict[str, Any]:
                 "name": profile["name"],
                 "ticker": profile["ticker"],
                 "aliases": profile["aliases"],
+                "frontier_lab_relevance": profile["frontier_lab_relevance"],
                 "bit_public_view_grade": profile["bit_public_view"]["grade"],
                 "bit_public_view_source_scope": profile["bit_public_view"]["source_scope"],
             }

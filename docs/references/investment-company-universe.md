@@ -1,6 +1,6 @@
 # Investment Company Universe
 
-Last reviewed: 2026-07-27
+Last reviewed: 2026-07-28
 
 This is the human inspection map for the first Investment audience fan-out.
 The canonical machine-readable source remains
@@ -24,7 +24,12 @@ Each canonical company profile already contains:
 - any public BIT view, kept separate from FLI analyst context and graded by
   source scope.
 
-The packet currently covers 37 companies with 114 operating drivers, 63
+The packet currently covers 37 sourced companies. A binary
+`frontier_lab_relevance` field places 22 in the focused FLI universe because
+they have a clear, recurring transmission path from frontier-model capability,
+compute demand, AI infrastructure, data, or AI-system security. The remaining
+15 stay available for portfolio audit but are outside the default retrieval
+set. The packet contains 114 operating drivers, 63
 frontier-AI transmission channels, 189 watchpoints, 112 cautions, and 77
 identity sources. Four companies have an explicit public BIT thesis, ten have
 BIT commentary, and 23 have no attributable BIT view. A missing BIT view must
@@ -47,6 +52,18 @@ disclosures:
 Holding weight is portfolio context, not evidence that an Event affects a
 company. It may order otherwise comparable affected companies, but it must
 never create a transmission mechanism.
+
+## Focused FLI Universe
+
+The default company universe contains Alphabet, Amazon, Microsoft, Meta,
+NVIDIA, AMD, Intel, TSMC, Micron, Broadcom, Marvell, IREN, Hut 8, Coherent,
+Lumentum, SanDisk, Pure Storage, Datadog, Rubrik, Palo Alto Networks, Netskope,
+and Reddit.
+
+AUTO1, Hinge Health, Lemonade, Robinhood, Oscar Health, Kaspi, Duolingo,
+Luckin Coffee, InPost, Grindr, Axon, Xometry, Omada Health, GCL-Poly, and
+Infineon remain in the sourced portfolio record but are outside the current
+FLI scope.
 
 ## Company Index
 
@@ -98,17 +115,15 @@ the particular Event activates any channel.
 
 For each relevant Event:
 
-1. Load this canonical company roster as the stable prompt prefix.
-2. Require one verdict for every company; never let the model silently choose
-   which holdings deserve consideration.
-3. Treat the Event as the changing suffix and the only evidence that can
-   activate a transmission channel.
-4. Preserve `unaffected` decisions with a compact reason code.
-5. For affected companies, return the mechanism, thesis or operating driver
-   touched, direction, action tier, and supporting source identifiers.
-6. Validate in code that all 37 canonical companies appear exactly once.
-7. Rank the validated Event-company pairs deterministically after the model
-   call. Never ask the model for a synthetic importance score.
+1. Load the compact index and begin with the 22 in-scope companies.
+2. Use the Event to produce a small shortlist, including no company when no
+   direct material connection is defensible.
+3. Retrieve the complete profile only for shortlisted companies.
+4. Treat the Event as the only evidence that can activate a transmission path.
+5. For each retained company, return the operating mechanism, direction,
+   uncertainty, watchpoints, and supporting source identifiers.
+6. Keep out-of-scope profiles available for audit; a future Event may justify
+   revisiting the explicit scope decision.
 
 The corresponding AI Engineering roster should be a separate, later
 definition of build surfaces. It should reuse the same fan-out engine without

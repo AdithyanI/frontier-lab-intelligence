@@ -8,7 +8,7 @@ import {
 } from '../../shared/api'
 
 type DisclosureFilter = 'all' | 'current' | 'audited' | 'later'
-type EvidenceFilter = 'all' | BitPublicViewGrade
+type ScopeFilter = 'in_scope' | 'all' | 'out_of_scope'
 type CompanySort = 'portfolio' | 'name'
 
 const dayFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -45,11 +45,10 @@ const disclosureOptions: readonly CompanyMenuOption<DisclosureFilter>[] = [
   { value: 'later', label: 'Later additions', description: 'Show current top-ten names absent from the audited baseline' },
 ]
 
-const evidenceOptions: readonly CompanyMenuOption<EvidenceFilter>[] = [
-  { value: 'all', label: 'All grades', description: 'Show every public-evidence grade' },
-  { value: 'explicit_thesis', label: 'BIT thesis', description: 'Show companies with a sourced public BIT thesis' },
-  { value: 'commentary', label: 'BIT commentary', description: 'Show companies with sourced public BIT commentary' },
-  { value: 'none', label: 'Analyst context only', description: 'Show companies without a public BIT view in the packet' },
+const scopeOptions: readonly CompanyMenuOption<ScopeFilter>[] = [
+  { value: 'in_scope', label: 'FLI universe', description: 'Show companies with a direct frontier-lab transmission path' },
+  { value: 'all', label: 'All profiles', description: 'Show every sourced company profile' },
+  { value: 'out_of_scope', label: 'Outside current scope', description: 'Show disclosed companies excluded from the focused FLI universe' },
 ]
 
 const sortOptions: readonly CompanyMenuOption<CompanySort>[] = [
@@ -193,6 +192,7 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
   const analyst = company.analyst_context
   const publicView = company.bit_public_view
   const knownExposureNames = analyst.frontier_ai_channels.map((channel) => channel.channel)
+  const isInScope = company.frontier_lab_relevance === 'in_scope'
 
   return (
     <div className="company-detail">
@@ -200,9 +200,15 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         <div className="company-context-heading">
           <div>
             <h3>Context used by the agent</h3>
-            <p>The company mental model supplied before the agent reads a new Event.</p>
+            <p>
+              {isInScope
+                ? 'The company mental model available when the agent reads a new Event.'
+                : 'Retained for portfolio audit, outside the focused FLI universe.'}
+            </p>
           </div>
-          <span className="mono">Starting context</span>
+          <span className="mono">
+            {isInScope ? 'FLI universe' : 'Outside current scope'}
+          </span>
         </div>
         <div className="company-context-copy">
           <p>{analyst.business_summary}</p>
@@ -328,8 +334,8 @@ export default function CompanyUniversePage() {
   const [error, setError] = useState(false)
   const [requestVersion, setRequestVersion] = useState(0)
   const [query, setQuery] = useState('')
+  const [scope, setScope] = useState<ScopeFilter>('in_scope')
   const [disclosure, setDisclosure] = useState<DisclosureFilter>('all')
-  const [evidence, setEvidence] = useState<EvidenceFilter>('all')
   const [sort, setSort] = useState<CompanySort>('portfolio')
   const [openCompanies, setOpenCompanies] = useState<Set<string>>(new Set())
 
@@ -353,13 +359,13 @@ export default function CompanyUniversePage() {
     const normalizedQuery = query.trim().toLocaleLowerCase()
     const companies = payload.companies.filter((company) => {
       const portfolio = company.portfolio_context
+      if (scope !== 'all' && company.frontier_lab_relevance !== scope) return false
       if (disclosure === 'current' && !portfolio.current_top_ten) return false
       if (disclosure === 'audited' && !portfolio.audited_baseline) return false
       if (
         disclosure === 'later'
         && (!portfolio.current_top_ten || portfolio.audited_baseline)
       ) return false
-      if (evidence !== 'all' && company.bit_public_view.grade !== evidence) return false
       return !normalizedQuery || companySearchText(company).includes(normalizedQuery)
     })
 
@@ -367,7 +373,7 @@ export default function CompanyUniversePage() {
       if (sort === 'name') return a.name.localeCompare(b.name)
       return comparePortfolio(a, b)
     })
-  }, [payload, query, disclosure, evidence, sort])
+  }, [payload, query, scope, disclosure, sort])
 
   function setCompanyOpen(ticker: string, isOpen: boolean) {
     setOpenCompanies((current) => {
@@ -404,10 +410,13 @@ export default function CompanyUniversePage() {
     <section className="company-universe-view" aria-label="Company context">
       <div className="company-universe-method">
         <p>
-          <strong>{payload.counts.companies} sourced company profiles.</strong>{' '}
+          <strong>
+            {payload.counts.in_scope_companies} frontier-linked companies.
+          </strong>{' '}
+          The focused universe is drawn from {payload.counts.companies} sourced
+          profiles.{' '}
           June shows only the current top ten; December 2025 is the latest complete
-          audited portfolio, and absence from June does not prove a sale. Presence
-          here is not automatic inclusion in an Investment output.
+          audited portfolio, and absence from June does not prove a sale.
         </p>
         <div>
           <a href={payload.disclosures.current_top_ten.source.url} target="_blank" rel="noreferrer">
@@ -431,16 +440,16 @@ export default function CompanyUniversePage() {
         </label>
         <div className="company-filter-controls">
           <CompanyMenuSelect
+            label="FLI scope"
+            value={scope}
+            options={scopeOptions}
+            onChange={setScope}
+          />
+          <CompanyMenuSelect
             label="Disclosure"
             value={disclosure}
             options={disclosureOptions}
             onChange={setDisclosure}
-          />
-          <CompanyMenuSelect
-            label="Public evidence"
-            value={evidence}
-            options={evidenceOptions}
-            onChange={setEvidence}
           />
           <CompanyMenuSelect
             label="Sort"
@@ -495,6 +504,9 @@ export default function CompanyUniversePage() {
                 <PortfolioContext company={company} />
                 <p>{company.analyst_context.business_summary}</p>
                 <div className="company-row-evidence">
+                  {company.frontier_lab_relevance === 'out_of_scope' && (
+                    <span className="company-scope-mark">Outside FLI scope</span>
+                  )}
                   <span className={`company-evidence-grade is-${company.bit_public_view.grade}`}>
                     {gradeCopy[company.bit_public_view.grade]}
                   </span>

@@ -92,9 +92,10 @@ Rules:
   assignment to the live product.
   BIT Lens holds the public client context used to translate frontier evidence
   into fund-specific research questions. Its ruled secondary navigation keeps
-  the long-form **Research brief** separate from the auditable **Company
-  universe** used by the Investment pass. Both remain separate from generated
-  daily Insights. System groups two technical views: **Architecture** is the
+  the auditable **Company universe** used by the Investment pass separate from
+  the long-form **Research brief**. Company universe is the first and default
+  view. Both remain separate from generated daily Insights. System groups two
+  technical views: **Architecture** is the
   current implementation map, and **Status** is the live published checkpoint.
 - Registry and Ranking share one top-level **Network** destination because they
   are two views of the same source system. Ranking is the first and default
@@ -318,8 +319,9 @@ Rules:
   judgment, and Devil's Advocate review; the resulting Investment-insight
   standard; contradictions, unknowns, and a source ledger. The **Company
   universe** is a searchable, filterable, expandable ledger derived from the
-  canonical Investment context packet. It keeps every sourced profile visible
-  for review. Each expanded row leads with one compact **Context used by the
+  canonical Investment context packet. It defaults to the explicit, binary
+  frontier-lab scope while retaining every sourced profile behind the scope
+  filter for portfolio audit. Each expanded row leads with one compact **Context used by the
   agent** block: the business model, operating drivers, and known AI exposures
   that cold-start Event analysis. These exposures are starting hypotheses, not
   a closed taxonomy or relevance score. Detailed opportunity, risk, and
@@ -329,14 +331,15 @@ Rules:
   AI-pathway count. The view opens directly on one compact disclosure note and
   the working controls; it does not repeat the BIT Lens title with a second
   landing header or a statistics band. Its four-control row remains Search
-  context, Disclosure, Public evidence, and Sort, with the three menus using the
+  context, FLI scope, Disclosure, and Sort, with the three menus using the
   same editorial menu grammar as Evidence. Each collapsed company row
   shows exactly one dated reference weight: the 30 June 2026 current top-ten
   weight when available, otherwise the 31 December 2025 audited weight marked
   `Last confirmed`. Expanded Disclosure history keeps both dated public values
   when both exist; the canonical API likewise preserves the reference date,
   basis, and current-confirmation state alongside both disclosure records.
-  Presence in this ledger does not imply that every Event affects the company.
+  The binary scope is prior retrieval context, never proof that a specific
+  Event affects a company.
   Use ordinary prose,
   descriptive headings, lists, and flat tables only where rows make exact dates
   or weights easier to compare. Keep body copy at 16px with a 72ch maximum and
