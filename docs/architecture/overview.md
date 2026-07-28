@@ -100,7 +100,19 @@ composition.
    or newly ranked Events alone require model work. Every new run records the
    current source Feed/Event IDs and full-day rank-input hash, and readers reject
    stale rank lineage.
-9. A daily editorial agent reviews the complete routed-positive cohort, reads
+9. The company-aware Investment agent first reads the complete Development and
+   a compact, stable card for every company in the 37-name universe. It rejects
+   uncertain matches at this screening stage. Only when the Development supplies
+   a concrete causal path may it call the local memo tool for a company. It then
+   either rejects that candidate after inspection or emits one minimal
+   assessment: bottom line, mechanism, affected business driver, direction,
+   main uncertainty, and one next check. Application code supplies the exact
+   Feed Development and company-memo links; the model does not generate URLs or
+   restate the source ledger. The durable run binds evidence and universe
+   hashes, exact memo calls, prompt/model identity, and token/cache/cost
+   telemetry. The July 21 rank-1 run is the first persisted proof of this
+   successor boundary; full-day calibration remains future work.
+10. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. Its compact index keeps all 37 profiles eligible.
    The 37 web-grounded company memos live independently in
@@ -121,7 +133,7 @@ composition.
    existing routing runs, attaches application-owned publication times, and
    projects exact catalogued artifact disclosure lineage without automatically
    pruning artifacts.
-10. Deterministic validation binds the draft to its frozen workspace and imports
+11. Deterministic validation binds the draft to its frozen workspace and imports
    Insights, Event roles, dispositions, and citations in one transaction.
    Artifact citations require an excerpt verified against the frozen artifact
    text; the agent still owns the semantic judgment that the passage supports
@@ -130,7 +142,7 @@ composition.
    Investment Insights persist one causal interpretation, company read-through,
    key uncertainty, watchpoints, and a diligence step; intermediate reasoning
    scaffolds are not separate reader fields.
-11. The date-keyed daily runner checkpoints the existing Evidence, routing,
+12. The date-keyed daily runner checkpoints the existing Evidence, routing,
    and strict-v3 workspace stages, then may hand the exact workspace to one
    named Codex task. Model and reasoning may inherit Codex configuration, but
    service speed defaults to an explicit Standard override (`serviceTier:
@@ -140,12 +152,12 @@ composition.
    complete imported editorial run is terminal product proof: retries close
    from that durable row before opening App Server, so a task later reused by a
    human is outside orchestration control.
-11. The web and CLI expose the frozen evidence, decisions, provenance, and
+13. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners. For a complete
    daily editorial run, the web adapter can deterministically render the same
    audience/date projection as a linked A4 PDF. The content-addressed derived
    cache is an acceleration layer, not another report or editorial store.
-12. An operator may explicitly deliver that same complete audience/date brief.
+14. An operator may explicitly deliver that same complete audience/date brief.
    Slack presents every cited Insight with its complete interpretation, then
    links to the complete brief and PDF. Email
    receives up to five ranked Insights with the cached PDF attached.

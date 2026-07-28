@@ -41,7 +41,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
 | Daily Development rank | `fli.scoring.development_attention` | Versioned lexicographic Development ordering. Production uses `daily-development-rank-v1`; the earlier exact-Event `daily-rank-v2` remains historical lineage only. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
-| Insights | `fli.insights` | Per-Development generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary: strict drafts, frozen workspaces, date-keyed orchestration, persisted Codex handoff, atomic runs, the canonical read model, and `pdf_report` for deterministic cached workbooks. Investment company selection follows `docs/references/investment-company-mapping.md`. |
+| Insights | `fli.insights` | Per-Development generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary. `investment_agent_runs` validates, stores, and projects the two-stage company-aware Investment trace: screen the compact universe, open only plausible memos, then emit a minimal company assessment. Investment company selection follows `docs/references/investment-company-mapping.md`. |
 | Delivery | `fli.delivery.daily_brief` | Manual Slack all-Insight and email top-five formatting, provider adapters, a same-origin confirmation guard, and reuse of the canonical cached PDF. It does not own editorial data or scheduling. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.developments`, `fli.web.artifact_library` | HTTP composition and read projections only. `/api/events` preserves exact Event inspection; `/api/developments` is the ranked Feed read model; `/api/developments/analysis-packet` renders the exact read-only routing input without a model call. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
@@ -87,6 +87,7 @@ do not recreate generic `pages/` or `components/` buckets.
 | Development read model | No independent writer | Feed, routing, artifact UI | Deterministic projection over exact Events plus accepted canonical artifacts. It is cached in process and rebuilt when either source store changes; there is deliberately no separate Development database yet. |
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, rank evaluation | Immutable per-day runs. Current-compatible runs bind their source Feed/Event publication and full-day Development rank-input SHA. |
 | `data/derived/insights/insights.db` | `fli insights` | Insight read model/UI | Current audience Insight run store. |
+| `data/derived/insights/investment-agent.db` | `fli insights import-investment-trace` | Investment Insights API/UI | Durable company-aware successor runs. Each row binds the Development, prompt/model identity, compact-universe and evidence hashes, exact memo calls, token/cache/cost telemetry, and validated minimal result. |
 | `data/derived/daily-intelligence/editorial.db` | `fli daily-intelligence import-result` / `run-day` | Daily Insight read model/UI and orchestration inspection | Complete agent-authored daily runs plus a `daily-orchestration-v3` date-keyed ledger that freezes source Event, Feed, routing, cohort, rank-input, and effective Codex model/reasoning/tier identities; strict v3 workspaces and the optional packet-keyed embedding cache live beside it. |
 | `data/derived/daily-intelligence/pdf-cache/` | `GET /api/insights/report.pdf` | Daily Insight PDF downloads | Rebuildable content-addressed PDFs keyed by report schema, read schema, date, audience, and editorial result hash; atomic writes make concurrent first requests safe. |
 | `data/derived/web-event-cache/` | Event API read model | Event API and Feed UI | Optional compressed exact-view cache, automatically invalidated by source database versions and projection code. Safe to delete; source stores remain authoritative. |
@@ -104,7 +105,8 @@ removing or archiving local data.
 - Materialize individual boundaries: `fli signal-feed`, `fli signal-events`,
   `fli artifacts`
 - Route Evidence: `fli audience-routing`
-- Generate or inspect Insights: `fli insights`
+- Generate or inspect Insights: `fli insights`; persist a validated
+  company-aware trace with `fli insights import-investment-trace`
 - Prepare, launch, author, validate, persist, or inspect one daily brief:
   `fli daily-intelligence` (`run-day` is the end-to-end entry point)
 - Inspect the daily Development rank: `/api/developments` or the Feed. The

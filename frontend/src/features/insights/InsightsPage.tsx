@@ -1140,12 +1140,6 @@ function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
             </li>
           ))}
         </ol>
-        <dl className="investment-agent-telemetry mono">
-          <div><dt>Model</dt><dd>{item.telemetry.model} · {item.telemetry.reasoning_effort}</dd></div>
-          <div><dt>Turns</dt><dd>{item.telemetry.turn_count}</dd></div>
-          <div><dt>Input cache</dt><dd>{item.telemetry.cached_tokens.toLocaleString()} tokens reused</dd></div>
-          <div><dt>Run cost</dt><dd>${item.telemetry.reported_cost_usd.toFixed(3)}</dd></div>
-        </dl>
       </div>
     </details>
   )
@@ -1169,16 +1163,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
       </div>
       <div className="insight-body investment-agent-body">
         <header className="insight-head investment-agent-head">
-          <div>
-            <h2 id={titleId}>{decodeTextEntities(sourceTitle)}</h2>
-            <p className="investment-agent-provenance mono">
-              {item.source?.author || 'Primary evidence'}
-              {item.source?.source_event_count
-                ? ` · ${item.source.source_event_count} source Events`
-                : ''}
-              {' '}· company-aware Investment pass
-            </p>
-          </div>
+          <h2 id={titleId}>{decodeTextEntities(sourceTitle)}</h2>
           {item.source?.url && (
             <a href={item.source.url} target="_blank" rel="noreferrer">
               Primary source ↗
@@ -1201,10 +1186,6 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
           <section className="investment-agent-companies" aria-label="Company read-throughs">
             <header>
               <h3>Company read-throughs</h3>
-              <p>
-                Each company was screened against the Development, then checked against its
-                complete research memo.
-              </p>
             </header>
             {item.company_assessments.map((assessment) => (
               <InvestmentAgentCompany
