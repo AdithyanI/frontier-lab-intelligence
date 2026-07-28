@@ -52,7 +52,28 @@ test('Insights uses the durable successor API and guards status-specific respons
   assert.match(insightSource, /loading=\{datesLoading\}/)
   assert.match(apiSource, /content_kind: 'candidate_decisions'/)
   assert.match(apiSource, /content_kind: 'daily_editorial'/)
+  assert.match(apiSource, /content_kind: 'investment_agent'/)
   assert.match(insightSource, /payload\.content_kind === 'daily_editorial'/)
+  assert.match(insightSource, /payload\.content_kind === 'investment_agent'/)
+})
+
+test('Investment Insights expose the company-aware causal and memo audit', () => {
+  assert.match(apiSource, /export interface InvestmentAgentCompanyAssessment/)
+  assert.match(apiSource, /rejected_after_memo:/)
+  assert.match(apiSource, /why_memo_is_needed: string/)
+  assert.match(insightSource, /function InvestmentAgentInsight/)
+  assert.match(insightSource, /Company read-throughs/)
+  assert.match(insightSource, /Why this company/)
+  assert.match(insightSource, /Operating driver/)
+  assert.match(insightSource, /Inspect evidence and open questions/)
+  assert.match(insightSource, /How the agent got here/)
+  assert.match(insightSource, /Why its memo was opened/)
+  assert.match(insightSource, /Opened, then rejected/)
+  assert.match(insightSource, /tokens reused/)
+  assert.match(appStyles, /\.investment-agent-company \{/)
+  assert.match(appStyles, /\.investment-agent-process \{/)
+  assert.doesNotMatch(appStyles, /\.investment-agent-company \{[^}]*border-radius:/)
+  assert.doesNotMatch(appStyles, /\.investment-agent-company \{[^}]*box-shadow:/)
 })
 
 test('A directly linked brief loads in parallel with the date index', () => {

@@ -21,6 +21,7 @@ from openai import APIConnectionError, APITimeoutError, AuthenticationError
 from fli import llm_responses
 from fli.evidence import feed as signal_feed
 from fli.insights import generation as insight_generation
+from fli.insights import investment_agent_runs
 from fli.insights import runs as insight_runs
 from fli.registry import classification as entity_kinds
 from fli.routing import model as routing_model
@@ -1005,6 +1006,17 @@ def _parser() -> argparse.ArgumentParser:
     imported.add_argument("--result-file", type=Path, required=True)
     imported.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
     _add_output_flags(imported)
+    investment_import = sub.add_parser(
+        "import-investment-trace",
+        help="Persist one validated company-aware Investment agent trace.",
+    )
+    investment_import.add_argument("--trace", type=Path, required=True)
+    investment_import.add_argument(
+        "--db",
+        type=Path,
+        default=investment_agent_runs.DEFAULT_DB,
+    )
+    _add_output_flags(investment_import)
     summary = sub.add_parser("summary", help="Inspect aggregate durable run state.")
     summary.add_argument("--db", type=Path, default=insight_runs.DEFAULT_DB)
     _add_output_flags(summary)
@@ -1025,6 +1037,7 @@ def _plain(payload: dict[str, Any]) -> str:
         "insights.summary",
         "insights.inspect",
         "insights.import-result",
+        "insights.import-investment-trace",
     }:
         return _canonical_json(data, pretty=True)
     if payload["command"] == "insights.refresh":
@@ -1067,6 +1080,11 @@ def main(
     try:
         if args.action == "contract":
             data = contract_payload(args.audience)
+        elif args.action == "import-investment-trace":
+            data = investment_agent_runs.import_trace(
+                args.trace,
+                db_path=args.db,
+            )
         elif args.action in {"summary", "inspect", "import-result"}:
             if args.action in {"summary", "inspect"} and not args.db.is_file():
                 raise FileNotFoundError(args.db)

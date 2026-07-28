@@ -214,10 +214,127 @@ export interface EditorialInsightsResponse {
   declined: EditorialDeclinedItem[]
 }
 
-export type InsightsResponse = CandidateDecisionInsightsResponse | EditorialInsightsResponse
+export type InvestmentAgentRelevance = 'direct' | 'indirect'
+export type InvestmentAgentDirection = 'positive' | 'negative' | 'mixed' | 'unclear'
+export type InvestmentAgentHorizon = 'near_term' | 'medium_term' | 'long_term' | 'unclear'
+export type InvestmentAgentThesisEffect =
+  | 'supports'
+  | 'challenges'
+  | 'mixed'
+  | 'no_public_thesis'
+  | 'insufficient_evidence'
+export type InvestmentAgentConfidence = 'high' | 'medium' | 'low'
+
+export interface InvestmentAgentEvidence {
+  claim: string
+  source_urls: string[]
+}
+
+export interface InvestmentAgentCompanyAssessment {
+  ticker: string
+  relevance: InvestmentAgentRelevance
+  mechanism: string
+  affected_operating_driver: string
+  economic_direction: InvestmentAgentDirection
+  time_horizon: InvestmentAgentHorizon
+  thesis_effect: InvestmentAgentThesisEffect
+  analyst_takeaway: string
+  confidence: InvestmentAgentConfidence
+  evidence: InvestmentAgentEvidence[]
+  uncertainties: string[]
+  next_checks: string[]
+}
+
+export interface InvestmentAgentMemoCall {
+  turn: number
+  call_id: string
+  arguments: {
+    ticker: string
+    connection_type: InvestmentAgentRelevance
+    mechanism: string
+    affected_operating_driver: string
+    why_memo_is_needed: string
+  }
+}
+
+export interface InvestmentAgentItem {
+  run_id: string
+  day: string
+  development_id: string
+  daily_rank: number
+  decision: InsightDecision
+  development_summary: string
+  portfolio_readthrough: string
+  company_assessments: InvestmentAgentCompanyAssessment[]
+  rejected_after_memo: Array<{ ticker: string; reason: string }>
+  no_match_reason: string | null
+  company_names: Record<string, string>
+  memo_calls: InvestmentAgentMemoCall[]
+  citation_repairs: Array<{
+    ticker: string
+    from: string
+    to: string
+    reason: string
+  }>
+  source: {
+    title: string
+    url: string
+    author: string
+    primary_event_id: string
+    source_event_count: number
+  } | null
+  telemetry: {
+    model: string
+    reasoning_effort: string
+    prompt_version: string
+    company_universe_count: number
+    memo_count: number
+    turn_count: number
+    input_tokens: number
+    cached_tokens: number
+    output_tokens: number
+    reasoning_tokens: number
+    reported_cost_usd: number
+    completed_at: string
+  }
+}
+
+export interface InvestmentAgentInsightsResponse {
+  schema_version: string
+  available: boolean
+  reason?: string | null
+  requested_date: string | null
+  date: string | null
+  audience: 'investment'
+  status: InsightStatus
+  content_kind: 'investment_agent'
+  run: {
+    date: string
+    development_count: number
+    surfaced_development_count: number
+    suppressed_development_count: number
+    company_assessment_count: number
+    rejected_company_count: number
+    model: string
+    reasoning_effort: string
+    prompt_version: string
+    turn_count: number
+    input_tokens: number
+    cached_tokens: number
+    output_tokens: number
+    reasoning_tokens: number
+    reported_cost_usd: number
+  } | null
+  items: InvestmentAgentItem[]
+}
+
+export type InsightsResponse =
+  | CandidateDecisionInsightsResponse
+  | EditorialInsightsResponse
+  | InvestmentAgentInsightsResponse
 
 export interface InsightDate extends FeedDate {
-  content_kind: 'daily_editorial' | 'candidate_decisions'
+  content_kind: 'daily_editorial' | 'candidate_decisions' | 'investment_agent'
   candidate_count: number
   included_candidate_count: number
   not_selected_candidate_count: number

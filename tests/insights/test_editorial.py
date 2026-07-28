@@ -10,6 +10,7 @@ import pytest
 from fli.insights import editorial
 from fli.insights import editorial_cli
 from fli.insights import editorial_runs
+from fli.insights import investment_agent_runs
 from fli.insights import runs as insight_runs
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
@@ -963,6 +964,11 @@ def test_web_prefers_editorial_for_kept_and_preserves_candidate_fallback(
     editorial_runs.import_result(workspace, draft_path, db_path=db)
     monkeypatch.setattr(editorial_runs, "DEFAULT_DB", db)
     monkeypatch.setattr(insight_runs, "DEFAULT_DB", tmp_path / "missing-insights.db")
+    monkeypatch.setattr(
+        investment_agent_runs,
+        "DEFAULT_DB",
+        tmp_path / "missing-investment-agent.db",
+    )
 
     kept = CLIENT.get(
         f"/api/insights?audience=investment&date={DAY}&status=kept"
@@ -1073,6 +1079,11 @@ def test_reader_and_api_reject_editorial_from_superseded_rank_lineage(
 
     monkeypatch.setattr(editorial_runs, "DEFAULT_DB", db)
     monkeypatch.setattr(insight_runs, "DEFAULT_DB", tmp_path / "missing-insights.db")
+    monkeypatch.setattr(
+        investment_agent_runs,
+        "DEFAULT_DB",
+        tmp_path / "missing-investment-agent.db",
+    )
     kept = CLIENT.get(
         f"/api/insights?audience=investment&date={DAY}&status=kept"
     ).json()

@@ -17,6 +17,9 @@ import {
   type InsightItem,
   type InsightStatus,
   type InsightsResponse,
+  type InvestmentAgentCompanyAssessment,
+  type InvestmentAgentInsightsResponse,
+  type InvestmentAgentItem,
   type InvestmentEditorialAnalysis,
   type InvestmentImpactDirection,
 } from '../../shared/api'
@@ -117,6 +120,12 @@ function displayInsightDay(day: string) {
 
 function isEditorialResponse(payload: InsightsResponse): payload is EditorialInsightsResponse {
   return payload.content_kind === 'daily_editorial'
+}
+
+function isInvestmentAgentResponse(
+  payload: InsightsResponse,
+): payload is InvestmentAgentInsightsResponse {
+  return payload.content_kind === 'investment_agent'
 }
 
 function isInvestmentAnalysis(
@@ -1040,6 +1049,306 @@ function DeclinedCandidates({
   )
 }
 
+const INVESTMENT_AGENT_DIRECTION = {
+  positive: { icon: '↗', label: 'Potential positive' },
+  negative: { icon: '↘', label: 'Potential negative' },
+  mixed: { icon: '↔', label: 'Mixed' },
+  unclear: { icon: '?', label: 'Direction unclear' },
+} as const
+
+const INVESTMENT_AGENT_THESIS = {
+  supports: 'Supports the public thesis',
+  challenges: 'Challenges the public thesis',
+  mixed: 'Mixed thesis effect',
+  no_public_thesis: 'No attributable public thesis',
+  insufficient_evidence: 'Insufficient thesis evidence',
+} as const
+
+function humanizeAgentValue(value: string) {
+  return value.replaceAll('_', ' ')
+}
+
+function InvestmentAgentEvidenceAudit({
+  assessment,
+}: {
+  assessment: InvestmentAgentCompanyAssessment
+}) {
+  const evidenceCount = assessment.evidence.reduce(
+    (count, evidence) => count + evidence.source_urls.length,
+    0,
+  )
+  return (
+    <details className="investment-agent-evidence">
+      <summary>
+        <span>Inspect evidence and open questions</span>
+        <span className="mono">
+          {assessment.evidence.length} claims · {evidenceCount} source links
+        </span>
+      </summary>
+      <div className="investment-agent-evidence-grid">
+        <section>
+          <h4 className="mono">Evidence used</h4>
+          <ol>
+            {assessment.evidence.map((evidence, index) => (
+              <li key={`${assessment.ticker}-evidence-${index}`}>
+                <p>{decodeTextEntities(evidence.claim)}</p>
+                <div className="investment-agent-source-links mono">
+                  {evidence.source_urls.map((url, sourceIndex) => (
+                    <a href={url} target="_blank" rel="noreferrer" key={url}>
+                      Source {sourceIndex + 1} ↗
+                    </a>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+        <section>
+          <h4 className="mono">Still uncertain</h4>
+          {assessment.uncertainties.length > 0 ? (
+            <ul>
+              {assessment.uncertainties.map((uncertainty) => (
+                <li key={uncertainty}>{decodeTextEntities(uncertainty)}</li>
+              ))}
+            </ul>
+          ) : <p>No additional uncertainty was recorded.</p>}
+        </section>
+        <section>
+          <h4 className="mono">Check next</h4>
+          {assessment.next_checks.length > 0 ? (
+            <ul>
+              {assessment.next_checks.map((check) => (
+                <li key={check}>{decodeTextEntities(check)}</li>
+              ))}
+            </ul>
+          ) : <p>No follow-up check was recorded.</p>}
+        </section>
+      </div>
+    </details>
+  )
+}
+
+function InvestmentAgentCompany({
+  assessment,
+  companyName,
+}: {
+  assessment: InvestmentAgentCompanyAssessment
+  companyName: string
+}) {
+  const direction = INVESTMENT_AGENT_DIRECTION[assessment.economic_direction]
+  const thesis = INVESTMENT_AGENT_THESIS[assessment.thesis_effect]
+  return (
+    <article className="investment-agent-company">
+      <header>
+        <div>
+          <h3>{companyName}</h3>
+          <span className="mono">{assessment.ticker}</span>
+        </div>
+        <div className="investment-agent-company-flags mono">
+          <span>{assessment.relevance} connection</span>
+          <span>{assessment.confidence} confidence</span>
+        </div>
+      </header>
+
+      <p className="investment-agent-takeaway">
+        {decodeTextEntities(assessment.analyst_takeaway)}
+      </p>
+
+      <dl className="investment-agent-result-strip">
+        <div>
+          <dt>Direction</dt>
+          <dd>
+            <span aria-hidden="true">{direction.icon}</span>
+            {direction.label}
+          </dd>
+        </div>
+        <div>
+          <dt>Horizon</dt>
+          <dd>{humanizeAgentValue(assessment.time_horizon)}</dd>
+        </div>
+        <div>
+          <dt>Thesis</dt>
+          <dd>{thesis}</dd>
+        </div>
+      </dl>
+
+      <div className="investment-agent-causal">
+        <section>
+          <h4 className="mono">Why this company</h4>
+          <p>{decodeTextEntities(assessment.mechanism)}</p>
+        </section>
+        <section>
+          <h4 className="mono">Operating driver</h4>
+          <p>{decodeTextEntities(assessment.affected_operating_driver)}</p>
+        </section>
+      </div>
+
+      <InvestmentAgentEvidenceAudit assessment={assessment} />
+    </article>
+  )
+}
+
+function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
+  const rejectedCount = item.rejected_after_memo.length
+  return (
+    <details className="investment-agent-process">
+      <summary>
+        <span>How the agent got here</span>
+        <span className="mono">
+          {item.telemetry.company_universe_count} screened → {item.telemetry.memo_count} memos opened
+          {' '}→ {item.company_assessments.length} retained
+          {rejectedCount > 0 ? ` → ${rejectedCount} rejected` : ''}
+        </span>
+      </summary>
+      <div className="investment-agent-process-body">
+        <ol>
+          {item.memo_calls.map((call) => (
+            <li key={call.call_id}>
+              <div className="investment-agent-process-company">
+                <strong>{item.company_names[call.arguments.ticker] ?? call.arguments.ticker}</strong>
+                <span className="mono">{call.arguments.ticker} · {call.arguments.connection_type}</span>
+              </div>
+              <div>
+                <h4 className="mono">Why its memo was opened</h4>
+                <p>{decodeTextEntities(call.arguments.why_memo_is_needed)}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <dl className="investment-agent-telemetry mono">
+          <div><dt>Model</dt><dd>{item.telemetry.model} · {item.telemetry.reasoning_effort}</dd></div>
+          <div><dt>Turns</dt><dd>{item.telemetry.turn_count}</dd></div>
+          <div><dt>Input cache</dt><dd>{item.telemetry.cached_tokens.toLocaleString()} tokens reused</dd></div>
+          <div><dt>Run cost</dt><dd>${item.telemetry.reported_cost_usd.toFixed(3)}</dd></div>
+        </dl>
+        {item.citation_repairs.length > 0 && (
+          <p className="investment-agent-repair-note">
+            {item.citation_repairs.length} model citation path was matched to the exact stored source
+            before publication. The replacement remains recorded in the run audit.
+          </p>
+        )}
+      </div>
+    </details>
+  )
+}
+
+function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
+  const titleId = `investment-agent-${item.development_id}-title`
+  const feedPath = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(item.development_id)}`
+  const sourceTitle = item.source?.title || 'Company-aware Investment read-through'
+  return (
+    <article
+      className="insight-row investment-agent-row"
+      id={`investment-agent-${item.development_id}`}
+      aria-labelledby={titleId}
+    >
+      <div className="insight-rank investment-agent-rank mono">
+        <Link to={feedPath}>
+          <strong>#{item.daily_rank}</strong>
+          <span>Feed rank ↗</span>
+        </Link>
+      </div>
+      <div className="insight-body investment-agent-body">
+        <header className="insight-head investment-agent-head">
+          <div>
+            <h2 id={titleId}>{decodeTextEntities(sourceTitle)}</h2>
+            <p className="investment-agent-provenance mono">
+              {item.source?.author || 'Primary evidence'}
+              {item.source?.source_event_count
+                ? ` · ${item.source.source_event_count} source Events`
+                : ''}
+              {' '}· company-aware Investment pass
+            </p>
+          </div>
+          {item.source?.url && (
+            <a href={item.source.url} target="_blank" rel="noreferrer">
+              Primary source ↗
+            </a>
+          )}
+        </header>
+
+        <div className="investment-agent-opening">
+          <section>
+            <h3 className="mono">What changed</h3>
+            <p>{decodeTextEntities(item.development_summary)}</p>
+          </section>
+          <section>
+            <h3 className="mono">Portfolio read-through</h3>
+            <p>{decodeTextEntities(item.portfolio_readthrough)}</p>
+          </section>
+        </div>
+
+        {item.company_assessments.length > 0 ? (
+          <section className="investment-agent-companies" aria-label="Company read-throughs">
+            <header>
+              <h3>Company read-throughs</h3>
+              <p>
+                Each company was screened against the Development, then checked against its
+                complete research memo.
+              </p>
+            </header>
+            {item.company_assessments.map((assessment) => (
+              <InvestmentAgentCompany
+                assessment={assessment}
+                companyName={item.company_names[assessment.ticker] ?? assessment.ticker}
+                key={assessment.ticker}
+              />
+            ))}
+          </section>
+        ) : (
+          <section className="investment-agent-no-match">
+            <h3>No company connection cleared the bar</h3>
+            <p>{decodeTextEntities(item.no_match_reason || 'No decision-useful connection was established.')}</p>
+          </section>
+        )}
+
+        {item.rejected_after_memo.length > 0 && (
+          <section className="investment-agent-rejections">
+            <h3>Opened, then rejected</h3>
+            <ul>
+              {item.rejected_after_memo.map((rejection) => (
+                <li key={rejection.ticker}>
+                  <strong>
+                    {item.company_names[rejection.ticker] ?? rejection.ticker}
+                    {' '}<span className="mono">{rejection.ticker}</span>
+                  </strong>
+                  <p>{decodeTextEntities(rejection.reason)}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <InvestmentAgentProcess item={item} />
+      </div>
+    </article>
+  )
+}
+
+function InvestmentAgentYield({
+  data,
+}: {
+  data: InvestmentAgentInsightsResponse
+}) {
+  const run = data.run
+  if (!run) return null
+  return (
+    <p className="insight-yield">
+      <span className="insight-yield-part">
+        <strong>{run.surfaced_development_count}</strong> Development surfaced
+      </span>
+      <span className="insight-yield-sep" aria-hidden="true">·</span>
+      <span className="insight-yield-part">
+        <strong>{run.company_assessment_count}</strong> company read-throughs
+      </span>
+      <span className="insight-yield-sep" aria-hidden="true">·</span>
+      <span className="insight-yield-part">
+        <strong>{run.rejected_company_count}</strong> rejected after memo review
+      </span>
+    </p>
+  )
+}
+
 function InsightYield({
   keptCount,
   reviewedCount,
@@ -1108,7 +1417,14 @@ export default function Insights() {
     ? dataView.payload
     : null
   const editorialData = currentData && isEditorialResponse(currentData) ? currentData : null
-  const candidateData = currentData && !isEditorialResponse(currentData) ? currentData : null
+  const investmentAgentData =
+    currentData && isInvestmentAgentResponse(currentData) ? currentData : null
+  const candidateData =
+    currentData &&
+    !isEditorialResponse(currentData) &&
+    !isInvestmentAgentResponse(currentData)
+      ? currentData
+      : null
   const availableDates = useMemo(() => currentDates?.dates ?? [], [currentDates])
   const dateWindow = useMemo(
     () => getDateWindow(dateWindowEnd, availableDates.length),
@@ -1277,6 +1593,9 @@ export default function Insights() {
               onRevealDeclined={revealDeclined}
             />
           )}
+          {investmentAgentData?.available && investmentAgentData.items.length > 0 && (
+            <InvestmentAgentYield data={investmentAgentData} />
+          )}
         </div>
         <DailyBriefActions
           audience={audience}
@@ -1371,6 +1690,16 @@ export default function Insights() {
       {candidateData?.available && candidateData.items.length > 0 && (
         <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
           {candidateData.items.map((item) => <InsightRow item={item} key={item.candidate_id} />)}
+        </section>
+      )}
+      {investmentAgentData?.available && investmentAgentData.items.length > 0 && (
+        <section
+          className="insight-list investment-agent-list"
+          aria-label={`${copy.label} company-aware ${STATUS_COPY[status].label.toLowerCase()} insights`}
+        >
+          {investmentAgentData.items.map((item) => (
+            <InvestmentAgentInsight item={item} key={item.run_id} />
+          ))}
         </section>
       )}
       {currentData?.available && currentData.items.length === 0 && (

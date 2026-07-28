@@ -41,6 +41,7 @@ from fastapi.staticfiles import StaticFiles
 from fli.ingestion import sources
 from fli.delivery import daily_brief as brief_delivery
 from fli.insights import editorial_runs as editorial_store
+from fli.insights import investment_agent_runs as investment_agent_store
 from fli.insights import pdf_report
 from fli.insights import view as insight_store
 from fli.network import view as rankings_store
@@ -551,14 +552,24 @@ def insight_dates(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
     """Available successor Insight dates for one audience."""
+    investment_agent = (
+        investment_agent_store.dates_payload()
+        if audience == "investment"
+        else {"available": False, "dates": []}
+    )
+    investment_agent_days = {
+        str(item["day"])
+        for item in investment_agent.get("dates", [])
+    }
     editorial = editorial_store.editorial_insight_dates_payload(audience=audience)
     editorial_days = {
         str(item["day"])
         for item in editorial.get("dates", [])
+        if str(item["day"]) not in investment_agent_days
     }
     payload = insight_store.insight_dates_payload(
         audience=audience,
-        exclude_days=editorial_days,
+        exclude_days=editorial_days | investment_agent_days,
     )
     candidate_dates = {
         str(item["day"]): {
@@ -571,11 +582,11 @@ def insight_dates(
         }
         for item in payload.get("dates", [])
     }
-    if not editorial["available"]:
-        return JSONResponse({**payload, "dates": list(candidate_dates.values())})
     dates = candidate_dates
     for item in editorial["dates"]:
         day = str(item["day"])
+        if day in investment_agent_days:
+            continue
         dates[day] = {
             "day": day,
             "content_kind": "daily_editorial",
@@ -584,7 +595,11 @@ def insight_dates(
             "included_candidate_count": int(item["included_candidate_count"]),
             "not_selected_candidate_count": int(item["not_selected_candidate_count"]),
         }
+    for item in investment_agent.get("dates", []):
+        dates[str(item["day"])] = item
     ordered = [dates[day] for day in sorted(dates)]
+    if not ordered:
+        return JSONResponse({**payload, "dates": []})
     return JSONResponse(
         {
             **payload,
@@ -596,6 +611,60 @@ def insight_dates(
     )
 
 
+def _investment_agent_source(
+    *,
+    day: str,
+    development_id: str,
+) -> dict[str, object] | None:
+    payload = development_store.developments_payload(
+        day=day,
+        lane="all",
+        sort="rank",
+        query="",
+        development_id=development_id,
+        event_id="",
+        routing_filter="all",
+        limit=1,
+        offset=0,
+        include_evidence=False,
+    )
+    items = payload.get("items") or []
+    if not items:
+        return None
+    development = items[0]
+    artifacts = development.get("development_artifacts") or []
+    primary_artifact = next(
+        (
+            artifact
+            for artifact in artifacts
+            if artifact.get("title") and artifact.get("canonical_url")
+        ),
+        None,
+    )
+    root = development.get("root") or {}
+    author = root.get("author") or {}
+    return {
+        "title": (
+            str(primary_artifact["title"])
+            if primary_artifact
+            else str(root.get("text") or "Investment read-through")
+        ),
+        "url": (
+            str(primary_artifact["canonical_url"])
+            if primary_artifact
+            else str(root.get("url") or "")
+        ),
+        "author": str(
+            author.get("entity_name")
+            or author.get("name")
+            or author.get("handle")
+            or ""
+        ),
+        "primary_event_id": str(development.get("primary_event_id") or ""),
+        "source_event_count": int(development.get("source_event_count") or 0),
+    }
+
+
 @app.get("/api/insights")
 def insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
@@ -604,6 +673,18 @@ def insights(
 ) -> JSONResponse:
     """Successor audience Insights ordered by application-owned Feed rank."""
     day = insight_date.isoformat() if insight_date else None
+    if audience == "investment":
+        investment_agent = investment_agent_store.insights_payload(
+            day=day,
+            status=status,
+        )
+        if investment_agent["available"]:
+            for item in investment_agent["items"]:
+                item["source"] = _investment_agent_source(
+                    day=str(item["day"]),
+                    development_id=str(item["development_id"]),
+                )
+            return JSONResponse(investment_agent)
     if status == "kept":
         editorial = editorial_store.editorial_insights_payload(
             audience=audience,
