@@ -270,8 +270,8 @@ export function EvidenceInputMap({
       viewBox={includeDailyOutcome ? '0 0 1080 420' : '0 0 1080 226'}
       role="img"
       aria-label={includeDailyOutcome
-        ? 'Daily intelligence path. A screened Registry supplies dated X output. The system groups exact Events, orders the day, attaches source artifacts, and routes each evidence packet for Investment and AI Engineering. Evidence relevant to either audience passes to the FLI daily agent, which produces two daily briefs.'
-        : 'Evidence input path. A screened Registry supplies dated X output. The system groups exact Events, orders the day, attaches source artifacts, and then routes each evidence packet independently for Investment and AI Engineering.'}
+        ? 'Daily intelligence path. A screened Registry supplies dated X output. The system preserves exact Events, groups same-artifact posts into Developments, orders the day, and routes each Development for Investment and AI Engineering. Evidence relevant to either audience can then pass to the FLI daily agent.'
+        : 'Evidence input path. A screened Registry supplies dated X output. The system preserves exact Events, groups same-artifact posts into Developments, and orders the day before any audience judgment.'}
     >
       <ArrowDefs id="flow-arrow" />
       <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">EVIDENCE INPUT · INSPECTABLE BEFORE JUDGMENT</text>
@@ -548,29 +548,29 @@ function RankingMethods() {
         <p className="method-limit">Registry shows N / voter denominator. Ranking keeps the global account discovery order. Neither is relevance.</p>
       </div>
       <div className="method-row method-row--rank">
-        <div className="method-id mono"><span>DAILY-RANK-V2</span><strong>Event rank</strong></div>
+        <div className="method-id mono"><span>DAILY-DEVELOPMENT-RANK-V1</span><strong>Development rank</strong></div>
         <div className="method-main">
           <p className="method-question">How is evidence ordered within one observed day?</p>
-          <div className="method-equation method-equation--large mono">trusted votes → mean voter position → source-author position → public interactions → Event ID</div>
-          <div className="method-weight" aria-label="Daily Event ranking layers">
-            <div className="method-weight-network"><b>1</b><span>distinct trusted votes</span></div>
-            <div className="method-weight-origin"><b>2–3</b><span>network-position ties</span></div>
-            <div className="method-weight-public"><b>4–5</b><span>public then stable ID</span></div>
+          <div className="method-equation method-equation--large mono">trusted participants → mean participant position → public interactions → Development ID</div>
+          <div className="method-weight" aria-label="Daily Development ranking layers">
+            <div className="method-weight-network"><b>1</b><span>distinct trusted participants</span></div>
+            <div className="method-weight-origin"><b>2</b><span>participant-position tie</span></div>
+            <div className="method-weight-public"><b>3–4</b><span>public then stable ID</span></div>
           </div>
           <p className="method-explain">
-            <strong>Trusted votes</strong> are the union of distinct active Registry
-            entities that quoted or reposted any member of the complete Event on its
-            canonical day. The source author is excluded after the union. A vote is
-            never multiplied by status. <strong>Network position</strong> breaks
-            equal-vote ties, first across voters and then for the source author. It
-            is the share of all other ranked Registry entities with strictly lower
-            entity-union support; equal support receives an equal position.
+            <strong>Trusted participants</strong> are the union of distinct active
+            Registry entities that authored an original post, quoted it, or reposted
+            any source inside the complete Development. Each entity counts once.
+            <strong>Network position</strong> breaks equal-participant ties using
+            the mean position of those participants. It is the share of all other
+            ranked Registry entities with strictly lower entity-union support;
+            equal support receives an equal position.
             <strong>Public interactions</strong> use the largest same-day single-post
-            sum of likes, replies, reposts, and quotes. Event ID makes a full tie
-            deterministic.
+            sum of likes, replies, reposts, and quotes. Development ID makes a full
+            tie deterministic.
           </p>
         </div>
-        <p className="method-limit">The ranked Event view shows one stable daily rank across filters; the raw Feed ledger is unranked. Exact rank inputs are SHA-bound, stale routing is rejected, and ranking is unavailable without current network analysis.</p>
+        <p className="method-limit">The Feed groups exact Events only through a shared release-specific artifact. It preserves every original post underneath, binds exact rank inputs, and remains unavailable without current network analysis.</p>
       </div>
     </div>
   )
@@ -602,7 +602,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--lead" id="overview">
         <div className="arch-section-head">
           <h2 className="arch-h">One completed day, end to end</h2>
-          <p className="arch-p">The system collects X output from the screened Registry, groups exact Events, orders the day, and returns two independent audience judgments in one structured call. It freezes every positive candidate, then one persisted Codex task researches the cohort and writes both briefs. Nothing is published or sent until the complete draft passes deterministic validation.</p>
+          <p className="arch-p">The system collects X output from the screened Registry, preserves exact Events, groups same-artifact posts into Developments, and orders the day. Audience judgment and daily-brief generation remain separate downstream stages. Nothing is published or sent until a complete draft passes deterministic validation.</p>
         </div>
         <div className="arch-canvas"><EvidenceInputMap /></div>
         <div className="arch-canvas arch-canvas--sub"><DailyIntelligenceMap /></div>
@@ -637,7 +637,7 @@ export default function Architecture() {
       <section className="arch-section arch-section--methods" id="ranking-methods">
         <div className="arch-section-head">
           <h2 className="arch-h">The numbers answer different questions</h2>
-          <p className="arch-p">Reach, network support, and the daily Event rank answer different questions so none can masquerade as quality.</p>
+          <p className="arch-p">Reach, network support, and the daily Development rank answer different questions so none can masquerade as quality.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><RankingMethods /></div>
         <div className="arch-canvas arch-canvas--sub"><NetworkRankFigure /></div>

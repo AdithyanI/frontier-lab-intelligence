@@ -55,9 +55,11 @@ durable run before completion. Each stage is checkpointed in the date-keyed
 orchestration ledger, so retrying the same command resumes the same run rather
 than creating a second brief.
 
-There is no first-class `Development` row. Several Events can support one
-Insight through explicit evidence roles. The Event remains the frozen evidence
-unit; the Insight is the reader-facing judgment.
+`Development` is now the ranked read-model unit. It groups same-day exact
+Events only when independently authored original posts share one
+release-specific canonical artifact. Exact Events remain the frozen provenance
+unit beneath it; every source post and artifact stays attributable. An Insight
+is still the reader-facing judgment, not another evidence merge.
 
 The daily workspace is a conservative semantic projection, not a raw-data
 store. It keeps first-party X sources published on the brief day or the seven
@@ -87,8 +89,8 @@ Every Insight has:
   argument rather than exposing intermediate reasoning fields;
 - one concrete `next_step`;
 - audience-specific `analysis`;
-- exact Event links with `primary`, `supporting`, `context`, or
-  `counterevidence` roles; and
+- Development links with `primary`, `supporting`, `context`, or
+  `counterevidence` roles, backed by exact Event provenance; and
 - ordered citations to frozen Events, artifacts, public context, or bounded web
   research.
 
@@ -255,8 +257,11 @@ untouched rather than silently changed back.
 
 `run-day` is the one-date entry point. `run-batch` is the historical
 parallelism boundary: it selects one complete current routing run per day,
-requires `daily-rank-v2`, records a separate `daily-orchestration-v3` lineage
-for each date, and launches at most four independent days concurrently.
+requires `daily-development-rank-v1`, records a separate
+`daily-orchestration-v3` lineage for each date, and launches at most four
+independent days concurrently. No Development-lineage daily run has been
+launched yet; the saved July 5–21 editorial corpus remains historical
+`daily-rank-v2` proof.
 That lineage freezes the source Event run, Feed run, routing run, routing
 cohort hash, and full-day `source_rank_input_sha256`; a workspace or completed
 editorial run from another rank input cannot be resumed as current.

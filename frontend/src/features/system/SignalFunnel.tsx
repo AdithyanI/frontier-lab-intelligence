@@ -107,7 +107,7 @@ const PLANES: Plane[] = [
     dots: 34,
     step: '3',
     name: 'Rank',
-    concept: 'a transparent Event rank',
+    concept: 'a transparent Development rank',
     detail: 'decides where to look first',
   },
   {
@@ -320,7 +320,7 @@ function PlaneDots({ plane }: { plane: Plane }) {
   }
 
   if (plane.id === 'rank') {
-    /* Ordered: size now encodes the day's Event rank, biggest first. */
+    /* Ordered: size now encodes the day's Development rank, biggest first. */
     return (
       <>
         {pts.map((p) => (
@@ -460,7 +460,7 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="The signal funnel: from everything published publicly, a screened cohort chooses what to collect, exact Events are ranked, judged for two audiences, and distilled into two daily cited briefs."
+      aria-label="The signal funnel: from everything published publicly, a screened cohort chooses what to collect, exact Events are grouped into Developments, ranked, judged for two audiences, and distilled into two daily cited briefs."
       className="signal-funnel"
     >
       <g

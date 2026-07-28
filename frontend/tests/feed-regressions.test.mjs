@@ -61,7 +61,7 @@ test('Feed exposes one mutually exclusive routing Status control', () => {
 })
 
 test('Feed exact-Event links reveal the target outside the default Relevant filter', () => {
-  assert.equal(initialFeedRoutingFilter(new URLSearchParams()), 'relevant')
+  assert.equal(initialFeedRoutingFilter(new URLSearchParams()), 'all')
   assert.equal(
     initialFeedRoutingFilter(new URLSearchParams('event_id=exact-event-id')),
     'all',

@@ -28,7 +28,8 @@ separate future concern.
 ## Product Purpose
 
 Frontier Lab Intelligence: track frontier AI labs and their key people, turn
-their public output into ranked Event evidence and cited, structured,
+their public output into ranked Development evidence with exact Event
+provenance and cited, structured,
 audience-specific Insights, and deliver the
 few things that matter to each audience while suppressing the noise. Success
 is defined by the client's own bar: "did this surface something we'd genuinely

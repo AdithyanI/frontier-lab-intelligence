@@ -43,7 +43,8 @@ change production behavior merely to make the system look more complete.
 Registry
   -> trusted X collection cohort
   -> exact quote / retweet / reply Events over time
-  -> transparent daily Event ranking
+  -> same-artifact, same-day Developments
+  -> transparent daily Development ranking
   -> independent AI Engineering + Investment routing
   -> optional per-Event working annotations
   -> daily agent research, consolidation, and ranked cited Insights
@@ -54,9 +55,13 @@ Registry
 The stored-X and canonical-artifact evidence paths are implemented. The earlier
 multi-stage Audience Insights v2 implementation and generated outputs were
 explicitly discarded on 2026-07-15; its learnings remain archived in docs.
-The successor now starts directly from ranked Event evidence projected from the
-raw Feed: one versioned GPT-5.4-mini/high call makes independent AI Engineering
-and Investment relevance judgments over a first-party-authored evidence packet.
+The successor now starts from ranked Developments projected from exact Event
+evidence and accepted canonical artifacts. Exact Events remain immutable;
+same-day original posts merge only when they point to the same release-specific
+artifact. The current implementation stops cleanly at this grouped Feed and
+rank boundary. Historical `daily-rank-v2` routing, Insight, editorial, PDF, and
+delivery outputs remain preserved as prior proof but are not current
+Development-lineage outputs.
 The former model-based
 keep/drop gate, its generated databases, and its live API/UI/CLI surfaces were
 removed on 2026-07-15. The Feed derives `kept` only when either audience is
@@ -66,10 +71,10 @@ calibrations remain documented, but their generated rows were deleted because
 they used superseded source and output contracts. The production path freezes
 first-party-only requests into one resumable SQLite store. Investment v10 and
 AI Engineering v7 now use per-audience watchpoint/experiment schemas and stored
-post dates. The July 5–21 `daily-rank-v2` cohort is fully evaluated. The
-per-Event layer remains an auditable annotation source. A repo-local daily
-intelligence agent now owns consolidation and final selection across the
-complete routed-positive cohort behind a strict validated write boundary.
+post dates. The July 5–21 `daily-rank-v2` cohort remains fully evaluated as
+historical lineage. A repo-local daily intelligence agent owns consolidation
+and final selection, but it has deliberately not been replayed against the new
+Development projection.
 
 ## Where the System Stands
 
@@ -79,12 +84,12 @@ complete routed-positive cohort behind a strict validated write boundary.
 | Trusted-following graph | Evaluated candidate generator | The current immutable incremental snapshot contains 2,832,858 outgoing-follow edges from 2,558 complete source accounts resolving to 2,521 voting entities. Entity-union overlap is the accepted inspectable support feature across 2,524 active X-addressable Registry targets, including 38 zero-support targets; personalized PageRank remains a diagnostic, not truth. |
 | X evidence store | Implemented source boundary | Raw provider evidence is preserved locally and normalized into replayable posts and relations. X is the only implemented discovery source today. |
 | Exact event projection | Implemented and regression-tested | Provider-declared evidence is stored as root-owned structural forests, not unrestricted connected components: quote/retweet reactions attach to one source, only the source author's replies extend its thread, and every member has at most one structural parent. Third-party replies remain in the ledger but cannot import their own branch or bridge independent roots. The product publishes each Event exactly once on its earliest canonical source day; later activity appends to that Event without creating another dated candidate. The current July 5–21 Feed contains 81,390 normalized posts; its published Event store contains 14,947 grouped components, 58,430 members, and 43,999 links. The Registry-aware read projection yields 19,657 complete daily Events. |
-| Feed + daily Event rank | Implemented audit surface | Daily collection includes authored replies and tracked reactions. The raw Feed ledger is unranked; the `/api/events` projection and `/evidence/feed` audit surface show one frozen canonical-day `daily-rank-v2` position across Status/search filters. The complete Event is ordered lexicographically by distinct trusted voters, mean voter network position, source-author network position, maximum same-day one-post public interactions, and stable Event ID. Network positions are tie-aware entity-support percentiles. There is no scalar score or weighted blend. Exact daily rank inputs are SHA-bound and ranking fails closed without the current network analysis. Later reactions remain available in one flat activity disclosure but do not republish or rerank the source Event. Registry changes affect derived views without rewriting raw evidence. |
+| Development projection + daily rank | Implemented grouping-only audit surface | `/api/developments` and `/evidence/feed` derive same-day Developments from exact Events plus accepted canonical artifacts. Independently authored original posts merge only when they share the same release-specific artifact; generic host roots are rejected as anchors. Exact Event IDs, posts, activity, and artifact lineage remain inspectable underneath. `daily-development-rank-v1` orders each day by distinct Registry participants across every source Event, mean participant network position, maximum public interactions on one source post, then stable Development ID. Original authors, quote authors, and reposters each count once. There is no organization bonus, scalar score, or weighted blend, and the projection needs no separate database yet. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The current Event-native import contains 6,298 accepted source observations, 6,304 disclosures, and 5,378 canonical artifacts with zero import failures. One shared extraction validator rejects placeholder-dominated bodies and deterministic bot, consent, authentication, client-rendering, and error shells before they become packet evidence; immutable raw responses remain preserved. |
-| Feed audience routing | Current v9 / `daily-rank-v2` cohort plus exact cross-publication reuse | The direct Evidence runtime returns independent AI Engineering and Investment booleans plus evidence-grounded reasons. New freezes admit only first-party X sources from the evaluation day through seven days earlier: a current same-author continuation may replace an older root, while an old-only Event is excluded. Independently authored reactions and pure reposts remain outside model input. All 17 July 5–21 runs are complete: 1,674 routed Events, 509 relevant to both audiences, 183 Engineering-only, 273 Investment-only, and 709 neither. Every run binds the exact source Feed/Event IDs and full-day rank-input SHA. The final tie-aware correction reused 1,647 exact compatible judgments and made 27 new calls for $0.089051 incremental proxy cost; reuse provenance remains stored per row. |
-| Audience Insight generation | Complete v10/v7 evaluation of every routed-positive audience | Investment v10 and AI Engineering v7 address distinct readers through one shared decision core and per-audience action schemas: `Summary` → `Why it matters` → one trigger-shaped Investment `Watchpoint` or one bounded Engineering `Experiment`. Insight-only rendering adds the evaluation day and stored post dates without changing routing hashes, and suppresses resurfaced historical material that has no current development. `fli insights` freezes exact requests before execution, rejects non-current ranking, source, or prompt contracts, resumes completed audiences without another call, and records result/cache/cost telemetry. The current 17-day production batch contains 1,474 Event/audience decisions across 965 unique Events: 619 surfaced and 855 suppressed. The final correction reused 1,451 exact prior outputs and completed 23 new Terra/high calls for $0.361769 incremental proxy cost. Cross-Event semantic duplicates remain an explicit downstream editorial boundary. |
+| Feed audience routing | Historical Event lineage preserved; Development replay paused | The complete July 5–21 `daily-rank-v2` runs remain auditable. The router now accepts one whole Development packet with all original posts and artifact lineage while leaving pure amplifiers out of semantic evidence. One July 21 Development-lineage routing trial completed before the scope was narrowed; it is not followed by current Insight or editorial generation. |
+| Audience Insight generation | Historical outputs preserved; no Development-lineage publication | Investment v10 and AI Engineering v7 remain the implemented audience contracts, but current readers reject the historical Event-rank lineage as successor output. An attempted July 21 Development refresh was interrupted before completion and produced no published successor run. |
 | Prompt-cache operations | Implemented and live-verified | Cacheable jobs keep stable 1,024+ token prefixes first, use deterministic keys, serialize within a key, and record Responses `cached_tokens`. Registry jobs now use eight cache lanes instead of 64; audience routing is single-key/cache-first by default; Insight refresh runs one lane per audience prompt. The 27 July different-input canary observed 3/4 Luna and 4/4 Terra warm hits through the shared Azure-backed LiteLLM route. `fli prompt-cache-canary --no-input` makes the check repeatable; misses remain a measured best-effort provider condition rather than proof that a model lacks caching. The authoritative contract, current proof, incident history, and troubleshooting checklist live in [`prompt-caching.md`](references/prompt-caching.md). |
-| Daily editorial agent | Complete 17-day workspace-v3 replay plus safe post-freeze date fan-out | `$fli-daily-intelligence` freezes the routed-positive day, applies the seven-day first-party X window, projects authoritative X publication dates, and exposes exact artifact disclosure lineage without automatically filtering artifacts. Workspace v3 with `semantic_snapshot_sha256` is the only executable authoring contract; historical packets are not upgraded or resumed. The Investment context exposes all 37 sourced company profiles as one candidate universe: the agent shortlists against a compact index and retrieves complete profiles only for Event-specific credible matches. The next validated boundary is an explicit direct/indirect/none relationship and supports/challenges/mixed/unclear thesis effect, not a permanent company exclusion. `fli daily-intelligence run-day` checkpoints exact Evidence, routing, workspace, Codex-task, and editorial-run identities for one date. Historical parallel work instead publishes Evidence once, routes the full range against that publication, and then fans out independent immutable workspaces and Codex tasks; several full `run-day` Evidence publishers do not compete. Retries treat a durable import as terminal before touching App Server and validate frozen task settings before any live resume. Artifact citations still require verified excerpts; embeddings remain optional retrieval only. All 17 July 5–21 `daily-orchestration-v3` runs are complete against exact `daily-rank-v2` lineage: 965 candidate Events, 1,474 audience pairs, 199 published Insights, and 353 citations. |
+| Daily editorial agent | Historical 17-day proof preserved; Development replay not started | The complete July 5–21 `daily-orchestration-v3` proof remains bound to historical `daily-rank-v2` lineage. The agent and validation contracts remain implemented, but no Development-lineage daily brief, PDF, or delivery projection has been generated. |
 | Insights UI and delivery | Canonical daily reader, cached PDF workbook, manual Slack/email delivery, plus candidate audit | For an imported day, `Kept` reads the newest complete daily editorial run. Investment presents the conclusion-led title, facts, one causal interpretation, company read-through, confirmation/challenge signals, and separate original-Feed and artifact/context sources without exposing intermediate reasoning scaffolding. Engineering retains its bounded experiment detail. The selected complete audience/day downloads from the top-right as a deterministic A4 workbook. Beside it, a muted `Send brief` action requires an explicit confirmation: Slack presents every cited Insight with its complete interpretation and links to the complete brief and PDF; email receives up to five ranked Insights with the cached PDF attached. Provider credentials remain server-side, and the same-origin app confirms sends without a separate access-key field. The PDF's reader-first opening combines the title, audience/date, and clickable ranked Insight titles without run hashes or pipeline counts; every title jumps directly to analysis without the web-only rank-rationale disclosure, then continues to its linked full source ledger, and every later page returns to the brief index. Original-Feed titles in the PDF open the exact internal Feed Event, which retains the onward original-post link; artifact/context titles still open their cited sources directly. Serif display headings and blue slash markers give the workbook a restrained visual relationship to the case brief without copying BIT branding. `/api/insights/report.pdf` renders only the canonical read projection into an atomic content-addressed cache with ETag revalidation. `Suppressed` / `All` and days without an imported run retain the per-Event candidate audit. `/api/insights` exposes a discriminated read contract and the date rail overlays final imported counts. All 17 July 5–21 days have canonical imported runs, and the content-addressed cache contains the 34 current audience/day PDFs. |
 | Submission package | Submitted 20 July 2026; live reviewer path remains available | The submitted email leads with the public product and video, links the written How it works report, provides five exact showcase Insights, links the public repository, and attaches one sample PDF. A clean checkout restores a checksummed read-only snapshot with one command. |
 
@@ -115,7 +120,8 @@ Adi's explicit current-session approval.
 ## What Is Deliberately Deferred
 
 - Broad RSS, blog, GitHub, arXiv, or second-source ingestion.
-- Semantic/topic event clustering beyond exact provider relations.
+- Semantic/topic clustering beyond exact provider relations and exact
+  same-artifact Development grouping.
 - A learned ranking model. Production uses the transparent, deterministic
   `daily-rank-v2` ordering; learning weights or optimizing it against downstream
   labels remains deferred.
@@ -129,21 +135,20 @@ case-study thesis.
 
 ## Current Direction
 
-The `daily-rank-v2` clean migration is complete and archived under
-[`docs/projects/archive/attention-ranking-redesign/`](projects/archive/attention-ranking-redesign/).
-The complete Event is now the ranking unit, exact rank lineage reaches every
-downstream model and read surface, all 17 saved days were replayed without an X
-refetch, and the current web/PDF product covers 5–21 July. Optional ranks
-101–200 recall measurement, Registry expansion, and additional sources remain
-separate future work.
+The current work boundary is the deterministic Development projection and
+`daily-development-rank-v1`. Exact Events remain the provenance unit; shared
+release-specific artifacts merge same-day original posts for inspection and
+ranking. The Feed opens on all grouped Developments and exposes every exact
+source underneath. Downstream routing, Insight, editorial, PDF, and delivery
+replay is intentionally paused until this grouping is reviewed.
 
 Repository housekeeping is complete and archived
 under [`docs/projects/archive/repo-housekeeping/`](projects/archive/repo-housekeeping/):
 all runtime domains have direct package ownership, the code/data map is the
 cold-start implementation index, local-data lifecycle is explicit, and fast
 checks prevent the former flat source layout from returning. The later
-attention-ranking redesign replaced the retired weighted score cleanly with
-`daily-rank-v2`; rejected formula experiments remain decision history only.
+attention-ranking redesign remains preserved as the historical Event-rank
+lineage; rejected formula experiments remain decision history only.
 
 The submission-critical daily-intelligence quality project is complete and
 archived under

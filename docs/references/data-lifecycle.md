@@ -41,6 +41,11 @@ Event-day projections and their compact date summary so process restarts do not
 rebuild every historical day before serving a click. Cache keys bind the source
 database versions and projection code; deleting it affects latency only.
 
+Developments do not have a separate database. They are a deterministic,
+in-process read projection over the current exact Event and accepted-artifact
+stores. Restarting the web process or changing either source rebuilds them;
+there is no Development store to preserve, restore, or clean up.
+
 Before a destructive cleanup, trace every default path in code, inspect tracked
 manifests/lineage, and run `PRAGMA quick_check` on the replacement store. Move a
 historical output to `data/archive/` when its evidence remains useful but no

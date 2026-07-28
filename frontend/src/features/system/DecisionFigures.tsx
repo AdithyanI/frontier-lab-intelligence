@@ -208,7 +208,7 @@ export function RankFigure() {
     <svg
       viewBox="0 0 1080 350"
       role="img"
-      aria-label="Left: a day of Events as unordered bars. Right: the same bars ordered by the daily Event ranking rules, with the top of the day marked as what goes to judging first."
+      aria-label="Left: a day of Developments as unordered bars. Right: the same bars ordered by the daily Development ranking rules, with the top of the day marked as what goes to judging first."
     >
       <defs>
         <marker id="rank-order-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -347,7 +347,7 @@ export function PublishFigure() {
   )
 }
 
-/* Stage 3b: how the ordering is decided. Four questions asked in order, each
+/* Stage 3b: how the ordering is decided. Three questions asked in order, each
    one shown as the comparison it actually makes. Nothing is blended, so no
    signal can quietly overpower another. */
 export function RankLayersFigure() {
@@ -358,17 +358,16 @@ export function RankLayersFigure() {
     Array.from({ length: count }, (_, i) => dot(688 + i * 21, y, opacity, `${key}-${i}`))
 
   const rows = [
-    { n: '1', title: 'How many voted?', note: 'DISTINCT TRUSTED ENTITIES · QUOTE OR REPOST · ONE EACH' },
-    { n: '2', title: 'Tie? Voter network support.', note: 'MEAN TIE-AWARE ENTITY-SUPPORT PERCENTILE' },
-    { n: '3', title: 'Tie? Source network support.', note: 'SOURCE-AUTHOR ENTITY-SUPPORT PERCENTILE' },
-    { n: '4', title: 'Tie? Public interaction.', note: 'MAX SAME-DAY POST · LIKES · REPLIES · REPOSTS · QUOTES' },
+    { n: '1', title: 'How many participated?', note: 'ORIGINAL AUTHOR · QUOTE · REPOST · EACH REGISTRY ENTITY ONCE' },
+    { n: '2', title: 'Tie? Who participated?', note: 'MEAN TIE-AWARE ENTITY-SUPPORT PERCENTILE' },
+    { n: '3', title: 'Tie? Public interaction.', note: 'MAX ONE SOURCE POST · LIKES · REPLIES · REPOSTS · QUOTES' },
   ]
 
   return (
     <svg
-      viewBox="0 0 1080 580"
+      viewBox="0 0 1080 450"
       role="img"
-      aria-label="The daily rank asks four questions in order instead of blending them into one weighted number. First, how many distinct trusted Registry entities quoted or reposted the complete Event, one vote each and with the source author excluded. If that ties, the average network position of those voters. If that still ties, the network position of the source author. If that still ties, the maximum same-day public interactions on one Event post. Below is a censored check from the current daily-rank-v2 routing cohort: Events with one trusted vote were routing-relevant 34 percent of the time, two votes 54 percent, three to four votes 64 percent, and five or more votes 72 percent."
+      aria-label="The daily Development rank asks three questions in order instead of blending them into one weighted number. First, how many distinct trusted Registry entities authored an original post, quoted, or reposted any source in the Development, one count each. If that ties, the average network position of those participants. If that still ties, the maximum public interactions on one source post. A stable Development ID resolves a complete tie."
     >
       <defs>
         <marker id="rank-layer-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -376,7 +375,7 @@ export function RankLayersFigure() {
         </marker>
       </defs>
 
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">RANK · FOUR QUESTIONS, ASKED IN ORDER</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">RANK · THREE QUESTIONS, ASKED IN ORDER</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">NOT A WEIGHTED SUM</text>
 
       <text x="660" y="66" fontFamily={MONO} fontSize="9" fill={BLUE_INK} letterSpacing="0.06em">▸ THIS ONE GOES FIRST</text>
@@ -399,8 +398,8 @@ export function RankLayersFigure() {
               <>
                 {dots(3, first, 1, 'r1a')}
                 {dots(1, second, 1, 'r1b')}
-                <text x="770" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">MORE TRUSTED VOTES</text>
-                <text x="770" y={second + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">FEWER TRUSTED VOTES</text>
+                <text x="770" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">MORE PARTICIPANTS</text>
+                <text x="770" y={second + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">FEWER PARTICIPANTS</text>
               </>
             ) : null}
 
@@ -417,16 +416,6 @@ export function RankLayersFigure() {
               <>
                 {dots(3, first, 0.55, 'r3a')}
                 {dots(3, second, 0.55, 'r3b')}
-                <rect x="770" y={first - 9} width="150" height="18" fill={BLUE_MID} opacity="0.85" />
-                <rect x="770" y={second - 9} width="52" height="18" fill={BLUE_MID} opacity="0.28" />
-                <text x="936" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">AUTHOR</text>
-              </>
-            ) : null}
-
-            {index === 3 ? (
-              <>
-                {dots(3, first, 0.55, 'r4a')}
-                {dots(3, second, 0.55, 'r4b')}
                 <rect x="770" y={first - 9} width="132" height="18" fill={MUTED} opacity="0.5" />
                 <rect x="770" y={second - 9} width="44" height="18" fill={MUTED} opacity="0.22" />
                 <text x="936" y={first + 4} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">PUBLIC</text>
@@ -443,25 +432,8 @@ export function RankLayersFigure() {
         )
       })}
 
-      <line x1="30" y1="502" x2="1050" y2="502" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="30" y="532" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">CURRENT V2 ROUTING · CENSORED CHECK</text>
-      <text x="30" y="548" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">MORE VOTES · MORE OFTEN ROUTING-RELEVANT</text>
-      {[
-        ['1 VOTE', 34],
-        ['2 VOTES', 54],
-        ['3–4 VOTES', 64],
-        ['5+ VOTES', 72],
-      ].map(([label, rate], index) => {
-        const x = 300 + index * 156
-        const height = Number(rate) * 0.42
-        return (
-          <g key={String(label)}>
-            <rect x={x} y={546 - height} width="104" height={height} fill={BLUE} opacity={0.4 + index * 0.2} />
-            <text x={x} y="562" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.05em">{label}</text>
-            <text x={x + 104} y="562" textAnchor="end" fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{rate}%</text>
-          </g>
-        )
-      })}
+      <line x1="30" y1="404" x2="1050" y2="404" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="30" y="431" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">FULL TIE · STABLE DEVELOPMENT ID KEEPS THE ORDER REPRODUCIBLE</text>
     </svg>
   )
 }

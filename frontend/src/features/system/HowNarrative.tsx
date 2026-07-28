@@ -218,6 +218,13 @@ export default function HowNarrative({
             Any retrieval gaps stay visible instead of being treated as
             evidence.
           </p>
+          <p>
+            Sometimes several tracked accounts publish separate original posts
+            about the same release. When those posts point to the same specific
+            paper, model card, repository, or announcement on the same day, the
+            system groups their exact Events into one Development. Every
+            original post and Event ID remains visible underneath.
+          </p>
           <FigureFrame>
             <CollectFigure />
           </FigureFrame>
@@ -238,34 +245,34 @@ export default function HowNarrative({
           <p>
             A normal engagement ranking is not very useful here. It mostly
             tells us what was popular on X. Instead the rank asks the narrower
-            question the network can actually answer: how many distinct
-            trusted Registry entities independently quoted or reposted this
-            Event? Each entity counts once across the complete Event. The
-            source author is removed from that union, so self-amplification
-            does not count.
+            question the network can actually answer: how many distinct trusted
+            Registry entities authored an original post, quoted it, or
+            reposted any source in this Development? Each entity counts once
+            across the complete Development.
           </p>
           <p>
-            Plenty of Events tie on that count, so three further questions
-            break ties, each asked only when the one above it came out level.
-            They are kept as four separate questions rather than one weighted
+            Plenty of Developments tie on that count, so two further questions
+            break ties: the average network position of those participants,
+            then the strongest public interaction total on one source post.
+            They stay as three separate questions rather than one weighted
             formula, so there is no weight to tune and no lane can quietly
             outvote another.
           </p>
-          <FigureFrame label="Expand how the four questions decide the order">
+          <FigureFrame label="Expand how the three questions decide the order">
             <RankLayersFigure />
           </FigureFrame>
           <p>
             This is where the Registry ranking becomes useful again. An
             announcement repeated by three trusted entities always ranks ahead
             of one repeated by two, even if those two sit higher in the
-            network. Network position only decides between Events with the
-            same number of trusted votes. It is a tie-aware percentile of
+            network. Network position only decides between Developments with
+            the same number of participants. It is a tie-aware percentile of
             entity-union support, so entities with equal support receive the
             same position.
           </p>
           <p>
             The rank only decides what we look at first. It does not say that
-            an Event is true, important, or relevant. The top Events move to
+            a Development is true, important, or relevant. The top Developments move to
             the next step, where they are judged without seeing this rank.
           </p>
           <FigureFrame label="Expand how ranking orders a day">

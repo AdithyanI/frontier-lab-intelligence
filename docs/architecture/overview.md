@@ -19,10 +19,12 @@ flowchart TD
     C --> F["Feed<br/>complete daily evidence"]
     F --> E["Events<br/>exact structural groups"]
     E --> A["Artifacts<br/>first-party source extraction"]
-    N --> S["Daily Event rank<br/>transparent ordering"]
+    E --> V["Developments<br/>same artifact, same day"]
+    A --> V
+    N --> S["Daily Development rank<br/>transparent ordering"]
     R --> S
-    E --> S
-    E --> Q["Audience routing<br/>AI Engineering and Investment"]
+    V --> S
+    V --> Q["Audience routing<br/>AI Engineering and Investment"]
     A --> Q
     S --> Q
     Q --> I["Daily editorial agent<br/>ranked, cited Insights per audience"]
@@ -44,9 +46,9 @@ or reinterpret its upstream evidence.
 | Registry | `fli.registry` | Canonical people, organizations, channels, provenance, admission, and curation. |
 | Ingestion | `fli.ingestion` | Public-source adapters, raw X storage, and date-complete collection. |
 | Trusted network | `fli.network` | Frozen outgoing-follow evidence and derived entity-support rankings. |
-| Evidence | `fli.evidence` | Deterministic Feed snapshots, exact structural Events, and one refresh workflow. |
+| Evidence | `fli.evidence` | Deterministic Feed snapshots, exact structural Events, artifact-anchored Developments, and one refresh workflow. |
 | Artifacts | `fli.evidence.artifacts` | Canonical source links, lineage, retrieval, and extracted text. |
-| Daily Event rank | `fli.scoring` | Versioned, inspectable lexicographic ordering and offline replay diagnostics. |
+| Daily Development rank | `fli.scoring.development_attention` | Versioned, inspectable lexicographic ordering of same-day Developments. |
 | Audience routing | `fli.routing` | Independent AI Engineering and Investment relevance decisions with durable runs. |
 | Insights | `fli.insights` | Per-Event working annotations plus agent-authored daily synthesis, strict validation, atomic storage, and the canonical read model. |
 | Delivery | `fli.delivery` | Explicitly confirmed Slack and email adapters over one canonical Daily Brief; credentials and provider behavior remain server-side. |
@@ -68,14 +70,21 @@ composition.
    perform topic clustering.
 5. Artifact enrichment admits source links only from the root author and that
    author's same-conversation continuation.
-6. Daily Event ranking orders each complete canonical-day Event with the
-   inspectable `daily-rank-v2` layers: trusted-voter count, mean voter network
-   position, source-author network position, maximum same-day one-post public
-   interactions, then stable Event ID. It is not a scalar score, an Insight, or
-   a quality judgment. Network positions are tie-aware entity-support
-   percentiles, and the complete day's exact rank inputs are bound into one
-   lineage hash.
-7. Audience routing independently decides whether the packet matters to AI
+6. The Development projection groups same-day exact Events only when their
+   independently authored root posts point to the same accepted,
+   release-specific canonical artifact. Generic home pages are not merge
+   anchors. Exact Event IDs, authors, posts, activity, and artifact lineage stay
+   attached, so grouping never erases provenance. The projection is
+   deterministic and rebuildable; it does not need its own database yet.
+7. Daily Development ranking orders each complete day with
+   `daily-development-rank-v1`: distinct Registry participants across every
+   source Event, then their mean network position, then the largest public
+   interaction total on one source post, then stable Development ID. Original
+   authors, quote authors, and reposters each count once per Development.
+   There is no organization bonus, scalar score, or topic-model judgment.
+   Network positions are tie-aware entity-support percentiles, and the complete
+   day's exact inputs are bound into one lineage hash.
+8. Audience routing independently decides whether the packet matters to AI
    Engineering and Investment. New routing freezes admit only first-party X
    sources no more than seven days old; a current same-author continuation may
    replace an older root, while old-only packets are excluded. A multi-day
@@ -86,7 +95,7 @@ composition.
    or newly ranked Events alone require model work. Every new run records the
    current source Feed/Event IDs and full-day rank-input hash, and readers reject
    stale rank lineage.
-8. A daily editorial agent reviews the complete routed-positive cohort, reads
+9. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. Its compact index keeps all 37 profiles eligible.
    The agent shortlists zero or a few credible matches for the particular Event,
@@ -102,7 +111,7 @@ composition.
    existing routing runs, attaches application-owned publication times, and
    projects exact catalogued artifact disclosure lineage without automatically
    pruning artifacts.
-9. Deterministic validation binds the draft to its frozen workspace and imports
+10. Deterministic validation binds the draft to its frozen workspace and imports
    Insights, Event roles, dispositions, and citations in one transaction.
    Artifact citations require an excerpt verified against the frozen artifact
    text; the agent still owns the semantic judgment that the passage supports
@@ -111,7 +120,7 @@ composition.
    Investment Insights persist one causal interpretation, company read-through,
    key uncertainty, watchpoints, and a diligence step; intermediate reasoning
    scaffolds are not separate reader fields.
-10. The date-keyed daily runner checkpoints the existing Evidence, routing,
+11. The date-keyed daily runner checkpoints the existing Evidence, routing,
    and strict-v3 workspace stages, then may hand the exact workspace to one
    named Codex task. Model and reasoning may inherit Codex configuration, but
    service speed defaults to an explicit Standard override (`serviceTier:

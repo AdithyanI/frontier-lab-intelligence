@@ -106,8 +106,8 @@ Rules:
 - Feed and Artifacts share one top-level **Evidence** destination
   because they are two inspection views over the same evidence layer. Feed is
   the first and default subview: the `/evidence/feed` product view owns daily
-  Event-rank disclosure and direct audience routing, while the lower-level raw
-  Feed ledger remains unranked. Artifacts follows as the canonical source
+  Development-rank disclosure and exact Event provenance, while the lower-level
+  raw Feed ledger remains unranked. Artifacts follows as the canonical source
   and retrieval-provenance index derived from selected Feed evidence. Keep the two
   object types in separate ruled views; do not blend events and artifacts into
   one list.
@@ -175,9 +175,10 @@ Rules:
   out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
-- **Evidence Feed:** default to the decision-ready `Relevant` / `Rank` view.
+- **Evidence Feed:** default to the grouping-first `All` / `Rank` view.
   `Relevant` is a derived display state—Engineering, Investment, or both—not
-  a separate model judgment.
+  a separate model judgment. It stays available for later routing inspection
+  but never triggers downstream work.
   Date navigation shows the newest seven available complete UTC days in one
   ruled row; explicit older/newer controls page through non-overlapping
   seven-date windows while keeping the selected column where possible. At
@@ -188,13 +189,14 @@ Rules:
   artifacts, and Insights. Switching between those views preserves the day;
   when a target view has no data for it, keep the date and show an honest empty
   state rather than silently selecting a different day.
-  The persistent left rail shows the Event's stable daily rank across all
+  The persistent left rail shows the Development's stable daily rank across all
   evidence for the selected day (`#1`, `#2`, ...). Status filters and search
   hide rows without restarting that rank. Clicking it opens one anchored,
-  non-modal disclosure with the union of distinct trusted Event voters, mean
-  voter network position, source-author network position, maximum same-day
-  one-post public interactions, the deciding layer, and limitations. These are
-  ordered tiebreak layers, not a composite decimal or weighted score. Rank is
+  non-modal disclosure with the union of distinct trusted Registry participants
+  across every source Event, mean participant network position, maximum
+  one-source-post public interactions, the deciding layer, and limitations.
+  Original authors, quote authors, and reposters count once per Development.
+  These are ordered tiebreak layers, not a composite decimal or weighted score. Rank is
   scope-aware: a future weekly view labels a weekly rank; it must not average
   ranks from different daily candidate sets.
   Status and sort are compact labeled disclosures rather than persistent
@@ -203,29 +205,32 @@ Rules:
   filter without inventing another evaluation state, followed by Relevant,
   Not relevant, and Not evaluated. Search shares their 44px square hairline treatment
   but remains a separate left-aligned input; the Status/Sort controls
-  anchor the right edge. They stack only on narrow screens. Per-Event routing rationale is collapsed by
+  anchor the right edge. They stack only on narrow screens. Each Development
+  row names its display post, reports the number of original posts and
+  amplifiers, and keeps every exact source post under one disclosure. Use
+  `Display post` and `Original post`; do not call the count “independent
+  sources,” because it counts posts rather than people. Per-Development routing rationale is collapsed by
   default behind a quiet `View reasons` disclosure so evidence remains the
-  primary reading surface. A routed Event shows neutral hairline `ENG`
+  primary reading surface. A routed Development shows neutral hairline `ENG`
   and/or `INV` marks, or the quiet `Neither audience`
   state when both judgments are negative. The disclosure presents only the
-  two audience-specific decisions and reasons. Unrouted or stale Events
+  two audience-specific decisions and reasons. Unrouted or stale Developments
   show no routing status.
 - **Artifact index:** a flat, ruled list over the canonical artifact catalog.
-  Within the selected source day, order by the best originating Feed rank; if
-  several Events reveal the same artifact, the smallest rank wins.
+  Within the selected source day, order by the inherited Development rank.
   This is inherited provenance, not a second artifact score. Keep the default
   row to Feed rank, artifact title and host, fetch-oriented type, and source.
   Keep content status and the exact source timestamp inside the expansion so
-  the scan surface stays crisp. When one Feed Event reveals several canonical
+  the scan surface stays crisp. When one Development reveals several canonical
   artifacts, keep them as separate expandable rows but show their shared rank
-  once in one continuous left rail. Equal ranks from different Events do
+  once in one continuous left rail. Equal ranks from different Developments do
   not visually merge. Native `<details>` expansion reveals
-  the canonical URL, a link back to the exact ranked Feed Event that
-  disclosed it, content status, and snapshot provenance. The status is
+  the canonical URL, a link back to the exact source Event inside the ranked
+  Development that disclosed it, content status, and snapshot provenance. The status is
   one of text ready, not extracted, not supported yet, extracting, retry needed,
   or unavailable; expanded provenance explains that state in plain language
-  rather than exposing an internal error code. The Feed Event
-  remains the evidence workspace and owns the onward X link; Artifacts does
+  rather than exposing an internal error code. The Feed Development
+  remains the evidence workspace, while the exact Event owns the onward X link; Artifacts does
   not duplicate that context. A single
   Feed-style date navigator filters by the UTC day of the source post that
   revealed the artifact, never by retrieval time; this is an inspection aid,
