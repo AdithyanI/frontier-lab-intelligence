@@ -33,6 +33,7 @@ CONTEXT_PATH = (
 DEFAULT_MODEL = "gpt-5.6-sol"
 DEFAULT_REASONING_EFFORT = "xhigh"
 DEFAULT_POLL_INTERVAL_SECONDS = 30.0
+MAX_RETRIEVE_FAILURES = 6
 PROMPT_VERSION = "company-memo-pilot-v1"
 PROMPT_CACHE_KEY = f"fli:company-memo:{PROMPT_VERSION}"
 
@@ -589,10 +590,25 @@ def research(
 
     response = client.responses.create(**request)
     creation_response_id = response.id
+    retrieve_failures = 0
     print(f"background response status={response.status}", file=sys.stderr, flush=True)
     while response.status in {"queued", "in_progress"}:
         time.sleep(poll_interval_seconds)
-        response = client.responses.retrieve(creation_response_id)
+        try:
+            response = client.responses.retrieve(creation_response_id)
+        except Exception as exc:
+            retrieve_failures += 1
+            print(
+                "background response retrieve_error="
+                f"{type(exc).__name__} attempt={retrieve_failures}/"
+                f"{MAX_RETRIEVE_FAILURES}",
+                file=sys.stderr,
+                flush=True,
+            )
+            if retrieve_failures >= MAX_RETRIEVE_FAILURES:
+                raise
+            continue
+        retrieve_failures = 0
         print(f"background response status={response.status}", file=sys.stderr, flush=True)
 
     response_data = llm_responses.as_dict(response)
