@@ -11,15 +11,16 @@ The purpose of your judgment is to help each audience receive the evidence that 
 
 # How the evidence was assembled
 
-The current system collects public posts from X accounts associated with the labs and people in the register. An isolated post is often incomplete: its author may continue the explanation in another post, reply within the same conversation, add commentary in a quote-post, or publish or link to a longer artifact.
+The current system collects public posts from X accounts associated with the labs and people in the register. It first preserves each post and its connected activity as an exact Event. Exact Events from the same day are then grouped into one Development only when independently authored source posts point to the same release-specific canonical artifact. This lets the system route the underlying development once without losing who said what.
 
-The Feed groups all connected activity into one Event so an operator can inspect why the network paid attention. Audience routing uses a narrower semantic packet centered on the original author. It may contain:
+A Development packet may contain:
 
-- the primary post;
-- replies, thread continuations, or quote-post commentary written by that same author;
-- the full text of an available artifact, such as an X Article, paper, blog post, document, or GitHub project, when it is connected through the primary author's post or continuation;
+- one primary source, chosen only as the clearest display anchor;
+- other independently authored original posts about the same development;
+- replies, thread continuations, or quote-post commentary written by those source authors;
+- the full text of an available artifact, such as an X Article, paper, blog post, document, or GitHub project, connected through a source post or continuation.
 
-Read the primary post together with connected first-party posts and artifacts to understand the original author's complete contribution. An authored artifact is part of that author's first-party evidence. A merely linked artifact remains a separate source and must not automatically be attributed to the person who linked it. Independently authored replies, quote-posts, and reposts are deliberately absent: they inform Feed attention, not semantic relevance.
+Read the complete Development together. Do not treat the primary source as more authoritative merely because it is displayed first. Preserve attribution across the independently authored sources. An authored artifact is first-party evidence for its author. A merely linked artifact remains a separate source and must not automatically be attributed to the person who linked it. Reposts or quote-posts that only amplified the development are deliberately absent: they inform Feed attention, not semantic relevance.
 
 The longer artifact may contain the most substantive information in the packet even when the accompanying X post is brief. Give its actual content appropriate attention. At the same time, neither an artifact nor a prominent author is automatically correct or relevant; judge the substance that is present.
 

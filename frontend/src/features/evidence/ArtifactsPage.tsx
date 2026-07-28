@@ -260,8 +260,8 @@ function ArtifactRow({
           aria-label={rankIsContinuation
             ? undefined
             : rankGroupSize > 1
-              ? `Feed rank ${item.best_source_rank}, shared by ${rankGroupSize} artifacts from one Feed Event`
-              : `Feed rank ${item.best_source_rank}`}
+              ? `Development rank ${item.best_source_rank}, shared by ${rankGroupSize} artifacts from one Development`
+              : `Development rank ${item.best_source_rank}`}
         >
           {!rankIsContinuation && <strong>#{item.best_source_rank}</strong>}
         </span>
@@ -535,8 +535,8 @@ export default function Artifacts() {
     for (const item of items) {
       const previousGroup = groups.at(-1)
       const sharesExactEvent = Boolean(
-        item.source_event_id
-        && previousGroup?.[0].source_event_id === item.source_event_id,
+        item.source_development_id
+        && previousGroup?.[0].source_development_id === item.source_development_id,
       )
       if (sharesExactEvent && previousGroup) previousGroup.push(item)
       else groups.push([item])
@@ -605,7 +605,7 @@ export default function Artifacts() {
       {data?.available && (
         <section className="artifact-index" aria-label="Artifacts">
           <div className="artifact-columns mono" aria-hidden="true">
-            <span>Feed rank</span>
+            <span>Development rank</span>
             <span>Artifact</span>
             <span>Type</span>
             <span>Found through</span>
@@ -613,7 +613,7 @@ export default function Artifacts() {
           </div>
           <div className="artifact-list">
             {artifactRankGroups.map((group) => (
-              <Fragment key={group[0].source_event_id || group[0].artifact_id}>
+              <Fragment key={group[0].source_development_id || group[0].source_event_id || group[0].artifact_id}>
                 {group.map((item, index) => (
                   <ArtifactRow
                     item={item}

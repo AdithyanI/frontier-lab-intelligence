@@ -8,9 +8,9 @@ from fli.routing import model as routing_model
 from fli.insights import generation as insight_generation
 from fli.insights import runs as insight_runs
 from fli.insights import view as insight_store
-from fli.scoring import attention
+from fli.scoring import development_attention
 from fli.web.app import app
-from fli.web import events as event_store
+from fli.web import developments as development_store
 
 
 client = TestClient(app)
@@ -23,7 +23,7 @@ SOURCE_RANK_INPUT_SHA256 = "rank-input-sha-insight-view"
 @pytest.fixture(autouse=True)
 def _current_rank_identity(monkeypatch):
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "current_rank_identity",
         lambda *, day: {
             "day": day,
@@ -117,7 +117,11 @@ def _routing_db(tmp_path, *, current=True):
             routing_model.PROMPT_VERSION if current else "audience-routing-v8",
             routing_model.prompt_sha256() if current else "superseded",
             routing_model.SCHEMA_VERSION,
-            attention.DAILY_RANK_VERSION if current else "attention-v1.1",
+            (
+                development_attention.DAILY_RANK_VERSION
+                if current
+                else "attention-v1.1"
+            ),
             DAY,
             SOURCE_RANK_INPUT_SHA256,
             EVENT_RUN_ID,

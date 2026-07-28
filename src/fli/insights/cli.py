@@ -26,7 +26,7 @@ from fli.registry import classification as entity_kinds
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_run_store
 from fli.routing import view as routing_view
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 CLI_SCHEMA_VERSION = "1.0"
@@ -211,7 +211,7 @@ def resolve_event(
     routing_root: Path,
     source_routing_run_id: str | None = None,
 ) -> dict[str, Any]:
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
     identities: dict[str, dict[str, str]] = {}
     matches: list[dict[str, Any]] = []
@@ -231,14 +231,15 @@ def resolve_event(
         try:
             identity = identities.setdefault(
                 route_day,
-                event_store.current_rank_identity(day=route_day),
+                development_store.current_rank_identity(day=route_day),
             )
         except ValueError:
             continue
         if (
             meta is None
             or row is None
-            or dict(meta).get("rank_version") != attention.DAILY_RANK_VERSION
+            or dict(meta).get("rank_version")
+            != development_attention.DAILY_RANK_VERSION
             or dict(meta).get("source_rank_input_sha256")
             != identity["rank_input_sha256"]
             or str(meta["source_event_run_id"]) != identity["event_run_id"]
@@ -552,12 +553,12 @@ def _current_routing_runs(
     days: list[str],
     routing_root: Path,
 ) -> tuple[dict[str, str], dict[str, dict[str, Any]]]:
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
     source = routing_run_store._published_event_source()
     selected: dict[str, dict[str, Any]] = {}
     for day in days:
-        identity = event_store.current_rank_identity(day=day)
+        identity = development_store.current_rank_identity(day=day)
         path = routing_view.latest_complete_run(
             day,
             expected_rank_input_sha256=identity["rank_input_sha256"],

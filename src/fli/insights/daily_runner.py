@@ -30,7 +30,7 @@ from fli.insights.codex_app_server import (
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.routing import view as routing_view
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -1029,7 +1029,7 @@ def run_day(
         "top_ranked": top_ranked,
         "routing_model": routing_model.DEFAULT_MODEL,
         "routing_reasoning_effort": routing_model.DEFAULT_REASONING_EFFORT,
-        "rank_version": attention.DAILY_RANK_VERSION,
+        "rank_version": development_attention.DAILY_RANK_VERSION,
         "routing_workers": routing_workers,
         "routing_day_workers": routing_day_workers,
         "repo_root": str(REPO_ROOT),
@@ -1549,9 +1549,9 @@ def run_day(
 
 def _current_inputs(day: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """Describe the already-published Evidence and current ranked routing."""
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
-    rank_identity = event_store.current_rank_identity(day=day)
+    rank_identity = development_store.current_rank_identity(day=day)
     routing_path = routing_view.latest_complete_run(
         day,
         expected_rank_input_sha256=rank_identity["rank_input_sha256"],
@@ -1559,7 +1559,9 @@ def _current_inputs(day: str) -> tuple[dict[str, Any], dict[str, Any]]:
         expected_feed_run_id=rank_identity["feed_run_id"],
     )
     if routing_path is None:
-        raise ValueError(f"no complete {attention.DAILY_RANK_VERSION} routing for {day}")
+        raise ValueError(
+            f"no complete {development_attention.DAILY_RANK_VERSION} routing for {day}"
+        )
     conn = sqlite3.connect(
         f"file:{routing_path.resolve().as_posix()}?mode=ro",
         uri=True,
@@ -1639,7 +1641,7 @@ def run_batch(
         "days": days,
         "selected_days": selected_days,
         "day_workers": min(day_workers, days),
-        "rank_version": attention.DAILY_RANK_VERSION,
+        "rank_version": development_attention.DAILY_RANK_VERSION,
         "will_collect_external_evidence": False,
         "will_call_routing_model": False,
         "will_launch_codex": not dry_run,

@@ -21,7 +21,7 @@ import tiktoken
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v9"
+PROMPT_VERSION = "audience-routing-v10"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "high"
@@ -55,7 +55,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v9",
+    "name": "audience_routing_v10",
     "strict": True,
     "schema": {
         "type": "object",
@@ -92,7 +92,7 @@ class EvidenceSource:
     source_char_start: int | None = None
     source_char_end: int | None = None
     # Insight-only temporal context. Deliberately excluded from the routing
-    # evidence hash and serialized routing packet so existing v9 runs remain
+    # evidence hash and serialized routing packet so existing runs remain
     # immutable and replayable.
     posted: str | None = None
 
@@ -206,6 +206,11 @@ def _render_full_input(
         for source in packet.sources
         if source.relation == "same_author_continuation"
     ]
+    independent_originals = [
+        source
+        for source in packet.sources
+        if source.relation == "independent_original"
+    ]
     artifacts = [
         source for source in packet.sources if source.source_type == "artifact"
     ]
@@ -227,32 +232,47 @@ def _render_full_input(
             lines.append(f"      posted: {_yaml_value(root.posted)}")
         lines.extend(_literal_field("text", root_text, indent="      "))
 
+    if independent_originals:
+        lines.append("  independent_sources:")
+        for source in independent_originals:
+            text = _display_text(source)
+            kind = "artifact_link" if _is_transport_only(text) else "x_post"
+            lines.append(f"    - kind: {kind}")
+            if source.author:
+                lines.append(f"      author: {_yaml_value(source.author)}")
+            if include_dates and source.posted:
+                lines.append(f"      posted: {_yaml_value(source.posted)}")
+            if not _is_transport_only(text):
+                lines.extend(_literal_field("text", text, indent="      "))
+
     if continuations:
-        lines.append("    continuations:")
+        lines.append("  supporting_continuations:")
         for source in continuations:
             text = _display_text(source)
             kind = "artifact_link" if _is_transport_only(text) else "x_post"
-            lines.append(f"      - kind: {kind}")
+            lines.append(f"    - kind: {kind}")
+            if source.author:
+                lines.append(f"      author: {_yaml_value(source.author)}")
             if include_dates and source.posted:
-                lines.append(f"        posted: {_yaml_value(source.posted)}")
+                lines.append(f"      posted: {_yaml_value(source.posted)}")
             if not _is_transport_only(text):
-                lines.extend(_literal_field("text", text, indent="        "))
+                lines.extend(_literal_field("text", text, indent="      "))
 
     if artifacts:
-        lines.append("    artifacts:")
+        lines.append("  artifacts:")
         for source in artifacts:
             kind = (
                 "authored_artifact"
                 if source.relation == "self_published_artifact"
                 else "linked_artifact"
             )
-            lines.append(f"      - kind: {kind}")
+            lines.append(f"    - kind: {kind}")
             if kind == "linked_artifact" and source.author:
-                lines.append(f"        author: {_yaml_value(source.author)}")
+                lines.append(f"      author: {_yaml_value(source.author)}")
             if source.title:
-                lines.append(f"        title: {_yaml_value(source.title)}")
+                lines.append(f"      title: {_yaml_value(source.title)}")
             lines.extend(
-                _literal_field("text", _display_text(source), indent="        ")
+                _literal_field("text", _display_text(source), indent="      ")
             )
 
     return "\n".join(lines)

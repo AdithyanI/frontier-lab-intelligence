@@ -6,7 +6,7 @@ import pytest
 from fli.evidence.artifacts import store as artifacts
 from fli.routing import runs as routing_runs
 from fli.scoring import attention
-from fli.web import events as event_store
+from fli.web import developments as development_store
 
 
 def test_connect_run_rejects_legacy_storage_without_rank_lineage(tmp_path):
@@ -55,46 +55,50 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     artifact_db = tmp_path / "artifacts.db"
     artifacts.connect(artifact_db).close()
     item = {
-        "event_id": "event-1",
+        "development_id": "development-1",
+        "source_event_ids": ["event-1"],
         "daily_rank": 3,
         "semantic_snapshot_sha256": "snapshot-1",
-        "root": {
-            "post_id": "post-1",
-            "author": {"handle": "alice"},
-            "text": "A concrete primary-source result.",
-            "url": "https://x.com/alice/status/post-1",
-            "published_at": "2026-07-12T08:00:00+00:00",
-        },
-        "evidence": [
+        "source_events": [
             {
-                "post_id": "post-2",
-                "author": {"handle": "bob"},
-                "text": "An independently authored reaction.",
-                "relationship": "quote",
-                "same_author_as_root": False,
-                "published_at": "2026-07-12T09:00:00+00:00",
-            },
-            {
-                "post_id": "post-3",
-                "author": {"handle": "alice"},
-                "text": "RT @bob: An independently authored reaction.",
-                "relationship": "retweet",
-                "same_author_as_root": True,
-                "published_at": "2026-07-12T10:00:00+00:00",
-            },
-            {
-                "post_id": "post-4",
-                "author": {"handle": "alice"},
-                "text": "My additional first-party interpretation.",
-                "relationship": "quote",
-                "same_author_as_root": True,
-                "published_at": "2026-07-12T11:00:00+00:00",
+                "event_id": "event-1",
+                "is_primary": True,
+                "post": {
+                    "post_id": "post-1",
+                    "author": {"handle": "alice"},
+                    "text": "A concrete primary-source result.",
+                    "url": "https://x.com/alice/status/post-1",
+                    "published_at": "2026-07-12T08:00:00+00:00",
+                },
+                "evidence": [
+                    {
+                        "post_id": "post-2",
+                        "author": {"handle": "bob"},
+                        "text": "An independently authored reaction.",
+                        "relationship": "quote",
+                        "published_at": "2026-07-12T09:00:00+00:00",
+                    },
+                    {
+                        "post_id": "post-3",
+                        "author": {"handle": "alice"},
+                        "text": "RT @bob: An independently authored reaction.",
+                        "relationship": "retweet",
+                        "published_at": "2026-07-12T10:00:00+00:00",
+                    },
+                    {
+                        "post_id": "post-4",
+                        "author": {"handle": "alice"},
+                        "text": "My additional first-party interpretation.",
+                        "relationship": "quote",
+                        "published_at": "2026-07-12T11:00:00+00:00",
+                    },
+                ],
             },
         ],
     }
     event_requests = []
 
-    def events_payload(**kwargs):
+    def developments_payload(**kwargs):
         event_requests.append(kwargs)
         return {
             "available": True,
@@ -103,7 +107,11 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
             "items": [item],
         }
 
-    monkeypatch.setattr(event_store, "events_payload", events_payload)
+    monkeypatch.setattr(
+        development_store,
+        "developments_payload",
+        developments_payload,
+    )
 
     conn = routing_runs.connect_run(tmp_path / "routing.db")
     count = routing_runs.freeze_run(
@@ -137,7 +145,7 @@ def test_freeze_run_reads_ranked_evidence_without_triage(tmp_path, monkeypatch):
     assert "source_triage_db" not in columns
     assert "source_triage_run_id" not in columns
     assert "prompt_cache_key" not in item_columns
-    assert frozen["event_id"] == "event-1"
+    assert frozen["event_id"] == "development-1"
     assert frozen["feed_rank"] == 3
     assert event_requests[0]["limit"] == 1
     packet = json.loads(frozen["packet_json"])
@@ -151,14 +159,18 @@ def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):
     artifact_db = tmp_path / "artifacts.db"
     artifact_conn = artifacts.connect(artifact_db)
     item = {
-        "event_id": "event-current-update",
-        "root": {
-            "post_id": "old-root",
-            "author": {"handle": "alice"},
-            "text": "A year-old announcement.",
-            "published_at": "2025-07-15T12:00:00+00:00",
-        },
-        "evidence": [
+        "development_id": "development-current-update",
+        "source_event_ids": ["event-current-update"],
+        "source_events": [{
+            "event_id": "event-current-update",
+            "is_primary": True,
+            "post": {
+                "post_id": "old-root",
+                "author": {"handle": "alice"},
+                "text": "A year-old announcement.",
+                "published_at": "2025-07-15T12:00:00+00:00",
+            },
+            "evidence": [
             {
                 "post_id": "current-update",
                 "author": {"handle": "alice"},
@@ -175,10 +187,11 @@ def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):
                 "same_author_as_root": False,
                 "published_at": "2026-07-10T13:00:00+00:00",
             },
-        ],
+            ],
+        }],
     }
 
-    packet = routing_runs.packet_from_event(
+    packet = routing_runs.packet_from_development(
         item,
         day="2026-07-10",
         artifact_conn=artifact_conn,
@@ -192,16 +205,21 @@ def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):
 
 def test_packet_excludes_an_event_with_only_an_old_first_party_source(tmp_path):
     artifact_conn = artifacts.connect(tmp_path / "artifacts.db")
-    packet = routing_runs.packet_from_event(
+    packet = routing_runs.packet_from_development(
         {
-            "event_id": "event-old-only",
-            "root": {
-                "post_id": "old-root",
-                "author": {"handle": "alice"},
-                "text": "Old announcement.",
-                "published_at": "2025-11-19T12:00:00+00:00",
-            },
-            "evidence": [],
+            "development_id": "development-old-only",
+            "source_event_ids": ["event-old-only"],
+            "source_events": [{
+                "event_id": "event-old-only",
+                "is_primary": True,
+                "post": {
+                    "post_id": "old-root",
+                    "author": {"handle": "alice"},
+                    "text": "Old announcement.",
+                    "published_at": "2025-11-19T12:00:00+00:00",
+                },
+                "evidence": [],
+            }],
         },
         day="2026-07-14",
         artifact_conn=artifact_conn,
@@ -675,7 +693,7 @@ def test_artifact_sources_deduplicate_one_artifact_across_source_posts(
 
     sources = routing_runs._artifact_sources(
         conn,
-        event_id="event-1",
+        event_ids=["event-1"],
         post_authors={"post-self": "@alice", "post-linked": "@alice"},
         primary_author="@alice",
     )

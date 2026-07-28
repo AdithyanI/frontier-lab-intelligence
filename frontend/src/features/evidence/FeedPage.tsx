@@ -10,12 +10,12 @@ import { useSearchParams } from 'react-router-dom'
 import {
   getJSON,
   getCachedJSON,
-  eventPageUrl,
+  developmentPageUrl,
+  type DevelopmentResponse,
   type EventEvidence,
-  type EventResponse,
   type FeedDates,
+  type FeedDevelopment,
   type FeedItem,
-  type FeedEvent,
 } from '../../shared/api'
 import {
   getDateWindowEndForSelection,
@@ -57,10 +57,10 @@ interface EventPageRequest {
   offset?: number
 }
 
-const eventPageCache = new Map<string, EventResponse>()
-const eventPageRequests = new Map<string, Promise<EventResponse>>()
-const eventEvidenceCache = new Map<string, EventEvidence[]>()
-const eventEvidenceRequests = new Map<string, Promise<EventEvidence[]>>()
+const eventPageCache = new Map<string, DevelopmentResponse>()
+const eventPageRequests = new Map<string, Promise<DevelopmentResponse>>()
+const developmentDetailCache = new Map<string, FeedDevelopment>()
+const developmentDetailRequests = new Map<string, Promise<FeedDevelopment>>()
 
 function eventPageKey({
   date,
@@ -73,14 +73,14 @@ function eventPageKey({
   return `${date}\u0000${sort}\u0000${routingFilter}\u0000${query}\u0000${eventId ?? ''}\u0000${offset}`
 }
 
-function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
+function requestEventPage(request: EventPageRequest): Promise<DevelopmentResponse> {
   const key = eventPageKey(request)
   const cached = eventPageCache.get(key)
   if (cached) return Promise.resolve(cached)
   const inFlight = eventPageRequests.get(key)
   if (inFlight) return inFlight
-  const pending = getCachedJSON<EventResponse>(
-    eventPageUrl({ ...request, limit: PAGE_SIZE }),
+  const pending = getCachedJSON<DevelopmentResponse>(
+    developmentPageUrl({ ...request, limit: PAGE_SIZE }),
   )
     .then((value) => {
       eventPageCache.set(key, value)
@@ -91,31 +91,32 @@ function requestEventPage(request: EventPageRequest): Promise<EventResponse> {
   return pending
 }
 
-function requestEventEvidence(date: string, eventId: string): Promise<EventEvidence[]> {
-  const key = `${date}\u0000${eventId}`
-  const cached = eventEvidenceCache.get(key)
+function requestDevelopmentDetail(
+  date: string,
+  developmentId: string,
+): Promise<FeedDevelopment> {
+  const key = `${date}\u0000${developmentId}`
+  const cached = developmentDetailCache.get(key)
   if (cached) return Promise.resolve(cached)
-  const inFlight = eventEvidenceRequests.get(key)
+  const inFlight = developmentDetailRequests.get(key)
   if (inFlight) return inFlight
-  const params = new URLSearchParams({
+  const pending = getJSON<DevelopmentResponse>(developmentPageUrl({
     date,
-    lane: 'all',
     sort: 'rank',
-    routing: 'all',
-    q: '',
-    event_id: eventId,
-    include_evidence: 'true',
-    limit: '1',
-    offset: '0',
-  })
-  const pending = getJSON<EventResponse>(`/api/events?${params}`)
+    routingFilter: 'all',
+    query: '',
+    developmentId,
+    includeEvidence: true,
+    limit: 1,
+  }))
     .then((value) => {
-      const evidence = value.items?.[0]?.evidence ?? []
-      eventEvidenceCache.set(key, evidence)
-      return evidence
+      const detail = value.items?.[0]
+      if (!detail) throw new Error('Development detail was not returned.')
+      developmentDetailCache.set(key, detail)
+      return detail
     })
-    .finally(() => eventEvidenceRequests.delete(key))
-  eventEvidenceRequests.set(key, pending)
+    .finally(() => developmentDetailRequests.delete(key))
+  developmentDetailRequests.set(key, pending)
   return pending
 }
 
@@ -238,7 +239,7 @@ function FeedMenuSelect<T extends string>({
   )
 }
 
-function RoutingNote({ item }: { item: FeedEvent }) {
+function RoutingNote({ item }: { item: FeedDevelopment }) {
   const routing = item.audience_routing
   if (!routing) return null
   const routedToNeither =
@@ -300,7 +301,7 @@ function RankDisclosure({
   onToggle,
   onClose,
 }: {
-  item: FeedEvent
+  item: FeedDevelopment
   rank: number
   total: number
   date: string
@@ -313,44 +314,39 @@ function RankDisclosure({
   const headingId = useId()
   const panelId = useId()
   const components = item.rank_components
-  const voterNames = components.voters
+  const participantNames = components.participants
     .slice(0, 5)
-    .map((voter) => voter.entity_name || `@${voter.handle}`)
+    .map((participant) => participant.entity_name || `@${participant.handle}`)
     .join(', ')
-  const meanVoterPercent = (components.mean_voter_position * 100).toFixed(1)
-  const authorPercent = (components.author_position * 100).toFixed(1)
+  const meanParticipantPercent = (
+    components.mean_participant_position * 100
+  ).toFixed(1)
   const rows = [
     {
       layer: 1,
-      label: 'Trusted votes',
-      raw: components.trusted_votes === 1
-        ? '1 trusted person or organization quoted or reposted this Event'
-        : `${components.trusted_votes.toLocaleString('en-US')} trusted people and organizations quoted or reposted this Event`,
-      detail: voterNames
-        ? `Each Registry entity counts once, even if it quoted or reposted several posts in this Event. The original author does not count. Example voters: ${voterNames}.`
-        : 'Each Registry entity counts once. The original author does not count. No trusted voter was observed.',
+      label: 'Trusted attention',
+      raw: components.trusted_attention === 1
+        ? '1 trusted person or organization posted, quoted, or reposted this Development'
+        : `${components.trusted_attention.toLocaleString('en-US')} trusted people and organizations posted, quoted, or reposted this Development`,
+      detail: participantNames
+        ? `Each Registry entity counts once across every source post. Original posters count because their independent posts are part of the attention signal. Examples: ${participantNames}.`
+        : 'Each Registry entity counts once across the complete Development. No trusted participant was observed.',
     },
     {
       layer: 2,
-      label: 'Who voted',
-      raw: components.trusted_votes
-        ? `On average, these voters rank above ${meanVoterPercent}% of the Registry`
-        : 'There were no trusted voters to compare',
-      detail: components.trusted_votes
-        ? `This comes from support inside the trusted network. Entities with equal support share the same position. Exact average: ${components.mean_voter_position.toFixed(6)}.`
-        : 'Without a trusted voter, this layer stays at 0.000000.',
+      label: 'Who paid attention',
+      raw: components.trusted_attention
+        ? `On average, these participants rank above ${meanParticipantPercent}% of the Registry`
+        : 'There were no trusted participants to compare',
+      detail: components.trusted_attention
+        ? `This comes from support inside the trusted network. Entities with equal support share the same position. Exact average: ${components.mean_participant_position.toFixed(6)}.`
+        : 'Without a trusted participant, this layer stays at 0.000000.',
     },
     {
       layer: 3,
-      label: 'Original author',
-      raw: `The author ranks above ${authorPercent}% of the Registry`,
-      detail: `This is used only when two Events have the same trusted-vote count and the same voter average. Exact position: ${components.author_position.toFixed(6)}.`,
-    },
-    {
-      layer: 4,
       label: 'Public engagement',
       raw: `The most-engaged post received ${components.public_interactions.toLocaleString('en-US')} public interactions`,
-      detail: 'This adds its likes, replies, reposts, and quotes from the same day. It is used only if the first three layers are tied.',
+      detail: 'This adds likes, replies, reposts, and quotes on the most-engaged source post. It is used only if the first two layers are tied.',
     },
   ]
 
@@ -420,7 +416,7 @@ function RankDisclosure({
                 <div className="feed-rank-component-head">
                   <strong>{row.layer}. {row.label}</strong>
                   {components.decided_at_layer === row.layer && (
-                    <span className="mono">first difference from the Event beside it</span>
+                    <span className="mono">first difference from the Development beside it</span>
                   )}
                 </div>
                 <p>{row.raw}</p>
@@ -428,14 +424,14 @@ function RankDisclosure({
               </div>
             ))}
           </div>
-          {components.decided_at_layer === 5 && (
+          {components.decided_at_layer === 4 && (
             <p className="feed-rank-source">
-              The first four layers were identical. The Event ID keeps the final order stable.
+              The first three layers were identical. The Development ID keeps the final order stable.
             </p>
           )}
           <p className="feed-rank-limit">
             This rank tells us what to inspect first. It does not decide whether the
-            Event is true, important, or useful. The trusted-vote number is not a
+            Development is true, important, or useful. The trusted-attention number is not a
             percentage of the whole network. Compare ranks only within the same day.
           </p>
         </div>
@@ -514,52 +510,136 @@ function RetweetTrace({ items }: { items: EventEvidence[] }) {
   )
 }
 
-function EventEvidenceDetails({
+function DevelopmentSource({
+  source,
+  focusedEventId,
+}: {
+  source: FeedDevelopment['source_events'][number]
+  focusedEventId: string
+}) {
+  const post = source.post
+  return (
+    <article
+      className={`development-source${source.event_id === focusedEventId ? ' development-source--focused' : ''}`}
+    >
+      <header>
+        <span className="event-relationship-kind mono">
+          {source.is_primary ? 'Display source' : 'Independent source'}
+        </span>
+        <strong>{post.author.entity_name ?? post.author.name}</strong>
+        <span className="mono">@{post.author.handle}</span>
+        <time className="mono" dateTime={post.published_at}>
+          {time.format(new Date(post.published_at))}
+        </time>
+      </header>
+      <p>{post.text || 'Post has no text.'}</p>
+      <footer className="development-source-footer mono">
+        <CopyEventId eventId={source.event_id} />
+        <a href={post.url} target="_blank" rel="noreferrer">Open source post on X ↗</a>
+      </footer>
+      {source.artifacts.length > 0 && (
+        <div className="development-source-artifacts mono">
+          {source.artifacts.map((artifact) => (
+            <a
+              href={artifact.canonical_url}
+              key={artifact.artifact_id}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {artifact.title || new URL(artifact.canonical_url).hostname} ↗
+            </a>
+          ))}
+        </div>
+      )}
+    </article>
+  )
+}
+
+function DevelopmentEvidenceDetails({
   item,
   date,
   relationshipSummary,
+  focusedEventId,
 }: {
-  item: FeedEvent
+  item: FeedDevelopment
   date: string
   relationshipSummary: string[]
+  focusedEventId: string
 }) {
-  const [open, setOpen] = useState(false)
-  const [evidence, setEvidence] = useState(item.evidence)
+  const [open, setOpen] = useState(
+    Boolean(focusedEventId && item.source_event_ids.includes(focusedEventId)),
+  )
+  const [detail, setDetail] = useState(item)
   const [evidenceLoaded, setEvidenceLoaded] = useState(item.evidence.length > 0)
   const [evidenceLoading, setEvidenceLoading] = useState(false)
   const [evidenceError, setEvidenceError] = useState('')
-  const narrative = evidence.filter((value) => value.relationship !== 'retweet')
-  const retweets = evidence.filter((value) => value.relationship === 'retweet')
+  const narrative = detail.evidence.filter(
+    (value) => value.relationship !== 'retweet' && !value.is_development_source,
+  )
+  const retweets = detail.evidence.filter(
+    (value) => value.relationship === 'retweet',
+  )
+
+  useEffect(() => {
+    if (focusedEventId && item.source_event_ids.includes(focusedEventId)) {
+      setOpen(true)
+    }
+  }, [focusedEventId, item.source_event_ids])
+
+  const ensureDetail = () => {
+    if (evidenceLoaded || evidenceLoading) return
+    setEvidenceLoading(true)
+    setEvidenceError('')
+    requestDevelopmentDetail(date, item.development_id)
+      .then((value) => {
+        setDetail(value)
+        setEvidenceLoaded(true)
+      })
+      .catch(() => {
+        setEvidenceError('Couldn’t load the source details. Close and retry.')
+      })
+      .finally(() => setEvidenceLoading(false))
+  }
+
   return (
     <details
       className="event-evidence"
+      open={open}
       onToggle={(event) => {
         const nextOpen = event.currentTarget.open
         setOpen(nextOpen)
-        if (!nextOpen || evidenceLoaded || evidenceLoading) return
-        setEvidenceLoading(true)
-        setEvidenceError('')
-        requestEventEvidence(date, item.event_id)
-          .then((value) => {
-            setEvidence(value)
-            setEvidenceLoaded(true)
-          })
-          .catch(() => setEvidenceError('Couldn’t load the related evidence. Close and retry.'))
-          .finally(() => setEvidenceLoading(false))
+        if (nextOpen) ensureDetail()
       }}
     >
       <summary>
         <span>
-          View activity · {relationshipSummary.join(' · ') || `${item.member_count - 1} related posts`}
+          {item.source_event_count > 1
+            ? `View ${item.source_event_count} independent sources`
+            : 'View source and activity'}
+          {relationshipSummary.length > 0 ? ` · ${relationshipSummary.join(' · ')}` : ''}
         </span>
         <span className="mono">
-          {item.author_count} {item.author_count === 1 ? 'author' : 'authors'}
+          {item.original_poster_count} {item.original_poster_count === 1 ? 'original poster' : 'original posters'}
         </span>
       </summary>
       {open && (
         <div className="event-thread">
           {evidenceLoading && <p className="mono muted">Loading evidence…</p>}
           {evidenceError && <p className="error-note">{evidenceError}</p>}
+          <div className="development-sources">
+            {detail.source_events.map((source) => (
+              <DevelopmentSource
+                key={source.event_id}
+                source={source}
+                focusedEventId={focusedEventId}
+              />
+            ))}
+          </div>
+          {narrative.length > 0 && (
+            <p className="development-supporting-label mono">
+              Connected author activity
+            </p>
+          )}
           {narrative.map((evidence) => (
             <RelationshipPost key={evidence.post_id} item={evidence} />
           ))}
@@ -570,7 +650,7 @@ function EventEvidenceDetails({
   )
 }
 
-function EventRow({
+function DevelopmentRow({
   item,
   rank,
   total,
@@ -578,18 +658,25 @@ function EventRow({
   rankOpen,
   onToggleRank,
   onCloseRank,
-  focused,
+  focusedEventId,
 }: {
-  item: FeedEvent
+  item: FeedDevelopment
   rank: number
   total: number
   date: string
   rankOpen: boolean
   onToggleRank: () => void
   onCloseRank: () => void
-  focused: boolean
+  focusedEventId: string
 }) {
   const root = item.root
+  const focused = Boolean(
+    focusedEventId
+    && (
+      focusedEventId === item.development_id
+      || item.source_event_ids.includes(focusedEventId)
+    )
+  )
   const counts = item.relationship_counts
   const relationshipSummary = [
     counts.author_updates
@@ -610,7 +697,7 @@ function EventRow({
   return (
     <article
       className={`feed-row event-row${focused ? ' event-row--focused' : ''}`}
-      id={`event-${item.event_id}`}
+      id={`development-${item.development_id}`}
     >
       <RankDisclosure
         item={item}
@@ -632,7 +719,11 @@ function EventRow({
           </div>
           <div className="feed-meta mono">
             {item.is_grouped && (
-              <span>{item.member_count - 1} related {item.member_count === 2 ? 'post' : 'posts'}</span>
+              <span>
+                {item.source_event_count} original {item.source_event_count === 1 ? 'post' : 'posts'}
+                {' · '}
+                {item.amplifier_count} {item.amplifier_count === 1 ? 'amplifier' : 'amplifiers'}
+              </span>
             )}
             {!item.is_grouped && root.post_type === 'quote' && <span>quote</span>}
             <time dateTime={root.published_at}>{time.format(new Date(root.published_at))}</time>
@@ -647,13 +738,12 @@ function EventRow({
           </div>
         )}
 
-        {item.is_grouped && (
-          <EventEvidenceDetails
-            item={item}
-            date={date}
-            relationshipSummary={relationshipSummary}
-          />
-        )}
+        <DevelopmentEvidenceDetails
+          item={item}
+          date={date}
+          relationshipSummary={relationshipSummary}
+          focusedEventId={focusedEventId}
+        />
 
         <RoutingNote item={item} />
 
@@ -665,9 +755,8 @@ function EventRow({
             <Metric label="views" value={root.metrics.views} />
           </div>
           <div className="feed-footer-actions">
-            <CopyEventId eventId={item.event_id} />
             <a href={root.url} target="_blank" rel="noreferrer">
-              Open root post on X ↗
+              Open display source on X ↗
             </a>
           </div>
         </footer>
@@ -698,8 +787,8 @@ export default function Feed() {
   )
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
-  const [data, setData] = useState<EventResponse | null>(null)
-  const [items, setItems] = useState<FeedEvent[]>([])
+  const [data, setData] = useState<DevelopmentResponse | null>(null)
+  const [items, setItems] = useState<FeedDevelopment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [openRankEventId, setOpenRankEventId] = useState<string | null>(null)
@@ -718,7 +807,7 @@ export default function Feed() {
   const canShowNewerDates = dateWindow.end < availableDates.length
 
   useEffect(() => {
-    getCachedJSON<FeedDates>('/api/events/dates')
+    getCachedJSON<FeedDates>('/api/developments/dates')
       .then((value) => {
         setDates(value)
         if (value.available && value.latest_complete_date) {
@@ -790,8 +879,16 @@ export default function Feed() {
   }, [selectedDate, sort, routingFilter, debouncedQuery, targetEventId])
 
   useEffect(() => {
-    if (!targetEventId || !items.some((item) => item.event_id === targetEventId)) return
-    document.getElementById(`event-${targetEventId}`)?.scrollIntoView({ block: 'start' })
+    if (!targetEventId) return
+    const focused = items.find(
+      (item) =>
+        item.development_id === targetEventId
+        || item.source_event_ids.includes(targetEventId),
+    )
+    if (!focused) return
+    document
+      .getElementById(`development-${focused.development_id}`)
+      ?.scrollIntoView({ block: 'start' })
   }, [items, targetEventId])
 
   const selectDate = (day: string) => {
@@ -898,10 +995,9 @@ export default function Feed() {
           What is the network paying attention to?
         </h2>
         <p className="evidence-view-sub">
-          Complete Events ordered first by distinct trusted Registry entities
-          that quoted or reposted any Event member. Mean voter position,
-          source-author position, and maximum same-day one-post public
-          interactions break ties in that order.
+          Developments ordered by distinct trusted Registry entities that
+          authored, quoted, or reposted any source. Their average network
+          position and the strongest one-post public engagement break ties.
         </p>
         <p className="page-method-line mono">
           <a href="/system/architecture#ranking-methods">How ranking works ↗</a>
@@ -918,7 +1014,7 @@ export default function Feed() {
           onShowOlderDates={() => moveDateWindow('older')}
           onShowNewerDates={() => moveDateWindow('newer')}
           ariaLabel="Feed date"
-          itemLabel="Events"
+          itemLabel="Developments"
           loading={dates === null}
         />
       </section>
@@ -944,7 +1040,7 @@ export default function Feed() {
               setRoutingFilter(value)
             }}
             options={[
-              { value: 'all', label: 'All', description: 'All Events', count: data?.routing_counts?.all },
+              { value: 'all', label: 'All', description: 'All Developments', count: data?.routing_counts?.all },
               { value: 'relevant', label: 'Relevant', description: 'AI Engineering or Investment', count: data?.routing_counts?.relevant },
               { value: 'not_relevant', label: 'Not relevant', description: 'Evaluated, but relevant to neither audience', count: data?.routing_counts?.not_relevant },
               { value: 'not_evaluated', label: 'Not evaluated', description: 'Outside the current cohort, stale, or unavailable', count: data?.routing_counts?.not_evaluated },
@@ -958,7 +1054,7 @@ export default function Feed() {
               setSort(value)
             }}
             options={[
-              { value: 'rank', label: 'Rank', description: 'Daily Event rank' },
+              { value: 'rank', label: 'Rank', description: 'Daily Development rank' },
               { value: 'recent', label: 'Recent', description: 'Most recent' },
               { value: 'engagement', label: 'Engagement', description: 'Public engagement' },
             ]}
@@ -969,7 +1065,7 @@ export default function Feed() {
       {hasSearch && (
         <div className="feed-summary mono">
           {(data?.total ?? 0).toLocaleString('en-US')}{' '}
-          {routingSummaryLabels[routingFilter]} Events
+          {routingSummaryLabels[routingFilter]} Developments
         </div>
       )}
 
@@ -983,20 +1079,20 @@ export default function Feed() {
               <div className="feed-skeleton skeleton" key={index} />
             ))
           : items.map((item) => (
-              <EventRow
-                key={item.event_id}
+              <DevelopmentRow
+                key={item.development_id}
                 item={item}
                 rank={item.daily_rank}
                 total={data?.daily_rank_total ?? items.length}
                 date={selectedDate}
-                rankOpen={openRankEventId === item.event_id}
+                rankOpen={openRankEventId === item.development_id}
                 onToggleRank={() =>
                   setOpenRankEventId((current) =>
-                    current === item.event_id ? null : item.event_id,
+                    current === item.development_id ? null : item.development_id,
                   )
                 }
                 onCloseRank={() => setOpenRankEventId(null)}
-                focused={targetEventId === item.event_id}
+                focusedEventId={targetEventId}
               />
             ))}
         {!loading && items.length === 0 && (
@@ -1004,7 +1100,7 @@ export default function Feed() {
             {selectedDate && !selectedDateIsAvailable
               ? `No complete Feed view is available for ${selectedDateLabel}. This audit date remains preserved across views.`
               : targetEventId
-                ? `This exact Feed Event is not available for ${selectedDateLabel}. Check the date or Event ID.`
+                ? `This source Event is not available for ${selectedDateLabel}. Check the date or Event ID.`
               : 'No evidence matches this search. Try another day or clear the search.'}
           </div>
         )}

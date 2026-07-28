@@ -120,16 +120,16 @@ def test_schema_requires_only_two_exact_audience_judgments():
         }
 
 
-def test_v9_prompt_uses_soft_reason_word_guidance_without_truncation():
+def test_v10_prompt_uses_soft_reason_word_guidance_without_truncation():
     prompt = routing_model.instructions()
 
-    assert routing_model.PROMPT_VERSION == "audience-routing-v9"
+    assert routing_model.PROMPT_VERSION == "audience-routing-v10"
     assert "Aim for roughly 40 to 50 words" in prompt
     assert "guidance, not a hard limit" in prompt
     assert "never truncate, reject, or add filler" in prompt
 
 
-def test_v9_prompt_defines_the_approved_audience_boundaries():
+def test_v10_prompt_defines_the_approved_audience_boundaries():
     prompt = routing_model.instructions()
 
     assert "temporary access extensions or resets" in prompt
@@ -157,14 +157,14 @@ def test_render_input_uses_readable_first_party_hierarchy_only():
     assert '    author: "Satya Nadella"' in rendered
     assert "    post:" in rendered
     assert "      kind: x_post" in rendered
-    assert "      - kind: authored_artifact" in rendered
-    assert '        title: "Serving system report"' in rendered
+    assert "    - kind: authored_artifact" in rendered
+    assert '      title: "Serving system report"' in rendered
     assert "independent_reactions" not in rendered
     assert "Independent Engineer" not in rendered
     assert "burst traffic & load" not in rendered
     assert "&amp;" not in rendered
     assert rendered.index("    post:") < rendered.index(
-        "      - kind: authored_artifact"
+        "    - kind: authored_artifact"
     )
     assert "reduced inference latency" in rendered
     assert "event-secret-42" not in rendered
@@ -328,7 +328,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v9",
+        "prompt:audience-routing-v10",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
@@ -383,10 +383,11 @@ def test_prompt_explains_product_evidence_and_independent_audience_job():
 
     assert "frontier lab intelligence" in prompt
     assert "current system collects public posts from x" in prompt
-    assert "groups all connected activity into one event" in prompt
-    assert "primary post" in prompt
+    assert "preserves each post and its connected activity as an exact event" in prompt
+    assert "grouped into one development" in prompt
+    assert "primary source" in prompt
     assert "full text of an available artifact" in prompt
-    assert "independently authored replies" in prompt
+    assert "independently authored original posts" in prompt
     assert "ai engineering" in prompt
     assert "investment" in prompt
     assert "decide independently" in prompt

@@ -11,8 +11,12 @@ from fli.registry import channels
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.routing import view as audience_routing_store
-from fli.scoring import attention
-from fli.web import events as event_store, feed as feed_store
+from fli.scoring import attention, development_attention
+from fli.web import (
+    developments as development_store,
+    events as event_store,
+    feed as feed_store,
+)
 import fli.web.app as web_app_module
 from fli.web.app import app
 from tests.evidence.test_feed import _raw_fixture, _tweet
@@ -30,6 +34,8 @@ def _isolate_event_view_cache(tmp_path, monkeypatch):
         "DEFAULT_EVENT_VIEW_CACHE_ROOT",
         tmp_path / "web-event-cache",
     )
+    development_store._developments_day_cached.cache_clear()
+    development_store._dates_payload_cached.cache_clear()
 
 
 def test_cutoff_component_identity_prefers_primary_thread_over_quoted_target():
@@ -194,7 +200,7 @@ def _write_audience_routing_run(
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
-            attention.DAILY_RANK_VERSION,
+            development_attention.DAILY_RANK_VERSION,
             source_event_run_id,
             source_rank_input_sha256,
             source_feed_run_id,
@@ -217,7 +223,7 @@ def _write_audience_routing_run(
                        'evidence-hash', 'input', 'input-hash', 'complete', 1,
                        ?, ?, ?, ?, ?, ?)""",
             (
-                item["event_id"],
+                item.get("development_id", item.get("event_id")),
                 rank,
                 item["semantic_snapshot_sha256"],
                 int(rank == 1),
@@ -525,7 +531,7 @@ def test_event_warmup_builds_each_day_in_the_published_window(monkeypatch):
 def test_service_startup_warms_only_the_newest_visible_event_window(monkeypatch):
     days = [f"2026-07-{day:02d}" for day in range(1, 11)]
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "dates_payload",
         lambda: {
             "available": True,
@@ -535,14 +541,14 @@ def test_service_startup_warms_only_the_newest_visible_event_window(monkeypatch)
         },
     )
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "_cache_token",
         lambda day: ((day, 0, 0, 0, 0),),
     )
     warmed: list[str] = []
     monkeypatch.setattr(
-        event_store,
-        "_events_day_cached",
+        development_store,
+        "_developments_day_cached",
         lambda *, day, cache_token: warmed.append(day),
     )
 
@@ -551,11 +557,11 @@ def test_service_startup_warms_only_the_newest_visible_event_window(monkeypatch)
     assert warmed == days[-web_app_module.STARTUP_EVENT_WARM_DAYS:]
 
 
-def test_events_api_projects_completed_audience_routing_directly(
+def test_developments_api_projects_completed_audience_routing_directly(
     tmp_path, monkeypatch
 ):
     _event_fixture(tmp_path, monkeypatch)
-    baseline = client.get("/api/events?date=2026-07-11&limit=20").json()
+    baseline = client.get("/api/developments?date=2026-07-11&limit=20").json()
     assert {item["routing_state"] for item in baseline["items"]} == {"unavailable"}
     _write_audience_routing_run(
         audience_routing_store.DEFAULT_ROUTING_ROOT,
@@ -565,7 +571,8 @@ def test_events_api_projects_completed_audience_routing_directly(
         source_feed_run_id=baseline["run"]["feed_run_id"],
     )
 
-    all_items = client.get("/api/events?date=2026-07-11&limit=20").json()
+    development_store._developments_day_cached.cache_clear()
+    all_items = client.get("/api/developments?date=2026-07-11&limit=20").json()
     assert all_items["audience_routing_run"]["run_id"] == "audience-run-1"
     assert all("triage" not in item for item in all_items["items"])
     routed = all_items["items"][0]
@@ -588,20 +595,20 @@ def test_events_api_projects_completed_audience_routing_directly(
         "not_evaluated": 0,
     }
     assert all_items["daily_rank_total"] == 2
-    daily_rank_by_event_id = {
-        item["event_id"]: item["daily_rank"] for item in all_items["items"]
+    daily_rank_by_development_id = {
+        item["development_id"]: item["daily_rank"] for item in all_items["items"]
     }
 
     recent = client.get(
-        "/api/events?date=2026-07-11&sort=recent&limit=20"
+        "/api/developments?date=2026-07-11&sort=recent&limit=20"
     ).json()
     assert {
-        item["event_id"]: item["daily_rank"] for item in recent["items"]
-    } == daily_rank_by_event_id
+        item["development_id"]: item["daily_rank"] for item in recent["items"]
+    } == daily_rank_by_development_id
 
     search_target = all_items["items"][-1]
     searched = client.get(
-        "/api/events",
+        "/api/developments",
         params={
             "date": "2026-07-11",
             "q": search_target["root"]["text"],
@@ -611,35 +618,41 @@ def test_events_api_projects_completed_audience_routing_directly(
     searched_item = next(
         item
         for item in searched["items"]
-        if item["event_id"] == search_target["event_id"]
+        if item["development_id"] == search_target["development_id"]
     )
     assert searched_item["daily_rank"] == search_target["daily_rank"]
     assert searched["daily_rank_total"] == all_items["daily_rank_total"]
 
     focused = client.get(
-        "/api/events",
+        "/api/developments",
         params={
             "date": "2026-07-11",
-            "event_id": search_target["event_id"],
+            "event_id": search_target["source_event_ids"][0],
             "limit": 20,
         },
     ).json()
-    assert focused["event_id"] == search_target["event_id"]
+    assert focused["event_id"] == search_target["source_event_ids"][0]
     assert focused["total"] == 1
-    assert focused["items"][0]["event_id"] == search_target["event_id"]
+    assert (
+        focused["items"][0]["development_id"]
+        == search_target["development_id"]
+    )
     assert focused["items"][0]["daily_rank"] == search_target["daily_rank"]
     assert focused["daily_rank_total"] == all_items["daily_rank_total"]
 
     relevant = client.get(
-        "/api/events?date=2026-07-11&routing=relevant&limit=20"
+        "/api/developments?date=2026-07-11&routing=relevant&limit=20"
     ).json()
     assert relevant["total"] == 1
-    assert relevant["items"][0]["event_id"] == routed["event_id"]
+    assert relevant["items"][0]["development_id"] == routed["development_id"]
     neither = client.get(
-        "/api/events?date=2026-07-11&routing=not_relevant&limit=20"
+        "/api/developments?date=2026-07-11&routing=not_relevant&limit=20"
     ).json()
     assert neither["total"] == 1
-    assert neither["items"][0]["event_id"] == all_items["items"][1]["event_id"]
+    assert (
+        neither["items"][0]["development_id"]
+        == all_items["items"][1]["development_id"]
+    )
 
 
 def test_events_ignore_routing_from_different_full_day_rank_inputs(

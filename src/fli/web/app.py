@@ -12,6 +12,8 @@ Endpoints:
 - /api/feed                      Registry-aware deterministic signal Feed
 - /api/events/dates              exact structural event counts by date
 - /api/events                    Registry-aware exact structural event groups
+- /api/developments/dates        artifact-linked Development counts by date
+- /api/developments              ranked, routed Development evidence
 - /api/artifacts/dates           source-evidence dates with artifact counts
 - /api/artifacts                 canonical primary-artifact library
 - /api/artifacts/{id}/text       normalized readable artifact snapshot
@@ -47,6 +49,7 @@ from fli.registry import intake as registry_intake
 from fli.registry import store as entity_registry
 from fli.registry import view as entity_registry_view
 from fli.web import artifact_library as artifact_store
+from fli.web import developments as development_store
 from fli.web import events as event_store, feed as feed_store
 
 DIST_DIR = Path(__file__).parent / "dist"
@@ -57,8 +60,8 @@ STARTUP_EVENT_WARM_DAYS = 7
 
 
 def _warm_recent_event_views() -> None:
-    """Warm only the newest visible Event window, not all historical days."""
-    summary = event_store.dates_payload()
+    """Warm only the newest visible Development window."""
+    summary = development_store.dates_payload()
     if not summary.get("available"):
         return
     date_from = str(summary.get("date_from") or "")
@@ -69,9 +72,9 @@ def _warm_recent_event_views() -> None:
         if date_from <= str(row.get("day") or "") <= date_to
     ][-STARTUP_EVENT_WARM_DAYS:]
     for day in days:
-        event_store._events_day_cached(
+        development_store._developments_day_cached(
             day=day,
-            cache_token=event_store._cache_token(day),
+            cache_token=development_store._cache_token(day),
         )
 
 
@@ -436,6 +439,49 @@ def events(
             event_id=event_id,
             routing_filter=routing,
             projection=projection,
+            include_evidence=include_evidence,
+            limit=limit,
+            offset=offset,
+        ),
+        headers=EVENT_READ_CACHE_HEADERS,
+    )
+
+
+@app.get("/api/developments/dates")
+def development_dates() -> JSONResponse:
+    """Artifact-linked Developments available for each Feed date."""
+    return JSONResponse(
+        development_store.dates_payload(),
+        headers=EVENT_READ_CACHE_HEADERS,
+    )
+
+
+@app.get("/api/developments")
+def developments(
+    development_date: calendar_date = Query(..., alias="date"),
+    lane: str = Query("all", pattern="^(all|network|firsthand)$"),
+    sort: str = Query("rank", pattern="^(rank|recent|engagement)$"),
+    q: str = Query("", max_length=200),
+    development_id: str = Query("", max_length=128),
+    event_id: str = Query("", max_length=128),
+    routing: str = Query(
+        "all",
+        pattern="^(all|relevant|not_relevant|not_evaluated)$",
+    ),
+    include_evidence: bool = Query(True),
+    limit: int = Query(40, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+) -> JSONResponse:
+    """One date of ranked Developments with exact Event provenance."""
+    return JSONResponse(
+        development_store.developments_payload(
+            day=development_date.isoformat(),
+            lane=lane,
+            sort=sort,
+            query=q,
+            development_id=development_id,
+            event_id=event_id,
+            routing_filter=routing,
             include_evidence=include_evidence,
             limit=limit,
             offset=offset,

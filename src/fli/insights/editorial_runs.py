@@ -21,7 +21,7 @@ from fli.routing import model as routing_model
 from fli.routing import freshness
 from fli.routing import runs as routing_runs
 from fli.routing import view as routing_view
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -457,11 +457,11 @@ def load_manifest(workspace: Path) -> dict[str, Any]:
 def _current_routing_lineage(
     day: str, routing_root: Path
 ) -> tuple[Path, dict[str, Any], dict[str, str]]:
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
-    identity = event_store.current_rank_identity(day=day)
-    if str(identity["rank_version"]) != attention.DAILY_RANK_VERSION:
-        raise ValueError(f"current Event rank version is invalid for {day}")
+    identity = development_store.current_rank_identity(day=day)
+    if str(identity["rank_version"]) != development_attention.DAILY_RANK_VERSION:
+        raise ValueError(f"current Development rank version is invalid for {day}")
     path = routing_view.latest_complete_run(
         day,
         expected_rank_input_sha256=identity["rank_input_sha256"],
@@ -569,10 +569,10 @@ def _source_index(packet: dict[str, Any]) -> tuple[list[str], list[dict[str, Any
 def _event_x_publication_times(
     *, day: str, routing_meta: dict[str, Any]
 ) -> dict[str, dict[str, str]]:
-    """Resolve X publication times from the Event run bound to routing."""
-    from fli.web import events as event_store
+    """Resolve X publication times from the Development projection bound to routing."""
+    from fli.web import developments as development_store
 
-    payload = event_store.events_payload(
+    payload = development_store.developments_payload(
         day=day,
         lane="all",
         sort="rank",
@@ -580,6 +580,7 @@ def _event_x_publication_times(
         routing_filter="all",
         limit=1_000_000,
         offset=0,
+        include_evidence=True,
     )
     if not payload.get("available"):
         raise ValueError(str(payload.get("reason") or "Evidence is unavailable"))
@@ -590,31 +591,59 @@ def _event_x_publication_times(
         or str(source.get("feed_run_id") or "")
         != str(routing_meta["source_feed_run_id"])
     ):
-        raise ValueError("Event publication changed after the routing run was frozen")
+        raise ValueError(
+            "Development source publication changed after routing was frozen"
+        )
     result: dict[str, dict[str, str]] = {}
     for item in payload.get("items") or []:
-        event_id = str(item["event_id"])
+        development_id = str(item["development_id"])
         times: dict[str, str] = {}
-        for source in [item["root"], *(item.get("evidence") or [])]:
-            source_id = str(source.get("post_id") or "")
-            published_at = str(source.get("published_at") or "")
-            if source_id and published_at:
-                times[source_id] = published_at
-        result[event_id] = times
+        for source_event in item.get("source_events") or []:
+            for source in [
+                source_event["post"],
+                *(source_event.get("evidence") or []),
+            ]:
+                source_id = str(source.get("post_id") or "")
+                published_at = str(source.get("published_at") or "")
+                if source_id and published_at:
+                    times[source_id] = published_at
+        result[development_id] = times
     return result
 
 
 def _event_artifact_disclosures(
     *,
+    day: str,
     artifact_db: Path,
     event_ids: set[str],
 ) -> dict[str, dict[str, list[dict[str, str]]]]:
-    """Resolve accepted artifact-to-disclosure lineage from the bound catalog."""
+    """Resolve exact Event disclosures under their parent Developments."""
     if not event_ids:
         return {}
     if not artifact_db.is_file():
         raise FileNotFoundError(artifact_db)
-    placeholders = ",".join("?" for _ in event_ids)
+    from fli.web import developments as development_store
+
+    payload = development_store.developments_payload(
+        day=day,
+        lane="all",
+        sort="rank",
+        query="",
+        routing_filter="all",
+        limit=1_000_000,
+        offset=0,
+        include_evidence=False,
+    )
+    exact_to_development = {
+        str(source_event_id): str(item["development_id"])
+        for item in payload.get("items") or []
+        if str(item["development_id"]) in event_ids
+        for source_event_id in item["source_event_ids"]
+    }
+    exact_event_ids = set(exact_to_development)
+    if not exact_event_ids:
+        return {}
+    placeholders = ",".join("?" for _ in exact_event_ids)
     conn = _open_readonly(artifact_db)
     try:
         rows = conn.execute(
@@ -632,14 +661,17 @@ def _event_artifact_disclosures(
                 ORDER BY candidate.event_id, candidate.artifact_id,
                          candidate.disclosure_published_at,
                          candidate.disclosure_external_id""",
-            (artifact_store.PRIMARY_AUTHOR_SELECTION_POLICY, *sorted(event_ids)),
+            (
+                artifact_store.PRIMARY_AUTHOR_SELECTION_POLICY,
+                *sorted(exact_event_ids),
+            ),
         ).fetchall()
     finally:
         conn.close()
     result: dict[str, dict[str, list[dict[str, str]]]] = {}
     seen: set[tuple[str, str, str, str]] = set()
     for row in rows:
-        event_id = str(row["event_id"])
+        event_id = exact_to_development[str(row["event_id"])]
         artifact_id = str(row["artifact_id"])
         source_id = str(row["disclosure_external_id"])
         published_at = str(row["disclosure_published_at"])
@@ -1145,6 +1177,7 @@ def prepare_workspace(
         routing_meta=meta,
     )
     artifact_disclosures = _event_artifact_disclosures(
+        day=day,
         artifact_db=_resolve_path(str(meta["source_artifact_db"])),
         event_ids={str(row["event_id"]) for row in rows},
     )

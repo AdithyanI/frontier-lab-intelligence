@@ -9,7 +9,7 @@ import pytest
 from fli.insights import daily_runner, editorial, editorial_runs
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 DAY = "2026-07-16"
@@ -84,7 +84,7 @@ def _routing_result(
         "top_ranked": routing_runs.DEFAULT_REFRESH_TOP_RANKED,
         "model": routing_model.DEFAULT_MODEL,
         "reasoning_effort": routing_model.DEFAULT_REASONING_EFFORT,
-        "rank_version": attention.DAILY_RANK_VERSION,
+        "rank_version": development_attention.DAILY_RANK_VERSION,
         "routing_cohort_sha256": routing_cohort_sha256,
         "source_rank_input_sha256": source_rank_input_sha256,
         "plan": [{"day": DAY, "run_id": routing_run_id, "reused": False}],
@@ -308,7 +308,7 @@ def _expected_config() -> dict[str, Any]:
         "top_ranked": routing_runs.DEFAULT_REFRESH_TOP_RANKED,
         "routing_model": routing_model.DEFAULT_MODEL,
         "routing_reasoning_effort": routing_model.DEFAULT_REASONING_EFFORT,
-        "rank_version": attention.DAILY_RANK_VERSION,
+        "rank_version": development_attention.DAILY_RANK_VERSION,
         "routing_workers": routing_runs.DEFAULT_REFRESH_WORKERS,
         "routing_day_workers": 1,
         "repo_root": str(daily_runner.REPO_ROOT),
@@ -528,7 +528,10 @@ def test_same_day_supports_a_second_versioned_contract_lineage(tmp_path):
 
     assert second["run_id"] != first["run_id"]
     assert second["config"]["workers"] == 16
-    assert second["config"]["rank_version"] == attention.DAILY_RANK_VERSION
+    assert (
+        second["config"]["rank_version"]
+        == development_attention.DAILY_RANK_VERSION
+    )
     conn = daily_runner.connect(db_path)
     try:
         assert conn.execute(
@@ -706,7 +709,7 @@ def test_resumed_routing_checkpoint_must_match_config_source_lineage(tmp_path):
 def test_current_inputs_exposes_exact_routing_source_hashes(
     tmp_path, monkeypatch
 ):
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
     routing_path = tmp_path / "routing.db"
     conn = sqlite3.connect(routing_path)
@@ -735,7 +738,7 @@ def test_current_inputs_exposes_exact_routing_source_hashes(
             FEED_RUN_ID,
             routing_model.DEFAULT_MODEL,
             routing_model.DEFAULT_REASONING_EFFORT,
-            attention.DAILY_RANK_VERSION,
+            development_attention.DAILY_RANK_VERSION,
             ROUTING_COHORT_SHA256,
             SOURCE_RANK_INPUT_SHA256,
         ),
@@ -748,11 +751,11 @@ def test_current_inputs_exposes_exact_routing_source_hashes(
         lambda day, **_kwargs: routing_path if day == DAY else None,
     )
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "current_rank_identity",
         lambda *, day: {
             "day": day,
-            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_version": development_attention.DAILY_RANK_VERSION,
             "rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
             "event_run_id": EVENT_RUN_ID,
             "feed_run_id": FEED_RUN_ID,
@@ -797,7 +800,10 @@ def test_run_batch_dry_run_plans_current_rank_without_touching_store(
     assert selected == ["2026-07-15", DAY]
     assert result["plan"]["selected_days"] == selected
     assert result["plan"]["day_workers"] == 2
-    assert result["plan"]["rank_version"] == attention.DAILY_RANK_VERSION
+    assert (
+        result["plan"]["rank_version"]
+        == development_attention.DAILY_RANK_VERSION
+    )
     assert result["plan"]["will_collect_external_evidence"] is False
     assert result["plan"]["will_call_routing_model"] is False
     assert result["plan"]["will_launch_codex"] is False

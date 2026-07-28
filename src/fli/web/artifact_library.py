@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from fli.evidence.artifacts import store as artifacts
+from fli.web import developments as development_store
 
 
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
@@ -362,11 +363,15 @@ def artifacts_payload(
                  {search_sql}
                ORDER BY observation.best_source_rank,
                         observation.source_published_at DESC,
-                        artifact.artifact_id
-               LIMIT ? OFFSET ?""",
-            (selected_day, *search_params, limit, offset),
+                        artifact.artifact_id""",
+            (selected_day, *search_params),
         ).fetchall()
 
+        development_by_event_id = (
+            development_store.current_development_rank_by_event_id(
+                day=str(selected_day)
+            )
+        )
         items = []
         for row in rows:
             item = dict(row)
@@ -376,10 +381,25 @@ def artifacts_payload(
             )
             item["fetch_state"] = _fetch_state(item.pop("fetch_status"))
             item["fetch_method"] = _fetch_method(item.pop("fetch_policy"))
+            development = development_by_event_id.get(
+                str(item["source_event_id"] or "")
+            )
+            item["source_development_id"] = (
+                str(development["development_id"]) if development else None
+            )
+            if development:
+                item["best_source_rank"] = int(development["daily_rank"])
             items.append(item)
+        items.sort(
+            key=lambda item: (
+                int(item["best_source_rank"]),
+                str(item["source_published_at"]),
+                str(item["artifact_id"]),
+            )
+        )
         return {
             "available": True,
-            "items": items,
+            "items": items[offset : offset + limit],
             "catalog_total": total,
             "matching_total": matching_total,
             "catalog_fetch_state_counts": counts,

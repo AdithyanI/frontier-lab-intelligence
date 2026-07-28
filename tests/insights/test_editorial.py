@@ -13,9 +13,9 @@ from fli.insights import editorial_runs
 from fli.insights import runs as insight_runs
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
-from fli.scoring import attention
+from fli.scoring import development_attention
 from fli.web.app import app
-from fli.web import events as event_store
+from fli.web import developments as development_store
 
 
 DAY = "2026-07-15"
@@ -109,7 +109,7 @@ def _routing_fixture(
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
-            attention.DAILY_RANK_VERSION,
+            development_attention.DAILY_RANK_VERSION,
             source_rank_input_sha256,
             source_event_run_id,
             source_feed_run_id,
@@ -164,11 +164,11 @@ def _workspace(tmp_path, monkeypatch):
         lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
     )
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "current_rank_identity",
         lambda *, day: {
             "day": day,
-            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_version": development_attention.DAILY_RANK_VERSION,
             "rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
             "event_run_id": "event-run",
             "feed_run_id": "feed-run",
@@ -384,7 +384,9 @@ def test_prepare_omits_prior_insight_when_routing_input_hash_changed(
     assert payload["prior_per_event_insights"] == {}
 
 
-def test_artifact_disclosures_are_loaded_from_the_bound_catalog(tmp_path):
+def test_artifact_disclosures_are_loaded_from_the_bound_catalog(
+    tmp_path, monkeypatch
+):
     db = tmp_path / "artifacts.db"
     conn = sqlite3.connect(db)
     conn.executescript(
@@ -416,10 +418,30 @@ def test_artifact_disclosures_are_loaded_from_the_bound_catalog(tmp_path):
     conn.commit()
     conn.close()
 
+    monkeypatch.setattr(
+        development_store,
+        "developments_payload",
+        lambda **_kwargs: {
+            "available": True,
+            "items": [
+                {
+                    "development_id": "development-a",
+                    "source_event_ids": ["event-a"],
+                },
+                {
+                    "development_id": "development-b",
+                    "source_event_ids": ["event-b"],
+                },
+            ],
+        },
+    )
+
     assert editorial_runs._event_artifact_disclosures(
-        artifact_db=db, event_ids={"event-a", "event-b"}
+        day=DAY,
+        artifact_db=db,
+        event_ids={"development-a", "development-b"},
     ) == {
-        "event-a": {
+        "development-a": {
             "artifact-a": [
                 {
                     "source_id": "post-a",
@@ -451,7 +473,7 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
             routing_model.PROMPT_VERSION,
             routing_model.prompt_sha256(),
             routing_model.SCHEMA_VERSION,
-            attention.DAILY_RANK_VERSION,
+            development_attention.DAILY_RANK_VERSION,
             SOURCE_RANK_INPUT_SHA256,
             now,
             now,
@@ -506,11 +528,11 @@ def test_prepare_prunes_stale_prose_and_promotes_current_source(tmp_path, monkey
         lambda: {"event_run_id": "event-run", "feed_run_id": "feed-run"},
     )
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "current_rank_identity",
         lambda *, day: {
             "day": day,
-            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_version": development_attention.DAILY_RANK_VERSION,
             "rank_input_sha256": SOURCE_RANK_INPUT_SHA256,
             "event_run_id": "event-run",
             "feed_run_id": "feed-run",
@@ -878,7 +900,10 @@ def test_editorial_read_selects_latest_complete_run_and_filters_audience(
         "notes": "Second editorial pass.",
     }
     assert payload["run"]["counts"]["insights"] == 1
-    assert payload["run"]["source"]["rank_version"] == attention.DAILY_RANK_VERSION
+    assert (
+        payload["run"]["source"]["rank_version"]
+        == development_attention.DAILY_RANK_VERSION
+    )
     assert (
         payload["run"]["source"]["rank_input_sha256"]
         == SOURCE_RANK_INPUT_SHA256
@@ -972,7 +997,7 @@ def test_editorial_date_lineage_is_reused_until_a_source_changes(
     db = tmp_path / "editorial.db"
     editorial_runs.import_result(workspace, draft_path, db_path=db)
 
-    current_rank_identity = event_store.current_rank_identity
+    current_rank_identity = development_store.current_rank_identity
     calls = 0
 
     def counted_rank_identity(*, day):
@@ -981,7 +1006,7 @@ def test_editorial_date_lineage_is_reused_until_a_source_changes(
         return current_rank_identity(day=day)
 
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "current_rank_identity",
         counted_rank_identity,
     )
@@ -1022,11 +1047,11 @@ def test_reader_and_api_reject_editorial_from_superseded_rank_lineage(
         cohort_sha256="cohort-sha-v3",
     )
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "current_rank_identity",
         lambda *, day: {
             "day": day,
-            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_version": development_attention.DAILY_RANK_VERSION,
             "rank_input_sha256": replacement_rank_sha,
             "event_run_id": "event-run-v3",
             "feed_run_id": "feed-run-v3",

@@ -118,6 +118,8 @@ export interface EventEvidence {
   parent_missing: boolean
   depth: number
   same_author_as_root: boolean
+  source_event_id?: string
+  is_development_source?: boolean
 }
 
 export interface FeedEvent {
@@ -279,4 +281,128 @@ export function prefetchExactEvent(date: string, eventId: string) {
       eventId,
     }),
   ).catch(() => undefined)
+}
+
+export interface DevelopmentParticipant {
+  entity_id: number
+  entity_name: string
+  entity_kind: string
+  handle: string
+  roles: Array<'source' | 'quote' | 'retweet'>
+  position: number
+  source_urls: string[]
+}
+
+export interface DevelopmentRankComponents {
+  version: 'daily-development-rank-v1'
+  trusted_attention: number
+  participants: DevelopmentParticipant[]
+  mean_participant_position: number
+  public_interactions: number
+  decided_at_layer: 1 | 2 | 3 | 4 | null
+}
+
+export interface DevelopmentArtifact {
+  artifact_id: string
+  canonical_url: string
+  artifact_kind: string
+  title: string | null
+  merge_anchor?: boolean
+  source_event_ids?: string[]
+  is_merge_basis?: boolean
+}
+
+export interface DevelopmentSourceEvent {
+  event_id: string
+  semantic_snapshot_sha256: string
+  is_primary: boolean
+  member_count: number
+  why_grouped: string[]
+  evidence: EventEvidence[]
+  post: FeedItem
+  artifacts: DevelopmentArtifact[]
+}
+
+export interface FeedDevelopment
+  extends Omit<
+    FeedEvent,
+    'event_id' | 'canonical_root_post_id' | 'presentation_root_post_id' | 'rank_components'
+  > {
+  development_id: string
+  bundle_contract: string
+  primary_event_id: string
+  source_event_ids: string[]
+  source_event_count: number
+  source_events: DevelopmentSourceEvent[]
+  development_artifacts: DevelopmentArtifact[]
+  original_poster_count: number
+  amplifier_count: number
+  rank_components: DevelopmentRankComponents
+}
+
+export interface DevelopmentResponse
+  extends Omit<EventResponse, 'items' | 'rank_contract' | 'run'> {
+  development_id?: string
+  run?: {
+    run_id: string
+    feed_run_id: string
+    development_run_id: string
+    bundle_contract: string
+    source_event_clustering_contract: string
+    artifact_import_run_id: string | null
+  }
+  rank_contract?: {
+    version: 'daily-development-rank-v1'
+    kind: 'daily_development_lexicographic'
+    layers: [
+      'trusted_attention',
+      'mean_participant_position',
+      'public_interactions',
+      'development_id',
+    ]
+    input_sha256: string
+    network: {
+      snapshot_id: string
+      snapshot_completed_at: string | null
+      network_source_total: number
+      network_rank_total: number
+      parent_snapshot_id: string | null
+      incremental: boolean
+    }
+    development_run_id: string
+    bundle_contract: string
+    note: string
+  }
+  items?: FeedDevelopment[]
+}
+
+export interface DevelopmentPageQuery extends EventPageQuery {
+  developmentId?: string
+  includeEvidence?: boolean
+}
+
+export function developmentPageUrl({
+  date,
+  sort,
+  routingFilter,
+  query,
+  developmentId,
+  eventId,
+  offset = 0,
+  limit = 20,
+  includeEvidence = false,
+}: DevelopmentPageQuery) {
+  const params = new URLSearchParams({
+    date,
+    lane: 'all',
+    sort,
+    routing: routingFilter,
+    q: query,
+    development_id: developmentId ?? '',
+    event_id: eventId ?? '',
+    include_evidence: String(includeEvidence),
+    limit: String(limit),
+    offset: String(offset),
+  })
+  return `/api/developments?${params}`
 }

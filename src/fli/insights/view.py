@@ -11,7 +11,7 @@ from typing import Any, Collection, Literal
 from fli.insights import generation as insight_generation
 from fli.insights import runs as insight_runs
 from fli.routing import model as routing_model
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 DEFAULT_AUDIENCE = insight_generation.InsightAudience.INVESTMENT.value
@@ -80,13 +80,16 @@ def _routing_source_cached(
             str(meta["prompt_version"]) != routing_model.PROMPT_VERSION
             or str(meta["prompt_sha256"]) != routing_model.prompt_sha256()
             or str(meta["schema_version"]) != routing_model.SCHEMA_VERSION
-            or str(meta["rank_version"]) != attention.DAILY_RANK_VERSION
+            or str(meta["rank_version"])
+            != development_attention.DAILY_RANK_VERSION
         ):
             return {"current": False, "packets": {}}
-        from fli.web import events as event_store
+        from fli.web import developments as development_store
 
         try:
-            identity = event_store.current_rank_identity(day=str(meta["day"]))
+            identity = development_store.current_rank_identity(
+                day=str(meta["day"])
+            )
         except ValueError:
             return {"current": False, "packets": {}}
         if (

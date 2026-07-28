@@ -76,8 +76,8 @@ test('Artifacts expose stable user-facing types with X Articles distinct', () =>
   assert.doesNotMatch(artifactSource, /className="artifact-kind mono">\{item\.artifact_kind\}/)
 })
 
-test('Artifacts inherit Feed rank while keeping the source timestamp in provenance', () => {
-  assert.match(artifactSource, /<span>Feed rank<\/span>/)
+test('Artifacts inherit Development rank while keeping the source timestamp in provenance', () => {
+  assert.match(artifactSource, /<span>Development rank<\/span>/)
   assert.match(artifactSource, /item\.best_source_rank/)
   assert.doesNotMatch(artifactSource, /<span>Source time<\/span>/)
   assert.match(artifactSource, /Source published \{observedTimestamp\.format/)
@@ -89,8 +89,8 @@ test('Artifacts inherit Feed rank while keeping the source timestamp in provenan
   assert.match(artifactSource, /sortArtifactsByFeedRank\(\[\.\.\.current, \.\.\.payload\.items\]\)/)
 })
 
-test('Artifacts from one exact Feed Event share one visual rank rail', () => {
-  assert.match(artifactSource, /previousGroup\?\.\[0\]\.source_event_id === item\.source_event_id/)
+test('Artifacts from one Development share one visual rank rail', () => {
+  assert.match(artifactSource, /previousGroup\?\.\[0\]\.source_development_id === item\.source_development_id/)
   assert.match(artifactSource, /rankIsContinuation=\{index > 0\}/)
   assert.match(artifactSource, /continuesRankGroup=\{index < group\.length - 1\}/)
   assert.match(artifactSource, /!rankIsContinuation && <strong>#\{item\.best_source_rank\}<\/strong>/)
@@ -103,7 +103,7 @@ test('Artifact provenance deep-links to the exact ranked Feed Event', () => {
   assert.match(artifactSource, /<CopyEventId eventId=\{item\.source_event_id\} \/>/)
   assert.match(artifactSource, /\/evidence\/feed\?date=/)
   assert.match(feedSource, /useSearchParams/)
-  assert.match(feedSource, /event_id:/)
+  assert.match(feedSource, /developmentPageUrl/)
   assert.match(feedSource, /targetEventId/)
   assert.match(feedSource, /event-row--focused/)
 })

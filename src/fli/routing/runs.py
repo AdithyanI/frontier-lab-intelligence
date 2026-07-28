@@ -19,7 +19,7 @@ from fli.evidence.artifacts import store as artifacts
 from fli.registry import classification as entity_kinds
 from fli.routing import freshness
 from fli.routing import model as routing_model
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -230,10 +230,10 @@ def _published_event_source() -> dict[str, str]:
 
 def _current_rank_identities(days: list[str]) -> dict[str, dict[str, str]]:
     """Resolve the exact full-day rank inputs before routing is frozen."""
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
     return {
-        day: event_store.current_rank_identity(day=day)
+        day: development_store.current_rank_identity(day=day)
         for day in days
     }
 
@@ -272,7 +272,8 @@ def _refresh_plan(
             "run_id": (
                 f"{routing_model.PROMPT_VERSION}-{_run_label(model)}-{day}-"
                 f"top{top_ranked}-{_run_label(effort)}-"
-                f"{_run_label(attention.DAILY_RANK_VERSION)}-{source_label}-"
+                f"{_run_label(development_attention.DAILY_RANK_VERSION)}-"
+                f"{source_label}-"
                 f"{rank_identities[day]['rank_input_sha256'][:12]}"
             ),
         }
@@ -435,7 +436,7 @@ def refresh_all_days(
         "top_ranked": top_ranked,
         "model": model,
         "reasoning_effort": effort,
-        "rank_version": attention.DAILY_RANK_VERSION,
+        "rank_version": development_attention.DAILY_RANK_VERSION,
         "workers_per_day": workers,
         "day_workers": min(day_workers, len(plan)),
         "replace": replace,
@@ -701,18 +702,21 @@ def _x_source(post: dict[str, Any], *, relation: str) -> routing_model.EvidenceS
 def _artifact_sources(
     conn: sqlite3.Connection,
     *,
-    event_id: str,
+    event_ids: list[str],
     post_authors: dict[str, str],
     primary_author: str,
     eligible_source_ids: set[str] | None = None,
 ) -> list[routing_model.EvidenceSource]:
-    """Load full accepted primary-author artifacts without old Insight state."""
+    """Load accepted artifacts across every exact source Event once."""
+    if not event_ids:
+        return []
+    placeholders = ",".join("?" for _ in event_ids)
     rows = conn.execute(
-        """SELECT DISTINCT candidate.artifact_id, candidate.relation,
-                          candidate.source_external_id,
-                          candidate.source_snapshot_sha256,
-                          artifact.canonical_url, artifact.title,
-                          latest.text_snapshot_ref, latest.text_sha256
+        f"""SELECT DISTINCT candidate.artifact_id, candidate.relation,
+                           candidate.source_external_id,
+                           candidate.source_snapshot_sha256,
+                           artifact.canonical_url, artifact.title,
+                           latest.text_snapshot_ref, latest.text_sha256
            FROM artifact_import_candidate AS candidate
            JOIN artifact_import_run AS import_run USING (import_run_id)
            JOIN artifact AS artifact USING (artifact_id)
@@ -725,7 +729,7 @@ def _artifact_sources(
                ORDER BY fetch.completed_at DESC, fetch.fetch_id DESC
                LIMIT 1
            )
-           WHERE candidate.event_id = ?
+           WHERE candidate.event_id IN ({placeholders})
              AND candidate.decision = 'accepted'
              AND import_run.selection_policy = ?
            ORDER BY candidate.artifact_id,
@@ -734,7 +738,7 @@ def _artifact_sources(
                     END,
                     candidate.source_external_id,
                     candidate.source_snapshot_sha256""",
-        (event_id, artifacts.PRIMARY_AUTHOR_SELECTION_POLICY),
+        (*event_ids, artifacts.PRIMARY_AUTHOR_SELECTION_POLICY),
     ).fetchall()
     sources: list[routing_model.EvidenceSource] = []
     seen_artifact_ids: set[str] = set()
@@ -778,44 +782,75 @@ def _artifact_sources(
     return sources
 
 
-def packet_from_event(
+def packet_from_development(
     item: dict[str, Any],
     *,
     day: str,
     artifact_conn: sqlite3.Connection,
 ) -> routing_model.RoutingPacket | None:
-    root_item = dict(item["root"])
-    root = {
-        "post_id": str(root_item["post_id"]),
-        "author": "@" + str(root_item["author"]["handle"]),
-        "text": str(root_item.get("text") or ""),
-        "published_at": str(root_item.get("published_at") or ""),
-    }
+    source_events = list(item.get("source_events") or [])
+    source_events.sort(
+        key=lambda source: (
+            not bool(source.get("is_primary")),
+            int(source.get("daily_rank") or 0),
+            str(source["event_id"]),
+        )
+    )
     x_posts: list[dict[str, Any]] = []
-    if freshness.is_current(
-        published_at=root["published_at"], evaluation_day=day
-    ):
-        x_posts.append({**root, "relation": "root"})
-    root_is_current = bool(x_posts)
-    for evidence in item.get("evidence") or []:
-        if (
-            not evidence.get("same_author_as_root")
-            or str(evidence.get("relationship") or "related") == "retweet"
-        ):
-            continue
-        post = {
-            "post_id": str(evidence["post_id"]),
-            "author": "@" + str(evidence["author"]["handle"]),
-            "text": str(evidence.get("text") or ""),
-            "published_at": str(evidence.get("published_at") or ""),
+    seen_post_ids: set[str] = set()
+    for source_event in source_events:
+        root_item = dict(source_event["post"])
+        root = {
+            "post_id": str(root_item["post_id"]),
+            "author": "@" + str(root_item["author"]["handle"]),
+            "text": str(root_item.get("text") or ""),
+            "published_at": str(root_item.get("published_at") or ""),
         }
-        if freshness.is_current(
-            published_at=post["published_at"], evaluation_day=day
+        if (
+            root["post_id"] not in seen_post_ids
+            and freshness.is_current(
+                published_at=root["published_at"],
+                evaluation_day=day,
+            )
         ):
-            x_posts.append({**post, "relation": "same_author_continuation"})
+            x_posts.append(
+                {
+                    **root,
+                    "relation": (
+                        "root"
+                        if bool(source_event.get("is_primary"))
+                        else "independent_original"
+                    ),
+                }
+            )
+            seen_post_ids.add(root["post_id"])
+        root_handle = str(root_item["author"]["handle"]).lower()
+        for evidence in source_event.get("evidence") or []:
+            if (
+                str(evidence.get("relationship") or "related") == "retweet"
+                or str(evidence["author"]["handle"]).lower() != root_handle
+            ):
+                continue
+            post = {
+                "post_id": str(evidence["post_id"]),
+                "author": "@" + str(evidence["author"]["handle"]),
+                "text": str(evidence.get("text") or ""),
+                "published_at": str(evidence.get("published_at") or ""),
+            }
+            if (
+                post["post_id"] not in seen_post_ids
+                and freshness.is_current(
+                    published_at=post["published_at"],
+                    evaluation_day=day,
+                )
+            ):
+                x_posts.append(
+                    {**post, "relation": "same_author_continuation"}
+                )
+                seen_post_ids.add(post["post_id"])
     if not x_posts:
         return None
-    if not root_is_current:
+    if not any(post["relation"] == "root" for post in x_posts):
         x_posts[0]["relation"] = "root"
     sources = [
         _x_source(post, relation=str(post["relation"])) for post in x_posts
@@ -827,14 +862,14 @@ def packet_from_event(
     sources.extend(
         _artifact_sources(
             artifact_conn,
-            event_id=str(item["event_id"]),
+            event_ids=[str(value) for value in item["source_event_ids"]],
             post_authors=post_authors,
-            primary_author=str(root.get("author") or ""),
+            primary_author=str(x_posts[0].get("author") or ""),
             eligible_source_ids=eligible_source_ids,
         )
     )
     return routing_model.RoutingPacket(
-        event_id=str(item["event_id"]),
+        event_id=str(item["development_id"]),
         day=day,
         sources=tuple(sources),
     )
@@ -854,17 +889,19 @@ def freeze_run(
 ) -> int:
     if top_ranked < 1:
         raise ValueError("top_ranked must be positive")
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
-    payload = event_store.events_payload(
+    payload = development_store.developments_payload(
         day=day,
         lane="all",
         sort="rank",
         query="",
+        development_id=event_id or "",
         event_id=event_id or "",
         routing_filter="all",
         limit=1 if event_id else top_ranked,
         offset=0,
+        include_evidence=True,
     )
     if not payload.get("available"):
         raise ValueError(str(payload.get("reason") or "Evidence is unavailable"))
@@ -886,19 +923,24 @@ def freeze_run(
         )
     items = list(payload.get("items") or [])
     if event_id:
-        items = [item for item in items if item["event_id"] == event_id]
+        items = [
+            item
+            for item in items
+            if item["development_id"] == event_id
+            or event_id in item["source_event_ids"]
+        ]
     else:
         items = items[:top_ranked]
     if not items:
-        raise ValueError("Evidence projection has no matching Events")
+        raise ValueError("Evidence projection has no matching Developments")
     missing_hashes = [
-        str(item["event_id"])
+        str(item["development_id"])
         for item in items
         if not item.get("semantic_snapshot_sha256")
     ]
     if missing_hashes:
         raise ValueError(
-            "Feed Events are missing snapshot hashes: "
+            "Feed Developments are missing snapshot hashes: "
             + ", ".join(missing_hashes)
         )
 
@@ -908,7 +950,7 @@ def freeze_run(
             (item, packet)
             for item in items
             if (
-                packet := packet_from_event(
+                packet := packet_from_development(
                     item,
                     day=day,
                     artifact_conn=artifact_conn,
@@ -951,7 +993,7 @@ def freeze_run(
         "prompt_version": routing_model.PROMPT_VERSION,
         "prompt_sha256": routing_model.prompt_sha256(),
         "schema_version": routing_model.SCHEMA_VERSION,
-        "rank_version": attention.DAILY_RANK_VERSION,
+        "rank_version": development_attention.DAILY_RANK_VERSION,
         "source_rank_input_sha256": source_rank_input_sha256,
         "source_event_run_id": str(source_run["run_id"]),
         "source_feed_run_id": str(source_run["feed_run_id"]),

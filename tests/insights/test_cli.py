@@ -7,7 +7,7 @@ import pytest
 from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.insights import cli as insight_cli
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 EVENT_ID = "event-spike-1"
@@ -16,14 +16,14 @@ RANK_INPUT_SHA256 = "a" * 64
 
 @pytest.fixture(autouse=True)
 def _current_event_rank_identity(monkeypatch):
-    from fli.web import events as event_store
+    from fli.web import developments as development_store
 
     monkeypatch.setattr(
-        event_store,
+        development_store,
         "current_rank_identity",
         lambda *, day: {
             "day": day,
-            "rank_version": attention.DAILY_RANK_VERSION,
+            "rank_version": development_attention.DAILY_RANK_VERSION,
             "rank_input_sha256": RANK_INPUT_SHA256,
             "event_run_id": "event-run",
             "feed_run_id": "feed-run",
@@ -94,7 +94,7 @@ def _routing_fixture(
                 routing_model.PROMPT_VERSION,
                 routing_model.prompt_sha256(),
                 routing_model.SCHEMA_VERSION,
-                attention.DAILY_RANK_VERSION,
+                development_attention.DAILY_RANK_VERSION,
                 RANK_INPUT_SHA256,
                 now,
                 now,

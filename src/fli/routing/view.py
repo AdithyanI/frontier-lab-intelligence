@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from fli.routing import model
-from fli.scoring import attention
+from fli.scoring import development_attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -59,7 +59,7 @@ def _complete_run(
             meta is None
             or "source_rank_input_sha256" not in meta_columns
             or str(meta["day"]) != day
-            or rank_version != attention.DAILY_RANK_VERSION
+            or rank_version != development_attention.DAILY_RANK_VERSION
             or (
                 expected_rank_input_sha256 is not None
                 and str(meta["source_rank_input_sha256"])
