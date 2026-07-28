@@ -301,31 +301,35 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
               </header>
               <dl className="company-causal-chain">
                 <div>
-                  <dt>Company exposure</dt>
+                  <dt>Exposure</dt>
                   <dd>{cleanMemoText(path.company_exposure)}</dd>
                 </div>
                 <div>
-                  <dt>Operating driver</dt>
+                  <dt>Driver</dt>
                   <dd>{cleanMemoText(path.affected_driver)}</dd>
                 </div>
                 <div>
-                  <dt>Financial consequence</dt>
+                  <dt>Consequence</dt>
                   <dd>{cleanMemoText(path.financial_consequence)}</dd>
                 </div>
                 <div>
-                  <dt>Becomes material when</dt>
+                  <dt>Material when</dt>
                   <dd>{cleanMemoText(path.materiality_condition)}</dd>
                 </div>
               </dl>
-              <div className="company-path-watch">
-                <span className="mono">Watch</span>
+              <details className="company-path-watch">
+                <summary>
+                  <span className="mono">
+                    {path.watchpoints.length} watchpoints
+                  </span>
+                  <MemoCitations sources={path.sources} sourceIndex={sourceIndex} />
+                </summary>
                 <ul>
                   {path.watchpoints.map((watchpoint) => (
                     <li key={watchpoint}>{cleanMemoText(watchpoint)}</li>
                   ))}
                 </ul>
-                <MemoCitations sources={path.sources} sourceIndex={sourceIndex} />
-              </div>
+              </details>
             </article>
           ))}
         </div>
