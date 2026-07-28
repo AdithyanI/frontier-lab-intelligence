@@ -1499,7 +1499,7 @@
 
 .investment-agent-company > summary {
   display: grid;
-  grid-template-columns: minmax(175px, 0.55fr) auto minmax(260px, 1.45fr);
+  grid-template-columns: minmax(175px, 0.55fr) 150px minmax(260px, 1.45fr);
   min-height: 78px;
   align-items: center;
   gap: 22px;

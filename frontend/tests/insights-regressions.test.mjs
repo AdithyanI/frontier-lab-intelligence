@@ -94,6 +94,10 @@ test('Investment Insights expose a minimal company judgment and memo audit', () 
   assert.doesNotMatch(insightSource, /Run cost/)
   assert.doesNotMatch(insightSource, /Each company was screened against/)
   assert.match(appStyles, /\.investment-agent-company \{/)
+  assert.match(
+    appStyles,
+    /grid-template-columns: minmax\(175px, 0\.55fr\) 150px minmax\(260px, 1\.45fr\)/,
+  )
   assert.match(appStyles, /\.investment-agent-direction\[data-direction='positive'\]/)
   assert.match(appStyles, /\.investment-agent-process \{/)
   assert.doesNotMatch(appStyles, /\.investment-agent-company \{[^}]*border-radius:/)
