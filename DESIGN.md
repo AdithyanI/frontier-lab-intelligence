@@ -319,11 +319,9 @@ Rules:
   judgment, and Devil's Advocate review; the resulting Investment-insight
   standard; contradictions, unknowns, and a source ledger. The **Company
   universe** is a searchable, filterable, expandable ledger derived from the
-  canonical Investment context packet. It defaults to the explicit, binary
-  frontier-lab scope while retaining every sourced profile behind the scope
-  filter for portfolio audit. Every excluded profile records and displays one
-  plain-language reason inside its expanded context; the collapsed ledger keeps
-  only the quiet scope mark so the default scan remains calm. Each expanded row
+  canonical Investment context packet. It keeps all 37 sourced profiles in one
+  candidate universe because relevance is decided for each Event, not by a
+  permanent company label. Each expanded row
   leads with one compact **Context used by the agent** block: the business
   model, operating drivers, and known AI exposures that cold-start Event
   analysis. These exposures are starting hypotheses, not a closed taxonomy or
@@ -333,16 +331,16 @@ Rules:
   disclosure history stay visibly separate. The UI never shows or ranks by an
   AI-pathway count. The view opens directly on one compact disclosure note and
   the working controls; it does not repeat the BIT Lens title with a second
-  landing header or a statistics band. Its four-control row remains Search
-  context, FLI scope, Disclosure, and Sort, with the three menus using the
+  landing header or a statistics band. Its three-control row remains Search
+  context, Disclosure, and Sort, with the two menus using the
   same editorial menu grammar as Evidence. Each collapsed company row
   shows exactly one dated reference weight: the 30 June 2026 current top-ten
   weight when available, otherwise the 31 December 2025 audited weight marked
   `Last confirmed`. Expanded Disclosure history keeps both dated public values
   when both exist; the canonical API likewise preserves the reference date,
   basis, and current-confirmation state alongside both disclosure records.
-  The binary scope is prior retrieval context, never proof that a specific
-  Event affects a company.
+  The candidate universe is prior retrieval context, never proof that a
+  specific Event affects a company.
   Use ordinary prose,
   descriptive headings, lists, and flat tables only where rows make exact dates
   or weights easier to compare. Keep body copy at 16px with a 72ch maximum and

@@ -8,7 +8,6 @@ import {
 } from '../../shared/api'
 
 type DisclosureFilter = 'all' | 'current' | 'audited' | 'later'
-type ScopeFilter = 'in_scope' | 'all' | 'out_of_scope'
 type CompanySort = 'portfolio' | 'name'
 
 const dayFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -43,12 +42,6 @@ const disclosureOptions: readonly CompanyMenuOption<DisclosureFilter>[] = [
   { value: 'current', label: 'Current top ten', description: 'Show the June 2026 top ten' },
   { value: 'audited', label: 'Audited baseline', description: 'Show companies in the complete December 2025 portfolio' },
   { value: 'later', label: 'Later additions', description: 'Show current top-ten names absent from the audited baseline' },
-]
-
-const scopeOptions: readonly CompanyMenuOption<ScopeFilter>[] = [
-  { value: 'in_scope', label: 'FLI universe', description: 'Show companies with a direct frontier-lab transmission path' },
-  { value: 'all', label: 'All profiles', description: 'Show every sourced company profile' },
-  { value: 'out_of_scope', label: 'Outside current scope', description: 'Show disclosed companies excluded from the focused FLI universe' },
 ]
 
 const sortOptions: readonly CompanyMenuOption<CompanySort>[] = [
@@ -149,7 +142,6 @@ function companySearchText(company: InvestmentCompany) {
     company.name,
     company.ticker,
     ...company.aliases,
-    company.frontier_lab_relevance_reason ?? '',
     analyst.business_summary,
     ...analyst.operating_drivers,
     ...analyst.frontier_ai_channels.flatMap((channel) => [
@@ -193,7 +185,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
   const analyst = company.analyst_context
   const publicView = company.bit_public_view
   const knownExposureNames = analyst.frontier_ai_channels.map((channel) => channel.channel)
-  const isInScope = company.frontier_lab_relevance === 'in_scope'
 
   return (
     <div className="company-detail">
@@ -201,24 +192,12 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         <div className="company-context-heading">
           <div>
             <h3>Context used by the agent</h3>
-            <p>
-              {isInScope
-                ? 'The company mental model available when the agent reads a new Event.'
-                : 'Retained for portfolio audit, outside the focused FLI universe.'}
-            </p>
+            <p>The company mental model available when the agent reads a new Event.</p>
           </div>
-          <span className="mono">
-            {isInScope ? 'FLI universe' : 'Outside current scope'}
-          </span>
+          <span className="mono">Candidate context</span>
         </div>
         <div className="company-context-copy">
           <p>{analyst.business_summary}</p>
-          {!isInScope && company.frontier_lab_relevance_reason && (
-            <p className="company-scope-reason">
-              <strong>Why it is outside the focused universe.</strong>{' '}
-              {company.frontier_lab_relevance_reason}
-            </p>
-          )}
           <p>
             <strong>What moves the economics.</strong>{' '}
             {joinContextItems(analyst.operating_drivers)}.
@@ -341,7 +320,6 @@ export default function CompanyUniversePage() {
   const [error, setError] = useState(false)
   const [requestVersion, setRequestVersion] = useState(0)
   const [query, setQuery] = useState('')
-  const [scope, setScope] = useState<ScopeFilter>('in_scope')
   const [disclosure, setDisclosure] = useState<DisclosureFilter>('all')
   const [sort, setSort] = useState<CompanySort>('portfolio')
   const [openCompanies, setOpenCompanies] = useState<Set<string>>(new Set())
@@ -366,7 +344,6 @@ export default function CompanyUniversePage() {
     const normalizedQuery = query.trim().toLocaleLowerCase()
     const companies = payload.companies.filter((company) => {
       const portfolio = company.portfolio_context
-      if (scope !== 'all' && company.frontier_lab_relevance !== scope) return false
       if (disclosure === 'current' && !portfolio.current_top_ten) return false
       if (disclosure === 'audited' && !portfolio.audited_baseline) return false
       if (
@@ -380,7 +357,7 @@ export default function CompanyUniversePage() {
       if (sort === 'name') return a.name.localeCompare(b.name)
       return comparePortfolio(a, b)
     })
-  }, [payload, query, scope, disclosure, sort])
+  }, [payload, query, disclosure, sort])
 
   function setCompanyOpen(ticker: string, isOpen: boolean) {
     setOpenCompanies((current) => {
@@ -417,11 +394,9 @@ export default function CompanyUniversePage() {
     <section className="company-universe-view" aria-label="Company context">
       <div className="company-universe-method">
         <p>
-          <strong>
-            {payload.counts.in_scope_companies} frontier-linked companies.
-          </strong>{' '}
-          The focused universe is drawn from {payload.counts.companies} sourced
-          profiles.{' '}
+          <strong>{payload.counts.companies} sourced company profiles.</strong>{' '}
+          Every Event starts with this candidate universe, then retrieves complete
+          context only for credible matches.{' '}
           June shows only the current top ten; December 2025 is the latest complete
           audited portfolio, and absence from June does not prove a sale.
         </p>
@@ -446,12 +421,6 @@ export default function CompanyUniversePage() {
           />
         </label>
         <div className="company-filter-controls">
-          <CompanyMenuSelect
-            label="FLI scope"
-            value={scope}
-            options={scopeOptions}
-            onChange={setScope}
-          />
           <CompanyMenuSelect
             label="Disclosure"
             value={disclosure}
@@ -493,7 +462,7 @@ export default function CompanyUniversePage() {
       {visibleCompanies.length === 0 ? (
         <div className="company-universe-empty">
           <h3>No company matches these filters</h3>
-          <p>Clear the search or widen the disclosure and evidence filters.</p>
+          <p>Clear the search or widen the disclosure filter.</p>
         </div>
       ) : (
         <div className="company-ledger">
@@ -511,9 +480,6 @@ export default function CompanyUniversePage() {
                 <PortfolioContext company={company} />
                 <p>{company.analyst_context.business_summary}</p>
                 <div className="company-row-evidence">
-                  {company.frontier_lab_relevance === 'out_of_scope' && (
-                    <span className="company-scope-mark">Outside FLI scope</span>
-                  )}
                   <span className={`company-evidence-grade is-${company.bit_public_view.grade}`}>
                     {gradeCopy[company.bit_public_view.grade]}
                   </span>

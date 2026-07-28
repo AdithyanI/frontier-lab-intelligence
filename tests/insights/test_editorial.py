@@ -1129,7 +1129,7 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     context = editorial_runs.investment_context()
     portfolio = context["portfolio"]
 
-    assert context["schema_version"] == "bit-investment-context-v4"
+    assert context["schema_version"] == "bit-investment-context-v5"
     assert len(portfolio["holdings"]) == 34
     assert round(sum(item["weight_pct"] for item in portfolio["holdings"]), 2) == 97.43
     assert {item["name"] for item in portfolio["holdings"]} >= {
@@ -1146,10 +1146,25 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
         holding["name"] for holding in editorial_runs._covered_holdings(context)
     ]
     assert len({profile["ticker"] for profile in profiles}) == 37
-    assert sum(
-        profile["frontier_lab_relevance"] == "in_scope"
-        for profile in profiles
-    ) == 26
+    assert context["event_company_mapping"] == {
+        "candidate_universe": "all_profiles",
+        "connection_types": ["direct", "indirect", "none"],
+        "thesis_effects": [
+            "supports",
+            "challenges",
+            "mixed",
+            "unclear",
+            "no_public_thesis",
+        ],
+        "shortlist_rule": (
+            "Review the compact index for every Event, then retrieve complete "
+            "profiles only for companies with a credible causal connection."
+        ),
+        "publication_rule": (
+            "Publish direct connections and well-evidenced material indirect "
+            "connections. Suppress none and weak indirect matches."
+        ),
+    }
     assert {profile["bit_public_view"]["grade"] for profile in profiles} <= {
         "explicit_thesis",
         "commentary",
@@ -1164,12 +1179,11 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     }
     assert all(profile["analyst_context"]["frontier_ai_channels"] for profile in profiles)
     by_name = {profile["name"]: profile for profile in profiles}
-    assert by_name["NVIDIA"]["frontier_lab_relevance"] == "in_scope"
-    assert by_name["Grindr"]["frontier_lab_relevance"] == "out_of_scope"
-    assert by_name["GCL-Poly"]["frontier_lab_relevance_reason"].startswith(
-        "AI electricity demand"
+    assert all(
+        "frontier_lab_relevance" not in profile
+        and "frontier_lab_relevance_reason" not in profile
+        for profile in profiles
     )
-    assert "frontier_lab_relevance_reason" not in by_name["Duolingo"]
     assert by_name["IREN"]["bit_public_view"]["grade"] == "explicit_thesis"
     assert by_name["Amazon"]["bit_public_view"] == {
         "grade": "none",
@@ -1201,7 +1215,7 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["data"]["format"] == "json"
     assert payload["data"]["projection"] == "full"
-    assert payload["data"]["context"]["schema_version"] == "bit-investment-context-v4"
+    assert payload["data"]["context"]["schema_version"] == "bit-investment-context-v5"
     assert payload["data"]["path"].endswith("references/bit-investment-context.json")
 
     assert editorial_cli.main(
@@ -1218,18 +1232,17 @@ def test_investment_context_is_complete_structured_skill_packet(capsys):
     assert compact["data"]["projection"] == "compact"
     assert "company_profiles" not in compact["data"]["context"]
     assert len(compact["data"]["context"]["company_profile_index"]) == 37
-    assert sum(
-        item["frontier_lab_relevance"] == "in_scope"
-        for item in compact["data"]["context"]["company_profile_index"]
-    ) == 26
     compact_by_name = {
         item["name"]: item
         for item in compact["data"]["context"]["company_profile_index"]
     }
-    assert compact_by_name["GCL-Poly"]["frontier_lab_relevance_reason"].startswith(
-        "AI electricity demand"
-    )
-    assert compact_by_name["Duolingo"]["frontier_lab_relevance_reason"] is None
+    assert set(compact_by_name["GCL-Poly"]) == {
+        "name",
+        "ticker",
+        "aliases",
+        "bit_public_view_grade",
+        "bit_public_view_source_scope",
+    }
 
 
 def test_ai_engineering_context_encodes_bit_operating_and_relevance_boundary(capsys):
@@ -1278,12 +1291,10 @@ def test_company_context_lookup_is_exact_and_machine_readable(capsys):
 def test_investment_company_universe_payload_is_complete_and_dated():
     payload = editorial_runs.investment_company_universe_payload()
 
-    assert payload["schema_version"] == "investment-company-universe-v3"
-    assert payload["scope"]["status"] == "curated"
+    assert payload["schema_version"] == "investment-company-universe-v4"
+    assert payload["mapping_policy"]["candidate_universe"] == "all_profiles"
     assert payload["counts"] == {
         "companies": 37,
-        "in_scope_companies": 26,
-        "out_of_scope_companies": 11,
         "current_top_ten": 10,
         "audited_baseline": 34,
         "later_top_ten_additions": 3,
@@ -1324,9 +1335,7 @@ def test_investment_company_universe_payload_is_complete_and_dated():
     assert companies["Microsoft"]["bit_public_view"]["grade"] == "commentary"
     assert companies["Microsoft"]["analyst_context"]["frontier_ai_channels"]
     assert companies["Microsoft"]["identity_sources"]
-    assert companies["GCL-Poly"]["frontier_lab_relevance_reason"].startswith(
-        "AI electricity demand"
-    )
+    assert "frontier_lab_relevance" not in companies["GCL-Poly"]
 
 
 def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, capsys):
@@ -1341,7 +1350,7 @@ def test_cli_default_json_and_stable_validation_error(tmp_path, monkeypatch, cap
     assert success["error"] is None
     assert (
         success["data"]["investment_context_schema_version"]
-        == "bit-investment-context-v4"
+        == "bit-investment-context-v5"
     )
     contract = success["data"]["draft"]
     assert contract["max_insights_per_audience"] is None

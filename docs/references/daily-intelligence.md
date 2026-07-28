@@ -110,7 +110,7 @@ The authoritative machine shape and enums are returned by:
 ```
 
 The Investment context command returns the structured
-`bit-investment-context-v4` packet; the Engineering context remains markdown in
+`bit-investment-context-v5` packet; the Engineering context remains markdown in
 the same stable response envelope.
 
 The Engineering context encodes BIT's publicly described Aion and data-platform
@@ -120,7 +120,7 @@ a concrete research-agent, signal-production, evaluation, LLMOps, or supporting
 data-platform decision; technical novelty alone is a valid reason for
 `not_selected`.
 
-Version 2 includes one reusable profile for every company in the working
+Version 5 includes one reusable profile for every company in the working
 portfolio baseline. Profiles keep attributable BIT views separate from FLI
 analyst context and provide stable company identity, operating drivers,
 two-sided frontier-AI exposure channels, and watchpoints. They reduce repeated
@@ -128,16 +128,17 @@ background research without deciding the impact of a daily development. BIT
 views also carry a source scope so firm-wide or other-product commentary cannot
 be mistaken for this flagship strategy's thesis.
 
-The dated human inspection map for all covered companies, the focused
-frontier-lab scope, disclosure boundaries, and transmission channels lives in
+The dated human inspection map for all covered companies, disclosure
+boundaries, and transmission channels lives in
 [`investment-company-universe.md`](investment-company-universe.md). The
-structured JSON packet remains canonical for runtime use.
+structured JSON packet remains canonical for runtime use. The minimal packet,
+two-stage retrieval, and Event-to-company judgment contract live in
+[`investment-company-mapping.md`](investment-company-mapping.md).
 
-Daily agents load the compact Investment projection first. Its binary
-`frontier_lab_relevance` field identifies the default 26-company retrieval
-universe while retaining every sourced holding for audit. Each excluded profile
-records the reason for that scope decision. Agents then retrieve only matching
-company profiles by exact canonical name, ticker, or alias:
+Daily agents load the compact Investment projection of all 37 profiles first.
+They shortlist zero or a few credible matches for the particular Event, then
+retrieve only those complete company profiles by exact canonical name, ticker,
+or alias:
 
 ```bash
 .venv/bin/fli daily-intelligence context \

@@ -89,15 +89,11 @@ test('The redesign is text-first and removes the diagram-heavy UI', () => {
   assert.doesNotMatch(styles, /\.lens-canvas|\.lens-svg-|\.lens-theme-bar/)
 })
 
-test('Company universe defaults to the curated frontier-lab scope', () => {
+test('Company universe keeps every sourced company eligible for Event matching', () => {
   assert.match(universe, /getCachedJSON<InvestmentCompanyUniverse>\('\/api\/bit-lens\/companies'\)/)
-  assert.match(universe, /useState<ScopeFilter>\('in_scope'\)/)
-  assert.match(universe, /label="FLI scope"/)
-  assert.match(universe, /FLI universe/)
-  assert.match(universe, /Outside current scope/)
-  assert.match(universe, /frontier_lab_relevance/)
-  assert.match(universe, /frontier_lab_relevance_reason/)
-  assert.match(universe, /Why it is outside the focused universe\./)
+  assert.match(universe, /Every Event starts with this candidate universe/)
+  assert.doesNotMatch(universe, /ScopeFilter|label="FLI scope"/)
+  assert.doesNotMatch(universe, /frontier_lab_relevance/)
   assert.doesNotMatch(universe, /The context behind each company/)
   assert.doesNotMatch(universe, /company-universe-facts/)
   assert.match(universe, /Context used by the agent/)
@@ -120,7 +116,7 @@ test('Company universe uses the existing flat research-ledger grammar', () => {
   assert.match(styles, /\.company-detail \{[\s\S]*?background: var\(--surface\)/)
   assert.match(styles, /\.company-agent-context \{[\s\S]*?display: grid/)
   assert.match(styles, /\.company-supporting-context \{[\s\S]*?grid-column: 2/)
-  assert.match(styles, /\.company-scope-reason \{[\s\S]*?border-top: 1px solid var\(--border\)/)
+  assert.doesNotMatch(styles, /\.company-scope-(reason|mark)/)
   assert.match(styles, /\.company-evidence-grade\.is-explicit_thesis/)
   assert.doesNotMatch(styles, /\.company-[^{]*\{[^}]*box-shadow/)
 })

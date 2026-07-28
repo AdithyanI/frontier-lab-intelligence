@@ -24,11 +24,10 @@ your own judgment for research, retrieval, grouping, and synthesis.
    portfolio baseline, reusable company profiles, and the boundary for companies
    outside that portfolio. Each company profile separates BIT's attributable
    public view from FLI analyst context; never present the latter as BIT's thesis.
-   The compact profile index marks the focused 26-company frontier-lab universe
-   with `frontier_lab_relevance: in_scope`. Treat that flag as the default
-   retrieval boundary, not proof that a specific Event affects the company.
-   Profiles outside the current scope remain available for portfolio audit and
-   carry the explicit reason for their exclusion.
+   The compact profile index keeps all 37 sourced companies eligible. Use it to
+   shortlist zero or a few credible Event matches, then retrieve only those
+   complete profiles. A company profile is prior context, never proof that a
+   specific Event affects the company.
    `source_scope` distinguishes firm-wide research, this flagship strategy,
    another BIT product, or mixed commentary.
 
@@ -262,6 +261,15 @@ shared theme as an automatic merge.
   source. Respect `source_scope`: commentary from another BIT product is not the
   flagship fund's thesis. When the grade is `none`, use the analyst context only
   to guide diligence and derive direction from development-specific evidence.
+- For Investment company matching, review the compact index before retrieving
+  full profiles. Classify each reviewed pair as `direct`, `indirect`, or `none`;
+  an indirect match must name its intermediate causal step. Publish only direct
+  or well-evidenced material indirect connections. Suppress `none` and weak
+  indirect matches rather than filling the output.
+- When a company is retained, state whether the Event `supports`, `challenges`,
+  or has a `mixed` or `unclear` effect on the attributable public thesis. Use
+  `no_public_thesis` when no company-specific BIT view is in the packet; do not
+  convert FLI analyst context into a BIT thesis.
 - For Investment, classify every named company as `portfolio` or
   `outside_portfolio`. Consider the portfolio first. Include an outside company
   only when a direct public-equity transmission path is defensible; omit that

@@ -24,13 +24,10 @@ Each canonical company profile already contains:
 - any public BIT view, kept separate from FLI analyst context and graded by
   source scope.
 
-The packet currently covers 37 sourced companies. A binary
-`frontier_lab_relevance` field places 26 in the focused FLI universe because
-they have a clear, recurring transmission path from frontier-model capability,
-compute demand, AI infrastructure, data, or AI-system security. The remaining
-11 stay available for portfolio audit but are outside the default retrieval
-set. Every excluded profile records the company-specific reason for that
-decision. The packet contains 114 operating drivers, 63
+The packet currently covers 37 sourced companies. All 37 remain eligible
+candidates because relevance depends on the particular Event, not a permanent
+company label. The compact index is used for shortlisting; complete profiles
+are retrieved only for credible matches. The packet contains 114 operating drivers, 63
 frontier-AI transmission channels, 189 watchpoints, 112 cautions, and 77
 identity sources. Four companies have an explicit public BIT thesis, ten have
 BIT commentary, and 23 have no attributable BIT view. A missing BIT view must
@@ -53,18 +50,6 @@ disclosures:
 Holding weight is portfolio context, not evidence that an Event affects a
 company. It may order otherwise comparable affected companies, but it must
 never create a transmission mechanism.
-
-## Focused FLI Universe
-
-The default company universe contains Alphabet, Amazon, Microsoft, Meta,
-NVIDIA, AMD, Intel, TSMC, Micron, Broadcom, Marvell, IREN, Hut 8, Coherent,
-Lumentum, SanDisk, Pure Storage, Datadog, Rubrik, Palo Alto Networks, Netskope,
-Reddit, Robinhood, Duolingo, Axon, and Infineon.
-
-AUTO1, Hinge Health, Lemonade, Oscar Health, Kaspi, Luckin Coffee, InPost,
-Grindr, Xometry, Omada Health, and GCL-Poly remain in the sourced portfolio
-record but are outside the current FLI scope. Their complete profiles explain
-why the ordinary transmission path is not strong enough for default retrieval.
 
 ## Company Index
 
@@ -116,15 +101,17 @@ the particular Event activates any channel.
 
 For each relevant Event:
 
-1. Load the compact index and begin with the 26 in-scope companies.
+1. Load the compact index of all 37 companies.
 2. Use the Event to produce a small shortlist, including no company when no
-   direct material connection is defensible.
+   credible material connection is defensible.
 3. Retrieve the complete profile only for shortlisted companies.
 4. Treat the Event as the only evidence that can activate a transmission path.
-5. For each retained company, return the operating mechanism, direction,
-   uncertainty, watchpoints, and supporting source identifiers.
-6. Keep out-of-scope profiles available for audit; a future Event may justify
-   revisiting the explicit scope decision.
+5. For each retained company, return the operating mechanism, affected drivers,
+   thesis effect, implication, watchpoints, and supporting source identifiers.
+6. Suppress `none` and weak indirect connections rather than filling the output.
+
+The complete relationship contract and minimal company packet are documented
+in [`investment-company-mapping.md`](investment-company-mapping.md).
 
 The corresponding AI Engineering roster should be a separate, later
 definition of build surfaces. It should reuse the same fan-out engine without

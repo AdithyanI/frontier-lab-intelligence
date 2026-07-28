@@ -20,8 +20,6 @@ export interface FrontierAIChannel {
 
 export interface InvestmentCompany {
   name: string
-  frontier_lab_relevance: 'in_scope' | 'out_of_scope'
-  frontier_lab_relevance_reason?: string
   ticker: string
   aliases: string[]
   listing_status: 'public'
@@ -52,13 +50,15 @@ export interface InvestmentCompany {
 }
 
 export interface InvestmentCompanyUniverse {
-  schema_version: 'investment-company-universe-v3'
+  schema_version: 'investment-company-universe-v4'
   source_context_schema_version: string
   profiles_reviewed_at: string
-  scope: {
-    status: 'curated'
-    label: string
-    note: string
+  mapping_policy: {
+    candidate_universe: 'all_profiles'
+    connection_types: ['direct', 'indirect', 'none']
+    thesis_effects: ['supports', 'challenges', 'mixed', 'unclear', 'no_public_thesis']
+    shortlist_rule: string
+    publication_rule: string
   }
   disclosures: {
     current_top_ten: {
@@ -75,8 +75,6 @@ export interface InvestmentCompanyUniverse {
   }
   counts: {
     companies: number
-    in_scope_companies: number
-    out_of_scope_companies: number
     current_top_ten: number
     audited_baseline: number
     later_top_ten_additions: number

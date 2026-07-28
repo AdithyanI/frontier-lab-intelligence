@@ -34,10 +34,17 @@ DEFAULT_MODEL = consolidation.DEFAULT_MODEL
 WORKSPACE_SCHEMA_VERSION = "daily-intelligence-workspace-v3"
 STORE_SCHEMA_VERSION = "daily-intelligence-store-v4"
 READ_SCHEMA_VERSION = "daily-intelligence-read-v4"
-INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v4"
+INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v5"
 BIT_PUBLIC_VIEW_GRADES = {"explicit_thesis", "commentary", "none"}
 BIT_PUBLIC_VIEW_SOURCE_SCOPES = {"firm", "flagship", "other_product", "mixed", "none"}
-FRONTIER_LAB_RELEVANCE_VALUES = {"in_scope", "out_of_scope"}
+EVENT_COMPANY_CONNECTION_TYPES = {"direct", "indirect", "none"}
+EVENT_COMPANY_THESIS_EFFECTS = {
+    "supports",
+    "challenges",
+    "mixed",
+    "unclear",
+    "no_public_thesis",
+}
 
 CONTEXT_PATHS = {
     "investment": (
@@ -783,20 +790,40 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
     portfolio = context.get("portfolio")
     if not isinstance(portfolio, dict) or not isinstance(portfolio.get("holdings"), list):
         raise ValueError("Investment context packet is missing portfolio holdings")
-    company_scope = context.get("frontier_lab_company_scope")
-    if not isinstance(company_scope, dict) or set(company_scope) != {
-        "definition",
-        "default_relevance",
-        "outside_scope_policy",
+    mapping_policy = context.get("event_company_mapping")
+    if not isinstance(mapping_policy, dict) or set(mapping_policy) != {
+        "candidate_universe",
+        "connection_types",
+        "thesis_effects",
+        "shortlist_rule",
+        "publication_rule",
     }:
         raise ValueError(
-            "Investment context packet is missing frontier_lab_company_scope"
+            "Investment context packet is missing event_company_mapping"
         )
-    if company_scope["default_relevance"] != "in_scope":
-        raise ValueError("frontier_lab_company_scope.default_relevance must be in_scope")
-    for key in ("definition", "outside_scope_policy"):
-        if not isinstance(company_scope[key], str) or not company_scope[key].strip():
-            raise ValueError(f"frontier_lab_company_scope.{key} must be non-empty")
+    if mapping_policy["candidate_universe"] != "all_profiles":
+        raise ValueError("event_company_mapping.candidate_universe must be all_profiles")
+    _validate_string_list(
+        mapping_policy["connection_types"],
+        "event_company_mapping.connection_types",
+        allow_empty=False,
+    )
+    if set(mapping_policy["connection_types"]) != EVENT_COMPANY_CONNECTION_TYPES:
+        raise ValueError(
+            "event_company_mapping.connection_types must define direct, indirect, and none"
+        )
+    _validate_string_list(
+        mapping_policy["thesis_effects"],
+        "event_company_mapping.thesis_effects",
+        allow_empty=False,
+    )
+    if set(mapping_policy["thesis_effects"]) != EVENT_COMPANY_THESIS_EFFECTS:
+        raise ValueError(
+            "event_company_mapping.thesis_effects must define the complete thesis-effect set"
+        )
+    for key in ("shortlist_rule", "publication_rule"):
+        if not isinstance(mapping_policy[key], str) or not mapping_policy[key].strip():
+            raise ValueError(f"event_company_mapping.{key} must be non-empty")
     profiles = context.get("company_profiles")
     if not isinstance(profiles, list):
         raise ValueError("Investment context packet is missing company_profiles")
@@ -826,7 +853,6 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
             raise ValueError(f"{path} must be an object")
         required = {
             "name",
-            "frontier_lab_relevance",
             "ticker",
             "aliases",
             "listing_status",
@@ -834,8 +860,6 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
             "analyst_context",
             "identity_sources",
         }
-        if profile.get("frontier_lab_relevance") == "out_of_scope":
-            required.add("frontier_lab_relevance_reason")
         if set(profile) != required:
             raise ValueError(f"{path} must contain exactly {sorted(required)}")
         ticker = profile["ticker"]
@@ -846,17 +870,6 @@ def _validate_company_profiles(context: dict[str, Any]) -> None:
         tickers.add(ticker)
         if profile["listing_status"] != "public":
             raise ValueError(f"{path}.listing_status must be public")
-        if profile["frontier_lab_relevance"] not in FRONTIER_LAB_RELEVANCE_VALUES:
-            raise ValueError(
-                f"{path}.frontier_lab_relevance must be one of "
-                f"{sorted(FRONTIER_LAB_RELEVANCE_VALUES)}"
-            )
-        if profile["frontier_lab_relevance"] == "out_of_scope":
-            reason = profile["frontier_lab_relevance_reason"]
-            if not isinstance(reason, str) or not reason.strip():
-                raise ValueError(
-                    f"{path}.frontier_lab_relevance_reason must be non-empty"
-                )
         _validate_string_list(profile["aliases"], f"{path}.aliases", allow_empty=True)
         for lookup_value in (profile["name"], profile["ticker"], *profile["aliases"]):
             lookup_key = " ".join(lookup_value.split()).casefold()
@@ -1063,20 +1076,11 @@ def investment_company_universe_payload() -> dict[str, Any]:
         and company["portfolio_context"]["audited_baseline"] is None
         for company in companies
     )
-    in_scope_count = sum(
-        company["frontier_lab_relevance"] == "in_scope"
-        for company in companies
-    )
-
     return {
-        "schema_version": "investment-company-universe-v3",
+        "schema_version": "investment-company-universe-v4",
         "source_context_schema_version": context["schema_version"],
         "profiles_reviewed_at": context["company_profiles_reviewed_at"],
-        "scope": {
-            "status": "curated",
-            "label": "Frontier-linked company universe",
-            "note": context["frontier_lab_company_scope"]["definition"],
-        },
+        "mapping_policy": context["event_company_mapping"],
         "disclosures": {
             "current_top_ten": {
                 "as_of": current["as_of"],
@@ -1098,8 +1102,6 @@ def investment_company_universe_payload() -> dict[str, Any]:
         },
         "counts": {
             "companies": len(companies),
-            "in_scope_companies": in_scope_count,
-            "out_of_scope_companies": len(companies) - in_scope_count,
             "current_top_ten": len(current["holdings"]),
             "audited_baseline": len(audited["holdings"]),
             "later_top_ten_additions": later_additions,

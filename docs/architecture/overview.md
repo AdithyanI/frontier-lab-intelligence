@@ -88,14 +88,11 @@ composition.
    stale rank lineage.
 8. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
-   profiles for Investment. The compact index carries a binary
-   `frontier_lab_relevance` field: 26 companies with recurring frontier-model,
-   compute, data, infrastructure, or AI-security transmission paths form the
-   default retrieval universe, while the remaining disclosed profiles stay
-   available for portfolio audit with explicit exclusion reasons. The agent
-   retrieves complete matching
-   profiles by canonical name, ticker, or alias; the scope flag is prior context,
-   not evidence that an Event affects a company. It may use
+   profiles for Investment. Its compact index keeps all 37 profiles eligible.
+   The agent shortlists zero or a few credible matches for the particular Event,
+   then retrieves complete profiles by canonical name, ticker, or alias. The
+   Event must establish a direct or well-evidenced material indirect
+   transmission path; a static company label never supplies relevance. It may use
    per-Event notes as annotations, researches missing transmission paths, and
    writes the ranked cited Insights that clear the audience bar. Each selected
    Insight stores the qualitative rationale for its audience-local priority;
