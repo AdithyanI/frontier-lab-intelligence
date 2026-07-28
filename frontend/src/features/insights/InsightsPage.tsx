@@ -1165,6 +1165,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
       <div className="insight-body investment-agent-body">
         <header className="insight-head investment-agent-head">
           <h2 id={titleId}>{decodeTextEntities(item.investment_headline)}</h2>
+          <CopyEventId eventId={item.development_id} label="Copy ID" />
         </header>
 
         <div className="investment-agent-opening">
@@ -1225,7 +1226,6 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
           </summary>
           <nav className="investment-agent-sources-body" aria-label="Evidence links">
             <Link to={feedPath}>View Development in Feed ↗</Link>
-            <CopyEventId eventId={item.development_id} label="Copy ID" />
             {item.provenance?.original_post?.url && (
               <a
                 href={item.provenance.original_post.url}

@@ -70,6 +70,10 @@ test('Investment Insights expose a minimal company judgment and memo audit', () 
   assert.match(apiSource, /why_memo_is_needed: string/)
   assert.match(insightSource, /function InvestmentAgentInsight/)
   assert.match(insightSource, /decodeTextEntities\(item\.investment_headline\)/)
+  assert.match(
+    insightSource,
+    /<header className="insight-head investment-agent-head">[\s\S]*?<CopyEventId eventId=\{item\.development_id\} label="Copy ID" \/>/,
+  )
   assert.doesNotMatch(insightSource, /item\.source\?\.title \|\|/)
   assert.match(insightSource, /Company read-throughs/)
   assert.match(insightSource, /Why this company/)
@@ -142,7 +146,6 @@ test('Investment Insights progressively discloses Feed evidence, the original po
   assert.match(insightSource, /<details className="investment-agent-sources">/)
   assert.match(insightSource, /<span>Sources<\/span>/)
   assert.match(insightSource, /View Development in Feed ↗/)
-  assert.match(insightSource, /<CopyEventId eventId=\{item\.development_id\} label="Copy ID" \/>/)
   assert.match(insightSource, /Open original post ↗/)
   assert.match(insightSource, /Read source artifact/)
   assert.doesNotMatch(insightSource, /Primary source ↗/)
